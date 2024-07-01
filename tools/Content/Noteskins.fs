@@ -1,17 +1,19 @@
 ﻿namespace YAVSRG.CLI.Features
 
+open System
 open System.IO
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
-open Prelude.Skinning.Noteskins.Repo
+open Prelude.Skinning.HudLayouts
+open Prelude.Skinning.Repo
 open Prelude
 open SixLabors.ImageSharp
 open YAVSRG.CLI.Utils
+open YAVSRG.CLI.Features.Backbeat
 
 module Noteskins =
 
-    let NOTESKINS_ROOT = Path.Combine(YAVSRG_PATH, "backbeat", "noteskins")
-    let FIXME_PATH = Path.Combine(NOTESKINS_ROOT, "FixMe")
+    let SKINS_ROOT = Path.Combine(YAVSRG_PATH, "backbeat", "skins")
 
     let private generate_preview (ns: Noteskin, target_file: string) =
         use img = NoteskinPreview.render ns
@@ -21,89 +23,96 @@ module Noteskins =
         use img = NoteskinPreview.render_thumbnail ns
         img.SaveAsPng target_file
 
-    let generate_index () =
+    let add_skin (name: string) =
 
         let existing_skins =
-            match JSON.FromFile(Path.Combine(NOTESKINS_ROOT, "index.json")) with
+            match JSON.FromFile(Path.Combine(SKINS_ROOT, "skins.json")) with
             | Ok repo -> repo
-            | Error e -> NoteskinRepo.Empty
+            | Error _ -> NoteskinRepo.Empty
 
-        let mutable updated_repo = existing_skins
-        let newly_added = ResizeArray [ "✨ Newly added noteskins ✨" ]
+        let skin_folder = Path.Combine(INTERLUDE_SKINS_PATH, name)
+        match Skin.FromPath skin_folder with
+        | Error err -> raise err
+        | Ok skin ->
 
-        for noteskin_file in Directory.EnumerateFiles(Path.Combine(NOTESKINS_ROOT, "Noteskins")) |> Seq.sort do
-            let filename = Path.GetFileName noteskin_file
+        let noteskin_folder = Path.Combine(skin_folder, "Noteskin")
+        match Noteskin.FromPath noteskin_folder with
+        | Error err -> raise err
+        | Ok noteskin ->
+            
+        let validation = noteskin.Validate() |> Array.ofSeq
 
-            let fixme_folder =
-                Path.Combine(FIXME_PATH, Path.GetFileNameWithoutExtension filename)
+        if validation.Length > 0 then
+            for msg in validation do
+                match msg with
+                | ValidationWarning w -> 
+                    printfn "Warning: '%s': %s" w.Element w.Message
+                    match w.SuggestedFix with 
+                    | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                    | None -> ()
+                | ValidationError e -> 
+                    printfn "Error: '%s': %s" e.Element e.Message
+                    match e.SuggestedFix with 
+                    | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                    | None -> ()
+            failwith "Fix validation errors before uploading"
 
-            if Path.Exists fixme_folder then
-                use ns = Noteskin.FromPath fixme_folder
-                ns.CompressToZip noteskin_file |> ignore
-                Directory.Delete(fixme_folder, true)
-
-            try
-                use ns = Noteskin.FromZipStream(File.OpenRead noteskin_file)
-                printfn "Loaded: '%s' by %s" ns.Config.Name ns.Config.Author
-                let validation = ns.Validate() |> Array.ofSeq
+        let hud_folder = Path.Combine(skin_folder, "HUD")
+        if Directory.Exists hud_folder then
+            match HudLayout.FromPath hud_folder with
+            | Error err -> raise err
+            | Ok hud ->
+            
+                let validation = hud.Validate() |> Array.ofSeq
 
                 if validation.Length > 0 then
                     for msg in validation do
                         match msg with
-                        | ValidationWarning w -> printfn "Warning: '%s': %s" w.Element w.Message
-                        | ValidationError e -> printfn "Error: '%s': %s" e.Element e.Message
+                        | ValidationWarning w -> 
+                            printfn "Warning: '%s': %s" w.Element w.Message
+                            match w.SuggestedFix with 
+                            | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                            | None -> ()
+                        | ValidationError e ->
+                            printfn "Error: '%s': %s" e.Element e.Message
+                            match e.SuggestedFix with 
+                            | Some fix -> printfn "Applying fix '%s'" fix.Description; fix.Action()
+                            | None -> ()
+                    failwith "Fix validation errors before uploading"
 
-                    ns.ExtractToFolder fixme_folder |> ignore
-                    let fixme_ns = Noteskin.FromPath fixme_folder
+        printf "Enter group name for this skin > "
+        let group_name = Console.ReadLine()
 
-                    fixme_ns.Validate()
-                    |> Seq.iter (
-                        function
-                        | ValidationWarning w -> w.SuggestedFix |> Option.iter (fun s -> s.Action())
-                        | ValidationError e -> e.SuggestedFix |> Option.iter (fun s -> s.Action())
-                    )
+        printf "Enter version name for this skin (for skins sharing a name) > "
+        let version = Console.ReadLine()
 
-                    fixme_ns.Validate()
-                    |> Seq.tryHead
-                    |> (function
-                    | Some _ -> printfn "Couldn't fix all these issues automatically. Go fix it manually then rerun"
-                    | None ->
-                        printfn "Fixed all validation issues automatically. Rerun this tool with the fixed version")
-                else
+        let filename = group_name + "_" + version
 
-                generate_preview (
-                    ns,
-                    Path.Combine(NOTESKINS_ROOT, "Previews", (Path.ChangeExtension(filename, ".png")))
-                )
+        skin.CompressToZip(Path.Combine(SKINS_ROOT, "files", filename + ".isk")) |> ignore
 
-                generate_thumbnail (
-                    ns,
-                    Path.Combine(NOTESKINS_ROOT, "Previews", (ns.Config.Name.Trim('.', ' ') + "__thumbnail.png"))
-                )
+        generate_preview (
+            noteskin,
+            Path.Combine(SKINS_ROOT, "files", filename + ".png")
+        )
 
-                let r, new_skin_added =
-                    NoteskinRepo.add
-                        ns.Config
-                        (sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Noteskins/%s" filename)
-                        (sprintf
-                            "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
-                            (Path.ChangeExtension(filename, ".png")))
-                        (sprintf
-                            "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/noteskins/Previews/%s"
-                            (ns.Config.Name.Trim('.', ' ') + "__thumbnail.png"))
-                        updated_repo
+        generate_thumbnail (
+            noteskin,
+            Path.Combine(SKINS_ROOT, "files", (group_name + "__thumbnail.png"))
+        )
 
-                updated_repo <- r
+        let updated_repo, new_skin_added =
+            NoteskinRepo.add
+                skin.Metadata
+                group_name
+                version
+                (sprintf "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s.isk" filename)
+                (sprintf
+                    "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s.png"
+                    filename)
+                (sprintf
+                    "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/%s"
+                    (group_name + "__thumbnail.png"))
+                existing_skins
 
-                if new_skin_added then
-                    newly_added.Add ns.Config.Name
-            with err ->
-                printfn "Error loading %s: %O" filename err
-
-        if newly_added.Count > 1 then
-            File.WriteAllText(Path.Combine(NOTESKINS_ROOT, "new.txt"), String.concat "\n- " newly_added)
-        else
-            File.WriteAllText(Path.Combine(NOTESKINS_ROOT, "new.txt"), "")
-
-        JSON.ToFile (Path.Combine(NOTESKINS_ROOT, "index.json"), true) updated_repo
+        JSON.ToFile (Path.Combine(SKINS_ROOT, "skins.json"), true) updated_repo
         printfn "OK :)"

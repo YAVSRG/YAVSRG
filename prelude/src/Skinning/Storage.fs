@@ -244,6 +244,9 @@ type Storage(storage: StorageType) =
         if File.Exists target then
             File.Delete target
 
+        if not (Directory.Exists (Path.GetDirectoryName target)) then
+            Directory.CreateDirectory(Path.GetDirectoryName target) |> ignore
+
         match storage with
         | Embedded _ ->
             Logging.Error("Exporting already zipped content as an archive is not implemented")

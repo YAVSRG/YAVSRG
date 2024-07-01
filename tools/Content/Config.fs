@@ -46,3 +46,5 @@ module Config =
         with err -> printfn "%O" err; failwith "Error initialising backbeat utils"
 
     let interlude_chart_cache = Cache.from_path (Path.Combine(backbeat_config.InterludePath, "Songs"))
+
+    let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

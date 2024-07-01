@@ -16,28 +16,18 @@ module Assets =
         ZipFile.CreateFromDirectory(source, target_zip)
 
     let private cleanup_noteskin_json (id) =
-        let ns = Path.Combine(Utils.ASSETS_PATH, id) |> Noteskin.FromPath
-        ns.Config <- ns.Config
+        match Path.Combine(Utils.ASSETS_PATH, id) |> Noteskin.FromPath with
+        | Ok ns ->
+            ns.Config <- ns.Config
+        | Error err -> raise err
 
     let bundle_assets () =
         make_zip
         <| Path.Combine(Utils.ASSETS_PATH, "default")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "default.zip")
 
-        cleanup_noteskin_json "defaultBar"
+        cleanup_noteskin_json "chocolate"
 
         make_zip
-        <| Path.Combine(Utils.ASSETS_PATH, "defaultBar")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultBar.isk")
-
-        cleanup_noteskin_json "defaultArrow"
-
-        make_zip
-        <| Path.Combine(Utils.ASSETS_PATH, "defaultArrow")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultArrow.isk")
-
-        cleanup_noteskin_json "defaultOrb"
-
-        make_zip
-        <| Path.Combine(Utils.ASSETS_PATH, "defaultOrb")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultOrb.isk")
+        <| Path.Combine(Utils.ASSETS_PATH, "chocolate")
+        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "chocolate.isk")

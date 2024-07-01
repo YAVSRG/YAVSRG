@@ -158,6 +158,7 @@ module NoteskinRepo =
 
     let add
         (skin_meta: SkinMetadata)
+        (name: string)
         (version: string)
         (download_link: string)
         (preview_image_link: string)
@@ -165,9 +166,7 @@ module NoteskinRepo =
         (repo: NoteskinRepo)
         : NoteskinRepo * bool =
 
-        let name, author =
-            skin_meta.Name.Trim(), skin_meta.Author.Trim()
-
+        let author = skin_meta.Author.Trim()
         let editor = skin_meta.Editor |> Option.map (_.Trim())
 
         match repo.Noteskins |> List.tryFind (fun x -> x.Name = name) with

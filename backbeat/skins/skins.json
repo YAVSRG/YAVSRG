@@ -1,0 +1,23 @@
+{
+    "Noteskins": [{
+        "Name": "Funkin'",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Funkin'__thumbnail.png",
+        "Versions": [{
+            "Author": "ecafree2",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Funkin'_Arrows.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Funkin'_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
+        "Name": "Delta",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Delta__thumbnail.png",
+        "Versions": [{
+            "Author": "Shakesoda",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Delta_Arrows.isk",
+            "Editor": "Percyqaz",
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Delta_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }]
+}
