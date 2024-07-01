@@ -41,7 +41,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         if Directory.Exists path then Installed else NotDownloaded
 
     let download () =
-        if status = NotDownloaded || status = DownloadFailed then
+        if status <> Downloading then
             let target =
                 Path.Combine(get_game_folder "Downloads", System.Guid.NewGuid().ToString() + ".zip")
 
