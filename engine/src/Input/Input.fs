@@ -330,8 +330,12 @@ module Input =
 
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
     let private DELETE_WORD = Bind.ctrl Keys.Backspace
+    let private DELETE_REPEAT_DELAY = 400L
+    let private DELETE_REPEAT_TIME = 30L
     let private COPY = Bind.ctrl Keys.C
     let private PASTE = Bind.ctrl Keys.V
+    let mutable private delete_held_timestamp = 0L
+    let mutable private delete_repeat_counter = 0L
 
     let update_input_listener () =
 
@@ -343,12 +347,31 @@ module Input =
 
             if pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
+                delete_held_timestamp <- DateTime.UtcNow.Ticks
+                delete_repeat_counter <- -1L
+
             elif pop_matching(DELETE_WORD, InputEvType.Press).IsSome then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
+                delete_held_timestamp <- DateTime.UtcNow.Ticks
+                delete_repeat_counter <- -1L
+
+            elif (held DELETE_CHARACTER || held DELETE_WORD) && s.Value.Length > 0 then
+                let rep = ( (DateTime.UtcNow.Ticks - delete_held_timestamp) / 10_000L - DELETE_REPEAT_DELAY) / DELETE_REPEAT_TIME
+                if delete_repeat_counter < rep then
+                    delete_repeat_counter <- delete_repeat_counter + 1L
+
+                    if this_frame.Ctrl then
+                        s.Value <-
+                            let parts = s.Value.Split(" ")
+                            Array.take (parts.Length - 1) parts |> String.concat " "
+                    else
+                        Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
+
             elif pop_matching(COPY, InputEvType.Press).IsSome then
                 gw.ClipboardString <- s.Value
+
             elif pop_matching(PASTE, InputEvType.Press).IsSome then
                 s.Value <-
                     s.Value
@@ -356,6 +379,9 @@ module Input =
                         gw.ClipboardString
                       with _ ->
                           ""
+
+            else
+                delete_repeat_counter <- Int64.MaxValue
 
             if input_listener_mouse_cancel > 200f then
                 remove_listener ()
