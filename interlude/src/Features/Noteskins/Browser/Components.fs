@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.Noteskins.Browser
 
 open System.IO
-open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -33,14 +32,13 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
         else
             group.Name + " - " + version.Version
 
+    let folder_when_downloaded = group.Name + "_" + version.Version
+
     let mutable status =
         if
-            false
-            // todo: check if installed
-            //Skins.list_noteskins ()
-            //|> Seq.map (snd >> _.Config)
-            //|> Seq.tryFind (fun cfg -> cfg.Name = group.Name && cfg.Version = version.Version)
-            //|> Option.isSome
+            Skins.list_noteskins ()
+            |> Seq.map (fun (id, _, _) -> id)
+            |> Seq.contains folder_when_downloaded
         then
             Installed
         else
@@ -94,8 +92,7 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
                 let target =
                     Path.Combine(
                         get_game_folder "Skins",
-                        Regex("[^a-zA-Z0-9_-]").Replace(title, "")
-                        + ".isk"
+                        folder_when_downloaded + ".isk"
                     )
 
                 WebServices.download_file.Request(

@@ -53,7 +53,7 @@ type NoteskinsBrowserPage() =
         error <- false
         noteskin_items.Clear()
         WebServices.download_json (
-            sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/noteskins/index.json" "githubusercontent",
+            sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/skins/skins.json" "githubusercontent",
             fun data ->
                 match data with
                 | Some(d: NoteskinRepo) ->
