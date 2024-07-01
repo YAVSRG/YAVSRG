@@ -50,7 +50,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         Rect.Create(
             Viewport.vwidth * (0.5f - 0.05f * select_animation.Value),
             top,
-            Viewport.vwidth - 15.0f,
+            Viewport.vwidth - 25.0f,
             top + GROUP_HEIGHT
         )
 

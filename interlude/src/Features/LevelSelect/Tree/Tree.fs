@@ -18,6 +18,7 @@ module Tree =
     let mutable private groups: GroupItem list = []
     let mutable private last_item: ChartItem option = None
     let mutable is_empty = false
+    let scroll_fade = Animation.Fade 0.0f
 
     let private find_selected_chart_in_tree () =
         match SelectedChart.CACHE_DATA with
@@ -176,8 +177,11 @@ module Tree =
         currently_drag_scrolling <- true
         drag_scroll_position <- Mouse.y ()
         drag_scroll_distance <- 0.0f
+        scroll_fade.Target <- 1.0f
 
-    let finish_drag_scroll () = currently_drag_scrolling <- false
+    let finish_drag_scroll () = 
+        currently_drag_scrolling <- false
+        scroll_fade.Target <- 0.0f
 
     let update_drag_scroll (origin, total_height, tree_height) =
         let d = Mouse.y () - drag_scroll_position
@@ -194,7 +198,8 @@ module Tree =
             finish_drag_scroll ()
 
     let update (origin: float32, originB: float32, elapsed_ms: float) =
-        scroll_pos.Update(elapsed_ms) |> ignore
+        scroll_pos.Update elapsed_ms
+        scroll_fade.Update elapsed_ms
 
         if Dialog.exists () then
             ()
@@ -216,11 +221,11 @@ module Tree =
             let total_height = originB - origin
             let tree_height = bottom_edge - scroll_pos.Value
 
-            let my = Mouse.y ()
+            let mx, my = Mouse.pos ()
 
             if currently_drag_scrolling then
                 update_drag_scroll (origin, total_height, tree_height)
-            elif my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
+            elif mx > Viewport.vwidth * 0.4f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
                 start_drag_scroll ()
 
             if click_cooldown > 0.0 then
@@ -248,17 +253,26 @@ module Tree =
 
         Stencil.finish ()
 
+        Draw.rect 
+            (Rect.Create(
+                Viewport.bounds.Right - 10.0f,
+                origin + 5.0f,
+                Viewport.bounds.Right,
+                originB - 50.0f
+            ))
+            (Colors.shadow_2.O3a scroll_fade.Alpha)
+
         let total_height = originB - origin
         let tree_height = bottom_edge - scroll_pos.Value
-        let lb = total_height - tree_height - origin
-        let ub = 20.0f + origin
-        let scroll_bar_pos = -(scroll_pos.Value - ub) / (ub - lb) * (total_height - 40.0f)
+        let lower_bound = total_height - tree_height - origin
+        let upper_bound = 20.0f + origin
+        let scroll_bar_pos = -(scroll_pos.Value - upper_bound) / (upper_bound - lower_bound) * (total_height - 30.0f - 50.0f)
 
         Draw.rect
             (Rect.Create(
-                Viewport.vwidth - 10.0f,
-                origin + 10.0f + scroll_bar_pos,
-                Viewport.vwidth - 5.0f,
+                Viewport.bounds.Right - 10.0f,
+                origin + 5.0f + scroll_bar_pos,
+                Viewport.bounds.Right,
                 origin + 30.0f + scroll_bar_pos
             ))
-            Color.White
+            Colors.white
