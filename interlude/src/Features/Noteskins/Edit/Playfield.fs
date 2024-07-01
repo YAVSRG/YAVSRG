@@ -83,18 +83,18 @@ type PlayfieldSettingsPage() =
     let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
 
     let column_spacing =
-        Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
+        Setting.bounded data.ColumnSpacing -150.0f 300.0f |> Setting.roundf 0
 
     let use_advanced_column_spacing = Setting.simple data.UseAdvancedColumnSpacing
     let fill_gaps = Setting.simple data.FillColumnGaps
     let spacing = data.AdvancedColumnSpacing
 
-    let g keymode i =
+    let spacing_setting keymode i =
         let k = int keymode - 3
 
         Setting.make (fun v -> spacing.[k].[i] <- v) (fun () -> spacing.[k].[i])
         |> Setting.roundf 0
-        |> Setting.bound 0.0f 300.0f
+        |> Setting.bound -150.0f 300.0f
 
     let NOTE_WIDTH = 120.0f
 
@@ -106,7 +106,7 @@ type PlayfieldSettingsPage() =
                 let n = float32 i
 
                 SpacingPicker(
-                    g keymode.Value i,
+                    spacing_setting keymode.Value i,
                     Position =
                         { Position.Default with
                             Left = 0.5f %+ (x + NOTE_WIDTH * n)
