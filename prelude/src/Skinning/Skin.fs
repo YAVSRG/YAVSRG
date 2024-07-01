@@ -8,7 +8,7 @@ open Prelude.Skinning.Noteskins
 open Prelude.Skinning.HudLayouts
 open Prelude.Skinning
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(false)>]
 type SkinMetadata =
     {
         Name: string
@@ -122,9 +122,9 @@ module NoteskinToSkinMigration =
     let folder_should_migrate (folder_path: string) =
         not (Skin.Exists folder_path) && Noteskin.Exists folder_path
 
-    let migrate_folder (folder_path: string) : Result<unit, string> =
+    let migrate_folder (folder_path: string) : Result<unit, exn> =
         match JSON.FromFile<SkinMetadata> (Path.Combine(folder_path, "noteskin.json")) with
-        | Error reason -> Error (sprintf "Parsing noteskin.json to skin metadata failed: %s" reason.Message)
+        | Error reason -> Error reason
         | Ok meta ->
 
         try
@@ -136,4 +136,4 @@ module NoteskinToSkinMigration =
             JSON.ToFile(Path.Combine(folder_path, "skin.json"), true) meta
             Ok()
         with err ->
-            Error (sprintf "Error changing noteskin folder to make a skin folder: %s" err.Message)
+            Error err

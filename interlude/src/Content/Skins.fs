@@ -315,7 +315,7 @@ module Skins =
             if NoteskinToSkinMigration.folder_should_migrate source then
                 match NoteskinToSkinMigration.migrate_folder source with
                 | Ok () -> Logging.Info(sprintf "Migrating noteskin '%s' to new skin format" (Path.GetFileName source))
-                | Error msg -> Logging.Error(sprintf "Error migrating noteskin '%s' to new skin format: %s" (Path.GetFileName source) msg)
+                | Error err -> Logging.Error(sprintf "Error migrating noteskin '%s' to new skin format" (Path.GetFileName source), err)
 
         // load all skins and their parts
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") |> Seq.where Skin.Exists do
