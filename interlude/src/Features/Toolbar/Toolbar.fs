@@ -16,10 +16,6 @@ open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
 open Interlude.Features.Noteskins.Edit
-open Interlude.Features.Import.osu
-open Interlude.Features.Import.Etterna
-open Interlude.Features.Tables.Browser
-open Interlude.Features.Rulesets
 
 type Toolbar() =
     inherit Widget(NodeType.None)
@@ -43,20 +39,7 @@ type Toolbar() =
         let container = 
             InlaidButton(
                 %"menu.import",
-                (fun () ->
-                    dropdown_wrapper.Toggle(fun () ->
-                        DropdownMenu
-                            {
-                                Items = 
-                                    [|
-                                        (fun () -> BeatmapBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"beatmap_browser"
-                                        (fun () -> EtternaPacksBrowserPage().Show()), Icons.DOWNLOAD_CLOUD + " " + %"etterna_pack_browser"
-                                        (fun () -> AddRulesetsPage().Show()), Icons.SLIDERS + " " + %"rulesets.add"
-                                        (fun () -> TableBrowserPage().Show()), Icons.SIDEBAR + " " + %"tables.browser"
-                                    |]
-                            }
-                    )
-                ),
+                (fun () -> ImportsMenuPage().Show()),
                 Icons.DOWNLOAD,
                 Hotkey = "import"
             )
@@ -64,7 +47,6 @@ type Toolbar() =
                 Imports.import_in_progress,
                 Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
             )
-            |+ dropdown_wrapper
         container.Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
 
     override this.Init(parent) =
@@ -93,7 +75,7 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.options",
-                OptionsMenuPage.Show,
+                (fun () -> OptionsMenuPage().Show()),
                 Icons.SETTINGS
             )
                 .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
@@ -212,7 +194,7 @@ type Toolbar() =
             Toolbar.take_screenshot()
         
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
-            OptionsMenuPage.Show()
+            OptionsMenuPage().Show()
 
         Terminal.update ()
 

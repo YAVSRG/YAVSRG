@@ -42,7 +42,7 @@ type OptionsMenuPage() =
                 if
                     SelectedChart.WITH_COLORS.IsSome
                     && Screen.change_new
-                        (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsMenuPage.Show()))
+                        (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsMenuPage().Show()))
                         Screen.Type.Practice
                         Transitions.Default
                 then
@@ -203,5 +203,3 @@ type OptionsMenuPage() =
     override this.OnClose() = on_destroy_current_tab(); header.Hide()
     override this.OnEnterNestedPage() = header.Hide()
     override this.OnReturnFromNestedPage() = on_return_current_tab(); header.Show()
-
-    static member Show() = Menu.ShowPage OptionsMenuPage

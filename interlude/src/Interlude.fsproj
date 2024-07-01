@@ -205,6 +205,7 @@
     <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\Layout.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
+    <Compile Include="Features\Options\ImportsMenu.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\List.fs" />
