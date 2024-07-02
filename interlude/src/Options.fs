@@ -372,7 +372,7 @@ module Options =
         let create (name: string) : Preset =
             {
                 Name = name
-                Mode = PresetMode.Unlocked
+                Mode = PresetMode.Autosave
 
                 VisualOffset = options.VisualOffset.Value
                 ScrollSpeed = options.ScrollSpeed.Value
