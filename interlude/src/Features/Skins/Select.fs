@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins
+namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -11,8 +11,8 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Import
-open Interlude.Features.Noteskins.Edit
-open Interlude.Features.Noteskins.Browser
+open Interlude.Features.Skins.EditNoteskin
+open Interlude.Features.Skins.Browser
 
 type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
     inherit
@@ -130,7 +130,7 @@ type SelectNoteskinsPage() =
             |+ OptionsMenuButton(
                 sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"skins.browser"),
                 0.0f,
-                (fun () -> NoteskinsBrowserPage().Show()),
+                (fun () -> SkinsBrowserPage().Show()),
                 Position = { Position.Default with Left = 0.26f %+ 0.0f; Right = 0.48f %+ 0.0f }
             )
             |+ OptionsMenuButton(

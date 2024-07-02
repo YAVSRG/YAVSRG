@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins.Browser
+namespace Interlude.Features.Skins.Browser
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -8,7 +8,7 @@ open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu
 
-type NoteskinsBrowserPage() =
+type SkinsBrowserPage() =
     inherit Page()
 
     let mutable loading = true
@@ -42,7 +42,7 @@ type NoteskinsBrowserPage() =
         |>> (fun nt -> Container(nt, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
         |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(70.0f).Margin(10.0f)).Conditional(fun () -> selected_group.IsSome)
 
-    let select_group(group: NoteskinGroup) =
+    let select_group(group: SkinGroup) =
         selected_group <- Some group
         version_items.Clear()
         for version in group.Versions do
@@ -56,9 +56,9 @@ type NoteskinsBrowserPage() =
             sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/skins/skins.json" "githubusercontent",
             fun data ->
                 match data with
-                | Some(d: NoteskinRepo) ->
+                | Some(d: SkinRepo) ->
                     defer (fun () ->
-                        for group in d.Noteskins do
+                        for group in d.Skins do
                             let is_selected = Setting.make (fun _ -> select_group group) (fun _ -> selected_group = Some group)
                             noteskin_items.Add <| GroupDisplay(group, is_selected)
                         loading <- false

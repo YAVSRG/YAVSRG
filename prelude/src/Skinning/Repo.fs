@@ -130,7 +130,7 @@ module NoteskinPreview =
         thumbnail
 
 [<Json.AutoCodec>]
-type NoteskinVersion =
+type SkinVersion =
     {
         Version: string
         Author: string
@@ -140,21 +140,21 @@ type NoteskinVersion =
     }
         
 [<Json.AutoCodec>]
-type NoteskinGroup =
+type SkinGroup =
     {
         Name: string
-        Versions: NoteskinVersion list
+        Versions: SkinVersion list
         Thumbnail: string
     }
 
 [<Json.AutoCodec>]
-type NoteskinRepo =
+type SkinRepo =
     {
-        Noteskins: NoteskinGroup list
+        Skins: SkinGroup list
     }
-    static member Empty = { Noteskins = [] }
+    static member Empty = { Skins = [] }
 
-module NoteskinRepo =
+module SkinRepo =
 
     let add
         (skin_meta: SkinMetadata)
@@ -163,13 +163,13 @@ module NoteskinRepo =
         (download_link: string)
         (preview_image_link: string)
         (thumbnail_image_link: string)
-        (repo: NoteskinRepo)
-        : NoteskinRepo * bool =
+        (repo: SkinRepo)
+        : SkinRepo * bool =
 
         let author = skin_meta.Author.Trim()
         let editor = skin_meta.Editor |> Option.map (_.Trim())
 
-        match repo.Noteskins |> List.tryFind (fun x -> x.Name = name) with
+        match repo.Skins |> List.tryFind (fun x -> x.Name = name) with
         | Some existing_group ->
             let new_group, new_skin_was_added =
                 match
@@ -205,12 +205,12 @@ module NoteskinRepo =
                     true
 
             { repo with
-                Noteskins = new_group :: (repo.Noteskins |> List.except [ existing_group ])
+                Skins = new_group :: (repo.Skins |> List.except [ existing_group ])
             },
             new_skin_was_added
         | None ->
             { repo with
-                Noteskins =
+                Skins =
                     {
                         Name = name
                         Versions =
@@ -225,6 +225,6 @@ module NoteskinRepo =
                             ]
                         Thumbnail = thumbnail_image_link
                     }
-                    :: repo.Noteskins
+                    :: repo.Skins
             },
             true

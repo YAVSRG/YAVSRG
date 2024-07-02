@@ -6,9 +6,9 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.HUD.Edit
-open Interlude.Features.Noteskins.Edit
-open Interlude.Features.Noteskins.Browser
-open Interlude.Features.Noteskins
+open Interlude.Features.Skins.EditNoteskin
+open Interlude.Features.Skins.Browser
+open Interlude.Features.Skins
 open Interlude.Features.Gameplay
 open Interlude.Features.Import.osu
 
@@ -31,7 +31,7 @@ module Noteskins =
 
                 yield PageButton(
                     %"skins.browser",
-                    (fun () -> NoteskinsBrowserPage().Show())
+                    (fun () -> SkinsBrowserPage().Show())
                 )
 
                 yield PageButton(

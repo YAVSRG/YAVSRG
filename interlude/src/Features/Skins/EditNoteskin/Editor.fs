@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Skins.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -6,8 +6,8 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.Noteskins
-open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Skins
+open Interlude.Features.Skins.EditNoteskin
 
 type EditNoteskinPage(from_hotkey: bool) =
     inherit Page()

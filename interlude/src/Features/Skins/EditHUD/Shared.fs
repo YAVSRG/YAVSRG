@@ -9,7 +9,7 @@ open Prelude.Skinning.HudLayouts
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
-open Interlude.Features.Noteskins
+open Interlude.Features.Skins
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<HudPosition>) =

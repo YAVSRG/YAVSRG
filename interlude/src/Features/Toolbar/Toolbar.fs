@@ -15,7 +15,7 @@ open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
-open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Skins.EditNoteskin
 
 type Toolbar() =
     inherit Widget(NodeType.None)

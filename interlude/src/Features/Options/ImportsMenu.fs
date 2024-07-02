@@ -9,7 +9,7 @@ open Interlude.Features.Mounts
 open Interlude.Features.Import.osu
 open Interlude.Features.Import.Etterna
 open Interlude.Features.Tables.Browser
-open Interlude.Features.Noteskins.Browser
+open Interlude.Features.Skins.Browser
 open Interlude.Features.Rulesets
 
 type ImportsMenuPage() =
@@ -29,7 +29,7 @@ type ImportsMenuPage() =
         |+ PageButton(%"etterna_pack_browser", fun () -> EtternaPacksBrowserPage().Show()).Pos(2, 2, PageWidth.Full)
         |+ PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show()).Pos(4, 2, PageWidth.Full)
         |+ PageButton(%"tables.browser", fun () -> TableBrowserPage().Show()).Pos(6, 2, PageWidth.Full)
-        |+ PageButton(%"skins.browser",fun () -> NoteskinsBrowserPage().Show()).Pos(8, 2, PageWidth.Full)
+        |+ PageButton(%"skins.browser",fun () -> SkinsBrowserPage().Show()).Pos(8, 2, PageWidth.Full)
 
     override this.Content() =
         NavigationContainer.Row()

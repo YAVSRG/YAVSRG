@@ -7,7 +7,7 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Features.Noteskins
+open Interlude.Features.Skins
 
 type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Button))

@@ -7,7 +7,7 @@ open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
-open Interlude.Features.Noteskins
+open Interlude.Features.Skins
 open Interlude.Features.Rulesets
 
 type GameplayPage() =

@@ -11,7 +11,7 @@ open SixLabors.ImageSharp
 open YAVSRG.CLI.Utils
 open YAVSRG.CLI.Features.Backbeat
 
-module Noteskins =
+module Skins =
 
     let SKINS_ROOT = Path.Combine(YAVSRG_PATH, "backbeat", "skins")
 
@@ -28,7 +28,7 @@ module Noteskins =
         let existing_skins =
             match JSON.FromFile(Path.Combine(SKINS_ROOT, "skins.json")) with
             | Ok repo -> repo
-            | Error _ -> NoteskinRepo.Empty
+            | Error _ -> SkinRepo.Empty
 
         let skin_folder = Path.Combine(INTERLUDE_SKINS_PATH, name)
         match Skin.FromPath skin_folder with
@@ -101,7 +101,7 @@ module Noteskins =
         )
 
         let updated_repo, new_skin_added =
-            NoteskinRepo.add
+            SkinRepo.add
                 skin.Metadata
                 group_name
                 version

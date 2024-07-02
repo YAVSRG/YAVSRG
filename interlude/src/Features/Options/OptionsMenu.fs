@@ -12,8 +12,8 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Stats
 open Interlude.Features.HUD.Edit
-open Interlude.Features.Noteskins
-open Interlude.Features.Noteskins.Edit
+open Interlude.Features.Skins
+open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Gameplay
 open Interlude.Features.Wiki
 open Interlude.Features.Import

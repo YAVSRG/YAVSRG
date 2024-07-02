@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Browser
+﻿namespace Interlude.Features.Skins.Browser
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI

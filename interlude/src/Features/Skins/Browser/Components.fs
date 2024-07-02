@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins.Browser
+namespace Interlude.Features.Skins.Browser
 
 open System.IO
 open Percyqaz.Common
@@ -17,7 +17,7 @@ type private Status =
     | Installed
     | DownloadFailed
 
-type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
+type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -111,7 +111,7 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
         if this.Focused then Draw.rect this.Bounds Colors.shadow_2.O2
         base.Draw()
 
-type GroupDisplay(group: NoteskinGroup, selected: Setting<bool>) =
+type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
     inherit
         Container(
             NodeType.Button(fun () ->

@@ -1,4 +1,4 @@
-namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Skins.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
