@@ -5,16 +5,16 @@ open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features.HUD.Edit
+open Interlude.Features.EditHUD
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.Browser
 open Interlude.Features.Skins
 open Interlude.Features.Gameplay
 open Interlude.Features.Import.osu
 
-module Noteskins =
+module Skins =
 
-    let search_noteskin_settings (tokens: string array) : SearchResult seq =
+    let search_skin_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"skins"|] then
                 yield PageButton(

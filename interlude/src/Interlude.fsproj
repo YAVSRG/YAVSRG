@@ -200,7 +200,7 @@
     <Compile Include="Features\Options\Library\Library.fs" />
     <Compile Include="Features\Options\Search\Core.fs" />
     <Compile Include="Features\Options\Search\Settings.fs" />
-    <Compile Include="Features\Options\Search\Noteskins.fs" />
+    <Compile Include="Features\Options\Search\Skins.fs" />
     <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\Presets.fs" />
     <Compile Include="Features\Options\Layout.fs" />

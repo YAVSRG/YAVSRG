@@ -9,7 +9,7 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
-open Interlude.Features.HUD.Edit
+open Interlude.Features.EditHUD
 
 type NoteskinPreview(position: Position) as this =
     inherit Container(NodeType.None)

@@ -9,7 +9,7 @@ module SearchResults =
             seq {
                 yield! Settings.search_system_settings tokens
                 yield! Settings.search_gameplay_settings tokens
-                yield! Noteskins.search_noteskin_settings tokens
+                yield! Skins.search_skin_settings tokens
                 yield! Settings.search_library_settings tokens
             }
         ) query
