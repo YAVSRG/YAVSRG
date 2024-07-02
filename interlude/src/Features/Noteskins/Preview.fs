@@ -14,6 +14,8 @@ open Interlude.Features.HUD.Edit
 type NoteskinPreview(position: Position) as this =
     inherit Container(NodeType.None)
 
+    static let mutable instances = []
+
     let fbo = FBO.create ()
 
     let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
@@ -72,6 +74,7 @@ type NoteskinPreview(position: Position) as this =
         )
 
     do
+        instances <- this :: instances
         fbo.Unbind()
 
         SelectedChart.if_loaded <| fun info -> renderer <- create_renderer info
@@ -89,6 +92,9 @@ type NoteskinPreview(position: Position) as this =
     member this.Refresh() =
         SelectedChart.recolor ()
         SelectedChart.when_loaded <| fun info -> renderer <- create_renderer info
+
+    static member RefreshAll() =
+        for instance in instances do instance.Refresh()
 
     override this.Update(elapsed_ms, moved) =
         this.Bounds <- Viewport.bounds
@@ -119,7 +125,9 @@ type NoteskinPreview(position: Position) as this =
         this.Bounds <- Viewport.bounds
         renderer.Init this
 
-    member this.Destroy() = fbo.Dispose()
+    member this.Destroy() = 
+        instances <- instances |> List.except [this]
+        fbo.Dispose()
 
     static member LEFT_HAND_SIDE (scale: float32) : Position =
         let w = Viewport.vwidth * scale

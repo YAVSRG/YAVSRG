@@ -159,7 +159,7 @@ type Position with
     member this.CenterX width =
         let (lefto, lefta) = this.Left
         let (righto, righta) = this.Right
-        let center = (0.5f * (lefto + righto), 0.5f % (lefta + righta))
+        let center = (0.5f * (lefto + righto), 0.5f * (lefta + righta))
         { this with
             Left = center ^- (width * 0.5f)
             Right = center ^+ (width * 0.5f)
@@ -168,7 +168,7 @@ type Position with
     member this.CenterY height =
         let (topo, topa) = this.Top
         let (bottomo, bottoma) = this.Bottom
-        let center = (0.5f * (topo + bottomo), 0.5f % (topa + bottoma))
+        let center = (0.5f * (topo + bottomo), 0.5f * (topa + bottoma))
         { this with
             Top = center ^- (height * 0.5f)
             Bottom = center ^+ (height * 0.5f)

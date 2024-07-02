@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Search
@@ -24,6 +25,10 @@ type private OptionsMenuTab =
     | Library
     | Noteskins
     | SearchResults of content: Widget
+
+module private State =
+
+    let mutable recent_tab = OptionsMenuTab.Home
 
 type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
@@ -73,7 +78,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                 Setting.simple "", 
                 (fun query ->
                     if query = "" then
-                        current_tab.Set OptionsMenuTab.Home
+                        current_tab.Set State.recent_tab
                     else
                         current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
                 ),
@@ -155,3 +160,32 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     member this.Show() =
         transition_timer.Reset()
         transition <- Transition.In
+
+type private OptionsMenuFooter() as this =
+    inherit Container(NodeType.Container(fun () -> Some this.Items))
+
+    let HEIGHT = 70.0f
+
+    let items = 
+        NavigationContainer.Row()
+        |+ InlaidButton(
+            %"menu.back",
+            Menu.Back,
+            Icons.ARROW_LEFT_CIRCLE,
+            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
+        )
+        |+ Presets.preset_buttons 1 options.Preset1
+        |+ Presets.preset_buttons 2 options.Preset2
+        |+ Presets.preset_buttons 3 options.Preset3
+
+    member this.Items = items
+
+    override this.Init(parent) =
+        this |* items
+        this.Position <- Position.SliceBottom HEIGHT
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect this.Bounds Colors.shadow_2.O1
+        Draw.rect (this.Bounds.BorderTop Style.PADDING) Colors.cyan_accent.O2
+        base.Draw()

@@ -30,10 +30,6 @@ module Imports =
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || osu.Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
-module private State =
-
-    let mutable recent_tab = OptionsMenuTab.Home
-
 type OptionsMenuPage() =
     inherit Page()
 
@@ -196,15 +192,21 @@ type OptionsMenuPage() =
             )
             (fun () -> current_tab)
 
-    let header = 
-        OptionsMenuHeader(content_setting)
+    let header = OptionsMenuHeader(content_setting)
 
     override this.Init(parent) =
         base.Init parent
         header.Focus false
 
     override this.Header() =
-        header |> OverlayContainer :> Widget
+        header
+        |> OverlayContainer
+        :> Widget
+
+    override this.Footer() =
+        OptionsMenuFooter() 
+        |> OverlayContainer 
+        :> Widget
 
     override this.Content() = 
         content_setting.Set State.recent_tab

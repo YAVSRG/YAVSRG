@@ -62,9 +62,6 @@ type GameplayPage() =
             .Pos(21, 2, PageWidth.Full)
         |>> Container
         |+ preview
-        |+ Presets.preset_buttons 1 options.Preset1 preview.Refresh
-        |+ Presets.preset_buttons 2 options.Preset2 preview.Refresh
-        |+ Presets.preset_buttons 3 options.Preset3 preview.Refresh
         :> Widget
 
     override this.Title = %"gameplay"

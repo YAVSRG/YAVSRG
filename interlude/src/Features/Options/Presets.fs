@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Gameplay
+﻿namespace Interlude.Features.OptionsMenu
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -7,6 +7,7 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features.Noteskins
 
 type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Button))
@@ -113,68 +114,47 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
 
 module private Presets =
 
-    let preset_buttons (preset_id: int) (setting: Setting<Preset option>) (refresh_preview: unit -> unit) =
-        Container(
-            NodeType.None,
-            Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 preset_id * 300.0f, -90.0f, 290.0f, 80.0f)
-        )
-        |+ Conditional(
-            (fun () ->
-                options.SelectedPreset.Value = Some preset_id
-                && match setting.Value with
-                   | Some p -> p.Mode = PresetMode.Autosave
-                   | None -> false
-            ),
-            Text(
-                sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
-                Color = K Colors.text_green,
-                Position = Position.SliceBottom(40.0f).Margin(10.0f, 0.0f)
-            )
-        )
-        |+ Button(
-            (fun () ->
-                match setting.Value with
-                | None -> sprintf "Preset %i (Empty)" preset_id
-                | Some s -> Icons.EDIT_2 + " " + s.Name
-            ),
-            (fun () ->
-                match setting.Value with
-                | Some s ->
-                    let needs_confirmation =
-                        match options.SelectedPreset.Value with
-                        | None -> true
-                        | Some i when preset_id = i -> false
-                        | Some i ->
-                            match (Presets.get i).Value with
-                            | Some p -> p.Mode <> PresetMode.Autosave
+    let preset_buttons (preset_id: int) (setting: Setting<Preset option>) =
+        
+        let create_preset_button =
+            Button(
+                (fun () ->
+                    match setting.Value with
+                    | None -> sprintf "Preset %i (Empty)" preset_id
+                    | Some s -> Icons.EDIT_2 + " " + s.Name
+                ),
+                (fun () ->
+                    match setting.Value with
+                    | Some s ->
+                        let needs_confirmation =
+                            match options.SelectedPreset.Value with
                             | None -> true
+                            | Some i when preset_id = i -> false
+                            | Some i ->
+                                match (Presets.get i).Value with
+                                | Some p -> p.Mode <> PresetMode.Autosave
+                                | None -> true
 
-                    if needs_confirmation then
-                        ConfirmPage(
-                            [ s.Name ] %> "gameplay.preset.load.prompt",
-                            fun () ->
-                                Presets.load preset_id |> ignore
-                                refresh_preview()
-                                defer <| EditPresetPage(preset_id, setting).Show
-                        )
-                            .Show()
-                    else
-                        Presets.load preset_id |> ignore
-                        refresh_preview()
-                        EditPresetPage(preset_id, setting).Show()
-                | None -> ()
-            ),
-            Disabled = (fun () -> setting.Value.IsNone),
-            Position = Position.SliceTop(40.0f)
-        )
+                        if needs_confirmation then
+                            ConfirmPage(
+                                [ s.Name ] %> "gameplay.preset.load.prompt",
+                                fun () ->
+                                    Presets.load preset_id |> ignore
+                                    NoteskinPreview.RefreshAll()
+                                    defer <| EditPresetPage(preset_id, setting).Show
+                            )
+                                .Show()
+                        else
+                            Presets.load preset_id |> ignore
+                            NoteskinPreview.RefreshAll()
+                            EditPresetPage(preset_id, setting).Show()
+                    | None -> ()
+                ),
+                Disabled = (fun () -> setting.Value.IsNone),
+                Position = Position.SliceTop(40.0f)
+            )
 
-        |+ Conditional(
-            (fun () ->
-                options.SelectedPreset.Value <> Some preset_id
-                || match setting.Value with
-                   | Some p -> p.Mode <> PresetMode.Autosave
-                   | None -> true
-            ),
+        let load_preset_button =
             Button(
                 %"gameplay.preset.load",
                 (fun () ->
@@ -193,7 +173,7 @@ module private Presets =
                                 [ s.Name ] %> "gameplay.preset.load.prompt",
                                 fun () ->
                                     Presets.load preset_id |> ignore
-                                    refresh_preview()
+                                    NoteskinPreview.RefreshAll()
 
                                     Notifications.action_feedback (
                                         Icons.ALERT_OCTAGON,
@@ -204,7 +184,7 @@ module private Presets =
                                 .Show()
                         else
                             Presets.load preset_id |> ignore
-                            refresh_preview()
+                            NoteskinPreview.RefreshAll()
                             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     | None -> ()
                 ),
@@ -215,14 +195,8 @@ module private Presets =
                     }
                         .Margin(40.0f, 0.0f)
             )
-        )
-        |+ Conditional(
-            (fun () ->
-                options.SelectedPreset.Value <> Some preset_id
-                || match setting.Value with
-                   | Some p -> p.Mode <> PresetMode.Autosave
-                   | None -> true
-            ),
+
+        let save_preset_button =
             Button(
                 %"gameplay.preset.save",
                 (fun () ->
@@ -257,4 +231,35 @@ module private Presets =
                     }
                         .Margin(40.0f, 0.0f)
             )
+
+        let lower_buttons = 
+            NavigationContainer.Row(WrapNavigation = false)
+            |+ load_preset_button
+                .Conditional(fun () ->
+                    options.SelectedPreset.Value <> Some preset_id
+                    || match setting.Value with
+                       | Some p -> p.Mode <> PresetMode.Autosave
+                       | None -> true
+                )
+            |+ save_preset_button
+                .Conditional(fun () ->
+                    options.SelectedPreset.Value <> Some preset_id
+                    || match setting.Value with
+                        | Some p -> p.Mode <> PresetMode.Autosave
+                        | None -> true
+                )
+
+        NavigationContainer.Column(WrapNavigation = false, Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 preset_id * 300.0f, -90.0f, 290.0f, 80.0f))
+        |+ create_preset_button
+        |+ lower_buttons
+        |+ Text(
+            sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
+            Color = K Colors.text_green,
+            Position = Position.SliceBottom(40.0f).Margin(10.0f, 0.0f)
         )
+            .Conditional(fun () ->
+                options.SelectedPreset.Value = Some preset_id
+                && match setting.Value with
+                   | Some p -> p.Mode = PresetMode.Autosave
+                   | None -> false
+            )
