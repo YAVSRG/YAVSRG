@@ -13,7 +13,7 @@ open Interlude.Features.Rulesets
 type GameplayPage() =
     inherit Page()
 
-    let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
+    let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE 0.35f)
 
     override this.Content() =
         page_container()

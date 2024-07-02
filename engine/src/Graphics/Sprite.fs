@@ -45,9 +45,6 @@ type Sprite =
     member this.Width = this.GridWidth / this.Columns
     member this.Height = this.GridHeight / this.Rows
     member this.AspectRatio = float32 this.Width / float32 this.Height
-    member this.Clone =
-        this.Texture.References <- this.Texture.References + 1
-        this
 
 [<Struct>]
 type QuadTexture =

@@ -141,13 +141,13 @@ module private Presets =
                                 [ s.Name ] %> "gameplay.preset.load.prompt",
                                 fun () ->
                                     Presets.load preset_id |> ignore
-                                    NoteskinPreview.RefreshAll()
+                                    SkinPreview.RefreshAll()
                                     defer <| EditPresetPage(preset_id, setting).Show
                             )
                                 .Show()
                         else
                             Presets.load preset_id |> ignore
-                            NoteskinPreview.RefreshAll()
+                            SkinPreview.RefreshAll()
                             EditPresetPage(preset_id, setting).Show()
                     | None -> ()
                 ),
@@ -174,7 +174,7 @@ module private Presets =
                                 [ s.Name ] %> "gameplay.preset.load.prompt",
                                 fun () ->
                                     Presets.load preset_id |> ignore
-                                    NoteskinPreview.RefreshAll()
+                                    SkinPreview.RefreshAll()
 
                                     Notifications.action_feedback (
                                         Icons.ALERT_OCTAGON,
@@ -185,7 +185,7 @@ module private Presets =
                                 .Show()
                         else
                             Presets.load preset_id |> ignore
-                            NoteskinPreview.RefreshAll()
+                            SkinPreview.RefreshAll()
                             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     | None -> ()
                 ),

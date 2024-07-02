@@ -19,7 +19,7 @@ module Skins =
             if token_match tokens [|%"skins"|] then
                 yield PageButton(
                     %"skins",
-                    (fun () -> SelectNoteskinsPage().Show())
+                    (fun () -> SelectSkinsPage().Show())
                 )
 
                 if not Content.Noteskin.IsEmbedded then

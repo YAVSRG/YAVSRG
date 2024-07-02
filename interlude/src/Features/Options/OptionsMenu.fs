@@ -55,7 +55,7 @@ type OptionsMenuPage() =
             0.0f,
             (fun () -> 
                 if Content.Noteskin.IsEmbedded then
-                    SelectNoteskinsPage().Show()
+                    SelectSkinsPage().Show()
                 else
                     EditNoteskinPage(false).Show()
             ),
@@ -181,7 +181,7 @@ type OptionsMenuPage() =
                     page_body.Current <- p.Content()
                     State.recent_tab <- new_tab
                 | OptionsMenuTab.Noteskins ->
-                    let p = SelectNoteskinsPage()
+                    let p = SelectSkinsPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()

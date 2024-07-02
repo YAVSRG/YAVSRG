@@ -50,13 +50,11 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
             Align = Alignment.LEFT,
             Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
         )
-        |+ { new Thumbnail(Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)) with
-            override this.Load() =
-                match Skins.get_icon id with
-                | Some sprite -> this.FinishLoading sprite
-                | None -> ()
-        }
         |* Clickable.Focus this
+
+        match Skins.get_icon id with
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)))
+        | None -> ()
 
         base.Init parent
 
@@ -72,15 +70,71 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
 
         base.Draw()
 
-type SelectNoteskinsPage() =
+type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
+    inherit
+        Container(
+            NodeType.Button(fun _ ->
+                if Skins.selected_hud_id.Value <> id then
+                    options.SelectedHUD.Set id
+                    Style.click.Play()
+                    on_switch ()
+            )
+        )
+
+    member this.IsCurrent = Skins.selected_hud_id.Value = id
+
+    override this.Init(parent: Widget) =
+        this
+        |+ Text(
+            K meta.Name,
+            Color =
+                (fun () ->
+                    if this.Focused then Colors.text_yellow_2
+                    elif this.IsCurrent then Colors.text_green
+                    else Colors.text
+                ),
+            Align = Alignment.LEFT,
+            Position = Position.TrimLeft(100.0f).Margin(Style.PADDING).SliceTop(70.0f)
+        )
+        |+ Text(
+            K(
+                match meta.Editor with
+                | Some e -> [meta.Author; e] %> "skins.credit.edited"
+                | None -> [meta.Author] %> "skins.credit"
+            ),
+            Color = K Colors.text_subheading,
+            Align = Alignment.LEFT,
+            Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
+        )
+        |* Clickable.Focus this
+
+        match Skins.get_icon id with
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)))
+        | None -> ()
+
+        base.Init parent
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Draw() =
+        if this.IsCurrent then
+            Draw.rect this.Bounds Colors.green_accent.O1
+        elif this.Focused then
+            Draw.rect this.Bounds Colors.yellow_accent.O1
+
+        base.Draw()
+
+type SelectSkinsPage() =
     inherit Page()
 
-    let preview = NoteskinPreview(NoteskinPreview.LEFT_HAND_SIDE 0.35f)
+    let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
 
     let grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
-    let rec edit_or_extract_noteskin () =
+    let edit_or_extract_noteskin () =
         let noteskin = Content.Noteskin
 
         if noteskin.IsEmbedded then
@@ -94,22 +148,15 @@ type SelectNoteskinsPage() =
                             else
                                 None
                         )
+                        |> not
                     then
-                        refresh ()
-                    else
                         Logging.Error "An editable skin has already been extracted"
                 )
             )
                 .Show()
-        else
-            Menu.ShowPage
-                { new EditNoteskinPage(false) with
-                    override this.OnClose() =
-                        base.OnClose()
-                        refresh ()
-                }
+        else EditNoteskinPage(false).Show()
 
-    and refresh () =
+    let refresh () =
         grid.Clear()
         preview.Refresh()
 
@@ -120,7 +167,7 @@ type SelectNoteskinsPage() =
         refresh ()
 
         let action_buttons =
-            NavigationContainer.Row(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT))
+            NavigationContainer.Row(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT).Translate(0.0f, 20.0f))
             |+ OptionsMenuButton(
                 sprintf "%s %s" Icons.EDIT_2 (%"noteskin.edit"),
                 0.0f,

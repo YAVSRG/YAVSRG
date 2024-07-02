@@ -11,7 +11,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Play
 open Interlude.Features.EditHUD
 
-type NoteskinPreview(position: Position) as this =
+type SkinPreview(position: Position) as this =
     inherit Container(NodeType.None)
 
     static let mutable instances = []

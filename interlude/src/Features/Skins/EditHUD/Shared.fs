@@ -13,7 +13,7 @@ open Interlude.Features.Skins
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<HudPosition>) =
-    inherit NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE scale)
+    inherit SkinPreview(SkinPreview.RIGHT_HAND_SIDE scale)
 
     let keycount = int (SelectedChart.keymode ())
 

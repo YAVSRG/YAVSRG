@@ -143,7 +143,6 @@
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
-    <Compile Include="Features\Skins\Thumbnails.fs" />
     <Compile Include="Features\Skins\EditHUD\Elements.fs" />
     <Compile Include="Features\Skins\Preview.fs" />
     <Compile Include="Features\Skins\EditHUD\Shared.fs" />
@@ -169,6 +168,7 @@
     <Compile Include="Features\Skins\EditNoteskin\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Problems.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Editor.fs" />
+    <Compile Include="Features\Skins\Browser\Thumbnails.fs" />
     <Compile Include="Features\Skins\Browser\Components.fs" />
     <Compile Include="Features\Skins\Browser\Browser.fs" />
     <Compile Include="Features\Skins\Select.fs" />

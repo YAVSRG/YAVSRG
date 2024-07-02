@@ -455,9 +455,9 @@ module Skins =
 
     let get_icon (skin_id: string) : Sprite option =
         if skin_id = DEFAULT_NOTESKIN_ID then 
-            DEFAULT_SKIN_ICON |> Option.map (fun sprite -> sprite.Clone)
+            DEFAULT_SKIN_ICON
         elif loaded_skins.ContainsKey skin_id then
-            loaded_skins.[skin_id].Icon |> Option.map (fun sprite -> sprite.Clone)
+            loaded_skins.[skin_id].Icon
         else None
 
     let save_noteskin_config (new_config: NoteskinConfig) =

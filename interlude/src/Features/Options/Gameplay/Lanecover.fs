@@ -9,7 +9,7 @@ open Interlude.Features.Skins
 type LanecoverPage() =
     inherit Page()
 
-    let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE 0.35f)
+    let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE 0.35f)
 
     override this.Content() =
         page_container()
