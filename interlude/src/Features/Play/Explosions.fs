@@ -27,7 +27,7 @@ type private Explosion =
             Time = -Time.infinity
         }
 
-type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
+type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let mutable last_time : Time = -Time.infinity
@@ -143,14 +143,6 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
         | _ -> ()
 
     do
-        let hitpos = float32 options.HitPosition.Value
-
-        this.Position <-
-            { Position.Default with
-                Top = 0.0f %+ hitpos
-                Bottom = 1.0f %- hitpos
-            }
-
         state.SubscribeToHits handle_event
 
     override this.Update(elapsed_ms, moved) =
@@ -193,13 +185,13 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                 let bounds =
                     (if options.Upscroll.Value then
                          Rect
-                             .Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top, column_width, column_width)
+                             .Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top + options.HitPosition.Value, column_width, column_width)
                              .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
                      else
                          Rect
                              .Box(
                                  this.Bounds.Left + column_positions.[k],
-                                 this.Bounds.Bottom - column_width,
+                                 this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                  column_width,
                                  column_width
                              )
@@ -248,7 +240,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                              Rect
                                  .Box(
                                      this.Bounds.Left + column_positions.[ex.Column],
-                                     this.Bounds.Top,
+                                     this.Bounds.Top + options.HitPosition.Value,
                                      column_width,
                                      column_width
                                  )
@@ -257,7 +249,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                              Rect
                                  .Box(
                                      this.Bounds.Left + column_positions.[ex.Column],
-                                     this.Bounds.Bottom - column_width,
+                                     this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                      column_width,
                                      column_width
                                  )
@@ -303,7 +295,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                              Rect
                                  .Box(
                                      this.Bounds.Left + column_positions.[ex.Column],
-                                     this.Bounds.Top,
+                                     this.Bounds.Top + options.HitPosition.Value,
                                      column_width,
                                      column_width
                                  )
@@ -312,7 +304,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) as this =
                              Rect
                                  .Box(
                                      this.Bounds.Left + column_positions.[ex.Column],
-                                     this.Bounds.Bottom - column_width,
+                                     this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                      column_width,
                                      column_width
                                  )

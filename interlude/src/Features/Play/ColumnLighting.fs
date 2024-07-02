@@ -8,7 +8,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Play
 
-type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
+type ColumnLighting(keys, ns: NoteskinConfig, state) =
     inherit StaticWidget(NodeType.None)
     let timers = Array.init keys (fun _ -> Animation.Delay ns.ColumnLightDuration)
     let sprite = Content.Texture "receptorlighting"
@@ -28,15 +28,6 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
 
                 v
             )
-
-    do
-        let hitpos = float32 options.HitPosition.Value
-
-        this.Position <-
-            { Position.Default with
-                Top = 0.0f %+ hitpos
-                Bottom = 1.0f %- hitpos
-            }
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -64,7 +55,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                      if options.Upscroll.Value then
                          Sprite.aligned_box_x
                              (this.Bounds.Left + x,
-                              this.Bounds.Top,
+                              this.Bounds.Top + options.HitPosition.Value,
                               0.5f,
                               1.0f,
                               ns.ColumnWidth * percent_remaining,
@@ -73,7 +64,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
                      else
                          Sprite.aligned_box_x
                              (this.Bounds.Left + x,
-                              this.Bounds.Bottom,
+                              this.Bounds.Bottom - options.HitPosition.Value,
                               0.5f,
                               1.0f,
                               ns.ColumnWidth * percent_remaining,
