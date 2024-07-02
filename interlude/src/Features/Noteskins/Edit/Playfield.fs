@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Noteskins.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -117,32 +117,32 @@ type PlayfieldSettingsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"noteskins.edit.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-            .Tooltip(Tooltip.Info("noteskins.edit.alignmentanchor"))
+        |+ PageSetting(%"noteskin.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
+            .Tooltip(Tooltip.Info("noteskin.alignmentanchor"))
             .Pos(0)
-        |+ PageSetting(%"noteskins.edit.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-            .Tooltip(Tooltip.Info("noteskins.edit.alignmentoffset"))
+        |+ PageSetting(%"noteskin.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
+            .Tooltip(Tooltip.Info("noteskin.alignmentoffset"))
             .Pos(2)
-        |+ PageSetting(%"noteskins.edit.usestagetextures", Checkbox use_stage_textures)
-            .Tooltip(Tooltip.Info("noteskins.edit.usestagetextures"))
+        |+ PageSetting(%"noteskin.usestagetextures", Checkbox use_stage_textures)
+            .Tooltip(Tooltip.Info("noteskin.usestagetextures"))
             .Pos(4)
-        |+ PageSetting(%"noteskins.edit.playfieldcolor", ColorPicker(playfield_color, true))
-            .Tooltip(Tooltip.Info("noteskins.edit.playfieldcolor"))
+        |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(playfield_color, true))
+            .Tooltip(Tooltip.Info("noteskin.playfieldcolor"))
             .Pos(6, 3)
         |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Tooltip(Tooltip.Info("gameplay.hitposition"))
             .Pos(10)
-        |+ PageSetting(%"noteskins.edit.columnwidth", Slider(column_width, Step = 1f))
-            .Tooltip(Tooltip.Info("noteskins.edit.columnwidth"))
+        |+ PageSetting(%"noteskin.columnwidth", Slider(column_width, Step = 1f))
+            .Tooltip(Tooltip.Info("noteskin.columnwidth"))
             .Pos(12)
-        |+ PageSetting(%"noteskins.edit.fillcolumngaps", Checkbox fill_gaps)
-            .Tooltip(Tooltip.Info("noteskins.edit.fillcolumngaps"))
+        |+ PageSetting(%"noteskin.fillcolumngaps", Checkbox fill_gaps)
+            .Tooltip(Tooltip.Info("noteskin.fillcolumngaps"))
             .Pos(14)
-        |+ PageSetting(%"noteskins.edit.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
-            .Tooltip(Tooltip.Info("noteskins.edit.useadvancedcolumnspacing"))
+        |+ PageSetting(%"noteskin.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
+            .Tooltip(Tooltip.Info("noteskin.useadvancedcolumnspacing"))
             .Pos(16)
-        |+ PageSetting(%"noteskins.edit.columnspacing", Slider(column_spacing, Step = 1f))
-            .Tooltip(Tooltip.Info("noteskins.edit.columnspacing"))
+        |+ PageSetting(%"noteskin.columnspacing", Slider(column_spacing, Step = 1f))
+            .Tooltip(Tooltip.Info("noteskin.columnspacing"))
             .Pos(18)
             .Conditional(use_advanced_column_spacing.Get >> not)
         |+ PageSetting(
@@ -151,8 +151,8 @@ type PlayfieldSettingsPage() =
             )
             .Pos(18)
             .Conditional(use_advanced_column_spacing.Get)
-        |+ PageSetting(%"noteskins.edit.advancedcolumnspacing", _spacings)
-            .Tooltip(Tooltip.Info("noteskins.edit.advancedcolumnspacing"))
+        |+ PageSetting(%"noteskin.advancedcolumnspacing", _spacings)
+            .Tooltip(Tooltip.Info("noteskin.advancedcolumnspacing"))
             .Pos(20, 2, PageWidth.Full)
             .Conditional(use_advanced_column_spacing.Get)
         :> Widget
@@ -228,7 +228,7 @@ type PlayfieldSettingsPage() =
         )
         <| Colors.green_accent.O2
 
-    override this.Title = %"noteskins.edit.playfield"
+    override this.Title = %"noteskin.playfield"
 
     override this.OnClose() =
         Skins.save_noteskin_config

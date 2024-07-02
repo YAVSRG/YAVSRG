@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Noteskins.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -26,17 +26,17 @@ type HoldNoteSettingsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"noteskins.edit.holdnotetrim", Slider(hold_note_trim))
-            .Tooltip(Tooltip.Info("noteskins.edit.holdnotetrim"))
+        |+ PageSetting(%"noteskin.holdnotetrim", Slider(hold_note_trim))
+            .Tooltip(Tooltip.Info("noteskin.holdnotetrim"))
             .Pos(0)
-        |+ PageSetting(%"noteskins.edit.usetailtexture", Checkbox use_tail_texture)
-            .Tooltip(Tooltip.Info("noteskins.edit.usetailtexture"))
+        |+ PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)
+            .Tooltip(Tooltip.Info("noteskin.usetailtexture"))
             .Pos(3)
-        |+ PageSetting(%"noteskins.edit.flipholdtail", Checkbox flip_hold_tail)
-            .Tooltip(Tooltip.Info("noteskins.edit.flipholdtail"))
+        |+ PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
+            .Tooltip(Tooltip.Info("noteskin.flipholdtail"))
             .Pos(5)
-        |+ PageSetting(%"noteskins.edit.droppedholdcolor", ColorPicker(dropped_color, true))
-            .Tooltip(Tooltip.Info("noteskins.edit.droppedholdcolor"))
+        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(dropped_color, true))
+            .Tooltip(Tooltip.Info("noteskin.droppedholdcolor"))
             .Pos(8, 3)
         :> Widget
 
@@ -99,7 +99,7 @@ type HoldNoteSettingsPage() =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
 
-    override this.Title = %"noteskins.edit.holdnotes"
+    override this.Title = %"noteskin.holdnotes"
 
     override this.OnClose() =
         Skins.save_noteskin_config

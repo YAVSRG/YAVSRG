@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Browser
+namespace Interlude.Features.Noteskins.Browser
 
 open System.IO
 open Percyqaz.Common
@@ -61,8 +61,8 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
         |+ Text(
             (
                 match version.Editor with
-                | Some e -> [version.Author; e] %> "noteskin.credit.edited"
-                | None -> [version.Author] %> "noteskin.credit"
+                | Some e -> [version.Author; e] %> "skins.credit.edited"
+                | None -> [version.Author] %> "skins.credit"
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -86,7 +86,7 @@ type VersionDisplay(group: NoteskinGroup, version: NoteskinVersion) as this =
 
     member this.Download() =
         if status = NotDownloaded || status = DownloadFailed then
-            ConfirmPage([title] %> "noteskin.confirm_install", fun () ->
+            ConfirmPage([title] %> "skins.confirm_install", fun () ->
                 status <- Downloading
 
                 let target =
@@ -124,9 +124,9 @@ type GroupDisplay(group: NoteskinGroup, selected: Setting<bool>) =
         match List.tryExactlyOne group.Versions with
         | Some version ->
             match version.Editor with
-            | Some e -> [version.Author; e] %> "noteskin.credit.edited"
-            | None -> [version.Author] %> "noteskin.credit"
-        | None -> %"noteskin.multiple_versions"
+            | Some e -> [version.Author; e] %> "skins.credit.edited"
+            | None -> [version.Author] %> "skins.credit"
+        | None -> %"skins.multiple_versions"
 
     override this.Init(parent) =
         this

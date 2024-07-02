@@ -134,7 +134,7 @@ module RadioButtons =
         }
 
     type TabButton(label: string, on_click: unit -> unit, is_disabled: unit -> bool, is_chosen: unit -> bool) =
-        inherit Button(label, on_click)
+        inherit Button(label, on_click, Disabled = is_disabled)
 
         override this.Draw() =
             if is_chosen() then

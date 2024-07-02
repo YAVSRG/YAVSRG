@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Noteskins.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -122,31 +122,31 @@ type RotationSettingsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"noteskins.edit.userotation", Checkbox use_rotation)
-            .Tooltip(Tooltip.Info("noteskins.edit.userotation"))
+        |+ PageSetting(%"noteskin.userotation", Checkbox use_rotation)
+            .Tooltip(Tooltip.Info("noteskin.userotation"))
             .Pos(0)
         |+ PageSetting(
             %"generic.keymode",
             Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_rotations))
         )
             .Pos(2)
-        |+ PageSetting(%"noteskins.edit.rotations", _rotations)
+        |+ PageSetting(%"noteskin.rotations", _rotations)
             .Pos(5, 3, PageWidth.Full)
         |+ PageSetting(
-            %"noteskins.edit.receptorstyle",
+            %"noteskin.receptorstyle",
             SelectDropdown(
                 [|
-                    ReceptorStyle.Rotate, %"noteskins.edit.receptorstyle.rotate"
-                    ReceptorStyle.Flip, %"noteskins.edit.receptorstyle.flip"
+                    ReceptorStyle.Rotate, %"noteskin.receptorstyle.rotate"
+                    ReceptorStyle.Flip, %"noteskin.receptorstyle.flip"
                 |],
                 receptor_style
             )
         )
-            .Tooltip(Tooltip.Info("noteskins.edit.receptorstyle"))
+            .Tooltip(Tooltip.Info("noteskin.receptorstyle"))
             .Pos(8)
         :> Widget
 
-    override this.Title = %"noteskins.edit.rotations"
+    override this.Title = %"noteskin.rotations"
 
     override this.OnClose() =
         Skins.save_noteskin_config

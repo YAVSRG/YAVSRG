@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu
+namespace Interlude.Features.OptionsMenu
 
 open System
 open Percyqaz.Common
@@ -61,7 +61,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.IMAGE (%"noteskins"),
+            sprintf "%s %s" Icons.IMAGE (%"skins"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
             IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins)

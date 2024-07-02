@@ -88,6 +88,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
         |+ delete_button.Pos(7)
+        // todo: localise
         |+ Text("Current preset options:", Align = Alignment.LEFT, Color = K Colors.text).Pos(10, 1)
         |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(11, 1)
         |+ Text(sprintf "Upscroll: %s" (if preset.Upscroll then "ON" else "OFF"), Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(12, 1)

@@ -132,4 +132,4 @@ module Skins =
                 ) :> Widget
 
         override this.OnClose() = ()
-        override this.Title = %"noteskins.import_from_osu"
+        override this.Title = %"skins.import_from_osu"

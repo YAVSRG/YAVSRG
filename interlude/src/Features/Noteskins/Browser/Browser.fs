@@ -35,12 +35,12 @@ type NoteskinsBrowserPage() =
                 TextColor = K Colors.text_cyan
             )
             |+ LoadingIndicator.Border(fun () -> loading))
-        |+ EmptyState(Icons.X, %"noteskins.browser.error").Conditional(fun () -> error)
+        |+ EmptyState(Icons.X, %"skins.browser.error").Conditional(fun () -> error)
 
     let pick_versions =
         ScrollContainer(version_items, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
         |>> (fun nt -> Container(nt, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
-        |+ Text(%"noteskins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(70.0f).Margin(10.0f)).Conditional(fun () -> selected_group.IsSome)
+        |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(70.0f).Margin(10.0f)).Conditional(fun () -> selected_group.IsSome)
 
     let select_group(group: NoteskinGroup) =
         selected_group <- Some group
@@ -79,6 +79,6 @@ type NoteskinsBrowserPage() =
         |+ pick_versions
         :> Widget
 
-    override this.Title = %"noteskins.browser"
+    override this.Title = %"skins.browser"
 
     override this.OnClose() = ()

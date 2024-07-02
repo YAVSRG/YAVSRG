@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Noteskins.Edit
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -31,7 +31,7 @@ type EditNoteskinPage(from_hotkey: bool) =
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
             |+ PageButton(
-                %"noteskins.edit.playfield",
+                %"noteskin.playfield",
                 fun () ->
                     { new PlayfieldSettingsPage() with
                         override this.OnClose() =
@@ -40,10 +40,10 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.playfield"))
+                .Tooltip(Tooltip.Info("noteskin.playfield"))
                 .Pos(6)
             |+ PageButton(
-                %"noteskins.edit.holdnotes",
+                %"noteskin.holdnotes",
                 fun () ->
                     { new HoldNoteSettingsPage() with
                         override this.OnClose() =
@@ -52,10 +52,10 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.holdnotes"))
+                .Tooltip(Tooltip.Info("noteskin.holdnotes"))
                 .Pos(8)
             |+ PageButton(
-                %"noteskins.edit.colors",
+                %"noteskin.colors",
                 fun () ->
                     { new ColorSettingsPage() with
                         override this.OnClose() =
@@ -64,10 +64,10 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.colors"))
+                .Tooltip(Tooltip.Info("noteskin.colors"))
                 .Pos(10)
             |+ PageButton(
-                %"noteskins.edit.rotations",
+                %"noteskin.rotations",
                 fun () ->
                     { new RotationSettingsPage() with
                         override this.OnClose() =
@@ -76,10 +76,10 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.rotations"))
+                .Tooltip(Tooltip.Info("noteskin.rotations"))
                 .Pos(12)
             |+ PageButton(
-                %"noteskins.animations",
+                %"noteskin.animations",
                 fun () ->
                     { new AnimationSettingsPage() with
                         override this.OnClose() =
@@ -88,7 +88,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskins.animations"))
+                .Tooltip(Tooltip.Info("noteskin.animations"))
                 .Pos(14)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
@@ -99,9 +99,9 @@ type EditNoteskinPage(from_hotkey: bool) =
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
-                            general_tab, %"noteskins.edit.general", K false
-                            textures_tab, %"noteskins.edit.textures", K false
-                            problems_tab, %"noteskins.edit.problems", K false
+                            general_tab, %"noteskin.general", K false
+                            textures_tab, %"noteskin.textures", K false
+                            problems_tab, %"noteskin.problems", K false
                         |]
                     Height = 50.0f
                 }
@@ -117,7 +117,7 @@ type EditNoteskinPage(from_hotkey: bool) =
         |+ (
             NavigationContainer.Column(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
             |+ PageButton(
-                %"noteskins.edit.export",
+                %"noteskin.export",
                 (fun () ->
                     if not (Skins.export_skin noteskin_id) then
                         Notifications.error (
@@ -127,10 +127,10 @@ type EditNoteskinPage(from_hotkey: bool) =
                 ),
                 Icon = Icons.UPLOAD
             )
-                .Tooltip(Tooltip.Info("noteskins.edit.export"))
+                .Tooltip(Tooltip.Info("noteskin.export"))
                 .Pos(0, 2, PageWidth.Full)
             |+ PageButton(
-                %"noteskins.edit.open_folder",
+                %"noteskin.open_folder",
                 (fun () ->
                     Skins.open_noteskin_folder noteskin_id |> ignore
                 ),
@@ -138,9 +138,9 @@ type EditNoteskinPage(from_hotkey: bool) =
             )
                 .Pos(2, 2, PageWidth.Full)
             |+ PageButton(
-                %"noteskins.edit.delete",
+                %"noteskin.delete",
                 (fun () ->
-                    ConfirmPage([meta.Name] %> "noteskins.edit.delete.confirm",
+                    ConfirmPage([meta.Name] %> "noteskin.delete.confirm",
                         fun () ->
                             if Skins.delete_noteskin noteskin_id then
                                 Menu.Back()
@@ -155,7 +155,7 @@ type EditNoteskinPage(from_hotkey: bool) =
         |+ (Callout.frame
                 (Callout.Small
                     .Icon(Icons.INFO)
-                    .Title(%"noteskins.edit.hotkey_hint")
+                    .Title(%"noteskin.hotkey_hint")
                     .Hotkey("edit_noteskin"))
                 (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
             ).Conditional(fun () -> not from_hotkey)

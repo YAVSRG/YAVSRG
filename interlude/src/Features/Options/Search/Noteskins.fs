@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.OptionsMenu.Search
+namespace Interlude.Features.OptionsMenu.Search
 
 open Prelude
 open Prelude.Skinning.HudLayouts
@@ -16,33 +16,33 @@ module Noteskins =
 
     let search_noteskin_settings (tokens: string array) : SearchResult seq =
         results {
-            if token_match tokens [|%"noteskins"|] then
+            if token_match tokens [|%"skins"|] then
                 yield PageButton(
-                    %"noteskins",
+                    %"skins",
                     (fun () -> SelectNoteskinsPage().Show())
                 )
 
                 if not Content.Noteskin.IsEmbedded then
                     yield PageButton(
-                        %"noteskins.edit",
+                        %"noteskin.edit",
                         (fun () -> EditNoteskinPage(false).Show())
                     )
-                        .Tooltip(Tooltip.Info("noteskins.edit"))
+                        .Tooltip(Tooltip.Info("noteskin.edit"))
 
                 yield PageButton(
-                    %"noteskins.get_more",
+                    %"skins.browser",
                     (fun () -> NoteskinsBrowserPage().Show())
                 )
 
                 yield PageButton(
-                    %"noteskins.open_folder",
+                    %"skins.open_folder",
                     (fun () -> open_directory (get_game_folder "Skins"))
                 )
-                    .Tooltip(Tooltip.Info("noteskins.open_folder"))
+                    .Tooltip(Tooltip.Info("skins.open_folder"))
 
-            if token_match tokens [|%"noteskins"; %"noteskins.import_from_osu"|] then
+            if token_match tokens [|%"skins"; %"skins.import_from_osu"|] then
                 yield PageButton(
-                    %"noteskins.import_from_osu",
+                    %"skins.import_from_osu",
                     (fun () -> Skins.OsuSkinsListPage().Show())
                 )
 

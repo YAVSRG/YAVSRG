@@ -91,11 +91,11 @@ module Check =
                         find (sprintf "mod.%s.%i.desc" m i) "Mods"
 
             for i = 0 to 9 do
-                find (sprintf "noteskins.edit.notecolors.chord.%i" i) "Note color tooltips"
-                find (sprintf "noteskins.edit.notecolors.column.%i" i) "Note color tooltips"
+                find (sprintf "noteskin.notecolors.chord.%i" i) "Note color tooltips"
+                find (sprintf "noteskin.notecolors.column.%i" i) "Note color tooltips"
 
                 if i < 9 then
-                    find (sprintf "noteskins.edit.notecolors.ddr.%i" i) "Note color tooltips"
+                    find (sprintf "noteskin.notecolors.ddr.%i" i) "Note color tooltips"
 
             for m in Prelude.Data.Library.Sorting.grouping_modes.Keys do
                 find (sprintf "levelselect.groupby.%s" m) "Level select grouping"

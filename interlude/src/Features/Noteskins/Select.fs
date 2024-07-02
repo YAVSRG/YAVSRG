@@ -43,8 +43,8 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
         |+ Text(
             K(
                 match meta.Editor with
-                | Some e -> [meta.Author; e] %> "noteskin.credit.edited"
-                | None -> [meta.Author] %> "noteskin.credit"
+                | Some e -> [meta.Author; e] %> "skins.credit.edited"
+                | None -> [meta.Author] %> "skins.credit"
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
@@ -85,7 +85,7 @@ type SelectNoteskinsPage() =
 
         if noteskin.IsEmbedded then
             ConfirmPage(
-                %"noteskins.confirm_extract_default",
+                %"skins.confirm_extract_default",
                 (fun () ->
                     if
                         Skins.create_user_noteskin_from_default (
@@ -122,35 +122,35 @@ type SelectNoteskinsPage() =
         let action_buttons =
             NavigationContainer.Row(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT))
             |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.EDIT_2 (%"noteskins.edit"),
+                sprintf "%s %s" Icons.EDIT_2 (%"noteskin.edit"),
                 0.0f,
                 edit_or_extract_noteskin,
                 Position = { Position.Default with Right = 0.22f %+ 0.0f }
             )
             |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"noteskins.get_more"),
+                sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"skins.browser"),
                 0.0f,
                 (fun () -> NoteskinsBrowserPage().Show()),
                 Position = { Position.Default with Left = 0.26f %+ 0.0f; Right = 0.48f %+ 0.0f }
             )
             |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.DOWNLOAD (%"noteskins.import_from_osu"),
+                sprintf "%s %s" Icons.DOWNLOAD (%"skins.import_from_osu"),
                 0.0f,
                 (fun () -> osu.Skins.OsuSkinsListPage().Show()),
                 Position = { Position.Default with Left = 0.52f %+ 0.0f; Right = 0.74f %+ 0.0f }
             )
             |+ OptionsMenuButton(
-                 sprintf "%s %s" Icons.FOLDER (%"noteskins.open_folder"),
+                 sprintf "%s %s" Icons.FOLDER (%"skins.open_folder"),
                 0.0f,
                 (fun () -> open_directory (get_game_folder "Skins")),
                 Position = { Position.Default with Left = 0.78f %+ 0.0f }
             )
-                .Tooltip(Tooltip.Info("noteskins.open_folder"))
+                .Tooltip(Tooltip.Info("skins.open_folder"))
 
         let left_info =
             Container(NodeType.None, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ Text(
-                %"noteskins.current",
+                %"skins.current",
                 Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
@@ -180,7 +180,7 @@ type SelectNoteskinsPage() =
         |+ preview
         :> Widget
 
-    override this.Title = %"noteskins"
+    override this.Title = %"skins"
 
     override this.OnDestroy() = preview.Destroy()
 

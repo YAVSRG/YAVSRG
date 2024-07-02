@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Noteskins.Edit
+namespace Interlude.Features.Noteskins.Edit
 
 open Prelude.Charts.Processing
 open Percyqaz.Common
@@ -31,8 +31,8 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
         this
         |+ Tooltip(
             Callout.Normal
-                .Title(sprintf "%s: %O" (%"noteskins.edit.notecolors") style)
-                .Body(%(sprintf "noteskins.edit.notecolors.%s.%i" (style.ToString().ToLower()) index))
+                .Title(sprintf "%s: %O" (%"noteskin.notecolors") style)
+                .Body(%(sprintf "noteskins.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
         |* Clickable(
             (fun () ->
@@ -122,7 +122,7 @@ type ColorSettingsPage() =
     override this.Content() =
         page_container()
         |+ PageSetting(
-            %"noteskins.edit.globalcolors",
+            %"noteskin.globalcolors",
             Checkbox(
                 Setting.make
                     (fun v -> note_colors <- { note_colors with UseGlobalColors = v })
@@ -130,7 +130,7 @@ type ColorSettingsPage() =
                 |> Setting.trigger (ignore >> refresh_colors)
             )
         )
-            .Tooltip(Tooltip.Info("noteskins.edit.globalcolors"))
+            .Tooltip(Tooltip.Info("noteskin.globalcolors"))
             .Pos(0)
         |+ PageSetting(
             %"generic.keymode",
@@ -138,24 +138,24 @@ type ColorSettingsPage() =
         )
             .Pos(2)
         |+ PageSetting(
-            %"noteskins.edit.colorstyle",
+            %"noteskin.colorstyle",
             SelectDropdown(
                 [|
-                    ColorScheme.Column, %"noteskins.edit.colorstyle.column"
-                    ColorScheme.Chord, %"noteskins.edit.colorstyle.chord"
-                    ColorScheme.DDR, %"noteskins.edit.colorstyle.ddr"
+                    ColorScheme.Column, %"noteskin.colorstyle.column"
+                    ColorScheme.Chord, %"noteskin.colorstyle.chord"
+                    ColorScheme.DDR, %"noteskin.colorstyle.ddr"
                 |],
                 Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
                 |> Setting.trigger (ignore >> refresh_colors)
             )
         )
-            .Tooltip(Tooltip.Info("noteskins.edit.colorstyle"))
+            .Tooltip(Tooltip.Info("noteskin.colorstyle"))
             .Pos(5)
-        |+ PageSetting(%"noteskins.edit.notecolors", colors)
+        |+ PageSetting(%"noteskin.notecolors", colors)
             .Pos(8, 3, PageWidth.Full)
         :> Widget
 
-    override this.Title = %"noteskins.edit.colors"
+    override this.Title = %"noteskin.colors"
 
     override this.OnClose() =
         Skins.save_noteskin_config

@@ -51,7 +51,7 @@ type OptionsMenuPage() =
             Position = Position.Row(70.0f, 60.0f)
         )
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.IMAGE (%"noteskins.edit"),
+            sprintf "%s %s" Icons.IMAGE (%"noteskin.edit"),
             0.0f,
             (fun () -> 
                 if Content.Noteskin.IsEmbedded then
