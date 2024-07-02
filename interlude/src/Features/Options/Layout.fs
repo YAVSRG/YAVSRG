@@ -174,9 +174,12 @@ type private OptionsMenuFooter() as this =
             Icons.ARROW_LEFT_CIRCLE,
             Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
         )
-        |+ Presets.preset_buttons 1 options.Preset1
-        |+ Presets.preset_buttons 2 options.Preset2
-        |+ Presets.preset_buttons 3 options.Preset3
+        |+ (
+            FlowContainer.RightToLeft(300.0f, Spacing = 20.0f, Position = Position.SliceBottom(HEIGHT + 10.0f).Translate(-30.0f, -20.0f))
+            |+ Presets.preset_buttons 3 options.Preset3
+            |+ Presets.preset_buttons 2 options.Preset2
+            |+ Presets.preset_buttons 1 options.Preset1
+        )
 
     member this.Items = items
 

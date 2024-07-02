@@ -249,9 +249,9 @@ module private Presets =
                         | None -> true
                 )
 
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Box(1.0f, 1.0f, -1200.0f + float32 preset_id * 300.0f, -90.0f, 290.0f, 80.0f))
-        |+ create_preset_button
+        NavigationContainer.Column(WrapNavigation = false)
         |+ lower_buttons
+        |+ create_preset_button
         |+ Text(
             sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
             Color = K Colors.text_green,
@@ -263,3 +263,4 @@ module private Presets =
                    | Some p -> p.Mode = PresetMode.Autosave
                    | None -> false
             )
+        |+ Frame(Border = K Colors.cyan_accent.O2, Fill = K Colors.cyan_shadow)
