@@ -63,6 +63,17 @@ module Options =
         | EndOfSong = 1
 
     [<Json.AutoCodec(false)>]
+    type LaneCoverPresetOptions =
+        {
+            Enabled: bool
+            DrawUnderReceptors: bool
+            Sudden: float32
+            Hidden: float32
+            FadeLength: float32
+            Color: Color
+        }
+
+    [<Json.AutoCodec(false)>]
     type LaneCoverOptions =
         {
             Enabled: Setting<bool>
@@ -72,12 +83,22 @@ module Options =
             FadeLength: Setting.Bounded<float32>
             Color: Setting<Color>
         }
-        member this.LoadPreset(p: LaneCoverOptions) =
-            this.Enabled.Value <- p.Enabled.Value
-            this.Sudden.Value <- p.Sudden.Value
-            this.Hidden.Value <- p.Hidden.Value
-            this.FadeLength.Value <- p.FadeLength.Value
-            this.Color.Value <- p.Color.Value
+        member this.LoadPreset(p: LaneCoverPresetOptions) =
+            this.Enabled.Set p.Enabled
+            this.DrawUnderReceptors.Set p.DrawUnderReceptors
+            this.Sudden.Set p.Sudden
+            this.Hidden.Set p.Hidden
+            this.FadeLength.Set p.FadeLength
+            this.Color.Set p.Color
+        member this.ToPreset : LaneCoverPresetOptions =
+            {
+                Enabled = this.Enabled.Value
+                DrawUnderReceptors = this.DrawUnderReceptors.Value
+                Sudden = this.Sudden.Value
+                Hidden = this.Hidden.Value
+                FadeLength = this.FadeLength.Value
+                Color = this.Color.Value
+            }
         static member Default =
             {
                 Enabled = Setting.simple false
@@ -105,7 +126,7 @@ module Options =
             ScrollSpeed: float32
             HitPosition: float32
             Upscroll: bool
-            LaneCover: LaneCoverOptions
+            LaneCover: LaneCoverPresetOptions
             Noteskin: string
             HUD: string
         }
@@ -378,7 +399,7 @@ module Options =
                 ScrollSpeed = options.ScrollSpeed.Value
                 HitPosition = options.HitPosition.Value
                 Upscroll = options.Upscroll.Value
-                LaneCover = options.LaneCover
+                LaneCover = options.LaneCover.ToPreset
                 Noteskin = options.Noteskin.Value
                 HUD = options.SelectedHUD.Value
             }
@@ -389,7 +410,7 @@ module Options =
                 ScrollSpeed = options.ScrollSpeed.Value
                 HitPosition = options.HitPosition.Value
                 Upscroll = options.Upscroll.Value
-                LaneCover = options.LaneCover
+                LaneCover = options.LaneCover.ToPreset
                 Noteskin = options.Noteskin.Value
                 HUD = options.SelectedHUD.Value
             }

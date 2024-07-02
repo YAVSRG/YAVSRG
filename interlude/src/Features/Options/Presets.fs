@@ -95,7 +95,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
         |+ Text(sprintf "Visual offset: %.0f" preset.VisualOffset, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(14, 1)
         |+ Text(sprintf "Noteskin: %s" preset.Noteskin, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(15, 1)
         |+ Text(sprintf "HUD: %s" preset.HUD, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(16, 1)
-        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled.Value then "ON + Settings" else "OFF"), Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(17, 1)
+        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF"), Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(17, 1)
         :> Widget
 
     override this.Title = preset.Name
