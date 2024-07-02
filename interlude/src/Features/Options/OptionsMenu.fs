@@ -152,7 +152,8 @@ type OptionsMenuPage() =
 
     let content_setting : Setting<OptionsMenuTab> = 
         Setting.make
-            (fun new_tab -> 
+            (fun new_tab ->
+                if current_tab = new_tab then () else
                 on_destroy_current_tab()
                 current_tab <- new_tab
                 match new_tab with
