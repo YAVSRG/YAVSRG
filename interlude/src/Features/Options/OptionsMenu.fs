@@ -30,6 +30,10 @@ module Imports =
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || osu.Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
+module private State =
+
+    let mutable recent_tab = OptionsMenuTab.Home
+
 type OptionsMenuPage() =
     inherit Page()
 
@@ -160,26 +164,31 @@ type OptionsMenuPage() =
                     on_destroy_current_tab <- ignore
                     on_return_current_tab <- ignore
                     page_body.Current <- options_home_page
+                    State.recent_tab <- new_tab
                 | OptionsMenuTab.System ->
                     let p = SystemSettings.SystemPage()
                     on_destroy_current_tab <- p.OnClose
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
+                    State.recent_tab <- new_tab
                 | OptionsMenuTab.Gameplay ->
                     let p = Gameplay.GameplayPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
+                    State.recent_tab <- new_tab
                 | OptionsMenuTab.Library ->
                     let p = Library.LibraryPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
+                    State.recent_tab <- new_tab
                 | OptionsMenuTab.Noteskins ->
                     let p = SelectNoteskinsPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
+                    State.recent_tab <- new_tab
                 | OptionsMenuTab.SearchResults contents ->
                     on_destroy_current_tab <- ignore
                     on_return_current_tab <- ignore
@@ -197,7 +206,9 @@ type OptionsMenuPage() =
     override this.Header() =
         header |> OverlayContainer :> Widget
 
-    override this.Content() = page_body
+    override this.Content() = 
+        content_setting.Set State.recent_tab
+        page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
     override this.OnClose() = on_destroy_current_tab(); header.Hide()
