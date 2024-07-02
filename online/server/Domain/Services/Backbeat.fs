@@ -12,6 +12,10 @@ open Interlude.Web.Server.Domain.Core
 module Backbeat =
 
     let rulesets = Dictionary<string, Ruleset>()
+    do
+        for judge = 3 to 6 do
+            let rs = PremadeRulesets.SC.create judge
+            rulesets.[Ruleset.hash rs] <- rs
 
     let init () =
         async {

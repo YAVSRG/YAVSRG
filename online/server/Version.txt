@@ -1,1 +1,1 @@
-﻿Patch for backbeat uploads
+﻿Patch for SC rulesets not being in repo any more
