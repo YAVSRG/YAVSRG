@@ -86,7 +86,15 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
         |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
             .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
-        |+ delete_button.Pos(6)
+        |+ delete_button.Pos(7)
+        |+ Text("Current preset options:", Align = Alignment.LEFT, Color = K Colors.text).Pos(10, 1)
+        |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(11, 1)
+        |+ Text(sprintf "Upscroll: %s" (if preset.Upscroll then "ON" else "OFF"), Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(12, 1)
+        |+ Text(sprintf "Hit position: %.0f" preset.HitPosition, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(13, 1)
+        |+ Text(sprintf "Visual offset: %.0f" preset.VisualOffset, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(14, 1)
+        |+ Text(sprintf "Noteskin: %s" preset.Noteskin, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(15, 1)
+        |+ Text(sprintf "HUD: %s" preset.HUD, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(16, 1)
+        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled.Value then "ON + Settings" else "OFF"), Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(17, 1)
         :> Widget
 
     override this.Title = preset.Name
@@ -147,7 +155,7 @@ module private Presets =
                             fun () ->
                                 Presets.load preset_id |> ignore
                                 refresh_preview()
-                                EditPresetPage(preset_id, setting).Show()
+                                defer <| EditPresetPage(preset_id, setting).Show
                         )
                             .Show()
                     else
