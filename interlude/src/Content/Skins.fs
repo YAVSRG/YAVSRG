@@ -251,6 +251,7 @@ module Skins =
     let private loaded_huds = new Dictionary<string, LoadedHUD>()
     let private _selected_hud_id = Setting.simple DEFAULT_HUD_FOLDER
     let mutable current_hud = Unchecked.defaultof<HudLayout>
+    let mutable current_hud_meta = DEFAULT_HUD_META
 
     let private loaded_skins = new Dictionary<string, LoadedSkin>()
 
@@ -384,6 +385,7 @@ module Skins =
             Logging.Warn("HUD '" + _selected_hud_id.Value + "' not found, switching to default")
             _selected_hud_id.Value <- DEFAULT_HUD_FOLDER
         current_hud <- loaded_huds.[_selected_hud_id.Value].HUD
+        current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
         loaded_huds.[_selected_hud_id.Value].Active(false)
 
     let reload_current_noteskin () =
@@ -394,6 +396,7 @@ module Skins =
 
     let reload_current_hud () =
         current_hud <- loaded_huds.[_selected_hud_id.Value].HUD
+        current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
         current_hud.ReloadFromDisk()
         loaded_huds.[_selected_hud_id.Value].Active(true)
 
@@ -417,6 +420,7 @@ module Skins =
                         loaded_huds.[_selected_hud_id.Value].Active(false)
 
                     current_hud <- loaded_huds.[_selected_hud_id.Value].HUD
+                    current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
                 else
                     _selected_hud_id.Value <- new_id
             )
@@ -478,6 +482,8 @@ module Skins =
 
             if loaded_huds.ContainsKey id then
                 loaded_huds.[id].Metadata <- new_meta
+                if id = selected_hud_id.Value then
+                    current_hud_meta <- new_meta
 
     let create_user_noteskin_from_default (username: string option) : bool =
 
@@ -489,7 +495,7 @@ module Skins =
         let can_go_in_user_folder = loaded_skins.[DEFAULT_HUD_FOLDER].Skin.NoteskinFolder().IsNone
         let id = 
             if can_go_in_user_folder then DEFAULT_HUD_FOLDER
-            else Text.RegularExpressions.Regex("[^a-zA-Z0-9_-'\s]").Replace(noteskin_name, "")
+            else Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(noteskin_name, "")
         let target_skin_config = Path.Combine(get_game_folder "Skins", id, "skin.json")
         let target_noteskin_folder = Path.Combine(get_game_folder "Skins", id, "Noteskin")
 
@@ -561,14 +567,14 @@ module Skins =
         if loaded_skins.ContainsKey id then
             let file_name = 
                 let original_name = loaded_skins.[id].Skin.Metadata.Name
-                let file_safe_name = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-'\s]").Replace(original_name, "")
+                let file_safe_name = Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(original_name, "")
                 if file_safe_name = "" then id + ".isk" else file_safe_name + ".isk"
             match loaded_skins.[id].Skin.Source with
             | Embedded _ -> false
             | Folder f ->
                 let target = Path.Combine(get_game_folder "Exports", file_name)
 
-                if current_noteskin.CompressToZip target then
+                if loaded_skins.[id].Skin.CompressToZip target then
                     open_directory (get_game_folder "Exports")
                     true
                 else

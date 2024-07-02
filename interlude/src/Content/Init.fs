@@ -28,6 +28,7 @@ type Content() =
     static member Noteskin = Skins.current_noteskin
     static member NoteskinMeta = Skins.current_noteskin_meta
     static member HUD = Skins.current_hud.Config
+    static member HUDMeta = Skins.current_hud_meta
     static member Texture(id: string) = Sprites.get id
 
     static member OnChartAdded = Data.charts_updated
