@@ -32,7 +32,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
         |+ Tooltip(
             Callout.Normal
                 .Title(sprintf "%s: %O" (%"noteskin.notecolors") style)
-                .Body(%(sprintf "noteskins.notecolors.%s.%i" (style.ToString().ToLower()) index))
+                .Body(%(sprintf "noteskin.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
         |* Clickable(
             (fun () ->

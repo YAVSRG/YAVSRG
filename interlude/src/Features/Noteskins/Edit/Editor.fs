@@ -16,6 +16,10 @@ type EditNoteskinPage(from_hotkey: bool) =
     let noteskin = Content.Noteskin
     let meta = Content.NoteskinMeta
 
+    let name = Setting.simple meta.Name
+    let author = Setting.simple meta.Author
+    let editor = Setting.simple (meta.Editor |> Option.defaultValue "")
+
     let preview = NoteskinPreview(NoteskinPreview.RIGHT_HAND_SIDE(0.35f).Translate(0.0f, -100.0f))
 
     let textures_tab, refresh_texture_grid = TextureGrid.create noteskin
@@ -30,6 +34,9 @@ type EditNoteskinPage(from_hotkey: bool) =
 
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
+            |+ PageTextEntry(%"skin.name", name).Tooltip(Tooltip.Info("skin.name")).Pos(4)
+            |+ PageTextEntry(%"skin.author", author).Tooltip(Tooltip.Info("skin.author")).Pos(6)
+            |+ PageTextEntry(%"skin.editor", editor).Tooltip(Tooltip.Info("skin.editor")).Pos(8)
             |+ PageButton(
                 %"noteskin.playfield",
                 fun () ->
@@ -41,7 +48,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                         .Show()
             )
                 .Tooltip(Tooltip.Info("noteskin.playfield"))
-                .Pos(6)
+                .Pos(11)
             |+ PageButton(
                 %"noteskin.holdnotes",
                 fun () ->
@@ -53,7 +60,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                         .Show()
             )
                 .Tooltip(Tooltip.Info("noteskin.holdnotes"))
-                .Pos(8)
+                .Pos(13)
             |+ PageButton(
                 %"noteskin.colors",
                 fun () ->
@@ -65,7 +72,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                         .Show()
             )
                 .Tooltip(Tooltip.Info("noteskin.colors"))
-                .Pos(10)
+                .Pos(15)
             |+ PageButton(
                 %"noteskin.rotations",
                 fun () ->
@@ -77,7 +84,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                         .Show()
             )
                 .Tooltip(Tooltip.Info("noteskin.rotations"))
-                .Pos(12)
+                .Pos(17)
             |+ PageButton(
                 %"noteskin.animations",
                 fun () ->
@@ -89,7 +96,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                         .Show()
             )
                 .Tooltip(Tooltip.Info("noteskin.animations"))
-                .Pos(14)
+                .Pos(19)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
@@ -172,4 +179,10 @@ type EditNoteskinPage(from_hotkey: bool) =
         refresh ()
         base.OnReturnFromNestedPage()
 
-    override this.OnClose() = ()
+    override this.OnClose() =
+        Skins.save_skin_meta noteskin_id
+            {
+                Name = name.Value.Trim()
+                Author = author.Value.Trim()
+                Editor = let e = editor.Value.Trim() in if e = "" then None else Some e
+            }

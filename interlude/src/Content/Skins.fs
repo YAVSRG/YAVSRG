@@ -47,7 +47,7 @@ type private LoadedSkin =
 
 type private LoadedNoteskin =
     {
-        Metadata: SkinMetadata
+        mutable Metadata: SkinMetadata
         Noteskin: Noteskin
         mutable Textures: (Texture * (string * Sprite) array) option
     }
@@ -134,7 +134,7 @@ type private LoadedNoteskin =
 
 type private LoadedHUD =
     {
-        Metadata: SkinMetadata
+        mutable Metadata: SkinMetadata
         HUD: HudLayout
         mutable Textures: (Texture * (string * Sprite) array) option
     }
@@ -466,6 +466,18 @@ module Skins =
 
     let save_hud_config (new_config: HudConfig) =
         current_hud.Config <- new_config
+
+    let save_skin_meta (id: string) (new_meta: SkinMetadata) =
+        if loaded_skins.ContainsKey id then
+            loaded_skins.[id].Skin.Metadata <- new_meta
+
+            if loaded_noteskins.ContainsKey id then
+                loaded_noteskins.[id].Metadata <- new_meta
+                if id = selected_noteskin_id.Value then
+                    current_noteskin_meta <- new_meta
+
+            if loaded_huds.ContainsKey id then
+                loaded_huds.[id].Metadata <- new_meta
 
     let create_user_noteskin_from_default (username: string option) : bool =
 

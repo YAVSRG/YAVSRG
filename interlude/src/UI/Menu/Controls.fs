@@ -376,7 +376,7 @@ type PageTextEntry(name, setting) =
 
             entry
             |+ Frame(
-                Position = Position.Default.Margin(-15.0f, -5.0f),
+                Position = Position.Default.Margin(-15.0f, 0.0f),
                 Fill = K Color.Transparent,
                 Border =
                     fun () ->
