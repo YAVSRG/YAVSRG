@@ -131,8 +131,22 @@ type SelectSkinsPage() =
 
     let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
 
-    let grid =
+    let noteskin_grid =
         GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+
+    let hud_grid =
+        GridFlowContainer<HUDButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+
+    let refresh () =
+        preview.Refresh()
+
+        noteskin_grid.Clear()
+        for id, _, meta in Skins.list_noteskins () do
+            noteskin_grid |* NoteskinButton(id, meta, preview.Refresh)
+
+        hud_grid.Clear()
+        for id, _, meta in Skins.list_huds () do
+            hud_grid |* HUDButton(id, meta, preview.Refresh)
 
     let edit_or_extract_noteskin () =
         let noteskin = Content.Noteskin
@@ -156,41 +170,30 @@ type SelectSkinsPage() =
                 .Show()
         else EditNoteskinPage(false).Show()
 
-    let refresh () =
-        grid.Clear()
-        preview.Refresh()
-
-        for id, _, meta in Skins.list_noteskins () do
-            grid |* NoteskinButton(id, meta, preview.Refresh)
-
     override this.Content() =
         refresh ()
 
         let action_buttons =
-            NavigationContainer.Row(Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT).Translate(0.0f, 20.0f))
+            GridFlowContainer<Widget>(50.0f, 4, Spacing = (5.0f, 5.0f), Position = Position.SliceBottom(50.0f))
             |+ OptionsMenuButton(
                 sprintf "%s %s" Icons.EDIT_2 (%"noteskin.edit"),
                 0.0f,
-                edit_or_extract_noteskin,
-                Position = { Position.Default with Right = 0.22f %+ 0.0f }
+                edit_or_extract_noteskin
             )
             |+ OptionsMenuButton(
                 sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"skins.browser"),
                 0.0f,
-                (fun () -> SkinsBrowserPage().Show()),
-                Position = { Position.Default with Left = 0.26f %+ 0.0f; Right = 0.48f %+ 0.0f }
+                (fun () -> SkinsBrowserPage().Show())
             )
             |+ OptionsMenuButton(
                 sprintf "%s %s" Icons.DOWNLOAD (%"skins.import_from_osu"),
                 0.0f,
-                (fun () -> osu.Skins.OsuSkinsListPage().Show()),
-                Position = { Position.Default with Left = 0.52f %+ 0.0f; Right = 0.74f %+ 0.0f }
+                (fun () -> osu.Skins.OsuSkinsListPage().Show())
             )
             |+ OptionsMenuButton(
                  sprintf "%s %s" Icons.FOLDER (%"skins.open_folder"),
                 0.0f,
-                (fun () -> open_directory (get_game_folder "Skins")),
-                Position = { Position.Default with Left = 0.78f %+ 0.0f }
+                (fun () -> open_directory (get_game_folder "Skins"))
             )
                 .Tooltip(Tooltip.Info("skins.open_folder"))
 
@@ -208,19 +211,42 @@ type SelectSkinsPage() =
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
-
-        let right_selection =
-            ScrollContainer(grid, 
-                Position = 
-                    { Position.Default with
-                        Left = 0.35f %+ 10.0f
-                    }
-                        .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
-                        .TrimBottom(PRETTYHEIGHT + 20.0f)
+            |+ Text(
+                (fun () -> if Skins.selected_hud_id.Value <> Skins.selected_noteskin_id.Value then "HUD: " + Content.HUDMeta.Name else ""),
+                Position = pretty_pos(3, 2, PageWidth.Full).TrimTop(15.0f),
+                Color = K Colors.text_subheading,
+                Align = Alignment.LEFT
             )
 
-        NavigationContainer.Column(WrapNavigation = false) 
-        |+ right_selection
+        let noteskin_tab = ScrollContainer(noteskin_grid)
+        let hud_tab = ScrollContainer(hud_grid)
+        let tabs = SwapContainer(noteskin_tab, Position = Position.Margin(0.0f, 60.0f))
+
+        let tab_buttons =
+            let c =
+                RadioButtons.create_tabs
+                    {
+                        Setting = Setting.make tabs.set_Current tabs.get_Current
+                        Options =
+                            [|
+                                noteskin_tab, %"skins.noteskins", K false
+                                hud_tab, %"skins.huds", K false
+                            |]
+                        Height = 50.0f
+                    }
+            c.Position <- Position.SliceTop(50.0f)
+            c
+
+        NavigationContainer.Column(
+            WrapNavigation = false, 
+            Position =
+                { Position.Default with
+                    Left = 0.35f %+ 10.0f
+                }
+                    .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+        )
+        |+ tab_buttons
+        |+ tabs
         |+ action_buttons
         |>> Container
         |+ left_info
