@@ -19,7 +19,7 @@ type SkinPreview(position: Position) as this =
     let fbo = FBO.create ()
 
     let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
-        if (HudElement.enabled_setting elem).Value then
+        if (HudElement.enabled_setting elem).Value && (elem <> HudElement.Pacemaker || Interlude.Options.options.EnablePacemaker.Value) then
             let pos = (HudElement.position_setting elem).Value
             let w = HudElement.constructor elem (Content.HUD, state)
             w.Position <-

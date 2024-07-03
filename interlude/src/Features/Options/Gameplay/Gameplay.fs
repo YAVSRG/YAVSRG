@@ -52,7 +52,7 @@ type GameplayPage() =
             .Tooltip(Tooltip.Info("gameplay.lanecover"))
             .Pos(14)
         |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
-            .Tooltip(Tooltip.Info("gameplay.pacemaker").Body(%"gameplay.pacemaker.hint"))
+            .Tooltip(Tooltip.Info("gameplay.pacemaker"))
             .Pos(16)
         |+ PageButton(%"rulesets", (fun () -> SelectRulesetPage().Show()))
             .Tooltip(Tooltip.Info("rulesets"))

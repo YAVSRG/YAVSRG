@@ -44,31 +44,27 @@ type PacemakerOptionsPage() =
             |> Array.ofSeq
 
         page_container()
+        |+ PageSetting(%"gameplay.pacemaker.enable", Checkbox options.EnablePacemaker)
+            .Pos(0)
         |+ PageSetting(%"gameplay.pacemaker.saveunderpace", Checkbox options.SaveScoreIfUnderPace)
             .Tooltip(Tooltip.Info("gameplay.pacemaker.saveunderpace"))
-            .Pos(0)
+            .Pos(2)
         |+ PageSetting(%"gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
             .Tooltip(Tooltip.Info("gameplay.pacemaker.onlysavenewrecords"))
-            .Pos(2)
+            .Pos(4)
         |+ PageSetting(%"gameplay.pacemaker.type",
             SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
         )
-            .Pos(5)
+            .Pos(7)
         |+ PageSetting(%"gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
             .Tooltip(Tooltip.Info("gameplay.pacemaker.use_personal_best"))
-            .Pos(7)
-        |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
             .Pos(9)
+        |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
+            .Pos(11)
             .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy)
         |+ PageSetting(%"gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-            .Pos(9)
+            .Pos(13)
             .Conditional(fun () -> mode.Value = PacemakerMode.Lamp)
-        |>> Container
-        |+ Text(
-            %"gameplay.pacemaker.hint",
-            Align = Alignment.CENTER,
-            Position = Position.SliceBottom(100.0f).TrimBottom(40.0f)
-        )
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")

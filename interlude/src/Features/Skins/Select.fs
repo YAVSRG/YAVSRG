@@ -173,6 +173,8 @@ type SelectSkinsPage() =
     override this.Content() =
         refresh ()
 
+        // todo: separate, always-on buttons to import skins from osu! or from ingame browser
+        // todo: ability to edit, export, open folder, delete
         let action_buttons =
             GridFlowContainer<Widget>(50.0f, 4, Spacing = (5.0f, 5.0f), Position = Position.SliceBottom(50.0f))
             |+ OptionsMenuButton(
