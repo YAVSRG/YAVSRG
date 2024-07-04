@@ -36,7 +36,7 @@ type OptionsMenuPage() =
     let quick_actions =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Default with Left = 0.65f %+ 10.0f })
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.ZAP (%"hud"),
+            sprintf "%s %s" Icons.ZAP (%"hud.edit"),
             0.0f,
             (fun () -> 
                 if

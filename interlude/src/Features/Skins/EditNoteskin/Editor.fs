@@ -124,20 +124,20 @@ type EditNoteskinPage(from_hotkey: bool) =
         |+ (
             NavigationContainer.Column(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
             |+ PageButton(
-                %"noteskin.export",
+                %"skins.export",
                 (fun () ->
                     if not (Skins.export_skin noteskin_id) then
                         Notifications.error (
-                            %"notification.export_noteskin_failure.title",
-                            %"notification.export_noteskin_failure.body"
+                            %"notification.export_skin_failure.title",
+                            %"notification.export_skin_failure.body"
                         )
                 ),
                 Icon = Icons.UPLOAD
             )
-                .Tooltip(Tooltip.Info("noteskin.export"))
+                .Tooltip(Tooltip.Info("skins.export"))
                 .Pos(0, 2, PageWidth.Full)
             |+ PageButton(
-                %"noteskin.open_folder",
+                %"skins.open_folder",
                 (fun () ->
                     Skins.open_noteskin_folder noteskin_id |> ignore
                 ),
@@ -145,7 +145,7 @@ type EditNoteskinPage(from_hotkey: bool) =
             )
                 .Pos(2, 2, PageWidth.Full)
             |+ PageButton(
-                %"noteskin.delete",
+                %"skins.delete",
                 (fun () ->
                     ConfirmPage([meta.Name] %> "noteskin.delete.confirm",
                         fun () ->

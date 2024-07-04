@@ -11,7 +11,9 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features.Import
+open Interlude.Features.Gameplay
 open Interlude.Features.Skins.EditNoteskin
+open Interlude.Features.EditHUD //todo: adjust this namespace
 open Interlude.Features.Skins.Browser
 
 type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
@@ -173,34 +175,20 @@ type SelectSkinsPage() =
     override this.Content() =
         refresh ()
 
-        // todo: separate, always-on buttons to import skins from osu! or from ingame browser
-        // todo: ability to edit, export, open folder, delete
-        let action_buttons =
-            GridFlowContainer<Widget>(50.0f, 4, Spacing = (5.0f, 5.0f), Position = Position.SliceBottom(50.0f))
-            |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.EDIT_2 (%"noteskin.edit"),
-                0.0f,
-                edit_or_extract_noteskin
-            )
-            |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.DOWNLOAD_CLOUD (%"skins.browser"),
-                0.0f,
-                (fun () -> SkinsBrowserPage().Show())
-            )
-            |+ OptionsMenuButton(
-                sprintf "%s %s" Icons.DOWNLOAD (%"skins.import_from_osu"),
-                0.0f,
-                (fun () -> osu.Skins.OsuSkinsListPage().Show())
-            )
-            |+ OptionsMenuButton(
-                 sprintf "%s %s" Icons.FOLDER (%"skins.open_folder"),
-                0.0f,
-                (fun () -> open_directory (get_game_folder "Skins"))
-            )
-                .Tooltip(Tooltip.Info("skins.open_folder"))
-
         let left_info =
-            Container(NodeType.None, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            NavigationContainer.Column(Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.35f %- 10.0f })
+            |+ OptionsMenuButton(
+                Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
+                0.0f,
+                (fun () -> SkinsBrowserPage().Show()),
+                Position = pretty_pos(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f)
+            )
+            |+ OptionsMenuButton(
+                Icons.DOWNLOAD + " " + %"skins.import_from_osu",
+                0.0f,
+                (fun () -> osu.Skins.OsuSkinsListPage().Show()),
+                Position = pretty_pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
+            )
             |+ Text(
                 %"skins.current",
                 Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
@@ -222,7 +210,7 @@ type SelectSkinsPage() =
 
         let noteskin_tab = ScrollContainer(noteskin_grid)
         let hud_tab = ScrollContainer(hud_grid)
-        let tabs = SwapContainer(noteskin_tab, Position = Position.Margin(0.0f, 60.0f))
+        let tabs = SwapContainer(noteskin_tab, Position = Position.TrimTop(115.0f))
 
         let tab_buttons =
             let c =
@@ -236,22 +224,88 @@ type SelectSkinsPage() =
                             |]
                         Height = 50.0f
                     }
-            c.Position <- Position.SliceTop(50.0f)
+            c.Position <- Position.TrimTop(60.0f).SliceTop(50.0f)
             c
 
-        NavigationContainer.Column(
-            WrapNavigation = false, 
-            Position =
-                { Position.Default with
-                    Left = 0.35f %+ 10.0f
-                }
-                    .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
-        )
-        |+ tab_buttons
-        |+ tabs
-        |+ action_buttons
-        |>> Container
+        let action_buttons =
+            GridFlowContainer<Widget>(70.0f, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceTop(60.0f), WrapNavigation = false)
+            |+ InlaidButton(
+                %"skins.edit",
+                (fun () ->
+                    if tabs.Current = noteskin_tab then
+                        edit_or_extract_noteskin()
+                    elif
+                        SelectedChart.WITH_COLORS.IsSome
+                        && Screen.change_new
+                            (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
+                            Screen.Type.Practice
+                            Transitions.Default
+                    then
+                        Menu.Exit()
+                ),
+                Icons.EDIT
+            )
+            |+ InlaidButton(
+                %"skins.export",
+                (fun () -> 
+                    if tabs.Current = noteskin_tab then
+                        if not (Skins.export_skin Skins.selected_noteskin_id.Value || Skins.current_noteskin.IsEmbedded) then
+                            Notifications.error (
+                                %"notification.export_skin_failure.title",
+                                %"notification.export_skin_failure.body"
+                            )
+                    else
+                        if not (Skins.export_skin Skins.selected_hud_id.Value) then
+                            Notifications.error (
+                                %"notification.export_skin_failure.title",
+                                %"notification.export_skin_failure.body"
+                            )
+                ),
+                Icons.UPLOAD
+            )
+                .Tooltip(Tooltip.Info("skins.export"))
+            |+ InlaidButton(
+                %"skins.open_folder",
+                (fun () -> 
+                    if tabs.Current = noteskin_tab then
+                        Skins.open_noteskin_folder Skins.selected_noteskin_id.Value |> ignore
+                    else
+                        Skins.open_hud_folder Skins.selected_hud_id.Value |> ignore
+                ),
+                Icons.FOLDER
+            )
+            |+ InlaidButton(
+                %"skins.delete",
+                (fun () -> 
+                    if tabs.Current = noteskin_tab then
+                        ConfirmPage([Content.NoteskinMeta.Name] %> "noteskin.delete.confirm",
+                            fun () -> Skins.delete_noteskin Skins.selected_noteskin_id.Value |> ignore
+                        ).Show()
+                    else
+                        ConfirmPage([Content.HUDMeta.Name] %> "hud.delete.confirm",
+                            fun () -> Skins.delete_hud Skins.selected_hud_id.Value |> ignore
+                        ).Show()
+                ),
+                Icons.TRASH
+            )
+
+        let right_side =
+            NavigationContainer.Column(
+                WrapNavigation = false, 
+                Position =
+                    { Position.Default with
+                        Left = 0.35f %+ 10.0f
+                    }
+                        .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+            )
+            |+ action_buttons
+            |+ tab_buttons
+            |+ tabs
+
+        NavigationContainer.Row()
+        |+ right_side
         |+ left_info
+        |>> Container
         |+ preview
         :> Widget
 

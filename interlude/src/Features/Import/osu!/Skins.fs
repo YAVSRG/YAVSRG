@@ -64,7 +64,8 @@ module Skins =
                         with err ->
                             Logging.Error("Error while converting to skin", err)
 
-                        Menu.Exit()
+                        Menu.Back()
+                        Menu.Back()
                 )
                 .Pos(if existing_folder.IsSome then 10 else 5)
             |+ Callout.frame

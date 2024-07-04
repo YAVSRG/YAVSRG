@@ -544,6 +544,7 @@ module Skins =
                     Logging.Error("IO error while deleting noteskin", err)
                     false
                 | _ -> reraise()
+                // todo: delete entire skin if now-empty
         else false
 
     let delete_hud (id: string) =
@@ -561,6 +562,7 @@ module Skins =
                     Logging.Error("IO error while deleting hud", err)
                     false
                 | _ -> reraise()
+                // todo: delete entire skin if now-empty
         else false
 
     let export_skin (id: string) =

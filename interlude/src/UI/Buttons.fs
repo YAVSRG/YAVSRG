@@ -140,7 +140,7 @@ module RadioButtons =
             if is_chosen() then
                 Draw.rect (this.Bounds.BorderTop(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
             else
-                Draw.rect (this.Bounds.SliceBottom(this.Bounds.Height + Style.PADDING)) (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_2.O1)
+                Draw.rect (this.Bounds.SliceBottom(this.Bounds.Height + Style.PADDING)) (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_1.O1)
                 Draw.rect (this.Bounds.BorderBottom(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
             Draw.rect (this.Bounds.SliceRight(Style.PADDING).Expand(0.0f, Style.PADDING)) Colors.grey_2.O2
             if this.Focused then

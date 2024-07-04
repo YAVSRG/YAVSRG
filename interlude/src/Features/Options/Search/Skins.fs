@@ -34,21 +34,15 @@ module Skins =
                     (fun () -> SkinsBrowserPage().Show())
                 )
 
-                yield PageButton(
-                    %"skins.open_folder",
-                    (fun () -> open_directory (get_game_folder "Skins"))
-                )
-                    .Tooltip(Tooltip.Info("skins.open_folder"))
-
             if token_match tokens [|%"skins"; %"skins.import_from_osu"|] then
                 yield PageButton(
                     %"skins.import_from_osu",
                     (fun () -> Skins.OsuSkinsListPage().Show())
                 )
 
-            if token_match tokens [|%"hud"|] || token_match tokens (HudElement.FULL_LIST |> Seq.map HudElement.name |> Array.ofSeq) then
+            if token_match tokens [|%"hud.edit"|] || token_match tokens (HudElement.FULL_LIST |> Seq.map HudElement.name |> Array.ofSeq) then
                 yield PageButton(
-                    %"hud",
+                    %"hud.edit",
                     (fun () ->
                         if
                             SelectedChart.WITH_COLORS.IsSome
@@ -60,7 +54,7 @@ module Skins =
                             Menu.Exit()
                     )
                 )
-                    .Tooltip(Tooltip.Info("hud"))
+                    .Tooltip(Tooltip.Info("hud.edit"))
 
             if token_match tokens [|%"themes.theme"; %"themes.showthemesfolder"|] then
                 yield PageSetting(%"themes.theme", 

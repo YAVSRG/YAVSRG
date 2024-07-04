@@ -100,7 +100,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     fun success ->
                         if success then
                             defer Skins.load
-                            Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_noteskin", group.Name)
+                            Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_skin", group.Name)
                             status <- Installed
                         else
                             status <- DownloadFailed
