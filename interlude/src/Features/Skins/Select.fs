@@ -13,7 +13,7 @@ open Interlude.UI.Menu
 open Interlude.Features.Import
 open Interlude.Features.Gameplay
 open Interlude.Features.Skins.EditNoteskin
-open Interlude.Features.EditHUD //todo: adjust this namespace
+open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins.Browser
 
 type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =

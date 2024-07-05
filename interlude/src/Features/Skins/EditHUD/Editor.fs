@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.EditHUD
+﻿namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
@@ -17,6 +17,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
+open Interlude.Features.Skins
 
 [<AutoOpen>]
 module private ElementMenus =

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.EditHUD
+﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

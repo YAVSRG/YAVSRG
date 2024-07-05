@@ -143,9 +143,9 @@
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
-    <Compile Include="Features\Skins\EditHUD\Elements.fs" />
-    <Compile Include="Features\Skins\Preview.fs" />
-    <Compile Include="Features\Skins\EditHUD\Shared.fs" />
+    <Compile Include="Features\Skins\Shared\Elements.fs" />
+    <Compile Include="Features\Skins\Shared\Preview.fs" />
+    <Compile Include="Features\Skins\EditHUD\ConfigPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\Accuracy.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\TimingDisplay.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\JudgementMeter.fs" />

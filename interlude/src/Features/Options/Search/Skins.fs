@@ -5,7 +5,7 @@ open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
-open Interlude.Features.EditHUD
+open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.Browser
 open Interlude.Features.Skins

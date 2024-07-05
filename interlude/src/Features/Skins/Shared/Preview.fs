@@ -9,7 +9,6 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
-open Interlude.Features.EditHUD
 
 type SkinPreview(position: Position) as this =
     inherit Container(NodeType.None)
