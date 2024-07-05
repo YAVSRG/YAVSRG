@@ -3,7 +3,7 @@ namespace Interlude.Features.Skins.Browser
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Repo
+open Prelude.Skins.Repo
 open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu

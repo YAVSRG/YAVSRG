@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.HudLayouts
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content

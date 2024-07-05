@@ -1,11 +1,10 @@
-namespace Prelude.Skinning.Themes
+namespace Prelude.Skins.Themes
 
 open System.IO
 open System.IO.Compression
-open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Skinning
+open Prelude.Skins
 
 (*
     Default config values for themes, textures, noteskins, widget layouts

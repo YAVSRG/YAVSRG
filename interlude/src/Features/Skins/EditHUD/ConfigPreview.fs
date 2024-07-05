@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay

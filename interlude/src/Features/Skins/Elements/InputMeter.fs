@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 

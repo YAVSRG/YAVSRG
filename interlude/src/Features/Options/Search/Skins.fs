@@ -1,7 +1,7 @@
 namespace Interlude.Features.OptionsMenu.Search
 
 open Prelude
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content

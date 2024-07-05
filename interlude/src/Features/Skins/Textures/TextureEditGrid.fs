@@ -5,9 +5,9 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu

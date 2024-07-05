@@ -1,8 +1,8 @@
-﻿namespace Prelude.Skinning.HudLayouts
+﻿namespace Prelude.Skins.HudLayouts
 
 open System.IO
 open System.IO.Compression
-open Prelude.Skinning
+open Prelude.Skins
 
 type HudLayout(storage) as this =
     inherit Storage(storage)

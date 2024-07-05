@@ -1,10 +1,10 @@
-﻿namespace Prelude.Skinning.HudLayouts
+﻿namespace Prelude.Skins.HudLayouts
 
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
-open Prelude.Skinning
+open Prelude.Skins
 
 [<RequireQualifiedAccess>]
 type HudElement =

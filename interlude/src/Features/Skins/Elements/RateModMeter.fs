@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Gameplay.Mods
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 

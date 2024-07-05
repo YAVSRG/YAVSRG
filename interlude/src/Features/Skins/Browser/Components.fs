@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.Repo
+open Prelude.Skins.Repo
 open Prelude.Data
 open Interlude.UI
 open Interlude.UI.Menu

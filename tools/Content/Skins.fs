@@ -2,10 +2,10 @@
 
 open System
 open System.IO
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
-open Prelude.Skinning.Repo
+open Prelude.Skins
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
+open Prelude.Skins.Repo
 open Prelude
 open SixLabors.ImageSharp
 open YAVSRG.CLI.Utils

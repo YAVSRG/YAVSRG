@@ -11,8 +11,8 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI

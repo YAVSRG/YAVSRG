@@ -1,12 +1,12 @@
-﻿namespace Prelude.Skinning
+﻿namespace Prelude.Skins
 
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
-open Prelude.Skinning
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
+open Prelude.Skins
 
 [<Json.AutoCodec(false)>]
 type SkinMetadata =

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skinning
+﻿namespace Prelude.Skins
 
 open System
 open System.IO

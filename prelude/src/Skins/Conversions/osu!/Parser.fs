@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skinning.Conversions
+﻿namespace Prelude.Skins.Conversions
 
 open Prelude
 

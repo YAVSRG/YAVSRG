@@ -1,11 +1,11 @@
-﻿namespace Prelude.Skinning.Repo
+﻿namespace Prelude.Skins.Repo
 
 open Percyqaz.Data
 open Prelude
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
+open Prelude.Skins
+open Prelude.Skins.Noteskins
 
 module NoteskinPreview =
 

@@ -5,7 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play

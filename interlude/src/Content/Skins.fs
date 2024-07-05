@@ -7,9 +7,9 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
 open Interlude
 
 type private LoadedSkin =

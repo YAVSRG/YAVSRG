@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skinning.Conversions
+﻿namespace Prelude.Skins.Conversions
 
 open System.IO
 open SixLabors.ImageSharp
@@ -7,9 +7,9 @@ open SixLabors.ImageSharp.Drawing.Processing
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Processing
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
-open Prelude.Skinning.HudLayouts
+open Prelude.Skins
+open Prelude.Skins.Noteskins
+open Prelude.Skins.HudLayouts
 
 module private TextureFile =
 

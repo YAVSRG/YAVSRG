@@ -2,7 +2,7 @@
 
 open System.IO
 open System.IO.Compression
-open Prelude.Skinning.Noteskins
+open Prelude.Skins.Noteskins
 open YAVSRG.CLI
 
 module Assets =

@@ -2,8 +2,8 @@
 
 open NUnit.Framework
 open Prelude
-open Prelude.Skinning
-open Prelude.Skinning.Noteskins
+open Prelude.Skins
+open Prelude.Skins.Noteskins
 open Helpers
 
 module Validation =
