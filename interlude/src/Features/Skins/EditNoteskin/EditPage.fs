@@ -106,9 +106,9 @@ type EditNoteskinPage(from_hotkey: bool) =
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
-                            general_tab, %"noteskin.general", K false
-                            textures_tab, %"noteskin.textures", K false
-                            problems_tab, %"noteskin.problems", K false
+                            general_tab, %"skins.general", K false
+                            textures_tab, %"skins.textures", K false
+                            problems_tab, %"skins.problems", K false
                         |]
                     Height = 50.0f
                 }

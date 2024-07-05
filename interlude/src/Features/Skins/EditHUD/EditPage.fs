@@ -45,9 +45,9 @@ type EditHUDPage() =
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
-                            general_tab, %"hud.general", K false
-                            textures_tab, %"hud.textures", K false
-                            problems_tab, %"hud.problems", K false
+                            general_tab, %"skins.general", K false
+                            textures_tab, %"skins.textures", K false
+                            problems_tab, %"skins.problems", K false
                         |]
                     Height = 50.0f
                 }
