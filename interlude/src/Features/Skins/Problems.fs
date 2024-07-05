@@ -1,9 +1,10 @@
-﻿namespace Interlude.Features.Skins.EditNoteskin
+﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -29,19 +30,37 @@ module Problems =
                 , Colors.red_accent, Colors.red.O2)
 
     let problems_loader = 
-        { new Async.SwitchServiceSeq<Noteskin * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), (unit -> unit)>() with 
-            override this.Process((noteskin, container, after_fix)) =
-                noteskin.Validate() |> Seq.map (fun msg -> fun () -> container |* problem_card msg after_fix)
+        { new Async.SwitchServiceSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), (unit -> unit)>() with 
+            override this.Process((storage, container, after_fix)) =
+                match storage with
+                | :? Noteskin as ns -> ns.Validate()
+                | :? HudLayout as hud -> hud.Validate()
+                | _ -> Seq.empty //todo: make Validate() an abstract member
+                |> Seq.map (fun msg -> fun () -> container |* problem_card msg after_fix)
             override this.Handle(action) = action()
         }
 
-    let create_list (noteskin: Noteskin) : Widget * (unit -> unit) =
+    let create_noteskin (noteskin: Noteskin) : Widget * (unit -> unit) =
         let problems_list =
             DynamicFlowContainer.Vertical<CalloutCard>(Spacing = 15.0f)
 
         let rec refresh () =
             problems_list.Clear()
             problems_loader.Request(noteskin, problems_list, fun () -> defer refresh)
+
+        ScrollContainer(
+            problems_list,
+            Margin = Style.PADDING,
+            Position = pretty_pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
+        ), refresh
+
+    let create_hud (hud: HudLayout) : Widget * (unit -> unit) =
+        let problems_list =
+            DynamicFlowContainer.Vertical<CalloutCard>(Spacing = 15.0f)
+
+        let rec refresh () =
+            problems_list.Clear()
+            problems_loader.Request(hud, problems_list, fun () -> defer refresh)
 
         ScrollContainer(
             problems_list,

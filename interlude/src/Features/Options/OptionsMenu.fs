@@ -42,7 +42,7 @@ type OptionsMenuPage() =
                 if
                     SelectedChart.WITH_COLORS.IsSome
                     && Screen.change_new
-                        (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsMenuPage().Show()))
+                        (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> OptionsMenuPage().Show()))
                         Screen.Type.Practice
                         Transitions.Default
                 then

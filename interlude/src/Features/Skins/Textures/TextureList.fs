@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditNoteskin
+﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Flux.UI
 open Prelude.Skinning

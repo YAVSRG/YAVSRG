@@ -722,7 +722,7 @@ type PositionerInfo(ctx: PositionerContext) =
 
         base.Update(elapsed_ms, moved)
 
-module HUDEditor =
+module EditHudScreen =
 
     let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit) =
 

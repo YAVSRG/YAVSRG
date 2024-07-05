@@ -47,7 +47,7 @@ module Skins =
                         if
                             SelectedChart.WITH_COLORS.IsSome
                             && Screen.change_new
-                                (fun () -> HUDEditor.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))
+                                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))
                                 Screen.Type.Practice
                                 Transitions.Default
                         then

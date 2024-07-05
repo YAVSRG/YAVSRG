@@ -145,6 +145,7 @@
     <Compile Include="Features\Play\Practice\Practice.fs" />
     <Compile Include="Features\Skins\Elements.fs" />
     <Compile Include="Features\Skins\Preview.fs" />
+    <Compile Include="Features\Skins\Problems.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
     <Compile Include="Features\Skins\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPreview.fs" />
@@ -160,14 +161,14 @@
     <Compile Include="Features\Skins\EditHUD\ConfigPages\RateModMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\BPMMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\InputMeter.fs" />
-    <Compile Include="Features\Skins\EditHUD\Editor.fs" />
+    <Compile Include="Features\Skins\EditHUD\EditPage.fs" />
+    <Compile Include="Features\Skins\EditHUD\EditScreen.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Playfield.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNotes.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Colors.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Rotations.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Animations.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Problems.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Editor.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\EditPage.fs" />
     <Compile Include="Features\Skins\Browser\Thumbnails.fs" />
     <Compile Include="Features\Skins\Browser\Components.fs" />
     <Compile Include="Features\Skins\Browser\Browser.fs" />
