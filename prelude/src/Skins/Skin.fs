@@ -119,6 +119,13 @@ type Skin(storage) as this =
 
 module NoteskinToSkinMigration =
 
+    [<Json.AutoCodec(false)>]
+    type HudLayoutMigrationModel =
+        {
+            HUD: HudConfig
+        }
+        static member Default = { HUD = HudConfig.Default }
+
     let folder_should_migrate (folder_path: string) =
         not (Skin.Exists folder_path) && Noteskin.Exists folder_path
 
@@ -127,6 +134,10 @@ module NoteskinToSkinMigration =
         | Error reason -> Error reason
         | Ok meta ->
 
+        match JSON.FromFile<HudLayoutMigrationModel> (Path.Combine(folder_path, "noteskin.json")) with
+        | Error reason -> Error reason
+        | Ok hud_data ->
+
         try
             let temporary_location = Path.Combine(Path.GetDirectoryName(folder_path), "_converting_to_skin_")
             Directory.Move(folder_path, temporary_location)
@@ -134,6 +145,19 @@ module NoteskinToSkinMigration =
             let noteskin_location = Path.Combine(folder_path, "Noteskin")
             Directory.Move(temporary_location, noteskin_location)
             JSON.ToFile(Path.Combine(folder_path, "skin.json"), true) meta
+
+            let mutable has_hud = false
+            let hud_location = Path.Combine(folder_path, "HUD")
+            for file in Directory.EnumerateFiles noteskin_location do
+                let filename = Path.GetFileName(file).ToLowerInvariant()
+                if HudTextureRules.list() |> Seq.exists (fun s -> filename.StartsWith s) then
+                    if not has_hud then
+                        has_hud <- true
+                        Directory.CreateDirectory(hud_location) |> ignore
+                    File.Move(file, Path.Combine(hud_location, filename))
+            if has_hud then
+                JSON.ToFile(Path.Combine(hud_location, "hud.json"), true) hud_data.HUD
+
             Ok()
         with err ->
             Error err
