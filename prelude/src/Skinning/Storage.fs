@@ -703,6 +703,8 @@ type Storage(storage: StorageType) =
                                     }
         }
 
+    member this.TextureFileMode(name: string) = this.GetTextureConfig(name).Mode
+
     member this.SplitTexture(name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"

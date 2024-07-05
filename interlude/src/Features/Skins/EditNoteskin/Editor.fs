@@ -22,7 +22,7 @@ type EditNoteskinPage(from_hotkey: bool) =
 
     let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).Translate(0.0f, -100.0f))
 
-    let textures_tab, refresh_texture_grid = TextureGrid.create noteskin
+    let textures_tab, refresh_texture_grid = TextureGrid.create_noteskin noteskin
     let problems_tab, refresh_problems_list = Problems.create_list noteskin
 
     let refresh () =

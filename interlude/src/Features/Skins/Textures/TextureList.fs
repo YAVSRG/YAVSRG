@@ -3,11 +3,12 @@
 open Percyqaz.Flux.UI
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
 
-type TextureCard(noteskin: Noteskin, id: string, on_click: unit -> unit) as this =
+type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
     inherit
         FrameContainer(
             NodeType.Button(fun () ->
@@ -32,7 +33,7 @@ type TextureCard(noteskin: Noteskin, id: string, on_click: unit -> unit) as this
 
     let sprite = Content.Texture id
 
-    let mutable is_stitched = noteskin.TextureFileMode(id) = Grid
+    let mutable is_stitched = source.TextureFileMode(id) = Grid
 
     do
         this
@@ -42,7 +43,7 @@ type TextureCard(noteskin: Noteskin, id: string, on_click: unit -> unit) as this
         |* Button(
             (fun () -> if is_stitched then Icons.SQUARE + " Grid" else Icons.GRID + " Loose"), 
             (fun () -> 
-                (if is_stitched then noteskin.SplitTexture id else noteskin.StitchTexture id)
+                (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
             ),
             Position = Position.Margin(Style.PADDING).SliceBottom(40.0f)
@@ -54,7 +55,7 @@ type TextureCard(noteskin: Noteskin, id: string, on_click: unit -> unit) as this
 
 module TextureGrid =
 
-    let create (noteskin: Noteskin) : Widget * (unit -> unit) =
+    let create_noteskin (noteskin: Noteskin) : Widget * (unit -> unit) =
         let textures_grid =
             GridFlowContainer<TextureCard>(
                 40.0f + PRETTYWIDTH / 5f,
@@ -67,7 +68,28 @@ module TextureGrid =
             textures_grid.Clear()
 
             for texture in noteskin.RequiredTextures do
-                textures_grid |* TextureCard(noteskin, texture, (fun () -> TextureEditPage(texture).Show()))
+                textures_grid |* TextureCard(noteskin, texture, (fun () -> TextureEditPage(noteskin, texture).Show()))
+
+        ScrollContainer(
+            textures_grid,
+            Margin = Style.PADDING,
+            Position = pretty_pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
+        ), refresh
+
+    let create_hud (hud: HudLayout) : Widget * (unit -> unit) =
+        let textures_grid =
+            GridFlowContainer<TextureCard>(
+                40.0f + PRETTYWIDTH / 5f,
+                5,
+                WrapNavigation = false,
+                Spacing = (15.0f, 15.0f)
+            )
+
+        let refresh () =
+            textures_grid.Clear()
+
+            for texture in hud.RequiredTextures do
+                textures_grid |* TextureCard(hud, texture, (fun () -> TextureEditPage(hud, texture).Show()))
 
         ScrollContainer(
             textures_grid,

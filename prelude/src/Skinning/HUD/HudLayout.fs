@@ -2,8 +2,6 @@
 
 open System.IO
 open System.IO.Compression
-open Percyqaz.Common
-open Prelude
 open Prelude.Skinning
 
 type HudLayout(storage) as this =
@@ -29,8 +27,6 @@ type HudLayout(storage) as this =
 
     member this.GetTexture(name: string) : TextureLoadResult =
         this.LoadTexture(name, HudTextureRules.get this.Config name)
-
-    member this.TextureFileMode(name: string) = this.GetTextureConfig(name).Mode
 
     member this.RequiredTextures =
         HudTextureRules.list ()

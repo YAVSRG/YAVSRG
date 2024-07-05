@@ -143,8 +143,10 @@
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
-    <Compile Include="Features\Skins\Shared\Elements.fs" />
-    <Compile Include="Features\Skins\Shared\Preview.fs" />
+    <Compile Include="Features\Skins\Elements.fs" />
+    <Compile Include="Features\Skins\Preview.fs" />
+    <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
+    <Compile Include="Features\Skins\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\Accuracy.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\TimingDisplay.fs" />
@@ -164,8 +166,6 @@
     <Compile Include="Features\Skins\EditNoteskin\Colors.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Rotations.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Animations.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Textures\TextureEditGrid.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Problems.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Editor.fs" />
     <Compile Include="Features\Skins\Browser\Thumbnails.fs" />

@@ -7,6 +7,7 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skinning
 open Prelude.Skinning.Noteskins
+open Prelude.Skinning.HudLayouts
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Menu
@@ -68,7 +69,7 @@ type private DeleteButton(on_click) =
 
         base.Draw()
 
-type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
+type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: string, rules: TextureRules) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Items))
 
     let mutable sprite = Unchecked.defaultof<Sprite>
@@ -80,8 +81,6 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
 
         if sprite.Columns <> selected.Length || sprite.Rows <> selected.[0].Length then
             selected <- Array.init sprite.Columns (fun _ -> Array.zeroCreate sprite.Rows)
-
-        
 
         let item_height =
             min
@@ -136,8 +135,8 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
                                     ConfirmPage(
                                         sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
                                         fun () ->
-                                            if Content.Noteskin.DeleteGridTextureColumn(c, texture_id) then
-                                                Skins.reload_current_noteskin ()
+                                            if source.DeleteGridTextureColumn(c, texture_id) then
+                                                reload_source()
                                                 this.Refresh()
                                     )
                                         .Show()
@@ -169,8 +168,8 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
                             ConfirmPage(
                                 sprintf "Really PERMANENTLY delete color %i?" (r + 1),
                                 fun () ->
-                                    if Content.Noteskin.DeleteGridTextureRow(r, texture_id) then
-                                        Skins.reload_current_noteskin ()
+                                    if source.DeleteGridTextureRow(r, texture_id) then
+                                        reload_source()
                                         this.Refresh()
                             )
                                 .Show()
@@ -201,9 +200,9 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
                                          "Add a new color to this texture? (will be a copy of color %i)"
                                          (src_row + 1),
                                      fun () ->
-                                         if Content.Noteskin.AddGridTextureRow(src_row, texture_id) then
-                                             Skins.reload_current_noteskin ()
-                                             this.Refresh()
+                                        if source.AddGridTextureRow(src_row, texture_id) then
+                                            reload_source()
+                                            this.Refresh()
                                  )
                                      .Show()
                              ),
@@ -233,9 +232,9 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
                                          "Add a new animation frame to this texture? (will be a copy of frame %i)"
                                          (src_col + 1),
                                      fun () ->
-                                         if Content.Noteskin.AddGridTextureColumn(src_col, texture_id) then
-                                             Skins.reload_current_noteskin ()
-                                             this.Refresh()
+                                        if source.AddGridTextureColumn(src_col, texture_id) then
+                                            reload_source()
+                                            this.Refresh()
                                  )
                                      .Show()
                              ),
@@ -275,20 +274,32 @@ type TextureEditGrid(texture_id: string, rules: TextureRules) as this =
         base.Draw()
         items.Draw()
 
-type TextureEditPage(texture_id: string) =
+type TextureEditPage(source: Storage, texture_id: string) =
     inherit Page()
 
-    let texture_rules = NoteskinTextureRules.get Content.NoteskinConfig texture_id
+    let texture_rules = 
+        match source with
+        | :? Noteskin as ns -> NoteskinTextureRules.get ns.Config texture_id
+        | :? HudLayout as hud -> HudTextureRules.get hud.Config texture_id
+        | _ -> failwith "Unrecognised storage object (maybe a theme)"
+
+    let reload_source : unit -> unit =
+        match source with
+        | :? Noteskin -> Skins.reload_current_noteskin
+        | :? HudLayout -> Skins.reload_current_hud
+        | _ -> failwith "Unrecognised storage object (maybe a theme)"
 
     let texture_editor =
         TextureEditGrid(
+            source,
+            reload_source,
             texture_id,
             texture_rules,
             Position = Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f)
         )
 
     override this.Content() =
-        Content.Noteskin.SplitTexture(texture_id)
+        source.SplitTexture(texture_id)
 
         NavigationContainer.Column()
         |+ texture_editor
@@ -297,9 +308,9 @@ type TextureEditPage(texture_id: string) =
                 Icons.ROTATE_CW + " Rotate clockwise"
                 , fun () ->
                     for (col, row) in texture_editor.SelectedTextures do
-                        Content.Noteskin.RotateClockwise((col, row), texture_id) |> ignore
+                        source.RotateClockwise((col, row), texture_id) |> ignore
 
-                    Skins.reload_current_noteskin ()
+                    reload_source()
                     texture_editor.Refresh()
                 , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
             )
@@ -307,9 +318,9 @@ type TextureEditPage(texture_id: string) =
                 Icons.ROTATE_CCW + " Rotate anticlockwise"
                 , fun () ->
                     for (col, row) in texture_editor.SelectedTextures do
-                        Content.Noteskin.RotateAnticlockwise((col, row), texture_id) |> ignore
+                        source.RotateAnticlockwise((col, row), texture_id) |> ignore
 
-                    Skins.reload_current_noteskin ()
+                    reload_source()
                     texture_editor.Refresh()
                 , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
             )
@@ -317,9 +328,9 @@ type TextureEditPage(texture_id: string) =
                 Icons.CORNER_LEFT_UP + " Vertical flip"
                 , fun () ->
                     for (col, row) in texture_editor.SelectedTextures do
-                        Content.Noteskin.VerticalFlipTexture((col, row), texture_id) |> ignore
+                        source.VerticalFlipTexture((col, row), texture_id) |> ignore
 
-                    Skins.reload_current_noteskin ()
+                    reload_source()
                     texture_editor.Refresh()
                 , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
             )
@@ -327,13 +338,13 @@ type TextureEditPage(texture_id: string) =
                 Icons.CORNER_DOWN_LEFT + " Horizontal flip"
                 , fun () ->
                     for (col, row) in texture_editor.SelectedTextures do
-                        Content.Noteskin.HorizontalFlipTexture((col, row), texture_id) |> ignore
+                        source.HorizontalFlipTexture((col, row), texture_id) |> ignore
 
-                    Skins.reload_current_noteskin ()
+                    reload_source()
                     texture_editor.Refresh()
                 , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
             ))
         :> Widget
 
-    override this.Title = "Texture: " + texture_id
+    override this.Title = Icons.IMAGE + " " + texture_id
     override this.OnClose() = ()
