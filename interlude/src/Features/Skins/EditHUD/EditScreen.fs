@@ -586,88 +586,66 @@ and PositionerContext =
 type PositionerInfo(ctx: PositionerContext) =
     inherit FrameContainer(NodeType.None, Fill = K Colors.shadow_2.O3, Border = K Colors.cyan_accent)
 
-    let mutable bottom = true
+    let mutable currently_on_right = true
 
-    let TOP_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 0.0f %- 1.0f; Bottom = 0.0f %+ 60.0f }
-    let BOTTOM_POSITION : Position = { Left = 0.5f %- 400.0f; Right = 0.5f %+ 400.0f; Top = 1.0f %- 60.0f; Bottom = 1.0f %+ 1.0f }
+    let LEFT_POSITION : Position = Position.CenterY(400.0f).SliceLeft(375.0f)
+    let RIGHT_POSITION : Position = Position.CenterY(400.0f).SliceRight(375.0f)
 
     let dropdown_wrapper = 
         DropdownWrapper(fun d ->
-            match d with
-            | :? DropdownMenu ->
-                if bottom then 
-                    { 
-                        Left = 1.0f %- 370.0f
-                        Top = 0.0f %- (10.0f + d.Height)
-                        Right = 1.0f %- 30.0f
-                        Bottom = 0.0f %- 10.0f
-                    }
-                else
-                    {
-                        Left = 1.0f %- 370.0f
-                        Top = 1.0f %+ 60.0f
-                        Right = 1.0f %- 30.0f
-                        Bottom = 1.0f %+ (60.0f + d.Height)
-                    }
-            | _ ->
-                if bottom then 
-                    { 
-                        Left = 0.0f %+ 30.0f
-                        Top = 0.0f %- (10.0f + d.Height)
-                        Right = 0.0f %+ 370.0f
-                        Bottom = 0.0f %- 10.0f
-                    }
-                else
-                    {
-                        Left = 0.0f %+ 30.0f
-                        Top = 1.0f %+ 10.0f
-                        Right = 0.0f %+ 370.0f
-                        Bottom = 1.0f %+ (10.0f + d.Height)
-                    }
+            if currently_on_right then 
+                Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
+            else
+                Position.CenterY(d.Height).BorderRight(370.0f).Translate(-10.0f, 0.0f)
         )
 
     override this.Init(parent) =
-        NavigationContainer.Row()
+        NavigationContainer.Column()
         |+ Button(
             (fun () -> HudElement.name ctx.Selected),
             this.ToggleElementDropdown,
             Hotkey = "context_menu",
-            Position = Position.SliceLeft(400.0f).Margin(20.0f, 5.0f)
+            Position = Position.SliceTop(60.0f).Margin(20.0f, 5.0f)
         )
         |+ Button(
-            (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
+            (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE + " " + %"hud.editor.enabled" else Icons.CIRCLE + " " + %"hud.editor.disabled"),
             (fun () ->
                 Setting.app not (HudElement.enabled_setting ctx.Selected)
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
             Disabled = (fun () -> HudElement.can_toggle ctx.Selected |> not),
-            Position = Position.Column(400.0f, 100.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(100.0f, 60.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
-            Icons.REFRESH_CW,
+            Icons.REFRESH_CW + " " + %"hud.editor.reset_position",
             (fun () ->
                 HudElement.position_setting(ctx.Selected).Set(HudElement.default_position ctx.Selected)
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
-            Position = Position.Column(500.0f, 100.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(160.0f, 60.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
-            Icons.SETTINGS,
+            Icons.SETTINGS + " " + %"hud.editor.element_options",
             (fun () -> show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
             Hotkey = "options",
             Disabled = (fun () -> HudElement.can_configure ctx.Selected |> not),
-            Position = Position.Column(600.0f, 100.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(220.0f, 60.0f).Margin(10.0f, 5.0f)
         )
         |+ Button(
-            Icons.LAYOUT,
+            Icons.ANCHOR + " " + %"hud.editor.anchor",
             this.ToggleAnchorDropdown,
-            Position = Position.Column(700.0f, 100.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(280.0f, 60.0f).Margin(10.0f, 5.0f)
+        )
+        |+ Button(
+            Icons.EDIT + " " + %"hud.editor.advanced",
+            (fun () -> EditHUDPage().Show()),
+            Position = Position.Row(340.0f, 60.0f).Margin(10.0f, 5.0f)
         )
         |> this.Add
 
         this |* dropdown_wrapper
 
-        this.Position <- BOTTOM_POSITION
+        this.Position <- RIGHT_POSITION
         base.Init parent
 
     member private this.ToggleElementDropdown() =
@@ -704,21 +682,21 @@ type PositionerInfo(ctx: PositionerContext) =
 
         if ctx.Positioners.ContainsKey ctx.Selected then
             if
-                bottom
+                currently_on_right
                 && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
-                && ctx.Positioners.[ctx.Selected].Bounds.Top > 60.0f
+                && ctx.Positioners.[ctx.Selected].Bounds.Left > 225.0f
             then
-                bottom <- false
+                currently_on_right <- false
                 moved <- true
-                this.Position <- TOP_POSITION
+                this.Position <- LEFT_POSITION
             elif
-                not bottom
+                not currently_on_right
                 && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
-                && ctx.Positioners.[ctx.Selected].Bounds.Bottom < this.Parent.Bounds.Bottom - 60.0f
+                && ctx.Positioners.[ctx.Selected].Bounds.Right < this.Parent.Bounds.Right - 225.0f
             then
-                bottom <- true
+                currently_on_right <- true
                 moved <- true
-                this.Position <- BOTTOM_POSITION
+                this.Position <- RIGHT_POSITION
 
         base.Update(elapsed_ms, moved)
 
