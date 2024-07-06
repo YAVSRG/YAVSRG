@@ -157,7 +157,7 @@ module Replay =
             Error(err.ToString())
 
     // the replay generated when Auto-play is enabled
-    let perfect_replay (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+    let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
         let time_until_next i =
             if i >= notes.Length - 1 then
                 50.0f<ms>
@@ -191,7 +191,9 @@ module Replay =
         }
         |> Array.ofSeq
 
-    let auto_replay_waving (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+    let perfect_replay = perfect_replay_uncached |> cached
+
+    let private auto_replay_waving_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
         let mutable last_time = -Time.infinity
 
         let offset (time: Time) =
@@ -203,6 +205,8 @@ module Replay =
             last_time <- new_time
             struct (new_time, r)
         )
+
+    let auto_replay_waving = auto_replay_waving_uncached |> cached
 
 type IReplayProvider =
     // are we at the end of the replay?

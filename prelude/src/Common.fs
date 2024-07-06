@@ -79,8 +79,8 @@ module Common =
         let rate x = bounded x 0.5f 2.0f |> roundf 2
 
     (*
-    Localisation
-*)
+        Localisation
+    *)
 
     module Localisation =
         let private mapping = new Dictionary<string, string>()
@@ -124,8 +124,8 @@ module Common =
             Localisation.localise_with args localisation_key
 
     (*
-    Misc helpers (mostly data storage)
-*)
+        Misc helpers (mostly data storage)
+    *)
 
     let JSON =
         Json(Json.Settings.Default)
@@ -133,6 +133,23 @@ module Common =
             .WithCodec<SettingCodec<_, _>>()
             .WithCodec<ColorCodec>()
             .WithCodec<ConcurrentDictionaryCodec<_, _>>()
+
+    let internal cached (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
+        let LOCK_OBJ = obj()
+        let mutable previous : ('A * 'B * 'C) option = None
+        fun (a: 'A) (b: 'B) ->
+            match
+                lock LOCK_OBJ (fun () ->
+                    match previous with
+                    | Some (_a, _b, _c) when a = _a && b = _b -> Some _c
+                    | _ -> None
+                )
+            with
+            | Some cached_calculation -> cached_calculation
+            | None ->
+                let res = f a b
+                lock LOCK_OBJ (fun () -> previous <- Some (a, b, res))
+                res
 
     type Bitmap = Image<PixelFormats.Rgba32>
 

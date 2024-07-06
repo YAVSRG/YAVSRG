@@ -4,6 +4,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Gameplay
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
@@ -51,11 +52,23 @@ type SkinPreview(position: Position) as this =
         for elem in HudElement.FULL_LIST do
             construct_hud_element state elem playfield overlay_items
 
+        let recreate_scoring() =
+            let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
+            let ruleset = Rulesets.current
+            let scoring = Metrics.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
+            state.ChangeScoring scoring
+
+        let mutable last_time = -Time.infinity
+
         playfield.Add({ new StaticWidget(NodeType.None) with
             override this.Draw() = ()
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
-                state.Scoring.Update (state.CurrentChartTime())
+                let now = state.CurrentChartTime()
+                state.Scoring.Update (now)
+                if last_time > now then
+                    recreate_scoring()
+                last_time <- now
         })
 
         playfield.Add(OverlayContainer(overlay_items))
