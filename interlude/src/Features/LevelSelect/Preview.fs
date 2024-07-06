@@ -19,7 +19,6 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
     let volume = Volume()
 
     let timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
-    let mutable dragging = false
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -49,7 +48,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) =
             SelectedChart.change_rate_hotkeys change_rate
 
     override this.Close() =
-        if dragging then
+        if Mouse.held Mouse.LEFT then
             Song.resume ()
 
         base.Close()
