@@ -1,23 +1,16 @@
-0.7.24
+0.7.24.1
 ====
 
-*Skinning update*
+Bit of a weird follow up update but here you go
 
-Noteskins and HUD layouts have become separate things, and a Skin is a new container folder that can hold one or both of these things
-An .isk file now represets a Skin (so it can contain a noteskin, hud layout or both)
+# New feature
+You can now turn off pitch rates via Options > System > Audio! When turned off, rates no longer also pitch the song up/down
 
-You don't need to do anything, your existing noteskins should be turned automatically into new Skin folders
+Let me know if you experience any bugs or offset issues while using this
 
-# New features
-- You can now select which HUD and which Noteskin to use independently of each other
-- Timelines and score graphs now display timestamps
-- Options menu previews now display HUD elements, explosions and column lighting
-- You can set negative column spacings and hold trim values ingame instead of manually editing noteskin files
-
-# Many UI improvements
-- Hold backspace to delete text
-- You can re-download Etterna packs that are already installed
-- The 'Import' button now opens a menu instead of a dropdown
-- Presets UI has been updated and improved
-- A bunch of other really tiny but nice changes
+# Bug fixes
+- Fixed a bunch of visual problems with hud elements in previews
+- Fixed some bugs with scrobbling on timelines
+- Fixed a bug when importing a .isk by dropping it on the window
+- Fixed problems clicking dropdowns in the HUD editor
 
