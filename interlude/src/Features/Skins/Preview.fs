@@ -46,9 +46,10 @@ type SkinPreview(position: Position) as this =
             playfield.Add(new Explosions(info.WithColors.Keys, noteskin_config, state))
 
         playfield.Add(LanecoverOverReceptors())
+        let overlay_items = Container(NodeType.None)
 
         for elem in HudElement.FULL_LIST do
-            construct_hud_element state elem playfield this
+            construct_hud_element state elem playfield overlay_items
 
         playfield.Add({ new StaticWidget(NodeType.None) with
             override this.Draw() = ()
@@ -56,6 +57,8 @@ type SkinPreview(position: Position) as this =
                 base.Update(elapsed_ms, moved)
                 state.Scoring.Update (state.CurrentChartTime())
         })
+
+        playfield.Add(OverlayContainer(overlay_items))
 
         if this.Initialised then
             playfield.Init this
