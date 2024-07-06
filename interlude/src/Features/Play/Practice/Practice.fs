@@ -181,20 +181,12 @@ module PracticeScreen =
                 DiscordRPC.playing ("Practice mode", info.CacheInfo.Title)
 
             override this.OnBack() =
-                if not state.Paused.Value then
-                    pause this
-                    input_key_state <- 0us
-                    None
-                else
-                    Song.resume ()
-                    base.OnBack()
+                Song.resume ()
+                base.OnBack()
 
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE
-
-                if not state.Paused.Value then
-                    Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
 
                 if (%%"retry").Tapped() then
                     restart this
@@ -213,6 +205,10 @@ module PracticeScreen =
                     else
                         SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
+                elif (%%"exit").Tapped() then
+                    pause this
+                    input_key_state <- 0us
+
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
@@ -225,6 +221,10 @@ module PracticeScreen =
                     )
 
                     this.State.Scoring.Update chart_time
+
+                if not state.Paused.Value then
+                    Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
+                    Input.finish_frame_events()
 
                 base.Update(elapsed_ms, moved)
 
