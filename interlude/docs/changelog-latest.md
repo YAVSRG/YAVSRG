@@ -1,15 +1,23 @@
-0.7.23.1
+0.7.24
 ====
 
-Several bug fixes thanks to your quick feedback :)
+*Skinning update*
 
-# Bug fixes by me
-- Fixed some visual issues in the Input Meter fade effect thanks to Lylcaruis
-- Fixed bug converting some older Quaver files thanks to 9382
-- Fixed behaviour of mouse dragging on color pickers thanks to Lylcaruis
-- Fixed Input Meter speeding up/slowing down when on rates thanks to Lylcaruis
+Noteskins and HUD layouts have become separate things, and a Skin is a new container folder that can hold one or both of these things
+An .isk file now represets a Skin (so it can contain a noteskin, hud layout or both)
 
-# Bug fixes by @9382
-- Fixed audio pausing when changing songs too quickly
-- Fixed UI overlapping on prompt about importing an unlinked songs folder
+You don't need to do anything, your existing noteskins should be turned automatically into new Skin folders
+
+# New features
+- You can now select which HUD and which Noteskin to use independently of each other
+- Timelines and score graphs now display timestamps
+- Options menu previews now display HUD elements, explosions and column lighting
+- You can set negative column spacings and hold trim values ingame instead of manually editing noteskin files
+
+# Many UI improvements
+- Hold backspace to delete text
+- You can re-download Etterna packs that are already installed
+- The 'Import' button now opens a menu instead of a dropdown
+- Presets UI has been updated and improved
+- A bunch of other really tiny but nice changes
 
