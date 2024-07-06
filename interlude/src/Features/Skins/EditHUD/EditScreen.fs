@@ -592,14 +592,19 @@ type PositionerInfo(ctx: PositionerContext) =
     let RIGHT_POSITION : Position = Position.CenterY(400.0f).SliceRight(375.0f)
 
     let dropdown_wrapper = 
-        DropdownWrapper(fun d ->
-            if currently_on_right then 
-                Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
-            else
-                Position.CenterY(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
+        DropdownWrapper(
+            (fun d ->
+                if currently_on_right then 
+                    Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
+                else
+                    Position.CenterY(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
+            ), 
+            FocusTrap = true
         )
 
     override this.Init(parent) =
+        this |* dropdown_wrapper
+
         NavigationContainer.Column()
         |+ Button(
             (fun () -> Icons.LIST + " " + HudElement.name ctx.Selected),
@@ -643,8 +648,6 @@ type PositionerInfo(ctx: PositionerContext) =
             Position = Position.Row(340.0f, 60.0f).Margin(10.0f, 5.0f)
         )
         |> this.Add
-
-        this |* dropdown_wrapper
 
         this.Position <- RIGHT_POSITION
         base.Init parent

@@ -45,6 +45,8 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
 
     member private this.Current = current |> Option.map (fun x -> x :> ISelection)
 
+    member val FocusTrap = false with get, set
+
     override this.Init(parent) =
         base.Init parent
         current |> Option.iter (fun dropdown -> dropdown.Init this)
@@ -85,8 +87,11 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
                 dropdown.Init this
         swapped_last_frame <- true
         if not dropdown.Focused then dropdown.Focus false
+        if this.FocusTrap then Selection.clamp_to dropdown
 
-    member this.Dismiss() = current <- None
+    member this.Dismiss() = 
+        current <- None
+        if this.FocusTrap then Selection.unclamp()
 
     member this.Toggle(thunk: unit -> 'T) =
         if current.IsSome then this.Dismiss()
