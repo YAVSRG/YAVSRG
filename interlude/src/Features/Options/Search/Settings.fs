@@ -99,6 +99,16 @@ module Settings =
                     }
                 )
                     .Tooltip(Tooltip.Info("system.audiooffset"))
+
+            if token_match tokens [|%"system.audio_pitch_rates"|] then
+                yield PageSetting(
+                    %"system.audio_pitch_rates",
+                    Checkbox(
+                        options.AudioPitchRates
+                        |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
+                    )
+                )
+                    .Tooltip(Tooltip.Info("system.audio_pitch_rates"))
             
             if token_match tokens [|%"system.visualoffset"|] then
                 yield PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))

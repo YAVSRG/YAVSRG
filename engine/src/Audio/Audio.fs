@@ -3,6 +3,7 @@
 open System
 open System.Diagnostics
 open ManagedBass
+open ManagedBass.Fx
 open Percyqaz.Common
 
 [<AutoOpen>]
@@ -25,7 +26,7 @@ type Song =
         }
 
     static member FromFile(file: string) =
-        let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan (* ||| BassFlags.Decode *))
+        let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if ID = 0 then
             Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
@@ -35,7 +36,7 @@ type Song =
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
             Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
-            (* let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource) *)
+            let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             {
                 ID = ID
                 Frequency = Frequency
@@ -76,6 +77,7 @@ module Song =
     let mutable on_finish = SongFinishAction.Wait
     let mutable private preview_point = 0.0f<ms>
     let mutable private last_note = 0.0f<ms>
+    let mutable private enable_pitch_rates = true
 
     let duration () = now_playing.Duration
 
@@ -148,13 +150,23 @@ module Song =
         let rate_changed = rate <> new_rate
         let time = time ()
         rate <- new_rate
-        (* Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0)
-        |> display_bass_error *)
+
+        if not enable_pitch_rates then
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0)
+            |> display_bass_error
+
         Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * rate)
         |> display_bass_error
 
         if rate_changed then
             seek time
+
+    let set_pitch_rates_enabled (enabled: bool) =
+        enable_pitch_rates <- enabled
+
+        if now_playing.ID <> 0 then
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, if enabled then 0.0 else -Math.Log(float rate, 2.0) * 12.0)
+            |> display_bass_error
 
     let set_local_offset (offset) = _local_offset <- offset
     let set_global_offset (offset) = _global_offset <- offset

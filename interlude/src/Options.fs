@@ -136,6 +136,7 @@ module Options =
             VisualOffset: Setting.Bounded<float32>
             AudioOffset: Setting.Bounded<float32>
             AudioVolume: Setting.Bounded<float>
+            AudioPitchRates: Setting<bool>
             CurrentChart: Setting<string>
             Theme: Setting<string>
 
@@ -192,6 +193,7 @@ module Options =
                 VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
                 AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
                 AudioVolume = Setting.percent 0.05
+                AudioPitchRates = Setting.simple true
                 CurrentChart = Setting.simple ""
                 Theme = Content.Themes.selected_id
 

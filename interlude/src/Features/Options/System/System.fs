@@ -161,6 +161,15 @@ type SystemPage() =
             .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(
+            %"system.audio_pitch_rates",
+            Checkbox(
+                options.AudioPitchRates
+                |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
+            )
+        )
+            .Tooltip(Tooltip.Info("system.audio_pitch_rates"))
+            .Pos(10)
+        |+ PageSetting(
             %"system.audiovolume",
             Slider.Percent(
                 options.AudioVolume
