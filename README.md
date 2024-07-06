@@ -56,8 +56,8 @@ The `yavsrg update` command will checkout and build the latest release, if you a
 
 Use `yavsrg debug_run` to build and test the current branch, or [go and look inside at what it does](https://github.com/YAVSRG/YAVSRG/blob/main/tools/Client/Play.fs) and use an IDE feature accordingly.
 
-On first startup via `yavsrg debug_run`, the game will tell you that you need the correct bass.dll/dynlib/so for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
-Look for it here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib  
+On first startup via `yavsrg debug_run`, the game will tell you that you need the correct bass.dll/dynlib/so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
+Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
 If your platform isn't there contact me in the discord or search online for it
 
 If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run with F5 which is my current workflow.

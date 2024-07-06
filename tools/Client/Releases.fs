@@ -37,6 +37,7 @@ Information, future updates and support available at:
             Name: string
             RuntimeId: string
             BassLibraryFile: string
+            BassFxLibraryFile: string
             GLFWLibraryFile: string
             SQLiteLibraryFile: string
             ExecutableFile: string
@@ -82,6 +83,11 @@ Information, future updates and support available at:
             Path.Combine(clean_dir, info.BassLibraryFile)
         )
 
+        File.Copy(
+            Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassLibraryFxFile),
+            Path.Combine(clean_dir, info.BassLibraryFxFile)
+        )
+
         File.Copy(Path.Combine(build_dir, "publish", info.ExecutableFile), Path.Combine(clean_dir, info.ExecutableFile))
 
         File.Copy(
@@ -112,6 +118,7 @@ Information, future updates and support available at:
                 Name = "osx-arm64"
                 RuntimeId = "osx-arm64"
                 BassLibraryFile = "libbass.dylib"
+                BassFxLibraryFile = "libbass_fx.dylib"
                 GLFWLibraryFile = "libglfw.3.dylib"
                 SQLiteLibraryFile = "libe_sqlite3.dylib"
                 ExecutableFile = "Interlude"
@@ -123,6 +130,7 @@ Information, future updates and support available at:
                 Name = "linux-x64"
                 RuntimeId = "linux-x64"
                 BassLibraryFile = "libbass.so"
+                BassFxLibraryFile = "libbass_fx.so"
                 GLFWLibraryFile = "libglfw.so.3.3"
                 SQLiteLibraryFile = "libe_sqlite3.so"
                 ExecutableFile = "Interlude"
@@ -134,6 +142,7 @@ Information, future updates and support available at:
                 Name = "win64"
                 RuntimeId = "win-x64"
                 BassLibraryFile = "bass.dll"
+                BassFxLibraryFile = "bass_fx.dll"
                 GLFWLibraryFile = "glfw3.dll"
                 SQLiteLibraryFile = "e_sqlite3.dll"
                 ExecutableFile = "Interlude.exe"
