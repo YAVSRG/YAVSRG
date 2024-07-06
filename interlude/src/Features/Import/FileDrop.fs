@@ -74,7 +74,7 @@ module FileDrop =
         | InterludeSkinArchive ->
             try
                 File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName path))
-                Skins.load ()
+                defer Skins.load
             with err ->
                 Logging.Error("Something went wrong when moving this skin!", err)
 
