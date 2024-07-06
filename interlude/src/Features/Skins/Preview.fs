@@ -19,7 +19,7 @@ type SkinPreview(position: Position) as this =
     let fbo = FBO.create ()
 
     let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
-        if (HudElement.enabled_setting elem).Value && (elem <> HudElement.Pacemaker || Interlude.Options.options.EnablePacemaker.Value) then
+        if (HudElement.enabled_setting elem).Value then
             let pos = (HudElement.position_setting elem).Value
             let w = HudElement.constructor elem (Content.HUD, state)
             w.Position <-
@@ -49,7 +49,13 @@ type SkinPreview(position: Position) as this =
         playfield.Add(LanecoverOverReceptors())
         let overlay_items = Container(NodeType.None)
 
-        for elem in HudElement.FULL_LIST do
+        let elements = 
+            HudElement.FULL_LIST 
+            |> Seq.except (seq { 
+                yield HudElement.SkipButton
+                if not Interlude.Options.options.EnablePacemaker.Value then yield HudElement.Pacemaker 
+            })
+        for elem in elements do
             construct_hud_element state elem playfield overlay_items
 
         let recreate_scoring() =
