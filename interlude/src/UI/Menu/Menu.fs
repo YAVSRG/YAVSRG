@@ -242,15 +242,15 @@ and Menu(top_level: Page) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
+        if (%%"screenshot").Tapped() then
+            Toolbar.take_screenshot ()
+
         if nest_level > 0 then
             stack.[nest_level - 1].Value.Update(elapsed_ms, moved)
 
         volume.Update(elapsed_ms, moved)
 
         exit_key.Update(elapsed_ms, moved)
-
-        if (%%"screenshot").Tapped() then
-            Toolbar.take_screenshot ()
 
         Input.finish_frame_events()
 
