@@ -84,8 +84,8 @@ Information, future updates and support available at:
         )
 
         File.Copy(
-            Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassLibraryFxFile),
-            Path.Combine(clean_dir, info.BassLibraryFxFile)
+            Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassFxLibraryFile),
+            Path.Combine(clean_dir, info.BassFxLibraryFile)
         )
 
         File.Copy(Path.Combine(build_dir, "publish", info.ExecutableFile), Path.Combine(clean_dir, info.ExecutableFile))
