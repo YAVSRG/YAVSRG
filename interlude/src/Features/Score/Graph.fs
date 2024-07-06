@@ -57,7 +57,7 @@ type ScoreGraph(score_info: ScoreInfo) =
         let width = this.Bounds.Width
         fbo.Bind true
 
-        Draw.rect this.Bounds (Colors.black.O3)
+        Draw.rect this.Bounds (Colors.black.O2)
 
         Draw.rect
             (Rect.Create(

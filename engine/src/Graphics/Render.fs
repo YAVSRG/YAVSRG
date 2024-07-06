@@ -259,7 +259,7 @@ module Render =
         GL.Enable(EnableCap.VertexArray)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
-        GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha)
+        GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
         Shader.on Shader.main
         Alpha.change_multiplier 1.0f |> ignore
