@@ -50,7 +50,6 @@ module FBO =
 
             if List.isEmpty stack then
                 Shader.set_uniform_mat4 ("uProjection", create_projection false) Shader.main
-                GL.Viewport(0, 0, int vwidth, int vheight)
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
 
@@ -66,7 +65,6 @@ module FBO =
             if List.isEmpty stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
                 Shader.set_uniform_mat4 ("uProjection", create_projection true) Shader.main
-                GL.Viewport(0, 0, rwidth, rheight)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
 
@@ -89,8 +87,8 @@ module FBO =
                 TextureTarget.Texture2DArray,
                 0,
                 PixelInternalFormat.Rgba,
-                int vwidth,
-                int vheight,
+                rwidth,
+                rheight,
                 2,
                 0,
                 PixelFormat.Rgba,
@@ -142,8 +140,8 @@ module FBO =
             GL.RenderbufferStorage(
                 RenderbufferTarget.RenderbufferExt,
                 RenderbufferStorage.Depth24Stencil8,
-                int vwidth,
-                int vheight
+                rwidth,
+                rheight
             )
 
             GL.FramebufferTextureLayer(
@@ -167,8 +165,8 @@ module FBO =
                         Handle = texture_ids.[i]
                         TextureUnit = 0
 
-                        Width = int vwidth
-                        Height = int vheight
+                        Width = rwidth
+                        Height = rheight
                         Layers = 1
 
                         References = -1
@@ -182,8 +180,8 @@ module FBO =
                         Y = 0
                         Z = 1
 
-                        GridWidth = int vwidth
-                        GridHeight = int vheight
+                        GridWidth = rwidth
+                        GridHeight = rheight
 
                         Rows = 1
                         Columns = 1
