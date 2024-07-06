@@ -913,6 +913,7 @@ stats.table.ratings=Ratings
 stats.table.skill_level=Skill level
 stats.total.title=All time
 system=System
+system.audio=Audio
 system.audio_pitch_rates=Rates change pitch
 system.audio_pitch_rates.tooltip=When enabled, speeding up/slowing down a song also changes its pitch.\nWhen disabled, the song doesn't change pitch.\nDisabling this uses more CPU.
 system.audiodevice=Audio device

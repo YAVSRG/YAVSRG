@@ -195,6 +195,7 @@
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Options\System\Hotkeys.fs" />
     <Compile Include="Features\Options\System\Performance.fs" />
+    <Compile Include="Features\Options\System\Audio.fs" />
     <Compile Include="Features\Options\System\System.fs" />
     <Compile Include="Features\Options\Gameplay\Keybinds.fs" />
     <Compile Include="Features\Options\Gameplay\Lanecover.fs" />

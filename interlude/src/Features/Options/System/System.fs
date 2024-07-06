@@ -117,6 +117,9 @@ type SystemPage() =
             .Tooltip(Tooltip.Info("system.hotkeys"))
             .Pos(2)
 
+        |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
+            .Pos(4)
+
         |+ PageSetting(
             %"system.windowmode",
             SelectDropdown(
@@ -131,13 +134,13 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.windowmode"))
-            .Pos(5)
+            .Pos(7)
         |+ PageSetting(
             %"system.windowresolution",
             WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
         )
             .Tooltip(Tooltip.Info("system.windowresolution"))
-            .Pos(7)
+            .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
         |+ PageSetting(
             %"system.monitor",
@@ -148,7 +151,7 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.monitor"))
-            .Pos(7)
+            .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
         |+ PageSetting(
             %"system.videomode",
@@ -158,52 +161,11 @@ type SystemPage() =
             )
         )
             .Tooltip(Tooltip.Info("system.videomode"))
-            .Pos(9)
+            .Pos(11)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
-        |+ PageSetting(
-            %"system.audio_pitch_rates",
-            Checkbox(
-                options.AudioPitchRates
-                |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
-            )
-        )
-            .Tooltip(Tooltip.Info("system.audio_pitch_rates"))
-            .Pos(10)
-        |+ PageSetting(
-            %"system.audiovolume",
-            Slider.Percent(
-                options.AudioVolume
-                |> Setting.trigger (fun v -> Devices.change_volume (v, v))
-                |> Setting.f32
-            )
-        )
-            .Tooltip(Tooltip.Info("system.audiovolume"))
-            .Pos(12)
-
-        |+ PageSetting(
-            %"system.audiodevice",
-            SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
-        )
-            .Tooltip(Tooltip.Info("system.audiodevice"))
-            .Pos(14)
-
-        |+ PageSetting(
-            %"system.audiooffset",
-            { new Slider(options.AudioOffset, Step = 1f) with
-                override this.OnDeselected(by_mouse: bool) =
-                    base.OnDeselected by_mouse
-                    Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
-            }
-        )
-            .Tooltip(Tooltip.Info("system.audiooffset"))
-            .Pos(16)
-        |+ PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
-            .Tooltip(Tooltip.Info("system.automatic_offset"))
-            .Pos(18)
-
         |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
             .Tooltip(Tooltip.Info("system.visualoffset"))
-            .Pos(21)
+            .Pos(13)
         :> Widget
 
     override this.OnClose() =
