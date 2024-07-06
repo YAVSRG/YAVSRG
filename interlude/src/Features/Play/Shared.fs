@@ -50,75 +50,6 @@ module LocalAudioSync =
         let setting = offset_setting save_data
         setting.Value <- get_automatic state save_data
 
-type Timeline(with_mods: ModdedChart, on_seek: Time -> unit) =
-    inherit StaticWidget(NodeType.None)
-
-    let HEIGHT = 60.0f
-
-    let samples =
-        int ((with_mods.LastNote - with_mods.FirstNote) / 1000.0f) |> max 10 |> min 400
-
-    // chord density is notes per second but n simultaneous notes count for 1 instead of n, aka 'chords per second'
-    let note_density, chord_density = Analysis.nps_cps samples with_mods
-
-    let note_density, chord_density =
-        Array.map float32 note_density, Array.map float32 chord_density
-
-    let max_note_density = Array.max note_density
-
-    override this.Draw() =
-        let b = this.Bounds.Shrink(10.0f, 20.0f)
-        let start = with_mods.FirstNote - Song.LEADIN_TIME
-        let offset = b.Width * Song.LEADIN_TIME / with_mods.LastNote
-
-        let w = (b.Width - offset) / float32 note_density.Length
-
-        let mutable x = b.Left + offset - w
-        let mutable note_prev = 0.0f
-        let mutable chord_prev = 0.0f
-
-        let chord_density_color = !*Palette.HIGHLIGHT_100
-
-        for i = 0 to note_density.Length - 1 do
-            let note_next = HEIGHT * note_density.[i] / max_note_density
-            let chord_next = HEIGHT * chord_density.[i] / max_note_density
-
-            Draw.untextured_quad
-                (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
-                Colors.white.O2.AsQuad
-
-            Draw.untextured_quad
-                (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
-                chord_density_color.AsQuad
-
-            x <- x + w
-            note_prev <- note_next
-            chord_prev <- chord_next
-
-        Draw.untextured_quad
-            (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
-            Colors.white.O2.AsQuad
-
-        Draw.untextured_quad
-            (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
-            chord_density_color.AsQuad
-
-        let percent = (Song.time () - start) / (with_mods.LastNote - start) |> min 1.0f
-        let x = b.Width * percent
-        Draw.rect (b.SliceBottom(5.0f)) (Color.FromArgb(160, Color.White))
-        Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Palette.color (255, 1.0f, 0.0f))
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if this.Bounds.Bottom - Mouse.y () < 200.0f && Mouse.left_click () then
-            let percent =
-                (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
-
-            let start = with_mods.FirstNote - Song.LEADIN_TIME
-            let new_time = start + (with_mods.LastNote - start) * percent
-            on_seek new_time
-
 [<AutoOpen>]
 module Utils =
 
@@ -202,6 +133,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         else
             Some Screen.Type.LevelSelect
 
+// todo: remove slideouts. local offset should just be a page and replay/practice modes can be a redesigned floating UI
 type SlideoutContent(content: Widget, height: float32) =
     inherit Container(NodeType.Container(fun () -> Some content))
 

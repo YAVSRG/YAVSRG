@@ -39,7 +39,7 @@ module PracticeScreen =
 
         override this.Init(parent) =
             this
-            |+ Timeline(with_mods, on_seek)
+            |+ Timeline(with_mods, on_seek, SelectedChart.rate)
             |+ (Callout.frame
                     info_callout
                     (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h, w + 100.0f, h))

@@ -329,7 +329,7 @@ module ReplayScreen =
         let slideout = Slideout(replay_controls, AutoCloseWhen = K false)
 
         override this.Init(parent) =
-            this |+ Timeline(with_mods, on_seek) |* slideout
+            this |+ Timeline(with_mods, on_seek, SelectedChart.rate) |* slideout
 
             base.Init parent
 
@@ -464,6 +464,7 @@ module ReplayScreen =
                 base.OnExit p
                 Song.change_rate SelectedChart.rate.Value
                 Toolbar.show_cursor ()
+                Song.resume()
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
