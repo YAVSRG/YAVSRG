@@ -263,6 +263,7 @@ hud.editor.advanced=Advanced
 hud.editor.anchor=Anchor
 hud.editor.disabled=OFF
 hud.editor.element_options=Configure
+hud.editor.elements_hint=Click for more elements
 hud.editor.enabled=ON
 hud.editor.relative_to=Position relative to:
 hud.editor.relative_to.playfield_center=Center of playfield

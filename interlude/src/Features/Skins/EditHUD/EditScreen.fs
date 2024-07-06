@@ -596,17 +596,18 @@ type PositionerInfo(ctx: PositionerContext) =
             if currently_on_right then 
                 Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
             else
-                Position.CenterY(d.Height).BorderRight(370.0f).Translate(-10.0f, 0.0f)
+                Position.CenterY(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
         )
 
     override this.Init(parent) =
         NavigationContainer.Column()
         |+ Button(
-            (fun () -> HudElement.name ctx.Selected),
+            (fun () -> Icons.LIST + " " + HudElement.name ctx.Selected),
             this.ToggleElementDropdown,
             Hotkey = "context_menu",
             Position = Position.SliceTop(60.0f).Margin(20.0f, 5.0f)
         )
+        |+ Text(%"hud.editor.elements_hint", Color = K Colors.text_subheading, Position = Position.Row(50.0f, 30.0f).Margin(20.0f, 0.0f))
         |+ Button(
             (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE + " " + %"hud.editor.enabled" else Icons.CIRCLE + " " + %"hud.editor.disabled"),
             (fun () ->
