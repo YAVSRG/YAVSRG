@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
@@ -41,7 +42,7 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
         |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(40.0f).Translate(0.0f, -40.0f))
         |+ Clickable.Focus this
         |* Button(
-            (fun () -> if is_stitched then Icons.SQUARE + " Grid" else Icons.GRID + " Loose"), 
+            (fun () -> if is_stitched then Icons.SQUARE + " " + %"skins.texture.grid" else Icons.GRID + " " + %"skins.texture.loose"), 
             (fun () -> 
                 (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
