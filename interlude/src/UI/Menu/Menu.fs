@@ -55,7 +55,7 @@ type Page() as this =
         Button(
             Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back",
             Menu.Back,
-            Position = Position.SliceBottom(80.0f).CenterY(55.0f).TrimLeft(10.0f).SliceLeft(180.0f)
+            Position = Position.SliceBottom(80.0f).CenterVertical(55.0f).TrimLeft(10.0f).SliceLeft(180.0f)
         )
         |> OverlayContainer
         :> Widget

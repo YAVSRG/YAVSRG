@@ -21,7 +21,7 @@ type WikiBrowserPage() =
 
     let buttons =
         NavigationContainer.Row(
-            Position = Position.SliceTop(70.0f).CenterX(1400.0f).Margin(0.0f, 10.0f)
+            Position = Position.SliceTop(70.0f).CenterHorizontal(1400.0f).Margin(0.0f, 10.0f)
         )
         |+ Button(
             fun () ->
@@ -120,7 +120,7 @@ type WikiBrowserPage() =
         | None -> content.Add(LoadingState())
 
         content._Size <- y - PARAGRAPH_SPACING + Style.PADDING * 2.0f
-        let scroll_container = ScrollContainer(content, Margin = Style.PADDING, Position = Position.CenterX(PAGE_WIDTH).Margin(-Style.PADDING, 80.0f))
+        let scroll_container = ScrollContainer(content, Margin = Style.PADDING, Position = Position.CenterHorizontal(PAGE_WIDTH).Margin(-Style.PADDING, 80.0f))
         Heading.scroll_handler <- fun w -> scroll_container.Scroll(w.Bounds.Top - scroll_container.Bounds.Top)
         container.Current <- scroll_container
 

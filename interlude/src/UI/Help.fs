@@ -13,13 +13,14 @@ type private HelpInfo =
         Size: float32 * float32
         Fade: Animation.Fade
         Target: Widget
-        Bind: Bind
     }
 
 module HelpOverlay =
 
     let mutable private current_info: HelpInfo option = None
-    let mutable internal info_available = false
+    let overlay_fade = Animation.Fade 0.0f
+    let border_animation = Animation.Counter(5000.0)
+    let mutable internal on = false
 
     type private Display() =
         inherit Overlay(NodeType.None)
@@ -27,13 +28,16 @@ module HelpOverlay =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
 
+            overlay_fade.Update elapsed_ms
+            border_animation.Update elapsed_ms
+
             match current_info with
             | None -> ()
             | Some t ->
                 t.Fade.Update elapsed_ms
 
                 if t.Fade.Target <> 0.0f then
-                    if t.Bind.Released() then
+                    if not (Mouse.hover t.Target.Bounds) then
                         t.Fade.Target <- 0.0f
                 elif t.Fade.Value < 0.01f then
                     current_info <- None
@@ -55,7 +59,9 @@ module HelpOverlay =
                 let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
                 Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
 
-            info_available <- false
+            if (%%"tooltip").Tapped() then
+                on <- not on
+                overlay_fade.Target <- if on then 1.0f else 0.0f
 
         override this.Draw() =
             match current_info with
@@ -133,37 +139,48 @@ module HelpOverlay =
 
     let display : Widget = Display()
 
-    let show (b: Bind, w: Widget, body: Callout) =
+    let show (w: Widget, body: Callout) =
         let t: HelpInfo =
             {
                 Data = body
                 Size = Callout.measure body
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Target = w
-                Bind = b
             }
 
         current_info <- Some t
-
-    let available () =
-        info_available <- true
-
 
 type Help(content: Callout) =
     inherit StaticWidget(NodeType.None)
 
     let content = content.Icon(Icons.INFO)
+    let mutable hover = false
+    let mutable info_seen = false
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if Mouse.hover this.Bounds then
-            HelpOverlay.available()
+        if HelpOverlay.on then
+            if not hover && Mouse.hover this.Bounds then
+                hover <- true
+                info_seen <- true
+                HelpOverlay.show (this, content)
+            elif hover && not (Mouse.hover this.Bounds) then
+                hover <- false
 
-            if (%%"tooltip").Tapped() then
-                HelpOverlay.show ((%%"tooltip"), this, content)
-
-    override this.Draw() = ()
+    override this.Draw() =
+        let a = HelpOverlay.overlay_fade.Alpha
+        let bounds = this.Bounds
+        if a > 0 then
+            let w = (max bounds.Width 200.0f) / 2.0f
+            let bounds : Rect = bounds.SliceCenterX(2.0f * w).SliceCenterY(60.0f)
+            Draw.untextured_quad 
+                (bounds.SliceLeft(w).AsQuad)
+                (Quad.gradient_left_to_right (Colors.black.O4a 0) (Colors.black.O2a a))
+            Draw.untextured_quad 
+                (bounds.SliceRight(w).AsQuad)
+                (Quad.gradient_left_to_right (Colors.black.O2a a) (Colors.black.O4a 0))
+            Text.fill_b(Style.font, Icons.INFO, bounds.Shrink(0.0f, 5.0f), (Colors.green_accent.O4a a, Colors.shadow_2.O4a a), 0.5f)
 
     static member Info(feature: string) =
         Callout.Normal

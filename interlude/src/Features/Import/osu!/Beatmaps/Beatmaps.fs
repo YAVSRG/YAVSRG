@@ -130,7 +130,7 @@ type BeatmapBrowserPage() =
         )
 
     let search_results =
-        NavigationContainer.Column(Position = Position.TrimTop(140.0f).CenterX(1400.0f).TrimBottom(70.0f))
+        NavigationContainer.Column(Position = Position.TrimTop(140.0f).CenterHorizontal(1400.0f).TrimBottom(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
         |>> Container
@@ -188,7 +188,7 @@ type BeatmapBrowserPage() =
                     Left = 0.72f %+ 0.0f
                 }
         )
-        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).CenterX(1400.0f)))
+        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).CenterHorizontal(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: Filter) ->

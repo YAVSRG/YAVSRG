@@ -40,7 +40,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         { Position.Default with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.CenterY(60.0f))
+        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.CenterVertical(60.0f))
         |+ OptionsMenuButton(
             Icons.HOME,
             60.0f,
@@ -81,7 +81,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                     else
                         current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
                 ),
-                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.CenterY(60.0f).TrimLeft(900.0f).Margin(Style.PADDING, 0.0f),
+                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.CenterVertical(60.0f).TrimLeft(900.0f).Margin(Style.PADDING, 0.0f),
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan) with

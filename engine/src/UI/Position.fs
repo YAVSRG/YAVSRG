@@ -156,7 +156,7 @@ type Position with
     static member BorderBottomCorners amount =
         Position.Default.BorderBottomCorners amount
 
-    member this.CenterX width =
+    member this.CenterHorizontal width =
         let (lefto, lefta) = this.Left
         let (righto, righta) = this.Right
         let center = (0.5f * (lefto + righto), 0.5f * (lefta + righta))
@@ -165,7 +165,7 @@ type Position with
             Right = center ^+ (width * 0.5f)
         }
 
-    member this.CenterY height =
+    member this.CenterVertical height =
         let (topo, topa) = this.Top
         let (bottomo, bottoma) = this.Bottom
         let center = (0.5f * (topo + bottomo), 0.5f * (topa + bottoma))
@@ -174,10 +174,10 @@ type Position with
             Bottom = center ^+ (height * 0.5f)
         }
 
-    member this.Center (width, height) = this.CenterX(width).CenterY(height)
+    member this.Center (width, height) = this.CenterHorizontal(width).CenterVertical(height)
     
-    static member CenterX width = Position.Default.CenterX width
-    static member CenterY height = Position.Default.CenterY height
+    static member CenterHorizontal width = Position.Default.CenterHorizontal width
+    static member CenterVertical height = Position.Default.CenterVertical height
     static member Center (width, height) = Position.Default.Center (width, height)
 
     static member Row(y, height) =

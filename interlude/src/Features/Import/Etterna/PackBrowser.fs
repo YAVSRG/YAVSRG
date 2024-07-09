@@ -81,7 +81,7 @@ type EtternaPacksBrowserPage() =
     override this.Content() =
         begin_search filter
 
-        NavigationContainer.Column(Position = Position.CenterX(1400.0f).TrimTop(90.0f).TrimBottom(70.0f))
+        NavigationContainer.Column(Position = Position.CenterHorizontal(1400.0f).TrimTop(90.0f).TrimBottom(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
         |+ EmptyState(Icons.X, %"etterna_pack_browser.error")
@@ -97,7 +97,7 @@ type EtternaPacksBrowserPage() =
                 filter <- f
                 defer (fun () -> begin_search filter)
             ),
-            Position = Position.CenterX(1400.0f).SliceTop(60.0f).Translate(0.0f, 20.0f)
+            Position = Position.CenterHorizontal(1400.0f).SliceTop(60.0f).Translate(0.0f, 20.0f)
         )
         |+ LoadingIndicator.Border(fun () -> loading)
         :> Widget
