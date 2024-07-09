@@ -6,7 +6,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 
 type WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))

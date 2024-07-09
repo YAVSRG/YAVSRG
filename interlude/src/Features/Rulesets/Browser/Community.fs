@@ -61,13 +61,12 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         match status with
         | UpToDate -> ()
         | UpdateAvailable ->
-            Menu
-                .ConfirmPage(
-                    "Update this ruleset? (If you made changes yourself, they will be lost)",
-                    fun () ->
-                        Rulesets.install_or_update id ruleset
-                        status <- UpToDate
-                )
+            ConfirmPage(
+                "Update this ruleset? (If you made changes yourself, they will be lost)",
+                fun () ->
+                    Rulesets.install_or_update id ruleset
+                    status <- UpToDate
+            )
                 .Show()
         | NotInstalled ->
             Rulesets.install_or_update id ruleset

@@ -9,7 +9,6 @@ open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.Pacemaker

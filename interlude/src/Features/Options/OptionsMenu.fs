@@ -8,7 +8,6 @@ open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Stats
 open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins

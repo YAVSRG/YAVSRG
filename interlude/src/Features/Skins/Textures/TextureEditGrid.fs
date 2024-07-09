@@ -10,7 +10,6 @@ open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
     inherit

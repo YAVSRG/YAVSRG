@@ -8,7 +8,6 @@ open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Import

@@ -3,7 +3,6 @@ namespace Interlude.Features.OptionsMenu.Search
 open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins.EditNoteskin

@@ -9,7 +9,6 @@ open Prelude.Gameplay
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType array) =
     inherit Container(NodeType.Leaf)

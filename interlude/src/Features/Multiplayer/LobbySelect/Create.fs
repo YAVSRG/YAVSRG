@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Web.Shared
-open Interlude.UI.Menu
 open Interlude.Features.Online
+open Interlude.UI
 
 type CreateLobbyPage() =
     inherit Page()

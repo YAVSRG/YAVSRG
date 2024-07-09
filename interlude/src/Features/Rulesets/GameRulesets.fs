@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.PremadeRulesets
-open Interlude.UI.Menu
 open Interlude.Content
+open Interlude.UI
 
 type OsuRulesetPage() =
     inherit Page()

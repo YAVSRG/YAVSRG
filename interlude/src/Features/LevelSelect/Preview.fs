@@ -4,7 +4,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play

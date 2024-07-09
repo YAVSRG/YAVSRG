@@ -5,7 +5,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Online
 open Interlude.Features.Online.Players
 open Interlude.Features.Multiplayer

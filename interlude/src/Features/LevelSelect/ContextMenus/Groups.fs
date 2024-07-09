@@ -7,7 +7,6 @@ open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 

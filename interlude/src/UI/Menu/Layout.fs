@@ -1,9 +1,6 @@
-﻿namespace Interlude.UI.Menu
+﻿namespace Interlude.UI
 
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
-open Prelude
-open Interlude.UI
 
 [<AutoOpen>]
 module PageLayout =

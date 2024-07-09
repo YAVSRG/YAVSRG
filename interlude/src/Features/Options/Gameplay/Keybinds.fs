@@ -5,8 +5,8 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Interlude.Options
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
+open Interlude.UI
 
 type GameplayKeybinder(keymode: Setting<Keymode>) as this =
     inherit Container(NodeType.FocusTrap)

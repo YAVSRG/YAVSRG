@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
-open Interlude.UI.Menu
+open Interlude.UI
 
 type PlayerListPage() as this =
     inherit Dialog()

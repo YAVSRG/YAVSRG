@@ -16,7 +16,6 @@ open Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 open Interlude.Features.Online

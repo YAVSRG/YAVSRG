@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Gameplay
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Play.HUD
 
 type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =

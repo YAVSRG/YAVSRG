@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Gameplay
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 
 type PacemakerOptionsPage() =

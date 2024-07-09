@@ -1,13 +1,11 @@
 ﻿namespace Interlude.Features.Multiplayer
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Interlude.Web.Shared
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Online
 open Interlude.Features.Online.Players
 

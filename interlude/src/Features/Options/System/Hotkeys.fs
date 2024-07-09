@@ -5,7 +5,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 
 type private Keybinder(hotkey: Hotkey) as this =
     inherit Container(NodeType.FocusTrap)

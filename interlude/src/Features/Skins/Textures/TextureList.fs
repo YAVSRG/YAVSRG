@@ -7,7 +7,6 @@ open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
     inherit

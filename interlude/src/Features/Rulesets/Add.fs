@@ -2,8 +2,8 @@ namespace Interlude.Features.Rulesets
 
 open Prelude
 open Percyqaz.Flux.UI
-open Interlude.UI.Menu
 open Interlude.Features.Rulesets.Browser
+open Interlude.UI
 
 type AddRulesetsPage() =
     inherit Page()

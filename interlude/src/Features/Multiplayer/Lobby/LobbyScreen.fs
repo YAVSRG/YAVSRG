@@ -9,7 +9,6 @@ open Prelude.Data
 open Interlude.Content
 open Interlude.Web.Shared
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Features.Play
 open Interlude.Features.Online

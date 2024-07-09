@@ -200,13 +200,12 @@ type MainMenuScreen() as this =
         if not Interlude.Options.options.ConfirmExit.Value || confirmed_exit then
             Some Screen.Type.SplashScreen
         else
-            Menu
-                .ConfirmPage(
-                    %"menu.exit_prompt",
-                    fun () ->
-                        confirmed_exit <- true
-                        Screen.back Transitions.UnderLogo |> ignore
-                )
+            ConfirmPage(
+                %"menu.exit_prompt",
+                fun () ->
+                    confirmed_exit <- true
+                    Screen.back Transitions.UnderLogo |> ignore
+            )
                 .Show()
 
             None

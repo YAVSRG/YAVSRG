@@ -11,7 +11,6 @@ open Interlude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Rulesets
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections

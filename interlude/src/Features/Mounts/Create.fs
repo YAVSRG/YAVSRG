@@ -7,7 +7,6 @@ open Prelude.Charts.Conversions
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Import
 
 type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =

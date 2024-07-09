@@ -8,7 +8,6 @@ open Prelude.Backbeat
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Tables.Browser
 
 type private TableButton(name, action) =

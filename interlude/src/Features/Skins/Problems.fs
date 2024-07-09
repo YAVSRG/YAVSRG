@@ -6,7 +6,6 @@ open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.UI
-open Interlude.UI.Menu
 
 module Problems =
 

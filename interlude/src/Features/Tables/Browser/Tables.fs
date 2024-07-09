@@ -7,7 +7,6 @@ open Prelude.Backbeat
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 [<RequireQualifiedAccess>]
 type private TableStatus =

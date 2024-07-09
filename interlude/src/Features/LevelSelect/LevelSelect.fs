@@ -15,7 +15,6 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Online
 
 type LevelSelectScreen() =

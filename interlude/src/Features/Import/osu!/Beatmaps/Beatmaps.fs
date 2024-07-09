@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.UI
-open Interlude.UI.Menu
         
 type BeatmapBrowserPage() =
     inherit Page()

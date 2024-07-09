@@ -1,12 +1,10 @@
 ﻿namespace Interlude.Features.Wiki
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 
 type WikiContent(nt) =
     inherit Container(nt)

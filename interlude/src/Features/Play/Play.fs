@@ -11,7 +11,6 @@ open Prelude.Charts.Processing
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 open Interlude.Features.Stats

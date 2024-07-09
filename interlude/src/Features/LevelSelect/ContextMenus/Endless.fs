@@ -4,9 +4,9 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Endless
 open Prelude.Data.Library.Sorting
-open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
+open Interlude.UI
 
 type EndlessModeMenu(info: LoadedChartInfo) =
     inherit Page()

@@ -6,7 +6,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Skins
 
 type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =

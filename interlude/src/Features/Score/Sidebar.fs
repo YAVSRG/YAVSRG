@@ -7,7 +7,6 @@ open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data
 open Interlude.UI
-open Interlude.UI.Menu
 
 #nowarn "3370"
 

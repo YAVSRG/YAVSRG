@@ -6,7 +6,6 @@ open Prelude.Data.Library
 open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Import
 
 type private EditMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =

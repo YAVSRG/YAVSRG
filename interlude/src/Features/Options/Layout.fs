@@ -7,7 +7,6 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.OptionsMenu.Search
 
 [<RequireQualifiedAccess>]

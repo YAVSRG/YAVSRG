@@ -7,8 +7,8 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data
-open Interlude.UI.Menu
 open Interlude.Options
+open Interlude.UI
 
 module GraphSettings =
 

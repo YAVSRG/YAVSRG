@@ -292,7 +292,7 @@ module ReplayScreen =
             )
 
         let dim_slider =
-            Menu.Slider.Percent(
+            Slider.Percent(
                 state.PlayfieldDim,
                 Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
             )

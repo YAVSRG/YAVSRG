@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Play.HUD
 
 type ComboPage(on_close: unit -> unit) =

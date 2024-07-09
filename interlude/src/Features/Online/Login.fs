@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 
 type RegisterPage(discord_tag) =
     inherit Page()

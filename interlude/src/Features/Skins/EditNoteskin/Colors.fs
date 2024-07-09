@@ -11,7 +11,6 @@ open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 
 type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
     inherit Container(NodeType.Leaf)

@@ -4,7 +4,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
 open Interlude.UI
-open Interlude.UI.Menu
 
 type SelectTableLevelPage(table: Table, action: int -> unit) =
     inherit Page()

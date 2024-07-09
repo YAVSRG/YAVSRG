@@ -3,7 +3,6 @@
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Online
 
 type LobbySelectPage() =

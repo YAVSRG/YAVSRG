@@ -1,11 +1,10 @@
-﻿namespace Interlude.UI.Menu
+﻿namespace Interlude.UI
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
-open Interlude.UI
 
 [<RequireQualifiedAccess>]
 type PageEasing =

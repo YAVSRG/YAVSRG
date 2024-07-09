@@ -4,7 +4,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Mounts
 open Interlude.Features.Import.osu
 open Interlude.Features.Import.Etterna

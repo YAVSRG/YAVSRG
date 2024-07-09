@@ -9,7 +9,6 @@ open Prelude.Data.Library.Caching
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 #nowarn "40"
 

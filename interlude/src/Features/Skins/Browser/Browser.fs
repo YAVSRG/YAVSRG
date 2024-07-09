@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Skins.Repo
 open Prelude.Data
 open Interlude.UI
-open Interlude.UI.Menu
 
 type SkinsBrowserPage() =
     inherit Page()

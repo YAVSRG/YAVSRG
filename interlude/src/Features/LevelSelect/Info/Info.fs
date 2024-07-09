@@ -8,7 +8,6 @@ open Prelude.Gameplay.Mods
 open Interlude.Features.Rulesets
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
 type ChartInfo() as this =

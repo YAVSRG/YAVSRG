@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Skins.Conversions
 open Prelude.Data.Library
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Options
 open Interlude.Content
 

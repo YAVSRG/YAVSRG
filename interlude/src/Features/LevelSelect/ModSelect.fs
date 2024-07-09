@@ -8,7 +8,6 @@ open Prelude.Gameplay.Mods
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 

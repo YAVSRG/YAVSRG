@@ -4,7 +4,6 @@ open System
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.UI.Menu
 
 [<AutoOpen>]
 module Search =

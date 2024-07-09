@@ -56,7 +56,7 @@
     <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
     <Compile Include="UI\Menu\Volume.fs" />
-    <Compile Include="UI\Menu\Helpers.fs" />
+    <Compile Include="UI\Menu\Layout.fs" />
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />

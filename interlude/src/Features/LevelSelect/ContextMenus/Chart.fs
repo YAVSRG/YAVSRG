@@ -11,7 +11,6 @@ open Prelude.Data.Library.Endless
 open Prelude.Data.``osu!``
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Collections

@@ -8,7 +8,6 @@ open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type private CreateFolderPage(on_create: (string * Collection) -> unit) =
     inherit Page()

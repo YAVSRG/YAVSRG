@@ -7,7 +7,6 @@ open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type TimingDisplayPage(on_close: unit -> unit) =
     inherit Page()

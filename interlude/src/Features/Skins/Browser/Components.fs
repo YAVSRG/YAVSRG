@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Skins.Repo
 open Prelude.Data
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 
 type private Status =

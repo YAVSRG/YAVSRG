@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type InputMeterPage(on_close: unit -> unit) =
     inherit Page()

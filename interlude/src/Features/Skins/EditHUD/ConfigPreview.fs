@@ -6,10 +6,10 @@ open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
-open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Skins
+open Interlude.UI
 
 [<AbstractClass>]
 type ConfigPreview(scale: float32, config: Setting<HudPosition>) =

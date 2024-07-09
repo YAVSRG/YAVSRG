@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 type SkipButtonPage(on_close: unit -> unit) =
     inherit Page()

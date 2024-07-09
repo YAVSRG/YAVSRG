@@ -6,7 +6,6 @@ open Prelude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts

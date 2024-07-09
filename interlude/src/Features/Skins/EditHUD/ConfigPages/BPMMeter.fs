@@ -7,7 +7,6 @@ open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Menu
 
 // currently unused
 type BPMMeterPage(on_close: unit -> unit) =

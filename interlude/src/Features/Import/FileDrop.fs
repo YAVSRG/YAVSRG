@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Data.Library
 open Prelude.Skins.Conversions
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Content
 
 type ConfirmUnlinkedSongsImport(path) =

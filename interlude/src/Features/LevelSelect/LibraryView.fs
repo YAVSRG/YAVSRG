@@ -7,7 +7,6 @@ open Prelude
 open Prelude.Data.Library.Sorting
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Tables

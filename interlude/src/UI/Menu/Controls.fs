@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Menu
+﻿namespace Interlude.UI
 
 open System
 open Percyqaz.Common
@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
-open Interlude.UI
 
 type Slider(setting: Setting.Bounded<float32>) as this =
     inherit Container(NodeType.Leaf)
