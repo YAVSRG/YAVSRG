@@ -46,30 +46,3 @@ module PageLayout =
         member this.Pos(y: int, h: int, width: PageWidth) =
             this.Position <- pretty_pos (y, h, width)
             this
-            
-type Help(content: Callout) =
-    inherit StaticWidget(NodeType.None)
-
-    let content = content.Icon(Icons.INFO)
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if Mouse.hover this.Bounds then
-            HelpOverlay.available()
-
-            if (%%"tooltip").Tapped() then
-                HelpOverlay.show ((%%"tooltip"), this, content)
-
-    override this.Draw() = ()
-
-    static member Info(feature: string) =
-        Callout.Normal
-            .Title(%feature)
-            .Body(%(sprintf "%s.tooltip" feature))
-
-    static member Info(feature: string, hotkey: Hotkey) =
-        Callout.Normal
-            .Title(%feature)
-            .Body(%(sprintf "%s.tooltip" feature))
-            .Hotkey(hotkey)

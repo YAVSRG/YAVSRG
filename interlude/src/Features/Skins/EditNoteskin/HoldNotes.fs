@@ -7,6 +7,7 @@ open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Menu
 
 type HoldNoteSettingsPage() =

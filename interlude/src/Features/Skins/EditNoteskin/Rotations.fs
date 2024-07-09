@@ -9,6 +9,7 @@ open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Menu
 
 type RotationPicker(rotation: Setting<float>) as this =

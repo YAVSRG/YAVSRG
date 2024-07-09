@@ -603,6 +603,3 @@ module Helpers =
 
         refresh ()
         r, refresh
-
-    type Container with
-        member this.Help(content: Callout) = this |+ Help(content)

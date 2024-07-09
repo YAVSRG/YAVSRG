@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Content
+open Interlude.UI
 open Interlude.UI.Menu
 
 type RateModMeterPage(on_close: unit -> unit) =

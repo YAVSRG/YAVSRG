@@ -4,6 +4,7 @@ open System
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.UI
 
 type private HelpInfo =
@@ -146,3 +147,37 @@ module HelpOverlay =
 
     let available () =
         info_available <- true
+
+
+type Help(content: Callout) =
+    inherit StaticWidget(NodeType.None)
+
+    let content = content.Icon(Icons.INFO)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if Mouse.hover this.Bounds then
+            HelpOverlay.available()
+
+            if (%%"tooltip").Tapped() then
+                HelpOverlay.show ((%%"tooltip"), this, content)
+
+    override this.Draw() = ()
+
+    static member Info(feature: string) =
+        Callout.Normal
+            .Title(%feature)
+            .Body(%(sprintf "%s.tooltip" feature))
+
+    static member Info(feature: string, hotkey: Hotkey) =
+        Callout.Normal
+            .Title(%feature)
+            .Body(%(sprintf "%s.tooltip" feature))
+            .Hotkey(hotkey)
+
+[<AutoOpen>]
+module Help =
+
+    type Container with
+        member this.Help(content: Callout) = this |+ Help(content)

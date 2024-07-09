@@ -8,6 +8,7 @@ open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.Features.Gameplay
+open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Options
 

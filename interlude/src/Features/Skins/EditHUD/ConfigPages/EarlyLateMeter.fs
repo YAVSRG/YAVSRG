@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Content
+open Interlude.UI
 open Interlude.UI.Menu
 
 type EarlyLateMeterPage(on_close: unit -> unit) =
