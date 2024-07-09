@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Features\Archive\Packs.fs" />
     <Compile Include="Features\Archive\Collect.fs" />
     <Compile Include="Features\Archive\Maintenance.fs" />
     <Compile Include="Features\Archive\Backbot.fs" />
@@ -15,11 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="Backblaze.Client" Version="1.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-	  <ProjectReference Include="..\..\libraries\Percyqaz.Shell\src\Percyqaz.Shell.fsproj" />
-    <ProjectReference Include="..\..\prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

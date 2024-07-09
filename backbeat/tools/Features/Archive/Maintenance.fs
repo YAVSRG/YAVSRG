@@ -2,8 +2,6 @@
 
 open System
 open System.Linq
-open Percyqaz.Common
-open Prelude.Backbeat.Archive
 
 module Maintenance =
 

@@ -1,39 +1,36 @@
 ﻿namespace Backbeat.Features.Archive
 
-open Percyqaz.Common
-open Prelude.Backbeat.Archive
+module Backbot = ()
 
-module Backbot =
+    //let make_suggestion (flag: string) (id: int64) (before: Song) (after: Song) : bool =
+    //    let inline diff label a b =
+    //        if a <> b then
+    //            Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
 
-    let make_suggestion (flag: string) (id: int64) (before: Song) (after: Song) : bool =
-        let inline diff label a b =
-            if a <> b then
-                Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
+    //    Logging.Info(sprintf "Backbot has a suggestion for '%i' that needs your approval" id)
+    //    diff "Artists" before.Artists after.Artists
+    //    diff "Performers" before.OtherArtists after.OtherArtists
+    //    diff "Remixers" before.Remixers after.Remixers
+    //    diff "Title" before.Title after.Title
+    //    diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
+    //    diff "Formatted title" before.FormattedTitle after.FormattedTitle
+    //    diff "Tags" before.Tags after.Tags
+    //    Logging.Info(sprintf "Reason: %s" flag)
+    //    Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
+    //    let mutable option_chosen = None
 
-        Logging.Info(sprintf "Backbot has a suggestion for '%i' that needs your approval" id)
-        diff "Artists" before.Artists after.Artists
-        diff "Performers" before.OtherArtists after.OtherArtists
-        diff "Remixers" before.Remixers after.Remixers
-        diff "Title" before.Title after.Title
-        diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
-        diff "Formatted title" before.FormattedTitle after.FormattedTitle
-        diff "Tags" before.Tags after.Tags
-        Logging.Info(sprintf "Reason: %s" flag)
-        Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
-        let mutable option_chosen = None
+    //    //while option_chosen.IsNone do
+    //    //    match Console.ReadKey().Key with
+    //    //    | ConsoleKey.D1 -> option_chosen <- Some true
+    //    //    | ConsoleKey.D2 ->
+    //    //        option_chosen <- Some false
+    //    //        Queue.append "song-review" id
+    //    //    | ConsoleKey.D3 ->
+    //    //        option_chosen <- Some false
+    //    //        Queue.append "song-ignore" id
+    //    //    | _ -> ()
 
-        //while option_chosen.IsNone do
-        //    match Console.ReadKey().Key with
-        //    | ConsoleKey.D1 -> option_chosen <- Some true
-        //    | ConsoleKey.D2 ->
-        //        option_chosen <- Some false
-        //        Queue.append "song-review" id
-        //    | ConsoleKey.D3 ->
-        //        option_chosen <- Some false
-        //        Queue.append "song-ignore" id
-        //    | _ -> ()
-
-        option_chosen.Value
+    //    option_chosen.Value
 
     //type Song_Deduplication = { Title: string; Artists: string list }
 
