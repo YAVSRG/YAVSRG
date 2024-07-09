@@ -47,7 +47,7 @@ type Toolbar() =
                 Imports.import_in_progress,
                 Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
             )
-        container.Tooltip(Tooltip.Info("menu.import").Hotkey("import"))
+        container.Help(Help.Info("menu.import").Hotkey("import"))
 
     override this.Init(parent) =
         container
@@ -78,7 +78,7 @@ type Toolbar() =
                 (fun () -> OptionsMenuPage().Show()),
                 Icons.SETTINGS
             )
-                .Tooltip(Tooltip.Info("menu.options").Hotkey("options"))
+                .Help(Help.Info("menu.options").Hotkey("options"))
             |+ import_button
             |+ InlaidButton(
                 %"menu.wiki",
@@ -87,7 +87,7 @@ type Toolbar() =
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
-                .Tooltip(Tooltip.Info("menu.wiki").Hotkey("wiki"))
+                .Help(Help.Info("menu.wiki").Hotkey("wiki"))
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
@@ -96,7 +96,7 @@ type Toolbar() =
                 ),
                 Icons.TRENDING_UP
             )
-                .Tooltip(Tooltip.Info("menu.stats")))
+                .Help(Help.Info("menu.stats")))
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
         |+ HotkeyAction(
             "edit_noteskin",

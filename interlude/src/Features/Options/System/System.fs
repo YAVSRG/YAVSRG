@@ -110,11 +110,11 @@ type SystemPage() =
             %"system.performance",
             (fun () -> PerformanceSettingsPage().Show())
         )
-            .Tooltip(Tooltip.Info("system.performance"))
+            .Help(Help.Info("system.performance"))
             .Pos(0)
 
         |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-            .Tooltip(Tooltip.Info("system.hotkeys"))
+            .Help(Help.Info("system.hotkeys"))
             .Pos(2)
 
         |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
@@ -133,13 +133,13 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
             )
         )
-            .Tooltip(Tooltip.Info("system.windowmode"))
+            .Help(Help.Info("system.windowmode"))
             .Pos(7)
         |+ PageSetting(
             %"system.windowresolution",
             WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
         )
-            .Tooltip(Tooltip.Info("system.windowresolution"))
+            .Help(Help.Info("system.windowresolution"))
             .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
         |+ PageSetting(
@@ -150,7 +150,7 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
             )
         )
-            .Tooltip(Tooltip.Info("system.monitor"))
+            .Help(Help.Info("system.monitor"))
             .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
         |+ PageSetting(
@@ -160,11 +160,11 @@ type SystemPage() =
                 get_current_supported_video_modes
             )
         )
-            .Tooltip(Tooltip.Info("system.videomode"))
+            .Help(Help.Info("system.videomode"))
             .Pos(11)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
-            .Tooltip(Tooltip.Info("system.visualoffset"))
+            .Help(Help.Info("system.visualoffset"))
             .Pos(13)
         :> Widget
 

@@ -47,7 +47,7 @@ module PageLayout =
             this.Position <- pretty_pos (y, h, width)
             this
             
-type Tooltip(content: Callout) =
+type Help(content: Callout) =
     inherit StaticWidget(NodeType.None)
 
     let content = content.Icon(Icons.INFO)
@@ -56,10 +56,10 @@ type Tooltip(content: Callout) =
         base.Update(elapsed_ms, moved)
 
         if Mouse.hover this.Bounds then
-            Tooltip.available()
+            HelpOverlay.available()
 
             if (%%"tooltip").Tapped() then
-                Tooltip.show ((%%"tooltip"), this, content)
+                HelpOverlay.show ((%%"tooltip"), this, content)
 
     override this.Draw() = ()
 

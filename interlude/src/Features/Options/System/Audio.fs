@@ -22,13 +22,13 @@ type AudioPage() =
                 |> Setting.f32
             )
         )
-            .Tooltip(Tooltip.Info("system.audiovolume"))
+            .Help(Help.Info("system.audiovolume"))
             .Pos(0)
         |+ PageSetting(
             %"system.audiodevice",
             SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
         )
-            .Tooltip(Tooltip.Info("system.audiodevice"))
+            .Help(Help.Info("system.audiodevice"))
             .Pos(2)
         |+ PageSetting(
             %"system.audio_pitch_rates",
@@ -37,7 +37,7 @@ type AudioPage() =
                 |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
             )
         )
-            .Tooltip(Tooltip.Info("system.audio_pitch_rates"))
+            .Help(Help.Info("system.audio_pitch_rates"))
             .Pos(4)
         |+ PageSetting(
             %"system.audiooffset",
@@ -47,10 +47,10 @@ type AudioPage() =
                     Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
             }
         )
-            .Tooltip(Tooltip.Info("system.audiooffset"))
+            .Help(Help.Info("system.audiooffset"))
             .Pos(6)
         |+ PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
-            .Tooltip(Tooltip.Info("system.automatic_offset"))
+            .Help(Help.Info("system.automatic_offset"))
             .Pos(8)
         :> Widget
 

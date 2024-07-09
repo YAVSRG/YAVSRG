@@ -604,11 +604,5 @@ module Helpers =
         refresh ()
         r, refresh
 
-    type PageSetting with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
-
-    type PageButton with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
-
     type Container with
-        member this.Tooltip(content: Callout) = this |+ Tooltip(content)
+        member this.Help(content: Callout) = this |+ Help(content)

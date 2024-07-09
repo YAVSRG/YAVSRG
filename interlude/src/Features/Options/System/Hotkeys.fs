@@ -105,7 +105,7 @@ type HotkeysPage() =
             if hk <> "none" then
                 container.Add(
                     PageSetting(%(sprintf "hotkeys.%s" hk), hotkey_editor hk)
-                        .Tooltip(Tooltip.Info(sprintf "hotkeys.%s" hk))
+                        .Help(Help.Info(sprintf "hotkeys.%s" hk))
                 )
 
         NavigationContainer.Column()

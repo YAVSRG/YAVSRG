@@ -74,8 +74,8 @@ type LibraryViewControls() =
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "group_mode"
         )
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.groupby", "group_mode")
                     .Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode")
             )
@@ -87,7 +87,7 @@ type LibraryViewControls() =
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
-            .Tooltip(Tooltip.Info("library.collections", "group_mode"))
+            .Help(Help.Info("library.collections", "group_mode"))
 
     let manage_tables =
         StylishButton(
@@ -96,7 +96,7 @@ type LibraryViewControls() =
             !%Palette.MAIN_100,
             Hotkey = "group_mode"
         )
-            .Tooltip(Tooltip.Info("library.tables", "group_mode"))
+            .Help(Help.Info("library.tables", "group_mode"))
 
     let swap =
         SwapContainer(
@@ -141,7 +141,7 @@ type LibraryViewControls() =
                         Bottom = 0.0f %+ 170.0f
                     }
             )
-            .Tooltip(Tooltip.Info("levelselect.librarymode", "library_mode"))
+            .Help(Help.Info("levelselect.librarymode", "library_mode"))
 
         |+ ModeDropdown(
             sorting_modes.Keys
@@ -160,8 +160,8 @@ type LibraryViewControls() =
                     Bottom = 0.0f %+ 170.0f
                 }
         )
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.sortby", "sort_mode")
                     .Hotkey(%"levelselect.sortby.reverse_hint", "reverse_sort_mode")
             )

@@ -51,7 +51,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
             (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
             Icon = Icons.TRASH
         )
-            .Tooltip(Tooltip.Info("group.delete"))
+            .Help(Help.Info("group.delete"))
         :> Widget
 
     override this.Title = name

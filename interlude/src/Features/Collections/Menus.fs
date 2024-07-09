@@ -249,13 +249,13 @@ type SelectCollectionPage
             %"collections.create_folder",
             (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
         )
-            .Tooltip(Tooltip.Info("collections.create_folder"))
+            .Help(Help.Info("collections.create_folder"))
             .Pos(0)
         |+ PageButton(
             %"collections.create_playlist",
             (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
         )
-            .Tooltip(Tooltip.Info("collections.create_playlist"))
+            .Help(Help.Info("collections.create_playlist"))
             .Pos(2)
         |+ ScrollContainer(grid, Position = pretty_pos(5, PAGE_BOTTOM - 5, PageWidth.Full))
         :> Widget

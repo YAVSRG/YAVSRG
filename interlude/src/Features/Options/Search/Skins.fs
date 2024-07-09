@@ -27,7 +27,7 @@ module Skins =
                         %"noteskin.edit",
                         (fun () -> EditNoteskinPage(false).Show())
                     )
-                        .Tooltip(Tooltip.Info("noteskin.edit"))
+                        .Help(Help.Info("noteskin.edit"))
 
                 yield PageButton(
                     %"skins.browser",
@@ -54,7 +54,7 @@ module Skins =
                             Menu.Exit()
                     )
                 )
-                    .Tooltip(Tooltip.Info("hud.edit"))
+                    .Help(Help.Info("hud.edit"))
 
             if token_match tokens [|%"themes.theme"; %"themes.showthemesfolder"|] then
                 yield PageSetting(%"themes.theme", 
@@ -64,5 +64,5 @@ module Skins =
                     %"themes.showthemesfolder", 
                     (fun () -> open_directory (get_game_folder "Themes"))
                 )
-                    .Tooltip(Tooltip.Info("themes.showthemesfolder"))
+                    .Help(Help.Info("themes.showthemesfolder"))
         }

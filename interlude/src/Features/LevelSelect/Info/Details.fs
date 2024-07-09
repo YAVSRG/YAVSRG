@@ -41,7 +41,7 @@ type Patterns(display: Setting<Display>) =
                     Bottom = 0.0f %+ 50.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.info.mode", "scoreboard_storage"))
+            .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
 
     override this.Draw() =
         base.Draw()

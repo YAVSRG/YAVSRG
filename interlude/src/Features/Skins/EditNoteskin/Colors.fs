@@ -29,7 +29,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
 
     override this.Init(parent: Widget) =
         this
-        |+ Tooltip(
+        |+ Help(
             Callout.Normal
                 .Title(sprintf "%s: %O" (%"noteskin.notecolors") style)
                 .Body(%(sprintf "noteskin.notecolors.%s.%i" (style.ToString().ToLower()) index))
@@ -130,7 +130,7 @@ type ColorSettingsPage() =
                 |> Setting.trigger (ignore >> refresh_colors)
             )
         )
-            .Tooltip(Tooltip.Info("noteskin.globalcolors"))
+            .Help(Help.Info("noteskin.globalcolors"))
             .Pos(0)
         |+ PageSetting(
             %"generic.keymode",
@@ -149,7 +149,7 @@ type ColorSettingsPage() =
                 |> Setting.trigger (ignore >> refresh_colors)
             )
         )
-            .Tooltip(Tooltip.Info("noteskin.colorstyle"))
+            .Help(Help.Info("noteskin.colorstyle"))
             .Pos(5)
         |+ PageSetting(%"noteskin.notecolors", colors)
             .Pos(8, 3, PageWidth.Full)

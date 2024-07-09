@@ -34,9 +34,9 @@ type EditNoteskinPage(from_hotkey: bool) =
 
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"skin.name", name).Tooltip(Tooltip.Info("skin.name")).Pos(4)
-            |+ PageTextEntry(%"skin.author", author).Tooltip(Tooltip.Info("skin.author")).Pos(6)
-            |+ PageTextEntry(%"skin.editor", editor).Tooltip(Tooltip.Info("skin.editor")).Pos(8)
+            |+ PageTextEntry(%"skin.name", name).Help(Help.Info("skin.name")).Pos(4)
+            |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
+            |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
             |+ PageButton(
                 %"noteskin.playfield",
                 fun () ->
@@ -47,7 +47,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskin.playfield"))
+                .Help(Help.Info("noteskin.playfield"))
                 .Pos(11)
             |+ PageButton(
                 %"noteskin.holdnotes",
@@ -59,7 +59,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskin.holdnotes"))
+                .Help(Help.Info("noteskin.holdnotes"))
                 .Pos(13)
             |+ PageButton(
                 %"noteskin.colors",
@@ -71,7 +71,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskin.colors"))
+                .Help(Help.Info("noteskin.colors"))
                 .Pos(15)
             |+ PageButton(
                 %"noteskin.rotations",
@@ -83,7 +83,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskin.rotations"))
+                .Help(Help.Info("noteskin.rotations"))
                 .Pos(17)
             |+ PageButton(
                 %"noteskin.animations",
@@ -95,7 +95,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                     }
                         .Show()
             )
-                .Tooltip(Tooltip.Info("noteskin.animations"))
+                .Help(Help.Info("noteskin.animations"))
                 .Pos(19)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
@@ -134,7 +134,7 @@ type EditNoteskinPage(from_hotkey: bool) =
                 ),
                 Icon = Icons.UPLOAD
             )
-                .Tooltip(Tooltip.Info("skins.export"))
+                .Help(Help.Info("skins.export"))
                 .Pos(0, 2, PageWidth.Full)
             |+ PageButton(
                 %"skins.open_folder",

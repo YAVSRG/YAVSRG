@@ -97,8 +97,8 @@ type ChartInfo() as this =
                     }
             )
             |+ Text((fun () -> Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay)), Align = Alignment.LEFT))
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.selected_mods")
                     .Hotkey(%"levelselect.selected_mods.mods.hint", "mods")
                     .Body(%"levelselect.selected_mods.rate.hint")
@@ -120,7 +120,7 @@ type ChartInfo() as this =
                     Bottom = 1.0f %- 0.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.preview", "preview"))
+            .Help(Help.Info("levelselect.preview", "preview"))
 
         |+ ModSelect(
             change_rate,
@@ -133,7 +133,7 @@ type ChartInfo() as this =
                     Bottom = 1.0f %- 0.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.mods", "mods"))
+            .Help(Help.Info("levelselect.mods", "mods"))
 
         |* RulesetSwitcher(
                 options.SelectedRuleset |> Setting.trigger (ignore >> LevelSelect.refresh_all),
@@ -145,8 +145,8 @@ type ChartInfo() as this =
                         Bottom = 1.0f %- 0.0f
                     }
             )
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.rulesets", "ruleset_switch")
             )
 

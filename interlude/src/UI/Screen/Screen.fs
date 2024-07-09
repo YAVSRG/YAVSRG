@@ -165,7 +165,7 @@ module Screen =
             perf.Update(elapsed_ms, moved)
 
             Background.update elapsed_ms
-            Tooltip.display.Update(elapsed_ms, moved)
+            HelpOverlay.display.Update(elapsed_ms, moved)
 
             if current_type <> Type.Play || Dialog.exists () then
                 Notifications.display.Update(elapsed_ms, moved)
@@ -207,7 +207,7 @@ module Screen =
             | None -> ()
 
             Dialog.display.Draw()
-            Tooltip.display.Draw()
+            HelpOverlay.display.Draw()
 
             if not Toolbar.cursor_hidden || Dialog.exists () then
                 Notifications.display.Draw()
@@ -215,7 +215,7 @@ module Screen =
 
                 Draw.sprite
                     (Rect.Box(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
-                    (if Tooltip.tooltip_available then
+                    (if HelpOverlay.info_available then
                          Colors.white
                      else
                          Palette.color (255, 1.0f, 0.5f))
@@ -229,7 +229,7 @@ module Screen =
             Logo.display.Init this
             toolbar.Init this
             Notifications.display.Init this
-            Tooltip.display.Init this
+            HelpOverlay.display.Init this
             Dialog.display.Init this
             screen_container.Init this
             perf.Init this

@@ -91,7 +91,7 @@ type LevelSelectScreen() =
                     Bottom = 0.0f %+ 90.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.search", "search"))
+            .Help(Help.Info("levelselect.search", "search"))
 
         |+ (
             Container(NodeType.None, Position = { Position.TrimTop(170.0f) with Left = 0.5f %+ 0.0f })
@@ -129,7 +129,7 @@ type LevelSelectScreen() =
             TiltRight = false,
             Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
         )
-            .Tooltip(Tooltip.Info("levelselect.play").Hotkey("select"))
+            .Help(Help.Info("levelselect.play").Hotkey("select"))
         |+ StylishButton(
             (fun () ->
                 match SelectedChart.LIBRARY_CTX with
@@ -148,7 +148,7 @@ type LevelSelectScreen() =
             Hotkey = "endless_mode",
             Disabled = (fun () -> Network.lobby.IsSome)
         )
-            .Tooltip(Tooltip.Info("playlist.play").Hotkey("endless_mode"))
+            .Help(Help.Info("playlist.play").Hotkey("endless_mode"))
             .Conditional(fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false)
         |+ StylishButton(
             (fun () -> SelectedChart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
@@ -158,7 +158,7 @@ type LevelSelectScreen() =
             Hotkey = "endless_mode",
             Disabled = (fun () -> Network.lobby.IsSome)
         )
-            .Tooltip(Tooltip.Info("levelselect.endless_mode").Hotkey("endless_mode"))
+            .Help(Help.Info("levelselect.endless_mode").Hotkey("endless_mode"))
             .Conditional(fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true)
         |+ StylishButton(
             (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
@@ -166,7 +166,7 @@ type LevelSelectScreen() =
             !%Palette.MAIN.O2,
             Position = Position.SliceBottom(50.0f).SliceRight(60.0f).Translate(-650.0f, 0.0f)
         )
-            .Tooltip(Tooltip.Info("levelselect.context_menu").Hotkey("context_menu"))
+            .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
 
         |* info_panel
 

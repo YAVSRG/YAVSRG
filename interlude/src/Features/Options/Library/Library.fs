@@ -21,14 +21,14 @@ type LibraryPage() =
             (fun () -> ManageCollectionsPage().Show()),
             Icon = Icons.FOLDER
         )
-            .Tooltip(Tooltip.Info("library.collections"))
+            .Help(Help.Info("library.collections"))
             .Pos(0, 2, PageWidth.Full)
         |+ PageButton(
             %"library.tables",
             (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
             Icon = Icons.SIDEBAR
         )
-            .Tooltip(Tooltip.Info("library.tables"))
+            .Help(Help.Info("library.tables"))
             .Pos(2, 2, PageWidth.Full)
         |+ PageButton
             .Once(
@@ -42,7 +42,7 @@ type LibraryPage() =
 
                     Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
             )
-            .Tooltip(Tooltip.Info("library.recache_charts"))
+            .Help(Help.Info("library.recache_charts"))
             .Pos(5, 2, PageWidth.Full)
         |+ PageButton
             .Once(
@@ -64,7 +64,7 @@ type LibraryPage() =
                         %"notification.pattern_cache_started.body"
                     )
             )
-            .Tooltip(Tooltip.Info("library.recache_patterns"))
+            .Help(Help.Info("library.recache_patterns"))
             .Pos(7, 2, PageWidth.Full)
 
     let mount_options =

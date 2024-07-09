@@ -30,10 +30,10 @@ type LobbySettingsPage(lobby: Lobby) =
         page_container()
         |+ PageTextEntry(%"lobby.name", name).Pos(0)
         |+ PageSetting(%"lobby.host_rotation", Checkbox host_rotation)
-            .Tooltip(Tooltip.Info("lobby.host_rotation"))
+            .Help(Help.Info("lobby.host_rotation"))
             .Pos(3)
         |+ PageSetting(%"lobby.auto_countdown", Checkbox auto_countdown)
-            .Tooltip(Tooltip.Info("lobby.auto_countdown"))
+            .Help(Help.Info("lobby.auto_countdown"))
             .Pos(5)
         :> Widget
 
@@ -86,7 +86,7 @@ type LobbyUI(lobby: Lobby) =
                     Right = (0.4f / 3f) %- 25.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.preview"))
+            .Help(Help.Info("levelselect.preview"))
         |+ StylishButton(
             ignore,
             K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
@@ -98,7 +98,7 @@ type LobbyUI(lobby: Lobby) =
                     Right = (0.4f / 1.5f) %- 25.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.mods"))
+            .Help(Help.Info("levelselect.mods"))
         |+ RulesetSwitcher(
                 options.SelectedRuleset,
                 Position =
@@ -109,8 +109,8 @@ type LobbyUI(lobby: Lobby) =
                         Bottom = 1.0f %- 0.0f
                     }
             )
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.rulesets", "ruleset_switch")
             )
         |+ SelectedChart(lobby,

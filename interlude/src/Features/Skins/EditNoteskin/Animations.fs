@@ -100,19 +100,19 @@ type AnimationSettingsPage() =
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
             |+ PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
-                .Tooltip(Tooltip.Info("noteskin.enablecolumnlight"))
+                .Help(Help.Info("noteskin.enablecolumnlight"))
                 .Pos(0)
             |+ PageSetting(
                 %"noteskin.columnlighttime",
                 Slider(column_light_duration |> Setting.f32, Step = 1f)
             )
-                .Tooltip(Tooltip.Info("noteskin.columnlighttime"))
+                .Help(Help.Info("noteskin.columnlighttime"))
                 .Pos(2)
             |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32, Step = 1f))
-                .Tooltip(Tooltip.Info("noteskin.animationtime"))
+                .Help(Help.Info("noteskin.animationtime"))
                 .Pos(5)
             |+ PageSetting(%"noteskin.enableexplosions", Checkbox enable_explosions)
-                .Tooltip(Tooltip.Info("noteskin.enableexplosions"))
+                .Help(Help.Info("noteskin.enableexplosions"))
                 .Pos(8)
 
         let note_explosion_tab =
@@ -121,7 +121,7 @@ type AnimationSettingsPage() =
                 %"noteskin.explosionanimationtime",
                 Slider(explosion_frame_time_note |> Setting.f32, Step = 1f)
             )
-                .Tooltip(Tooltip.Info("noteskin.explosionanimationtime"))
+                .Help(Help.Info("noteskin.explosionanimationtime"))
                 .Pos(0)
             |+ PageSetting(
                 %"noteskin.explosioncolors",
@@ -130,26 +130,26 @@ type AnimationSettingsPage() =
                     explosion_colors_note
                 )
             )
-                .Tooltip(Tooltip.Info("noteskin.explosioncolors"))
+                .Help(Help.Info("noteskin.explosioncolors"))
                 .Pos(2)
             |+ PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_note))
-                .Tooltip(Tooltip.Info("noteskin.explosionoffset"))
+                .Help(Help.Info("noteskin.explosionoffset"))
                 .Pos(4)
             |+ PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_note))
-                .Tooltip(Tooltip.Info("noteskin.explosionscale"))
+                .Help(Help.Info("noteskin.explosionscale"))
                 .Pos(6)
             |+ PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_note)
-                .Tooltip(Tooltip.Info("noteskin.usebuiltinanimation"))
+                .Help(Help.Info("noteskin.usebuiltinanimation"))
                 .Pos(8)
             |+ PageSetting(
                 %"noteskin.explosionduration",
                 Slider(explosion_duration_note |> Setting.f32, Step = 1f)
             )
-                .Tooltip(Tooltip.Info("noteskin.explosionduration"))
+                .Help(Help.Info("noteskin.explosionduration"))
                 .Pos(10)
                 .Conditional(explosion_builtin_note.Get)
             |+ PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_note))
-                .Tooltip(Tooltip.Info("noteskin.explosionexpand"))
+                .Help(Help.Info("noteskin.explosionexpand"))
                 .Pos(12)
                 .Conditional(explosion_builtin_note.Get)
 
@@ -159,7 +159,7 @@ type AnimationSettingsPage() =
                 %"noteskin.explosionanimationtime",
                 Slider(explosion_frame_time_hold |> Setting.f32, Step = 1f)
             )
-                .Tooltip(Tooltip.Info("noteskin.explosionanimationtime"))
+                .Help(Help.Info("noteskin.explosionanimationtime"))
                 .Pos(0)
             |+ PageSetting(
                 %"noteskin.explosioncolors",
@@ -168,30 +168,30 @@ type AnimationSettingsPage() =
                     explosion_colors_hold
                 )
             )
-                .Tooltip(Tooltip.Info("noteskin.explosioncolors"))
+                .Help(Help.Info("noteskin.explosioncolors"))
                 .Pos(2)
             |+ PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_hold))
-                .Tooltip(Tooltip.Info("noteskin.explosionoffset"))
+                .Help(Help.Info("noteskin.explosionoffset"))
                 .Pos(4)
             |+ PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_hold))
-                .Tooltip(Tooltip.Info("noteskin.explosionscale"))
+                .Help(Help.Info("noteskin.explosionscale"))
                 .Pos(6)
             |+ PageSetting(%"noteskin.usereleaseanimation", Checkbox explosion_hold_use_release)
-                .Tooltip(Tooltip.Info("noteskin.usereleaseanimation"))
+                .Help(Help.Info("noteskin.usereleaseanimation"))
                 .Pos(8)
             |+ PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_release)
-                .Tooltip(Tooltip.Info("noteskin.usebuiltinanimation"))
+                .Help(Help.Info("noteskin.usebuiltinanimation"))
                 .Pos(10)
                 .Conditional(explosion_hold_use_release.Get)
             |+ PageSetting(
                 %"noteskin.explosionduration",
                 Slider(explosion_duration_hold |> Setting.f32, Step = 1f)
             )
-                .Tooltip(Tooltip.Info("noteskin.explosionduration"))
+                .Help(Help.Info("noteskin.explosionduration"))
                 .Pos(12)
                 .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
             |+ PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_hold))
-                .Tooltip(Tooltip.Info("noteskin.explosionexpand"))
+                .Help(Help.Info("noteskin.explosionexpand"))
                 .Pos(14)
                 .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 

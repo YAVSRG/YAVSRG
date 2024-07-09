@@ -263,7 +263,7 @@ type SelectSkinsPage() =
                 ),
                 Icons.UPLOAD
             )
-                .Tooltip(Tooltip.Info("skins.export"))
+                .Help(Help.Info("skins.export"))
             |+ InlaidButton(
                 %"skins.open_folder",
                 (fun () -> 

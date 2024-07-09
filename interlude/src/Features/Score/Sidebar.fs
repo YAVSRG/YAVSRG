@@ -51,7 +51,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Align = Alignment.RIGHT
         )
         // todo: update this on ruleset change
-        |+ Tooltip(
+        |+ Help(
             Callout.Normal
                 .Icon(Icons.TRENDING_UP)
                 .Title("Taps")

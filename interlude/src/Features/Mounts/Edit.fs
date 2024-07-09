@@ -19,7 +19,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
     override this.Content() =
         page_container()
         |+ PageSetting(%"mount.importatstartup", Checkbox import_on_startup)
-            .Tooltip(Tooltip.Info("mount.importatstartup"))
+            .Help(Help.Info("mount.importatstartup"))
             .Pos(0)
         |+ PageButton
             .Once(
@@ -28,7 +28,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     import <- true
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
             )
-            .Tooltip(Tooltip.Info("mount.import"))
+            .Help(Help.Info("mount.import"))
             .Pos(3)
         |+ PageButton
             .Once(
@@ -38,7 +38,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     mount.LastImported <- System.DateTime.UnixEpoch
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
             )
-            .Tooltip(Tooltip.Info("mount.importall"))
+            .Help(Help.Info("mount.importall"))
             .Pos(5)
         |+
             if
@@ -64,7 +64,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                             ""
                         )
                 )
-                    .Tooltip(Tooltip.Info("mount.import_osu_scores"))
+                    .Help(Help.Info("mount.import_osu_scores"))
                     .Pos(8)
             else
                 Dummy()
@@ -76,7 +76,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                     %"mount.import_osu_skins",
                     fun () -> osu.Skins.OsuSkinsListPage().Show()
                 )
-                    .Tooltip(Tooltip.Info("mount.import_osu_skins"))
+                    .Help(Help.Info("mount.import_osu_skins"))
                     .Pos(10)
             else
                 Dummy()

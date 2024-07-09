@@ -82,10 +82,10 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
                 mode
             )
         )
-            .Tooltip(Tooltip.Info("gameplay.preset.mode"))
+            .Help(Help.Info("gameplay.preset.mode"))
             .Pos(2)
         |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
-            .Tooltip(Tooltip.Info("gameplay.preset.keymode_preference"))
+            .Help(Help.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
         |+ delete_button.Pos(7)
         // todo: localise

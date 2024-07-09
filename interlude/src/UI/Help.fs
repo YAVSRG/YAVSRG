@@ -6,9 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Interlude.UI
 
-// todo: rename to 'Help Mode' and make it a toggle overlay
-
-type private Tooltip =
+type private HelpInfo =
     {
         Data: Callout
         Size: float32 * float32
@@ -17,10 +15,10 @@ type private Tooltip =
         Bind: Bind
     }
 
-module Tooltip =
+module HelpOverlay =
 
-    let mutable private current_tooltip: Tooltip option = None
-    let mutable internal tooltip_available = false
+    let mutable private current_info: HelpInfo option = None
+    let mutable internal info_available = false
 
     type private Display() =
         inherit Overlay(NodeType.None)
@@ -28,7 +26,7 @@ module Tooltip =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
 
-            match current_tooltip with
+            match current_info with
             | None -> ()
             | Some t ->
                 t.Fade.Update elapsed_ms
@@ -37,7 +35,7 @@ module Tooltip =
                     if t.Bind.Released() then
                         t.Fade.Target <- 0.0f
                 elif t.Fade.Value < 0.01f then
-                    current_tooltip <- None
+                    current_info <- None
 
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
                 let width, height = t.Size
@@ -56,10 +54,10 @@ module Tooltip =
                 let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
                 Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
 
-            tooltip_available <- false
+            info_available <- false
 
         override this.Draw() =
-            match current_tooltip with
+            match current_info with
             | None -> ()
             | Some t ->
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
@@ -135,7 +133,7 @@ module Tooltip =
     let display : Widget = Display()
 
     let show (b: Bind, w: Widget, body: Callout) =
-        let t: Tooltip =
+        let t: HelpInfo =
             {
                 Data = body
                 Size = Callout.measure body
@@ -144,7 +142,7 @@ module Tooltip =
                 Bind = b
             }
 
-        current_tooltip <- Some t
+        current_info <- Some t
 
     let available () =
-        tooltip_available <- true
+        info_available <- true

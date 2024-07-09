@@ -41,7 +41,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
             Icon = Icons.FLAG,
             Enabled = Network.lobby.IsNone
         )
-            .Tooltip(Tooltip.Info("score.challenge"))
+            .Help(Help.Info("score.challenge"))
             .Pos(4)
         :> Widget
 

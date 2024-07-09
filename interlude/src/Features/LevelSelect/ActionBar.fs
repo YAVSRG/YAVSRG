@@ -140,14 +140,14 @@ type ActionBar() =
             Hotkey = "practice_mode",
             Position = Position.Column(0.0f, 60.0f)
         )
-            .Tooltip(Tooltip.Info("levelselect.practice_mode").Hotkey("practice_mode"))
+            .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
         |+ ActionButton(
             Icons.REFRESH_CCW,
             Suggestions.random_chart,
             (K false),
             Position = Position.Column(70.0f, 60.0f)
         )
-            .Tooltip(Tooltip.Info("levelselect.random_chart").Hotkey("random_chart"))
+            .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart"))
         |* ActionButton(
             Icons.MESSAGE_SQUARE,
             (fun () -> Comments.fade.Target <- 1.0f - Comments.fade.Target),
@@ -155,8 +155,8 @@ type ActionBar() =
             Hotkey = "show_comments",
             Position = Position.Column(140.0f, 60.0f)
         )
-            .Tooltip(
-                Tooltip
+            .Help(
+                Help
                     .Info("levelselect.show_comments")
                     .Hotkey("show_comments")
                     .Hotkey(%"levelselect.show_comments.hint", "comment")

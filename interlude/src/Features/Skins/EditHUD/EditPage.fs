@@ -33,9 +33,9 @@ type EditHUDPage() =
 
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"skin.name", name).Tooltip(Tooltip.Info("skin.name")).Pos(4)
-            |+ PageTextEntry(%"skin.author", author).Tooltip(Tooltip.Info("skin.author")).Pos(6)
-            |+ PageTextEntry(%"skin.editor", editor).Tooltip(Tooltip.Info("skin.editor")).Pos(8)
+            |+ PageTextEntry(%"skin.name", name).Help(Help.Info("skin.name")).Pos(4)
+            |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
+            |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
@@ -73,7 +73,7 @@ type EditHUDPage() =
                 ),
                 Icon = Icons.UPLOAD
             )
-                .Tooltip(Tooltip.Info("skins.export"))
+                .Help(Help.Info("skins.export"))
                 .Pos(0, 2, PageWidth.Full)
             |+ PageButton(
                 %"skins.open_folder",

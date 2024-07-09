@@ -31,7 +31,7 @@ type RateModMeterPage(on_close: unit -> unit) =
     override this.Content() =
         page_container()
         |+ PageSetting(%"hud.ratemodmeter.showmods", Checkbox show_mods)
-            .Tooltip(Tooltip.Info("hud.ratemodmeter.showmods"))
+            .Help(Help.Info("hud.ratemodmeter.showmods"))
             .Pos(0)
         |>> Container
         |+ preview

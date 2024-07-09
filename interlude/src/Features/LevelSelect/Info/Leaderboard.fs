@@ -300,7 +300,7 @@ type Leaderboard(display: Setting<Display>) =
                     Bottom = 0.0f %+ 50.0f
                 }
         )
-            .Tooltip(Tooltip.Info("levelselect.info.mode", "scoreboard_storage"))
+            .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
         |+ StylishButton
             .Selector(
                 Icons.CHEVRONS_UP,
@@ -320,7 +320,7 @@ type Leaderboard(display: Setting<Display>) =
                         Bottom = 0.0f %+ 50.0f
                     }
             )
-            .Tooltip(Tooltip.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
+            .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton
             .Selector(
                 Icons.FILTER,
@@ -341,7 +341,7 @@ type Leaderboard(display: Setting<Display>) =
                         Bottom = 0.0f %+ 50.0f
                     }
             )
-            .Tooltip(Tooltip.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
+            .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container
         |+ HotkeyAction(
             "scoreboard",

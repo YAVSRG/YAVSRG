@@ -30,7 +30,7 @@ type PerformanceSettingsPage() =
                 config.RenderMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
             )
         )
-            .Tooltip(Tooltip.Info("system.framelimit"))
+            .Help(Help.Info("system.framelimit"))
             .Pos(0)
         |+ Text(%"system.framelimit.unlimited_warning", 
             Color = K Colors.text_red,
@@ -44,7 +44,7 @@ type PerformanceSettingsPage() =
                 |> Setting.trigger (fun v -> anti_jitter <- v)
             )
         )
-            .Tooltip(Tooltip.Info("system.performance.antijitter"))
+            .Help(Help.Info("system.performance.antijitter"))
             .Pos(2)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
         |+ PageSetting(%"system.performance.screen_tear_alignment", 

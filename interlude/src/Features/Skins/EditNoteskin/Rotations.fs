@@ -123,7 +123,7 @@ type RotationSettingsPage() =
     override this.Content() =
         page_container()
         |+ PageSetting(%"noteskin.userotation", Checkbox use_rotation)
-            .Tooltip(Tooltip.Info("noteskin.userotation"))
+            .Help(Help.Info("noteskin.userotation"))
             .Pos(0)
         |+ PageSetting(
             %"generic.keymode",
@@ -142,7 +142,7 @@ type RotationSettingsPage() =
                 receptor_style
             )
         )
-            .Tooltip(Tooltip.Info("noteskin.receptorstyle"))
+            .Help(Help.Info("noteskin.receptorstyle"))
             .Pos(8)
         :> Widget
 
