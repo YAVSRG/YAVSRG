@@ -34,7 +34,6 @@ type Toolbar() =
         | None -> ()
 
     let import_button =
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height).Translate(0.0f, HEIGHT).SliceLeft(370.0f))
         let container = 
             InlaidButton(
                 %"menu.import",
@@ -44,9 +43,9 @@ type Toolbar() =
             )
             |+ LoadingIndicator.Strip(
                 Imports.import_in_progress,
-                Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
+                Position = Position.BorderBottom(Style.PADDING)
             )
-        container.Help(Help.Info("menu.import").Hotkey("import"))
+        container.Tooltip(Help.Info("menu.import", "import"))
 
     override this.Init(parent) =
         container
@@ -64,20 +63,20 @@ type Toolbar() =
             %"menu.back",
             (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
+            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
         )
         |+ (FlowContainer.LeftToRight(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
-                Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f)
+                Position = Position.SliceTop(InlaidButton.HEIGHT).TrimLeft(20.0f)
             )
             |+ InlaidButton(
                 %"menu.options",
                 (fun () -> OptionsMenuPage().Show()),
                 Icons.SETTINGS
             )
-                .Help(Help.Info("menu.options").Hotkey("options"))
+                .Tooltip(Help.Info("menu.options", "options"))
             |+ import_button
             |+ InlaidButton(
                 %"menu.wiki",
@@ -86,7 +85,7 @@ type Toolbar() =
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
-                .Help(Help.Info("menu.wiki").Hotkey("wiki"))
+                .Tooltip(Help.Info("menu.wiki", "wiki"))
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
@@ -95,7 +94,7 @@ type Toolbar() =
                 ),
                 Icons.TRENDING_UP
             )
-                .Help(Help.Info("menu.stats")))
+                .Tooltip(Help.Info("menu.stats")))
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
         |+ HotkeyAction(
             "edit_noteskin",

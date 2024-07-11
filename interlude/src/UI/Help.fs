@@ -206,8 +206,49 @@ type Help(content: Callout) =
             .Body(%(sprintf "%s.tooltip" feature))
             .Hotkey(hotkey)
 
+type Tooltip(content: Callout) =
+    inherit StaticWidget(NodeType.None)
+
+    let SPACING = 10.0f
+    
+    let mutable width, height = 0.0f, 0.0f
+    let mutable hover = false
+
+    override this.Init(parent) =
+        let a, b = Callout.measure content
+        width <- a; height <- b
+        base.Init parent
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if not hover && Mouse.hover this.Bounds then
+            hover <- true
+        elif hover && not (Mouse.hover this.Bounds) then
+            hover <- false
+
+    override this.Draw() =
+        if not hover then () else
+
+        let x =
+            this.Bounds.CenterX - width * 0.5f
+            |> min (Viewport.bounds.Width - width - SPACING)
+            |> max SPACING
+
+        let y =
+            if this.Bounds.Top > Viewport.bounds.CenterY then
+                this.Bounds.Top - SPACING - height
+            else
+                this.Bounds.Bottom + SPACING
+
+        let bounds = Rect.Box(x, y, width, height)
+
+        Draw.rect bounds Colors.shadow_2.O3
+        Callout.draw (bounds.Left, bounds.Top, width, height, Colors.text, content)
+
 [<AutoOpen>]
 module Help =
 
     type Container with
         member this.Help(content: Callout) = this |+ Help content
+        member this.Tooltip(content: Callout) = this |+ Tooltip content

@@ -171,7 +171,7 @@ type private OptionsMenuFooter() as this =
             %"menu.back",
             Menu.Back,
             Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
+            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
         )
         |+ (
             FlowContainer.RightToLeft(300.0f, Spacing = 20.0f, Position = Position.SliceBottom(HEIGHT + 10.0f).Translate(-30.0f, -20.0f))
