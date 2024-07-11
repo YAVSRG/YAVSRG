@@ -19,8 +19,8 @@ module HelpOverlay =
 
     let mutable private current_info: HelpInfo option = None
     let overlay_fade = Animation.Fade 0.0f
-    let border_animation = Animation.Counter(5000.0)
     let mutable internal on = false
+    //let mutable private info_regions: Rect list = []
 
     type private Display() =
         inherit Overlay(NodeType.None)
@@ -28,42 +28,63 @@ module HelpOverlay =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
 
+            on <- (%%"tooltip").Pressed()
+            overlay_fade.Target <- if on then 1.0f else 0.0f
             overlay_fade.Update elapsed_ms
-            border_animation.Update elapsed_ms
 
             match current_info with
             | None -> ()
             | Some t ->
-                t.Fade.Update elapsed_ms
+                if t.Fade.Target = 0.0f || on then
+                    t.Fade.Update elapsed_ms
 
                 if t.Fade.Target <> 0.0f then
-                    if not (Mouse.hover t.Target.Bounds) then
+                    if not (Mouse.hover t.Target.Bounds) || not on then
                         t.Fade.Target <- 0.0f
                 elif t.Fade.Value < 0.01f then
                     current_info <- None
 
-                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
-                let width, height = t.Size
+                if t.Fade.Value > 0.01f then
 
-                let x =
-                    outline.CenterX - width * 0.5f
-                    |> min (Viewport.bounds.Width - width - 50.0f)
-                    |> max 50.0f
+                    let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                    let width, height = t.Size
 
-                let y =
-                    if outline.Top > Viewport.bounds.CenterY then
-                        outline.Top - 50.0f - height - 60.0f
-                    else
-                        outline.Bottom + 50.0f
+                    let x =
+                        outline.CenterX - width * 0.5f
+                        |> min (Viewport.bounds.Width - width - 50.0f)
+                        |> max 50.0f
 
-                let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
-                Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
+                    let y =
+                        if outline.Top > Viewport.bounds.CenterY then
+                            outline.Top - 50.0f - height - 60.0f
+                        else
+                            outline.Bottom + 50.0f
 
-            if (%%"tooltip").Tapped() then
-                on <- not on
-                overlay_fade.Target <- if on then 1.0f else 0.0f
+                    let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
+                    Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
+
 
         override this.Draw() =
+            //let a = overlay_fade.Alpha
+            //if on then
+            //    while not (List.isEmpty info_regions) do
+
+            //        let bounds = info_regions.Head
+
+            //        let w = (max bounds.Width 200.0f) / 2.0f
+            //        let bounds : Rect = bounds.SliceCenterX(2.0f * w)
+
+            //        Draw.untextured_quad 
+            //            (bounds.SliceLeft(w).AsQuad)
+            //            (Quad.gradient_left_to_right (Colors.yellow_accent.O4a 0) (Colors.yellow_accent.O2a a))
+            //        Draw.untextured_quad 
+            //            (bounds.SliceRight(w).AsQuad)
+            //            (Quad.gradient_left_to_right (Colors.yellow_accent.O2a a) (Colors.yellow_accent.O4a 0))
+
+            //        Text.fill_b(Style.font, Icons.INFO, bounds.SliceCenterY(50.0f), (Colors.green_accent.O4a a, Colors.shadow_2.O4a a), 0.5f)
+
+            //        info_regions <- List.tail info_regions
+
             match current_info with
             | None -> ()
             | Some t ->
@@ -89,22 +110,22 @@ module HelpOverlay =
                     (Colors.yellow_accent.O3a t.Fade.Alpha)
 
                 // blackout effect
-                Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
-                Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O2a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O2a t.Fade.Alpha)
 
                 Draw.rect
                     (Viewport.bounds
                         .TrimLeft(outline.Left)
                         .SliceLeft(outline.Width)
                         .SliceTop(outline.Top))
-                    (Colors.shadow_2.O3a t.Fade.Alpha)
+                    (Colors.shadow_2.O2a t.Fade.Alpha)
 
                 Draw.rect
                     (Viewport.bounds
                         .TrimLeft(outline.Left)
                         .SliceLeft(outline.Width)
                         .TrimTop(outline.Bottom))
-                    (Colors.shadow_2.O3a t.Fade.Alpha)
+                    (Colors.shadow_2.O2a t.Fade.Alpha)
 
                 // draw tooltip
                 let width, height = t.Size
@@ -150,37 +171,29 @@ module HelpOverlay =
 
         current_info <- Some t
 
+    //let region (bounds: Rect) = info_regions <- bounds :: info_regions
+
 type Help(content: Callout) =
     inherit StaticWidget(NodeType.None)
 
     let content = content.Icon(Icons.INFO)
     let mutable hover = false
-    let mutable info_seen = false
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if HelpOverlay.on then
-            if not hover && Mouse.hover this.Bounds then
-                hover <- true
-                info_seen <- true
-                HelpOverlay.show (this, content)
-            elif hover && not (Mouse.hover this.Bounds) then
-                hover <- false
+        //if HelpOverlay.on then
 
-    override this.Draw() =
-        let a = HelpOverlay.overlay_fade.Alpha
-        let bounds = this.Bounds
-        if a > 0 then
-            let w = (max bounds.Width 200.0f) / 2.0f
-            let bounds : Rect = bounds.SliceCenterX(2.0f * w).SliceCenterY(60.0f)
-            Draw.untextured_quad 
-                (bounds.SliceLeft(w).AsQuad)
-                (Quad.gradient_left_to_right (Colors.black.O4a 0) (Colors.black.O2a a))
-            Draw.untextured_quad 
-                (bounds.SliceRight(w).AsQuad)
-                (Quad.gradient_left_to_right (Colors.black.O2a a) (Colors.black.O4a 0))
-            Text.fill_b(Style.font, Icons.INFO, bounds.Shrink(0.0f, 5.0f), (Colors.green_accent.O4a a, Colors.shadow_2.O4a a), 0.5f)
+            //HelpOverlay.region this.Bounds
+
+        if not hover && Mouse.hover this.Bounds then
+            hover <- true
+            HelpOverlay.show (this, content)
+
+        elif hover && not (Mouse.hover this.Bounds) then
+            hover <- false
+
+    override this.Draw() = ()
 
     static member Info(feature: string) =
         Callout.Normal
@@ -197,4 +210,4 @@ type Help(content: Callout) =
 module Help =
 
     type Container with
-        member this.Help(content: Callout) = this |+ Help(content)
+        member this.Help(content: Callout) = this |+ Help content

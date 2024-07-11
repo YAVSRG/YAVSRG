@@ -432,6 +432,7 @@ module Input =
         this_frame_finished <- false
         update_input_listener ()
 
+    // todo: find out what this was used for / remove it because unused
     let button_pressed_recently () =
         (DateTime.UtcNow.Ticks - last_input_event) < 100L * 10_000L
 
