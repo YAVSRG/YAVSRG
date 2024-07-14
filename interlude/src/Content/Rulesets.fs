@@ -18,7 +18,7 @@ module Rulesets =
     let mutable current_hash = Ruleset.hash current
     let private _selected_id = Setting.simple DEFAULT_ID
 
-    let private load () =
+    let load () =
         loaded.Clear()
 
         let path = get_game_folder "Rulesets"

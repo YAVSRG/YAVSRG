@@ -108,14 +108,14 @@ type Toolbar() =
                     EditNoteskinPage(true).Show()
         )
         |+ HotkeyAction(
-            "reload_themes",
+            "reload_content",
             fun () ->
                 if not (Dialog.exists()) then
                     Themes.reload_current ()
-                    Skins.reload_current_noteskin()
-                    Skins.reload_current_hud()
+                    Skins.load()
+                    Rulesets.load()
                     SelectedChart.recolor ()
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_themes", "")
+                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_content", "")
         )
         |+ HotkeyAction("preset1", fun () -> load_preset 1)
         |+ HotkeyAction("preset2", fun () -> load_preset 2)
