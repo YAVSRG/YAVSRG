@@ -58,7 +58,7 @@ type Chat(lobby: Lobby) =
         if replays.Keys.Count > 0 then
             add_msg (
                 Text(
-                    sprintf "== Results for %s ==" lobby.Chart.Value.Title,
+                    sprintf "== Results for: %s ==" lobby.Chart.Value.Title,
                     Color = K Colors.text,
                     Align = Alignment.CENTER
                 )
@@ -142,6 +142,14 @@ type Chat(lobby: Lobby) =
                     )
 
                 add_msg cmp
+
+            add_msg (
+                Text(
+                    "Click a score to view details",
+                    Color = K Colors.text_greyout,
+                    Align = Alignment.CENTER
+                )
+            )
 
     let countdown (reason, seconds) =
         let now = System.DateTime.UtcNow
