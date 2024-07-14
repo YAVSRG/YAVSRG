@@ -246,8 +246,15 @@ type Tooltip(content: Callout) =
         Draw.rect bounds Colors.shadow_2.O3
         Callout.draw (bounds.Left, bounds.Top, width, height, Colors.text, content)
 
-[<AutoOpen>]
 module Help =
+    let text (text: string) = Callout.Normal.Body(text)
+    let hotkey (hk: Hotkey) = Callout.Normal.Hotkey(hk)
+    let text_hotkey (text: string, hk: Hotkey) = Callout.Normal.Body(text).Hotkey(hk)
+    let info (title: string, body: string) = Callout.Normal.Title(title).Body(body)
+    let info_hotkey (title: string, body: string, hk: Hotkey) = Callout.Normal.Title(title).Body(body).Hotkey(hk)
+
+[<AutoOpen>]
+module HelpExtensions =
 
     type Container with
         member this.Help(content: Callout) = this |+ Help content
