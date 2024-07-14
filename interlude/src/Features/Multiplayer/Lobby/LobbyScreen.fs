@@ -146,7 +146,6 @@ type LobbyUI(lobby: Lobby) =
                         |> not
                     then
                         Logging.Warn("Missed the start of the lobby song because you were changing screen")
-
         )
 
         lobby.OnPlayerStatusChanged.Add(fun (username, status) ->

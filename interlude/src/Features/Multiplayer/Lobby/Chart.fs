@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Multiplayer
 
-open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
@@ -49,7 +48,7 @@ module LobbyChart =
         | _ -> None
 
     let is_loaded_or_loading() =
-        if is_loading then true else info_if_selected().IsSome
+        is_loading || info_if_selected().IsSome
 
     let attempt_match_lobby_chart (lobby: Lobby) =
         last_seen_lobby_chart <- lobby.Chart
@@ -75,7 +74,7 @@ module LobbyChart =
                     function
                     | false -> 
                         Logging.Debug("Multiplayer chart not found on the server either")
-                        Network.lobby.Value.ReportMissingChart()
+                        lobby.ReportMissingChart()
                         is_loading <- false
                         Notifications.error(%"notification.multiplayer_chart_not_found.title", %"notification.multiplayer_chart_not_found.body")
                     | true ->
@@ -328,7 +327,7 @@ type SelectedChart(lobby: Lobby) =
                 && not lobby.GameInProgress
             )
 
-        lobby.OnChartChanged.Add(fun () ->
+        lobby.OnChartChanged.Add(fun _ ->
             if Screen.current_type = Screen.Type.Lobby then
                 LobbyChart.attempt_match_lobby_chart lobby
         )

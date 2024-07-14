@@ -46,11 +46,11 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
 
     let chat_message_ev = new Event<string * string>()
     let system_message_ev = new Event<string>()
-    let lobby_settings_updated_ev = new Event<LobbySettings>() // pass settings
+    let lobby_settings_updated_ev = new Event<LobbySettings>()
     let lobby_event_ev = new Event<LobbyEvent * string>()
     let lobby_players_updated_ev = new Event<unit>()
     let player_status_ev = new Event<string * LobbyPlayerStatus>()
-    let change_chart_ev = new Event<unit>() // pass lobby chart
+    let change_chart_ev = new Event<LobbyChart>()
     let countdown_ev = new Event<string * int>()
     let game_start_ev = new Event<unit>()
     let game_end_ev = new Event<unit>()
@@ -85,7 +85,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
             player.Status <- LobbyPlayerStatus.NotReady
 
         this.ReadyStatus <- ReadyFlag.NotReady
-        change_chart_ev.Trigger()
+        change_chart_ev.Trigger lc
         lobby_players_updated_ev.Trigger()
 
     member this.UpdateSettings(settings: LobbySettings) =

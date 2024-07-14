@@ -34,7 +34,7 @@ type Chat(lobby: Lobby) =
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
-    let message_box =
+    let message_history =
         ScrollContainer(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
 
     let chatline =
@@ -47,8 +47,8 @@ type Chat(lobby: Lobby) =
 
         match last_msg with
         | Some m ->
-            if m.Bounds.Top - message_box.RemainingScrollAnimation - message_box.Bounds.Bottom < 200.0f then
-                defer (fun () -> message_box.Scroll infinityf)
+            if m.Bounds.Top - message_history.RemainingScrollAnimation - message_history.Bounds.Bottom < 200.0f then
+                defer (fun () -> message_history.Scroll infinityf)
         | None -> ()
 
         last_msg <- Some w
@@ -188,7 +188,7 @@ type Chat(lobby: Lobby) =
             Position = Position.SliceBottom(50.0f).Margin(5.0f),
             Align = Alignment.LEFT
         )
-        |* message_box
+        |* message_history
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)
         lobby.OnSystemMessage.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
