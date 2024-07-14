@@ -19,3 +19,10 @@ module Sounds =
             cache.Remove id |> ignore
 
         cache.Add(id, sound)
+
+    let init_window() =
+        Devices.current_device_changed.Add(
+            fun () -> 
+                for fx in cache.Keys do
+                    cache.[fx].ChangeDevice()
+        )

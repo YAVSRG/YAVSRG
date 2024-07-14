@@ -35,8 +35,8 @@ type Song =
             let d = Bass.ChannelGetInfo ID
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
-            Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
             let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
+            Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
             {
                 ID = ID
                 Frequency = Frequency
@@ -243,7 +243,7 @@ module Song =
 type SoundEffect =
     {
         ID: int
-        ChannelID: int
+        mutable ChannelID: int
     }
     static member FromStream(source: string, stream: IO.Stream) =
         use ms = new IO.MemoryStream()
@@ -263,14 +263,17 @@ type SoundEffect =
         if this.ID <> 0 then
             Bass.SampleFree this.ID |> display_bass_error
 
+    member this.ChangeDevice() =
+        Bass.ChannelSetDevice(this.ID, current_device) |> display_bass_error
+        this.ChannelID <- Bass.SampleGetChannel(this.ID)
+        printfn "%i" this.ChannelID
+
     static member Default = { ID = 0; ChannelID = 0 }
 
 module SoundEffect =
 
     // todo: if you change audio device sfx stops working
     let play (fx: SoundEffect) (volume: float) =
-        Bass.ChannelSetDevice(fx.ChannelID, Bass.CurrentDevice) |> display_bass_error
-
         Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 2.0)
         |> display_bass_error
 
@@ -325,6 +328,9 @@ module Devices =
         Bass.GlobalSampleVolume <- int (fx_volume * 8000.0) |> max 0
         Bass.GlobalStreamVolume <- int (song_volume * 8000.0) |> max 0
 
+    let private current_device_changed_ev = Event<unit>()
+    let current_device_changed = current_device_changed_ev.Publish
+
     let private get () =
         devices <-
             seq {
@@ -360,6 +366,9 @@ module Devices =
                 Bass.ChannelSetDevice(Song.now_playing.ID, id) |> display_bass_error
 
             current_device <- id
+
+            current_device_changed_ev.Trigger()
+
         with err ->
             Logging.Error(sprintf "Error switching to audio output %i" index, err)
 

@@ -13,6 +13,7 @@ type Content() =
         Rulesets.init_window ()
         Themes.init_window ()
         Skins.init_window ()
+        Sounds.init_window ()
 
     static member deinit() = Data.deinit ()
 
