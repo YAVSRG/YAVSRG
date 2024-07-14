@@ -688,7 +688,7 @@ type PositionerInfo(ctx: PositionerContext) =
             if
                 currently_on_right
                 && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
-                && ctx.Positioners.[ctx.Selected].Bounds.Left > 225.0f
+                && ctx.Positioners.[ctx.Selected].Bounds.Left > 400.0f
             then
                 currently_on_right <- false
                 moved <- true
@@ -696,7 +696,7 @@ type PositionerInfo(ctx: PositionerContext) =
             elif
                 not currently_on_right
                 && (ctx.Positioners.[ctx.Selected].Bounds.Intersect this.Bounds).Visible
-                && ctx.Positioners.[ctx.Selected].Bounds.Right < this.Parent.Bounds.Right - 225.0f
+                && ctx.Positioners.[ctx.Selected].Bounds.Right < this.Parent.Bounds.Right - 400.0f
             then
                 currently_on_right <- true
                 moved <- true
