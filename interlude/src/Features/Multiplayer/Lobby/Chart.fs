@@ -114,6 +114,17 @@ module LobbyChart =
             last_seen_loaded_chart <- Some info
         )
 
+        Content.OnChartAdded.Add(fun () ->
+            match Network.lobby with
+            | Some lobby ->
+                if 
+                    Screen.current_type = Screen.Type.Lobby
+                    && not (is_loaded_or_loading()) 
+                then
+                    attempt_match_lobby_chart (lobby)
+            | None -> ()
+        )
+
 type SelectedChart(lobby: Lobby) =
     inherit Container(NodeType.None)
 
