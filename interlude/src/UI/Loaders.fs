@@ -45,59 +45,6 @@ module LoadingIndicator =
         let animation = Animation.Counter(1500.0)
         let fade = Animation.Fade 0.0f
 
-        // todo: move to Animations.fs
-        let draw (bounds: Rect) (a: float32) (length: float32) (color: Color) =
-            let perimeter = (bounds.Width + bounds.Height) * 2.0f
-            let a = a % 1.0f
-            let b = a + length
-
-            let corner_1 = bounds.Width / perimeter
-            let corner_2 = (bounds.Width + bounds.Height) / perimeter
-            let corner_3 = corner_1 + corner_2
-
-            if b > 1.0f || a < corner_1 then
-                Draw.rect
-                    (Rect.Create(
-                        (if b > 1.0f then
-                             bounds.Left
-                         else
-                             bounds.Left + a * perimeter),
-                        bounds.Top,
-                        bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right,
-                        bounds.Top + Style.PADDING
-                    ))
-                    color
-
-            if b > corner_1 && a < corner_2 then
-                Draw.rect
-                    (Rect.Create(
-                        bounds.Right - Style.PADDING,
-                        bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
-                        bounds.Right,
-                        bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom
-                    ))
-                    color
-
-            if b > corner_2 && a < corner_3 then
-                Draw.rect
-                    (Rect.Create(
-                        bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
-                        bounds.Bottom - Style.PADDING,
-                        bounds.Right - (b - corner_2) * perimeter |> max bounds.Left,
-                        bounds.Bottom
-                    ))
-                    color
-
-            if b > corner_3 && a < 1.0f then
-                Draw.rect
-                    (Rect.Create(
-                        bounds.Left,
-                        bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,
-                        bounds.Left + Style.PADDING,
-                        bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top
-                    ))
-                    color
-
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
             animation.Update elapsed_ms
@@ -111,10 +58,7 @@ module LoadingIndicator =
 
                 let b = this.Bounds.Expand(Style.PADDING)
                 let x = float32 (animation.Time / animation.Interval)
-                let color = Colors.white.O4a fade.Alpha
-                draw b x 0.1f color
-                draw b (x + 0.333f) 0.1f color
-                draw b (x + 0.666f) 0.1f color
+                LoadingAnimation.draw_border b x (Colors.white.O4a fade.Alpha)
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)

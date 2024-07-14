@@ -43,7 +43,7 @@ module Search =
                         .Title(%"options.search.no_results.title")
                         .Body(%"options.search.no_results.body")
                 )
-                (fun (w, h) -> Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y * 2.0f).SliceBottom(h).CenterX(w))
+                (fun (w, h) -> Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y * 2.0f).SliceBottom(h).CenterHorizontal(w))
             :> Widget
         else
             let content = 

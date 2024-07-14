@@ -81,6 +81,24 @@ type Rect =
     member inline this.Shrink(x, y) = this.Expand(-x, -y)
     member inline this.Shrink amount = this.Shrink(amount, amount)
 
+    member inline this.SliceCenterX amount =
+        let center = this.CenterX
+        {
+            Left = center - amount * 0.5f
+            Top = this.Top
+            Right = center + amount * 0.5f
+            Bottom = this.Bottom
+        }
+
+    member inline this.SliceCenterY amount =
+        let center = this.CenterY
+        {
+            Left = this.Left
+            Top = center - amount * 0.5f
+            Right = this.Right
+            Bottom = center + amount * 0.5f
+        }
+
     member inline this.SliceLeft amount =
         {
             Left = this.Left

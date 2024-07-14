@@ -153,7 +153,7 @@ type private Profile() =
                             Colors.text_pink_2
                         else
                             Colors.text_red_2),
-                Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)
+                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
             )
         )
         |+ Conditional(
@@ -163,7 +163,7 @@ type private Profile() =
                 add_friend,
                 Icons.USER_PLUS,
                 UnfocusedColor = Colors.text_green_2,
-                Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)
+                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
             )
         )
         // Color button on your profile
@@ -173,7 +173,7 @@ type private Profile() =
                 %"online.players.profile.change_color",
                 change_color_dropdown,
                 Icons.REFRESH_CCW,
-                Position = Position.TrimRight(40.0f).SliceTop(70.0f).SliceRight(300.0f)
+                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
             )
         )
         |+ color_picker
@@ -184,7 +184,7 @@ type private Profile() =
                 %"online.players.profile.invite_to_lobby",
                 (fun () -> Network.lobby.Value.InvitePlayer(data.Username)),
                 Icons.SEND,
-                Position = Position.TrimRight(380.0f).SliceTop(70.0f).SliceRight(300.0f)
+                Position = Position.TrimRight(380.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
             )
         )
         :> Widget

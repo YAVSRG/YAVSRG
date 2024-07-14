@@ -136,7 +136,7 @@ type OptionsMenuPage() =
             Position = { Position.Default with Right = 0.65f %- 60.0f }
         )
         |+ EmptyState(Icons.SETTINGS, %"menu.options", Subtitle = "Suggest in Discord what should go here")
-        |+ Callout.frame help_mode_info (fun (w, h) -> Position.CenterX(w).SliceBottom(h).Translate(0.0f, -65.0f))
+        |+ Callout.frame help_mode_info (fun (w, h) -> Position.CenterHorizontal(w).SliceBottom(h).Translate(0.0f, -65.0f))
         
     let options_home_page =
         NavigationContainer.Row(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))

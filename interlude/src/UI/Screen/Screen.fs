@@ -215,10 +215,7 @@ module Screen =
 
                 Draw.sprite
                     (Rect.Box(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
-                    (if HelpOverlay.info_available then
-                         Colors.white
-                     else
-                         Palette.color (255, 1.0f, 0.5f))
+                    (Palette.color (255, 1.0f, 0.5f))
                     (Content.Texture "cursor")
 
             perf.Draw()

@@ -588,16 +588,16 @@ type PositionerInfo(ctx: PositionerContext) =
 
     let mutable currently_on_right = true
 
-    let LEFT_POSITION : Position = Position.CenterY(400.0f).SliceLeft(375.0f)
-    let RIGHT_POSITION : Position = Position.CenterY(400.0f).SliceRight(375.0f)
+    let LEFT_POSITION : Position = Position.CenterVertical(400.0f).SliceLeft(375.0f)
+    let RIGHT_POSITION : Position = Position.CenterVertical(400.0f).SliceRight(375.0f)
 
     let dropdown_wrapper = 
         DropdownWrapper(
             (fun d ->
                 if currently_on_right then 
-                    Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
+                    Position.CenterVertical(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
                 else
-                    Position.CenterY(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
+                    Position.CenterVertical(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
             ), 
             FocusTrap = true
         )
