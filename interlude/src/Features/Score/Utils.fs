@@ -56,31 +56,22 @@ type ScoreScreenStats =
 
                     inc notes_count
 
-                if e.Delta < 0.0f<ms> then
-                    inc early_taps
-
-                if e.Judgement.IsSome then
+                if not e.Missed then
                     inc taps
-
-                    if not e.Missed then
-                        tap_sum ++ e.Delta
-                        tap_sumOfSq ++ e.Delta * float32 e.Delta
+                    tap_sum ++ e.Delta
+                    tap_sumOfSq ++ e.Delta * float32 e.Delta
+                    if e.Delta < 0.0f<ms> then
+                        inc early_taps
 
             | Release e ->
-                if not e.Missed then
-                    inc releases_released
-
                 inc releases_count
 
-                if e.Delta < 0.0f<ms> then
-                    inc early_releases
-
-                if e.Judgement.IsSome then
-                    inc releases
-
-                    if not e.Missed then
-                        release_sum ++ e.Delta
-                        release_sumOfSq ++ e.Delta * float32 e.Delta
+                if not e.Missed then
+                    inc releases_released
+                    release_sum ++ e.Delta
+                    release_sumOfSq ++ e.Delta * float32 e.Delta
+                    if e.Delta < 0.0f<ms> then
+                        inc early_releases
 
         let tap_mean = tap_sum.Value / float32 taps.Value
         let release_mean = release_sum.Value / float32 releases.Value
