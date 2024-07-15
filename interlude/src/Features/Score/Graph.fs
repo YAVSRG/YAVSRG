@@ -13,9 +13,9 @@ open Interlude.UI
 module GraphSettings =
 
     let only_releases = Setting.simple false
-    let column_filters = Array.create 10 true
+    let column_filter = Array.create 10 true
 
-type ScoreGraphSettingsPage() =
+type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()
 
     override this.Content() = 
@@ -37,9 +37,9 @@ type ScoreGraphSettingsPage() =
         :> Widget
 
     override this.Title = %"score.graph.settings"
-    override this.OnClose() = ()
+    override this.OnClose() = graph.Refresh()
 
-type ScoreGraph(score_info: ScoreInfo) =
+and ScoreGraph(score_info: ScoreInfo) =
     inherit StaticWidget(NodeType.None)
 
     let fbo = FBO.create ()
@@ -52,7 +52,7 @@ type ScoreGraph(score_info: ScoreInfo) =
 
     let draw_snapshot_info (bounds: Rect) (info: ScoreMetricSnapshot) =
         Draw.rect bounds Colors.shadow_2.O2
-        let row_height = bounds.Height / 3.0f
+        let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceTop(row_height).Shrink(20.0f, 5.0f)
 
         let accuracy = 
@@ -85,6 +85,14 @@ type ScoreGraph(score_info: ScoreInfo) =
             Alignment.LEFT
         )
 
+        Text.fill_b (
+            Style.font,
+            info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ",
+            text_b.Translate(0.0f, row_height * 3.0f).Shrink(0.0f, 5.0f),
+            Colors.text,
+            Alignment.LEFT
+        )
+
     do fbo.Unbind()
 
     member this.Refresh() = refresh <- true
@@ -94,8 +102,6 @@ type ScoreGraph(score_info: ScoreInfo) =
         let h = 0.5f * this.Bounds.Height
         let width = this.Bounds.Width
         fbo.Bind true
-
-        Draw.rect this.Bounds (Colors.black.O2)
 
         Draw.rect
             (Rect.Create(
@@ -181,24 +187,29 @@ type ScoreGraph(score_info: ScoreInfo) =
         let hscale = (width - 10.0f) / events.[events.Count - 1].Time
 
         for ev in events do
-            let y, col =
+            let dot : (float32 * Color) voption =
                 match ev.Guts with
                 | Hit evData ->
-                    match evData.Judgement with
-                    | Some judgement when not GraphSettings.only_releases.Value ->
-                        h - evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS),
-                        score_info.Ruleset.JudgementColor judgement
-                    | _ -> 0.0f, Color.Transparent
-                | Release evData ->
-                    match evData.Judgement with
-                    | Some judgement ->
-                        h
-                        - 0.5f * evData.Delta / score_info.Scoring.MissWindow
-                          * (h - THICKNESS - HTHICKNESS),
-                        Color.FromArgb(127, score_info.Ruleset.JudgementColor judgement)
-                    | None -> 0.0f, Color.Transparent
 
-            if col.A > 0uy then
+                    match evData.Judgement with
+                    | Some judgement when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
+                        let y = h - evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS)
+                        ValueSome(y, score_info.Ruleset.JudgementColor judgement)
+
+                    | _ -> ValueNone
+
+                | Release evData ->
+
+                    match evData.Judgement with
+                    | Some judgement when GraphSettings.column_filter.[ev.Column] ->
+                        let y = h - 0.5f * evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS)
+                        ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
+
+                    | _ -> ValueNone
+
+            match dot with
+            | ValueNone -> ()
+            | ValueSome (y, col) ->
                 let x = this.Bounds.Left + 5.0f + ev.Time * hscale
                 Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
 
@@ -211,9 +222,14 @@ type ScoreGraph(score_info: ScoreInfo) =
         if moved then
             refresh <- true
 
+        if Mouse.hover this.Bounds && Mouse.left_click() then
+            ScoreGraphSettingsPage(this).Show()
+
     override this.Draw() =
         if refresh then
             this.Redraw()
+
+        Draw.rect this.Bounds Colors.black.O2
 
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
@@ -222,15 +238,16 @@ type ScoreGraph(score_info: ScoreInfo) =
             let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = percent * float32 snapshots.Count |> int |> max 0 |> min (snapshots.Count - 1)
             let current_snapshot = snapshots.[snapshot_index]
-            let BOX_PADDING = 10.0f
+            let BOX_PADDING_X = 10.0f
+            let BOX_PADDING_Y = 0.0f
             let BOX_WIDTH = 300.0f
 
             let box =
                 Rect.Box(
-                    this.Bounds.Left + BOX_PADDING + percent * (this.Bounds.Width - BOX_WIDTH - BOX_PADDING - BOX_PADDING),
-                    this.Bounds.Top + BOX_PADDING,
+                    this.Bounds.Left + BOX_PADDING_X + percent * (this.Bounds.Width - BOX_WIDTH - BOX_PADDING_X - BOX_PADDING_X),
+                    this.Bounds.Top + BOX_PADDING_Y,
                     BOX_WIDTH,
-                    this.Bounds.Height - BOX_PADDING - BOX_PADDING
+                    this.Bounds.Height - BOX_PADDING_Y - BOX_PADDING_Y
                 )
 
             draw_snapshot_info box current_snapshot

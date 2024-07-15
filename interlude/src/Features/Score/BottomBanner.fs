@@ -103,11 +103,7 @@ type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: Sco
             GridFlowContainer<Widget>(65.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceBottom(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
             |+ InlaidButton(
                 %"score.graph.settings",
-                (fun () ->
-                    { new ScoreGraphSettingsPage() with
-                        override this.OnClose() = graph.Refresh()
-                    }
-                        .Show()
+                (fun () -> ScoreGraphSettingsPage(graph).Show()
                 ),
                 Icons.EDIT_2
             )
