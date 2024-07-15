@@ -16,6 +16,9 @@ type AccuracySystemState =
         mutable BestCombo: int
         mutable MaxPossibleCombo: int
         mutable ComboBreaks: int
+        mutable Sxx: float32<ms^2>
+        mutable Sx: Time
+        mutable N: float32
     }
     member this.BreakCombo(would_have_increased_combo: bool) =
         if would_have_increased_combo then
@@ -35,6 +38,16 @@ type AccuracySystemState =
         this.Judgements.[judge] <- this.Judgements.[judge] + 1
 
     member this.Add(judge: JudgementId) = this.Add(0.0, 0.0, judge)
+
+    member this.AddDelta(ms_delta: Time) =
+        this.N <- this.N + 1.0f
+        this.Sx <- this.Sx + ms_delta
+        this.Sxx <- this.Sxx + ms_delta * ms_delta
+
+    member this.Mean = if this.N = 0.0f then 0.0f<ms> else this.Sx / this.N
+    member this.StandardDeviation =
+        let mean = this.Mean
+        if this.N = 0.0f then 0.0f<ms> else MathF.Sqrt(this.Sxx / this.N - mean * mean |> float32) * 1.0f<ms>
 
 /// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
 /// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)

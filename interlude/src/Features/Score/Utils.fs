@@ -29,7 +29,7 @@ type ScoreScreenStats =
         let taps = ref 1
         let early_taps = ref 0
         let tap_sum = ref 0.0f<ms>
-        let tap_sumOfSq = ref 0.0f<ms>
+        let tap_sumOfSq = ref 0.0f<ms> // f# type system bug
         let releases = ref 1
         let early_releases = ref 0
         let release_sum = ref 0.0f<ms>
@@ -56,11 +56,11 @@ type ScoreScreenStats =
 
                     inc notes_count
 
+                if e.Delta < 0.0f<ms> then
+                    inc early_taps
+
                 if e.Judgement.IsSome then
                     inc taps
-
-                    if e.Delta < 0.0f<ms> then
-                        inc early_taps
 
                     if not e.Missed then
                         tap_sum ++ e.Delta
@@ -93,7 +93,8 @@ type ScoreScreenStats =
             TapMean = tap_mean
             TapStandardDeviation =
                 System.MathF.Sqrt(
-                    ((tap_sumOfSq.Value / float32 taps.Value * 1.0f<ms>) - tap_mean * tap_mean)
+                    ((tap_sumOfSq.Value / float32 taps.Value * 1.0f<ms>)
+                     - tap_mean * tap_mean)
                     |> float32
                 )
                 * 1.0f<ms>

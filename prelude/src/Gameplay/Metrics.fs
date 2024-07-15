@@ -66,6 +66,9 @@ type ScoreMetricSnapshot =
         MaxPointsScored: float
         Combo: int
         Lamp: int
+        Mean: Time
+        StandardDeviation: Time
+        Judgements: int array
     }
     static member COUNT = 200
 
@@ -98,7 +101,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
     member this.OnHit = on_hit
 
-    member val State =
+    member val State : AccuracySystemState =
         {
             Judgements = Array.zeroCreate ruleset.Judgements.Length
             PointsScored = 0.0
@@ -107,6 +110,9 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
             BestCombo = 0
             ComboBreaks = 0
             MaxPossibleCombo = 0
+            Sxx = 0.0f<ms * ms>
+            Sx = 0.0f<ms>
+            N = 0.0f
         }
 
     member this.Name = ruleset.Name
@@ -177,6 +183,9 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                     MaxPointsScored = this.State.MaxPointsScored
                     Combo = this.State.CurrentCombo
                     Lamp = Lamp.calculate ruleset.Grading.Lamps this.State
+                    Mean = this.State.Mean
+                    StandardDeviation = this.State.StandardDeviation
+                    Judgements = this.State.Judgements |> Array.copy
                 }
 
     member private this.HandlePassive(chart_time: ChartTime) =
@@ -416,6 +425,9 @@ type ScoreMetric(config: Ruleset, keys, replay, notes, rate) =
                 match ev.Guts with
                 | Hit_(delta, isHold, missed) ->
                     let judgement = window_func delta
+
+                    if not missed then
+                        this.State.AddDelta delta
 
                     if isHold then
                         head_judgements.[ev.Column] <- judgement

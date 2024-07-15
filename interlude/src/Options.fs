@@ -56,6 +56,8 @@ module Options =
     type ScoreGraphMode =
         | None = 0
         | Combo = 1
+        | Mean = 2
+        | StandardDeviation = 3
 
     type FailType =
         | Instant = 0

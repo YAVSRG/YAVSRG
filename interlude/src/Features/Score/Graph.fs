@@ -13,6 +13,7 @@ open Interlude.UI
 module GraphSettings =
 
     let only_releases = Setting.simple false
+    let column_filters = Array.create 10 true
 
 type ScoreGraphSettingsPage() =
     inherit Page()
@@ -24,6 +25,8 @@ type ScoreGraphSettingsPage() =
                 [|
                     ScoreGraphMode.None, %"score.graph.settings.graph_mode.none"
                     ScoreGraphMode.Combo, %"score.graph.settings.graph_mode.combo"
+                    ScoreGraphMode.Mean, %"score.graph.settings.graph_mode.mean"
+                    ScoreGraphMode.StandardDeviation, %"score.graph.settings.graph_mode.standard_deviation"
                 |],
                 options.ScoreGraphMode
             )
@@ -46,6 +49,41 @@ type ScoreGraph(score_info: ScoreInfo) =
     let HTHICKNESS = THICKNESS * 0.5f
 
     let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> Interlude.Utils.format_duration_ms
+
+    let draw_snapshot_info (bounds: Rect) (info: ScoreMetricSnapshot) =
+        Draw.rect bounds Colors.shadow_2.O2
+        let row_height = bounds.Height / 3.0f
+        let text_b = bounds.SliceTop(row_height).Shrink(20.0f, 5.0f)
+
+        let accuracy = 
+            if info.MaxPointsScored = 0.0 then
+                100.0
+            else
+                100.0 * info.PointsScored / info.MaxPointsScored
+
+        Text.fill_b (
+            Style.font,
+            sprintf "%.4f%%, %ix" accuracy info.Combo,
+            text_b,
+            Colors.text,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            info.Mean |> sprintf "M: %.2fms",
+            text_b.Translate(0.0f, row_height),
+            Colors.text,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            info.StandardDeviation |> sprintf "SD: %.2fms",
+            text_b.Translate(0.0f, row_height * 2.0f),
+            Colors.text,
+            Alignment.LEFT
+        )
 
     do fbo.Unbind()
 
@@ -71,13 +109,20 @@ type ScoreGraph(score_info: ScoreInfo) =
         let events = score_info.Scoring.HitEvents
         assert (events.Count > 0)
 
+        let draw_line (x1, y1) (x2, y2) (color: Color) =
+            let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
+            let dy = -HTHICKNESS * System.MathF.Cos theta
+            let dx = HTHICKNESS * System.MathF.Sin theta
+
+            Draw.untextured_quad
+                (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
+                color.O3.AsQuad
+
         // line graph
-        if
-            options.ScoreGraphMode.Value = ScoreGraphMode.Combo
-            && score_info.Scoring.Snapshots.Count > 0
-        then
+        match options.ScoreGraphMode.Value with
+        | ScoreGraphMode.Combo when score_info.Scoring.Snapshots.Count > 0 ->
             let snapshots = score_info.Scoring.Snapshots
-            let hscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
 
             for i = 1 to snapshots.Count - 1 do
                 let l, r =
@@ -85,17 +130,52 @@ type ScoreGraph(score_info: ScoreInfo) =
                     float32 snapshots.[i].Combo / float32 score_info.Scoring.State.BestCombo
 
                 let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
-                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * hscale
-                let x2 = this.Bounds.Left + snapshots.[i].Time * hscale
+                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
+                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
                 let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
                 let y2 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * r
-                let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
-                let dy = -HTHICKNESS * System.MathF.Cos theta
-                let dx = HTHICKNESS * System.MathF.Sin theta
+                
+                draw_line (x1, y1) (x2, y2) color
+        
+        | ScoreGraphMode.Mean when score_info.Scoring.Snapshots.Count > 0 ->
+            let snapshots = score_info.Scoring.Snapshots
+            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+            let yscale = 0.5f / 10.0f<ms>
+            let height = this.Bounds.Height
 
-                Draw.untextured_quad
-                    (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
-                    color.O3.AsQuad
+            for i = 1 to snapshots.Count - 1 do
+                let l, r =
+                    0.5f + snapshots.[i - 1].Mean * yscale |> min 1.0f |> max 0.0f,
+                    0.5f + snapshots.[i].Mean * yscale |> min 1.0f |> max 0.0f
+
+                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
+                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
+                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
+                let y1 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * l
+                let y2 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * r
+                
+                draw_line (x1, y1) (x2, y2) color
+
+        | ScoreGraphMode.StandardDeviation when score_info.Scoring.Snapshots.Count > 0 ->
+            let snapshots = score_info.Scoring.Snapshots
+            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+            let yscale = 1.0f / 25.0f<ms>
+            let height = this.Bounds.Height
+
+            for i = 1 to snapshots.Count - 1 do
+                let l, r =
+                    snapshots.[i - 1].StandardDeviation * yscale |> min 1.0f,
+                    snapshots.[i].StandardDeviation * yscale |> min 1.0f
+
+                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
+                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
+                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
+                let y1 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * l
+                let y2 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * r
+                
+                draw_line (x1, y1) (x2, y2) color
+
+        | _ -> ()
 
         // draw dots
         let hscale = (width - 10.0f) / events.[events.Count - 1].Time
@@ -138,41 +218,22 @@ type ScoreGraph(score_info: ScoreInfo) =
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
         if this.Bounds.Contains(Mouse.pos ()) && score_info.Scoring.Snapshots.Count > 0 then
-            let sss = score_info.Scoring.Snapshots
-            let pc = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
-            let snapshot_index = pc * float32 sss.Count |> int |> max 0 |> min (sss.Count - 1)
-            let ss = sss.[snapshot_index]
-            let box_h = this.Bounds.Height - 80.0f
+            let snapshots = score_info.Scoring.Snapshots
+            let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
+            let snapshot_index = percent * float32 snapshots.Count |> int |> max 0 |> min (snapshots.Count - 1)
+            let current_snapshot = snapshots.[snapshot_index]
+            let BOX_PADDING = 10.0f
+            let BOX_WIDTH = 300.0f
 
             let box =
                 Rect.Box(
-                    this.Bounds.Left + 40.0f + pc * (this.Bounds.Width - 200.0f - 80.0f),
-                    this.Bounds.Top + 40.0f,
-                    200.0f,
-                    box_h
+                    this.Bounds.Left + BOX_PADDING + percent * (this.Bounds.Width - BOX_WIDTH - BOX_PADDING - BOX_PADDING),
+                    this.Bounds.Top + BOX_PADDING,
+                    BOX_WIDTH,
+                    this.Bounds.Height - BOX_PADDING - BOX_PADDING
                 )
 
-            Draw.rect box Colors.shadow_2.O2
-
-            Text.fill_b (
-                Style.font,
-                (if ss.MaxPointsScored = 0.0 then
-                     100.0
-                 else
-                     100.0 * ss.PointsScored / ss.MaxPointsScored)
-                |> sprintf "%.4f%%",
-                box.SliceTop(box_h * 0.5f).Expand(-20.0f, -5.0f),
-                Colors.text,
-                Alignment.LEFT
-            )
-
-            Text.fill_b (
-                Style.font,
-                ss.Combo |> sprintf "%ix",
-                box.TrimTop(box_h * 0.5f).Expand(-20.0f, -5.0f),
-                Colors.text,
-                Alignment.LEFT
-            )
+            draw_snapshot_info box current_snapshot
 
             Text.draw (Style.font, %"score.graph.early", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1)
             Text.draw (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.white.O1)
