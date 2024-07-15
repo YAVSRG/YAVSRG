@@ -93,7 +93,7 @@ and ScoreGraph(score_info: ScoreInfo) =
         Text.fill_b (
             Style.font,
             info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ",
-            text_b.Translate(0.0f, row_height * 3.0f).Shrink(0.0f, 5.0f),
+            text_b.Translate(0.0f, row_height * 3.0f),
             Colors.text,
             Alignment.LEFT
         )
