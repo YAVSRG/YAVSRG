@@ -42,7 +42,7 @@ module Gameplay =
         }
 
     let set_score (met_pacemaker: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
-        let mod_status = score_info.ModStatus()
+        let mod_status = score_info.ModStatus
 
         if
             mod_status < ModStatus.Unstored

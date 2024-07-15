@@ -48,10 +48,7 @@ type ScoreInfo =
     member this.Accuracy = this.Scoring.Value
     member this.Mods = this.WithMods.ModsApplied
 
-    member this.ModStatus() =
-        match Mods.check this.Mods with
-        | Ok r -> r
-        | Error msg -> failwith msg
+    member this.ModStatus = this.WithMods.Status
 
     member this.ModString() =
         Mods.format (this.Rate, this.Mods, false)

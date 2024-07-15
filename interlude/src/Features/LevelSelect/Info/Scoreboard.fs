@@ -156,7 +156,7 @@ module Scoreboard =
                             let score_info =
                                 ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
 
-                            if score_info.ModStatus() = Mods.ModStatus.Ranked then
+                            if score_info.ModStatus = Mods.ModStatus.Ranked then
                                 req.NewBests <-
                                     Some(
                                         match req.NewBests with

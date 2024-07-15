@@ -71,6 +71,13 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit) =
     inherit Page()
 
+    let mutable last_seen_mod_status = ModStatus.Ranked
+    let mod_status () = 
+        match SelectedChart.WITH_MODS with 
+        | Some m -> last_seen_mod_status <- m.Status
+        | None -> ()
+        last_seen_mod_status
+
     override this.Content() =
         let mod_grid =
             GridFlowContainer<Widget>(
@@ -125,6 +132,26 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
             .Help(Help.Info("gameplay.pacemaker"))
             .Pos(17)
+
+        |+ PageSetting(%"mods.mod_status", 
+            Text(
+                (fun () -> 
+                    match mod_status() with
+                    | ModStatus.Ranked -> %"mods.mod_status.ranked"
+                    | ModStatus.Unranked -> %"mods.mod_status.unranked"
+                    | _ -> %"mods.mod_status.unstored"
+                ),
+                Color = 
+                    (fun () -> 
+                        match mod_status() with
+                        | ModStatus.Ranked -> Colors.text_green_2
+                        | ModStatus.Unranked -> Colors.text_yellow_2
+                        | _ -> Colors.text_greyout
+                    ),
+                Align = Alignment.LEFT
+            )
+        )
+            .Pos(20)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

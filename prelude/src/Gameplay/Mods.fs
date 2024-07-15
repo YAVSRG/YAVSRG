@@ -5,16 +5,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 
-(*
-    Marker for status of mods.
-        0 = This is a non-silly mod suitable for online upload, personal bests, leaderboards
-        1 = This is a for-fun mod that may transform a chart in large ways or are otherwise not suitable for leaderboards e.g. randomiser
-        2 = Scores with this mod enabled should not be saved at all e.g. something experimental or still in development
-*)
-type ModStatus =
-    | Ranked = 0
-    | Unranked = 1
-    | Unstored = 2
+type ModStatus = Processing.ModStatus
 
 type ModState = Map<string, int>
 
@@ -196,6 +187,7 @@ module Mods =
             }
 
         let mutable mods_applied = []
+        let mutable status = ModStatus.Ranked
 
         for id, m, state in in_priority_order mods do
             let new_mc, mod_was_applied = m.Apply state modchart_internal
@@ -203,6 +195,7 @@ module Mods =
             if mod_was_applied then
                 mods_applied <- mods_applied @ [ id ]
                 modchart_internal <- new_mc
+                status <- max status m.Status
 
         {
             Keys = modchart_internal.Keys
@@ -212,6 +205,7 @@ module Mods =
 
             ModsSelected = mods
             ModsApplied = List.fold (fun m i -> Map.add i mods.[i] m) Map.empty mods_applied
+            Status = status
         }
 
     let format (rate: float32, mods: ModState, autoplay: bool) =

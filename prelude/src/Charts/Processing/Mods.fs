@@ -4,6 +4,17 @@ open System
 open Prelude
 open Prelude.Charts
 
+(*
+    Marker for status of mods.
+        0 = This is a non-silly mod suitable for online upload, personal bests, leaderboards
+        1 = This is a for-fun mod that may transform a chart in large ways or are otherwise not suitable for leaderboards e.g. randomiser
+        2 = Scores with this mod enabled should not be saved at all e.g. something experimental or still in development
+*)
+type ModStatus =
+    | Ranked = 0
+    | Unranked = 1
+    | Unstored = 2
+
 type ModdedChart =
     {
         Keys: int
@@ -12,6 +23,7 @@ type ModdedChart =
         SV: TimeArray<float32>
         ModsSelected: Map<string, int>
         ModsApplied: Map<string, int>
+        Status: ModStatus
     }
     member this.FirstNote = this.Notes.[0].Time
     member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
