@@ -99,18 +99,18 @@ module ScoreInfo =
 module Bests =
 
     let update (score_info: ScoreInfo) (existing: Bests) : Bests * ImprovementFlags =
-        let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate) existing.Lamp
+        let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate, score_info.TimePlayed) existing.Lamp
 
         let a, ap =
-            PersonalBests.update (score_info.Accuracy, score_info.Rate) existing.Accuracy
+            PersonalBests.update (score_info.Accuracy, score_info.Rate, score_info.TimePlayed) existing.Accuracy
 
-        let g, gp = PersonalBests.update (score_info.Grade, score_info.Rate) existing.Grade
+        let g, gp = PersonalBests.update (score_info.Grade, score_info.Rate, score_info.TimePlayed) existing.Grade
 
         { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
 
     let create (score_info: ScoreInfo) : Bests =
         {
-            Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate)
-            Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate)
-            Grade = PersonalBests.create (score_info.Grade, score_info.Rate)
+            Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate, score_info.TimePlayed)
+            Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate, score_info.TimePlayed)
+            Grade = PersonalBests.create (score_info.Grade, score_info.Rate, score_info.TimePlayed)
         }

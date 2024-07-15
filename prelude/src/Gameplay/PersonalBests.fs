@@ -30,14 +30,14 @@ type ImprovementFlags =
             Grade = Improvement.New
         }
 
-type PersonalBests<'T> = ('T * float32) list
+type PersonalBests<'T> = ('T * float32 * int64) list // Value, Rate, Timestamp
 
 module PersonalBests =
 
     let rec get_best_above_with_rate (minimum_rate: float32) (bests: PersonalBests<'T>) =
         match bests with
         | [] -> None
-        | (value, rate) :: xs ->
+        | (value, rate, _) :: xs ->
             if rate = minimum_rate then
                 Some(value, rate)
             elif rate < minimum_rate then
@@ -54,7 +54,7 @@ module PersonalBests =
     let rec get_best_below_with_rate (maximum_rate: float32) (bests: PersonalBests<'T>) =
         match bests with
         | [] -> None
-        | (value, rate) :: xs ->
+        | (value, rate, _) :: xs ->
             if rate > maximum_rate then
                 get_best_below_with_rate maximum_rate xs
             else
@@ -63,33 +63,33 @@ module PersonalBests =
     let get_best_below maximum_rate =
         get_best_below_with_rate maximum_rate >> Option.map fst
 
-    let create (value: 'T, rate: float32) : PersonalBests<'T> = [ value, rate ]
+    let create (value: 'T, rate: float32, timestamp: int64) : PersonalBests<'T> = [ value, rate, timestamp ]
 
-    let inline update (value: 'T, rate: float32) (bests: PersonalBests<'T>) : PersonalBests<'T> * Improvement<'T> =
+    let inline update (value: 'T, rate: float32, timestamp: int64) (bests: PersonalBests<'T>) : PersonalBests<'T> * Improvement<'T> =
         let rec remove_worse_breakpoints (v: 'T) (bests: PersonalBests<'T>) =
             match bests with
             | [] -> []
-            | (value, _) :: xs when value <= v -> remove_worse_breakpoints v xs
+            | (value, _, _) :: xs when value <= v -> remove_worse_breakpoints v xs
             | xs -> xs
 
         let rec loop (xs: PersonalBests<'T>) : PersonalBests<'T> * Improvement<'T> =
             match xs with
-            | [] -> (value, rate) :: [], Improvement.New
-            | (v, r) :: xs ->
+            | [] -> (value, rate, timestamp) :: [], Improvement.New
+            | (v, r, t) :: xs ->
                 if rate < r && value > v then
-                    let res, imp = loop xs in (v, r) :: res, imp
+                    let res, imp = loop xs in (v, r, t) :: res, imp
                 elif rate < r then
-                    (v, r) :: xs, Improvement.None
+                    (v, r, t) :: xs, Improvement.None
                 elif rate = r && value > v then
-                    (value, rate) :: remove_worse_breakpoints value xs, Improvement.Better(value - v)
+                    (value, rate, timestamp) :: remove_worse_breakpoints value xs, Improvement.Better(value - v)
                 elif rate = r then
-                    (v, r) :: xs, Improvement.None
+                    (v, r, t) :: xs, Improvement.None
                 else if value > v then
-                    (value, rate) :: remove_worse_breakpoints value xs, Improvement.FasterBetter(rate - r, value - v)
+                    (value, rate, timestamp) :: remove_worse_breakpoints value xs, Improvement.FasterBetter(rate - r, value - v)
                 elif value = v then
-                    (value, rate) :: remove_worse_breakpoints value xs, Improvement.Faster(rate - r)
+                    (value, rate, timestamp) :: remove_worse_breakpoints value xs, Improvement.Faster(rate - r)
                 else
-                    (value, rate) :: (v, r) :: xs, Improvement.New
+                    (value, rate, timestamp) :: (v, r, t) :: xs, Improvement.New
 
         loop bests
 

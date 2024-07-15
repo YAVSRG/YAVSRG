@@ -93,6 +93,7 @@
     <Compile Include="Features\Mounts\Edit.fs" />
     <Compile Include="Features\Mounts\Display.fs" />
     <Compile Include="Features\Mounts\Mounts.fs" />
+    <Compile Include="Features\Rulesets\Recalculate.fs" />
     <Compile Include="Features\Rulesets\Edit\EditRuleset.fs" />
     <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />

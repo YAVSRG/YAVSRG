@@ -8,8 +8,6 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Prelude
 open Prelude.Charts
-open Prelude.Data.Library.Caching
-open Prelude.Data.``osu!``
 open Prelude.Data
 open Prelude.Gameplay
 open Interlude
@@ -96,47 +94,10 @@ module Printerlude =
                         | _ -> ()
             )
 
-        let private personal_best_fixer =
-            { new Async.Service<string * Ruleset, unit>() with
-                override this.Handle((ruleset_id, ruleset)) =
-                    async {
-                        for cc in Content.Cache.Entries.Values |> Seq.toArray do
-                            let data = ScoreDatabase.get cc.Hash Content.Scores
-
-                            if not data.Scores.IsEmpty then
-                                match Cache.load cc Content.Cache with
-                                | Error reason ->
-                                    Logging.Debug(sprintf "Couldn't load %s for pb processing: %s" cc.Key reason)
-                                | Ok chart ->
-
-                                let existing_bests = data.PersonalBests
-                                let mutable new_bests = existing_bests
-
-                                for score in data.Scores do
-                                    let score_info = ScoreInfo.from_score cc chart ruleset score
-
-                                    if new_bests.ContainsKey ruleset_id then
-                                        let ruleset_bests, _ = Bests.update score_info new_bests.[ruleset_id]
-                                        new_bests <- Map.add ruleset_id ruleset_bests new_bests
-                                    else
-                                        new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
-
-                                if new_bests <> existing_bests then
-                                    data.PersonalBests <- new_bests
-
-                        Logging.Info(sprintf "Finished processing personal bests for %s" ruleset.Name)
-                    }
-            }
-
-        let fix_personal_bests () =
-            personal_best_fixer.Request((Rulesets.current_hash, Rulesets.current), ignore)
-            Logging.Info("Queued a reprocess of personal bests")
-
         let register_commands (ctx: ShellContext) =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithCommand("fix_personal_bests", "Fix personal best display values", fix_personal_bests)
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand(
                     "local_server",

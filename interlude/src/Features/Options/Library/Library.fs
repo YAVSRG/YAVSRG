@@ -10,6 +10,8 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
+open Interlude.Features.Rulesets
+
 type LibraryPage() =
     inherit Page()
 
@@ -65,6 +67,13 @@ type LibraryPage() =
             )
             .Help(Help.Info("library.recache_patterns"))
             .Pos(7, 2, PageWidth.Full)
+        |+ PageButton
+            .Once(
+                %"library.recalculate_personal_bests",
+                PersonalBests.recalculate
+            )
+            .Help(Help.Info("library.recalculate_personal_bests"))
+            .Pos(9, 2, PageWidth.Full)
 
     let mount_options =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.5f %+ 10.0f })

@@ -203,6 +203,11 @@ module DbChartData =
             );
             """
         }
+    
+    let internal RESET_PERSONAL_BESTS: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL = """ UPDATE chart_data SET PersonalBests = '[]'; """
+        }
 
     let private GET: Query<string, DbChartData> =
         {

@@ -244,4 +244,10 @@ module Settings =
                         )
                 )
                     .Help(Help.Info("library.recache_patterns"))
+            if token_match tokens [|%"library.recalculate_personal_bests"|] then
+                yield PageButton.Once(
+                    %"library.recalculate_personal_bests",
+                    PersonalBests.recalculate
+                )
+                    .Help(Help.Info("library.recalculate_personal_bests"))
         }

@@ -163,6 +163,11 @@ module ScoreDatabase =
             "AddChartIdIndexToScores"
             (fun db -> DbScores.CREATE_INDEX.Execute () db |> expect |> ignore)
             db
+        
+        Database.migrate
+            "ResetPbDataTimestampsAdded"
+            (fun db -> DbChartData.RESET_PERSONAL_BESTS.Execute () db |> expect |> ignore)
+            db
 
         db
 
