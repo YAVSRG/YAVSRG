@@ -18,6 +18,9 @@ module GraphSettings =
 type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()
 
+    let column_filter_setting k = Setting.make (fun v -> GraphSettings.column_filter.[k] <- v) (fun () -> GraphSettings.column_filter.[k])
+    let column_filter_ui, _ = refreshable_row (fun () -> graph.Keys) (fun k _ -> Checkbox(column_filter_setting k, Position = Position.SliceLeft(100.0f).Translate(float32 k * 100.0f, 0.0f)))
+
     override this.Content() = 
         page_container()
         |+ PageSetting(%"score.graph.settings.graph_mode", 
@@ -34,6 +37,8 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
             .Pos(0)
         |+ PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
             .Pos(3)
+        |+ PageSetting(%"score.graph.settings.column_filter", column_filter_ui)
+            .Pos(5, 2, PageWidth.Full)
         :> Widget
 
     override this.Title = %"score.graph.settings"
@@ -96,6 +101,8 @@ and ScoreGraph(score_info: ScoreInfo) =
     do fbo.Unbind()
 
     member this.Refresh() = refresh <- true
+
+    member this.Keys : int = score_info.WithMods.Keys
 
     member private this.Redraw() =
         refresh <- false
