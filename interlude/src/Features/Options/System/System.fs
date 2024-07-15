@@ -31,29 +31,99 @@ type WindowedResolution(setting: Setting<int * int>) as this =
         )
 
 type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
-    inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
+    inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(560.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
+    let rec gcd a b =
+        if a = b then a
+        elif a > b then gcd (a - b) b
+        else gcd a (b - a)
+
+    let mutable aspect_ratio =
+        let mode = setting.Value
+        let gcd = gcd mode.Width mode.Height
+        mode.Width / gcd, mode.Height / gcd
+
+    let setting = setting |> Setting.trigger (fun mode -> let gcd = gcd mode.Width mode.Height in aspect_ratio <- mode.Width / gcd, mode.Height / gcd)
+
+    let buttons = 
+        GridFlowContainer(PRETTYHEIGHT - 10.0f, 3)
+        |+ Button(
+            (fun () -> let mode = setting.Value in sprintf "%ix%i" mode.Width mode.Height),
+            (fun () -> this.ToggleResolutionDropdown())
+        )
+        |+ Button(
+            (fun () -> sprintf "%ihz" setting.Value.RefreshRate),
+            (fun () -> this.ToggleRefreshRateDropdown())
+        )
+        |+ Button(
+            (fun () -> sprintf "%i:%i" (fst aspect_ratio) (snd aspect_ratio)),
+            (fun () -> this.ToggleAspectRatioDropdown())
+        )
+
+    let dropdown_wrapper = 
+        DropdownWrapper(
+            (fun d -> 
+                Position.BorderBottom(min d.Height 400.0f).Margin(Style.PADDING, 0.0f)
+            ),
+            OnClose = fun () -> buttons.Focus(false)
+        )
+
+    member this.Buttons = buttons
 
     override this.Init(parent) =
         this
-        |+ Text(
-            (fun () -> let mode = setting.Value in sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate),
-            Align = Alignment.LEFT
-        )
-        |+ Clickable.Focus this
+        |+ buttons
         |* dropdown_wrapper
 
         base.Init parent
 
-    member this.ToggleDropdown() =
+    member this.ToggleResolutionDropdown() =
         dropdown_wrapper.Toggle(fun () ->
+            let current_mode = setting.Value
+            let (ax, ay) = aspect_ratio
             Dropdown
                 {
                     Items =
                         modes_thunk ()
+                        |> Seq.filter (fun mode -> mode.RefreshRate = current_mode.RefreshRate && mode.Height * ax = mode.Width * ay)
                         |> Seq.map (fun mode ->
-                            mode, sprintf "%ix%i@%ihz" mode.Width mode.Height mode.RefreshRate
+                            mode, sprintf "%ix%i" mode.Width mode.Height
+                        )
+                    ColorFunc = K Colors.text
+                    Setting = setting
+                }
+        )
+
+    member this.ToggleRefreshRateDropdown() =
+        dropdown_wrapper.Toggle(fun () ->
+            let current_mode = setting.Value
+            let (ax, ay) = aspect_ratio
+            Dropdown
+                {
+                    Items =
+                        modes_thunk ()
+                        |> Seq.filter (fun mode -> mode.Width = current_mode.Width && mode.Height = current_mode.Height)
+                        |> Seq.map (fun mode ->
+                            mode, sprintf "%ihz" mode.RefreshRate
+                        )
+                    ColorFunc = K Colors.text
+                    Setting = setting
+                }
+        )
+
+    member this.ToggleAspectRatioDropdown() =
+        dropdown_wrapper.Toggle(fun () ->
+            let current_mode = setting.Value
+            Dropdown
+                {
+                    Items =
+                        modes_thunk ()
+                        |> Seq.map (fun mode -> mode, let r = gcd mode.Width mode.Height in mode.Width / r, mode.Height / r)
+                        |> Seq.sortBy (fun (mode, _) -> abs (mode.RefreshRate - current_mode.RefreshRate))
+                        |> Seq.sortBy (fun (mode, _) -> abs (mode.Height - current_mode.Height))
+                        |> Seq.distinctBy snd
+                        |> Seq.map (fun (mode, (ax, ay)) ->
+                            mode, sprintf "%ix%i (%i:%i)" mode.Width mode.Height ax ay
                         )
                     ColorFunc = K Colors.text
                     Setting = setting
