@@ -158,6 +158,7 @@ module Sorting =
                 "title", Comparison(compare_by (fun x -> x.Title) |> then_compare_by (fun x -> x.Physical))
                 "artist", Comparison(compare_by (fun x -> x.Artist) |> then_compare_by (fun x -> x.Physical))
                 "creator", Comparison(compare_by (fun x -> x.Creator) |> then_compare_by (fun x -> x.Physical))
+                "length", Comparison(compare_by (fun x -> x.Length) |> then_compare_by (fun x -> x.Physical))
             ]
 
     type FilterPart =
