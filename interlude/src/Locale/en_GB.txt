@@ -458,6 +458,7 @@ levelselect.sortby=Chart sorting
 levelselect.sortby.artist=Artist
 levelselect.sortby.bpm=BPM
 levelselect.sortby.creator=Creator
+levelselect.sortby.date_installed=Date added
 levelselect.sortby.difficulty=Difficulty
 levelselect.sortby.length=Length
 levelselect.sortby.reverse_hint=Reverse sorting direction

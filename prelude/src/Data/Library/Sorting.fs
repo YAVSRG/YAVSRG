@@ -159,6 +159,7 @@ module Sorting =
                 "artist", Comparison(compare_by (fun x -> x.Artist) |> then_compare_by (fun x -> x.Physical))
                 "creator", Comparison(compare_by (fun x -> x.Creator) |> then_compare_by (fun x -> x.Physical))
                 "length", Comparison(compare_by (fun x -> x.Length) |> then_compare_by (fun x -> x.Physical))
+                "date_installed", Comparison(compare_by (fun x -> x.DateAdded) |> then_compare_by (fun x -> x.Physical))
             ]
 
     type FilterPart =
