@@ -13,9 +13,7 @@ type RegisterPage(discord_tag) =
     let register () =
         Network.complete_registration (username.Value.Trim())
 
-    let submit_button = PageButton(%"register.register", register, Enabled = false)
-
-    let agree_tos = Setting.simple false |> Setting.trigger submit_button.set_Enabled
+    let agree_tos = Setting.simple false
 
     let handler = NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back())
 
@@ -44,7 +42,8 @@ type RegisterPage(discord_tag) =
             .Pos(16)
         |+ PageSetting(%"register.confirm_terms_of_service", Checkbox agree_tos)
             .Pos(18)
-        |+ submit_button.Pos(21)
+        |+ PageButton(%"register.register", register, Disabled = fun () -> not agree_tos.Value || username.Value = "")
+            .Pos(21)
         :> Widget
 
     override this.Title = %"register"

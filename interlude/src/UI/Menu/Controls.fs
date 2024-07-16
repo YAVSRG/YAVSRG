@@ -308,7 +308,7 @@ type PageButton(localised_text, action) as this =
     inherit
         Container(
             NodeType.Button(fun _ ->
-                if this.Enabled then
+                if not (this.Disabled()) then
                     Style.click.Play()
                     action ()
             )
@@ -327,7 +327,7 @@ type PageButton(localised_text, action) as this =
             ),
             Color =
                 (fun () ->
-                    if this.Enabled then
+                    if not (this.Disabled()) then
                         (if this.Focused then Colors.text_yellow_2 else Colors.text)
                     else
                         Colors.text_greyout
@@ -349,23 +349,29 @@ type PageButton(localised_text, action) as this =
 
         base.Draw()
 
-    member val Enabled = true with get, set
+    member val Disabled = K false with get, set
 
     static member Once(localised_text, action) =
-        let mutable ref = Unchecked.defaultof<PageButton>
+        let mutable clicked = false
+        PageButton(
+            localised_text,
+            (fun () -> 
+                clicked <- true
+                action()
+            ),
+            Disabled = fun () -> clicked
+        )
 
-        let button =
-            PageButton(
-                localised_text,
-                fun () ->
-                    if ref.Enabled then
-                        action ()
-
-                    ref.Enabled <- false
-            )
-
-        ref <- button
-        button
+    static member Once(localised_text, action, disabled: unit -> bool) =
+        let mutable clicked = false
+        PageButton(
+            localised_text,
+            (fun () -> 
+                clicked <- true
+                action()
+            ),
+            Disabled = fun () -> clicked || disabled()
+        )
 
 type PageTextEntry(name, setting) =
     inherit

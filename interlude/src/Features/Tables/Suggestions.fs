@@ -145,7 +145,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
 
     override this.Content() =
         page_container()
-        |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, Icon = Icons.PLAY, Enabled = (suggestion.LocalChart.IsSome || suggestion.BackbeatInfo.IsSome))
+        |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, K (suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone), Icon = Icons.PLAY)
             .Pos(6)
         |+ PageButton(
             %"table.suggestions.vote_another_level", 
@@ -153,7 +153,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             Icon = Icons.EDIT_2
         )
             .Pos(8)
-        |+ PageButton(%"table.suggestions.accept", (fun () -> SelectTableLevelPage(table, accept_level).Show()), Icon = Icons.CHECK, Enabled = suggestion.BackbeatInfo.IsSome)
+        |+ PageButton(%"table.suggestions.accept", (fun () -> SelectTableLevelPage(table, accept_level).Show()), Icon = Icons.CHECK, Disabled = K suggestion.BackbeatInfo.IsNone)
             .Conditional(fun () -> Network.credentials.Username = "Percyqaz") // todo: add permission check instead of temporary check
             .Pos(10)
         |+ PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()), Icon = Icons.X)

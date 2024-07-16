@@ -12,7 +12,7 @@ open Interlude.UI
 type private CreateFolderPage(on_create: (string * Collection) -> unit) =
     inherit Page()
 
-    let new_name = Setting.simple "Folder" |> Setting.alphanumeric
+    let new_name = Setting.simple "" |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
     override this.Content() = 
@@ -29,7 +29,8 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
                     on_create (new_name.Value, Folder folder)
                 | None ->
                     Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
-            )
+            ),
+            Disabled = fun () -> new_name.Value = ""
         )
             .Pos(6)
         :> Widget
@@ -48,7 +49,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
 type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
     inherit Page()
 
-    let new_name = Setting.simple "Playlist" |> Setting.alphanumeric
+    let new_name = Setting.simple "" |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
     override this.Content() =
@@ -65,7 +66,8 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
                     on_create (new_name.Value, Playlist playlist)
                 | None ->
                     Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
-            )
+            ),
+            Disabled = fun () -> new_name.Value = ""
         )
             .Pos(6)
         :> Widget

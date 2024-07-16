@@ -38,7 +38,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
                 Menu.Back()
             ),
             Icon = Icons.FLAG,
-            Enabled = Network.lobby.IsNone
+            Disabled = K Network.lobby.IsSome
         )
             .Help(Help.Info("score.challenge"))
             .Pos(4)

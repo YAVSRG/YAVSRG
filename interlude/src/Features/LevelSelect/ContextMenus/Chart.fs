@@ -52,7 +52,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                         Menu.Back()
                 ),
                 Icon = Icons.ARROW_UP_CIRCLE,
-                Enabled = (index > 0)
+                Disabled = K (index = 0)
             )
             |+ PageButton(
                 %"chart.move_down_in_playlist",
@@ -61,7 +61,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                         Menu.Back()
                 ),
                 Icon = Icons.ARROW_DOWN_CIRCLE,
-                Enabled = (index + 1 < Content.Collections.GetPlaylist(name).Value.Charts.Count)
+                Disabled = K (index + 1 = Content.Collections.GetPlaylist(name).Value.Charts.Count)
             )
             |+ PageButton(
                 [ name ] %> "chart.remove_from_collection",
@@ -81,7 +81,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                             Content.Library
                     ) true
                 ),
-                Icon = Icons.PLAY
+                Icon = Icons.PLAY,
+                Disabled = K Network.lobby.IsSome
             )
             |+ if index > 0 then 
                 [PageButton.Once(
@@ -94,7 +95,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                                 Content.Library
                         ) true
                     ),
-                    Icon = Icons.PLAY
+                    Icon = Icons.PLAY,
+                    Disabled = K Network.lobby.IsSome
                 )] else []
             |* PageButton.Once(
                 %"playlist.play_shuffled",
@@ -105,7 +107,8 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                             Content.Library
                     ) true
                 ),
-                Icon = Icons.SHUFFLE
+                Icon = Icons.SHUFFLE,
+                Disabled = K Network.lobby.IsSome
             )
 
         if Some cc = SelectedChart.CACHE_DATA then

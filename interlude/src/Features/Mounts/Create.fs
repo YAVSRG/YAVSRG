@@ -18,6 +18,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
         | MountedGameType.Quaver -> Imports.QUAVER_SONG_FOLDER
         | MountedGameType.Stepmania -> Imports.STEPMANIA_PACK_FOLDER
         | MountedGameType.Etterna -> Imports.ETTERNA_PACK_FOLDER
+
     let folder_detected = System.IO.Directory.Exists auto_detect_location
 
     let info =
@@ -66,7 +67,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
         |+ PageButton(
             (if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"), 
             (fun () -> FileDrop.on_file_drop.Value auto_detect_location),
-            Enabled = folder_detected
+            Disabled = K (not folder_detected)
         ).Pos(6)
         |+ Callout.frame info (fun (w, h) -> pretty_pos (0, 5, PageWidth.Custom w))
         :> Widget

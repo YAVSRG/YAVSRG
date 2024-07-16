@@ -46,20 +46,9 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
 
     let mutable delete = false
 
-    let delete_button =
-        PageButton(
-            %"gameplay.preset.delete",
-            fun () ->
-                delete <- true
-                Menu.Back()
-        )
-
     let preset = setting.Value.Value
     let name = Setting.simple preset.Name
-
-    let mode =
-        Setting.simple preset.Mode
-        |> Setting.trigger (fun mode -> delete_button.Enabled <- mode <> PresetMode.Locked)
+    let mode = Setting.simple preset.Mode
 
     override this.Content() =
         let keymode_preference =
@@ -86,7 +75,15 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
         |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
             .Help(Help.Info("gameplay.preset.keymode_preference"))
             .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
-        |+ delete_button.Pos(7)
+        |+ PageButton(
+            %"gameplay.preset.delete",
+            (fun () ->
+                delete <- true
+                Menu.Back()
+            ),
+            Disabled = fun () -> mode.Value = PresetMode.Locked
+        )
+            .Pos(7)
         // todo: localise
         |+ Text("Current preset options:", Align = Alignment.LEFT, Color = K Colors.text).Pos(10, 1)
         |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed, Align = Alignment.LEFT, Color = K Colors.text_subheading).Pos(11, 1)
