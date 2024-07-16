@@ -7,6 +7,7 @@ open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Skins
+open Interlude.Features.Gameplay
 
 type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Button))
@@ -147,6 +148,7 @@ module private Presets =
                             EditPresetPage(preset_id, setting).Show()
                     | None -> ()
                 ),
+                Floating = true,
                 Disabled = (fun () -> setting.Value.IsNone),
                 Position = Position.SliceTop(40.0f)
             )
@@ -170,6 +172,7 @@ module private Presets =
                                 [ s.Name ] %> "gameplay.preset.load.prompt",
                                 fun () ->
                                     Presets.load preset_id |> ignore
+                                    SelectedChart.recolor()
                                     SkinPreview.RefreshAll()
 
                                     Notifications.action_feedback (
@@ -181,6 +184,7 @@ module private Presets =
                                 .Show()
                         else
                             Presets.load preset_id |> ignore
+                            SelectedChart.recolor()
                             SkinPreview.RefreshAll()
                             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     | None -> ()
