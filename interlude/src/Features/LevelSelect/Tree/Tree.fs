@@ -225,8 +225,10 @@ module Tree =
 
             if currently_drag_scrolling then
                 update_drag_scroll (origin, total_height, tree_height)
-            elif mx > Viewport.vwidth * 0.4f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
+            elif mx > Viewport.vwidth * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
                 start_drag_scroll ()
+            elif mx < Viewport.vwidth * 0.2f then
+                scroll_to <- ScrollTo.Chart
 
             if click_cooldown > 0.0 then
                 click_cooldown <- click_cooldown - elapsed_ms
