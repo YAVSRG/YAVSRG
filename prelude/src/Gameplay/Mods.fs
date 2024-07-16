@@ -54,7 +54,7 @@ module Mods =
 
             "shuffle",
             { Mod.Default with
-                Status = ModStatus.Unstored
+                Status = ModStatus.Unranked
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.shuffle s mc
                 Exclusions = [ "random"; "mirror" ]
@@ -62,7 +62,7 @@ module Mods =
             
             "random",
             { Mod.Default with
-                Status = ModStatus.Unstored
+                Status = ModStatus.Unranked
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.randomise s mc
                 Exclusions = [ "shuffle"; "mirror" ]
