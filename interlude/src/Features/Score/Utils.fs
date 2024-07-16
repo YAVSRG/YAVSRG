@@ -101,7 +101,7 @@ type ScoreScreenStats =
                 * 1.0f<ms>
             ReleaseEarlyPercent = float early_releases.Value / float releases.Value
 
-            JudgementCount = taps.Value + releases.Value - 2
+            JudgementCount = Array.sum judgements
 
             MA =
                 let mv = if judgements.Length > 0 then judgements.[0] else 0
