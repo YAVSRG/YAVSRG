@@ -356,7 +356,7 @@ module MoreNotes =
 module Randomise =
     
     let shuffle (seed: int) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
-        let random = new Random(seed)
+        let random = PseudoRandom.FromSeed(seed)
         let shuffled_columns = Array.init chart.Keys id 
         random.Shuffle shuffled_columns
 
@@ -369,7 +369,7 @@ module Randomise =
         { chart with Notes = TimeArray.map shuffle_notes chart.Notes }, true
 
     let randomise (seed: int) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
-        let random = new Random(seed)
+        let random = PseudoRandom.FromSeed(seed)
 
         let original_chart_column_last_used = Array.create chart.Keys -Time.infinity
 

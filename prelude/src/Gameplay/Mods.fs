@@ -136,7 +136,7 @@ module Mods =
         assert(APPLICATION_PRIORITY_ORDER.Length = AVAILABLE_MODS.Count)
         assert(MENU_DISPLAY_ORDER.Length = AVAILABLE_MODS.Count)
 
-    let private r = new Random()
+    let private seed_generation = new Random()
 
     let name (id: string) (state: int option) =
         match state with
@@ -159,7 +159,7 @@ module Mods =
         else
             let state =
                 if AVAILABLE_MODS.[id].RandomSeed then
-                    r.Next(-Int32.MinValue,0)
+                    seed_generation.Next(-Int32.MinValue,0)
                 else
                     0
 

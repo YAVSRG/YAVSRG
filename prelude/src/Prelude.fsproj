@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="Random.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="IO\Web.fs" />
     <Compile Include="IO\Images.fs" />
