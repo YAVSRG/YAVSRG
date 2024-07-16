@@ -66,6 +66,9 @@ type ChartSaveData(chart_id: string, data: DbChartData, db: ScoreDatabase) =
         with get () = scores
         and internal set v = scores <- v
 
+    member this.ScoreByTimestamp (timestamp: int64) =
+        scores |> List.tryFind (fun score -> score.Timestamp = timestamp)
+
 and ScoreDatabase =
     internal
         {

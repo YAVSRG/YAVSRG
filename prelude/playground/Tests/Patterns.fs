@@ -45,8 +45,8 @@ module Patterns =
             let data = ScoreDatabase.get cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
-                match PersonalBests.get_best_above_with_rate 1.0f pbs.Accuracy with
-                | Some (acc, rate) ->
+                match PersonalBests.get_best_above 1.0f pbs.Accuracy with
+                | Some (acc, rate, _) ->
                     match library.Cache.Patterns.TryGetValue cc.Hash with
                     | true, res ->
                         for p in res.Patterns do

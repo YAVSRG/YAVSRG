@@ -88,8 +88,8 @@ type Accuracy
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs ->
-                    match PersonalBests.get_best_above_with_rate score_info.Rate pbs.Accuracy with
-                    | Some(v, r) ->
+                    match PersonalBests.get_best_above score_info.Rate pbs.Accuracy with
+                    | Some(v, r, _) ->
 
                         let summary, distance_from_pb =
                             if r > score_info.Rate then
@@ -172,8 +172,8 @@ type Lamp
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs ->
-                    match PersonalBests.get_best_above_with_rate score_info.Rate pbs.Lamp with
-                    | Some(v, r) ->
+                    match PersonalBests.get_best_above score_info.Rate pbs.Lamp with
+                    | Some(v, r, _) ->
 
                         let summary =
                             if r > score_info.Rate then

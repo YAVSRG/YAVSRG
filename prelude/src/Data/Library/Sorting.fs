@@ -72,7 +72,7 @@ module Sorting =
             data.PersonalBests
             |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
         with
-        | Some i -> i, ctx.Ruleset.GradeName i
+        | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
         | None -> -2, "No grade achieved"
 
     let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
@@ -82,7 +82,7 @@ module Sorting =
             data.PersonalBests
             |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
         with
-        | Some i -> i, ctx.Ruleset.LampName i
+        | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"
 
     type GroupMethod = CachedChart * LibraryViewContext -> int * string

@@ -52,12 +52,12 @@ module private TreeState =
         | Some b -> Colors.white.O2
 
     let get_pb (bests: PersonalBests<'T>) (color_func: 'T -> Color) (format: 'T -> string) =
-        match PersonalBests.get_best_above_with_rate SelectedChart.rate.Value bests with
-        | Some(v, r) -> Some(v, r, color_func v, format v)
+        match PersonalBests.get_best_above SelectedChart.rate.Value bests with
+        | Some(v, r, _) -> Some(v, r, color_func v, format v)
         | None ->
 
-        match PersonalBests.get_best_below_with_rate SelectedChart.rate.Value bests with
-        | Some(v, r) -> Some(v, r, Colors.white.O2, format v)
+        match PersonalBests.get_best_below SelectedChart.rate.Value bests with
+        | Some(v, r, _) -> Some(v, r, Colors.white.O2, format v)
         | None -> None
 
     let CHART_HEIGHT = 90.0f

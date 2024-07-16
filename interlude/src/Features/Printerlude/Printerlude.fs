@@ -78,7 +78,7 @@ module Printerlude =
                             data.PersonalBests
                             |> Bests.ruleset_best_above table.Info.RulesetId (_.Accuracy) 1.0f
                         with
-                        | Some acc when acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0) ->
+                        | Some (acc, _, _) when acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0) ->
                             for score in data.Scores do
                                 Charts.Scores.Save.post (
                                     ({

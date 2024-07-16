@@ -30,38 +30,33 @@ type ImprovementFlags =
             Grade = Improvement.New
         }
 
-type PersonalBests<'T> = ('T * float32 * int64) list // Value, Rate, Timestamp
+type PersonalBestEntry<'T> = 'T * float32 * int64 // Value, Rate, Timestamp
+type PersonalBests<'T> = PersonalBestEntry<'T> list
 
 module PersonalBests =
 
-    let rec get_best_above_with_rate (minimum_rate: float32) (bests: PersonalBests<'T>) =
+    let rec get_best_above (minimum_rate: float32) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
         match bests with
         | [] -> None
-        | (value, rate, _) :: xs ->
+        | (value, rate, timestamp) :: xs ->
             if rate = minimum_rate then
-                Some(value, rate)
+                Some(value, rate, timestamp)
             elif rate < minimum_rate then
                 None
             else
-                get_best_above_with_rate minimum_rate xs
+                get_best_above minimum_rate xs
                 |> function
-                    | None -> Some(value, rate)
+                    | None -> Some(value, rate, timestamp)
                     | Some x -> Some x
 
-    let get_best_above minimum_rate =
-        get_best_above_with_rate minimum_rate >> Option.map fst
-
-    let rec get_best_below_with_rate (maximum_rate: float32) (bests: PersonalBests<'T>) =
+    let rec get_best_below (maximum_rate: float32) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
         match bests with
         | [] -> None
-        | (value, rate, _) :: xs ->
+        | (value, rate, timestamp) :: xs ->
             if rate > maximum_rate then
-                get_best_below_with_rate maximum_rate xs
+                get_best_below maximum_rate xs
             else
-                Some(value, rate)
-
-    let get_best_below maximum_rate =
-        get_best_below_with_rate maximum_rate >> Option.map fst
+                Some(value, rate, timestamp)
 
     let create (value: 'T, rate: float32, timestamp: int64) : PersonalBests<'T> = [ value, rate, timestamp ]
 
@@ -104,22 +99,12 @@ type Bests =
 
 module Bests =
     
-    let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : 'T option =
+    let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_below maximum_rate (property bests)
     
-    let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : 'T option =
+    let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_above minimum_rate (property bests)
-    
-    let ruleset_best_below_with_rate<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : ('T * float32) option =
-        match map.TryFind ruleset with
-        | None -> None
-        | Some bests -> PersonalBests.get_best_below_with_rate maximum_rate (property bests)
-    
-    let ruleset_best_above_with_rate<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : ('T * float32) option =
-        match map.TryFind ruleset with
-        | None -> None
-        | Some bests -> PersonalBests.get_best_above_with_rate minimum_rate (property bests)

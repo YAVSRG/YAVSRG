@@ -2,6 +2,7 @@
 
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Mods
 open Prelude.Data
 open Interlude.Options
 open Interlude.Content
@@ -66,8 +67,17 @@ module PacemakerState =
 
                 if setting.UsePersonalBest then
                     match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) SelectedChart.rate.Value with
-                    | Some best_accuracy ->
-                        PacemakerState.Accuracy best_accuracy
+                    | Some (best_accuracy, _, timestamp) ->
+
+                        match info.SaveData.ScoreByTimestamp timestamp with
+                        | Some score ->
+                            let with_mods = Mods.apply score.Mods info.Chart
+                            let replay_data = score.Replay |> Replay.decompress_bytes
+                            let scoring = Metrics.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+
+                            PacemakerState.Replay scoring
+
+                        | None -> PacemakerState.Accuracy best_accuracy
                     | None -> PacemakerState.Accuracy setting.Accuracy
                 else
                     PacemakerState.Accuracy setting.Accuracy
@@ -77,7 +87,7 @@ module PacemakerState =
                 let lamp =
                     if setting.UsePersonalBest then
                         match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
-                        | Some best_lamp -> best_lamp
+                        | Some (best_lamp, _, _) -> best_lamp
                         | None -> setting.Lamp
                     else
                         setting.Lamp
