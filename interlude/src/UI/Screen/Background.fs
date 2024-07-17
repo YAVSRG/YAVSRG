@@ -71,8 +71,12 @@ module Background =
 
                             if bmp.Width * 3 / 4 > Viewport.rwidth && Viewport.rwidth > 0 then
                                 bmp.Mutate(fun img -> img.Resize(Viewport.rwidth, 0) |> ignore)
+                            let new_bmp = new Bitmap(bmp.Width, bmp.Height, SixLabors.ImageSharp.PixelFormats.Rgba32(0uy, 0uy, 0uy, 255uy))
+                            new_bmp.Mutate(fun img -> img.DrawImage(bmp, 1.0f) |> ignore)
 
-                            return Some(bmp, col)
+                            bmp.Dispose()
+
+                            return Some(new_bmp, col)
                         with err ->
                             Logging.Warn("Failed to load background image: " + file, err)
                             return None
