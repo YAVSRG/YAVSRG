@@ -1,1 +1,1 @@
-﻿Patch for SC rulesets not being in repo any more
+﻿Update server version to support mod changes
