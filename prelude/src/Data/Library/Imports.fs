@@ -112,7 +112,7 @@ module Imports =
                                             function 
                                             | Ok original -> 
                                                 original.Notes.Length = chart.Notes.Length 
-                                                && abs(chart.LastNote * rate - original.LastNote) < 2.0f<ms>
+                                                && abs((chart.LastNote - chart.FirstNote) * rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
                                             | _ -> false
                                         )
                                     if original.IsSome then 
