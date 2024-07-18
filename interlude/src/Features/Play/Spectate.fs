@@ -9,7 +9,6 @@ open Prelude
 open Prelude.Gameplay
 open Interlude.Web.Shared.Packets
 open Interlude.Content
-open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay

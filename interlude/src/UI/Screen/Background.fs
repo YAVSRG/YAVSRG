@@ -98,6 +98,11 @@ module Background =
                     Palette.accent_color.Target <- Content.ThemeConfig.DefaultAccentColor
         }
 
+    let get_current () =
+        match List.tryHead background with
+        | Some (sprite, _, false) -> Some sprite
+        | _ -> None
+
     let load (path: string option) =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
         loader.Request(if Content.ThemeConfig.AlwaysUseDefaultBackground then None else path)

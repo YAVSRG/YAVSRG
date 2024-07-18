@@ -98,6 +98,7 @@ module Animation =
         member val Interval = milliseconds with get, set
         member this.Time = elapsed
         member this.Loops = loops
+        // todo: percent getter
 
         member this.Reset() =
             elapsed <- 0.0
@@ -123,6 +124,7 @@ module Animation =
         member this.Time = min elapsed this.Interval
         member this.FrameSkip() = frameskip <- true
         member this.Reset() = elapsed <- 0.0
+        // todo: percent getter
 
         override this.Update(elapsed_ms) =
             if frameskip then
