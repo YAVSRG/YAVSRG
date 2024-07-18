@@ -84,10 +84,10 @@ type EtternaPacksBrowserPage() =
         NavigationContainer.Column(Position = Position.CenterX(1400.0f).TrimTop(90.0f).TrimBottom(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
-        |+ EmptyState(Icons.X, %"etterna_pack_browser.error")
+        |+ EmptyState(Icons.X, %"etterna_pack_browser.error", Position = Position.TrimTop(120.0f))
             .Conditional(fun () -> failed)
         |+ EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results", Position = Position.TrimTop(120.0f))
-            .Conditional(fun () -> not loading && items.Count = 0)
+            .Conditional(fun () -> not failed && not loading && items.Count = 0)
         :> Widget
 
     override this.Header() =
