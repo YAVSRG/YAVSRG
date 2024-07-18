@@ -193,9 +193,6 @@ module Osu_To_Interlude =
             if keys < 3 || keys > 10 then
                 skip_conversion "Keymode not supported"
 
-            if detect_rate_mod(b.Metadata.Version).IsSome then
-                skip_conversion "Skipping rate modded beatmap"
-
             if b.Objects.Length < 20 then
                 skip_conversion "Beatmap has less than 20 notes"
 

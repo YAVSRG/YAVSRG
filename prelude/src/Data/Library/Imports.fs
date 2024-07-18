@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.IO.Compression
+open System.Text.RegularExpressions
 open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Charts
@@ -52,6 +53,23 @@ module Imports =
                 ImportOnStartup = false
             }
 
+    let private RATE_REGEX =
+        Regex(
+            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
+        )
+
+    let detect_rate_mod (difficulty_name: string) : float32 option =
+        let m = RATE_REGEX.Match difficulty_name
+
+        if m.Success then
+            let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
+
+            match Single.TryParse r with
+            | true, r -> Some r
+            | false, _ -> None
+        else
+            None
+
     let convert_song_folder =
         { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
             override this.Handle((path, config, { Cache = cache })) =
@@ -80,12 +98,36 @@ module Imports =
                             | Error skipped_conversion -> Error skipped_conversion
                         )
                         |> List.ofSeq
+
+                    let filter_rates =
+                        results 
+                        |> List.map (
+                            function
+                            | Ok chart ->
+                                match detect_rate_mod chart.Header.DiffName with
+                                | Some rate ->
+                                    let original =
+                                        results
+                                        |> List.tryFind (
+                                            function 
+                                            | Ok original -> 
+                                                original.Notes.Length = chart.Notes.Length 
+                                                && abs(chart.LastNote * rate - original.LastNote) < 2.0f<ms>
+                                            | _ -> false
+                                        )
+                                    if original.IsSome then 
+                                        Error (chart.LoadedFromPath, sprintf "Skipping %.2fx rate of another map" rate)
+                                    else Ok chart
+                                | None -> Ok chart
+                            | Error skipped_conversion -> Error skipped_conversion
+                        )
+
                     let mutable success_count = 0
-                    let charts = results |> Seq.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                    let charts = filter_rates |> Seq.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
                     Cache.add_new config.PackName charts cache
                     return {
                         ConvertedCharts = success_count
-                        SkippedCharts = results |> List.choose (function Error skipped -> Some skipped | _ -> None)
+                        SkippedCharts = filter_rates |> List.choose (function Error skipped -> Some skipped | _ -> None)
                     }
                 }
         }

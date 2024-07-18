@@ -951,7 +951,6 @@ module ``osu!`` =
             }
 
     open System.Text
-    open System.Text.RegularExpressions
     open System.IO
 
     let beatmap_from_file path : Result<Beatmap, string> =
@@ -975,20 +974,3 @@ module ``osu!`` =
 
     let storyboard_to_file path events =
         File.WriteAllText(path, storyboard_to_string events + "\n\n")
-
-    let private RATE_REGEX =
-        Regex(
-            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)x)"""
-        )
-    // Interlude supports rates, so rate mods are detected to be skipped when batch converting
-    let detect_rate_mod (difficulty_name: string) : float32 option =
-        let m = RATE_REGEX.Match difficulty_name
-
-        if m.Success then
-            let r = m.Value.Trim([| ' '; 'x' |]).Replace(',', '.')
-
-            match System.Single.TryParse r with
-            | true, r -> Some r
-            | false, _ -> None
-        else
-            None

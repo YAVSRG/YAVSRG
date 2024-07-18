@@ -10,6 +10,7 @@ open Prelude.Charts.Formats.``osu!``
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Interlude.Options
 open Interlude.Content
@@ -56,7 +57,7 @@ module Scores =
 
             match Cache.by_hash chart_hash Content.Cache with
             | None ->
-                match detect_rate_mod beatmap_data.Difficulty with
+                match Imports.detect_rate_mod beatmap_data.Difficulty with
                 | Some rate ->
                     let chart = Chart.scale rate chart
                     let chart_hash = Chart.hash chart
