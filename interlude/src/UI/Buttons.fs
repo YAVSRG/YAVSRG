@@ -104,7 +104,9 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
         let area = this.Bounds.TrimBottom(15.0f)
 
         let text =
-            if this.Focused then
+            if icon = "" then 
+                label_func()
+            elif this.Focused then
                 sprintf "%s %s" this.HoverIcon this.HoverText
             else
                 sprintf "%s %s" icon (label_func())

@@ -8,6 +8,9 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 
+type Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys
+type MouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton
+
 type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
@@ -61,8 +64,6 @@ type Bind =
         (if ctrl then "Ctrl + " else "")
         + (if alt then "Alt + " else "")
         + (if shift then "Shift + " else "")
-
-    static member DummyBind = Setting.simple Dummy
 
     static member internal IsModifier(k: Keys) =
         k = Keys.LeftShift

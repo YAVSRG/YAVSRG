@@ -556,6 +556,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
         )
 
     member val IsHighlighted = K false with get, set
+    member val Keybind = Bind.Dummy with get, set
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -564,6 +565,10 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
     override this.Init(parent) =
         this |* Clickable.Focus this
         base.Init(parent)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        if this.Keybind.Tapped() then on_click()
 
     override this.Draw() =
         let is_highlighted = this.IsHighlighted()

@@ -24,7 +24,7 @@ module Skins =
                 if not Content.Noteskin.IsEmbedded then
                     yield PageButton(
                         %"noteskin.edit",
-                        (fun () -> EditNoteskinPage(false).Show())
+                        (fun () -> EditNoteskinPage().Show())
                     )
                         .Help(Help.Info("noteskin.edit"))
 

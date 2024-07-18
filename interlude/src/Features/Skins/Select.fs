@@ -169,7 +169,7 @@ type SelectSkinsPage() =
                 )
             )
                 .Show()
-        else EditNoteskinPage(false).Show()
+        else EditNoteskinPage().Show()
 
     override this.Content() =
         refresh ()

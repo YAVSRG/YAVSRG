@@ -8,7 +8,7 @@ open Interlude.UI
 open Interlude.Features.Skins
 open Interlude.Features.Skins.EditNoteskin
 
-type EditNoteskinPage(from_hotkey: bool) =
+type EditNoteskinPage() =
     inherit Page()
 
     let noteskin_id = Skins.selected_noteskin_id.Value
@@ -158,13 +158,6 @@ type EditNoteskinPage(from_hotkey: bool) =
         )
         |>> Container
         |+ preview
-        |+ (Callout.frame
-                (Callout.Small
-                    .Icon(Icons.INFO)
-                    .Title(%"noteskin.hotkey_hint")
-                    .Hotkey("edit_noteskin"))
-                (fun (w, h) -> Position.SliceTop(h).SliceRight(w).Translate(-20.0f, 20.0f))
-            ).Conditional(fun () -> not from_hotkey)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

@@ -2,7 +2,6 @@
 
 open System.IO
 open System.Collections.Generic
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Flux.Input
@@ -331,8 +330,8 @@ module Options =
             Hotkeys.register "options" (ctrl Keys.O)
             Hotkeys.register "wiki" (ctrl Keys.H)
             Hotkeys.register "console" (mk Keys.GraveAccent)
-            Hotkeys.register "edit_noteskin" (ctrl Keys.E)
             Hotkeys.register "player_list" (mk Keys.F9)
+            Hotkeys.register "quick_menu" (ctrl Keys.Tab)
 
             Hotkeys.register "library_mode" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)

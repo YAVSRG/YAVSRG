@@ -1,8 +1,11 @@
 namespace Interlude.Features.OptionsMenu.Library
 
+open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.Library.Caching
 open Prelude
+open Prelude.Data
+open Prelude.Data.Library
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -11,9 +14,48 @@ open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
 open Interlude.Features.Rulesets
+open Interlude.Features.Import.osu
+open Interlude.Features.Tables.Browser
+
+module Imports =
+    
+    let import_in_progress () =
+        WebServices.download_file.Status <> Async.ServiceStatus.Idle
+        || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
+        || Cache.recache_service.Status <> Async.ServiceStatus.Idle
+        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+        || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
 type LibraryPage() =
     inherit Page()
+
+    let import_info =
+        Container(NodeType.None, Position = pretty_pos(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
+        |+ Text(
+            (fun () ->
+                if Imports.import_in_progress () then
+                    %"imports.in_progress"
+                else
+                    %"imports.not_in_progress"
+            ),
+            Color =
+                (fun () ->
+                    if Imports.import_in_progress () then
+                        Colors.text_green
+                    else
+                        Colors.text_subheading
+                ),
+            Position = Position.SliceTop(40.0f).Margin(20.0f, 0.0f)
+        )
+        |+ LoadingIndicator.Strip(
+            Imports.import_in_progress,
+            Position = Position.Row(40.0f, Style.PADDING).Margin(150.0f, 0.0f)
+        )
+        |+ Text(
+            sprintf "%i charts installed" Content.Library.Cache.Entries.Count,
+            Color = K Colors.text_subheading,
+            Position = Position.Row(65.0f, 30.0f).Margin(20.0f, 0.0f)
+        )
 
     let main_options =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
@@ -74,6 +116,8 @@ type LibraryPage() =
             )
             .Help(Help.Info("library.recalculate_personal_bests"))
             .Pos(9, 2, PageWidth.Full)
+
+        |+ import_info
 
     let mount_options =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.5f %+ 10.0f })

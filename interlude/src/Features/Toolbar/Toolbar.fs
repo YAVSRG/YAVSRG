@@ -13,8 +13,8 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
+open Interlude.Features.OptionsMenu.Library
 open Interlude.Features.Printerlude
-open Interlude.Features.Skins.EditNoteskin
 
 type Toolbar() =
     inherit Widget(NodeType.None)
@@ -34,7 +34,6 @@ type Toolbar() =
         | None -> ()
 
     let import_button =
-        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height).Translate(0.0f, HEIGHT).SliceLeft(370.0f))
         let container = 
             InlaidButton(
                 %"menu.import",
@@ -65,12 +64,19 @@ type Toolbar() =
             (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
             Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
+        )            
+        |+ InlaidButton(
+            Icons.MENU,
+            (fun () -> QuickMenuPage().Show()),
+            "",
+            Position = Position.SliceTop(HEIGHT).TrimLeft(10.0f).SliceLeft(HEIGHT)
         )
+            .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
         |+ (FlowContainer.LeftToRight(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
-                Position = Position.SliceTop(HEIGHT).TrimLeft(20.0f)
+                Position = Position.SliceTop(HEIGHT).TrimLeft(HEIGHT + 20.0f)
             )
             |+ InlaidButton(
                 %"menu.options",
@@ -97,16 +103,6 @@ type Toolbar() =
             )
                 .Help(Help.Info("menu.stats")))
         |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
-        |+ HotkeyAction(
-            "edit_noteskin",
-            fun () ->
-                if
-                    Screen.current_type <> Screen.Type.Play
-                    && Screen.current_type <> Screen.Type.Replay
-                    && (not Content.Noteskin.IsEmbedded)
-                then
-                    EditNoteskinPage(true).Show()
-        )
         |+ HotkeyAction(
             "reload_content",
             fun () ->
@@ -194,6 +190,8 @@ type Toolbar() =
         
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
             OptionsMenuPage().Show()
+        if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
+            QuickMenuPage().Show()
 
         Terminal.update ()
 

@@ -1,9 +1,9 @@
 namespace Interlude.Features.OptionsMenu
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude
 open Interlude.Options
 open Interlude.UI
@@ -18,7 +18,6 @@ type private Transition =
 
 [<RequireQualifiedAccess>]
 type private OptionsMenuTab =
-    | Home
     | System
     | Gameplay
     | Library
@@ -27,7 +26,7 @@ type private OptionsMenuTab =
 
 module private State =
 
-    let mutable recent_tab = OptionsMenuTab.Home
+    let mutable recent_tab = OptionsMenuTab.System
 
 type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
@@ -42,34 +41,32 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let tab_buttons =
         DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.CenterY(60.0f))
         |+ OptionsMenuButton(
-            Icons.HOME,
-            60.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.Home),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Home)
-        )
-        |+ OptionsMenuButton(
             sprintf "%s %s" Icons.AIRPLAY (%"system"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.System),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
+            Keybind = Bind.mk Keys.D1
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
+            Keybind = Bind.mk Keys.D2
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"skins"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins),
+            Keybind = Bind.mk Keys.D3
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.ARCHIVE (%"library"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Library),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library)
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library),
+            Keybind = Bind.mk Keys.D4
         )
 
     let search_box =
