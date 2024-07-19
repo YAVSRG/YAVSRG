@@ -68,7 +68,13 @@ module FileDrop =
             defer 
             <| fun () -> 
                 Menu.Exit()
-                osu.Skins.import_osu_noteskin path
+                osu.Skins.import_osu_skin path
+
+        | StepmaniaNoteskinFolder ->
+            defer
+            <| fun () ->
+                Menu.Exit()
+                Etterna.Skins.import_stepmania_noteskin path
 
         | InterludeSkinArchive ->
             try
@@ -84,7 +90,7 @@ module FileDrop =
             defer 
             <| fun () -> 
                 Menu.Exit()
-                osu.Skins.import_osu_noteskin target
+                osu.Skins.import_osu_skin target
             // todo: clean up extracted noteskin in downloads
 
         | Unknown -> // Treat it as a chart/pack/library import

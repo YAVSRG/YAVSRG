@@ -203,15 +203,16 @@ and Menu(top_level: Page) as this =
         | Some instance -> instance.Exit()
 
     member private this.Back() =
-        namestack <- List.tail namestack
-        nest_level <- nest_level - 1
-        let page = stack.[nest_level].Value
-        page.OnClose()
-        page.Hide(page.Direction.Reverse)
-
         if nest_level > 0 then
-            stack.[nest_level - 1].Value.Show(page.Direction.Reverse)
-            stack.[nest_level - 1].Value.OnReturnFromNestedPage()
+            namestack <- List.tail namestack
+            nest_level <- nest_level - 1
+            let page = stack.[nest_level].Value
+            page.OnClose()
+            page.Hide(page.Direction.Reverse)
+
+            if nest_level > 0 then
+                stack.[nest_level - 1].Value.Show(page.Direction.Reverse)
+                stack.[nest_level - 1].Value.OnReturnFromNestedPage()
 
     member private this.Exit() =
         while namestack <> [] do

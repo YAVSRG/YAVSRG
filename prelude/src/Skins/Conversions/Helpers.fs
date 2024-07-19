@@ -5,10 +5,12 @@ open System.IO
 [<AutoOpen>]
 module IdentifyFolder =
 
-    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
+    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|StepmaniaNoteskinFolder|Unknown|) (path: string) =
         if Directory.Exists path then
             if File.Exists(Path.Combine(path, "skin.ini")) then
                 OsuSkinFolder
+            elif File.Exists(Path.Combine(path, "metrics.ini")) then
+                StepmaniaNoteskinFolder
             else
                 Unknown
         else

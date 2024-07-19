@@ -51,9 +51,9 @@ module Skins =
                                 try
                                     match existing_folder with
                                     | Some old_name ->
-                                        let noteskin_path = Path.Combine(get_game_folder "Skins", old_name)
-                                        if Directory.Exists noteskin_path then
-                                            Directory.Delete(noteskin_path, true)
+                                        let skin_path = Path.Combine(get_game_folder "Skins", old_name)
+                                        if Directory.Exists skin_path then
+                                            Directory.Delete(skin_path, true)
                                     | None -> failwith "impossible"
                                 with err ->
                                     Logging.Error("Error deleting old skin")
@@ -79,7 +79,7 @@ module Skins =
         override this.Title = ini.General.Name
         override this.OnClose() = ()
 
-    let import_osu_noteskin (path: string) =
+    let import_osu_skin (path: string) =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
         let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
 
@@ -125,7 +125,7 @@ module Skins =
                         for path in osu_skin_paths do
                             yield PageButton(
                                 Path.GetFileName(path), 
-                                fun () -> import_osu_noteskin(path)
+                                fun () -> import_osu_skin(path)
                             )
                     },
                     Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
