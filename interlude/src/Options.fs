@@ -357,6 +357,8 @@ module Options =
             Hotkeys.register "practice_mode" (mk Keys.V)
             Hotkeys.register "accept_suggestion" (mk Keys.Tab)
 
+            Hotkeys.register "uprate_big" (ctrlShift Keys.Equal)
+            Hotkeys.register "downrate_big" (ctrlShift Keys.Minus)
             Hotkeys.register "uprate" (mk Keys.Equal)
             Hotkeys.register "downrate" (mk Keys.Minus)
             Hotkeys.register "uprate_half" (ctrl Keys.Equal)

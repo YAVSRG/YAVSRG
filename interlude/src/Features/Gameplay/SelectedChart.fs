@@ -404,12 +404,16 @@ module SelectedChart =
             change_rate_by (0.01f)
         elif (%%"uprate_half").Tapped() then
             change_rate_by (0.05f)
+        elif (%%"uprate_big").Tapped() then
+            change_rate_by (0.25f)
         elif (%%"uprate").Tapped() then
             change_rate_by (0.1f)
         elif (%%"downrate_small").Tapped() then
             change_rate_by (-0.01f)
         elif (%%"downrate_half").Tapped() then
             change_rate_by (-0.05f)
+        elif (%%"downrate_big").Tapped() then
+            change_rate_by (-0.25f)
         elif (%%"downrate").Tapped() then
             change_rate_by (-0.1f)
 

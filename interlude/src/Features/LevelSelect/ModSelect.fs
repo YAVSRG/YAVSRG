@@ -116,7 +116,11 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
             Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
             Format = sprintf "%.02fx")
         )
-            .Help(Help.Info("gameplay.rate"))
+            .Help(
+                Help.Info("gameplay.rate")
+                    .Hotkey(%"levelselect.selected_mods.uprate.hint", "uprate")
+                    .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
+            )
             .Pos(0)
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
             Color = K Colors.text_subheading,
