@@ -194,9 +194,9 @@ and ScoreGraph(score_info: ScoreInfo) =
             this.DrawLineGraph(y_func, line_color)
 
         | ScoreGraphLineMode.StandardDeviation when score_info.Scoring.Snapshots.Count > 0 ->
-
-            let yscale = 1.0f / 25.0f<ms>
-            let y_func (snapshot: ScoreMetricSnapshot) = snapshot.StandardDeviation * yscale |> min 1.0f
+        
+            let max_sd = score_info.Scoring.Snapshots |> Seq.map _.StandardDeviation |> Seq.max
+            let y_func (snapshot: ScoreMetricSnapshot) = snapshot.StandardDeviation / max_sd
             this.DrawLineGraph(y_func, line_color)
 
         | ScoreGraphLineMode.Accuracy when score_info.Scoring.Snapshots.Count > 0 ->
