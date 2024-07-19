@@ -52,11 +52,18 @@ module Options =
             }
 
     [<RequireQualifiedAccess>]
-    type ScoreGraphMode =
+    type ScoreGraphLineMode =
         | None = 0
         | Combo = 1
         | Mean = 2
         | StandardDeviation = 3
+        | Accuracy = 4
+        
+    [<RequireQualifiedAccess>]
+    type ScoreGraphLineColor =
+        | White = 0
+        | Lamp = 1
+        | Grade = 2
 
     type FailType =
         | Instant = 0
@@ -185,7 +192,8 @@ module Options =
 
             VanishingNotes: Setting<bool>
             AutoCalibrateOffset: Setting<bool>
-            ScoreGraphMode: Setting<ScoreGraphMode>
+            ScoreGraphLineMode: Setting<ScoreGraphLineMode>
+            ScoreGraphLineColor: Setting<ScoreGraphLineColor>
             ConfirmExit: Setting<bool>
             HoldToGiveUp: Setting<bool>
         }
@@ -297,7 +305,8 @@ module Options =
 
                 VanishingNotes = Setting.simple true
                 AutoCalibrateOffset = Setting.simple false
-                ScoreGraphMode = Setting.simple ScoreGraphMode.Combo
+                ScoreGraphLineMode = Setting.simple ScoreGraphLineMode.Combo
+                ScoreGraphLineColor = Setting.simple ScoreGraphLineColor.Lamp
                 ConfirmExit = Setting.simple true
                 HoldToGiveUp = Setting.simple false
             }

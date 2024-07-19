@@ -23,22 +23,35 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
 
     override this.Content() = 
         page_container()
-        |+ PageSetting(%"score.graph.settings.graph_mode", 
+        |+ PageSetting(%"score.graph.settings.line_mode", 
             SelectDropdown(
                 [|
-                    ScoreGraphMode.None, %"score.graph.settings.graph_mode.none"
-                    ScoreGraphMode.Combo, %"score.graph.settings.graph_mode.combo"
-                    ScoreGraphMode.Mean, %"score.graph.settings.graph_mode.mean"
-                    ScoreGraphMode.StandardDeviation, %"score.graph.settings.graph_mode.standard_deviation"
+                    ScoreGraphLineMode.None, %"score.graph.settings.line_mode.none"
+                    ScoreGraphLineMode.Combo, %"score.graph.settings.line_mode.combo"
+                    ScoreGraphLineMode.Mean, %"score.graph.settings.line_mode.mean"
+                    ScoreGraphLineMode.StandardDeviation, %"score.graph.settings.line_mode.standard_deviation"
+                    ScoreGraphLineMode.Accuracy, %"score.graph.settings.line_mode.accuracy"
                 |],
-                options.ScoreGraphMode
+                options.ScoreGraphLineMode
             )
         )
             .Pos(0)
+        |+ PageSetting(%"score.graph.settings.line_color", 
+            SelectDropdown(
+                [|
+                    ScoreGraphLineColor.White, %"score.graph.settings.line_color.white"
+                    ScoreGraphLineColor.Lamp, %"score.graph.settings.line_color.lamp"
+                    ScoreGraphLineColor.Grade, %"score.graph.settings.line_color.grade"
+                |],
+                options.ScoreGraphLineColor
+            )
+        )
+            .Conditional(fun () -> options.ScoreGraphLineMode.Value <> ScoreGraphLineMode.None)
+            .Pos(2)
         |+ PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
-            .Pos(3)
+            .Pos(5)
         |+ PageSetting(%"score.graph.settings.column_filter", column_filter_ui)
-            .Pos(5, 2, PageWidth.Full)
+            .Pos(7, 2, PageWidth.Full)
         :> Widget
 
     override this.Title = %"score.graph.settings"
@@ -104,6 +117,32 @@ and ScoreGraph(score_info: ScoreInfo) =
 
     member this.Keys : int = score_info.WithMods.Keys
 
+    member private this.DrawLineGraph(y_func: ScoreMetricSnapshot -> float32, color_func: ScoreMetricSnapshot -> Color) =
+
+        let draw_line (x1, y1) (x2, y2) (color: Color) =
+            let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
+            let dy = -HTHICKNESS * System.MathF.Cos theta
+            let dx = HTHICKNESS * System.MathF.Sin theta
+
+            Draw.untextured_quad
+                (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
+                color.AsQuad
+
+        let snapshots = score_info.Scoring.Snapshots
+        let xscale = (this.Bounds.Width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+
+        for i = 1 to snapshots.Count - 1 do
+            let l, r =
+                y_func snapshots.[i - 1],
+                y_func snapshots.[i]
+
+            let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
+            let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
+            let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
+            let y2 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * r
+                
+            draw_line (x1, y1) (x2, y2) (color_func snapshots.[i]).O3
+
     member private this.Redraw() =
         refresh <- false
         let h = 0.5f * this.Bounds.Height
@@ -131,63 +170,44 @@ and ScoreGraph(score_info: ScoreInfo) =
                 (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
                 color.O3.AsQuad
 
+        let line_color =
+            match options.ScoreGraphLineColor.Value with
+            | ScoreGraphLineColor.Lamp ->
+                fun (snapshot: ScoreMetricSnapshot) -> score_info.Ruleset.LampColor snapshot.Lamp
+            | ScoreGraphLineColor.Grade ->
+                fun (snapshot: ScoreMetricSnapshot) -> 
+                    let grade = (snapshot.Accuracy |> Grade.calculate_with_target score_info.Ruleset.Grading.Grades).Grade
+                    score_info.Ruleset.GradeColor grade
+            | _ -> K Colors.white
+
         // line graph
-        match options.ScoreGraphMode.Value with
-        | ScoreGraphMode.Combo when score_info.Scoring.Snapshots.Count > 0 ->
-            let snapshots = score_info.Scoring.Snapshots
-            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+        match options.ScoreGraphLineMode.Value with
+        | ScoreGraphLineMode.Combo when score_info.Scoring.Snapshots.Count > 0 ->
 
-            for i = 1 to snapshots.Count - 1 do
-                let l, r =
-                    float32 snapshots.[i - 1].Combo / float32 score_info.Scoring.State.BestCombo,
-                    float32 snapshots.[i].Combo / float32 score_info.Scoring.State.BestCombo
-
-                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
-                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
-                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
-                let y1 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * l
-                let y2 = this.Bounds.Bottom - HTHICKNESS - (this.Bounds.Height - THICKNESS) * r
-                
-                draw_line (x1, y1) (x2, y2) color
+            let y_func (snapshot: ScoreMetricSnapshot) = float32 snapshot.Combo / float32 score_info.Scoring.State.BestCombo
+            this.DrawLineGraph(y_func, line_color)
         
-        | ScoreGraphMode.Mean when score_info.Scoring.Snapshots.Count > 0 ->
-            let snapshots = score_info.Scoring.Snapshots
-            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
+        | ScoreGraphLineMode.Mean when score_info.Scoring.Snapshots.Count > 0 ->
+
             let yscale = 0.5f / 10.0f<ms>
-            let height = this.Bounds.Height
+            let y_func (snapshot: ScoreMetricSnapshot) = 0.5f + snapshot.Mean * yscale |> min 1.0f |> max 0.0f
+            this.DrawLineGraph(y_func, line_color)
 
-            for i = 1 to snapshots.Count - 1 do
-                let l, r =
-                    0.5f + snapshots.[i - 1].Mean * yscale |> min 1.0f |> max 0.0f,
-                    0.5f + snapshots.[i].Mean * yscale |> min 1.0f |> max 0.0f
+        | ScoreGraphLineMode.StandardDeviation when score_info.Scoring.Snapshots.Count > 0 ->
 
-                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
-                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
-                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
-                let y1 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * l
-                let y2 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * r
-                
-                draw_line (x1, y1) (x2, y2) color
-
-        | ScoreGraphMode.StandardDeviation when score_info.Scoring.Snapshots.Count > 0 ->
-            let snapshots = score_info.Scoring.Snapshots
-            let xscale = (width - 10.0f) / snapshots.[snapshots.Count - 1].Time
             let yscale = 1.0f / 25.0f<ms>
-            let height = this.Bounds.Height
+            let y_func (snapshot: ScoreMetricSnapshot) = snapshot.StandardDeviation * yscale |> min 1.0f
+            this.DrawLineGraph(y_func, line_color)
 
-            for i = 1 to snapshots.Count - 1 do
-                let l, r =
-                    snapshots.[i - 1].StandardDeviation * yscale |> min 1.0f,
-                    snapshots.[i].StandardDeviation * yscale |> min 1.0f
+        | ScoreGraphLineMode.Accuracy when score_info.Scoring.Snapshots.Count > 0 ->
 
-                let color = score_info.Ruleset.LampColor snapshots.[i].Lamp
-                let x1 = this.Bounds.Left + snapshots.[i - 1].Time * xscale
-                let x2 = this.Bounds.Left + snapshots.[i].Time * xscale
-                let y1 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * l
-                let y2 = this.Bounds.Bottom - HTHICKNESS - (height - THICKNESS) * r
-                
-                draw_line (x1, y1) (x2, y2) color
-
+            let accuracies = score_info.Scoring.Snapshots |> Seq.map _.Accuracy
+            let max_acc = accuracies |> Seq.max
+            let min_acc = accuracies |> Seq.min
+            
+            let y_func (snapshot: ScoreMetricSnapshot) = (snapshot.Accuracy - min_acc) / (max_acc - min_acc) |> float32
+            this.DrawLineGraph(y_func, line_color)
+            
         | _ -> ()
 
         // draw dots

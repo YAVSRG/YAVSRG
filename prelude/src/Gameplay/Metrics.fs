@@ -70,6 +70,7 @@ type ScoreMetricSnapshot =
         StandardDeviation: Time
         Judgements: int array
     }
+    member this.Accuracy = if this.MaxPointsScored = 0.0 then 1.0 else this.PointsScored / this.MaxPointsScored
     static member COUNT = 200
 
 [<AbstractClass>]
