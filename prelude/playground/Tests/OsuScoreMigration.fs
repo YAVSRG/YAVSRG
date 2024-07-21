@@ -172,9 +172,9 @@ module OsuScoreMigration =
     let replay_generator (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
         let inputs : (int * int) seq =
             seq {
-                yield -31, -8
-                yield -1, 2
-                yield 31, 36
+                yield -159, -1 // 158 in window // 159 out //158.5 on od10
+                yield 130, 500
+                yield 1000, 1500
             }
         let input_as_replay_string =
             let mutable previous_time = -1000
@@ -233,7 +233,7 @@ module OsuScoreMigration =
 
         match
             main_db.Beatmaps
-            |> Seq.tryFind (fun b -> b.Difficulty = "THANK YOU FOR HOLDING")
+            |> Seq.tryFind (fun b -> b.Difficulty = "thanks for holding")
         with
         | Some b ->
 

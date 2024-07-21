@@ -95,7 +95,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
     let on_hit_ev = Event<HitEvent<HitEventGuts>>()
     let on_hit = on_hit_ev.Publish
 
-    //let osu_cbrush_cancel =
+    //let osu_window_behaviour =
     //    match ruleset.Accuracy.HoldNoteBehaviour with
     //    | HoldNoteBehaviour.Osu _ -> true
     //    | _ -> false
@@ -274,7 +274,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
 
             // Find unhit note that is closer than the current candidate
             if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                if (Time.abs matching_note_delta > Time.abs delta) then
+                if Time.abs matching_note_delta > Time.abs delta then
                     matching_note_index <- i
                     matching_note_delta <- delta
 
@@ -282,19 +282,12 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                 // Otherwise keep looking for something closer and allow this note to be missed
                 if Time.abs matching_note_delta < ruleset.Accuracy.CbrushWindow then
                     i <- hit_data.Length
-            // Osu's naive version of cbrush cancelling <-- added for tests and then removed
-            //elif 
-            //    osu_cbrush_cancel
-            //    && status.[k] = HitStatus.HIT_ACCEPTED
-            //    && t > now
-            //then
-            //    cbrush_absorb_delta <- -1.0f<ms>
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif
                 status.[k] = HitStatus.HIT_ACCEPTED
                 && deltas.[k] < -ruleset.Accuracy.CbrushWindow
             then
-                if (Time.abs cbrush_absorb_delta > Time.abs delta) then
+                if Time.abs cbrush_absorb_delta > Time.abs delta then
                     cbrush_absorb_delta <- delta
 
             i <- i + 1
@@ -317,6 +310,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
                 // Begin tracking if it's a hold note
                 if is_hold_head then
                     hold_states.[k] <- Holding, matching_note_index
+
         else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             hold_states.[k] <-
                 match hold_states.[k] with

@@ -201,3 +201,32 @@ module ``osu OD8`` =
 
         Assert.AreNotEqual(3, result.Judgements.[0])
         Assert.AreEqual(1, result.Judgements.[5])
+
+    [<Test>]
+    let WindowsDoNotExtendPastNextObject () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(300.0f<ms>)
+                .Note(400.0f<ms>)
+                .Note(500.0f<ms>)
+                .Note(600.0f<ms>)
+                .Build()
+        let replay = 
+            ReplayBuilder()
+                .KeyDown(110.0f<ms>, 0).KeyUp(111.0f<ms>, 0)
+                .KeyDown(210.0f<ms>, 0).KeyUp(211.0f<ms>, 0)
+                .KeyDown(310.0f<ms>, 0).KeyUp(311.0f<ms>, 0)
+                .KeyDown(410.0f<ms>, 0).KeyUp(411.0f<ms>, 0)
+                .KeyDown(510.0f<ms>, 0).KeyUp(511.0f<ms>, 0)
+                .KeyDown(610.0f<ms>, 0).KeyUp(611.0f<ms>, 0)
+                .Build()
+        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let result = scoring.State
+
+        printfn "%A" result
+
+        Assert.AreEqual(6, result.Judgements.[0])
+        Assert.AreEqual(1, result.Judgements.[5])
