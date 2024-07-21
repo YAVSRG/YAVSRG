@@ -12,7 +12,7 @@ module Launch =
     let entry_point (config: Config, name: string, ui_root: Root, icon: Utils.Bitmap option) =
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 
-        Console.hide_console_on_successful_launch()
+        Console.detect()
 
         let window =
             try
@@ -48,14 +48,15 @@ module Launch =
         if window.IsSome then
             let mutable crashed = false
             use window = window.Value
+            
+            Window.after_init.Add (fun () -> Console.hide())
 
             try
-                window.Run()
+                crashed <- window.Run() <> Ok()
             with err ->
-                Logging.Critical("Fatal error in window thread", err)
+                Logging.Critical("Fatal error in window/input thread", err)
                 crashed <- true
 
-            window.Close()
+            if crashed then Error() else Ok()
 
-            if crashed then
-                ignore (Console.ReadLine())
+        else Error()

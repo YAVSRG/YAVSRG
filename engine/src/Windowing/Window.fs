@@ -310,6 +310,9 @@ type Window(config: Config, title: string, ui_root: Root) as this =
             InputThread.poll (this.KeyboardState, this.MouseState)
 
         this.OnUnload()
+        this.Close()
+
+        if render_thread.HasFatalError then Error() else Ok()
 
     member this.OnLoad() =
         this.ApplyConfig config

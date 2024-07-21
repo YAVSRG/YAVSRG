@@ -6,6 +6,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Data
@@ -98,6 +99,7 @@ module Printerlude =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
+                .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand(
                     "local_server",

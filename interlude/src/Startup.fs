@@ -74,7 +74,12 @@ module Startup =
 
     let mutable private has_shutdown = false
 
-    let deinit unexpected_shutdown crash_splash =
+    type ShutdownType =
+        | Normal
+        | InternalCrash
+        | ExternalCrash
+
+    let deinit shutdown_type crash_splash =
         if has_shutdown then
             ()
         else
@@ -86,10 +91,13 @@ module Startup =
             Printerlude.deinit ()
             DiscordRPC.deinit ()
 
-            if unexpected_shutdown then
+            match shutdown_type with
+            | Normal -> Logging.Info("Thank you for playing")
+            | InternalCrash -> 
                 crash_splash ()
-                Logging.Critical("The game crashed or quit abnormally, but was able to shut down correctly")
-            else
-                Logging.Info("Thank you for playing")
+                System.Console.ReadLine() |> ignore
+            | ExternalCrash ->
+                crash_splash ()
+                Logging.Critical("The game was abnormally force-quit, but was able to shut down correctly")
 
             Logging.Shutdown()

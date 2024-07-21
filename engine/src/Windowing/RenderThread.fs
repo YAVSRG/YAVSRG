@@ -314,8 +314,12 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let mutable is_focused = true
     let mutable strategy = Unlimited
 
+    let mutable fatal_error = false
+
     let now () =
         total_frame_timer.Elapsed.TotalMilliseconds
+
+    member this.HasFatalError = fatal_error
 
     member this.IsFocused
         with set v = is_focused <- v
@@ -353,10 +357,13 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         fps_timer.Start()
 
         try
+            Console.hide()
             while not (GLFW.WindowShouldClose window.WindowPtr) do
                 this.DispatchFrame()
         with fatal_err ->
+            fatal_error <- true
             Logging.Critical("Fatal crash in UI thread", fatal_err)
+            Console.restore()
             window.Close()
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
 

@@ -43,16 +43,16 @@ let launch (instance: int) =
     if successful_startup then
 
         Window.after_init.Add(fun () ->
-            AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit true crash_splash)
+            AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit Startup.ExternalCrash crash_splash)
         )
 
         Window.on_file_drop.Add(Import.FileDrop.handle)
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
         let icon = Bitmap.from_stream true icon_stream
-        Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, icon)
+        let result = Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, icon)
 
-        Startup.deinit false crash_splash
+        Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) crash_splash
 
 [<EntryPoint>]
 let main argv =

@@ -9,12 +9,20 @@ module Console =
     open System.Diagnostics
     
     [<DllImport("user32.dll")>]
-    extern bool ShowWindow(IntPtr hWindow, int32 nCmdShow)
+    extern bool private ShowWindow(IntPtr hWindow, int32 nCmdShow)
 
-    let hide_console_on_successful_launch() =
+    let mutable private hWindow = -1n
+
+    let detect() =
         if OperatingSystem.IsWindows() then
             try
-                let hWindow = Process.GetCurrentProcess().MainWindowHandle
-                Window.after_init.Add(fun () -> ShowWindow(hWindow, 0) |> ignore)
-            with err -> 
-                Logging.Error("Error hiding console window", err)
+                hWindow <- Process.GetCurrentProcess().MainWindowHandle
+            with err -> Logging.Debug("No console window available to hide", err)
+
+    let hide() =
+        if OperatingSystem.IsWindows() && hWindow <> -1n then
+            ShowWindow(hWindow, 0x00) |> ignore
+
+    let restore () =
+        if OperatingSystem.IsWindows() && hWindow <> -1n then
+            ShowWindow(hWindow, 0x09) |> ignore
