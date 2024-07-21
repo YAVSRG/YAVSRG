@@ -12,6 +12,8 @@ module Launch =
     let entry_point (config: Config, name: string, ui_root: Root, icon: Utils.Bitmap option) =
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 
+        Console.hide_console_on_successful_launch()
+
         let window =
             try
                 let w = new Window(config, name, ui_root)
