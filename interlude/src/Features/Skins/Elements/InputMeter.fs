@@ -61,7 +61,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
                     if config.InputMeterInputFadeDistance > 0.0f then
                         (height - offset) / config.InputMeterInputFadeDistance |> min 1.0f
                     else 1.0f
-                config.InputMeterInputColor.O4a (255.0f * mult |> int |> min (int config.InputMeterInputColor.A) |> max 0)
+                config.InputMeterInputColor.O4a (float32 config.InputMeterInputColor.A * mult |> int |> min 255 |> max 0)
 
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
