@@ -32,13 +32,17 @@ module Patterns =
                         density * 15f / float32 bpm 
                     else density * 30f / float32 bpm
 
+                let feels_like_bpm = scaled_density * float32 bpm
+
+                printfn "feels like %.0fms of %.0f bpm %O" time feels_like_bpm pattern_type
+
                 match pattern_type with 
                 | Patterns.CorePatternType.Jack ->
-                    jack <- jack |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
+                    jack <- jack |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
                 | Patterns.CorePatternType.Chordstream ->
-                    chordstream <- chordstream |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
+                    chordstream <- chordstream |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
                 | Patterns.CorePatternType.Stream ->
-                    stream <- stream |> PatternStats.add_observation (bpm, scaled_density, accuracy, time)
+                    stream <- stream |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
 
         for cc_key in library.Cache.Entries.Keys do
             let cc = library.Cache.Entries.[cc_key]
@@ -57,28 +61,25 @@ module Patterns =
             | None -> ()
             
         for k in stream |> Seq.sortDescending do
-            let (bpm, density, control, time) = k
+            let (bpm, control, time) = k
             
-            printfn "%iBPM STREAM (%.2f%%, %.2f%%): %.0fs" 
+            printfn "%iBPM STREAM (%.2f%%): %.0fs" 
                 bpm 
-                (density * 100.0f) 
                 (control * 100.0) 
                 (time / 1000.0f<ms>)
 
         for k in chordstream |> Seq.sortDescending do
-            let (bpm, density, control, time) = k
+            let (bpm, control, time) = k
 
-            printfn "%iBPM CHORDSTREAM (%.2f%%, %.2f%%): %.0fs" 
+            printfn "%iBPM CHORDSTREAM (%.2f%%): %.0fs" 
                 bpm 
-                (density * 100.0f)
                 (control * 100.0)
                 (time / 1000.0f<ms>)
 
         for k in jack |> Seq.sortDescending do
-            let (bpm, density, control, time) = k
+            let (bpm, control, time) = k
 
-            printfn "%iBPM JACK (%.2f%%, %.2f%%): %.0fs"
+            printfn "%iBPM JACK (%.2f%%): %.0fs"
                 bpm
-                (density * 100.0f)
                 (control * 100.0)
                 (time / 1000.0f<ms>)
