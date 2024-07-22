@@ -78,7 +78,7 @@ type RulesetSwitcher(setting: Setting<string>) =
     member this.ToggleDropdown() =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper
 
-type BottomBanner(stats: ScoreScreenStats ref, score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
+type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
     =
     inherit Container(NodeType.None)
 

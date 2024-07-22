@@ -18,7 +18,8 @@ module GraphSettings =
 type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()
 
-    let column_filter_setting k = Setting.make (fun v -> GraphSettings.column_filter.[k] <- v) (fun () -> GraphSettings.column_filter.[k])
+    let mutable column_filter_changed = false
+    let column_filter_setting k = Setting.make (fun v -> column_filter_changed <- true; GraphSettings.column_filter.[k] <- v) (fun () -> GraphSettings.column_filter.[k])
     let column_filter_ui, _ = refreshable_row (fun () -> graph.Keys) (fun k _ -> Checkbox(column_filter_setting k, Position = Position.SliceLeft(100.0f).Translate(float32 k * 100.0f, 0.0f)))
 
     override this.Content() = 
@@ -55,9 +56,11 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
         :> Widget
 
     override this.Title = %"score.graph.settings"
-    override this.OnClose() = graph.Refresh()
+    override this.OnClose() =
+        if column_filter_changed then graph.ApplyColumnFilter()
+        graph.Refresh()
 
-and ScoreGraph(score_info: ScoreInfo) =
+and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     inherit StaticWidget(NodeType.None)
 
     let fbo = FBO.create ()
@@ -114,6 +117,9 @@ and ScoreGraph(score_info: ScoreInfo) =
     do fbo.Unbind()
 
     member this.Refresh() = refresh <- true
+
+    member this.ApplyColumnFilter() =
+        stats.Value <- ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
 
     member this.Keys : int = score_info.WithMods.Keys
 
@@ -288,4 +294,6 @@ and ScoreGraph(score_info: ScoreInfo) =
             Text.draw_b (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.text)
             Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
 
-    member this.Dispose() = fbo.Dispose()
+    member this.Dispose() = 
+        for i = 0 to 9 do GraphSettings.column_filter.[i] <- true
+        fbo.Dispose()

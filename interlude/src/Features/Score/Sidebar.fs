@@ -74,7 +74,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         |* Text(
             (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
             Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
-            Align = Alignment.CENTER
+            Align = Alignment.CENTER,
+            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
         )
 
         this
@@ -108,7 +109,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         let counters =
             Rect.Box(this.Bounds.Left + 10.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 20.0f, 350.0f)
 
-        let judgement_counts = score_info.Scoring.State.Judgements
+        let judgement_counts = (!stats).Judgements
         let judgements = score_info.Ruleset.Judgements |> Array.indexed
         let h = counters.Height / float32 judgements.Length
         let mutable y = counters.Top
@@ -128,7 +129,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
                 Style.font,
                 sprintf "%s: %i" j.Name judgement_counts.[i],
                 b.Shrink(5.0f, 2.0f),
-                Colors.text,
+                (if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text),
                 Alignment.LEFT
             )
 

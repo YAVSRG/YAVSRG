@@ -18,13 +18,19 @@ type ScoreScreenStats =
         ReleaseStandardDeviation: Time
         ReleaseEarlyPercent: float
 
+        Judgements: int array
         JudgementCount: int
         MA: string
         PA: string
+
+        ColumnFilterApplied: bool
     }
-    static member Generate (judgements: int array) (events: HitEvent<HitEventGuts> seq) =
+    static member Generate (judgements: int array) (events: HitEvent<HitEventGuts> seq) (column_filter: bool array) =
+
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: Time ref) (t: Time) = x.Value <- x.Value + t
+
+        let filtered_judgements = Array.zeroCreate judgements.Length
 
         let taps = ref 1
         let early_taps = ref 0
@@ -42,7 +48,7 @@ type ScoreScreenStats =
         let releases_released = ref 0
         let releases_count = ref 0
 
-        for ev in events do
+        for ev in events |> Seq.where(fun ev -> column_filter.[ev.Column]) do
             match ev.Guts with
             | Hit e ->
                 if e.IsHold then
@@ -63,6 +69,8 @@ type ScoreScreenStats =
                     if e.Delta < 0.0f<ms> then
                         inc early_taps
 
+                if e.Judgement.IsSome then filtered_judgements.[e.Judgement.Value] <- filtered_judgements.[e.Judgement.Value] + 1
+
             | Release e ->
                 inc releases_count
 
@@ -72,6 +80,8 @@ type ScoreScreenStats =
                     release_sumOfSq ++ e.Delta * float32 e.Delta
                     if e.Delta < 0.0f<ms> then
                         inc early_releases
+
+                if e.Judgement.IsSome then filtered_judgements.[e.Judgement.Value] <- filtered_judgements.[e.Judgement.Value] + 1
 
         let tap_mean = tap_sum.Value / float32 taps.Value
         let release_mean = release_sum.Value / float32 releases.Value
@@ -101,17 +111,20 @@ type ScoreScreenStats =
                 * 1.0f<ms>
             ReleaseEarlyPercent = float early_releases.Value / float releases.Value
 
-            JudgementCount = Array.sum judgements
+            Judgements = filtered_judgements
+            JudgementCount = Array.sum filtered_judgements
 
             MA =
-                let mv = if judgements.Length > 0 then judgements.[0] else 0
-                let pf = if judgements.Length > 1 then judgements.[1] else 0
+                let mv = if filtered_judgements.Length > 0 then filtered_judgements.[0] else 0
+                let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
                 if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)
             
             PA =
-                let pf = if judgements.Length > 1 then judgements.[1] else 0
-                let gr = if judgements.Length > 2 then judgements.[2] else 0
+                let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
+                let gr = if filtered_judgements.Length > 2 then filtered_judgements.[2] else 0
                 if gr = 0 then sprintf "%.1f:0" (float pf) else sprintf "%.1f:1" (float pf / float gr)
+            
+            ColumnFilterApplied = column_filter |> Array.forall id |> not
         }
 
 module ScoreScreenHelpers =

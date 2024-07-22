@@ -25,7 +25,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         ref
         <| Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents
+    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
@@ -36,7 +36,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
 
     let original_ruleset = options.SelectedRuleset.Value
 
-    let graph = new ScoreGraph(score_info)
+    let graph = new ScoreGraph(score_info, stats)
 
     let refresh () =
         personal_bests := ImprovementFlags.None
@@ -47,7 +47,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         lamp
         := Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
 
-        stats := ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents
+        stats := ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
         previous_personal_bests := None
         graph.Refresh()
 
@@ -67,7 +67,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         )
         |+ TopBanner(score_info, Position = Position.SliceTop(180.0f))
         |+ BottomBanner(
-            stats,
             score_info,
             graph,
             refresh,
