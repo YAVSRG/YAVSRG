@@ -48,7 +48,8 @@ type Patterns(display: Setting<Display>) =
         let mutable b =
             this.Bounds.SliceTop(60.0f).Shrink(20.0f, 0.0f).Translate(0.0f, 60.0f)
 
-        let BAR_L = b.Left + 165.0f
+        let TEXT_WIDTH = 240.0f
+        let BAR_L = b.Left + TEXT_WIDTH + 5.0f
         let BAR_R = b.Right - 5.0f
         let BAR_WIDTH = BAR_R - BAR_L
 
@@ -56,18 +57,25 @@ type Patterns(display: Setting<Display>) =
             Text.fill_b (
                 Style.font,
                 (sprintf "%O" entry.Pattern),
-                b.TrimBottom(25.0f).SliceLeft(160.0f),
+                b.TrimBottom(25.0f).SliceLeft(TEXT_WIDTH),
                 Colors.text,
                 Alignment.LEFT
             )
 
+            let scaled_bpm =
+                match entry.Pattern with
+                | Jack -> 17.5f
+                | _ -> 35.0f
+                * entry.Density50
+                |> int
+
             Text.fill_b (
                 Style.font,
                 (if entry.Mixed then
-                     sprintf "Mixed, ~%i BPM" entry.BPM
+                     sprintf "Mixed, ~%i BPM (feels like %i)" entry.BPM scaled_bpm
                  else
-                     sprintf "%i BPM" entry.BPM),
-                b.SliceBottom(30.0f).SliceLeft(160.0f),
+                     sprintf "%i BPM (feels like %i)" entry.BPM scaled_bpm),
+                b.SliceBottom(30.0f).SliceLeft(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
@@ -75,12 +83,12 @@ type Patterns(display: Setting<Display>) =
             Text.fill_b (
                 Style.font,
                 String.concat ", " (entry.Specifics |> Seq.map fst),
-                b.SliceBottom(30.0f).TrimLeft(160.0f),
+                b.SliceBottom(30.0f).TrimLeft(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
 
-            Draw.rect (b.SliceLeft(5.0f).SliceTop(20.0f).Translate(160.0f, 10.0f)) Colors.white
+            Draw.rect (b.SliceLeft(5.0f).SliceTop(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
             Draw.rect (b.SliceRight(5.0f).SliceTop(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32) =
