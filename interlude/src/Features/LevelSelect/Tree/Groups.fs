@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Collections
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Content
 
 open TreeState

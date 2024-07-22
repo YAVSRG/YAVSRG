@@ -146,7 +146,7 @@ type private CompareFriend
                                         |+ Text(
                                             (match your_score with
                                              | None -> "--"
-                                             | Some(_, acc) -> sprintf "%.2f%%" (acc * 100.0)),
+                                             | Some(_, acc) -> format_accuracy acc),
                                             Color =
                                                 K(
                                                     ruleset.GradeColor(
@@ -170,7 +170,7 @@ type private CompareFriend
                                         |+ Text(
                                             (match their_score with
                                              | None -> "--"
-                                             | Some(_, acc) -> sprintf "%.2f%%" (acc * 100.0)),
+                                             | Some(_, acc) -> format_accuracy acc),
                                             Color =
                                                 K(
                                                     ruleset.GradeColor(

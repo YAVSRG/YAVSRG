@@ -14,7 +14,6 @@ open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
@@ -92,7 +91,7 @@ module Leaderboard =
                     {
                         Left = 0.0f %+ 5.0f
                         Top = 0.0f %+ 0.0f
-                        Right = 0.5f %+ 0.0f
+                        Right = 0.8f %+ 0.0f
                         Bottom = 0.6f %+ 0.0f
                     }
             )

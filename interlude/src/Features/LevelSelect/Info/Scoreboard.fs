@@ -12,7 +12,6 @@ open Prelude.Data
 open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Score

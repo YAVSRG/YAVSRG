@@ -69,7 +69,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
 
-    let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> Interlude.Utils.format_duration_ms
+    let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
     let draw_snapshot_info (bounds: Rect) (info: ScoreMetricSnapshot) =
         Draw.rect bounds Colors.shadow_2.O2

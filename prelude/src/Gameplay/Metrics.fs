@@ -122,7 +122,7 @@ type IScoreMetric(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: T
         let v = this.State.PointsScored / this.State.MaxPointsScored
         if Double.IsNaN v then 1.0 else v
 
-    member this.FormatAccuracy() = sprintf "%.2f%%" (this.Value * 100.0)
+    member this.FormatAccuracy() = format_accuracy this.Value
     member this.MissWindow = ruleset.Accuracy.MissWindow
     member this.ScaledMissWindow = miss_window
     member this.Ruleset = ruleset

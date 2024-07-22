@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Interlude.Utils
+open Prelude
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
@@ -40,7 +40,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b (
                 Style.font,
-                sprintf "%.2f%%" (score.Score * 100.0),
+                format_accuracy score.Score,
                 b.TrimRight(h * 3.5f).SliceRight(h * 2.0f).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.RIGHT

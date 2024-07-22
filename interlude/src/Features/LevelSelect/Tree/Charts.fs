@@ -41,7 +41,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
             grade <- 
                 match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
                 | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match get_pb personal_bests.Value.Accuracy (K Colors.white) (fun acc -> sprintf "%.2f%%" (acc * 100.0)) with
+                    match get_pb personal_bests.Value.Accuracy (K Colors.white) format_accuracy with
                     | Some (accuracy, accuracy_rate, _, text) ->
                         Some (grade, accuracy_rate, color, text)
                     | None -> Some (grade, grade_rate, color, text)
