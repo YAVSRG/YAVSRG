@@ -28,7 +28,7 @@ type ChartSaveData(chart_id: string, data: DbChartData, db: ScoreDatabase) =
     let mutable comment = data.Comment
     let mutable breakpoints = data.Breakpoints
     let mutable personal_bests = data.PersonalBests
-    let mutable scores = []
+    let mutable scores : Score list = []
 
     // todo: add locks to protect from threads
 

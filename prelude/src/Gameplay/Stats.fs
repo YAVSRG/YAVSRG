@@ -1,45 +1,89 @@
 ﻿namespace Prelude.Gameplay
 
+open Percyqaz.Data
 open Prelude
+open Prelude.Charts.Processing
 
-type BPM = int
+[<Json.AutoCodec>]
+type PatternStatPoint = { BPM: int; Duration: Time; Timestamp: int64 }
+type PatternStatLine = PatternStatPoint list
 
-type PatternKey = BPM * float * Time
+module PatternStatLine =
 
-module PatternKey =
-    
-    let supersedes (bpm1, accuracy1, time1) (bpm2, accuracy2, time2) =
-        bpm2 >= bpm1 && accuracy2 >= accuracy1 && time2 >= time1
+    let add_observation (bpm: int, duration: Time, timestamp: int64) (stats: PatternStatLine) : PatternStatLine =
+        let rec remove_worse_points (duration: Time) (bests: PatternStatLine) =
+            match bests with
+            | [] -> []
+            | { Duration = time } :: xs when time <= duration -> remove_worse_points duration xs
+            | xs -> xs
 
-    let max (bpm1, accuracy1, time1) (bpm2, accuracy2, time2) =
-        max bpm1 bpm2, max accuracy1 accuracy2, max time1 time2
+        let rec loop (xs: PatternStatLine) : PatternStatLine =
+            match xs with
+            | [] -> { BPM = bpm; Duration = duration; Timestamp = timestamp } :: []//, Improvement.New
+            | existing :: xs ->
+                if bpm < existing.BPM && duration > existing.Duration then
+                    let res = loop xs in existing :: res//, imp
+                elif bpm < existing.BPM then
+                    existing :: xs//, Improvement.None
+                elif bpm = existing.BPM && duration > existing.Duration then
+                    { BPM = bpm; Duration = duration; Timestamp = timestamp } :: remove_worse_points duration xs//, Improvement.Better(value - v)
+                elif bpm = existing.BPM then
+                    existing :: xs//, Improvement.None
+                else if duration >= existing.Duration then
+                    { BPM = bpm; Duration = duration; Timestamp = timestamp } :: remove_worse_points duration xs//, Improvement.FasterBetter(rate - r, value - v)
+                else
+                    { BPM = bpm; Duration = duration; Timestamp = timestamp } :: existing :: xs//, Improvement.New
 
-type PatternStats = Set<PatternKey>
+        if duration > 500.0f<ms> then loop stats else stats
 
-module PatternStats =
+[<Json.AutoCodec>]
+type PatternSkillBreakdown =
+    {
+        mutable Accuracy: PatternStatLine
+        mutable Control: PatternStatLine
+        mutable Normal: PatternStatLine
+        mutable Survival: PatternStatLine
+    }
 
-    let create () = Set.empty
+    static member Default = { Accuracy = []; Control = []; Normal = []; Survival = [] }
 
-    let add_observation (bpm: float32, accuracy: float, time: Time) (stats: PatternStats) : PatternStats =
+    member this.ObserveAccuracy(bpm: int, duration: Time, timestamp: int64) =
+        this.Accuracy <- this.Accuracy |> PatternStatLine.add_observation (bpm, duration, timestamp)
+    member this.ObserveControl(bpm: int, duration: Time, timestamp: int64) =
+        this.Control <- this.Control |> PatternStatLine.add_observation (bpm, duration, timestamp)
+    member this.ObserveNormal(bpm: int, duration: Time, timestamp: int64) =
+        this.Normal <- this.Normal |> PatternStatLine.add_observation (bpm, duration, timestamp)
+    member this.ObserveSurvival(bpm: int, duration: Time, timestamp: int64) =
+        this.Survival <- this.Survival |> PatternStatLine.add_observation (bpm, duration, timestamp)
 
-        let incoming_key = 
-            floor (bpm / 5f) * 5f |> int,
-            (accuracy / 0.02 |> floor |> fun x -> x * 0.02),
-            time
+module PatternSkillBreakdown =
 
-        let mutable is_superseded = false
+    let multiplier (threshold: float) (accuracy: float) : float32 =
+        if accuracy >= threshold then 1.0f
+        else System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-        let redundancies_removed = 
-            Set.map (fun key ->
-                if key |> PatternKey.supersedes incoming_key then
-                    is_superseded <- true
-                    key
+    let observe pattern_type (density, accuracy, duration: Time, timestamp) (breakdown: PatternSkillBreakdown) : unit =
+        let feels_like_bpm =
+            if pattern_type = Patterns.CorePatternType.Jack then
+                density * 17.5f
+            else density * 35f
+            |> int
 
-                elif incoming_key |> PatternKey.supersedes key then 
-                    incoming_key
+        match pattern_type with 
+        | Patterns.CorePatternType.Jack ->
+            breakdown.ObserveAccuracy (feels_like_bpm, duration * multiplier 0.99 accuracy, timestamp)
+            breakdown.ObserveControl (feels_like_bpm, duration * multiplier 0.98 accuracy, timestamp)
+            breakdown.ObserveNormal (feels_like_bpm, duration * multiplier 0.96 accuracy, timestamp)
+            breakdown.ObserveSurvival (feels_like_bpm, duration * multiplier 0.93 accuracy, timestamp)
+                        
+        | Patterns.CorePatternType.Chordstream ->
+            breakdown.ObserveAccuracy (feels_like_bpm, duration * multiplier 0.985 accuracy, timestamp)
+            breakdown.ObserveControl (feels_like_bpm, duration * multiplier 0.97 accuracy, timestamp)
+            breakdown.ObserveNormal (feels_like_bpm, duration * multiplier 0.945 accuracy, timestamp)
+            breakdown.ObserveSurvival (feels_like_bpm, duration * multiplier 0.91 accuracy, timestamp)
 
-                else key
-            ) stats
-        if not is_superseded then
-            redundancies_removed |> Set.add incoming_key
-        else redundancies_removed
+        | Patterns.CorePatternType.Stream ->
+            breakdown.ObserveAccuracy (feels_like_bpm, duration * multiplier 0.98 accuracy, timestamp)
+            breakdown.ObserveControl (feels_like_bpm, duration * multiplier 0.965 accuracy, timestamp)
+            breakdown.ObserveNormal (feels_like_bpm, duration * multiplier 0.93 accuracy, timestamp)
+            breakdown.ObserveSurvival (feels_like_bpm, duration * multiplier 0.90 accuracy, timestamp)

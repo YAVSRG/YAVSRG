@@ -20,66 +20,32 @@ module Patterns =
         let sc_j4 = PremadeRulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
-        let mutable stream = PatternStats.create()
-        let mutable chordstream = PatternStats.create()
-        let mutable jack = PatternStats.create()
+        let stream : PatternSkillBreakdown = PatternSkillBreakdown.Default
+        let chordstream : PatternSkillBreakdown = PatternSkillBreakdown.Default
+        let jack : PatternSkillBreakdown = PatternSkillBreakdown.Default
 
-        let observe pattern_type (bpm: float32, density, accuracy, time) =
-            if time > 5000.0f<ms> then
-
-                let scaled_density =
-                    if pattern_type = Patterns.CorePatternType.Jack then
-                        density * 15f / float32 bpm 
-                    else density * 30f / float32 bpm
-
-                let feels_like_bpm = scaled_density * float32 bpm
-
-                printfn "feels like %.0fms of %.0f bpm %O" time feels_like_bpm pattern_type
-
-                match pattern_type with 
-                | Patterns.CorePatternType.Jack ->
-                    jack <- jack |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
-                | Patterns.CorePatternType.Chordstream ->
-                    chordstream <- chordstream |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
-                | Patterns.CorePatternType.Stream ->
-                    stream <- stream |> PatternStats.add_observation (feels_like_bpm, accuracy, time)
+        let observe pattern_type (density, accuracy, time, timestamp) =
+            match pattern_type with
+            | Patterns.CorePatternType.Jack -> jack
+            | Patterns.CorePatternType.Chordstream -> chordstream
+            | Patterns.CorePatternType.Stream -> stream
+            |> PatternSkillBreakdown.observe pattern_type (density, accuracy, time, timestamp)
 
         for cc_key in library.Cache.Entries.Keys do
             let cc = library.Cache.Entries.[cc_key]
             let data = ScoreDatabase.get cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
-                match PersonalBests.get_best_above 1.0f pbs.Accuracy with
-                | Some (acc, rate, _) ->
+                for (acc, rate, timestamp) in pbs.Accuracy do
                     match library.Cache.Patterns.TryGetValue cc.Hash with
                     | true, res ->
                         for p in res.Patterns do
-                            let time = res.Patterns |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50) |> Seq.sumBy (_.Amount)
-                            observe p.Pattern (float32 p.BPM * rate, p.Density50, acc, Time.of_number (time / rate))
+                            let time = 
+                                res.Patterns 
+                                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50)
+                                |> Seq.sumBy _.Amount
+
+                            for octave, time_mult in [| 0.9f, 1.2f; 1.0f, 1.0f; 1.1f, 0.5f |] do
+                                observe p.Pattern (p.Density50 * rate * octave, acc, Time.of_number (time / rate * time_mult), timestamp)
                     | false, _ -> ()
-                | None -> ()
             | None -> ()
-            
-        for k in stream |> Seq.sortDescending do
-            let (bpm, control, time) = k
-            
-            printfn "%iBPM STREAM (%.2f%%): %.0fs" 
-                bpm 
-                (control * 100.0) 
-                (time / 1000.0f<ms>)
-
-        for k in chordstream |> Seq.sortDescending do
-            let (bpm, control, time) = k
-
-            printfn "%iBPM CHORDSTREAM (%.2f%%): %.0fs" 
-                bpm 
-                (control * 100.0)
-                (time / 1000.0f<ms>)
-
-        for k in jack |> Seq.sortDescending do
-            let (bpm, control, time) = k
-
-            printfn "%iBPM JACK (%.2f%%): %.0fs"
-                bpm
-                (control * 100.0)
-                (time / 1000.0f<ms>)

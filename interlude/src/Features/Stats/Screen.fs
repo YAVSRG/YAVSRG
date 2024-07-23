@@ -222,7 +222,7 @@ type private Tabs() =
     inherit Container(NodeType.None)
 
     let table = TableStats()
-    let skillsets = EmptyState(Icons.BAR_CHART, %"misc.nyi")
+    let skillsets = Skills()
     let goals = EmptyState(Icons.BAR_CHART, %"misc.nyi")
 
     let swap = SwapContainer(table, Position = Position.TrimTop 50.0f)
