@@ -311,7 +311,6 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
     let mutable real_next_frame = 0.0
     let mutable start_of_frame = 0.0
     let mutable frame_is_ready = 0.0
-    let mutable is_focused = true
     let mutable strategy = Unlimited
 
     let mutable fatal_error = false
@@ -321,8 +320,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
 
     member this.HasFatalError = fatal_error
 
-    member this.IsFocused
-        with set v = is_focused <- v
+    member val IsFocused = true with get, set
 
     member val RenderMode = FrameLimit.Smart with get, set
 

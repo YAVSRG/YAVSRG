@@ -71,6 +71,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
     let mutable refresh_rate = 60
     let mutable was_fullscreen = false
     let mutable input_cpu_saver = false
+    let mutable disable_windows_key = false
 
     do
         base.Title <- title
@@ -87,6 +88,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         let monitor_list = Monitors.GetMonitors()
 
         input_cpu_saver <- config.InputCPUSaver.Value
+        disable_windows_key <- config.DisableWindowsKey.Value
 
         Window._monitors <-
             monitor_list
@@ -241,6 +243,10 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         if OperatingSystem.IsWindows() then
             FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
 
+            if disable_windows_key && render_thread.IsFocused then 
+                WindowsKey.disable()
+            else WindowsKey.enable()
+
         defer
         <| fun () ->
             render_thread.RenderModeChanged(
@@ -274,7 +280,11 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 render_thread.OnResize(e.Width, e.Height)
         )
 
-    override this.OnFocusedChanged e = render_thread.IsFocused <- e.IsFocused
+    override this.OnFocusedChanged e =
+        if e.IsFocused && disable_windows_key && OperatingSystem.IsWindows() then 
+            WindowsKey.disable()
+        else WindowsKey.enable()
+        render_thread.IsFocused <- e.IsFocused
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.on_file_drop.Trigger e.FileNames
@@ -312,6 +322,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         this.OnUnload()
         this.Close()
 
+        WindowsKey.enable()
         if render_thread.HasFatalError then Error() else Ok()
 
     member this.OnLoad() =

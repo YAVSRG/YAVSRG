@@ -26,6 +26,7 @@
 	  <Compile Include="Audio\SoundEffect.fs" />
 	  <Compile Include="Audio\Devices.fs" />
 	  <Compile Include="Audio\Waveform.fs" />
+	  <Compile Include="Input\WindowsKey.fs" />
 	  <Compile Include="Input\Input.fs" />
 	  <Compile Include="Input\Hotkeys.fs" />
 	  <Compile Include="UI\Animation.fs" />
