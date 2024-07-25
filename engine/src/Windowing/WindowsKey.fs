@@ -1,4 +1,4 @@
-﻿namespace Percyqaz.Flux.Input
+﻿namespace Percyqaz.Flux.Windowing
 
 open System
 open System.Diagnostics

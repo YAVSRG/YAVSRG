@@ -43,6 +43,8 @@ module Window =
         | ApplyConfig of Config
         | EnableResize of callback: ((int * int) -> unit)
         | DisableResize
+        | DisableWindowsKey
+        | EnableWindowsKey
 
     let defer (a: WindowAction) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ a ])
@@ -71,6 +73,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
     let mutable refresh_rate = 60
     let mutable was_fullscreen = false
     let mutable input_cpu_saver = false
+
     let mutable disable_windows_key = false
 
     do
@@ -83,12 +86,17 @@ type Window(config: Config, title: string, ui_root: Root) as this =
             else
                 CursorState.Hidden
 
+    let should_disable_windows_key() = 
+        disable_windows_key 
+        && render_thread.IsFocused 
+        && not input_cpu_saver 
+        && OperatingSystem.IsWindows()
+
     member this.ApplyConfig(config: Config) =
 
         let monitor_list = Monitors.GetMonitors()
 
         input_cpu_saver <- config.InputCPUSaver.Value
-        disable_windows_key <- config.DisableWindowsKey.Value
 
         Window._monitors <-
             monitor_list
@@ -243,10 +251,6 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         if OperatingSystem.IsWindows() then
             FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
 
-            if disable_windows_key && render_thread.IsFocused then 
-                WindowsKey.disable()
-            else WindowsKey.enable()
-
         defer
         <| fun () ->
             render_thread.RenderModeChanged(
@@ -281,10 +285,10 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         )
 
     override this.OnFocusedChanged e =
-        if e.IsFocused && disable_windows_key && OperatingSystem.IsWindows() then 
+        render_thread.IsFocused <- e.IsFocused
+        if should_disable_windows_key() then 
             WindowsKey.disable()
         else WindowsKey.enable()
-        render_thread.IsFocused <- e.IsFocused
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.on_file_drop.Trigger e.FileNames
@@ -301,13 +305,20 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
         while not (GLFW.WindowShouldClose this.WindowPtr) do
             lock
-                (Window.LOCK_OBJ)
+                Window.LOCK_OBJ
                 (fun () ->
                     for a in Window.action_queue do
                         match a with
                         | Window.ApplyConfig c -> this.ApplyConfig c
                         | Window.EnableResize c -> this.EnableResize c
                         | Window.DisableResize -> this.DisableResize()
+                        | Window.DisableWindowsKey ->
+                            disable_windows_key <- true
+                            if should_disable_windows_key() then
+                                WindowsKey.disable()
+                        | Window.EnableWindowsKey ->
+                            disable_windows_key <- false
+                            WindowsKey.enable()
 
                     Window.action_queue <- []
                 )

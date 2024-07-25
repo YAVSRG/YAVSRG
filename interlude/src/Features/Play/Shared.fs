@@ -5,10 +5,10 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Skins.Noteskins
@@ -120,12 +120,16 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Song.play_leadin ()
         Input.remove_listener ()
         Input.finish_frame_events ()
+        Window.defer Window.DisableWindowsKey
 
     override this.OnExit next =
         Background.dim 0.7f
 
         if next <> Screen.Type.Score then
             Toolbar.show ()
+
+        if next <> Screen.Type.Play then
+            Window.defer Window.EnableWindowsKey
 
     override this.OnBack() =
         if Network.lobby.IsSome then

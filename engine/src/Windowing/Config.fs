@@ -49,7 +49,6 @@ type Config =
         Display: Setting<int>
         AudioDevice: Setting<int>
         InputCPUSaver: Setting<bool>
-        DisableWindowsKey: Setting<bool>
     }
     static member Default =
         {
@@ -71,5 +70,4 @@ type Config =
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
             InputCPUSaver = Setting.simple false
-            DisableWindowsKey = Setting.simple false
         }

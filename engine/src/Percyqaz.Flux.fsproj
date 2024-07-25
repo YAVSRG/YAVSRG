@@ -26,7 +26,6 @@
 	  <Compile Include="Audio\SoundEffect.fs" />
 	  <Compile Include="Audio\Devices.fs" />
 	  <Compile Include="Audio\Waveform.fs" />
-	  <Compile Include="Input\WindowsKey.fs" />
 	  <Compile Include="Input\Input.fs" />
 	  <Compile Include="Input\Hotkeys.fs" />
 	  <Compile Include="UI\Animation.fs" />
@@ -49,6 +48,7 @@
     <Compile Include="UI\Components\Dialogs.fs" />
     <Compile Include="UI\Components\Performance.fs" />
     <Compile Include="UI\Root.fs" />
+    <Compile Include="Windowing\WindowsKey.fs" />
     <Compile Include="Windowing\Config.fs" />
     <Compile Include="Windowing\Console.fs" />
     <Compile Include="Windowing\RenderThread.fs" />
