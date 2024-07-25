@@ -53,7 +53,8 @@ module PatternStatLine =
     let get_ratio (bpm: int, duration: Time) (stats: PatternStatLine) =
         match get_duration_at bpm stats with
         | None -> 10.0f
-        | Some observed_duration -> duration / observed_duration |> min 10.0f |> max 0.1f
+        | Some observed_duration ->
+            duration / observed_duration |> min 10.0f |> max 0.1f
 
 [<Json.AutoCodec>]
 type PatternSkillBreakdown =
@@ -74,12 +75,8 @@ module PatternSkillBreakdown =
         else 
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-    let private observe_octave pattern_type (density, accuracy, duration: Time) (breakdown: PatternSkillBreakdown) : unit =
-        let feels_like_bpm =
-            if pattern_type = Patterns.CorePatternType.Jack then
-                density * 17.5f
-            else density * 35f
-            |> int
+    let private observe_octave (pattern_type: Patterns.CorePatternType) (density, accuracy, duration: Time) (breakdown: PatternSkillBreakdown) : unit =
+        let feels_like_bpm = pattern_type.DensityToBPM * density |> int
 
         match pattern_type with 
         | Patterns.CorePatternType.Jack ->
@@ -145,11 +142,7 @@ module KeymodeSkillBreakdown =
             | Patterns.CorePatternType.Chordstream -> skills.Chordstream
             | Patterns.CorePatternType.Stream -> skills.Stream
 
-        let feels_like_bpm =
-            if pattern_type = Patterns.CorePatternType.Jack then
-                density * 17.5f
-            else density * 35f
-            |> int
+        let feels_like_bpm = pattern_type.DensityToBPM * density |> int
 
         if PatternStatLine.get_ratio (feels_like_bpm, duration) target.Accuracy < 1.0f then
             0.985
@@ -162,11 +155,11 @@ module KeymodeSkillBreakdown =
         else
             0.88
         |> fun x ->
-            printfn "%s of %i bpm %A: %s" (duration |> format_duration_ms) (feels_like_bpm) pattern_type (format_accuracy x)
+            printfn "%.0fms of %i bpm %A: %s" duration (feels_like_bpm) pattern_type (format_accuracy x)
             x
 
     let query (patterns: Patterns.PatternInfo) (rate: float32) (skills: KeymodeSkillBreakdown) =
-        let mutable total_weight : float = 0.1
+        let mutable total_weight : float = 0.00001
         let mutable total : float = 0.0
         let add_weight res time =
             total <- total + res * time
@@ -175,7 +168,7 @@ module KeymodeSkillBreakdown =
         for p in patterns.Patterns do
             let time = 
                 patterns.Patterns 
-                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50)
+                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
                 |> Seq.sumBy _.Amount
 
             let a1 = expected_result (p.Pattern, p.Density50 * rate, Time.of_number (time / rate)) skills
@@ -184,5 +177,28 @@ module KeymodeSkillBreakdown =
             add_weight a2 (time / rate * 0.5f |> float)
             let a3 = expected_result (p.Pattern, p.Density25 * rate, Time.of_number (time / rate * 1.5f)) skills
             add_weight a3 (time / rate * 1.5f |> float)
+
+        total / total_weight
+
+    let tech_factor (patterns: Patterns.PatternInfo) =
+        let mutable total_weight : float32 = 0.00001f
+        let mutable total : float32 = 0.0f
+        let add_weight res time =
+            total <- total + res * time
+            total_weight <- total_weight + time
+
+        let factor (bpm: int) (feels_like_bpm: float32) =
+            System.MathF.Log2(feels_like_bpm / float32 bpm) |> abs
+
+        let f (pattern_type: Patterns.CorePatternType) (density: float32) (bpm: int) (time: float32) =
+            let feels_like_bpm = pattern_type.DensityToBPM * density
+            let x = factor bpm feels_like_bpm
+            add_weight x time
+
+        for p in patterns.Patterns do
+
+            f p.Pattern p.Density25 p.BPM (float32 (p.Amount * 1.5f))
+            f p.Pattern p.Density50 p.BPM (float32 (p.Amount * 1.0f))
+            f p.Pattern p.Density75 p.BPM (float32 (p.Amount * 0.5f))
 
         total / total_weight

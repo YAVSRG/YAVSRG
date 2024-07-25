@@ -9,6 +9,11 @@ type CorePatternType =
     | Stream
     | Chordstream
     | Jack
+    member this.DensityToBPM =
+        match this with
+        | Stream -> 52.5f
+        | Chordstream -> 35f
+        | Jack -> 17.5f
 
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
@@ -322,7 +327,6 @@ module Patterns =
                         MsPerBeat = data.Head.MsPerBeat
                     }
                 | n ->
-                    let d = List.take n data
                     let mean_mspb = List.take n data |> List.averageBy (fun d -> d.MsPerBeat)
 
                     specific_matches.Add { 

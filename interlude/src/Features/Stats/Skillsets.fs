@@ -29,7 +29,7 @@ module ProofOfConcept =
                         for p in res.Patterns do
                             let time = 
                                 res.Patterns 
-                                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50)
+                                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
                                 |> Seq.sumBy _.Amount
 
                             KeymodeSkillBreakdown.observe p.Pattern (p.Density50 * rate, acc, Time.of_number (time / rate)) skills

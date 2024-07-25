@@ -104,6 +104,14 @@ module Printerlude =
                 |> io.WriteLine
             | None -> ()
 
+        let tech_factor (io: IOContext) =
+            match SelectedChart.PATTERNS with
+            | Some patterns ->
+                KeymodeSkillBreakdown.tech_factor patterns
+                |> sprintf "%A"
+                |> io.WriteLine
+            | None -> ()
+
         let register_commands (ctx: ShellContext) =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
@@ -111,6 +119,7 @@ module Printerlude =
                 .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
+                .WithIOCommand("tech", "Experimental tech factor", tech_factor)
                 .WithIOCommand(
                     "local_server",
                     "Switch to local development server",

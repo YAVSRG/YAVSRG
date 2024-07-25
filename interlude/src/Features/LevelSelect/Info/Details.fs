@@ -62,19 +62,14 @@ type Patterns(display: Setting<Display>) =
                 Alignment.LEFT
             )
 
-            let scaled_bpm =
-                match entry.Pattern with
-                | Jack -> 17.5f
-                | _ -> 35.0f
-                * entry.Density50
-                |> int
+            let feels_like_bpm = entry.Pattern.DensityToBPM * entry.Density50 |> int
 
             Text.fill_b (
                 Style.font,
                 (if entry.Mixed then
-                     sprintf "Mixed, ~%i BPM (feels like %i)" entry.BPM scaled_bpm
+                     sprintf "Mixed, ~%i BPM (feels like %i)" entry.BPM feels_like_bpm
                  else
-                     sprintf "%i BPM (feels like %i)" entry.BPM scaled_bpm),
+                     sprintf "%i BPM (feels like %i)" entry.BPM feels_like_bpm),
                 b.SliceBottom(30.0f).SliceLeft(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
