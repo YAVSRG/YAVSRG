@@ -14,13 +14,14 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
     let HEIGHT = 60.0f
     let LAST_NOTE = with_mods.LastNote
+    let FIRST_NOTE = with_mods.FirstNote
 
     let samples =
-        int ((LAST_NOTE - with_mods.FirstNote) / 1000.0f)
+        int ((LAST_NOTE - FIRST_NOTE) / 1000.0f)
         |> max 10
         |> min 400
 
-    let duration_on_1x = (LAST_NOTE - with_mods.FirstNote) |> format_duration_ms
+    let duration_on_1x = (LAST_NOTE - FIRST_NOTE) |> format_duration_ms
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n, aka 'chords per second'
     let note_density, chord_density = Analysis.nps_cps samples with_mods
@@ -74,9 +75,9 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         Draw.rect (b.BorderBottom(10.0f)) Colors.grey_1.O3
         Draw.rect (b.BorderBottom(10.0f).SliceLeft x) Colors.cyan_accent
 
-        let duration = (LAST_NOTE - with_mods.FirstNote) / rate.Value |> format_duration_ms
-        let now_on_1x = max 0.0f<ms> now |> format_duration_ms
-        let now = max 0.0f<ms> now / rate.Value |> format_duration_ms
+        let duration = (LAST_NOTE - FIRST_NOTE) / rate.Value |> format_duration_ms
+        let now_on_1x = max 0.0f<ms> (now - FIRST_NOTE) |> format_duration_ms
+        let now = max 0.0f<ms> (now - FIRST_NOTE) / rate.Value |> format_duration_ms
 
         Text.draw_aligned_b(Style.font, (sprintf "%.0f%%" (percent * 100.0f)), 24.0f, b.CenterX, b.Bottom - 40.0f, Colors.text, Alignment.CENTER)
 
@@ -100,8 +101,8 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let percent =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
-            let start = with_mods.FirstNote - Song.LEADIN_TIME
-            let new_time = start + (with_mods.LastNote - start) * percent
+            let start = FIRST_NOTE - Song.LEADIN_TIME
+            let new_time = start + (LAST_NOTE - start) * percent
             on_seek new_time
 
         if not (Mouse.held Mouse.LEFT) then
