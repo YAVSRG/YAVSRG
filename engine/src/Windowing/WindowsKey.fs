@@ -32,7 +32,6 @@ module WindowsKey =
         if nCode >= 0 && wParam = WM_KEYDOWN && (vkCode = VK_LWIN || vkCode = VK_RWIN) then
             1n
         else 
-            GLFW.PostEmptyEvent()
             CallNextHookEx(hook, nCode, wParam, lParam)
     let private hook_callback_delegate = LowLevelKeyboardProc(hook_callback)
 
