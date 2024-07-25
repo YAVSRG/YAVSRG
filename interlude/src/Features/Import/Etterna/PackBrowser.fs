@@ -64,7 +64,7 @@ type EtternaPacksBrowserPage() =
             filter
 
         let url =
-            sprintf "https://api.beta.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
+            sprintf "https://api.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
                 (page + 1)
                 (if descending_order.Value then "-" else "")
                 (query_order.Value)
