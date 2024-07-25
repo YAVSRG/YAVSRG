@@ -95,12 +95,22 @@ module Printerlude =
                         | _ -> ()
             )
 
+        let challenge_level (io: IOContext) =
+            match SelectedChart.PATTERNS with
+            | Some patterns ->
+                let skills = Features.Stats.ProofOfConcept.skills
+                KeymodeSkillBreakdown.query patterns SelectedChart.rate.Value skills
+                |> format_accuracy
+                |> io.WriteLine
+            | None -> ()
+
         let register_commands (ctx: ShellContext) =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
+                .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
                 .WithIOCommand(
                     "local_server",
                     "Switch to local development server",

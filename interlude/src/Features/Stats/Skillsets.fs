@@ -3,23 +3,13 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Processing
 open Prelude.Gameplay
 open Prelude.Data
 open Interlude.Content
 
 module ProofOfConcept =
 
-    let stream : PatternSkillBreakdown = PatternSkillBreakdown.Default
-    let chordstream : PatternSkillBreakdown = PatternSkillBreakdown.Default
-    let jack : PatternSkillBreakdown = PatternSkillBreakdown.Default
-
-    let private observe pattern_type (density, accuracy, time, timestamp) =
-        match pattern_type with
-        | Patterns.CorePatternType.Jack -> jack
-        | Patterns.CorePatternType.Chordstream -> chordstream
-        | Patterns.CorePatternType.Stream -> stream
-        |> PatternSkillBreakdown.observe pattern_type (density, accuracy, time, timestamp)
+    let skills = KeymodeSkillBreakdown.Default
 
     let calculate () =
         let library = Content.Library
@@ -33,7 +23,7 @@ module ProofOfConcept =
             let data = ScoreDatabase.get cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
-                for (acc, rate, timestamp) in pbs.Accuracy do
+                for (acc, rate, _) in pbs.Accuracy do
                     match library.Cache.Patterns.TryGetValue cc.Hash with
                     | true, res ->
                         for p in res.Patterns do
@@ -42,10 +32,9 @@ module ProofOfConcept =
                                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 > p.Density50)
                                 |> Seq.sumBy _.Amount
 
-                            for octave, time_mult in [| 0.9f, 1.2f; 1.0f, 1.0f; 1.1f, 0.5f |] do
-                                observe p.Pattern (p.Density50 * rate * octave, acc, Time.of_number (time / rate * time_mult), timestamp)
-                                observe p.Pattern (p.Density75 * rate * octave, acc, Time.of_number (time / rate * time_mult * 0.5f), timestamp)
-                                observe p.Pattern (p.Density25 * rate * octave, acc, Time.of_number (time / rate * time_mult * 1.5f), timestamp)
+                            KeymodeSkillBreakdown.observe p.Pattern (p.Density50 * rate, acc, Time.of_number (time / rate)) skills
+                            KeymodeSkillBreakdown.observe p.Pattern (p.Density75 * rate, acc, Time.of_number (time / rate * 0.5f)) skills
+                            KeymodeSkillBreakdown.observe p.Pattern (p.Density25 * rate, acc, Time.of_number (time / rate * 1.5f)) skills
                     | false, _ -> ()
             | None -> ()
 
@@ -91,7 +80,7 @@ type Skills() =
     override this.Init(parent) =
         ProofOfConcept.calculate()
         this 
-        |+ SkillsetGraph(ProofOfConcept.stream, Position = { Position.Margin(20.0f) with Bottom = 0.33f %- 10.0f })
-        |+ SkillsetGraph(ProofOfConcept.chordstream, Position = { Position.Margin(20.0f) with Top = 0.33f %+ 10.0f; Bottom = 0.66f %- 10.0f })
-        |* SkillsetGraph(ProofOfConcept.jack, Position = { Position.Margin(20.0f) with Top = 0.66f %+ 10.0f })
+        |+ SkillsetGraph(ProofOfConcept.skills.Stream, Position = { Position.Margin(20.0f) with Bottom = 0.33f %- 10.0f })
+        |+ SkillsetGraph(ProofOfConcept.skills.Chordstream, Position = { Position.Margin(20.0f) with Top = 0.33f %+ 10.0f; Bottom = 0.66f %- 10.0f })
+        |* SkillsetGraph(ProofOfConcept.skills.Jack, Position = { Position.Margin(20.0f) with Top = 0.66f %+ 10.0f })
         base.Init parent

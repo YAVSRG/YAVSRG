@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="Tests\Polyrhythm.fs" />
-    <Compile Include="Tests\Patterns.fs" />
     <Compile Include="Tests\Quaver.fs" />
     <Compile Include="Tests\Images.fs" />
     <Compile Include="Tests\Endless.fs" />

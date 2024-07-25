@@ -46,7 +46,7 @@
     <Compile Include="Gameplay\Metrics.fs" />
     <Compile Include="Gameplay\Performance.fs" />
     <Compile Include="Gameplay\PersonalBests.fs" />
-    <Compile Include="Gameplay\Stats.fs" />
+    <Compile Include="Gameplay\Skillsets.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
     <Compile Include="Skins\HUD\Config.fs" />

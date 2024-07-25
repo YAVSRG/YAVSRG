@@ -77,7 +77,7 @@
     <Compile Include="Features\Online\Players\PlayerList.fs" />
     <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Tables.fs" />
-    <Compile Include="Features\Stats\Skills.fs" />
+    <Compile Include="Features\Stats\Skillsets.fs" />
     <Compile Include="Features\Stats\Screen.fs" />
     <Compile Include="Features\Import\Backbeat.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
