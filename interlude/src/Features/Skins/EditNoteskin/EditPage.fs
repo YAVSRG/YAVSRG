@@ -49,6 +49,18 @@ type EditNoteskinPage() =
                 .Help(Help.Info("noteskin.playfield"))
                 .Pos(11)
             |+ PageButton(
+                %"noteskin.notes",
+                fun () ->
+                    { new NotesSettingsPage() with
+                        override this.OnClose() =
+                            base.OnClose()
+                            preview.Refresh()
+                    }
+                        .Show()
+            )
+                .Help(Help.Info("noteskin.notes"))
+                .Pos(13)
+            |+ PageButton(
                 %"noteskin.holdnotes",
                 fun () ->
                     { new HoldNoteSettingsPage() with
@@ -59,31 +71,7 @@ type EditNoteskinPage() =
                         .Show()
             )
                 .Help(Help.Info("noteskin.holdnotes"))
-                .Pos(13)
-            |+ PageButton(
-                %"noteskin.colors",
-                fun () ->
-                    { new ColorSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Help(Help.Info("noteskin.colors"))
                 .Pos(15)
-            |+ PageButton(
-                %"noteskin.rotations",
-                fun () ->
-                    { new RotationSettingsPage() with
-                        override this.OnClose() =
-                            base.OnClose()
-                            preview.Refresh()
-                    }
-                        .Show()
-            )
-                .Help(Help.Info("noteskin.rotations"))
-                .Pos(17)
             |+ PageButton(
                 %"noteskin.animations",
                 fun () ->

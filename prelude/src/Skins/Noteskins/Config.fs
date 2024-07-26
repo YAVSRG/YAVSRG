@@ -67,11 +67,11 @@ type HoldExplosionConfig =
             ExpandAmount = 0.15f
         }
 
-[<RequireQualifiedAccess>]
-[<Json.AutoCodec>]
 type ReceptorStyle =
-    | Rotate
-    | Flip
+    | Receptors = 0
+    | Rotate = 0
+    | Keys = 1
+    | Flip = 1
 
 [<Json.AutoCodec(false)>]
 type NoteskinConfig =

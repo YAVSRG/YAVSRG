@@ -170,8 +170,7 @@
     <Compile Include="Features\Skins\EditHUD\EditScreen.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Playfield.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNotes.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Colors.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Rotations.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\Notes.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Animations.fs" />
     <Compile Include="Features\Skins\EditNoteskin\EditPage.fs" />
     <Compile Include="Features\Skins\Browser\Thumbnails.fs" />
