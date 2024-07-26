@@ -15,6 +15,7 @@ type InputMeterPage(on_close: unit -> unit) =
     let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f 1000.0f
     let key_color = Setting.simple config.InputMeterKeyColor
 
+    let show_kps = Setting.simple config.InputMeterShowKPS
     let show_inputs = Setting.simple config.InputMeterShowInputs
     let input_color = Setting.simple config.InputMeterInputColor
     let input_fade_distance = Setting.bounded config.InputMeterInputFadeDistance 0.0f 1000.0f
@@ -30,13 +31,16 @@ type InputMeterPage(on_close: unit -> unit) =
             .Pos(4, 3)
         |+ PageSetting(%"hud.inputmeter.scroll_downwards", Checkbox scroll_downwards)
             .Pos(7)
-        |+ PageSetting(%"hud.inputmeter.show_inputs", Checkbox show_inputs)
+        |+ PageSetting(%"hud.inputmeter.show_kps", Checkbox show_kps)
+            .Help(Help.Info("hud.inputmeter.show_kps"))
             .Pos(9)
+        |+ PageSetting(%"hud.inputmeter.show_inputs", Checkbox show_inputs)
+            .Pos(11)
         |+ PageSetting(%"hud.inputmeter.input_color", ColorPicker(input_color, true))
-            .Pos(11, 3)
+            .Pos(13, 3)
             .Conditional(show_inputs.Get)
         |+ PageSetting(%"hud.inputmeter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
-            .Pos(14)
+            .Pos(16)
             .Conditional(show_inputs.Get)
         
         :> Widget
@@ -49,6 +53,7 @@ type InputMeterPage(on_close: unit -> unit) =
                 InputMeterScrollSpeed = scroll_speed.Value
                 InputMeterKeyFadeTime = key_fade_time.Value
                 InputMeterKeyColor = key_color.Value
+                InputMeterShowKPS = show_kps.Value
                 InputMeterShowInputs = show_inputs.Value
                 InputMeterInputColor = input_color.Value
                 InputMeterInputFadeDistance = input_fade_distance.Value
