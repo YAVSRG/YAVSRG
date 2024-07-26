@@ -65,6 +65,18 @@ type QuickMenuPage() =
         |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceLeft(w).SliceBottom(h))
         :> Widget
 
+    override this.Header() = 
+        Container(NodeType.None)
+        |+ PageHeaderBase()
+        |+ Text(
+            sprintf "%s: %O" (%"misc.hotkeyhint") (%%"quick_menu"), 
+            Color = K Colors.text_cyan,
+            Position = Position.TrimLeft(PRETTY_MARGIN_X).TrimTop(110.0f).SliceTop(35.0f),
+            Align = Alignment.LEFT
+        )
+        :> Widget
+
+    override this.Direction = PageEasing.Right
     override this.Title = %"menu.quick"
     override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = Menu.Back()
