@@ -431,7 +431,7 @@ module ``osu!`` =
                 match Cache.background_path chart cache with
                 | Some bg_path ->
                     use fs = File.Open(bg_path, FileMode.Open)
-                    let bg_file_entry = archive.CreateEntry("bg.png") // todo: use the correct file name for charts that use loose files
+                    let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _) -> Some bg | _ -> None))
                     use bg_file_stream = bg_file_entry.Open()
                     fs.CopyTo(bg_file_stream)
                 | None -> ()
@@ -442,7 +442,7 @@ module ``osu!`` =
                     use fs =
                         File.Open(audio_path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
 
-                    let audio_file_entry = archive.CreateEntry("audio.mp3")
+                    let audio_file_entry = archive.CreateEntry(beatmap.General.AudioFilename)
                     use audio_file_stream = audio_file_entry.Open()
                     fs.CopyTo(audio_file_stream)
                 | None -> ()
