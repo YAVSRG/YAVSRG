@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
-open Prelude.Charts.Processing.Patterns
 open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
@@ -103,5 +102,9 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
                 kps <- kps + keys * (1f - (now - previous_time) / TWO_SECONDS)
                 previous <- keystate
                 previous_time <- timestamp
-            let text_bounds = this.Bounds.TrimBottom(box_height).SliceBottom(this.Bounds.Width * 0.1f)
+            let text_bounds = 
+                if config.InputMeterScrollDownwards then
+                    this.Bounds.TrimTop(box_height).SliceTop(this.Bounds.Width * 0.1f)
+                else
+                    this.Bounds.TrimBottom(box_height).SliceBottom(this.Bounds.Width * 0.1f)
             Text.fill_b(Style.font, sprintf "%.0f KPS" kps, text_bounds, Colors.text, Alignment.CENTER)
