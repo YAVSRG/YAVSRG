@@ -202,7 +202,7 @@ module Validation =
         let noteskin =
             InMemoryNoteskinBuilder(
                 { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Rotate
+                    ReceptorStyle = ReceptorStyle.Receptors
                 }
             )
                 .AddImageFile("note.png", ONEPIXELIMAGE)
@@ -237,7 +237,7 @@ module Validation =
         let noteskin =
             InMemoryNoteskinBuilder(
                 { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Rotate
+                    ReceptorStyle = ReceptorStyle.Receptors
                 }
             )
                 .AddImageFile("note.png", ONEPIXELIMAGE)

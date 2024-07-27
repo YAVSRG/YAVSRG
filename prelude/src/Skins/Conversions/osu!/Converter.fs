@@ -787,7 +787,7 @@ module OsuSkinConverter =
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures
                 EnableColumnLight = columnlighting
-                ReceptorStyle = if key_receptors then ReceptorStyle.Flip else ReceptorStyle.Rotate
+                ReceptorStyle = if key_receptors then ReceptorStyle.Keys else ReceptorStyle.Receptors
 
                 UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
                 NoteExplosionSettings =

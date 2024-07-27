@@ -128,6 +128,7 @@ type NoteskinConfig =
         Rotations: float array array
 
         ReceptorStyle: ReceptorStyle
+        ReceptorOffset: float32
 
         LinearSampling: bool
     }
@@ -174,7 +175,8 @@ type NoteskinConfig =
                     [| 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0 |]
                     [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
                 |]
-            ReceptorStyle = ReceptorStyle.Rotate
+            ReceptorStyle = ReceptorStyle.Receptors
+            ReceptorOffset = 0.0f
             LinearSampling = true
         }
 
@@ -249,7 +251,7 @@ module NoteskinTextureRules =
                 "receptor",
                 {
                     IsRequired = K true
-                    MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Rotate
+                    MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Receptors
                     MaxGridSize = K(20, 32)
                 }
                 "noteexplosion",

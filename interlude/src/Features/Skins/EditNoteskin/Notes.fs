@@ -165,7 +165,6 @@ type NotesSettingsPage() =
     let use_rotation = Setting.simple data.UseRotation
 
     let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-    let receptor_style = Setting.simple data.ReceptorStyle
     let note_rotations = data.Rotations
     let mutable note_colors = data.NoteColors
 
@@ -257,18 +256,6 @@ type NotesSettingsPage() =
             .Pos(10)
         |+ PageSetting(%"noteskin.rotations", rotations)
             .Pos(12, 3, PageWidth.Full)
-        |+ PageSetting(
-            %"noteskin.receptorstyle",
-            SelectDropdown(
-                [|
-                    ReceptorStyle.Rotate, %"noteskin.receptorstyle.receptors"
-                    ReceptorStyle.Flip, %"noteskin.receptorstyle.keys"
-                |],
-                receptor_style
-            )
-        )
-            .Help(Help.Info("noteskin.receptorstyle"))
-            .Pos(15)
         :> Widget
 
     override this.Title = %"noteskin.notes"
@@ -279,5 +266,4 @@ type NotesSettingsPage() =
                 NoteColors = note_colors
                 Rotations = note_rotations
                 UseRotation = use_rotation.Value
-                ReceptorStyle = receptor_style.Value
             }

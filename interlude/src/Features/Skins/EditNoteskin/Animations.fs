@@ -95,6 +95,9 @@ type AnimationSettingsPage() =
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
+    let receptor_style = Setting.simple data.ReceptorStyle
+    let receptor_offset = Setting.bounded data.ReceptorOffset -1.0f 1.0f
+
     override this.Content() =
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
@@ -113,6 +116,24 @@ type AnimationSettingsPage() =
             |+ PageSetting(%"noteskin.enableexplosions", Checkbox enable_explosions)
                 .Help(Help.Info("noteskin.enableexplosions"))
                 .Pos(8)
+            |+ PageSetting(
+                %"noteskin.receptorstyle",
+                SelectDropdown(
+                    [|
+                        ReceptorStyle.Receptors, %"noteskin.receptorstyle.receptors"
+                        ReceptorStyle.Keys, %"noteskin.receptorstyle.keys"
+                    |],
+                    receptor_style
+                )
+            )
+                .Help(Help.Info("noteskin.receptorstyle"))
+                .Pos(11)
+            |+ PageSetting(
+                %"noteskin.receptor_offset",
+                Slider.Percent receptor_offset
+            )
+                .Help(Help.Info("noteskin.receptor_offset"))
+                .Pos(13)
 
         let note_explosion_tab =
             NavigationContainer.Column(WrapNavigation = false)
@@ -251,7 +272,10 @@ type AnimationSettingsPage() =
 
         // draw note explosion example
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
+            (Rect
+                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
+                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
+                .AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) receptor)
 
@@ -284,7 +308,10 @@ type AnimationSettingsPage() =
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
+            (Rect
+                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
+                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
+                .AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
@@ -342,7 +369,9 @@ type AnimationSettingsPage() =
         bottom <- bottom - COLUMN_WIDTH * 2.0f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+            (Rect
+                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                .AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) note)
 
@@ -351,7 +380,10 @@ type AnimationSettingsPage() =
         left <- left - COLUMN_WIDTH * 1.5f
 
         Draw.quad
-            (Rect.Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio).AsQuad)
+            (Rect
+                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
+                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
+                .AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
@@ -410,4 +442,6 @@ type AnimationSettingsPage() =
                         Duration = explosion_duration_hold.Value
                         ExpandAmount = explosion_expand_hold.Value
                     }
+                ReceptorStyle = receptor_style.Value
+                ReceptorOffset = receptor_offset.Value
             }

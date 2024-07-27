@@ -26,7 +26,6 @@ module Skins =
                         %"noteskin.edit",
                         (fun () -> EditNoteskinPage().Show())
                     )
-                        .Help(Help.Info("noteskin.edit"))
 
                 yield PageButton(
                     %"skins.browser",

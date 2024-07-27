@@ -166,7 +166,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                         hitposition + note_height - note_height / receptor_aspect_ratio,
                         column_width,
                         note_height / receptor_aspect_ratio
-                     )
+                     ).Translate(0.0f, note_height * noteskin_config.ReceptorOffset)
                      |> scroll_direction_transform bottom
                      |> _.AsQuad
                      |> receptor_transform k)

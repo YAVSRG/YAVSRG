@@ -46,7 +46,6 @@ type EditNoteskinPage() =
                     }
                         .Show()
             )
-                .Help(Help.Info("noteskin.playfield"))
                 .Pos(11)
             |+ PageButton(
                 %"noteskin.notes",
@@ -70,7 +69,6 @@ type EditNoteskinPage() =
                     }
                         .Show()
             )
-                .Help(Help.Info("noteskin.holdnotes"))
                 .Pos(15)
             |+ PageButton(
                 %"noteskin.animations",
@@ -82,8 +80,7 @@ type EditNoteskinPage() =
                     }
                         .Show()
             )
-                .Help(Help.Info("noteskin.animations"))
-                .Pos(19)
+                .Pos(17)
 
         let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 

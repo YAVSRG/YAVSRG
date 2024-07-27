@@ -95,7 +95,7 @@ module StepmaniaSkinConverter =
                 UseHoldTailTexture = holdtail
                 UseRotation = is_arrows
                 EnableColumnLight = false
-                ReceptorStyle = ReceptorStyle.Rotate
+                ReceptorStyle = ReceptorStyle.Receptors
 
                 UseExplosions = noteexplosion && holdexplosion
             }
