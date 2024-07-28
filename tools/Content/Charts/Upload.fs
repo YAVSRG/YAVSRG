@@ -157,11 +157,17 @@ module Upload =
                     BPM = Chart.find_min_max_bpm chart
                     Sources =
                         match chart.Header.ChartSource with
-                        | Osu(-1, 0) -> []
-                        | Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
-                        | Stepmania(id) -> [ Backbeat.Archive.ChartSource.Stepmania id ]
-                        | Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
+                        | Osu(-1, _)
+                        | Osu(_, 0)
+                        | Quaver(-1, _)
+                        | Quaver(_, 0)
+                        | Etterna ""
+                        | Stepmania _
                         | Unknown -> []
+
+                        | Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
+                        | Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
+                        | Etterna pack_name -> [ Backbeat.Archive.ChartSource.Etterna pack_name ]
                     PreviewTime = chart.Header.PreviewTime
                     BackgroundHash = background_hash
                     AudioHash = audio_hash

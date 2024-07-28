@@ -14,12 +14,12 @@ module Helpers =
         match Path.GetExtension(action.Source).ToLower() with
         | ".sm" ->
             let set_pack_source =
-                if action.Config.StepmaniaPackId.IsSome then
+                if action.Config.EtternaPackName.IsSome then
                     fun chart ->
                         { chart with
                             Header =
                                 { chart.Header with
-                                    ChartSource = Stepmania action.Config.StepmaniaPackId.Value
+                                    ChartSource = Etterna action.Config.EtternaPackName.Value
                                 }
                         }
                 else

@@ -104,8 +104,8 @@ type StepmaniaPack =
 type ChartSource =
     | Osu of {| BeatmapId: int; BeatmapSetId: int |}
     | Quaver of {| MapId: int; MapsetId: int |}
-    | Stepmania of id: int
-    | CommunityPack of id: string
+    | Etterna of pack_name: string
+    | Stepmania of id: int // deprecated
 
 type ChartHash = string
 
@@ -155,7 +155,8 @@ module Archive =
             ChartSource =
                 match chart.Sources with
                 | Osu d :: _ -> Origin.Osu(d.BeatmapSetId, d.BeatmapId)
-                | Stepmania d :: _ -> Origin.Stepmania d
+                | Quaver d :: _ -> Origin.Quaver(d.MapsetId, d.MapId)
+                | Etterna pack_name :: _ -> Origin.Etterna pack_name
                 | _ -> Origin.Unknown
         }
 

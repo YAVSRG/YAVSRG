@@ -221,8 +221,8 @@ module Imports =
         }
 
     let convert_stepmania_pack_zip =
-        { new Async.Service<string * int * Library, ConversionResult option>() with
-            override this.Handle((path, pack_id, library)) =
+        { new Async.Service<string * string * Library, ConversionResult option>() with
+            override this.Handle((path, pack_name, library)) =
                 async {
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -243,7 +243,7 @@ module Imports =
                                     convert_pack_folder.RequestAsync(
                                         pack_folder,
                                         { ConversionOptions.Default with
-                                            StepmaniaPackId = Some pack_id
+                                            EtternaPackName = Some pack_name
                                             PackName = Path.GetFileName pack_folder
                                             MoveAssets = true
                                         },

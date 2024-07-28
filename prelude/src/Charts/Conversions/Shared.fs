@@ -6,14 +6,14 @@ open System.IO
 type ConversionOptions =
     {
         MoveAssets: bool
-        StepmaniaPackId: int option
+        EtternaPackName: string option
         ChangedAfter: DateTime option
         PackName: string
     }
     static member Default =
         {
             MoveAssets = false
-            StepmaniaPackId = None
+            EtternaPackName = None
             ChangedAfter = None
             PackName = "Singles"
         }

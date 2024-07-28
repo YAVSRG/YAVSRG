@@ -37,7 +37,7 @@ module Songs =
             BPM = random.NextSingle() * 1000.0f<ms / beat>, random.NextSingle() * 1000.0f<ms / beat>
             BackgroundHash = random_text 15
             AudioHash = random_text 15
-            Sources = [ Stepmania(random.Next 10000); CommunityPack(random_text 5) ]
+            Sources = [ Etterna "Nanahira Minipack" ]
         }
 
     let TEST_SONG: Song =
@@ -67,7 +67,7 @@ module Songs =
             BPM = 413.7931f<ms / beat>, 413.7931f<ms / beat>
             BackgroundHash = "823436D6ED4350C2ED3ED6CC8502B69207F2670E60C6B5EAF6AB1A01744BD750"
             AudioHash = "D0AC559C92AE400A3A2C95EA0ED0E9034798634E1AF60ACAD99C6FA272631B89"
-            Sources = [ Stepmania 13813 ]
+            Sources = [ Etterna "Nanahira Minipack" ]
         }
 
     [<Test>]

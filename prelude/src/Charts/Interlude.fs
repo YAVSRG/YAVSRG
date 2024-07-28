@@ -110,8 +110,9 @@ type MediaPath =
 [<Json.AutoCodec>]
 type Origin =
     | Osu of beatmapsetid: int * beatmapid: int
-    | Stepmania of packid: int
     | Quaver of mapsetid: int * mapid: int
+    | Etterna of pack_name: string
+    | Stepmania of packid: int // deprecated
     | Unknown
 
 [<Json.AutoCodec(false)>]
