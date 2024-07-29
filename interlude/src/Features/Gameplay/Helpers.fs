@@ -62,25 +62,8 @@ module Gameplay =
                     )
 
 
-                //Skillsets.score score_info.Patterns.Patterns score_info.Accuracy score_info.Rate
-                //let skills = Skillsets.skills
-
-                //let jack = 
-                //    [skills.Jack.Accuracy; skills.Jack.Control; skills.Jack.Normal; skills.Jack.Survival]
-                //    |> List.map PatternStatLine.value
-                //let cs = 
-                //    [skills.Chordstream.Accuracy; skills.Chordstream.Control; skills.Chordstream.Normal; skills.Chordstream.Survival]
-                //    |> List.map PatternStatLine.value
-                //    |> List.map (fun x -> x / 2f)
-                //let stream = 
-                //    [skills.Stream.Accuracy; skills.Stream.Control; skills.Stream.Normal; skills.Stream.Survival]
-                //    |> List.map PatternStatLine.value
-                //    |> List.map (fun x -> x / 3f)
-
-                //printfn "percy points breakdown"
-                //printfn "jack: %A (%.0f)" jack (List.sum jack)
-                //printfn "chordstream: %A (%.0f)" cs (List.sum cs)
-                //printfn "stream: %A (%.0f)" stream (List.sum stream)
+                KeymodeSkillBreakdown.score score_info.Patterns.Patterns score_info.Accuracy score_info.Rate Skillsets.skills
+                |> ignore //|> printfn "%O"
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with

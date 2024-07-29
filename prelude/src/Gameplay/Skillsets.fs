@@ -3,6 +3,7 @@
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts.Processing
+open Prelude.Charts.Processing.Patterns
 
 [<Json.AutoCodec>]
 type PatternStatPoint = { BPM: int; Duration: Time }
@@ -50,12 +51,6 @@ module PatternStatLine =
                     | None -> Some x.Duration
                     | Some better_duration -> Some better_duration
 
-    let get_ratio (bpm: int, duration: Time) (stats: PatternStatLine) =
-        match get_duration_at bpm stats with
-        | None -> 10.0f
-        | Some observed_duration ->
-            duration / observed_duration |> min 10.0f |> max 0.1f
-
     let value (stats: PatternStatLine) =
         let ONE_MINUTE = 60000f<ms>
         let duration_value (duration: Time) =
@@ -73,46 +68,48 @@ module PatternStatLine =
             | [] -> 0.0f
         v stats * 10.0f
 
+type PatternSkillIncrease =
+    {
+        Accuracy: float32
+        Control: float32
+        Push: float32
+    }
+    member this.Total = this.Accuracy + this.Control + this.Push
+    override this.ToString() = sprintf "+%.0f Accuracy, +%.0f Control, +%.0f Push (+%.0f Total)" this.Accuracy this.Control this.Push this.Total
+
 [<Json.AutoCodec>]
 type PatternSkillBreakdown =
     {
         mutable Accuracy: PatternStatLine
         mutable Control: PatternStatLine
-        mutable Normal: PatternStatLine
-        mutable Survival: PatternStatLine
+        mutable Push: PatternStatLine
     }
 
-    static member Default = { Accuracy = []; Control = []; Normal = []; Survival = [] }
+    static member Default = { Accuracy = []; Control = []; Push = [] }
+    member this.Copy = { Accuracy = this.Accuracy; Control = this.Control; Push = this.Push }
+    member this.Minus (other: PatternSkillBreakdown) : PatternSkillIncrease =
+        {
+            Accuracy = PatternStatLine.value this.Accuracy - PatternStatLine.value other.Accuracy
+            Control = PatternStatLine.value this.Control - PatternStatLine.value other.Control
+            Push = PatternStatLine.value this.Push - PatternStatLine.value other.Push
+        }
 
 module PatternSkillBreakdown =
 
     let multiplier (threshold: float) (accuracy: float) : float32 =
         if accuracy >= threshold then
-            System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 0.3) |> float32
+            System.Math.Pow((1.0 - threshold) / (max (1.0 - accuracy) 0.001), 0.3) |> float32
         else 
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
     let private observe_octave (pattern_type: Patterns.CorePatternType) (density, accuracy, duration: Time) (breakdown: PatternSkillBreakdown) : unit =
         let feels_like_bpm = pattern_type.DensityToBPM * density |> int
 
-        match pattern_type with 
-        | Patterns.CorePatternType.Jack ->
-            breakdown.Accuracy <- breakdown.Accuracy |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.99 accuracy)
-            breakdown.Control <- breakdown.Control |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.98 accuracy)
-            breakdown.Normal <- breakdown.Normal |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.96 accuracy)
-            breakdown.Survival <- breakdown.Survival |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.93 accuracy)
-                        
-        | Patterns.CorePatternType.Chordstream ->
-            breakdown.Accuracy <- breakdown.Accuracy |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.985 accuracy)
-            breakdown.Control <- breakdown.Control |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.97 accuracy)
-            breakdown.Normal <- breakdown.Normal |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.945 accuracy)
-            breakdown.Survival <- breakdown.Survival |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.91 accuracy)
+        let acc_threshold, ctrl_threshold, push_threshold = pattern_type.AccuracyBreakpoints
 
-        | Patterns.CorePatternType.Stream ->
-            breakdown.Accuracy <- breakdown.Accuracy |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.98 accuracy)
-            breakdown.Control <- breakdown.Control |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.965 accuracy)
-            breakdown.Normal <- breakdown.Normal |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.93 accuracy)
-            breakdown.Survival <- breakdown.Survival |> PatternStatLine.add (feels_like_bpm, duration * multiplier 0.90 accuracy)
+        breakdown.Accuracy <- breakdown.Accuracy |> PatternStatLine.add (feels_like_bpm, duration * multiplier acc_threshold accuracy)
+        breakdown.Control <- breakdown.Control |> PatternStatLine.add (feels_like_bpm, duration * multiplier ctrl_threshold accuracy)
+        breakdown.Push <- breakdown.Push |> PatternStatLine.add (feels_like_bpm, duration * multiplier push_threshold accuracy)
 
     let private OCTAVES = 
         [|
@@ -128,6 +125,23 @@ module PatternSkillBreakdown =
         for octave, time_mult in OCTAVES do
             observe_octave pattern_type (density * octave, accuracy, Time.of_number (duration * time_mult)) breakdown
 
+type KeymodeSkillIncrease =
+    {
+        Jack: PatternSkillIncrease
+        Chordstream: PatternSkillIncrease
+        Stream: PatternSkillIncrease
+    }
+    member this.Total = this.Jack.Total + this.Chordstream.Total + this.Stream.Total
+    override this.ToString() = 
+        if this.Total = 0.0f then "No change" else
+        [
+            if this.Jack.Total > 0.0f then sprintf "Jack: %O" this.Jack else "Jack: --"
+            if this.Chordstream.Total > 0.0f then sprintf "Chordstream: %O" this.Chordstream else "Chordstream: --"
+            if this.Stream.Total > 0.0f then sprintf "Stream: %O" this.Stream else "Stream: --"
+            sprintf "+%.0f Total" this.Total
+        ]
+        |> String.concat "\n"
+
 [<Json.AutoCodec>]
 type KeymodeSkillBreakdown =
     {
@@ -142,59 +156,58 @@ type KeymodeSkillBreakdown =
             Chordstream = PatternSkillBreakdown.Default
             Stream = PatternSkillBreakdown.Default
         }
+    
+    member this.Copy = { Jack = this.Jack.Copy; Chordstream = this.Chordstream.Copy; Stream = this.Stream.Copy }
+    member this.Minus (other: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+        {
+            Jack = this.Jack.Minus other.Jack
+            Chordstream = this.Chordstream.Minus other.Chordstream
+            Stream = this.Stream.Minus other.Stream
+        }
 
 module KeymodeSkillBreakdown =
-    
-    let observe pattern_type (density: float32, accuracy: float, duration: Time) (skills: KeymodeSkillBreakdown) : unit =
-        match pattern_type with
-        | Patterns.CorePatternType.Jack -> skills.Jack
-        | Patterns.CorePatternType.Chordstream -> skills.Chordstream
-        | Patterns.CorePatternType.Stream -> skills.Stream
-        |> PatternSkillBreakdown.observe pattern_type (density, accuracy, duration)
 
-    let expected_result (pattern_type: Patterns.CorePatternType, density: float32, duration: Time) (skills: KeymodeSkillBreakdown) =
-        let target =
-            match pattern_type with
-            | Patterns.CorePatternType.Jack -> skills.Jack
-            | Patterns.CorePatternType.Chordstream -> skills.Chordstream
-            | Patterns.CorePatternType.Stream -> skills.Stream
+    let score (patterns: PatternSummary.PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+        
+        let before = skills.Copy
 
-        let feels_like_bpm = pattern_type.DensityToBPM * density |> int
-
-        if PatternStatLine.get_ratio (feels_like_bpm, duration) target.Accuracy < 1.0f then
-            0.985
-        elif PatternStatLine.get_ratio (feels_like_bpm, duration) target.Control < 1.0f then
-            0.965
-        elif PatternStatLine.get_ratio (feels_like_bpm, duration) target.Normal < 1.0f then
-            0.945
-        elif PatternStatLine.get_ratio (feels_like_bpm, duration) target.Survival < 1.0f then
-            0.91
-        else
-            0.88
-        |> fun x ->
-            x
-
-    let query (patterns: Patterns.PatternInfo) (rate: float32) (skills: KeymodeSkillBreakdown) =
-        let mutable total_weight : float = 0.00001
-        let mutable total : float = 0.0
-        let add_weight res time =
-            total <- total + res * time
-            total_weight <- total_weight + time
-
-        for p in patterns.Patterns do
+        for p in patterns do
             let time = 
-                patterns.Patterns 
+                patterns 
                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
                 |> Seq.sumBy _.Amount
 
-            let a1 = expected_result (p.Pattern, p.Density50 * rate, Time.of_number (time / rate)) skills
-            add_weight a1 (time / rate * 1.0f |> float)
-            let a2 = expected_result (p.Pattern, p.Density75 * rate, Time.of_number (time / rate * 0.5f)) skills
-            add_weight a2 (time / rate * 0.5f |> float)
-            let a3 = expected_result (p.Pattern, p.Density25 * rate, Time.of_number (time / rate * 1.5f)) skills
-            add_weight a3 (time / rate * 1.5f |> float)
+            let skill =
+                match p.Pattern with
+                | Jack -> skills.Jack
+                | Chordstream -> skills.Chordstream
+                | Stream -> skills.Stream
+            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
 
-        total / total_weight
+        skills.Minus before
+
+    let what_if (patterns: PatternSummary.PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+
+        let potential = skills.Copy
+
+        for p in patterns do
+            let time = 
+                patterns 
+                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
+                |> Seq.sumBy _.Amount
+
+            let skill =
+                match p.Pattern with
+                | Jack -> potential.Jack
+                | Chordstream -> potential.Chordstream
+                | Stream -> potential.Stream
+            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
+
+        potential.Minus skills
 
     let tech_factor (patterns: Patterns.PatternInfo) =
         let mutable total_weight : float32 = 0.00001f

@@ -14,6 +14,11 @@ type CorePatternType =
         | Stream -> 52.5f
         | Chordstream -> 35f
         | Jack -> 17.5f
+    member this.AccuracyBreakpoints =
+        match this with
+        | Stream -> ( 0.98, 0.94, 0.90 )
+        | Chordstream -> ( 0.985, 0.95, 0.915 )
+        | Jack -> ( 0.99, 0.96, 0.93 )
 
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
