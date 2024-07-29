@@ -56,6 +56,23 @@ module PatternStatLine =
         | Some observed_duration ->
             duration / observed_duration |> min 10.0f |> max 0.1f
 
+    let value (stats: PatternStatLine) =
+        let ONE_MINUTE = 60000f<ms>
+        let duration_value (duration: Time) =
+            if duration > ONE_MINUTE then
+                1.0f + ((duration - ONE_MINUTE) / ONE_MINUTE * 0.01f)
+            else duration / ONE_MINUTE
+        
+        let rec v (xs: PatternStatLine) =
+            match xs with
+            | x :: y :: xs ->
+                (float32 x.BPM - float32 y.BPM) * duration_value x.Duration
+                + v (y :: xs)
+            | x :: [] ->
+                float32 x.BPM * duration_value x.Duration
+            | [] -> 0.0f
+        v stats * 10.0f
+
 [<Json.AutoCodec>]
 type PatternSkillBreakdown =
     {
@@ -155,7 +172,6 @@ module KeymodeSkillBreakdown =
         else
             0.88
         |> fun x ->
-            printfn "%.0fms of %i bpm %A: %s" duration (feels_like_bpm) pattern_type (format_accuracy x)
             x
 
     let query (patterns: Patterns.PatternInfo) (rate: float32) (skills: KeymodeSkillBreakdown) =

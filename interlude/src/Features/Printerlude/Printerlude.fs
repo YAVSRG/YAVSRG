@@ -98,7 +98,7 @@ module Printerlude =
         let challenge_level (io: IOContext) =
             match SelectedChart.PATTERNS with
             | Some patterns ->
-                let skills = Features.Stats.ProofOfConcept.skills
+                let skills = Skillsets.skills
                 KeymodeSkillBreakdown.query patterns SelectedChart.rate.Value skills
                 |> format_accuracy
                 |> io.WriteLine

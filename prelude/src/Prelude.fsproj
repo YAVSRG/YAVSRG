@@ -71,6 +71,7 @@
     <Compile Include="Data\Library\Imports.fs" />
     <Compile Include="Data\Library\Sorting.fs" />
     <Compile Include="Data\Library\Endless.fs" />
+    <Compile Include="Data\Skillsets.fs" />
     <Compile Include="Data\ScoreInfo.fs" />
     <Compile Include="Data\osu!.fs" />
   </ItemGroup>

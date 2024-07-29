@@ -2,41 +2,9 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude
 open Prelude.Gameplay
 open Prelude.Data
 open Interlude.Content
-
-module ProofOfConcept =
-
-    let skills = KeymodeSkillBreakdown.Default
-
-    let calculate () =
-        let library = Content.Library
-        let score_db = Content.Scores
-
-        let sc_j4 = PremadeRulesets.SC.create 4
-        let sc_j4_id = Ruleset.hash sc_j4
-
-        for cc_key in library.Cache.Entries.Keys do
-            let cc = library.Cache.Entries.[cc_key]
-            let data = ScoreDatabase.get cc.Hash score_db
-            match data.PersonalBests.TryFind(sc_j4_id) with
-            | Some pbs ->
-                for (acc, rate, _) in pbs.Accuracy do
-                    match library.Cache.Patterns.TryGetValue cc.Hash with
-                    | true, res ->
-                        for p in res.Patterns do
-                            let time = 
-                                res.Patterns 
-                                |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
-                                |> Seq.sumBy _.Amount
-
-                            KeymodeSkillBreakdown.observe p.Pattern (p.Density50 * rate, acc, Time.of_number (time / rate)) skills
-                            KeymodeSkillBreakdown.observe p.Pattern (p.Density75 * rate, acc, Time.of_number (time / rate * 0.5f)) skills
-                            KeymodeSkillBreakdown.observe p.Pattern (p.Density25 * rate, acc, Time.of_number (time / rate * 1.5f)) skills
-                    | false, _ -> ()
-            | None -> ()
 
 type SkillsetGraph(target: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
@@ -78,9 +46,9 @@ type Skills() =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        ProofOfConcept.calculate()
+        //Skillsets.calculate Content.Scores Content.Library
         this 
-        |+ SkillsetGraph(ProofOfConcept.skills.Stream, Position = { Position.Margin(20.0f) with Bottom = 0.33f %- 10.0f })
-        |+ SkillsetGraph(ProofOfConcept.skills.Chordstream, Position = { Position.Margin(20.0f) with Top = 0.33f %+ 10.0f; Bottom = 0.66f %- 10.0f })
-        |* SkillsetGraph(ProofOfConcept.skills.Jack, Position = { Position.Margin(20.0f) with Top = 0.66f %+ 10.0f })
+        |+ SkillsetGraph(Skillsets.skills.Stream, Position = { Position.Margin(20.0f) with Bottom = 0.33f %- 10.0f })
+        |+ SkillsetGraph(Skillsets.skills.Chordstream, Position = { Position.Margin(20.0f) with Top = 0.33f %+ 10.0f; Bottom = 0.66f %- 10.0f })
+        |* SkillsetGraph(Skillsets.skills.Jack, Position = { Position.Margin(20.0f) with Top = 0.66f %+ 10.0f })
         base.Init parent
