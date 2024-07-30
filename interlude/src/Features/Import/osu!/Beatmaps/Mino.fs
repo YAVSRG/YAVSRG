@@ -3,7 +3,7 @@
 open Percyqaz.Data
 
 [<Json.AutoCodec>]
-type NeriNyanBeatmap =
+type MinoBeatmap =
     {
         id: int
         difficulty_rating: float
@@ -13,7 +13,7 @@ type NeriNyanBeatmap =
     }
 
 [<Json.AutoCodec>]
-type NeriNyanBeatmapset =
+type MinoBeatmapSet =
     {
         id: int
         artist: string
@@ -22,19 +22,7 @@ type NeriNyanBeatmapset =
         favourite_count: int
         play_count: int
         status: string
-        beatmaps: NeriNyanBeatmap array
+        beatmaps: MinoBeatmap array
     }
 
-[<Json.AutoCodec>]
-type NeriNyanBeatmapSearch = NeriNyanBeatmapset array
-
-[<Json.AutoCodec>]
-type NeriNyanBeatmapSearchRequest =
-    {
-        m: string
-        page: int
-        query: string
-        ranked: string
-        sort: string
-        cs: {| min: float; max: float |}
-    }
+type MinoBeatmapSearch = MinoBeatmapSet array

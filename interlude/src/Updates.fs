@@ -109,9 +109,9 @@ module Updates =
         if OperatingSystem.IsWindows() then
             WebServices.download_json (
                 "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
-                fun (d: GithubRelease option) ->
-                    if d.IsSome then
-                        handle_update d.Value
+                function
+                | WebResult.Ok (d: GithubRelease) -> handle_update d
+                | _ -> ()
             )
 
             let path = get_interlude_location ()

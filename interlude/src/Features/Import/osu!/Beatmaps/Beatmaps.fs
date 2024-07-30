@@ -16,30 +16,31 @@ type BeatmapBrowserPage() =
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
     let mutable filter: Filter = []
-    let query_order = Setting.simple "updated"
+    let query_order = Setting.simple "submitted_date"
     let descending_order = Setting.simple true
-    let mutable statuses = Set.singleton "Ranked"
+    let mutable statuses = Set.singleton 1
     let mutable when_at_bottom: (unit -> unit) option = None
     let mutable loading = false
 
     let json_downloader =
-        { new Async.SwitchService<string * (unit -> unit), NeriNyanBeatmapSearch option * (unit -> unit)>() with
+        { new Async.SwitchService<string * (unit -> unit), MinoBeatmapSearch option * (unit -> unit)>() with
             override this.Process((url, action_at_bottom)) =
                 async {
-                    match! WebServices.download_string.RequestAsync(url) with
-                    | Some bad_json ->
-                        let fixed_json = Regex.Replace(bad_json, @"[^\u0000-\u007F]+", "")
-
-                        match JSON.FromString(fixed_json) with 
-                        | Ok data ->
-                            return Some data, action_at_bottom
-                        | Error err ->
-                            Logging.Error("Failed to parse json data from " + url, err)
-                            return None, action_at_bottom
-                    | None -> return None, action_at_bottom
+                    match! WebServices.download_json_async(url) with
+                    | WebResult.Ok (data: MinoBeatmapSearch) -> return Some data, action_at_bottom
+                    | WebResult.HttpError 429 ->
+                        Logging.Error("Mino rate limit hit")
+                        Threading.Thread.Sleep(60000)
+                        return None, action_at_bottom
+                    | WebResult.HttpError code ->
+                        Logging.Error(sprintf "Mino API returned code %i" code)
+                        return None, action_at_bottom
+                    | WebResult.Exception err ->
+                        Logging.Error("Error getting Mino data from " + url, err)
+                        return None, action_at_bottom
                 }
 
-            override this.Handle((data: NeriNyanBeatmapSearch option, action_at_bottom)) =
+            override this.Handle((data: MinoBeatmapSearch option, action_at_bottom)) =
                 match data with
                 | Some d ->
                     for p in d do
@@ -56,15 +57,7 @@ type BeatmapBrowserPage() =
         loading <- true
         when_at_bottom <- None
 
-        let mutable request =
-            {
-                m = "mania"
-                page = page
-                query = ""
-                ranked = (String.concat "," statuses).ToLower()
-                sort = query_order.Value + if descending_order.Value then "_desc" else "_asc"
-                cs = {| min = 3.0; max = 10.0 |}
-            }
+        let mutable query = ""
 
         let mutable invalid = false
 
@@ -72,36 +65,21 @@ type BeatmapBrowserPage() =
             (function
             | Impossible -> invalid <- true
             | String s ->
-                request <-
-                    { request with
-                        query =
-                            match request.query with
-                            | "" -> s
-                            | t -> request.query + " " + s
-                    }
-            | Equals("k", n)
-            | Equals("key", n)
-            | Equals("keys", n) ->
-                match Int32.TryParse n with
-                | (true, i) ->
-                    request <-
-                        { request with
-                            cs = {| min = float i; max = float i |}
-                        }
-                | _ -> ()
+                query <- if query = "" then s else query + " " + s
             | _ -> ())
             filter
 
+        let status_string =
+            (if statuses.Contains 0 then "status=-2&status=-1&" else "")
+            + (statuses |> Seq.map (sprintf "status=%i") |> String.concat "&")
+
         let url =
-            "https://api.nerinyan.moe/search?b64="
-            + (request
-                |> JSON.ToString
-                |> fun s ->
-                    s.Replace("\n", "")
-                    |> System.Text.Encoding.UTF8.GetBytes
-                    |> Convert.ToBase64String
-                    |> Uri.EscapeDataString)
-            + "&ps=50"
+            sprintf "https://catboy.best/api/v2/search?query=%s&mode=3&sort=%s:%s&limit=50&offset=%i&%s"
+                (Uri.EscapeDataString query)
+                query_order.Value
+                (if descending_order.Value then "desc" else "asc")
+                (page * 50)
+                status_string
 
         json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
@@ -109,7 +87,7 @@ type BeatmapBrowserPage() =
         search filter 0
         items.Clear()
 
-    let status_button (status: string) (position: Position) (color: Color) =
+    let status_button (label: string) (status: int) (position: Position) (color: Color) =
         StylishButton(
             (fun () ->
                 if statuses.Contains status then
@@ -121,9 +99,9 @@ type BeatmapBrowserPage() =
             ),
             (fun () ->
                 if statuses.Contains status then
-                    Icons.CHECK + " " + status
+                    Icons.CHECK + " " + label
                 else
-                    Icons.X + " " + status
+                    Icons.X + " " + label
             ),
             (fun () -> if statuses.Contains status then color.O3 else color.O1),
             Position = position
@@ -143,6 +121,7 @@ type BeatmapBrowserPage() =
         |+ (let r =
                 status_button
                     "Ranked"
+                    1
                     { Position.Default with
                         Right = 0.18f %- 25.0f
                     }
@@ -152,6 +131,7 @@ type BeatmapBrowserPage() =
             r)
         |+ status_button
             "Qualified"
+            3
             { Position.Default with
                 Left = 0.18f %+ 0.0f
                 Right = 0.36f %- 25.0f
@@ -159,6 +139,7 @@ type BeatmapBrowserPage() =
             Colors.green
         |+ status_button
             "Loved"
+            4
             { Position.Default with
                 Left = 0.36f %+ 0.0f
                 Right = 0.54f %- 25.0f
@@ -166,6 +147,7 @@ type BeatmapBrowserPage() =
             Colors.pink
         |+ status_button
             "Unranked"
+            0
             { Position.Default with
                 Left = 0.54f %+ 0.0f
                 Right = 0.72f %- 25.0f
@@ -174,10 +156,10 @@ type BeatmapBrowserPage() =
         // todo: this should not use accent color and should be keyboard navigatable
         |+ SortingDropdown(
             [
-                "plays", "Play count"
-                "updated", "Date"
-                "difficulty", "Difficulty"
-                "favourites", "Favourites"
+                "play_count", "Play count"
+                "submitted_date", "Date"
+                "beatmaps.difficulty_rating", "Difficulty"
+                "favourite_count", "Favourites"
             ],
             "Sort",
             query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),

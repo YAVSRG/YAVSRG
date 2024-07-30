@@ -25,9 +25,9 @@ type EtternaPacksBrowserPage() =
             override this.Process((url, action_at_bottom)) =
                 async {
                     match! WebServices.download_json_async<EtternaOnlineApiResponse>(url) with
-                    | Some data ->
+                    | WebResult.Ok data ->
                         return Some data, action_at_bottom
-                    | None -> return None, action_at_bottom
+                    | _ -> return None, action_at_bottom
                 }
 
             override this.Handle((data: EtternaOnlineApiResponse option, action_at_bottom)) =

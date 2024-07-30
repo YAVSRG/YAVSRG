@@ -55,14 +55,14 @@ type SkinsBrowserPage() =
             sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/skins/skins.json" "githubusercontent",
             fun data ->
                 match data with
-                | Some(d: SkinRepo) ->
+                | WebResult.Ok(d: SkinRepo) ->
                     defer (fun () ->
                         for group in d.Skins do
                             let is_selected = Setting.make (fun _ -> select_group group) (fun _ -> selected_group = Some group)
                             noteskin_items.Add <| GroupDisplay(group, is_selected)
                         loading <- false
                     )
-                | None ->
+                | _ ->
                     defer (fun () ->
                         error <- true
                         loading <- false

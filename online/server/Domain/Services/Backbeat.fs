@@ -23,13 +23,12 @@ module Backbeat =
                 WebServices.download_json_async
                     "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json"
             with
-            | None -> failwith "Failed to download backbeat rulesets"
-            | Some(archive: RulesetRepo) ->
+            | WebResult.Ok(archive: RulesetRepo) ->
+                Logging.Info(sprintf "Backbeat downloads complete")
 
-            Logging.Info(sprintf "Backbeat downloads complete")
-
-            for rs in archive.Rulesets.Values do
-                rulesets.[Ruleset.hash rs] <- rs
+                for rs in archive.Rulesets.Values do
+                    rulesets.[Ruleset.hash rs] <- rs
+            | otherwise -> failwithf "Failed to download backbeat rulesets: %O" otherwise
         }
 
     module Tables =

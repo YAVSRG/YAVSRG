@@ -118,14 +118,14 @@ type RulesetSearch() as this =
             sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json" "githubusercontent",
             fun data ->
                 match data with
-                | Some(d: RulesetRepo) ->
+                | WebResult.Ok (d: RulesetRepo) ->
                     defer (fun () ->
                         for id in d.Rulesets.Keys do
                             grid.Add(RulesetCard(id, d.Rulesets.[id]))
 
                         loading <- false
                     )
-                | None ->
+                | _ ->
                     defer (fun () ->
                         failed <- true
                         loading <- false

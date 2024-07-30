@@ -18,7 +18,7 @@ type private BeatmapDownloadStatus =
     | Installed
     | DownloadFailed
 
-type private BeatmapImportCard(data: NeriNyanBeatmapset) as this =
+type private BeatmapImportCard(data: MinoBeatmapSet) as this =
     inherit
         Container(
             NodeType.Button(fun () ->

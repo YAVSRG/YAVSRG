@@ -51,13 +51,13 @@ module private WikiState =
                                     sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.md" "githubusercontent"
                                 )
                             with
-                            | Some md ->
+                            | WebResult.Ok md ->
                                 match!
                                     WebServices.download_json_async (
                                         sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/index.json" "githubusercontent"
                                     )
                                 with
-                                | Some toc ->
+                                | WebResult.Ok toc ->
                                     Cache.index_table_of_contents <- toc
 
                                     Cache.page_cache_by_filename <-
@@ -77,8 +77,8 @@ module private WikiState =
                                         |> Map.ofSeq
 
                                     Cache.index_content <- Some [| Markdown.Parse md |]
-                                | None -> ()
-                            | None -> ()
+                                | otherwise -> Logging.Debug(sprintf "Getting wiki index.json failed: %O" otherwise)
+                            | otherwise -> Logging.Debug(sprintf "Getting wiki index.md failed: %O" otherwise)
 
                         return Cache.index_content |> Option.defaultValue [||]
 
@@ -89,7 +89,7 @@ module private WikiState =
                                     sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/wiki/%s.md" "githubusercontent" p.Filename
                                 )
                             with
-                            | Some md ->
+                            | WebResult.Ok md ->
                                 let sections =
                                     md
                                         .Split("---", 3, System.StringSplitOptions.TrimEntries)
@@ -100,7 +100,7 @@ module private WikiState =
                                         p.Filename,
                                         Some(sections |> Array.map Markdown.Parse)
                                     )
-                            | None -> ()
+                            | otherwise -> Logging.Debug(sprintf "Getting wiki page '%s' failed: %O" p.Filename otherwise)
 
                         return Cache.page_cache_by_filename.[p.Filename] |> Option.defaultValue [||]
 
@@ -111,10 +111,10 @@ module private WikiState =
                                     sprintf "https://raw.%s.com/YAVSRG/YAVSRG/main/interlude/docs/changelog.md" "githubusercontent"
                                 )
                             with
-                            | Some md ->
+                            | WebResult.Ok md ->
                                 let version_split_regex = System.Text.RegularExpressions.Regex(@"\s(?=[\.0-9]+\s+====)")
                                 Cache.changelog_content <- version_split_regex.Split(md) |> Array.map Markdown.Parse |> Some
-                            | None -> ()
+                            | otherwise -> Logging.Debug(sprintf "Getting changelog failed: %O" otherwise)
 
                         return Cache.changelog_content |> Option.defaultValue [||]
                 }
