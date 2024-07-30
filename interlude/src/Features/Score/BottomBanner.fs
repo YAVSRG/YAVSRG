@@ -100,7 +100,7 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
             Align = Alignment.CENTER
         )
         |* (
-            GridFlowContainer<Widget>(65.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceBottom(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
+            GridFlowContainer<Widget>(50.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceBottom(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
             |+ InlaidButton(
                 %"score.graph.settings",
                 (fun () -> ScoreGraphSettingsPage(graph).Show()

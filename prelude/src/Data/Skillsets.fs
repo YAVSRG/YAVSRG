@@ -1,13 +1,11 @@
 ﻿namespace Prelude.Data
 
-open Prelude
 open Prelude.Gameplay
 open Prelude.Data.Library
-open Prelude.Charts.Processing.Patterns
 
 module Skillsets =
 
-    let skills = KeymodeSkillBreakdown.Default
+    let keymode_skills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
 
     let calculate (score_db: ScoreDatabase) (library: Library) =
 
@@ -22,6 +20,6 @@ module Skillsets =
                 for (acc, rate, _) in pbs.Accuracy do
                     match library.Cache.Patterns.TryGetValue cc.Hash with
                     | true, res ->
-                        KeymodeSkillBreakdown.score res.Patterns acc rate skills |> ignore
+                        KeymodeSkillBreakdown.score res.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
                     | false, _ -> ()
             | None -> ()

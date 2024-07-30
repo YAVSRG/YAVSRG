@@ -62,7 +62,7 @@ module Gameplay =
                     )
 
 
-                KeymodeSkillBreakdown.score score_info.Patterns.Patterns score_info.Accuracy score_info.Rate Skillsets.skills
+                KeymodeSkillBreakdown.score score_info.Patterns.Patterns score_info.Accuracy score_info.Rate Skillsets.keymode_skills.[score_info.WithMods.Keys - 3]
                 |> ignore //|> printfn "%O"
 
                 let new_bests, improvement_flags =

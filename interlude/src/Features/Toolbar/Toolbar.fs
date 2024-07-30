@@ -63,20 +63,20 @@ type Toolbar() =
             %"menu.back",
             (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, HEIGHT)
+            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
         )            
         |+ InlaidButton(
             Icons.MENU,
             (fun () -> QuickMenuPage().Show()),
             "",
-            Position = Position.SliceTop(HEIGHT).TrimLeft(10.0f).SliceLeft(HEIGHT)
+            Position = Position.SliceTop(InlaidButton.HEIGHT).TrimLeft(10.0f).SliceLeft(HEIGHT)
         )
             .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
         |+ (FlowContainer.LeftToRight(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
-                Position = Position.SliceTop(HEIGHT).TrimLeft(HEIGHT + 20.0f)
+                Position = Position.SliceTop(InlaidButton.HEIGHT).TrimLeft(HEIGHT + 20.0f)
             )
             |+ InlaidButton(
                 %"menu.options",

@@ -1,10 +1,13 @@
 ﻿namespace Interlude.Features.Stats
 
+open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data
+open Prelude.Charts.Processing.Patterns
+open Interlude.UI
 
 type SkillsetGraph(target: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
@@ -50,13 +53,66 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
             Draw.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
 
+    static member Create(data: PatternSkillBreakdown) =
+        if data = PatternSkillBreakdown.Default then
+            EmptyState(Icons.X, "No data") :> Widget
+        else 
+            SkillsetGraph(data)
+
 type Skills() =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        if Skillsets.skills = KeymodeSkillBreakdown.Default then Skillsets.calculate Interlude.Content.Content.Scores Interlude.Content.Content.Library
-        this 
-        //|+ SkillsetGraph(Skillsets.skills.Stream, Position = { Position.Margin(20.0f) with Bottom = 0.33f %- 10.0f })
-        //|+ SkillsetGraph(Skillsets.skills.Chordstream, Position = { Position.Margin(20.0f) with Top = 0.33f %+ 10.0f; Bottom = 0.66f %- 10.0f })
-        |* SkillsetGraph(Skillsets.skills.Jack, Position = Position.Margin(20.0f))
+        Skillsets.calculate Interlude.Content.Content.Scores Interlude.Content.Content.Library
+        let available_keymodes =
+            seq {
+                for i = 3 to 10 do
+                    if Skillsets.keymode_skills.[i - 3] <> KeymodeSkillBreakdown.Default then
+                        yield i
+            }
+            |> Array.ofSeq
+
+        let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
+
+        let keymode = Setting.simple available_keymodes.[0]
+        let skill = Setting.simple Jack
+
+        let graph_container = SwapContainer(SkillsetGraph.Create(Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Margin(20.0f))
+
+        let refresh_graph() =
+            let skills = Skillsets.keymode_skills.[keymode.Value - 3]
+            let skill_data = 
+                match skill.Value with
+                | Jack -> skills.Jack
+                | Chordstream -> skills.Chordstream
+                | Stream -> skills.Stream
+            graph_container.Current <- SkillsetGraph.Create(skill_data)
+
+        let keymode_switcher = 
+            InlaidButton(
+                (fun () -> sprintf "%iK" keymode.Value),
+                (fun () ->
+                    keymode.Value <- available_keymodes.[(1 + Array.findIndex ((=) keymode.Value) available_keymodes) % available_keymodes.Length]
+                    refresh_graph()
+                ),
+                ""
+            )
+
+        let skill_switcher = 
+            InlaidButton(
+                (fun () -> sprintf "%O" skill.Value),
+                (fun () ->
+                    skill.Value <- match skill.Value with Jack -> Chordstream | Chordstream -> Stream | Stream -> Jack
+                    refresh_graph()
+                ),
+                ""
+            )
+
+        this
+        |+ (
+            FlowContainer.RightToLeft(180.0f, Spacing = 10.0f, Position = Position.Margin(20.0f).SliceTop(InlaidButton.HEIGHT))
+            |+ skill_switcher
+            |+ keymode_switcher
+        )
+        |* graph_container
         base.Init parent

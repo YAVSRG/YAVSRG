@@ -227,7 +227,7 @@ type SelectSkinsPage() =
             c
 
         let action_buttons =
-            GridFlowContainer<Widget>(70.0f, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceTop(60.0f), WrapNavigation = false)
+            GridFlowContainer<Widget>(InlaidButton.HEIGHT, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceTop(60.0f), WrapNavigation = false)
             |+ InlaidButton(
                 %"skins.edit",
                 (fun () ->
