@@ -167,15 +167,6 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let events = score_info.Scoring.HitEvents
         assert (events.Count > 0)
 
-        let draw_line (x1, y1) (x2, y2) (color: Color) =
-            let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
-            let dy = -HTHICKNESS * System.MathF.Cos theta
-            let dx = HTHICKNESS * System.MathF.Sin theta
-
-            Draw.untextured_quad
-                (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
-                color.O3.AsQuad
-
         let line_color =
             match options.ScoreGraphLineColor.Value with
             | ScoreGraphLineColor.Lamp ->
