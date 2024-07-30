@@ -106,6 +106,7 @@ module Printerlude =
             | None -> ()
 
         let tech_factor (io: IOContext) =
+            Skillsets.find_underperformance Content.Scores Content.Library
             match SelectedChart.PATTERNS with
             | Some patterns ->
                 KeymodeSkillBreakdown.tech_factor patterns

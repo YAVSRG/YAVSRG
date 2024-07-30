@@ -69,8 +69,8 @@ module Patterns =
         let GLUTS : PatternRecogniser =
             function
             |   { Notes = a }
-                :: { Notes = b; Jacks = 1 } 
-                :: _ when a > 1 && b > 1 -> 2
+                :: { Jacks = 1 } 
+                :: _ when a > 1 -> 2
             | _ -> 0
             
         let MINIJACKS : PatternRecogniser =

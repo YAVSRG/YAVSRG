@@ -182,9 +182,12 @@ module KeymodeSkillBreakdown =
                 | Jack -> skills.Jack
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
+                
+            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, Time.of_number (time / rate * 1.8f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, Time.of_number (time / rate * 0.2f)) skill
 
         skills.Minus before
 
@@ -203,9 +206,12 @@ module KeymodeSkillBreakdown =
                 | Jack -> potential.Jack
                 | Chordstream -> potential.Chordstream
                 | Stream -> potential.Stream
+
+            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, Time.of_number (time / rate * 1.8f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, Time.of_number (time / rate * 0.2f)) skill
 
         potential.Minus skills
 
@@ -225,9 +231,11 @@ module KeymodeSkillBreakdown =
             add_weight x time
 
         for p in patterns.Patterns do
-
+        
+            f p.Pattern p.Density10 p.BPM (float32 (p.Amount * 1.8f))
             f p.Pattern p.Density25 p.BPM (float32 (p.Amount * 1.5f))
             f p.Pattern p.Density50 p.BPM (float32 (p.Amount * 1.0f))
             f p.Pattern p.Density75 p.BPM (float32 (p.Amount * 0.5f))
+            f p.Pattern p.Density90 p.BPM (float32 (p.Amount * 0.2f))
 
         total / total_weight

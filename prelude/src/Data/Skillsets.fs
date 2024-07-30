@@ -14,12 +14,34 @@ module Skillsets =
 
         for cc_key in library.Cache.Entries.Keys do
             let cc = library.Cache.Entries.[cc_key]
+            match library.Cache.Patterns.TryGetValue cc.Hash with
+            | false, _ -> ()
+            | true, res ->
+
             let data = ScoreDatabase.get cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
-                    match library.Cache.Patterns.TryGetValue cc.Hash with
-                    | true, res ->
-                        KeymodeSkillBreakdown.score res.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
-                    | false, _ -> ()
+                    KeymodeSkillBreakdown.score res.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
+            | None -> ()
+
+    let find_underperformance (score_db: ScoreDatabase) (library: Library) =
+
+        let sc_j4 = PremadeRulesets.SC.create 4
+        let sc_j4_id = Ruleset.hash sc_j4
+
+        for cc_key in library.Cache.Entries.Keys do
+            let cc = library.Cache.Entries.[cc_key]
+            match library.Cache.Patterns.TryGetValue cc.Hash with
+            | false, _ -> ()
+            | true, res ->
+
+            let data = ScoreDatabase.get cc.Hash score_db
+            match data.PersonalBests.TryFind(sc_j4_id) with
+            | Some pbs ->
+                for (acc, rate, _) in pbs.Accuracy do
+                    let double_quality_acc = 1.0 - 0.5 * (1.0 - acc)
+                    let improvement = KeymodeSkillBreakdown.what_if res.Patterns double_quality_acc rate keymode_skills.[cc.Keys - 3]
+                    if improvement.Total = 0.0f then
+                        printfn "%.2f%% [%.2fx] on %s is an accuracy underperformance" (acc * 100.0) rate cc.Title
             | None -> ()
