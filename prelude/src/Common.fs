@@ -76,7 +76,7 @@ module Common =
 
     module Setting =
         open Percyqaz.Common.Setting
-        let rate x = bounded x 0.5f 2.0f |> roundf 2
+        let rate x = bounded x 0.5f 3.0f |> roundf 2
 
     (*
         Localisation
