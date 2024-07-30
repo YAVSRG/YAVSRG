@@ -13,22 +13,24 @@ open Interlude.Features.Pacemaker
 type Pacemaker(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
+    let AHEAD_BY_SCALE = 15.0
+
     let color = Animation.Color(Color.White)
     let flag_position = Animation.Fade(0.5f)
-    let position_cooldown = Animation.Delay(3000.0)
+    let position_cooldown = Animation.Delay(1500.0)
     let mutable ahead_by = 0.0
     let mutable hearts = -1
 
     let update_flag_position () =
-        if ahead_by >= 10.0 then
+        if ahead_by >= AHEAD_BY_SCALE then
             flag_position.Target <- 1.0f
-        elif ahead_by > -10.0 then
-            flag_position.Target <- (ahead_by + 10.0) / 20.0 |> float32
+        elif ahead_by > -AHEAD_BY_SCALE then
+            flag_position.Target <- (ahead_by + AHEAD_BY_SCALE) / AHEAD_BY_SCALE / 2.0 |> float32
 
             if ahead_by > 0.0 then
-                color.Target <- Color.FromHsv(140.0f / 360.0f, ahead_by / 10.0 |> float32, 1.0f)
+                color.Target <- Color.FromHsv(140.0f / 360.0f, ahead_by / AHEAD_BY_SCALE |> float32, 1.0f)
             else
-                color.Target <- Color.FromHsv(340.0f / 360.0f, ahead_by / -10.0 |> float32, 1.0f)
+                color.Target <- Color.FromHsv(340.0f / 360.0f, ahead_by / -AHEAD_BY_SCALE |> float32, 1.0f)
         else
             flag_position.Target <- 0.0f
 
