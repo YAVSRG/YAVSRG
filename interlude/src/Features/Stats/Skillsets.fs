@@ -9,6 +9,15 @@ open Prelude.Data
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 
+type RatingTile(color: Color, value: float32) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black.O3
+        Background.draw (this.Bounds, Colors.grey_2, 0.8f)
+        Draw.rect this.Bounds color.O1
+        Text.fill_b (Style.font, sprintf "%.0f" value, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.CENTER)
+
 type SkillsetGraph(target: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
 
@@ -53,11 +62,22 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
             Draw.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
 
-    static member Create(data: PatternSkillBreakdown) =
+    static member Create(pattern: CorePatternType, data: PatternSkillBreakdown) =
         if data = PatternSkillBreakdown.Default then
             EmptyState(Icons.X, "No data") :> Widget
-        else 
-            SkillsetGraph(data)
+        else
+            let total = PatternStatLine.value data.Push + PatternStatLine.value data.Accuracy + PatternStatLine.value data.Control
+            let mult = pattern.RatingMultiplier
+            Container(NodeType.None)
+            |+ SkillsetGraph(data, Position = Position.TrimBottom(100.0f))
+            |+ (
+                GridFlowContainer(60.0f, 4, Spacing = (90.0f, 0.0f), Position = Position.SliceBottom(60.0f))
+                |+ RatingTile(Colors.yellow_accent, mult * PatternStatLine.value data.Accuracy)
+                |+ RatingTile(Colors.green_accent, mult * PatternStatLine.value data.Control)
+                |+ RatingTile(Colors.blue_accent, mult * PatternStatLine.value data.Push)
+                |+ RatingTile(Colors.shadow_2, mult * total)
+            )
+            :> Widget
 
 type Skills() =
     inherit Container(NodeType.None)
@@ -77,7 +97,7 @@ type Skills() =
         let keymode = Setting.simple available_keymodes.[0]
         let skill = Setting.simple Jack
 
-        let graph_container = SwapContainer(SkillsetGraph.Create(Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Margin(20.0f))
+        let graph_container = SwapContainer(SkillsetGraph.Create(Jack, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Margin(20.0f))
 
         let refresh_graph() =
             let skills = Skillsets.keymode_skills.[keymode.Value - 3]
@@ -86,7 +106,7 @@ type Skills() =
                 | Jack -> skills.Jack
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
-            graph_container.Current <- SkillsetGraph.Create(skill_data)
+            graph_container.Current <- SkillsetGraph.Create(skill.Value, skill_data)
 
         let keymode_switcher = 
             InlaidButton(

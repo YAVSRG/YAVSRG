@@ -14,6 +14,11 @@ type CorePatternType =
         | Stream -> 52.5f
         | Chordstream -> 35f
         | Jack -> 17.5f
+    member this.RatingMultiplier =
+        match this with
+        | Stream -> 1f / 3f
+        | Chordstream -> 0.5f
+        | Jack -> 1.0f
     member this.AccuracyBreakpoints =
         match this with
         | Stream -> ( 0.98, 0.94, 0.90 )
