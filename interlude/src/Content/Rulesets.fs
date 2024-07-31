@@ -10,12 +10,13 @@ open Prelude.Gameplay.PremadeRulesets
 module Rulesets =
 
     let private DEFAULT_ID = "sc-j4"
-    let private DEFAULT = SC.create 4
+    let DEFAULT = SC.create 4
+    let DEFAULT_HASH = Ruleset.hash DEFAULT
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Ruleset>()
     let mutable current = DEFAULT
-    let mutable current_hash = Ruleset.hash current
+    let mutable current_hash = DEFAULT_HASH
     let private _selected_id = Setting.simple DEFAULT_ID
 
     let load () =

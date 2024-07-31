@@ -44,6 +44,16 @@ type ScoreInfo =
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Grading.Lamps scoring.State
             this.Grade <- Grade.calculate ruleset.Grading.Grades scoring.State
+    
+    member this.WithRuleset (ruleset: Ruleset) =
+        let scoring =
+            Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+
+        { this with
+            Scoring = scoring
+            Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
+            Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+        }
 
     member this.Accuracy = this.Scoring.Value
     member this.Mods = this.WithMods.ModsApplied

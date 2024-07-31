@@ -61,8 +61,12 @@ module Gameplay =
                         ignore
                     )
 
+                let standardised_score =
+                    if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+                        score_info.WithRuleset Rulesets.DEFAULT
+                    else score_info
 
-                KeymodeSkillBreakdown.score score_info.Patterns.Patterns score_info.Accuracy score_info.Rate Skillsets.keymode_skills.[score_info.WithMods.Keys - 3]
+                KeymodeSkillBreakdown.score standardised_score.Patterns.Patterns standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
                 |> ignore //|> printfn "%O"
 
                 let new_bests, improvement_flags =
@@ -73,6 +77,14 @@ module Gameplay =
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
                     ScoreDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
+
+                    if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+                        let new_standard_bests =
+                            match Map.tryFind Rulesets.DEFAULT_HASH save_data.PersonalBests with
+                            | Some existing_bests -> Bests.update standardised_score existing_bests |> fst
+                            | None -> Bests.create standardised_score
+                        save_data.PersonalBests <- Map.add Rulesets.DEFAULT_HASH new_standard_bests save_data.PersonalBests
+
                     ScoreDatabase.save_changes Content.Scores
                 improvement_flags
 
