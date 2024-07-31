@@ -1,21 +1,22 @@
-0.7.24.6
+0.7.24.7
 ====
 
-Some cool technical changes in this one, let me know in Discord if you experience any issues
+I have honored several feature requests
 
 # New stuff
-- If you are on Windows, the Windows key is disabled during gameplay (so pressing it by mistake won't ruin your score)
-- Console window is now hidden except when the game crashes
-- High accuracies are formatted to more than 2 decimal places (i.e. accuracies between 99.98% and 100.00%)
-- Score screen column filters now also affect the left-hand-side stats
-- Added text to the Quick menu indicating the hotkey
-- Standard Deviation line mode on score graph now scales to highest SD during the score
+- 'Receptor offset' setting in noteskins
+- Added a 'KPS meter' option to the Input meter HUD element
+- Rates up to 3.00x are now supported (previously went up to 2.00x)
+- Sort by 'Date played'
+- Click on the score screen graph to expand it
+- Message shown when trying to reload skins in a menu, saying to close the menu first
 
-# Bugs fixed
-- Etterna pack downloader updated to point to the new site (no longer beta.etternaonline)
-- Timestamps on timelines have been adjusted to make more sense
-- UI crashes no longer instant-quit the entire program, you can see the error message like you could a long time ago
-- Fixed an issue with transparency + fading on the input meter
+# Improvements
+- osu! Beatmap search is now powered by Mino which should work significantly better
+- Fixed a bug when exporting certain charts to .osz
+- Noteskin editing menu has been rearranged to make things easier to find
+- Pacemaker HUD element updates its position more often
 
-More cool features in the works, those of you snooping at code commits will know more than I let on in these changelogs for now
+Those of you in the Discord that know about the skillset breakdown system I've been working on:  
+You can now go to 'Skillsets' on the Stats page to snoop at your graphs and numbers, but you otherwise can't interact with it yet
 
