@@ -86,6 +86,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                     Bottom = 1.0f %- 60.0f
                 }
         )
+        |+ graph
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
         base.Init parent

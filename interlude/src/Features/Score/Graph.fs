@@ -65,9 +65,30 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     let fbo = FBO.create ()
     let mutable refresh = true
+    let mutable expanded = false
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
+
+    let BOX_HEIGHT = 180.0f
+    let BOX_WIDTH = 300.0f
+    let BOX_PADDING_X = 10.0f
+
+    let NORMAL_POSITION =
+        {
+            Left = 0.35f %+ 30.0f
+            Top = 0.75f %+ 25.0f
+            Right = 1.0f %- 20.0f
+            Bottom = 1.0f %- 65.0f
+        }
+
+    let EXPANDED_POSITION =
+        {
+            Left = 0.0f %+ 20.0f
+            Top = 0.25f %+ 0.0f
+            Right = 1.0f %- 20.0f
+            Bottom = 1.0f %- 65.0f
+        }
 
     let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
@@ -115,6 +136,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         )
 
     do fbo.Unbind()
+
+    override this.Init(parent) =
+        this.Position <- NORMAL_POSITION
+        base.Init parent
 
     member this.Refresh() = refresh <- true
 
@@ -243,18 +268,24 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if moved then
-            refresh <- true
-
-        if Mouse.hover this.Bounds && Mouse.left_click() then
-            ScoreGraphSettingsPage(this).Show()
+        if Mouse.hover this.Bounds then
+            if Mouse.right_click() then
+                ScoreGraphSettingsPage(this).Show()
+            elif Mouse.left_click() then
+                expanded <- not expanded
+                this.Position <- if expanded then EXPANDED_POSITION else NORMAL_POSITION
+                refresh <- true
 
     override this.Draw() =
         if refresh then
             this.Redraw()
+            
+        Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.white
 
-        Draw.rect this.Bounds Colors.black.O2
-
+        Draw.rect this.Bounds Colors.black.O3
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
         if this.Bounds.Contains(Mouse.pos ()) && score_info.Scoring.Snapshots.Count > 0 then
@@ -262,16 +293,15 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = percent * float32 snapshots.Count |> int |> max 0 |> min (snapshots.Count - 1)
             let current_snapshot = snapshots.[snapshot_index]
-            let BOX_PADDING_X = 10.0f
-            let BOX_PADDING_Y = 0.0f
-            let BOX_WIDTH = 300.0f
+
+            let box_padding_y = (this.Bounds.Height - BOX_HEIGHT) * 0.5f
 
             let box =
                 Rect.Box(
                     this.Bounds.Left + BOX_PADDING_X + percent * (this.Bounds.Width - BOX_WIDTH - BOX_PADDING_X - BOX_PADDING_X),
-                    this.Bounds.Top + BOX_PADDING_Y,
+                    this.Bounds.Top + box_padding_y,
                     BOX_WIDTH,
-                    this.Bounds.Height - BOX_PADDING_Y - BOX_PADDING_Y
+                    this.Bounds.Height - box_padding_y - box_padding_y
                 )
 
             draw_snapshot_info box current_snapshot

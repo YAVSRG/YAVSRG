@@ -134,7 +134,7 @@ module Background =
     let drawq (q: Quad, color: Color, depth: float32) =
         List.iter
             (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
-                let color = Color.FromArgb(fade.Alpha, color)
+                let color = color.O4a fade.Alpha
                 let pwidth = Viewport.vwidth + parallaxZ.Value * depth
                 let pheight = Viewport.vheight + parallaxZ.Value * depth
                 let x = -parallaxX.Value * parallaxZ.Value * depth

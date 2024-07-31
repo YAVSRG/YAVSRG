@@ -83,16 +83,7 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
     inherit Container(NodeType.None)
 
     do
-        graph.Position <-
-            {
-                Left = 0.35f %+ 30.0f
-                Top = 0.0f %+ 25.0f
-                Right = 1.0f %- 20.0f
-                Bottom = 1.0f %- 65.0f
-            }
-
         this
-        |+ graph
         |+ Text(
             Updates.version + "  : :  www.yavsrg.net",
             Position = { Position.SliceBottom(50.0f) with Right = 0.35f %+ 0.0f }.Margin(20.0f, 5.0f),
@@ -133,9 +124,5 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
 
         Draw.rect (this.Bounds.TrimTop 5.0f) (Palette.color (127, 0.5f, 0.0f))
         Draw.rect (this.Bounds.SliceTop 5.0f) Colors.white.O2
-
-        // graph background
-        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
-        Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 1.0f)
 
         base.Draw()
