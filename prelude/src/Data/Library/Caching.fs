@@ -25,7 +25,7 @@ type CachedChart =
         Hash: string
         Keys: int
         Length: Time
-        DateAdded: DateTime
+        DateAdded: DateTime // todo: change to int64
         BPM: (float32<ms / beat> * float32<ms / beat>)
         DifficultyName: string
         Physical: float
@@ -186,7 +186,6 @@ module Cache =
                         Directory.EnumerateDirectories cache.RootPath
                         |> Seq.filter (fun p -> Path.GetFileName p <> ".assets") do
 
-                        // current system. just very minor sanity checks then straight into cache
                         for file in Directory.EnumerateFiles folder do
                             match Path.GetExtension(file).ToLower() with
                             | ".yav" ->

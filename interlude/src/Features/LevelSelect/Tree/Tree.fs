@@ -63,7 +63,7 @@ module Tree =
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
 
-            if library_groups.[g].Charts.Count = 1 then
+            if library_groups.[g].Charts.Length = 1 then
                 let cc, context = library_groups.[g].Charts.[0]
 
                 if cc.Key <> selected_chart then

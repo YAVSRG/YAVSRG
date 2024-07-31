@@ -133,33 +133,28 @@ module Sorting =
         | Some report -> report.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
         | None -> false
 
-    let private compare_by (f: CachedChart -> IComparable) =
-        fun a b -> f(fst a).CompareTo <| f (fst b)
+    let private then_by_physical (cc: CachedChart) (sort_value: int) : int64 =
+        (int64 sort_value <<< 32) + (cc.Physical * 1000.0 |> int64)
 
-    let private then_compare_by (f: CachedChart -> IComparable) cmp =
-        let cmp2 = compare_by f
-
-        fun a b ->
-            match cmp a b with
-            | 0 -> cmp2 a b
-            | x -> x
-
-    type SortMethod = Comparison<CachedChart * Collections.LibraryContext>
+    type SortingTag = string * float32 * float
+    type SortMethod = CachedChart * LibraryViewContext -> SortingTag
 
     let sorting_modes: IDictionary<string, SortMethod> =
         dict
             [
-                "difficulty", Comparison(compare_by (fun x -> x.Physical))
-                "bpm",
-                Comparison(
-                    compare_by (fun x -> let (a, b) = x.BPM in (1f / a, 1f / b))
-                    |> then_compare_by (fun x -> x.Physical)
-                )
-                "title", Comparison(compare_by (fun x -> x.Title) |> then_compare_by (fun x -> x.Physical))
-                "artist", Comparison(compare_by (fun x -> x.Artist) |> then_compare_by (fun x -> x.Physical))
-                "creator", Comparison(compare_by (fun x -> x.Creator) |> then_compare_by (fun x -> x.Physical))
-                "length", Comparison(compare_by (fun x -> x.Length) |> then_compare_by (fun x -> x.Physical))
-                "date_installed", Comparison(compare_by (fun x -> x.DateAdded) |> then_compare_by (fun x -> x.Physical))
+                "difficulty", fun (x, _) -> "", 0.0f, x.Physical
+                "bpm", fun (x, _) -> "", (60000.0f<ms/minute> / snd x.BPM * 10.0f |> float32), x.Physical
+                "title", fun (x, _) -> x.Title, 0.0f, x.Physical
+                "artist", fun (x, _) -> x.Artist, 0.0f, x.Physical
+                "creator", fun (x, _) -> x.Creator, 0.0f, x.Physical
+                "length", fun (x, _) -> "", (float32 x.Length), x.Physical
+                "date_installed", fun (x, _) -> "", (Timestamp.from_datetime x.DateAdded |> float32), x.Physical
+                "date_played", fun (x, ctx) -> 
+                    let date_played =
+                         match ScoreDatabase.get_cached x.Hash ctx.ScoreDatabase with
+                         | Some d -> d.LastPlayed |> float32
+                         | None -> 0.0f
+                    "", date_played, x.Physical
             ]
 
     type FilterPart =
@@ -268,11 +263,28 @@ module Sorting =
         | Collections
         | Table
 
+
     type Group =
         {
-            Charts: ResizeArray<CachedChart * LibraryContext>
+            Charts: (CachedChart * LibraryContext) array
             Context: LibraryGroupContext
         }
+
+    type private GroupWithSorting =
+        {
+            Charts: ResizeArray<CachedChart * LibraryContext * SortingTag>
+            Context: LibraryGroupContext
+        }
+        member this.ToGroup : Group =
+            {
+                Charts = 
+                    this.Charts
+                    |> Seq.distinctBy (fun (cc, _, _) -> cc.Hash)
+                    |> Seq.sortBy (fun (_, _, key) -> key)
+                    |> Seq.map (fun (cc, ctx, _) -> (cc, ctx))
+                    |> Array.ofSeq
+                Context = this.Context
+            }
 
     type LexSortedGroups = Dictionary<int * string, Group>
 
@@ -283,29 +295,26 @@ module Sorting =
         (ctx: LibraryViewContext)
         : LexSortedGroups =
 
-        let groups = new Dictionary<int * string, Group>()
+        let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
         for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values do
             let s = group_by (cc, ctx)
 
-            if groups.ContainsKey s |> not then
-                groups.Add(
+            if found_groups.ContainsKey s |> not then
+                found_groups.Add(
                     s,
                     {
-                        Charts = ResizeArray<CachedChart * LibraryContext>()
+                        Charts = ResizeArray<CachedChart * LibraryContext * SortingTag>()
                         Context = LibraryGroupContext.None
                     }
                 )
 
-            groups.[s].Charts.Add(cc, LibraryContext.None)
+            found_groups.[s].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
 
-        for g in groups.Keys |> Seq.toArray do
-            groups.[g] <-
-                { groups.[g] with
-                    Charts = groups.[g].Charts |> Seq.distinctBy (fun (cc, _) -> cc.Hash) |> ResizeArray
-                }
+        let groups = new Dictionary<int * string, Group>()
 
-            groups.[g].Charts.Sort sort_by
+        for g in found_groups.Keys |> Seq.toArray do
+            groups.[g] <- found_groups.[g].ToGroup
 
         groups
 
@@ -327,16 +336,13 @@ module Sorting =
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Folder name)
                 | None ->
-                    //Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name)
                     None
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
-            |> ResizeArray<CachedChart * LibraryContext>
+            |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> Array.ofSeq
             |> fun x ->
-                x.Sort sort_by
-                x
-            |> fun x ->
-                if x.Count > 0 then
+                if x.Length > 0 then
                     groups.Add(
                         (0, name),
                         {
@@ -360,13 +366,12 @@ module Sorting =
                     entry.Path <- cc.Key
                     Some(cc, LibraryContext.Playlist(i, name, info))
                 | None ->
-                    //Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name)
                     None
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
-            |> ResizeArray<CachedChart * LibraryContext>
+            |> Array.ofSeq
             |> fun x ->
-                if x.Count > 0 then
+                if x.Length > 0 then
                     groups.Add(
                         (0, name),
                         {
@@ -395,12 +400,10 @@ module Sorting =
                     |> Option.map (fun x -> x, LibraryContext.Table level)
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
-            |> ResizeArray<CachedChart * LibraryContext>
+            |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> Array.ofSeq
             |> fun x ->
-                x.Sort sort_by
-                x
-            |> fun x ->
-                if x.Count > 0 then
+                if x.Length > 0 then
                     groups.Add(
                         (level,
                          table.Info.LevelDisplayNames.TryFind level
