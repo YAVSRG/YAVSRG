@@ -84,6 +84,7 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
 
     do
         this
+        |+ graph
         |+ Text(
             Updates.version + "  : :  www.yavsrg.net",
             Position = { Position.SliceBottom(50.0f) with Right = 0.35f %+ 0.0f }.Margin(20.0f, 5.0f),
@@ -119,10 +120,3 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
                 )
             )
         )
-
-    override this.Draw() =
-
-        Draw.rect (this.Bounds.TrimTop 5.0f) (Palette.color (127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceTop 5.0f) Colors.white.O2
-
-        base.Draw()

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Gameplay
 open Prelude.Data
 open Interlude.Options
@@ -51,6 +52,17 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         previous_personal_bests := None
         graph.Refresh()
 
+    let bottom_info =
+        BottomBanner(
+            score_info,
+            graph,
+            refresh,
+            Position =
+                { Position.Default with
+                    Top = 0.75f %- 0.0f
+                }
+        )
+
     override this.Init(parent) =
         this
         |+ Results(
@@ -66,15 +78,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                 }
         )
         |+ TopBanner(score_info, Position = Position.SliceTop(180.0f))
-        |+ BottomBanner(
-            score_info,
-            graph,
-            refresh,
-            Position =
-                { Position.Default with
-                    Top = 0.75f %- 0.0f
-                }
-        )
         |+ Sidebar(
             stats,
             score_info,
@@ -86,7 +89,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                     Bottom = 1.0f %- 60.0f
                 }
         )
-        |+ graph
+        |+ bottom_info
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
         base.Init parent
@@ -112,3 +115,10 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             None
         else
             Some Screen.Type.LevelSelect
+
+    override this.Draw() =
+        
+        Draw.rect (bottom_info.Bounds.TrimTop 5.0f) (Palette.color (127, 0.5f, 0.0f))
+        Draw.rect (bottom_info.Bounds.SliceTop 5.0f) Colors.white.O2
+
+        base.Draw()

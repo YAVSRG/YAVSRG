@@ -77,7 +77,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let NORMAL_POSITION =
         {
             Left = 0.35f %+ 30.0f
-            Top = 0.75f %+ 25.0f
+            Top = 0.0f %+ 25.0f
             Right = 1.0f %- 20.0f
             Bottom = 1.0f %- 65.0f
         }
@@ -85,7 +85,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let EXPANDED_POSITION =
         {
             Left = 0.0f %+ 20.0f
-            Top = 0.25f %+ 0.0f
+            Top = -2.0f %+ 0.0f
             Right = 1.0f %- 20.0f
             Bottom = 1.0f %- 65.0f
         }
