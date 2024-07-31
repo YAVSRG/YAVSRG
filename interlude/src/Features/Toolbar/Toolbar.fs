@@ -111,7 +111,7 @@ type Toolbar() =
                     Skins.load()
                     Rulesets.load()
                     SelectedChart.recolor ()
-                    Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.reload_content", "")
+                    Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
         )
         |+ HotkeyAction("preset1", fun () -> load_preset 1)
         |+ HotkeyAction("preset2", fun () -> load_preset 2)
