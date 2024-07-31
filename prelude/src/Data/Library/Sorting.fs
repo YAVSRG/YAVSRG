@@ -144,9 +144,9 @@ module Sorting =
             [
                 "difficulty", fun (x, _) -> "", 0.0f, x.Physical
                 "bpm", fun (x, _) -> "", (60000.0f<ms/minute> / snd x.BPM * 10.0f |> float32), x.Physical
-                "title", fun (x, _) -> x.Title, 0.0f, x.Physical
-                "artist", fun (x, _) -> x.Artist, 0.0f, x.Physical
-                "creator", fun (x, _) -> x.Creator, 0.0f, x.Physical
+                "title", fun (x, _) -> x.Title.ToLowerInvariant(), 0.0f, x.Physical
+                "artist", fun (x, _) -> x.Artist.ToLowerInvariant(), 0.0f, x.Physical
+                "creator", fun (x, _) -> x.Creator.ToLowerInvariant(), 0.0f, x.Physical
                 "length", fun (x, _) -> "", (float32 x.Length), x.Physical
                 "date_installed", fun (x, _) -> "", (Timestamp.from_datetime x.DateAdded |> float32), x.Physical
                 "date_played", fun (x, ctx) -> 
