@@ -43,7 +43,7 @@ type Toolbar() =
             )
             |+ LoadingIndicator.Strip(
                 Imports.import_in_progress,
-                Position = Position.SliceBottom(15.0f).SliceTop(Style.PADDING)
+                Position = Position.BorderBottom(Style.PADDING)
             )
         container.Help(Help.Info("menu.import").Hotkey("import"))
 
