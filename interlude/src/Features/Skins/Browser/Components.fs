@@ -171,7 +171,9 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
         base.Draw()
 
     member this.Name = group.Name
+    member this.Versions = group.Versions
 
     static member Filter(query: string) =
         fun (c: GroupDisplay) ->
             c.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
+            || c.Versions |> Seq.exists(fun v -> v.Version.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
