@@ -1,5 +1,15 @@
 {
     "Skins": [{
+        "Name": "Klee",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Klee__thumbnail.png",
+        "Versions": [{
+            "Author": "Suminoze",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Klee_Bars.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Klee_Bars.png",
+            "Version": "Bars"
+        }]
+    }, {
         "Name": "Collei Sav Edit",
         "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Collei Sav Edit__thumbnail.png",
         "Versions": [{
