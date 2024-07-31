@@ -1,5 +1,25 @@
 {
     "Skins": [{
+        "Name": "Collei Sav Edit",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Collei Sav Edit__thumbnail.png",
+        "Versions": [{
+            "Author": "Sav",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Collei Sav Edit_Orbs.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Collei Sav Edit_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
+        "Name": "Lyldelfu",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Lyldelfu__thumbnail.png",
+        "Versions": [{
+            "Author": "Coffebonito13",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Lyldelfu_Arrows.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Lyldelfu_Arrows.png",
+            "Version": "Arrows"
+        }]
+    }, {
         "Name": "DivideByQuaverCircle",
         "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/DivideByQuaverCircle__thumbnail.png",
         "Versions": [{
