@@ -28,7 +28,7 @@ type LevelSelectScreen() =
                 {
                     Left = 0.0f %+ 0.0f
                     Top = 0.0f %+ 175.0f
-                    Right = 0.4f %- 10.0f
+                    Right = 0.4f %- 0.0f
                     Bottom = 1.0f %+ 0.0f
                 }
         )
@@ -44,38 +44,7 @@ type LevelSelectScreen() =
         Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
-        |+ Text(
-            (fun () ->
-                match SelectedChart.CACHE_DATA with
-                | None -> ""
-                | Some c -> c.Title
-            ),
-            Align = Alignment.CENTER,
-            Position =
-                {
-                    Left = 0.0f %+ 30.0f
-                    Top = 0.0f %+ 20.0f
-                    Right = 0.4f %- 30.0f
-                    Bottom = 0.0f %+ 100.0f
-                }
-        )
-
-        |+ Text(
-            (fun () ->
-                match SelectedChart.CACHE_DATA with
-                | None -> ""
-                | Some c -> c.DifficultyName
-            ),
-            Align = Alignment.CENTER,
-            Position =
-                {
-                    Left = 0.0f %+ 30.0f
-                    Top = 0.0f %+ 90.0f
-                    Right = 0.4f %- 30.0f
-                    Bottom = 0.0f %+ 140.0f
-                }
-        )
-
+        |+ CurrentChart(Position = { Position.SliceTop(170.0f) with Right = 0.4f %- 0.0f })
         |+ SearchBox(
             search_text,
             (fun f ->
@@ -217,8 +186,6 @@ type LevelSelectScreen() =
              <| Vector2(left, top + 170.0f))
             (!*Palette.DARK_100).AsQuad
 
-        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (Colors.shadow_2.O2)
-
         Draw.untextured_quad
             (Quad.create
              <| Vector2(left + w + 85.0f, top)
@@ -227,7 +194,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w, top + 170.0f))
             Colors.shadow_2.O2.AsQuad
 
-        Draw.rect (this.Bounds.SliceTop(175.0f).SliceBottom(5.0f)) (Palette.color (255, 0.8f, 0.0f))
+        Draw.rect (this.Bounds.SliceTop(170.0f).BorderBottom(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 
         base.Draw()
         Comments.draw ()

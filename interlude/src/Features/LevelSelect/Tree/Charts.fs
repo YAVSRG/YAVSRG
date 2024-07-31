@@ -64,7 +64,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
                 | _ -> ""
 
     override this.Bounds(top) =
-        Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + CHART_HEIGHT)
+        Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)
 
     override this.Selected =
         selected_chart = cc.Key
@@ -110,11 +110,9 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
                 <| new Vector2(left, bottom - 25.0f))
             (Quad.gradient_left_to_right accent Color.Transparent)
 
-        let border = bounds.Expand(5.0f, 0.0f)
         let border_color = if this.Selected then !*Palette.LIGHT else color
-
         if border_color.A > 0uy then
-            Draw.rect (border.SliceLeft 5.0f) border_color
+            Draw.rect (bounds.BorderLeft Style.PADDING) border_color
 
         // draw pbs
         let disp (data: 'T * float32 * Color * string) (pos: float32) =

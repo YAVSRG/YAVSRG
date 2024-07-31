@@ -191,6 +191,7 @@
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
+    <Compile Include="Features\LevelSelect\CurrentChart.fs" />
     <Compile Include="Features\LevelSelect\Info\Details.fs" />
     <Compile Include="Features\LevelSelect\Info\Leaderboard.fs" />
     <Compile Include="Features\LevelSelect\Info\Scoreboard.fs" />
