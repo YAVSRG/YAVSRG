@@ -30,6 +30,8 @@ module Skillsets =
         let sc_j4 = PremadeRulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
+        let ACC_INCREASE = 3.0
+
         for cc_key in library.Cache.Entries.Keys do
             let cc = library.Cache.Entries.[cc_key]
             match library.Cache.Patterns.TryGetValue cc.Hash with
@@ -40,8 +42,9 @@ module Skillsets =
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
-                    let double_quality_acc = 1.0 - 0.5 * (1.0 - acc)
-                    let improvement = KeymodeSkillBreakdown.what_if res.Patterns double_quality_acc rate keymode_skills.[cc.Keys - 3]
+                    let better_accuracy = 1.0 - (1.0 - acc) / ACC_INCREASE
+                    let better_rate = rate + 0.3f
+                    let improvement = KeymodeSkillBreakdown.what_if res.Patterns better_accuracy better_rate keymode_skills.[cc.Keys - 3]
                     if improvement.Total = 0.0f then
-                        printfn "%.2f%% [%.2fx] on %s is an accuracy underperformance" (acc * 100.0) rate cc.Title
+                        printfn "%.2f%% [%.2fx] on %s is an underperformance" (acc * 100.0) rate cc.Title
             | None -> ()
