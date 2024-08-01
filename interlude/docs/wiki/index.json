@@ -20,10 +20,6 @@
         "Filename": "how_to_play",
         "Folder": "Getting started",
         "Title": "How to play"
-    }, {
-        "Filename": "performance",
-        "Folder": "Getting started",
-        "Title": "Performance"
     }],
     "Migrating": [{
         "Filename": "migrate_osu_mania",
@@ -37,5 +33,22 @@
         "Filename": "migrate_sm_etterna",
         "Folder": "Migrating",
         "Title": "StepMania/Etterna"
+    }],
+    "Performance": [{
+        "Filename": "performance_diagnosis",
+        "Folder": "Performance",
+        "Title": "Introduction"
+    }, {
+        "Filename": "performance_input",
+        "Folder": "Performance",
+        "Title": "Input"
+    }, {
+        "Filename": "performance_recording",
+        "Folder": "Performance",
+        "Title": "Recording"
+    }, {
+        "Filename": "performance_unlimited_fps",
+        "Folder": "Performance",
+        "Title": "Advanced settings"
     }]
 }
