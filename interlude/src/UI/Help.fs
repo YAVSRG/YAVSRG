@@ -115,7 +115,7 @@ module HelpOverlay =
                         outline.Bottom + 50.0f
 
                 let callout_bounds = Rect.Box(x, y, width, height)
-                Draw.rect callout_bounds (Colors.cyan.O3a t.Fade.Alpha)
+                Draw.rect callout_bounds (Colors.cyan.O2a t.Fade.Alpha)
                 let frame_bounds = callout_bounds.Expand(5.0f)
                 Draw.rect (frame_bounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
                 Draw.rect (frame_bounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)

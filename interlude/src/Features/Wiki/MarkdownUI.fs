@@ -325,7 +325,7 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
                 Draw.rect (this.Bounds.BorderTopCorners(Style.PADDING)) Colors.cyan_accent
                 Draw.rect (this.Bounds.BorderLeft(Style.PADDING)) Colors.cyan_accent
                 Draw.rect (this.Bounds.BorderRight(Style.PADDING)) Colors.cyan_accent
-                Draw.rect this.Bounds Colors.cyan.O3
+                Draw.rect this.Bounds Colors.cyan.O2
 
             base.Draw()
 
