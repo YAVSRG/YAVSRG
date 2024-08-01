@@ -9,6 +9,7 @@ VSRGs are a genre of game where **performance truly matters**.
 These pages aim to explain what settings Interlude provides for performance and how they work, so you can decide what works best on your hardware.
 
 Here are some terms the performance articles use and what they mean:
+
 - *Frames* refer to each single image that gets sent to your screen - Tens or hundreds of frames are produced per second to make a moving image
 - *Frame drops* are when the game misses a frame entirely - the notes stay still for a few frames and then jump further along the screen
 - *Frame rate* is the number of frames produced by the game per second
