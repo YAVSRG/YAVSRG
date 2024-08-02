@@ -58,6 +58,8 @@ module Options =
         | Mean = 2
         | StandardDeviation = 3
         | Accuracy = 4
+        | MA = 5
+        | PA = 6
         
     [<RequireQualifiedAccess>]
     type ScoreGraphLineColor =

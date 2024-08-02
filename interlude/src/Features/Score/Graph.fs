@@ -32,6 +32,8 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
                     ScoreGraphLineMode.Mean, %"score.graph.settings.line_mode.mean"
                     ScoreGraphLineMode.StandardDeviation, %"score.graph.settings.line_mode.standard_deviation"
                     ScoreGraphLineMode.Accuracy, %"score.graph.settings.line_mode.accuracy"
+                    ScoreGraphLineMode.MA, %"score.graph.settings.line_mode.ma"
+                    ScoreGraphLineMode.PA, %"score.graph.settings.line_mode.pa"
                 |],
                 options.ScoreGraphLineMode
             )
@@ -228,6 +230,26 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let min_acc = accuracies |> Seq.min
             
             let y_func (snapshot: ScoreMetricSnapshot) = (snapshot.Accuracy - min_acc) / (max_acc - min_acc) |> float32
+            this.DrawLineGraph(y_func, line_color)
+
+        | ScoreGraphLineMode.MA when score_info.Scoring.Snapshots.Count > 0 && score_info.Scoring.State.Judgements.Length > 1 ->
+
+            let ma (ss: ScoreMetricSnapshot) = if ss.Judgements.[1] = 0 then float32 ss.Judgements.[0] else float32 ss.Judgements.[0] / float32 ss.Judgements.[1]
+            let ratios = score_info.Scoring.Snapshots |> Seq.map ma
+            let max_ratio = ratios |> Seq.max
+            let min_ratio = ratios |> Seq.min
+            
+            let y_func (snapshot: ScoreMetricSnapshot) = (ma snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
+            this.DrawLineGraph(y_func, line_color)
+
+        | ScoreGraphLineMode.PA when score_info.Scoring.Snapshots.Count > 0 && score_info.Scoring.State.Judgements.Length > 2 ->
+
+            let pa (ss: ScoreMetricSnapshot) = if ss.Judgements.[2] = 0 then float32 ss.Judgements.[1] else float32 ss.Judgements.[1] / float32 ss.Judgements.[2]
+            let ratios = score_info.Scoring.Snapshots |> Seq.map pa
+            let max_ratio = ratios |> Seq.max
+            let min_ratio = ratios |> Seq.min
+            
+            let y_func (snapshot: ScoreMetricSnapshot) = (pa snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
             this.DrawLineGraph(y_func, line_color)
             
         | _ -> ()
