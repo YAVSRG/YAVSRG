@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+		<title>Advanced settings - Interlude Wiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="../../style.css" rel="stylesheet"/>
+    <link rel="icon" type="image/x-icon" href="../../favicon.png"/>
+  </head>
+  <body class="background-2 akrobat flex flex-row">
+		<div class="flex flex-col h-screen w-full justify-between">
+      
+      <div class="mx-4">
+        <!-- content -->
+        <div class="w-full p-10 space-y-8">
+          <div class="frame text-2xl container flex flex-col mx-auto p-4"><h2 class="text-3xl">Using 'Unlimited' frame cap</h2><p class="leading-8 mb-4">If you are having problems with 'Smart' frame cap (such as particularly high visual latency), you can <em>entirely uncap the engine to produce as many frames per second as possible</em>.<br/>This should be used at your own risk as it can potentially make your graphics card hot as if running a much bigger game or system benchmark.</p><p class="leading-8 mb-4">If you have an NVIDIA graphics card you can add a frame cap in your graphics drivers to prevent the GPU getting as hot/using as much power, which I <strong>strongly recommend</strong>.<br/>Adding a frame cap directly in the drivers is far more effective than any frame cap I could code into the game engine.</p><p class="leading-8 mb-4">Here's how:</p><ul><li class="ml-8 list-disc">Open the start menu, find and open NVIDIA Control Panel</li><li class="ml-8 list-disc">On the left hand sidebar, select 'Manage 3D settings'</li><li class="ml-8 list-disc">On the 'Manage 3D Settings' page, switch to the 'Program Settings' tab</li><li class="ml-8 list-disc">Select Interlude.exe in the dropdown of what program to customise</li><li class="ml-8 list-disc">Find 'Max Frame Rate' and change it to On, 1000FPS (experiment with other values if you like)</li><li class="ml-8 list-disc">Click 'Apply' in the bottom right</li><li class="ml-8 list-disc">Now <strong>restart the game</strong> and switch to 'Unlimited' frame cap after restarting</li></ul><p class="leading-8 mb-4">If you don't have an NVIDIA graphics card you will have to figure out equivalent steps by Googling or asking in the Discord.</p></div>
+        </div>
+      </div>
+			
+			<!-- footer -->
+			<footer class="footer text-2xl px-4 flex flex-col lg:flex-row items-center justify-center gap-x-5">
+			  <span>© Percyqaz 2018-2024</span>
+			  <div></div>
+	          <a href="../../index.html">Home</a>
+			  <a href="../changelog.html">Changelog</a>
+			  <a href="index.html">Wiki</a>
+			  <div class="py-2"></div>
+			  <a href="../../terms_of_service.html">Terms</a>
+			  <a href="../../privacy_policy.html">Privacy</a>
+			  <a href="mailto:dmca@yavsrg.net">DMCA</a>
+			</footer>
+
+		</div>
+  </body>
+</html>
