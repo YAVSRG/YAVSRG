@@ -1,22 +1,15 @@
-0.7.24.7
+0.7.24.8
 ====
 
-I have honored several feature requests
+Hotfix update
 
-# New stuff
-- 'Receptor offset' setting in noteskins
-- Added a 'KPS meter' option to the Input meter HUD element
-- Rates up to 3.00x are now supported (previously went up to 2.00x)
-- Sort by 'Date played'
-- Click on the score screen graph to expand it
-- Message shown when trying to reload skins in a menu, saying to close the menu first
+# Bugs fixed
+- Fixed ruleset selection appearing behind score screen graph
+- Fixed import indicator being too high up
 
-# Improvements
-- osu! Beatmap search is now powered by Mino which should work significantly better
-- Fixed a bug when exporting certain charts to .osz
-- Noteskin editing menu has been rearranged to make things easier to find
-- Pacemaker HUD element updates its position more often
-
-Those of you in the Discord that know about the skillset breakdown system I've been working on:  
-You can now go to 'Skillsets' on the Stats page to snoop at your graphs and numbers, but you otherwise can't interact with it yet
+# Other stuff
+- You can now search "orbs", "arrows", "bars", etc in the skins browser
+- Changed appearance of the ingame wiki and tooltips slightly
+- Added MA/PA line graph modes
+- Some other subtle UI improvements
 
