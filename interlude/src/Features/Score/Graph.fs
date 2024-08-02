@@ -333,8 +333,22 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             draw_snapshot_info box current_snapshot
 
-            Text.draw (Style.font, %"score.graph.early", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1)
-            Text.draw (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.white.O1)
+            Text.draw (
+                Style.font, 
+                sprintf "%s (-%.0fms)" (%"score.graph.early") score_info.Ruleset.Accuracy.MissWindow, 
+                24.0f,
+                this.Bounds.Left + 10.0f,
+                this.Bounds.Bottom - 40.0f,
+                Colors.white.O1
+            )
+            Text.draw (
+                Style.font,
+                sprintf "%s (+%.0fms)" (%"score.graph.late") score_info.Ruleset.Accuracy.MissWindow, 
+                24.0f,
+                this.Bounds.Left + 10.0f,
+                this.Bounds.Top + 3.0f,
+                Colors.white.O1
+            )
             Text.draw_aligned (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1, Alignment.RIGHT)
 
         else
