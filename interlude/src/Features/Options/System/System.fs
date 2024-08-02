@@ -10,7 +10,7 @@ open Interlude.UI
 type WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
     override this.Init(parent) =
         this
@@ -63,7 +63,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
     let dropdown_wrapper = 
         DropdownWrapper(
             (fun d -> 
-                Position.BorderBottom(min d.Height 400.0f).Margin(Style.PADDING, 0.0f)
+                Position.BorderB(min d.Height 400.0f).Shrink(Style.PADDING, 0.0f)
             ),
             OnClose = fun () -> buttons.Focus(false)
         )

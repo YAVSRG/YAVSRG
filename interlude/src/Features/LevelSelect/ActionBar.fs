@@ -27,7 +27,7 @@ module Comments =
                             ),
                         "comment",
                         true,
-                        Position = Position.Margin(20.0f, 10.0f),
+                        Position = Position.Shrink(20.0f, 10.0f),
                         Clickable = false) with
             override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
@@ -40,12 +40,12 @@ module Comments =
         }
 
     let editor =
-        Container(NodeType.None, Position = Position.SliceBottom(160.0f))
+        Container(NodeType.None, Position = Position.SliceB(160.0f))
         |+ (FrameContainer(
                 NodeType.None,
                 Fill = K Colors.grey_2.O2,
                 Border = K Colors.grey_2,
-                Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f)
+                Position = Position.DEFAULT.Shrink(200.0f, 0.0f).ShrinkB(15.0f).ShrinkT(60.0f)
             )
             |+ text_entry)
         |+ Text(
@@ -56,7 +56,7 @@ module Comments =
             ),
             Color = K Colors.text,
             Align = Alignment.CENTER,
-            Position = Position.SliceTop 55.0f
+            Position = Position.SliceT 55.0f
         )
 
     let begin_edit () = editor.Select false

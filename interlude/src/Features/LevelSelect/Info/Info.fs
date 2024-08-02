@@ -16,9 +16,9 @@ type ChartInfo() as this =
     let display =
         Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
 
-    let scoreboard = Scoreboard(display, Position = Position.TrimBottom 170.0f)
-    let online = Leaderboard(display, Position = Position.TrimBottom 170.0f)
-    let patterns = Patterns(display, Position = Position.TrimBottom 170.0f)
+    let scoreboard = Scoreboard(display, Position = Position.ShrinkB 170.0f)
+    let online = Leaderboard(display, Position = Position.ShrinkB 170.0f)
+    let patterns = Patterns(display, Position = Position.ShrinkB 170.0f)
 
     let mutable rating = 0.0
     let mutable notecounts = ""

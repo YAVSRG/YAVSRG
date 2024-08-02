@@ -21,7 +21,7 @@ type WikiBrowserPage() =
 
     let buttons =
         NavigationContainer.Row(
-            Position = Position.SliceTop(70.0f).CenterX(1400.0f).Margin(0.0f, 10.0f)
+            Position = Position.SliceT(70.0f).SliceX(1400.0f).Shrink(0.0f, 10.0f)
         )
         |+ Button(
             fun () ->
@@ -35,7 +35,7 @@ type WikiBrowserPage() =
                     load_resource y
                     page_history <- y :: xs
                 | _ -> Menu.Back()
-            , Position = Position.SliceLeft(150.0f)
+            , Position = Position.SliceL(150.0f)
         )
         |+ Text(
             (fun () ->
@@ -56,7 +56,7 @@ type WikiBrowserPage() =
                 | WikiIndex -> open_url ("https://yavsrg.net/interlude/wiki/index.html")
                 | WikiPage p -> open_url ("https://yavsrg.net/interlude/wiki/" + p.Filename + ".html")
                 | Changelog -> open_url ("https://yavsrg.net/interlude/changelog.html")
-            , Position = Position.SliceRight(300.0f)
+            , Position = Position.SliceR(300.0f)
         )
 
     override this.Header() = buttons
@@ -82,13 +82,13 @@ type WikiBrowserPage() =
                     FlowContainer.LeftToRight<_>(
                         (PAGE_WIDTH - 10.0f - (fcount - 1.0f) * 20.0f) / fcount,
                         Spacing = 20.0f,
-                        Position = Position.TrimTop(80.0f).Margin(5.0f, 0.0f)
+                        Position = Position.ShrinkT(80.0f).Shrink(5.0f, 0.0f)
                     )
 
                 for key in Cache.index_table_of_contents.Keys do
                     let pages = Cache.index_table_of_contents.[key]
 
-                    let links = FlowContainer.Vertical(50.0f, Position = Position.TrimTop(60.0f))
+                    let links = FlowContainer.Vertical(50.0f, Position = Position.ShrinkT(60.0f))
 
                     for p in pages do
                         links.Add(Button(p.Title, (fun () -> load_resource (WikiPage p))))
@@ -99,7 +99,7 @@ type WikiBrowserPage() =
                             Fill = K Colors.cyan.O2,
                             Border = K Colors.cyan_accent
                         )
-                        |+ Text(key, Position = Position.SliceTop(60.0f), Color = K Colors.text_subheading)
+                        |+ Text(key, Position = Position.SliceT(60.0f), Color = K Colors.text_subheading)
                         |+ links
                     )
 
@@ -110,7 +110,7 @@ type WikiBrowserPage() =
                     )
                     |+ Text(
                         sprintf "%s %s" Icons.BOOK_OPEN (%"wiki.contents"),
-                        Position = Position.SliceTop(70.0f).Margin(20.0f, 0.0f),
+                        Position = Position.SliceT(70.0f).Shrink(20.0f, 0.0f),
                         Align = Alignment.LEFT
                     )
                     |+ folders
@@ -120,7 +120,7 @@ type WikiBrowserPage() =
         | None -> content.Add(LoadingState())
 
         content._Size <- y - PARAGRAPH_SPACING + Style.PADDING * 2.0f
-        let scroll_container = ScrollContainer(content, Margin = Style.PADDING, Position = Position.CenterX(PAGE_WIDTH).Margin(-Style.PADDING, 80.0f))
+        let scroll_container = ScrollContainer(content, Margin = Style.PADDING, Position = Position.SliceX(PAGE_WIDTH).Shrink(-Style.PADDING, 80.0f))
         Heading.scroll_handler <- fun w -> scroll_container.Scroll(w.Bounds.Top - scroll_container.Bounds.Top)
         container.Current <- scroll_container
 

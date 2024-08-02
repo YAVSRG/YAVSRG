@@ -217,7 +217,7 @@ type private SortingDropdown
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.PADDING, 0.0f))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
     override this.Init(parent: Widget) =
         this
@@ -226,7 +226,7 @@ type private SortingDropdown
             K(label + ":"),
             !%Palette.HIGHLIGHT_100,
             Hotkey = bind,
-            Position = Position.SliceLeft 120.0f
+            Position = Position.SliceL 120.0f
         )
         |+ StylishButton(
             (fun () -> reverse.Value <- not reverse.Value),
@@ -241,7 +241,7 @@ type private SortingDropdown
             ),
             !%Palette.DARK_100,
             TiltRight = false,
-            Position = Position.TrimLeft 145.0f
+            Position = Position.ShrinkL 145.0f
         )
         |* dropdown_wrapper
 

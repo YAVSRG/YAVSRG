@@ -10,17 +10,17 @@ type PlayerListPage() as this =
         Container(NodeType.None)
         |+ PlayerListSidebar(
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Right = 0.35f %+ 40.0f
                 }
-                    .Margin(40.0f)
+                    .Shrink(40.0f)
         )
         |+ Profile(
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = 0.35f %- 0.0f
                 }
-                    .Margin(40.0f)
+                    .Shrink(40.0f)
         )
         |+ HotkeyAction("exit", this.Close)
         |+ HotkeyAction("player_list", this.Close)

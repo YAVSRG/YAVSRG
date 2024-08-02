@@ -39,7 +39,7 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(Style.PADDING).SliceTop(70.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
         )
         |+ Text(
             K(
@@ -49,12 +49,12 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
         )
         |* Clickable.Focus this
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(100.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -95,7 +95,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) 
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(Style.PADDING).SliceTop(70.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
         )
         |+ Text(
             K(
@@ -105,12 +105,12 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) 
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
         )
         |* Clickable.Focus this
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(100.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -175,7 +175,7 @@ type SelectSkinsPage() =
         refresh ()
 
         let left_info =
-            NavigationContainer.Column(Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.35f %- 10.0f })
+            NavigationContainer.Column(Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.35f %- 10.0f })
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
                 0.0f,
@@ -190,7 +190,7 @@ type SelectSkinsPage() =
             )
             |+ Text(
                 %"skins.current",
-                Position = pretty_pos(0, 1, PageWidth.Full).SliceTop(PRETTYHEIGHT * 0.65f),
+                Position = pretty_pos(0, 1, PageWidth.Full).SliceT(PRETTYHEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
@@ -202,14 +202,14 @@ type SelectSkinsPage() =
             )
             |+ Text(
                 (fun () -> if Skins.selected_hud_id.Value <> Skins.selected_noteskin_id.Value then "HUD: " + Content.HUDMeta.Name else ""),
-                Position = pretty_pos(3, 2, PageWidth.Full).TrimTop(15.0f),
+                Position = pretty_pos(3, 2, PageWidth.Full).ShrinkT(15.0f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
 
         let noteskin_tab = ScrollContainer(noteskin_grid)
         let hud_tab = ScrollContainer(hud_grid)
-        let tabs = SwapContainer(noteskin_tab, Position = Position.TrimTop(115.0f))
+        let tabs = SwapContainer(noteskin_tab, Position = Position.ShrinkT(115.0f))
 
         let tab_buttons =
             let c =
@@ -223,11 +223,11 @@ type SelectSkinsPage() =
                             |]
                         Height = 50.0f
                     }
-            c.Position <- Position.TrimTop(60.0f).SliceTop(50.0f)
+            c.Position <- Position.ShrinkT(60.0f).SliceT(50.0f)
             c
 
         let action_buttons =
-            GridFlowContainer<Widget>(InlaidButton.HEIGHT, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceTop(60.0f), WrapNavigation = false)
+            GridFlowContainer<Widget>(InlaidButton.HEIGHT, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceT(60.0f), WrapNavigation = false)
             |+ InlaidButton(
                 %"skins.edit",
                 (fun () ->
@@ -292,10 +292,10 @@ type SelectSkinsPage() =
             NavigationContainer.Column(
                 WrapNavigation = false, 
                 Position =
-                    { Position.Default with
+                    { Position.DEFAULT with
                         Left = 0.35f %+ 10.0f
                     }
-                        .Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+                        .Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
             )
             |+ action_buttons
             |+ tab_buttons

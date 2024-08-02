@@ -26,9 +26,9 @@ module SpectateScreen =
                 %"spectate.title",
                 Color = K Colors.text_subheading,
                 Align = Alignment.CENTER,
-                Position = Position.SliceTop(40.0f)
+                Position = Position.SliceT(40.0f)
             )
-            |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER, Position = Position.TrimTop(40.0f))
+            |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER, Position = Position.ShrinkT(40.0f))
             |* Clickable(cycle)
 
             base.Init parent
@@ -54,7 +54,7 @@ module SpectateScreen =
 
             if Mouse.moved_recently () then
                 show <- true
-                this.Position <- Position.Default
+                this.Position <- Position.DEFAULT
                 show_timeout <- 1500.0
                 Toolbar.show_cursor ()
             elif show then
@@ -64,7 +64,7 @@ module SpectateScreen =
                     show <- false
 
                     this.Position <-
-                        { Position.Default with
+                        { Position.DEFAULT with
                             Top = 0.0f %- 300.0f
                             Bottom = 1.0f %+ 100.0f
                         }

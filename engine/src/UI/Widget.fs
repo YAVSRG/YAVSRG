@@ -77,7 +77,7 @@ type Widget(node_type) =
 type StaticWidget(node_type) =
     inherit Widget(node_type)
 
-    let mutable pos = Position.Default
+    let mutable pos = Position.DEFAULT
 
     override this.Position
         with set (value) =

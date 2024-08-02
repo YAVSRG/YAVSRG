@@ -45,7 +45,7 @@ module RulesetSwitcher =
 type RulesetSwitcher(setting: Setting<string>) =
     inherit Container(NodeType.None)
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderTop(min d.Height 500.0f).Margin(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderT(min d.Height 500.0f).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -Style.PADDING))
 
     override this.Init(parent: Widget) =
         this

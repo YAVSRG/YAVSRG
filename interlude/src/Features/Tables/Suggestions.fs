@@ -216,7 +216,7 @@ type SuggestionsList(table: Table) =
 
                 defer (fun () -> fc.Focus false)
 
-                ScrollContainer(fc, Position = Position.Margin(100.0f, 200.0f), Margin = 5.0f)
+                ScrollContainer(fc, Position = Position.Shrink(100.0f, 200.0f), Margin = 5.0f)
         )
 
 type SuggestionsPage(table: Table) =

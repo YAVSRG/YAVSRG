@@ -34,7 +34,7 @@ module Search =
         let mutable y = 0
         let results = search_func tokens
         if Seq.isEmpty results then
-            EmptyState(Icons.SEARCH, %"options.search.no_results", Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            EmptyState(Icons.SEARCH, %"options.search.no_results", Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |>> Container
             |+ Callout.frame
                 (
@@ -43,7 +43,7 @@ module Search =
                         .Title(%"options.search.no_results.title")
                         .Body(%"options.search.no_results.body")
                 )
-                (fun (w, h) -> Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y * 2.0f).SliceBottom(h).CenterX(w))
+                (fun (w, h) -> Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y * 2.0f).SliceB(h).SliceX(w))
             :> Widget
         else
             let content = 
@@ -54,4 +54,4 @@ module Search =
                         y <- y + spacing
                 }
                 |>> (fun nt -> SearchResultContainer(float32 y * 0.5f * PRETTYHEIGHT, nt))
-            ScrollContainer(content, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            ScrollContainer(content, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))

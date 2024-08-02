@@ -26,7 +26,7 @@ type private PlayerButton(username, color) =
             username,
             Color = K(Color.FromArgb color, Colors.shadow_2),
             Align = Alignment.LEFT,
-            Position = Position.Margin(20.0f, 5.0f)
+            Position = Position.Shrink(20.0f, 5.0f)
         )
         |* Clickable.Focus this
 

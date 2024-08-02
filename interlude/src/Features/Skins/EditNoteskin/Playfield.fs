@@ -108,7 +108,7 @@ type PlayfieldSettingsPage() =
                 SpacingPicker(
                     spacing_setting keymode.Value i,
                     Position =
-                        { Position.Default with
+                        { Position.DEFAULT with
                             Left = 0.5f %+ (x + NOTE_WIDTH * n)
                             Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
                         }

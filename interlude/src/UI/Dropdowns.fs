@@ -22,7 +22,7 @@ module private Dropdown =
         override this.Init(parent) =
             this 
             |+ Clickable.Focus(this, Floating = true)
-            |* Text(label, Align = Alignment.LEFT, Position = Position.Margin(10.0f, 5.0f), Color = K color)
+            |* Text(label, Align = Alignment.LEFT, Position = Position.Shrink(10.0f, 5.0f), Color = K color)
             base.Init parent
 
         override this.OnFocus(by_mouse: bool) =

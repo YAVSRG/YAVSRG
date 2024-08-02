@@ -95,7 +95,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
 
     let position = HudElement.position_setting elem
 
-    let mutable new_unsaved_pos: Position = Position.Default
+    let mutable new_unsaved_pos: Position = Position.DEFAULT
 
     let validate_pos (parent_bounds: Rect) (pos: Position) =
         let bounds = Position.calculate pos parent_bounds
@@ -175,7 +175,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderBottomCorners(10.0f).SliceRight(10.0f)
+            Position = Position.BorderCornersB(10.0f).SliceR(10.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -199,7 +199,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderBottomCorners(10.0f).SliceLeft(10.0f)
+            Position = Position.BorderCornersB(10.0f).SliceL(10.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -223,7 +223,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderTopCorners(10.0f).SliceRight(10.0f)
+            Position = Position.BorderCornersT(10.0f).SliceR(10.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -247,7 +247,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderTopCorners(10.0f).SliceLeft(10.0f)
+            Position = Position.BorderCornersT(10.0f).SliceL(10.0f)
         )
 
         |+ SubPositioner(
@@ -273,7 +273,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
             ),
             save_pos,
             Position =
-                { Position.BorderLeft(10.0f) with
+                { Position.BorderL(10.0f) with
                     Top = 0.5f %- 5.0f
                     Bottom = 0.5f %+ 5.0f
                 }
@@ -301,7 +301,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
             ),
             save_pos,
             Position =
-                { Position.BorderTop(10.0f) with
+                { Position.BorderT(10.0f) with
                     Left = 0.5f %- 5.0f
                     Right = 0.5f %+ 5.0f
                 }
@@ -329,7 +329,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
             ),
             save_pos,
             Position =
-                { Position.BorderRight(10.0f) with
+                { Position.BorderR(10.0f) with
                     Top = 0.5f %- 5.0f
                     Bottom = 0.5f %+ 5.0f
                 }
@@ -357,7 +357,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
             ),
             save_pos,
             Position =
-                { Position.BorderBottom(10.0f) with
+                { Position.BorderB(10.0f) with
                     Left = 0.5f %- 5.0f
                     Right = 0.5f %+ 5.0f
                 }
@@ -588,16 +588,16 @@ type PositionerInfo(ctx: PositionerContext) =
 
     let mutable currently_on_right = true
 
-    let LEFT_POSITION : Position = Position.CenterY(400.0f).SliceLeft(375.0f)
-    let RIGHT_POSITION : Position = Position.CenterY(400.0f).SliceRight(375.0f)
+    let LEFT_POSITION : Position = Position.SliceY(400.0f).SliceL(375.0f)
+    let RIGHT_POSITION : Position = Position.SliceY(400.0f).SliceR(375.0f)
 
     let dropdown_wrapper = 
         DropdownWrapper(
             (fun d ->
                 if currently_on_right then 
-                    Position.CenterY(d.Height).BorderLeft(370.0f).Translate(-10.0f, 0.0f)
+                    Position.SliceY(d.Height).BorderL(370.0f).Translate(-10.0f, 0.0f)
                 else
-                    Position.CenterY(d.Height).BorderRight(370.0f).Translate(10.0f, 0.0f)
+                    Position.SliceY(d.Height).BorderR(370.0f).Translate(10.0f, 0.0f)
             ), 
             FocusTrap = true
         )
@@ -610,9 +610,9 @@ type PositionerInfo(ctx: PositionerContext) =
             (fun () -> Icons.LIST + " " + HudElement.name ctx.Selected),
             this.ToggleElementDropdown,
             Hotkey = "context_menu",
-            Position = Position.SliceTop(60.0f).Margin(20.0f, 5.0f)
+            Position = Position.SliceT(60.0f).Shrink(20.0f, 5.0f)
         )
-        |+ Text(%"hud.editor.elements_hint", Color = K Colors.text_subheading, Position = Position.Row(50.0f, 30.0f).Margin(20.0f, 0.0f))
+        |+ Text(%"hud.editor.elements_hint", Color = K Colors.text_subheading, Position = Position.Row(50.0f, 30.0f).Shrink(20.0f, 0.0f))
         |+ Button(
             (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE + " " + %"hud.editor.enabled" else Icons.CIRCLE + " " + %"hud.editor.disabled"),
             (fun () ->
@@ -620,7 +620,7 @@ type PositionerInfo(ctx: PositionerContext) =
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
             Disabled = (fun () -> HudElement.can_toggle ctx.Selected |> not),
-            Position = Position.Row(100.0f, 60.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(100.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |+ Button(
             Icons.REFRESH_CW + " " + %"hud.editor.reset_position",
@@ -628,24 +628,24 @@ type PositionerInfo(ctx: PositionerContext) =
                 HudElement.position_setting(ctx.Selected).Set(HudElement.default_position ctx.Selected)
                 defer (fun () -> ctx.Create ctx.Selected)
             ),
-            Position = Position.Row(160.0f, 60.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(160.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |+ Button(
             Icons.SETTINGS + " " + %"hud.editor.element_options",
             (fun () -> show_menu ctx.Selected (fun () -> ctx.Create ctx.Selected)),
             Hotkey = "options",
             Disabled = (fun () -> HudElement.can_configure ctx.Selected |> not),
-            Position = Position.Row(220.0f, 60.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(220.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |+ Button(
             Icons.ANCHOR + " " + %"hud.editor.anchor",
             this.ToggleAnchorDropdown,
-            Position = Position.Row(280.0f, 60.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(280.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |+ Button(
             Icons.EDIT + " " + %"hud.editor.advanced",
             (fun () -> EditHUDPage().Show()),
-            Position = Position.Row(340.0f, 60.0f).Margin(10.0f, 5.0f)
+            Position = Position.Row(340.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |> this.Add
 
@@ -678,7 +678,7 @@ type PositionerInfo(ctx: PositionerContext) =
                         (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT)), %"hud.editor.relative_to.screen_right"
                     ]
                 }
-            |+ Text(%"hud.editor.relative_to", Position = Position.BorderTop 40.0f)
+            |+ Text(%"hud.editor.relative_to", Position = Position.BorderT 40.0f)
         )
 
     override this.Update(elapsed_ms, moved) =

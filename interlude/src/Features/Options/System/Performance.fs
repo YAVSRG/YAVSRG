@@ -34,7 +34,7 @@ type PerformanceSettingsPage() =
             .Pos(0)
         |+ Text(%"system.framelimit.unlimited_warning", 
             Color = K Colors.text_red,
-            Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+            Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
@@ -54,7 +54,7 @@ type PerformanceSettingsPage() =
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen)
         |+ Text(%"system.performance.screen_tear_alignment.hint", 
             Color = K Colors.text,
-            Position = pretty_pos(6, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH),
+            Position = pretty_pos(6, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.SmartCapAntiJitter.Value && config.WindowMode.Value = WindowType.Fullscreen)

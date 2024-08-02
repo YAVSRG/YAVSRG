@@ -108,21 +108,21 @@ type BeatmapBrowserPage() =
         )
 
     let search_results =
-        NavigationContainer.Column(Position = Position.TrimTop(140.0f).CenterX(1400.0f).TrimBottom(70.0f))
+        NavigationContainer.Column(Position = Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
         |>> Container
-        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results", Position = Position.TrimTop(135.0f))
+        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results", Position = Position.ShrinkT(135.0f))
             .Conditional(fun () -> not loading && items.Count = 0)
         :> Widget
 
     let header =
-        NavigationContainer.Row(Position = Position.SliceBottom(50.0f))
+        NavigationContainer.Row(Position = Position.SliceB(50.0f))
         |+ (let r =
                 status_button
                     "Ranked"
                     1
-                    { Position.Default with
+                    { Position.DEFAULT with
                         Right = 0.18f %- 25.0f
                     }
                     Colors.cyan
@@ -132,7 +132,7 @@ type BeatmapBrowserPage() =
         |+ status_button
             "Qualified"
             3
-            { Position.Default with
+            { Position.DEFAULT with
                 Left = 0.18f %+ 0.0f
                 Right = 0.36f %- 25.0f
             }
@@ -140,7 +140,7 @@ type BeatmapBrowserPage() =
         |+ status_button
             "Loved"
             4
-            { Position.Default with
+            { Position.DEFAULT with
                 Left = 0.36f %+ 0.0f
                 Right = 0.54f %- 25.0f
             }
@@ -148,7 +148,7 @@ type BeatmapBrowserPage() =
         |+ status_button
             "Unranked"
             0
-            { Position.Default with
+            { Position.DEFAULT with
                 Left = 0.54f %+ 0.0f
                 Right = 0.72f %- 25.0f
             }
@@ -166,18 +166,18 @@ type BeatmapBrowserPage() =
             descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             "sort_mode",
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = 0.72f %+ 0.0f
                 }
         )
-        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).CenterX(1400.0f)))
+        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: Filter) ->
                     filter <- f
                     defer (fun () -> begin_search filter)
                 ),
-                Position = Position.SliceTop 60.0f,
+                Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan
@@ -193,7 +193,7 @@ type BeatmapBrowserPage() =
         search_results
 
     override this.Header() =
-        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceBottom(55.0f).Translate(0.0f, -10.0f))
+        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()

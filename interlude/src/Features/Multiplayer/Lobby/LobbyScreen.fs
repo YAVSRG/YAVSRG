@@ -54,14 +54,14 @@ type LobbyUI(lobby: Lobby) =
         |+ Button(
             Icons.SETTINGS, 
             (fun () -> LobbySettingsPage(lobby).Show()),
-            Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
+            Position = Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f)
         )
             .Conditional(fun () -> lobby.YouAreHost)
         |+ Text(
             (fun () -> lobby.Settings.Name),
             Align = Alignment.CENTER,
             Position =
-                { Position.SliceTop(90.0f).Margin(10.0f) with
+                { Position.SliceT(90.0f).Shrink(10.0f) with
                     Right = 0.4f %- 0.0f
                 }
         )
@@ -81,7 +81,7 @@ type LobbyUI(lobby: Lobby) =
             TiltLeft = false,
             Hotkey = "preview",
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Right = (0.4f / 3f) %- 25.0f
                 }
         )
@@ -92,7 +92,7 @@ type LobbyUI(lobby: Lobby) =
             !%Palette.DARK_100,
             Hotkey = "mods",
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Left = (0.4f / 3f) %- 0.0f
                     Right = (0.4f / 1.5f) %- 25.0f
                 }
@@ -123,7 +123,7 @@ type LobbyUI(lobby: Lobby) =
         )
         |* Chat(lobby,
             Position =
-                { Position.Margin(20.0f) with
+                { Position.Shrink(20.0f) with
                     Left = 0.4f %+ 20.0f
                     Top = 0.5f %+ 0.0f
                 }

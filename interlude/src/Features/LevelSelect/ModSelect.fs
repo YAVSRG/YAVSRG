@@ -125,11 +125,11 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = pretty_pos(2, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH))
+            Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH))
         |+ Text(%"gameplay.rate.hotkey_hint_ii", 
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = pretty_pos(3, 1, PageWidth.Full).TrimLeft(PRETTYTEXTWIDTH))
+            Position = pretty_pos(3, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH))
 
         |+ mod_grid
 

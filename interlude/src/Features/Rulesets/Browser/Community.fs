@@ -44,11 +44,11 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     override this.Init(parent) =
         this
-        |+ Text(ruleset.Name, Align = Alignment.LEFT, Position = Position.SliceTop(50.0f).Margin(10.0f, Style.PADDING))
+        |+ Text(ruleset.Name, Align = Alignment.LEFT, Position = Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
         |+ Text(
             ruleset.Description,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(40.0f).Margin(10.0f, Style.PADDING)
+            Position = Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING)
         )
         |* Clickable.Focus this
         base.Init parent
@@ -108,7 +108,7 @@ type RulesetSearch() as this =
         GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
 
     let scroll =
-        ScrollContainer(grid, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
+        ScrollContainer(grid, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
 
     let mutable loading = true
     let mutable failed = false
@@ -136,7 +136,7 @@ type RulesetSearch() as this =
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
-                Position = Position.SliceTop 60.0f
+                Position = Position.SliceT 60.0f
             )
             |+ LoadingIndicator.Border(fun () -> loading))
         |+ EmptyState(Icons.X, %"rulesets.browser.error").Conditional(fun () -> failed)

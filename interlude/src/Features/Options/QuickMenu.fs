@@ -20,7 +20,7 @@ type private QuickAction(label, action, hotkey: Bind) =
         |* Text(sprintf "%s: %O" (%"misc.hotkeyhint") hotkey,
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT,
-            Position = Position.Margin(10.0f, 5.0f)
+            Position = Position.Shrink(10.0f, 5.0f)
         )
         base.Init parent
 
@@ -62,7 +62,7 @@ type QuickMenuPage() =
         |+ QuickAction(%"noteskin.edit", edit_noteskin, Bind.mk Keys.N,  Icon = Icons.IMAGE).Pos(3)
         |+ QuickAction(%"hud.edit", edit_hud, Bind.mk Keys.H, Icon = Icons.ZAP).Pos(5)
         |+ QuickAction(%"system.hotkeys", (fun () -> HotkeysPage().Show()), Bind.mk Keys.K).Pos(8)
-        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceLeft(w).SliceBottom(h))
+        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceL(w).SliceB(h))
         :> Widget
 
     override this.Header() = 
@@ -71,7 +71,7 @@ type QuickMenuPage() =
         |+ Text(
             sprintf "%s: %O" (%"misc.hotkeyhint") (%%"quick_menu"), 
             Color = K Colors.text_cyan,
-            Position = Position.TrimLeft(PRETTY_MARGIN_X).TrimTop(110.0f).SliceTop(35.0f),
+            Position = Position.ShrinkL(PRETTY_MARGIN_X).ShrinkT(110.0f).SliceT(35.0f),
             Align = Alignment.LEFT
         )
         :> Widget

@@ -154,7 +154,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                     Position =
                         Position
                             .Box(0.0f, 0.0f, -250.0f, float32 r * (item_height + 10.0f), 200.0f, item_height)
-                            .Margin(10.0f, item_height * 0.5f - 20.0f)
+                            .Shrink(10.0f, item_height * 0.5f - 20.0f)
                 ),
                 0,
                 r + 1
@@ -177,7 +177,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                         Position =
                             Position
                                 .Box(0.0f, 0.0f, -50.0f, float32 r * (item_height + 10.0f), 40.0f, item_height)
-                                .Margin(0.0f, item_height * 0.5f - 20.0f)
+                                .Shrink(0.0f, item_height * 0.5f - 20.0f)
                     ),
                     1,
                     r + 2
@@ -206,7 +206,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                      .Show()
                              ),
                              Floating = true,
-                             Position = Position.Margin(0.0f, -50.0f).SliceBottom(40.0f)) with
+                             Position = Position.Shrink(0.0f, -50.0f).SliceB(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
                             Draw.rect this.Bounds Colors.yellow_accent.O2
@@ -238,7 +238,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                      .Show()
                              ),
                              Floating = true,
-                             Position = Position.Margin(-50.0f, 0.0f).SliceRight(40.0f)) with
+                             Position = Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
                             Draw.rect this.Bounds Colors.yellow_accent.O2
@@ -302,7 +302,7 @@ type TextureEditPage(source: Storage, texture_id: string) =
 
         NavigationContainer.Column()
         |+ texture_editor
-        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceRight(400.0f).Margin(50.0f))
+        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceR(400.0f).Shrink(50.0f))
             |+ Button(
                 Icons.ROTATE_CW + " Rotate clockwise"
                 , fun () ->

@@ -186,7 +186,7 @@ type private CollectionButton(icon, name, action) as this =
                      K Colors.text_greyout
                  else
                      K Colors.text),
-            Position = Position.Margin(20.0f, 15.0f)
+            Position = Position.Shrink(20.0f, 15.0f)
         )
         |> fun x ->
             if not this.Disabled then

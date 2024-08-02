@@ -55,7 +55,7 @@ type Page() as this =
         Button(
             Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back",
             Menu.Back,
-            Position = Position.SliceBottom(80.0f).CenterY(55.0f).TrimLeft(10.0f).SliceLeft(180.0f)
+            Position = Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f)
         )
         |> OverlayContainer
         :> Widget
@@ -70,12 +70,12 @@ type Page() as this =
     member this.Show(dir: PageEasing) =
         match dir with
         | PageEasing.None ->
-            this.Position <- Position.Default
+            this.Position <- Position.DEFAULT
             this.SnapPosition()
         | _ ->
             this.Hide(dir.Reverse)
             this.SnapPosition()
-            this.Position <- Position.Default
+            this.Position <- Position.DEFAULT
         this.Opacity.Target <- 1.0f
 
         Selection.clamp_to this
@@ -87,25 +87,25 @@ type Page() as this =
         match dir with
         | PageEasing.Up ->
             this.Position <-
-                { Position.Default with
+                { Position.DEFAULT with
                     Top = (0.0f - EASING_SCALE) %+ 0.0f
                     Bottom = (1.0f - EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Down ->
             this.Position <-
-                { Position.Default with
+                { Position.DEFAULT with
                     Top = (0.0f + EASING_SCALE) %+ 0.0f
                     Bottom = (1.0f + EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Left ->
             this.Position <-
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = (0.0f - EASING_SCALE) %+ 0.0f
                     Right = (1.0f - EASING_SCALE) %+ 0.0f
                 }
         | PageEasing.Right ->
             this.Position <-
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = (0.0f + EASING_SCALE) %+ 0.0f
                     Right = (1.0f + EASING_SCALE) %+ 0.0f
                 }

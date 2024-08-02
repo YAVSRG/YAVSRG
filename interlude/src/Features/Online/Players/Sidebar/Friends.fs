@@ -39,7 +39,7 @@ type private FriendList() =
                                         Colors.text_greyout
                                 ),
                             Align = Alignment.RIGHT,
-                            Position = Position.Margin(20.0f, 15.0f)
+                            Position = Position.Shrink(20.0f, 15.0f)
                         )
                     )
 

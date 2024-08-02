@@ -265,7 +265,7 @@ module ReplayScreen =
     let private controls (state: ReplayState) : SlideoutContent =
 
         let overlay_buttons =
-            NavigationContainer.Column(Position = Position.SliceLeft(400.0f))
+            NavigationContainer.Column(Position = Position.SliceL(400.0f))
             |+ Button(
                 (fun () ->
                     sprintf "%s %s"
@@ -276,7 +276,7 @@ module ReplayScreen =
                         %"replay.input_overlay"
                 ),
                 (fun () -> Setting.app not state.ShowInputOverlay),
-                Position = Position.SliceTop(50.0f)
+                Position = Position.SliceT(50.0f)
             )
             |+ Button(
                 (fun () ->
@@ -288,13 +288,13 @@ module ReplayScreen =
                         %"replay.hit_overlay"
                 ),
                 (fun () -> Setting.app not state.ShowHitOverlay),
-                Position = Position.SliceBottom(50.0f)
+                Position = Position.SliceB(50.0f)
             )
 
         let dim_slider =
             Slider.Percent(
                 state.PlayfieldDim,
-                Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceBottom(50.0f).Margin(5.0f)
+                Position = Position.ShrinkL(400.0f).SliceL(400.0f).SliceB(50.0f).Shrink(5.0f)
             )
 
         SlideoutContent(NavigationContainer.Row() |+ overlay_buttons |+ dim_slider, 100.0f)
@@ -302,7 +302,7 @@ module ReplayScreen =
             sprintf "%s %s" Icons.PLAY (if state.IsAuto then %"replay.title.autoplay" else %"replay.title"),
             Color = K Colors.text,
             Align = Alignment.RIGHT,
-            Position = Position.Margin(30.0f, 20.0f)
+            Position = Position.Shrink(30.0f, 20.0f)
         )
         |+ Text(
             %"replay.playfield_dim",
@@ -316,7 +316,7 @@ module ReplayScreen =
                         Colors.text_greyout
                 ),
             Align = Alignment.CENTER,
-            Position = Position.TrimLeft(400.0f).SliceLeft(400.0f).SliceTop(50.0f)
+            Position = Position.ShrinkL(400.0f).SliceL(400.0f).SliceT(50.0f)
         )
 
     type private ControlOverlay(with_mods: ModdedChart, state: ReplayState, on_seek: Time -> unit) =
@@ -341,7 +341,7 @@ module ReplayScreen =
             if Mouse.moved_recently () then
                 show <- true
                 slideout.Open()
-                this.Position <- Position.Default
+                this.Position <- Position.DEFAULT
                 show_timeout <- 1500.0
                 Toolbar.show_cursor ()
 
@@ -354,7 +354,7 @@ module ReplayScreen =
                     slideout.Close()
 
                     this.Position <-
-                        { Position.Default with
+                        { Position.DEFAULT with
                             Bottom = 1.0f %+ 100.0f
                         }
                     Toolbar.hide_cursor ()

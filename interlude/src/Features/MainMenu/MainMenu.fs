@@ -124,13 +124,13 @@ type MainMenuScreen() as this =
             K(Icons.STAR + " " + %"menu.changelog"),
             !%Palette.MAIN_100,
             TiltRight = false,
-            Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
+            Position = Position.SliceB(50.0f).SliceR(300.0f)
         ))
         |* StylishButton(
             (fun () -> open_url ("https://discord.gg/tA22tWR")),
             K(Icons.MESSAGE_SQUARE + " " + %"menu.discord"),
             !%Palette.DARK_100,
-            Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f)
         )
 
     override this.OnEnter prev =

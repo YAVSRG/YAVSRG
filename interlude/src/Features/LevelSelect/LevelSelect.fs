@@ -44,7 +44,7 @@ type LevelSelectScreen() =
         Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
-        |+ CurrentChart(Position = { Position.SliceTop(170.0f) with Right = 0.4f %- 0.0f })
+        |+ CurrentChart(Position = { Position.SliceT(170.0f) with Right = 0.4f %- 0.0f })
         |+ SearchBox(
             search_text,
             (fun f ->
@@ -62,7 +62,7 @@ type LevelSelectScreen() =
             .Help(Help.Info("levelselect.search", "search"))
 
         |+ (
-            Container(NodeType.None, Position = { Position.TrimTop(170.0f) with Left = 0.5f %+ 0.0f })
+            Container(NodeType.None, Position = { Position.ShrinkT(170.0f) with Left = 0.5f %+ 0.0f })
             |+ EmptyState(Icons.SEARCH, %"levelselect.empty.search")
                 .Conditional(fun () -> LevelSelect.filter <> [])
             |+ EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
@@ -95,7 +95,7 @@ type LevelSelectScreen() =
             K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
             !%Palette.MAIN.O2,
             TiltRight = false,
-            Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
+            Position = Position.SliceB(50.0f).SliceR(300.0f)
         )
             .Help(Help.Info("levelselect.play").Hotkey("select"))
         |+ StylishButton(
@@ -112,7 +112,7 @@ type LevelSelectScreen() =
             ),
             K (sprintf "%s %s" Icons.PLAY_CIRCLE %"playlist.play"),
             !%Palette.DARK.O2,
-            Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f),
+            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
             Hotkey = "endless_mode",
             Disabled = (fun () -> Network.lobby.IsSome)
         )
@@ -122,7 +122,7 @@ type LevelSelectScreen() =
             (fun () -> SelectedChart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
             K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode"),
             !%Palette.DARK.O2,
-            Position = Position.SliceBottom(50.0f).SliceRight(300.0f).Translate(-325.0f, 0.0f),
+            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
             Hotkey = "endless_mode",
             Disabled = (fun () -> Network.lobby.IsSome)
         )
@@ -132,7 +132,7 @@ type LevelSelectScreen() =
             (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
             K Icons.LIST,
             !%Palette.MAIN.O2,
-            Position = Position.SliceBottom(50.0f).SliceRight(60.0f).Translate(-650.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-650.0f, 0.0f)
         )
             .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
 

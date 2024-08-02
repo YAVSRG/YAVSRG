@@ -29,16 +29,16 @@ type Chat(lobby: Lobby) =
                 lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
-        |+ Text(sender, Color = K sender_color, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
-        |+ Text(": " + message, Color = K Colors.text, Position = Position.TrimLeft w, Align = Alignment.LEFT)
+        |+ Text(sender, Color = K sender_color, Position = Position.SliceL w, Align = Alignment.RIGHT)
+        |+ Text(": " + message, Color = K Colors.text, Position = Position.ShrinkL w, Align = Alignment.LEFT)
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
     let message_history =
-        ScrollContainer(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
+        ScrollContainer(messages, Position = Position.ShrinkB(60.0f).Shrink(5.0f))
 
     let chatline =
-        TextEntry(current_message, "none", true, Position = Position.SliceBottom(50.0f).Margin(5.0f))
+        TextEntry(current_message, "none", true, Position = Position.SliceB(50.0f).Shrink(5.0f))
 
     let mutable last_msg: Widget option = None
 
@@ -185,7 +185,7 @@ type Chat(lobby: Lobby) =
                     ""
             ),
             Color = K Colors.text_subheading,
-            Position = Position.SliceBottom(50.0f).Margin(5.0f),
+            Position = Position.SliceB(50.0f).Shrink(5.0f),
             Align = Alignment.LEFT
         )
         |* message_history

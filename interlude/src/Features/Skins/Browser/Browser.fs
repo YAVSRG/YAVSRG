@@ -23,12 +23,12 @@ type SkinsBrowserPage() =
     let search_groups = 
         NavigationContainer.Column()
         |+ Dummy(NodeType.Leaf)
-        |+ ScrollContainer(noteskin_items, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
-        |>> (fun nt -> Container(nt, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.65f %- 10.0f }))
+        |+ ScrollContainer(noteskin_items, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
+        |>> (fun nt -> Container(nt, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.65f %- 10.0f }))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (query: string) -> noteskin_items.Filter <- GroupDisplay.Filter query),
-                Position = Position.SliceTop 60.0f,
+                Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan
@@ -37,9 +37,9 @@ type SkinsBrowserPage() =
         |+ EmptyState(Icons.X, %"skins.browser.error").Conditional(fun () -> error)
 
     let pick_versions =
-        ScrollContainer(version_items, Margin = Style.PADDING, Position = Position.TrimTop(70.0f))
-        |>> (fun nt -> Container(nt, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
-        |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceTop(70.0f).Margin(10.0f)).Conditional(fun () -> selected_group.IsSome)
+        ScrollContainer(version_items, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
+        |>> (fun nt -> Container(nt, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
+        |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceT(70.0f).Shrink(10.0f)).Conditional(fun () -> selected_group.IsSome)
 
     let select_group(group: SkinGroup) =
         selected_group <- Some group

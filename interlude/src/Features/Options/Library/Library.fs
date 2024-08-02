@@ -45,20 +45,20 @@ type LibraryPage() =
                     else
                         Colors.text_subheading
                 ),
-            Position = Position.SliceTop(40.0f).Margin(20.0f, 0.0f)
+            Position = Position.SliceT(40.0f).Shrink(20.0f, 0.0f)
         )
         |+ LoadingIndicator.Strip(
             Imports.import_in_progress,
-            Position = Position.Row(40.0f, Style.PADDING).Margin(150.0f, 0.0f)
+            Position = Position.Row(40.0f, Style.PADDING).Shrink(150.0f, 0.0f)
         )
         |+ Text(
             sprintf "%i charts installed" Content.Library.Cache.Entries.Count,
             Color = K Colors.text_subheading,
-            Position = Position.Row(65.0f, 30.0f).Margin(20.0f, 0.0f)
+            Position = Position.Row(65.0f, 30.0f).Shrink(20.0f, 0.0f)
         )
 
     let main_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
+        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
         |+ PageButton(
             %"library.collections",
             (fun () -> ManageCollectionsPage().Show()),
@@ -120,7 +120,7 @@ type LibraryPage() =
         |+ import_info
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.5f %+ 10.0f })
+        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.5f %+ 10.0f })
         |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.Row(100.0f, 150.0f))
         |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.Row(270.0f, 150.0f))
         |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.Row(440.0f, 150.0f))

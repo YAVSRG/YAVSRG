@@ -105,7 +105,7 @@ module PlayScreen =
                     |> Setting.bound -200.0f 200.0f,
                     Step = 1f,
                     Format = (fun v -> sprintf "%.0fms" v),
-                    Position = Position.SliceTop(60.0f).SliceLeft(600.0f)
+                    Position = Position.SliceT(60.0f).SliceL(600.0f)
                 )
 
             Slideout(
@@ -128,7 +128,7 @@ module PlayScreen =
                         .Body(
                             %"play.localoffset.hint_ii"
                         ))
-                    (fun (w, h) -> Position.SliceRight(w)),
+                    (fun (w, h) -> Position.SliceR(w)),
                 OnOpen =
                     (fun () ->
                         liveplay.Finish()

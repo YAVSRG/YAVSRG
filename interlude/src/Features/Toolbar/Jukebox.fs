@@ -21,18 +21,18 @@ type Jukebox() =
             Suggestions.previous_chart,
             Hotkey = "previous_random_chart",
             Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (Suggestions.has_previous())),
-            Position = Position.Margin(5.0f).SliceLeft(45.0f)
+            Position = Position.Shrink(5.0f).SliceL(45.0f)
         )
         |+ Button(Icons.PAUSE, 
             (fun () -> if Song.playing() then Song.pause() else Song.resume()),
             Hotkey = "pause_music",
-            Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(45.0f, 0.0f)
+            Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)
         )
         |* Button(Icons.SKIP_FORWARD,
             Suggestions.random_chart,
             Hotkey = "random_chart",
             Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby),
-            Position = Position.Margin(5.0f).SliceLeft(45.0f).Translate(90.0f, 0.0f)
+            Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f)
         )
         base.Init parent
 

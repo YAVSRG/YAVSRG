@@ -65,9 +65,9 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
         if moved then
             child.Position <-
                 Position
-                    .SliceTop(content_height)
+                    .SliceT(content_height)
                     .Translate(0.0f, -scroll_pos.Value)
-                    .Margin(this.Margin)
+                    .Shrink(this.Margin)
 
         if this.Focused then
             let before = Selection.get_focused_element ()
@@ -89,7 +89,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
     override this.Init(parent: Widget) =
         base.Init parent
-        child.Position <- Position.Margin(this.Margin)
+        child.Position <- Position.Shrink(this.Margin)
         child.Init this
 
         content_height <- child.Height
@@ -99,9 +99,9 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
         child.Position <-
             Position
-                .SliceTop(content_height)
+                .SliceT(content_height)
                 .Translate(0.0f, -scroll_pos.Value)
-                .Margin(this.Margin)
+                .Shrink(this.Margin)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse

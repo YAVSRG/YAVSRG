@@ -40,12 +40,12 @@ type TableCard(online_table: Tables.List.Table) as this =
         |+ Text(
             online_table.Info.Name,
             Align = Alignment.CENTER,
-            Position = Position.SliceTop(80.0f).Margin(20.0f, Style.PADDING)
+            Position = Position.SliceT(80.0f).Shrink(20.0f, Style.PADDING)
         )
         |+ Text(
             online_table.Info.Description,
             Align = Alignment.CENTER,
-            Position = Position.TrimTop(65.0f).SliceTop(60.0f).Margin(20.0f, Style.PADDING)
+            Position = Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING)
         )
         |+ Text(
             fun () ->
@@ -55,7 +55,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | TableStatus.Installing -> "Installing ..."
                 | TableStatus.Installed -> "Click to view"
             , Align = Alignment.CENTER
-            , Position = Position.SliceBottom(60.0f).Margin(20.0f, Style.PADDING)
+            , Position = Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING)
         )
         |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
         |* Clickable.Focus this
@@ -116,7 +116,7 @@ type TableBrowserPage() =
     inherit Page()
 
     let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
-    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     override this.Content() =
         Tables.List.get (

@@ -31,7 +31,7 @@ type private Keybinder(hotkey: Hotkey) as this =
                     Colors.shadow_1
                 ),
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft 20.0f
+            Position = Position.ShrinkL 20.0f
         )
         |* Clickable.Focus(
             this,
@@ -75,7 +75,7 @@ type HotkeysPage() =
                             | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
                             | _ -> false
                     ),
-                    Position = Position.Row(40.0f, 60.0f).Margin(PRETTY_MARGIN_X, 0.0f).SliceRight(500.0f),
+                    Position = Position.Row(40.0f, 60.0f).Shrink(PRETTY_MARGIN_X, 0.0f).SliceR(500.0f),
                     Fill = K Colors.cyan.O3,
                     Border = K Colors.cyan_accent,
                     TextColor = K Colors.text_cyan) with
@@ -86,11 +86,11 @@ type HotkeysPage() =
 
         let hotkey_editor (hotkey: Hotkey) =
             NavigationContainer.Row()
-            |+ Keybinder(hotkey, Position = Position.TrimRight PRETTYHEIGHT)
-            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceRight PRETTYHEIGHT)
+            |+ Keybinder(hotkey, Position = Position.ShrinkR PRETTYHEIGHT)
+            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceR PRETTYHEIGHT)
 
         let scroll_container =
-            ScrollContainer(container, Position = Position.Margin(100.0f, 200.0f))
+            ScrollContainer(container, Position = Position.Shrink(100.0f, 200.0f))
 
         container.Add(
             PageButton(

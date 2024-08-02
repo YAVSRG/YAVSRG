@@ -56,14 +56,14 @@ module PracticeScreen =
             if state.Paused.Value && not show then
                 show <- true
                 slideout.Open()
-                this.Position <- Position.Default
+                this.Position <- Position.DEFAULT
                 Toolbar.show_cursor ()
             elif not state.Paused.Value && show then
                 show <- false
                 slideout.Close()
 
                 this.Position <-
-                    { Position.Default with
+                    { Position.DEFAULT with
                         Bottom = 1.0f %+ 100.0f
                     }
                 Toolbar.hide_cursor ()

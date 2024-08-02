@@ -273,7 +273,7 @@ type Leaderboard(display: Setting<Display>) =
     let sort = Setting.map enum int options.ScoreSortMode
 
     let scroll_container =
-        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(55.0f))
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.ShrinkT(55.0f))
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add(fun info ->

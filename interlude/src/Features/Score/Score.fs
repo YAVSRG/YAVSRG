@@ -58,7 +58,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             graph,
             refresh,
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Top = 0.75f %- 0.0f
                 }
         )
@@ -72,12 +72,12 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             previous_personal_bests,
             score_info,
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Top = 0.0f %+ 175.0f
                     Bottom = 0.75f %+ 0.0f
                 }
         )
-        |+ TopBanner(score_info, Position = Position.SliceTop(180.0f))
+        |+ TopBanner(score_info, Position = Position.SliceT(180.0f))
         |+ Sidebar(
             stats,
             score_info,

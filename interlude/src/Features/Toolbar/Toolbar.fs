@@ -24,7 +24,7 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume_when_collapsed = Volume(Position = Position.Margin(0.0f, HEIGHT))
+    let volume_when_collapsed = Volume(Position = Position.Shrink(0.0f, HEIGHT))
 
     let load_preset (i: int) =
         match Presets.load i with
@@ -43,7 +43,7 @@ type Toolbar() =
             )
             |+ LoadingIndicator.Strip(
                 Imports.import_in_progress,
-                Position = Position.BorderBottom(Style.PADDING)
+                Position = Position.BorderB(Style.PADDING)
             )
         container.Help(Help.Info("menu.import").Hotkey("import"))
 
@@ -69,14 +69,14 @@ type Toolbar() =
             Icons.MENU,
             (fun () -> QuickMenuPage().Show()),
             "",
-            Position = Position.SliceTop(InlaidButton.HEIGHT).TrimLeft(10.0f).SliceLeft(HEIGHT)
+            Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT)
         )
             .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
         |+ (FlowContainer.LeftToRight(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
-                Position = Position.SliceTop(InlaidButton.HEIGHT).TrimLeft(HEIGHT + 20.0f)
+                Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f)
             )
             |+ InlaidButton(
                 %"menu.options",
@@ -102,7 +102,7 @@ type Toolbar() =
                 Icons.TRENDING_UP
             )
                 .Help(Help.Info("menu.stats")))
-        |+ NetworkStatus(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
+        |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
         |+ HotkeyAction(
             "reload_content",
             fun () ->
@@ -119,7 +119,7 @@ type Toolbar() =
         |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
-        |* Volume(Position = Position.Margin(0.0f, HEIGHT))
+        |* Volume(Position = Position.Shrink(0.0f, HEIGHT))
 
         base.Init parent
 

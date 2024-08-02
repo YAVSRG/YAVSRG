@@ -22,7 +22,7 @@ type ScoreChartContextMenu(cc: CachedChart) =
 
     override this.Content() =
         let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(100.0f, 200.0f))
 
             |+ PageButton(
                 %"chart.add_to_collection",
@@ -60,7 +60,7 @@ type ScoreChartContextMenu(cc: CachedChart) =
 type RulesetSwitcher(setting: Setting<string>) =
     inherit Container(NodeType.None)
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderTop(min d.Height 500.0f).Margin(Style.PADDING, 0.0f).Translate(0.0f, -10.0f))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderT(min d.Height 500.0f).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -10.0f))
 
     override this.Init(parent: Widget) =
         this
@@ -87,12 +87,12 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
         |+ graph
         |+ Text(
             Updates.version + "  : :  www.yavsrg.net",
-            Position = { Position.SliceBottom(50.0f) with Right = 0.35f %+ 0.0f }.Margin(20.0f, 5.0f),
+            Position = { Position.SliceB(50.0f) with Right = 0.35f %+ 0.0f }.Shrink(20.0f, 5.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
         |* (
-            GridFlowContainer<Widget>(50.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceBottom(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
+            GridFlowContainer<Widget>(50.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceB(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
             |+ InlaidButton(
                 %"score.graph.settings",
                 (fun () -> ScoreGraphSettingsPage(graph).Show()

@@ -13,16 +13,16 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
         Button(
             sprintf "%s %s" Icons.LINK (%"mount.create"),
             (fun () -> CreateMountPage(game, setting).Show()),
-            Position = Position.SliceBottom(50.0f).Margin 5.0f
+            Position = Position.SliceB(50.0f).Shrink 5.0f
         )
 
     let edit_buttons =
-        NavigationContainer.Row(WrapNavigation = false, Position = Position.SliceBottom(50.0f).Margin 5.0f)
+        NavigationContainer.Row(WrapNavigation = false, Position = Position.SliceB(50.0f).Shrink 5.0f)
         |+ Button(
             sprintf "%s %s" Icons.EDIT_2 (%"mount.edit"),
             (fun () -> EditMountPage(game, setting).Show()),
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Right = 0.5f %+ 0.0f
                 }
         )
@@ -30,7 +30,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
             sprintf "%s %s" Icons.TRASH (%"mount.delete"),
             (fun () -> setting.Value <- None),
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = 0.5f %+ 0.0f
                 }
         )

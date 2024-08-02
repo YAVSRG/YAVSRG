@@ -12,7 +12,7 @@ type private PlayerListSidebar() =
     let friends = FriendList()
     let search = SearchList()
 
-    let swap = SwapContainer(online, Position = Position.TrimTop(50.0f).Margin(40.0f))
+    let swap = SwapContainer(online, Position = Position.ShrinkT(50.0f).Shrink(40.0f))
 
     let button (label: string, cmp) =
         let button = Button(label, (fun () -> swap.Current <- cmp))
@@ -31,7 +31,7 @@ type private PlayerListSidebar() =
 
     override this.Init(parent) =
         this
-        |+ (GridFlowContainer(50.0f, 3, Position = Position.SliceTop(50.0f))
+        |+ (GridFlowContainer(50.0f, 3, Position = Position.SliceT(50.0f))
             |+ button (%"online.players.online", online)
             |+ button (%"online.players.friends", friends)
             |+ button (%"online.players.search", search))

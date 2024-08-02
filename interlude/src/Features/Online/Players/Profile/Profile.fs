@@ -38,7 +38,7 @@ type private Profile() =
 
     let rerender (container: WebRequestContainer<_>) (data: Players.Profile.View.Response) =
         let color_picker =
-            DropdownWrapper(fun d -> Position.TrimRight(40.0f).TrimTop(70.0f).SliceRight(300.0f).SliceTop(500.0f))
+            DropdownWrapper(fun d -> Position.ShrinkR(40.0f).ShrinkT(70.0f).SliceR(300.0f).SliceT(500.0f))
 
         let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
         
@@ -105,13 +105,13 @@ type private Profile() =
             data.Username,
             Color = K(Color.FromArgb data.Color, Colors.shadow_2),
             Align = Alignment.LEFT,
-            Position = Position.SliceTop(80.0f).Margin(45.0f, 5.0f)
+            Position = Position.SliceT(80.0f).Shrink(45.0f, 5.0f)
         )
         |+ Text(
             String.concat ", " (data.Badges |> Seq.map (fun b -> b.Name)),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(70.0f).SliceTop(40.0f).Margin(45.0f, 0.0f)
+            Position = Position.ShrinkT(70.0f).SliceT(40.0f).Shrink(45.0f, 0.0f)
         )
         |+ Text(
             [
@@ -123,15 +123,15 @@ type private Profile() =
             %> "online.players.profile.playing_since",
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT,
-            Position = Position.TrimTop(125.0f).SliceTop(45.0f).Margin(45.0f, 0.0f)
+            Position = Position.ShrinkT(125.0f).SliceT(45.0f).Shrink(45.0f, 0.0f)
         )
         |+ Text(
             %"online.players.profile.recent_scores",
             Color = K Colors.text,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(125.0f).SliceTop(45.0f).Margin(45.0f, 0.0f)
+            Position = Position.ShrinkT(125.0f).SliceT(45.0f).Shrink(45.0f, 0.0f)
         )
-        |+ RecentScores(data.RecentScores, Position = Position.TrimTop(130.0f).Margin(40.0f))
+        |+ RecentScores(data.RecentScores, Position = Position.ShrinkT(130.0f).Shrink(40.0f))
 
         // Friend button when not your profile
         |+ Conditional(
@@ -153,7 +153,7 @@ type private Profile() =
                             Colors.text_pink_2
                         else
                             Colors.text_red_2),
-                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
+                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
             )
         )
         |+ Conditional(
@@ -163,7 +163,7 @@ type private Profile() =
                 add_friend,
                 Icons.USER_PLUS,
                 UnfocusedColor = Colors.text_green_2,
-                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
+                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
             )
         )
         // Color button on your profile
@@ -173,7 +173,7 @@ type private Profile() =
                 %"online.players.profile.change_color",
                 change_color_dropdown,
                 Icons.REFRESH_CCW,
-                Position = Position.TrimRight(40.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
+                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
             )
         )
         |+ color_picker
@@ -184,7 +184,7 @@ type private Profile() =
                 %"online.players.profile.invite_to_lobby",
                 (fun () -> Network.lobby.Value.InvitePlayer(data.Username)),
                 Icons.SEND,
-                Position = Position.TrimRight(380.0f).SliceTop(InlaidButton.HEIGHT).SliceRight(300.0f)
+                Position = Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
             )
         )
         :> Widget

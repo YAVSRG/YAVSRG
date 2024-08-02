@@ -37,8 +37,8 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
 
     do
         this
-        |+ Image(sprite, Position = Position.TrimBottom(65.0f).Margin(20.0f), StretchToFill = false)
-        |+ Text(id, Align = Alignment.CENTER, Position = Position.Margin(Style.PADDING).SliceBottom(40.0f).Translate(0.0f, -40.0f))
+        |+ Image(sprite, Position = Position.ShrinkB(65.0f).Shrink(20.0f), StretchToFill = false)
+        |+ Text(id, Align = Alignment.CENTER, Position = Position.Shrink(Style.PADDING).SliceB(40.0f).Translate(0.0f, -40.0f))
         |+ Clickable.Focus this
         |* Button(
             (fun () -> if is_stitched then Icons.SQUARE + " " + %"skins.texture.grid" else Icons.GRID + " " + %"skins.texture.loose"), 
@@ -46,7 +46,7 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
                 (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
             ),
-            Position = Position.Margin(Style.PADDING).SliceBottom(40.0f)
+            Position = Position.Shrink(Style.PADDING).SliceB(40.0f)
         )
 
     override this.OnFocus(by_mouse: bool) =

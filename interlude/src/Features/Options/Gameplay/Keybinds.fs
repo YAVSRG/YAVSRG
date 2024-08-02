@@ -93,11 +93,11 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
 
     static member KeymodeAndKeybinder() =
         let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-        let binder = GameplayKeybinder(keymode, Position = Position.TrimLeft 100.0f)
+        let binder = GameplayKeybinder(keymode, Position = Position.ShrinkL 100.0f)
         binder.Add { new StaticWidget(NodeType.None) with
             override this.Draw() = if binder.Focused then Draw.rect (this.Bounds.BorderB(Style.PADDING).SliceL(50.0f)) Colors.yellow_accent
         }
-        let keymode_selector = Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceLeft 100.0f)
+        let keymode_selector = Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceL 100.0f)
         keymode_selector.Add { new StaticWidget(NodeType.None) with
             override this.Draw() = if keymode_selector.Focused then Draw.rect (this.Bounds.BorderB(Style.PADDING).SliceL(50.0f)) Colors.yellow_accent
         }

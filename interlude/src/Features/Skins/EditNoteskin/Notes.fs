@@ -29,7 +29,7 @@ type RotationPicker(rotation: Setting<float>) as this =
         this
         |+ Text(
             (fun () -> sprintf "%.1f" rotation.Value),
-            Position = Position.SliceBottom(30.0f),
+            Position = Position.SliceB(30.0f),
             Align = Alignment.LEFT,
             Color = K Colors.text_subheading
         )
@@ -191,7 +191,7 @@ type NotesSettingsPage() =
                 RotationPicker(
                     rotate_picker keymode.Value i,
                     Position =
-                        { Position.Default with
+                        { Position.DEFAULT with
                             Left = 0.5f %+ (x + NOTE_SCALE * n)
                             Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }
@@ -210,7 +210,7 @@ type NotesSettingsPage() =
                     note_colors.Style,
                     i,
                     Position =
-                        { Position.Default with
+                        { Position.DEFAULT with
                             Left = 0.5f %+ (x + NOTE_SCALE * n)
                             Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }

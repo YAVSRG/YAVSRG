@@ -55,7 +55,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                         Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.Row(0.0f, 70.0f).Margin(Style.PADDING)
+            Position = Position.Row(0.0f, 70.0f).Shrink(Style.PADDING)
         )
         |+ Text(
             (
@@ -65,9 +65,9 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.Row(60.0f, 50.0f).Margin(Style.PADDING)
+            Position = Position.Row(60.0f, 50.0f).Shrink(Style.PADDING)
         )
-        |+ { new Thumbnail(Position = Position.TrimTop(130.0f).Margin(10.0f)) with
+        |+ { new Thumbnail(Position = Position.ShrinkT(130.0f).Shrink(10.0f)) with
             override this.Load() =
                 ImageServices.get_cached_image.Request(
                     version.Preview,
@@ -138,15 +138,15 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(Style.PADDING).SliceTop(70.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
         )
         |+ Text(
             subtitle,
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimLeft(100.0f).Margin(7.5f, Style.PADDING).SliceBottom(30.0f)
+            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
         )
-        |+ { new Thumbnail(Position = Position.SliceLeft(100.0f).Margin(Style.PADDING)) with
+        |+ { new Thumbnail(Position = Position.SliceL(100.0f).Shrink(Style.PADDING)) with
             override this.Load() =
                 ImageServices.get_cached_image.Request(
                     group.Thumbnail,

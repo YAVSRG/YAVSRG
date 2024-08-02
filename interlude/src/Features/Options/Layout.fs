@@ -36,10 +36,10 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let scaled_margins =
         let pc = (PRETTY_MARGIN_X - 5.0f) / 480.0f
         let offset = 5.0f - pc * 1440.0f
-        { Position.Default with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
+        { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.CenterY(60.0f))
+        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.SliceY(60.0f))
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.AIRPLAY (%"system"),
             200.0f,
@@ -78,7 +78,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                     else
                         current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
                 ),
-                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.CenterY(60.0f).TrimLeft(900.0f).Margin(Style.PADDING, 0.0f),
+                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.SliceY(60.0f).ShrinkL(900.0f).Shrink(Style.PADDING, 0.0f),
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan) with
@@ -93,7 +93,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     member private this.Buttons = tab_buttons
         
     override this.Init(parent) =
-        this.Position <- Position.SliceTop(HEIGHT)
+        this.Position <- Position.SliceT(HEIGHT)
         this
         |+ search_box
         |* tab_buttons
@@ -171,7 +171,7 @@ type private OptionsMenuFooter() as this =
             Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
         )
         |+ (
-            FlowContainer.RightToLeft(300.0f, Spacing = 20.0f, Position = Position.SliceBottom(HEIGHT + 10.0f).Translate(-30.0f, -20.0f))
+            FlowContainer.RightToLeft(300.0f, Spacing = 20.0f, Position = Position.SliceB(HEIGHT + 10.0f).Translate(-30.0f, -20.0f))
             |+ Presets.preset_buttons 3 options.Preset3
             |+ Presets.preset_buttons 2 options.Preset2
             |+ Presets.preset_buttons 1 options.Preset1
@@ -181,7 +181,7 @@ type private OptionsMenuFooter() as this =
 
     override this.Init(parent) =
         this |* items
-        this.Position <- Position.SliceBottom HEIGHT
+        this.Position <- Position.SliceB HEIGHT
         base.Init parent
 
     override this.Draw() =

@@ -21,7 +21,7 @@ type MultiplayerChartContextMenu(cc: CachedChart) =
     inherit Page()
 
     override this.Content() =
-        FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+        FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(100.0f, 200.0f))
 
         |+ PageButton(
             %"chart.add_to_collection",
@@ -137,7 +137,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> %"lobby.no_song_selected"
             ),
             Align = Alignment.LEFT,
-            Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f)
+            Position = Position.SliceT(40.0f).Shrink(10.0f, 0.0f)
         )
         |+ Text(
             (fun () ->
@@ -147,7 +147,7 @@ type SelectedChart(lobby: Lobby) =
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f)
+            Position = Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)
         )
         |+ Text(
             (fun () ->
@@ -157,7 +157,7 @@ type SelectedChart(lobby: Lobby) =
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f)
+            Position = Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)
         )
 
         |+ Text(
@@ -167,7 +167,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(100.0f).SliceTop(60.0f)
+            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
             (fun () -> 
@@ -176,7 +176,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Align = Alignment.CENTER,
-            Position = Position.TrimTop(100.0f).SliceTop(60.0f)
+            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
             (fun () -> 
@@ -185,7 +185,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Align = Alignment.RIGHT,
-            Position = Position.TrimTop(100.0f).SliceTop(60.0f)
+            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
             (fun () -> 
@@ -194,7 +194,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Align = Alignment.LEFT,
-            Position = Position.TrimTop(160.0f).SliceTop(40.0f)
+            Position = Position.ShrinkT(160.0f).SliceT(40.0f)
         )
         |+ Text(
             (fun () -> 
@@ -203,7 +203,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Align = Alignment.RIGHT,
-            Position = Position.TrimTop(160.0f).SliceTop(40.0f)
+            Position = Position.ShrinkT(160.0f).SliceT(40.0f)
         )
         |+ Text(
             (fun () ->
@@ -213,12 +213,12 @@ type SelectedChart(lobby: Lobby) =
                     %"lobby.missing_chart"
             ),
             Align = Alignment.CENTER,
-            Position = Position.TrimTop(100.0f).SliceTop(60.0f)
+            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
 
         |+ Clickable(
             fun () -> if lobby.YouAreHost then Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
-            , Position = Position.SliceTop(100.0f)
+            , Position = Position.SliceT(100.0f)
         )
 
         |+ StylishButton(
@@ -231,7 +231,7 @@ type SelectedChart(lobby: Lobby) =
             ),
             !%Palette.MAIN_100,
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Right = 0.5f %- 25.0f
                 }
         )
@@ -259,7 +259,7 @@ type SelectedChart(lobby: Lobby) =
             !%Palette.DARK_100,
             TiltRight = false,
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Left = 0.5f %- 0.0f
                 }
         )
@@ -292,7 +292,7 @@ type SelectedChart(lobby: Lobby) =
             !%Palette.DARK_100,
             TiltRight = false,
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Left = 0.5f %- 0.0f
                 }
         )
@@ -317,7 +317,7 @@ type SelectedChart(lobby: Lobby) =
             ),
             !%Palette.MAIN_100,
             Position =
-                { Position.SliceBottom(50.0f) with
+                { Position.SliceB(50.0f) with
                     Right = 0.5f %- 25.0f
                 }
         )

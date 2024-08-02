@@ -161,23 +161,23 @@ type Slideout(content: SlideoutContent) =
     member val AutoCloseWhen = fun (content: SlideoutContent) -> not content.Focused with get, set
 
     override this.Init(parent: Widget) =
-        content.Position <- Position.Margin(MARGIN)
+        content.Position <- Position.Shrink(MARGIN)
         content.Init this
-        this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+        this.Position <- Position.SliceT(height).Translate(0.0f, -height - 5.0f)
 
         base.Init parent
 
     member this.Close() =
         if is_open then
             is_open <- false
-            this.Position <- Position.SliceTop(height).Translate(0.0f, -height - 5.0f)
+            this.Position <- Position.SliceT(height).Translate(0.0f, -height - 5.0f)
             this.OnClose()
 
     member this.Open() =
         if not is_open then
             is_open <- true
             content.Focus false
-            this.Position <- Position.SliceTop(height)
+            this.Position <- Position.SliceT(height)
             this.OnOpen()
 
     override this.Draw() =

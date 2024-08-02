@@ -69,9 +69,9 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
             let total = PatternStatLine.value data.Push + PatternStatLine.value data.Accuracy + PatternStatLine.value data.Control
             let mult = pattern.RatingMultiplier
             Container(NodeType.None)
-            |+ SkillsetGraph(data, Position = Position.TrimBottom(100.0f))
+            |+ SkillsetGraph(data, Position = Position.ShrinkB(100.0f))
             |+ (
-                GridFlowContainer(60.0f, 4, Spacing = (90.0f, 0.0f), Position = Position.SliceBottom(60.0f))
+                GridFlowContainer(60.0f, 4, Spacing = (90.0f, 0.0f), Position = Position.SliceB(60.0f))
                 |+ RatingTile(Colors.yellow_accent, mult * PatternStatLine.value data.Accuracy)
                 |+ RatingTile(Colors.green_accent, mult * PatternStatLine.value data.Control)
                 |+ RatingTile(Colors.blue_accent, mult * PatternStatLine.value data.Push)
@@ -97,7 +97,7 @@ type Skills() =
         let keymode = Setting.simple available_keymodes.[0]
         let skill = Setting.simple Jack
 
-        let graph_container = SwapContainer(SkillsetGraph.Create(Jack, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Margin(20.0f))
+        let graph_container = SwapContainer(SkillsetGraph.Create(Jack, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Shrink(20.0f))
 
         let refresh_graph() =
             let skills = Skillsets.keymode_skills.[keymode.Value - 3]
@@ -130,7 +130,7 @@ type Skills() =
 
         this
         |+ (
-            FlowContainer.RightToLeft(180.0f, Spacing = 10.0f, Position = Position.Margin(20.0f).SliceTop(InlaidButton.HEIGHT))
+            FlowContainer.RightToLeft(180.0f, Spacing = 10.0f, Position = Position.Shrink(20.0f).SliceT(InlaidButton.HEIGHT))
             |+ skill_switcher
             |+ keymode_switcher
         )

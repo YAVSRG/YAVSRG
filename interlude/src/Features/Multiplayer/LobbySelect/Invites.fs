@@ -9,19 +9,19 @@ type InviteCard(invite: LobbyInvite) =
 
     override this.Init(parent) =
         this
-        |+ Text(Icons.MAIL + " " + invite.InvitedBy, Position = Position.Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text(Icons.MAIL + " " + invite.InvitedBy, Position = Position.Shrink(5.0f), Align = Alignment.LEFT)
         |+ Button(
             Icons.CHECK,
             (fun () ->
                 defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
                 Network.join_lobby invite.LobbyId
             ),
-            Position = Position.TrimRight(50.0f).SliceRight(50.0f)
+            Position = Position.ShrinkR(50.0f).SliceR(50.0f)
         )
         |* Button(
             Icons.X,
             (fun () -> defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
-            Position = Position.SliceRight(50.0f)
+            Position = Position.SliceR(50.0f)
         )
 
         base.Init parent
@@ -30,7 +30,7 @@ type InviteList() =
     inherit Container(NodeType.None)
 
     let container =
-        FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f, Position = Position.Margin(0.0f, 80.0f))
+        FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f, Position = Position.Shrink(0.0f, 80.0f))
     
     member this.UpdateList() =
         container.Clear()

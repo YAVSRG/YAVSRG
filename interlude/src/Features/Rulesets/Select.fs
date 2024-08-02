@@ -28,7 +28,7 @@ type private RulesetButton(name, action) =
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.Margin Style.PADDING
+            Position = Position.Shrink Style.PADDING
         )
         |* Clickable.Focus this
 
@@ -66,7 +66,7 @@ type SelectRulesetPage() =
                 |+ RulesetButton(
                     ruleset.Name,
                     (fun () -> options.SelectedRuleset.Set id),
-                    Position = Position.TrimRight 100.0f
+                    Position = Position.ShrinkR 100.0f
                 )
                 |+ Button(
                     Icons.TRASH,
@@ -77,7 +77,7 @@ type SelectRulesetPage() =
                         )
                             .Show()
                     ),
-                    Position = Position.SliceRight 100.0f
+                    Position = Position.SliceR 100.0f
                 )
             )
 
@@ -86,7 +86,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

@@ -14,7 +14,7 @@ type NetworkStatus() as this =
 
     let retry_timer = Animation.Delay(10000.0)
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceTop(d.Height + this.Bounds.Height).TrimTop(this.Bounds.Height).Margin(Style.PADDING, 0.0f))
+    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + this.Bounds.Height).ShrinkT(this.Bounds.Height).Shrink(Style.PADDING, 0.0f))
 
     override this.Init(parent) =
         this |* dropdown_wrapper

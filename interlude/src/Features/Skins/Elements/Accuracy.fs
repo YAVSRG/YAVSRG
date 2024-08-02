@@ -67,7 +67,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
                 Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position =
-                    { Position.Default with
+                    { Position.DEFAULT with
                         Bottom = 0.7f %+ 0.0f
                     }
             )
@@ -79,7 +79,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
                 Color = K Colors.text_subheading,
                 Align = Alignment.CENTER,
                 Position =
-                    { Position.Default with
+                    { Position.DEFAULT with
                         Top = 0.6f %+ 0.0f
                     }
             )

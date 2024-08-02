@@ -25,28 +25,28 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         this
         |+ Text(
             (fun () -> sprintf "%s  %iK  •  %s" Icons.BAR_CHART score_info.Chart.Keys score_info.Ruleset.Name),
-            Position = Position.SliceTop(80.0f).Margin(10.0f, 0.0f),
+            Position = Position.SliceT(80.0f).Shrink(10.0f, 0.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
             sprintf "%s  %s" Icons.ZAP mod_string,
-            Position = Position.TrimTop(80.0f).SliceTop(80.0f).Margin(10.0f, 0.0f),
+            Position = Position.ShrinkT(80.0f).SliceT(80.0f).Shrink(10.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
         |+ Text(
             sprintf "%s %.2f" Icons.STAR score_info.Rating.Physical,
-            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Position = Position.ShrinkT(530.0f).SliceT(70.0f).Shrink(10.0f, 0.0f),
             Align = Alignment.LEFT
         )
         |+ Text(
             (fun () -> sprintf "%ix" score_info.Scoring.State.BestCombo),
-            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Position = Position.ShrinkT(530.0f).SliceT(70.0f).Shrink(10.0f, 0.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
             sprintf "%.2f" score_info.Physical,
-            Position = Position.TrimTop(530.0f).SliceTop(70.0f).Margin(10.0f, 0.0f),
+            Position = Position.ShrinkT(530.0f).SliceT(70.0f).Shrink(10.0f, 0.0f),
             Align = Alignment.RIGHT
         )
         // todo: update this on ruleset change
@@ -69,11 +69,11 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
                         (!stats).ReleaseStandardDeviation
                         (100.0 * (!stats).ReleaseEarlyPercent)
                 ),
-            Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f)
+            Position = Position.ShrinkT(600.0f).SliceT(40.0f).Shrink(10.0f, 0.0f)
         )
         |* Text(
             (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
-            Position = Position.TrimTop(600.0f).SliceTop(40.0f).Margin(10.0f, 0.0f),
+            Position = Position.ShrinkT(600.0f).SliceT(40.0f).Shrink(10.0f, 0.0f),
             Align = Alignment.CENTER,
             Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
         )
@@ -81,18 +81,18 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         this
         |+ Text(
             category,
-            Position = Position.TrimBottom(95.0f).SliceBottom(60.0f).Margin(20.0f, 0.0f),
+            Position = Position.ShrinkB(95.0f).SliceB(60.0f).Shrink(20.0f, 0.0f),
             Align = Alignment.LEFT
         )
         |+ Text(
             main_elements,
-            Position = Position.TrimBottom(60.0f).SliceBottom(40.0f).Margin(20.0f, 0.0f),
+            Position = Position.ShrinkB(60.0f).SliceB(40.0f).Shrink(20.0f, 0.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT
         )
         |* Text(
             minor_elements,
-            Position = Position.TrimBottom(30.0f).SliceBottom(30.0f).Margin(20.0f, 0.0f),
+            Position = Position.ShrinkB(30.0f).SliceB(30.0f).Shrink(20.0f, 0.0f),
             Color = K Colors.text_greyout,
             Align = Alignment.LEFT
         )

@@ -12,20 +12,20 @@ type LobbyInfoCard(info: LobbyInfo) =
 
     override this.Init(parent) =
         this
-        |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text(info.Name, Position = Position.SliceT(50.0f).Shrink(5.0f), Align = Alignment.LEFT)
         |+ Text(
             (match info.CurrentlyPlaying with
              | None -> %"lobby.no_song_selected"
              | Some s -> s),
             Color = K Colors.text_subheading,
-            Position = Position.SliceBottom(40.0f).Margin(5.0f),
+            Position = Position.SliceB(40.0f).Shrink(5.0f),
             Align = Alignment.LEFT
         )
         |+ Clickable(fun () -> Network.join_lobby info.Id)
         |* Text(
             info.Players.ToString() + " " + Icons.USERS,
             Color = K Colors.text_subheading,
-            Position = Position.SliceTop(50.0f).Margin(5.0f),
+            Position = Position.SliceT(50.0f).Shrink(5.0f),
             Align = Alignment.RIGHT
         )
 
@@ -55,7 +55,7 @@ type LobbyList() =
 
     override this.Init(parent) =
         this
-        |+ ScrollContainer(list_container, Position = Position.Margin(0.0f, 80.0f), Margin = Style.PADDING)
+        |+ ScrollContainer(list_container, Position = Position.Shrink(0.0f, 80.0f), Margin = Style.PADDING)
         |+ EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
             .Conditional(fun () -> no_lobbies)
         |+ IconButton(
@@ -63,19 +63,19 @@ type LobbyList() =
             Icons.PLUS_CIRCLE,
             60.0f,
             create_lobby,
-            Position = Position.SliceBottom(60.0f).TrimRight(250.0f)
+            Position = Position.SliceB(60.0f).ShrinkR(250.0f)
         )
         |+ IconButton(
             %"lobby_list.refresh",
             Icons.REFRESH_CCW,
             60.0f,
             refresh_list,
-            Position = Position.SliceBottom(60.0f).SliceRight(250.0f)
+            Position = Position.SliceB(60.0f).SliceR(250.0f)
         )
         |* SearchBox(
             search_text,
             (fun (query: string) -> list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)),
-            Position = Position.SliceTop 60.0f
+            Position = Position.SliceT 60.0f
         )
         base.Init parent
 

@@ -30,133 +30,72 @@ module Position =
         }
         : Percyqaz.Flux.Graphics.Rect
 
+    let DEFAULT =
+        {
+            Left = MIN
+            Top = MIN
+            Right = MAX
+            Bottom = MAX
+        }
+
 type Position with
-    static member Default =
-        {
-            Left = Position.MIN
-            Top = Position.MIN
-            Right = Position.MAX
-            Bottom = Position.MAX
-        }
 
-    member this.Margin(x, y) =
-        {
-            Left = this.Left ^+ x
-            Top = this.Top ^+ y
-            Right = this.Right ^- x
-            Bottom = this.Bottom ^- y
-        }
-
-    member this.Margin amount = this.Margin(amount, amount)
-
-    static member Margin(x, y) = Position.Default.Margin(x, y)
-    static member Margin amount = Position.Margin(amount, amount)
-
-    member this.Translate(x, y) =
+    member inline this.Translate(x, y) =
         {
             Left = this.Left ^+ x
             Top = this.Top ^+ y
             Right = this.Right ^+ x
             Bottom = this.Bottom ^+ y
         }
-
-    member this.SliceLeft amount =
+    member inline this.TranslateX amount =
         { this with
-            Right = this.Left ^+ amount
-        }
-
-    member this.SliceTop amount =
-        { this with
-            Bottom = this.Top ^+ amount
-        }
-
-    member this.SliceRight amount =
-        { this with
-            Left = this.Right ^- amount
-        }
-
-    member this.SliceBottom amount =
-        { this with
-            Top = this.Bottom ^- amount
-        }
-
-    static member SliceLeft amount = Position.Default.SliceLeft amount
-    static member SliceTop amount = Position.Default.SliceTop amount
-    static member SliceRight amount = Position.Default.SliceRight amount
-    static member SliceBottom amount = Position.Default.SliceBottom amount
-
-    member this.TrimLeft amount =
-        { this with Left = this.Left ^+ amount }
-
-    member this.TrimTop amount = { this with Top = this.Top ^+ amount }
-
-    member this.TrimRight amount =
-        { this with
-            Right = this.Right ^- amount
-        }
-
-    member this.TrimBottom amount =
-        { this with
-            Bottom = this.Bottom ^- amount
-        }
-
-    static member TrimLeft amount = Position.Default.TrimLeft amount
-    static member TrimTop amount = Position.Default.TrimTop amount
-    static member TrimRight amount = Position.Default.TrimRight amount
-    static member TrimBottom amount = Position.Default.TrimBottom amount
-
-    member this.BorderLeft amount =
-        { this with
-            Left = this.Left ^- amount
-            Right = this.Left
-        }
-
-    member this.BorderTop amount =
-        { this with
-            Top = this.Top ^- amount
-            Bottom = this.Top
-        }
-
-    member this.BorderRight amount =
-        { this with
-            Left = this.Right
+            Left = this.Left ^+ amount
             Right = this.Right ^+ amount
         }
-
-    member this.BorderBottom amount =
+    member inline this.TranslateY amount =
         { this with
-            Top = this.Bottom
+            Top = this.Top ^+ amount
             Bottom = this.Bottom ^+ amount
         }
 
-    static member BorderLeft amount = Position.Default.BorderLeft amount
-    static member BorderTop amount = Position.Default.BorderTop amount
-    static member BorderRight amount = Position.Default.BorderRight amount
-    static member BorderBottom amount = Position.Default.BorderBottom amount
-
-    member this.BorderTopCorners amount =
-        { this with
-            Left = this.Left ^- amount
-            Top = this.Top ^- amount
-            Right = this.Right ^+ amount
-            Bottom = this.Top
+    member inline this.Shrink(x, y) =
+        {
+            Left = this.Left ^+ x
+            Top = this.Top ^+ y
+            Right = this.Right ^- x
+            Bottom = this.Bottom ^- y
         }
+    member inline this.Shrink amount = this.Shrink(amount, amount)
+    member inline this.ShrinkL amount = { this with Left = this.Left ^+ amount }
+    member inline this.ShrinkT amount = { this with Top = this.Top ^+ amount }
+    member inline this.ShrinkR amount = { this with Right = this.Right ^- amount }
+    member inline this.ShrinkB amount = { this with Bottom = this.Bottom ^- amount }
+    member inline this.ShrinkX amount = { this with Left = this.Left ^+ amount; Right = this.Right ^- amount }
+    member inline this.ShrinkY amount = { this with Top = this.Top ^+ amount; Bottom = this.Bottom ^- amount }
 
-    member this.BorderBottomCorners amount =
-        { this with
-            Left = this.Left ^- amount
-            Top = this.Bottom
-            Right = this.Right ^+ amount
-            Bottom = this.Bottom ^+ amount
-        }
+    member inline this.Expand (x, y) = this.Shrink (-x, -y)
+    member inline this.Expand amount = this.Shrink -amount
+    member inline this.ExpandL amount = this.ShrinkL -amount
+    member inline this.ExpandT amount = this.ShrinkT -amount
+    member inline this.ExpandR amount = this.ShrinkR -amount
+    member inline this.ExpandB amount = this.ShrinkB -amount
+    member inline this.ExpandX amount = this.ShrinkX -amount
+    member inline this.ExpandY amount = this.ShrinkY -amount
 
-    static member BorderTopCorners amount =
-        Position.Default.BorderTopCorners amount
+    static member inline Shrink(x, y) = Position.DEFAULT.Shrink(x, y)
+    static member inline Shrink amount = Position.DEFAULT.Shrink(amount, amount)
+    static member inline ShrinkL amount = Position.DEFAULT.ShrinkL amount
+    static member inline ShrinkT amount = Position.DEFAULT.ShrinkT amount
+    static member inline ShrinkR amount = Position.DEFAULT.ShrinkR amount
+    static member inline ShrinkB amount = Position.DEFAULT.ShrinkB amount
+    static member inline ShrinkX amount = Position.DEFAULT.ShrinkX amount
+    static member inline ShrinkY amount = Position.DEFAULT.ShrinkY amount
 
-    static member BorderBottomCorners amount =
-        Position.Default.BorderBottomCorners amount
-
-    member this.CenterX width =
+    member inline this.SliceL amount = { this with Right = this.Left ^+ amount }
+    member inline this.SliceT amount = { this with Bottom = this.Top ^+ amount }
+    member inline this.SliceR amount = { this with Left = this.Right ^- amount }
+    member inline this.SliceB amount = { this with Top = this.Bottom ^- amount }
+    member inline this.SliceX width =
         let (lefto, lefta) = this.Left
         let (righto, righta) = this.Right
         let center = (0.5f * (lefto + righto), 0.5f * (lefta + righta))
@@ -164,8 +103,7 @@ type Position with
             Left = center ^- (width * 0.5f)
             Right = center ^+ (width * 0.5f)
         }
-
-    member this.CenterY height =
+    member inline this.SliceY height =
         let (topo, topa) = this.Top
         let (bottomo, bottoma) = this.Bottom
         let center = (0.5f * (topo + bottomo), 0.5f * (topa + bottoma))
@@ -174,11 +112,54 @@ type Position with
             Bottom = center ^+ (height * 0.5f)
         }
 
-    member this.Center (width, height) = this.CenterX(width).CenterY(height)
-    
-    static member CenterX width = Position.Default.CenterX width
-    static member CenterY height = Position.Default.CenterY height
-    static member Center (width, height) = Position.Default.Center (width, height)
+    static member inline SliceL amount = Position.DEFAULT.SliceL amount
+    static member inline SliceT amount = Position.DEFAULT.SliceT amount
+    static member inline SliceR amount = Position.DEFAULT.SliceR amount
+    static member inline SliceB amount = Position.DEFAULT.SliceB amount
+    static member inline SliceX width = Position.DEFAULT.SliceX width
+    static member inline SliceY height = Position.DEFAULT.SliceY height
+
+    member inline this.BorderL amount =
+        { this with
+            Left = this.Left ^- amount
+            Right = this.Left
+        }
+    member inline this.BorderT amount =
+        { this with
+            Top = this.Top ^- amount
+            Bottom = this.Top
+        }
+    member inline this.BorderR amount =
+        { this with
+            Left = this.Right
+            Right = this.Right ^+ amount
+        }
+    member inline this.BorderB amount =
+        { this with
+            Top = this.Bottom
+            Bottom = this.Bottom ^+ amount
+        }
+    member inline this.BorderCornersT amount =
+        { this with
+            Left = this.Left ^- amount
+            Top = this.Top ^- amount
+            Right = this.Right ^+ amount
+            Bottom = this.Top
+        }
+    member inline this.BorderCornersB amount =
+        { this with
+            Left = this.Left ^- amount
+            Top = this.Bottom
+            Right = this.Right ^+ amount
+            Bottom = this.Bottom ^+ amount
+        }
+
+    static member inline BorderL amount = Position.DEFAULT.BorderL amount
+    static member inline BorderT amount = Position.DEFAULT.BorderT amount
+    static member inline BorderR amount = Position.DEFAULT.BorderR amount
+    static member inline BorderB amount = Position.DEFAULT.BorderB amount
+    static member inline BorderCornersT amount = Position.DEFAULT.BorderCornersT amount
+    static member inline BorderCornersB amount = Position.DEFAULT.BorderCornersB amount
 
     static member Row(y, height) =
         {

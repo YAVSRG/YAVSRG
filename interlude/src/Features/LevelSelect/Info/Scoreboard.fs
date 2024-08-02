@@ -68,8 +68,8 @@ module Scoreboard =
             let text_subcolor =
                 fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
 
-            let upper = Position.SliceTop(47.5f).Margin(10.0f, 1f).Translate(0.0f, -2.0f)
-            let lower = Position.TrimTop(37.5f).Margin(10.0f, 1f).Translate(0.0f, -1.0f)
+            let upper = Position.SliceT(47.5f).Shrink(10.0f, 1f).Translate(0.0f, -2.0f)
+            let lower = Position.ShrinkT(37.5f).Shrink(10.0f, 1f).Translate(0.0f, -1.0f)
 
             this
             |+ Text(
@@ -222,7 +222,7 @@ type Scoreboard(display: Setting<Display>) =
         | _ -> K true
 
     let scroll_container =
-        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.TrimTop(50.0f).TrimBottom(125.0f))
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.ShrinkT(50.0f).ShrinkB(125.0f))
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add(fun info ->

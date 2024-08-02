@@ -18,7 +18,7 @@ type Grade(grade: Grade.GradeResult ref, score_info: ScoreInfo) =
         |* Text(
             (fun () -> score_info.Ruleset.GradeName (!grade).Grade),
             Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
-            Position = Position.Margin(-10.0f)
+            Position = Position.Shrink(-10.0f)
         )
 
         base.Init parent
@@ -50,7 +50,7 @@ type Accuracy
         |* Text(
             (fun () -> score_info.Scoring.FormatAccuracy()),
             Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
-            Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE)
+            Position = Position.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE)
         )
 
         if (!improvements).Accuracy <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
@@ -140,7 +140,7 @@ type Lamp
         |* Text(
             (fun () -> score_info.Ruleset.LampName (!lamp).Lamp),
             Color = (fun () -> (score_info.Ruleset.LampColor (!lamp).Lamp, Colors.black)),
-            Position = Position.Margin(10.0f, 0.0f).TrimBottom(LOWER_SIZE)
+            Position = Position.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE)
         )
 
         if (!improvements).Lamp <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
@@ -196,7 +196,7 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
         Container(
             NodeType.None,
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Left = 0.35f %+ 0.0f
                 }
         )

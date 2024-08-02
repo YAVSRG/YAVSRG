@@ -79,7 +79,7 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
                     elif this.Focused then Colors.text_yellow_2
                     else Colors.text
                 ),
-            Position = Position.SliceLeft icon_size
+            Position = Position.SliceL icon_size
         )
         |+ Text(
             text,
@@ -90,7 +90,7 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
                     elif this.Focused then Colors.text_yellow_2
                     else Colors.text
                 ),
-            Position = Position.TrimLeft icon_size
+            Position = Position.ShrinkL icon_size
         )
         |+ Clickable.Focus(this)
         |* HotkeyAction(

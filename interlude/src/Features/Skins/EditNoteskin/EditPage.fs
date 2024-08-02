@@ -82,7 +82,7 @@ type EditNoteskinPage() =
             )
                 .Pos(17)
 
-        let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
         let tab_buttons =
             RadioButtons.create_tabs
@@ -106,7 +106,7 @@ type EditNoteskinPage() =
             |+ tabs
         )
         |+ (
-            NavigationContainer.Column(Position = Position.TrimLeft(PRETTYWIDTH + PRETTY_MARGIN_X).Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceBottom(PRETTYHEIGHT * 3.0f))
+            NavigationContainer.Column(Position = Position.ShrinkL(PRETTYWIDTH + PRETTY_MARGIN_X).Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceB(PRETTYHEIGHT * 3.0f))
             |+ PageButton(
                 %"skins.export",
                 (fun () ->

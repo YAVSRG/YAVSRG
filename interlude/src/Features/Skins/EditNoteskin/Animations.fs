@@ -215,7 +215,7 @@ type AnimationSettingsPage() =
                 .Pos(14)
                 .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 
-        let tabs = SwapContainer(general_tab, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).TrimTop(100.0f))
+        let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).ShrinkT(100.0f))
 
         let tab_buttons =
             RadioButtons.create_tabs

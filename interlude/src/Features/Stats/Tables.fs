@@ -46,17 +46,17 @@ type private Leaderboard() =
                                         player.Username,
                                         Color = K(Color.FromArgb player.Color, Colors.shadow_2),
                                         Align = Alignment.LEFT,
-                                        Position = Position.Margin(100.0f, 5.0f)
+                                        Position = Position.Shrink(100.0f, 5.0f)
                                     )
                                     |+ Text(
                                         "#" + player.Rank.ToString(),
                                         Align = Alignment.LEFT,
-                                        Position = Position.Margin(10.0f, 5.0f)
+                                        Position = Position.Shrink(10.0f, 5.0f)
                                     )
                                     |+ Text(
                                         sprintf "%.2f" player.Rating,
                                         Align = Alignment.RIGHT,
-                                        Position = Position.Margin(10.0f, 5.0f)
+                                        Position = Position.Shrink(10.0f, 5.0f)
                                     )
                                 )
                         | None -> status <- WebRequestState.ServerError
@@ -142,7 +142,7 @@ type private CompareFriend
 
                                     contents.Add(
                                         Container(NodeType.None)
-                                        |+ Text(name, Align = Alignment.CENTER, Position = Position.Margin(0.0f, 5.0f))
+                                        |+ Text(name, Align = Alignment.CENTER, Position = Position.Shrink(0.0f, 5.0f))
                                         |+ Text(
                                             (match your_score with
                                              | None -> "--"
@@ -164,7 +164,7 @@ type private CompareFriend
                                              else
                                                  ""),
                                             Color = K Colors.text_green,
-                                            Position = Position.Margin(150.0f, 0.0f),
+                                            Position = Position.Shrink(150.0f, 0.0f),
                                             Align = if delta > 0 then Alignment.LEFT else Alignment.RIGHT
                                         )
                                         |+ Text(
@@ -195,10 +195,10 @@ type private CompareFriend
         |+ Text(
             "Comparing to " + name,
             Align = Alignment.RIGHT,
-            Position = Position.SliceTop(50.0f).Margin(20.0f, 0.0f)
+            Position = Position.SliceT(50.0f).Shrink(20.0f, 0.0f)
         )
         |+ Button(K(Icons.ARROW_LEFT_CIRCLE + " Back"), on_back, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 200.0f, 50.0f))
-        |* ScrollContainer(contents, Position = Position.Margin(10.0f, 0.0f).TrimTop(55.0f))
+        |* ScrollContainer(contents, Position = Position.Shrink(10.0f, 0.0f).ShrinkT(55.0f))
 
         base.Init parent
 
@@ -234,8 +234,8 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
 
     let friend (name: string, on_compare: unit -> unit) =
         Container(NodeType.None)
-        |+ Text(name, Position = Position.Margin(20.0f, 5.0f), Align = Alignment.LEFT)
-        |+ Button(K "Compare >", on_compare, Position = Position.SliceRight(250.0f).Margin(5.0f))
+        |+ Text(name, Position = Position.Shrink(20.0f, 5.0f), Align = Alignment.LEFT)
+        |+ Button(K "Compare >", on_compare, Position = Position.SliceR(250.0f).Shrink(5.0f))
 
     override this.Init(parent) =
 
@@ -412,7 +412,7 @@ type private TableStats() =
                     table_bests_items.Add(TableScore(i, chart_id, grade, rating, ruleset))
 
                 let swap =
-                    SwapContainer(table_breakdown, Position = Position.TrimTop(120.0f).Margin(40.0f))
+                    SwapContainer(table_breakdown, Position = Position.ShrinkT(120.0f).Shrink(40.0f))
 
                 let button (label: string, cmp) =
                     StylishButton(
@@ -428,23 +428,23 @@ type private TableStats() =
                 this
                 |+ Text(
                     table.Info.Name,
-                    Position = Position.SliceTop(120.0f).Margin(40.0f, 10.0f),
+                    Position = Position.SliceT(120.0f).Shrink(40.0f, 10.0f),
                     Align = Alignment.LEFT
                 )
                 |+ Text(
                     %"stats.table.skill_level",
-                    Position = Position.Row(10.0f, 40.0f).Margin(40.0f, 0.0f),
+                    Position = Position.Row(10.0f, 40.0f).Shrink(40.0f, 0.0f),
                     Align = Alignment.RIGHT
                 )
                 |+ Text(
                     sprintf "%.2f" table_rating,
-                    Position = Position.Row(50.0f, 60.0f).Margin(40.0f, 0.0f),
+                    Position = Position.Row(50.0f, 60.0f).Shrink(40.0f, 0.0f),
                     Align = Alignment.RIGHT
                 )
                 |+ (GridFlowContainer(
                         50.0f,
                         4,
-                        Position = Position.Row(110.0f, 50.0f).Margin(40.0f, 0.0f),
+                        Position = Position.Row(110.0f, 50.0f).Shrink(40.0f, 0.0f),
                         Spacing = (25.0f, 0.0f)
                     )
                     |+ (button (sprintf "%s %s" Icons.BAR_CHART (%"stats.table.breakdown"), table_breakdown)

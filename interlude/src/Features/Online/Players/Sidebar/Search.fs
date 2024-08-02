@@ -48,11 +48,11 @@ type private SearchList() =
                             else
                                 %"online.players.search.empty_search_bar"
                         )
-                , Position = Position.TrimTop(60.0f)
+                , Position = Position.ShrinkT(60.0f)
             )
 
         this
-        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.TrimTop(5.0f).SliceTop(50.0f))
+        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.ShrinkT(5.0f).SliceT(50.0f))
         |* searcher
 
         base.Init parent

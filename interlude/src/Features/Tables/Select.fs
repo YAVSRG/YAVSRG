@@ -30,7 +30,7 @@ type private TableButton(name, action) =
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.Margin Style.PADDING
+            Position = Position.Shrink Style.PADDING
         )
         |* Clickable.Focus this
 
@@ -86,7 +86,7 @@ type SelectTablePage(refresh_table_view) =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
     override this.OnClose() = ()

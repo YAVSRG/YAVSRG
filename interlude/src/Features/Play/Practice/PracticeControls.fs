@@ -53,7 +53,7 @@ type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =
 type SyncSuggestionControls(state: PracticeState) =
     inherit
         SlideoutContent(
-            FlowContainer.Vertical<ModeButton>(40.0f, Position = Position.SliceLeft(250.0f))
+            FlowContainer.Vertical<ModeButton>(40.0f, Position = Position.SliceL(250.0f))
             |+ ModeButton(%"practice.localoffset", SyncMode.AUDIO_OFFSET, state)
             |+ ModeButton(%"gameplay.hitposition", SyncMode.HIT_POSITION, state)
             |+ ModeButton(%"gameplay.scrollspeed", SyncMode.SCROLL_SPEED, state)

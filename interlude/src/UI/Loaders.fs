@@ -121,7 +121,7 @@ type WIP() as this =
 
     let text = %"misc.wip"
 
-    do this.Position <- Position.SliceBottom(100.0f)
+    do this.Position <- Position.SliceB(100.0f)
 
     override this.Draw() =
         Draw.rect this.Bounds (Color.FromArgb(127, Color.Yellow))

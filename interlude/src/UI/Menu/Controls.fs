@@ -34,7 +34,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
             (fun () -> this.Format setting.Value),
             Align = Alignment.LEFT,
             Position =
-                { Position.Default with
+                { Position.DEFAULT with
                     Right = 0.0f %+ TEXTWIDTH
                 }
         )
@@ -209,7 +209,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
 
     let dropdown_wrapper = DropdownWrapper(fun d ->
         let height = min d.Height (Viewport.vheight - this.Bounds.Bottom - Style.PADDING * 2.0f)
-        Position.BorderBottom(height + 2.0f * Style.PADDING).Margin(Style.PADDING)
+        Position.BorderB(height + 2.0f * Style.PADDING).Shrink(Style.PADDING)
     )
 
     let wrapped_setting = 
@@ -257,7 +257,7 @@ type PageSetting(localised_text, widget: Widget) as this =
         and set (w: Widget) =
             let old_widget = widget
             widget <- w
-            w.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
+            w.Position <- Position.ShrinkL(PRETTYTEXTWIDTH).Shrink(Style.PADDING)
 
             if this.Initialised then
                 w.Init this
@@ -276,11 +276,11 @@ type PageSetting(localised_text, widget: Widget) as this =
             Position =
                 Position
                     .Box(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT)
-                    .Margin(Style.PADDING)
+                    .Shrink(Style.PADDING)
         )
 
         base.Init parent
-        widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.PADDING)
+        widget.Position <- Position.ShrinkL(PRETTYTEXTWIDTH).Shrink(Style.PADDING)
         widget.Init this
 
     override this.Draw() =
@@ -325,7 +325,7 @@ type PageButton(localised_text, action) as this =
                         Colors.text_greyout
                 ),
             Align = Alignment.LEFT,
-            Position = Position.Margin(Style.PADDING)
+            Position = Position.Shrink(Style.PADDING)
         )
         |* Clickable.Focus this
 
@@ -373,7 +373,7 @@ type PageTextEntry(name, setting) =
 
             entry
             |+ Frame(
-                Position = Position.Default.Margin(-15.0f, 0.0f),
+                Position = Position.DEFAULT.Shrink(-15.0f, 0.0f),
                 Fill = K Color.Transparent,
                 Border =
                     fun () ->
@@ -412,7 +412,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         )
 
     let hex_editor =
-        { new TextEntry(hex, "none", false, Position = Position.TrimLeft(50.0f).SliceTop HEX_EDITOR_HEIGHT) with
+        { new TextEntry(hex, "none", false, Position = Position.ShrinkL(50.0f).SliceT HEX_EDITOR_HEIGHT) with
             override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
                 hex.Value <- s.Value.ToHex()
@@ -591,7 +591,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
 module Helpers =
 
     let page_container () =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Margin(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
 
     let refreshable_row number cons =
         let r = NavigationContainer.Row()

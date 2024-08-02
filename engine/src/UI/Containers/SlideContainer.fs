@@ -69,7 +69,7 @@ type private SlideablePosition(pos: Position) =
 type SlideContainer(node_type) =
     inherit Widget(node_type)
 
-    let pos = SlideablePosition(Position.Default)
+    let pos = SlideablePosition(Position.DEFAULT)
     let children = ResizeArray<Widget>()
     let mutable snapped_last_frame = false
 
