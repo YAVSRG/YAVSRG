@@ -148,22 +148,22 @@ type ConfigPreviewNew(position: HudPosition) =
 
     override this.Draw() =
         
-        let bounds = Rect.Box(this.Bounds.TrimLeft(PRETTYWIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
+        let bounds = Rect.Box(this.Bounds.ShrinkL(PRETTYWIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
         // Draw bounds
         Draw.rect
-            (bounds.BorderLeft Style.PADDING)
+            (bounds.BorderL Style.PADDING)
             Color.Lime
 
         Draw.rect
-            (bounds.BorderTopCorners Style.PADDING)
+            (bounds.BorderCornersT Style.PADDING)
             Color.Lime
 
         Draw.rect
-            (bounds.BorderRight Style.PADDING)
+            (bounds.BorderR Style.PADDING)
             Color.Lime
 
         Draw.rect
-            (bounds.BorderBottomCorners Style.PADDING)
+            (bounds.BorderCornersB Style.PADDING)
             Color.Lime
 
         this.DrawComponent(bounds)

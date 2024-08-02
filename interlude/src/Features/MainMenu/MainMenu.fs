@@ -256,7 +256,7 @@ type MainMenuScreen() as this =
         button_sequence.Update elapsed_ms
 
         splash_subtitle_fade.Target <-
-            if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then
+            if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceT(100.0f)) then
                 1.0f
             else
                 0.0f

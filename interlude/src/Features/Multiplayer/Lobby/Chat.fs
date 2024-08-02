@@ -215,8 +215,8 @@ type Chat(lobby: Lobby) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.TrimBottom 60.0f) Colors.shadow_2.O3
-        Draw.rect (this.Bounds.SliceBottom 50.0f) Colors.shadow_2.O3
+        Draw.rect (this.Bounds.ShrinkB 60.0f) Colors.shadow_2.O3
+        Draw.rect (this.Bounds.SliceB 50.0f) Colors.shadow_2.O3
         base.Draw()
 
     override this.Update(elapsed_ms, moved) =

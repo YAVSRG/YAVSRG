@@ -54,7 +54,7 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
 
         Draw.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms> - 2.5f, this.Bounds.Right, y 60000.0f<ms> + 2.5f)) Colors.white.O1
 
-        Draw.rect (this.Bounds.SliceBottom(AXIS_HEIGHT)) Colors.shadow_2.O1
+        Draw.rect (this.Bounds.SliceB(AXIS_HEIGHT)) Colors.shadow_2.O1
         let SPACING = floor(max_bpm / 200.0f) * 10.0f |> max 10.0f
         let mutable bpm = round(min_bpm / SPACING) * SPACING
         while bpm < max_bpm - SPACING * 1.5f do

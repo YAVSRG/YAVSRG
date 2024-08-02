@@ -26,14 +26,14 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
         for score, ago in scores do
 
-            let b = this.Bounds.TrimTop(y).SliceTop(h)
+            let b = this.Bounds.ShrinkT(y).SliceT(h)
 
-            Text.fill_b (Style.font, score.Title, b.SliceTop(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+            Text.fill_b (Style.font, score.Title, b.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
 
             Text.fill_b (
                 Style.font,
                 score.Artist + "  •  " + score.Difficulty + "  •  " + ago,
-                b.TrimTop(50.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -5.0f),
+                b.ShrinkT(50.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -5.0f),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
@@ -41,7 +41,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             Text.fill_b (
                 Style.font,
                 format_accuracy score.Score,
-                b.TrimRight(h * 3.5f).SliceRight(h * 2.0f).Shrink(0.0f, h * 0.2f),
+                b.ShrinkR(h * 3.5f).SliceR(h * 2.0f).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.RIGHT
             )
@@ -49,7 +49,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             Text.fill_b (
                 Style.font,
                 score.Lamp,
-                b.TrimRight(h * 2.0f).SliceRight(h).Shrink(0.0f, h * 0.2f),
+                b.ShrinkR(h * 2.0f).SliceR(h).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.CENTER
             )
@@ -57,7 +57,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             Text.fill_b (
                 Style.font,
                 score.Mods,
-                b.TrimRight(h * 0.5f).SliceRight(h).Shrink(0.0f, h * 0.2f),
+                b.ShrinkR(h * 0.5f).SliceR(h).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.CENTER
             )

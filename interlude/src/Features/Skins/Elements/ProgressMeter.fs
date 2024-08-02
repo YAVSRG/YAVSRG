@@ -117,7 +117,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
         let now = state.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(this.Bounds.SliceTop(this.Bounds.Width), config.ProgressMeterColor, config.ProgressMeterBackgroundColor, percent)
+        ProgressMeter.draw_pie(this.Bounds.SliceT(this.Bounds.Width), config.ProgressMeterColor, config.ProgressMeterBackgroundColor, percent)
 
         if config.ProgressMeterUseFont then
 
@@ -126,7 +126,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
-                        this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize), 
+                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
                         Color.White,
                         time_left,
                         config.ProgressMeterFontSpacing,
@@ -135,7 +135,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
                 | ProgressMeterLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
-                        this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize), 
+                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
                         Color.White,
                         percent,
                         config.ProgressMeterFontSpacing,
@@ -156,7 +156,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
             Text.fill_b (
                 Style.font,
                 text,
-                this.Bounds.SliceBottom(this.Bounds.Width * config.ProgressMeterLabelSize),
+                this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
                 Colors.text_subheading,
                 Alignment.CENTER
             )

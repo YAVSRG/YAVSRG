@@ -101,8 +101,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds.SliceTop(160.0f), !*Palette.DARKER, 2.0f)
-        Background.draw (this.Bounds.TrimTop(160.0f), (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds.SliceT(160.0f), !*Palette.DARKER, 2.0f)
+        Background.draw (this.Bounds.ShrinkT(160.0f), (Color.FromArgb(40, 40, 40)), 2.0f)
         base.Draw()
 
         // accuracy info
@@ -119,7 +119,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Draw.rect b (Color.FromArgb(40, j.Color))
 
             Draw.rect
-                (b.SliceLeft(
+                (b.SliceL(
                     counters.Width
                     * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)
                 ))

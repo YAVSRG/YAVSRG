@@ -275,10 +275,10 @@ type CalloutCard(callout: Callout, border: Color, fill: Color) =
 
     override this.Draw() =
 
-        Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) border
-        Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) border
-        Draw.rect (this.Bounds.BorderLeft Style.PADDING) border
-        Draw.rect (this.Bounds.BorderRight Style.PADDING) border
+        Draw.rect (this.Bounds.BorderCornersT Style.PADDING) border
+        Draw.rect (this.Bounds.BorderCornersB Style.PADDING) border
+        Draw.rect (this.Bounds.BorderL Style.PADDING) border
+        Draw.rect (this.Bounds.BorderR Style.PADDING) border
 
         Draw.rect this.Bounds fill
 

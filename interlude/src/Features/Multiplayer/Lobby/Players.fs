@@ -25,11 +25,11 @@ type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
             | _ -> "", Colors.cyan, Colors.cyan_accent
 
         let b = this.Bounds.Expand(Style.PADDING)
-        Draw.rect (b.SliceTop Style.PADDING) border.O3
-        Draw.rect (b.SliceBottom Style.PADDING) border.O3
+        Draw.rect (b.SliceT Style.PADDING) border.O3
+        Draw.rect (b.SliceB Style.PADDING) border.O3
         let b2 = this.Bounds.Expand(Style.PADDING, 0.0f)
-        Draw.rect (b2.SliceRight Style.PADDING) border.O3
-        Draw.rect (b2.SliceLeft Style.PADDING) border.O3
+        Draw.rect (b2.SliceR Style.PADDING) border.O3
+        Draw.rect (b2.SliceL Style.PADDING) border.O3
 
         Draw.rect this.Bounds fill.O3
 
@@ -75,14 +75,12 @@ type PlayerList(lobby: Lobby) =
 
         let fill, border = Colors.cyan, Colors.cyan_accent
 
-        let user_bounds = this.Bounds.SliceTop(55.0f)
+        let user_bounds = this.Bounds.SliceT(55.0f)
 
-        let b = user_bounds.Expand(Style.PADDING)
-        Draw.rect (b.SliceTop Style.PADDING) border.O3
-        Draw.rect (b.SliceBottom Style.PADDING) border.O3
-        let b2 = user_bounds.Expand(Style.PADDING, 0.0f)
-        Draw.rect (b2.SliceRight Style.PADDING) border.O3
-        Draw.rect (b2.SliceLeft Style.PADDING) border.O3
+        Draw.rect (user_bounds.BorderL Style.PADDING) border.O3
+        Draw.rect (user_bounds.BorderCornersT Style.PADDING) border.O3
+        Draw.rect (user_bounds.BorderR Style.PADDING) border.O3
+        Draw.rect (user_bounds.BorderCornersB Style.PADDING) border.O3
 
         Draw.rect user_bounds fill.O3
 

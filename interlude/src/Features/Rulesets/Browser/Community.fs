@@ -74,7 +74,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     override this.Draw() =
         base.Draw()
-        Draw.rect (this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font
@@ -82,7 +82,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
               | NotInstalled -> Icons.DOWNLOAD + " Install"
               | UpdateAvailable -> Icons.DOWNLOAD + " Update available"
               | UpToDate -> Icons.CHECK + " Installed"
-            , this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(25.0f, Style.PADDING)
+            , this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(25.0f, Style.PADDING)
             , match status with
               | NotInstalled -> if this.Focused then Colors.text_yellow_2 else Colors.text
               | UpdateAvailable -> Colors.text_yellow_2

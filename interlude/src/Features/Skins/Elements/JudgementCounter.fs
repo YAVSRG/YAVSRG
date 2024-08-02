@@ -105,7 +105,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
     override this.Draw() =
         base.Draw()
         let h = this.Bounds.Height / float32 (judgement_animations.Length + if config.JudgementCounterShowRatio then 1 else 0)
-        let mutable r = this.Bounds.SliceTop(h)
+        let mutable r = this.Bounds.SliceT(h)
 
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
             let j = state.Ruleset.Judgements.[i]
@@ -126,7 +126,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
                         Color.White.AsQuad
                         (Sprite.pick_texture (0, texture_index) texture)
             | None ->
-                Draw.rect (r.SliceLeft(5.0f)) j.Color
+                Draw.rect (r.SliceL(5.0f)) j.Color
                 Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
             if config.JudgementCounterUseFont then

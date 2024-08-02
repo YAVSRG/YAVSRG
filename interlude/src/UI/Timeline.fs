@@ -72,8 +72,8 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         let now = Song.time()
         let percent = (now - start) / (LAST_NOTE - start) |> min 1.0f
         let x = b.Width * percent
-        Draw.rect (b.BorderBottom(10.0f)) Colors.grey_1.O3
-        Draw.rect (b.BorderBottom(10.0f).SliceLeft x) Colors.cyan_accent
+        Draw.rect (b.BorderB(10.0f)) Colors.grey_1.O3
+        Draw.rect (b.BorderB(10.0f).SliceL x) Colors.cyan_accent
 
         let duration = (LAST_NOTE - FIRST_NOTE) / rate.Value |> format_duration_ms
         let now_on_1x = max 0.0f<ms> (now - FIRST_NOTE) |> format_duration_ms

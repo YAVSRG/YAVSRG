@@ -316,7 +316,7 @@ type Scoreboard(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             category.Category,
-            this.Bounds.TrimBottom(65.0f).SliceBottom(60.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.ShrinkB(65.0f).SliceB(60.0f).Shrink(20.0f, 0.0f),
             Colors.text,
             Alignment.LEFT
         )
@@ -324,7 +324,7 @@ type Scoreboard(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MajorFeatures,
-            this.Bounds.TrimBottom(30.0f).SliceBottom(40.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.ShrinkB(30.0f).SliceB(40.0f).Shrink(20.0f, 0.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
@@ -332,7 +332,7 @@ type Scoreboard(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MinorFeatures,
-            this.Bounds.SliceBottom(30.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.SliceB(30.0f).Shrink(20.0f, 0.0f),
             Colors.text_greyout,
             Alignment.LEFT
         )

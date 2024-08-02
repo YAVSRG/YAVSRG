@@ -21,7 +21,7 @@ type NetworkStatus() as this =
         base.Init parent
 
     override this.Draw() =
-        let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
+        let area = this.Bounds.Shrink(30.0f, 0.0f).ShrinkB(15.0f)
 
         let text, color =
             match Network.status with
@@ -35,7 +35,7 @@ type NetworkStatus() as this =
         Text.fill_b (Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
 
         if Network.credentials.Host = "localhost" then
-            Text.fill_b (Style.font, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
+            Text.fill_b (Style.font, "LOCALHOST", this.Bounds.SliceB(20.0f), Colors.text, Alignment.CENTER)
 
         if Screen.current_type <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)

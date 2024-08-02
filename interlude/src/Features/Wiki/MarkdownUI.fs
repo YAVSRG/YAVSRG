@@ -67,8 +67,8 @@ module private Span =
     let link_fragment (text: string, link: string) =
         { new Button(text, (fun () -> LinkHandler.handle link)) with
             override this.Draw() =
-                Draw.rect (this.Bounds.SliceBottom(2.0f).Translate(2.0f, 2.0f)) Colors.shadow_2
-                Draw.rect (this.Bounds.SliceBottom(2.0f)) (if this.Focused then Colors.yellow_accent else Colors.white)
+                Draw.rect (this.Bounds.SliceB(2.0f).Translate(2.0f, 2.0f)) Colors.shadow_2
+                Draw.rect (this.Bounds.SliceB(2.0f)) (if this.Focused then Colors.yellow_accent else Colors.white)
                 base.Draw()
         }
 
@@ -321,10 +321,10 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
     override this.Draw() =
         if this.VisibleBounds.Visible then
             if not nested then
-                Draw.rect (this.Bounds.BorderBottomCorners(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderTopCorners(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderLeft(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderRight(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderCornersB(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderCornersT(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderL(Style.PADDING)) Colors.cyan_accent
+                Draw.rect (this.Bounds.BorderR(Style.PADDING)) Colors.cyan_accent
                 Draw.rect this.Bounds Colors.cyan.O2
 
             base.Draw()
@@ -391,7 +391,7 @@ type HorizontalRule(max_width) =
 
     override this.Draw() =
         if this.VisibleBounds.Visible then
-            Draw.rect (this.Bounds.SliceTop(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) Colors.white.O2
+            Draw.rect (this.Bounds.SliceT(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) Colors.white.O2
 
 type CodeBlock(max_width, code, language) as this =
     inherit IParagraph()

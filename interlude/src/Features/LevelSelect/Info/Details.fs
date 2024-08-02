@@ -46,7 +46,7 @@ type Patterns(display: Setting<Display>) =
         base.Draw()
 
         let mutable b =
-            this.Bounds.SliceTop(60.0f).Shrink(20.0f, 0.0f).Translate(0.0f, 60.0f)
+            this.Bounds.SliceT(60.0f).Shrink(20.0f, 0.0f).Translate(0.0f, 60.0f)
 
         let TEXT_WIDTH = 240.0f
         let BAR_L = b.Left + TEXT_WIDTH + 5.0f
@@ -57,7 +57,7 @@ type Patterns(display: Setting<Display>) =
             Text.fill_b (
                 Style.font,
                 (sprintf "%O" entry.Pattern),
-                b.TrimBottom(25.0f).SliceLeft(TEXT_WIDTH),
+                b.ShrinkB(25.0f).SliceL(TEXT_WIDTH),
                 Colors.text,
                 Alignment.LEFT
             )
@@ -70,7 +70,7 @@ type Patterns(display: Setting<Display>) =
                      sprintf "Mixed, ~%i BPM (feels like %i)" entry.BPM feels_like_bpm
                  else
                      sprintf "%i BPM (feels like %i)" entry.BPM feels_like_bpm),
-                b.SliceBottom(30.0f).SliceLeft(TEXT_WIDTH),
+                b.SliceB(30.0f).SliceL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
@@ -78,13 +78,13 @@ type Patterns(display: Setting<Display>) =
             Text.fill_b (
                 Style.font,
                 String.concat ", " (entry.Specifics |> Seq.map fst),
-                b.SliceBottom(30.0f).TrimLeft(TEXT_WIDTH),
+                b.SliceB(30.0f).ShrinkL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
 
-            Draw.rect (b.SliceLeft(5.0f).SliceTop(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
-            Draw.rect (b.SliceRight(5.0f).SliceTop(20.0f).Translate(0.0f, 10.0f)) Colors.white
+            Draw.rect (b.SliceL(5.0f).SliceT(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
+            Draw.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32) =
                 nps * 2.0f |> float |> DifficultyRating.physical_color
@@ -115,7 +115,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             category.Category,
-            this.Bounds.TrimBottom(65.0f).SliceBottom(60.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.ShrinkB(65.0f).SliceB(60.0f).Shrink(20.0f, 0.0f),
             Colors.text,
             Alignment.LEFT
         )
@@ -123,7 +123,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MajorFeatures,
-            this.Bounds.TrimBottom(30.0f).SliceBottom(40.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.ShrinkB(30.0f).SliceB(40.0f).Shrink(20.0f, 0.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
@@ -131,7 +131,7 @@ type Patterns(display: Setting<Display>) =
         Text.fill_b (
             Style.font,
             String.concat ", " category.MinorFeatures,
-            this.Bounds.SliceBottom(30.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.SliceB(30.0f).Shrink(20.0f, 0.0f),
             Colors.text_greyout,
             Alignment.LEFT
         )

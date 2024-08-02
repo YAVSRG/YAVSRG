@@ -146,12 +146,12 @@ type EmptyState(icon: string, text: string) =
 
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
-        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
 
         Text.fill_b (
             Style.font,
             text,
-            this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f),
+            this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(175.0f).SliceT(60.0f),
             color,
             Alignment.CENTER
         )
@@ -159,7 +159,7 @@ type EmptyState(icon: string, text: string) =
         Text.fill_b (
             Style.font,
             this.Subtitle,
-            this.Bounds.Shrink(30.0f, 100.0f).TrimTop(230.0f).SliceTop(40.0f),
+            this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(230.0f).SliceT(40.0f),
             color,
             Alignment.CENTER
         )
@@ -188,12 +188,12 @@ type LoadingState() =
     override this.Draw() =
         let color = (!*Palette.LIGHT, !*Palette.DARKER)
         let icon = animation_frames.[animation.Loops % animation_frames.Length]
-        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceTop(200.0f), color, Alignment.CENTER)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
 
         Text.fill_b (
             Style.font,
             this.Text,
-            this.Bounds.Shrink(30.0f, 100.0f).TrimTop(175.0f).SliceTop(60.0f),
+            this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(175.0f).SliceT(60.0f),
             color,
             Alignment.CENTER
         )

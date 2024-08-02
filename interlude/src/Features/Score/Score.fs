@@ -118,7 +118,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
 
     override this.Draw() =
         
-        Draw.rect (bottom_info.Bounds.TrimTop 5.0f) (Palette.color (127, 0.5f, 0.0f))
-        Draw.rect (bottom_info.Bounds.SliceTop 5.0f) Colors.white.O2
+        Draw.rect (bottom_info.Bounds.ShrinkT 5.0f) (Palette.color (127, 0.5f, 0.0f))
+        Draw.rect (bottom_info.Bounds.SliceT 5.0f) Colors.white.O2
 
         base.Draw()

@@ -12,17 +12,17 @@ module Lanecover =
         let fade_length = options.LaneCover.FadeLength.Value
 
         let upper (amount: float32) =
-            Draw.rect (bounds.SliceTop(amount - fade_length)) options.LaneCover.Color.Value
+            Draw.rect (bounds.SliceT(amount - fade_length)) options.LaneCover.Color.Value
 
             Draw.untextured_quad
-                (bounds.SliceTop(amount).SliceBottom(fade_length).AsQuad)
+                (bounds.SliceT(amount).SliceB(fade_length).AsQuad)
                 (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a 0))
 
         let lower (amount: float32) =
-            Draw.rect (bounds.SliceBottom(amount - fade_length)) options.LaneCover.Color.Value
+            Draw.rect (bounds.SliceB(amount - fade_length)) options.LaneCover.Color.Value
 
             Draw.untextured_quad
-                (bounds.SliceBottom(amount).SliceTop(fade_length).AsQuad)
+                (bounds.SliceB(amount).SliceT(fade_length).AsQuad)
                 (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a 0) options.LaneCover.Color.Value)
 
         let height = bounds.Height

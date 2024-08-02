@@ -73,7 +73,7 @@ type PerformanceSettingsPage() =
         base.Draw()
         if closed then () else
         Draw.rect 
-            (this.Bounds.SliceRight(200.0f).Shrink(20.0f))
+            (this.Bounds.SliceR(200.0f).Shrink(20.0f))
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
 
         for i = 0 to 10 do

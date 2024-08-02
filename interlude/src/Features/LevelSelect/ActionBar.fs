@@ -104,7 +104,7 @@ type private ActionButton(icon, action, active) =
         Style.hover.Play()
 
     override this.Draw() =
-        let area = this.Bounds.SliceTop(this.Bounds.Height + 5.0f)
+        let area = this.Bounds.SliceT(this.Bounds.Height + 5.0f)
         let is_active = active ()
         Draw.rect area !*Palette.MAIN_100
 

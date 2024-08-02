@@ -154,12 +154,12 @@ type Frame() =
         if border.A > 0uy then
 
             let r = this.Bounds.Expand Style.PADDING
-            Draw.rect (r.SliceLeft Style.PADDING) border
-            Draw.rect (r.SliceRight Style.PADDING) border
+            Draw.rect (r.SliceL Style.PADDING) border
+            Draw.rect (r.SliceR Style.PADDING) border
 
             let r = this.Bounds.Expand(0.0f, Style.PADDING)
-            Draw.rect (r.SliceTop Style.PADDING) border
-            Draw.rect (r.SliceBottom Style.PADDING) border
+            Draw.rect (r.SliceT Style.PADDING) border
+            Draw.rect (r.SliceB Style.PADDING) border
 
         let fill = this.Fill()
 
@@ -179,12 +179,12 @@ type FrameContainer(nt: NodeType) =
         if border.A > 0uy then
 
             let r = this.Bounds.Expand Style.PADDING
-            Draw.rect (r.SliceLeft Style.PADDING) border
-            Draw.rect (r.SliceRight Style.PADDING) border
+            Draw.rect (r.SliceL Style.PADDING) border
+            Draw.rect (r.SliceR Style.PADDING) border
 
             let r = this.Bounds.Expand(0.0f, Style.PADDING)
-            Draw.rect (r.SliceTop Style.PADDING) border
-            Draw.rect (r.SliceBottom Style.PADDING) border
+            Draw.rect (r.SliceT Style.PADDING) border
+            Draw.rect (r.SliceB Style.PADDING) border
 
         let fill = this.Fill()
 

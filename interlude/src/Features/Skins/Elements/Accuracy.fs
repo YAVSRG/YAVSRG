@@ -88,7 +88,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
     override this.Draw() =
         base.Draw()
         if config.AccuracyUseFont then
-            let text_bounds = this.Bounds.SliceTop(this.Bounds.Height * 0.6f)
+            let text_bounds = this.Bounds.SliceT(this.Bounds.Height * 0.6f)
             Accuracy.draw_accuracy_centered(
                 font_texture,
                 text_bounds,

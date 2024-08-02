@@ -39,7 +39,7 @@ type SongInfo(state: PlayState) =
             |> min 255
 
         let bg_panel = Rect.Box(x - BG_WIDTH * 0.5f + motion_x, y - 350.0f, BG_WIDTH, BG_HEIGHT)
-        let info_panel = bg_panel.BorderBottom(100.0f).Translate(0.0f, 10.0f)
+        let info_panel = bg_panel.BorderB(100.0f).Translate(0.0f, 10.0f)
 
         match Background.get_current() with
         | Some bg ->
@@ -53,9 +53,9 @@ type SongInfo(state: PlayState) =
         let text_color = (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha)
         let text_subheading_color = (Colors.grey_1.O4a alpha, Colors.shadow_2.O4a alpha)
 
-        Text.fill_b(Style.font, state.Chart.Header.Title, info_panel.SliceTop(40.0f), text_color, Alignment.CENTER)
-        Text.fill_b(Style.font, state.Chart.Header.Artist, info_panel.TrimTop(35.0f).SliceTop(40.0f), text_subheading_color, Alignment.CENTER)
-        Text.fill_b(Style.font, mod_string, info_panel.SliceBottom(30.0f), text_subheading_color, Alignment.CENTER)
+        Text.fill_b(Style.font, state.Chart.Header.Title, info_panel.SliceT(40.0f), text_color, Alignment.CENTER)
+        Text.fill_b(Style.font, state.Chart.Header.Artist, info_panel.ShrinkT(35.0f).SliceT(40.0f), text_subheading_color, Alignment.CENTER)
+        Text.fill_b(Style.font, mod_string, info_panel.SliceB(30.0f), text_subheading_color, Alignment.CENTER)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

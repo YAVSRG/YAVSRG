@@ -194,7 +194,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w, top + 170.0f))
             Colors.shadow_2.O2.AsQuad
 
-        Draw.rect (this.Bounds.SliceTop(170.0f).BorderBottom(5.0f)) (Palette.color (255, 0.8f, 0.0f))
+        Draw.rect (this.Bounds.SliceT(170.0f).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 
         base.Draw()
         Comments.draw ()

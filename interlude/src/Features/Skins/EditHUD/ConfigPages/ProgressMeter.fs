@@ -32,7 +32,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
     let preview =
         { new ConfigPreviewNew(pos.Value) with
             override this.DrawComponent(bounds) =
-                ProgressMeter.draw_pie(bounds.SliceTop(bounds.Width), color.Value, background_color.Value, 0.6f)
+                ProgressMeter.draw_pie(bounds.SliceT(bounds.Width), color.Value, background_color.Value, 0.6f)
 
                 if use_font.Value then
 
@@ -41,7 +41,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
                             let time_left = 447000.0f<ms>
                             ProgressMeter.draw_countdown_centered (
                                 font_texture,
-                                bounds.SliceBottom(bounds.Width * label_size.Value), 
+                                bounds.SliceB(bounds.Width * label_size.Value), 
                                 Color.White,
                                 time_left,
                                 font_spacing.Value,
@@ -50,7 +50,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
                         | ProgressMeterLabel.Percentage ->
                             ProgressMeter.draw_percent_progress_centered (
                                 font_texture,
-                                bounds.SliceBottom(bounds.Width * label_size.Value), 
+                                bounds.SliceB(bounds.Width * label_size.Value), 
                                 Color.White,
                                 0.6f,
                                 font_spacing.Value,
@@ -69,7 +69,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
                     Text.fill_b (
                         Style.font,
                         text,
-                        bounds.SliceBottom(bounds.Width * label_size.Value),
+                        bounds.SliceB(bounds.Width * label_size.Value),
                         Colors.text_subheading,
                         Alignment.CENTER
                     )

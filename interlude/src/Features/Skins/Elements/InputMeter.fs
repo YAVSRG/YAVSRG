@@ -32,11 +32,11 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
         let mutable box = 
             (
                 if config.InputMeterScrollDownwards then
-                    this.Bounds.SliceTop(box_height)
+                    this.Bounds.SliceT(box_height)
                 else
-                    this.Bounds.SliceBottom(box_height)
+                    this.Bounds.SliceB(box_height)
             )
-                .SliceLeft(box_height)
+                .SliceL(box_height)
                 .Shrink(Style.PADDING)
         for k = 0 to state.Chart.Keys - 1 do
             let key_alpha = 255.0f - 127.0f * (float32 fades.[k].Time / float32 fades.[k].Interval) |> int
@@ -104,7 +104,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
                 previous_time <- timestamp
             let text_bounds = 
                 if config.InputMeterScrollDownwards then
-                    this.Bounds.TrimTop(box_height).SliceTop(this.Bounds.Width * 0.1f)
+                    this.Bounds.ShrinkT(box_height).SliceT(this.Bounds.Width * 0.1f)
                 else
-                    this.Bounds.TrimBottom(box_height).SliceBottom(this.Bounds.Width * 0.1f)
+                    this.Bounds.ShrinkB(box_height).SliceB(this.Bounds.Width * 0.1f)
             Text.fill_b(Style.font, sprintf "%.0f KPS" kps, text_bounds, Colors.text, Alignment.CENTER)

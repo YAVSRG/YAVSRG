@@ -108,13 +108,13 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         base.Draw()
 
         match status with
-        | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
+        | Downloading -> Draw.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
         Text.fill_b (
             Style.font,
             data.title,
-            this.Bounds.SliceTop(45.0f).Shrink(10.0f, 0.0f),
+            this.Bounds.SliceT(45.0f).Shrink(10.0f, 0.0f),
             Colors.text,
             Alignment.LEFT
         )
@@ -122,26 +122,26 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         Text.fill_b (
             Style.font,
             data.artist + "  •  " + data.creator,
-            this.Bounds.SliceBottom(45.0f).Shrink(10.0f, 5.0f),
+            this.Bounds.SliceB(45.0f).Shrink(10.0f, 5.0f),
             Colors.text_subheading,
             Alignment.LEFT
         )
 
         let status_bounds =
-            this.Bounds.SliceBottom(40.0f).SliceRight(150.0f).Shrink(5.0f, 0.0f)
+            this.Bounds.SliceB(40.0f).SliceR(150.0f).Shrink(5.0f, 0.0f)
 
         Draw.rect status_bounds Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font,
             ranked_status,
-            status_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
+            status_bounds.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
             (border, Colors.shadow_2),
             Alignment.CENTER
         )
 
         let download_bounds =
-            this.Bounds.SliceTop(40.0f).SliceRight(300.0f).Shrink(5.0f, 0.0f)
+            this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(5.0f, 0.0f)
 
         Draw.rect download_bounds Colors.shadow_2.O2
 
@@ -152,7 +152,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
              | Downloading -> Icons.DOWNLOAD + " Downloading .."
              | DownloadFailed -> Icons.X + " Error"
              | Installed -> Icons.CHECK + " Downloaded"),
-            download_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
+            download_bounds.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
             (match status with
              | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
              | Downloading -> Colors.text_yellow_2
@@ -162,13 +162,13 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         )
 
         let stat x text =
-            let stat_bounds = this.Bounds.SliceBottom(40.0f).TrimRight(x).SliceRight(145.0f)
+            let stat_bounds = this.Bounds.SliceB(40.0f).ShrinkR(x).SliceR(145.0f)
             Draw.rect stat_bounds Colors.shadow_2.O2
 
             Text.fill_b (
                 Style.font,
                 text,
-                stat_bounds.Shrink(5.0f, 0.0f).TrimBottom(5.0f),
+                stat_bounds.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
                 Colors.text_subheading,
                 Alignment.CENTER
             )
@@ -193,7 +193,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 Text.fill_b (
                     Style.font,
                     beatmap.version,
-                    popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
+                    popover_bounds.SliceT(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
                     Colors.text,
                     Alignment.LEFT
                 )
@@ -201,7 +201,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 Text.fill_b (
                     Style.font,
                     sprintf "%.2f*" beatmap.difficulty_rating,
-                    popover_bounds.SliceTop(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
+                    popover_bounds.SliceT(45.0f).Translate(0.0f, y).Shrink(10.0f, 5.0f),
                     Colors.text,
                     Alignment.RIGHT
                 )

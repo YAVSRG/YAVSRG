@@ -183,7 +183,7 @@ type Slideout(content: SlideoutContent) =
     override this.Draw() =
         if this.Bounds.Bottom > this.Parent.Bounds.Top - 4.0f then
             Draw.rect this.Bounds Colors.shadow_2.O2
-            Draw.rect (this.Bounds.Expand(5.0f).SliceBottom(5.0f)) Colors.cyan_shadow
+            Draw.rect (this.Bounds.Expand(5.0f).SliceB(5.0f)) Colors.cyan_shadow
             content.Draw()
 
     override this.Update(elapsed_ms, moved) =

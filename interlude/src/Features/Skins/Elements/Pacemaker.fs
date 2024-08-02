@@ -79,7 +79,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
                 Style.font,
                 Icons.FLAG,
                 this.Bounds
-                    .SliceLeft(0.0f)
+                    .SliceL(0.0f)
                     .Expand(this.Bounds.Height, 0.0f)
                     .Translate(this.Bounds.Width * 0.5f, 0.0f),
                 (color.Value, Color.Black),
@@ -91,7 +91,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
                 Style.font,
                 Icons.FLAG,
                 this.Bounds
-                    .SliceLeft(0.0f)
+                    .SliceL(0.0f)
                     .Expand(this.Bounds.Height, 0.0f)
                     .Translate(this.Bounds.Width * flag_position.Value, 0.0f),
                 (color.Value, Color.Black),

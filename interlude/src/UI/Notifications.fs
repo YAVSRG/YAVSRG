@@ -60,10 +60,10 @@ module Notifications =
                 let bounds =
                     Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height)
 
-                Draw.rect (bounds.BorderLeft(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (bounds.BorderTopCorners(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (bounds.BorderRight(5.0f)) (accent.O4a i.Fade.Alpha)
-                Draw.rect (bounds.BorderBottomCorners(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderL(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderCornersT(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderR(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect (bounds.BorderCornersB(5.0f)) (accent.O4a i.Fade.Alpha)
                 Draw.rect bounds (Colors.shadow_2.O2a i.Fade.Alpha)
                 Draw.rect bounds (body.O3a i.Fade.Alpha)
 

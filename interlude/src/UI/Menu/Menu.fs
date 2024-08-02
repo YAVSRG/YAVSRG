@@ -146,7 +146,7 @@ and PageHeaderBase() =
             Text.fill_b (Style.font, t, bounds, Colors.text, Alignment.CENTER)
             x <- x + width + GAP_BETWEEN_BOXES
             if not first then
-                Text.fill_b (Style.font, Icons.ARROW_RIGHT, bounds.BorderLeft GAP_BETWEEN_BOXES, Colors.text_greyout, Alignment.CENTER)
+                Text.fill_b (Style.font, Icons.ARROW_RIGHT, bounds.BorderL GAP_BETWEEN_BOXES, Colors.text_greyout, Alignment.CENTER)
             first <- false
         
 and Menu(top_level: Page) as this =

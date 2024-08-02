@@ -74,7 +74,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 else
                     Palette.color (100, 0.7f, 0.0f))
 
-        Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).TrimRight(100.0f), Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
     member this.Draw(top, origin, originB) =

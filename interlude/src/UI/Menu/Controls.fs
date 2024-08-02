@@ -70,7 +70,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        let bounds = this.Bounds.TrimLeft TEXTWIDTH
+        let bounds = this.Bounds.ShrinkL TEXTWIDTH
 
         if dragging && Mouse.held Mouse.LEFT then
             let l, r = bounds.Left, bounds.Right
@@ -101,7 +101,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
 
     override this.Draw() =
         let v = get_percent ()
-        let bounds = this.Bounds.TrimLeft TEXTWIDTH
+        let bounds = this.Bounds.ShrinkL TEXTWIDTH
 
         let cursor_x = bounds.Left + bounds.Width * v
 
@@ -431,23 +431,23 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
     override this.Draw() =
         base.Draw()
 
-        let preview = this.Bounds.SliceTop(HEX_EDITOR_HEIGHT).SliceLeft(50.0f).Shrink(5.0f)
+        let preview = this.Bounds.SliceT(HEX_EDITOR_HEIGHT).SliceL(50.0f).Shrink(5.0f)
 
         let saturation_value_picker =
-            this.Bounds.TrimTop(HEX_EDITOR_HEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+            this.Bounds.ShrinkT(HEX_EDITOR_HEIGHT).SliceL(200.0f).Shrink(5.0f)
 
         let hue_picker =
             this.Bounds
-                .TrimTop(HEX_EDITOR_HEIGHT)
-                .SliceLeft(230.0f)
-                .TrimLeft(200.0f)
+                .ShrinkT(HEX_EDITOR_HEIGHT)
+                .SliceL(230.0f)
+                .ShrinkL(200.0f)
                 .Shrink(5.0f)
 
         let alpha_picker =
             this.Bounds
-                .TrimTop(HEX_EDITOR_HEIGHT)
-                .SliceLeft(260.0f)
-                .TrimLeft(230.0f)
+                .ShrinkT(HEX_EDITOR_HEIGHT)
+                .SliceL(260.0f)
+                .ShrinkL(230.0f)
                 .Shrink(5.0f)
 
         Draw.rect preview s.Value
@@ -494,20 +494,20 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
         base.Update(elapsed_ms, moved)
 
         let saturation_value_picker =
-            this.Bounds.TrimTop(HEX_EDITOR_HEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+            this.Bounds.ShrinkT(HEX_EDITOR_HEIGHT).SliceL(200.0f).Shrink(5.0f)
 
         let hue_picker =
             this.Bounds
-                .TrimTop(HEX_EDITOR_HEIGHT)
-                .SliceLeft(230.0f)
-                .TrimLeft(200.0f)
+                .ShrinkT(HEX_EDITOR_HEIGHT)
+                .SliceL(230.0f)
+                .ShrinkL(200.0f)
                 .Shrink(5.0f)
 
         let alpha_picker =
             this.Bounds
-                .TrimTop(HEX_EDITOR_HEIGHT)
-                .SliceLeft(260.0f)
-                .TrimLeft(230.0f)
+                .ShrinkT(HEX_EDITOR_HEIGHT)
+                .SliceL(260.0f)
+                .ShrinkL(230.0f)
                 .Shrink(5.0f)
 
         if Mouse.hover saturation_value_picker && Mouse.left_click() then
@@ -580,7 +580,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
             else Colors.text_subheading
 
         Draw.rect this.Bounds color
-        Draw.rect (this.Bounds.BorderBottom Style.PADDING) trim_color
+        Draw.rect (this.Bounds.BorderB Style.PADDING) trim_color
 
         Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
 

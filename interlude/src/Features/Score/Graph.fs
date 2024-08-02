@@ -97,7 +97,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let draw_snapshot_info (bounds: Rect) (info: ScoreMetricSnapshot) =
         Draw.rect bounds Colors.shadow_2.O2
         let row_height = bounds.Height / 4.0f
-        let text_b = bounds.SliceTop(row_height).Shrink(20.0f, 5.0f)
+        let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
 
         let accuracy = 
             if info.MaxPointsScored = 0.0 then
@@ -307,10 +307,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if refresh then
             this.Redraw()
             
-        Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.white
+        Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white
 
         Draw.rect this.Bounds Colors.black.O3
         Draw.sprite Viewport.bounds Color.White fbo.sprite

@@ -502,15 +502,15 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
         base.Draw()
 
         if this.Focused then
-            Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.yellow_accent
+            Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.yellow_accent
         elif hover then
-            Draw.rect (this.Bounds.BorderTopCorners Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderBottomCorners Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderLeft Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderRight Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.white.O2
+            Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.white.O2
 
 and PositionerContext =
     {

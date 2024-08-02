@@ -65,15 +65,15 @@ type Accuracy
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
-        Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) grade_color.O1
-        Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) grade_color.O2
+        Draw.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
+        Draw.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
 
         Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
         Text.fill_b (
             Style.font,
             score_info.Scoring.FormatAccuracy(),
-            this.Bounds.Shrink(10.0f, 0.0f).TrimBottom(LOWER_SIZE),
+            this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
             (grade_color, Colors.black),
             Alignment.CENTER
         )
@@ -106,11 +106,11 @@ type Accuracy
                     | None -> "--", (Colors.grey_2.O2, Colors.black)
                 | None -> "--", (Colors.grey_2.O2, Colors.black)
 
-        Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
+        Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceB(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
 
         if hover then
-            let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceBottom(60.0f)
+            let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
             Draw.rect acc_tooltip Colors.shadow_2.O2
 
             Text.fill_b (
@@ -150,8 +150,8 @@ type Lamp
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
-        Draw.rect (this.Bounds.TrimBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
-        Draw.rect (this.Bounds.SliceBottom(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
+        Draw.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
+        Draw.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
 
         Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
@@ -186,7 +186,7 @@ type Lamp
                     | None -> "--", (Colors.grey_2.O2, Colors.black)
                 | None -> "--", (Colors.grey_2.O2, Colors.black)
 
-        Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceBottom(LOWER_SIZE), color, Alignment.CENTER)
+        Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceB(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
 
 type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
@@ -232,6 +232,6 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.SliceTop(160.0f).TrimTop(5.0f)) Colors.shadow_2.O2
-        Draw.rect (this.Bounds.TrimTop(160.0f).SliceTop(5.0f)) Colors.white
+        Draw.rect (this.Bounds.SliceT(160.0f).ShrinkT(5.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.ShrinkT(160.0f).SliceT(5.0f)) Colors.white
         base.Draw()

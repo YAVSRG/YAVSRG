@@ -291,9 +291,9 @@ type private TableLevelStats(level_name: string, data: (int * int) array, rulese
     override this.Draw() =
         Draw.rect this.Bounds Colors.black.O2
         let b = this.Bounds.Shrink(20.0f, 0.0f)
-        Text.fill_b (Style.font, level_name, b.SliceLeft(150.0f), Colors.text_subheading, Alignment.CENTER)
+        Text.fill_b (Style.font, level_name, b.SliceL(150.0f), Colors.text_subheading, Alignment.CENTER)
 
-        let b = this.Bounds.TrimLeft(170.0f)
+        let b = this.Bounds.ShrinkL(170.0f)
         let mutable x = b.Left
         let total = data |> Array.sumBy snd |> float32
 
@@ -327,7 +327,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
         Text.fill_b (
             Style.font,
             grade_name,
-            this.Bounds.TrimRight(100.0f).SliceRight(100.0f).Shrink(10.0f, 5.0f),
+            this.Bounds.ShrinkR(100.0f).SliceR(100.0f).Shrink(10.0f, 5.0f),
             (grade_color, Colors.shadow_2),
             Alignment.CENTER
         )

@@ -32,10 +32,10 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
     override this.Draw() =
         let state = current_state ()
-        Draw.rect (this.Bounds.SliceTop(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
+        Draw.rect (this.Bounds.SliceT(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
 
         Draw.rect
-            (this.Bounds.TrimTop(TOP_HEIGHT))
+            (this.Bounds.ShrinkT(TOP_HEIGHT))
             (if state.IsSome then
                  Colors.pink_shadow.O3
              else
@@ -45,7 +45,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
             Text.fill_b (
                 Style.font,
                 Icons.CHECK,
-                this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f),
+                this.Bounds.SliceT(TOP_HEIGHT).Shrink(20.0f, 0.0f),
                 Colors.text,
                 Alignment.RIGHT
             )
@@ -53,7 +53,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
         Text.fill_b (
             Style.font,
             Mods.name id state,
-            this.Bounds.SliceTop(TOP_HEIGHT).Shrink(20.0f, 0.0f),
+            this.Bounds.SliceT(TOP_HEIGHT).Shrink(20.0f, 0.0f),
             (if this.Focused then Colors.text_yellow_2 else Colors.text), 
             Alignment.LEFT
         )
@@ -61,7 +61,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
         Text.fill_b (
             Style.font,
             Mods.desc id state,
-            this.Bounds.TrimTop(TOP_HEIGHT - 2.0f).Shrink(20.0f, 0.0f),
+            this.Bounds.ShrinkT(TOP_HEIGHT - 2.0f).Shrink(20.0f, 0.0f),
             (if this.Focused then Colors.text_yellow_2 else Colors.text_subheading), 
             Alignment.LEFT
         )

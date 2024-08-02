@@ -67,37 +67,37 @@ module HelpOverlay =
                     Math.Clamp((t.Fade.Value - l) / 0.25f, 0.0f, 1.0f)
                 // border around thing
                 Draw.rect
-                    (outline.SliceLeft(Style.PADDING).SliceBottom(outline.Height * c 0.0f))
+                    (outline.SliceL(Style.PADDING).SliceB(outline.Height * c 0.0f))
                     (Colors.yellow_accent.O3a t.Fade.Alpha)
 
                 Draw.rect
-                    (outline.SliceTop(Style.PADDING).SliceLeft(outline.Width * c 0.25f))
+                    (outline.SliceT(Style.PADDING).SliceL(outline.Width * c 0.25f))
                     (Colors.yellow_accent.O3a t.Fade.Alpha)
 
                 Draw.rect
-                    (outline.SliceRight(Style.PADDING).SliceTop(outline.Height * c 0.5f))
+                    (outline.SliceR(Style.PADDING).SliceT(outline.Height * c 0.5f))
                     (Colors.yellow_accent.O3a t.Fade.Alpha)
 
                 Draw.rect
-                    (outline.SliceBottom(Style.PADDING).SliceRight(outline.Width * c 0.75f))
+                    (outline.SliceB(Style.PADDING).SliceR(outline.Width * c 0.75f))
                     (Colors.yellow_accent.O3a t.Fade.Alpha)
 
                 // blackout effect
-                Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
-                Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.SliceL outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
 
                 Draw.rect
                     (Viewport.bounds
-                        .TrimLeft(outline.Left)
-                        .SliceLeft(outline.Width)
-                        .SliceTop(outline.Top))
+                        .ShrinkL(outline.Left)
+                        .SliceL(outline.Width)
+                        .SliceT(outline.Top))
                     (Colors.shadow_2.O3a t.Fade.Alpha)
 
                 Draw.rect
                     (Viewport.bounds
-                        .TrimLeft(outline.Left)
-                        .SliceLeft(outline.Width)
-                        .TrimTop(outline.Bottom))
+                        .ShrinkL(outline.Left)
+                        .SliceL(outline.Width)
+                        .ShrinkT(outline.Bottom))
                     (Colors.shadow_2.O3a t.Fade.Alpha)
 
                 // draw tooltip
@@ -117,10 +117,10 @@ module HelpOverlay =
                 let callout_bounds = Rect.Box(x, y, width, height)
                 Draw.rect callout_bounds (Colors.cyan.O2a t.Fade.Alpha)
                 let frame_bounds = callout_bounds.Expand(5.0f)
-                Draw.rect (frame_bounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceT 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceB 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceL 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceR 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
 
                 Callout.draw (
                     callout_bounds.Left,

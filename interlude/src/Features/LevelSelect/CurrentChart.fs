@@ -10,16 +10,16 @@ type CurrentChart() =
 
     override this.Draw() =
         
-        Draw.rect (this.Bounds.Shrink(20.0f, 0.0f).TrimTop(20.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.Shrink(20.0f, 0.0f).ShrinkT(20.0f)) Colors.shadow_2.O2
 
         let title_text =
             match SelectedChart.CACHE_DATA with
             | None -> %"jukebox.no_chart_selected"
             | Some c -> c.Title
-        Text.fill_b (Style.font, title_text, this.Bounds.Shrink(30.0f, 20.0f).SliceTop(80.0f), Colors.text, Alignment.CENTER)
+        Text.fill_b (Style.font, title_text, this.Bounds.Shrink(30.0f, 20.0f).SliceT(80.0f), Colors.text, Alignment.CENTER)
 
         let diff_text =
             match SelectedChart.CACHE_DATA with
             | None -> "--"
             | Some c -> c.DifficultyName
-        Text.fill_b (Style.font, diff_text, this.Bounds.Shrink(30.0f, 20.0f).SliceBottom(50.0f), Colors.text, Alignment.CENTER)
+        Text.fill_b (Style.font, diff_text, this.Bounds.Shrink(30.0f, 20.0f).SliceB(50.0f), Colors.text, Alignment.CENTER)

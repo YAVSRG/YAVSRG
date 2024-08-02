@@ -173,10 +173,10 @@ type PlayfieldSettingsPage() =
         let keys = int keymode.Value
 
         let frame = preview_bounds.Expand Style.PADDING
-        Draw.rect (frame.SliceLeft Style.PADDING) Colors.white
-        Draw.rect (frame.SliceTop Style.PADDING) Colors.white
-        Draw.rect (frame.SliceRight Style.PADDING) Colors.white
-        Draw.rect (frame.SliceBottom Style.PADDING) Colors.white
+        Draw.rect (frame.SliceL Style.PADDING) Colors.white
+        Draw.rect (frame.SliceT Style.PADDING) Colors.white
+        Draw.rect (frame.SliceR Style.PADDING) Colors.white
+        Draw.rect (frame.SliceB Style.PADDING) Colors.white
 
         let pw =
             (float32 keys * column_width.Value
@@ -190,11 +190,11 @@ type PlayfieldSettingsPage() =
         let mutable left = start
 
         if fill_gaps.Value then
-            Draw.rect (preview_bounds.TrimLeft(left).SliceLeft(pw)) playfield_color.Value
+            Draw.rect (preview_bounds.ShrinkL(left).SliceL(pw)) playfield_color.Value
         else
             for i = 1 to keys do
                 Draw.rect
-                    (preview_bounds.TrimLeft(left).SliceLeft(column_width.Value * PREVIEW_SCALE))
+                    (preview_bounds.ShrinkL(left).SliceL(column_width.Value * PREVIEW_SCALE))
                     playfield_color.Value
 
                 if i < keys then

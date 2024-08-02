@@ -67,6 +67,20 @@ type Rect =
             Right = this.Right + x
             Bottom = this.Bottom + y
         }
+    member inline this.TranslateX amount =
+        {
+            Left = this.Left + amount
+            Top = this.Top
+            Right = this.Right + amount
+            Bottom = this.Bottom
+        }
+    member inline this.TranslateY amount =
+        {
+            Left = this.Left
+            Top = this.Top + amount
+            Right = this.Right
+            Bottom = this.Bottom + amount
+        }
 
     member inline this.Expand(x, y) =
         {
@@ -75,45 +89,64 @@ type Rect =
             Right = this.Right + x
             Bottom = this.Bottom + y
         }
-
     member inline this.Expand amount = this.Expand(amount, amount)
+    member inline this.ExpandX amount =
+        {
+            Left = this.Left - amount
+            Top = this.Top
+            Right = this.Right + amount
+            Bottom = this.Bottom
+        }
+    member inline this.ExpandY amount =
+        {
+            Left = this.Left
+            Top = this.Top - amount
+            Right = this.Right
+            Bottom = this.Bottom + amount
+        }
+    member inline this.ExpandL amount =
+        {
+            Left = this.Left - amount
+            Top = this.Top
+            Right = this.Right
+            Bottom = this.Bottom
+        }
+    member inline this.ExpandT amount =
+        {
+            Left = this.Left
+            Top = this.Top - amount
+            Right = this.Right
+            Bottom = this.Bottom
+        }
+    member inline this.ExpandR amount =
+        {
+            Left = this.Left
+            Top = this.Top
+            Right = this.Right + amount
+            Bottom = this.Bottom
+        }
+    member inline this.ExpandB amount =
+        {
+            Left = this.Left
+            Top = this.Top
+            Right = this.Right
+            Bottom = this.Bottom + amount
+        }
+
+    member inline this.ExpandPercentL percent = this.ExpandL (this.Width * percent)
+    member inline this.ExpandPercentT percent = this.ExpandT (this.Height * percent)
+    member inline this.ExpandPercentR percent = this.ExpandR (this.Width * percent)
+    member inline this.ExpandPercentB percent = this.ExpandB (this.Height * percent)
+    member inline this.ExpandPercentX percent = this.ExpandX (this.Width * percent)
+    member inline this.ExpandPercentY percent = this.ExpandY (this.Height * percent)
+    member inline this.ExpandPercent percent = this.Expand (this.Width * percent, this.Height * percent)
 
     member inline this.Shrink(x, y) = this.Expand(-x, -y)
     member inline this.Shrink amount = this.Shrink(amount, amount)
+    member inline this.ShrinkX x = this.ExpandX -x
+    member inline this.ShrinkY x = this.ExpandY -x
 
-    member inline this.SliceLeft amount =
-        {
-            Left = this.Left
-            Top = this.Top
-            Right = this.Left + amount
-            Bottom = this.Bottom
-        }
-
-    member inline this.SliceTop amount =
-        {
-            Left = this.Left
-            Top = this.Top
-            Right = this.Right
-            Bottom = this.Top + amount
-        }
-
-    member inline this.SliceRight amount =
-        {
-            Left = this.Right - amount
-            Top = this.Top
-            Right = this.Right
-            Bottom = this.Bottom
-        }
-
-    member inline this.SliceBottom amount =
-        {
-            Left = this.Left
-            Top = this.Bottom - amount
-            Right = this.Right
-            Bottom = this.Bottom
-        }
-
-    member inline this.TrimLeft amount =
+    member inline this.ShrinkL amount =
         {
             Left = this.Left + amount
             Top = this.Top
@@ -121,7 +154,7 @@ type Rect =
             Bottom = this.Bottom
         }
 
-    member inline this.TrimTop amount =
+    member inline this.ShrinkT amount =
         {
             Left = this.Left
             Top = this.Top + amount
@@ -129,7 +162,7 @@ type Rect =
             Bottom = this.Bottom
         }
 
-    member inline this.TrimRight amount =
+    member inline this.ShrinkR amount =
         {
             Left = this.Left
             Top = this.Top
@@ -137,7 +170,7 @@ type Rect =
             Bottom = this.Bottom
         }
 
-    member inline this.TrimBottom amount =
+    member inline this.ShrinkB amount =
         {
             Left = this.Left
             Top = this.Top
@@ -145,58 +178,90 @@ type Rect =
             Bottom = this.Bottom - amount
         }
 
-    member inline this.BorderLeft amount =
+    member inline this.ShrinkPercentL percent = this.ShrinkL (this.Width * percent)
+    member inline this.ShrinkPercentT percent = this.ShrinkT (this.Height * percent)
+    member inline this.ShrinkPercentR percent = this.ShrinkR (this.Width * percent)
+    member inline this.ShrinkPercentB percent = this.ShrinkB (this.Height * percent)
+    member inline this.ShrinkPercentX percent = this.ShrinkX (this.Width * percent)
+    member inline this.ShrinkPercentY percent = this.ShrinkY (this.Height * percent)
+    member inline this.ShrinkPercent percent = this.Shrink (this.Width * percent, this.Height * percent)
+
+    member inline this.SliceL amount =
+        {
+            Left = this.Left
+            Top = this.Top
+            Right = this.Left + amount
+            Bottom = this.Bottom
+        }
+    member inline this.SliceT amount =
+        {
+            Left = this.Left
+            Top = this.Top
+            Right = this.Right
+            Bottom = this.Top + amount
+        }
+    member inline this.SliceR amount =
+        {
+            Left = this.Right - amount
+            Top = this.Top
+            Right = this.Right
+            Bottom = this.Bottom
+        }
+    member inline this.SliceB amount =
+        {
+            Left = this.Left
+            Top = this.Bottom - amount
+            Right = this.Right
+            Bottom = this.Bottom
+        }
+
+    member inline this.SlicePercentL percent = this.SliceL (this.Width * percent)
+    member inline this.SlicePercentT percent = this.SliceT (this.Height * percent)
+    member inline this.SlicePercentR percent = this.SliceR (this.Width * percent)
+    member inline this.SlicePercentB percent = this.SliceB (this.Height * percent)
+
+    member inline this.BorderL amount =
         {
             Left = this.Left - amount
             Top = this.Top
             Right = this.Left
             Bottom = this.Bottom
         }
-
-    member inline this.BorderTop amount =
+    member inline this.BorderT amount =
         {
             Left = this.Left
             Top = this.Top - amount
             Right = this.Right
             Bottom = this.Top
         }
-
-    member inline this.BorderRight amount =
+    member inline this.BorderR amount =
         {
             Left = this.Right
             Top = this.Top
             Right = this.Right + amount
             Bottom = this.Bottom
         }
-
-    member inline this.BorderBottom amount =
+    member inline this.BorderB amount =
         {
             Left = this.Left
             Top = this.Bottom
             Right = this.Right
             Bottom = this.Bottom + amount
         }
-
-    member inline this.BorderTopCorners amount =
+    member inline this.BorderCornersT amount =
         {
             Left = this.Left - amount
             Top = this.Top - amount
             Right = this.Right + amount
             Bottom = this.Top
         }
-
-    member inline this.BorderBottomCorners amount =
+    member inline this.BorderCornersB amount =
         {
             Left = this.Left - amount
             Top = this.Bottom
             Right = this.Right + amount
             Bottom = this.Bottom + amount
         }
-
-    member inline this.SliceLeftPercent percent = this.SliceLeft (this.Width * percent)
-    member inline this.SliceTopPercent percent = this.SliceTop (this.Height * percent)
-    member inline this.SliceRightPercent percent = this.SliceRight (this.Width * percent)
-    member inline this.SliceBottomPercent percent = this.SliceBottom (this.Height * percent)
 
 module Rect =
 

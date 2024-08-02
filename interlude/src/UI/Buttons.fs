@@ -141,13 +141,13 @@ module RadioButtons =
 
         override this.Draw() =
             if is_chosen() then
-                Draw.rect (this.Bounds.BorderTop(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
+                Draw.rect (this.Bounds.BorderT(Style.PADDING).ShrinkR(Style.PADDING)) Colors.grey_2.O2
             else
-                Draw.rect (this.Bounds.SliceBottom(this.Bounds.Height + Style.PADDING)) (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_1.O1)
-                Draw.rect (this.Bounds.BorderBottom(Style.PADDING).TrimRight(Style.PADDING)) Colors.grey_2.O2
-            Draw.rect (this.Bounds.SliceRight(Style.PADDING).Expand(0.0f, Style.PADDING)) Colors.grey_2.O2
+                Draw.rect (this.Bounds.SliceB(this.Bounds.Height + Style.PADDING)) (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_1.O1)
+                Draw.rect (this.Bounds.BorderB(Style.PADDING).ShrinkR(Style.PADDING)) Colors.grey_2.O2
+            Draw.rect (this.Bounds.SliceR(Style.PADDING).Expand(0.0f, Style.PADDING)) Colors.grey_2.O2
             if this.Focused then
-                Draw.rect (this.Bounds.SliceBottom(Style.PADDING).Shrink(20.0f, 0.0f)) Colors.yellow_accent.O3
+                Draw.rect (this.Bounds.SliceB(Style.PADDING).Shrink(20.0f, 0.0f)) Colors.yellow_accent.O3
             base.Draw()
 
     // alternative designed to represent tabs on a tabbed container or view

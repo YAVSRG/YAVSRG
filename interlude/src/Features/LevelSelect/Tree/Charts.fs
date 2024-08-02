@@ -112,7 +112,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
 
         let border_color = if this.Selected then !*Palette.LIGHT else color
         if border_color.A > 0uy then
-            Draw.rect (bounds.BorderLeft Style.PADDING) border_color
+            Draw.rect (bounds.BorderL Style.PADDING) border_color
 
         // draw pbs
         let disp (data: 'T * float32 * Color * string) (pos: float32) =
@@ -147,7 +147,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
             disp lamp.Value 165.0f
 
         // draw text
-        Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
+        Draw.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
         Text.draw_b (Style.font, cc.Title, 23.0f, left + 7f, top, Colors.text)
 
         Text.draw_b (
