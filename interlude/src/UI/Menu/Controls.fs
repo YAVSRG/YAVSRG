@@ -119,19 +119,18 @@ type Slider(setting: Setting.Bounded<float32>) as this =
         base.Draw()
 
 type Checkbox(setting: Setting<bool>) =
-    inherit Container(NodeType.Leaf)
-
-    let toggle () =
-        setting.Value <- not setting.Value
-        Style.click.Play()
+    inherit Container(NodeType.Button(fun () -> setting.Value <- not setting.Value; Style.click.Play()))
 
     override this.Init(parent: Widget) =
         this 
-        |+ Text((fun () -> if setting.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE), Align = Alignment.LEFT)
+        |+ Text(
+            (fun () -> if setting.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE),
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text), 
+            Align = Alignment.LEFT
+        )
         |* Clickable(
             (fun () ->
                 this.Select true
-                toggle ()
             ),
             OnHover =
                 fun b ->
@@ -146,13 +145,6 @@ type Checkbox(setting: Setting<bool>) =
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        if this.Selected then
-            if (%%"left").Tapped() || (%%"right").Tapped() || (%%"up").Tapped() || (%%"down").Tapped() then
-                toggle ()
 
 type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
     inherit Container(NodeType.Leaf)
