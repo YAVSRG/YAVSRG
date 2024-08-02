@@ -13,22 +13,35 @@ type CalloutContent =
     | Hotkey of string option * Hotkey
     | Button of string * (unit -> unit)
 
+type CalloutSize =
+    | Large
+    | Small
+    | Tiny
+
 type Callout =
     {
-        IsSmall: bool
+        Size: CalloutSize
         Contents: CalloutContent list
         _Icon: string option
     }
+
+    static member Tiny =
+        {
+            Size = Tiny
+            Contents = []
+            _Icon = None
+        }
+
     static member Small =
         {
-            IsSmall = true
+            Size = Small
             Contents = []
             _Icon = None
         }
 
     static member Normal =
         {
-            IsSmall = false
+            Size = Large
             Contents = []
             _Icon = None
         }
@@ -76,44 +89,65 @@ module Callout =
 
     let private PADDING_X = 30.0f
     let private PADDING_Y = 20.0f
-    let private spacing is_small = if is_small then 10.0f else 15.0f
-    let private header_size is_small = if is_small then 25.0f else 35.0f
-    let private text_size is_small = if is_small then 18.0f else 25.0f
-    let private text_spacing is_small = if is_small then 8.0f else 10.0f
+    let private spacing = 
+        function
+        | Tiny -> 10.0f
+        | Small -> 10.0f
+        | Large -> 15.0f
+    let private header_size =
+        function
+        | Tiny -> 20.0f
+        | Small -> 25.0f
+        | Large -> 35.0f
+    let private text_size =
+        function
+        | Tiny -> 15.0f
+        | Small -> 18.0f
+        | Large -> 25.0f
+    let private text_spacing = 
+        function
+        | Tiny -> 6.0f
+        | Small -> 8.0f
+        | Large -> 10.0f
+    let private icon_size =
+        function
+        | Tiny -> 25.0f
+        | Small -> 30.0f
+        | Large -> 50.0f
 
     let private DEFAULT_HOTKEY_TEXT = %"misc.hotkeyhint"
 
     let measure (c: Callout) : float32 * float32 =
-        let spacing = spacing c.IsSmall
+        let spacing = spacing c.Size
         let mutable width = 0.0f
         let mutable height = PADDING_Y * 2.0f
 
         for b in c.Contents do
             match b with
             | CalloutContent.Header text ->
-                let size = header_size c.IsSmall
+                let size = header_size c.Size
                 height <- height + size
                 width <- max width (Text.measure (Style.font, text) * size)
             | CalloutContent.Body xs ->
-                let size = text_size c.IsSmall
+                let size = text_size c.Size
 
                 height <-
                     height
                     + (float32 xs.Length * size)
-                    + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
+                    + (float32 (xs.Length - 1) * text_spacing c.Size)
 
                 for x in xs do
                     width <- max width (Text.measure (Style.font, x) * size)
-            | CalloutContent.Hotkey _ -> height <- height + text_size c.IsSmall
+            | CalloutContent.Hotkey _ -> height <- height + text_size c.Size
             | CalloutContent.Button (text, _) ->
-                width <- max width (Text.measure (Style.font, text) * text_size c.IsSmall + spacing * 2.0f)
-                height <- height + spacing * 3.0f + text_size c.IsSmall
+                width <- max width (Text.measure (Style.font, text) * text_size c.Size + spacing * 2.0f)
+                height <- height + spacing * 3.0f + text_size c.Size
 
             height <- height + spacing
 
         let icon_size =
             if c._Icon.IsSome then
-                min (if c.IsSmall then 30.0f else 50.0f) height + PADDING_X * 2.0f
+                min (icon_size c.Size) height + PADDING_X * 2.0f
             else
                 PADDING_X
 
@@ -123,24 +157,24 @@ module Callout =
         let x, width =
             match c._Icon with
             | Some i ->
-                let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
+                let icon_size = min (icon_size c.Size) height
                 Text.draw_b (Style.font, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
                 x + icon_size + PADDING_X * 2.0f, width - icon_size - PADDING_X * 3.0f
             | None -> x + PADDING_X, width - PADDING_X * 2.0f
 
-        let spacing = spacing c.IsSmall
+        let spacing = spacing c.Size
         let mutable y = y + PADDING_Y
         let a = int (fst col).A
 
         for b in c.Contents do
             match b with
             | CalloutContent.Header s ->
-                let size = header_size c.IsSmall
+                let size = header_size c.Size
                 Text.draw_b (Style.font, s, size, x, y, col)
                 y <- y + size
             | CalloutContent.Body xs ->
-                let size = text_size c.IsSmall
-                let tspacing = text_spacing c.IsSmall
+                let size = text_size c.Size
+                let tspacing = text_spacing c.Size
 
                 for line in xs do
                     Text.draw_b (Style.font, line, size, x, y, col)
@@ -149,7 +183,7 @@ module Callout =
 
                 y <- y - tspacing
             | CalloutContent.Hotkey(desc, hotkey) ->
-                let size = text_size c.IsSmall
+                let size = text_size c.Size
 
                 let text = sprintf "%s: %O" (Option.defaultValue DEFAULT_HOTKEY_TEXT desc) %%hotkey
 
@@ -157,7 +191,7 @@ module Callout =
                 y <- y + size
             | CalloutContent.Button(label, _) ->
                 y <- y + spacing
-                let tsize = text_size c.IsSmall
+                let tsize = text_size c.Size
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.Box(x, y, width, button_size)
                 Draw.rect bounds (Colors.shadow_2.O2a a)
@@ -186,25 +220,25 @@ module Callout =
         let x, width =
             match c._Icon with
             | Some i ->
-                let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
+                let icon_size = min (icon_size c.Size) height
                 x + icon_size + PADDING_X * 2.0f, width - icon_size - PADDING_X * 3.0f
             | None -> x + PADDING_X, width - PADDING_X * 2.0f
 
-        let spacing = spacing c.IsSmall
+        let spacing = spacing c.Size
         let mutable y = y
 
         for b in c.Contents do
             match b with
-            | CalloutContent.Header s -> y <- y + header_size c.IsSmall
+            | CalloutContent.Header s -> y <- y + header_size c.Size
             | CalloutContent.Body xs ->
                 y <-
                     y
-                    + (float32 xs.Length * text_size c.IsSmall)
-                    + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
-            | CalloutContent.Hotkey(desc, hk) -> y <- y + text_size c.IsSmall
+                    + (float32 xs.Length * text_size c.Size)
+                    + (float32 (xs.Length - 1) * text_spacing c.Size)
+            | CalloutContent.Hotkey(desc, hk) -> y <- y + text_size c.Size
             | CalloutContent.Button(_, action) ->
                 y <- y + spacing
-                let tsize = text_size c.IsSmall
+                let tsize = text_size c.Size
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.Box(x, y, width, button_size)
 
