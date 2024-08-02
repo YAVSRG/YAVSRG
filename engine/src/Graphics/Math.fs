@@ -143,41 +143,12 @@ type Rect =
 
     member inline this.Shrink(x, y) = this.Expand(-x, -y)
     member inline this.Shrink amount = this.Shrink(amount, amount)
+    member inline this.ShrinkL amount = this.ExpandL -amount
+    member inline this.ShrinkT amount = this.ExpandT -amount
+    member inline this.ShrinkR amount = this.ExpandR -amount
+    member inline this.ShrinkB amount = this.ExpandB -amount
     member inline this.ShrinkX x = this.ExpandX -x
     member inline this.ShrinkY x = this.ExpandY -x
-
-    member inline this.ShrinkL amount =
-        {
-            Left = this.Left + amount
-            Top = this.Top
-            Right = this.Right
-            Bottom = this.Bottom
-        }
-
-    member inline this.ShrinkT amount =
-        {
-            Left = this.Left
-            Top = this.Top + amount
-            Right = this.Right
-            Bottom = this.Bottom
-        }
-
-    member inline this.ShrinkR amount =
-        {
-            Left = this.Left
-            Top = this.Top
-            Right = this.Right - amount
-            Bottom = this.Bottom
-        }
-
-    member inline this.ShrinkB amount =
-        {
-            Left = this.Left
-            Top = this.Top
-            Right = this.Right
-            Bottom = this.Bottom - amount
-        }
-
     member inline this.ShrinkPercentL percent = this.ShrinkL (this.Width * percent)
     member inline this.ShrinkPercentT percent = this.ShrinkT (this.Height * percent)
     member inline this.ShrinkPercentR percent = this.ShrinkR (this.Width * percent)
@@ -214,11 +185,29 @@ type Rect =
             Right = this.Right
             Bottom = this.Bottom
         }
+    member inline this.SliceX amount =
+        let center_x = this.CenterX
+        {
+            Left = center_x - 0.5f * amount
+            Top = this.Top
+            Right = center_x + 0.5f * amount
+            Bottom = this.Bottom
+        }
+    member inline this.SliceY amount =
+        let center_y = this.CenterY
+        {
+            Left = this.Left
+            Top = center_y - 0.5f * amount
+            Right = this.Right
+            Bottom = center_y + 0.5f * amount
+        }
 
     member inline this.SlicePercentL percent = this.SliceL (this.Width * percent)
     member inline this.SlicePercentT percent = this.SliceT (this.Height * percent)
     member inline this.SlicePercentR percent = this.SliceR (this.Width * percent)
     member inline this.SlicePercentB percent = this.SliceB (this.Height * percent)
+    member inline this.SlicePercentX percent = this.SliceX (this.Width * percent)
+    member inline this.SlicePercentY percent = this.SliceY (this.Height * percent)
 
     member inline this.BorderL amount =
         {

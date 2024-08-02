@@ -73,6 +73,15 @@ type Position with
     member inline this.ShrinkX amount = { this with Left = this.Left ^+ amount; Right = this.Right ^- amount }
     member inline this.ShrinkY amount = { this with Top = this.Top ^+ amount; Bottom = this.Bottom ^- amount }
 
+    static member inline Shrink (x, y) = Position.DEFAULT.Shrink(x, y)
+    static member inline Shrink amount = Position.DEFAULT.Shrink(amount, amount)
+    static member inline ShrinkL amount = Position.DEFAULT.ShrinkL amount
+    static member inline ShrinkT amount = Position.DEFAULT.ShrinkT amount
+    static member inline ShrinkR amount = Position.DEFAULT.ShrinkR amount
+    static member inline ShrinkB amount = Position.DEFAULT.ShrinkB amount
+    static member inline ShrinkX amount = Position.DEFAULT.ShrinkX amount
+    static member inline ShrinkY amount = Position.DEFAULT.ShrinkY amount
+
     member inline this.Expand (x, y) = this.Shrink (-x, -y)
     member inline this.Expand amount = this.Shrink -amount
     member inline this.ExpandL amount = this.ShrinkL -amount
@@ -82,14 +91,14 @@ type Position with
     member inline this.ExpandX amount = this.ShrinkX -amount
     member inline this.ExpandY amount = this.ShrinkY -amount
 
-    static member inline Shrink(x, y) = Position.DEFAULT.Shrink(x, y)
-    static member inline Shrink amount = Position.DEFAULT.Shrink(amount, amount)
-    static member inline ShrinkL amount = Position.DEFAULT.ShrinkL amount
-    static member inline ShrinkT amount = Position.DEFAULT.ShrinkT amount
-    static member inline ShrinkR amount = Position.DEFAULT.ShrinkR amount
-    static member inline ShrinkB amount = Position.DEFAULT.ShrinkB amount
-    static member inline ShrinkX amount = Position.DEFAULT.ShrinkX amount
-    static member inline ShrinkY amount = Position.DEFAULT.ShrinkY amount
+    static member inline Expand (x, y) = Position.DEFAULT.Expand(x, y)
+    static member inline Expand amount = Position.DEFAULT.Expand(amount, amount)
+    static member inline ExpandL amount = Position.DEFAULT.ExpandL amount
+    static member inline ExpandT amount = Position.DEFAULT.ExpandT amount
+    static member inline ExpandR amount = Position.DEFAULT.ExpandR amount
+    static member inline ExpandB amount = Position.DEFAULT.ExpandB amount
+    static member inline ExpandX amount = Position.DEFAULT.ExpandX amount
+    static member inline ExpandY amount = Position.DEFAULT.ExpandY amount
 
     member inline this.SliceL amount = { this with Right = this.Left ^+ amount }
     member inline this.SliceT amount = { this with Bottom = this.Top ^+ amount }
