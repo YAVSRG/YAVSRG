@@ -298,6 +298,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 this.Position <- if expanded then EXPANDED_POSITION else NORMAL_POSITION
                 refresh <- true
 
+        if expanded && (%%"exit").Tapped() then
+            expanded <- false
+            this.Position <- NORMAL_POSITION
+            refresh <- true
+
     override this.Draw() =
         if refresh then
             this.Redraw()
