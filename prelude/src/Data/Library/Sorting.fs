@@ -161,14 +161,14 @@ module Sorting =
                         |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Physical
-                    | None -> "", -1.0f, x.Physical
+                    | None -> "", -2.0f, x.Physical
                 "lamp", fun (x, ctx) ->
                     match 
                         (ScoreDatabase.get x.Hash ctx.ScoreDatabase).PersonalBests
                         |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Physical
-                    | None -> "", -1.0f, x.Physical
+                    | None -> "", -2.0f, x.Physical
             ]
 
     type FilterPart =
