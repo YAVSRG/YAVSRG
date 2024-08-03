@@ -142,7 +142,7 @@ type ActionBar() =
             .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
         |+ ActionButton(
             Icons.REFRESH_CCW,
-            Suggestions.random_chart,
+            LevelSelect.random_chart,
             (K false),
             Position = Position.Column(70.0f, 60.0f)
         )

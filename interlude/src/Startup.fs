@@ -56,7 +56,7 @@ module Startup =
         Song.set_pitch_rates_enabled Options.options.AudioPitchRates.Value
 
         Gameplay.watch_replay <- LevelSelect.watch_replay
-        Gameplay.continue_endless_mode <- Suggestions.continue_endless_mode
+        Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
 
         Updates.check_for_updates ()
 

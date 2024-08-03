@@ -13,20 +13,20 @@ type EndlessModeMenu(info: LoadedChartInfo) =
 
     let start() =
 
-        Suggestions.begin_endless_mode
-        <| EndlessModeState.create
-            {
-                BaseDifficulty = info.Rating.Physical
-                BaseChart = info.CacheInfo, SelectedChart.rate.Value
-                Filter = LevelSelect.filter |> Filter.except_keywords
-                Mods = SelectedChart.selected_mods.Value
-                RulesetId = Rulesets.current_hash
-                Ruleset = Rulesets.current
-                Library = Content.Library
-                ScoreDatabase = Content.Scores
-                Priority = Suggestions.endless_priority.Value
-            }
-        <| false
+        //Suggestions.begin_endless_mode
+        //<| EndlessModeState.create
+        //    {
+        //        BaseDifficulty = info.Rating.Physical
+        //        BaseChart = info.CacheInfo, SelectedChart.rate.Value
+        //        Filter = LevelSelect.filter |> Filter.except_keywords
+        //        Mods = SelectedChart.selected_mods.Value
+        //        RulesetId = Rulesets.current_hash
+        //        Ruleset = Rulesets.current
+        //        Library = Content.Library
+        //        ScoreDatabase = Content.Scores
+        //        Priority = Suggestions.endless_priority.Value
+        //    }
+        //<| false
         Menu.Exit()
 
     override this.Content() =
@@ -37,7 +37,7 @@ type EndlessModeMenu(info: LoadedChartInfo) =
                     SuggestionPriority.Variety, %"levelselect.endless_mode.priority.variety"
                     SuggestionPriority.Consistency, %"levelselect.endless_mode.priority.consistency"
                 |],
-                Suggestions.endless_priority
+                LevelSelect.endless_priority
             )
         )
             .Pos(0)

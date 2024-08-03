@@ -18,9 +18,9 @@ type Jukebox() =
     override this.Init(parent) =
         this 
         |+ Button(Icons.SKIP_BACK, 
-            Suggestions.previous_chart,
+            LevelSelect.History.previous,
             Hotkey = "previous_random_chart",
-            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (Suggestions.has_previous())),
+            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (LevelSelect.History.has_previous())),
             Position = Position.Shrink(5.0f).SliceL(45.0f)
         )
         |+ Button(Icons.PAUSE, 
@@ -29,7 +29,7 @@ type Jukebox() =
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)
         )
         |* Button(Icons.SKIP_FORWARD,
-            Suggestions.random_chart,
+            LevelSelect.random_chart,
             Hotkey = "random_chart",
             Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby),
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f)

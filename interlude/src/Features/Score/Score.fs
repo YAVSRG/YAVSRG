@@ -90,6 +90,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                 }
         )
         |+ bottom_info
+        |+ HotkeyAction("select", Gameplay.continue_endless_mode >> ignore)
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
         base.Init parent
@@ -111,8 +112,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     override this.OnBack() =
         if Network.lobby.IsSome then
             Some Screen.Type.Lobby
-        elif played_just_now && Gameplay.continue_endless_mode () then
-            None
         else
             Some Screen.Type.LevelSelect
 

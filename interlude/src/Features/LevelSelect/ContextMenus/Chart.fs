@@ -74,38 +74,15 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
             |+ PageButton.Once(
                 %"playlist.play",
                 (fun () ->
-                    Suggestions.begin_endless_mode (
-                        EndlessModeState.create_from_playlist
-                            0
-                            (Content.Collections.GetPlaylist(name).Value)
-                            Content.Library
-                    ) true
+                    LevelSelect.start_playlist (Content.Collections.GetPlaylist(name).Value)
                 ),
                 Icon = Icons.PLAY,
                 Disabled = K Network.lobby.IsSome
             )
-            |+ if index > 0 then 
-                [PageButton.Once(
-                    %"playlist.play_from_here",
-                    (fun () ->
-                        Suggestions.begin_endless_mode (
-                            EndlessModeState.create_from_playlist
-                                index
-                                (Content.Collections.GetPlaylist(name).Value)
-                                Content.Library
-                        ) true
-                    ),
-                    Icon = Icons.PLAY,
-                    Disabled = K Network.lobby.IsSome
-                )] else []
             |* PageButton.Once(
                 %"playlist.play_shuffled",
                 (fun () ->
-                    Suggestions.begin_endless_mode (
-                        EndlessModeState.create_from_playlist_shuffled
-                            (Content.Collections.GetPlaylist(name).Value)
-                            Content.Library
-                    ) true
+                    LevelSelect.start_playlist_shuffled (Content.Collections.GetPlaylist(name).Value)
                 ),
                 Icon = Icons.SHUFFLE,
                 Disabled = K Network.lobby.IsSome

@@ -4,10 +4,8 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 
 type PlaylistContextMenu(name: string, playlist: Playlist) =
@@ -20,18 +18,14 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
         |+ PageButton
             .Once(
                 %"playlist.play",
-                (fun () ->
-                    Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist 0 playlist Content.Library) true
-                ),
+                (fun () -> LevelSelect.start_playlist playlist),
                 Icon = Icons.PLAY
             )
             .Pos(3)
         |+ PageButton
             .Once(
                 %"playlist.play_shuffled",
-                (fun () ->
-                    Suggestions.begin_endless_mode (EndlessModeState.create_from_playlist_shuffled playlist Content.Library) true
-                ),
+                (fun () -> LevelSelect.start_playlist_shuffled playlist),
                 Icon = Icons.SHUFFLE
             )
             .Pos(5)

@@ -178,7 +178,6 @@
     <Compile Include="Features\Skins\Browser\Browser.fs" />
     <Compile Include="Features\Skins\Select.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
-    <Compile Include="Features\LevelSelect\Suggestions.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />

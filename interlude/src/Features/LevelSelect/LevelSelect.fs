@@ -9,8 +9,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library.Caching
-open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -99,40 +97,10 @@ type LevelSelectScreen() =
         )
             .Help(Help.Info("levelselect.play").Hotkey("select"))
         |+ StylishButton(
-            (fun () ->
-                match SelectedChart.LIBRARY_CTX with
-                | LibraryContext.Playlist (_, name, _) ->
-                    Suggestions.begin_endless_mode (
-                        EndlessModeState.create_from_playlist
-                            0
-                            (Content.Collections.GetPlaylist(name).Value)
-                            Content.Library
-                    ) true
-                | _ -> ()
-            ),
-            K (sprintf "%s %s" Icons.PLAY_CIRCLE %"playlist.play"),
-            !%Palette.DARK.O2,
-            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
-            Hotkey = "endless_mode",
-            Disabled = (fun () -> Network.lobby.IsSome)
-        )
-            .Help(Help.Info("playlist.play").Hotkey("endless_mode"))
-            .Conditional(fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> true | _ -> false)
-        |+ StylishButton(
-            (fun () -> SelectedChart.if_loaded(fun info -> EndlessModeMenu(info).Show())),
-            K (sprintf "%s %s" Icons.PLAY_CIRCLE %"levelselect.endless_mode"),
-            !%Palette.DARK.O2,
-            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
-            Hotkey = "endless_mode",
-            Disabled = (fun () -> Network.lobby.IsSome)
-        )
-            .Help(Help.Info("levelselect.endless_mode").Hotkey("endless_mode"))
-            .Conditional(fun () -> match SelectedChart.LIBRARY_CTX with LibraryContext.Playlist _ -> false | _ -> true)
-        |+ StylishButton(
             (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
             K Icons.LIST,
-            !%Palette.MAIN.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-650.0f, 0.0f)
+            !%Palette.DARK.O2,
+            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-325.0f, 0.0f)
         )
             .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
 
@@ -200,7 +168,7 @@ type LevelSelectScreen() =
         Comments.draw ()
 
     override this.OnEnter prev =
-        Suggestions.exit_endless_mode ()
+        LevelSelect.exit_gameplay()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         if Cache.recache_service.Status <> Async.ServiceStatus.Idle then

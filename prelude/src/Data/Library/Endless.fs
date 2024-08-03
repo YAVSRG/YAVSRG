@@ -18,13 +18,13 @@ type SuggestionPriority =
     //| SnipeScores
     | Consistency
 
-type ChartSuggestionContext =
+type SuggestionContext =
     {
         BaseDifficulty: float
         BaseChart: CachedChart * float32
-        Priority: SuggestionPriority
-        Filter: Filter
         Mods: ModState
+        Filter: Filter
+        Priority: SuggestionPriority
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
@@ -32,7 +32,7 @@ type ChartSuggestionContext =
     }
     member this.LibraryViewContext: LibraryViewContext =
         {
-            Rate = let (cc, rate) = this.BaseChart in rate
+            Rate = let (_, rate) = this.BaseChart in rate
             RulesetId = this.RulesetId
             Ruleset = this.Ruleset
             Library = this.Library
@@ -55,10 +55,10 @@ module Suggestion =
                     similarity <- similarity + bpm_similarity * density_similarity * (min p.Amount p2.Amount) / total_amount
         similarity
 
-    let private get_suggestions (ctx: ChartSuggestionContext) : (CachedChart * float32) seq =
+    let private get_suggestions (ctx: SuggestionContext) : (CachedChart * float32) seq =
 
         let base_chart, rate = ctx.BaseChart
-
+        
         match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
         | None -> Seq.empty
         | Some patterns ->
@@ -113,9 +113,21 @@ module Suggestion =
         |> Seq.sortByDescending snd
         |> Seq.map (fun (cc, _) -> (cc, rate))
 
-    let get_suggestion (ctx: ChartSuggestionContext) : (CachedChart * float32) option =
+    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
         let rand = Random()
 
+        let charts =
+            Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values
+            |> Array.ofSeq
+
+        if charts.Length > 0 then
+            let result = charts.[rand.Next charts.Length]
+            Some result
+        else
+            None
+
+    let get_suggestion (ctx: SuggestionContext) : (CachedChart * float32) option =
+        let rand = Random()
         let best_matches = get_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
 
         if best_matches.Length = 0 then
@@ -137,74 +149,64 @@ module Suggestion =
             
             Some (cc, rate)
 
-    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
-        let rand = Random()
-
-        let charts =
-            Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values
-            |> Array.ofSeq
-
-        if charts.Length > 0 then
-            let result = charts.[rand.Next charts.Length]
-            Some result
-        else
-            None
-
-[<RequireQualifiedAccess>]
 type EndlessModeState =
-    | Playlist of (CachedChart * PlaylistEntryInfo) list
-    | Normal of ChartSuggestionContext
+    internal {
+        mutable Queue: (CachedChart * PlaylistEntryInfo) list
+    }
 
 module EndlessModeState =
+
+    let create () = { Queue = [] }
 
     let private shuffle_playlist_charts (items: 'T seq) =
         let random = new Random()
         items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
-    let create_from_playlist (from: int) (playlist: Playlist) (library: Library) =
-        playlist.Charts
-        |> Seq.skip from
-        |> Seq.choose (fun (c, info) ->
-            match Cache.by_hash c.Hash library.Cache with
-            | Some cc -> Some(cc, info)
-            | None -> None
-        )
-        |> List.ofSeq
-        |> EndlessModeState.Playlist
+    let queue_playlist (from: int) (playlist: Playlist) (library: Library) (state: EndlessModeState) =
+        state.Queue <-
+            playlist.Charts
+            |> Seq.skip from
+            |> Seq.choose (fun (c, info) ->
+                match Cache.by_hash c.Hash library.Cache with
+                | Some cc -> Some(cc, info)
+                | None -> None
+            )
+            |> List.ofSeq
 
-    let create_from_playlist_shuffled (playlist: Playlist) (library: Library) =
-        playlist.Charts
-        |> Seq.choose (fun (c, info) ->
-            match Cache.by_hash c.Hash library.Cache with
-            | Some cc -> Some(cc, info)
-            | None -> None
-        )
-        |>  shuffle_playlist_charts
-        |> List.ofSeq
-        |> EndlessModeState.Playlist
+    let queue_shuffled_playlist (playlist: Playlist) (library: Library) (state: EndlessModeState) =
+        state.Queue <-
+            playlist.Charts
+            |> Seq.choose (fun (c, info) ->
+                match Cache.by_hash c.Hash library.Cache with
+                | Some cc -> Some(cc, info)
+                | None -> None
+            )
+            |> shuffle_playlist_charts
+            |> List.ofSeq
 
-    let create (ctx: ChartSuggestionContext) = EndlessModeState.Normal ctx
+    let clear_queue (state: EndlessModeState) =
+        state.Queue <- []
 
     type Next =
         {
             Chart: CachedChart
             Rate: float32
             Mods: ModState
-            NewState: EndlessModeState
+            NextContext: SuggestionContext
         }
 
-    let next (state: EndlessModeState) : Next option =
-        match state with
-        | EndlessModeState.Playlist [] -> None
-        | EndlessModeState.Playlist((chart, { Rate = rate; Mods = mods }) :: xs) ->
+    let next (ctx: SuggestionContext) (state: EndlessModeState) : Next option =
+        match state.Queue with
+        | (chart, { Rate = rate; Mods = mods }) :: xs ->
+            state.Queue <- xs
             Some
                 {
                     Chart = chart
                     Rate = rate.Value
                     Mods = mods.Value
-                    NewState = EndlessModeState.Playlist xs
+                    NextContext = ctx
                 }
-        | EndlessModeState.Normal ctx ->
+        | [] ->
             match Suggestion.get_suggestion ctx with
             | Some (next_cc, rate) ->
                 Some
@@ -212,14 +214,9 @@ module EndlessModeState =
                         Chart = next_cc
                         Rate = rate
                         Mods = ctx.Mods
-                        NewState = 
-                            EndlessModeState.Normal
-                                { ctx with
-                                    BaseChart =
-                                        match ctx.Priority with
-                                        | SuggestionPriority.Consistency -> ctx.BaseChart
-                                        | SuggestionPriority.Variety -> next_cc, rate
-                                    // base difficulty adjustment over time
-                                }
+                        NextContext = 
+                            match ctx.Priority with
+                            | SuggestionPriority.Consistency -> ctx
+                            | SuggestionPriority.Variety -> { ctx with BaseChart = next_cc, rate }
                     }
             | None -> None

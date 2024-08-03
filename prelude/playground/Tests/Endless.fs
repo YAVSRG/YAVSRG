@@ -36,8 +36,9 @@ module Endless =
 
         printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator
 
-        let mutable endless_mode_state = 
-            EndlessModeState.create {
+        let state = EndlessModeState.create()
+        let mutable suggestion_ctx = 
+            {
                 Library = library
                 ScoreDatabase = score_db
                 BaseChart = start, 1.0f
@@ -51,10 +52,10 @@ module Endless =
 
         let mutable loop = true
         while loop do
-            match EndlessModeState.next endless_mode_state with
+            match EndlessModeState.next suggestion_ctx state with
             | None -> Logging.Info("Nothing found :("); loop <- false
             | Some next ->
-                endless_mode_state <- next.NewState
+                suggestion_ctx <- next.NextContext
                 printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator next.Rate
 
                 printfn ""
