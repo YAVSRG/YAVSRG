@@ -155,6 +155,20 @@ module Sorting =
                          | Some d -> d.LastPlayed |> float32
                          | None -> 0.0f
                     "", date_played, x.Physical
+                "grade", fun (x, ctx) ->
+                    match 
+                        (ScoreDatabase.get x.Hash ctx.ScoreDatabase).PersonalBests
+                        |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
+                    with
+                    | Some (i, _, _) -> "", float32 i, x.Physical
+                    | None -> "", -1.0f, x.Physical
+                "lamp", fun (x, ctx) ->
+                    match 
+                        (ScoreDatabase.get x.Hash ctx.ScoreDatabase).PersonalBests
+                        |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
+                    with
+                    | Some (i, _, _) -> "", float32 i, x.Physical
+                    | None -> "", -1.0f, x.Physical
             ]
 
     type FilterPart =
