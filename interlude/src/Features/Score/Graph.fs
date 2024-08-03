@@ -290,6 +290,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
+        if moved then
+            this.Refresh()
+
         if Mouse.hover this.Bounds then
             if Mouse.right_click() then
                 ScoreGraphSettingsPage(this).Show()
