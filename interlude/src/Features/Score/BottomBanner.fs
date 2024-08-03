@@ -78,11 +78,31 @@ type RulesetSwitcher(setting: Setting<string>) =
     member this.ToggleDropdown() =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper
 
-type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> unit) as this
-    =
+type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGraph, refresh: unit -> unit) =
     inherit Container(NodeType.None)
 
-    do
+    override this.Init(parent) =
+        
+        if Network.lobby.IsNone && played_just_now then
+            this
+            |+ StylishButton(
+                Gameplay.continue_endless_mode >> ignore,
+                K (sprintf "%s %s" Icons.PLAY %"score.continue"),
+                !%Palette.MAIN.O2,
+                TiltRight = false,
+                Position = Position.BorderT(50.0f).SliceR(300.0f),
+                Floating = true
+            )
+            |+ StylishButton(
+                Gameplay.retry,
+                K (sprintf "%s %s" Icons.REPEAT %"score.retry"),
+                !%Palette.DARK.O2,
+                Position = Position.BorderT(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
+                Floating = true
+            )
+            |+ HotkeyAction("retry", Gameplay.retry)
+            |* HotkeyAction("select", Gameplay.continue_endless_mode >> ignore)
+
         this
         |+ graph
         |+ Text(
@@ -120,3 +140,5 @@ type BottomBanner(score_info: ScoreInfo, graph: ScoreGraph, refresh: unit -> uni
                 )
             )
         )
+
+        base.Init parent

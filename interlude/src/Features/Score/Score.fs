@@ -55,6 +55,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     let bottom_info =
         BottomBanner(
             score_info,
+            played_just_now,
             graph,
             refresh,
             Position =
@@ -90,7 +91,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                 }
         )
         |+ bottom_info
-        |+ HotkeyAction("select", Gameplay.continue_endless_mode >> ignore)
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
         base.Init parent

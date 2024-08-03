@@ -20,6 +20,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
     member val Disabled: unit -> bool = K false with get, set
+    member val Floating = false with get, set
 
     member val TextColor =
         fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2 with get, set
@@ -39,7 +40,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
         base.Draw()
 
     override this.Init(parent: Widget) =
-        this |+ Clickable.Focus this
+        this |+ Clickable.Focus(this, Floating = this.Floating)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
