@@ -77,6 +77,7 @@ module Rulesets =
             for k in loaded.Keys do
                 yield (k, loaded.[k])
         }
+        |> Seq.sortBy (fun (_, rs) -> rs.Name)
 
     let exists = loaded.ContainsKey
 
