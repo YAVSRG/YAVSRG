@@ -6,7 +6,10 @@ open Prelude.Gameplay
 module private DP =
 
     let windows judge ridiculous =
-        let pf = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
+        let pf = 
+            if judge >= 9 then
+                0.2f * 45.0f<ms> 
+            else 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
 
         let ma = pf * 0.5f
         let gr = pf * 2f
