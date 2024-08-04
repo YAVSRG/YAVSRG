@@ -11,6 +11,7 @@ open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Play
+open Interlude.Features.Play.Spectate
 open Interlude.Features.Online
 open Interlude.Features.LevelSelect
 open Interlude.Features.Rulesets
@@ -193,7 +194,7 @@ type LobbyUI(lobby: Lobby) =
                 then
                     if
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
+                            (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay
                             Transitions.Default
                         |> not

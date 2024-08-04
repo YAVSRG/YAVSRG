@@ -15,7 +15,7 @@ open Interlude.Features.Import
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
-open Interlude.Features.Play
+open Interlude.Features.Play.Spectate
 
 type MultiplayerChartContextMenu(cc: CachedChart) =
     inherit Page()
@@ -248,7 +248,7 @@ type SelectedChart(lobby: Lobby) =
                     match LobbyChart.info_if_selected() with
                     | Some info -> 
                         Screen.change_new
-                            (fun () -> SpectateScreen.spectate_screen (info, username, replay_info, lobby))
+                            (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay
                             Transitions.Default
                         |> ignore
