@@ -145,14 +145,13 @@ type EmptyState(icon: string, text: string) =
     member val Subtitle = "" with get, set
 
     override this.Draw() =
-        let color = (!*Palette.LIGHT, !*Palette.DARKER)
-        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), color, Alignment.CENTER)
+        Text.fill_b (Style.font, icon, this.Bounds.Shrink(30.0f, 100.0f).SliceT(200.0f), Colors.text_greyout, Alignment.CENTER)
 
         Text.fill_b (
             Style.font,
             text,
             this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(175.0f).SliceT(60.0f),
-            color,
+            Colors.text_greyout,
             Alignment.CENTER
         )
 
@@ -160,7 +159,7 @@ type EmptyState(icon: string, text: string) =
             Style.font,
             this.Subtitle,
             this.Bounds.Shrink(30.0f, 100.0f).ShrinkT(230.0f).SliceT(40.0f),
-            color,
+            Colors.text_greyout,
             Alignment.CENTER
         )
 

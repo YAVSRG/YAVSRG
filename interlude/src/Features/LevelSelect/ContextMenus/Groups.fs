@@ -38,13 +38,14 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
     inherit Page()
 
     override this.Content() =
-        FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(100.0f, 200.0f))
+        page_container()
         |+ PageButton(
             %"group.delete",
             (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
             Icon = Icons.TRASH
         )
             .Help(Help.Info("group.delete"))
+            .Pos(0)
         :> Widget
 
     override this.Title = name
