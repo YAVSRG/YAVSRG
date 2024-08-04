@@ -5,7 +5,7 @@ open Prelude.Gameplay
 
 module private DP =
 
-    let windows judge ridiculous =
+    let windows (judge: int) (ridiculous: bool) =
         let pf = 
             if judge >= 9 then
                 0.2f * 45.0f<ms> 
@@ -239,7 +239,7 @@ module ``osu!`` =
         | NoMod
         | HardRock
 
-    let private nomod_windows od =
+    let private nomod_windows (od: float32) =
         (
             16.5f<ms>,
             floor (64f - od * 3f) * 1.0f<ms> + 0.5f<ms>,
@@ -249,7 +249,7 @@ module ``osu!`` =
             floor (188f - od * 3f) * 1.0f<ms> + 0.5f<ms>
         )
     
-    let private hr_windows od =
+    let private hr_windows (od: float32) =
         let (ma, pf, gr, gd, bd, ms) = nomod_windows od
         let hr (window: Time) = floor (5f / 7f<ms> * window) * 1.0f<ms> + 0.5f<ms>
         (
@@ -261,7 +261,7 @@ module ``osu!`` =
             hr ms
         )
     
-    let private ez_windows od =
+    let private ez_windows (od: float32) =
         let (ma, pf, gr, gd, bd, ms) = nomod_windows od
         let ez (window: Time) = floor (7f / 5f<ms> * window) * 1.0f<ms> + 0.5f<ms>
         (
@@ -273,7 +273,7 @@ module ``osu!`` =
             ez ms
         )
 
-    let private windows od mode =
+    let private windows (od: float32) (mode: Mode) =
         match mode with
         | Easy -> ez_windows od
         | NoMod -> nomod_windows od
