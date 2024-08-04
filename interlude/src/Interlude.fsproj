@@ -128,6 +128,7 @@
     <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\Shared.fs" />
+    <Compile Include="Features\Play\LocalOffset.fs" />
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
     <Compile Include="Features\Skins\Elements\TimingDisplay.fs" />
     <Compile Include="Features\Skins\Elements\JudgementMeter.fs" />

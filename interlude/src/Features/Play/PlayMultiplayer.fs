@@ -172,7 +172,7 @@ module PlayScreenMultiplayer =
 
             override this.OnExit(next) =
                 if options.AutoCalibrateOffset.Value then
-                    LocalAudioSync.apply_automatic this.State info.SaveData
+                    LocalOffset.apply_automatic this.State info.SaveData
 
                 Toolbar.show_cursor ()
                 base.OnExit(next)

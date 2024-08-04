@@ -40,9 +40,8 @@ module PlayScreen =
 
         let pacemaker_state = PacemakerState.create info pacemaker_ctx
 
-        let mutable recommended_offset = 0.0f
-
-        let offset_setting = LocalAudioSync.offset_setting info.SaveData
+        let mutable offset_manually_changed = false
+        let offset_setting = LocalOffset.offset_setting info.SaveData
 
         let retry () =
             if
@@ -96,49 +95,11 @@ module PlayScreen =
             then
                 Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 
-        let offset_slideout (screen: IPlayScreen) =
-
-            let offset_slider =
-                Slider(
-                    offset_setting
-                    |> Setting.map float32 (fun x -> x * 1.0f<ms>)
-                    |> Setting.bound -200.0f 200.0f,
-                    Step = 1f,
-                    Format = (fun v -> sprintf "%.0fms" v),
-                    Position = Position.SliceT(60.0f).SliceL(600.0f)
-                )
-
-            Slideout(
-                SlideoutContent(offset_slider, 100.0f)
-                |+ Text(
-                    (fun () ->
-                        [(%%"accept_suggestion").ToString(); (sprintf "%.0fms" recommended_offset)] %> "play.localoffset.accept_hint"
-                    ),
-                    Position = Position.Box(0.0f, 0.0f, 0.0f, 60.0f, 600.0f, 40.0f)
-                )
-                |+ HotkeyAction(
-                    "accept_suggestion",
-                    fun () ->
-                        offset_setting.Value <- recommended_offset * 1.0f<ms>
-                        retry ()
-                )
-                |+ Callout.frame
-                    (Callout.Small
-                        .Icon(Icons.INFO)
-                        .Body(
-                            %"play.localoffset.hint_ii"
-                        ))
-                    (fun (w, h) -> Position.SliceR(w)),
-                OnOpen =
-                    (fun () ->
-                        liveplay.Finish()
-                        Song.pause ()
-                        recommended_offset <- LocalAudioSync.get_automatic screen.State info.SaveData |> float32
-                        offset_slider.Select false
-                    ),
-                OnClose = retry,
-                AutoCloseWhen = (fun (_: SlideoutContent) -> not offset_slider.Selected)
-            )
+        let change_offset(state) =
+            Song.pause()
+            liveplay.Finish()
+            offset_manually_changed <- true
+            LocalOffsetPage(state, info.SaveData, offset_setting, retry).Show()
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
             override this.AddWidgets() =
@@ -159,8 +120,6 @@ module PlayScreen =
                 if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPMMeter
                 if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
 
-                let offset_slideout = offset_slideout this
-
                 this
                 |+ HotkeyHoldAction(
                     "retry",
@@ -172,8 +131,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
-                |+ HotkeyAction("offset", offset_slideout.Open)
-                |* offset_slideout
+                |* HotkeyAction("offset", fun () -> change_offset this.State)
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
@@ -186,8 +144,8 @@ module PlayScreen =
                 DiscordRPC.playing_timed ("Playing", info.CacheInfo.Title, info.CacheInfo.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                if options.AutoCalibrateOffset.Value && recommended_offset = 0.0f then
-                    LocalAudioSync.apply_automatic this.State info.SaveData
+                if options.AutoCalibrateOffset.Value && not offset_manually_changed then
+                    LocalOffset.apply_automatic this.State info.SaveData
                 Toolbar.show_cursor ()
 
                 base.OnExit(next)

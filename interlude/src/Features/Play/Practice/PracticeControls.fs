@@ -62,7 +62,7 @@ type SyncSuggestionControls(state: PracticeState) =
         )
 
     let local_audio_offset =
-        LocalAudioSync.offset_setting state.SaveData
+        LocalOffset.offset_setting state.SaveData
         |> Setting.bound -200.0f<ms> 200.0f<ms>
 
     let visual_offset = options.VisualOffset |> Setting.roundf 0

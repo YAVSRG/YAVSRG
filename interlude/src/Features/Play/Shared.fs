@@ -10,7 +10,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay
-open Prelude.Data
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.Options
@@ -20,35 +19,6 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Online
 open Interlude.Features.Play
-
-module LocalAudioSync =
-
-    let offset_setting (save_data: ChartSaveData) =
-        Setting.make save_data.set_Offset save_data.get_Offset
-        |> Setting.roundt 0
-        |> Setting.trigger Song.set_local_offset
-
-    let get_automatic (state: PlayState) (save_data: ChartSaveData) =
-        let mutable sum = 0.0f<ms>
-        let mutable count = 1.0f
-
-        for ev in state.Scoring.HitEvents do
-            match ev.Guts with
-            | Hit x when not x.Missed ->
-                sum <- sum + x.Delta
-                count <- count + 1.0f
-            | _ -> ()
-
-        let mean = sum / count * SelectedChart.rate.Value
-
-        if count < 10.0f then
-            save_data.Offset
-        else
-            save_data.Offset - mean * 1.25f
-
-    let apply_automatic (state: PlayState) (save_data: ChartSaveData) =
-        let setting = offset_setting save_data
-        setting.Value <- get_automatic state save_data
 
 [<AutoOpen>]
 module Utils =
