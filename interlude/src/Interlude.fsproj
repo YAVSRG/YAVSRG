@@ -144,7 +144,11 @@
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\PlayMultiplayer.fs" />
-    <Compile Include="Features\Play\Replay.fs" />
+    <Compile Include="Features\Play\Replay\ReplayState.fs" />
+    <Compile Include="Features\Play\Replay\HitOverlay.fs" />
+    <Compile Include="Features\Play\Replay\InputOverlay.fs" />
+    <Compile Include="Features\Play\Replay\ReplayControls.fs" />
+    <Compile Include="Features\Play\Replay\ReplayScreen.fs" />
     <Compile Include="Features\Play\Spectate.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />

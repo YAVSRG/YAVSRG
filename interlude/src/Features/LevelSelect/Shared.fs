@@ -14,6 +14,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Pacemaker
 open Interlude.Features.Play
+open Interlude.Features.Play.Replay
 open Interlude.Features.Online
 open Interlude.Features.Collections
 open Interlude.Features.Gameplay
