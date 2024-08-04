@@ -154,22 +154,22 @@ module Wife3 =
                             {
                                 Name = "AAAA"
                                 Accuracy = 0.99955
-                                Color = Color.Gold
+                                Color = Color.Cyan
                             }
                             {
                                 Name = "AAAA."
                                 Accuracy = 0.9997
-                                Color = Color.Gold
+                                Color = Color.Cyan
                             }
                             {
                                 Name = "AAAA:"
                                 Accuracy = 0.9998
-                                Color = Color.Gold
+                                Color = Color.Cyan
                             }
                             {
                                 Name = "AAAAA"
                                 Accuracy = 0.999935
-                                Color = Color.Gold
+                                Color = Color.White
                             }
                         |]
                     Lamps =
