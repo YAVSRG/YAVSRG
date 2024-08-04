@@ -1,6 +1,7 @@
 <img src="https://github.com/YAVSRG/YAVSRG/assets/21290233/f3a88ac6-431a-46a1-9351-95266f30fe70.png" align="left" height="240">
 
-## What is YAVSRG?
+### What is YAVSRG?
+
 YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME is my collection of rhythm game projects full of the features and ideas I think make games of this genre fun to play.
 
 The project is centred around my custom rhythm game client, **Interlude**, and the tooling around it.
