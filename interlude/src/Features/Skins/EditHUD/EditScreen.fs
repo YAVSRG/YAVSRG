@@ -758,11 +758,6 @@ module EditHudScreen =
                 base.OnExit s
                 if s <> Screen.Type.Play then on_exit ()
 
-            override this.OnBack() =
-                // todo: continue endless mode from level select instead of this automatic thing
-                if Gameplay.continue_endless_mode () then None
-                else base.OnBack()
-
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE
