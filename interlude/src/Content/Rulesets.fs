@@ -39,15 +39,15 @@ module Rulesets =
         if not (loaded.ContainsKey DEFAULT_ID) then
             loaded.Add(DEFAULT_ID, DEFAULT)
 
-    let init_window () =
-        load ()
-
         if not (loaded.ContainsKey _selected_id.Value) then
             Logging.Warn("Ruleset '" + _selected_id.Value + "' not found, switching to default")
             _selected_id.Value <- DEFAULT_ID
 
         current <- loaded.[_selected_id.Value]
         current_hash <- Ruleset.hash current
+
+    let init_window () =
+        load ()
         initialised <- true
 
     let selected_id =
