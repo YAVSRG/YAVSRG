@@ -1,7 +1,7 @@
 <img src="https://github.com/YAVSRG/YAVSRG/assets/21290233/f3a88ac6-431a-46a1-9351-95266f30fe70.png" align="left" height="240">
 
 ## What is YAVSRG?
-YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME is a collection of rhythm game projects full of the features and ideas I think make games of this genre fun to play.
+YET ANOTHER VERTICALLY SCROLLING RHYTHM GAME is my collection of rhythm game projects full of the features and ideas I think make games of this genre fun to play.
 
 The project is centred around my custom rhythm game client, **Interlude**, and the tooling around it.
 
@@ -69,10 +69,12 @@ If you previously built Interlude as a non-developer, I recommend setting it to 
 
 <h2 align="center">🤝 Contributing</h2>
 
-Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc. I'm active a lot in there
+Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc. I'm active a lot in 
+
+Once up and running with the developer build instructions above, steps for contributing are outlined [here](https://github.com/YAVSRG/YAVSRG/tree/main/docs/contributors.md)
 
 Pull requests are very welcome!
-If you spot a bug, typo or other minor change and have a quick fix, feel free to submit a PR.
+If you spot a bug, typo or other minor problem and have a quick fix, feel free to submit a PR.
 If you want to work on a feature please check with me first via [Discord](https://discord.gg/tA22tWR)
 
 > [!Warning]
