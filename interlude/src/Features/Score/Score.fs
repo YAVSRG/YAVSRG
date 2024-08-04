@@ -60,7 +60,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             refresh,
             Position =
                 { Position.DEFAULT with
-                    Top = 0.75f %- 0.0f
+                    Top = 0.65f %- 0.0f
                 }
         )
 
@@ -75,7 +75,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             Position =
                 { Position.DEFAULT with
                     Top = 0.0f %+ 175.0f
-                    Bottom = 0.75f %+ 0.0f
+                    Bottom = 0.65f %+ 0.0f
                 }
         )
         |+ TopBanner(score_info, Position = Position.SliceT(180.0f))
@@ -106,7 +106,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
     override this.OnExit next =
         options.SelectedRuleset.Set original_ruleset
         score_info.Ruleset <- Rulesets.current
-        graph.Dispose()
+        (graph :> System.IDisposable).Dispose()
         Toolbar.show ()
 
     override this.OnBack() =

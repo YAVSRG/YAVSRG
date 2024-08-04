@@ -68,6 +68,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let fbo = FBO.create ()
     let mutable refresh = true
     let mutable expanded = false
+    let mutable scale = 1.0f
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
@@ -87,7 +88,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let EXPANDED_POSITION =
         {
             Left = 0.0f %+ 20.0f
-            Top = -2.0f %+ 0.0f
+            Top = -(1.0f / 0.35f - 1.0f) %+ 390.0f
             Right = 1.0f %- 20.0f
             Bottom = 1.0f %- 65.0f
         }
@@ -255,7 +256,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         | _ -> ()
 
         // draw dots
-        let hscale = (width - 10.0f) / events.[events.Count - 1].Time
+        let xscale = (width - 10.0f) / events.[events.Count - 1].Time
 
         for ev in events do
             let dot : (float32 * Color) voption =
@@ -264,7 +265,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some judgement when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS)
+                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * scale, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor judgement)
 
                     | _ -> ValueNone
@@ -273,7 +274,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some judgement when GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - 0.5f * evData.Delta / score_info.Scoring.MissWindow * (h - THICKNESS - HTHICKNESS)
+                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * scale * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
 
                     | _ -> ValueNone
@@ -281,9 +282,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             match dot with
             | ValueNone -> ()
             | ValueSome (y, col) ->
-                let x = this.Bounds.Left + 5.0f + ev.Time * hscale
+                let x = this.Bounds.Left + 5.0f + ev.Time * xscale
                 Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
-
 
         fbo.Unbind()
 
@@ -299,6 +299,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             elif Mouse.left_click() then
                 expanded <- not expanded
                 this.Position <- if expanded then EXPANDED_POSITION else NORMAL_POSITION
+                refresh <- true
+
+            let s = Mouse.scroll()
+            if s <> 0.0f then
+                scale <- scale + 0.25f * s |> min 3.0f |> max 1.0f
                 refresh <- true
 
         if expanded && (%%"exit").Tapped() then
@@ -338,7 +343,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             Text.draw (
                 Style.font, 
-                sprintf "%s (-%.0fms)" (%"score.graph.early") score_info.Ruleset.Accuracy.MissWindow, 
+                sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / scale), 
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Bottom - 40.0f,
@@ -346,7 +351,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             )
             Text.draw (
                 Style.font,
-                sprintf "%s (+%.0fms)" (%"score.graph.late") score_info.Ruleset.Accuracy.MissWindow, 
+                sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / scale), 
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Top + 3.0f,
@@ -359,6 +364,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Text.draw_b (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.text)
             Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
 
-    member this.Dispose() = 
-        for i = 0 to 9 do GraphSettings.column_filter.[i] <- true
-        fbo.Dispose()
+    interface System.IDisposable with
+        override this.Dispose() = 
+            for i = 0 to 9 do GraphSettings.column_filter.[i] <- true
+            fbo.Dispose()
