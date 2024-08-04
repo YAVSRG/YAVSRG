@@ -80,6 +80,7 @@ module ReplayScreen =
                     if hud_config.InputMeterEnabled then 
                         add_widget hud_config.InputMeterPosition
                             (fun (hud_config, play_state) -> InputMeter(hud_config, play_state, fun () -> not state.ShowInputOverlay.Value))
+                if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
 
                 this
                 |+ { new StaticWidget(NodeType.None) with

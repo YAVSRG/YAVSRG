@@ -24,6 +24,7 @@ module HudElement =
         | HudElement.BPMMeter -> %"hud.bpmmeter"
         | HudElement.Pacemaker -> %"hud.pacemaker"
         | HudElement.InputMeter -> %"hud.inputmeter"
+        | HudElement.CustomImage -> %"hud.customimage"
 
     let tooltip (e: HudElement) : string =
         match e with
@@ -39,6 +40,7 @@ module HudElement =
         | HudElement.BPMMeter -> %"hud.bpmmeter.tooltip"
         | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
         | HudElement.InputMeter -> %"hud.inputmeter.tooltip"
+        | HudElement.CustomImage -> %"hud.customimage.tooltip"
 
     let can_configure (e: HudElement) =
         match e with
@@ -68,6 +70,7 @@ module HudElement =
         | HudElement.BPMMeter -> cast BPMMeter
         | HudElement.Pacemaker -> cast Pacemaker
         | HudElement.InputMeter -> cast InputMeter
+        | HudElement.CustomImage -> cast CustomImage
 
     let enabled_setting (e: HudElement) : Setting<bool> =
         match e with
@@ -161,6 +164,8 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.BPMMeterEnabled)
+        | HudElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
+            Setting.make (fun _ -> ()) (fun () -> true)
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->
@@ -170,8 +175,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.InputMeterEnabled)
-        | HudElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
-            Setting.make (fun _ -> ()) (fun () -> true)
+        | HudElement.CustomImage ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            CustomImageEnabled = v
+                        }
+                )
+                (fun () -> Content.HUD.CustomImageEnabled)
 
     let position_setting (e: HudElement) : Setting<HudPosition> =
         match e with
@@ -265,15 +277,6 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.BPMMeterPosition)
-        | HudElement.InputMeter ->
-            Setting.make
-                (fun v ->
-                    Skins.save_hud_config
-                        { Content.HUD with
-                            InputMeterPosition = v
-                        }
-                )
-                (fun () -> Content.HUD.InputMeterPosition)
         | HudElement.Pacemaker ->
             Setting.make
                 (fun v ->
@@ -283,6 +286,24 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.PacemakerPosition)
+        | HudElement.InputMeter ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            InputMeterPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.InputMeterPosition)
+        | HudElement.CustomImage ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            CustomImagePosition = v
+                        }
+                )
+                (fun () -> Content.HUD.CustomImagePosition)
 
     let default_position (e: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default
@@ -298,5 +319,6 @@ module HudElement =
         | HudElement.JudgementCounter -> all_defaults.JudgementCounterPosition
         | HudElement.RateModMeter -> all_defaults.RateModMeterPosition
         | HudElement.BPMMeter -> all_defaults.BPMMeterPosition
-        | HudElement.InputMeter -> all_defaults.InputMeterPosition
         | HudElement.Pacemaker -> all_defaults.PacemakerPosition
+        | HudElement.InputMeter -> all_defaults.InputMeterPosition
+        | HudElement.CustomImage -> all_defaults.CustomImagePosition

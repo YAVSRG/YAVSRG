@@ -63,6 +63,7 @@ module Spectate =
                 if hud_config.RateModMeterEnabled then add_widget hud_config.RateModMeterPosition RateModMeter
                 if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPMMeter
                 if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
+                if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
                 add_widget hud_config.PacemakerPosition 
                     (fun (hud_config, state) -> MultiplayerScoreTracker(hud_config, state, lobby.Replays))
 
