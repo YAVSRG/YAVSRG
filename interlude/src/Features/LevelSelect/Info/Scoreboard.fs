@@ -222,7 +222,7 @@ type Scoreboard(display: Setting<Display>) =
         | _ -> K true
 
     let scroll_container =
-        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.ShrinkT(50.0f).ShrinkB(125.0f))
+        ScrollContainer(Loader.container, Margin = Style.PADDING, Position = Position.ShrinkT(50.0f))
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add(fun info ->
@@ -303,39 +303,6 @@ type Scoreboard(display: Setting<Display>) =
         |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty", Subtitle = %"levelselect.info.scoreboard.empty.subtitle")
             .Conditional(fun () -> count = 0)
         base.Init parent
-
-    override this.Draw() =
-        base.Draw()
-
-        match SelectedChart.PATTERNS with
-        | None -> ()
-        | Some info ->
-
-        let category = info.Category
-
-        Text.fill_b (
-            Style.font,
-            category.Category,
-            this.Bounds.ShrinkB(65.0f).SliceB(60.0f).Shrink(20.0f, 0.0f),
-            Colors.text,
-            Alignment.LEFT
-        )
-
-        Text.fill_b (
-            Style.font,
-            String.concat ", " category.MajorFeatures,
-            this.Bounds.ShrinkB(30.0f).SliceB(40.0f).Shrink(20.0f, 0.0f),
-            Colors.text_subheading,
-            Alignment.LEFT
-        )
-        
-        Text.fill_b (
-            Style.font,
-            String.concat ", " category.MinorFeatures,
-            this.Bounds.SliceB(30.0f).Shrink(20.0f, 0.0f),
-            Colors.text_greyout,
-            Alignment.LEFT
-        )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

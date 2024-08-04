@@ -111,22 +111,6 @@ type Patterns(display: Setting<Display>) =
             bar (0.9f, entry.Density90, 1.0f, entry.Density90)
 
             b <- b.Translate(0.0f, 60.0f)
-
-        Text.fill_b (
-            Style.font,
-            category.Category,
-            this.Bounds.ShrinkB(65.0f).SliceB(60.0f).Shrink(20.0f, 0.0f),
-            Colors.text,
-            Alignment.LEFT
-        )
-
-        Text.fill_b (
-            Style.font,
-            String.concat ", " category.MajorFeatures,
-            this.Bounds.ShrinkB(30.0f).SliceB(40.0f).Shrink(20.0f, 0.0f),
-            Colors.text_subheading,
-            Alignment.LEFT
-        )
         
         Text.fill_b (
             Style.font,
