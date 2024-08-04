@@ -17,7 +17,7 @@ module Hotkeys =
         hotkeys.Add(id, value)
 
     do
-        register "none" Dummy
+        register "none" Bind.Dummy
         register "exit" (mk Keys.Escape)
         register "select" (mk Keys.Enter)
         register "up" (mk Keys.Up)

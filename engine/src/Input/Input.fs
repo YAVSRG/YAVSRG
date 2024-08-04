@@ -11,6 +11,7 @@ open Percyqaz.Flux.Audio
 type Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys
 type MouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton
 
+[<RequireQualifiedAccess>]
 type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
@@ -75,12 +76,12 @@ type Bind =
 
 module Bind =
 
-    let inline mk k = Key(k, (false, false, false))
-    let inline ctrl k = Key(k, (true, false, false))
-    let inline alt k = Key(k, (false, true, false))
-    let inline shift k = Key(k, (false, false, true))
-    let inline ctrlShift k = Key(k, (true, false, true))
-    let inline ctrlAlt k = Key(k, (true, true, false))
+    let inline mk k = Bind.Key(k, (false, false, false))
+    let inline ctrl k = Bind.Key(k, (true, false, false))
+    let inline alt k = Bind.Key(k, (false, true, false))
+    let inline shift k = Bind.Key(k, (false, false, true))
+    let inline ctrlShift k = Bind.Key(k, (true, false, true))
+    let inline ctrlAlt k = Bind.Key(k, (true, true, false))
 
 type InputEvType =
     | Press = 0
@@ -140,17 +141,17 @@ module internal InputThread =
             //if k < 340 || k > 347 then
             if keyboard.IsKeyDown(enum k) then
                 if keyboard.WasKeyDown(enum k) |> not then
-                    struct ((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add
+                    struct ((enum k, (ctrl, alt, shift)) |> Bind.Key, InputEvType.Press, now) |> add
             elif keyboard.WasKeyDown(enum k) then
-                struct ((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Release, now) |> add
+                struct ((enum k, (ctrl, alt, shift)) |> Bind.Key, InputEvType.Release, now) |> add
 
         // mouse input handler
         for b in 0 .. int MouseButton.Last do
             if mouse.IsButtonDown(enum b) then
                 if mouse.WasButtonDown(enum b) |> not then
-                    struct (enum b |> Mouse, InputEvType.Press, now) |> add
+                    struct (enum b |> Bind.Mouse, InputEvType.Press, now) |> add
             elif mouse.WasButtonDown(enum b) then
-                struct (enum b |> Mouse, InputEvType.Release, now) |> add
+                struct (enum b |> Bind.Mouse, InputEvType.Release, now) |> add
 
     let mutable internal game_window: NativeWindow = null
 
@@ -261,8 +262,8 @@ module Input =
     let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
         let bind_match bind target =
             match bind, target with
-            | Key(k, _), Key(K, _) when k = K -> true
-            | Mouse b, Mouse B when b = B -> true
+            | Bind.Key(k, _), Bind.Key(K, _) when k = K -> true
+            | Bind.Mouse b, Bind.Mouse B when b = B -> true
             | _ -> false
 
         let rec pop_inputs_matching_binds evs =
@@ -313,17 +314,17 @@ module Input =
         else
 
         match b with
-        | Key(Keys.LeftControl, _)
-        | Key(Keys.RightControl, _) -> this_frame.Ctrl
-        | Key(Keys.LeftAlt, _)
-        | Key(Keys.RightAlt, _) -> this_frame.Alt
-        | Key(Keys.LeftShift, _)
-        | Key(Keys.RightShift, _) -> this_frame.Shift
-        | Key(k, m) ->
+        | Bind.Key(Keys.LeftControl, _)
+        | Bind.Key(Keys.RightControl, _) -> this_frame.Ctrl
+        | Bind.Key(Keys.LeftAlt, _)
+        | Bind.Key(Keys.RightAlt, _) -> this_frame.Alt
+        | Bind.Key(Keys.LeftShift, _)
+        | Bind.Key(Keys.RightShift, _) -> this_frame.Shift
+        | Bind.Key(k, m) ->
             this_frame.KeyboardState.[k]
             && m = (this_frame.Ctrl, this_frame.Alt, this_frame.Shift)
-        | Mouse m -> this_frame.MouseState.[m]
-        | Dummy -> false
+        | Bind.Mouse m -> this_frame.MouseState.[m]
+        | Bind.Dummy -> false
 
     let init (win: NativeWindow) =
         gw <- win
@@ -391,7 +392,7 @@ module Input =
             match pop_any InputEvType.Press with
             | ValueSome(x, _) ->
                 match x with
-                | Key(k, m) ->
+                | Bind.Key(k, m) ->
                     if Bind.IsModifier k then
                         ()
                     else
@@ -404,7 +405,7 @@ module Input =
                 match pop_any InputEvType.Release with
                 | ValueSome(x, _) ->
                     match x with
-                    | Key(k, m) ->
+                    | Bind.Key(k, m) ->
                         if Bind.IsModifier k then
                             remove_listener ()
                             callback x
@@ -440,6 +441,7 @@ module Mouse =
 
     let LEFT = MouseButton.Left
     let RIGHT = MouseButton.Right
+    let MIDDLE = MouseButton.Middle
 
     let pos () =
         (Input.this_frame.MouseX, Input.last_frame.MouseY)
@@ -453,15 +455,16 @@ module Mouse =
         v
 
     let private click b : bool =
-        Input.pop_matching(Mouse b, InputEvType.Press).IsSome
+        Input.pop_matching(Bind.Mouse b, InputEvType.Press).IsSome
 
     let left_click () : bool = click LEFT
     let right_click () : bool = click RIGHT
+    let middle_click () : bool = click MIDDLE
 
-    let held b : bool = Input.held (Mouse b)
+    let held b : bool = Input.held (Bind.Mouse b)
 
     let released b : bool =
-        Input.pop_matching(Mouse b, InputEvType.Release).IsSome
+        Input.pop_matching(Bind.Mouse b, InputEvType.Release).IsSome
 
     let moved_recently () : bool =
         (DateTime.UtcNow.Ticks - Input.last_time_mouse_moved) < 100L * 10_000L

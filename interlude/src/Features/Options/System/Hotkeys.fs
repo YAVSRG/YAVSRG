@@ -13,8 +13,8 @@ type private Keybinder(hotkey: Hotkey) as this =
 
     let rec input_callback (b) =
         match b with
-        | Key(k, (ctrl, _, shift)) ->
-            set <| Key(k, (ctrl, false, shift))
+        | Bind.Key(k, (ctrl, _, shift)) ->
+            set <| Bind.Key(k, (ctrl, false, shift))
             this.Focus false
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback

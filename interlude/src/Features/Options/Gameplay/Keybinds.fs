@@ -35,9 +35,9 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
         let binds = options.GameplayBinds.[int keymode.Value - 3]
 
         match b with
-        | Key(k, _) ->
+        | Bind.Key(k, _) ->
             // todo: prevent duplicates
-            binds.[progress] <- Key(k, (false, false, false))
+            binds.[progress] <- Bind.Key(k, (false, false, false))
             progress <- progress + 1
 
             if progress = int keymode.Value then

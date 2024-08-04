@@ -2,7 +2,6 @@
 
 open System.Drawing
 open System.Diagnostics
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -10,9 +9,9 @@ open Percyqaz.Flux.Input
 type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
-    let dump_profiling = Key(Keys.F2, (true, true, true))
-    let all_bind = Key(Keys.F3, (true, true, true))
-    let graph_bind = Key(Keys.F4, (true, true, true))
+    let dump_profiling = Bind.Key(Keys.F2, (true, true, true))
+    let all_bind = Bind.Key(Keys.F3, (true, true, true))
+    let graph_bind = Bind.Key(Keys.F4, (true, true, true))
 
     let mutable enable = false
     let mutable enable_graph = false
