@@ -14,6 +14,7 @@ module GraphSettings =
 
     let only_releases = Setting.simple false
     let column_filter = Array.create 10 true
+    let scale = Setting.bounded 1.0f 1.0f 6.0f
 
 type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()
@@ -55,6 +56,8 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
             .Pos(5)
         |+ PageSetting(%"score.graph.settings.column_filter", column_filter_ui)
             .Pos(7, 2, PageWidth.Full)
+        |+ PageSetting(%"score.graph.settings.scale", Slider(GraphSettings.scale, Step = 0.25f, Format = fun x -> sprintf "%.0f%%" (x * 100.0f)))
+            .Pos(9)
         :> Widget
 
     override this.Title = %"score.graph.settings"
@@ -68,7 +71,6 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let fbo = FBO.create ()
     let mutable refresh = true
     let mutable expanded = false
-    let mutable scale = 1.0f
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
@@ -265,7 +267,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some judgement when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * scale, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
+                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * GraphSettings.scale.Value, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor judgement)
 
                     | _ -> ValueNone
@@ -274,7 +276,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some judgement when GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * scale * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
+                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
 
                     | _ -> ValueNone
@@ -303,7 +305,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             let s = Mouse.scroll()
             if s <> 0.0f then
-                scale <- scale + 0.25f * s |> min 3.0f |> max 1.0f
+                GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
                 refresh <- true
 
         if expanded && (%%"exit").Tapped() then
@@ -343,7 +345,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             Text.draw (
                 Style.font, 
-                sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / scale), 
+                sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Bottom - 40.0f,
@@ -351,7 +353,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             )
             Text.draw (
                 Style.font,
-                sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / scale), 
+                sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
                 24.0f,
                 this.Bounds.Left + 10.0f,
                 this.Bounds.Top + 3.0f,

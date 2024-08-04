@@ -886,6 +886,7 @@ score.graph.settings.line_mode.none=None
 score.graph.settings.line_mode.pa=PA
 score.graph.settings.line_mode.standard_deviation=Standard deviation
 score.graph.settings.only_releases=Only show releases
+score.graph.settings.scale=Scale
 score.new_record=New record!
 score.played_by=Played by: %0
 score.retry=Retry
