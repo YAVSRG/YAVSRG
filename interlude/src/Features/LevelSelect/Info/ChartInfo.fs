@@ -31,7 +31,7 @@ type ChartInfo() as this =
         |+ online.Conditional(fun () -> display.Value = Display.Online)
         |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
 
-        |+ BottomInfo(Position = Position.SliceB(BottomInfo.HEIGHT).TranslateY(-50.0f))
+        |+ BottomInfo(Position = Position.SliceB(BottomInfo.HEIGHT))
 
         |+ StylishButton(
             (fun () -> SelectedChart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
@@ -42,9 +42,9 @@ type ChartInfo() as this =
             Position =
                 {
                     Left = 0.0f %+ 0.0f
-                    Top = 1.0f %- 50.0f
+                    Top = 1.0f %- (BottomInfo.HEIGHT + 50.0f)
                     Right = 0.33f %- 25.0f
-                    Bottom = 1.0f %- 0.0f
+                    Bottom = 1.0f %- BottomInfo.HEIGHT
                 }
         )
             .Help(Help.Info("levelselect.preview", "preview"))
@@ -55,9 +55,9 @@ type ChartInfo() as this =
             Position =
                 {
                     Left = 0.33f %+ 0.0f
-                    Top = 1.0f %- 50.0f
+                    Top = 1.0f %- (BottomInfo.HEIGHT + 50.0f)
                     Right = 0.66f %- 25.0f
-                    Bottom = 1.0f %- 0.0f
+                    Bottom = 1.0f %- BottomInfo.HEIGHT
                 }
         )
             .Help(Help.Info("levelselect.mods", "mods"))
@@ -67,9 +67,9 @@ type ChartInfo() as this =
             Position =
                 {
                     Left = 0.66f %+ 0.0f
-                    Top = 1.0f %- 50.0f
+                    Top = 1.0f %- (BottomInfo.HEIGHT + 50.0f)
                     Right = 1.0f %- 0.0f
-                    Bottom = 1.0f %- 0.0f
+                    Bottom = 1.0f %- BottomInfo.HEIGHT
                 }
         )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
@@ -81,8 +81,8 @@ type ChartInfo() as this =
         base.Init(parent)
 
     override this.Draw() =
-        let info_area = this.Bounds.ShrinkB(50.0f).SliceB(BottomInfo.HEIGHT)
-        Draw.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
+        let info_area = this.Bounds.SliceB(BottomInfo.HEIGHT)
+        Draw.rect (info_area.BorderT(Style.PADDING).TranslateY(-50.0f)) (Palette.color (255, 0.8f, 0.0f))
         Draw.rect info_area (!*Palette.DARK_100)
         base.Draw()
 
