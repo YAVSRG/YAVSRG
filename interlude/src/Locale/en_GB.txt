@@ -461,11 +461,7 @@ levelselect.rulesets=Ruleset switcher
 levelselect.rulesets.tooltip=This button lets you hot-switch rulesets, changing the ruleset you use when playing.\nDifferent rulesets can simulate how other games would score your performance.
 levelselect.search=Chart searching
 levelselect.search.tooltip=Type here to search for charts!\nKeywords are separated by spaces. Put text "in quotes" to search for exact text.\nSome useful filters:\n- key=4 will match only 4K charts\n- length>120 will match only charts longer than 2 minutes\n- diff>6 will match only charts harder than 6.00 rating\n- comment="..." will match charts with comments matching the text\n- pattern=jumpstream will match all charts containing mostly jumpstream
-levelselect.selected_mods=Selected mods
 levelselect.selected_mods.downrate.hint=Decrease song speed
-levelselect.selected_mods.mods.hint=Select mods
-levelselect.selected_mods.rate.hint=You can also change the song's speed for practice or extra challenge.\nUse ctrl/shift to change the speed in smaller steps.
-levelselect.selected_mods.tooltip=This displays the current enabled modifiers for this chart.\nYou can select modifiers via the Mods menu.
 levelselect.selected_mods.uprate.hint=Increase song speed
 levelselect.show_comments=Show comments
 levelselect.show_comments.hint=Write/edit a comment
@@ -630,6 +626,7 @@ noteskin.colorstyle=Color style
 noteskin.colorstyle.chord=Chord
 noteskin.colorstyle.column=Column
 noteskin.colorstyle.ddr=DDR
+noteskin.colorstyle.density=Density
 noteskin.colorstyle.tooltip=This is the rule for when each note should be a certain color.\n'DDR' simulates Dance Dance Revolution's system where notes are colored by their musical rhythm placement.\n'Column' just sets a fixed color per column.\n'Chord' colors notes by the number simultaneous notes pressed, as chords.
 noteskin.columnlighttime=Column light time
 noteskin.columnlighttime.tooltip=Controls how slowly column lights fade away.\nHigher value = longer fading animation.\nLow value = column lights vanish nearly instantly.

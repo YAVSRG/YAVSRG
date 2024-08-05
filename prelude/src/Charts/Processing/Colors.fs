@@ -15,6 +15,7 @@ type ColorScheme =
     | Column = 0
     | Chord = 1
     | DDR = 2
+    | Density = 3
 
 module ColorScheme =
 
@@ -27,6 +28,7 @@ module ColorScheme =
         | ColorScheme.Column -> keycount
         | ColorScheme.Chord -> keycount
         | ColorScheme.DDR -> Array.length DDR_VALUES + 1
+        | ColorScheme.Density -> 3
         | _ -> keycount
 
 type ColorData = byte array
@@ -149,12 +151,49 @@ module NoteColors =
             { Time = time; Data = colors }
         )
 
+    let private density_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
+        let times = Array.zeroCreate mc.Keys
+        let densities = Array.zeroCreate mc.Keys
+
+        let mutable red = 0
+        let mutable blue = 0
+        let mutable green = 0
+
+        let mutable index = 0.0f
+        let scale = (mc.LastNote - mc.FirstNote) / 60000.0f<ms>
+
+        mc.Notes
+        |> Array.map (fun { Time = time; Data = nr } ->
+            let colors = Array.create mc.Keys color_data.[0]
+
+            for k = 0 to mc.Keys - 1 do
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                    let new_density = Patterns.Density.note (time - times.[k]) densities.[k]
+
+                    if new_density > densities.[k] then
+                        index <- index + (new_density - densities.[k]) / float32 (time - times.[k]) / scale
+
+                    if new_density < densities.[k] - 0.5f then
+                        colors.[k] <- color_data.[1]; blue <- blue + 1
+                    elif new_density > densities.[k] + 0.5f then 
+                        red <- red + 1
+                    else
+                        colors.[k] <- color_data.[2]
+                        green <- green + 1
+                    times.[k] <- time
+                    densities.[k] <- new_density
+
+            { Time = time; Data = colors }
+        )
+        |> fun result -> printfn "red: %i; green: %i; blue: %i; [%.1f]" red green blue index; result
+
     let private apply_scheme (scheme: ColorScheme) (color_data: ColorData) (mc: ModdedChart) : ColoredChart =
         let colored_notes =
             match scheme with
             | ColorScheme.Column -> column_colors color_data mc
             | ColorScheme.Chord -> chord_colors color_data mc
             | ColorScheme.DDR -> ddr_colors color_data mc
+            | ColorScheme.Density -> density_colors color_data mc
             | _ -> column_colors (Array.zeroCreate mc.Keys) mc
 
         { Source = mc; Colors = colored_notes }

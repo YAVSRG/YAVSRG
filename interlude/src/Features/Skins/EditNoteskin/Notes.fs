@@ -242,6 +242,7 @@ type NotesSettingsPage() =
                     ColorScheme.Column, %"noteskin.colorstyle.column"
                     ColorScheme.Chord, %"noteskin.colorstyle.chord"
                     ColorScheme.DDR, %"noteskin.colorstyle.ddr"
+                    ColorScheme.Density, %"noteskin.colorstyle.density"
                 |],
                 Setting.make (fun v -> note_colors <- { note_colors with Style = v }) (fun () -> note_colors.Style)
                 |> Setting.trigger (ignore >> refresh_colors)
