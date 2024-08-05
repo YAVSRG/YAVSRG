@@ -118,7 +118,7 @@ type Toolbar() =
         |+ HotkeyAction("preset3", fun () -> load_preset 3)
         |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
-        |+ Jukebox(Position = Position.Box(0.0f, 1.0f, 200.0f, -62.5f, 560.0f, 55.0f))
+        |+ Jukebox(Position = { Position.SliceB(55.0f).Translate(200.0f, -7.5f) with Right = 0.4f %- 10.0f })
         |* Volume(Position = Position.Shrink(0.0f, HEIGHT))
 
         base.Init parent
