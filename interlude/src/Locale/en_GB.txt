@@ -447,6 +447,8 @@ levelselect.librarymode.table=Table
 levelselect.librarymode.tooltip=Switches the library view.\nAll = The normal display of all charts available, grouped and sorted.\nCollections = Display your collections.\nTable = Display the current table.
 levelselect.mods=Mods
 levelselect.mods.tooltip=Choose gameplay modifiers here!\nGameplay modifiers will change how a chart is played.\nThey can add to or remove extra challenges from a chart.
+levelselect.no_personal_best=No personal best
+levelselect.no_personal_best.subtitle=Set one now..?
 levelselect.play=Play
 levelselect.play.tooltip=Play the selected chart!
 levelselect.practice_mode=Practice mode

@@ -31,7 +31,7 @@ type PersonalBests() =
 
     override this.Draw() =
         Draw.rect (this.Bounds.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Draw.rect this.Bounds (!*Palette.DARK_100)
         match save_data with
         | Some save_data when save_data.PersonalBests.ContainsKey Rulesets.current_hash ->
 
@@ -63,6 +63,7 @@ type PersonalBests() =
             let accuracy_bounds = this.Bounds.SliceR(180.0f).Shrink(10.0f)
             match accuracy with
             | Some (acc, rate, timestamp, color) ->
+                Draw.rect accuracy_bounds Colors.shadow_2.O2
                 let time_ago = System.DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset timestamp
                 Text.fill_b (Style.font, format_accuracy acc, accuracy_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), accuracy_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
@@ -71,18 +72,24 @@ type PersonalBests() =
             let lamp_bounds = accuracy_bounds.Translate(-180.0f, 0.0f)
             match lamp with
             | Some (lamp, rate, timestamp, color) ->
+                Draw.rect lamp_bounds Colors.shadow_2.O2
                 let time_ago = System.DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset timestamp
                 Text.fill_b (Style.font, Rulesets.current.LampName lamp, lamp_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), lamp_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
             | None -> ()
 
-        | _ -> ()
+        | _ ->
+            let no_pb_bounds = this.Bounds.SliceR(360.0f).Shrink(10.0f)
+            Draw.rect no_pb_bounds Colors.shadow_2.O2
+            Text.fill_b (Style.font, %"levelselect.no_personal_best", no_pb_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text_greyout, Alignment.CENTER)
+            Text.fill_b (Style.font, %"levelselect.no_personal_best.subtitle", no_pb_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), Colors.text_greyout, Alignment.CENTER)
 
         match patterns with
         | None -> ()
         | Some info ->
 
         let pattern_bounds = this.Bounds.ShrinkR(360.0f).Shrink(10.0f)
+        Draw.rect pattern_bounds Colors.shadow_2.O2
         let category = info.Category
 
         Text.fill_b (
