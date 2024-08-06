@@ -105,7 +105,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let new_time = start + (LAST_NOTE - start) * percent
             on_seek new_time
 
-        if not (Mouse.held Mouse.LEFT) then
-            dragging <- false
-            if unpause_after_drag then
-                Song.resume()
+            if not (Mouse.held Mouse.LEFT) then
+                dragging <- false
+                if unpause_after_drag then
+                    Song.resume()

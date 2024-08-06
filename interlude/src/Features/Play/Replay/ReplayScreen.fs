@@ -145,7 +145,9 @@ module ReplayScreen =
                         |> ignore
 
                 if (%%"skip").Tapped() then
-                    if Song.playing () then (if Song.time () > 0.0f<ms> then Song.pause ()) else Song.resume ()
+                    if Song.playing () then 
+                        (if Song.time () > 0.0f<ms> then Song.pause ())
+                    elif not (Mouse.held Mouse.LEFT) then Song.resume ()
                 else
                     SelectedChart.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
         }
