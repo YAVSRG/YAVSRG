@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
@@ -56,7 +57,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
 
             let now =
                 state.CurrentChartTime()
-                + Performance.frame_compensation ()
+                + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
                 + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
 
             while replay_data.Length - 1 > seek

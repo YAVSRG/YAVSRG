@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Processing
@@ -134,7 +135,7 @@ type private HitOverlay
 
             let now =
                 state.CurrentChartTime()
-                + Performance.frame_compensation ()
+                + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
                 + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
 
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
