@@ -17,7 +17,7 @@ module OsuScoreMigration =
 
     let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: OsuScoreDatabase_Score) =
         let metric =
-            Metrics.run (``osu!``.create 8.0f ``osu!``.NoMod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
+            ScoreProcessor.run (``osu!``.create 8.0f ``osu!``.NoMod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
         let sum =
             300.0
@@ -37,12 +37,12 @@ module OsuScoreMigration =
             + 50.0 * float score_data.Count50
             |> fun total -> total / sum
 
-        if 100.0 * abs (acc - metric.Value) > 0.2 then
+        if 100.0 * abs (acc - metric.Accuracy) > 0.2 then
             printfn "Score on %s [%s]\n----" chart.Header.Title chart.Header.DiffName
 
             printfn
                 "Interlude says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
-                (metric.Value * 100.0)
+                (metric.Accuracy * 100.0)
                 metric.State.Judgements.[0]
                 metric.State.Judgements.[1]
                 metric.State.Judgements.[2]

@@ -43,7 +43,7 @@ type PracticeState =
 
 module PracticeState =
 
-    let update_suggestions (scoring: ScoreMetric) (state: PracticeState) =
+    let update_suggestions (scoring: ScoreProcessor) (state: PracticeState) =
 
         let mutable sum = 0.0f<ms>
         let mutable count = 1.0f

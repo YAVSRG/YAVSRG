@@ -155,7 +155,7 @@ type LobbyUI(lobby: Lobby) =
                 <| fun info ->
 
                 let replay : OnlineReplayProvider = OnlineReplayProvider()
-                let scoring = Metrics.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes SelectedChart.rate.Value
+                let scoring = ScoreProcessor.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes SelectedChart.rate.Value
                 let replay_info =
                     {
                         Replay = replay

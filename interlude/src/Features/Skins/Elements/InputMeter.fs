@@ -44,7 +44,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
             box <- box.Translate(box_height, 0.0f)
 
         if config.InputMeterShowInputs && should_show_inputs () then
-            let recent_events = state.Scoring.ReplayRecentEvents()
+            let recent_events = state.Scoring.EnumerateRecentInputs()
 
             let now = state.CurrentChartTime()
             let point (time: ChartTime) : float32 * Color = 
@@ -93,7 +93,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
             let rate = SelectedChart.rate.Value
             let ONE_SECOND = 1000.0f<ms> * rate
 
-            let recent_events = state.Scoring.ReplayRecentEvents()
+            let recent_events = state.Scoring.EnumerateRecentInputs()
             let now = state.CurrentChartTime()
             let mutable kps = 0.0f
             let mutable previous = 0us

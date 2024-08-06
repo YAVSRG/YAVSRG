@@ -71,7 +71,7 @@ type Chat(lobby: Lobby) =
                     replay_info.ScoreMetric.Update Time.infinity
                     username, replay_info.GetScoreInfo()
                 )
-                |> Seq.sortByDescending (fun (_, s) -> s.Scoring.Value)
+                |> Seq.sortByDescending (fun (_, s) -> s.Scoring.Accuracy)
 
             let mutable place = 0
 

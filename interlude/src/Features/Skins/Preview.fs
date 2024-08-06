@@ -61,7 +61,7 @@ type SkinPreview(position: Position) as this =
         let recreate_scoring() =
             let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
             let ruleset = Rulesets.current
-            let scoring = Metrics.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
+            let scoring = ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
             state.ChangeScoring scoring
 
         let mutable last_time = -Time.infinity

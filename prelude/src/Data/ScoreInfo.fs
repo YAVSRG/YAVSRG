@@ -25,7 +25,7 @@ type ScoreInfo =
         Rate: float32
 
         Replay: ReplayData
-        mutable Scoring: ScoreMetric
+        mutable Scoring: ScoreProcessor
         mutable Lamp: int
         mutable Grade: int
 
@@ -39,7 +39,7 @@ type ScoreInfo =
         with get () = this.Scoring.Ruleset
         and set (ruleset) =
             let scoring =
-                Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+                ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
 
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Grading.Lamps scoring.State
@@ -47,7 +47,7 @@ type ScoreInfo =
     
     member this.WithRuleset (ruleset: Ruleset) =
         let scoring =
-            Metrics.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+            ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
 
         { this with
             Scoring = scoring
@@ -55,7 +55,7 @@ type ScoreInfo =
             Grade = Grade.calculate ruleset.Grading.Grades scoring.State
         }
 
-    member this.Accuracy = this.Scoring.Value
+    member this.Accuracy = this.Scoring.Accuracy
     member this.Mods = this.WithMods.ModsApplied
 
     member this.ModStatus = this.WithMods.Status
@@ -70,7 +70,7 @@ module ScoreInfo =
         let replay_data = score.Replay |> Replay.decompress_bytes
 
         let scoring =
-            Metrics.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+            ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
         let patterns = PatternSummary.generate_pattern_data score.Rate chart

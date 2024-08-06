@@ -93,9 +93,9 @@ type Accuracy
 
                         let summary, distance_from_pb =
                             if r > score_info.Rate then
-                                sprintf "%s (%.2fx)" (format_accuracy v) r, (v - score_info.Scoring.Value)
+                                sprintf "%s (%.2fx)" (format_accuracy v) r, (v - score_info.Scoring.Accuracy)
                             else
-                                format_accuracy v, (v - score_info.Scoring.Value)
+                                format_accuracy v, (v - score_info.Scoring.Accuracy)
 
                         if distance_from_pb < 0.0001 then
                             [summary] %> "score.your_record", (Colors.grey_2.O2, Colors.black)
@@ -115,7 +115,7 @@ type Accuracy
 
             Text.fill_b (
                 Style.font,
-                sprintf "%.4f%%" (score_info.Scoring.Value * 100.0),
+                sprintf "%.4f%%" (score_info.Scoring.Accuracy * 100.0),
                 acc_tooltip.Shrink(10.0f, 5.0f),
                 Colors.text,
                 Alignment.CENTER

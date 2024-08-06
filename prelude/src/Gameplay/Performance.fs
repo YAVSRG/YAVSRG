@@ -28,7 +28,7 @@ module Performance =
     let private performance_func b value deviation delta =
         DifficultyRating.stamina_func b (value * confidence_value deviation) delta
 
-    let calculate (rr: DifficultyRating) (keys: int) (scoring: IScoreMetric) =
+    let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessorBase) =
         let lastTimes = Array.create keys 0.0f<ms>
         let mutable pv = 0.01
         let mutable tv = 0.01

@@ -96,7 +96,7 @@ module PracticeScreen =
             liveplay <- LiveReplayProvider FIRST_NOTE
 
             scoring <-
-                Metrics.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
+                ScoreProcessor.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
             let ignore_notes_before_time =
                 state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value

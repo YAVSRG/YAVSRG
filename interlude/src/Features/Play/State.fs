@@ -14,7 +14,7 @@ type PlayState =
     {
         Chart: Chart
         WithColors: ColoredChart
-        mutable Scoring: IScoreMetric
+        mutable Scoring: ScoreProcessorBase
         ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerState
@@ -24,7 +24,7 @@ type PlayState =
     static member Dummy(info: LoadedChartInfo) =
         let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
         let ruleset = Rulesets.current
-        let scoring = Metrics.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
+        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
         let first_note = info.WithMods.FirstNote
 
         {

@@ -19,7 +19,7 @@ type MultiplayerScoreTracker(config: HudConfig, state: PlayState, replays: Dicti
 
         replays
         |> Seq.map (|KeyValue|)
-        |> Seq.sortByDescending (fun (_: string, replay_info: LobbyPlayerReplayInfo) -> replay_info.ScoreMetric.Value)
+        |> Seq.sortByDescending (fun (_: string, replay_info: LobbyPlayerReplayInfo) -> replay_info.ScoreMetric.Accuracy)
         |> Seq.iter (fun (username: string, replay_info: LobbyPlayerReplayInfo) ->
             let color =
                 if username = Network.credentials.Username then

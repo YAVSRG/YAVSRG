@@ -29,7 +29,7 @@ module PlayScreenMultiplayer =
         let liveplay = LiveReplayProvider first_note
 
         let scoring =
-            Metrics.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
+            ScoreProcessor.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us

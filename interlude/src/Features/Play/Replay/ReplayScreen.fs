@@ -50,11 +50,11 @@ module ReplayScreen =
         let mutable replay_data = replay_data
 
         let mutable scoring =
-            Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
-            scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with

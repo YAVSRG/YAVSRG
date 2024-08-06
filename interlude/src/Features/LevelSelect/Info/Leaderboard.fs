@@ -206,7 +206,7 @@ module Leaderboard =
                             let replay_data = Replay.decompress_string score.Replay
 
                             let scoring =
-                                Metrics.run
+                                ScoreProcessor.run
                                     req.Ruleset
                                     with_mods.Keys
                                     (StoredReplayProvider replay_data)

@@ -17,7 +17,7 @@ module Gameplay =
 
     let score_info_from_gameplay
         (info: LoadedChartInfo)
-        (scoring: ScoreMetric)
+        (scoring: ScoreProcessor)
         (replay_data: ReplayData)
         : ScoreInfo =
         {

@@ -93,7 +93,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
                 font_texture,
                 text_bounds,
                 color.Value,
-                state.Scoring.Value,
+                state.Scoring.Accuracy,
                 config.AccuracyFontSpacing,
                 config.AccuracyDotExtraSpacing,
                 config.AccuracyPercentExtraSpacing

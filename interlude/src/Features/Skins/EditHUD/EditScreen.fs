@@ -718,13 +718,13 @@ module EditHudScreen =
         let mutable replay_data = replay_data
 
         let mutable scoring =
-            Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
+            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
 
         let mutable time = -Time.infinity
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
-            scoring <- Metrics.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
+            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with

@@ -12,7 +12,7 @@ open Interlude.Features.Gameplay
 type PacemakerState =
     | None
     | Accuracy of float
-    | Replay of IScoreMetric
+    | Replay of ScoreProcessorBase
     | Judgement of target: JudgementId * max_count: int
 
 [<RequireQualifiedAccess>]
@@ -23,13 +23,13 @@ type PacemakerCreationContext =
 
 module PacemakerState =
 
-    let pacemaker_met (scoring: IScoreMetric) (state: PacemakerState) =
+    let pacemaker_met (scoring: ScoreProcessorBase) (state: PacemakerState) =
         match state with
         | PacemakerState.None -> true
-        | PacemakerState.Accuracy x -> scoring.Value >= x
+        | PacemakerState.Accuracy x -> scoring.Accuracy >= x
         | PacemakerState.Replay r ->
             r.Update Time.infinity
-            scoring.Value >= r.Value
+            scoring.Accuracy >= r.Accuracy
         | PacemakerState.Judgement(judgement, count) ->
             let actual =
                 if judgement = -1 then
@@ -51,7 +51,7 @@ module PacemakerState =
             let replay_data = StoredReplayProvider(score_info.Replay) :> IReplayProvider
 
             let replay_scoring =
-                Metrics.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate
+                ScoreProcessor.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate
 
             PacemakerState.Replay replay_scoring
 
@@ -73,7 +73,7 @@ module PacemakerState =
                         | Some score ->
                             let with_mods = Mods.apply score.Mods info.Chart
                             let replay_data = score.Replay |> Replay.decompress_bytes
-                            let scoring = Metrics.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+                            let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
                             PacemakerState.Replay scoring
 

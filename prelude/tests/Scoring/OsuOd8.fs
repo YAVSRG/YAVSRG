@@ -14,7 +14,7 @@ module ``osu OD8`` =
     let TapNote () =
         let notes = ChartBuilder(4).Note(0.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(0.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -28,7 +28,7 @@ module ``osu OD8`` =
     let HoldNote () =
         let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(0.0f<ms>, 0).KeyUp(1000.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -42,7 +42,7 @@ module ``osu OD8`` =
     let HoldNote_Overhold () =
         let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(0.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -56,7 +56,7 @@ module ``osu OD8`` =
     let HoldNote_Underhold () =
         let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(0.0f<ms>, 0).KeyUp(500.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -78,7 +78,7 @@ module ``osu OD8`` =
                 .KeyUp(1000.0f<ms>, 0)
                 .Build()
 
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -92,7 +92,7 @@ module ``osu OD8`` =
     let HoldNote_Miss_Regrab () =
         let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(500.0f<ms>, 0).KeyUp(1000.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -106,7 +106,7 @@ module ``osu OD8`` =
     let HoldNote_EarlyHold_Release () =
         let notes = ChartBuilder(4).Note(0.0f<ms>).Hold(500.0f<ms>, 1500.0f<ms>).Build()
         let replay = ReplayBuilder().KeyDown(0.0f<ms>, 0).KeyUp(1500.0f<ms>, 0).Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -122,7 +122,7 @@ module ``osu OD8`` =
     let HoldNote_Miss () =
         let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
         let replay = ReplayBuilder().Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -141,7 +141,7 @@ module ``osu OD8`` =
                 .KeyDown(10.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
                 .KeyDown(20.0f<ms>, 0).KeyUp(25.0f<ms>, 0)
                 .Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -159,7 +159,7 @@ module ``osu OD8`` =
                 .KeyDown(0.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
                 .KeyDown(10.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
                 .Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -177,7 +177,7 @@ module ``osu OD8`` =
                 .KeyDown(-1.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
                 .KeyDown(10.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
                 .Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -194,7 +194,7 @@ module ``osu OD8`` =
                 .KeyDown(-5.0f<ms>, 0).KeyUp(5.0f<ms>, 0)
                 .KeyDown(5.0f<ms>, 0).KeyUp(15.0f<ms>, 0)
                 .Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
@@ -223,7 +223,7 @@ module ``osu OD8`` =
                 .KeyDown(510.0f<ms>, 0).KeyUp(511.0f<ms>, 0)
                 .KeyDown(610.0f<ms>, 0).KeyUp(611.0f<ms>, 0)
                 .Build()
-        let scoring = Metrics.run RULESET 4 replay notes 1.0f
+        let scoring = ScoreProcessor.run RULESET 4 replay notes 1.0f
         let result = scoring.State
 
         printfn "%A" result
