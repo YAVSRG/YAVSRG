@@ -21,5 +21,5 @@ type CurrentChart() =
         let diff_text =
             match SelectedChart.CACHE_DATA with
             | None -> "--"
-            | Some c -> c.DifficultyName
+            | Some c -> c.Folder
         Text.fill_b (Style.font, diff_text, this.Bounds.Shrink(30.0f, 20.0f).SliceB(50.0f), Colors.text, Alignment.CENTER)
