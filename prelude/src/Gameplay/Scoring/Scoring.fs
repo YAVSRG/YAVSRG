@@ -13,10 +13,11 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
     let last_note = (TimeArray.last notes).Value.Time
     let duration = last_note - first_note
     let miss_window = ruleset.Accuracy.MissWindow * rate
+    let cbrush_window = ruleset.Accuracy.CbrushWindow * rate
 
     // having two seekers improves performance when processing entire scores
-    let mutable note_seek_passive = 0
-    let mutable note_seek_active = 0
+    let mutable note_seek_misses = 0
+    let mutable note_seek_inputs = 0
 
     let hold_states = Array.create keys (Nothing, -1)
 
@@ -27,10 +28,16 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
     let on_hit_ev = Event<HitEvent<HitEventGuts>>()
     let on_hit = on_hit_ev.Publish
 
-    //let osu_window_behaviour =
-    //    match ruleset.Accuracy.HoldNoteBehaviour with
-    //    | HoldNoteBehaviour.Osu _ -> true
-    //    | _ -> false
+    let hit_mechanics, PREVENT_BACKWARDS_NOTES =
+        match ruleset.Accuracy.HoldNoteBehaviour with
+        | HoldNoteBehaviour.Osu _ ->
+            HitMechanics.osu (hit_data, miss_window, cbrush_window), true
+        | _ ->
+            match ruleset.Accuracy.Points with
+            | AccuracyPoints.WifeCurve _ ->
+                HitMechanics.etterna (hit_data, miss_window), false
+            | _ ->
+                HitMechanics.interlude (hit_data, miss_window, cbrush_window), true
 
     member this.OnHit = on_hit
 
@@ -86,7 +93,7 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
 
     member this.HitData = hit_data // todo: stop exposing this
 
-    member this.Finished = note_seek_passive = hit_data.Length
+    member this.Finished = note_seek_misses = hit_data.Length
 
     member this.HitEvents = hit_events.AsReadOnly()
     member this.Snapshots = snapshots.AsReadOnly()
@@ -95,7 +102,7 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
     // call Update with Time.infinity to do a correct feeding of the whole replay
     member this.Update(chart_time: ChartTime) =
         this.PollReplay chart_time // calls HandleKeyDown and HandleKeyUp appropriately
-        this.HandlePassive chart_time
+        this.HandleMissedNotes chart_time
 
     member private this.UpdateStateSnapshots(chart_time: ChartTime) =
         let snapshot_target_count =
@@ -121,41 +128,43 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
                     Judgements = this.State.Judgements |> Array.copy
                 }
 
-    member private this.HandlePassive(chart_time: ChartTime) =
+    member private this.HandleMissedNotes(chart_time: ChartTime) =
         let now = first_note + chart_time
         let target = now - miss_window
 
-        while note_seek_passive < hit_data.Length
-              && InternalScore.offsetOf hit_data.[note_seek_passive] <= target do
-            let struct (t, deltas, status) = hit_data.[note_seek_passive]
+        while note_seek_misses < hit_data.Length
+              && InternalScore.offsetOf hit_data.[note_seek_misses] <= target do
+            let struct (t, deltas, status) = hit_data.[note_seek_misses]
 
             for k = 0 to (keys - 1) do
 
                 if status.[k] = HitStatus.HIT_REQUIRED then
                     this._HandleEvent
                         {
-                            Index = note_seek_passive
+                            Index = note_seek_misses
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Hit_(deltas.[k], false, true)
                         }
+                    status.[k] <- HitStatus.HIT_ACCEPTED
 
                 elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                    hold_states.[k] <- MissedHead, note_seek_passive
+                    hold_states.[k] <- MissedHead, note_seek_misses
 
                     this._HandleEvent
                         {
-                            Index = note_seek_passive
+                            Index = note_seek_misses
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Hit_(deltas.[k], true, true)
                         }
+                    status.[k] <- HitStatus.HIT_ACCEPTED
 
                 elif status.[k] = HitStatus.RELEASE_REQUIRED then
                     let overhold =
                         match hold_states.[k] with
                         | Dropped, i
-                        | Holding, i when i <= note_seek_passive -> Bitmask.has_key k this.KeyState
+                        | Holding, i when i <= note_seek_misses -> Bitmask.has_key k this.KeyState
                         | _ -> false
 
                     let dropped =
@@ -172,85 +181,94 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
 
                     this._HandleEvent
                         {
-                            Index = note_seek_passive
+                            Index = note_seek_misses
                             Time = t - first_note + miss_window
                             Column = k
                             Guts = Release_(deltas.[k], true, overhold, dropped, missed_head)
                         }
+                    status.[k] <- HitStatus.RELEASE_ACCEPTED
 
                     match hold_states.[k] with
-                    | _, i when i < note_seek_passive -> hold_states.[k] <- Nothing, note_seek_passive
+                    | _, i when i < note_seek_misses -> hold_states.[k] <- Nothing, note_seek_misses
                     | _ -> ()
 
-            note_seek_passive <- note_seek_passive + 1
+            note_seek_misses <- note_seek_misses + 1
 
         this.UpdateStateSnapshots(chart_time)
 
-    override this.HandleKeyDown(chart_time: ChartTime, k: int) =
-        this.HandlePassive chart_time
-        let now = first_note + chart_time
-
-        while note_seek_active < hit_data.Length
-              && InternalScore.offsetOf hit_data.[note_seek_active] < now - miss_window do
-            note_seek_active <- note_seek_active + 1
-
-        let mutable i = note_seek_active
-        let mutable cbrush_absorb_delta = miss_window
-        let mutable matching_note_index = -1
-        let mutable matching_note_delta = miss_window
-        let target = now + miss_window
-
-        while i < hit_data.Length && InternalScore.offsetOf hit_data.[i] <= target do
+    member private this.MissPreviousNotes(k: int, before_index: int, chart_time: Time) =
+        let mutable i = note_seek_misses
+        while i < before_index do
             let struct (t, deltas, status) = hit_data.[i]
-            let delta = now - t
 
-            // Find unhit note that is closer than the current candidate
-            if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                if Time.abs matching_note_delta > Time.abs delta then
-                    matching_note_index <- i
-                    matching_note_delta <- delta
+            if status.[k] = HitStatus.HIT_REQUIRED then
+                this._HandleEvent
+                    {
+                        Index = i
+                        Time = chart_time
+                        Column = k
+                        Guts = Hit_(deltas.[k], false, true)
+                    }
+                status.[k] <- HitStatus.HIT_ACCEPTED
 
-                // If new candidate is within cbrush window, stop looking resulting in earliest match being used
-                // Otherwise keep looking for something closer and allow this note to be missed
-                if Time.abs matching_note_delta < ruleset.Accuracy.CbrushWindow then
-                    i <- hit_data.Length
-            // Find hit note that got hit earlier than the cbrush window, and track how close it is
-            elif
-                status.[k] = HitStatus.HIT_ACCEPTED
-                && deltas.[k] < -ruleset.Accuracy.CbrushWindow
-            then
-                if Time.abs cbrush_absorb_delta > Time.abs delta then
-                    cbrush_absorb_delta <- delta
+            elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
+                this._HandleEvent
+                    {
+                        Index = i
+                        Time = chart_time
+                        Column = k
+                        Guts = Hit_(deltas.[k], true, true)
+                    }
+                status.[k] <- HitStatus.HIT_ACCEPTED
+
+            elif status.[k] = HitStatus.RELEASE_REQUIRED then
+                this._HandleEvent
+                    {
+                        Index = i
+                        Time = chart_time
+                        Column = k
+                        Guts = Release_(deltas.[k], true, false, true, true)
+                    }
+                status.[k] <- HitStatus.RELEASE_ACCEPTED
 
             i <- i + 1
 
-        if matching_note_index >= 0 then
-            let struct (_, deltas, status) = hit_data.[matching_note_index]
-            // If fumbled note detected is closer than hit candidate, swallow the hit
-            if Time.abs cbrush_absorb_delta >= Time.abs matching_note_delta then
-                let is_hold_head = status.[k] <> HitStatus.HIT_REQUIRED
-                status.[k] <- HitStatus.HIT_ACCEPTED
-                deltas.[k] <- matching_note_delta / rate
+    override this.HandleKeyDown(chart_time: ChartTime, k: int) =
+        this.HandleMissedNotes chart_time
+        let now = first_note + chart_time
 
-                this._HandleEvent
-                    {
-                        Index = matching_note_index
-                        Time = chart_time
-                        Column = k
-                        Guts = Hit_(deltas.[k], is_hold_head, false)
-                    }
-                // Begin tracking if it's a hold note
-                if is_hold_head then
-                    hold_states.[k] <- Holding, matching_note_index
+        while note_seek_inputs < hit_data.Length
+              && InternalScore.offsetOf hit_data.[note_seek_inputs] < now - miss_window do
+            note_seek_inputs <- note_seek_inputs + 1
 
-        else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
+        match hit_mechanics (k, note_seek_inputs, now) with
+        | BLOCKED -> ()
+        | FOUND (index, delta) ->
+            let struct (t, deltas, status) = hit_data.[index]
+            if PREVENT_BACKWARDS_NOTES then this.MissPreviousNotes(k, index, chart_time)
+            let is_hold_head = status.[k] <> HitStatus.HIT_REQUIRED
+            status.[k] <- HitStatus.HIT_ACCEPTED
+            deltas.[k] <- delta / rate
+
+            this._HandleEvent
+                {
+                    Index = index
+                    Time = chart_time
+                    Column = k
+                    Guts = Hit_(deltas.[k], is_hold_head, false)
+                }
+            // Begin tracking if it's a hold note
+            if is_hold_head then
+                hold_states.[k] <- Holding, index
+        | NOTFOUND ->
+            // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             hold_states.[k] <-
                 match hold_states.[k] with
                 | MissedHead, i -> MissedHeadThenHeld, i
                 | x -> x
 
     override this.HandleKeyUp(chart_time: ChartTime, k: int) =
-        this.HandlePassive chart_time
+        this.HandleMissedNotes chart_time
         let now = first_note + chart_time
 
         match hold_states.[k] with
