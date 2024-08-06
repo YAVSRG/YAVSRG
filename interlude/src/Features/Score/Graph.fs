@@ -204,7 +204,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let ms_to_y (time: Time) = c - System.Math.Clamp(time * GraphSettings.scale.Value / score_info.Ruleset.Accuracy.MissWindow, -1.0f, 1.0f) * h
 
             for (time, _) in score_info.Ruleset.Accuracy.Timegates do
-                let label = if time < 0.0f<ms> then sprintf "%.1fms" time else sprintf "+%.1fms" time
+                let label = if time < 0.0f<ms> then sprintf "%gms" time else sprintf "+%gms" time
                 Text.draw_b(Style.font, label, 15.0f, this.Bounds.Left + 5.0f, ms_to_y time - (if time < 0.0f<ms> then 24.0f else 0.0f), color)
         else
             Text.draw_b (
