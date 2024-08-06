@@ -80,6 +80,16 @@ module Patterns =
                 :: _ when x > 0 -> 2
             | _ -> 0
 
+    module Jacks_4K =
+            
+        let QUADSTREAM : PatternRecogniser =
+            function
+            |   { Notes = 4 }
+                :: { Jacks = 1 } 
+                :: { Jacks = 0 }
+                :: { Jacks = 0 } :: _ -> 4
+            | _ -> 0
+
         // todo: identify anchors
 
     module Chordstream_4K =
@@ -272,6 +282,7 @@ module Patterns =
         Jack, "Chordjacks", Jacks.CHORDJACKS
         Jack, "Gluts", Jacks.GLUTS
         Jack, "Minijacks", Jacks.MINIJACKS
+        Jack, "Quadstream", Jacks_4K.QUADSTREAM
     |]
     
     let SPECIFIC_PATTERNS_7K = [|

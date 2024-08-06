@@ -115,7 +115,10 @@ module Sorting =
 
     let private has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
         match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+        | Some report -> 
+            report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+            || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+            || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
         | None -> false
     
     let private below_ln_percent (threshold: float) (cc: CachedChart, ctx: LibraryViewContext) =
@@ -132,9 +135,6 @@ module Sorting =
         match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
         | Some report -> report.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
         | None -> false
-
-    let private then_by_physical (cc: CachedChart) (sort_value: int) : int64 =
-        (int64 sort_value <<< 32) + (cc.Physical * 1000.0 |> int64)
 
     type SortingTag = string * float32 * float
     type SortMethod = CachedChart * LibraryViewContext -> SortingTag
