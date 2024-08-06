@@ -52,12 +52,17 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
         )
             .Conditional(fun () -> options.ScoreGraphLineMode.Value <> ScoreGraphLineMode.None)
             .Pos(2)
+        |+ PageSetting(%"score.graph.settings.line_on_top", Checkbox(options.ScoreGraphLineOnTop))
+            .Conditional(fun () -> options.ScoreGraphLineMode.Value <> ScoreGraphLineMode.None)
+            .Pos(4)
         |+ PageSetting(%"score.graph.settings.only_releases", Checkbox GraphSettings.only_releases)
-            .Pos(5)
+            .Pos(7)
         |+ PageSetting(%"score.graph.settings.column_filter", column_filter_ui)
-            .Pos(7, 2, PageWidth.Full)
+            .Pos(9, 2, PageWidth.Full)
         |+ PageSetting(%"score.graph.settings.scale", Slider(GraphSettings.scale, Step = 0.25f, Format = fun x -> sprintf "%.0f%%" (x * 100.0f)))
-            .Pos(9)
+            .Pos(11)
+        |+ PageSetting(%"score.graph.settings.windows_background", Checkbox(options.ScoreGraphWindowBackground))
+            .Pos(13)
         :> Widget
 
     override this.Title = %"score.graph.settings"
@@ -153,7 +158,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     member this.Keys : int = score_info.WithMods.Keys
 
-    member private this.DrawLineGraph(y_func: ScoreMetricSnapshot -> float32, color_func: ScoreMetricSnapshot -> Color) =
+    member private this.PlotLine(y_func: ScoreMetricSnapshot -> float32, color_func: ScoreMetricSnapshot -> Color) =
 
         let draw_line (x1, y1) (x2, y2) (color: Color) =
             let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
@@ -179,24 +184,48 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 
             draw_line (x1, y1) (x2, y2) (color_func snapshots.[i]).O3
 
-    member private this.Redraw() =
-        refresh <- false
+    member private this.DrawWindows() =
         let h = 0.5f * this.Bounds.Height
-        let width = this.Bounds.Width
-        fbo.Bind true
+        let c = this.Bounds.CenterY
+        let ms_to_y (time: Time) = c - System.Math.Clamp(time * GraphSettings.scale.Value / score_info.Ruleset.Accuracy.MissWindow, -1.0f, 1.0f) * h
 
+        let mutable time = -score_info.Ruleset.Accuracy.MissWindow
+        for (time2, j) in score_info.Ruleset.Accuracy.Timegates do
+            Draw.rect (Rect.Create(this.Bounds.Left, ms_to_y time2, this.Bounds.Right, ms_to_y time)) (score_info.Ruleset.JudgementColor(j).O4a 100)
+            time <- time2
         Draw.rect
-            (Rect.Create(
-                this.Bounds.Left,
-                (this.Bounds.Top + h - 2.5f),
-                this.Bounds.Right,
-                (this.Bounds.Top + h + 2.5f)
-            ))
-            (Colors.white.O2)
+            (Rect.Create(this.Bounds.Left, ms_to_y score_info.Ruleset.Accuracy.MissWindow, this.Bounds.Right, ms_to_y time))
+            (score_info.Ruleset.JudgementColor(score_info.Ruleset.Judgements.Length - 1).O4a 100)
 
-        let events = score_info.Scoring.HitEvents
-        assert (events.Count > 0)
+    member private this.DrawLabels(color: Color * Color) =
+        if expanded && options.ScoreGraphWindowBackground.Value then
+            let h = 0.5f * this.Bounds.Height
+            let c = this.Bounds.CenterY
+            let ms_to_y (time: Time) = c - System.Math.Clamp(time * GraphSettings.scale.Value / score_info.Ruleset.Accuracy.MissWindow, -1.0f, 1.0f) * h
 
+            for (time, _) in score_info.Ruleset.Accuracy.Timegates do
+                let label = if time < 0.0f<ms> then sprintf "%.1fms" time else sprintf "+%.1fms" time
+                Text.draw_b(Style.font, label, 15.0f, this.Bounds.Left + 5.0f, ms_to_y time - (if time < 0.0f<ms> then 24.0f else 0.0f), color)
+        else
+            Text.draw_b (
+                    Style.font, 
+                    sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
+                    24.0f,
+                    this.Bounds.Left + 10.0f,
+                    this.Bounds.Bottom - 40.0f,
+                    color
+                )
+            Text.draw_b (
+                Style.font,
+                sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
+                24.0f,
+                this.Bounds.Left + 10.0f,
+                this.Bounds.Top + 3.0f,
+                color
+            )
+        Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, color, Alignment.RIGHT)
+
+    member private this.DrawLineGraph() =
         let line_color =
             match options.ScoreGraphLineColor.Value with
             | ScoreGraphLineColor.Lamp ->
@@ -207,24 +236,23 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     score_info.Ruleset.GradeColor grade
             | _ -> K Colors.white
 
-        // line graph
         match options.ScoreGraphLineMode.Value with
         | ScoreGraphLineMode.Combo when score_info.Scoring.Snapshots.Count > 0 ->
 
             let y_func (snapshot: ScoreMetricSnapshot) = float32 snapshot.Combo / float32 score_info.Scoring.State.BestCombo
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
         
         | ScoreGraphLineMode.Mean when score_info.Scoring.Snapshots.Count > 0 ->
 
             let yscale = 0.5f / 10.0f<ms>
             let y_func (snapshot: ScoreMetricSnapshot) = 0.5f + snapshot.Mean * yscale |> min 1.0f |> max 0.0f
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.StandardDeviation when score_info.Scoring.Snapshots.Count > 0 ->
         
             let max_sd = score_info.Scoring.Snapshots |> Seq.map _.StandardDeviation |> Seq.max
             let y_func (snapshot: ScoreMetricSnapshot) = snapshot.StandardDeviation / max_sd
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.Accuracy when score_info.Scoring.Snapshots.Count > 0 ->
 
@@ -233,7 +261,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let min_acc = accuracies |> Seq.min
             
             let y_func (snapshot: ScoreMetricSnapshot) = (snapshot.Accuracy - min_acc) / (max_acc - min_acc) |> float32
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.MA when score_info.Scoring.Snapshots.Count > 0 && score_info.Scoring.State.Judgements.Length > 1 ->
 
@@ -243,7 +271,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let min_ratio = ratios |> Seq.min
             
             let y_func (snapshot: ScoreMetricSnapshot) = (ma snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.PA when score_info.Scoring.Snapshots.Count > 0 && score_info.Scoring.State.Judgements.Length > 2 ->
 
@@ -253,11 +281,16 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let min_ratio = ratios |> Seq.min
             
             let y_func (snapshot: ScoreMetricSnapshot) = (pa snapshot - min_ratio) / (max_ratio - min_ratio) |> float32
-            this.DrawLineGraph(y_func, line_color)
+            this.PlotLine(y_func, line_color)
             
         | _ -> ()
 
-        // draw dots
+    member private this.DrawHits() =
+        let events = score_info.Scoring.HitEvents
+        assert (events.Count > 0)
+
+        let h = 0.5f * this.Bounds.Height
+        let width = this.Bounds.Width
         let xscale = (width - 10.0f) / events.[events.Count - 1].Time
 
         for ev in events do
@@ -286,6 +319,30 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | ValueSome (y, col) ->
                 let x = this.Bounds.Left + 5.0f + ev.Time * xscale
                 Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
+
+    member private this.Redraw() =
+        refresh <- false
+        let h = 0.5f * this.Bounds.Height
+        fbo.Bind true
+
+        if options.ScoreGraphWindowBackground.Value then
+            this.DrawWindows()
+
+        Draw.rect
+            (Rect.Create(
+                this.Bounds.Left,
+                (this.Bounds.Top + h - 2.5f),
+                this.Bounds.Right,
+                (this.Bounds.Top + h + 2.5f)
+            ))
+            (Colors.white.O2)
+
+        if options.ScoreGraphLineOnTop.Value then
+            this.DrawHits()
+            this.DrawLineGraph()
+        else
+            this.DrawLineGraph()
+            this.DrawHits()
 
         fbo.Unbind()
 
@@ -343,28 +400,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             draw_snapshot_info box current_snapshot
 
-            Text.draw (
-                Style.font, 
-                sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
-                24.0f,
-                this.Bounds.Left + 10.0f,
-                this.Bounds.Bottom - 40.0f,
-                Colors.white.O1
-            )
-            Text.draw (
-                Style.font,
-                sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
-                24.0f,
-                this.Bounds.Left + 10.0f,
-                this.Bounds.Top + 3.0f,
-                Colors.white.O1
-            )
-            Text.draw_aligned (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.white.O1, Alignment.RIGHT)
-
+            this.DrawLabels((Colors.white.O1, Color.Transparent))
         else
-            Text.draw_b (Style.font, %"score.graph.early", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Bottom - 40.0f, Colors.text)
-            Text.draw_b (Style.font, %"score.graph.late", 24.0f, this.Bounds.Left + 10.0f, this.Bounds.Top + 3.0f, Colors.text)
-            Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
+            this.DrawLabels(Colors.text)
 
     interface System.IDisposable with
         override this.Dispose() = 

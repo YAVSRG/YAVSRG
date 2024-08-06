@@ -196,6 +196,8 @@ module Options =
             AutoCalibrateOffset: Setting<bool>
             ScoreGraphLineMode: Setting<ScoreGraphLineMode>
             ScoreGraphLineColor: Setting<ScoreGraphLineColor>
+            ScoreGraphLineOnTop: Setting<bool>
+            ScoreGraphWindowBackground: Setting<bool>
             ConfirmExit: Setting<bool>
             HoldToGiveUp: Setting<bool>
         }
@@ -309,6 +311,8 @@ module Options =
                 AutoCalibrateOffset = Setting.simple false
                 ScoreGraphLineMode = Setting.simple ScoreGraphLineMode.Combo
                 ScoreGraphLineColor = Setting.simple ScoreGraphLineColor.Lamp
+                ScoreGraphLineOnTop = Setting.simple false
+                ScoreGraphWindowBackground = Setting.simple false
                 ConfirmExit = Setting.simple true
                 HoldToGiveUp = Setting.simple false
             }
