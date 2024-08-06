@@ -300,7 +300,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some judgement when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - System.Math.Clamp(evData.Delta / score_info.Scoring.MissWindow * GraphSettings.scale.Value, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
+                        let y = h - System.Math.Clamp(h * evData.Delta / score_info.Scoring.MissWindow * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor judgement)
 
                     | _ -> ValueNone
