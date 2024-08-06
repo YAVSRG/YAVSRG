@@ -90,7 +90,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
 
         if config.InputMeterShowKPS then
 
-            let ONE_SECOND = 1000.0f<ms>
+            let ONE_SECOND = 1000.0f<ms> * SelectedChart.rate.Value
 
             let recent_events = state.Scoring.ReplayRecentEvents()
             let now = state.CurrentChartTime()
