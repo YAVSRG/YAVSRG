@@ -41,7 +41,7 @@ module LevelSelect =
         )
 
     let mutable filter: Filter = []
-    let endless_priority = Setting.simple SuggestionPriority.Variety
+    let endless_priority = Setting.simple SuggestionPriority.Consistency
 
     module History =
 
