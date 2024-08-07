@@ -166,6 +166,7 @@ module PatternSummary =
         amount
 
     let private find_density_percentile (sorted_densities: float32 array) (percentile: float32) =
+        if sorted_densities.Length = 0 then 0.0f else
         let index = percentile * float32 sorted_densities.Length |> floor |> int
         sorted_densities.[index]
 
@@ -459,7 +460,7 @@ module PatternSummary =
         {
             Category = category + if sv_amount > SV_AMOUNT_THRESHOLD then " + SV" else ""
             MajorFeatures = major |> List.map (fun x -> x.ToString())
-            MinorFeatures = minor |> List.map (fun x -> x.ToString()) |> List.truncate 3
+            MinorFeatures = minor |> List.map (fun x -> x.ToString())
         }
 
     [<Json.AutoCodec>]
@@ -469,11 +470,27 @@ module PatternSummary =
             LNPercent: float32
             SVAmount: Time
             Category: ChartCategorisation
+            Density10: float32
+            Density25: float32
+            Density50: float32
+            Density75: float32
+            Density90: float32
         }
-        static member Default = { Patterns = []; LNPercent = 0.0f; SVAmount = 0.0f<ms>; Category = ChartCategorisation.Default }
+        static member Default = 
+            { 
+                Patterns = []
+                LNPercent = 0.0f
+                SVAmount = 0.0f<ms>
+                Category = ChartCategorisation.Default
+                Density10 = 0.0f
+                Density25 = 0.0f
+                Density50 = 0.0f
+                Density75 = 0.0f
+                Density90 = 0.0f
+            }
 
     let generate_pattern_data_uncached (rate: float32) (chart: Chart) : Info =
-        let core_patterns, specific_patterns = Patterns.analyse rate chart
+        let raw_data, core_patterns, specific_patterns = Patterns.analyse rate chart
 
         let breakdown =
             core_patterns
@@ -496,11 +513,18 @@ module PatternSummary =
         let patterns = breakdown |> List.filter (is_useless >> not)
         let sv_amount = sv_time chart
 
+        let sorted_densities = raw_data |> Seq.map _.Density |> Array.ofSeq |> Array.sort
+
         {
             Patterns = patterns
             LNPercent = ln_percent chart
             SVAmount = sv_amount
             Category = categorise_chart chart.Keys patterns sv_amount
+            Density10 = find_density_percentile sorted_densities 0.1f
+            Density25 = find_density_percentile sorted_densities 0.25f
+            Density50 = find_density_percentile sorted_densities 0.5f
+            Density75 = find_density_percentile sorted_densities 0.75f
+            Density90 = find_density_percentile sorted_densities 0.9f
         }
 
     let generate_pattern_data = generate_pattern_data_uncached |> cached
