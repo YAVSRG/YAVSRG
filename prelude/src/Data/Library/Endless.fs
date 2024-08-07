@@ -13,18 +13,17 @@ open Prelude.Data.Library.Collections
 open Prelude.Data
 
 [<RequireQualifiedAccess>]
-type SuggestionPriority =
-    | Variety
-    //| SnipeScores
-    | Consistency
+type Variety =
+    | Low
+    | High
 
 type SuggestionContext =
     {
-        BaseDifficulty: float
         BaseChart: CachedChart * float32
         Mods: ModState
         Filter: Filter
-        Priority: SuggestionPriority
+        MinimumRate: float32
+        MaximumRate: float32
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
@@ -43,75 +42,21 @@ module Suggestion =
 
     let mutable recommended_already = Set.empty
 
-    let private pattern_similarity (total_amount: ScaledTime) (base_patterns: PatternInfo) (other_patterns: PatternInfo) : float32 =
+    let private pattern_similarity (total: ScaledTime) (rate: float32, patterns: PatternInfo) (c_rate: float32, c_patterns: PatternInfo) : float32 =
+        let c_total = c_patterns.Patterns |> Seq.sumBy _.Amount
         let mutable similarity = 0.0f
-        for p in base_patterns.Patterns do
-            for p2 in other_patterns.Patterns do
-                if p.Pattern = p2.Pattern && p.Mixed = p2.Mixed then
+        for p2 in c_patterns.Patterns do
+            for p1 in patterns.Patterns do
+                if p1.Pattern = p2.Pattern then
+                    let mixed_similarity = if p1.Mixed = p2.Mixed then 1.0f else 0.5f
                     let bpm_similarity =
-                        1.0f - 10.0f * MathF.Abs(MathF.Log(float32 p.BPM / float32 p2.BPM)) |> max 0.0f
+                        let difference = (rate * float32 p1.BPM) / (c_rate * float32 p2.BPM) |> log |> abs
+                        Math.Clamp(1.0f - 10.0f * difference, 0.0f, 1.0f)
                     let density_similarity =
-                        1.0f - 10.0f * MathF.Abs(MathF.Log(p.Density75 / p2.Density75)) |> max 0.0f
-                    similarity <- similarity + bpm_similarity * density_similarity * (min p.Amount p2.Amount) / total_amount
+                        let difference = (rate * p1.Density75) / (c_rate * p2.Density75) |> log |> abs
+                        Math.Clamp(1.0f - 10.0f * difference, 0.0f, 1.0f)
+                    similarity <- similarity + mixed_similarity * bpm_similarity * density_similarity * (p1.Amount / total) * (p2.Amount / c_total)
         similarity
-
-    let private get_suggestions (ctx: SuggestionContext) : (CachedChart * float32) seq =
-
-        let base_chart, rate = ctx.BaseChart
-        
-        match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
-        | None -> Seq.empty
-        | Some patterns ->
-
-        recommended_already <- Set.add base_chart.Hash recommended_already
-        recommended_already <- Set.add (base_chart.Title.ToLower()) recommended_already
-
-        let min_difficulty = base_chart.Physical * 0.9
-        let max_difficulty = base_chart.Physical * 1.1
-
-        let min_length = base_chart.Length - 60000.0f<ms>
-        let max_length = min_length + 120000.0f<ms>
-
-        let max_ln_pc = patterns.LNPercent + 0.1f
-        let min_ln_pc = patterns.LNPercent - 0.1f
-
-        let now = Timestamp.now ()
-        let SEVEN_DAYS = 7L * 24L * 3600_000L
-
-        let candidates =
-            ctx.Library.Cache.Entries.Values
-            |> Seq.filter (fun x -> x.Keys = base_chart.Keys)
-            |> Seq.filter (fun x -> x.Physical >= min_difficulty && x.Physical <= max_difficulty)
-            |> Seq.filter (fun x -> x.Length >= min_length && x.Length <= max_length)
-            |> Seq.filter (fun x -> not (recommended_already.Contains x.Hash))
-            |> Seq.filter (fun x -> not (recommended_already.Contains (x.Title.ToLower())))
-            |> Seq.choose (fun x -> match Cache.patterns_by_hash x.Hash ctx.Library.Cache with Some p -> Some (x, p) | None -> None)
-            |> Seq.filter (fun (x, p) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
-            |> Seq.filter (fun (x, p) -> now - (ScoreDatabase.get x.Hash ctx.ScoreDatabase).LastPlayed > SEVEN_DAYS)
-            |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
-
-        let total_pattern_amount = patterns.Patterns |> Seq.sumBy (fun x -> x.Amount)
-
-        seq {
-            for entry, candidate_patterns in candidates do
-
-                let mutable similarity_score = pattern_similarity total_pattern_amount patterns candidate_patterns
-
-                if (patterns.SVAmount < 30000.0f<ms>) <> (candidate_patterns.SVAmount < 30000.0f<ms>) then
-                    similarity_score <- similarity_score - 0.5f
-
-                let difficulty_similarity =
-                    abs (entry.Physical * float rate - ctx.BaseDifficulty) / ctx.BaseDifficulty * 5.0
-                    |> min 1.0
-                    |> fun x -> 1.0 - x * x
-                    |> float32
-
-                similarity_score <- similarity_score * difficulty_similarity
-
-                yield entry, similarity_score
-        }
-        |> Seq.sortByDescending snd
-        |> Seq.map (fun (cc, _) -> (cc, rate))
 
     let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
         let rand = Random()
@@ -126,9 +71,78 @@ module Suggestion =
         else
             None
 
+    let private get_core_suggestions (ctx: SuggestionContext) : (CachedChart * float32) seq =
+
+        let base_chart, rate = ctx.BaseChart
+        
+        match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
+        | None -> Seq.empty
+        | Some patterns ->
+
+        recommended_already <- Set.add base_chart.Hash recommended_already
+        recommended_already <- Set.add (base_chart.Title.ToLower()) recommended_already
+
+        let target_density = patterns.Density50 * rate
+
+        let max_ln_pc = patterns.LNPercent + 0.1f
+        let min_ln_pc = patterns.LNPercent - 0.1f
+
+        let now = Timestamp.now ()
+        let THIRTY_DAYS = 30L * 24L * 3600_000L
+
+        let candidates =
+            ctx.Library.Cache.Entries.Values
+            |> Seq.filter (fun cc -> cc.Keys = base_chart.Keys)
+            |> Seq.filter (fun cc -> not (recommended_already.Contains cc.Hash))
+            |> Seq.filter (fun cc -> not (recommended_already.Contains (cc.Title.ToLower())))
+            |> Seq.choose (fun cc -> 
+                match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with 
+                | None -> None
+                | Some p -> 
+                    let best_rate = target_density / p.Density50
+                    let best_approx_rate = round(best_rate / 0.05f) * 0.05f
+                    if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
+                        Some (cc, (best_approx_rate, p))
+                    else None
+            )
+            |> Seq.filter (fun (cc, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
+            |> Seq.filter (fun (cc, (rate, p)) -> now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed > THIRTY_DAYS)
+            |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
+
+        let total_pattern_amount = patterns.Patterns |> Seq.sumBy _.Amount
+        let spikiness = patterns.Density90 / patterns.Density50
+
+        seq {
+            for cc, (c_rate, c_patterns) in candidates do
+
+                let sv_compatibility = 
+                    if (patterns.SVAmount < 30000.0f<ms>) <> (c_patterns.SVAmount < 30000.0f<ms>) then
+                        0.5f
+                    else 1.0f
+
+                let length_compatibility =
+                    let l1 = base_chart.Length / rate
+                    let l2 = cc.Length / c_rate
+                    1.0f - min 1.0f (abs (l2 - l1) / l1 * 10.0f)
+
+                let difficulty_compatibility =
+                    let c_spikiness = c_patterns.Density90 / c_patterns.Density50
+                    1.0f - min 1.0f (abs (c_spikiness - spikiness) * 10.0f)
+
+                let pattern_compatibility =
+                    pattern_similarity total_pattern_amount (rate, patterns) (c_rate, c_patterns)
+
+                let compatibility = 
+                    sv_compatibility * length_compatibility * difficulty_compatibility * pattern_compatibility
+
+                yield (cc, c_rate), compatibility
+        }
+        |> Seq.sortByDescending snd
+        |> Seq.map fst
+
     let get_suggestion (ctx: SuggestionContext) : (CachedChart * float32) option =
         let rand = Random()
-        let best_matches = get_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
+        let best_matches = get_core_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
 
         if best_matches.Length = 0 then
             None
@@ -214,9 +228,6 @@ module EndlessModeState =
                         Chart = next_cc
                         Rate = rate
                         Mods = ctx.Mods
-                        NextContext = 
-                            match ctx.Priority with
-                            | SuggestionPriority.Consistency -> ctx
-                            | SuggestionPriority.Variety -> { ctx with BaseChart = next_cc, rate }
+                        NextContext = ctx
                     }
             | None -> None

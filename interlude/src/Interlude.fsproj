@@ -191,7 +191,6 @@
     <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Groups.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Score.fs" />
-    <Compile Include="Features\LevelSelect\ContextMenus\Endless.fs" />
     <Compile Include="Features\LevelSelect\Tree\State.fs" />
     <Compile Include="Features\LevelSelect\Tree\Charts.fs" />
     <Compile Include="Features\LevelSelect\Tree\Groups.fs" />

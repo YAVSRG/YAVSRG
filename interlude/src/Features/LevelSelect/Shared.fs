@@ -41,22 +41,22 @@ module LevelSelect =
         )
 
     let mutable filter: Filter = []
-    let endless_priority = Setting.simple SuggestionPriority.Consistency
 
     module History =
 
-        let mutable private history: CachedChart list = []
+        let mutable private history: (CachedChart * float32) list = []
 
         let append_current () = 
             match SelectedChart.CACHE_DATA with
-            | Some cc -> history <- cc :: history
+            | Some cc -> history <- (cc, SelectedChart.rate.Value) :: history
             | None -> ()
 
         let previous () =
             if not (Transitions.in_progress()) then
                 match history with
-                | cc :: xs -> 
+                | (cc, rate) :: xs -> 
                     history <- xs
+                    SelectedChart._rate.Set rate
                     SelectedChart.change(cc, LibraryContext.None, true)
                 | _ -> ()
 
@@ -98,15 +98,15 @@ module LevelSelect =
             match suggestion_ctx with
             | None ->
                 {
-                    BaseDifficulty = SelectedChart.RATING.Value.Physical
                     BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
+                    MinimumRate = 1.00f
+                    MaximumRate = 1.50f
                     Filter = filter |> Filter.except_keywords
                     Mods = SelectedChart.selected_mods.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
                     ScoreDatabase = Content.Scores
-                    Priority = endless_priority.Value
                 }
             | Some ctx -> ctx
 
@@ -139,15 +139,15 @@ module LevelSelect =
             if SelectedChart.RATING.IsSome then
                 let ctx =
                     {
-                        BaseDifficulty = SelectedChart.RATING.Value.Physical
                         BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
+                        MinimumRate = 1.00f
+                        MaximumRate = 1.50f
                         Filter = filter |> Filter.except_keywords
                         Mods = SelectedChart.selected_mods.Value
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
                         ScoreDatabase = Content.Scores
-                        Priority = endless_priority.Value
                     }
 
                 match Suggestion.get_suggestion ctx with

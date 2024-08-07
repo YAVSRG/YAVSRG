@@ -123,3 +123,9 @@ type Patterns(display: Setting<Display>) =
     member this.OnChartUpdated(info: LoadedChartInfo) =
         patterns <- info.Patterns.Patterns |> List.truncate 6
         category <- info.Patterns.Category
+        printfn "%.2f - %.2f - %.2f - %.2f - %.2f" 
+            info.Patterns.Density10
+            info.Patterns.Density25
+            info.Patterns.Density50
+            info.Patterns.Density75
+            info.Patterns.Density90
