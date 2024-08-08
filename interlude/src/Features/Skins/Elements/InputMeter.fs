@@ -91,16 +91,16 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
         if config.InputMeterShowKPS then
             
             let rate = SelectedChart.rate.Value
-            let ONE_SECOND = 1000.0f<ms> * rate
+            let TWO_SECONDS = 2000.0f<ms> * rate
 
             let recent_events = state.Scoring.EnumerateRecentInputs()
             let now = state.CurrentChartTime()
             let mutable kps = 0.0f
             let mutable previous = 0us
             let mutable previous_time = now
-            for struct (timestamp, keystate) in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - ONE_SECOND) do
+            for struct (timestamp, keystate) in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - TWO_SECONDS) do
                 let keys = Bitmask.count (previous &&& ~~~keystate) |> float32
-                kps <- kps + keys * rate * (1f - (now - previous_time) / ONE_SECOND)
+                kps <- kps + keys * rate * (1f - (now - previous_time) / TWO_SECONDS)
                 previous <- keystate
                 previous_time <- timestamp
             let text_bounds = 
