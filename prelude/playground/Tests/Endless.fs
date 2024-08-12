@@ -42,12 +42,12 @@ module Endless =
                 Library = library
                 ScoreDatabase = score_db
                 BaseChart = start, 1.0f
-                BaseDifficulty = start.Physical
+                MinimumRate = 1.0f
+                MaximumRate = 1.5f
                 Filter = []
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
                 Mods = Map.empty
-                Priority = SuggestionPriority.Consistency
             }
 
         let mutable loop = true

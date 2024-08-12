@@ -37,8 +37,6 @@ type AccuracySystemState =
         this.MaxPointsScored <- this.MaxPointsScored + maxpoints
         this.Judgements.[judge] <- this.Judgements.[judge] + 1
 
-    member this.Add(judge: JudgementId) = this.Add(0.0, 0.0, judge)
-
     member this.AddDelta(ms_delta: Time) =
         this.N <- this.N + 1.0f
         this.Sx <- this.Sx + ms_delta
