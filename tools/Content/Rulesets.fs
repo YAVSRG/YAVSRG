@@ -4,7 +4,7 @@ open System.IO
 open System.Collections.Generic
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.PremadeRulesets
+open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open YAVSRG.CLI.Utils
 
@@ -13,12 +13,7 @@ module Rulesets =
     let RULESETS_PATH = Path.Combine(YAVSRG_PATH, "backbeat", "rulesets")
 
     let DEFAULT_RULESETS =
-        List.map
-            (fun (d: Ex_Score.Type) ->
-                (sprintf "xs-%s" (d.Name.ToLower()), Ex_Score.create d)
-            )
-            [ Ex_Score.mizu ]
-        @ [ "noodles", Noodles.RULESET ]
+        [ "noodles", Noodles.RULESET ]
 
     let generate_index () =
         let data: RulesetRepo =

@@ -10,7 +10,7 @@ open Prelude.Charts.Formats.``osu!``
 open Prelude.Data.``osu!``
 open Prelude.Data.Library
 open Prelude.Gameplay
-open Prelude.Gameplay.PremadeRulesets
+open Prelude.Gameplay.Rulesets
 open SevenZip.Compression
 
 module OsuScoreMigration =

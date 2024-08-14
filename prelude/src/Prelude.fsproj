@@ -41,8 +41,12 @@
     <Compile Include="Charts\Processing\Colors.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\Replays.fs" />
-    <Compile Include="Gameplay\Rulesets.fs" />
-    <Compile Include="Gameplay\PremadeRulesets.fs" />
+    <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
+    <Compile Include="Gameplay\Rulesets\Templates\Shared.fs" />
+    <Compile Include="Gameplay\Rulesets\Templates\SC.fs" />
+    <Compile Include="Gameplay\Rulesets\Templates\osu!.fs" />
+    <Compile Include="Gameplay\Rulesets\Templates\Wife3.fs" />
+    <Compile Include="Gameplay\Rulesets\Templates\Noodles.fs" />
     <Compile Include="Gameplay\Scoring\Events.fs" />
     <Compile Include="Gameplay\Scoring\Scoring.fs" />
     <Compile Include="Gameplay\Performance.fs" />

@@ -3,7 +3,7 @@ namespace Interlude.Features.Rulesets
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay.PremadeRulesets
+open Prelude.Gameplay.Rulesets
 open Interlude.Content
 open Interlude.UI
 

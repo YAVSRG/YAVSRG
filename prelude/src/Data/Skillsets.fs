@@ -9,7 +9,7 @@ module Skillsets =
 
     let calculate (score_db: ScoreDatabase) (library: Library) =
 
-        let sc_j4 = PremadeRulesets.SC.create 4
+        let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
         for cc_key in library.Cache.Entries.Keys do
@@ -27,7 +27,7 @@ module Skillsets =
 
     let find_underperformance (score_db: ScoreDatabase) (library: Library) =
 
-        let sc_j4 = PremadeRulesets.SC.create 4
+        let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
         let ACC_INCREASE = 3.0

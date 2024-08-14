@@ -3,6 +3,7 @@
 open System
 open Prelude
 open Prelude.Charts
+open Prelude.Gameplay.Rulesets
 
 [<AbstractClass>]
 type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =
@@ -326,7 +327,7 @@ module Helpers =
 
     let judgement_to_points (conf: Ruleset) (delta: Time) (judge: JudgementId) : float =
         match conf.Accuracy.Points with
-        | AccuracyPoints.WifeCurve j -> RulesetUtils.wife_curve j delta
+        | AccuracyPoints.WifeCurve j -> Wife3.wife_curve j delta
         | AccuracyPoints.Weights(maxweight, weights) -> weights.[judge] / maxweight
 
 type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =
@@ -414,7 +415,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         match ruleset.Accuracy.HoldNoteBehaviour with
         | HoldNoteBehaviour.Osu windows ->
             let judgement =
-                RulesetUtils.osu_ln_judgement windows head_deltas.[column] delta is_overhold is_dropped
+                ``osu!``.ln_judgement windows head_deltas.[column] delta is_overhold is_dropped
 
             this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
 
@@ -540,5 +541,5 @@ module ScoreProcessor =
     open Prelude.Charts.Processing
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        let ruleset = PremadeRulesets.SC.create 4
+        let ruleset = Rulesets.SC.create 4
         create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
