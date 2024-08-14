@@ -427,7 +427,7 @@ module RulesetUtils =
 
         let delta = float delta |> Math.Abs
 
-        let scale = if judge >= 9 then 0.2 else (10.0 - float judge) / 6.0
+        let scale = (10.0 - float judge) / 6.0
         let miss_weight = -2.75
         let ridic = 5.0 * scale
         let boo_window = 180.0 * scale
