@@ -167,7 +167,7 @@ type MainMenuScreen() as this =
         Toolbar.show ()
         Song.on_finish <- 
             SongFinishAction.Custom (fun () -> 
-                LevelSelect.random_chart()
+                LevelSelect.random_chart ()
                 splash_text <- choose_splash ()
             )
 

@@ -120,6 +120,7 @@ module LevelSelect =
             suggestion_ctx <- Some next.NextContext
             true
         | None ->
+            Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
     let start_playlist (playlist: Playlist) =
@@ -135,6 +136,22 @@ module LevelSelect =
         EndlessModeState.clear_queue state
 
     let random_chart () =
+        let true_random_chart() =
+            let ctx =
+                {
+                    Rate = SelectedChart.rate.Value
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
+                    Library = Content.Library
+                    ScoreDatabase = Content.Scores
+                }
+
+            match Suggestion.get_random filter ctx with
+            | Some cc ->
+                History.append_current()
+                SelectedChart.change(cc, LibraryContext.None, true)
+            | None -> ()
+
         if not (Transitions.in_progress()) then
             if SelectedChart.RATING.IsSome then
                 let ctx =
@@ -156,23 +173,9 @@ module LevelSelect =
                     SelectedChart._rate.Value <- rate
                     SelectedChart.change(cc, LibraryContext.None, true)
                 | None -> 
-                    Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
-                    if Screen.current_type = Screen.Type.MainMenu then Percyqaz.Flux.Audio.Song.play_leadin()
+                    true_random_chart()
             else
-                let ctx =
-                    {
-                        Rate = SelectedChart.rate.Value
-                        RulesetId = Rulesets.current_hash
-                        Ruleset = Rulesets.current
-                        Library = Content.Library
-                        ScoreDatabase = Content.Scores
-                    }
-
-                match Suggestion.get_random filter ctx with
-                | Some cc ->
-                    History.append_current()
-                    SelectedChart.change(cc, LibraryContext.None, true)
-                | None -> ()
+                true_random_chart()
 
     let choose_this_chart () =
         SelectedChart.when_loaded
