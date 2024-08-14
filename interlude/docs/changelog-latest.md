@@ -1,23 +1,21 @@
-0.7.25
+0.7.25.1
 ====
 
-# Endless mode
-Endless mode has been overhauled: Now just press 'Continue' on the score screen to play another song
+Bug fix update
 
-# Other new things
-- Retry button also added to score screen
-- Some changes to level select UI, let me know what you think
-- 'Custom image' HUD element that can also be animated
-- Sort by grade and lamp on level select
-- Scroll wheel on score graph to zoom in, graph is also bigger now
-- Option to draw score graph line over hits instead of under
-- Option to draw timing window overlay on score graph
-- Changing local offset is a menu again
+# Bugs fixed
+- Fixed dots on score graph being slightly vertically off
+- 'Continue' button shows notification when it failed to find anything, instead of doing nothing
+- Fix wife lamp colors and J9 scoring curve (again)
+- Fix KPS meter showing 0.5x the right number
 
-# Bug fixes
-- Fixed KPS meter not scaling to rates
-- Fixed J9 windows not being the right scale (requires regenerating the ruleset)
-- Fixed Wife AAAA and AAAAA lamps not being the right color (requires regenerating the ruleset)
-- Fixed score graph disappearing when the window is tabbed out or resized
-- Fixed not being able to pause on replay screen
+# Changes
+- Endless mode now suggests things on rates (so that on that rate, it's similar to what you just played)
+- Endless mode should now suggest better stuff
+- Moved preview/mods/rulesets buttons on level select back where they were
+
+# New stuff
+- `pattern=...` in level select can now pick out particular patterns e.g `pattern=quadstream`
+
+This update will need to recalculate patterns for all installed charts. This is automatically done when you update
 
