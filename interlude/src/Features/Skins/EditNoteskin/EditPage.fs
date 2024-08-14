@@ -154,6 +154,7 @@ type EditNoteskinPage() =
 
     override this.OnReturnFromNestedPage() =
         refresh ()
+        preview.Refresh()
         base.OnReturnFromNestedPage()
 
     override this.OnClose() =
