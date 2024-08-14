@@ -30,17 +30,11 @@ type RowInfo =
     }
 
 module Density =
-    let private DENSITY_SENTITIVITY = -4f
-
-    let step (time: Time) (d: float32) =
-        let seconds = time / 1000f<ms>
-        d * System.MathF.Exp(DENSITY_SENTITIVITY * seconds)
+    let private DENSITY_SENTITIVITY = 0.9f
 
     let note (time: Time) (d: float32) =
-        let seconds = time / 1000f<ms>
-
-        step time d
-        + (1.0f - System.MathF.Exp(DENSITY_SENTITIVITY * seconds)) / seconds
+        let next_d = 1000.0f<ms> / time
+        d * DENSITY_SENTITIVITY + next_d * (1.0f - DENSITY_SENTITIVITY)
 
 module Analysis =
 
@@ -112,7 +106,7 @@ module Analysis =
 
         let mutable previous_row =
             seq { 0 .. chart.Keys - 1 }
-            |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
+            |> Seq.filter (fun k -> row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD)
             |> Array.ofSeq
 
         if previous_row.Length = 0 then
@@ -130,7 +124,7 @@ module Analysis =
 
                 let current_row =
                     seq { 0 .. chart.Keys - 1 }
-                    |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
+                    |> Seq.filter (fun k -> row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD)
                     |> Array.ofSeq
 
                 if current_row.Length > 0 then

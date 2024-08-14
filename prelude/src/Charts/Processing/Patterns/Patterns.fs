@@ -329,13 +329,13 @@ module Patterns =
                     }
                 | n ->
                     let d = List.take n remaining_data
-                    let mean_mspb = List.take n remaining_data |> List.averageBy (fun d -> d.MsPerBeat)
+                    let mean_mspb = d |> List.averageBy _.MsPerBeat
 
                     core_matches.Add {
                         Pattern = pattern_type
                         Time = remaining_data.Head.Time
                         MsPerBeat = mean_mspb
-                        Density = d |> List.averageBy (fun d -> d.Density)
+                        Density = d |> List.averageBy _.Density
                         Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
                     }
             for pattern_type, pattern_name, pattern in specific_patterns do
@@ -348,7 +348,7 @@ module Patterns =
                         MsPerBeat = remaining_data.Head.MsPerBeat
                     }
                 | n ->
-                    let mean_mspb = List.take n remaining_data |> List.averageBy (fun d -> d.MsPerBeat)
+                    let mean_mspb = List.take n remaining_data |> List.averageBy _.MsPerBeat
 
                     specific_matches.Add { 
                         Pattern = pattern_type, pattern_name

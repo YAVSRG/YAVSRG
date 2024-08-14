@@ -42,8 +42,21 @@ module Suggestion =
 
     let mutable recommended_already = Set.empty
 
+    let most_common_pattern (total: ScaledTime) (patterns: PatternInfo) =
+        if patterns.Patterns = [] then Stream else
+        patterns.Patterns
+        |> Seq.groupBy _.Pattern
+        |> Seq.map (fun (p, ps) -> p, Seq.sumBy (fun (p: PatternSummary.PatternBreakdown) -> p.Amount) ps)
+        |> Seq.maxBy snd
+        |> fst
+
     let private pattern_similarity (total: ScaledTime) (rate: float32, patterns: PatternInfo) (c_rate: float32, c_patterns: PatternInfo) : float32 =
+
+
         let c_total = c_patterns.Patterns |> Seq.sumBy _.Amount
+        if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then 0.0f
+        else
+
         let mutable similarity = 0.0f
         for p2 in c_patterns.Patterns do
             for p1 in patterns.Patterns do

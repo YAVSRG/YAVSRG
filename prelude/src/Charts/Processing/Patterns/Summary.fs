@@ -45,17 +45,17 @@ module PatternSummary =
 
     type private BPMCluster =
         {
-            mutable TotalMs: float32<ms / beat>
+            mutable SumMs: float32<ms / beat>
             mutable OriginalMsPerBeat: float32<ms / beat>
             mutable Count: int
             mutable BPM: int option
         }
         member this.Add value =
             this.Count <- this.Count + 1
-            this.TotalMs <- this.TotalMs + value
+            this.SumMs <- this.SumMs + value
 
         member this.Calculate() =
-            let average = this.TotalMs / float32 this.Count
+            let average = this.SumMs / float32 this.Count
             this.BPM <- 60000.0f<ms / minute> / average |> float32 |> round |> int |> Some
 
         member this.Value = this.BPM.Value
@@ -88,7 +88,7 @@ module PatternSummary =
                 let new_cluster =
                     {
                         Count = 1
-                        TotalMs = value
+                        SumMs = value
                         OriginalMsPerBeat = value
                         BPM = None
                     }
@@ -105,7 +105,7 @@ module PatternSummary =
                 let new_cluster =
                     {
                         Count = 1
-                        TotalMs = value
+                        SumMs = value
                         OriginalMsPerBeat = value
                         BPM = None
                     }
@@ -136,34 +136,25 @@ module PatternSummary =
 
     let private pattern_amount (sorted_times: ScaledTime seq) : ScaledTime =
 
-        let PATTERN_DURATION = 600.0f<ms / rate>
-        let REST_FALLOFF_FLOOR = 0.5f
-        let REST_FALLOFF_RATE = 0.0f // disabled because it works like dog rn
+        let PATTERN_DURATION = 800.0f<ms / rate>
 
-        let mutable amount: ScaledTime = 0.0f<ms / rate>
         let mutable total_time: ScaledTime = 0.0f<ms / rate>
 
         let mutable current_start = Seq.head sorted_times
-        let mutable previous_end = current_start
         let mutable current_end = current_start + PATTERN_DURATION
-
-        let add (rest_time: ScaledTime) (pattern_time: ScaledTime) =
-            let falloff_floor = REST_FALLOFF_FLOOR * total_time
-            total_time <- total_time + pattern_time
-            amount <- pattern_time + max falloff_floor (amount - rest_time * REST_FALLOFF_RATE)
 
         for time in sorted_times do
             if current_end < time then
-                add (current_start - previous_end) (current_end - current_start)
+                total_time <- total_time + (current_end - current_start)
+
                 current_start <- time
-                previous_end <- current_end
                 current_end <- current_start + PATTERN_DURATION
             else
                 current_end <- time + PATTERN_DURATION
 
-        add (current_start - previous_end) (current_end - current_start)
+        total_time <- total_time +  (current_end - current_start)
 
-        amount
+        total_time
 
     let private find_density_percentile (sorted_densities: float32 array) (percentile: float32) =
         if sorted_densities.Length = 0 then 0.0f else
@@ -227,7 +218,6 @@ module PatternSummary =
                     )
                     |> Array.map (fun x -> snd x.Pattern)
                     |> Array.countBy id
-                    //|> Array.filter (fun (_, count) -> count > times.Length / 100)
                     |> Array.sortByDescending snd
                     |> Array.truncate 3
 
@@ -499,13 +489,13 @@ module PatternSummary =
             |> pattern_breakdown specific_patterns
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> List.ofSeq
-            |> List.truncate 16
 
         let is_useless (pattern: PatternBreakdown) =
             breakdown
             |> Seq.exists (fun p ->
                 p.Pattern = pattern.Pattern
                 && p.Amount * 0.5f > pattern.Amount
+                && p.Density75 > pattern.Density75
                 && p.BPM > pattern.BPM
                 && p.Mixed = pattern.Mixed
             )
