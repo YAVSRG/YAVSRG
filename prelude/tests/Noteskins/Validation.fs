@@ -83,6 +83,57 @@ module Validation =
         Assert.AreEqual(0, validation_results.Length)
 
     [<Test>]
+    let WithRequiredTextures_Loose_Multiple () =
+        let noteskin =
+            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+                .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("note-0-1.png", ONEPIXELIMAGE)
+                .AddImageFile("note-1-0.png", ONEPIXELIMAGE)
+                .AddImageFile("note-1-1.png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
+                .Build()
+
+        let validation_results = noteskin.Validate() |> Array.ofSeq
+
+        printfn "%A" validation_results
+
+        Assert.AreEqual(0, validation_results.Length)
+
+    [<Test>]
+    let WithRequiredTextures_Loose_OneMissing () =
+        let noteskin =
+            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+                .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("note-0-1.png", ONEPIXELIMAGE)
+                .AddImageFile("note-1-1.png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
+                .Build()
+
+        let validation_results = noteskin.Validate() |> Array.ofSeq
+
+        printfn "%A" validation_results
+
+        Assert.AreEqual(1, validation_results.Length)
+
+        match
+            Array.tryFind
+                (function
+                | ValidationError { Element = "note" } -> true
+                | _ -> false)
+                validation_results
+        with
+        | None -> Assert.Fail("Expected an error message for missing loose 'note' texture")
+        | _ -> ()
+
+    [<Test>]
     let WithExtraTextures () =
         let noteskin =
             InMemoryNoteskinBuilder(
