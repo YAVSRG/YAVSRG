@@ -72,13 +72,13 @@ module Validation =
                     EnableColumnLight = false
                 }
             )
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddImageFile("receptor.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
-                .AddImageFile("noteexplosion.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("noteexplosion[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -111,13 +111,12 @@ module Validation =
     let WithWrongNoteTextureModeLoose () =
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
-                .AddJsonFile("note.json", { Columns = 1; Rows = 1; Mode = Loose })
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddImageFile("receptor.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -170,13 +169,12 @@ module Validation =
 
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddJsonFile("receptor.json", { Columns = 16; Rows = 21; Mode = Grid })
-                .AddImageFile("receptor.png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[16x21].png", receptor_grid_bmp)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -205,13 +203,12 @@ module Validation =
                     ReceptorStyle = ReceptorStyle.Receptors
                 }
             )
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddJsonFile("receptor.json", { Columns = 16; Rows = 2; Mode = Grid })
-                .AddImageFile("receptor.png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[16x2].png", receptor_grid_bmp)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -240,13 +237,12 @@ module Validation =
                     ReceptorStyle = ReceptorStyle.Receptors
                 }
             )
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddJsonFile("receptor.json", { Columns = 7; Rows = 2; Mode = Grid })
-                .AddImageFile("receptor.png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[7x2].png", receptor_grid_bmp)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq

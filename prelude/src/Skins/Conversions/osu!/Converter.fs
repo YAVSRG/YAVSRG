@@ -154,14 +154,6 @@ module OsuSkinConverter =
                 square_image.Save(Path.Combine(target, sprintf "%s-%i-%i.png" element_name row column))
                 square_image.Dispose()
 
-        JSON.ToFile
-            (Path.Combine(target, element_name + ".json"), false)
-            {
-                Rows = colors
-                Columns = animation_frames
-                Mode = Loose
-            }
-
     let convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
         let animation_frames = List.map List.length images |> List.max
         let colors = List.length images
@@ -197,23 +189,8 @@ module OsuSkinConverter =
                         |> ignore)
 
                     percy_tail_texture.Save(Path.Combine(target, "holdtail-0-0.png"))
-                    JSON.ToFile
-                        (Path.Combine(target, "holdtail.json"), true)
-                        {
-                            Rows = 1
-                            Columns = 1
-                            Mode = Loose
-                        }
 
                     percy_ln_fix <- true
-
-        JSON.ToFile
-            (Path.Combine(target, "holdbody.json"), false)
-            {
-                Rows = colors
-                Columns = animation_frames
-                Mode = Loose
-            }
 
         percy_ln_fix
 
@@ -287,13 +264,6 @@ module OsuSkinConverter =
             for i, img in Array.append images optional_extras |> Array.indexed do
                 let padded = Image.pad (max_width, max_height) img
                 padded.Save(Path.Combine(target, sprintf "%s-%i-0.png" element_name i))
-            JSON.ToFile
-                (Path.Combine(target, element_name + ".json"), false)
-                {
-                    Rows = images.Length + optional_extras.Length
-                    Columns = 1
-                    Mode = Loose
-                }
             Ok (-2.0f * float32 osu_overlap / float32 max_width)
         with err ->
             Error err
@@ -327,14 +297,6 @@ module OsuSkinConverter =
             for i, img in Array.append images [|dot; colon; percent|] |> Array.indexed do
                 let padded = Image.pad (max_width, max_height) img
                 padded.Save(Path.Combine(target, sprintf "%s-%i-0.png" element_name i))
-
-            JSON.ToFile
-                (Path.Combine(target, element_name + ".json"), false)
-                {
-                    Rows = images.Length + 3
-                    Columns = 1
-                    Mode = Loose
-                }
 
             Ok {
                 Spacing = -2.0f * float32 osu_overlap / float32 max_width
@@ -391,14 +353,6 @@ module OsuSkinConverter =
                     let padded = Image.pad (max_width, max_height) image
                     padded.Save(Path.Combine(target, sprintf "judgements-%i-%i.png" row column))
                     padded.Dispose()
-
-            JSON.ToFile
-                (Path.Combine(target, "judgements.json"), false)
-                {
-                    Rows = images.Length
-                    Columns = max_frames
-                    Mode = Loose
-                }
             judgement_textures <- true
         with err ->
             Logging.Warn("Error converting judgement textures", err)
@@ -422,14 +376,6 @@ module OsuSkinConverter =
                 let padded = Image.pad (max_width, max_height) image
                 padded.Save(Path.Combine(target, sprintf "judgement-counter-judgements-%i-0.png" i))
                 padded.Dispose()
-
-            JSON.ToFile
-                (Path.Combine(target, "judgement-counter-judgements.json"), false)
-                {
-                    Rows = images.Length
-                    Columns = 1
-                    Mode = Loose
-                }
             judgement_counter_textures <- true
         with err ->
             Logging.Warn("Error converting judgement counter judgement textures", err)
@@ -653,7 +599,6 @@ module OsuSkinConverter =
                 |> Seq.indexed
                 |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
                 key_receptors <- true
-            JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = key_textures.Length; Columns = 1; Mode = Loose }
         with err ->
             Logging.Warn("Error converting keys to receptors", err)
             try
@@ -668,8 +613,6 @@ module OsuSkinConverter =
 
                 not_pressed.Save(Path.Combine(target, "receptor-0-0.png"))
                 pressed.Save(Path.Combine(target, "receptor-1-0.png"))
-
-                JSON.ToFile (Path.Combine(target, "receptor.json"), false) { Rows = 2; Columns = 1; Mode = Loose }
             with err ->
                 Logging.Warn("Error generating placeholder receptors from note textures", err)
 
@@ -706,14 +649,6 @@ module OsuSkinConverter =
                 )
                 colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
 
-            JSON.ToFile
-                (Path.Combine(target, "receptorlighting.json"), false)
-                {
-                    Rows = keymode
-                    Columns = 1
-                    Mode = Loose
-                }
-
             columnlighting <- true
         | None -> ()
 
@@ -729,15 +664,7 @@ module OsuSkinConverter =
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
                 padded.Save(Path.Combine(target, sprintf "noteexplosion-0-%i.png" i))
                 padded.Dispose()
-            
 
-            JSON.ToFile
-                (Path.Combine(target, "noteexplosion.json"), false)
-                {
-                    Rows = 1
-                    Columns = images.Length
-                    Mode = Loose
-                }
             note_explosions_scale <- Some (480.0f / float32 max_dim)
         with err ->
             Logging.Warn("Error converting note explosions", err)
@@ -753,15 +680,7 @@ module OsuSkinConverter =
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
                 padded.Save(Path.Combine(target, sprintf "holdexplosion-0-%i.png" i))
                 padded.Dispose()
-            
 
-            JSON.ToFile
-                (Path.Combine(target, "holdexplosion.json"), false)
-                {
-                    Rows = 1
-                    Columns = images.Length
-                    Mode = Loose
-                }
             hold_explosions_scale <- Some (480.0f / float32 max_dim)
         with err ->
             Logging.Warn("Error converting hold explosions", err)

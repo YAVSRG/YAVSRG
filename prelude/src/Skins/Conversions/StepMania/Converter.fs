@@ -70,9 +70,7 @@ module StepmaniaSkinConverter =
                         image
                     | _ -> image
 
-                transformed.SaveAsPng(Path.Combine(target, texture + ".png"))
-
-                JSON.ToFile (Path.Combine(target, texture + ".json"), true) { Rows = rows; Columns = columns; Mode = Grid }
+                transformed.SaveAsPng(Path.Combine(target, TextureFileName.to_grid texture (columns, rows)))
                 true
 
         let receptor = map_words_to_texture [|"Down"; "Go"; "Receptor"|] [||] "receptor" NoTransform

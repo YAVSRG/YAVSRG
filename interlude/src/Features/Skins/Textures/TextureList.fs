@@ -33,7 +33,7 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
 
     let sprite = Content.Texture id
 
-    let mutable is_stitched = source.TextureFileMode(id) = Grid
+    let mutable is_stitched = source.TextureIsGrid(id)
 
     do
         this

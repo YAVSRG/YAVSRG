@@ -18,17 +18,17 @@ module NoteskinPreview =
 
     let private get_texture (id: string) (ns: Noteskin) =
         match ns.GetTexture id with
-        | TextureOk(a, b) -> a, b
+        | TextureOk(a, columns, rows) -> a, columns, rows
         | _ -> failwithf "Failed to get texture '%s'" id
 
     let render (ns: Noteskin) : Bitmap =
 
         let img: Bitmap = new Bitmap(WIDTH, HEIGHT)
 
-        let gen_tex (u, v) (bmp: Bitmap, config: TextureConfig) =
-            let new_img = new Bitmap(bmp.Width / config.Columns, bmp.Height / config.Rows)
-            let u = u % config.Columns
-            let v = v % config.Rows
+        let gen_tex (u, v) (bmp: Bitmap, columns, rows) =
+            let new_img = new Bitmap(bmp.Width / columns, bmp.Height / rows)
+            let u = u % columns
+            let v = v % rows
             new_img.Mutate(fun i -> i.DrawImage(bmp, Point(new_img.Width * -u, new_img.Height * -v), 1.0f) |> ignore)
             new_img.Mutate(fun i -> i.Resize(Size(NOTE_SIZE, NOTE_SIZE)) |> ignore)
             new_img
@@ -122,9 +122,9 @@ module NoteskinPreview =
         img
 
     let render_thumbnail (ns: Noteskin) =
-        let bmp, config = get_texture "note" ns
-        let size = min (bmp.Width / config.Columns) NOTE_SIZE
-        let thumbnail = new Bitmap(bmp.Width / config.Columns, bmp.Height / config.Rows)
+        let bmp, columns, rows = get_texture "note" ns
+        let size = min (bmp.Width / columns) NOTE_SIZE
+        let thumbnail = new Bitmap(bmp.Width / columns, bmp.Height / rows)
         thumbnail.Mutate(fun i -> i.DrawImage(bmp, Point(0, 0), 1.0f) |> ignore)
         thumbnail.Mutate(fun i -> i.Resize(Size(size, size)) |> ignore)
         thumbnail

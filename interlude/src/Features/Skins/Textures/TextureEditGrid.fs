@@ -134,7 +134,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                     ConfirmPage(
                                         sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
                                         fun () ->
-                                            if source.DeleteGridTextureColumn(c, texture_id) then
+                                            if source.DeleteLooseTextureColumn(c, texture_id) then
                                                 reload_source()
                                                 this.Refresh()
                                     )
@@ -167,7 +167,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                             ConfirmPage(
                                 sprintf "Really PERMANENTLY delete color %i?" (r + 1),
                                 fun () ->
-                                    if source.DeleteGridTextureRow(r, texture_id) then
+                                    if source.DeleteLooseTextureRow(r, texture_id) then
                                         reload_source()
                                         this.Refresh()
                             )
@@ -199,7 +199,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                          "Add a new color to this texture? (will be a copy of color %i)"
                                          (src_row + 1),
                                      fun () ->
-                                        if source.AddGridTextureRow(src_row, texture_id) then
+                                        if source.AddLooseTextureRow(src_row, texture_id) then
                                             reload_source()
                                             this.Refresh()
                                  )
@@ -231,7 +231,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                          "Add a new animation frame to this texture? (will be a copy of frame %i)"
                                          (src_col + 1),
                                      fun () ->
-                                        if source.AddGridTextureColumn(src_col, texture_id) then
+                                        if source.AddLooseTextureColumn(src_col, texture_id) then
                                             reload_source()
                                             this.Refresh()
                                  )

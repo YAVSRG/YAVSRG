@@ -48,13 +48,13 @@ module Themes =
             Sprites.remove id
 
             match current.GetTexture id with
-            | TextureOk(img, config) ->
+            | TextureOk(img, columns, rows) ->
                 available_textures.Add
                     {
                         Label = id
                         Image = img
-                        Rows = config.Rows
-                        Columns = config.Columns
+                        Rows = rows
+                        Columns = columns
                         DisposeImageAfter = true
                     }
             | TextureError reason ->

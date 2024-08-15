@@ -2,7 +2,7 @@
 
 open System
 open Percyqaz.Common
-open Prelude.Gameplay.RulesetUtils
+open Prelude.Gameplay.Rulesets
 
 module Wife3 =
 
@@ -12,11 +12,11 @@ module Wife3 =
         let ran = Random()
 
         let delta = 6f<ms>
-        let base_value = wife_curve 4 delta
+        let base_value = Wife3.wife_curve 4 delta
 
         let note_rounding_error_value =
             { 1..1000 }
-            |> Seq.map (fun _ -> wife_curve 4 (delta + (-0.5 + ran.NextDouble() |> float32 |> (fun x -> x * 1.0f<ms>))))
+            |> Seq.map (fun _ -> Wife3.wife_curve 4 (delta + (-0.5 + ran.NextDouble() |> float32 |> (fun x -> x * 1.0f<ms>))))
             |> Seq.average
 
         printfn

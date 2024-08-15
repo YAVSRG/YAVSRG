@@ -30,4 +30,4 @@ module Assets =
 
         make_zip
         <| Path.Combine(Utils.ASSETS_PATH, "chocolate")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "chocolate.isk")
+        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "chocolate.zip")

@@ -21,12 +21,12 @@ type private LoadedSkin =
     static member Create(skin: Skin) : LoadedSkin =
         let sprite = 
             match skin.GetIcon() with
-            | TextureOk(img, config) ->
+            | TextureOk(img, columns, rows) ->
                 Sprite.upload_one false true 
                     { 
                         Label = skin.Metadata.Name + "_icon"
-                        Rows = config.Rows
-                        Columns = config.Columns
+                        Rows = rows
+                        Columns = columns
                         Image = img
                         DisposeImageAfter = true
                     }
@@ -67,13 +67,13 @@ type private LoadedNoteskin =
 
         for texture_id in NoteskinTextureRules.list () do
             match this.Noteskin.GetTexture texture_id with
-            | TextureOk(img, config) ->
+            | TextureOk(img, columns, rows) ->
                 available_textures.Add
                     {
                         Label = texture_id
                         Image = img
-                        Rows = config.Rows
-                        Columns = config.Columns
+                        Rows = rows
+                        Columns = columns
                         DisposeImageAfter = true
                     }
             | TextureError reason ->
@@ -154,13 +154,13 @@ type private LoadedHUD =
 
         for texture_id in HudTextureRules.list () do
             match this.HUD.GetTexture texture_id with
-            | TextureOk(img, config) ->
+            | TextureOk(img, columns, rows) ->
                 available_textures.Add
                     {
                         Label = texture_id
                         Image = img
-                        Rows = config.Rows
-                        Columns = config.Columns
+                        Rows = rows
+                        Columns = columns
                         DisposeImageAfter = true
                     }
             | TextureError reason ->
@@ -276,18 +276,18 @@ module Skins =
         if DEFAULT_SKIN_ICON.IsNone then
             DEFAULT_SKIN_ICON <-
                 match DEFAULT_NOTESKIN.GetTexture("note") with
-                | TextureOk(img, config) ->
+                | TextureOk(img, columns, rows) ->
                     Sprite.upload_one false true 
                         { 
                             Label = "DEFAULT_SKIN_ICON"
-                            Rows = config.Rows
-                            Columns = config.Columns
+                            Rows = rows
+                            Columns = columns
                             Image = img
                             DisposeImageAfter = true
                         }
                     |> Some
                 | TextureNotRequired
-                | TextureError _ -> failwith "impossible"
+                | TextureError _ as x -> failwithf "%A" x
 
         // migrate old noteskins folder
         let would_be_skins_folder = Path.Combine(Directory.GetCurrentDirectory(), "Skins")
