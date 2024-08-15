@@ -151,7 +151,7 @@ module OsuSkinConverter =
                 let image = let r = images.[row] in r[column % r.Length]
 
                 let square_image = Image.upscale_to_square size image
-                square_image.Save(Path.Combine(target, sprintf "%s-%i-%i.png" element_name row column))
+                square_image.Save(Path.Combine(target, TextureFileName.to_loose element_name (column, row)))
                 square_image.Dispose()
 
     let convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
@@ -171,7 +171,7 @@ module OsuSkinConverter =
                     else
                         Image.pad_to_square width image
 
-                square_image.Save(Path.Combine(target, sprintf "holdbody-%i-%i.png" row column))
+                square_image.Save(Path.Combine(target, TextureFileName.to_loose "holdbody" (column, row)))
 
                 square_image.Dispose()
 
@@ -188,7 +188,7 @@ module OsuSkinConverter =
                             .Resize(width, width) 
                         |> ignore)
 
-                    percy_tail_texture.Save(Path.Combine(target, "holdtail-0-0.png"))
+                    percy_tail_texture.Save(Path.Combine(target, TextureFileName.to_loose "holdtail" (column, row)))
 
                     percy_ln_fix <- true
 
@@ -263,7 +263,7 @@ module OsuSkinConverter =
 
             for i, img in Array.append images optional_extras |> Array.indexed do
                 let padded = Image.pad (max_width, max_height) img
-                padded.Save(Path.Combine(target, sprintf "%s-%i-0.png" element_name i))
+                padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
             Ok (-2.0f * float32 osu_overlap / float32 max_width)
         with err ->
             Error err
@@ -296,7 +296,7 @@ module OsuSkinConverter =
 
             for i, img in Array.append images [|dot; colon; percent|] |> Array.indexed do
                 let padded = Image.pad (max_width, max_height) img
-                padded.Save(Path.Combine(target, sprintf "%s-%i-0.png" element_name i))
+                padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
 
             Ok {
                 Spacing = -2.0f * float32 osu_overlap / float32 max_width
@@ -351,7 +351,7 @@ module OsuSkinConverter =
                     let image = let r = images.[row] in r[column % r.Length]
 
                     let padded = Image.pad (max_width, max_height) image
-                    padded.Save(Path.Combine(target, sprintf "judgements-%i-%i.png" row column))
+                    padded.Save(Path.Combine(target, TextureFileName.to_loose "judgements" (column, row)))
                     padded.Dispose()
             judgement_textures <- true
         with err ->
@@ -374,7 +374,7 @@ module OsuSkinConverter =
 
             for i, image in List.indexed images do
                 let padded = Image.pad (max_width, max_height) image
-                padded.Save(Path.Combine(target, sprintf "judgement-counter-judgements-%i-0.png" i))
+                padded.Save(Path.Combine(target, TextureFileName.to_loose "judgement-counter-judgements" (0, i)))
                 padded.Dispose()
             judgement_counter_textures <- true
         with err ->
@@ -593,11 +593,11 @@ module OsuSkinConverter =
                 Logging.Debug("Detected 'receptors' in osu mania key textures")
                 scaled
                 |> Seq.indexed
-                |> Seq.iter (fun (i, img) -> (transform img).Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+                |> Seq.iter (fun (i, img) -> (transform img).Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, i))))
             | None ->
                 scaled
                 |> Seq.indexed
-                |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, sprintf "receptor-%i-0.png" i)))
+                |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, i))))
                 key_receptors <- true
         with err ->
             Logging.Warn("Error converting keys to receptors", err)
@@ -611,8 +611,8 @@ module OsuSkinConverter =
                 use not_pressed = Image.grayscale 0.5f receptor_base |> Image.pad_to_square receptor_base.Width
                 use pressed = Image.grayscale 1.0f receptor_base |> Image.pad_to_square receptor_base.Width
 
-                not_pressed.Save(Path.Combine(target, "receptor-0-0.png"))
-                pressed.Save(Path.Combine(target, "receptor-1-0.png"))
+                not_pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 0)))
+                pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 1)))
             with err ->
                 Logging.Warn("Error generating placeholder receptors from note textures", err)
 
@@ -621,8 +621,8 @@ module OsuSkinConverter =
         | Some stage_left ->
             match TextureFile.find (keymode_settings.StageRight, source) with
             | Some stage_right ->
-                stage_left.Load.Image.Save(Path.Combine(target, "stageleft.png"))
-                stage_right.Load.Image.Save(Path.Combine(target, "stageright.png"))
+                stage_left.Load.Image.Save(Path.Combine(target, TextureFileName.to_loose "stageleft" (0, 0)))
+                stage_right.Load.Image.Save(Path.Combine(target, TextureFileName.to_loose "stageright" (0, 0)))
                 stage_textures <- true
             | None -> ()
         | None -> ()
@@ -647,7 +647,7 @@ module OsuSkinConverter =
                         .Opacity(float32 stage_light_color.A / 255.0f) 
                     |> ignore
                 )
-                colored.Save(Path.Combine(target, sprintf "receptorlighting-%i-0.png" k))
+                colored.Save(Path.Combine(target, TextureFileName.to_loose "receptorlighting" (0, k)))
 
             columnlighting <- true
         | None -> ()
@@ -662,7 +662,7 @@ module OsuSkinConverter =
 
             for i, image in List.indexed images do
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
-                padded.Save(Path.Combine(target, sprintf "noteexplosion-0-%i.png" i))
+                padded.Save(Path.Combine(target, TextureFileName.to_loose "noteexplosion" (i, 0)))
                 padded.Dispose()
 
             note_explosions_scale <- Some (480.0f / float32 max_dim)
@@ -678,7 +678,7 @@ module OsuSkinConverter =
 
             for i, image in List.indexed images do
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
-                padded.Save(Path.Combine(target, sprintf "holdexplosion-0-%i.png" i))
+                padded.Save(Path.Combine(target, TextureFileName.to_loose "holdexplosion" (i, 0)))
                 padded.Dispose()
 
             hold_explosions_scale <- Some (480.0f / float32 max_dim)

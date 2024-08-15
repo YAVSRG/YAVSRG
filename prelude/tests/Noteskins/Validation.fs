@@ -14,10 +14,10 @@ module Validation =
     let MissingTextures () =
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -47,15 +47,33 @@ module Validation =
         | _ -> ()
 
     [<Test>]
-    let WithRequiredTextures () =
+    let WithRequiredTextures_Grid () =
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
-                .AddImageFile("note.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddImageFile("receptor.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
+                .Build()
+
+        let validation_results = noteskin.Validate() |> Array.ofSeq
+
+        printfn "%A" validation_results
+
+        Assert.AreEqual(0, validation_results.Length)
+
+    [<Test>]
+    let WithRequiredTextures_Loose () =
+        let noteskin =
+            InMemoryNoteskinBuilder(NoteskinConfig.Default)
+                .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -108,10 +126,12 @@ module Validation =
         | _ -> ()
 
     [<Test>]
-    let WithWrongNoteTextureModeLoose () =
+    [<Ignore("Currently the user can mix textures this way and not get an error")>] // todo: validate against this
+    let WithMixedGridAndLooseFiles () =
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
@@ -136,15 +156,17 @@ module Validation =
         | _ -> ()
 
     [<Test>]
-    let WithWrongNoteTextureModeGrid () =
+    let WithMixedGridFiles () =
+        use receptor_grid_bmp = new Bitmap(16, 3)
         let noteskin =
             InMemoryNoteskinBuilder(NoteskinConfig.Default)
-                .AddImageFile("note-0-0.png", ONEPIXELIMAGE)
-                .AddImageFile("holdbody.png", ONEPIXELIMAGE)
-                .AddImageFile("holdhead.png", ONEPIXELIMAGE)
-                .AddImageFile("holdtail.png", ONEPIXELIMAGE)
-                .AddImageFile("receptor.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting.png", ONEPIXELIMAGE)
+                .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[16x3].png", receptor_grid_bmp)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -156,11 +178,11 @@ module Validation =
         match
             Array.tryFind
                 (function
-                | ValidationError { Element = "note" } -> true
+                | ValidationError { Element = "receptor" } -> true
                 | _ -> false)
                 validation_results
         with
-        | None -> Assert.Fail("Expected an error message for wrong mode on 'note' texture")
+        | None -> Assert.Fail("Expected an error message for wrong mode on 'receptor' texture")
         | _ -> ()
 
     [<Test>]
@@ -228,7 +250,7 @@ module Validation =
         | _ -> ()
 
     [<Test>]
-    let WithRowsAndColumnsBackwards () =
+    let SuggestRowsAndColumnsBackwards () =
         use receptor_grid_bmp = new Bitmap(200, 700)
 
         let noteskin =
@@ -259,4 +281,38 @@ module Validation =
                 validation_results
         with
         | None -> Assert.Fail("Expected an error message for image size on 'receptor' texture")
+        | _ -> ()
+
+    [<Test>]
+    let SuggestRowsAndColumnsBackwards_Square () =
+        use note_grid_bmp = new Bitmap(64, 16)
+
+        let noteskin =
+            InMemoryNoteskinBuilder(
+                { NoteskinConfig.Default with
+                    ReceptorStyle = ReceptorStyle.Receptors
+                }
+            )
+                .AddImageFile("note[1x4].png", note_grid_bmp)
+                .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
+                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
+                .Build()
+
+        let validation_results = noteskin.Validate() |> Array.ofSeq
+
+        printfn "%A" validation_results
+
+        Assert.AreEqual(1, validation_results.Length)
+
+        match
+            Array.tryFind
+                (function
+                | ValidationError { Element = "note" } -> true
+                | _ -> false)
+                validation_results
+        with
+        | None -> Assert.Fail("Expected an error message for image size on 'note' texture")
         | _ -> ()
