@@ -397,7 +397,6 @@ type Storage(storage: StorageType) =
                 | None -> 1, 1, false
             match storage with
             | Folder f ->
-                Logging.Debug(sprintf "Renaming grid file '%s' to include dimensions" name)
                 File.Move(
                     Path.Combine(f, Path.Combine path, sprintf "%s.png" name),
                     Path.Combine(f, Path.Combine path, TextureFileName.to_grid name (columns, rows))
@@ -499,7 +498,7 @@ type Storage(storage: StorageType) =
                                         Element = name
                                         Message =
                                             sprintf
-                                                "'%s' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i\nPerhaps you've got rows and columns the wrong way around?"
+                                                "'%s' dimensions should be multiple of %ix%i but are %ix%i\nPerhaps you've got rows and columns the wrong way around?"
                                                 filename
                                                 columns
                                                 rows
@@ -525,8 +524,8 @@ type Storage(storage: StorageType) =
                                         Element = name
                                         Message =
                                             sprintf
-                                                "'%s.png' has mismatched dimensions, should be a multiple of (%i, %i) but is %ix%i"
-                                                name
+                                                "'%s' dimensions should be multiple of %ix%i but are %ix%i"
+                                                filename
                                                 columns
                                                 rows
                                                 img.Width
@@ -547,7 +546,7 @@ type Storage(storage: StorageType) =
                                             Element = name
                                             Message =
                                                 sprintf
-                                                    "'%s' needs to be only square images, but currently each image is %ix%i\nPerhaps you've got rows and columns the wrong way around?"
+                                                    "'%s' must be square images, but each image is %ix%i\nPerhaps you've got rows and columns the wrong way around?"
                                                     filename
                                                     w
                                                     h
@@ -571,7 +570,7 @@ type Storage(storage: StorageType) =
                                             Element = name
                                             Message =
                                                 sprintf
-                                                    "'%s' needs to be only square images, but currently each image is %ix%i"
+                                                    "'%s' must be square images, but each image is %ix%i"
                                                     filename
                                                     w
                                                     h
@@ -613,6 +612,7 @@ type Storage(storage: StorageType) =
             [<ParamArray>] path: string array
         ) : ValidationMessage seq =
         seq {
+            let base_filename = TextureFileName.to_loose name (0, 0)
             let check_img (width, height) row column =
                 seq {
                     let filename = TextureFileName.to_loose name (column, row)
@@ -635,9 +635,7 @@ type Storage(storage: StorageType) =
                                             Element = name
                                             Message =
                                                 sprintf
-                                                    "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)"
-                                                    row
-                                                    column
+                                                    "All images must be the same dimensions, '%s' doesn't match '%s'" filename base_filename
                                             SuggestedFix = None
                                         }
                     | None ->
@@ -647,7 +645,7 @@ type Storage(storage: StorageType) =
                                     Element = name
                                     Message =
                                         sprintf
-                                            "'%s' is missing (as part of one or many textures making up a grid)" 
+                                            "'%s' is missing" 
                                             filename
                                     SuggestedFix = None
                                 }
@@ -673,7 +671,7 @@ type Storage(storage: StorageType) =
                                     Element = name
                                     Message =
                                         sprintf
-                                            "This texture needs to be only square images, but '%s' is %ix%i"
+                                            "This texture must be square images, but '%s' is %ix%i"
                                             base_filename
                                             base_img.Width
                                             base_img.Height
@@ -690,11 +688,11 @@ type Storage(storage: StorageType) =
                             ValidationWarning
                                 {
                                     Element = name
-                                    Message = sprintf "%s is not used" name
+                                    Message = sprintf "'%s' is not used" name
                                     SuggestedFix =
                                         Some
                                             {
-                                                Description = sprintf "Delete all %s images" name
+                                                Description = sprintf "Delete all '%s' images" name
                                                 Action =
                                                     fun () ->
                                                         for file in this.GetFiles path do
