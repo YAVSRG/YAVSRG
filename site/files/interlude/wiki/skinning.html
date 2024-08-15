@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+		<title>Introduction - Interlude Wiki</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="../../style.css" rel="stylesheet"/>
+    <link rel="icon" type="image/x-icon" href="../../favicon.png"/>
+  </head>
+  <body class="background-2 akrobat flex flex-row">
+		<div class="flex flex-col h-screen w-full justify-between">
+      
+      <div class="mx-4">
+        <!-- content -->
+        <div class="w-full p-10 space-y-8">
+          <div class="frame text-2xl container flex flex-col mx-auto p-4"><h1 class="text-3xl">Skins</h1><p class="leading-8 mb-4">A <strong>skin</strong> is a bundle of files that customise how gameplay looks.</p><p class="leading-8 mb-4">A skin contains one or both of: A <strong>HUD</strong> and a <strong>Noteskin</strong>.</p><p class="leading-8 mb-4">All skin textures are actually a "grid" of individual sprites - this allows for 'variants' of a texture and animation frames for those variants.</p><p class="leading-8 mb-4">A grid can be a single <code>.png</code> file, with a suffix indicating how many sprites are in it, for example:</p><ul><li class="ml-8 list-disc"><code>note[1x1].png</code> stores all the <code>note</code> sprites, and there is only 1 sprite.</li><li class="ml-8 list-disc"><code>note[8x16].png</code> stores all the <code>note</code> sprites, there are 8 variants (for notes this means different colors), and 16 animation frames per color.</li></ul><p class="leading-8 mb-4">This single-file approach is similar to how Stepmania/Etterna noteskins store textures.</p><p class="leading-8 mb-4">If you prefer, each sprite can simply be its own file instead:</p><ul><li class="ml-8 list-disc"><code>note-0-0.png</code> represents the first frame of the first note color</li><li class="ml-8 list-disc"><code>note-3-1.png</code> represents the second frame of the fourth note color</li><li class="ml-8 list-disc"><code>note-0-5.png</code> represents the sixth frame of the first note color</li></ul><p class="leading-8 mb-4">This multiple-file approach is similar to how osu! skins store textures.</p><p class="leading-8 mb-4">Each texture can independently be in single-file form or multiple-file form, depending on what suits you best.<br/><em>You can switch a texture between these modes by using the ingame skin editor tools.</em></p><p class="leading-8 mb-4">You can directly edit <code>.png</code> files with any image editor (If you don't have one, some free options are <a class="underline" href="https://www.gimp.org/">GIMP</a> or <a class="underline" href="https://www.getpaint.net/">Paint.NET</a>).</p><p class="leading-8 mb-4">A skin is a folder with:</p><ul><li class="ml-8 list-disc">A <code>skin.json</code> file containing metadata about the skin (its name and author)</li><li class="ml-8 list-disc">An optional <code>HUD</code> folder containing HUD config and textures</li><li class="ml-8 list-disc">An optional <code>Noteskin</code> folder containing Noteskin config and textures</li></ul><p class="leading-8 mb-4">Click here to read more about <a class="underline" href="skinning_noteskins.html">Noteskins</a>.<br/>Click here to read more about <a class="underline" href="skinning_huds.html">HUD layouts</a>.</p></div>
+        </div>
+      </div>
+			
+			<!-- footer -->
+			<footer class="footer text-2xl px-4 flex flex-col lg:flex-row items-center justify-center gap-x-5">
+			  <span>© Percyqaz 2018-2024</span>
+			  <div></div>
+	          <a href="../../index.html">Home</a>
+			  <a href="../changelog.html">Changelog</a>
+			  <a href="index.html">Wiki</a>
+			  <div class="py-2"></div>
+			  <a href="../../terms_of_service.html">Terms</a>
+			  <a href="../../privacy_policy.html">Privacy</a>
+			  <a href="mailto:dmca@yavsrg.net">DMCA</a>
+			</footer>
+
+		</div>
+  </body>
+</html>

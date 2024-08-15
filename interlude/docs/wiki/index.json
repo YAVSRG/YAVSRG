@@ -4,10 +4,6 @@
         "Folder": "Features",
         "Title": "Level select"
     }, {
-        "Filename": "noteskins",
-        "Folder": "Features",
-        "Title": "Noteskins"
-    }, {
         "Filename": "rulesets",
         "Folder": "Features",
         "Title": "Rulesets"
@@ -50,5 +46,18 @@
         "Filename": "performance_unlimited_fps",
         "Folder": "Performance",
         "Title": "Advanced settings"
+    }],
+    "Skinning": [{
+        "Filename": "skinning",
+        "Folder": "Skinning",
+        "Title": "Introduction"
+    }, {
+        "Filename": "skinning_huds",
+        "Folder": "Skinning",
+        "Title": "HUD layouts"
+    }, {
+        "Filename": "skinning_noteskins",
+        "Folder": "Skinning",
+        "Title": "Noteskins"
     }]
 }
