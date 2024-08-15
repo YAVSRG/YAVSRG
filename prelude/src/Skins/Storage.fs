@@ -97,8 +97,6 @@ module TextureFileName =
 
 type Storage(storage: StorageType) =
 
-    let mutable file_name_cache: Map<string, string array> = Map.empty
-
     member this.Source = storage
 
     member this.IsEmbedded =
@@ -107,8 +105,7 @@ type Storage(storage: StorageType) =
         | _ -> false
 
     abstract member ReloadFromDisk : unit -> unit
-    default this.ReloadFromDisk() =
-        file_name_cache <- Map.empty
+    default this.ReloadFromDisk() = ()
 
     /// Returns stream for requested file, or None if that file doesn't exist
     /// Can throw exceptions for other IO errors
@@ -176,13 +173,7 @@ type Storage(storage: StorageType) =
         | Folder f ->
             let target = Path.Combine(f, p)
             Directory.CreateDirectory target |> ignore
-            match Map.tryFind target file_name_cache with
-            | None ->
-                let files = 
-                    Directory.EnumerateFiles target |> Seq.map Path.GetFileName |> Array.ofSeq
-                file_name_cache <- Map.add target files file_name_cache
-                files
-            | Some files -> files
+            Directory.EnumerateFiles target |> Seq.map Path.GetFileName |> Array.ofSeq
 
     /// Returns string names of folders in the requested folder
     member this.GetFolders([<ParamArray>] path: string array) =
@@ -769,7 +760,7 @@ type Storage(storage: StorageType) =
                 | Error _ -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
                 | Ok img ->
 
-                img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
+                img.SaveAsPng(Path.Combine(f, Path.Combine path, TextureFileName.to_grid name (columns, rows)))
 
                 for row in 0 .. rows - 1 do
                     for col in 0 .. columns - 1 do
