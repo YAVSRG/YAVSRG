@@ -27,7 +27,9 @@ You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in
 1. Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads), and building requires [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
 Follow the install instructions for both of these for your platform
 
-2. To set up the codebase on your machine, run these commands in your terminal:
+2. Run the setup scripts
+
+To do this via terminal on macOS or linux:
 ```bash
 # Navigate to somewhere you want to store the interlude codebase
 git clone https://github.com/YAVSRG/YAVSRG.git
@@ -37,6 +39,8 @@ chmod +x ./setup_repo.sh
 chmod +x ./setup_cli.sh
 ./setup_cli.sh
 ```
+On windows terminal, skip the `chmod` lines, or run the scripts through other means like double clicking to run them in Git Bash
+
 The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number output in the terminal.  
 **If this hasn't worked and you are stuck, get assistance from me in [the discord](https://discord.gg/tA22tWR)**
 
