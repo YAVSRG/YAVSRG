@@ -11,13 +11,13 @@ type private HelpInfo =
     {
         Data: Callout
         Size: float32 * float32
-        Fade: Animation.Fade
         Target: Widget
         Bind: Bind
     }
 
 module HelpOverlay =
 
+    let fade = Animation.Fade(0.0f)
     let mutable private current_info: HelpInfo option = None
     let mutable internal info_available = false
 
@@ -28,14 +28,11 @@ module HelpOverlay =
             base.Update(elapsed_ms, moved)
 
             match current_info with
-            | None -> ()
+            | None ->
+                fade.Target <- 0.0f
             | Some t ->
-                t.Fade.Update elapsed_ms
-
-                if t.Fade.Target <> 0.0f then
-                    if t.Bind.Released() then
-                        t.Fade.Target <- 0.0f
-                elif t.Fade.Value < 0.01f then
+                fade.Target <- 1.0f
+                if t.Bind.Released() then
                     current_info <- None
 
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
@@ -55,50 +52,36 @@ module HelpOverlay =
                 let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
                 Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
 
+            fade.Update elapsed_ms
             info_available <- false
 
         override this.Draw() =
             match current_info with
-            | None -> ()
+            | None ->
+                Draw.rect Viewport.bounds (Colors.shadow_2.O3a fade.Alpha)
             | Some t ->
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let alpha = fade.Alpha
 
-                let c l =
-                    Math.Clamp((t.Fade.Value - l) / 0.25f, 0.0f, 1.0f)
-                // border around thing
-                Draw.rect
-                    (outline.SliceL(Style.PADDING).SliceB(outline.Height * c 0.0f))
-                    (Colors.yellow_accent.O3a t.Fade.Alpha)
-
-                Draw.rect
-                    (outline.SliceT(Style.PADDING).SliceL(outline.Width * c 0.25f))
-                    (Colors.yellow_accent.O3a t.Fade.Alpha)
-
-                Draw.rect
-                    (outline.SliceR(Style.PADDING).SliceT(outline.Height * c 0.5f))
-                    (Colors.yellow_accent.O3a t.Fade.Alpha)
-
-                Draw.rect
-                    (outline.SliceB(Style.PADDING).SliceR(outline.Width * c 0.75f))
-                    (Colors.yellow_accent.O3a t.Fade.Alpha)
+                LoadingAnimation.draw_border_piece outline 0.0f fade.Value (Colors.yellow_accent.O3a alpha)
 
                 // blackout effect
-                Draw.rect (Viewport.bounds.SliceL outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
-                Draw.rect (Viewport.bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
+                Draw.rect (Viewport.bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
 
                 Draw.rect
                     (Viewport.bounds
                         .ShrinkL(outline.Left)
                         .SliceL(outline.Width)
                         .SliceT(outline.Top))
-                    (Colors.shadow_2.O3a t.Fade.Alpha)
+                    (Colors.shadow_2.O3a alpha)
 
                 Draw.rect
                     (Viewport.bounds
                         .ShrinkL(outline.Left)
                         .SliceL(outline.Width)
                         .ShrinkT(outline.Bottom))
-                    (Colors.shadow_2.O3a t.Fade.Alpha)
+                    (Colors.shadow_2.O3a alpha)
 
                 // draw tooltip
                 let width, height = t.Size
@@ -115,19 +98,19 @@ module HelpOverlay =
                         outline.Bottom + 50.0f
 
                 let callout_bounds = Rect.Box(x, y, width, height)
-                Draw.rect callout_bounds (Colors.cyan.O2a t.Fade.Alpha)
+                Draw.rect callout_bounds Colors.cyan.O2
                 let frame_bounds = callout_bounds.Expand(5.0f)
-                Draw.rect (frame_bounds.SliceT 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceB 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceL 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
-                Draw.rect (frame_bounds.SliceR 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frame_bounds.SliceT 5.0f) Colors.cyan_accent
+                Draw.rect (frame_bounds.SliceB 5.0f) Colors.cyan_accent
+                Draw.rect (frame_bounds.SliceL 5.0f) Colors.cyan_accent
+                Draw.rect (frame_bounds.SliceR 5.0f) Colors.cyan_accent
 
                 Callout.draw (
                     callout_bounds.Left,
                     callout_bounds.Top,
                     width,
                     height,
-                    (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha),
+                    Colors.text,
                     t.Data
                 )
 
@@ -138,7 +121,6 @@ module HelpOverlay =
             {
                 Data = body
                 Size = Callout.measure body
-                Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Target = w
                 Bind = b
             }

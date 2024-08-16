@@ -284,3 +284,62 @@ module StripeWipe =
                 (left, bounds.Bottom)
             )
             color.AsQuad
+
+module LoadingAnimation =
+
+    let draw_border_piece (bounds: Rect) (start: float32) (length: float32) (color: Color) =
+        let perimeter = (bounds.Width + bounds.Height) * 2.0f
+        let a = start % 1.0f
+        let b = a + length
+
+        let corner_1 = bounds.Width / perimeter
+        let corner_2 = (bounds.Width + bounds.Height) / perimeter
+        let corner_3 = corner_1 + corner_2
+
+        if b > 1.0f || a < corner_1 then
+            Draw.rect
+                (Rect.Create(
+                    (if b > 1.0f then
+                            bounds.Left
+                        else
+                            bounds.Left + a * perimeter),
+                    bounds.Top,
+                    bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right,
+                    bounds.Top + Style.PADDING
+                ))
+                color
+
+        if b > corner_1 && a < corner_2 then
+            Draw.rect
+                (Rect.Create(
+                    bounds.Right - Style.PADDING,
+                    bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
+                    bounds.Right,
+                    bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom
+                ))
+                color
+
+        if b > corner_2 && a < corner_3 then
+            Draw.rect
+                (Rect.Create(
+                    bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
+                    bounds.Bottom - Style.PADDING,
+                    bounds.Right - (b - corner_2) * perimeter |> max bounds.Left,
+                    bounds.Bottom
+                ))
+                color
+
+        if b > corner_3 && a < 1.0f then
+            Draw.rect
+                (Rect.Create(
+                    bounds.Left,
+                    bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,
+                    bounds.Left + Style.PADDING,
+                    bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top
+                ))
+                color
+
+    let draw_border (bounds: Rect) (offset: float32) (color: Color) =
+        draw_border_piece bounds offset 0.1f color
+        draw_border_piece bounds (offset + 0.333f) 0.1f color
+        draw_border_piece bounds (offset + 0.666f) 0.1f color
