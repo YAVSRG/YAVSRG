@@ -10,10 +10,6 @@ open Prelude.Charts.Processing
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-// todo: H to hide ui immediately (also on mouse idle)
-// todo: ui fades in and out instead of sliding in and out
-// todo: display original rate and playback speed
-
 type private ReplayModeSettingsPage() =
     inherit Page()
 
@@ -58,7 +54,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32
             Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
         |+ Text(
-            sprintf "Hide overlay: %O" (%%"hide_replay_overlay"),
+            sprintf "%s: %O" (%"replay.hide_overlay") (%%"hide_replay_overlay"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.LEFT
@@ -70,14 +66,20 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32
             Align = Alignment.RIGHT
         )
         |+ Text(
-            (fun () -> sprintf "Original rate: %.2fx" rate),
+            (fun () -> sprintf "%s: %.2fx" (%"replay.original_rate") rate),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(105.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT
         )
         |+ Text(
-            sprintf "Change speed: %O/%O" (%%"uprate") (%%"downrate"),
+            sprintf "%s: %O/%O" (%"replay.change_playback_rate") (%%"uprate") (%%"downrate"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
+            Color = K Colors.text_cyan,
+            Align = Alignment.RIGHT
+        )
+        |+ Text(
+            sprintf "%s: %O" (%"replay.pause") (%%"skip"),
+            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
@@ -97,10 +99,15 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32
 
         fade.Update elapsed_ms
 
-        if fade.Target = 1.0f && not (Dialog.exists()) then
+        if show_cooldown <= 0.0 && Mouse.moved_recently () then
+            fade.Target <- 1.0f
+            Toolbar.show_cursor ()
+            auto_hide_timer <- 1500.0
+
+        elif fade.Target = 1.0f && not (Dialog.exists()) then
             auto_hide_timer <- auto_hide_timer - elapsed_ms
 
-            if auto_hide_timer < 0.0 then
+            if auto_hide_timer <= 0.0 then
                 fade.Target <- 0.0f
                 Toolbar.hide_cursor ()
 
@@ -108,11 +115,6 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32
                 fade.Target <- 0.0f
                 Toolbar.hide_cursor ()
                 show_cooldown <- 1000.0
-
-        elif show_cooldown < 0.0 && Mouse.moved_recently () then
-            fade.Target <- 1.0f
-            Toolbar.show_cursor ()
-            auto_hide_timer <- 1500.0
 
         else show_cooldown <- show_cooldown - elapsed_ms
 
