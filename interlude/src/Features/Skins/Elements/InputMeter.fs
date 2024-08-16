@@ -9,14 +9,12 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit -> bool) =
+type InputMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
 
     let SCROLL_SPEED = config.InputMeterScrollSpeed * 1.0f</ms> / SelectedChart.rate.Value
-
-    new(config: HudConfig, state: PlayState) = InputMeter(config, state, K true)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -43,7 +41,7 @@ type InputMeter(config: HudConfig, state: PlayState, should_show_inputs: unit ->
             Draw.rect box (config.InputMeterKeyColor.O3a key_alpha)
             box <- box.Translate(box_height, 0.0f)
 
-        if config.InputMeterShowInputs && should_show_inputs () then
+        if config.InputMeterShowInputs then
             let recent_events = state.Scoring.EnumerateRecentInputs()
 
             let now = state.CurrentChartTime()

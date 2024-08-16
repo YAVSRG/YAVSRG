@@ -36,17 +36,6 @@ module ReplayScreen =
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
 
-        let state =
-            {
-                ShowInputOverlay = Setting.simple false
-                ShowHitOverlay = Setting.simple false
-                PlayfieldDim = Setting.percentf 0.5f
-                IsAuto = is_auto
-            }
-
-        let playback_speed =
-            Setting.bounded rate 0.5f 2.0f |> Setting.trigger (fun r -> Song.change_rate r)
-
         let mutable replay_data = replay_data
 
         let mutable scoring =
@@ -71,31 +60,29 @@ module ReplayScreen =
                     if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
                     if hud_config.TimingDisplayEnabled then 
                         add_widget hud_config.TimingDisplayPosition 
-                            (fun x -> TimingDisplay(x).Conditional(state.ShowHitOverlay.Get >> not))
+                            (fun x -> TimingDisplay(x).Conditional(show_hit_overlay.Get >> not))
                     if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
                     if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition JudgementMeter
                     if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLateMeter
                     if hud_config.RateModMeterEnabled then add_widget hud_config.RateModMeterPosition RateModMeter
                     if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPMMeter
-                    if hud_config.InputMeterEnabled then 
-                        add_widget hud_config.InputMeterPosition
-                            (fun (hud_config, play_state) -> InputMeter(hud_config, play_state, fun () -> not state.ShowInputOverlay.Value))
+                    if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
 
                 this
                 |+ { new StaticWidget(NodeType.None) with
                        override _.Draw() =
-                           if state.ShowInputOverlay.Value || state.ShowHitOverlay.Value then
+                           if show_input_overlay.Value || show_hit_overlay.Value then
                                Draw.rect
                                    this.Playfield.Bounds
-                                   (Colors.black.O4a(255.0f * state.PlayfieldDim.Value |> int))
+                                   (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
                    }
                 |+ InputOverlay(
                     with_colors.Keys,
                     replay_data.GetFullReplay(),
                     this.State,
                     this.Playfield,
-                    state.ShowInputOverlay
+                    show_input_overlay
                 )
                 |+ HitOverlay(
                     rate,
@@ -103,11 +90,12 @@ module ReplayScreen =
                     replay_data.GetFullReplay(),
                     this.State,
                     this.Playfield,
-                    state.ShowHitOverlay
+                    show_hit_overlay
                 )
-                |* ControlOverlay(
+                |* ReplayControls(
                     with_colors.Source,
-                    state,
+                    is_auto,
+                    rate,
                     fun t ->
                         let now = Song.time () in
                         Song.seek t
@@ -143,11 +131,4 @@ module ReplayScreen =
                             Screen.Type.Score
                             Transitions.EnterGameplay
                         |> ignore
-
-                if (%%"skip").Tapped() then
-                    if Song.playing () then 
-                        (if Song.time () > 0.0f<ms> then Song.pause ())
-                    elif not (Mouse.held Mouse.LEFT) then Song.resume ()
-                else
-                    SelectedChart.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
         }
