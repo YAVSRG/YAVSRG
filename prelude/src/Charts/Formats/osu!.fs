@@ -330,9 +330,10 @@ module ``osu!`` =
     let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true .>> spaces
 
     let private parse_key_value =
-        parse_name .>> spaces .>> colon .>> manyChars (anyOf " \t")
+        parse_name .>> spaces .>> colon
         .>>. (restOfLine true)
         .>> spaces
+        |>> (fun (key, value) -> (key.Trim(), value.Trim()))
 
     let private parse_expected_header_title name =
         pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
