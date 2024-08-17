@@ -327,6 +327,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         if options.ScoreGraphWindowBackground.Value then
             this.DrawWindows()
+        else 
+            Draw.rect this.Bounds Colors.black.O1
 
         Draw.rect
             (Rect.Create(
