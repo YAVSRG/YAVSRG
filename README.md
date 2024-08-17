@@ -57,12 +57,13 @@ After that you can delete the entire YAVSRG folder to entirely remove the game a
 >
 > If the setup guide for non-developers on Linux/macOS didn't work, please **do not try these steps** and instead get assistance in [the discord](https://discord.gg/tA22tWR) if all you want to do is play.
 
-The `yavsrg update` command will checkout and build the latest release, if you are a developer you will want to build what is on your local branch instead.
+Developers should first follow the non-developer setup and ensure the `yavsrg` CLI tool works.  
+The `yavsrg update` command will checkout and build the latest release, but if you are a developer you will want to build what is on your local branch instead.
 
-Use `yavsrg debug_run` to build and test the current branch, or [go and look inside at what it does](https://github.com/YAVSRG/YAVSRG/blob/main/tools/Client/Play.fs) and use an IDE feature accordingly.
+Use `yavsrg debug_run` to build and test the current branch - You should run this at least once before building via an IDE.
 
-On first startup via `yavsrg debug_run`, the game will tell you that you need the correct bass.dll/dynlib/so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
-Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
+After the first use of `yavsrg debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
+If not, the game will let you know on launch - Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
 If your platform isn't there contact me in the discord or search online for it
 
 If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run with F5 which is my current workflow.
@@ -70,11 +71,12 @@ If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.co
 While Interlude stores all its data in the same folder as the exe by default, you can change that to a specific location - In YAVSRG/interlude/src/bin/Debug/net8.0/config.json you can edit `WorkingDirectory` to whatever is convenient
 
 I use `"C:/Interlude/dev"` on Windows  
-If you previously built Interlude as a non-developer, I recommend setting it to `"../../../../../GAME"` so both builds share data
+If you previously built Interlude as a non-developer, setting it to `"../../../../../GAME"` means both builds share data  
+If you previously installed Interlude somewhere else, setting it to that path means both copies share data
 
 <h2 align="center">🤝 Contributing</h2>
 
-Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc. I'm active a lot in 
+Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc.
 
 Once up and running with the developer build instructions above, steps for contributing are outlined [here](https://github.com/YAVSRG/YAVSRG/tree/main/docs/contributors.md)
 

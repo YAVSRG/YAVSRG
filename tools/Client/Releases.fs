@@ -42,6 +42,36 @@ Information, future updates and support available at:
             SQLiteLibraryFile: string
             ExecutableFile: string
         }
+        static member OSX_ARM64 =
+            {
+                Name = "osx-arm64"
+                RuntimeId = "osx-arm64"
+                BassLibraryFile = "libbass.dylib"
+                BassFxLibraryFile = "libbass_fx.dylib"
+                GLFWLibraryFile = "libglfw.3.dylib"
+                SQLiteLibraryFile = "libe_sqlite3.dylib"
+                ExecutableFile = "Interlude"
+            }
+        static member LINUX_X64 =
+            {
+                Name = "linux-x64"
+                RuntimeId = "linux-x64"
+                BassLibraryFile = "libbass.so"
+                BassFxLibraryFile = "libbass_fx.so"
+                GLFWLibraryFile = "libglfw.so.3.3"
+                SQLiteLibraryFile = "libe_sqlite3.so"
+                ExecutableFile = "Interlude"
+            }
+        static member WINDOWS_X64 =
+            {
+                Name = "win64"
+                RuntimeId = "win-x64"
+                BassLibraryFile = "bass.dll"
+                BassFxLibraryFile = "bass_fx.dll"
+                GLFWLibraryFile = "glfw3.dll"
+                SQLiteLibraryFile = "e_sqlite3.dll"
+                ExecutableFile = "Interlude.exe"
+            }
 
     let build_platform (info: BuildPlatformInfo) =
 
@@ -112,38 +142,8 @@ Information, future updates and support available at:
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
         printfn "Zipped to: %s.zip" clean_dir
 
-    let build_osx_arm64 () =
-        build_platform
-            {
-                Name = "osx-arm64"
-                RuntimeId = "osx-arm64"
-                BassLibraryFile = "libbass.dylib"
-                BassFxLibraryFile = "libbass_fx.dylib"
-                GLFWLibraryFile = "libglfw.3.dylib"
-                SQLiteLibraryFile = "libe_sqlite3.dylib"
-                ExecutableFile = "Interlude"
-            }
+    let build_osx_arm64 () = build_platform BuildPlatformInfo.OSX_ARM64
 
-    let build_linux_x64 () =
-        build_platform
-            {
-                Name = "linux-x64"
-                RuntimeId = "linux-x64"
-                BassLibraryFile = "libbass.so"
-                BassFxLibraryFile = "libbass_fx.so"
-                GLFWLibraryFile = "libglfw.so.3.3"
-                SQLiteLibraryFile = "libe_sqlite3.so"
-                ExecutableFile = "Interlude"
-            }
+    let build_linux_x64 () = build_platform BuildPlatformInfo.LINUX_X64
 
-    let build_win_x64 () =
-        build_platform
-            {
-                Name = "win64"
-                RuntimeId = "win-x64"
-                BassLibraryFile = "bass.dll"
-                BassFxLibraryFile = "bass_fx.dll"
-                GLFWLibraryFile = "glfw3.dll"
-                SQLiteLibraryFile = "e_sqlite3.dll"
-                ExecutableFile = "Interlude.exe"
-            }
+    let build_win_x64 () = build_platform BuildPlatformInfo.WINDOWS_X64

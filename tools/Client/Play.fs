@@ -3,15 +3,23 @@
 open System.IO
 open System.IO.Compression
 open System.Diagnostics
+open System.Runtime.InteropServices
 open YAVSRG.CLI.Utils
 
 module Play =
 
-    let debug_run () =
-        exec_at INTERLUDE_SOURCE_PATH "dotnet" "build --configuration Debug -v q"
-        exec_at (Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0")) "dotnet" "run --project ../../.."
-
     let GAME_FOLDER = Path.Combine(YAVSRG_PATH, "GAME")
+
+    let detect_build_info() =
+        let arch = RuntimeInformation.OSArchitecture
+        match arch with
+        | Architecture.X64 when System.OperatingSystem.IsWindows() ->
+            Releases.BuildPlatformInfo.WINDOWS_X64
+        | Architecture.X64 when System.OperatingSystem.IsLinux() ->
+            Releases.BuildPlatformInfo.LINUX_X64
+        | Architecture.Arm64 when System.OperatingSystem.IsMacOS() ->
+            Releases.BuildPlatformInfo.OSX_ARM64
+        | _ -> failwithf "Your platform (%O) is not supported! Maybe complain in the discord?" arch
 
     let update () =
         exec "git" "checkout main"
@@ -24,18 +32,9 @@ module Play =
 
         try
             Directory.CreateDirectory GAME_FOLDER |> ignore
-
-            if System.OperatingSystem.IsWindows() then 
-                Releases.build_win_x64()
-                ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", "Interlude-win64.zip"), GAME_FOLDER, true)
-            elif System.OperatingSystem.IsLinux() then
-                Releases.build_linux_x64()
-                ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", "Interlude-linux-x64.zip"), GAME_FOLDER, true)
-            elif System.OperatingSystem.IsMacOS() then 
-                Releases.build_osx_arm64()
-                ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", "Interlude-osx-arm64.zip"), GAME_FOLDER, true)
-            else printfn "Your platform is not supported! Maybe complain in the discord?"
-
+            let build_info = detect_build_info()
+            Releases.build_platform build_info
+            ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", sprintf "Interlude-%s.zip" build_info.Name), GAME_FOLDER, true)
         with err -> printfn "Error creating GAME folder: %O" err
 
         exec "git" "checkout main"
@@ -51,3 +50,21 @@ module Play =
             Process.Start(Path.Combine(GAME_FOLDER, "Interlude")).WaitForExit()
         else
             printfn "Your GAME folder is missing an Interlude executable, run `yavsrg update` to fix it"
+
+    let debug_run () =
+        exec_at INTERLUDE_SOURCE_PATH "dotnet" "build --configuration Debug -v q"
+        try
+            let build_info = detect_build_info()
+            File.Copy(
+                Path.Combine(YAVSRG_PATH, "engine", "lib", build_info.RuntimeId, build_info.BassLibraryFile),
+                Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0", build_info.BassLibraryFile),
+                true
+            )
+
+            File.Copy(
+                Path.Combine(YAVSRG_PATH, "engine", "lib", build_info.RuntimeId, build_info.BassFxLibraryFile),
+                Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0", build_info.BassFxLibraryFile),
+                true
+            )
+        with err -> printfn "Error detecting platform: %O" err
+        exec_at (Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0")) "dotnet" "run --project ../../.."
