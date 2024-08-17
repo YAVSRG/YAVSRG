@@ -50,7 +50,7 @@ type Accuracy
         |* Text(
             (fun () -> score_info.Scoring.FormatAccuracy()),
             Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
-            Position = Position.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE)
+            Position = Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE)
         )
 
         if (!improvements).Accuracy <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
