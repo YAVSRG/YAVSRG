@@ -101,13 +101,12 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds.SliceT(160.0f), !*Palette.DARKER, 2.0f)
-        Background.draw (this.Bounds.ShrinkT(160.0f), (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds, Colors.white, 2.0f)
+        Draw.untextured_quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
         base.Draw()
 
         // accuracy info
-        let counters =
-            Rect.Box(this.Bounds.Left + 25.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 50.0f, 350.0f)
+        let counters = Rect.Box(this.Bounds.Left + 25.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 50.0f, 350.0f)
 
         let judgement_counts = (!stats).Judgements
         let judgements = score_info.Ruleset.Judgements |> Array.indexed
@@ -116,19 +115,19 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
         for i, j in judgements do
             let b = Rect.Create(counters.Left, y, counters.Right, y + h)
-            Draw.rect b (Color.FromArgb(40, j.Color))
+            Draw.rect b j.Color.O1
 
             Draw.rect
                 (b.SliceL(
                     counters.Width
                     * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)
                 ))
-                (Color.FromArgb(127, j.Color))
+                j.Color.O2
 
             Text.fill_b (
                 Style.font,
                 sprintf "%s: %i" j.Name judgement_counts.[i],
-                b.Shrink(15.0f, 2.0f),
+                b.Shrink(10.0f, 2.0f),
                 (if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text),
                 Alignment.LEFT
             )

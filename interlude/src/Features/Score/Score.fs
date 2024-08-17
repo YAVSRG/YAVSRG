@@ -87,7 +87,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
                     Left = 0.0f %+ 20.0f
                     Top = 0.0f %+ 215.0f
                     Right = 0.35f %- 0.0f
-                    Bottom = 1.0f %- 60.0f
+                    Bottom = 1.0f %- 70.0f
                 }
         )
         |+ bottom_info
