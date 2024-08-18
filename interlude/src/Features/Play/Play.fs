@@ -62,6 +62,9 @@ module PlayScreen =
                 Background.dim (float32 options.BackgroundDim.Value)
                 Background.set_parallax_amount 40.0f
         )
+
+        let skip_song () =
+            if Gameplay.continue_endless_mode() then Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
         
         let give_up () =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
@@ -136,6 +139,11 @@ module PlayScreen =
                     "retry",
                     (if options.HoldToGiveUp.Value then ignore else retry),
                     (if options.HoldToGiveUp.Value then retry else ignore)
+                )
+                |+ HotkeyHoldAction(
+                    "next_song",
+                    (if options.HoldToGiveUp.Value then ignore else skip_song),
+                    (if options.HoldToGiveUp.Value then skip_song else ignore)
                 )
                 |+ HotkeyHoldAction(
                     "exit",

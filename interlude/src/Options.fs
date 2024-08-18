@@ -364,8 +364,8 @@ module Options =
             Hotkeys.register "accept_suggestion" (mk Keys.Tab)
             Hotkeys.register "hide_replay_overlay" (mk Keys.H)
 
-            Hotkeys.register "uprate_big" (ctrlShift Keys.Equal)
-            Hotkeys.register "downrate_big" (ctrlShift Keys.Minus)
+            Hotkeys.register "uprate_big" (ctrl_shift Keys.Equal)
+            Hotkeys.register "downrate_big" (ctrl_shift Keys.Minus)
             Hotkeys.register "uprate" (mk Keys.Equal)
             Hotkeys.register "downrate" (mk Keys.Minus)
             Hotkeys.register "uprate_half" (ctrl Keys.Equal)
@@ -391,6 +391,7 @@ module Options =
 
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
+            Hotkeys.register "next_song" (ctrl_shift Keys.R)
             Hotkeys.register "offset" (ctrl Keys.O)
 
             Hotkeys.register "preset1" (ctrl Keys.F1)

@@ -80,7 +80,7 @@ module Bind =
     let inline ctrl k = Bind.Key(k, (true, false, false))
     let inline alt k = Bind.Key(k, (false, true, false))
     let inline shift k = Bind.Key(k, (false, false, true))
-    let inline ctrlShift k = Bind.Key(k, (true, false, true))
+    let inline ctrl_shift k = Bind.Key(k, (true, false, true))
     let inline ctrlAlt k = Bind.Key(k, (true, true, false))
 
 type InputEvType =
