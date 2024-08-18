@@ -52,10 +52,11 @@ module PlayScreen =
             then
                 Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
 
-        let SHOW_SONG_INFO = true
-        let fade_in = Animation.Fade (if SHOW_SONG_INFO then 0.0f else 1.0f)
-        let song_info = SongInfo(
-            info, 
+        let SHOW_START_OVERLAY = true
+        let fade_in = Animation.Fade (if SHOW_START_OVERLAY then 0.0f else 1.0f)
+        let start_overlay = StartOverlay(
+            info,
+            pacemaker_state,
             fun () ->
                 fade_in.Target <- 1.0f
                 Background.dim (float32 options.BackgroundDim.Value)
@@ -151,7 +152,7 @@ module PlayScreen =
 
                 base.OnEnter(previous)
 
-                if SHOW_SONG_INFO then
+                if SHOW_START_OVERLAY then
                     Background.dim 0.6f
                     Background.set_parallax_amount 240.0f
 
@@ -161,12 +162,13 @@ module PlayScreen =
                 if options.AutoCalibrateOffset.Value && not offset_manually_changed then
                     LocalOffset.apply_automatic this.State info.SaveData
                 Toolbar.show_cursor ()
+                Background.set_parallax_amount 40.0f
 
                 base.OnExit(next)
 
             override this.Init(parent) =
                 base.Init(parent)
-                song_info.Init this
+                start_overlay.Init this
 
             override this.Update(elapsed_ms, moved) =
                 Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
@@ -190,7 +192,7 @@ module PlayScreen =
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play()
 
                 if fade_in.Value < 1.0f then
-                    song_info.Update(elapsed_ms, moved)
+                    start_overlay.Update(elapsed_ms, moved)
                     fade_in.Update elapsed_ms
 
             override this.Draw() =
@@ -199,7 +201,7 @@ module PlayScreen =
                     let old_m = Alpha.change_multiplier fade_in.Value
                     base.Draw()
                     Alpha.change_multiplier old_m |> ignore
-                    song_info.Draw()
+                    start_overlay.Draw()
                 else
                     base.Draw()
 

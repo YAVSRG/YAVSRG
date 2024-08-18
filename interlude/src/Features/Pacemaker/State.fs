@@ -12,7 +12,7 @@ open Interlude.Features.Gameplay
 type PacemakerState =
     | None
     | Accuracy of float
-    | Replay of ScoreProcessorBase
+    | Replay of float * ScoreProcessorBase
     | Judgement of target: JudgementId * max_count: int
 
 [<RequireQualifiedAccess>]
@@ -27,7 +27,7 @@ module PacemakerState =
         match state with
         | PacemakerState.None -> true
         | PacemakerState.Accuracy x -> scoring.Accuracy >= x
-        | PacemakerState.Replay r ->
+        | PacemakerState.Replay (_, r) ->
             r.Update Time.infinity
             scoring.Accuracy >= r.Accuracy
         | PacemakerState.Judgement(judgement, count) ->
@@ -53,7 +53,7 @@ module PacemakerState =
             let replay_scoring =
                 ScoreProcessor.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate
 
-            PacemakerState.Replay replay_scoring
+            PacemakerState.Replay (score_info.Accuracy, replay_scoring)
 
         | PacemakerCreationContext.FromUserSetting ->
             let setting =
@@ -75,7 +75,7 @@ module PacemakerState =
                             let replay_data = score.Replay |> Replay.decompress_bytes
                             let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
-                            PacemakerState.Replay scoring
+                            PacemakerState.Replay (best_accuracy, scoring)
 
                         | None -> PacemakerState.Accuracy best_accuracy
                     | None -> PacemakerState.Accuracy setting.Accuracy

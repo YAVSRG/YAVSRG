@@ -59,7 +59,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
-        | PacemakerState.Replay score ->
+        | PacemakerState.Replay (_, score) ->
             if position_cooldown.Complete then
                 score.Update(state.CurrentChartTime())
                 ahead_by <- state.Scoring.State.PointsScored - score.State.PointsScored
