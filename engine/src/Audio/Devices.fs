@@ -1,9 +1,7 @@
 ﻿namespace Percyqaz.Flux.Audio
 
 open System
-open System.Diagnostics
 open ManagedBass
-open ManagedBass.Fx
 open Percyqaz.Common
 
 module Devices =
@@ -41,7 +39,7 @@ module Devices =
 
     let update (elapsed_ms: float) =
         update_waveform elapsed_ms
-        Song.update ()
+        Song.update elapsed_ms
 
     let mutable private default_device = -1
     let mutable private devices = [||]

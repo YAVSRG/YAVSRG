@@ -5,18 +5,21 @@ open System.Diagnostics
 open ManagedBass
 open ManagedBass.Fx
 open Percyqaz.Common
+open Percyqaz.Flux.Utils
 
 type Song =
     {
         ID: int
         Frequency: int // in hz
         Duration: float32<ms>
+        mutable LowPassFilterEffect: int
     }
     static member Default =
         {
             ID = 0
             Frequency = 1
             Duration = 1000.0f<ms>
+            LowPassFilterEffect = 0
         }
 
     static member FromFile(file: string) =
@@ -31,14 +34,32 @@ type Song =
             let Frequency = d.Frequency
             let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
+            Bass.ChannelSetAttribute(ID, ChannelAttribute.NoBuffer, 1f) |> display_bass_error
+
             {
                 ID = ID
                 Frequency = Frequency
                 Duration = float32 Duration * 1.0f<ms>
+                LowPassFilterEffect = 0
             }
 
     member this.Free() =
         Bass.StreamFree this.ID |> display_bass_error
+
+    member this.SetLowPass(amount: float32) =
+        match this.LowPassFilterEffect with
+        | 0 when amount > 0.0f ->
+            let effect = Bass.ChannelSetFX(this.ID, EffectType.BQF, 1)
+            let center = lerp amount 22049f 800f
+            Bass.FXSetParameters(effect, BQFParameters(lFilter = BQFType.LowPass, fCenter = center, fBandwidth = 0f, fQ = 0.7f)) |> display_bass_error
+            this.LowPassFilterEffect <- effect
+        | existing when amount = 0.0f ->
+            Bass.ChannelRemoveFX(this.ID, existing) |> display_bass_error
+            this.LowPassFilterEffect <- 0
+        | existing ->
+            let center = lerp amount 22049f 800f
+            Bass.FXSetParameters(existing, BQFParameters(lFilter = BQFType.LowPass, fCenter = center, fBandwidth = 0f, fQ = 0.7f)) |> display_bass_error
+        
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -72,6 +93,9 @@ module Song =
     let mutable private preview_point = 0.0f<ms>
     let mutable private last_note = 0.0f<ms>
     let mutable private enable_pitch_rates = true
+
+    let mutable private low_pass_amount = 0.0f
+    let mutable private low_pass_target = 0.0f
 
     let duration () = now_playing.Duration
 
@@ -162,6 +186,10 @@ module Song =
             Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, if enabled then 0.0 else -Math.Log(float rate, 2.0) * 12.0)
             |> display_bass_error
 
+    let set_low_pass (amount: float32) =
+        low_pass_target <- amount
+        now_playing.SetLowPass low_pass_amount
+
     let set_local_offset (offset) = _local_offset <- offset
     let set_global_offset (offset) = _global_offset <- offset
 
@@ -179,6 +207,8 @@ module Song =
                 loading <- false
                 now_playing <- song
                 change_rate rate
+
+                song.SetLowPass low_pass_amount
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
@@ -206,7 +236,12 @@ module Song =
             loading <- true
             song_loader.Request(path, after_load)
 
-    let update () =
+    let update (elapsed_ms: float) =
+
+        if low_pass_target <> low_pass_amount then
+            low_pass_amount <- lerp (float32 <| Math.Pow(0.994, elapsed_ms)) low_pass_target low_pass_amount
+            if abs (low_pass_amount - low_pass_target) < 0.01f then low_pass_amount <- low_pass_target
+            now_playing.SetLowPass low_pass_amount
 
         song_loader.Join()
 

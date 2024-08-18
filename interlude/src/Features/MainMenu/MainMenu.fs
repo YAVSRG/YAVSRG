@@ -205,6 +205,7 @@ type MainMenuScreen() as this =
                 fun () ->
                     confirmed_exit <- true
                     Screen.back Transitions.UnderLogo |> ignore
+                    defer (fun () -> Song.set_low_pass 1.0f)
             )
                 .Show()
 

@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
@@ -223,6 +224,7 @@ and Menu(top_level: Page) as this =
         volume.Init this
         exit_key.Init this
         this.ShowPage top_level
+        Song.set_low_pass 1.0f
 
     override this.Draw() =
         volume.Draw()
@@ -276,6 +278,7 @@ and Menu(top_level: Page) as this =
         base.Close()
         Selection.unclamp ()
         _instance <- None
+        Song.set_low_pass 0.0f
 
     member private this.PageTitles() = namestack
     static member PageTitles() = 
