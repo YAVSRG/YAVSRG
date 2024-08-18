@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 
-type Slider(setting: Setting.Bounded<float32>) as this =
+type Slider(setting: Setting.Bounded<float32>) =
     inherit Container(NodeType.Leaf)
 
     let TEXTWIDTH = 130.0f
@@ -16,27 +16,42 @@ type Slider(setting: Setting.Bounded<float32>) as this =
     let mutable decimal_places = 2
     let mutable step = 0.01f
 
+    let typed_number = 
+        Setting.simple ""
+        |> Setting.trigger (fun v ->
+            Style.key.Play()
+            match Single.TryParse(v.Replace(',', '.'), Globalization.CultureInfo.InvariantCulture) with
+            | true, r ->
+                let lo, hi = setting.Config
+                if r > hi && r / 100.0f > lo && r / 100.0f < hi then
+                    setting.Set (r / 100.0f)
+                else setting.Set r
+            | false, _ -> ()
+        )
+        |> Setting.map id (fun v -> v |> Seq.filter (fun c -> c = '.' || c = ',' || Char.IsAsciiDigit c) |> Array.ofSeq |> String)
+
     let get_percent () =
-        let (Setting.Bounds(lo, hi)) = setting.Config
+        let lo, hi = setting.Config
         (setting.Value - lo) / (hi - lo)
 
     let set_percent (v: float32) =
-        let (Setting.Bounds(lo, hi)) = setting.Config
+        let lo, hi = setting.Config
         setting.Value <- MathF.Round((hi - lo) * v + lo, decimal_places)
 
     let add (v) =
         setting.Value <- MathF.Round(setting.Value + v, decimal_places)
         Style.click.Play()
 
-    do
+    override this.Init(parent) =
         this
         |+ Text(
-            (fun () -> this.Format setting.Value),
+            (fun () -> if typed_number.Value = "" then this.Format setting.Value else typed_number.Value),
             Align = Alignment.LEFT,
             Position =
                 { Position.DEFAULT with
                     Right = 0.0f %+ TEXTWIDTH
-                }
+                },
+            Color = fun () -> if typed_number.Value <> "" then Colors.text_yellow_2 else Colors.text
         )
         |* Clickable(
             (fun () ->
@@ -52,6 +67,7 @@ type Slider(setting: Setting.Bounded<float32>) as this =
                         Selection.up true
                 )
         )
+        base.Init parent
 
     member this.Step
         with get () = step
@@ -67,6 +83,15 @@ type Slider(setting: Setting.Bounded<float32>) as this =
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
+
+    override this.OnSelected(by_mouse: bool) =
+        base.OnSelected by_mouse
+        Input.listen_to_text(typed_number, false, ignore)
+
+    override this.OnDeselected(by_mouse: bool) =
+        base.OnDeselected by_mouse
+        Input.remove_listener()
+        typed_number.Set ""
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -98,6 +123,8 @@ type Slider(setting: Setting.Bounded<float32>) as this =
                 add (step * 5.0f)
             elif (%%"down").Tapped() then
                 add (-step * 5.0f)
+            elif (%%"select").Tapped() then
+                typed_number.Set ""
 
     override this.Draw() =
         let v = get_percent ()

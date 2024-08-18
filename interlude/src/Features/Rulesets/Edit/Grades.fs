@@ -21,7 +21,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
         |+ PageSetting(%"rulesets.grade.color", ColorPicker(color, false))
             .Pos(2, 3)
         |+ PageSetting(%"rulesets.grade.accuracy", 
-            Slider(acc_required, Format = (fun v -> sprintf "%.3f%%" (v * 100.0f)), Step = 0.00001f)
+            Slider(acc_required, Format = (fun v -> sprintf "%.3f%%" (v * 100.0f)), Step = 0.001f)
         )
             .Pos(5)
         :> Widget

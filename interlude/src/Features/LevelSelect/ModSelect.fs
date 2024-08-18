@@ -133,7 +133,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
 
         |+ mod_grid
 
-        |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
+        |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()), Icon = Icons.FLAG)
             .Help(Help.Info("gameplay.pacemaker"))
             .Pos(17)
 
