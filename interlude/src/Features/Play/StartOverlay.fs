@@ -20,11 +20,6 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
     let timer = Animation.Delay (float Song.LEADIN_TIME * 0.5)
     let fade = Animation.Fade 1.0f
 
-    //let subrange lo hi x = (x - lo) / (hi - lo) |> min 1.0f |> max 0.0f
-    //let decelerate x = (2.0f - x) * x
-    //let accelerate x = x * x
-    //let range lo hi x = lo + x * (hi - lo)
-
     override this.Draw() =
         let alpha = fade.Alpha
 

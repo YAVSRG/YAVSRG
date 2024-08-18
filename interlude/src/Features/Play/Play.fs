@@ -150,6 +150,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
+                //|+ HotkeyAction("skip", fun () -> this |* FailOverlay())
                 |* HotkeyAction("offset", fun () -> change_offset this.State)
 
             override this.OnEnter(previous) =

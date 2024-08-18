@@ -131,6 +131,7 @@
     <Compile Include="Features\Score\Score.fs" />
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\StartOverlay.fs" />
+    <Compile Include="Features\Play\FailOverlay.fs" />
     <Compile Include="Features\Play\Lanecover.fs" />
     <Compile Include="Features\Play\Explosions.fs" />
     <Compile Include="Features\Play\ColumnLighting.fs" />
