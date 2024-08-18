@@ -13,7 +13,7 @@ module Background =
     let private parallaxX = Animation.Fade 0.0f
     let private parallaxY = Animation.Fade 0.0f
     let private parallaxZ = Animation.Fade 40.0f
-    let private dim_percent = Animation.Fade 1.0f
+    let internal dim_percent = Animation.Fade 1.0f
 
     let dim (amount: float32) = dim_percent.Target <- amount
 

@@ -55,7 +55,7 @@ type SongLoadAction =
 
 module Song =
 
-    let LEADIN_TIME = 2000.0f<ms>
+    let LEADIN_TIME = 3000.0f<ms>
 
     let mutable load_path: string option = None
     let mutable loading = false

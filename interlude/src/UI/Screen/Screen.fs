@@ -190,7 +190,7 @@ module Screen =
         override this.Draw() =
             if
                 current_type <> Type.Play
-                || Interlude.Options.options.BackgroundDim.Value < 1.0f
+                || Background.dim_percent.Value < 1.0f
             then
                 Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
 

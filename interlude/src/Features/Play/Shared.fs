@@ -107,7 +107,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         else
             Some Screen.Type.LevelSelect
 
-// todo: remove slideouts. local offset should just be a page and replay/practice modes can be a redesigned floating UI
+// todo: remove slideouts. practice mode to be redesigned
 type SlideoutContent(content: Widget, height: float32) =
     inherit Container(NodeType.Container(fun () -> Some content))
 
