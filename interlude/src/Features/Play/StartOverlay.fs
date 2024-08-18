@@ -55,7 +55,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
             | PacemakerState.Judgement (j, count) ->
                 let jname = 
                     if j < 0 then "combo break"
-                    else sprintf "'%s'" (Rulesets.current.JudgementName j)
+                    else Rulesets.current.JudgementName j
                 if count = 0 then 
                     sprintf "%s Get 0x %s" Icons.FLAG jname
                 else 

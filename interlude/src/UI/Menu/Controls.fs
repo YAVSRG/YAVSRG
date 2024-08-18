@@ -529,7 +529,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
             if not (Mouse.held Mouse.LEFT) then dragging_h <- false
 
-        elif Mouse.hover alpha_picker && Mouse.left_click() then
+        elif allow_alpha && Mouse.hover alpha_picker && Mouse.left_click() then
             dragging_a <- true
 
         if dragging_a then

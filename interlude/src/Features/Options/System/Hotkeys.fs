@@ -62,6 +62,9 @@ type HotkeysPage() =
     override this.Content() = 
         let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
+        let scroll_container =
+            ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+
         let search_box =
             { new SearchBox(
                     Setting.simple "", 
@@ -88,9 +91,6 @@ type HotkeysPage() =
             NavigationContainer.Row()
             |+ Keybinder(hotkey, Position = Position.ShrinkR PRETTYHEIGHT)
             |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceR PRETTYHEIGHT)
-
-        let scroll_container =
-            ScrollContainer(container, Position = Position.Shrink(100.0f, 200.0f))
 
         container.Add(
             PageButton(

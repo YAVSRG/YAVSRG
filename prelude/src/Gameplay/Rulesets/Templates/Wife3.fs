@@ -57,7 +57,7 @@ module Wife3 =
             Judgements =
                 [|
                     {
-                        Name = "Marvellous"
+                        Name = "Marvelous"
                         Color = Color.Aqua
                         BreaksCombo = false
                     }

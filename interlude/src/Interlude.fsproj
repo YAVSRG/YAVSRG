@@ -96,7 +96,11 @@
     <Compile Include="Features\Mounts\Display.fs" />
     <Compile Include="Features\Mounts\Mounts.fs" />
     <Compile Include="Features\Rulesets\Recalculate.fs" />
-    <Compile Include="Features\Rulesets\Edit\EditRuleset.fs" />
+    <Compile Include="Features\Rulesets\Edit\Shared.fs" />
+    <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
+    <Compile Include="Features\Rulesets\Edit\Grades.fs" />
+    <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
+    <Compile Include="Features\Rulesets\Edit\RulesetEditor.fs" />
     <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
     <Compile Include="Features\Rulesets\Add.fs" />

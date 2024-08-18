@@ -7,6 +7,7 @@ open Prelude
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Rulesets.Edit
 
 type private RulesetButton(name, action) =
     inherit
@@ -49,7 +50,7 @@ type SelectRulesetPage() =
 
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
-    let rec refresh () =
+    let refresh () =
         container.Clear()
 
         container
@@ -66,7 +67,14 @@ type SelectRulesetPage() =
                 |+ RulesetButton(
                     ruleset.Name,
                     (fun () -> options.SelectedRuleset.Set id),
-                    Position = Position.ShrinkR 100.0f
+                    Position = Position.ShrinkR(PRETTYHEIGHT * 2.0f)
+                )
+                |+ Button(
+                    Icons.EDIT,
+                    (fun () -> 
+                        RulesetEditorPage(id, ruleset).Show()
+                    ),
+                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT)
                 )
                 |+ Button(
                     Icons.TRASH,
@@ -77,7 +85,7 @@ type SelectRulesetPage() =
                         )
                             .Show()
                     ),
-                    Position = Position.SliceR 100.0f
+                    Position = Position.SliceR PRETTYHEIGHT
                 )
             )
 
@@ -86,7 +94,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()
