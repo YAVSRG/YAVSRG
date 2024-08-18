@@ -74,6 +74,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             score_info,
             Position =
                 { Position.DEFAULT with
+                    Left = 0.35f %+ 0.0f
                     Top = 0.0f %+ 175.0f
                     Bottom = 0.65f %+ 0.0f
                 }

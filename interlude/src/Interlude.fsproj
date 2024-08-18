@@ -124,6 +124,7 @@
     <Compile Include="Features\Score\Utils.fs" />
     <Compile Include="Features\Score\TopBanner.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
+    <Compile Include="Features\Score\SessionScore.fs" />
     <Compile Include="Features\Score\Results.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\BottomBanner.fs" />

@@ -193,13 +193,8 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        Container(
-            NodeType.None,
-            Position =
-                { Position.DEFAULT with
-                    Left = 0.35f %+ 0.0f
-                }
-        )
+        this
+        //|+ SessionScoreBar(Position = Position.Row(220.0f, 40.0f).ShrinkX(40.0f))
         |+ Grade(grade, score_info, Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
         |+ Accuracy(
             grade,
@@ -214,7 +209,7 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
                     Bottom = 0.0f %+ 200.0f
                 }
         )
-        |+ Lamp(
+        |* Lamp(
             lamp,
             improvements,
             previous_personal_bests,
@@ -227,7 +222,6 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
                     Bottom = 0.0f %+ 200.0f
                 }
         )
-        |> this.Add
 
         base.Init parent
 
