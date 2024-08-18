@@ -193,28 +193,22 @@ module Cache =
                                 | Ok c ->
                                     let entry, patterns = create_entry (Path.GetFileName folder) (File.GetCreationTimeUtc file) c
 
-                                    match c.Header.BackgroundFile with
-                                    | Relative _ ->
-                                        Logging.Warn(
-                                            sprintf
-                                                ".yav files in the cache (%s) shouldn't have relative assets, this is a legacy feature"
-                                                file
-                                        )
-                                    | _ -> ()
-
                                     match c.Header.AudioFile with
-                                    | Relative _ ->
-                                        Logging.Warn(
+                                    | Absolute path when not (File.Exists path) ->
+                                        Logging.Debug(
                                             sprintf
-                                                ".yav files in the cache (%s) shouldn't have relative assets, this is a legacy feature"
+                                                "Deleting %s because its original audio file is gone"
                                                 file
                                         )
+
+                                        File.Delete file
                                     | _ -> ()
+                                        
 
                                     let intended_path = get_path entry cache
 
                                     if intended_path <> file && File.Exists intended_path then
-                                        Logging.Warn(
+                                        Logging.Debug(
                                             sprintf
                                                 "Deleting %s because it should be named %s, which already exists"
                                                 file
