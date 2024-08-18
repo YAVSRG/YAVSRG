@@ -94,6 +94,8 @@ module LevelSelect =
             defer (fun () -> retry_until_song_loaded info action)
 
     let continue_endless_mode () : bool =
+        if Transitions.in_progress() then false else
+
         let ctx =
             match suggestion_ctx with
             | None ->
