@@ -361,12 +361,12 @@ type HudConfig =
             InputMeterPosition =
                 {
                     RelativeToPlayfield = true
-                    Left = 20.0f, 1.0f
-                    Top = -580.0f, 1.0f
-                    Right = 440.0f, 1.0f
-                    Bottom = -20.0f, 1.0f
+                    Left = 30.0f, 1.0f
+                    Top = -400.0f, 1.0f
+                    Right = 200.0f, 1.0f
+                    Bottom = -100.0f, 1.0f
                 }
-            InputMeterScrollSpeed = 1.5f
+            InputMeterScrollSpeed = 0.75f
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterKeyFadeTime = 300.0f
             InputMeterShowKPS = false
