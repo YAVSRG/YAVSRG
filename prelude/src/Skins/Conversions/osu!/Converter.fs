@@ -506,7 +506,7 @@ module OsuSkinConverter =
 
             result |> List.ofSeq
 
-        let mutable flipholdtail = false
+        let mutable flipholdtail = keymode_settings.NoteFlipWhenUpsideDownΔT.[0]
         let mutable useholdtail = true
         let mutable columnlighting = false
         let mutable stage_textures = false

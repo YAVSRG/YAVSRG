@@ -104,12 +104,12 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     Bottom = bottom - r.Top
                 }
 
-    let hold_tail_flip =
-        fun q ->
-            if not (noteskin_config.FlipHoldTail) || options.Upscroll.Value then
-                q
-            else
-                Quad.flip_vertical q
+    let hold_tail_transform k =
+        if not useholdtail then rotation k
+        elif not noteskin_config.FlipHoldTail || options.Upscroll.Value then
+            id
+        else
+            Quad.flip_vertical
 
     let receptor_transform k =
         if noteskin_config.ReceptorStyle = ReceptorStyle.Flip then
@@ -222,18 +222,25 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 else struct (lt, rt, rb, lb)
 
             Draw.quad
-                ((Rect.Create(
-                    left + column_positions.[k],
-                    max clip pos,
-                    left + column_positions.[k] + note_height,
-                    pos + note_height
-                  )
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> if useholdtail then id else rotation k)
+                (
+                    (
+                        Rect.Create(
+                            left + column_positions.[k],
+                            max clip pos,
+                            left + column_positions.[k] + note_height,
+                            pos + note_height
+                        )
+                        |> scroll_direction_transform bottom
+                    ).AsQuad
+                    |> hold_tail_transform k
+                )
                 tint.AsQuad
-                (Sprite.pick_texture (animation.Loops, color) (if useholdtail then holdtail else holdhead)
-                 |> fun x -> x.Transform(quad_clip_correction).Transform(hold_tail_flip))
+                (
+                    Sprite.pick_texture 
+                        (animation.Loops, color) 
+                        (if useholdtail then holdtail else holdhead)
+                    |> fun x -> x.Transform(quad_clip_correction)
+                )
 
         // CALCULATE TIME + SV STUFF
 
@@ -318,7 +325,6 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         draw_receptors()
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
-        // todo: also put a cap at -playfield_height when *negative sv comes into play
         while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
 
             let { Time = t; Data = nr } = chart.Notes.[note_peek]
