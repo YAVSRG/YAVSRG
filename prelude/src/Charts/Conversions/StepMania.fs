@@ -215,7 +215,7 @@ module StepMania_To_Interlude =
                 || filename.ToLower().Contains "ogg"
             )
 
-        let find_author () : string =
+        let guess_author () : string =
             let folder_name = Path.GetFileName path
             let round_paren = folder_name.LastIndexOf('(')
             let square_paren = folder_name.LastIndexOf('[')
@@ -227,27 +227,30 @@ module StepMania_To_Interlude =
                 let guess = folder_name.Substring(square_paren + 1)
                 if guess.EndsWith(']') then guess.TrimEnd ']' else ""
             else
-                ""
+                "Unknown"
+
+        let choose_translit (original: string) (translit: string) : string * string option =
+            if translit = "" then
+                original, None
+            elif original = "" then
+                translit, None
+            elif (original |> Seq.filter Char.IsAscii |> Seq.length) > (translit |> Seq.filter Char.IsAscii |> Seq.length) then
+                original, Some translit
+            else translit, Some original
 
         let convert_difficulty (i: int) (diff: ChartData) : Result<Chart, SkippedConversion> =
             try
                 let keys = diff.STEPSTYPE.Keycount
-                let title = metadata_fallback [ sm.TITLETRANSLIT; sm.TITLE ]
-                let artist = metadata_fallback [ sm.ARTISTTRANSLIT; sm.ARTIST ]
+                let title, title_native = choose_translit sm.TITLE sm.TITLETRANSLIT
+                let artist, artist_native = choose_translit sm.ARTIST sm.ARTISTTRANSLIT
 
                 let header =
                     {
                         Title = title
-                        TitleNative =
-                            match metadata_fallback_opt [ sm.TITLETRANSLIT ] with
-                            | Some t when t = title -> None
-                            | x -> x
+                        TitleNative = title_native
                         Artist = artist
-                        ArtistNative =
-                            match metadata_fallback_opt [ sm.ARTISTTRANSLIT ] with
-                            | Some t when t = artist -> None
-                            | x -> x
-                        Creator = metadata_fallback [ find_author (); sm.CREDIT; diff.CREDIT ]
+                        ArtistNative = artist_native
+                        Creator = metadata_fallback [ if diff.CREDIT.Contains("Copied f") then "" else diff.CREDIT.Trim(); sm.CREDIT.Trim(); guess_author () ]
                         DiffName = sprintf "%O %O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
                         Subtitle = metadata_fallback_opt [ sm.SUBTITLETRANSLIT; sm.SUBTITLE ]
                         Tags =
