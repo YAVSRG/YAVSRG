@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI
 
-open System
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI

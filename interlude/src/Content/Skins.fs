@@ -537,6 +537,8 @@ module Skins =
                 if selected_noteskin_id.Value = id then selected_noteskin_id.Value <- DEFAULT_NOTESKIN_ID
                 try
                     Directory.Delete(f, true)
+                    if not (loaded_huds.ContainsKey id) then
+                        Directory.Delete(Path.Combine(get_game_folder "Skins", id), true)
                     load()
                     true
                 with
@@ -544,7 +546,6 @@ module Skins =
                     Logging.Error("IO error while deleting noteskin", err)
                     false
                 | _ -> reraise()
-                // todo: delete entire skin if now-empty
         else false
 
     let delete_hud (id: string) =
@@ -555,6 +556,8 @@ module Skins =
                 if selected_hud_id.Value = id then selected_hud_id.Value <- DEFAULT_NOTESKIN_ID
                 try
                     Directory.Delete(f, true)
+                    if not (loaded_noteskins.ContainsKey id) then
+                        Directory.Delete(Path.Combine(get_game_folder "Skins", id), true)
                     load()
                     true
                 with
@@ -562,7 +565,6 @@ module Skins =
                     Logging.Error("IO error while deleting hud", err)
                     false
                 | _ -> reraise()
-                // todo: delete entire skin if now-empty
         else false
 
     let export_skin (id: string) =
