@@ -22,7 +22,7 @@ type ScoreChartContextMenu(cc: CachedChart) =
 
     override this.Content() =
         let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(100.0f, 200.0f))
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
 
             |+ PageButton(
                 %"chart.add_to_collection",

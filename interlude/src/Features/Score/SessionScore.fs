@@ -17,9 +17,9 @@ type SessionScoreBar() =
         // bar
         let bar = this.Bounds.SliceY(20.0f).ShrinkX(10.0f)
         Draw.rect bar Colors.shadow_2.O2
-        Draw.rect (bar.SlicePercentL(0.6f)) Colors.yellow_accent
+        Draw.rect (bar.SlicePercentL(0.6f)) (!*Palette.HIGHLIGHT_100).O4
 
-        let counter = this.Bounds.BorderB(60.0f).SliceR(400.0f)
+        let counter = this.Bounds.BorderB(60.0f).SliceR(220.0f)
         let counterq = 
             let struct (a, b, c, d) = counter.AsQuad
             struct (a - OpenTK.Mathematics.Vector2(30.0f, 0.0f), b, c, d)
@@ -27,4 +27,5 @@ type SessionScoreBar() =
         Background.drawq (counterq, (Color.FromArgb(40, 40, 40)), 2.0f)
         Draw.untextured_quad counterq (!*Palette.MAIN_100).AsQuad
 
-        Text.fill_b(Style.font, "0062727", counter, Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, "7272727", counter, Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, "Session score", counter.BorderB(40.0f).TranslateY(10.0f), Colors.text, Alignment.CENTER)
