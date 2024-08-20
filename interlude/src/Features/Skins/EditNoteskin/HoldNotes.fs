@@ -34,6 +34,7 @@ type HoldNoteSettingsPage() =
             .Pos(3)
         |+ PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
             .Help(Help.Info("noteskin.flipholdtail"))
+            .Conditional(use_tail_texture.Get)
             .Pos(5)
         |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(dropped_color, true))
             .Help(Help.Info("noteskin.droppedholdcolor"))
@@ -79,8 +80,8 @@ type HoldNoteSettingsPage() =
 
             Draw.quad
                 (Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                 |> if flip_hold_tail.Value && downscroll then
-                        fun (r: Rect) -> r.Shrink(0.0f, r.Height)
+                 |> if flip_hold_tail.Value && downscroll && use_tail_texture.Value then
+                        fun (r: Rect) -> r.ShrinkY(r.Height)
                     else
                         id)
                     .AsQuad

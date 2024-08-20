@@ -70,7 +70,6 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holdhead = Content.Texture "holdhead"
     let holdbody = Content.Texture "holdbody"
     let note = Content.Texture "note"
-    let useholdtail = noteskin_config.UseHoldTailTexture
     let animation = Animation.Counter(noteskin_config.AnimationFrameTime)
 
     let sv = chart.SV
@@ -105,7 +104,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 }
 
     let hold_tail_transform k =
-        if not useholdtail then rotation k
+        if not noteskin_config.UseHoldTailTexture then rotation k
         elif not noteskin_config.FlipHoldTail || options.Upscroll.Value then
             id
         else
@@ -238,7 +237,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (
                     Sprite.pick_texture 
                         (animation.Loops, color) 
-                        (if useholdtail then holdtail else holdhead)
+                        (if noteskin_config.UseHoldTailTexture then holdtail else holdhead)
                     |> fun x -> x.Transform(quad_clip_correction)
                 )
 
