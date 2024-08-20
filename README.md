@@ -24,25 +24,23 @@ You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in
 >
 > If you just want to play the game on Windows, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
-1. Cloning the codebase to your machine requires [Git](https://git-scm.com/downloads), and building requires [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
+1. Install [Git](https://git-scm.com/downloads), and [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
 Follow the install instructions for both of these for your platform
 
-2. Run the setup scripts
+2. Clone the repository and set up the CLI tool
 
-To do this via terminal on macOS or linux:
-```bash
-# Navigate to somewhere you want to store the interlude codebase
-git clone https://github.com/YAVSRG/YAVSRG.git
-cd YAVSRG/scripts
-chmod +x ./setup_repo.sh
-./setup_repo.sh
-chmod +x ./setup_cli.sh
-./setup_cli.sh
-```
-On windows terminal, skip the `chmod` lines, or run the scripts through other means like double clicking to run them in Git Bash
+	To do this via a terminal:
+	```bash
+	# Navigate to somewhere you want to store the interlude codebase - Don't forget --recurse-submodules!
+	git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
+	# Setup the `yavsrg` CLI tool
+	cd YAVSRG/tools
+	dotnet pack
+	dotnet tool install -g --add-source ./nupkg YAVSRG.CLI
+	```
 
-The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number output in the terminal.  
-**If this hasn't worked and you are stuck, get assistance from me in [the discord](https://discord.gg/tA22tWR)**
+	The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number in the terminal.  
+	**If this hasn't worked and you are stuck, get assistance in [the discord](https://yavsrg.net/discord)**
 
 3. Run `yavsrg play` to build and play the latest version.  
    From now on `yavsrg play` will launch the game when you want to play.  
@@ -55,11 +53,9 @@ After that you can delete the entire YAVSRG folder to entirely remove the game a
 
 > [!Note]
 >
-> If the setup guide for non-developers on Linux/macOS didn't work, please **do not try these steps** and instead get assistance in [the discord](https://discord.gg/tA22tWR) if all you want to do is play.
+> If the setup guide for non-developers on Linux/macOS didn't work, please **do not try these steps** and instead get assistance in [the discord](https://yavsrg.net/discord) if all you want to do is play.
 
 Developers should first follow the non-developer setup and ensure the `yavsrg` CLI tool works.  
-The `yavsrg update` command will checkout and build the latest release, but if you are a developer you will want to build what is on your local branch instead.
-
 Use `yavsrg debug_run` to build and test the current branch - You should run this at least once before building via an IDE.
 
 After the first use of `yavsrg debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
@@ -76,13 +72,13 @@ If you previously installed Interlude somewhere else, setting it to that path me
 
 <h2 align="center">🤝 Contributing</h2>
 
-Come join [the discord](https://discord.gg/tA22tWR) -- Send me playtesting feedback, feature requests, bug reports, etc.
+Come join [the discord](https://yavsrg.net/discord) -- Send me playtesting feedback, feature requests, bug reports, etc.
 
 Once up and running with the developer build instructions above, steps for contributing are outlined [here](https://github.com/YAVSRG/YAVSRG/tree/main/docs/contributors.md)
 
 Pull requests are very welcome!
 If you spot a bug, typo or other minor problem and have a quick fix, feel free to submit a PR.
-If you want to work on a feature please check with me first via [Discord](https://discord.gg/tA22tWR)
+If you want to work on a feature please check with me first via [Discord](https://yavsrg.net/discord)
 
 > [!Warning]
 >
