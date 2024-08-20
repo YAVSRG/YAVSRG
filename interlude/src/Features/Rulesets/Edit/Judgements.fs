@@ -12,6 +12,7 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
     let judgement = ruleset.Value.Judgements.[id]
     let name = Setting.simple judgement.Name
     let color = Setting.simple judgement.Color
+    let breaks_combo = Setting.simple judgement.BreaksCombo
 
     override this.Content() =
         page_container()
@@ -19,30 +20,44 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
             .Pos(0)
         |+ PageSetting(%"rulesets.judgement.color", ColorPicker(color, false))
             .Pos(2, 3)
-        // todo: checkbox if it breaks combo
-        // todo: maybe put timing windows here as it makes most logical sense
+        |+ PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
+            .Pos(5)
         :> Widget
 
     override this.Title = judgement.Name
     override this.OnClose() =
         let new_js = ruleset.Value.Judgements |> Array.copy
-        new_js.[id] <- { judgement with Name = name.Value.Trim(); Color = color.Value }
+        new_js.[id] <- { Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
         ruleset.Set { ruleset.Value with Judgements = new_js }
 
 type EditJudgementsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let judgement_controls (i: int, j: Judgement) =
-        NavigationContainer.Row()
-        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
-        |+ Button(Icons.TRASH, ignore, Position = Position.SliceR PRETTYHEIGHT)
-
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
-    let refresh() =
+    let rec judgement_controls (i: int, j: Judgement) =
+        NavigationContainer.Row()
+        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ Button(
+            Icons.TRASH,
+            (fun () -> 
+                ConfirmPage(
+                    [j.Name] %> "rulesets.judgement.confirm_delete",
+                    fun () -> delete_judgement i
+                ).Show()
+            ),
+            Disabled = K true,
+            Position = Position.SliceR PRETTYHEIGHT
+        )
+
+    and refresh() : unit =
         container.Clear()
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             container.Add (judgement_controls (i, j))
+
+    and delete_judgement (i: int) : unit =
+        ruleset.Set { ruleset.Value with Judgements = ruleset.Value.Judgements |> Array.removeAt i }
+        refresh()
 
     override this.Content() =
         refresh()

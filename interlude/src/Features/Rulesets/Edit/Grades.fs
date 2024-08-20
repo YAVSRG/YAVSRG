@@ -36,17 +36,46 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
 type EditGradesPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let grade_controls (i: int, g: Grade) =
-        NavigationContainer.Row()
-        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
-        |+ Button(Icons.TRASH, ignore, Position = Position.SliceR PRETTYHEIGHT)
-
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
-    let refresh() =
+    let rec grade_controls (i: int, g: Grade) =
+        NavigationContainer.Row()
+        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ Button(
+            Icons.TRASH,
+            (fun () -> 
+                ConfirmPage(
+                    [g.Name] %> "rulesets.grade.confirm_delete",
+                    fun () -> delete_grade i
+                ).Show()
+            ),
+            Position = Position.SliceR PRETTYHEIGHT
+        )
+
+    and refresh() =
         container.Clear()
         for i, g in ruleset.Value.Grading.Grades |> Seq.indexed |> Seq.rev do
             container.Add (grade_controls (i, g))
+        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.grade.add", add_grade)
+
+    and add_grade() =
+        let new_grade =
+            {
+                Name = "???"
+                Color = Color.White
+                Accuracy = 0.0
+            }
+        let new_grading = 
+            { ruleset.Value.Grading with 
+                Grades = ruleset.Value.Grading.Grades |> Array.append [| new_grade |] 
+            }
+        ruleset.Set { ruleset.Value with Grading = new_grading }
+        refresh()
+
+    and delete_grade(i: int) : unit =
+        let new_grading = { ruleset.Value.Grading with Grades = ruleset.Value.Grading.Grades |> Array.removeAt i }
+        ruleset.Set { ruleset.Value with Grading = new_grading }
+        refresh()
 
     override this.Content() =
         refresh()

@@ -62,17 +62,47 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
 type EditLampsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let grade_controls (i: int, l: Lamp) =
-        NavigationContainer.Row()
-        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
-        |+ Button(Icons.TRASH, ignore, Position = Position.SliceR PRETTYHEIGHT)
-
     let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
-    let refresh() =
+    let rec lamp_controls (i: int, l: Lamp) =
+        NavigationContainer.Row()
+        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ Button(
+            Icons.TRASH,
+            (fun () -> 
+                ConfirmPage(
+                    [l.Name] %> "rulesets.lamp.confirm_delete",
+                    fun () -> delete_lamp i
+                ).Show()
+            ),
+            Position = Position.SliceR PRETTYHEIGHT
+        )
+
+    and refresh() =
         container.Clear()
         for i, l in ruleset.Value.Grading.Lamps |> Seq.indexed |> Seq.rev do
-            container.Add (grade_controls (i, l))
+            container.Add (lamp_controls (i, l))
+        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.lamp.add", add_lamp)
+
+    and add_lamp() =
+        let new_lamp =
+            {
+                Name = "???"
+                Color = Color.White
+                Judgement = -1
+                JudgementThreshold = System.Int32.MaxValue
+            }
+        let new_grading = 
+            { ruleset.Value.Grading with 
+                Lamps = ruleset.Value.Grading.Lamps |> Array.append [| new_lamp |] 
+            }
+        ruleset.Set { ruleset.Value with Grading = new_grading }
+        refresh()
+
+    and delete_lamp(i: int) : unit =
+        let new_grading = { ruleset.Value.Grading with Lamps = ruleset.Value.Grading.Lamps |> Array.removeAt i }
+        ruleset.Set { ruleset.Value with Grading = new_grading }
+        refresh()
 
     override this.Content() =
         refresh()
