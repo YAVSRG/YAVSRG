@@ -2,6 +2,8 @@
 
 open System.IO
 open System.IO.Compression
+open SixLabors.ImageSharp
+open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Skins
@@ -106,6 +108,46 @@ type Noteskin(storage) as this =
         seq {
             for texture_id in NoteskinTextureRules.list () do
                 yield! this.ValidateTexture(texture_id, NoteskinTextureRules.get this.Config texture_id)
+
+            yield! this.ValidateHoldTail()
+        }
+
+    member private this.ValidateHoldTail() : ValidationMessage seq =
+        seq {
+            match this.GetTexture "holdtail" with
+            | TextureNotRequired
+            | TextureError _ -> ()
+            | TextureOk (bmp, rows, columns) ->
+                let x, y = bmp.Width / columns / 2, bmp.Height / rows / 2
+                if 
+                    this.Config.UseHoldTailTexture
+                    && not this.Config.FlipHoldTail
+                    && bmp.Height / rows > 24 
+                    && bmp.[x, y - 8].A > 127uy
+                    && bmp.[x, y + 8].A < 127uy
+                then
+                    yield
+                        ValidationWarning
+                            {
+                                Element = "holdtail"
+                                Message = "Looks like your holdtail is pointing up.\nIt should point down and flip when using downscroll.\nThis will make it look right on both scroll directions."
+                                SuggestedFix =
+                                    Some
+                                        {
+                                            Description = "Apply fix"
+                                            Action =
+                                                fun () ->
+                                                    if this.TextureIsGrid "holdtail" then
+                                                        this.SplitTexture "holdtail"
+                                                        this.MutateLooseTextures((fun (ctx: IImageProcessingContext) -> ctx.Flip FlipMode.Vertical), "holdtail") |> ignore
+                                                        this.StitchTexture "holdtail"
+                                                    else
+                                                        this.MutateLooseTextures((fun (ctx: IImageProcessingContext) -> ctx.Flip FlipMode.Vertical), "holdtail") |> ignore
+
+                                                    this.Config <- { this.Config with FlipHoldTail = true }
+                                        }
+                            }
+                    
         }
         
     static member FromZipStream(stream: Stream) =

@@ -841,6 +841,37 @@ type Storage(storage: StorageType) =
             Logging.Warn(sprintf "Couldn't find file '%s'" filename)
             false
 
+    member this.MutateLooseTextures(action: (IImageProcessingContext -> IImageProcessingContext), name: string, [<ParamArray>] path: string array) : bool =
+        match storage with
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+        
+        match this.DetectTextureFormat(name, path) with
+        | Error reason -> 
+            Logging.Error(sprintf "Cannot mutate '%s': %s" name reason)
+            false
+        | Ok (columns, rows, is_grid) ->
+
+        if is_grid then
+            Logging.Warn(sprintf "Cannot mutate %s as it is a grid texture" name)
+            false
+        else
+
+        for col = 0 to columns - 1 do
+            for row = 0 to rows - 1 do
+                let filename = TextureFileName.to_loose name (col, row)
+                match this.TryReadFile(Array.append path [| filename |]) with
+                | Some stream ->
+                    match Bitmap.from_stream true stream with
+                    | None ->
+                        Logging.Warn(sprintf "'%s' is not a valid image" filename)
+                    | Some img ->
+                        img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
+                        img.SaveAsPng(Path.Combine(f, Path.Combine path, filename))
+                | None ->
+                    Logging.Warn(sprintf "Couldn't find file '%s'" filename)
+        true
+
     member this.VerticalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
         this.MutateLooseTexture((col, row), (fun (ctx: IImageProcessingContext) -> ctx.Flip FlipMode.Vertical), name, path)
 

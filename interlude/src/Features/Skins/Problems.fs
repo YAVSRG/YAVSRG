@@ -6,6 +6,7 @@ open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.UI
+open Interlude.Content
 
 module Problems =
 
@@ -45,7 +46,7 @@ module Problems =
 
         let rec refresh () =
             problems_list.Clear()
-            problems_loader.Request(noteskin, problems_list, fun () -> defer refresh)
+            problems_loader.Request(noteskin, problems_list, fun () -> Skins.reload_current_noteskin(); defer refresh)
 
         ScrollContainer(
             problems_list,
@@ -59,7 +60,7 @@ module Problems =
 
         let rec refresh () =
             problems_list.Clear()
-            problems_loader.Request(hud, problems_list, fun () -> defer refresh)
+            problems_loader.Request(hud, problems_list, fun () -> Skins.reload_current_hud(); defer refresh)
 
         ScrollContainer(
             problems_list,
