@@ -43,7 +43,6 @@
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Animations.fs" />
     <Compile Include="UI\Callouts.fs" />
-    <Compile Include="UI\Help.fs" />
     <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Loaders.fs" />
     <Compile Include="UI\Buttons.fs" />
@@ -51,6 +50,7 @@
     <Compile Include="UI\Dropdowns.fs" />
     <Compile Include="UI\Web.fs" />
     <Compile Include="UI\Timeline.fs" />
+    <Compile Include="UI\Help.fs" />
     <Compile Include="UI\Screen\Logo.fs" />
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />

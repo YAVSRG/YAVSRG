@@ -338,7 +338,6 @@ module Options =
             Hotkeys.register "next_group" (mk Keys.PageDown)
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
-            Hotkeys.register "endless_mode" (shift Keys.E)
             Hotkeys.register "pause_music" (Bind.Mouse MouseButton.Middle)
 
             Hotkeys.register "import" (ctrl Keys.I)

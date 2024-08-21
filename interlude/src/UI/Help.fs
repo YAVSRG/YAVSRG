@@ -11,6 +11,7 @@ type private HelpInfo =
         Data: Callout
         Size: float32 * float32
         Target: Widget
+        mutable Delay: float
         Fade: Animation.Fade
         ByMouse: bool
     }
@@ -21,8 +22,11 @@ module HelpOverlay =
     let mutable private current_info: HelpInfo option = None
     let mutable private _keep_alive = false
 
+
     type private Display() =
         inherit Overlay(NodeType.None)
+
+        let SPACING = 20.0f
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
@@ -32,24 +36,28 @@ module HelpOverlay =
             | Some t ->
                 if not _keep_alive then
                     t.Fade.Target <- 0.0f
-                t.Fade.Update elapsed_ms
+
+                if t.Delay > 0.0 then 
+                    t.Delay <- t.Delay - elapsed_ms
+                else 
+                    t.Fade.Update elapsed_ms
 
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
                 let width, height = t.Size
 
                 let x =
                     outline.CenterX - width * 0.5f
-                    |> min (Viewport.bounds.Width - width - 50.0f)
-                    |> max 50.0f
+                    |> min (Viewport.bounds.Width - width - SPACING)
+                    |> max SPACING
 
                 let y =
                     if outline.Top > Viewport.bounds.CenterY then
-                        outline.Top - 50.0f - height - 60.0f
+                        outline.Top - SPACING - height
                     else
-                        outline.Bottom + 50.0f
+                        outline.Bottom + SPACING
 
-                let callout_bounds = Rect.Box(x, y, width, height + 60.0f)
-                Callout.update (callout_bounds.Left, callout_bounds.Top + 30.0f, width, height, t.Data)
+                let callout_bounds = Rect.Box(x, y, width, height)
+                Callout.update (callout_bounds.Left, callout_bounds.Top, width, height, t.Data)
 
             _keep_alive <- false
 
@@ -88,14 +96,14 @@ module HelpOverlay =
 
                 let x =
                     outline.CenterX - width * 0.5f
-                    |> min (Viewport.bounds.Width - width - 50.0f)
-                    |> max 50.0f
+                    |> min (Viewport.bounds.Width - width - SPACING)
+                    |> max SPACING
 
                 let y =
                     if outline.Top > Viewport.bounds.CenterY then
-                        outline.Top - 50.0f - height
+                        outline.Top - SPACING - height
                     else
-                        outline.Bottom + 50.0f
+                        outline.Bottom + SPACING
 
                 let callout_bounds = Rect.Box(x, y, width, height)
                 Draw.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
@@ -123,6 +131,7 @@ module HelpOverlay =
                 Size = Callout.measure body
                 Target = w
                 ByMouse = by_mouse
+                Delay = if by_mouse then 700.0 else 0.0
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
             }
         _keep_alive <- true
@@ -166,7 +175,7 @@ type Help(content: Callout) =
 
         elif id >= 0 && by_mouse then
 
-            if next_hover then
+            if next_hover && (match Selection.get_focused_element() with Some (:? Dropdown.Item) -> false | _ -> true) then
                 HelpOverlay.keep_alive id
             else 
                 id <- -1
