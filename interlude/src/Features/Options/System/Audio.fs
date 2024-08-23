@@ -21,13 +21,11 @@ type AudioPage() =
                 |> Setting.f32
             )
         )
-            .Help(Help.Info("system.audiovolume"))
             .Pos(0)
         |+ PageSetting(
             %"system.audiodevice",
             SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
         )
-            .Help(Help.Info("system.audiodevice"))
             .Pos(2)
         |+ PageSetting(
             %"system.audio_pitch_rates",

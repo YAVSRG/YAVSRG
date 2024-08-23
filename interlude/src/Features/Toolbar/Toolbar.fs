@@ -34,18 +34,16 @@ type Toolbar() =
         | None -> ()
 
     let import_button =
-        let container = 
-            InlaidButton(
-                %"menu.import",
-                (fun () -> ImportsMenuPage().Show()),
-                Icons.DOWNLOAD,
-                Hotkey = "import"
-            )
-            |+ LoadingIndicator.Strip(
-                Imports.import_in_progress,
-                Position = Position.BorderB(Style.PADDING)
-            )
-        container.Help(Help.Info("menu.import").Hotkey("import"))
+        InlaidButton(
+            %"menu.import",
+            (fun () -> ImportsMenuPage().Show()),
+            Icons.DOWNLOAD,
+            Hotkey = "import"
+        )
+        |+ LoadingIndicator.Strip(
+            Imports.import_in_progress,
+            Position = Position.BorderB(Style.PADDING)
+        )
 
     override this.Init(parent) =
         container
@@ -83,7 +81,6 @@ type Toolbar() =
                 (fun () -> OptionsMenuPage().Show()),
                 Icons.SETTINGS
             )
-                .Help(Help.Info("menu.options").Hotkey("options"))
             |+ import_button
             |+ InlaidButton(
                 %"menu.wiki",
@@ -92,7 +89,6 @@ type Toolbar() =
                 HoverIcon = Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
-                .Help(Help.Info("menu.wiki").Hotkey("wiki"))
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
@@ -101,7 +97,7 @@ type Toolbar() =
                 ),
                 Icons.TRENDING_UP
             )
-                .Help(Help.Info("menu.stats")))
+        )
         |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
         |+ HotkeyAction(
             "reload_content",

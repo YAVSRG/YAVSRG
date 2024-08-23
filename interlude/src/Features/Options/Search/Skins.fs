@@ -62,5 +62,4 @@ module Skins =
                     %"themes.showthemesfolder", 
                     (fun () -> open_directory (get_game_folder "Themes"))
                 )
-                    .Help(Help.Info("themes.showthemesfolder"))
         }

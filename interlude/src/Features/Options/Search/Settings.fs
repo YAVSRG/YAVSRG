@@ -44,7 +44,6 @@ module Settings =
                         |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
                     )
                 )
-                    .Help(Help.Info("system.windowmode")) :> Widget
                 yield PageSetting(
                     %"system.windowresolution",
                     WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
@@ -60,7 +59,6 @@ module Settings =
                         |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
                     )
                 )
-                    .Help(Help.Info("system.monitor"))
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
                     %"system.videomode",
@@ -80,13 +78,11 @@ module Settings =
                         |> Setting.f32
                     )
                 )
-                    .Help(Help.Info("system.audiovolume"))
             if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
                     %"system.audiodevice",
                     SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
-                    .Help(Help.Info("system.audiodevice"))
                 
             if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
@@ -115,7 +111,6 @@ module Settings =
                 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-                    .Help(Help.Info("system.hotkeys"))
 
             if token_match tokens [|%"system.automatic_offset"|] then
                 yield PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)

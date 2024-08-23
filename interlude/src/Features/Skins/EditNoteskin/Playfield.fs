@@ -127,7 +127,6 @@ type PlayfieldSettingsPage() =
             .Help(Help.Info("noteskin.usestagetextures"))
             .Pos(4)
         |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(playfield_color, true))
-            .Help(Help.Info("noteskin.playfieldcolor"))
             .Pos(6, 3)
         |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Help(Help.Info("gameplay.hitposition"))

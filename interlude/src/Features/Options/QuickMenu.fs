@@ -49,20 +49,12 @@ type QuickMenuPage() =
         then
             Menu.Exit()
 
-    let help_mode_info =
-        Callout.Normal
-            .Icon(Icons.INFO)
-            .Title(%"options.ingame_help")
-            .Body(%"options.ingame_help.hint")
-            .Hotkey("tooltip")
-
     override this.Content() =
         page_container()
         |+ QuickAction(%"menu.options", (fun () -> OptionsMenuPage().Show()), Bind.mk Keys.O, Icon = Icons.SETTINGS).Pos(0)
         |+ QuickAction(%"noteskin.edit", edit_noteskin, Bind.mk Keys.N,  Icon = Icons.IMAGE).Pos(3)
         |+ QuickAction(%"hud.edit", edit_hud, Bind.mk Keys.H, Icon = Icons.ZAP).Pos(5)
         |+ QuickAction(%"system.hotkeys", (fun () -> HotkeysPage().Show()), Bind.mk Keys.K).Pos(8)
-        |+ Callout.frame help_mode_info (fun (w, h) -> Position.SliceL(w).SliceB(h))
         :> Widget
 
     override this.Header() = 

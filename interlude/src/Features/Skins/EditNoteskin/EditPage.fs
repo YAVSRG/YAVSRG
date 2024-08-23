@@ -33,7 +33,7 @@ type EditNoteskinPage() =
 
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"skin.name", name).Help(Help.Info("skin.name")).Pos(4)
+            |+ PageTextEntry(%"skin.name", name).Pos(4)
             |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
             |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
             |+ PageButton(
@@ -57,7 +57,6 @@ type EditNoteskinPage() =
                     }
                         .Show()
             )
-                .Help(Help.Info("noteskin.notes"))
                 .Pos(13)
             |+ PageButton(
                 %"noteskin.holdnotes",

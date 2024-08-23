@@ -182,7 +182,6 @@ type SystemPage() =
             .Pos(0)
 
         |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-            .Help(Help.Info("system.hotkeys"))
             .Pos(2)
 
         |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
@@ -201,7 +200,6 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
             )
         )
-            .Help(Help.Info("system.windowmode"))
             .Pos(7)
         |+ PageSetting(
             %"system.windowresolution",
@@ -218,7 +216,6 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
             )
         )
-            .Help(Help.Info("system.monitor"))
             .Pos(9)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
         |+ PageSetting(
