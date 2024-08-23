@@ -22,7 +22,6 @@ module HelpOverlay =
     let mutable private current_info: HelpInfo option = None
     let mutable private _keep_alive = false
 
-
     type private Display() =
         inherit Overlay(NodeType.None)
 

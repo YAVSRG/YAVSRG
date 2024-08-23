@@ -641,7 +641,7 @@ noteskin.enableexplosions.tooltip=Enables explosion effects when a note is hit.
 noteskin.explosionanimationtime=Explosion frame time
 noteskin.explosionanimationtime.tooltip=The time, in milliseconds, between each animated frame on explosions.
 noteskin.explosioncolors=Explosion colors
-noteskin.explosioncolors.tooltip=Explosion color mode\n'Note' = Match the explosion color to the color of note that was hit.\n'Judgements' = Use alternative 1 for Marvellous/300g, alternative 2 for Perfect/300, etc.
+noteskin.explosioncolors.tooltip=Explosion color mode\n'Note' = Match the explosion color to the color of note that was hit.\n'Judgements' = Color 1 used for Marvellous/300g, Color 2 for Perfect/300, etc.
 noteskin.explosionduration=Explosion fade time
 noteskin.explosionduration.tooltip=The time, in milliseconds, for the explosion to fade away.
 noteskin.explosionexpand=Explosion expansion

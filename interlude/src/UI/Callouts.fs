@@ -248,48 +248,38 @@ module Callout =
                 y <- y + button_size
 
             y <- y + spacing
+            
+    type Card(callout: Callout, border: Color, fill: Color) =
+        inherit StaticWidget(NodeType.None)
 
-    // todo: get rid of me, use CalloutCard instead
-    let frame (callout: Callout) (pos: float32 * float32 -> Position) =
         let w, h = measure callout
 
-        { new FrameContainer(NodeType.None,
-                             Fill = K Colors.cyan.O3,
-                             Border = K Colors.cyan_accent,
-                             Position = pos (w, h)) with
-            override this.Draw() =
-                base.Draw()
-                draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, Colors.text, callout)
+        member val ContentColor = Colors.text with get, set
 
-            override this.Update(elapsed_ms, moved) =
-                base.Update(elapsed_ms, moved)
-                update (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
-        }
+        override this.Draw() =
 
-type CalloutCard(callout: Callout, border: Color, fill: Color) =
-    inherit StaticWidget(NodeType.None)
+            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) border
+            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) border
+            Draw.rect (this.Bounds.BorderL Style.PADDING) border
+            Draw.rect (this.Bounds.BorderR Style.PADDING) border
 
-    let w, h = Callout.measure callout
+            Draw.rect this.Bounds fill
 
-    member val ContentColor = Colors.text with get, set
+            draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)
 
-    override this.Draw() =
+        override this.Update(elapsed_ms, moved) =
+            base.Update(elapsed_ms, moved)
+            update (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
 
-        Draw.rect (this.Bounds.BorderCornersT Style.PADDING) border
-        Draw.rect (this.Bounds.BorderCornersB Style.PADDING) border
-        Draw.rect (this.Bounds.BorderL Style.PADDING) border
-        Draw.rect (this.Bounds.BorderR Style.PADDING) border
+        interface IHeight with
+            member _.Height = h
 
-        Draw.rect this.Bounds fill
+        interface IWidth with
+            member _.Width = w
 
-        Callout.draw (this.Bounds.Left, this.Bounds.Top, w, h, this.ContentColor, callout)
+    let frame (callout: Callout) (pos: float32 * float32 -> Position) =
+        let c = Card(callout, Colors.cyan_accent, Colors.cyan.O3)
+        c.Position <- pos ((c :> IWidth).Width, (c :> IHeight).Height)
+        c
 
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-        Callout.update (this.Bounds.Left, this.Bounds.Top, w, h, callout)
-
-    interface IHeight with
-        member _.Height = h
-
-    interface IWidth with
-        member _.Width = w
+type CalloutCard = Callout.Card
