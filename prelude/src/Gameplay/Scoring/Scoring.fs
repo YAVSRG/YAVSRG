@@ -356,7 +356,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     IsHold = false
                 |}
         | _ ->
-            let judgement = ms_to_judgement delta
+            let judgement = if is_miss then ruleset.DefaultJudgement else ms_to_judgement delta
 
             this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
 
@@ -374,7 +374,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
 
     member this.HandleHoldHead (column: int, delta: Time, is_miss: bool) =
-        let judgement = ms_to_judgement delta
+        let judgement = if is_miss then ruleset.DefaultJudgement else ms_to_judgement delta
 
         if not is_miss then
             this.State.AddDelta delta
@@ -415,7 +415,10 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         match ruleset.Accuracy.HoldNoteBehaviour with
         | HoldNoteBehaviour.Osu windows ->
             let judgement =
-                ``osu!``.ln_judgement windows head_deltas.[column] delta is_overhold is_dropped
+                if is_miss && is_head_missed then
+                    ruleset.DefaultJudgement
+                else 
+                    ``osu!``.ln_judgement windows head_deltas.[column] delta is_overhold is_dropped
 
             this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
 
@@ -449,7 +452,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
 
         | HoldNoteBehaviour.JudgeReleases data ->
-            let judgement = Helpers.ms_to_judgement ruleset.DefaultJudgement data.Timegates delta
+            let judgement = if is_miss then ruleset.DefaultJudgement else Helpers.ms_to_judgement ruleset.DefaultJudgement data.Timegates delta
             this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
@@ -494,7 +497,12 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
         | HoldNoteBehaviour.OnlyJudgeReleases judgement_if_dropped ->
             let judgement = 
-                if is_overhold || is_dropped then judgement_if_dropped else ms_to_judgement delta
+                if is_miss then
+                    ruleset.DefaultJudgement
+                elif is_overhold || is_dropped then 
+                    judgement_if_dropped 
+                else 
+                    ms_to_judgement delta
             this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
@@ -541,5 +549,5 @@ module ScoreProcessor =
     open Prelude.Charts.Processing
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        let ruleset = Rulesets.SC.create 4
+        let ruleset = SC.create 4
         create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

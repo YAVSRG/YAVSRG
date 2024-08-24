@@ -107,15 +107,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
 
-        let accuracy = 
-            if info.MaxPointsScored = 0.0 then
-                100.0
-            else
-                100.0 * info.PointsScored / info.MaxPointsScored
-
         Text.fill_b (
             Style.font,
-            sprintf "%.4f%%, %ix" accuracy info.Combo,
+            sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) info.Combo,
             text_b,
             Colors.text,
             Alignment.LEFT
