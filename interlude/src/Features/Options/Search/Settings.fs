@@ -104,6 +104,15 @@ module Settings =
                     )
                 )
                     .Help(Help.Info("system.audio_pitch_rates"))
+                    
+            if token_match tokens [|%"system.menus_muffle_song"|] then
+                yield PageSetting(%"system.menus_muffle_song", 
+                    Checkbox(
+                        options.MenusMuffleSong 
+                        |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
+                    )
+                )
+                    .Help(Help.Info("system.menus_muffle_song"))
             
             if token_match tokens [|%"system.visualoffset"|] then
                 yield PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))

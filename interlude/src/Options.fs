@@ -200,6 +200,7 @@ module Options =
             ScoreGraphWindowBackground: Setting<bool>
             ConfirmExit: Setting<bool>
             HoldToGiveUp: Setting<bool>
+            MenusMuffleSong: Setting<bool>
         }
         static member Default =
             {
@@ -315,6 +316,7 @@ module Options =
                 ScoreGraphWindowBackground = Setting.simple false
                 ConfirmExit = Setting.simple true
                 HoldToGiveUp = Setting.simple false
+                MenusMuffleSong = Setting.simple true
             }
 
     let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>

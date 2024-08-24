@@ -35,7 +35,15 @@ type AudioPage() =
             )
         )
             .Help(Help.Info("system.audio_pitch_rates"))
-            .Pos(4)
+            .Pos(5)
+        |+ PageSetting(%"system.menus_muffle_song", 
+            Checkbox (
+                options.MenusMuffleSong
+                |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
+            )
+        )
+            .Help(Help.Info("system.menus_muffle_song"))
+            .Pos(7)
         |+ PageSetting(
             %"system.audiooffset",
             { new Slider(options.AudioOffset, Step = 1f) with
@@ -45,10 +53,10 @@ type AudioPage() =
             }
         )
             .Help(Help.Info("system.audiooffset"))
-            .Pos(6)
+            .Pos(10)
         |+ PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
             .Help(Help.Info("system.automatic_offset"))
-            .Pos(8)
+            .Pos(12)
         :> Widget
 
     override this.OnClose() = ()

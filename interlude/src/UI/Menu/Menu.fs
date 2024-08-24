@@ -224,7 +224,7 @@ and Menu(top_level: Page) as this =
         volume.Init this
         exit_key.Init this
         this.ShowPage top_level
-        Song.set_low_pass 1.0f
+        if Interlude.Options.options.MenusMuffleSong.Value then Song.set_low_pass 1.0f
 
     override this.Draw() =
         volume.Draw()
