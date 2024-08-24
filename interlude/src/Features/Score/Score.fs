@@ -117,6 +117,9 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
             Some Screen.Type.LevelSelect
 
     override this.Draw() =
+
+        Draw.rect (this.Bounds.ShrinkT(175.0f).SliceT(160.0f).ShrinkT(5.0f)) Colors.shadow_2.O2
+        Draw.rect (this.Bounds.ShrinkT(175.0f).ShrinkT(160.0f).SliceT(5.0f)) Colors.white
         
         Draw.rect (bottom_info.Bounds.ShrinkT 5.0f) (Palette.color (127, 0.5f, 0.0f))
         Draw.rect (bottom_info.Bounds.SliceT 5.0f) Colors.white.O2

@@ -224,8 +224,3 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
         )
 
         base.Init parent
-
-    override this.Draw() =
-        Draw.rect (this.Bounds.SliceT(160.0f).ShrinkT(5.0f)) Colors.shadow_2.O2
-        Draw.rect (this.Bounds.ShrinkT(160.0f).SliceT(5.0f)) Colors.white
-        base.Draw()
