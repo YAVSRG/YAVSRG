@@ -53,8 +53,10 @@ type Player =
     member this.ReceivePlayPacket(id: PlayerId, timestamp: float32, data: byte array) =
         if this.Status <> LobbyPlayerStatus.Playing || this.PlayComplete then
             malice id "Sent play packet while not playing"
-        elif data.Length % 6 > 0 then
+        elif data.Length % REPLAY_FRAME_SIZE_BYTES > 0 then
             malice id "Sending garbage data"
+        elif timestamp < this.CurrentChartTime then
+            malice id "Replay data timestamp went backwards"
         else
             this.CurrentChartTime <- timestamp
             this.CurrentPlayBuffer.Write(data, 0, data.Length)

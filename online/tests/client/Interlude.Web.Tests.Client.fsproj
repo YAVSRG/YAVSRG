@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Shared.fs" />
+    <Compile Include="EchoClient.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
