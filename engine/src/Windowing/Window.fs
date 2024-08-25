@@ -323,7 +323,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                     Window.action_queue <- []
                 )
 
-            this.ProcessInputEvents()
+            this.NewInputFrame()
             if input_cpu_saver then
                 GLFW.WaitEventsTimeout(0.5)
             else
