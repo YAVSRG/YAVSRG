@@ -8,6 +8,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 
+
+
 type Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys
 type MouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton
 
@@ -155,6 +157,10 @@ module internal InputThread =
 
     let mutable internal game_window: NativeWindow = null
 
+    let private error_callback (code: ErrorCode) (desc: string) =
+        Logging.Debug(sprintf "GLFW Error (%O): %s" code desc)
+    let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
+
     let init (win: NativeWindow) =
         game_window <- win
         game_window.add_MouseWheel (fun e -> mouse_z <- mouse_z + e.OffsetY)
@@ -169,6 +175,8 @@ module internal InputThread =
                 since_last_typed.Restart()
                 lock LOCK_OBJ (fun () -> typed_text <- typed_text + e.AsString)
         )
+        
+        GLFW.SetErrorCallback(error_callback_d) |> ignore
 
     let fetch (events_this_frame: InputEv list byref, this_frame: FrameEvents byref) =
         let a, b =
