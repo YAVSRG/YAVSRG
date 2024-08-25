@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="Shared.fs" />
     <Compile Include="EchoClient.fs" />
+    <Compile Include="ExtraKeysClient.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

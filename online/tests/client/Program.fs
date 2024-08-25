@@ -22,6 +22,7 @@ let get_debug_token_for_username(username: string) : string =
 let clients : Client array = 
     [|
         EchoClient(get_debug_token_for_username "EchoClient")
+        ExtraKeysClient(get_debug_token_for_username "ExtraKeysClient")
     |]
 
 for c in clients do
