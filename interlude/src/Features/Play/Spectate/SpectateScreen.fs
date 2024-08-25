@@ -24,6 +24,7 @@ module Spectate =
         let cycle_spectator (screen: IPlayScreen) =
             let users_available_to_spectate =
                 lobby.Replays.Keys
+                |> Seq.where (fun name -> name <> Network.credentials.Username)
                 |> Array.ofSeq
 
             let next_user =
