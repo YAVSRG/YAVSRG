@@ -85,9 +85,7 @@ module Bind =
     let inline ctrl_shift k = Bind.Key(k, (true, false, true))
     let inline ctrlAlt k = Bind.Key(k, (true, true, false))
 
-type InputEvType =
-    | Press = 0
-    | Release = 1
+type InputEvType = InputAction
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
 
@@ -117,43 +115,15 @@ module internal InputThread =
     let mutable private mouse_z = 0.0f
     let mutable private typed_text = ""
     let mutable private events_buffer: InputEv list = []
+    let mutable private ctrl = false
+    let mutable private alt = false
+    let mutable private shift = false
 
     let mutable typing = false
 
-    let private since_last_typed = Diagnostics.Stopwatch.StartNew()
+    let mutable last_typed = 0.0
 
     let private LOCK_OBJ = Object()
-
-    let poll (keyboard: KeyboardState, mouse: MouseState) =
-        let add x =
-            if since_last_typed.ElapsedMilliseconds > 50l then
-                lock LOCK_OBJ (fun () -> events_buffer <- List.append events_buffer [ x ])
-
-        let now = Song.time_with_offset ()
-
-        let ctrl =
-            keyboard.IsKeyDown Keys.LeftControl || keyboard.IsKeyDown Keys.RightControl
-
-        let shift = keyboard.IsKeyDown Keys.LeftShift || keyboard.IsKeyDown Keys.RightShift
-        let alt = keyboard.IsKeyDown Keys.LeftAlt || keyboard.IsKeyDown Keys.RightAlt
-
-        // keyboard input handler
-        // todo: way of remembering modifier combo for hold/release?
-        for k in 0 .. int Keys.LastKey do
-            //if k < 340 || k > 347 then
-            if keyboard.IsKeyDown(enum k) then
-                if keyboard.WasKeyDown(enum k) |> not then
-                    struct ((enum k, (ctrl, alt, shift)) |> Bind.Key, InputEvType.Press, now) |> add
-            elif keyboard.WasKeyDown(enum k) then
-                struct ((enum k, (ctrl, alt, shift)) |> Bind.Key, InputEvType.Release, now) |> add
-
-        // mouse input handler
-        for b in 0 .. int MouseButton.Last do
-            if mouse.IsButtonDown(enum b) then
-                if mouse.WasButtonDown(enum b) |> not then
-                    struct (enum b |> Bind.Mouse, InputEvType.Press, now) |> add
-            elif mouse.WasButtonDown(enum b) then
-                struct (enum b |> Bind.Mouse, InputEvType.Release, now) |> add
 
     let mutable internal game_window: NativeWindow = null
 
@@ -161,21 +131,72 @@ module internal InputThread =
         Logging.Debug(sprintf "GLFW Error (%O): %s" code desc)
     let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
 
+    let private char_callback (_: nativeptr<Window>) (char: uint32) =
+        if typing then
+            last_typed <- GLFW.GetTime()
+            lock LOCK_OBJ (fun () -> 
+                typed_text <- typed_text + Convert.ToChar(char).ToString()
+                events_buffer <- []
+            )
+    let private char_callback_d = GLFWCallbacks.CharCallback char_callback
+
+    let private cursor_pos_callback (_: nativeptr<Window>) (x: float) (y: float) =
+        mouse_x <- Math.Clamp(Viewport.vwidth / float32 Viewport.rwidth * float32 x, 0.0f, Viewport.vwidth)
+        mouse_y <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 y, 0.0f, Viewport.vheight)
+    let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
+
+    let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) =
+        mouse_z <- mouse_z + float32 offset_y
+    let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
+
+    let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) =
+        let event = 
+            struct (
+                (
+                    key, 
+                    (
+                        modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
+                        modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
+                        modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
+                    )
+                ) |> Bind.Key, 
+                action, 
+                Song.time_with_offset ()
+            )
+        lock LOCK_OBJ (fun () -> 
+            if GLFW.GetTime() - last_typed > 0.500 then
+                events_buffer <- List.append events_buffer [ event ]
+
+            if action = InputAction.Release then
+                if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- false
+                elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- false
+                elif key = Keys.LeftShift || key = Keys.RightShift then shift <- false
+            elif action = InputAction.Press then
+                if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- true
+                elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- true
+                elif key = Keys.LeftShift || key = Keys.RightShift then shift <- true
+        )
+    let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
+
+    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) =
+        let event = 
+            struct (
+                Bind.Mouse button,
+                action, 
+                Song.time_with_offset ()
+            )
+        lock LOCK_OBJ (fun () -> 
+            events_buffer <- List.append events_buffer [ event ]
+        )
+    let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
+
     let init (win: NativeWindow) =
         game_window <- win
-        game_window.add_MouseWheel (fun e -> mouse_z <- mouse_z + e.OffsetY)
-
-        game_window.add_MouseMove (fun e ->
-            mouse_x <- Math.Clamp(Viewport.vwidth / float32 Viewport.rwidth * float32 e.X, 0.0f, Viewport.vwidth)
-            mouse_y <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 e.Y, 0.0f, Viewport.vheight)
-        )
-
-        game_window.add_TextInput (fun e ->
-            if typing then
-                since_last_typed.Restart()
-                lock LOCK_OBJ (fun () -> typed_text <- typed_text + e.AsString)
-        )
-        
+        GLFW.SetCharCallback(win.WindowPtr, char_callback_d) |> ignore
+        GLFW.SetKeyCallback(win.WindowPtr, key_callback_d) |> ignore
+        GLFW.SetMouseButtonCallback(win.WindowPtr, mouse_button_callback_d) |> ignore
+        GLFW.SetScrollCallback(win.WindowPtr, scroll_callback_d) |> ignore
+        GLFW.SetCursorPosCallback(win.WindowPtr, cursor_pos_callback_d) |> ignore
         GLFW.SetErrorCallback(error_callback_d) |> ignore
 
     let fetch (events_this_frame: InputEv list byref, this_frame: FrameEvents byref) =
@@ -194,9 +215,9 @@ module internal InputThread =
                             TypedText = typed_text
                             KeyboardState = kb
                             MouseState = ms
-                            Ctrl = kb.IsKeyDown Keys.LeftControl || kb.IsKeyDown Keys.RightControl
-                            Shift = kb.IsKeyDown Keys.LeftShift || kb.IsKeyDown Keys.RightShift
-                            Alt = kb.IsKeyDown Keys.LeftAlt || kb.IsKeyDown Keys.RightAlt
+                            Ctrl = ctrl
+                            Shift = shift
+                            Alt = alt
                         },
                         events_buffer
 

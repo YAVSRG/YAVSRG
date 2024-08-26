@@ -323,12 +323,10 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                     Window.action_queue <- []
                 )
 
-            this.NewInputFrame()
             if input_cpu_saver then
                 GLFW.WaitEventsTimeout(0.5)
             else
                 GLFW.PollEvents()
-            InputThread.poll (this.KeyboardState, this.MouseState)
 
         this.OnUnload()
         this.Close()
