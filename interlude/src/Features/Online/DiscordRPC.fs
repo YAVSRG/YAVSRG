@@ -6,7 +6,7 @@ open DiscordRPC
 module DiscordRPC =
 
     let private client =
-        new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger())
+        new DiscordRpcClient("420320424199716864", Logger = Logging.NullLogger(), ShutdownOnly = true)
 
     let deinit () =
         if not client.IsDisposed then
@@ -21,10 +21,12 @@ module DiscordRPC =
         //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
+    let clear() = 
+        if not client.IsDisposed then 
+            client.ClearPresence()
+
     let in_menus (details: string) =
-        if client.IsDisposed then
-            ()
-        else
+        if not client.IsDisposed then
 
             let rp = 
                 new RichPresence(
@@ -36,9 +38,7 @@ module DiscordRPC =
             client.SetPresence(rp)
 
     let playing (mode: string, song: string) =
-        if client.IsDisposed then
-            ()
-        else
+        if not client.IsDisposed then
 
             let rp =
                 new RichPresence(
@@ -54,9 +54,7 @@ module DiscordRPC =
             client.SetPresence(rp)
 
     let playing_timed (mode: string, song: string, time_left: Time) =
-        if client.IsDisposed then
-            ()
-        else
+        if not client.IsDisposed then
 
             let rp =
                 new RichPresence(

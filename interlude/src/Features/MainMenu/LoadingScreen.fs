@@ -5,6 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
+open Interlude.Features.Online
 
 // Loading screen
 
@@ -31,6 +32,7 @@ type LoadingScreen() =
             )
         | _ ->
             closing <- true
+            DiscordRPC.clear()
             audio_fade.Snap()
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 0.0f))

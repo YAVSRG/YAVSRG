@@ -1,11 +1,9 @@
 ﻿namespace Interlude.Features.Play.Replay
 
 open Percyqaz.Flux.Audio
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
-open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Data
