@@ -82,7 +82,6 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     let BOX_HEIGHT = 180.0f
     let BOX_WIDTH = 300.0f
-    let BOX_PADDING_X = 10.0f
 
     let NORMAL_POSITION =
         {
@@ -123,14 +122,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Draw.rect outline_bounds Colors.white.O4
         Draw.rect bounds Colors.shadow_2.O4
         let mouse_x = Mouse.x()
-        let percent = (mouse_x - bounds.Left) / bounds.Width
-        let adjusted_x = 
-            min mouse_x (bounds.Right - outline_thickness / 2.0f)
         let start_y = outline_bounds.Bottom
         let end_y = this.Bounds.Bottom
         let line_rect =
             Rect.Box(
-                adjusted_x - outline_thickness / 2.0f, 
+                mouse_x - outline_thickness / 2.0f, 
                 start_y,               
                 outline_thickness,                   
                 end_y - start_y
@@ -402,8 +398,6 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
             let snapshot_index = percent * float32 snapshots.Count |> int |> max 0 |> min (snapshots.Count - 1)
             let current_snapshot = snapshots.[snapshot_index]
-
-            let box_padding_y = (this.Bounds.Height - BOX_HEIGHT) * 0.5f
 
             let box =
                 Rect.Box(
