@@ -51,13 +51,14 @@ module Session =
                 match Users.Auth.login_via_token auth_token with
                 | Ok(user_id, username) ->
                     if username_to_session_id_map.ContainsKey(username) then
-                        session_id_to_state_map[username_to_session_id_map.[username]] <- SessionState.Handshake
-                        Server.kick (username_to_session_id_map.[username], "Logged in from another location")
-
-                    username_to_session_id_map.[username] <- session_id
-                    session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
-                    Server.send (session_id, Downstream.LOGIN_SUCCESS username)
-                    Logging.Info(sprintf "[-> %s" username)
+                        let old_session_id = username_to_session_id_map.[username]
+                        Server.kick (old_session_id, "Logged in from another location")
+                        Server.kick (session_id, "Already logged in somewhere else")
+                    else
+                        username_to_session_id_map.[username] <- session_id
+                        session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
+                        Server.send (session_id, Downstream.LOGIN_SUCCESS username)
+                        Logging.Info(sprintf "[-> %s" username)
                 | Error() ->
                     Logging.Info(sprintf "%O failed to authenticate" session_id)
                     Server.send (session_id, Downstream.LOGIN_FAILED "Login token invalid or expired")
