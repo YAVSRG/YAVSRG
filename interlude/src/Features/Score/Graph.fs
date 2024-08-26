@@ -80,8 +80,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
 
-    let BOX_HEIGHT = 180.0f
-    let BOX_WIDTH = 300.0f
+    let BOX_HEIGHT = 200.0f
+    let BOX_WIDTH = 350.0f
 
     let NORMAL_POSITION =
         {
@@ -402,7 +402,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let box =
                 Rect.Box(
                     this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
-                    this.Bounds.Top - 250f,
+                    this.Bounds.Top - BOX_HEIGHT - 20.0f,
                     BOX_WIDTH,
                     BOX_HEIGHT
                 )
