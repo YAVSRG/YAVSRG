@@ -109,7 +109,9 @@ module Users =
                 auth_flows.[new_flow] <- AuthFlowState.RegisterWaitingCallback id
 
                 let url =
-                    @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
+                    @"https://discord.com/api/oauth2/authorize?client_id="
+                    + SECRETS.DiscordClientId
+                    + "&redirect_uri=https%3A%2F%2F"
                     + SECRETS.ApiBaseUrl
                     + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
                     + new_flow
@@ -123,7 +125,9 @@ module Users =
                 auth_flows.[new_flow] <- AuthFlowState.LoginWaitingCallback id
 
                 let url =
-                    @"https://discord.com/api/oauth2/authorize?client_id=420320424199716864&redirect_uri=https%3A%2F%2F"
+                    @"https://discord.com/api/oauth2/authorize?client_id="
+                    + SECRETS.DiscordClientId
+                    + "&redirect_uri=https%3A%2F%2F"
                     + SECRETS.ApiBaseUrl
                     + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
                     + new_flow
