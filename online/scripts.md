@@ -1,3 +1,10 @@
+# Set up dev cert for local testing
+
+```
+cd secrets
+dotnet dev-certs https -ep localhost.pfx -p DEVELOPMENT --trust
+```
+
 # Build & Push
 
 For manual use, also see the github action which does the same

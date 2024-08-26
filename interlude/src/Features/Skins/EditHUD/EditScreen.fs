@@ -81,10 +81,6 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
 
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
-    let mutable repeat = -1
-    let mutable time = 0.0
-    let REPEAT_DELAY = 400.0
-    let REPEAT_INTERVAL = 40.0
 
     let SMALL_UP = (%%"up").WithModifiers(false, false, true)
     let SMALL_DOWN = (%%"down").WithModifiers(false, false, true)
@@ -371,57 +367,15 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
         let mutable moved = moved
 
         if this.Focused then
-            if SMALL_UP.Tapped() then this.Move(0.0f, -1.0f)
-            elif SMALL_DOWN.Tapped() then this.Move(0.0f, 1.0f)
-            elif SMALL_LEFT.Tapped() then this.Move(-1.0f, 0.0f)
-            elif SMALL_RIGHT.Tapped() then this.Move(1.0f, 0.0f)
+            if SMALL_UP.TappedOrRepeated() then this.Move(0.0f, -1.0f)
+            elif SMALL_DOWN.TappedOrRepeated() then this.Move(0.0f, 1.0f)
+            elif SMALL_LEFT.TappedOrRepeated() then this.Move(-1.0f, 0.0f)
+            elif SMALL_RIGHT.TappedOrRepeated() then this.Move(1.0f, 0.0f)
 
-            let u = (%%"up").Tapped()
-            let d = (%%"down").Tapped()
-            let l = (%%"left").Tapped()
-            let r = (%%"right").Tapped()
-
-            if u || d || l || r then
-                repeat <- 0
-                time <- 0
-
-                if u then
-                    this.Move(0.0f, -5.0f)
-
-                if d then
-                    this.Move(0.0f, 5.0f)
-
-                if l then
-                    this.Move(-5.0f, 0.0f)
-
-                if r then
-                    this.Move(5.0f, 0.0f)
-
-            if repeat >= 0 then
-                let u = (%%"up").Pressed()
-                let d = (%%"down").Pressed()
-                let l = (%%"left").Pressed()
-                let r = (%%"right").Pressed()
-
-                time <- time + elapsed_ms
-
-                if (float repeat * REPEAT_INTERVAL + REPEAT_DELAY < time) then
-                    repeat <- repeat + 1
-
-                    if u then
-                        this.Move(0.0f, -5.0f)
-
-                    if d then
-                        this.Move(0.0f, 5.0f)
-
-                    if l then
-                        this.Move(-5.0f, 0.0f)
-
-                    if r then
-                        this.Move(5.0f, 0.0f)
-
-                if not (u || d || l || r) then
-                    repeat <- -1
+            if (%%"up").TappedOrRepeated() then this.Move(0.0f, -5.0f)
+            if (%%"down").TappedOrRepeated() then this.Move(0.0f, 5.0f)
+            if (%%"left").TappedOrRepeated() then this.Move(-5.0f, 0.0f)
+            if (%%"right").TappedOrRepeated() then this.Move(5.0f, 0.0f)
 
         hover <- Mouse.hover this.Bounds
 

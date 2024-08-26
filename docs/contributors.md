@@ -23,9 +23,10 @@ Once the fork is created, you can connect the repository you already have on you
 
 ```bash
 # terminal needs to be in the YAVSRG folder
-git remote add personal https://github.com/<*YOUR GITHUB USERNAME*>/YAVSRG
+git remote add personal https://github.com/<*YOUR GITHUB USERNAME*>/YAVSRG.git
 git checkout -b <*BRANCH NAME*>
 git push --set-upstream personal <*BRANCH NAME*>
+# now you can add commits and push them as you please
 ```
 
 Not sure what to name your branch? You can just call it `develop` or if you are adding a particular feature you could name it something descriptive like `help-mode` or `scoring-bug-fix`

@@ -115,13 +115,13 @@ type Slider(setting: Setting.Bounded<float32>) =
 
         if this.Selected then
 
-            if (%%"left").Tapped() then
+            if (%%"left").TappedOrRepeated() then
                 add (-step)
-            elif (%%"right").Tapped() then
+            elif (%%"right").TappedOrRepeated() then
                 add (step)
-            elif (%%"up").Tapped() then
+            elif (%%"up").TappedOrRepeated() then
                 add (step * 5.0f)
-            elif (%%"down").Tapped() then
+            elif (%%"down").TappedOrRepeated() then
                 add (-step * 5.0f)
             elif (%%"select").Tapped() then
                 typed_number.Set ""
