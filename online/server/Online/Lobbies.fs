@@ -44,9 +44,10 @@ type Player =
 
     member this.StartPlay() =
         this.Status <- LobbyPlayerStatus.Playing
-        this.PlayComplete <- false
+        this.CurrentChartTime <- -10000f
         this.CurrentPlayBuffer <- new MemoryStream()
         this.PlayPacketsReceived <- 0
+        this.PlayComplete <- false
 
     member this.FinishPlay() = this.PlayComplete <- true
 
@@ -565,7 +566,7 @@ module Lobby =
                             if needs_catchup then
                                 for p in lobby.Players.Values do
                                     if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
-                                        // 65532 is a multiple of 6, less than the max packet size of 65535, with room for username + timestamp in the packet too
+                                        // 64536 is a multiple of 6, less than the max packet size of 65535, with room for username + timestamp in the packet too
                                         let PACKET_SIZE = 64536
 
                                         let timestamp, data = p.GetReplay()
@@ -729,8 +730,9 @@ module Lobby =
     type Action with
         member this.Do = state_change.Request(this, ignore)
 
-    let ensure_player_leaves_lobby (player, callback) =
-        if in_lobby.ContainsKey(player) then
-            state_change.Request(Leave(player), callback)
+    let ensure_player_leaves_lobby (session_id, callback) =
+        if in_lobby.ContainsKey(session_id) then
+            state_change.Request(Leave(session_id), callback)
         else
-            callback ()
+            callback()
+
