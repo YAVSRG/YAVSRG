@@ -165,7 +165,6 @@ module internal InputThread =
                 action, 
                 Song.time_with_offset ()
             )
-        printfn "%O %O" key action
         lock LOCK_OBJ (fun () -> 
             if GLFW.GetTime() - last_typed > 0.050 then
                 events_buffer <- List.append events_buffer [ event ]
