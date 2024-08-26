@@ -127,14 +127,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let adjusted_x = 
             max bounds.Left (min mouse_x (bounds.Right - outline_thickness / 2.0f))
         let start_y = outline_bounds.Bottom
-        let end_y = 
-            this.Bounds.Bottom
+        let end_y = this.Bounds.Bottom
         let line_rect =
             Rect.Box(
                 adjusted_x - outline_thickness / 2.0f, 
                 start_y,               
                 outline_thickness,                   
-                end_y
+                end_y - start_y
         )
         Draw.rect line_rect Colors.white.O1
         let row_height = bounds.Height / 4.0f
