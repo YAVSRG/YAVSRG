@@ -122,10 +122,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Draw.rect outline_bounds Colors.white.O4
         Draw.rect bounds Colors.shadow_2.O4
-        let mouse_x, mouse_y = Mouse.pos()
+        let mouse_x = Mouse.x()
         let percent = (mouse_x - bounds.Left) / bounds.Width
         let adjusted_x = 
-            max bounds.Left (min mouse_x (bounds.Right - outline_thickness / 2.0f))
+            min mouse_x (bounds.Right - outline_thickness / 2.0f)
         let start_y = outline_bounds.Bottom
         let end_y = this.Bounds.Bottom
         let line_rect =
@@ -410,7 +410,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
                     this.Bounds.Top - 250f,
                     BOX_WIDTH,
-                    this.Bounds.Height - box_padding_y - box_padding_y
+                    BOX_HEIGHT
                 )
 
             this.DrawSnapshotInfo(box, current_snapshot)
