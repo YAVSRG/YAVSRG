@@ -13,6 +13,8 @@ open Interlude.UI
 type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
+    let show_more_info = Setting.simple false
+
     let mod_string = Mods.format (score_info.Rate, score_info.Mods, false)
 
     let category, main_elements, minor_elements =
@@ -49,53 +51,70 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f),
             Align = Alignment.RIGHT
         )
-        // todo: update this on ruleset change
-        |+ Help(
-            Callout.Normal
-                .Icon(Icons.TRENDING_UP)
-                .Title("Taps")
-                .Body(
-                    sprintf
-                        "M: %.1fms | SD: %.1fms | %.1f%% early"
-                        (!stats).TapMean
-                        (!stats).TapStandardDeviation
-                        (100.0 * (!stats).TapEarlyPercent)
-                )
-                .Title("Releases")
-                .Body(
-                    sprintf
-                        "M: %.1fms | SD: %.1fms | %.1f%% early"
-                        (!stats).ReleaseMean
-                        (!stats).ReleaseStandardDeviation
-                        (100.0 * (!stats).ReleaseEarlyPercent)
-                ),
-            Position = Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f)
-        )
-        |* Text(
-            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
-            Position = Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f),
-            Align = Alignment.CENTER,
-            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
-        )
 
-        this
+        |+ Button(
+            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
+            (fun () -> show_more_info.Set true),
+            Position = Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f),
+            TextColor = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
+        )
+            .Conditional(show_more_info.Get >> not)
         |+ Text(
             category,
-            Position = Position.ShrinkB(95.0f).SliceB(60.0f).ShrinkX(25.0f),
+            Position = Position.ShrinkB(85.0f).SliceB(60.0f).ShrinkX(25.0f),
             Align = Alignment.LEFT
         )
+            .Conditional(show_more_info.Get >> not)
         |+ Text(
             main_elements,
-            Position = Position.ShrinkB(60.0f).SliceB(40.0f).ShrinkX(25.0f),
+            Position = Position.ShrinkB(50.0f).SliceB(40.0f).ShrinkX(25.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT
         )
-        |* Text(
+            .Conditional(show_more_info.Get >> not)
+        |+ Text(
             minor_elements,
-            Position = Position.ShrinkB(30.0f).SliceB(30.0f).ShrinkX(25.0f),
+            Position = Position.ShrinkB(20.0f).SliceB(30.0f).ShrinkX(25.0f),
             Color = K Colors.text_greyout,
             Align = Alignment.LEFT
         )
+            .Conditional(show_more_info.Get >> not)
+        
+        |+ Button(
+            (fun () -> sprintf "MA: %s  •  PA: %s" (!stats).MA (!stats).PA),
+            (fun () -> show_more_info.Set false),
+            Position = Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f),
+            TextColor = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
+        )
+            .Conditional(show_more_info.Get)
+        |+ Text(
+            (fun () -> sprintf "Taps ~ M: %.1fms  •  SD: %.1fms" (!stats).TapMean (!stats).TapStandardDeviation),
+            Position = Position.ShrinkT(640.0f).SliceT(40.0f).ShrinkX(25.0f),
+            Align = Alignment.CENTER,
+            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
+        )
+            .Conditional(show_more_info.Get)
+        |+ Text(
+            (fun () -> sprintf "%.1fms earliest  •  +%.1fms latest  •  %.1f%% early" (fst (!stats).TapRange) (snd (!stats).TapRange) (100.0 * (!stats).TapEarlyPercent)),
+            Position = Position.ShrinkT(675.0f).SliceT(40.0f).ShrinkX(25.0f),
+            Align = Alignment.CENTER,
+            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text_subheading
+        )
+            .Conditional(show_more_info.Get)
+        |+ Text(
+            (fun () -> sprintf "Releases ~ M: %.1fms  •  SD: %.1fms" (!stats).ReleaseMean (!stats).ReleaseStandardDeviation),
+            Position = Position.ShrinkT(715.0f).SliceT(40.0f).ShrinkX(25.0f),
+            Align = Alignment.CENTER,
+            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
+        )
+            .Conditional(show_more_info.Get)
+        |* Text(
+            (fun () -> sprintf "%.1fms earliest  •  +%.1fms latest  •  %.1f%% early" (fst (!stats).ReleaseRange) (snd (!stats).ReleaseRange) (100.0 * (!stats).ReleaseEarlyPercent)),
+            Position = Position.ShrinkT(750.0f).SliceT(40.0f).ShrinkX(25.0f),
+            Align = Alignment.CENTER,
+            Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text_subheading
+        )
+            .Conditional(show_more_info.Get)
 
         base.Init(parent)
 

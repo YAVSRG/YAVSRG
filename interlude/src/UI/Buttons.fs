@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI
 
-open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -21,9 +20,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
     member val TiltRight = true with get, set
     member val Disabled: unit -> bool = K false with get, set
     member val Floating = false with get, set
-
-    member val TextColor =
-        fun () -> (if this.Focused then Colors.yellow_accent else Colors.grey_1), Colors.shadow_2 with get, set
+    member val TextColor = K Colors.text_subheading with get, set
 
     override this.Draw() =
         let h = this.Bounds.Height
@@ -36,7 +33,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
                 (this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
             (color_func()).AsQuad
 
-        Text.fill_b (Style.font, label_func (), this.Bounds, (if this.Disabled() then Colors.text_greyout else this.TextColor()), 0.5f)
+        Text.fill_b (Style.font, label_func (), this.Bounds, (if this.Disabled() then Colors.text_greyout elif this.Focused then Colors.text_yellow_2 else this.TextColor()), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =

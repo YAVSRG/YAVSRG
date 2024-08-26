@@ -13,10 +13,12 @@ type ScoreScreenStats =
         TapMean: Time
         TapStandardDeviation: Time
         TapEarlyPercent: float
+        TapRange: Time * Time
 
         ReleaseMean: Time
         ReleaseStandardDeviation: Time
         ReleaseEarlyPercent: float
+        ReleaseRange: Time * Time
 
         Judgements: int array
         JudgementCount: int
@@ -36,10 +38,15 @@ type ScoreScreenStats =
         let early_taps = ref 0
         let tap_sum = ref 0.0f<ms>
         let tap_sumOfSq = ref 0.0f<ms> // f# type system bug
+        let earliest_tap = ref 0.0f<ms>
+        let latest_tap = ref 0.0f<ms>
+
         let releases = ref 1
         let early_releases = ref 0
         let release_sum = ref 0.0f<ms>
         let release_sumOfSq = ref 0.0f<ms>
+        let earliest_release = ref 0.0f<ms>
+        let latest_release = ref 0.0f<ms>
 
         let notes_hit = ref 0
         let notes_count = ref 0
@@ -66,6 +73,8 @@ type ScoreScreenStats =
                     inc taps
                     tap_sum ++ e.Delta
                     tap_sumOfSq ++ e.Delta * float32 e.Delta
+                    earliest_tap.Value <- min earliest_tap.Value e.Delta
+                    latest_tap.Value <- max latest_tap.Value e.Delta
                     if e.Delta < 0.0f<ms> then
                         inc early_taps
 
@@ -75,9 +84,12 @@ type ScoreScreenStats =
                 inc releases_count
 
                 if not e.Missed then
+                    inc releases
                     inc releases_released
                     release_sum ++ e.Delta
                     release_sumOfSq ++ e.Delta * float32 e.Delta
+                    earliest_release.Value <- min earliest_release.Value e.Delta
+                    latest_release.Value <- max latest_release.Value e.Delta
                     if e.Delta < 0.0f<ms> then
                         inc early_releases
 
@@ -100,6 +112,7 @@ type ScoreScreenStats =
                 )
                 * 1.0f<ms>
             TapEarlyPercent = float early_taps.Value / float taps.Value
+            TapRange = earliest_tap.Value, latest_tap.Value
 
             ReleaseMean = release_mean
             ReleaseStandardDeviation =
@@ -110,6 +123,7 @@ type ScoreScreenStats =
                 )
                 * 1.0f<ms>
             ReleaseEarlyPercent = float early_releases.Value / float releases.Value
+            ReleaseRange = earliest_release.Value, latest_release.Value
 
             Judgements = filtered_judgements
             JudgementCount = Array.sum filtered_judgements

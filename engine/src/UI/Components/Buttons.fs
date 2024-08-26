@@ -16,6 +16,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
     member val Hotkey: Hotkey = "none" with get, set
     member val Disabled: unit -> bool = K false with get, set
     member val Floating = false with get, set
+    member val TextColor = K Colors.text with get, set
 
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
@@ -32,7 +33,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
                 fun () ->
                     if this.Disabled() then Colors.text_greyout
                     elif this.Focused then Colors.text_yellow_2
-                    else Colors.text
+                    else this.TextColor()
         )
         |+ Clickable.Focus(this, Floating = this.Floating)
         |* HotkeyAction(
