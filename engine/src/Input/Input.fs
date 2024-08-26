@@ -8,10 +8,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 
-
-
-type Keys = OpenTK.Windowing.GraphicsLibraryFramework.Keys
-type MouseButton = OpenTK.Windowing.GraphicsLibraryFramework.MouseButton
+type Keys = Windowing.GraphicsLibraryFramework.Keys
+type MouseButton = Windowing.GraphicsLibraryFramework.MouseButton
 
 [<RequireQualifiedAccess>]
 type Bind =
@@ -100,8 +98,8 @@ type internal FrameEvents =
         MouseX: float32
         MouseY: float32
         MouseZ: float32
-        KeyboardState: KeyboardState
-        MouseState: MouseState
+        HeldKeys: Set<Keys>
+        HeldMouseButtons: Set<MouseButton>
         Ctrl: bool
         Alt: bool
         Shift: bool
@@ -118,10 +116,11 @@ module internal InputThread =
     let mutable private ctrl = false
     let mutable private alt = false
     let mutable private shift = false
+    let mutable private held_keys = Set.empty<Keys>
+    let mutable private held_mouse_buttons = Set.empty<MouseButton>
 
+    let mutable private last_typed = 0.0
     let mutable typing = false
-
-    let mutable last_typed = 0.0
 
     let private LOCK_OBJ = Object()
 
@@ -171,10 +170,15 @@ module internal InputThread =
                 if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- false
                 elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- false
                 elif key = Keys.LeftShift || key = Keys.RightShift then shift <- false
+
+                held_keys <- Set.remove key held_keys
+
             elif action = InputAction.Press then
                 if key = Keys.LeftControl || key = Keys.RightControl then ctrl <- true
                 elif key = Keys.LeftAlt || key = Keys.RightAlt then alt <- true
                 elif key = Keys.LeftShift || key = Keys.RightShift then shift <- true
+
+                held_keys <- Set.add key held_keys
         )
     let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
 
@@ -187,6 +191,11 @@ module internal InputThread =
             )
         lock LOCK_OBJ (fun () -> 
             events_buffer <- List.append events_buffer [ event ]
+            if action = InputAction.Release then
+                held_mouse_buttons <- Set.remove button held_mouse_buttons
+            elif action = InputAction.Press then
+                held_mouse_buttons <- Set.add button held_mouse_buttons
+                
         )
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
@@ -213,8 +222,8 @@ module internal InputThread =
                             MouseY = mouse_y
                             MouseZ = mouse_z
                             TypedText = typed_text
-                            KeyboardState = kb
-                            MouseState = ms
+                            HeldKeys = held_keys
+                            HeldMouseButtons = held_mouse_buttons
                             Ctrl = ctrl
                             Shift = shift
                             Alt = alt
@@ -350,9 +359,9 @@ module Input =
         | Bind.Key(Keys.LeftShift, _)
         | Bind.Key(Keys.RightShift, _) -> this_frame.Shift
         | Bind.Key(k, m) ->
-            this_frame.KeyboardState.[k]
+            this_frame.HeldKeys.Contains k
             && m = (this_frame.Ctrl, this_frame.Alt, this_frame.Shift)
-        | Bind.Mouse m -> this_frame.MouseState.[m]
+        | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
         | Bind.Dummy -> false
 
     let init (win: NativeWindow) =
