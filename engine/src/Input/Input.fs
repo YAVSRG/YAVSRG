@@ -16,6 +16,7 @@ type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
     | Mouse of MouseButton
+    // todo: joystick support ever?
 
     override this.ToString() =
         match this with
@@ -120,11 +121,9 @@ module internal InputThread =
     let mutable private held_mouse_buttons = Set.empty<MouseButton>
 
     let mutable private last_typed = 0.0
-    let mutable typing = false
+    let mutable private typing = false
 
     let private LOCK_OBJ = Object()
-
-    let mutable internal game_window: NativeWindow = null
 
     let private error_callback (code: ErrorCode) (desc: string) =
         Logging.Debug(sprintf "GLFW Error (%O): %s" code desc)
@@ -140,12 +139,16 @@ module internal InputThread =
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
 
     let private cursor_pos_callback (_: nativeptr<Window>) (x: float) (y: float) =
-        mouse_x <- Math.Clamp(Viewport.vwidth / float32 Viewport.rwidth * float32 x, 0.0f, Viewport.vwidth)
-        mouse_y <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 y, 0.0f, Viewport.vheight)
+        lock LOCK_OBJ (fun () -> 
+            mouse_x <- Math.Clamp(Viewport.vwidth / float32 Viewport.rwidth * float32 x, 0.0f, Viewport.vwidth)
+            mouse_y <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 y, 0.0f, Viewport.vheight)
+        )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
     let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) =
-        mouse_z <- mouse_z + float32 offset_y
+        lock LOCK_OBJ (fun () -> 
+            mouse_z <- mouse_z + float32 offset_y
+        )
     let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
 
     let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) =
@@ -163,7 +166,7 @@ module internal InputThread =
                 Song.time_with_offset ()
             )
         lock LOCK_OBJ (fun () -> 
-            if GLFW.GetTime() - last_typed > 0.500 then
+            if GLFW.GetTime() - last_typed > 0.050 then
                 events_buffer <- List.append events_buffer [ event ]
 
             if action = InputAction.Release then
@@ -199,8 +202,10 @@ module internal InputThread =
         )
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
+    let enable_typing (v: bool) =
+        lock LOCK_OBJ (fun () -> typing <- v)
+
     let init (win: NativeWindow) =
-        game_window <- win
         GLFW.SetCharCallback(win.WindowPtr, char_callback_d) |> ignore
         GLFW.SetKeyCallback(win.WindowPtr, key_callback_d) |> ignore
         GLFW.SetMouseButtonCallback(win.WindowPtr, mouse_button_callback_d) |> ignore
@@ -213,9 +218,6 @@ module internal InputThread =
             lock
                 LOCK_OBJ
                 (fun () ->
-                    let kb = game_window.KeyboardState.GetSnapshot()
-                    let ms = game_window.MouseState.GetSnapshot()
-
                     let output =
                         {
                             MouseX = mouse_x
@@ -240,8 +242,8 @@ module internal InputThread =
 
 module Input =
 
-    let mutable last_time_mouse_moved = 0L
-    let mutable last_input_event = 0L
+    let mutable last_time_mouse_moved = 0.0
+    let mutable last_input_event = 0.0
     let mutable internal this_frame: FrameEvents = Unchecked.defaultof<_>
     let mutable internal last_frame: FrameEvents = Unchecked.defaultof<_>
     let mutable internal this_frame_finished = false
@@ -259,7 +261,7 @@ module Input =
     let remove_listener () =
         match input_listener with
         | InputListener.Text(_, on_remove) ->
-            InputThread.typing <- false
+            InputThread.enable_typing false
             on_remove ()
         | InputListener.Bind _
         | InputListener.None -> ()
@@ -273,7 +275,7 @@ module Input =
     let listen_to_text (s: Setting<string>, mouse_cancel: bool, on_remove: unit -> unit) =
         remove_listener ()
         input_listener <- InputListener.Text(s, on_remove)
-        InputThread.typing <- true
+        InputThread.enable_typing true
         input_listener_mouse_cancel <- if mouse_cancel then 0f else -infinityf
 
     /// Used for UIs that let the user bind a key to a hotkey
@@ -370,12 +372,8 @@ module Input =
 
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
     let private DELETE_WORD = Bind.ctrl Keys.Backspace
-    let private DELETE_REPEAT_DELAY = 400L
-    let private DELETE_REPEAT_TIME = 30L
     let private COPY = Bind.ctrl Keys.C
     let private PASTE = Bind.ctrl Keys.V
-    let mutable private delete_held_timestamp = 0L
-    let mutable private delete_repeat_counter = 0L
 
     let update_input_listener () =
 
@@ -385,29 +383,13 @@ module Input =
             if this_frame.TypedText <> "" then
                 s.Value <- s.Value + this_frame.TypedText
 
-            if pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome && s.Value.Length > 0 then
+            if (pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome || pop_matching(DELETE_CHARACTER, InputEvType.Repeat).IsSome) && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
-                delete_held_timestamp <- DateTime.UtcNow.Ticks
-                delete_repeat_counter <- -1L
 
-            elif pop_matching(DELETE_WORD, InputEvType.Press).IsSome then
+            elif (pop_matching(DELETE_WORD, InputEvType.Press).IsSome || pop_matching(DELETE_WORD, InputEvType.Repeat).IsSome) && s.Value.Length > 0 then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
-                delete_held_timestamp <- DateTime.UtcNow.Ticks
-                delete_repeat_counter <- -1L
-
-            elif (held DELETE_CHARACTER || held DELETE_WORD) && s.Value.Length > 0 then
-                let rep = ( (DateTime.UtcNow.Ticks - delete_held_timestamp) / 10_000L - DELETE_REPEAT_DELAY) / DELETE_REPEAT_TIME
-                if delete_repeat_counter < rep then
-                    delete_repeat_counter <- delete_repeat_counter + 1L
-
-                    if this_frame.Ctrl then
-                        s.Value <-
-                            let parts = s.Value.Split(" ")
-                            Array.take (parts.Length - 1) parts |> String.concat " "
-                    else
-                        Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
 
             elif pop_matching(COPY, InputEvType.Press).IsSome then
                 gw.ClipboardString <- s.Value
@@ -419,9 +401,6 @@ module Input =
                         gw.ClipboardString
                       with _ ->
                           ""
-
-            else
-                delete_repeat_counter <- Int64.MaxValue
 
             if input_listener_mouse_cancel > 200f then
                 remove_listener ()
@@ -463,17 +442,16 @@ module Input =
             (this_frame.MouseX <> last_frame.MouseX)
             || (this_frame.MouseY <> last_frame.MouseY)
         then
-            last_time_mouse_moved <- DateTime.UtcNow.Ticks
+            last_time_mouse_moved <- GLFW.GetTime()
 
         if events_this_frame <> [] then
-            last_input_event <- DateTime.UtcNow.Ticks
+            last_input_event <- GLFW.GetTime()
 
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         this_frame_finished <- false
         update_input_listener ()
 
-    let button_pressed_recently () =
-        (DateTime.UtcNow.Ticks - last_input_event) < 100L * 10_000L
+    let button_pressed_recently () = GLFW.GetTime() - last_input_event < 0.100
 
 module Mouse =
 
@@ -504,8 +482,7 @@ module Mouse =
     let released b : bool =
         Input.pop_matching(Bind.Mouse b, InputEvType.Release).IsSome
 
-    let moved_recently () : bool =
-        (DateTime.UtcNow.Ticks - Input.last_time_mouse_moved) < 100L * 10_000L
+    let moved_recently () : bool = GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
 
     let hover (r: Rect) : bool =
         not Input.this_frame_finished && r.Contains(pos ())
@@ -515,6 +492,20 @@ type Bind with
         match this with
         | Key _
         | Mouse _ -> Input.held this
+        | _ -> false
+
+    member this.Repeated() =
+        match this with
+        | Key _
+        | Mouse _ -> Input.pop_matching(this, InputEvType.Repeat).IsSome
+        | _ -> false
+
+    member this.TappedOrRepeated() =
+        match this with
+        | Key _
+        | Mouse _ -> 
+            Input.pop_matching(this, InputEvType.Press).IsSome
+            || Input.pop_matching(this, InputEvType.Repeat).IsSome
         | _ -> false
 
     member this.Tapped() =
