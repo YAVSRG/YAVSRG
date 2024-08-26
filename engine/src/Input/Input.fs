@@ -165,6 +165,7 @@ module internal InputThread =
                 action, 
                 Song.time_with_offset ()
             )
+        printfn "%O %O" key action
         lock LOCK_OBJ (fun () -> 
             if GLFW.GetTime() - last_typed > 0.050 then
                 events_buffer <- List.append events_buffer [ event ]
@@ -309,7 +310,7 @@ module Input =
         let rec pop_inputs_matching_binds evs =
             match evs with
             | [] -> []
-            | struct (b, t, time) :: xs ->
+            | struct (b, t, time) :: xs when t <> InputEvType.Repeat ->
                 let mutable i = 0
                 let mutable matched = false
 
@@ -321,6 +322,7 @@ module Input =
                     i <- i + 1
 
                 if matched then pop_inputs_matching_binds xs else struct (b, t, time) :: (pop_inputs_matching_binds xs)
+            | _ :: xs -> pop_inputs_matching_binds xs
 
         events_this_frame <- pop_inputs_matching_binds events_this_frame
 
