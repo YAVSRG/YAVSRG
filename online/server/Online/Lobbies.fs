@@ -45,6 +45,7 @@ type Player =
     member this.StartPlay() =
         this.Status <- LobbyPlayerStatus.Playing
         this.PlayComplete <- false
+        this.CurrentChartTime <- -10000f
         this.CurrentPlayBuffer <- new MemoryStream()
         this.PlayPacketsReceived <- 0
 
