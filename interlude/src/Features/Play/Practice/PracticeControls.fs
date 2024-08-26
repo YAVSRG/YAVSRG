@@ -15,7 +15,7 @@ type private ModeButton(label: string, mode: SyncMode, state: PracticeState) =
                 Style.click.Play()
 
                 if state.SyncMode.Value = mode then
-                    PracticeState.accept_suggestion state
+                    PracticeState.accept_suggested_offset state
                 else
                     state.SyncMode.Set mode
             )

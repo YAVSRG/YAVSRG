@@ -43,15 +43,12 @@ type LocalOffsetPage(state: PlayState, save_data: Data.ChartSaveData, setting: S
     inherit Page()
 
     let offset_slider =
-        PageSetting(
-            %"play.localoffset",
-            Slider(
-                setting
-                |> Setting.map float32 (fun x -> x * 1.0f<ms>)
-                |> Setting.bound -200.0f 200.0f,
-                Step = 1f,
-                Format = (fun v -> sprintf "%.0fms" v)
-            )
+        Slider(
+            setting
+            |> Setting.map float32 (fun x -> x * 1.0f<ms>)
+            |> Setting.bound -200.0f 200.0f,
+            Step = 1f,
+            Format = (fun v -> sprintf "%.0fms" v)
         )
 
     let recommended_offset = LocalOffset.get_automatic state save_data
@@ -60,28 +57,44 @@ type LocalOffsetPage(state: PlayState, save_data: Data.ChartSaveData, setting: S
         setting.Set recommended_offset
         Menu.Back()
 
+    let reset_offset() =
+        setting.Set 0.0f<ms>
+
     override this.Content() =
         defer (fun () -> offset_slider.Select false)
 
         page_container()
-        |+ offset_slider.Pos(0)
+        |+ PageSetting(
+            %"play.localoffset",
+            offset_slider
+        )
+            .Pos(0)
         |+ Text(%"play.localoffset.slider_hint", Align = Alignment.LEFT).Pos(2, 1)
         |+ (
             PageButton(
                 [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
                 apply_recommended
             )
-            |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"accept_suggestion"),
+            |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"accept_offset"),
                 Color = K Colors.text_cyan,
                 Align = Alignment.RIGHT,
                 Position = Position.Shrink(10.0f, 5.0f)
             )
         ).Pos(3)
-        |+ HotkeyAction("accept_suggestion", apply_recommended)
+        |+ HotkeyAction("accept_offset", apply_recommended)
+        |+ (
+            PageButton(%"play.localoffset.reset", reset_offset)
+            |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"reset_offset"),
+                Color = K Colors.text_cyan,
+                Align = Alignment.RIGHT,
+                Position = Position.Shrink(10.0f, 5.0f)
+            )
+        ).Pos(5)
+        |+ HotkeyAction("reset_offset", reset_offset)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =
-        if offset_slider.Focused && (%%"select").Tapped() then
+        if offset_slider.Selected && (%%"select").Tapped() then
             Menu.Back()
 
         base.Update(elapsed_ms, moved)

@@ -89,7 +89,7 @@ module PracticeState =
                     ScrollSpeed = scroll_speed_suggestion
                 }
 
-    let accept_suggestion (state: PracticeState) =
+    let accept_suggested_offset (state: PracticeState) =
         match state.SyncSuggestions with
         | None -> ()
         | Some suggestions ->

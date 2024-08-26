@@ -32,7 +32,7 @@ module PracticeScreen =
                 .Hotkey(%"practice.info.play", "skip")
                 .Hotkey(%"practice.info.restart", "retry")
                 .Hotkey(%"practice.info.options", "exit")
-                .Hotkey(%"practice.info.accept_suggestion", "accept_suggestion")
+                .Hotkey(%"practice.info.accept_suggestion", "accept_offset")
 
         let sync_controls = SyncSuggestionControls state
         let slideout = Slideout(sync_controls, AutoCloseWhen = K false)
@@ -192,12 +192,12 @@ module PracticeScreen =
                 if (%%"retry").Tapped() then
                     restart this
 
-                elif (%%"accept_suggestion").Tapped() then
+                elif (%%"accept_offset").Tapped() then
                     if state.Paused.Value then
-                        PracticeState.accept_suggestion state
+                        PracticeState.accept_suggested_offset state
                     else
                         pause this
-                        PracticeState.accept_suggestion state
+                        PracticeState.accept_suggested_offset state
                         restart this
 
                 elif state.Paused.Value then

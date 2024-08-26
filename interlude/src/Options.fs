@@ -362,7 +362,8 @@ module Options =
             Hotkeys.register "show_comments" (shift Keys.F)
             Hotkeys.register "context_menu" (mk Keys.Period)
             Hotkeys.register "practice_mode" (mk Keys.V)
-            Hotkeys.register "accept_suggestion" (mk Keys.Tab)
+            Hotkeys.register "accept_offset" (mk Keys.Tab)
+            Hotkeys.register "reset_offset" (shift Keys.Tab)
             Hotkeys.register "hide_replay_overlay" (mk Keys.H)
 
             Hotkeys.register "uprate_big" (ctrl_shift Keys.Equal)

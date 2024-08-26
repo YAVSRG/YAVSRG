@@ -28,7 +28,7 @@ type Slider(setting: Setting.Bounded<float32>) =
                 else setting.Set r
             | false, _ -> ()
         )
-        |> Setting.map id (fun v -> v |> Seq.filter (fun c -> c = '.' || c = ',' || Char.IsAsciiDigit c) |> Array.ofSeq |> String)
+        |> Setting.map id (fun v -> v |> Seq.filter (fun c -> c = '-' || c = '.' || c = ',' || Char.IsAsciiDigit c) |> Array.ofSeq |> String)
 
     let get_percent () =
         let lo, hi = setting.Config
