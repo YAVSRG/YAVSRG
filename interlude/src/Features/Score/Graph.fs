@@ -102,8 +102,41 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
-    let draw_snapshot_info (bounds: Rect) (info: ScoreMetricSnapshot) =
-        Draw.rect bounds Colors.shadow_2.O2
+    do fbo.Unbind()
+
+    override this.Init(parent) =
+        this.Position <- NORMAL_POSITION
+        base.Init parent
+
+    member this.Refresh() = refresh <- true
+
+    member this.ApplyColumnFilter() =
+        stats.Value <- ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
+
+    member this.Keys : int = score_info.WithMods.Keys
+
+    member private this.DrawSnapshotInfo(bounds: Rect, info: ScoreMetricSnapshot) =
+        let outline_thickness = 5.0f 
+    
+        let outline_bounds = bounds.Expand(outline_thickness)
+
+        Draw.rect outline_bounds Colors.white.O4
+        Draw.rect bounds Colors.shadow_2.O4
+        let mouse_x, mouse_y = Mouse.pos()
+        let percent = (mouse_x - bounds.Left) / bounds.Width
+        let adjusted_x = 
+            max bounds.Left (min mouse_x (bounds.Right - outline_thickness / 2.0f))
+        let start_y = outline_bounds.Bottom
+        let end_y = 
+            this.Bounds.Bottom
+        let line_rect =
+            Rect.Box(
+                adjusted_x - outline_thickness / 2.0f, 
+                start_y,               
+                outline_thickness,                   
+                end_y
+        )
+        Draw.rect line_rect Colors.white.O1
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
 
@@ -138,19 +171,6 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Colors.text,
             Alignment.LEFT
         )
-
-    do fbo.Unbind()
-
-    override this.Init(parent) =
-        this.Position <- NORMAL_POSITION
-        base.Init parent
-
-    member this.Refresh() = refresh <- true
-
-    member this.ApplyColumnFilter() =
-        stats.Value <- ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
-
-    member this.Keys : int = score_info.WithMods.Keys
 
     member private this.PlotLine(y_func: ScoreMetricSnapshot -> float32, color_func: ScoreMetricSnapshot -> Color) =
 
@@ -278,7 +298,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             this.PlotLine(y_func, line_color)
             
         | _ -> ()
-
+    
     member private this.DrawHits() =
         let events = score_info.Scoring.HitEvents
         assert (events.Count > 0)
@@ -388,13 +408,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             let box =
                 Rect.Box(
-                    this.Bounds.Left + BOX_PADDING_X + percent * (this.Bounds.Width - BOX_WIDTH - BOX_PADDING_X - BOX_PADDING_X),
-                    this.Bounds.Top + box_padding_y,
+                    this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
+                    this.Bounds.Top - 250f,
                     BOX_WIDTH,
                     this.Bounds.Height - box_padding_y - box_padding_y
                 )
 
-            draw_snapshot_info box current_snapshot
+            this.DrawSnapshotInfo(box, current_snapshot)
 
             this.DrawLabels((Colors.white.O1, Color.Transparent))
         else
