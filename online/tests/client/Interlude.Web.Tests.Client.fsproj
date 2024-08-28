@@ -9,6 +9,9 @@
     <Compile Include="Shared.fs" />
     <Compile Include="EchoClient.fs" />
     <Compile Include="ExtraKeysClient.fs" />
+    <Compile Include="InvalidTimestampsClient.fs" />
+    <Compile Include="FuzzSession.fs" />
+    <Compile Include="FuzzTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

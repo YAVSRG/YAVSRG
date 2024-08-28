@@ -2,8 +2,8 @@
 
 open Interlude.Web.Shared
 
-// Client that echos replays like EchoClient but also includes key presses in columns that don't exist
-type ExtraKeysClient(token: string) =
+// Client that echos replays like EchoClient but garbles the timestamps
+type InvalidTimestampsClient(token: string) =
     inherit Client(System.Net.IPAddress.Parse("127.0.0.1"), 32767)
 
     let mutable ready_to_play = false
@@ -39,6 +39,9 @@ type ExtraKeysClient(token: string) =
         | Downstream.PLAY_DATA("Percyqaz", ts, data) ->
             if ready_to_play then 
                 for i = 0 to (data.Length / 6) - 1 do
-                    data.[i + 5] <- data.[i + 5] ||| 255uy
+                    data.[i] <- data.[i] ^^^ 0b10101010uy
+                    data.[i + 1] <- data.[i + 1] ^^^ 0b10101010uy
+                    data.[i + 2] <- data.[i + 2] ^^^ 0b10101010uy
+                    data.[i + 3] <- data.[i + 3] ^^^ 0b10101010uy
                 this.Send(Upstream.PLAY_DATA (ts, data))
         | _ -> ()

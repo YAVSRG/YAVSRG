@@ -13,6 +13,19 @@ type Buffer =
 
 module Buffer =
 
+    (*
+        Packets have a 3 byte header
+        - First byte: MOST SIGNIFICANT (this is BIG ENDIAN) bits of the length of the packet body
+        - Second byte: LEAST SIGNFICIANT bits of the length of the packet body
+        - Third byte: packet 'kind' - See Packets.fs
+        Followed by body bytes, the same number as represented in those first 2 bytes
+        
+        After that the next byte is the first of the header for another packet
+    *)
+
+    // This is a consequence of only having 2 bytes to encode the length, 65535 is the biggest representable number
+    let MAX_PACKET_SIZE = 65535
+
     let handle (buffer: Buffer ref, data: byte array, offset: int64, size: int64, packet: byte * byte array -> unit) =
         let mutable offset = int offset
         let size = int size
@@ -51,7 +64,7 @@ module Buffer =
                     buffer := Reading_Buffer(new_remaining, kind, b)
 
     let packet_bytes (kind: byte, data: byte array) =
-        if data.Length > int UInt16.MaxValue then
+        if data.Length > MAX_PACKET_SIZE then
             failwithf "Packet data exceeded maximum size"
 
         let result = Array.zeroCreate (data.Length + 3)

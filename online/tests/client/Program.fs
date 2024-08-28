@@ -1,7 +1,5 @@
 ﻿open System
-open System.Net
 open System.Net.Http
-open System.Net.Security
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Tests.Client
@@ -23,9 +21,13 @@ let clients : Client array =
     [|
         EchoClient(get_debug_token_for_username "EchoClient")
         ExtraKeysClient(get_debug_token_for_username "ExtraKeysClient")
+        InvalidTimestampsClient(get_debug_token_for_username "InvalidTimestampsClient")
     |]
 
-for c in clients do
-    c.Connect()
+//for c in clients do
+//    c.Connect()
+
+for i = 0 to 1000 do
+    (new MalformedPacketsSession()).ConnectAsync() |> ignore
 
 Console.ReadLine() |> ignore
