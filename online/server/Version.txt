@@ -1,1 +1,1 @@
-﻿Update server version to support mod changes
+﻿Fixed login from another location bug + multiplayer protocol protection
