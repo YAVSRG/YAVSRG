@@ -56,7 +56,6 @@ type Accuracy
         if (!improvements).Accuracy <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
         base.Init parent
 
-
     override this.Update(elapsed_ms, moved) =
         hover <- Mouse.hover this.Bounds
         base.Update(elapsed_ms, moved)
@@ -111,7 +110,8 @@ type Accuracy
 
         if hover then
             let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
-            Draw.rect acc_tooltip Colors.shadow_2.O2
+            Draw.rect (acc_tooltip.Expand(Style.PADDING)) Colors.white
+            Draw.rect acc_tooltip Colors.shadow_2
 
             Text.fill_b (
                 Style.font,
@@ -132,6 +132,7 @@ type Lamp
 
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
+    let mutable hover = false
 
     let glint_animation = Animation.Delay(375.0)
 
@@ -146,6 +147,10 @@ type Lamp
         if (!improvements).Lamp <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
 
         base.Init parent
+
+    override this.Update(elapsed_ms, moved) =
+        hover <- Mouse.hover this.Bounds
+        base.Update(elapsed_ms, moved)
 
     override this.Draw() =
         Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
@@ -188,6 +193,19 @@ type Lamp
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceB(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
+        
+        if hover then
+            let raw_greats_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
+            Draw.rect (raw_greats_tooltip.Expand(Style.PADDING)) Colors.white
+            Draw.rect raw_greats_tooltip Colors.shadow_2
+
+            Text.fill_b (
+                Style.font,
+                sprintf "%.1f raw" (score_info.Scoring.State.MaxPointsScored - score_info.Scoring.State.PointsScored),
+                raw_greats_tooltip.Shrink(10.0f, 5.0f),
+                Colors.text,
+                Alignment.CENTER
+            )
 
 type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
     inherit Container(NodeType.None)
