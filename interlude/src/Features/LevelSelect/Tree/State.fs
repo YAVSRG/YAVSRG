@@ -37,6 +37,7 @@ module private TreeState =
     let mutable drag_scroll_distance = 0.0f
     let mutable drag_scroll_position = 0.0f
     let mutable click_cooldown = 0.0
+    let mutable scroll_to_chart_once = false
 
     let DRAG_THRESHOLD = 40.0f
     let DRAG_LEFTCLICK_SCALE = 1.75f
