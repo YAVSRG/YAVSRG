@@ -30,17 +30,19 @@ module PersonalBests =
                                 let _, initial_ruleset = rulesets.[0]
                                 let score_info = ScoreInfo.from_score cc chart initial_ruleset score
 
-                                for ruleset_id, ruleset in rulesets do
-                                    score_info.Ruleset <- ruleset
+                                if score_info.ModStatus = Mods.ModStatus.Ranked then
 
-                                    if new_bests.ContainsKey ruleset_id then
-                                        let ruleset_bests, _ = Bests.update score_info new_bests.[ruleset_id]
-                                        new_bests <- Map.add ruleset_id ruleset_bests new_bests
-                                    else
-                                        new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
+                                    for ruleset_id, ruleset in rulesets do
+                                        score_info.Ruleset <- ruleset
 
-                                if new_bests <> existing_bests then
-                                    data.PersonalBests <- new_bests
+                                        if new_bests.ContainsKey ruleset_id then
+                                            let ruleset_bests, _ = Bests.update score_info new_bests.[ruleset_id]
+                                            new_bests <- Map.add ruleset_id ruleset_bests new_bests
+                                        else
+                                            new_bests <- Map.add ruleset_id (Bests.create score_info) new_bests
+
+                            if new_bests <> existing_bests then
+                                data.PersonalBests <- new_bests
 
                     Logging.Info(sprintf "Finished processing personal bests for all rulesets")
                 }
