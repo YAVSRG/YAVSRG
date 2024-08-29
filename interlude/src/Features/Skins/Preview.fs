@@ -123,7 +123,7 @@ type SkinPreview(position: Position) as this =
         base.Update(elapsed_ms, moved)
         if (Mouse.hover bounds_placeholder.Bounds && Mouse.left_click()) || (%%"preview").Tapped() then
             expand <- not expand
-            bounds_placeholder.Position <- if expand then Position.DEFAULT else position
+            bounds_placeholder.Position <- if expand then Position.Expand(0.5f) else position
         elif expand && (%%"exit").Tapped() then
             expand <- false
             bounds_placeholder.Position <- position
