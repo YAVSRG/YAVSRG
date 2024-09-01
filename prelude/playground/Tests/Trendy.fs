@@ -137,26 +137,25 @@ let updateIndex time =
             originalNow <- nextTime
             rate <- rate + 0.01f
 
-//let handleObject (object: HitObject) =
-//    match object with
-//    | HitCircle(p, time, hs, addition) ->
-//        updateIndex time
-//        let newTime = actualNow + (time - originalNow) / rate
-//        HitCircle(p, newTime, hs, addition)
-//    | _ -> failwith ""
+let handle_object (object: HitObject) =
+    match object with
+    | HitCircle note ->
+        updateIndex (Time.of_number note.Time)
+        let new_time = actualNow + (Time.of_number note.Time - originalNow) / rate
+        HitCircle { note with Time = int new_time }
+    | _ -> failwith ""
 
-//let main () =
-//    { trendy with
-//        Objects = trendy.Objects |> List.map handleObject
-//        General =
-//            { trendy.General with
-//                AudioFilename = "output.mp3"
-//            }
-//        Metadata =
-//            { trendy.Metadata with
-//                Version = "Faster"
-//                BeatmapID = 0
-//            }
-//    }
-//    |> beatmap_to_file
-//        @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Faster].osu"
+let main () =
+    { trendy with
+        Objects = trendy.Objects |> List.map handle_object
+        General =
+            { trendy.General with
+                AudioFilename = "output.mp3"
+            }
+        Metadata =
+            { trendy.Metadata with
+                Version = "Faster"
+                BeatmapID = 0
+            }
+    }.ToFile
+        @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Faster].osu"

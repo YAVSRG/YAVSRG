@@ -149,13 +149,14 @@ let lines =
         bass 104f
     ]
 
-//let line (t: Time) =
-//    BPM(t, 60000f<ms / minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
+let line (t: Time) =
+    { UninheritedTimingPoint.Create(t, 60000f<ms / minute> / bpm, 4) with
+        Effects = TimingEffect.OmitFirstBarline
+    } |> Uninherited
 
-//let renderedLines = lines |> List.concat |> List.map line
+let renderedLines = lines |> List.concat |> List.map line
 
-//let main () =
-//    { sail with
-//        Timing = (line start) :: renderedLines
-//    }
-//    |> beatmap_to_file source
+let main () =
+    { sail with
+        Timing = (line start) :: renderedLines
+    }.ToFile source

@@ -20,12 +20,12 @@ let dansen = Beatmap.FromFile osu_file |> Result.toOption |> Option.get
 
 let mutable _msPerBeat = Unchecked.defaultof<_>
 
-//let measure =
-//    match dansen.Timing.Head with
-//    | BPM(start, msPerBeat, _, _, _) ->
-//        _msPerBeat <- msPerBeat
-//        fun (m: float32<measure>) -> m * 4.0f<beat / measure> * msPerBeat + start
-//    | _ -> failwith "Couldn't find first bpm of osu file"
+let measure =
+    match dansen.Timing.Head with
+    | Uninherited x ->
+        _msPerBeat <- Time.of_number x.MsPerBeat / 1.0f<beat>
+        fun (m: float32<measure>) -> m * 4.0f<beat / measure> * _msPerBeat + Time.of_number x.Time
+    | _ -> failwith "Couldn't find first bpm of osu file"
 
 let intro = 1.0f<measure> // josh
 let hook1 = 11.0f<measure> // josh
