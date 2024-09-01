@@ -424,7 +424,6 @@ module ``osu!`` =
             do
                 let osu_file_entry = archive.CreateEntry(file_name)
                 use osu_file_stream = osu_file_entry.Open()
-                use tw = new StreamWriter(osu_file_stream, Encoding.UTF8)
                 beatmap.ToStream osu_file_stream
 
             do

@@ -183,6 +183,6 @@ type StoryboardObject =
         | Sprite sprite -> sprite.ToString()
         | Animation animation -> animation.ToString()
         | Sample (time, layer, filename, volume) -> sprintf "Sample,%i,%i,%A,%i" time (int layer) filename volume
-        | Background(filename, x, y) -> sprintf "0,%A,%i,%i" filename x y
+        | Background(filename, x, y) -> sprintf "0,0,%A,%i,%i" filename x y
         | Video(time, filename, x, y) -> sprintf "1,%i,%A,%i,%i" time filename x y
         | Break(start, finish) -> sprintf "2,%i,%i" start finish
