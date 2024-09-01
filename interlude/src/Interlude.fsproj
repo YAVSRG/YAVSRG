@@ -197,7 +197,6 @@
     <Compile Include="Features\Skins\Select.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
-    <Compile Include="Features\LevelSelect\ActionBar.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Groups.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Score.fs" />

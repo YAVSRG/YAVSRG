@@ -14,6 +14,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.UI
 open Interlude.Features.Online
+open Interlude.Features.Play
 
 type LevelSelectScreen() =
     inherit Screen()
@@ -51,7 +52,7 @@ type LevelSelectScreen() =
             ),
             Position =
                 {
-                    Left = 1.0f %- 580.0f
+                    Left = 0.4f %+ 290.0f
                     Top = 0.0f %+ 30.0f
                     Right = 1.0f %- (20.0f + Style.PADDING)
                     Bottom = 0.0f %+ 90.0f
@@ -76,16 +77,6 @@ type LevelSelectScreen() =
         )
             .Conditional(fun () -> Tree.is_empty)
 
-        |+ ActionBar(
-            Position =
-                {
-                    Left = 1.0f %- 805.0f
-                    Top = 0.0f %+ 30.0f
-                    Right = 1.0f %- 605.0f
-                    Bottom = 0.0f %+ 90.0f
-                }
-        )
-
         |+ LibraryViewControls()
 
         |+ StylishButton(
@@ -93,27 +84,46 @@ type LevelSelectScreen() =
             K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
             !%Palette.MAIN.O2,
             TiltRight = false,
-            Position = Position.SliceB(50.0f).SliceR(300.0f)
+            Position = Position.SliceB(50.0f).SliceR(250.0f)
         )
             .Help(Help.Info("levelselect.play").Hotkey("select"))
+        |+ StylishButton(
+            (fun () ->
+                SelectedChart.when_loaded
+                <| fun info ->
+                    Screen.change_new
+                        (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                        Screen.Type.Practice
+                        Transitions.Default
+                    |> ignore
+            ),
+            K Icons.TARGET,
+            !%Palette.DARK.O2,
+            Hotkey = "practice_mode",
+            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-275.0f, 0.0f)
+        )
+            .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
+        |+ StylishButton(
+            LevelSelect.random_chart,
+            K Icons.REFRESH_CCW,
+            !%Palette.MAIN.O2,
+            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-360.0f, 0.0f)
+        )
+            .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart"))
         |+ StylishButton(
             (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
             K Icons.LIST,
             !%Palette.DARK.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-325.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-445.0f, 0.0f)
         )
             .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
 
         |* info_panel
 
-        Comments.init this
-
         LevelSelect.on_refresh_all.Add refresh
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-
-        Comments.update (elapsed_ms, moved)
 
         if (%%"select").Tapped() then
             LevelSelect.choose_this_chart ()
@@ -165,7 +175,6 @@ type LevelSelectScreen() =
         Draw.rect (this.Bounds.SliceT(170.0f).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 
         base.Draw()
-        Comments.draw ()
 
     override this.OnEnter prev =
         LevelSelect.exit_gameplay()

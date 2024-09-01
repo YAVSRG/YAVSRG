@@ -10,7 +10,6 @@ open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
-open Interlude.UI
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -51,17 +50,8 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
 
         color <- color_func personal_bests
 
-        markers <-
-            //if options.LibraryMode.Value <> LibraryMode.Collections then
-            //    match Collections.current with
-            //    | Some(Folder c) -> if c.Contains cc then c.Icon.Value + " " else ""
-            //    | Some(Playlist p) -> if p.Contains cc then p.Icon.Value + " " else ""
-            //    | None -> ""
-            //else
-            ""
-            + match chart_save_data with
-                | Some c when not (System.String.IsNullOrEmpty c.Comment) -> Icons.MESSAGE_SQUARE
-                | _ -> ""
+        markers <- ""
+            // todo: icon if chart is liked
 
     override this.Bounds(top) =
         Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)
@@ -169,21 +159,6 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
         )
 
         Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
-
-        if
-            Comments.fade.Value > 0.01f
-            && chart_save_data.IsSome
-            && chart_save_data.Value.Comment <> ""
-        then
-            Draw.rect bounds (Palette.color (Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
-
-            Text.fill_b (
-                Style.font,
-                chart_save_data.Value.Comment,
-                bounds.Shrink(30.0f, 15.0f),
-                (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha),
-                Alignment.CENTER
-            )
 
     member this.Draw(top, origin, originB) =
         this.CheckBounds(top, origin, originB, this.OnDraw)
