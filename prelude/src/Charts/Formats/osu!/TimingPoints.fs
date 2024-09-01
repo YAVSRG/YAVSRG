@@ -26,26 +26,43 @@ type UninheritedTimingPoint =
             this.SampleIndex
             this.Volume
             (int this.Effects)
+    static member inline Create(time: ^X, ms_per_beat: ^Y, meter: ^Z) =
+        {
+            Time = int time
+            MsPerBeat = float ms_per_beat
+            Meter = int meter
+            SampleSet = SampleSet.Soft
+            SampleIndex = 0
+            Volume = 10
+            Effects = TimingEffect.None
+        }
 
 type InheritedTimingPoint =
     {
         Time: int
         Multiplier: float
-        METER__UNUSED: int
         SampleSet: SampleSet
         SampleIndex: int
         Volume: int
         Effects: TimingEffect
     }
     override this.ToString() =
-        sprintf "%i,%s,%i,%i,%i,%i,0,%i"
+        sprintf "%i,%s,4,%i,%i,%i,0,%i"
             this.Time
             (-100.0 / this.Multiplier |> fun f -> f.ToString(CultureInfo.InvariantCulture))
-            this.METER__UNUSED
             (int this.SampleSet)
             this.SampleIndex
             this.Volume
             (int this.Effects)
+    static member inline Create(time: ^Z, multiplier: ^Y) =
+        {
+            Time = int time
+            Multiplier = float multiplier
+            SampleSet = SampleSet.Soft
+            SampleIndex = 0
+            Volume = 10
+            Effects = TimingEffect.None
+        }
 
 type TimingPoint =
     | Uninherited of UninheritedTimingPoint
@@ -58,3 +75,7 @@ type TimingPoint =
         match this with
         | Uninherited x -> x.ToString()
         | Inherited x -> x.ToString()
+    static member inline CreateBPM(time, ms_per_beat, meter) =
+        UninheritedTimingPoint.Create(time, ms_per_beat, meter) |> Uninherited
+    static member inline CreateSV(time, multiplier) =
+        InheritedTimingPoint.Create(time, multiplier) |> Inherited

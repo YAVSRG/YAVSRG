@@ -141,7 +141,6 @@ module private Parser =
             Inherited {
                 Time = CsvHelpers.int_or 0 0 csv
                 Multiplier = -100.0 / (CsvHelpers.float_or 1 1.0 csv)
-                METER__UNUSED = CsvHelpers.int_or 2 4 csv
                 SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
                 SampleIndex = CsvHelpers.int_or 4 0 csv
                 Volume = CsvHelpers.int_or 5 0 csv
@@ -248,7 +247,7 @@ module private Parser =
             }
         elif obj_type &&& 128 > 0 then
             let endtime_and_sample = CsvHelpers.string_or 5 "" csv |> fun s -> s.Split([|':'|], 2, StringSplitOptions.TrimEntries)
-            HoldNote {
+            Hold {
                 X = x
                 Y = y
                 Time = time
@@ -347,8 +346,8 @@ module private Parser =
             Metadata = Metadata.FromMap metadata.Value
             Difficulty = Difficulty.FromMap difficulty.Value
             Events = List.ofSeq events
-            Objects = List.ofSeq objects
-            Timing = List.ofSeq timing
+            Objects = objects |> Seq.sortBy (_.Time) |> List.ofSeq
+            Timing = timing |> Seq.sortBy (_.Time) |> List.ofSeq 
         }
 
 type Beatmap with

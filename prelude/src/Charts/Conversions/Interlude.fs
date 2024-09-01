@@ -8,10 +8,7 @@ open Prelude.Charts
 
 module Interlude_To_Osu =
 
-    let private notes_to_hitobjects (notes: TimeArray<NoteRow>) keys =
-        let column_to_x k =
-            (float k + 0.5) * 512.0 / float keys |> int
-
+    let private notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) =
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
             match snaps with
             | { Time = offset; Data = nr } :: ss ->
@@ -27,28 +24,9 @@ module Interlude_To_Osu =
                 | { Time = offset; Data = nr } :: ss ->
                     for k = 0 to keys - 1 do
                         if nr.[k] = NoteType.NORMAL then
-                            yield 
-                                HitCircle {
-                                    X = column_to_x k
-                                    Y = 240
-                                    Time = int offset
-                                    StartsNewCombo = false
-                                    ColorHax = 0
-                                    HitSound = HitSound.Default
-                                    HitSample = HitSample.Default
-                                }
+                            yield HitObject.CreateManiaNote(keys, k, offset)
                         elif nr.[k] = NoteType.HOLDHEAD then
-                            yield
-                                HoldNote {
-                                    X = column_to_x k
-                                    Y = 240
-                                    Time = int offset
-                                    StartsNewCombo = false
-                                    ColorHax = 0
-                                    HitSound = HitSound.Default
-                                    EndTime = int (ln_lookahead k ss)
-                                    HitSample = HitSample.Default
-                                }
+                            yield HitObject.CreateManiaHold(keys, k, offset, ln_lookahead k ss)
 
                     yield! convert ss
                 | [] -> ()
@@ -76,17 +54,7 @@ module Interlude_To_Osu =
                     if time = offset then
                         None
                     else
-                        Some(
-                            TimingPoint.Inherited { 
-                                Time = int time
-                                Multiplier = mult * value |> float
-                                METER__UNUSED = 4
-                                SampleSet = SampleSet.Soft
-                                SampleIndex = 0
-                                Volume = 10
-                                Effects = TimingEffect.None
-                            }
-                        )
+                        Some(TimingPoint.CreateSV(time, mult * value))
 
         let svs time1 time2 mult =
             seq {
@@ -95,16 +63,7 @@ module Interlude_To_Osu =
                 | Some x -> yield x
 
                 for { Time = offset; Data = value } in TimeArray.between time1 time2 sv do
-                    yield 
-                        TimingPoint.Inherited {
-                            Time = int offset
-                            Multiplier = mult * value |> float
-                            METER__UNUSED = 4
-                            SampleSet = SampleSet.Soft
-                            SampleIndex = 0
-                            Volume = 10
-                            Effects = TimingEffect.None
-                        }
+                    yield TimingPoint.CreateSV(offset, mult * value)
             }
 
         let tps =
@@ -123,16 +82,7 @@ module Interlude_To_Osu =
                               Time = offset
                               Data = { Meter = meter; MsPerBeat = mspb }
                           } :: { Time = offset2 } :: rs ->
-                            yield 
-                                TimingPoint.Uninherited {
-                                    Time = int offset
-                                    MsPerBeat = mspb |> float
-                                    Meter = int meter
-                                    SampleSet = SampleSet.Soft
-                                    SampleIndex = 0
-                                    Volume = 10
-                                    Effects = TimingEffect.None
-                                }
+                            yield TimingPoint.CreateBPM(offset, mspb, meter)
                             yield! svs offset offset2 (most_common_mspb / mspb)
                             bs <- List.tail bs
                         | {
@@ -142,16 +92,7 @@ module Interlude_To_Osu =
                                          MsPerBeat = mspb
                                      }
                           } :: [] ->
-                            yield 
-                                TimingPoint.Uninherited {
-                                    Time = int offset
-                                    MsPerBeat = mspb |> float
-                                    Meter = int meter
-                                    SampleSet = SampleSet.Soft
-                                    SampleIndex = 0
-                                    Volume = 10
-                                    Effects = TimingEffect.None
-                                }
+                            yield TimingPoint.CreateBPM(offset, mspb, meter)
                             yield! svs offset Time.infinity (most_common_mspb / mspb)
                             bs <- List.tail bs
                         | [] -> failwith "impossible by loop condition"

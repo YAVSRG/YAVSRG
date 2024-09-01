@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Charts.Formats.osu
 
 open System.Globalization
+open Percyqaz.Common
 
 type HitSample = 
     {
@@ -46,6 +47,16 @@ type HitCircle =
             (1 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.HitSample
+    static member inline Create(keys: int, key: int, time: ^T) =
+        {
+            X = (float key + 0.5) * 512.0 / float keys |> int
+            Y = 240
+            Time = int time
+            StartsNewCombo = false
+            ColorHax = 0
+            HitSound = HitSound.Default
+            HitSample = HitSample.Default
+        }
 
 type SliderShape =
     | Linear
@@ -131,21 +142,34 @@ type Hold =
             (int this.HitSound)
             this.EndTime
             this.HitSample
+    static member inline Create(keys: int, key: int, start_time: ^T, end_time: ^T) =
+        {
+            X = (float key + 0.5) * 512.0 / float keys |> int
+            Y = 240
+            Time = int start_time
+            StartsNewCombo = false
+            ColorHax = 0
+            HitSound = HitSound.Default
+            EndTime = int end_time
+            HitSample = HitSample.Default
+        }
 
 type HitObject =
     | HitCircle of HitCircle
-    | HoldNote of Hold
+    | Hold of Hold
     | Slider of Slider
     | Spinner of Spinner
     member this.Time =
         match this with
         | HitCircle x -> x.Time
-        | HoldNote x -> x.Time
+        | Hold x -> x.Time
         | Slider x -> x.Time
         | Spinner x -> x.Time
     override this.ToString() =
         match this with
         | HitCircle x -> x.ToString()
-        | HoldNote x -> x.ToString()
+        | Hold x -> x.ToString()
         | Slider x -> x.ToString()
         | Spinner x -> x.ToString()
+    static member inline CreateManiaNote(keys, key, time) = HitCircle.Create(keys, key, time) |> HitCircle
+    static member inline CreateManiaHold(keys, key, start_time, end_time) = Hold.Create(keys, key, start_time, end_time) |> Hold

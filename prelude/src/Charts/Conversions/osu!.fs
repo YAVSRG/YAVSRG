@@ -16,7 +16,7 @@ module Osu_To_Interlude =
         let holding_until: Time option array = Array.zeroCreate keys
         let mutable last_row: TimeItem<NoteRow> = { Time = -Time.infinity; Data = [||] }
 
-        let xToColumn (x: float) =
+        let x_to_column (x: float) =
             x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
 
         let finish_holds time =
@@ -103,11 +103,11 @@ module Osu_To_Interlude =
                 holding_until.[column] <- Some end_time
             | _ -> skip_conversion (sprintf "Stacked LN at %f" time)
 
-        for object in objects |> List.sortBy (fun o -> o.Time) do
+        for object in objects do
             match object with
-            | HitCircle x -> add_note (xToColumn x.X) (Time.of_number x.Time)
-            | HoldNote x when x.EndTime > x.Time -> start_hold (xToColumn x.X) (Time.of_number x.Time) (Time.of_number x.EndTime)
-            | HoldNote x -> add_note (xToColumn x.X) (Time.of_number x.Time)
+            | HitCircle x -> add_note (x_to_column x.X) (Time.of_number x.Time)
+            | Hold x when x.EndTime > x.Time -> start_hold (x_to_column x.X) (Time.of_number x.Time) (Time.of_number x.EndTime)
+            | Hold x -> add_note (x_to_column x.X) (Time.of_number x.Time)
             | _ -> ()
 
         finish_holds Time.infinity
@@ -121,7 +121,7 @@ module Osu_To_Interlude =
             skip_conversion "Beatmap has no BPM points set"
 
         match List.head points with
-        | TimingPoint.Uninherited b ->
+        | Uninherited b ->
             let mutable current: float32<ms / beat> = Time.of_number b.MsPerBeat / 1f<beat>
             let mutable t: Time = Time.of_number b.Time
             let data = new Dictionary<float32<ms / beat>, Time>()
@@ -131,7 +131,7 @@ module Osu_To_Interlude =
                     data.Add(current, 0.0f<ms>)
 
                 match p with
-                | (TimingPoint.Uninherited b2) ->
+                | Uninherited b2 ->
                     data.[current] <- data.[current] + Time.of_number b2.Time - t
                     t <- Time.of_number b2.Time
                     current <- Time.of_number b2.MsPerBeat / 1f<beat>
@@ -169,7 +169,7 @@ module Osu_To_Interlude =
                 (point: TimingPoint)
                 : (TimeItem<BPM> list * TimeItem<float32> list * float32) =
                 match point with
-                | (TimingPoint.Uninherited b) ->
+                | Uninherited b ->
                     let mspb = Time.of_number b.MsPerBeat / 1f<beat>
                     {
                         Time = (Time.of_number b.Time)
@@ -178,7 +178,7 @@ module Osu_To_Interlude =
                     :: bpm,
                     add_sv_value (Time.of_number b.Time, most_common_bpm / mspb) sv,
                     most_common_bpm / mspb
-                | (TimingPoint.Inherited s) -> bpm, add_sv_value (Time.of_number s.Time, float32 s.Multiplier * scroll) sv, scroll
+                | Inherited s -> bpm, add_sv_value (Time.of_number s.Time, float32 s.Multiplier * scroll) sv, scroll
 
             List.fold func ([], [], 1.0f) points
 
