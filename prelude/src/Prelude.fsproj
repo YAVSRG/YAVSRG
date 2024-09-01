@@ -18,13 +18,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Charts\Formats\osu!\Shared.fs" />
+    <Compile Include="Charts\Formats\osu!\Headers.fs" />
+    <Compile Include="Charts\Formats\osu!\HitObjects.fs" />
+    <Compile Include="Charts\Formats\osu!\TimingPoints.fs" />
+    <Compile Include="Charts\Formats\osu!\Events.fs" />
+    <Compile Include="Charts\Formats\osu!\Parser.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Random.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="IO\Web.fs" />
     <Compile Include="IO\Images.fs" />
     <Compile Include="Charts\Interlude.fs" />
-    <Compile Include="Charts\Formats\osu!.fs" />
     <Compile Include="Charts\Formats\StepMania.fs" />
     <Compile Include="Charts\Formats\Quaver.fs" />
     <Compile Include="Charts\Conversions\Shared.fs" />
