@@ -1,12 +1,11 @@
 ﻿open System
 open Percyqaz.Common
-open Prelude.Test
 
 // This project is for a bunch of loose scripts/ad-hoc testing
 // Maybe it will become its own repo of fsx files
 
 let your_script_here () =
-    Polyrhythm.main()
+    Beatmaps.main()
 
 [<EntryPoint>]
 let main argv =

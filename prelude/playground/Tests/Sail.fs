@@ -1,12 +1,12 @@
 ﻿module Sail
 
 open Prelude
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 
 let source =
     @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"
 
-let sail = beatmap_from_file source |> Result.toOption |> Option.get
+let sail = Beatmap.FromFile source |> Result.toOption |> Option.get
 
 let note_gradient (start_nps, end_nps, start_time, end_time) =
 
@@ -149,13 +149,13 @@ let lines =
         bass 104f
     ]
 
-let line (t: Time) =
-    BPM(t, 60000f<ms / minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
+//let line (t: Time) =
+//    BPM(t, 60000f<ms / minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
 
-let renderedLines = lines |> List.concat |> List.map line
+//let renderedLines = lines |> List.concat |> List.map line
 
-let main () =
-    { sail with
-        Timing = (line start) :: renderedLines
-    }
-    |> beatmap_to_file source
+//let main () =
+//    { sail with
+//        Timing = (line start) :: renderedLines
+//    }
+//    |> beatmap_to_file source

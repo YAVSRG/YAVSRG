@@ -7,10 +7,8 @@ open System.Globalization
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468
 (*
   Not currently supported:
-    Sliders (parsing or writing)
-    Combo colors/starters
-    Loops in storyboard (parsing or writing)
-    Parsing of storyboard shorthand notation
+    Parsing storyboards (only writing a newly created storyboard is available)
+    Loops and triggers in storyboards (both reading and writing)
 *)
 
 module MapHelpers =
@@ -50,7 +48,7 @@ module MapHelpers =
             | false, _ -> None
         | None -> None
 
-    let enum_or<'T when 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (key: string) (default_value: 'T) (map: Map<string, string>) =
+    let enum_or<'T when 'T : enum<int> and 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (key: string) (default_value: 'T) (map: Map<string, string>) =
         match map.TryFind key with
         | Some s ->
             match Enum.TryParse(s, true) with
@@ -82,7 +80,7 @@ module CsvHelpers =
             | true, v -> v
             | false, _ -> default_value
 
-    let enum_or<'T when 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (index: int) (default_value: 'T) (csv: string array) =
+    let enum_or<'T when 'T : enum<int> and 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (index: int) (default_value: 'T) (csv: string array) =
         if index >= csv.Length then 
             default_value 
         else
@@ -338,7 +336,7 @@ type HitCircle =
             this.X
             this.Y
             this.Time
-            (1 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (1 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.HitSample
 
@@ -371,16 +369,16 @@ type Slider =
         HitSample: HitSample
     }
     override this.ToString() =
-        sprintf "%i,%i,%i,%i,%i,%O|%s,%i,%f,%s,%s,%O"
+        sprintf "%i,%i,%i,%i,%i,%O|%s,%i,%s,%s,%s,%O"
             this.X
             this.Y
             this.Time
-            (2 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (2 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.CurveType
             (this.CurvePoints |> Seq.map (fun (x, y) -> sprintf "%i:%i" x y) |> String.concat "|")
             this.Slides
-            this.Length
+            (this.Length.ToString(CultureInfo.InvariantCulture))
             (this.EdgeSounds |> Seq.map (int >> sprintf "%i") |> String.concat "|")
             (this.EdgeSets |> Seq.map (fun (normal, addition) -> sprintf "%i:%i" (int normal) (int addition)) |> String.concat "|")
             this.HitSample
@@ -401,7 +399,7 @@ type Spinner =
             this.X
             this.Y
             this.Time
-            (8 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (8 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.EndTime
             this.HitSample
@@ -422,7 +420,7 @@ type Hold =
             this.X
             this.Y
             this.Time
-            (128 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (128 ||| (if this.StartsNewCombo then 4 else 0) ||| (this.ColorHax &&& 7 <<< 4))
             (int this.HitSound)
             this.EndTime
             this.HitSample
@@ -461,9 +459,9 @@ type UninheritedTimingPoint =
         Effects: TimingEffect
     }
     override this.ToString() =
-        sprintf "%i,%f,%i,%i,%i,%i,1,%i"
+        sprintf "%i,%s,%i,%i,%i,%i,1,%i"
             this.Time
-            this.MsPerBeat
+            (this.MsPerBeat.ToString(CultureInfo.InvariantCulture))
             this.Meter
             (int this.SampleSet)
             this.SampleIndex
@@ -481,9 +479,9 @@ type InheritedTimingPoint =
         Effects: TimingEffect
     }
     override this.ToString() =
-        sprintf "%i,%f,%i,%i,%i,%i,0,%i"
+        sprintf "%i,%s,%i,%i,%i,%i,0,%i"
             this.Time
-            (-100.0 / this.Multiplier)
+            (-100.0 / this.Multiplier |> fun f -> f.ToString(CultureInfo.InvariantCulture))
             this.METER__UNUSED
             (int this.SampleSet)
             this.SampleIndex
@@ -769,7 +767,7 @@ module private Parser =
         | "0"
         | "background" ->   
             Background(
-                CsvHelpers.string_or 2 "" csv,
+                (CsvHelpers.string_or 2 "" csv).Trim('"'),
                 CsvHelpers.int_or 3 0 csv,
                 CsvHelpers.int_or 4 0 csv
             )
@@ -778,7 +776,7 @@ module private Parser =
         | "video" ->
             Video(
                 CsvHelpers.int_or 1 0 csv,
-                CsvHelpers.string_or 2 "" csv,
+                (CsvHelpers.string_or 2 "" csv).Trim('"'),
                 CsvHelpers.int_or 3 0 csv,
                 CsvHelpers.int_or 4 0 csv
             )
@@ -794,7 +792,7 @@ module private Parser =
             Sample(
                 CsvHelpers.int_or 1 0 csv,
                 CsvHelpers.enum_or 2 Layer.Background csv,
-                CsvHelpers.string_or 3 "" csv,
+                (CsvHelpers.string_or 3 "" csv).Trim('"'),
                 CsvHelpers.int_or 4 0 csv
             )
             |> Some
@@ -829,8 +827,8 @@ module private Parser =
         {
             NormalSet = CsvHelpers.enum_or 0 SampleSet.Default colon_separated_values
             AdditionSet = CsvHelpers.enum_or 1 SampleSet.Default colon_separated_values
-            Index = CsvHelpers.enum_or 2 0 colon_separated_values
-            Volume = CsvHelpers.enum_or 3 0 colon_separated_values
+            Index = CsvHelpers.int_or 2 0 colon_separated_values
+            Volume = CsvHelpers.int_or 3 0 colon_separated_values
             Filename = CsvHelpers.string_or 4 "" colon_separated_values
         }
 
@@ -909,7 +907,7 @@ module private Parser =
                     |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
                     |> parse_hit_sample
             }
-        elif obj_type &&& 2 > 0 then
+        elif obj_type &&& 8 > 0 then
             Spinner {
                 X = x
                 Y = y
@@ -1037,6 +1035,7 @@ type Beatmap with
             use stream = File.OpenRead(path)
             Ok (Parser.beatmap_from_stream stream)
         with err ->
+            printfn "%s" err.StackTrace
             Error err.Message
     member this.ToFile(path: string) =
         this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents, Encoding.UTF8)

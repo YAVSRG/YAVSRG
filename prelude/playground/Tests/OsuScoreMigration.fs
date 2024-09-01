@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 open Prelude.Data.``osu!``
 open Prelude.Data.Library
 open Prelude.Gameplay
@@ -86,7 +86,7 @@ module OsuScoreMigration =
 
             let chart =
                 try
-                    beatmap_from_file osu_file
+                    Beatmap.FromFile osu_file
                     |> expect
                     |> fun b ->
                         Osu_To_Interlude.convert
