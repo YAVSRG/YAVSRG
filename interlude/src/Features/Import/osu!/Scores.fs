@@ -6,7 +6,7 @@ open System.Text
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Conversions
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
 open Prelude.Data
@@ -90,7 +90,7 @@ module Scores =
                 Path.Combine(m.SourceFolder, beatmap_data.FolderName, beatmap_data.Filename)
 
             match
-                match beatmap_from_file osu_file with
+                match Beatmap.FromFile osu_file with
                 | Ok beatmap ->
                     Osu_To_Interlude.convert
                         beatmap

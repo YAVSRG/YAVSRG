@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions
+﻿namespace Prelude.Skins.Conversions.Stepmania
 
 open System.IO
 open System.Text.RegularExpressions
