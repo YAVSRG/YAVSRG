@@ -1,9 +1,9 @@
-﻿namespace Prelude.Charts.Formats
+﻿namespace Prelude.Charts.Formats.osu
 
-open FParsec
-open Prelude
+open System
+open System.Globalization
 
-//https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)
+//https://osu.ppy.sh/wiki/en/Client/File_formats/osu_(file_format)
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468
 (*
   Not currently supported:
@@ -13,965 +13,997 @@ open Prelude
     Parsing of storyboard shorthand notation
 *)
 
-// todo: rewrite this parser to be much dumber using string splitting
-// fparsec was not the way and I was just excited to use it in 2019, in fact this file is one of the first things I wrote in f#
+module MapHelpers =
 
-module ``osu!`` =
+    let string_or (key: string) (default_value: string) (map: Map<string, string>) =
+        map.TryFind key |> Option.defaultValue default_value
 
-    (*
-        Basic .osu file representation
-        Headers are just decoded data and then parsed into record structures with the data tags
-    *)
+    let int_or (key: string) (default_value: int) (map: Map<string, string>) =
+        match map.TryFind key with
+        | Some s ->
+            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> default_value
+        | None -> default_value
 
-    type Header = string * (string * string) list
+    let float_or (key: string) (default_value: float) (map: Map<string, string>) =
+        match map.TryFind key with
+        | Some s ->
+            match Double.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> default_value
+        | None -> default_value
 
-    let private format_header (title, entries) =
-        let f (key, value) = key + ":" + value
-        "[" + title + "]\n" + (String.concat "\n" (List.map f entries))
+    let enum_or<'T when 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (key: string) (default_value: 'T) (map: Map<string, string>) =
+        match map.TryFind key with
+        | Some s ->
+            match Enum.TryParse(s, true) with
+            | true, v -> v
+            | false, _ -> default_value
+        | None -> default_value
 
-    type TimingEffect =
-        | None = 0
-        | Kiai = 1
-        | OmitFirstBarline = 8
+module CsvHelpers =
+    
+    let string_or (index: int) (default_value: string) (csv: string array) =
+        if index >= csv.Length then 
+            default_value 
+        else
+            csv.[index]
 
-    type SampleSet =
-        | None = 0
-        | Default = 0
-        | Normal = 1
-        | Soft = 2
-        | Drum = 3
+    let int_or (index: int) (default_value: int) (csv: string array) =
+        if index >= csv.Length then 
+            default_value
+        else
+            match Int32.TryParse(csv.[index], CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> default_value
 
-    type TimingPoint =
-        | BPM of Time * float32<ms / beat> * int<beat> * (SampleSet * int * int) * TimingEffect
-        | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
-        override this.ToString() =
-            match this with
-            | BPM(time, msPerBeat, meter, (set, index, volume), effect) ->
-                String.concat
-                    ","
-                    [
-                        string time
-                        string msPerBeat
-                        string meter
-                        set |> int |> string
-                        string index
-                        string volume
-                        "1"
-                        effect |> int |> string
-                    ]
-            | SV(time, value, (set, index, volume), effect) ->
-                String.concat
-                    ","
-                    [
-                        string time
-                        string (-100.0f / value)
-                        "4"
-                        set |> int |> string
-                        string index
-                        string volume
-                        "0"
-                        effect |> int |> string
-                    ]
+    let float_or (index: int) (default_value: float) (csv: string array) =
+        if index >= csv.Length then 
+            default_value
+        else
+            match Double.TryParse(csv.[index], CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> default_value
 
-    type Point = float * float
+    let enum_or<'T when 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (index: int) (default_value: 'T) (csv: string array) =
+        if index >= csv.Length then 
+            default_value 
+        else
+            match Enum.TryParse(csv.[index], true) with
+            | true, v -> v
+            | false, _ -> default_value
+        
+type Gamemode =
+    | OSU = 0
+    | OSU_TAIKO = 1
+    | OSU_CATCH = 2
+    | OSU_MANIA = 3
 
-    type SliderShape =
-        | Linear
-        | Catmull
-        | Bezier
-        | PerfectCircle
-        override this.ToString() =
-            match this with
-            | Linear -> "L"
-            | Catmull -> "C"
-            | Bezier -> "B"
-            | PerfectCircle -> "P"
+type OverlayPosition =
+    | NoChange = 0
+    | Below = 1
+    | Above = 2
 
-    type HitAddition = SampleSet * SampleSet * int * int * string
+type Countdown =
+    | None = 0
+    | Normal = 1
+    | Half = 2
+    | Double = 3
 
-    let private format_hit_addition (s1, s2, index, volume, file) =
-        String.concat ":" [ s1 |> int |> string; s2 |> int |> string; string index; string volume; file ]
+type SampleSet =
+    | None = 0
+    | Default = 0
+    | Normal = 1
+    | Soft = 2
+    | Drum = 3
 
-    type HitSound =
-        | Normal = 1
-        | Whistle = 2
-        | Finish = 4
-        | Clap = 8
+type General =
+    {
+        AudioFilename: string
+        AudioLeadIn: int
+        PreviewTime: int
+        Countdown: Countdown
+        SampleSet: SampleSet
+        StackLeniency: float
+        Mode: Gamemode
+        LetterboxInBreaks: bool
+        UseSkinSprites: bool
+        OverlayPosition: OverlayPosition
+        SkinPreference: string
+        EpilepsyWarning: bool
+        CountdownOffset: int
+        SpecialStyle: bool
+        WidescreenStoryboard: bool
+        SamplesMatchPlaybackRate: bool
+    }
+    static member FromMap (properties: Map<string, string>) =
+        {
+            AudioFilename = MapHelpers.string_or "AudioFilename" "" properties
+            AudioLeadIn = MapHelpers.int_or "AudioLeadIn" 0 properties
+            PreviewTime = MapHelpers.int_or "PreviewTime" -1 properties
+            Countdown = MapHelpers.int_or "Countdown" 1 properties |> enum
+            SampleSet = MapHelpers.enum_or "SampleSet" SampleSet.Normal properties
+            StackLeniency = MapHelpers.float_or "StackLeniency" 0.7 properties
+            Mode = MapHelpers.enum_or "Mode" Gamemode.OSU properties
+            LetterboxInBreaks = MapHelpers.int_or "LetterBoxInBreaks" 0 properties <> 0
+            UseSkinSprites = MapHelpers.int_or "UseSkinSprites" 0 properties <> 0
+            OverlayPosition = MapHelpers.enum_or "OverlayPosition" OverlayPosition.NoChange properties
+            SkinPreference = MapHelpers.string_or "SkinPreference" "" properties
+            EpilepsyWarning = MapHelpers.int_or "EpilepsyWarning" 0 properties <> 0
+            CountdownOffset = MapHelpers.int_or "CountdownOffset" 0 properties
+            SpecialStyle = MapHelpers.int_or "SpecialStyle" 0 properties <> 0
+            WidescreenStoryboard = MapHelpers.int_or "WidescreenStoryboard" 0 properties <> 0
+            SamplesMatchPlaybackRate = MapHelpers.int_or "SamplesMatchPlaybackRate" 0 properties <> 0
+        }
+    member this.ToMap : (string * string) seq =
+        seq {
+            yield "AudioFilename", this.AudioFilename
+            yield "AudioLeadIn", this.AudioLeadIn.ToString()
+            yield "PreviewTime", this.PreviewTime.ToString()
+            yield "Countdown", (int this.Countdown).ToString()
+            yield "SampleSet", this.SampleSet.ToString()
+            yield "StackLeniency", this.StackLeniency.ToString(CultureInfo.InvariantCulture)
+            yield "Mode", (int this.Mode).ToString()
+            yield "LetterboxInBreaks", if this.LetterboxInBreaks then "1" else "0"
+            yield "UseSkinSprites", if this.UseSkinSprites then "1" else "0"
+            yield "OverlayPosition", this.OverlayPosition.ToString()
+            yield "SkinPreference", this.SkinPreference
+            yield "EpilepsyWarning", if this.EpilepsyWarning then "1" else "0"
+            yield "CountdownOffset", this.CountdownOffset.ToString()
+            yield "SpecialStyle", if this.SpecialStyle then "1" else "0"
+            yield "WidescreenStoryboard", if this.WidescreenStoryboard then "1" else "0"
+            yield "SamplesMatchPlaybackRate", if this.SamplesMatchPlaybackRate then "1" else "0"
+        }
 
-    type HitObject =
-        | HitCircle of Point * Time * HitSound * HitAddition
-        | HoldNote of Point * Time * Time * HitSound * HitAddition
-        | Slider of
-            Point *
-            Time *
-            int *
-            (SliderShape * Point list) *
-            float *
-            HitSound *
-            (HitSound list * (SampleSet * SampleSet) list * HitAddition) option
-        | Spinner of Time * Time * HitSound * HitAddition
-        member this.Time =
-            match this with
-            | HitCircle(_, time, _, _) -> time
-            | HoldNote(_, time, _, _, _) -> time
-            | Slider(_, time, _, _, _, _, _) -> time
-            | Spinner(_, time, _, _) -> time
-
-        override this.ToString() =
-            match this with
-            | HitCircle((x, y), offset, hs, addition) ->
-                String.concat
-                    ","
-                    [
-                        x |> string
-                        y |> string
-                        offset |> string
-                        "1"
-                        hs |> int |> string
-                        format_hit_addition addition
-                    ]
-            | HoldNote((x, y), start, finish, hs, addition) ->
-                String.concat
-                    ","
-                    [
-                        string x
-                        string y
-                        string start
-                        "128"
-                        hs |> int |> string
-                        (string finish) + ":" + format_hit_addition addition
-                    ]
-            | Slider((x, y), offset, repeats, points, length, hs, sounds) -> "nyi"
-            | Spinner(start, finish, hs, addition) ->
-                String.concat
-                    ","
-                    [
-                        "320"
-                        "240"
-                        string start
-                        "8"
-                        hs |> int |> string
-                        string finish
-                        format_hit_addition addition
-                    ]
-
-    (*
-        Storyboard data types
-    *)
-
-    //There's actually 35 of these. todo: maybe include them all?
-    //https://osu.ppy.sh/wiki/en/Storyboard_Scripting/Commands
-
-    type Easing =
-        | None = 0
-        | Decelerate = 1
-        | Accelerate = 2
-
-    type Layer =
-        | Background = 0
-        | Fail = 1
-        | Pass = 2
-        | Foreground = 3
-        | Overlay = 4
-
-    type LoopType =
-        | LoopForever = 0
-        | LoopOnce = 1
-
-    type TriggerType =
-        | HitSoundClap
-        | HitSoundFinish
-        | HitSoundWhistle
-        | Passing
-        | Failing
-
-    type SpriteOrigin =
-        | TopLeft = 0
-        | TopCentre = 1
-        | TopRight = 2
-        | CentreLeft = 3
-        | Centre = 4
-        | CentreRight = 5
-        | BottomLeft = 6
-        | BottomCentre = 7
-        | BottomRight = 8
-
-    type SpriteParameter =
-        | VerticalFlip
-        | HorizontalFlip
-        | AdditiveBlendColor
-
-    type StoryboardEvent =
-        | Fade of Time * Time * Easing * float * float
-        | Move of Time * Time * Easing * Point * Point
-        | Move_X of Time * Time * Easing * float * float
-        | Move_Y of Time * Time * Easing * float * float
-        | Scale of Time * Time * Easing * float * float
-        | VectorScale of Time * Time * Easing * Point * Point
-        | Rotate of Time * Time * Easing * float * float
-        | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
-        | Loop of Time * int * StoryboardEvent list
-        | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
-        | Parameter of Time * Time * SpriteParameter
-        member this.Format padding =
-            let strint: Time -> string = int >> string
-
-            padding
-            + (String.concat
-                ","
-                (match this with
-                 | Fade(time1, time2, easing, a, b) ->
-                     [ "F"; easing |> int |> string; strint time1; strint time2; string a; string b ]
-                 | Move(time1, time2, easing, (x1, y1), (x2, y2)) ->
-                     [
-                         "M"
-                         easing |> int |> string
-                         strint time1
-                         strint time2
-                         string x1
-                         string y1
-                         string x2
-                         string y2
-                     ]
-                 | Move_X(time1, time2, easing, a, b) ->
-                     [
-                         "MX"
-                         easing |> int |> string
-                         strint time1
-                         strint time2
-                         string a
-                         string b
-                     ]
-                 | Move_Y(time1, time2, easing, a, b) ->
-                     [
-                         "MY"
-                         easing |> int |> string
-                         strint time1
-                         strint time2
-                         string a
-                         string b
-                     ]
-                 | Scale(time1, time2, easing, a, b) ->
-                     [ "S"; easing |> int |> string; strint time1; strint time2; string a; string b ]
-                 | VectorScale(time1, time2, easing, (x1, y1), (x2, y2)) ->
-                     [
-                         "V"
-                         easing |> int |> string
-                         strint time1
-                         strint time2
-                         string x1
-                         string y1
-                         string x2
-                         string y2
-                     ]
-                 | Rotate(time1, time2, easing, a, b) ->
-                     [ "R"; easing |> int |> string; strint time1; strint time2; string a; string b ]
-                 | Color(time1, time2, easing, (r1, g1, b1), (r2, g2, b2)) ->
-                     [
-                         "C"
-                         easing |> int |> string
-                         strint time1
-                         strint time2
-                         string r1
-                         string g1
-                         string b1
-                         string r2
-                         string g2
-                         string b2
-                     ]
-                 | _ -> [ "nyi" ]))
-
-    type StoryboardObject =
-        | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
-        | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
-        | Sample of Time * Layer * string * int
-        | Background of string * Point
-        | Video of Time * string * Point
-        | Break of Time * Time
-        | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
-        override this.ToString() =
-            match this with
-            | Background(filename, (x, y)) -> String.concat "," [ "0"; "0"; "\"" + filename + "\""; string x; string y ]
-            | Video(time, filename, (x, y)) ->
-                String.concat "," [ "1"; string time; "\"" + filename + "\""; string x; string y ]
-            | Break(start, finish) -> String.concat "," [ "2"; string start; string finish ]
-            | Sprite(layer, origin, filename, (x, y), events) ->
-                String.concat
-                    "\n"
-                    ((String.concat
-                        ","
-                        [
-                            "Sprite"
-                            layer.ToString("G")
-                            origin.ToString("G")
-                            "\"" + filename + "\""
-                            string x
-                            string y
-                        ])
-                     :: (List.map (fun (x: StoryboardEvent) -> x.Format " ") events))
-            | _ -> "nyi"
-
-    (*
-        Parsing of .osu and .osb formats
-    *)
-
-    let private is_letter_or_digit c = isLetter c || isDigit c
-    let private comma = pchar ','
-    let private colon = pchar ':'
-    let private pipe = pchar '|'
-    let private parse_num = pfloat
-    let private parse_int = pint64 |>> int
-    let private parse_name = many1Satisfy is_letter_or_digit
-
-    let private parse_quote =
-        between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"'))
-        <|> (many1Satisfy (Text.IsWhitespace >> not))
-
-    let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true .>> spaces
-
-    let private parse_key_value =
-        parse_name .>> spaces .>> colon
-        .>>. (restOfLine true)
-        .>> spaces
-        |>> (fun (key, value) -> (key.Trim(), value.Trim()))
-
-    let private parse_expected_header_title name =
-        pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
-
-    let private parse_header_title : Parser<string, unit> =
-        between (pchar '[') (pchar ']') (many1Satisfy isAsciiLetter)
-        .>> (restOfLine true) 
-        .>> spaces
-
-    let parse_expected_header name : Parser<Header, unit> =
-        many comment >>. parse_expected_header_title name
-        .>>. (many comment >>. many (parse_key_value .>> (many comment)))
-        .>> spaces
-        |>> Header
-
-    let parse_header : Parser<Header, unit> =
-        many comment >>. parse_header_title
-        .>>. (many comment >>. many (parse_key_value .>> (many comment)))
-        .>> spaces
-        |>> Header
-
-    let private parse_timing_point: Parser<TimingPoint, unit> =
-        (tuple4 (parse_num .>> comma) (parse_num .>> comma) (parse_int .>> comma) (parse_int .>> comma))
-        .>>. (tuple4 (parse_int .>> comma) (parse_int .>> comma) (parse_int .>> comma) parse_int)
-        |>> fun ((offset, value, meter, sampleSet), (sampleIndex, volume, isBpm, effects)) ->
-            if isBpm > 0 then
-                BPM(
-                    Time.of_number offset,
-                    Time.of_number value / 1.0f<beat>,
-                    meter * 1<beat>,
-                    (enum sampleSet, sampleIndex, volume),
-                    enum effects
+type Editor =
+    {
+        Bookmarks: int list
+        DistanceSpacing: float
+        BeatDivisor: int
+        GridSize: int
+        TimelineZoom: float
+    }
+    static member FromMap (properties: Map<string, string>) =
+        {
+            Bookmarks = 
+                MapHelpers.string_or "Bookmarks" "" properties
+                |> fun s -> s.Trim().Trim(',').Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                |> Seq.choose (fun s -> 
+                    match Int32.TryParse(s, CultureInfo.InvariantCulture) with
+                    | true, v -> Some v
+                    | false, _ -> None
                 )
-            else
-                SV(Time.of_number offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
-
-    let private parse_timing_points =
-        pstring "[TimingPoints]" >>. newline >>. many (parse_timing_point .>> newline)
-
-    let private parse_point = parse_num .>> comma .>>. parse_num |>> Point
-    let private parse_point_colon = parse_num .>> colon .>>. parse_num |>> Point
-
-    let private parse_addition: Parser<HitAddition, unit> =
-        attempt (
-            tuple5
-                (parse_int .>> colon)
-                (parse_int .>> colon)
-                (parse_int .>> colon)
-                (parse_int .>> colon)
-                (restOfLine true)
-            |>> fun (normal, addition, index, volume, file) -> (enum normal, enum addition, index, volume, file)
-        )
-        // for parsing and discarding legacy hitsounds (there is no documentation)
-        <|> ((parse_int >>. colon >>. parse_int >>. colon >>. parse_int >>. restOfLine true)
-             >>. preturn (enum 0, enum 0, 0, 0, ""))
-
-    let private parse_slider_type =
-        anyOf "LBCP"
-        |>> fun c ->
-            match c with
-            | 'L' -> Linear
-            | 'B' -> Bezier
-            | 'C' -> Catmull
-            | 'P' -> PerfectCircle
-            | _ -> failwith "impossible"
-
-    let private parse_slider_sounds =
-        (sepBy1 (parse_int |>> enum) pipe) .>> comma
-        .>>. (sepBy1 ((parse_int |>> enum) .>> colon .>>. (parse_int |>> enum)) pipe)
-
-    let private parse_slider_points =
-        parse_slider_type .>> pipe .>>. sepBy1 parse_point_colon pipe
-
-    let private parse_hit_object: Parser<HitObject, unit> =
-        tuple4 (parse_point .>> comma) (parse_num .>> comma) (parse_int .>> comma) ((parse_int .>> comma) |>> enum)
-        >>= (fun (pos, offset, objType, hitsound) ->
-            let offset = Time.of_number offset
-
-            match objType &&& 139 with
-            | 1 -> parse_addition |>> fun addition -> HitCircle(pos, offset, hitsound, addition)
-            | 2 ->
-                tuple4
-                    (parse_slider_points .>> comma)
-                    (parse_int .>> comma)
-                    parse_num
-                    (opt (comma >>. (parse_slider_sounds .>> comma) .>>. parse_addition)
-                     |>> Option.map (fun ((a, b), c) -> (a, b, c)))
-                |>> fun (points, slides, length, sounds) ->
-                    Slider(pos, offset, slides, points, length, hitsound, sounds)
-            | 8 ->
-                pipe2
-                    (parse_num .>> comma)
-                    parse_addition
-                    (fun endTime addition -> Spinner(offset, Time.of_number endTime, hitsound, addition))
-            | 128 ->
-                pipe2
-                    (parse_num .>> colon)
-                    parse_addition
-                    (fun endTime addition -> HoldNote(pos, offset, Time.of_number endTime, hitsound, addition))
-            | _ -> failwith "Unknown hitobject type"
-        )
-
-    let private parse_hit_objects =
-        pstring "[HitObjects]" >>. newline >>. many parse_hit_object
-
-    (*
-        Storyboard parsing code
-    *)
-
-    let rec private parse_sprite_event depth_skip =
-        depth_skip
-        >>. ((pchar 'L' >>. fail "Storyboard loops are not supported!")
-             <|>
-             //((pchar 'L' >>. comma >>. tuple3 (parseNum .>> comma) (parseInt .>> comma .>> spaces) (many (parseSpriteEvent ((pchar ' ' <|> pchar '_') >>. depthSkipper .>> skipNewline))))
-             //|>> (fun (time, repeats, events) -> Loop(time, repeats, events)))
-             //<|>
-             (tuple4
-                 ((pstring "MX" <|> pstring "MY" <|> (satisfy (isAnyOf "FMSVRCP") |>> string))
-                  .>> comma
-                  .>> spaces)
-                 (parse_int .>> comma .>> spaces |>> enum)
-                 (opt parse_num .>> comma .>> spaces)
-                 (opt parse_num .>> comma .>> spaces)
-              >>= (fun (eventType, easing, startTime, endTime) ->
-                  let parsePoint = ((parse_num .>> comma) .>>. parse_num)
-
-                  let parse_nums_with_shorthand =
-                      (parse_num .>>. opt (comma >>. parse_num))
-                      |>> fun (a, b) -> (a, Option.defaultValue a b)
-
-                  let startTime, endTime =
-                      match startTime, endTime with
-                      | None, None -> failwith "Both start time and end time were left blank"
-                      | Some x, None -> x, x
-                      | None, Some x -> x, x
-                      | Some x, Some y -> x, y
-
-                  let startTime, endTime = Time.of_number startTime, Time.of_number endTime
-
-                  match eventType with
-                  | "F" ->
-                      parse_nums_with_shorthand
-                      |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
-                  | "M" ->
-                      parsePoint .>>. opt (comma >>. parsePoint)
-                      |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, Option.defaultValue p1 p2)
-                  | "MX" ->
-                      parse_nums_with_shorthand
-                      |>> fun (f1, f2) -> Move_X(startTime, endTime, easing, f1, f2)
-                  | "MY" ->
-                      parse_nums_with_shorthand
-                      |>> fun (f1, f2) -> Move_Y(startTime, endTime, easing, f1, f2)
-                  | "S" ->
-                      parse_nums_with_shorthand
-                      |>> fun (s1, s2) -> Scale(startTime, endTime, easing, s1, s2)
-                  | "V" ->
-                      parsePoint .>>. opt (comma >>. parsePoint)
-                      |>> fun (p1, p2) -> VectorScale(startTime, endTime, easing, p1, Option.defaultValue p1 p2)
-                  | "R" ->
-                      parse_nums_with_shorthand
-                      |>> fun (f1, f2) -> Rotate(startTime, endTime, easing, f1, f2)
-                  | "P" ->
-                      (charReturn 'H' HorizontalFlip
-                       <|> charReturn 'V' VerticalFlip
-                       <|> charReturn 'A' AdditiveBlendColor)
-                      |>> fun p -> Parameter(startTime, endTime, p)
-                  | "C" ->
-                      (tuple3 (parse_int .>> comma) (parse_int .>> comma) (parse_int))
-                      .>>. opt (tuple3 (comma >>. parse_int .>> comma) (parse_int .>> comma) parse_int)
-                      |>> fun (c1, c2) -> Color(startTime, endTime, easing, c1, Option.defaultValue c1 c2)
-                  | _ -> failwith "Unknown storyboard event"
-              )))
-
-    let private parse_sprite_events depthSkipper =
-        many (parse_sprite_event depthSkipper .>> skipNewline)
-
-    let private parse_storyboard_event =
-        (pstring "Animation"
-         >>. comma
-         >>. (tuple3
-             (tuple4
-                 (parse_name .>> comma |>> Layer.Parse)
-                 (parse_name .>> comma |>> SpriteOrigin.Parse)
-                 (parse_quote .>> comma)
-                 (parse_num .>> comma))
-             ((tuple4 (parse_num .>> comma) (parse_int .>> comma) (parse_num .>> comma) (parse_name |>> LoopType.Parse))
-              .>> pchar '\n')
-             (parse_sprite_events (pchar '_' <|> pchar ' ')))
-         |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
-             Animation(layer, origin, file, (x, y), frames, Time.of_number frameTime, loopType, events))
-
-        <|> ((pstring "Sprite" <|> pstring "4")
-             >>. comma
-             >>. ((tuple5
-                      (parse_name .>> comma |>> Layer.Parse)
-                      (parse_name .>> comma |>> SpriteOrigin.Parse)
-                      (parse_quote .>> comma)
-                      (parse_num .>> comma)
-                      parse_num)
-                  .>> pchar '\n')
-             .>>. (parse_sprite_events (pchar '_' <|> pchar ' '))
-             |>> fun ((layer, origin, file, x, y), events) -> Sprite(layer, origin, file, (x, y), events))
-
-        <|> ((pstring "Background" <|> pstring "0")
-             >>. comma
-             >>. (tuple3
-                 (parse_num .>> comma)
-                 parse_quote
-                 (opt (tuple2 (comma >>. parse_num) (comma >>. parse_num))
-                  |>> Option.defaultValue (0.0, 0.0)))
-             |>> fun (time, file, (x, y)) -> Background(file, (x, y)))
-
-        <|> ((pstring "Sample")
-             >>. comma
-             >>. (tuple4 (parse_num .>> comma) (parse_name .>> comma |>> Layer.Parse) (parse_quote .>> comma) parse_int)
-             |>> fun (time, layer, file, volume) -> Sample(Time.of_number time, layer, file, volume))
-
-        <|> ((pstring "Video" <|> pstring "1")
-             >>. comma
-             >>. (tuple3
-                 (parse_num .>> comma)
-                 parse_quote
-                 (opt (tuple2 (comma >>. parse_num) (comma >>. parse_num))
-                  |>> Option.defaultValue (0.0, 0.0)))
-             |>> fun (time, file, (x, y)) -> Video(Time.of_number time, file, (x, y)))
-
-        <|> ((pstring "Break" <|> pstring "2") >>. comma >>. (parse_num .>> comma)
-             .>>. parse_num
-             |>> fun (time1, time2) -> Break(Time.of_number time1, Time.of_number time2))
-
-        //I have no idea what this does and cannot for the life of me find any documentation on it
-        <|> (pstring "3"
-             >>. comma
-             >>. (tuple4 (parse_num .>> comma) (parse_int .>> comma) (parse_int .>> comma) (parse_int))
-             |>> fun (time, r, g, b) -> BackgroundColorChange(Time.of_number time, r, g, b))
-
-    let private parse_events =
-        pstring "[Events]"
-        >>. newline
-        >>. many comment
-        >>. many ((parse_storyboard_event .>> spaces) .>> (many comment))
-        .>> spaces
-
-    (*
-        Metadata structures to turn parsed headers into the meaningful metadata
-        Can also check here for invalid values/ignore unknown values
-    *)
-
-    type GameMode =
-        | osu = 0
-        | Taiko = 1
-        | Catch = 2
-        | Mania = 3
-
-    type OverlayPosition =
-        | NoChange = 0
-        | Below = 1
-        | Above = 2
-
-    type General =
-        {
-            AudioFilename: string
-            AudioLeadIn: int
-            PreviewTime: int
-            Countdown: int
-            SampleSet: SampleSet
-            StackLeniency: float
-            Mode: GameMode
-            LetterboxInBreaks: bool
-            UseSkinSprites: bool
-            OverlayPosition: OverlayPosition
-            SkinPreference: string
-            EpilepsyWarning: bool
-            CountdownOffset: int
-            SpecialStyle: bool
-            WidescreenStoryboard: bool
-            SamplesMatchPlaybackRate: bool
+                |> List.ofSeq
+            DistanceSpacing = MapHelpers.float_or "DistanceSpacing" 1.0 properties
+            BeatDivisor = MapHelpers.int_or "BeatDivisor" 8 properties
+            GridSize = MapHelpers.int_or "GridSize" 4 properties
+            TimelineZoom = MapHelpers.float_or "TimelineZoom" 1.0 properties
         }
-        static member Default =
-            {
-                AudioFilename = ""
-                AudioLeadIn = 0
-                PreviewTime = -1
-                Countdown = 0
-                SampleSet = SampleSet.Normal
-                StackLeniency = 0.7
-                Mode = GameMode.osu
-                LetterboxInBreaks = false
-                UseSkinSprites = false
-                OverlayPosition = OverlayPosition.NoChange
-                SkinPreference = ""
-                EpilepsyWarning = false
-                CountdownOffset = 0
-                SpecialStyle = false
-                WidescreenStoryboard = false
-                SamplesMatchPlaybackRate = false
-            }
-
-    let private read_general (title, settings) =
-        assert (title = "General")
-        let read_bool = int >> fun x -> x <> 0
-
-        let f s (key, value) =
-            match key with
-            | "AudioFilename" -> { s with AudioFilename = value }
-            | "AudioLeadIn" -> { s with AudioLeadIn = value |> int }
-            | "PreviewTime" -> { s with PreviewTime = value |> int }
-            | "Countdown" -> { s with Countdown = value |> int }
-            | "SampleSet" ->
-                { s with
-                    SampleSet = value |> SampleSet.Parse
-                }
-            | "StackLeniency" ->
-                { s with
-                    StackLeniency = value |> float
-                }
-            | "Mode" -> { s with Mode = (value |> int |> enum) }
-            | "LetterboxInBreaks" ->
-                { s with
-                    LetterboxInBreaks = value |> read_bool
-                }
-            | "UseSkinSprites" ->
-                { s with
-                    UseSkinSprites = value |> read_bool
-                }
-            | "OverlayPosition" ->
-                { s with
-                    OverlayPosition = value |> OverlayPosition.Parse
-                }
-            | "SkinPreference" -> { s with SkinPreference = value }
-            | "EpilepsyWarning" ->
-                { s with
-                    EpilepsyWarning = value |> read_bool
-                }
-            | "CountdownOffset" ->
-                { s with
-                    CountdownOffset = value |> int
-                }
-            | "SpecialStyle" ->
-                { s with
-                    SpecialStyle = value |> read_bool
-                }
-            | "WidescreenStoryboard" ->
-                { s with
-                    WidescreenStoryboard = value |> read_bool
-                }
-            | "SamplesMatchPlaybackRate" ->
-                { s with
-                    SamplesMatchPlaybackRate = value |> read_bool
-                }
-            | _ -> s
-
-        List.fold f General.Default settings
-
-    let private write_general (data: General) : Header =
-        ("General",
-         [
-             ("AudioFilename", data.AudioFilename)
-             ("AudioLeadIn", string data.AudioLeadIn)
-             ("PreviewTime", string data.PreviewTime)
-             ("Countdown", string data.Countdown)
-             ("SampleSet", string data.SampleSet)
-             ("StackLeniency", string data.StackLeniency)
-             ("Mode", data.Mode |> int |> string)
-             ("LetterboxInBreaks", (if data.LetterboxInBreaks then "1" else "0"))
-             ("UseSkinSprites", (if data.UseSkinSprites then "1" else "0"))
-             ("OverlayPosition", string data.OverlayPosition)
-             ("SkinPreference", data.SkinPreference)
-             ("EpilepsyWarning", (if data.EpilepsyWarning then "1" else "0"))
-             ("CountdownOffset", string data.CountdownOffset)
-             ("SpecialStyle", (if data.SpecialStyle then "1" else "0"))
-             ("WidescreenStoryboard", (if data.WidescreenStoryboard then "1" else "0"))
-             ("SamplesMatchPlaybackRate", (if data.SamplesMatchPlaybackRate then "1" else "0"))
-         ])
-
-
-    type Editor =
-        {
-            Bookmarks: Time list
-            DistanceSpacing: float
-            BeatDivisor: float
-            GridSize: int
-            TimelineZoom: float
-        }
-        static member Default =
-            {
-                Bookmarks = []
-                DistanceSpacing = 1.0
-                BeatDivisor = 8.0
-                GridSize = 4
-                TimelineZoom = 1.0
-            }
-
-    let private read_editor (title, settings) =
-        assert (title = "Editor")
-
-        let f s (key, value) =
-            match key with
-            | "Bookmarks" ->
-                match run (sepBy parse_num comma) value with
-                | Success(result, _, _) ->
-                    { s with
-                        Bookmarks = result |> List.map Time.of_number
-                    }
-                | Failure(errorMsg, _, _) -> failwith errorMsg
-            | "DistanceSpacing" ->
-                { s with
-                    DistanceSpacing = value |> float
-                }
-            | "BeatDivisor" -> { s with BeatDivisor = value |> float }
-            | "GridSize" -> { s with GridSize = value |> int }
-            | "TimelineZoom" -> { s with TimelineZoom = value |> float }
-            | _ -> s
-
-        List.fold f Editor.Default settings
-
-    let private write_editor (data: Editor) : Header =
-        ("Editor",
-         [
-             ("Bookmarks", String.concat "," (List.map string data.Bookmarks))
-             ("DistanceSpacing", string data.DistanceSpacing)
-             ("BeatDivisor", string data.BeatDivisor)
-             ("GridSize", string data.GridSize)
-             ("TimelineZoom", string data.TimelineZoom)
-         ])
-
-
-    type Metadata =
-        {
-            Title: string
-            TitleUnicode: string
-            Artist: string
-            ArtistUnicode: string
-            Creator: string
-            Version: string
-            Source: string
-            Tags: string list
-            BeatmapID: int
-            BeatmapSetID: int
-        }
-        static member Default =
-            {
-                Title = ""
-                TitleUnicode = ""
-                Artist = ""
-                ArtistUnicode = ""
-                Creator = ""
-                Version = ""
-                Source = ""
-                Tags = []
-                BeatmapID = 0
-                BeatmapSetID = -1
-            }
-
-    let private read_metadata (title, settings) =
-        assert (title = "Metadata")
-
-        let f s (key, value: string) =
-            match key with
-            | "Tags" ->
-                { s with
-                    Tags =
-                        value.Split(([||]: char array), System.StringSplitOptions.RemoveEmptyEntries)
-                        |> List.ofArray
-                }
-            | "Title" -> { s with Title = value }
-            | "TitleUnicode" -> { s with TitleUnicode = value }
-            | "Artist" -> { s with Artist = value }
-            | "ArtistUnicode" -> { s with ArtistUnicode = value }
-            | "Creator" -> { s with Creator = value }
-            | "Version" -> { s with Version = value }
-            | "Source" -> { s with Source = value }
-            | "BeatmapID" -> { s with BeatmapID = int value }
-            | "BeatmapSetID" -> { s with BeatmapSetID = int value }
-            | _ -> s
-
-        List.fold f Metadata.Default settings
-
-    let private write_metadata (data: Metadata) : Header =
-        ("Metadata",
-         [
-             ("Title", data.Title)
-             ("TitleUnicode", data.TitleUnicode)
-             ("Artist", data.Artist)
-             ("ArtistUnicode", data.ArtistUnicode)
-             ("Creator", data.Creator)
-             ("Version", data.Version)
-             ("Source", data.Source)
-             ("Tags", String.concat " " data.Tags)
-             ("BeatmapID", string data.BeatmapID)
-             ("BeatmapSetID", string data.BeatmapSetID)
-         ])
-
-
-    type Difficulty =
-        {
-            HPDrainRate: float
-            CircleSize: float
-            OverallDifficulty: float
-            ApproachRate: float
-            SliderMultiplier: float
-            SliderTickRate: float
-        }
-        static member Default =
-            {
-                HPDrainRate = 5.0
-                CircleSize = 5.0
-                OverallDifficulty = 5.0
-                ApproachRate = 5.0
-                SliderMultiplier = 1.4
-                SliderTickRate = 1.0
-            }
-
-    let private read_difficulty (title, settings) =
-        assert (title = "Difficulty")
-
-        let f s (key, value) =
-            match key with
-            | "HPDrainRate" -> { s with HPDrainRate = float value }
-            | "CircleSize" -> { s with CircleSize = float value }
-            | "OverallDifficulty" ->
-                { s with
-                    OverallDifficulty = float value
-                }
-            | "ApproachRate" -> { s with ApproachRate = float value }
-            | "SliderMultiplier" ->
-                { s with
-                    SliderMultiplier = float value
-                }
-            | "SliderTickRate" -> { s with SliderTickRate = float value }
-            | _ -> s
-
-        List.fold f Difficulty.Default settings
-
-    let private write_difficulty (data: Difficulty) : Header =
-        ("Difficulty",
-         [
-             ("HPDrainRate", string data.HPDrainRate)
-             ("CircleSize", string data.CircleSize)
-             ("OverallDifficulty", string data.OverallDifficulty)
-             ("ApproachRate", string data.ApproachRate)
-             ("SliderMultiplier", string data.SliderMultiplier)
-             ("SliderTickRate", string data.SliderTickRate)
-         ])
-
-    (*
-        Final parsing of .osu file into meaningful data/saving .osu files from internal representation
-    *)
-
-    type Beatmap =
-        {
-            General: General
-            Editor: Editor
-            Metadata: Metadata
-            Difficulty: Difficulty
-            Events: StoryboardObject list
-            Objects: HitObject list
-            Timing: TimingPoint list
+    member this.ToMap : (string * string) seq =
+        seq {
+            yield "Bookmarks", (this.Bookmarks |> Seq.map string |> String.concat ",")
+            yield "DistanceSpacing", this.DistanceSpacing.ToString(CultureInfo.InvariantCulture)
+            yield "BeatDivisor", this.BeatDivisor.ToString()
+            yield "GridSize", this.GridSize.ToString()
+            yield "TimelineZoom", this.TimelineZoom.ToString(CultureInfo.InvariantCulture)
         }
 
+type Metadata =
+    {
+        Title: string
+        TitleUnicode: string
+        Artist: string
+        ArtistUnicode: string
+        Creator: string
+        Version: string
+        Source: string
+        Tags: string list
+        BeatmapID: int
+        BeatmapSetID: int
+    }
+    static member FromMap (properties: Map<string, string>) =
+        {
+            Title = MapHelpers.string_or "Title" "" properties
+            TitleUnicode = MapHelpers.string_or "TitleUnicode" "" properties
+            Artist = MapHelpers.string_or "Artist" "" properties
+            ArtistUnicode = MapHelpers.string_or "ArtistUnicode" "" properties
+            Creator = MapHelpers.string_or "Creator" "" properties
+            Version = MapHelpers.string_or "Version" "" properties
+            Source = MapHelpers.string_or "Source" "" properties
+            Tags = 
+                MapHelpers.string_or "Tags" "" properties
+                |> fun s -> s.Split(' ', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
+                |> List.ofSeq
+            BeatmapID = MapHelpers.int_or "BeatmapID" 0 properties
+            BeatmapSetID = MapHelpers.int_or "BeatmapSetID" -1 properties
+        }
+    member this.ToMap : (string * string) seq =
+        seq {
+            yield "Title", this.Title
+            yield "TitleUnicode", this.TitleUnicode
+            yield "Artist", this.Artist
+            yield "ArtistUnicode", this.ArtistUnicode
+            yield "Creator", this.Creator
+            yield "Version", this.Version
+            yield "Source", this.Source
+            yield "Tags", (this.Tags |> String.concat " ")
+            yield "BeatmapID", this.BeatmapID.ToString()
+            yield "BeatmapSetID", this.BeatmapSetID.ToString()
+        }
 
-    //todo: in future can include variables list too
-    type Storyboard = StoryboardObject list
+type Difficulty =
+    {
+        HPDrainRate: float
+        CircleSize: float
+        OverallDifficulty: float
+        ApproachRate: float
+        SliderMultiplier: float
+        SliderTickRate: float
+    }
+    static member FromMap (properties: Map<string, string>) =
+        {
+            HPDrainRate = MapHelpers.float_or "HPDrainRate" 5.0 properties
+            CircleSize = MapHelpers.float_or "CircleSize" 5.0 properties
+            OverallDifficulty = MapHelpers.float_or "OverallDifficulty" 5.0 properties
+            ApproachRate = MapHelpers.float_or "ApproachRate" 5.0 properties
+            SliderMultiplier = MapHelpers.float_or "SliderMultiplier" 1.4 properties
+            SliderTickRate = MapHelpers.float_or "SliderTickRate" 1.0 properties
+        }
+    member this.ToMap : (string * string) seq =
+        seq {
+            yield "HPDrainRate", this.HPDrainRate.ToString(CultureInfo.InvariantCulture)
+            yield "CircleSize", this.CircleSize.ToString(CultureInfo.InvariantCulture)
+            yield "OverallDifficulty", this.OverallDifficulty.ToString(CultureInfo.InvariantCulture)
+            yield "ApproachRate", this.ApproachRate.ToString(CultureInfo.InvariantCulture)
+            yield "SliderMultiplier", this.SliderMultiplier.ToString(CultureInfo.InvariantCulture)
+            yield "SliderTickRate", this.SliderTickRate.ToString(CultureInfo.InvariantCulture)
+        }
 
-    let get_osu_filename beatmap =
+type HitSample = 
+    {
+        NormalSet: SampleSet
+        AdditionSet: SampleSet
+        Index: int
+        Volume: int
+        Filename: string
+    }
+    static member Default =
+        {
+            NormalSet = SampleSet.None
+            AdditionSet = SampleSet.None
+            Index = 0
+            Volume = 0
+            Filename = ""
+        }
+    override this.ToString() =
+        sprintf "%i:%i:%i:%i:%s" (int this.NormalSet) (int this.AdditionSet) this.Index this.Volume this.Filename
+
+type HitSound =
+    | Default = 0
+    | Normal = 1
+    | Whistle = 2
+    | Finish = 4
+    | Clap = 8
+
+type HitCircle =
+    {
+        X: int
+        Y: int
+        Time: int
+        StartsNewCombo: bool
+        ColorHax: int
+        HitSound: HitSound
+        HitSample: HitSample
+    }
+    override this.ToString() =
+        sprintf "%i,%i,%i,%i,%i,%O"
+            this.X
+            this.Y
+            this.Time
+            (1 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (int this.HitSound)
+            this.HitSample
+
+type SliderShape =
+    | Linear
+    | Catmull
+    | Bezier
+    | PerfectCircle
+    override this.ToString() =
+        match this with
+        | Linear -> "L"
+        | Catmull -> "C"
+        | Bezier -> "B"
+        | PerfectCircle -> "P"
+
+type Slider =
+    {
+        X: int
+        Y: int
+        Time: int
+        StartsNewCombo: bool
+        ColorHax: int
+        HitSound: HitSound
+        CurveType: SliderShape
+        CurvePoints: (int * int) list
+        Slides: int
+        Length: float
+        EdgeSounds: HitSound list
+        EdgeSets: (SampleSet * SampleSet) list
+        HitSample: HitSample
+    }
+    override this.ToString() =
+        sprintf "%i,%i,%i,%i,%i,%O|%s,%i,%f,%s,%s,%O"
+            this.X
+            this.Y
+            this.Time
+            (2 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (int this.HitSound)
+            this.CurveType
+            (this.CurvePoints |> Seq.map (fun (x, y) -> sprintf "%i:%i" x y) |> String.concat "|")
+            this.Slides
+            this.Length
+            (this.EdgeSounds |> Seq.map (int >> sprintf "%i") |> String.concat "|")
+            (this.EdgeSets |> Seq.map (fun (normal, addition) -> sprintf "%i:%i" (int normal) (int addition)) |> String.concat "|")
+            this.HitSample
+
+type Spinner =
+    {
+        X: int
+        Y: int
+        Time: int
+        StartsNewCombo: bool
+        ColorHax: int
+        HitSound: HitSound
+        EndTime: int
+        HitSample: HitSample
+    }
+    override this.ToString() =
+        sprintf "%i,%i,%i,%i,%i,%i,%O"
+            this.X
+            this.Y
+            this.Time
+            (8 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (int this.HitSound)
+            this.EndTime
+            this.HitSample
+
+type Hold =
+    {
+        X: int
+        Y: int
+        Time: int
+        StartsNewCombo: bool
+        ColorHax: int
+        HitSound: HitSound
+        EndTime: int
+        HitSample: HitSample
+    }
+    override this.ToString() =
+        sprintf "%i,%i,%i,%i,%i,%i:%O"
+            this.X
+            this.Y
+            this.Time
+            (128 ||| (if this.StartsNewCombo then 4 else 0) ||| this.ColorHax &&& 7 <<< 4)
+            (int this.HitSound)
+            this.EndTime
+            this.HitSample
+
+type HitObject =
+    | HitCircle of HitCircle
+    | HoldNote of Hold
+    | Slider of Slider
+    | Spinner of Spinner
+    member this.Time =
+        match this with
+        | HitCircle x -> x.Time
+        | HoldNote x -> x.Time
+        | Slider x -> x.Time
+        | Spinner x -> x.Time
+    override this.ToString() =
+        match this with
+        | HitCircle x -> x.ToString()
+        | HoldNote x -> x.ToString()
+        | Slider x -> x.ToString()
+        | Spinner x -> x.ToString()
+
+type TimingEffect =
+    | None = 0
+    | Kiai = 1
+    | OmitFirstBarline = 8
+
+type UninheritedTimingPoint =
+    {
+        Time: int
+        MsPerBeat: float
+        Meter: int
+        SampleSet: SampleSet
+        SampleIndex: int
+        Volume: int
+        Effects: TimingEffect
+    }
+    override this.ToString() =
+        sprintf "%i,%f,%i,%i,%i,%i,1,%i"
+            this.Time
+            this.MsPerBeat
+            this.Meter
+            (int this.SampleSet)
+            this.SampleIndex
+            this.Volume
+            (int this.Effects)
+
+type InheritedTimingPoint =
+    {
+        Time: int
+        Multiplier: float
+        METER__UNUSED: int
+        SampleSet: SampleSet
+        SampleIndex: int
+        Volume: int
+        Effects: TimingEffect
+    }
+    override this.ToString() =
+        sprintf "%i,%f,%i,%i,%i,%i,0,%i"
+            this.Time
+            (-100.0 / this.Multiplier)
+            this.METER__UNUSED
+            (int this.SampleSet)
+            this.SampleIndex
+            this.Volume
+            (int this.Effects)
+
+type TimingPoint =
+    | Uninherited of UninheritedTimingPoint
+    | Inherited of InheritedTimingPoint
+    member this.Time =
+        match this with
+        | Uninherited x -> x.Time
+        | Inherited x -> x.Time
+    override this.ToString() =
+        match this with
+        | Uninherited x -> x.ToString()
+        | Inherited x -> x.ToString()
+
+type Easing =
+    | Linear = 0
+    | EasingOut = 1 // Decelerate
+    | EasingIn = 2 // Accelerate
+    | QuadIn = 3
+    | QuadOut = 4
+    | QuadInOut = 5
+    | CubicIn = 6
+    | CubicOut = 7
+    | CubicInOut = 8
+    | QuartIn = 9
+    | QuartOut = 10
+    | QuartInOut = 11
+    | QuintIn = 12
+    | QuintOut = 13
+    | QuintInOut = 14
+    | SineIn = 15
+    | SineOut = 16
+    | SineInOut = 17
+    | ExpoIn = 18
+    | ExpoOut = 19
+    | ExpoInOut = 20
+    | CircIn = 21
+    | CircOut = 22
+    | CircInOut = 23
+    | ElasticIn = 24
+    | ElasticOut = 25
+    | ElasticHalfOut = 26
+    | ElasticQuarterOut = 27
+    | ElasticInOut = 28
+    | BackIn = 29
+    | BackOut = 30
+    | BackInOut = 31
+    | BounceIn = 32
+    | BounceOut = 33
+    | BounceInOut = 34
+
+type Layer =
+    | Background = 0
+    | Fail = 1
+    | Pass = 2
+    | Foreground = 3
+    | Overlay = 4
+
+type LoopType =
+    | LoopForever = 0
+    | LoopOnce = 1
+
+type TriggerType =
+    | HitSoundClap
+    | HitSoundFinish
+    | HitSoundWhistle
+    | Passing
+    | Failing
+
+type SpriteOrigin =
+    | TopLeft = 0
+    | TopCentre = 1
+    | TopRight = 2
+    | CentreLeft = 3
+    | Centre = 4
+    | CentreRight = 5
+    | BottomLeft = 6
+    | BottomCentre = 7
+    | BottomRight = 8
+
+type SpriteParameter =
+    | VerticalFlip
+    | HorizontalFlip
+    | AdditiveBlendColor
+
+type StoryboardCommandGuts =
+    | Fade of start_opacity: float * end_opacity: float
+    | Move of start_pos: (int * int) * end_pos: (int * int)
+    | Move_X of start_x: int * end_x: int
+    | Move_Y of start_y: int * end_y: int
+    | Scale of start_scale: float * end_scale: float
+    | VectorScale of start_scale: (float * float) * end_scale: (float * float)
+    | Rotate of start_radians: float * end_radians: float
+    | Color of start_color: (int * int * int) * end_color: (int * int * int)
+    member this.Shorthand =
+        match this with
+        | Fade _ -> "F"
+        | Move _ -> "M"
+        | Move_X _ -> "MX"
+        | Move_Y _ -> "MY"
+        | Scale _ -> "S"
+        | VectorScale _ -> "V"
+        | Rotate _ -> "R"
+        | Color _ -> "C"
+    override this.ToString() =
+        match this with
+        | Fade (a, b) -> sprintf "%f,%f" a b
+        | Move ((x1, y1), (x2, y2)) -> sprintf "%i,%i,%i,%i" x1 y1 x2 y2
+        | Move_X (a, b) -> sprintf "%i,%i" a b
+        | Move_Y (a, b) -> sprintf "%i,%i" a b
+        | Scale (a, b) -> sprintf "%f,%f" a b
+        | VectorScale ((x1, y1), (x2, y2)) -> sprintf "%f,%f,%f,%f" x1 y1 x2 y2
+        | Rotate (a, b) -> sprintf "%f,%f" a b
+        | Color ((r1, g1, b1), (r2, g2, b2)) -> sprintf "%i,%i,%i,%i,%i,%i" r1 g1 b1 r2 g2 b2
+
+// todo: normal/trigger/loop DU
+type StoryboardCommand =
+    {
+        Easing: Easing
+        StartTime: int
+        EndTime: int
+        Command: StoryboardCommandGuts
+    }
+    member this.Format : string seq =
+        seq {
+            yield sprintf "%s,%i,%i,%i,%O"
+                this.Command.Shorthand
+                (int this.Easing)
+                this.StartTime
+                this.EndTime
+                this.Command
+        }
+
+type Sprite =
+    {
+        Layer: Layer
+        Origin: SpriteOrigin
+        File: string
+        X: int
+        Y: int
+        Commands: StoryboardCommand list
+    }
+    override this.ToString() =
+        seq {
+            yield sprintf "Sprite,%O,%O,%A,%i,%i"
+                this.Layer
+                this.Origin
+                this.File
+                this.X
+                this.Y
+            for command in this.Commands do
+                for f in command.Format do
+                    yield " " + f
+        }
+        |> String.concat "\n"
+
+type Animation =
+    {
+        Layer: Layer
+        Origin: SpriteOrigin
+        File: string
+        X: int
+        Y: int
+        FrameCount: int
+        MsPerFrame: int
+        LoopType: LoopType
+        Commands: StoryboardCommand list
+    }
+    override this.ToString() =
+        seq {
+            yield sprintf "Animation,%O,%O,%A,%i,%i,%i,%i,%i"
+                this.Layer
+                this.Origin
+                this.File
+                this.X
+                this.Y
+                this.FrameCount
+                this.MsPerFrame
+                (int this.LoopType)
+            for command in this.Commands do
+                for f in command.Format do
+                    yield " " + f
+        }
+        |> String.concat "\n"
+
+type StoryboardObject =
+    | Sprite of Sprite
+    | Animation of Animation
+    | Sample of int * Layer * string * int
+    | Background of string * int * int
+    | Video of int * string * int * int
+    | Break of int * int
+    override this.ToString() =
+        match this with
+        | Sprite sprite -> sprite.ToString()
+        | Animation animation -> animation.ToString()
+        | Sample (time, layer, filename, volume) -> sprintf "Sample,%i,%i,%A,%i" time (int layer) filename volume
+        | Background(filename, x, y) -> sprintf "0,%A,%i,%i" filename x y
+        | Video(time, filename, x, y) -> sprintf "1,%i,%A,%i,%i" time filename x y
+        | Break(start, finish) -> sprintf "2,%i,%i" start finish
+
+type Beatmap =
+    {
+        General: General
+        Editor: Editor
+        Metadata: Metadata
+        Difficulty: Difficulty
+        Events: StoryboardObject list
+        Objects: HitObject list
+        Timing: TimingPoint list
+    }
+    member this.Filename =
         let clean =
             String.filter (fun c -> System.Char.IsWhiteSpace c || System.Char.IsLetterOrDigit c)
 
         sprintf
             "%s - %s (%s) [%s].osu"
-            (clean beatmap.Metadata.ArtistUnicode)
-            (clean beatmap.Metadata.TitleUnicode)
-            (clean beatmap.Metadata.Creator)
-            (clean beatmap.Metadata.Version)
+            (clean this.Metadata.ArtistUnicode)
+            (clean this.Metadata.TitleUnicode)
+            (clean this.Metadata.Creator)
+            (clean this.Metadata.Version)
+    member this.ToLines =
+        seq {
+            yield "osu file format v14"
+            yield ""
+            yield "[General]"
+            for key, value in this.General.ToMap do
+                yield sprintf "%s: %s" key value
+            yield ""
+            yield "[Editor]"
+            for key, value in this.Editor.ToMap do
+                yield sprintf "%s: %s" key value
+            yield ""
+            yield "[Metadata]"
+            for key, value in this.Metadata.ToMap do
+                yield sprintf "%s: %s" key value
+            yield ""
+            yield "[Difficulty]"
+            for key, value in this.Difficulty.ToMap do
+                yield sprintf "%s: %s" key value
+            yield ""
+            yield "[Events]"
+            for object in this.Events do
+                yield object.ToString()
+            yield ""
+            yield "[TimingPoints]"
+            for object in this.Timing do
+                yield object.ToString()
+            yield ""
+            // todo: [Colours]
+            yield "[HitObjects]"
+            for object in this.Objects do
+                yield object.ToString()
+            yield ""
+        }
 
-    let storyboard_to_string (events: StoryboardObject list) =
-        "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events)
 
-    let beatmap_to_string beatmap =
-        String.concat
-            "\n\n"
-            [
-                "osu file format v14"
-                beatmap.General |> write_general |> format_header
-                beatmap.Editor |> write_editor |> format_header
-                beatmap.Metadata |> write_metadata |> format_header
-                beatmap.Difficulty |> write_difficulty |> format_header
-                beatmap.Events |> storyboard_to_string
-                "[TimingPoints]\n"
-                + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Timing)
-                "[HitObjects]\n"
-                + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Objects)
-            ]
+type Storyboard =
+    {
+        // todo: Variables
+        Events: StoryboardObject list
+    }
+    member this.ToLines =
+        seq {
+            yield "[Events]"
+            for object in this.Events do
+                yield object.ToString()
+        }
 
-    let private parse_beatmap =
-        tuple4
-            (spaces >>. pstring "osu file format v" >>. restOfLine true .>> spaces)
-            (parse_expected_header "General" .>> spaces) //General
-            (parse_expected_header "Editor" .>> spaces) //Editor
-            (parse_expected_header "Metadata" .>> spaces) //Metadata
-        .>>. tuple5
-            (parse_expected_header "Difficulty" .>> spaces) (*Difficulty*)
-            (parse_events .>> spaces)
-            (parse_timing_points .>> spaces)
-            (optional (parse_expected_header "Colours" .>> spaces))
-            (parse_hit_objects .>> spaces)
-        |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, _, hitobjects)) ->
-            {
-                General = read_general general
-                Editor = read_editor editor
-                Metadata = read_metadata metadata
-                Difficulty = read_difficulty difficulty
-                Events = events
-                Objects = hitobjects
-                Timing = timingpoints
-            }
+module private Parser =
 
-    open System.Text
     open System.IO
 
-    let beatmap_from_file path : Result<Beatmap, string> =
+    let parse_failure message line =
+        failwithf "osu! parse error: %s\nat: %s" message line
+
+    [<Struct>]
+    type private ParserState =
+        | Nothing
+        | Header
+        | Events
+        | TimingPoints
+        | Objects
+        | Colors
+
+    let parse_storyboard_event (csv: string array) =
+        match csv.[0].ToLowerInvariant() with
+        | "0"
+        | "background" ->   
+            Background(
+                CsvHelpers.string_or 2 "" csv,
+                CsvHelpers.int_or 3 0 csv,
+                CsvHelpers.int_or 4 0 csv
+            )
+            |> Some
+        | "1"
+        | "video" ->
+            Video(
+                CsvHelpers.int_or 1 0 csv,
+                CsvHelpers.string_or 2 "" csv,
+                CsvHelpers.int_or 3 0 csv,
+                CsvHelpers.int_or 4 0 csv
+            )
+            |> Some
+        | "2"
+        | "break" ->
+            Break(
+                CsvHelpers.int_or 1 0 csv,
+                CsvHelpers.int_or 2 0 csv
+            )
+            |> Some
+        | "sample" ->
+            Sample(
+                CsvHelpers.int_or 1 0 csv,
+                CsvHelpers.enum_or 2 Layer.Background csv,
+                CsvHelpers.string_or 3 "" csv,
+                CsvHelpers.int_or 4 0 csv
+            )
+            |> Some
+        | "sprite"
+        | "animation"
+        | _ -> None
+
+    let parse_timing_point (csv: string array) =
+        let uninherited = CsvHelpers.int_or 6 1 csv <> 0
+        if uninherited then
+            Uninherited {
+                Time = CsvHelpers.int_or 0 0 csv
+                MsPerBeat = CsvHelpers.float_or 1 500.0 csv
+                Meter = CsvHelpers.int_or 2 4 csv
+                SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
+                SampleIndex = CsvHelpers.int_or 4 0 csv
+                Volume = CsvHelpers.int_or 5 0 csv
+                Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
+            }
+        else
+            Inherited {
+                Time = CsvHelpers.int_or 0 0 csv
+                Multiplier = -100.0 / (CsvHelpers.float_or 1 1.0 csv)
+                METER__UNUSED = CsvHelpers.int_or 2 4 csv
+                SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
+                SampleIndex = CsvHelpers.int_or 4 0 csv
+                Volume = CsvHelpers.int_or 5 0 csv
+                Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
+            }
+
+    let parse_hit_sample (colon_separated_values: string array) =
+        {
+            NormalSet = CsvHelpers.enum_or 0 SampleSet.Default colon_separated_values
+            AdditionSet = CsvHelpers.enum_or 1 SampleSet.Default colon_separated_values
+            Index = CsvHelpers.enum_or 2 0 colon_separated_values
+            Volume = CsvHelpers.enum_or 3 0 colon_separated_values
+            Filename = CsvHelpers.string_or 4 "" colon_separated_values
+        }
+
+    let parse_hit_object (line: string) (csv: string array) =
+        let x = CsvHelpers.int_or 0 0 csv
+        let y = CsvHelpers.int_or 1 0 csv
+        let time = CsvHelpers.int_or 2 0 csv
+        let obj_type = CsvHelpers.int_or 3 0 csv
+        let hitsound = CsvHelpers.enum_or 4 HitSound.Default csv
+
+        let starts_new_combo = obj_type &&& 4 <> 0
+        let color_hax = (obj_type >>> 4) &&& 7
+
+        if obj_type &&& 1 > 0 then
+            HitCircle {
+                X = x
+                Y = y
+                Time = time
+                StartsNewCombo = starts_new_combo
+                ColorHax = color_hax
+                HitSound = hitsound
+                HitSample = 
+                    CsvHelpers.string_or 5 "" csv
+                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
+                    |> parse_hit_sample
+            }
+        elif obj_type &&& 2 > 0 then
+            let curve = CsvHelpers.string_or 5 "" csv |> fun s -> s.Split([|'|'|], 2, StringSplitOptions.TrimEntries)
+            let curve_shape, curve_points =
+                if curve.Length < 2 then
+                    parse_failure "Invalid slider curve" line
+                else
+                    match curve.[0].ToUpperInvariant() with
+                    | "B" -> Bezier
+                    | "C" -> Catmull
+                    | "L" -> Linear
+                    | "P" -> PerfectCircle
+                    | _ -> Bezier
+                    ,
+                    curve.[1].Split('|', StringSplitOptions.TrimEntries)
+                    |> Seq.map (fun s -> 
+                        let xy = s.Split(':', StringSplitOptions.TrimEntries)
+                        CsvHelpers.int_or 0 0 xy, CsvHelpers.int_or 1 0 xy
+                    )
+                    |> List.ofSeq
+            Slider {
+                X = x
+                Y = y
+                Time = time
+                StartsNewCombo = starts_new_combo
+                ColorHax = color_hax
+                HitSound = hitsound
+                CurveType = curve_shape
+                CurvePoints = curve_points
+                Slides = CsvHelpers.int_or 6 1 csv
+                Length = CsvHelpers.float_or 7 100.0 csv
+                EdgeSounds = 
+                    CsvHelpers.string_or 8 "" csv
+                    |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
+                    |> Seq.choose (fun n ->
+                        match Int32.TryParse(n, CultureInfo.InvariantCulture) with
+                        | true, v -> Some (enum v)
+                        | false, _ -> None
+                    )
+                    |> List.ofSeq
+                EdgeSets = 
+                    CsvHelpers.string_or 9 "" csv
+                    |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
+                    |> Seq.map (fun s -> 
+                        let sets = s.Split(':', StringSplitOptions.TrimEntries)
+                        CsvHelpers.enum_or 0 SampleSet.None sets, CsvHelpers.enum_or 1 SampleSet.None sets
+                    )
+                    |> List.ofSeq
+                HitSample = 
+                    CsvHelpers.string_or 10 "" csv
+                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
+                    |> parse_hit_sample
+            }
+        elif obj_type &&& 2 > 0 then
+            Spinner {
+                X = x
+                Y = y
+                Time = time
+                StartsNewCombo = starts_new_combo
+                ColorHax = color_hax
+                HitSound = hitsound
+                EndTime = CsvHelpers.int_or 5 time csv
+                HitSample = 
+                    CsvHelpers.string_or 6 "" csv
+                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
+                    |> parse_hit_sample
+            }
+        elif obj_type &&& 128 > 0 then
+            let endtime_and_sample = CsvHelpers.string_or 5 "" csv |> fun s -> s.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+            HoldNote {
+                X = x
+                Y = y
+                Time = time
+                StartsNewCombo = starts_new_combo
+                ColorHax = color_hax
+                HitSound = hitsound
+                EndTime = CsvHelpers.int_or 0 time endtime_and_sample
+                HitSample = 
+                    CsvHelpers.string_or 1 "" endtime_and_sample
+                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
+                    |> parse_hit_sample
+            }
+        else
+            parse_failure "Unrecognised object type" line
+
+    let beatmap_from_stream (stream: Stream) : Beatmap =
+        use reader = new StreamReader(stream)
+
+        let mutable state = Nothing
+        let general = ref Map.empty
+        let editor = ref Map.empty
+        let metadata = ref Map.empty
+        let difficulty = ref Map.empty
+        let mutable section_ref = general
+
+        let objects = ResizeArray<HitObject>()
+        let timing = ResizeArray<TimingPoint>()
+        let events = ResizeArray<StoryboardObject>()
+
+        while reader.Peek() >= 0 do
+            let line = reader.ReadLine()
+            let trimmed = line.Trim()
+            match trimmed with
+            | "" -> ()
+            | _ when line.StartsWith("//") -> ()
+            | "[General]" ->
+                state <- Header
+                section_ref <- general
+            | "[Editor]" ->
+                state <- Header
+                section_ref <- editor
+            | "[Metadata]" ->
+                state <- Header
+                section_ref <- metadata
+            | "[Difficulty]" ->
+                state <- Header
+                section_ref <- difficulty
+            | "[Events]" ->
+                state <- Events
+            | "[TimingPoints]" ->
+                state <- TimingPoints
+            | "[HitObjects]" ->
+                state <- Objects
+            | "[Colours]" -> // todo: support colors header
+                state <- Colors
+            | _ ->
+
+            match state with
+            | Nothing -> ()
+            | Header ->
+                let parts = trimmed.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+                if parts.Length = 2 then
+                    section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
+            | Events ->
+                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
+                if csv.Length > 1 then
+                    match parse_storyboard_event csv with
+                    | Some event -> events.Add event
+                    | None -> ()
+            | TimingPoints ->
+                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
+                if csv.Length > 1 && csv.Length < 8 then
+                    parse_failure "Failed to parse timing point" line
+                elif csv.Length >= 8 then
+                    parse_timing_point csv |> timing.Add
+            | Objects ->
+                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
+                if csv.Length > 1 && csv.Length < 5 then
+                    parse_failure "Failed to parse hit object" line
+                elif csv.Length >= 5 then
+                    parse_hit_object line csv |> objects.Add
+            | Colors -> ()
+
+        {
+            General = General.FromMap general.Value
+            Editor = Editor.FromMap editor.Value
+            Metadata = Metadata.FromMap metadata.Value
+            Difficulty = Difficulty.FromMap difficulty.Value
+            Events = List.ofSeq events
+            Objects = List.ofSeq objects
+            Timing = List.ofSeq timing
+        }
+
+open System.IO
+
+type Beatmap with
+    static member FromFile(path: string) =
         try
-            match runParserOnFile parse_beatmap () path Encoding.UTF8 with
-            | Success(result, _, _) -> Result.Ok result
-            | Failure(error_message, _, _) -> Result.Error error_message
-        with
-        | :? IOException as exn -> Result.Error exn.Message
+            use stream = File.OpenRead(path)
+            Ok (Parser.beatmap_from_stream stream)
+        with err ->
+            Error err.Message
+    member this.ToFile(path: string) =
+        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents)
 
-    let beatmap_to_file path beatmap =
-        File.WriteAllText(path, beatmap_to_string beatmap)
-
-    let storyboard_from_file path : Result<Storyboard, string> =
-        try
-            match runParserOnFile parse_events () path Encoding.UTF8 with
-            | Success(result, _, _) -> Result.Ok result
-            | Failure(error_msg, _, _) -> Result.Error error_msg
-        with
-        | :? IOException as exn -> Result.Error exn.Message
-
-    let storyboard_to_file path events =
-        File.WriteAllText(path, storyboard_to_string events + "\n\n")
+type Storyboard with
+    // todo: there is currently no support for reading a storyboard file, only generating one
+    member this.ToFile(path: string) =
+        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents)
