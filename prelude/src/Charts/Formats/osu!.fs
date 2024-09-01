@@ -26,6 +26,14 @@ module MapHelpers =
             | false, _ -> default_value
         | None -> default_value
 
+    let int_opt (key: string) (map: Map<string, string>) =
+        match map.TryFind key with
+        | Some s ->
+            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> Some v
+            | false, _ -> None
+        | None -> None
+
     let float_or (key: string) (default_value: float) (map: Map<string, string>) =
         match map.TryFind key with
         | Some s ->
@@ -33,6 +41,14 @@ module MapHelpers =
             | true, v -> v
             | false, _ -> default_value
         | None -> default_value
+
+    let float_opt (key: string) (map: Map<string, string>) =
+        match map.TryFind key with
+        | Some s ->
+            match Double.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> Some v
+            | false, _ -> None
+        | None -> None
 
     let enum_or<'T when 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (key: string) (default_value: 'T) (map: Map<string, string>) =
         match map.TryFind key with
@@ -164,6 +180,14 @@ type Editor =
         GridSize: int
         TimelineZoom: float
     }
+    static member Default = 
+        {
+            Bookmarks = []
+            DistanceSpacing = 1.0
+            BeatDivisor = 8
+            GridSize = 4
+            TimelineZoom = 1.0
+        }
     static member FromMap (properties: Map<string, string>) =
         {
             Bookmarks = 
@@ -202,6 +226,19 @@ type Metadata =
         BeatmapID: int
         BeatmapSetID: int
     }
+    static member Default =
+        {
+            Title = ""
+            TitleUnicode = ""
+            Artist = ""
+            ArtistUnicode = ""
+            Creator = ""
+            Version = ""
+            Source = ""
+            Tags = []
+            BeatmapID = 0
+            BeatmapSetID = -1
+        }
     static member FromMap (properties: Map<string, string>) =
         {
             Title = MapHelpers.string_or "Title" "" properties
@@ -727,15 +764,6 @@ module private Parser =
     let parse_failure message line =
         failwithf "osu! parse error: %s\nat: %s" message line
 
-    [<Struct>]
-    type private ParserState =
-        | Nothing
-        | Header
-        | Events
-        | TimingPoints
-        | Objects
-        | Colors
-
     let parse_storyboard_event (csv: string array) =
         match csv.[0].ToLowerInvariant() with
         | "0"
@@ -913,6 +941,15 @@ module private Parser =
         else
             parse_failure "Unrecognised object type" line
 
+    [<Struct>]
+    type private ParserState =
+        | Nothing
+        | Header
+        | Events
+        | TimingPoints
+        | Objects
+        | Colors
+
     let beatmap_from_stream (stream: Stream) : Beatmap =
         use reader = new StreamReader(stream)
 
@@ -992,6 +1029,7 @@ module private Parser =
         }
 
 open System.IO
+open System.Text
 
 type Beatmap with
     static member FromFile(path: string) =
@@ -1001,7 +1039,10 @@ type Beatmap with
         with err ->
             Error err.Message
     member this.ToFile(path: string) =
-        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents)
+        this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents, Encoding.UTF8)
+    member this.ToStream(stream: Stream) =
+        use writer = new StreamWriter(stream, Encoding.UTF8)
+        this.ToLines |> Seq.iter writer.WriteLine
 
 type Storyboard with
     // todo: there is currently no support for reading a storyboard file, only generating one

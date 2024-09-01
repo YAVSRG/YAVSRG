@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions
+﻿namespace Prelude.Skins.Conversions.osu
 
 open System.IO
 open SixLabors.ImageSharp
@@ -124,10 +124,7 @@ module private Image =
 module OsuSkinConverter =
 
     let check_before_convert (source: string) =
-        try
-            SkinIni.parse (Path.Combine(source, "skin.ini")) |> Ok
-        with err ->
-            Error err.Message
+        SkinIni.FromFile (Path.Combine(source, "skin.ini"))
 
     let scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
         if is_2x_res then
@@ -317,7 +314,7 @@ module OsuSkinConverter =
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (SkinIni.Mania.Default keymode)
+            |> Option.defaultValue (Mania.Default keymode)
 
         let mutable combo_font_spacing : float32 option = None
         let mutable accuracy_font_info : ConvertedFont option = None
@@ -483,7 +480,7 @@ module OsuSkinConverter =
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (SkinIni.Mania.Default keymode)
+            |> Option.defaultValue (Mania.Default keymode)
 
         let colors = Array.zeroCreate 10
 

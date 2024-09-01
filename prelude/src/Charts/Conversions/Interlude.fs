@@ -2,7 +2,7 @@
 
 open System.IO
 open Prelude
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 open Prelude.Charts.Formats.StepMania
 open Prelude.Charts
 
@@ -10,7 +10,7 @@ module Interlude_To_Osu =
 
     let private notes_to_hitobjects (notes: TimeArray<NoteRow>) keys =
         let column_to_x k =
-            (float k + 0.5) * 512.0 / float keys |> round
+            (float k + 0.5) * 512.0 / float keys |> int
 
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
             match snaps with
@@ -27,16 +27,28 @@ module Interlude_To_Osu =
                 | { Time = offset; Data = nr } :: ss ->
                     for k = 0 to keys - 1 do
                         if nr.[k] = NoteType.NORMAL then
-                            yield HitCircle((column_to_x k, 240.0), offset, enum 0, (enum 0, enum 0, 0, 0, ""))
+                            yield 
+                                HitCircle {
+                                    X = column_to_x k
+                                    Y = 240
+                                    Time = int offset
+                                    StartsNewCombo = false
+                                    ColorHax = 0
+                                    HitSound = HitSound.Default
+                                    HitSample = HitSample.Default
+                                }
                         elif nr.[k] = NoteType.HOLDHEAD then
                             yield
-                                HoldNote(
-                                    (column_to_x k, 240.0),
-                                    offset,
-                                    ln_lookahead k ss,
-                                    enum 0,
-                                    (enum 0, enum 0, 0, 0, "")
-                                )
+                                HoldNote {
+                                    X = column_to_x k
+                                    Y = 240
+                                    Time = int offset
+                                    StartsNewCombo = false
+                                    ColorHax = 0
+                                    HitSound = HitSound.Default
+                                    EndTime = int (ln_lookahead k ss)
+                                    HitSample = HitSample.Default
+                                }
 
                     yield! convert ss
                 | [] -> ()
@@ -64,7 +76,17 @@ module Interlude_To_Osu =
                     if time = offset then
                         None
                     else
-                        Some(TimingPoint.SV(offset, mult * value, (SampleSet.Soft, 0, 10), enum 0))
+                        Some(
+                            TimingPoint.Inherited { 
+                                Time = int time
+                                Multiplier = mult * value |> float
+                                METER__UNUSED = 4
+                                SampleSet = SampleSet.Soft
+                                SampleIndex = 0
+                                Volume = 10
+                                Effects = TimingEffect.None
+                            }
+                        )
 
         let svs time1 time2 mult =
             seq {
@@ -73,7 +95,16 @@ module Interlude_To_Osu =
                 | Some x -> yield x
 
                 for { Time = offset; Data = value } in TimeArray.between time1 time2 sv do
-                    yield TimingPoint.SV(offset, mult * value, (SampleSet.Soft, 0, 10), enum 0)
+                    yield 
+                        TimingPoint.Inherited {
+                            Time = int offset
+                            Multiplier = mult * value |> float
+                            METER__UNUSED = 4
+                            SampleSet = SampleSet.Soft
+                            SampleIndex = 0
+                            Volume = 10
+                            Effects = TimingEffect.None
+                        }
             }
 
         let tps =
@@ -92,18 +123,36 @@ module Interlude_To_Osu =
                               Time = offset
                               Data = { Meter = meter; MsPerBeat = mspb }
                           } :: { Time = offset2 } :: rs ->
-                            yield TimingPoint.BPM(offset, mspb, meter, (SampleSet.Soft, 0, 10), enum 0)
+                            yield 
+                                TimingPoint.Uninherited {
+                                    Time = int offset
+                                    MsPerBeat = mspb |> float
+                                    Meter = int meter
+                                    SampleSet = SampleSet.Soft
+                                    SampleIndex = 0
+                                    Volume = 10
+                                    Effects = TimingEffect.None
+                                }
                             yield! svs offset offset2 (most_common_mspb / mspb)
                             bs <- List.tail bs
                         | {
                               Time = offset
                               Data = {
                                          Meter = meter
-                                         MsPerBeat = beatLength
+                                         MsPerBeat = mspb
                                      }
                           } :: [] ->
-                            yield TimingPoint.BPM(offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
-                            yield! svs offset Time.infinity (most_common_mspb / beatLength)
+                            yield 
+                                TimingPoint.Uninherited {
+                                    Time = int offset
+                                    MsPerBeat = mspb |> float
+                                    Meter = int meter
+                                    SampleSet = SampleSet.Soft
+                                    SampleIndex = 0
+                                    Volume = 10
+                                    Effects = TimingEffect.None
+                                }
+                            yield! svs offset Time.infinity (most_common_mspb / mspb)
                             bs <- List.tail bs
                         | [] -> failwith "impossible by loop condition"
             }
@@ -111,17 +160,29 @@ module Interlude_To_Osu =
         tps |> List.ofSeq
 
     let convert (chart: Chart) : Beatmap =
-        let general =
-            { General.Default with
+        let general : General =
+            {
                 AudioFilename =
                     match chart.Header.AudioFile with
                     | Relative s -> s
                     | Absolute s -> Path.GetFileName s
                     | Asset _
                     | Missing -> "audio.mp3"
+                AudioLeadIn = 0
                 PreviewTime = int chart.Header.PreviewTime
+                Countdown = Countdown.None
                 SampleSet = SampleSet.Soft
-                Mode = GameMode.Mania
+                StackLeniency = 0.7
+                Mode = Gamemode.OSU_MANIA
+                LetterboxInBreaks = false
+                UseSkinSprites = false
+                OverlayPosition = OverlayPosition.NoChange
+                SkinPreference = ""
+                EpilepsyWarning = false
+                CountdownOffset = 0
+                SpecialStyle = false
+                WidescreenStoryboard = false
+                SamplesMatchPlaybackRate = false
             }
 
         let editor = Editor.Default
@@ -137,10 +198,13 @@ module Interlude_To_Osu =
             }
 
         let diff =
-            { Difficulty.Default with
+            {
                 CircleSize = float chart.Keys
                 OverallDifficulty = 8.0
                 HPDrainRate = 8.0
+                ApproachRate = 5.0
+                SliderMultiplier = 1.4
+                SliderTickRate = 1.0
             }
 
         {
@@ -156,7 +220,7 @@ module Interlude_To_Osu =
                          | Absolute s -> Path.GetFileName s
                          | Asset _
                          | Missing -> "bg.png"),
-                        (0.0, 0.0)
+                        0, 0
                     )
                 ]
             Objects = notes_to_hitobjects chart.Notes chart.Keys

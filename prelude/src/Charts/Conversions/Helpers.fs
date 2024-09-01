@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 open Prelude.Charts.Formats.StepMania
 open Prelude.Charts.Formats.Quaver
 
@@ -46,8 +46,8 @@ module Helpers =
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | ".osu" ->
-            match beatmap_from_file action.Source with
-            | Ok beatmap when beatmap.General.Mode <> GameMode.Mania -> []
+            match Beatmap.FromFile action.Source with
+            | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
             | Ok beatmap ->
 
                 [ Osu_To_Interlude.convert beatmap action ]

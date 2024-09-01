@@ -1,600 +1,475 @@
-﻿namespace Prelude.Skins.Conversions
+﻿namespace Prelude.Skins.Conversions.osu
 
+open System
+open System.Globalization
+open System.IO
 open Prelude
+open Prelude.Charts.Formats.osu
 
-//https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
-module SkinIni =
+//https://osu.ppy.sh/wiki/en/Skinning/skin.ini#[mania]
 
-    open FParsec
-    open Prelude.Charts.Formats.``osu!``
+[<AutoOpen>]
+module OsuSkinHelpers =
 
-    let private parse_bool = int >> fun x -> x <> 0
+    let rgb_or (default_color: Color) (s: string) : Color =
+        let split = s.Split(",", StringSplitOptions.TrimEntries)
+        match split |> List.ofArray with
+        | _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
+        | _ -> default_color
 
-    let private parse_rgb (s: string) : Color =
-        match s.Split(",") |> List.ofArray |> List.map int with
-        | r :: g :: b :: _ -> Color.FromArgb(r, g, b)
-        | _ -> failwith "not enough numbers given for RGB"
+    let rgba_or (default_color: Color) (s: string) : Color =
+        let split = s.Split(",", StringSplitOptions.TrimEntries)
+        match split |> List.ofArray with
+        | _ :: _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 3 255 split, CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
+        | _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
+        | _ -> default_color
 
-    let private parse_rgba (s: string) : Color =
-        match s.Split(",") |> List.ofArray |> List.map int with
-        | r :: g :: b :: a :: _ -> Color.FromArgb(a, r, g, b)
-        | r :: g :: b :: _ -> Color.FromArgb(255, r, g, b)
-        | _ -> failwith "not enough numbers given for RGBa"
+    let parse_comma_ints_or (default_value: int list) (s: string) =
+        s.Split(",", StringSplitOptions.TrimEntries)
+        |> Seq.choose (fun s ->
+            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> Some v
+            | false, _ -> None
+        )
+        |> List.ofSeq
+        |> function [] -> default_value | xs -> xs
+    
+    let key_texture keys key =
+        match keys with
+        | 1 -> "S"
+        | 2 -> "1"
+        | 3 -> [| "1"; "S"; "1" |].[key]
+        | 4 -> [| "1"; "2"; "2"; "1" |].[key]
+        | 5 -> [| "1"; "2"; "S"; "2"; "1" |].[key]
+        | 6 -> [| "1"; "2"; "1"; "1"; "2"; "1" |].[key]
+        | 7 -> [| "1"; "2"; "1"; "S"; "1"; "2"; "1" |].[key]
+        | 8 -> [| "1"; "2"; "1"; "2"; "2"; "1"; "2"; "1" |].[key]
+        | 9 -> [| "1"; "2"; "1"; "2"; "S"; "2"; "1"; "2"; "1" |].[key]
+        | 10 -> [| "1"; "2"; "1"; "2"; "1"; "1"; "2"; "1"; "2"; "1" |].[key]
+        | _ -> ""
 
-    let private parse_ints (s: string) =
-        match run (spaces >>. (sepBy pint32 (pchar ',' .>> spaces))) s with
-        | Success(xs, _, _) -> xs
-        | Failure(e, _, _) -> failwith e
-
-    type General =
+type General =
+    {
+        Name: string
+        Author: string
+        Version: string
+        AnimationFramerate: int
+        AllowSliderBallTint: bool
+        ComboBurstRandom: bool
+        CursorCentre: bool
+        CursorExpand: bool
+        CursorRotate: bool
+        CursorTrailRotate: bool
+        CustomComboBurstSounds: int list
+        HitCircleOverlayAboveNumber: bool
+        LayeredHitSounds: bool
+        SliderBallFlip: bool
+        SpinnerFadePlayfield: bool
+        SpinnerFrequencyModulate: bool
+        SpinnerNoBlink: bool
+    }
+    static member Default: General =
         {
-            Name: string
-            Author: string
-            Version: string
-            AnimationFramerate: int
-            AllowSliderBallTint: bool
-            ComboBurstRandom: bool
-            CursorCentre: bool
-            CursorExpand: bool
-            CursorRotate: bool
-            CursorTrailRotate: bool
-            CustomComboBurstSounds: int list
-            HitCircleOverlayAboveNumber: bool
-            LayeredHitSounds: bool
-            SliderBallFlip: bool
-            SpinnerFadePlayfield: bool
-            SpinnerFrequencyModulate: bool
-            SpinnerNoBlink: bool
+            Name = ""
+            Author = ""
+            Version = "1.0"
+            AnimationFramerate = -1
+            AllowSliderBallTint = false
+            ComboBurstRandom = false
+            CursorCentre = true
+            CursorExpand = true
+            CursorRotate = true
+            CursorTrailRotate = true
+            CustomComboBurstSounds = [ 30; 60; 90; 120; 240; 480 ] //not default but cant find it
+            HitCircleOverlayAboveNumber = true
+            LayeredHitSounds = true
+            SliderBallFlip = true
+            SpinnerFadePlayfield = false
+            SpinnerFrequencyModulate = true
+            SpinnerNoBlink = false
         }
-        static member Default: General =
-            {
-                Name = ""
-                Author = ""
-                Version = "1.0"
-                AnimationFramerate = -1
-                AllowSliderBallTint = false
-                ComboBurstRandom = false
-                CursorCentre = true
-                CursorExpand = true
-                CursorRotate = true
-                CursorTrailRotate = true
-                CustomComboBurstSounds = [ 30; 60; 90; 120; 240; 480 ] //not default but cant find it
-                HitCircleOverlayAboveNumber = true
-                LayeredHitSounds = true
-                SliderBallFlip = true
-                SpinnerFadePlayfield = false
-                SpinnerFrequencyModulate = true
-                SpinnerNoBlink = false
-            }
-
-    let private parse_general ((title, settings): Header) : General =
-        assert (title = "General")
-
-        let f (s: General) (key, value) =
-            match key with
-            | "Name" -> { s with Name = value }
-            | "Author" -> { s with Author = value }
-            | "Version" -> { s with Version = value }
-            | "AnimationFramerate" ->
-                { s with
-                    AnimationFramerate = int value
-                }
-            | "AllowSliderBallTint" ->
-                { s with
-                    AllowSliderBallTint = parse_bool value
-                }
-            | "ComboBurstRandom" ->
-                { s with
-                    ComboBurstRandom = parse_bool value
-                }
-            | "CursorCentre" ->
-                { s with
-                    CursorCentre = parse_bool value
-                }
-            | "CursorExpand" ->
-                { s with
-                    CursorExpand = parse_bool value
-                }
-            | "CursorRotate" ->
-                { s with
-                    CursorRotate = parse_bool value
-                }
-            | "CursorTrailRotate" ->
-                { s with
-                    CursorTrailRotate = parse_bool value
-                }
-            | "CustomComboBurstSounds" ->
-                { s with
-                    CustomComboBurstSounds = parse_ints value
-                }
-            | "HitCircleOverlayAboveNumer"
-            | "HitCircleOverlayAboveNumber" ->
-                { s with
-                    HitCircleOverlayAboveNumber = parse_bool value
-                }
-            | "LayeredHitSounds" ->
-                { s with
-                    LayeredHitSounds = parse_bool value
-                }
-            | "SliderBallFlip" ->
-                { s with
-                    SliderBallFlip = parse_bool value
-                }
-            | "SpinnerFadePlayfield" ->
-                { s with
-                    SpinnerFadePlayfield = parse_bool value
-                }
-            | "SpinnerFrequencyModulate" ->
-                { s with
-                    SpinnerFrequencyModulate = parse_bool value
-                }
-            | "SpinnerNoBlink" ->
-                { s with
-                    SpinnerNoBlink = parse_bool value
-                }
-            | _ -> s
-
-        List.fold f General.Default settings
-
-    type Colours =
+    static member FromMap (properties: Map<string, string>) =
         {
-            Combo1: Color option
-            Combo2: Color option
-            Combo3: Color option
-            Combo4: Color option
-            Combo5: Color option
-            Combo6: Color option
-            Combo7: Color option
-            Combo8: Color option
-            InputOverlayText: Color
-            MenuGlow: Color
-            SliderBall: Color
-            SliderBorder: Color
-            SliderTrackOverride: Color option
-            SongSelectActiveText: Color
-            SongSelectInactiveText: Color
-            SpinnerBackground: Color
-            StarBreakAdditive: Color
-        }
-        static member Default: Colours =
-            {
-                Combo1 = Some <| Color.FromArgb(255, 192, 0)
-                Combo2 = Some <| Color.FromArgb(0, 202, 0)
-                Combo3 = Some <| Color.FromArgb(18, 124, 255)
-                Combo4 = Some <| Color.FromArgb(242, 24, 57)
-                Combo5 = None
-                Combo6 = None
-                Combo7 = None
-                Combo8 = None
-                InputOverlayText = Color.Black
-                MenuGlow = Color.FromArgb(0, 78, 155)
-                SliderBall = Color.FromArgb(2, 170, 255)
-                SliderBorder = Color.White
-                SliderTrackOverride = None
-                SongSelectActiveText = Color.Black
-                SongSelectInactiveText = Color.White
-                SpinnerBackground = Color.FromArgb(100, 100, 100)
-                StarBreakAdditive = Color.FromArgb(255, 182, 193)
-            }
-
-    let private parse_colours ((title, settings): Header) : Colours = Colours.Default
-
-    type Fonts =
-        {
-            HitCirclePrefix: string
-            HitCircleOverlap: int
-            ScorePrefix: string
-            ScoreOverlap: int
-            ComboPrefix: string
-            ComboOverlap: int
-        }
-        static member Default =
-            {
-                HitCirclePrefix = "default"
-                HitCircleOverlap = -2
-                ScorePrefix = "score"
-                ScoreOverlap = -2
-                ComboPrefix = "score"
-                ComboOverlap = -2
-            }
-
-    let private parse_fonts ((title, settings): Header) : Fonts =
-        let f (s: Fonts) (key, value) =
-            match key with
-            | "HitCirclePrefix" ->
-                { s with
-                    HitCirclePrefix = value
-                }
-            | "HitCircleOverlap" ->
-                { s with
-                    HitCircleOverlap = int value
-                }
-            | "ScorePrefix" ->
-                { s with
-                    ScorePrefix = value
-                }
-            | "ScoreOverlap" ->
-                { s with
-                    ScoreOverlap = int value
-                }
-            | "ComboPrefix" ->
-                { s with
-                    ComboPrefix = value
-                }
-            | "ComboOverlap" ->
-                { s with
-                    ComboOverlap = int value
-                }
-            | _ -> s
-
-        List.fold f Fonts.Default settings
-
-    type CatchTheBeat =
-        {
-            HyperDash: Color
-            HyperDashFruit: Color
-            HyperDashAfterImage: Color
-        }
-        static member Default =
-            {
-                HyperDash = Color.Red
-                HyperDashFruit = Color.Red
-                HyperDashAfterImage = Color.Red
-            }
-
-    let private parse_ctb ((title, settings): Header) : CatchTheBeat = CatchTheBeat.Default
-
-    let mania_default_textures k format =
-        match k with
-        | 1 -> [| "S" |]
-        | 2 -> [| "1"; "1" |]
-        | 3 -> [| "1"; "S"; "1" |]
-        | 4 -> [| "1"; "2"; "2"; "1" |]
-        | 5 -> [| "1"; "2"; "S"; "2"; "1" |]
-        | 6 -> [| "1"; "2"; "1"; "1"; "2"; "1" |]
-        | 7 -> [| "1"; "2"; "1"; "S"; "1"; "2"; "1" |]
-        | 8 -> [| "1"; "2"; "1"; "2"; "2"; "1"; "2"; "1" |]
-        | 9 -> [| "1"; "2"; "1"; "2"; "S"; "2"; "1"; "2"; "1" |]
-        | 10 -> [| "1"; "2"; "1"; "2"; "1"; "1"; "2"; "1"; "2"; "1" |]
-        | _ -> Array.create k "1" //not supported
-        |> Array.map (sprintf format)
-
-    type Mania =
-        {
-            Keys: int
-            ColumnStart: int
-            ColumnRight: int
-            ColumnSpacing: int list
-            ColumnWidth: int list
-            ColumnLineWidth: int list
-            BarlineHeight: float
-            LightingNWidth: int list
-            LightingLWidth: int list
-            WidthForNoteHeightScale: int option
-            HitPosition: int
-            LightPosition: int
-            ScorePosition: int
-            ComboPosition: int
-            JudgementLine: bool
-            //LightFramePerSecond: unit // nobody knows what this does
-            SpecialStyle: string
-            ComboBurstStyle: int
-            SplitStages: bool option
-            StageSeparation: int
-            SeparateScore: bool
-            KeysUnderNotes: bool
-            UpsideDown: bool
-            KeyFlipWhenUpsideDown: bool
-            KeyFlipWhenUpsideDownΔ: bool array
-            NoteFlipWhenUpsideDown: bool
-            KeyFlipWhenUpsideDownΔD: bool array
-            NoteFlipWhenUpsideDownΔ: bool array
-            NoteFlipWhenUpsideDownΔH: bool array
-            NoteFlipWhenUpsideDownΔL: bool array
-            NoteFlipWhenUpsideDownΔT: bool array
-            NoteBodyStyle: int
-            NoteBodyStyleΔ: int array
-            ColourΔ: Color array
-            ColourLightΔ: Color array
-            ColourColumnLine: Color
-            ColourBarline: Color
-            ColourJudgementLine: Color
-            ColourKeyWarning: Color
-            ColourHold: Color
-            ColourBreak: Color
-            KeyImageΔ: string array
-            KeyImageΔD: string array
-            NoteImageΔ: string array
-            NoteImageΔH: string array
-            NoteImageΔL: string array
-            NoteImageΔT: string array
-            StageLeft: string
-            StageRight: string
-            StageBottom: string
-            StageHint: string
-            StageLight: string
-            LightingN: string
-            LightingL: string
-            WarningArrow: string
-            Hit0: string
-            Hit50: string
-            Hit100: string
-            Hit200: string
-            Hit300: string
-            Hit300g: string
-        }
-        static member Default k =
-            {
-                Keys = k
-                ColumnStart = 136
-                ColumnRight = 19
-                ColumnSpacing = [ 0 ]
-                ColumnWidth = [ 30 ]
-                ColumnLineWidth = [ 2 ]
-                BarlineHeight = 1.2
-                LightingNWidth = []
-                LightingLWidth = []
-                WidthForNoteHeightScale = None
-                HitPosition = 402
-                LightPosition = 413
-                ScorePosition = 80 // 80 isn't the correct default, can't find the true default value online
-                ComboPosition = 180 // ^ likewise
-                JudgementLine = false
-                SpecialStyle = "0"
-                ComboBurstStyle = 1
-                SplitStages = None
-                StageSeparation = 40
-                SeparateScore = true
-                KeysUnderNotes = false
-                UpsideDown = false
-                KeyFlipWhenUpsideDown = true
-                KeyFlipWhenUpsideDownΔ = Array.create k true
-                NoteFlipWhenUpsideDown = true
-                KeyFlipWhenUpsideDownΔD = Array.create k true
-                NoteFlipWhenUpsideDownΔ = Array.create k true
-                NoteFlipWhenUpsideDownΔH = Array.create k true
-                NoteFlipWhenUpsideDownΔL = Array.create k true
-                NoteFlipWhenUpsideDownΔT = Array.create k true
-                NoteBodyStyle = 1
-                NoteBodyStyleΔ = Array.create k 1
-                ColourΔ = Array.create k Color.Black
-                ColourLightΔ = Array.create k (Color.FromArgb(55, 255, 255))
-                ColourColumnLine = Color.White
-                ColourBarline = Color.White
-                ColourJudgementLine = Color.White
-                ColourKeyWarning = Color.Black
-                ColourHold = Color.FromArgb(255, 191, 51, 255)
-                ColourBreak = Color.Red
-                KeyImageΔ = mania_default_textures k "mania-key%s"
-                KeyImageΔD = mania_default_textures k "mania-key%sD"
-                NoteImageΔ = mania_default_textures k "mania-note%s"
-                NoteImageΔH = mania_default_textures k "mania-note%sH"
-                NoteImageΔL = mania_default_textures k "mania-note%sL"
-                NoteImageΔT = mania_default_textures k "mania-note%sT"
-                StageLeft = "mania-stage-left"
-                StageRight = "mania-stage-right"
-                StageBottom = "mania-stage-bottom" // ?
-                StageHint = "mania-stage-hint"
-                StageLight = "mania-stage-light"
-                LightingN = "lightingN"
-                LightingL = "lightingL"
-                WarningArrow = "" // ?
-                Hit0 = "mania-hit0"
-                Hit50 = "mania-hit50"
-                Hit100 = "mania-hit100"
-                Hit200 = "mania-hit200"
-                Hit300 = "mania-hit300"
-                Hit300g = "mania-hit300g"
-            }
-
-    let (|P_0|_|) (keys: int) (pre: string) (suff: string) (target: string) =
-        match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
-        | Success(n, _, _) -> if 0 <= n && n < keys then Some n else None
-        | Failure(_, _, _) -> None
-
-    let (|P_1|_|) (keys: int) (pre: string) (suff: string) (target: string) =
-        match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
-        | Success(n, _, _) -> if 0 < n && n <= keys then Some(n - 1) else None
-        | Failure(_, _, _) -> None
-
-    let private parse_mania ((title, settings): Header) : Mania =
-        assert (title = "Mania")
-
-        match settings with
-        | ("Keys", keys) :: settings ->
-            let keys = int keys
-
-            let f s (key, value: string) =
-                match key with
-                | "ColumnStart" -> { s with ColumnStart = int value }
-                | "ColumnRight" -> { s with ColumnRight = int value }
-                | "ColumnSpacing" ->
-                    { s with
-                        ColumnSpacing = parse_ints value
-                    }
-                | "ColumnWidth" ->
-                    { s with
-                        ColumnWidth = parse_ints value
-                    }
-                | "ColumnLineWidth" ->
-                    { s with
-                        ColumnLineWidth = parse_ints value
-                    }
-                | "BarlineHeight" -> { s with BarlineHeight = float value }
-                | "LightingNWidth" ->
-                    { s with
-                        LightingNWidth = parse_ints value
-                    }
-                | "LightingLWidth" ->
-                    { s with
-                        LightingLWidth = parse_ints value
-                    }
-                | "WidthForNoteHeightScale" ->
-                    { s with
-                        WidthForNoteHeightScale = Some(int value)
-                    }
-                | "HitPosition" -> { s with HitPosition = int value }
-                | "LightPosition" -> { s with LightPosition = int value }
-                | "ScorePosition" -> { s with ScorePosition = int value }
-                | "ComboPosition" -> { s with ComboPosition = int value }
-                | "JudgementLine" ->
-                    { s with
-                        JudgementLine = parse_bool value
-                    }
-                | "SpecialStyle" -> { s with SpecialStyle = value }
-                | "ComboBurstStyle" -> { s with ComboBurstStyle = int value }
-                | "SplitStages" ->
-                    { s with
-                        SplitStages = Some(parse_bool value)
-                    }
-                | "StageSeparation" -> { s with StageSeparation = int value }
-                | "SeparateScore" ->
-                    { s with
-                        SeparateScore = parse_bool value
-                    }
-                | "KeysUnderNotes" ->
-                    { s with
-                        KeysUnderNotes = parse_bool value
-                    }
-                | "UpsideDown" -> { s with UpsideDown = parse_bool value }
-                | "KeyFlipWhenUpsideDown" ->
-                    { s with
-                        KeyFlipWhenUpsideDown = parse_bool value
-                    }
-                | P_0 keys "KeyFlipWhenUpsideDown" "" n ->
-                    s.KeyFlipWhenUpsideDownΔ.[n] <- parse_bool value
-                    s
-                | "NoteFlipWhenUpsideDown" ->
-                    { s with
-                        NoteFlipWhenUpsideDown = parse_bool value
-                    }
-                | P_0 keys "KeyFlipWhenUpsideDown" "D" n ->
-                    s.KeyFlipWhenUpsideDownΔD.[n] <- parse_bool value
-                    s
-                | P_0 keys "NoteFlipWhenUpsideDown" "" n ->
-                    s.NoteFlipWhenUpsideDownΔ.[n] <- parse_bool value
-                    s
-                | P_0 keys "NoteFlipWhenUpsideDown" "H" n ->
-                    s.NoteFlipWhenUpsideDownΔH.[n] <- parse_bool value
-                    s
-                | P_0 keys "NoteFlipWhenUpsideDown" "L" n ->
-                    s.NoteFlipWhenUpsideDownΔL.[n] <- parse_bool value
-                    s
-                | P_0 keys "NoteFlipWhenUpsideDown" "T" n ->
-                    s.NoteFlipWhenUpsideDownΔT.[n] <- parse_bool value
-                    s
-                | "NoteBodyStyle" -> { s with NoteBodyStyle = int value }
-                | P_0 keys "NoteBodyStyle" "" n ->
-                    s.NoteBodyStyleΔ.[n] <- int value
-                    s
-                | P_1 keys "Colour" "" n ->
-                    s.ColourΔ.[n] <- parse_rgba value
-                    s
-                | P_1 keys "ColourLight" "" n ->
-                    s.ColourLightΔ.[n] <- parse_rgba value
-                    s
-                | "ColourColumnLine" ->
-                    { s with
-                        ColourColumnLine = parse_rgba value
-                    }
-                | "ColourBarline" ->
-                    { s with
-                        ColourBarline = parse_rgba value
-                    }
-                | "ColourJudgementLine" ->
-                    { s with
-                        ColourJudgementLine = parse_rgb value
-                    }
-                | "ColourKeyWarning" ->
-                    { s with
-                        ColourKeyWarning = parse_rgb value
-                    }
-                | "ColourHold" -> { s with ColourHold = parse_rgba value }
-                | "ColourBreak" -> { s with ColourBreak = parse_rgb value }
-                | P_0 keys "KeyImage" "" n ->
-                    s.KeyImageΔ.[n] <- value
-                    s
-                | P_0 keys "KeyImage" "D" n ->
-                    s.KeyImageΔD.[n] <- value
-                    s
-                | P_0 keys "NoteImage" "" n ->
-                    s.NoteImageΔ.[n] <- value
-                    s
-                | P_0 keys "NoteImage" "H" n ->
-                    s.NoteImageΔH.[n] <- value
-                    s
-                | P_0 keys "NoteImage" "L" n ->
-                    s.NoteImageΔL.[n] <- value
-                    s
-                | P_0 keys "NoteImage" "T" n ->
-                    s.NoteImageΔT.[n] <- value
-                    s
-                | "StageLeft" -> { s with StageLeft = value }
-                | "StageRight" -> { s with StageRight = value }
-                | "StageBottom" -> { s with StageBottom = value }
-                | "StageHint" -> { s with StageHint = value }
-                | "StageLight" -> { s with StageLight = value }
-                | "LightingN" -> { s with LightingN = value }
-                | "LightingL" -> { s with LightingL = value }
-                | "WarningArrow" -> { s with WarningArrow = value }
-                | "Hit0" -> { s with Hit0 = value }
-                | "Hit50" -> { s with Hit50 = value }
-                | "Hit100" -> { s with Hit100 = value }
-                | "Hit200" -> { s with Hit200 = value }
-                | "Hit300" -> { s with Hit300 = value }
-                | "Hit300g" -> { s with Hit300g = value }
-                | _ -> s
-
-            List.fold f (Mania.Default keys) settings
-        | _ -> failwith "mania block did not specify keycount"
-
-    type OsuSkinIni =
-        {
-            General: General
-            Colours: Colours
-            Fonts: Fonts
-            Mania: Mania list
+            Name = MapHelpers.string_or "Name" "" properties
+            Author = MapHelpers.string_or "Author" "" properties
+            Version = MapHelpers.string_or "Version" "" properties
+            AnimationFramerate = MapHelpers.int_or "AnimationFramerate" -1 properties
+            AllowSliderBallTint = MapHelpers.int_or "AllowSliderBallTint" 0 properties <> 0
+            ComboBurstRandom = MapHelpers.int_or "ComboBurstRandom" 0 properties <> 0
+            CursorCentre = MapHelpers.int_or "CursorCentre" 1 properties <> 0
+            CursorExpand = MapHelpers.int_or "CursorExpand" 1 properties <> 0
+            CursorRotate = MapHelpers.int_or "CursorRotate" 1 properties <> 0
+            CursorTrailRotate = MapHelpers.int_or "CursorTrailRotate" 1 properties <> 0
+            CustomComboBurstSounds = 
+                MapHelpers.string_or "CustomComboBurstSounds" "" properties
+                |> fun s -> s.Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
+                |> Seq.choose (fun s ->
+                    match Int32.TryParse(s, CultureInfo.InvariantCulture) with
+                    | true, v -> Some v
+                    | false, _ -> None
+                )
+                |> List.ofSeq
+            HitCircleOverlayAboveNumber = MapHelpers.int_or "HitCircleOverlayAboveNumber" 1 properties <> 0
+            LayeredHitSounds = MapHelpers.int_or "LayeredHitSounds" 1 properties <> 0
+            SliderBallFlip = MapHelpers.int_or "SliderBallFlip" 1 properties <> 0
+            SpinnerFadePlayfield = MapHelpers.int_or "SpinnerFadePlayfield" 0 properties <> 0
+            SpinnerFrequencyModulate = MapHelpers.int_or "SpinnerFrequencyModulate" 1 properties <> 0
+            SpinnerNoBlink = MapHelpers.int_or "SpinnerNoBlink" 0 properties <> 0
         }
 
-    let private skin_ini_parser =
-        (many (parse_header .>> spaces))
-        |>> fun (headers: Header list) ->
-            let grouped_headers =
-                headers 
-                |> Seq.groupBy fst
-                |> Map.ofSeq
+type Colours =
+    {
+        Combo1: Color option
+        Combo2: Color option
+        Combo3: Color option
+        Combo4: Color option
+        Combo5: Color option
+        Combo6: Color option
+        Combo7: Color option
+        Combo8: Color option
+        InputOverlayText: Color
+        MenuGlow: Color
+        SliderBall: Color
+        SliderBorder: Color
+        SliderTrackOverride: Color option
+        SongSelectActiveText: Color
+        SongSelectInactiveText: Color
+        SpinnerBackground: Color
+        StarBreakAdditive: Color
+    }
+    static member Default: Colours =
+        {
+            Combo1 = Some <| Color.FromArgb(255, 192, 0)
+            Combo2 = Some <| Color.FromArgb(0, 202, 0)
+            Combo3 = Some <| Color.FromArgb(18, 124, 255)
+            Combo4 = Some <| Color.FromArgb(242, 24, 57)
+            Combo5 = None
+            Combo6 = None
+            Combo7 = None
+            Combo8 = None
+            InputOverlayText = Color.Black
+            MenuGlow = Color.FromArgb(0, 78, 155)
+            SliderBall = Color.FromArgb(2, 170, 255)
+            SliderBorder = Color.White
+            SliderTrackOverride = None
+            SongSelectActiveText = Color.Black
+            SongSelectInactiveText = Color.White
+            SpinnerBackground = Color.FromArgb(100, 100, 100)
+            StarBreakAdditive = Color.FromArgb(255, 182, 193)
+        }
+    static member FromMap (properties: Map<string, string>) = Colours.Default // todo: parse the real info
 
-            let get_header name : Header =
-                match grouped_headers.TryFind name with
-                | Some v -> 
-                    match Seq.tryExactlyOne v with
-                    | Some h -> h
-                    | None -> failwithf "Skin.ini has multiple [%s] headers" name
-                | None -> failwithf "Skin.ini is missing header [%s]" name
+type Fonts =
+    {
+        HitCirclePrefix: string
+        HitCircleOverlap: int
+        ScorePrefix: string
+        ScoreOverlap: int
+        ComboPrefix: string
+        ComboOverlap: int
+    }
+    static member Default =
+        {
+            HitCirclePrefix = "default"
+            HitCircleOverlap = -2
+            ScorePrefix = "score"
+            ScoreOverlap = -2
+            ComboPrefix = "score"
+            ComboOverlap = -2
+        }
+    static member FromMap (properties: Map<string, string>) =
+        {
+            HitCirclePrefix = MapHelpers.string_or "HitCirclePrefix" "default" properties
+            HitCircleOverlap = MapHelpers.int_or "HitCircleOverlap" -2 properties
+            ScorePrefix = MapHelpers.string_or "ScorePrefix" "score" properties
+            ScoreOverlap = MapHelpers.int_or "ScoreOverlap" -2 properties
+            ComboPrefix = MapHelpers.string_or "ComboPrefix" "score" properties
+            ComboOverlap = MapHelpers.int_or "ComboOverlap" -2 properties
+        }
 
-            let try_get_header name : Header option =
-                match grouped_headers.TryFind name with
-                | Some v ->
-                    match Seq.tryExactlyOne v with
-                    | Some h -> Some h
-                    | None -> failwithf "Skin.ini has multiple [%s] headers" name
-                | None -> None
+type CatchTheBeat =
+    {
+        HyperDash: Color
+        HyperDashFruit: Color
+        HyperDashAfterImage: Color
+    }
+    static member Default =
+        {
+            HyperDash = Color.Red
+            HyperDashFruit = Color.Red
+            HyperDashAfterImage = Color.Red
+        }
+    static member FromMap (properties: Map<string, string>) = CatchTheBeat.Default // todo: parse the real info
 
-            let get_headers name : Header seq =
-                match grouped_headers.TryFind name with
-                | Some v -> v
-                | None -> []
+type Mania =
+    {
+        Keys: int
+        ColumnStart: int
+        ColumnRight: int
+        ColumnSpacing: int list
+        ColumnWidth: int list
+        ColumnLineWidth: int list
+        BarlineHeight: float
+        LightingNWidth: int list
+        LightingLWidth: int list
+        WidthForNoteHeightScale: int option
+        HitPosition: int
+        LightPosition: int
+        ScorePosition: int
+        ComboPosition: int
+        JudgementLine: bool
+        SpecialStyle: int
+        ComboBurstStyle: int
+        SplitStages: bool option
+        StageSeparation: int
+        SeparateScore: bool
+        KeysUnderNotes: bool
+        UpsideDown: bool
+        KeyFlipWhenUpsideDown: bool
+        KeyFlipWhenUpsideDownΔ: bool array
+        NoteFlipWhenUpsideDown: bool
+        KeyFlipWhenUpsideDownΔD: bool array
+        NoteFlipWhenUpsideDownΔ: bool array
+        NoteFlipWhenUpsideDownΔH: bool array
+        NoteFlipWhenUpsideDownΔL: bool array
+        NoteFlipWhenUpsideDownΔT: bool array
+        NoteBodyStyle: int
+        NoteBodyStyleΔ: int array
+        ColourΔ: Color array
+        ColourLightΔ: Color array
+        ColourColumnLine: Color
+        ColourBarline: Color
+        ColourJudgementLine: Color
+        ColourKeyWarning: Color
+        ColourHold: Color
+        ColourBreak: Color
+        KeyImageΔ: string array
+        KeyImageΔD: string array
+        NoteImageΔ: string array
+        NoteImageΔH: string array
+        NoteImageΔL: string array
+        NoteImageΔT: string array
+        StageLeft: string
+        StageRight: string
+        StageBottom: string
+        StageHint: string
+        StageLight: string
+        LightingN: string
+        LightingL: string
+        WarningArrow: string
+        Hit0: string
+        Hit50: string
+        Hit100: string
+        Hit200: string
+        Hit300: string
+        Hit300g: string
+    }
+    static member Default k =
+        {
+            Keys = k
+            ColumnStart = 136
+            ColumnRight = 19
+            ColumnSpacing = [ 0 ]
+            ColumnWidth = [ 30 ]
+            ColumnLineWidth = [ 2 ]
+            BarlineHeight = 1.2
+            LightingNWidth = []
+            LightingLWidth = []
+            WidthForNoteHeightScale = None
+            HitPosition = 402
+            LightPosition = 413
+            ScorePosition = 80 // 80 isn't the correct default, can't find the true default value online
+            ComboPosition = 180 // ^ likewise
+            JudgementLine = false
+            SpecialStyle = 0
+            ComboBurstStyle = 1
+            SplitStages = None
+            StageSeparation = 40
+            SeparateScore = true
+            KeysUnderNotes = false
+            UpsideDown = false
+            KeyFlipWhenUpsideDown = true
+            KeyFlipWhenUpsideDownΔ = Array.create k true
+            NoteFlipWhenUpsideDown = true
+            KeyFlipWhenUpsideDownΔD = Array.create k true
+            NoteFlipWhenUpsideDownΔ = Array.create k true
+            NoteFlipWhenUpsideDownΔH = Array.create k true
+            NoteFlipWhenUpsideDownΔL = Array.create k true
+            NoteFlipWhenUpsideDownΔT = Array.create k true
+            NoteBodyStyle = 1
+            NoteBodyStyleΔ = Array.create k 1
+            ColourΔ = Array.create k Color.Black
+            ColourLightΔ = Array.create k (Color.FromArgb(55, 255, 255))
+            ColourColumnLine = Color.White
+            ColourBarline = Color.White
+            ColourJudgementLine = Color.White
+            ColourKeyWarning = Color.Black
+            ColourHold = Color.FromArgb(255, 191, 51, 255)
+            ColourBreak = Color.Red
+            KeyImageΔ = Array.init k (fun i -> sprintf "mania-key%s" (key_texture k i))
+            KeyImageΔD = Array.init k (fun i -> sprintf "mania-key%sD" (key_texture k i))
+            NoteImageΔ = Array.init k (fun i -> sprintf "mania-note%s" (key_texture k i))
+            NoteImageΔH = Array.init k (fun i -> sprintf "mania-note%sH" (key_texture k i))
+            NoteImageΔL = Array.init k (fun i -> sprintf "mania-note%sL" (key_texture k i))
+            NoteImageΔT = Array.init k (fun i -> sprintf "mania-note%sT" (key_texture k i))
+            StageLeft = "mania-stage-left"
+            StageRight = "mania-stage-right"
+            StageBottom = "mania-stage-bottom" // ?
+            StageHint = "mania-stage-hint"
+            StageLight = "mania-stage-light"
+            LightingN = "lightingN"
+            LightingL = "lightingL"
+            WarningArrow = "" // ?
+            Hit0 = "mania-hit0"
+            Hit50 = "mania-hit50"
+            Hit100 = "mania-hit100"
+            Hit200 = "mania-hit200"
+            Hit300 = "mania-hit300"
+            Hit300g = "mania-hit300g"
+        }
+    static member FromMap (properties: Map<string, string>) =
+        let keys = MapHelpers.int_or "Keys" 0 properties
+        {
+            Keys = keys
+            ColumnStart = MapHelpers.int_or "ColumnStart" 136 properties
+            ColumnRight = MapHelpers.int_or "ColumnRight" 19 properties
+            ColumnSpacing = MapHelpers.string_or "ColumnSpacing" "" properties |> parse_comma_ints_or [0]
+            ColumnWidth = MapHelpers.string_or "ColumnWidth" "" properties |> parse_comma_ints_or [30]
+            ColumnLineWidth = MapHelpers.string_or "ColumnLineWidth" "" properties |> parse_comma_ints_or [2]
+            BarlineHeight = MapHelpers.float_or "BarlineHeight" 1.2 properties
+            LightingNWidth = MapHelpers.string_or "LightingNWidth" "" properties |> parse_comma_ints_or []
+            LightingLWidth = MapHelpers.string_or "LightingLWidth" "" properties |> parse_comma_ints_or []
+            WidthForNoteHeightScale = MapHelpers.int_opt "WidthForNoteHeightScale" properties
+            HitPosition = MapHelpers.int_or "HitPosition" 402 properties
+            LightPosition = MapHelpers.int_or "LightPosition" 413 properties
+            ScorePosition = MapHelpers.int_or "ScorePosition" 80 properties
+            ComboPosition = MapHelpers.int_or "ComboPosition" 180 properties
+            JudgementLine = MapHelpers.int_or "JudgementLine" 0 properties <> 0
+            SpecialStyle = MapHelpers.int_or "SpecialStyle" 0 properties
+            ComboBurstStyle = MapHelpers.int_or "ComboBurstStyle" 1 properties
+            SplitStages = MapHelpers.int_opt "SplitStages" properties |> Option.map ((<>) 0)
+            StageSeparation = MapHelpers.int_or "StageSeparation" 40 properties
+            SeparateScore = MapHelpers.int_or "SeparateScore" 1 properties <> 0
+            KeysUnderNotes = MapHelpers.int_or "KeysUnderNotes" 0 properties <> 0
+            UpsideDown = MapHelpers.int_or "UpsideDown" 0 properties <> 0
+            KeyFlipWhenUpsideDown = MapHelpers.int_or "KeyFlipWhenUpsideDown" 0 properties <> 0
+            KeyFlipWhenUpsideDownΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "KeyFlipWhenUpsideDown%i" i) 1 properties <> 0)
+            NoteFlipWhenUpsideDown = MapHelpers.int_or "NoteFlipWhenUpsideDown" 1 properties <> 0
+            KeyFlipWhenUpsideDownΔD = Array.init keys (fun i -> MapHelpers.int_or (sprintf "KeyFlipWhenUpsideDown%iD" i) 1 properties <> 0)
+            NoteFlipWhenUpsideDownΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%i" i) 1 properties <> 0)
+            NoteFlipWhenUpsideDownΔH = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iH" i) 1 properties <> 0)
+            NoteFlipWhenUpsideDownΔL = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iL" i) 1 properties <> 0)
+            NoteFlipWhenUpsideDownΔT = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NoteFlipWhenUpsideDown%iT" i) 1 properties <> 0)
+            NoteBodyStyle = MapHelpers.int_or "NodeBodyStyle" 1 properties
+            NoteBodyStyleΔ = Array.init keys (fun i -> MapHelpers.int_or (sprintf "NodeBodyStyle%i" i) 1 properties)
+            ColourΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "Colour%i" i) "" properties |> rgba_or Color.Black)
+            ColourLightΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "ColourLight%i" i) "" properties |> rgb_or Color.White)
+            ColourColumnLine = MapHelpers.string_or "ColourColumnLine" "" properties |> rgba_or Color.White
+            ColourBarline = MapHelpers.string_or "ColourBarline" "" properties |> rgba_or Color.White
+            ColourJudgementLine = MapHelpers.string_or "ColourJudgementLine" "" properties |> rgb_or Color.White
+            ColourKeyWarning = MapHelpers.string_or "ColourKeyWarning" "" properties |> rgb_or Color.Black
+            ColourHold = MapHelpers.string_or "ColourHold" "" properties |> rgba_or (Color.FromArgb(255, 191, 51))
+            ColourBreak = MapHelpers.string_or "ColourBreak" "" properties |> rgb_or (Color.FromArgb(255, 0, 0))
+            KeyImageΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "KeyImage%i" i) (sprintf "mania-key%s" (key_texture keys i)) properties)
+            KeyImageΔD = Array.init keys (fun i -> MapHelpers.string_or (sprintf "KeyImage%iD" i) (sprintf "mania-key%sD" (key_texture keys i)) properties)
+            NoteImageΔ = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%i" i) (sprintf "mania-note%s" (key_texture keys i)) properties)
+            NoteImageΔH = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iH" i) (sprintf "mania-note%sH" (key_texture keys i)) properties)
+            NoteImageΔL = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iL" i) (sprintf "mania-note%sL" (key_texture keys i)) properties)
+            NoteImageΔT = Array.init keys (fun i -> MapHelpers.string_or (sprintf "NoteImage%iT" i) (sprintf "mania-note%sT" (key_texture keys i)) properties)
+            StageLeft = MapHelpers.string_or "StageLeft" "mania-stage-left" properties
+            StageRight = MapHelpers.string_or "StageRight" "mania-stage-right" properties
+            StageBottom = MapHelpers.string_or "StageBottom" "mania-stage-bottom" properties
+            StageHint = MapHelpers.string_or "StageHint" "mania-stage-hint" properties
+            StageLight = MapHelpers.string_or "StageLight" "mania-stage-light" properties
+            LightingN = MapHelpers.string_or "LightingN" "lightingN" properties
+            LightingL = MapHelpers.string_or "LightingL" "lightingL" properties
+            WarningArrow = MapHelpers.string_or "WarningArrow" "" properties
+            Hit0 = MapHelpers.string_or "Hit0" "mania-hit0" properties
+            Hit50 = MapHelpers.string_or "Hit50" "mania-hit50" properties
+            Hit100 = MapHelpers.string_or "Hit100" "mania-hit100" properties
+            Hit200 = MapHelpers.string_or "Hit200" "mania-hit200" properties
+            Hit300 = MapHelpers.string_or "Hit300" "mania-hit300" properties
+            Hit300g = MapHelpers.string_or "Hit300g" "mania-hit300g" properties
+        }
 
-            {
-                General = get_header "General" |> parse_general
-                Colours = try_get_header "Colours" |> Option.map parse_colours |> Option.defaultValue Colours.Default
-                Fonts = try_get_header "Fonts" |> Option.map parse_fonts |> Option.defaultValue Fonts.Default
-                Mania = get_headers "Mania" |> Seq.map parse_mania |> List.ofSeq
-            }
+type SkinIni =
+    {
+        General: General
+        Colours: Colours
+        Fonts: Fonts
+        CatchTheBeat: CatchTheBeat
+        Mania: Mania list
+    }
 
-    let parse file =
-        match runParserOnFile skin_ini_parser () file System.Text.Encoding.UTF8 with
-        | Success(s, _, _) -> s
-        | Failure(e, _, _) -> failwith e
+module Parser = 
 
-type SkinIni = SkinIni.OsuSkinIni
+    [<Struct>]
+    type private ParserState =
+        | Nothing
+        | Header
+        | ManiaHeader
+
+    let skin_ini_from_stream (stream: Stream) : SkinIni =
+        use reader = new StreamReader(stream)
+
+        let mutable state = Nothing
+        let general = ref Map.empty
+        let colours = ref Map.empty
+        let fonts = ref Map.empty
+        let ctb = ref Map.empty
+        let mutable section_ref = general
+
+        let mania_sections = ResizeArray<Mania>()
+
+        let change_state (s: ParserState) =
+            if s = ManiaHeader then mania_sections.Add(Mania.FromMap section_ref.Value)
+            state <- s
+
+        while reader.Peek() >= 0 do
+            let line = reader.ReadLine()
+            let trimmed = line.Trim()
+            match trimmed with
+            | "" -> ()
+            | _ when line.StartsWith("//") -> ()
+            | "[General]" ->
+                change_state Header
+                section_ref <- general
+            | "[Colours]" ->
+                change_state Header
+                section_ref <- colours
+            | "[Fonts]" ->
+                change_state Header
+                section_ref <- fonts
+            | "[CatchTheBeat]" ->
+                change_state Header
+                section_ref <- ctb
+            | "[Mania]" ->
+                change_state ManiaHeader
+                section_ref <- ref Map.empty
+            | _ ->
+
+            match state with
+            | Nothing -> ()
+            | Header
+            | ManiaHeader ->
+                let parts = trimmed.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+                if parts.Length = 2 then
+                    section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
+
+        change_state Nothing
+
+        {
+            General = General.FromMap general.Value
+            Colours = Colours.FromMap colours.Value
+            Fonts = Fonts.FromMap fonts.Value
+            CatchTheBeat = CatchTheBeat.FromMap ctb.Value
+            Mania = mania_sections |> List.ofSeq
+        }
+
+type SkinIni with
+    static member FromFile(path: string) =
+        try
+            use stream = File.OpenRead(path)
+            Ok (Parser.skin_ini_from_stream stream)
+        with err ->
+            Error err.Message

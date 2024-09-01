@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Linq
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.osu
 open Prelude.Charts
 
 module Osu_To_Interlude =
@@ -105,9 +105,9 @@ module Osu_To_Interlude =
 
         for object in objects |> List.sortBy (fun o -> o.Time) do
             match object with
-            | HitCircle((x, _), time, _, _) -> add_note (xToColumn x) time
-            | HoldNote((x, _), time, endTime, _, _) when endTime > time -> start_hold (xToColumn x) time endTime
-            | HoldNote((x, _), time, endTime, _, _) -> add_note (xToColumn x) time
+            | HitCircle x -> add_note (xToColumn x.X) (Time.of_number x.Time)
+            | HoldNote x when x.EndTime > x.Time -> start_hold (xToColumn x.X) (Time.of_number x.Time) (Time.of_number x.EndTime)
+            | HoldNote x -> add_note (xToColumn x.X) (Time.of_number x.Time)
             | _ -> ()
 
         finish_holds Time.infinity
@@ -121,9 +121,9 @@ module Osu_To_Interlude =
             skip_conversion "Beatmap has no BPM points set"
 
         match List.head points with
-        | TimingPoint.BPM(offset, mspb, _, _, _) ->
-            let mutable current: float32<ms / beat> = mspb
-            let mutable t: Time = offset
+        | TimingPoint.Uninherited b ->
+            let mutable current: float32<ms / beat> = Time.of_number b.MsPerBeat / 1f<beat>
+            let mutable t: Time = Time.of_number b.Time
             let data = new Dictionary<float32<ms / beat>, Time>()
 
             for p in points do
@@ -131,11 +131,11 @@ module Osu_To_Interlude =
                     data.Add(current, 0.0f<ms>)
 
                 match p with
-                | (TimingPoint.SV _) -> ()
-                | (TimingPoint.BPM(offset, mspb, _, _, _)) ->
-                    data.[current] <- data.[current] + offset - t
-                    t <- offset
-                    current <- mspb
+                | (TimingPoint.Uninherited b2) ->
+                    data.[current] <- data.[current] + Time.of_number b2.Time - t
+                    t <- Time.of_number b2.Time
+                    current <- Time.of_number b2.MsPerBeat / 1f<beat>
+                | _ -> ()
 
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
@@ -169,15 +169,16 @@ module Osu_To_Interlude =
                 (point: TimingPoint)
                 : (TimeItem<BPM> list * TimeItem<float32> list * float32) =
                 match point with
-                | (TimingPoint.BPM(offset, msPerBeat, meter, _, _)) ->
+                | (TimingPoint.Uninherited b) ->
+                    let mspb = Time.of_number b.MsPerBeat / 1f<beat>
                     {
-                        Time = offset
-                        Data = { Meter = meter; MsPerBeat = msPerBeat }
+                        Time = (Time.of_number b.Time)
+                        Data = { Meter = b.Meter * 1<beat>; MsPerBeat = mspb }
                     }
                     :: bpm,
-                    add_sv_value (offset, (most_common_bpm / msPerBeat)) sv,
-                    most_common_bpm / msPerBeat
-                | (TimingPoint.SV(offset, value, _, _)) -> bpm, add_sv_value (offset, (value * scroll)) sv, scroll
+                    add_sv_value (Time.of_number b.Time, most_common_bpm / mspb) sv,
+                    most_common_bpm / mspb
+                | (TimingPoint.Inherited s) -> bpm, add_sv_value (Time.of_number s.Time, float32 s.Multiplier * scroll) sv, scroll
 
             List.fold func ([], [], 1.0f) points
 
@@ -187,7 +188,7 @@ module Osu_To_Interlude =
         try
             let keys = b.Difficulty.CircleSize |> int
 
-            if b.General.Mode <> GameMode.Mania then
+            if b.General.Mode <> Gamemode.OSU_MANIA then
                 skip_conversion "Beatmap is not osu!mania gamemode"
 
             if keys < 3 || keys > 10 then
@@ -200,7 +201,7 @@ module Osu_To_Interlude =
 
             let rec find_background_file e =
                 match e with
-                | (Background(bg, _)) :: _ -> bg
+                | (Background(bg, _, _)) :: _ -> bg
                 | _ :: es -> find_background_file es
                 | [] -> ""
 

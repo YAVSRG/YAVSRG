@@ -409,13 +409,13 @@ module ``osu!`` =
 
     open System.IO.Compression
     open Prelude.Charts.Conversions
-    open Prelude.Charts.Formats.``osu!``
+    open Prelude.Charts.Formats.osu
     open Prelude.Data.Library.Caching
 
     let create_osz (chart: Chart) (cache: Cache) (export_folder: string) : Result<unit, exn> =
         try
             let beatmap = Interlude_To_Osu.convert chart
-            let file_name = get_osu_filename beatmap
+            let file_name = beatmap.Filename
             let archive_path = Path.Combine(export_folder, file_name.Replace(".osu", ".osz"))
 
             use fs = File.Open(archive_path, FileMode.Create)
@@ -425,13 +425,13 @@ module ``osu!`` =
                 let osu_file_entry = archive.CreateEntry(file_name)
                 use osu_file_stream = osu_file_entry.Open()
                 use tw = new StreamWriter(osu_file_stream, Encoding.UTF8)
-                tw.Write(beatmap_to_string beatmap)
+                beatmap.ToStream osu_file_stream
 
             do
                 match Cache.background_path chart cache with
                 | Some bg_path ->
                     use fs = File.Open(bg_path, FileMode.Open)
-                    let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _) -> Some bg | _ -> None))
+                    let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _, _) -> Some bg | _ -> None))
                     use bg_file_stream = bg_file_entry.Open()
                     fs.CopyTo(bg_file_stream)
                 | None -> ()
