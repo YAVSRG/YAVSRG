@@ -101,3 +101,12 @@ module PracticeState =
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set suggestions.VisualOffset
 
         state.SyncSuggestions <- None
+    
+    let reset_offset (state: PracticeState) =
+        match state.SyncMode.Value with
+        | SyncMode.AUDIO_OFFSET -> (LocalOffset.offset_setting state.SaveData).Set 0.0f<ms>
+        | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set 0.0f
+        | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set 2.05f
+        | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set 0.0f
+
+        state.SyncSuggestions <- None

@@ -156,12 +156,12 @@
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\PlayMultiplayer.fs" />
     <Compile Include="Features\Play\Spectate\SpectateControls.fs" />
-    <Compile Include="Features\Play\Spectate\SpectateScreen.fs" />
+    <Compile Include="Features\Play\Spectate\Spectate.fs" />
     <Compile Include="Features\Play\Replay\ReplayState.fs" />
     <Compile Include="Features\Play\Replay\HitOverlay.fs" />
     <Compile Include="Features\Play\Replay\InputOverlay.fs" />
     <Compile Include="Features\Play\Replay\ReplayControls.fs" />
-    <Compile Include="Features\Play\Replay\ReplayScreen.fs" />
+    <Compile Include="Features\Play\Replay\Replay.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />

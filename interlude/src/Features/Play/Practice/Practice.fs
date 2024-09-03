@@ -20,57 +20,6 @@ module PracticeScreen =
 
     let UNPAUSE_NOTE_LEADWAY = 800.0f<ms>
 
-    type ControlOverlay(state: PracticeState, with_mods, on_seek) =
-        inherit SlideContainer(NodeType.None)
-
-        let mutable show = true
-
-        let info_callout =
-            Callout.Small
-                .Icon(Icons.TARGET)
-                .Title(%"practice.info.title")
-                .Hotkey(%"practice.info.play", "skip")
-                .Hotkey(%"practice.info.restart", "retry")
-                .Hotkey(%"practice.info.options", "exit")
-                .Hotkey(%"practice.info.accept_suggestion", "accept_offset")
-
-        let sync_controls = SyncSuggestionControls state
-        let slideout = Slideout(sync_controls, AutoCloseWhen = K false)
-
-        override this.Init(parent) =
-            this
-            |+ Timeline(with_mods, on_seek, SelectedChart.rate)
-            |+ (Callout.frame
-                    info_callout
-                    (fun (w, h) -> Position.Box(0.0f, 1.0f, 20.0f, -100.0f - h, w + 100.0f, h))
-                ).Conditional(fun () -> show)
-            |* slideout
-
-            base.Init parent
-
-            slideout.Open()
-
-        override this.Update(elapsed_ms, moved) =
-            base.Update(elapsed_ms, moved)
-
-            if state.Paused.Value && not show then
-                show <- true
-                slideout.Open()
-                this.Position <- Position.DEFAULT
-                Toolbar.show_cursor ()
-            elif not state.Paused.Value && show then
-                show <- false
-                slideout.Close()
-
-                this.Position <-
-                    { Position.DEFAULT with
-                        Bottom = 1.0f %+ 100.0f
-                    }
-                Toolbar.hide_cursor ()
-
-            if show && not sync_controls.Focused then
-                Screen.back Transitions.Default |> ignore
-
     let practice_screen (info: LoadedChartInfo, start_at: Time) =
 
         let mutable liveplay = Unchecked.defaultof<_>
@@ -145,7 +94,7 @@ module PracticeScreen =
                 restart screen
 
         let paused_overlay =
-            ControlOverlay(
+            PracticeControls(
                 state,
                 info.WithMods,
                 fun t ->
@@ -200,6 +149,14 @@ module PracticeScreen =
                         PracticeState.accept_suggested_offset state
                         restart this
 
+                elif (%%"reset_offset").Tapped() then
+                    if state.Paused.Value then
+                        PracticeState.reset_offset state
+                    else
+                        pause this
+                        PracticeState.reset_offset state
+                        restart this
+
                 elif state.Paused.Value then
                     if (%%"skip").Tapped() then
                         resume this
@@ -207,8 +164,11 @@ module PracticeScreen =
                         SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
                 elif (%%"exit").Tapped() then
-                    pause this
-                    input_key_state <- 0us
+                    if not state.Paused.Value then
+                        pause this
+                        input_key_state <- 0us
+                    else 
+                        Screen.back Transitions.Default |> ignore
 
                 elif not (liveplay :> IReplayProvider).Finished then
                     Input.pop_gameplay now binds (
