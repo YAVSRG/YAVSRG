@@ -5,9 +5,9 @@ open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Backbeat
 open Prelude
+open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Endless
 open Prelude.Data.``osu!``
 open Interlude.Content
 open Interlude.UI
@@ -120,6 +120,41 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                 ),
                 Icon = Icons.UPLOAD
             )
+            match SelectedChart.WITH_MODS with
+            | Some m when m.ModsApplied <> Map.empty ->
+                content
+                |* PageButton.Once(
+                    %"chart.export_osz_mods",
+                    (fun () ->
+                        match SelectedChart.CHART with
+                        | None -> ()
+                        | Some c ->
+                            let mod_string =
+                                m.ModsApplied
+                                |> Mods.in_priority_order
+                                |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
+                                |> String.concat ", "
+                            let chart_with_mods =
+                                { c with
+                                    Notes = m.Notes
+                                    SV = m.SV
+                                    BPM = m.BPM
+                                    Header = 
+                                        { c.Header with
+                                            DiffName = c.Header.DiffName.Trim() + sprintf " (+%s)" mod_string
+                                        }
+                                }
+                            match create_osz chart_with_mods Content.Cache (get_game_folder "Exports") with
+                            | Ok () ->
+                                open_directory (get_game_folder "Exports")
+                                Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
+                            | Error err ->
+                                Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
+                                Logging.Error(sprintf "Error exporting '%s' as osz" c.Header.Title, err)
+                    ),
+                    Icon = Icons.UPLOAD
+                )
+            | _ -> ()
 
         match Content.Table, SelectedChart.CHART with
         | Some table, Some chart ->

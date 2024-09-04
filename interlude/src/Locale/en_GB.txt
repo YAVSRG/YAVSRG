@@ -4,6 +4,7 @@ beatmap_browser.no_results=No results :(
 chart.add_to_collection=Add to collection
 chart.delete=Delete chart
 chart.export_osz=Export as .osz
+chart.export_osz_mods=Export as .osz (with mods)
 chart.move_down_in_playlist=Move down
 chart.move_up_in_playlist=Move up
 chart.practice=Practice this chart
