@@ -12,11 +12,6 @@ open Prelude.Data.Library.Sorting
 open Prelude.Data.Library.Collections
 open Prelude.Data
 
-[<RequireQualifiedAccess>]
-type Variety =
-    | Low
-    | High
-
 type SuggestionContext =
     {
         BaseChart: CachedChart * float32
@@ -24,6 +19,7 @@ type SuggestionContext =
         Filter: Filter
         MinimumRate: float32
         MaximumRate: float32
+        OnlyNewCharts: bool
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
@@ -119,7 +115,10 @@ module Suggestion =
                     else None
             )
             |> Seq.filter (fun (cc, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
-            |> Seq.filter (fun (cc, (rate, p)) -> now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed > THIRTY_DAYS)
+            |> if ctx.OnlyNewCharts then 
+                Seq.filter (fun (cc, (rate, p)) -> now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed > THIRTY_DAYS) 
+               else 
+                id
             |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
 
         let total_pattern_amount = patterns.Patterns |> Seq.sumBy _.Amount

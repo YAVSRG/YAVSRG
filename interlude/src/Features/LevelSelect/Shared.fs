@@ -101,8 +101,9 @@ module LevelSelect =
             | None ->
                 {
                     BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                    MinimumRate = 1.00f
-                    MaximumRate = 1.50f
+                    MinimumRate = options.SuggestionsMinRate.Value
+                    MaximumRate = options.SuggestionsMaxRate.Value
+                    OnlyNewCharts = options.SuggestionsOnlyNew.Value
                     Filter = filter |> Filter.except_keywords
                     Mods = SelectedChart.selected_mods.Value
                     RulesetId = Rulesets.current_hash
@@ -159,8 +160,9 @@ module LevelSelect =
                 let ctx =
                     {
                         BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                        MinimumRate = 1.00f
-                        MaximumRate = 1.50f
+                        MinimumRate = options.SuggestionsMinRate.Value
+                        MaximumRate = options.SuggestionsMaxRate.Value
+                        OnlyNewCharts = false
                         Filter = filter |> Filter.except_keywords
                         Mods = SelectedChart.selected_mods.Value
                         RulesetId = Rulesets.current_hash

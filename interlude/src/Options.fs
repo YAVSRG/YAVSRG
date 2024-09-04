@@ -178,9 +178,11 @@ module Options =
             LibraryMode: Setting<LibraryMode>
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
-
             TreeShowGradesOnly: Setting<bool>
             Table: Setting<string option>
+            SuggestionsMinRate: Setting.Bounded<float32>
+            SuggestionsMaxRate: Setting.Bounded<float32>
+            SuggestionsOnlyNew: Setting<bool>
 
             EnableConsole: Setting<bool>
             Hotkeys: Dictionary<Hotkey, Bind>
@@ -239,9 +241,11 @@ module Options =
                 LibraryMode = Setting.simple LibraryMode.All
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
-
                 TreeShowGradesOnly = Setting.simple true
                 Table = Content.Tables.selected_id
+                SuggestionsMinRate = Setting.rate 1.0f
+                SuggestionsMaxRate = Setting.rate 1.5f
+                SuggestionsOnlyNew = Setting.simple true
 
                 EnableConsole = Setting.simple false
                 Hotkeys = Dictionary<Hotkey, Bind>()

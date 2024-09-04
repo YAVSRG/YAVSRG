@@ -439,10 +439,17 @@ levelselect.librarymode.all=All
 levelselect.librarymode.collections=Collections
 levelselect.librarymode.table=Table
 levelselect.librarymode.tooltip=Switches the library view.\nAll = The normal display of all charts available, grouped and sorted.\nCollections = Display your collections.\nTable = Display the current table.
+levelselect.min_suggestion_rate=Min suggested rate
+levelselect.min_suggestion_rate.tooltip=Random suggestions and endless mode will never suggest a song at a rate below this.
 levelselect.mods=Mods
 levelselect.mods.tooltip=Choose gameplay modifiers here!\nGameplay modifiers will change how a chart is played.\nThey can add to or remove extra challenges from a chart.
 levelselect.no_personal_best=No personal best
 levelselect.no_personal_best.subtitle=Set one now..?
+levelselect.only_show_grades=Only show grades
+levelselect.only_show_grades.tooltip=When turned off, your best accuracy is shown on level select instead of best grade.
+levelselect.only_suggest_new_songs=Only suggest new songs
+levelselect.only_suggest_new_songs.tooltip=When turned on, suggestions can only be songs you haven't played in over a month.
+levelselect.options=Level select options
 levelselect.play=Play
 levelselect.play.tooltip=Play the selected chart!
 levelselect.practice_mode=Practice mode

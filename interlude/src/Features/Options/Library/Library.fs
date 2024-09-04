@@ -116,7 +116,11 @@ type LibraryPage() =
             )
             .Help(Help.Info("library.recalculate_personal_bests"))
             .Pos(9, 2, PageWidth.Full)
-
+        |+ PageButton(
+                %"levelselect.options",
+                (fun () -> LevelSelectPage().Show())
+            )
+            .Pos(12, 2, PageWidth.Full)
         |+ import_info
 
     let mount_options =
