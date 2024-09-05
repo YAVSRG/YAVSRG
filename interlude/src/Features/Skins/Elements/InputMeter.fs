@@ -85,25 +85,3 @@ type InputMeter(config: HudConfig, state: PlayState) =
                         else
                             bar (k, timestamp, previous)
                 previous <- timestamp
-
-        if config.InputMeterShowKPS then
-            
-            let rate = SelectedChart.rate.Value
-            let TWO_SECONDS = 2000.0f<ms> * rate
-
-            let recent_events = state.Scoring.EnumerateRecentInputs()
-            let now = state.CurrentChartTime()
-            let mutable kps = 0.0f
-            let mutable previous = 0us
-            let mutable previous_time = now
-            for struct (timestamp, keystate) in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - TWO_SECONDS) do
-                let keys = Bitmask.count (previous &&& ~~~keystate) |> float32
-                kps <- kps + keys * rate * (1f - (now - previous_time) / TWO_SECONDS)
-                previous <- keystate
-                previous_time <- timestamp
-            let text_bounds = 
-                if config.InputMeterScrollDownwards then
-                    this.Bounds.ShrinkT(box_height).SliceT(this.Bounds.Width * 0.1f)
-                else
-                    this.Bounds.ShrinkB(box_height).SliceB(this.Bounds.Width * 0.1f)
-            Text.fill_b(Style.font, sprintf "%.0f KPS" kps, text_bounds, Colors.text, Alignment.CENTER)

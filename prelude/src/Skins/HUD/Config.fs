@@ -20,6 +20,7 @@ type HudElement =
     | BPMMeter
     | Pacemaker
     | InputMeter
+    | KeysPerSecondMeter
     | CustomImage
     static member FULL_LIST = 
         [
@@ -35,6 +36,7 @@ type HudElement =
             BPMMeter
             Pacemaker
             InputMeter
+            KeysPerSecondMeter
             CustomImage
         ]
 
@@ -167,11 +169,13 @@ type HudConfig =
         InputMeterScrollSpeed: float32
         InputMeterKeyColor: Color
         InputMeterKeyFadeTime: float32
-        InputMeterShowKPS: bool
         InputMeterShowInputs: bool
         InputMeterInputColor: Color
         InputMeterInputFadeDistance: float32
         InputMeterScrollDownwards: bool
+
+        KeysPerSecondMeterEnabled: bool
+        KeysPerSecondMeterPosition: HudPosition
 
         MultiplayerScoreTrackerPosition: HudPosition
         
@@ -369,11 +373,20 @@ type HudConfig =
             InputMeterScrollSpeed = 0.75f
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterKeyFadeTime = 300.0f
-            InputMeterShowKPS = false
             InputMeterShowInputs = true
             InputMeterInputColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterInputFadeDistance = 100.0f
             InputMeterScrollDownwards = false
+            
+            KeysPerSecondMeterEnabled = false
+            KeysPerSecondMeterPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 30.0f, 1.0f
+                    Top = -100.0f, 1.0f
+                    Right = 200.0f, 1.0f
+                    Bottom = 0.0f, 1.0f
+                }
 
             MultiplayerScoreTrackerPosition =
                 {

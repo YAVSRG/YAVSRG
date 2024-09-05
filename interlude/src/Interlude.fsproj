@@ -152,6 +152,7 @@
     <Compile Include="Features\Skins\Elements\RateModMeter.fs" />
     <Compile Include="Features\Skins\Elements\BPMMeter.fs" />
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />
+    <Compile Include="Features\Skins\Elements\KeysPerSecondMeter.fs" />
     <Compile Include="Features\Skins\Elements\CustomImage.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\PlayMultiplayer.fs" />
@@ -183,6 +184,7 @@
     <Compile Include="Features\Skins\EditHUD\ConfigPages\RateModMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\BPMMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\InputMeter.fs" />
+    <Compile Include="Features\Skins\EditHUD\ConfigPages\KeysPerSecondMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\CustomImage.fs" />
     <Compile Include="Features\Skins\EditHUD\EditPage.fs" />
     <Compile Include="Features\Skins\EditHUD\EditScreen.fs" />

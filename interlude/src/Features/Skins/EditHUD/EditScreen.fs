@@ -36,6 +36,7 @@ module private ElementMenus =
         | HudElement.BPMMeter -> BPMMeterPage(on_close).Show()
         | HudElement.InputMeter -> InputMeterPage(on_close).Show()
         | HudElement.Pacemaker -> PacemakerPage(on_close).Show()
+        | HudElement.KeysPerSecondMeter -> KeysPerSecondMeterPage(on_close).Show()
         | HudElement.CustomImage -> CustomImagePage(on_close).Show()
 
 type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
@@ -44,7 +45,7 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
 
-    let SHIFT = Bind.mk (OpenTK.Windowing.GraphicsLibraryFramework.Keys.LeftShift)
+    let SHIFT = Bind.mk Keys.LeftShift
 
     override this.Update(elapsed_ms, moved) =
 

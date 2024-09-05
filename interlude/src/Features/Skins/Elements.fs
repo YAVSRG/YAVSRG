@@ -24,6 +24,7 @@ module HudElement =
         | HudElement.BPMMeter -> %"hud.bpmmeter"
         | HudElement.Pacemaker -> %"hud.pacemaker"
         | HudElement.InputMeter -> %"hud.inputmeter"
+        | HudElement.KeysPerSecondMeter -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.customimage"
 
     let tooltip (e: HudElement) : string =
@@ -40,12 +41,14 @@ module HudElement =
         | HudElement.BPMMeter -> %"hud.bpmmeter.tooltip"
         | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
         | HudElement.InputMeter -> %"hud.inputmeter.tooltip"
+        | HudElement.KeysPerSecondMeter -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.customimage.tooltip"
 
     let can_configure (e: HudElement) =
         match e with
         | HudElement.SkipButton -> not Content.Noteskin.IsEmbedded
         | HudElement.BPMMeter -> false
+        | HudElement.KeysPerSecondMeter -> false
         | HudElement.Pacemaker -> false
         | _ -> true
     
@@ -70,6 +73,7 @@ module HudElement =
         | HudElement.BPMMeter -> cast BPMMeter
         | HudElement.Pacemaker -> cast Pacemaker
         | HudElement.InputMeter -> cast InputMeter
+        | HudElement.KeysPerSecondMeter -> cast KeysPerSecondMeter
         | HudElement.CustomImage -> cast CustomImage
 
     let enabled_setting (e: HudElement) : Setting<bool> =
@@ -175,6 +179,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.InputMeterEnabled)
+        | HudElement.KeysPerSecondMeter ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            KeysPerSecondMeterEnabled = v
+                        }
+                )
+                (fun () -> Content.HUD.KeysPerSecondMeterEnabled)
         | HudElement.CustomImage ->
             Setting.make
                 (fun v ->
@@ -295,6 +308,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.InputMeterPosition)
+        | HudElement.KeysPerSecondMeter ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            KeysPerSecondMeterPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.KeysPerSecondMeterPosition)
         | HudElement.CustomImage ->
             Setting.make
                 (fun v ->
@@ -321,4 +343,5 @@ module HudElement =
         | HudElement.BPMMeter -> all_defaults.BPMMeterPosition
         | HudElement.Pacemaker -> all_defaults.PacemakerPosition
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
+        | HudElement.KeysPerSecondMeter -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition

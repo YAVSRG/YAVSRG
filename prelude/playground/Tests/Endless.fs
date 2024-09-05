@@ -44,6 +44,7 @@ module Endless =
                 BaseChart = start, 1.0f
                 MinimumRate = 1.0f
                 MaximumRate = 1.5f
+                OnlyNewCharts = false
                 Filter = []
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
