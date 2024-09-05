@@ -276,12 +276,13 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
     override this.OnResize e =
         base.OnResize e
+        let client_size = this.ClientSize
         defer (fun () ->
-            if e.Height <> 0 && e.Width <> 0 then
+            if client_size.X <> 0 && client_size.Y <> 0 then
                 if this.WindowBorder = WindowBorder.Resizable then
-                    resize_callback (e.Width, e.Height)
+                    resize_callback (client_size.X, client_size.Y)
 
-                render_thread.OnResize(e.Width, e.Height)
+                render_thread.OnResize(client_size.X, client_size.Y)
         )
 
     override this.OnFocusedChanged e =
