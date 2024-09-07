@@ -95,8 +95,6 @@ module Devices =
     let init (device: int, device_period: int, device_buffer_length: int) =
         get ()
 
-        printfn "%i %i" device_period device_buffer_length
-
         // https://github.com/ppy/osu/issues/3800
         Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
         Bass.Configure(Configuration.DevicePeriod, device_period) |> display_bass_error
