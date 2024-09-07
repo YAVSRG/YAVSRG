@@ -92,15 +92,23 @@ module Devices =
         with err ->
             Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
-    let init (device: int) =
+    let init (device: int, device_period: int, device_buffer_length: int) =
         get ()
 
+        printfn "%i %i" device_period device_buffer_length
+
+        // https://github.com/ppy/osu/issues/3800
+        Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
+        Bass.Configure(Configuration.DevicePeriod, device_period) |> display_bass_error
+        Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length) |> display_bass_error
+        Bass.Configure(Configuration.PlaybackBufferLength, 100) |> display_bass_error
+        Bass.Configure(Configuration.UpdatePeriod, 5) |> display_bass_error
+
         for (i, name) in devices do
-            // https://github.com/ppy/osu/issues/3800
-            Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
-            Bass.Configure(Configuration.DevicePeriod, 2) |> display_bass_error
-            Bass.Configure(Configuration.DeviceBufferLength, 4) |> display_bass_error
-            Bass.Init i |> display_bass_error
+            Bass.Init(i, Flags = DeviceInitFlags.Latency) |> display_bass_error
+        match Bass.GetInfo() with
+        | true, info -> Logging.Debug (sprintf "BASS %O | L: %ims | B: %ims | DS: %i" Bass.Version info.Latency info.MinBufferLength info.DSVersion)
+        | false, _ -> Logging.Debug (sprintf "BASS %O | Fetching info failed" Bass.Version)
 
         change device
         Bass.GlobalStreamVolume <- 0

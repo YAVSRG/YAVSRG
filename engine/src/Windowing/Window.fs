@@ -67,7 +67,14 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         )
 
     let render_thread =
-        RenderThread(this, config.AudioDevice.Value, ui_root, WindowEvents.after_init.Trigger)
+        RenderThread(
+            this, 
+            config.AudioDevice.Value,
+            config.AudioDevicePeriod.Value,
+            config.AudioDevicePeriod.Value * config.AudioDeviceBufferLengthMultiplier.Value,
+            ui_root,
+            WindowEvents.after_init.Trigger
+        )
 
     let mutable resize_callback = fun (w, h) -> ()
     let mutable refresh_rate = 60
@@ -257,6 +264,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 config.WindowMode.Value = WindowType.Fullscreen
                 || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
             )
+
             anti_jitter <- config.SmartCapAntiJitter.Value
             tearline_position <- config.SmartCapTearlinePosition.Value
             framerate_multiplier <- config.SmartCapFramerateMultiplier.Value

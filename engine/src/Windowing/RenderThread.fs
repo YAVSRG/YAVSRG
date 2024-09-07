@@ -300,7 +300,7 @@ module SmartCapConstants =
     let mutable tearline_position = 0.75
     let mutable framerate_multiplier = 8.0
 
-type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root, after_init: unit -> unit) =
+type private RenderThread(window: NativeWindow, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: Root, after_init: unit -> unit) =
 
     let mutable resized = false
     let mutable fps_count = 0
@@ -435,7 +435,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, ui_root: Root
         Performance.elapsed_ms <- elapsed_ms
 
     member this.Init() =
-        Devices.init audio_device
+        Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
         Render.init ()
         let window_x, window_y = window.ClientSize.X, window.ClientSize.Y
         if window_x = 0 || window_y = 0 then Viewport.DEFAULT_SCREEN else (window_x, window_y)
