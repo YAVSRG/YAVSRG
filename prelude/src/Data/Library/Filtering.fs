@@ -55,7 +55,7 @@ module Filter =
 
     let parse (str: string) =
         match run filter (str.Trim()) with
-        | Success(x, _, _) -> x |> Percyqaz.Common.Combinators.debug
+        | Success(x, _, _) -> x
         | Failure(f, _, _) -> [ Impossible ]
 
     let except_keywords = List.filter (function String _ -> false | Impossible -> false | _ -> true)
