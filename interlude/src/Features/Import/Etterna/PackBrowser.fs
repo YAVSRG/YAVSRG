@@ -3,7 +3,7 @@ namespace Interlude.Features.Import.Etterna
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 open Prelude.Data
 open Interlude.UI
 

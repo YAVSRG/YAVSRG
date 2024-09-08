@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Processing
 open Prelude.Data
+open Prelude.Data.Library
 open Prelude.Data.Library.Sorting
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless

@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data
-open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 

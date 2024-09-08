@@ -3,6 +3,8 @@
 open System.IO
 open Percyqaz.Common
 open Prelude
+open Prelude.Gameplay
+open Prelude.Data
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 
@@ -38,3 +40,12 @@ module Library =
     let save (library: Library) =
         Cache.save library.Cache
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) library.Collections
+
+type LibraryViewContext =
+    {
+        Rate: float32
+        RulesetId: string
+        Ruleset: Ruleset
+        Library: Library
+        ScoreDatabase: ScoreDatabase
+    }

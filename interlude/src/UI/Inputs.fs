@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 
 type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as this =
     inherit Container(if focus_trap then NodeType.FocusTrap else NodeType.Leaf)

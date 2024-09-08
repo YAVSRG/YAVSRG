@@ -21,7 +21,7 @@ module Endless =
         let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
-        let ctx : Sorting.LibraryViewContext =
+        let ctx : LibraryViewContext =
             {
                 Library = library
                 ScoreDatabase = score_db
@@ -31,7 +31,7 @@ module Endless =
             }
 
         let search = "icyworld sa'eed"
-        let search_result = Sorting.get_groups (Sorting.Filter.parse search) Sorting.grouping_modes.["pack"] Sorting.sorting_modes.["difficulty"] ctx
+        let search_result = Sorting.get_groups (Filter.parse search) Sorting.grouping_modes.["pack"] Sorting.sorting_modes.["difficulty"] ctx
         let start = search_result.Values |> Seq.head |> fun group -> fst group.Charts.[0]
 
         printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator
