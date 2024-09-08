@@ -180,28 +180,31 @@ module Sorting =
                 (function
                 | Impossible -> false
                 | String str -> s.Contains str
+                | NotString str -> s.Contains str |> not
 
                 | Equals("k", n)
                 | Equals("key", n)
                 | Equals("keys", n) -> cc.Keys.ToString() = n
 
-                | Equals("c", str)
-                | Equals("comment", str) -> has_comment str (cc, ctx)
-                | Tag "c"
-                | Tag "comment" -> has_comment "" (cc, ctx)
+                | NotEquals("k", n)
+                | NotEquals("key", n)
+                | NotEquals("keys", n) -> cc.Keys.ToString() <> n
 
                 | Equals("p", str) -> has_pattern str (cc, ctx)
                 | Equals("pattern", str) -> has_pattern str (cc, ctx)
 
+                | NotEquals("p", str) -> has_pattern str (cc, ctx) |> not
+                | NotEquals("pattern", str) -> has_pattern str (cc, ctx) |> not
+
                 | MoreThan("d", d)
-                | MoreThan("diff", d) -> cc.Physical > d
+                | MoreThan("diff", d) -> cc.Physical >= d
                 | LessThan("d", d)
-                | LessThan("diff", d) -> cc.Physical < d
+                | LessThan("diff", d) -> cc.Physical <= d
 
                 | MoreThan("l", l)
-                | MoreThan("length", l) -> float (cc.Length / 1000.0f<ms>) > l
+                | MoreThan("length", l) -> float (cc.Length / 1000.0f<ms>) >= l
                 | LessThan("l", l)
-                | LessThan("length", l) -> float (cc.Length / 1000.0f<ms>) < l
+                | LessThan("length", l) -> float (cc.Length / 1000.0f<ms>) <= l
 
                 | LessThan("ln", pc)
                 | LessThan("holds", pc)
