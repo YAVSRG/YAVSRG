@@ -515,7 +515,7 @@ module Options =
             "Dragging and dropping things into this folder won't work.\n"
             + "Instead, drag and drop things onto the *game window* while it's open and it will import, OR use the ingame downloaders.\n"
             + "> Help! I have files in here, but they don't show up ingame?\n"
-            + "Make sure they are .yav files, if so go to Options > Debug > Rebuild cache and let that run, it will re-add anything that's missing."
+            + "Make sure they are .yav files, if so go to Options > Library > Rebuild cache and let that run, it will re-add anything that's missing."
         )
 
     let deinit () =
