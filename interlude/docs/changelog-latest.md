@@ -1,26 +1,16 @@
-0.7.26.1
+0.7.26.2
 ====
 
-Bug fix update (and some UI changes)
+Bug fix update :)
 
 # Bug fixes
-- Fixed a crash when spectating in multiplayer
-- Fixed a crash when someone sends invalid replay data during multiplayer
-- Fixed pasting an image from the clipboard breaking your clipboard until the game is closed thanks to @9382
-- Fixed a pixel seam when maximising preview in options menus
-- Fixed a performance issue in level select
-- Fixed ruleset recalculation using scores with mods that unrank the score
+- Fixed game's viewport being cut off at the top when launching in windowed mode
+- Fixed keybind conflict between reset offset and deleting characters when typing an offset
 
-# New UI stuff
-- Hotkey to reset local offset when changing it
-- More stats can be shown on score screen by clicking on MA/PA stat line
-- Appearance of graph hover info improved thanks to @Lylcaruis1
-- Hover over lamp on score screen to see "raw mistakes" experimental feature
-- Practice mode UI has been overhauled
-- Some adjustments to level select UI
-
-# Rewrites
-- Part of keyboard input handling has been rewritten, which allows the game to listen to key "repeats" properly
-- Input latency may be slightly lower now due to the code doing less but I haven't measured it
-- osu! beatmap and skin.ini parser has been rewritten
+# New features
+- Option to export charts to .osz with current mods applied
+- KPS meter is now a separate HUD element
+- New audio config options to correct crackling audio on some Linux systems
+- You can use R and SHIFT+R while the preview is open to cycle through random charts (before, the preview had to be closed)
+- some other stuff. it's a secret
 
