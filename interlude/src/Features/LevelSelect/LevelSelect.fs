@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.Options
@@ -39,8 +39,8 @@ type LevelSelectScreen() =
     override this.Init(parent: Widget) =
         base.Init parent
 
-        Setting.app (fun s -> if sorting_modes.ContainsKey s then s else "title") options.ChartSortMode
-        Setting.app (fun s -> if grouping_modes.ContainsKey s then s else "pack") options.ChartGroupMode
+        Setting.app (fun s -> if Sorting.modes.ContainsKey s then s else "title") options.ChartSortMode
+        Setting.app (fun s -> if Grouping.modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
         |+ CurrentChart(Position = { Position.SliceT(170.0f) with Right = 0.4f %- 0.0f })
@@ -63,17 +63,17 @@ type LevelSelectScreen() =
         |+ (
             Container(NodeType.None, Position = { Position.ShrinkT(170.0f) with Left = 0.5f %+ 0.0f })
             |+ EmptyState(Icons.SEARCH, %"levelselect.empty.search")
-                .Conditional(fun () -> LevelSelect.filter <> [])
+                .Conditional(fun () -> search_text.Value <> "")
             |+ EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
                 .Conditional(fun () ->
-                    LevelSelect.filter = []
-                    && options.LibraryMode.Value = LibraryMode.Table
+                    search_text.Value = ""
+                    && options.LibraryMode.Value = LibraryView.Table
                     && Content.Table.IsNone
                 )
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
-                .Conditional(fun () -> LevelSelect.filter = [] && options.LibraryMode.Value = LibraryMode.Collections)
+                .Conditional(fun () -> search_text.Value = "" && options.LibraryMode.Value = LibraryView.Collections)
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
-                .Conditional(fun () -> LevelSelect.filter = [] && options.LibraryMode.Value = LibraryMode.All)
+                .Conditional(fun () -> search_text.Value = "" && options.LibraryMode.Value = LibraryView.All)
         )
             .Conditional(fun () -> Tree.is_empty)
 

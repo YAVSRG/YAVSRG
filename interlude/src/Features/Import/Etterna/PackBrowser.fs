@@ -13,7 +13,7 @@ type EtternaPacksBrowserPage() =
     let items = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
-    let mutable filter: Filter = []
+    let mutable filter: FilterPart list = []
     let query_order = Setting.simple "popularity"
     let descending_order = Setting.simple true
     let mutable when_at_bottom: (unit -> unit) option = None
@@ -45,7 +45,7 @@ type EtternaPacksBrowserPage() =
                     loading <- false
         }
 
-    let rec search (filter: Filter) (page: int) =
+    let rec search (filter: FilterPart list) (page: int) =
         loading <- true
         when_at_bottom <- None
         let mutable search_string = ""
@@ -72,7 +72,7 @@ type EtternaPacksBrowserPage() =
 
         json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
-    let begin_search (filter: Filter) =
+    let begin_search (filter: FilterPart list) =
         search filter 0
         items.Clear()
 
@@ -93,7 +93,7 @@ type EtternaPacksBrowserPage() =
     override this.Header() =
         SearchBox(
             Setting.simple "",
-            (fun (f: Filter) ->
+            (fun (f: FilterPart list) ->
                 filter <- f
                 defer (fun () -> begin_search filter)
             ),

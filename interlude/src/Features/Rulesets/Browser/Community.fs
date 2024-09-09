@@ -92,7 +92,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     member this.Name = ruleset.Name
 
-    static member Filter(filter: Filter) =
+    static member Filter(filter: FilterPart list) =
         fun (c: RulesetCard) ->
             List.forall
                 (function
@@ -135,7 +135,7 @@ type RulesetSearch() as this =
         this
         |+ (SearchBox(
                 Setting.simple "",
-                (fun (f: Filter) -> grid.Filter <- RulesetCard.Filter f),
+                (fun (f: FilterPart list) -> grid.Filter <- RulesetCard.Filter f),
                 Position = Position.SliceT 60.0f
             )
             |+ LoadingIndicator.Border(fun () -> loading))

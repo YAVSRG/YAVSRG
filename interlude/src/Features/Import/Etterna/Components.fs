@@ -136,7 +136,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     member private this.Download() = download ()
 
-    static member Filter(filter: Filter) =
+    static member Filter(filter: FilterPart list) =
         fun (c: EtternaPackCard) ->
             List.forall
                 (function

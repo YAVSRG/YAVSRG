@@ -31,7 +31,7 @@ module Endless =
             }
 
         let search = "icyworld sa'eed"
-        let search_result = Sorting.get_groups (Filter.parse search) Sorting.grouping_modes.["pack"] Sorting.sorting_modes.["difficulty"] ctx
+        let search_result = Views.get_groups (FilterParts.parse search |> Filter.FromParts) Grouping.modes.["pack"] Sorting.modes.["difficulty"] ctx
         let start = search_result.Values |> Seq.head |> fun group -> fst group.Charts.[0]
 
         printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator
@@ -45,7 +45,7 @@ module Endless =
                 MinimumRate = 1.0f
                 MaximumRate = 1.5f
                 OnlyNewCharts = false
-                Filter = []
+                Filter = Filter.Empty
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
                 Mods = Map.empty

@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Sorting
 open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.Options
@@ -47,18 +46,18 @@ module Tree =
                 }
 
             match options.LibraryMode.Value with
-            | LibraryMode.Collections ->
-                get_collection_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] ctx
-            | LibraryMode.Table ->
+            | LibraryView.Collections ->
+                Views.get_collection_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] ctx
+            | LibraryView.Table ->
                 match Content.Table with
                 | Some table ->
-                    get_table_groups LevelSelect.filter sorting_modes.[options.ChartSortMode.Value] table ctx
-                | None -> get_empty_view ()
-            | LibraryMode.All ->
-                get_groups
+                    Views.get_table_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] table ctx
+                | None -> Views.get_empty_view ()
+            | LibraryView.All ->
+                Views.get_groups
                     LevelSelect.filter
-                    grouping_modes.[options.ChartGroupMode.Value]
-                    sorting_modes.[options.ChartSortMode.Value]
+                    Grouping.modes.[options.ChartGroupMode.Value]
+                    Sorting.modes.[options.ChartSortMode.Value]
                     ctx
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then

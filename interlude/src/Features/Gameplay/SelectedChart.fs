@@ -11,6 +11,7 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
@@ -426,7 +427,7 @@ module SelectedChart =
 
             match
                 Suggestion.get_random
-                    []
+                    Filter.Empty
                     {
                         Rate = rate.Value
                         RulesetId = Rulesets.current_hash

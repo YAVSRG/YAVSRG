@@ -14,7 +14,7 @@ type BeatmapBrowserPage() =
     let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
-    let mutable filter: Filter = []
+    let mutable filter: FilterPart list = []
     let query_order = Setting.simple "submitted_date"
     let descending_order = Setting.simple true
     let mutable statuses = Set.singleton 1
@@ -52,7 +52,7 @@ type BeatmapBrowserPage() =
                 | None -> ()
         }
 
-    let rec search (filter: Filter) (page: int) =
+    let rec search (filter: FilterPart list) (page: int) =
         loading <- true
         when_at_bottom <- None
 
@@ -82,7 +82,7 @@ type BeatmapBrowserPage() =
 
         json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
-    let begin_search (filter: Filter) =
+    let begin_search (filter: FilterPart list) =
         search filter 0
         items.Clear()
 
@@ -172,7 +172,7 @@ type BeatmapBrowserPage() =
         |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
-                (fun (f: Filter) ->
+                (fun (f: FilterPart list) ->
                     filter <- f
                     defer (fun () -> begin_search filter)
                 ),

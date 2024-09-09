@@ -35,13 +35,13 @@ module LevelSelect =
         Content.OnChartAdded.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
         CollectionActions.collection_modified.Add(fun () ->
-            if options.LibraryMode.Value = LibraryMode.Collections then
+            if options.LibraryMode.Value = LibraryView.Collections then
                 refresh_all ()
             else
                 refresh_details ()
         )
 
-    let mutable filter: Filter = []
+    let mutable filter: Filter = Filter.Empty
 
     module History =
 
@@ -105,7 +105,7 @@ module LevelSelect =
                     MinimumRate = options.SuggestionsMinRate.Value
                     MaximumRate = options.SuggestionsMaxRate.Value
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
-                    Filter = filter |> Filter.except_keywords
+                    Filter = filter.WithoutSearchTerms
                     Mods = SelectedChart.selected_mods.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
@@ -164,7 +164,7 @@ module LevelSelect =
                         MinimumRate = options.SuggestionsMinRate.Value
                         MaximumRate = options.SuggestionsMaxRate.Value
                         OnlyNewCharts = false
-                        Filter = filter |> Filter.except_keywords
+                        Filter = filter.WithoutSearchTerms
                         Mods = SelectedChart.selected_mods.Value
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current

@@ -69,7 +69,7 @@ type SelectTablePage(refresh_table_view) =
                 fun () ->
                     options.Table.Set(Some e.Id)
 
-                    if options.LibraryMode.Value = Data.Library.Sorting.LibraryMode.Table && Screen.current_type = Screen.Type.LevelSelect then
+                    if options.LibraryMode.Value = Data.Library.LibraryView.Table && Screen.current_type = Screen.Type.LevelSelect then
                         refresh_table_view()
 
                     defer refresh

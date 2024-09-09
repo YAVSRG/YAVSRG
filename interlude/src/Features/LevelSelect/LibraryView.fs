@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Sorting
+open Prelude.Data.Library
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -66,7 +66,7 @@ type LibraryViewControls() =
 
     let group_selector =
         ModeDropdown(
-            grouping_modes.Keys
+            Grouping.modes.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
             "Group",
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
@@ -111,9 +111,9 @@ type LibraryViewControls() =
     let update_swap () =
         swap.Current <-
             match options.LibraryMode.Value with
-            | LibraryMode.All -> group_selector
-            | LibraryMode.Collections -> manage_collections
-            | LibraryMode.Table -> manage_tables
+            | LibraryView.All -> group_selector
+            | LibraryView.Collections -> manage_collections
+            | LibraryView.Table -> manage_tables
 
     override this.Init(parent) =
         this
@@ -121,9 +121,9 @@ type LibraryViewControls() =
             .Selector(
                 sprintf "%s %s:" Icons.FOLDER (%"levelselect.librarymode"),
                 [|
-                    LibraryMode.All, %"levelselect.librarymode.all"
-                    LibraryMode.Collections, %"levelselect.librarymode.collections"
-                    LibraryMode.Table, %"levelselect.librarymode.table"
+                    LibraryView.All, %"levelselect.librarymode.all"
+                    LibraryView.Collections, %"levelselect.librarymode.collections"
+                    LibraryView.Table, %"levelselect.librarymode.table"
                 |],
                 options.LibraryMode
                 |> Setting.trigger (fun _ ->
@@ -143,7 +143,7 @@ type LibraryViewControls() =
             .Help(Help.Info("levelselect.librarymode", "library_mode"))
 
         |+ ModeDropdown(
-            sorting_modes.Keys
+            Sorting.modes.Keys
             |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby." + id))),
             "Sort",
             options.ChartSortMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
