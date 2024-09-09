@@ -236,34 +236,3 @@ module Collections =
             this.Playlists.Remove oldname |> ignore
             this.Playlists.Add(newname, playlist)
             true
-
-    type CollectionSource = { Name: string; Position: int }
-
-    [<RequireQualifiedAccess>]
-    [<CustomEquality>]
-    [<NoComparison>]
-    type LibraryContext =
-        | None
-        | Table of level: int
-        | Folder of id: string
-        | Playlist of index: int * id: string * data: PlaylistEntryInfo
-        member this.CollectionSource: CollectionSource option =
-            match this with
-            | None
-            | Table _ -> Option.None
-            | Folder id -> Some { Name = id; Position = 0 }
-            | Playlist(i, id, _) -> Some { Name = id; Position = i }
-
-        override this.Equals(other: obj) =
-            match other with
-            | :? LibraryContext as other -> this.CollectionSource = other.CollectionSource
-            | _ -> false
-
-        override this.GetHashCode() = this.CollectionSource.GetHashCode()
-
-    [<RequireQualifiedAccess>]
-    type LibraryGroupContext =
-        | None
-        | Table of level: int
-        | Folder of id: string
-        | Playlist of id: string

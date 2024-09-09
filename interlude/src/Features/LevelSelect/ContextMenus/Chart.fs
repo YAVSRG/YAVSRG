@@ -6,8 +6,8 @@ open Prelude.Charts
 open Prelude.Backbeat
 open Prelude
 open Prelude.Gameplay.Mods
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
-open Prelude.Data.Library.Collections
 open Prelude.Data.``osu!``
 open Interlude.Content
 open Interlude.UI

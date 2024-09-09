@@ -8,8 +8,8 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
-open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay

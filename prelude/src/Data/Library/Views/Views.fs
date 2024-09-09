@@ -12,7 +12,7 @@ type LibraryView =
     | Collections
     | Table
 
-module Views =
+module LibraryView =
 
     type LexSortedGroups = Dictionary<int * string, Group>
 
@@ -26,18 +26,18 @@ module Views =
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
         for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values do
-            let s = group_by (cc, ctx)
+            let group_key = group_by (cc, ctx)
 
-            if found_groups.ContainsKey s |> not then
+            if found_groups.ContainsKey group_key |> not then
                 found_groups.Add(
-                    s,
+                    group_key,
                     {
                         Charts = ResizeArray<CachedChart * LibraryContext * SortingTag>()
                         Context = LibraryGroupContext.None
                     }
                 )
 
-            found_groups.[s].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
+            found_groups.[group_key].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
 
         let groups = new Dictionary<int * string, Group>()
 

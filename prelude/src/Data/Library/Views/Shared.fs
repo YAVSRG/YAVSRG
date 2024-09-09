@@ -6,6 +6,7 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.Library.Caching
+open Prelude.Data.Library.Collections
 
 [<AutoOpen>]
 module internal Shared =
@@ -91,3 +92,30 @@ module internal Shared =
         match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
         | Some report -> report.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
         | None -> false
+
+[<RequireQualifiedAccess>]
+[<CustomEquality>]
+[<NoComparison>]
+type LibraryContext =
+    | None
+    | Table of level: int
+    | Folder of id: string
+    | Playlist of index: int * id: string * data: PlaylistEntryInfo
+
+    override this.Equals(other: obj) =
+        match other with
+        | :? LibraryContext as other ->
+            match this, other with
+            | Folder id, Folder id2 -> id = id2
+            | Playlist (i, id, _), Playlist (i2, id2, _) -> id = id2 && i = i2
+            | _ -> false
+        | _ -> false
+
+    override this.GetHashCode() = -1
+
+[<RequireQualifiedAccess>]
+type LibraryGroupContext =
+    | None
+    | Table of level: int
+    | Folder of id: string
+    | Playlist of id: string

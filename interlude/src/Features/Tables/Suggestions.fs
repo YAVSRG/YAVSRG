@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
+open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.Content
@@ -117,12 +118,11 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         )
         Menu.Back()
         
-
     let mutable still_open = true
     let playtest_suggestion () =
         match suggestion.LocalChart with
         | Some cc ->
-            SelectedChart.change(cc, Data.Library.Collections.LibraryContext.None, true)
+            SelectedChart.change(cc, LibraryContext.None, true)
             Menu.Exit()
         | None ->
 
@@ -135,7 +135,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                     if still_open then
                         match Cache.by_hash suggestion.ChartId Content.Cache with
                         | Some cc ->
-                            SelectedChart.change(cc, Data.Library.Collections.LibraryContext.None, true)
+                            SelectedChart.change(cc, LibraryContext.None, true)
                             Menu.Exit()
                         | None -> ()
                 )

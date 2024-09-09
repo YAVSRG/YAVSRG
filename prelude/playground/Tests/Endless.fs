@@ -31,7 +31,7 @@ module Endless =
             }
 
         let search = "icyworld sa'eed"
-        let search_result = Views.get_groups (FilterParts.parse search |> Filter.FromParts) Grouping.modes.["pack"] Sorting.modes.["difficulty"] ctx
+        let search_result = LibraryView.get_groups (FilterParts.parse search |> Filter.FromParts) Grouping.modes.["pack"] Sorting.modes.["difficulty"] ctx
         let start = search_result.Values |> Seq.head |> fun group -> fst group.Charts.[0]
 
         printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator

@@ -47,14 +47,14 @@ module Tree =
 
             match options.LibraryMode.Value with
             | LibraryView.Collections ->
-                Views.get_collection_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] ctx
+                LibraryView.get_collection_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] ctx
             | LibraryView.Table ->
                 match Content.Table with
                 | Some table ->
-                    Views.get_table_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] table ctx
-                | None -> Views.get_empty_view ()
+                    LibraryView.get_table_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] table ctx
+                | None -> LibraryView.get_empty_view ()
             | LibraryView.All ->
-                Views.get_groups
+                LibraryView.get_groups
                     LevelSelect.filter
                     Grouping.modes.[options.ChartGroupMode.Value]
                     Sorting.modes.[options.ChartSortMode.Value]
