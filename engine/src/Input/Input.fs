@@ -384,10 +384,10 @@ module Input =
             if this_frame.TypedText <> "" then
                 s.Value <- s.Value + this_frame.TypedText
 
-            if (pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome || pop_matching(DELETE_CHARACTER, InputEvType.Repeat).IsSome) && s.Value.Length > 0 then
+            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome || pop_matching(DELETE_CHARACTER, InputEvType.Repeat).IsSome) then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
 
-            elif (pop_matching(DELETE_WORD, InputEvType.Press).IsSome || pop_matching(DELETE_WORD, InputEvType.Repeat).IsSome) && s.Value.Length > 0 then
+            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputEvType.Press).IsSome || pop_matching(DELETE_WORD, InputEvType.Repeat).IsSome) then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
