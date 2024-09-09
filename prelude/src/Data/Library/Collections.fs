@@ -151,12 +151,24 @@ module Collections =
         | Folder of Folder
         | Playlist of Playlist
 
-    [<Json.AutoCodec>]
+    [<Json.AutoCodec(false)>]
     type Collections =
         {
             Folders: Dictionary<string, Folder>
             Playlists: Dictionary<string, Playlist>
+            mutable Likes: Set<string>
         }
+        static member Default =
+            {
+                Folders = Dictionary()
+                Playlists = Dictionary()
+                Likes = Set.empty
+            }
+
+        member this.EnumerateLikes = this.Likes :> seq<string>
+        member this.Like (id: string) = this.Likes <- this.Likes.Add id
+        member this.Unlike (id: string) = this.Likes <- this.Likes.Remove id
+        member this.IsLiked (id: string) = this.Likes.Contains id
 
         member this.List: (string * Collection) seq =
             seq {
