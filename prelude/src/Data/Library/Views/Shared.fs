@@ -102,16 +102,19 @@ type LibraryContext =
     | Folder of id: string
     | Playlist of index: int * id: string * data: PlaylistEntryInfo
 
+    member internal this.CollectionSource : (string * int) option =
+        match this with
+        | None
+        | Table _ -> Option.None
+        | Folder id -> Some (id, 0)
+        | Playlist(i, id, _) -> Some (id, i)
+
     override this.Equals(other: obj) =
         match other with
-        | :? LibraryContext as other ->
-            match this, other with
-            | Folder id, Folder id2 -> id = id2
-            | Playlist (i, id, _), Playlist (i2, id2, _) -> id = id2 && i = i2
-            | _ -> false
+        | :? LibraryContext as other -> this.CollectionSource = other.CollectionSource
         | _ -> false
 
-    override this.GetHashCode() = -1
+    override this.GetHashCode() = this.CollectionSource.GetHashCode()
 
 [<RequireQualifiedAccess>]
 type LibraryGroupContext =
