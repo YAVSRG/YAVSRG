@@ -129,7 +129,7 @@ module private Parser =
         let uninherited = CsvHelpers.int_or 6 1 csv <> 0
         if uninherited then
             Uninherited {
-                Time = CsvHelpers.int_or 0 0 csv
+                Time = CsvHelpers.float_or 0 0.0 csv
                 MsPerBeat = CsvHelpers.float_or 1 500.0 csv
                 Meter = CsvHelpers.int_or 2 4 csv
                 SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
@@ -139,7 +139,7 @@ module private Parser =
             }
         else
             Inherited {
-                Time = CsvHelpers.int_or 0 0 csv
+                Time = CsvHelpers.float_or 0 0.0 csv
                 Multiplier = -100.0 / (CsvHelpers.float_or 1 1.0 csv)
                 SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
                 SampleIndex = CsvHelpers.int_or 4 0 csv

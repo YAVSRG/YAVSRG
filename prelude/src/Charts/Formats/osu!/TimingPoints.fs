@@ -9,7 +9,7 @@ type TimingEffect =
 
 type UninheritedTimingPoint =
     {
-        Time: int
+        Time: float
         MsPerBeat: float
         Meter: int
         SampleSet: SampleSet
@@ -18,8 +18,8 @@ type UninheritedTimingPoint =
         Effects: TimingEffect
     }
     override this.ToString() =
-        sprintf "%i,%s,%i,%i,%i,%i,1,%i"
-            this.Time
+        sprintf "%s,%s,%i,%i,%i,%i,1,%i"
+            (this.Time.ToString(CultureInfo.InvariantCulture))
             (this.MsPerBeat.ToString(CultureInfo.InvariantCulture))
             this.Meter
             (int this.SampleSet)
@@ -39,7 +39,7 @@ type UninheritedTimingPoint =
 
 type InheritedTimingPoint =
     {
-        Time: int
+        Time: float
         Multiplier: float
         SampleSet: SampleSet
         SampleIndex: int
@@ -47,8 +47,8 @@ type InheritedTimingPoint =
         Effects: TimingEffect
     }
     override this.ToString() =
-        sprintf "%i,%s,4,%i,%i,%i,0,%i"
-            this.Time
+        sprintf "%s,%s,4,%i,%i,%i,0,%i"
+            (this.Time.ToString(CultureInfo.InvariantCulture))
             (-100.0 / this.Multiplier |> fun f -> f.ToString(CultureInfo.InvariantCulture))
             (int this.SampleSet)
             this.SampleIndex
