@@ -137,6 +137,8 @@ type NoteskinConfig =
         JudgementLineScale: float32
         JudgementLineOffset: float32
 
+        NotesUnderReceptors: bool
+
         /// When false, textures are upscaled pixel-for-pixel without blurring
         /// Should be false for skins with crisp pixel art edges, and true for skins with smooth edges that should stay smooth at high resolution
         LinearSampling: bool
@@ -221,6 +223,8 @@ type NoteskinConfig =
             UseJudgementLine = false
             JudgementLineScale = 1.0f
             JudgementLineOffset = 0.0f
+
+            NotesUnderReceptors = false
 
             LinearSampling = true
         }

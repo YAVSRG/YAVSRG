@@ -67,6 +67,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let receptor_colors = noteskin_config.ReceptorColors.[keys - 3]
 
     let receptor = Content.Texture "receptor"
+    let judgement_line = Content.Texture "judgementline"
     let holdtail = Content.Texture "holdtail"
     let holdhead = Content.Texture "holdhead"
     let holdbody = Content.Texture "holdbody"
@@ -117,6 +118,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         else
             rotation k
 
+    let judgement_line_transform =
+        // todo: setting to turn this off
+        if options.Upscroll.Value then Quad.flip_vertical else id
+
     do
         let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
 
@@ -159,6 +164,22 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let receptor_aspect_ratio = receptor.AspectRatio
 
         let inline draw_receptors() = 
+            if noteskin_config.UseJudgementLine then
+                let area = 
+                    Rect.Create(
+                        left,
+                        hitposition + (note_height - note_height * noteskin_config.JudgementLineScale) * 0.5f,
+                        right,
+                        hitposition + (note_height + note_height * noteskin_config.JudgementLineScale) * 0.5f
+                    ).TranslateY(note_height * noteskin_config.JudgementLineOffset)
+                    |> scroll_direction_transform bottom
+                    |> _.AsQuad
+                    |> judgement_line_transform
+                Draw.quad
+                    area
+                    Color.White.AsQuad
+                    (Sprite.pick_texture (animation.Loops, 0) judgement_line)
+
             if noteskin_config.UseReceptors then
                 for k in 0 .. (keys - 1) do
                     Draw.quad
@@ -167,7 +188,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             hitposition + note_height - note_height / receptor_aspect_ratio,
                             column_width,
                             note_height / receptor_aspect_ratio
-                         ).Translate(0.0f, note_height * noteskin_config.ReceptorOffset)
+                         ).TranslateY(note_height * noteskin_config.ReceptorOffset)
                          |> scroll_direction_transform bottom
                          |> _.AsQuad
                          |> receptor_transform k)
@@ -323,7 +344,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 else
                     HeadOffscreen holds_offscreen.[k]
 
-        draw_receptors()
+        if not noteskin_config.NotesUnderReceptors && (not options.LaneCover.Enabled.Value || not options.LaneCover.DrawUnderReceptors.Value) then
+            draw_receptors()
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
         while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
@@ -482,6 +504,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         if options.LaneCover.Enabled.Value && options.LaneCover.DrawUnderReceptors.Value then
             Lanecover.draw(this.Bounds)
+            draw_receptors()
+        elif noteskin_config.NotesUnderReceptors then
             draw_receptors()
 
         base.Draw()
