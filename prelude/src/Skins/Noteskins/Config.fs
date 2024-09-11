@@ -131,6 +131,9 @@ type NoteskinConfig =
         ReceptorStyle: ReceptorStyle
         ReceptorOffset: float32
 
+        ColumnLightColors: int array array
+        ReceptorColors: int array array
+
         LinearSampling: bool
     }
     static member Default =
@@ -178,6 +181,30 @@ type NoteskinConfig =
                 |]
             ReceptorStyle = ReceptorStyle.Receptors
             ReceptorOffset = 0.0f
+
+            ColumnLightColors = 
+                [|
+                    Array.init 3 id
+                    Array.init 4 id
+                    Array.init 5 id
+                    Array.init 6 id
+                    Array.init 7 id
+                    Array.init 8 id
+                    Array.init 9 id
+                    Array.init 10 id
+                |]
+            ReceptorColors = 
+                [|
+                    Array.init 3 id
+                    Array.init 4 id
+                    Array.init 5 id
+                    Array.init 6 id
+                    Array.init 7 id
+                    Array.init 8 id
+                    Array.init 9 id
+                    Array.init 10 id
+                |]
+
             LinearSampling = true
         }
 
@@ -209,6 +236,30 @@ type NoteskinConfig =
                     )
 
                     NoteskinConfig.Default.AdvancedColumnSpacing
+            ColumnLightColors =
+                if
+                    this.ColumnLightColors.Length = 8
+                    && Array.indexed this.ColumnLightColors |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                then
+                    this.ColumnLightColors
+                else
+                    Logging.Error(
+                        "Problem with noteskin: ColumnLightColors are not in the right format - Please use the ingame editor"
+                    )
+
+                    NoteskinConfig.Default.ColumnLightColors
+            ReceptorColors =
+                if
+                    this.ReceptorColors.Length = 8
+                    && Array.indexed this.ReceptorColors |> Array.forall (fun (i, a) -> a.Length = 3 + i)
+                then
+                    this.ReceptorColors
+                else
+                    Logging.Error(
+                        "Problem with noteskin: ReceptorColors are not in the right format - Please use the ingame editor"
+                    )
+
+                    NoteskinConfig.Default.ReceptorColors
         }
 
     member this.KeymodeColumnSpacing(keymode: int) : float32 array =

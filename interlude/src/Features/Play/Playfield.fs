@@ -64,6 +64,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
     let playfield_color = noteskin_config.PlayfieldColor
     let fill_column_gaps = noteskin_config.FillColumnGaps
+    let receptor_colors = noteskin_config.ReceptorColors.[keys - 3]
 
     let receptor = Content.Texture "receptor"
     let holdtail = Content.Texture "holdtail"
@@ -172,7 +173,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     Color.White.AsQuad
                     (Sprite.pick_texture
                         (animation.Loops,
-                        k * 2 +
+                        receptor_colors.[k] * 2 +
                          if (state.Scoring.KeyState |> Bitmask.has_key k) then
                              1
                          else

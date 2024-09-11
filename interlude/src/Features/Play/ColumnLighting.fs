@@ -14,6 +14,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
     let sprite = Content.Texture "receptorlighting"
 
     let column_spacing = ns.KeymodeColumnSpacing keys
+    let column_light_colors = ns.ColumnLightColors.[keys - 3]
 
     let column_positions =
         let mutable x = 0.0f
@@ -72,6 +73,6 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                              sprite)
                         .AsQuad
                     (Color.White.O4a a).AsQuad
-                    (Sprite.pick_texture (0, k) sprite)
+                    (Sprite.pick_texture (0, column_light_colors.[k]) sprite)
 
         Array.iteri draw_column timers
