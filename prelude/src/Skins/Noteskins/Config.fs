@@ -76,9 +76,6 @@ type ReceptorStyle =
 [<Json.AutoCodec(false)>]
 type NoteskinConfig =
     {
-        /// Contains settings for the color scheme of notes
-        NoteColors: ColorConfig
-
         /// Hold tail textures are oriented for upscroll. Set this to true if you want them to be flipped when playing in downscroll mode.
         /// Ignored if UseHoldTailTexture is true.
         FlipHoldTail: bool
@@ -88,6 +85,8 @@ type NoteskinConfig =
         HoldNoteTrim: float32
         /// Sets the color that hold notes should turn when they are not being held
         DroppedHoldColor: Color
+        /// Millisecond duration of each frame on note/hold texture animations
+        AnimationFrameTime: float
 
         /// Sets the color of the playfield behind notes
         PlayfieldColor: Color
@@ -104,16 +103,18 @@ type NoteskinConfig =
         /// If true, spacing between columns is filled instead of having a gap
         FillColumnGaps: bool
 
+        /// Contains settings for the color scheme of notes
+        NoteColors: ColorConfig
+
         /// When true, enables `stageleft` and `stageright` textures drawn next to the playfield
         EnableStageTextures: bool
 
-        /// Milliseconds duration of column light animation
-        ColumnLightDuration: float
         /// Set to false to disable column lighting when keys are pressed
         EnableColumnLight: bool
-
-        /// Millisecond duration of each frame on note/hold texture animations
-        AnimationFrameTime: float
+        ColumnLightOffset: float32
+        ColumnLightColors: int array array
+        /// Milliseconds duration of column light animation
+        ColumnLightDuration: float
 
         /// Enables explosion animations
         UseExplosions: bool
@@ -124,16 +125,20 @@ type NoteskinConfig =
         /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
         /// Applies to receptors, notes and if UseHoldTailTexture is false it applies to tails too.
         UseRotation: bool
-
         /// Stores rotation infomation for notes. Only applied when UseRotation is true
         Rotations: float array array
 
+        UseReceptors: bool
         ReceptorStyle: ReceptorStyle
         ReceptorOffset: float32
-
-        ColumnLightColors: int array array
         ReceptorColors: int array array
 
+        UseJudgementLine: bool
+        JudgementLineScale: float32
+        JudgementLineOffset: float32
+
+        /// When false, textures are upscaled pixel-for-pixel without blurring
+        /// Should be false for skins with crisp pixel art edges, and true for skins with smooth edges that should stay smooth at high resolution
         LinearSampling: bool
     }
     static member Default =
@@ -141,9 +146,11 @@ type NoteskinConfig =
             FlipHoldTail = true
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f
+            DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
+            AnimationFrameTime = 200.0
+
             PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
             PlayfieldAlignment = 0.5f, 0.5f
-            DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
             ColumnSpacing = 0.0f
             UseAdvancedColumnSpacing = false
@@ -159,14 +166,30 @@ type NoteskinConfig =
                     Array.zeroCreate 9
                 |]
             FillColumnGaps = false
+
+            NoteColors = ColorConfig.Default
+
             EnableStageTextures = false
+
+            EnableColumnLight = false
+            ColumnLightOffset = 0.0f
+            ColumnLightColors = 
+                [|
+                    Array.init 3 id
+                    Array.init 4 id
+                    Array.init 5 id
+                    Array.init 6 id
+                    Array.init 7 id
+                    Array.init 8 id
+                    Array.init 9 id
+                    Array.init 10 id
+                |]
             ColumnLightDuration = 100.0
-            EnableColumnLight = true
-            AnimationFrameTime = 200.0
+
             UseExplosions = false
             NoteExplosionSettings = NoteExplosionConfig.Default
             HoldExplosionSettings = HoldExplosionConfig.Default
-            NoteColors = ColorConfig.Default
+
             UseRotation = false
             Rotations =
                 [|
@@ -179,20 +202,10 @@ type NoteskinConfig =
                     [| 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0 |]
                     [| 45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0 |]
                 |]
+
+            UseReceptors = true
             ReceptorStyle = ReceptorStyle.Receptors
             ReceptorOffset = 0.0f
-
-            ColumnLightColors = 
-                [|
-                    Array.init 3 id
-                    Array.init 4 id
-                    Array.init 5 id
-                    Array.init 6 id
-                    Array.init 7 id
-                    Array.init 8 id
-                    Array.init 9 id
-                    Array.init 10 id
-                |]
             ReceptorColors = 
                 [|
                     Array.init 3 id
@@ -204,6 +217,10 @@ type NoteskinConfig =
                     Array.init 9 id
                     Array.init 10 id
                 |]
+
+            UseJudgementLine = false
+            JudgementLineScale = 1.0f
+            JudgementLineOffset = 0.0f
 
             LinearSampling = true
         }
@@ -302,9 +319,15 @@ module NoteskinTextureRules =
                 }
                 "receptor",
                 {
-                    IsRequired = K true
+                    IsRequired = fun config -> config.UseReceptors
                     MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Receptors
                     MaxGridSize = K(20, 32)
+                }
+                "judgementline",
+                {
+                    IsRequired = fun config -> config.UseJudgementLine
+                    MustBeSquare = K false
+                    MaxGridSize = K(1, 1)
                 }
                 "noteexplosion",
                 { DEFAULT with
