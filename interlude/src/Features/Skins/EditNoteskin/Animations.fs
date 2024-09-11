@@ -97,30 +97,35 @@ type AnimationSettingsPage() =
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
+    let enable_receptors = Setting.simple data.UseReceptors
     let receptor_style = Setting.simple data.ReceptorStyle
     let receptor_offset = Setting.bounded data.ReceptorOffset -1.0f 1.0f
 
     override this.Content() =
         let general_tab =
             NavigationContainer.Column(WrapNavigation = false)
+            |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32, Step = 1f))
+                .Help(Help.Info("noteskin.animationtime"))
+                .Pos(0)
             |+ PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
                 .Help(Help.Info("noteskin.enablecolumnlight"))
-                .Pos(0)
+                .Pos(3)
             |+ PageSetting(%"noteskin.columnlightoffset", Slider.Percent(column_light_offset))
                 .Help(Help.Info("noteskin.columnlightoffset"))
-                .Pos(2)
+                .Pos(5)
+                .Conditional(enable_column_light.Get)
             |+ PageSetting(
                 %"noteskin.columnlighttime",
                 Slider(column_light_duration |> Setting.f32, Step = 1f)
             )
                 .Help(Help.Info("noteskin.columnlighttime"))
-                .Pos(4)
-            |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32, Step = 1f))
-                .Help(Help.Info("noteskin.animationtime"))
                 .Pos(7)
+                .Conditional(enable_column_light.Get)
             |+ PageSetting(%"noteskin.enableexplosions", Checkbox enable_explosions)
-                .Help(Help.Info("noteskin.enableexplosions"))
                 .Pos(10)
+                
+            |+ PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
+                .Pos(13)
             |+ PageSetting(
                 %"noteskin.receptorstyle",
                 SelectDropdown(
@@ -132,13 +137,15 @@ type AnimationSettingsPage() =
                 )
             )
                 .Help(Help.Info("noteskin.receptorstyle"))
-                .Pos(13)
+                .Pos(15)
+                .Conditional(enable_receptors.Get)
             |+ PageSetting(
                 %"noteskin.receptor_offset",
                 Slider.Percent(receptor_offset)
             )
                 .Help(Help.Info("noteskin.receptor_offset"))
-                .Pos(15)
+                .Pos(17)
+                .Conditional(enable_receptors.Get)
 
         let note_explosion_tab =
             NavigationContainer.Column(WrapNavigation = false)
@@ -448,6 +455,7 @@ type AnimationSettingsPage() =
                         Duration = explosion_duration_hold.Value
                         ExpandAmount = explosion_expand_hold.Value
                     }
+                UseReceptors = enable_receptors.Value
                 ReceptorStyle = receptor_style.Value
                 ReceptorOffset = receptor_offset.Value
             }
