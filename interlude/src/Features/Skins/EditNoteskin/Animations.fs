@@ -39,6 +39,8 @@ type AnimationSettingsPage() =
 
     let enable_column_light = Setting.simple data.EnableColumnLight
 
+    let column_light_offset = Setting.bounded data.ColumnLightOffset -1.0f 1.0f
+
     let column_light_duration =
         Setting.bounded data.ColumnLightDuration 0.0 1000.0
         |> Setting.round 0
@@ -104,18 +106,21 @@ type AnimationSettingsPage() =
             |+ PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
                 .Help(Help.Info("noteskin.enablecolumnlight"))
                 .Pos(0)
+            |+ PageSetting(%"noteskin.columnlightoffset", Slider.Percent(column_light_offset))
+                .Help(Help.Info("noteskin.columnlightoffset"))
+                .Pos(2)
             |+ PageSetting(
                 %"noteskin.columnlighttime",
                 Slider(column_light_duration |> Setting.f32, Step = 1f)
             )
                 .Help(Help.Info("noteskin.columnlighttime"))
-                .Pos(2)
+                .Pos(4)
             |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32, Step = 1f))
                 .Help(Help.Info("noteskin.animationtime"))
-                .Pos(5)
+                .Pos(7)
             |+ PageSetting(%"noteskin.enableexplosions", Checkbox enable_explosions)
                 .Help(Help.Info("noteskin.enableexplosions"))
-                .Pos(8)
+                .Pos(10)
             |+ PageSetting(
                 %"noteskin.receptorstyle",
                 SelectDropdown(
@@ -127,13 +132,13 @@ type AnimationSettingsPage() =
                 )
             )
                 .Help(Help.Info("noteskin.receptorstyle"))
-                .Pos(11)
+                .Pos(13)
             |+ PageSetting(
                 %"noteskin.receptor_offset",
-                Slider.Percent receptor_offset
+                Slider.Percent(receptor_offset)
             )
                 .Help(Help.Info("noteskin.receptor_offset"))
-                .Pos(13)
+                .Pos(15)
 
         let note_explosion_tab =
             NavigationContainer.Column(WrapNavigation = false)
@@ -403,7 +408,7 @@ type AnimationSettingsPage() =
             Draw.sprite
                 (Sprite.aligned_box_x
                     (left + COLUMN_WIDTH * 0.5f,
-                     bottom,
+                     bottom - COLUMN_WIDTH * column_light_offset.Value,
                      0.5f,
                      1.0f,
                      COLUMN_WIDTH * percent_remaining,
@@ -418,6 +423,7 @@ type AnimationSettingsPage() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 EnableColumnLight = enable_column_light.Value
+                ColumnLightOffset = column_light_offset.Value
                 ColumnLightDuration = column_light_duration.Value
                 AnimationFrameTime = note_animation_time.Value
                 UseExplosions = enable_explosions.Value

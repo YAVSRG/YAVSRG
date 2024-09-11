@@ -622,6 +622,8 @@ noteskin.colorstyle.chord=Chord
 noteskin.colorstyle.column=Column
 noteskin.colorstyle.ddr=DDR
 noteskin.colorstyle.tooltip=This is the rule for when each note should be a certain color.\n'DDR' simulates Dance Dance Revolution's system where notes are colored by their musical rhythm placement.\n'Column' just sets a fixed color per column.\n'Chord' colors notes by the number simultaneous notes pressed, as chords.
+noteskin.columnlightoffset=Column light offset
+noteskin.columnlightoffset.tooltip=Increase this value to adjust your column lights closer to the middle of the screen.\nNegative values will move them away from the center instead.
 noteskin.columnlighttime=Column light time
 noteskin.columnlighttime.tooltip=Controls how slowly column lights fade away.\nHigher value = longer fading animation.\nLow value = column lights vanish nearly instantly.
 noteskin.columnspacing=Column spacing

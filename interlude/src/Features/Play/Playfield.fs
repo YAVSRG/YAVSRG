@@ -159,26 +159,27 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let receptor_aspect_ratio = receptor.AspectRatio
 
         let inline draw_receptors() = 
-            for k in 0 .. (keys - 1) do
-                Draw.quad
-                    (Rect.Box(
-                        left + column_positions.[k],
-                        hitposition + note_height - note_height / receptor_aspect_ratio,
-                        column_width,
-                        note_height / receptor_aspect_ratio
-                     ).Translate(0.0f, note_height * noteskin_config.ReceptorOffset)
-                     |> scroll_direction_transform bottom
-                     |> _.AsQuad
-                     |> receptor_transform k)
-                    Color.White.AsQuad
-                    (Sprite.pick_texture
-                        (animation.Loops,
-                        receptor_colors.[k] * 2 +
-                         if (state.Scoring.KeyState |> Bitmask.has_key k) then
-                             1
-                         else
-                             0)
-                        receptor)
+            if noteskin_config.UseReceptors then
+                for k in 0 .. (keys - 1) do
+                    Draw.quad
+                        (Rect.Box(
+                            left + column_positions.[k],
+                            hitposition + note_height - note_height / receptor_aspect_ratio,
+                            column_width,
+                            note_height / receptor_aspect_ratio
+                         ).Translate(0.0f, note_height * noteskin_config.ReceptorOffset)
+                         |> scroll_direction_transform bottom
+                         |> _.AsQuad
+                         |> receptor_transform k)
+                        Color.White.AsQuad
+                        (Sprite.pick_texture
+                            (animation.Loops,
+                            receptor_colors.[k] * 2 +
+                             if (state.Scoring.KeyState |> Bitmask.has_key k) then
+                                 1
+                             else
+                                 0)
+                            receptor)
         
         let inline draw_note (k, pos, color) =
             Draw.quad

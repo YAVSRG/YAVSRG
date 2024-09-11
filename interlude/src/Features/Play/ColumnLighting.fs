@@ -16,6 +16,8 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
     let column_spacing = ns.KeymodeColumnSpacing keys
     let column_light_colors = ns.ColumnLightColors.[keys - 3]
 
+    let offset = ns.ColumnLightOffset * ns.ColumnWidth
+
     let column_positions =
         let mutable x = 0.0f
 
@@ -56,7 +58,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                      if options.Upscroll.Value then
                          Sprite.aligned_box_x
                              (this.Bounds.Left + x,
-                              this.Bounds.Top + options.HitPosition.Value,
+                              this.Bounds.Top + options.HitPosition.Value + offset,
                               0.5f,
                               1.0f,
                               ns.ColumnWidth * percent_remaining,
@@ -65,7 +67,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                      else
                          Sprite.aligned_box_x
                              (this.Bounds.Left + x,
-                              this.Bounds.Bottom - options.HitPosition.Value,
+                              this.Bounds.Bottom - options.HitPosition.Value - offset,
                               0.5f,
                               1.0f,
                               ns.ColumnWidth * percent_remaining,
