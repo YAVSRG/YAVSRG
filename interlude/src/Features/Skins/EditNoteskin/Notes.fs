@@ -164,6 +164,9 @@ type NotesSettingsPage() =
 
     let use_rotation = Setting.simple data.UseRotation
 
+    let note_animation_time =
+        Setting.bounded data.AnimationFrameTime 10.0 1000.0 |> Setting.round 0
+
     let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
     let note_rotations = data.Rotations
     let mutable note_colors = data.NoteColors
@@ -256,6 +259,10 @@ type NotesSettingsPage() =
             .Pos(10)
         |+ PageSetting(%"noteskin.rotations", rotations)
             .Pos(12, 3, PageWidth.Full)
+
+        |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32))
+            .Help(Help.Info("noteskin.animationtime"))
+            .Pos(16)
         :> Widget
 
     override this.Title = %"noteskin.notes"
@@ -263,6 +270,7 @@ type NotesSettingsPage() =
     override this.OnClose() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
+                AnimationFrameTime = note_animation_time.Value
                 NoteColors = note_colors
                 Rotations = note_rotations
                 UseRotation = use_rotation.Value
