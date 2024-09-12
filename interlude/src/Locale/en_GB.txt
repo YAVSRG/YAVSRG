@@ -699,6 +699,7 @@ noteskin.notecolors.ddr.6=This controls the colors of notes that land on sixteen
 noteskin.notecolors.ddr.7=This controls the colors of notes that land on hemidemisemiquavers / 1/64 of a measure.
 noteskin.notecolors.ddr.8=This controls the colors of notes that are 'unsnapped'.\nThis is when they don't line up with any of the other measurements.
 noteskin.notes=Notes
+noteskin.notes_under_receptors=Notes under receptors
 noteskin.playfield=Playfield
 noteskin.playfieldcolor=Playfield color
 noteskin.receptor_offset=Receptor offset

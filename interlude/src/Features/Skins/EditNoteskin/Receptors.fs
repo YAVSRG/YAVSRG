@@ -40,6 +40,7 @@ type AnimationSettingsPage() =
     let enable_receptors = Setting.simple data.UseReceptors
     let receptor_style = Setting.simple data.ReceptorStyle
     let receptor_offset = Setting.bounded data.ReceptorOffset -1.0f 1.0f
+    let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let receptors_tab =
         NavigationContainer.Column(WrapNavigation = false)
@@ -65,6 +66,11 @@ type AnimationSettingsPage() =
             .Help(Help.Info("noteskin.receptor_offset"))
             .Pos(4)
             .Conditional(enable_receptors.Get)
+        |+ PageSetting(
+            %"noteskin.notes_under_receptors",
+            Checkbox notes_under_receptors
+        )
+            .Pos(6)
 
     (* Judgement line *)
 
@@ -341,6 +347,14 @@ type AnimationSettingsPage() =
         let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f
 
+        if notes_under_receptors.Value then
+            Draw.quad
+                (Rect
+                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .AsQuad)
+                Color.White.AsQuad
+                (Sprite.pick_texture (f_note.Loops, 0) note)
+
         if enable_judgement_line.Value then
             Draw.quad
                 (Rect
@@ -362,12 +376,13 @@ type AnimationSettingsPage() =
                     (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
         receptor()
-        Draw.quad
-            (Rect
-                .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                .AsQuad)
-            Color.White.AsQuad
-            (Sprite.pick_texture (f_note.Loops, 0) note)
+        if not notes_under_receptors.Value then
+            Draw.quad
+                (Rect
+                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .AsQuad)
+                Color.White.AsQuad
+                (Sprite.pick_texture (f_note.Loops, 0) note)
 
         if enable_column_light.Value then
             left <- left + COLUMN_WIDTH
@@ -479,6 +494,8 @@ type AnimationSettingsPage() =
     override this.OnClose() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
+                NotesUnderReceptors = notes_under_receptors.Value
+
                 UseReceptors = enable_receptors.Value
                 ReceptorStyle = receptor_style.Value
                 ReceptorOffset = receptor_offset.Value
