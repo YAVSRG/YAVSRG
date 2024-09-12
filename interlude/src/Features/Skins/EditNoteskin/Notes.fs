@@ -168,16 +168,15 @@ type NotesSettingsPage() =
         Setting.bounded data.AnimationFrameTime 10.0 1000.0 |> Setting.round 0
 
     let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-    let note_rotations = data.Rotations
-    let mutable note_colors = data.NoteColors
 
+    let note_rotations = data.Rotations
     let rotate_picker keycount i =
         let k = int keycount - 3
 
         Setting.make (fun v -> note_rotations.[k].[i] <- v) (fun () -> note_rotations.[k].[i])
         |> Setting.round 1
 
-
+    let mutable note_colors = data.NoteColors
     let color_picker keycount i =
         let k = if note_colors.UseGlobalColors then 0 else int keycount - 2
         Setting.make (fun v -> note_colors.Colors.[k].[i] <- v) (fun () -> note_colors.Colors.[k].[i])

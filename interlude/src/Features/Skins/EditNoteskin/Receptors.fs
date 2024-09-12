@@ -3,10 +3,147 @@ namespace Interlude.Features.Skins.EditNoteskin
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.UI
+open Interlude.Options
+open Interlude.Features.Gameplay
+
+type ReceptorColorPicker(color: Setting<int>) =
+    inherit Container(NodeType.Leaf)
+
+    let sprite = Content.Texture "receptor"
+    let n = sprite.Rows / 2
+
+    let fd () =
+        Setting.app (fun x -> (x + 1) % n) color
+        Style.click.Play()
+
+    let bk () =
+        Setting.app (fun x -> (x + n - 1) % n) color
+        Style.click.Play()
+
+    override this.Init(parent: Widget) =
+        this
+        |* Clickable(
+            (fun () ->
+                if not this.Selected then
+                    this.Select true
+
+                fd ()
+            ),
+            OnHover =
+                (fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+                ),
+            OnRightClick =
+                fun () ->
+                    if not this.Selected then
+                        this.Select true
+
+                    bk ()
+        )
+
+        base.Init parent
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Draw() =
+        base.Draw()
+
+        if this.Selected then
+            Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.pink_accent.O2
+        elif this.Focused then
+            Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
+
+        Draw.quad (this.Bounds.SliceY(this.Bounds.Width).SlicePercentT(1.0f / sprite.AspectRatio).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, 1 + color.Value * 2) sprite)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if this.Selected then
+            if (%%"up").Tapped() then
+                fd ()
+            elif (%%"down").Tapped() then
+                bk ()
+            elif (%%"left").Tapped() then
+                bk ()
+            elif (%%"right").Tapped() then
+                fd ()
+
+type ColumnLightColorPicker(color: Setting<int>) =
+    inherit Container(NodeType.Leaf)
+
+    let sprite = Content.Texture "receptorlighting"
+    let n = sprite.Rows
+
+    let fd () =
+        Setting.app (fun x -> (x + 1) % n) color
+        Style.click.Play()
+
+    let bk () =
+        Setting.app (fun x -> (x + n - 1) % n) color
+        Style.click.Play()
+
+    override this.Init(parent: Widget) =
+        this
+        |* Clickable(
+            (fun () ->
+                if not this.Selected then
+                    this.Select true
+
+                fd ()
+            ),
+            OnHover =
+                (fun b ->
+                    if b && not this.Focused then
+                        this.Focus true
+                    elif not b && this.FocusedByMouse then
+                        Selection.up true
+                ),
+            OnRightClick =
+                fun () ->
+                    if not this.Selected then
+                        this.Select true
+
+                    bk ()
+        )
+
+        base.Init parent
+
+    override this.OnFocus(by_mouse: bool) =
+        base.OnFocus by_mouse
+        Style.hover.Play()
+
+    override this.Draw() =
+        base.Draw()
+
+        if this.Selected then
+            Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.pink_accent.O2
+        elif this.Focused then
+            Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
+
+        Draw.quad (this.Bounds.SliceY(this.Bounds.Width).ExpandPercentY((1.0f / sprite.AspectRatio |> min 2.0f) - 1.0f).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, color.Value) sprite)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if this.Selected then
+            if (%%"up").Tapped() then
+                fd ()
+            elif (%%"down").Tapped() then
+                bk ()
+            elif (%%"left").Tapped() then
+                bk ()
+            elif (%%"right").Tapped() then
+                fd ()
 
 type AnimationSettingsPage() =
     inherit Page()
@@ -35,6 +172,8 @@ type AnimationSettingsPage() =
     let f_hold_ex = Animation.Counter(data.HoldExplosionSettings.AnimationFrameTime)
     let t_hold_ex = Animation.Delay(data.HoldExplosionSettings.Duration)
 
+    let NOTE_SCALE = (PRETTYWIDTH - PRETTYTEXTWIDTH) / 10.0f
+
     (* Receptors *)
 
     let enable_receptors = Setting.simple data.UseReceptors
@@ -43,9 +182,40 @@ type AnimationSettingsPage() =
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let receptors_tab =
+    
+        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+
+        let receptor_colors = data.ReceptorColors
+        let color_picker keycount i =
+            let k = int keycount - 3
+
+            Setting.make (fun v -> receptor_colors.[k].[i] <- v) (fun () -> receptor_colors.[k].[i])
+        
+        let colors, refresh_colors =
+            refreshable_row
+                (fun () -> int keymode.Value)
+                (fun i k ->
+                    let x = NOTE_SCALE * -0.5f * float32 k
+                    let n = float32 i
+
+                    ReceptorColorPicker(
+                        color_picker keymode.Value i,
+                        Position =
+                            { Position.DEFAULT with
+                                Left = 0.5f %+ (x + NOTE_SCALE * n)
+                                Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
+                            }
+                    )
+                )
+
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
             .Pos(0)
+        |+ PageSetting(
+            %"noteskin.notes_under_receptors",
+            Checkbox notes_under_receptors
+        )
+            .Pos(2)
         |+ PageSetting(
             %"noteskin.receptorstyle",
             SelectDropdown(
@@ -57,20 +227,24 @@ type AnimationSettingsPage() =
             )
         )
             .Help(Help.Info("noteskin.receptorstyle"))
-            .Pos(2)
+            .Pos(4)
             .Conditional(enable_receptors.Get)
         |+ PageSetting(
             %"noteskin.receptor_offset",
             Slider.Percent(receptor_offset)
         )
             .Help(Help.Info("noteskin.receptor_offset"))
-            .Pos(4)
+            .Pos(6)
             .Conditional(enable_receptors.Get)
         |+ PageSetting(
-            %"noteskin.notes_under_receptors",
-            Checkbox notes_under_receptors
+            %"generic.keymode",
+            Selector.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
         )
-            .Pos(6)
+            .Pos(9)
+            .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
+        |+ PageSetting(%"noteskin.receptor_colors", colors)
+            .Pos(11, 3, PageWidth.Normal)
+            .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
 
     (* Judgement line *)
 
@@ -109,6 +283,32 @@ type AnimationSettingsPage() =
         |> Setting.trigger t_columnlight.set_Interval
 
     let column_light_tab =
+
+        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
+
+        let column_light_colors = data.ColumnLightColors
+        let color_picker keycount i =
+            let k = int keycount - 3
+
+            Setting.make (fun v -> column_light_colors.[k].[i] <- v) (fun () -> column_light_colors.[k].[i])
+        
+        let colors, refresh_colors =
+            refreshable_row
+                (fun () -> int keymode.Value)
+                (fun i k ->
+                    let x = NOTE_SCALE * -0.5f * float32 k
+                    let n = float32 i
+
+                    ColumnLightColorPicker(
+                        color_picker keymode.Value i,
+                        Position =
+                            { Position.DEFAULT with
+                                Left = 0.5f %+ (x + NOTE_SCALE * n)
+                                Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
+                            }
+                    )
+                )
+
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
             .Help(Help.Info("noteskin.enablecolumnlight"))
@@ -124,6 +324,15 @@ type AnimationSettingsPage() =
             .Help(Help.Info("noteskin.columnlighttime"))
             .Pos(4)
             .Conditional(enable_column_light.Get)
+        |+ PageSetting(
+            %"generic.keymode",
+            Selector.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+        )
+            .Pos(7)
+            .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
+        |+ PageSetting(%"noteskin.column_light_colors", colors)
+            .Pos(9, 3, PageWidth.Normal)
+            .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
     
     (* Explosions *)
 
