@@ -286,7 +286,7 @@ type AnimationSettingsPage() =
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
-                            receptors_tab, %"noteskin.general", K false
+                            receptors_tab, %"noteskin.receptors", K false
                             judgement_line_tab, %"noteskin.judgement_line", K false
                             column_light_tab, %"noteskin.column_lighting", K false
                             explosions_tab, %"noteskin.explosions", K false
@@ -331,19 +331,74 @@ type AnimationSettingsPage() =
         base.Draw()
 
         let COLUMN_WIDTH = 120.0f
-        let mutable left = this.Bounds.Right - 50.0f - COLUMN_WIDTH * 2.0f
-        let mutable bottom = this.Bounds.Bottom - 50.0f - COLUMN_WIDTH
+        let preview_width =
+            1.0f
+            + (if enable_column_light.Value then 1.0f else 0.0f)
+            + (if enable_explosions.Value then 2.0f else 0.0f)
 
-        // draw note explosion example
+        let center = this.Bounds.Right - (this.Bounds.Width - PRETTYWIDTH - PRETTY_MARGIN_X * 2.0f) * 0.5f
+
+        let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
+        let position = this.Bounds.Top + this.Bounds.Height * 0.6f
+
+        if enable_judgement_line.Value then
+            Draw.quad
+                (Rect
+                    .Box(left, position - COLUMN_WIDTH, preview_width * COLUMN_WIDTH, COLUMN_WIDTH)
+                    .ExpandPercentY(judgement_line_scale.Value - 1.0f)
+                    .TranslateY(-COLUMN_WIDTH * judgement_line_offset.Value)
+                    .AsQuad)
+                Color.White.AsQuad
+                (Sprite.pick_texture (f_note.Loops, 0) judgementline)
+
+        let receptor() =
+            if enable_receptors.Value then
+                Draw.quad
+                    (Rect
+                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
+                        .TranslateY(-COLUMN_WIDTH * receptor_offset.Value)
+                        .AsQuad)
+                    Color.White.AsQuad
+                    (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
+
+        receptor()
         Draw.quad
             (Rect
-                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
-                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
+                .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                 .AsQuad)
             Color.White.AsQuad
-            (Sprite.pick_texture (f_note.Loops, 0) receptor)
+            (Sprite.pick_texture (f_note.Loops, 0) note)
+
+        if enable_column_light.Value then
+            left <- left + COLUMN_WIDTH
+            receptor()
+
+            let percent_remaining =
+                if holding then
+                    1.0f
+                else
+                    1.0 - (t_columnlight.Time / t_columnlight.Interval)
+                    |> min 1.0
+                    |> max 0.0
+                    |> float32
+
+            let a = 255.0f * percent_remaining |> int |> min 255 |> max 0
+
+            Draw.sprite
+                (Sprite.aligned_box_x
+                    (left + COLUMN_WIDTH * 0.5f,
+                     position - COLUMN_WIDTH * column_light_offset.Value,
+                     0.5f,
+                     1.0f,
+                     COLUMN_WIDTH * percent_remaining,
+                     1.0f / percent_remaining)
+                    columnlighting)
+                (Color.White.O4a a)
+                columnlighting
 
         if enable_explosions.Value then
+            left <- left + COLUMN_WIDTH
+            receptor()
 
             let percent_remaining =
                 if explosion_builtin_note.Value then
@@ -360,7 +415,7 @@ type AnimationSettingsPage() =
 
             Draw.quad
                 (Rect
-                    .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale_note.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                     .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                     .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_note.Value)
@@ -368,18 +423,8 @@ type AnimationSettingsPage() =
                 (Color.White.O4a a).AsQuad
                 (Sprite.pick_texture (f_note_ex.Loops, 0) noteexplosion)
 
-        // draw hold explosion example
-        bottom <- bottom - COLUMN_WIDTH * 2.0f
-
-        Draw.quad
-            (Rect
-                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
-                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
-                .AsQuad)
-            Color.White.AsQuad
-            (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
-
-        if enable_explosions.Value then
+            left <- left + COLUMN_WIDTH
+            receptor()
 
             if not explosion_hold_use_release.Value || holding then
 
@@ -396,7 +441,7 @@ type AnimationSettingsPage() =
 
                 Draw.quad
                     (Rect
-                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
@@ -421,60 +466,13 @@ type AnimationSettingsPage() =
 
                 Draw.quad
                     (Rect
-                        .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
                         .AsQuad)
                     (Color.White.O4a a).AsQuad
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
-
-        // draw note animation example
-        bottom <- bottom - COLUMN_WIDTH * 2.0f
-
-        Draw.quad
-            (Rect
-                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                .AsQuad)
-            Color.White.AsQuad
-            (Sprite.pick_texture (f_note.Loops, 0) note)
-
-        // draw column light example
-        bottom <- bottom + COLUMN_WIDTH * 4.0f
-        left <- left - COLUMN_WIDTH * 1.5f
-
-        Draw.quad
-            (Rect
-                .Box(left, bottom - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
-                .Translate(0.0f, -COLUMN_WIDTH * receptor_offset.Value)
-                .AsQuad)
-            Color.White.AsQuad
-            (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
-
-        if enable_column_light.Value then
-
-            let percent_remaining =
-                if holding then
-                    1.0f
-                else
-                    1.0 - (t_columnlight.Time / t_columnlight.Interval)
-                    |> min 1.0
-                    |> max 0.0
-                    |> float32
-
-            let a = 255.0f * percent_remaining |> int |> min 255 |> max 0
-
-            Draw.sprite
-                (Sprite.aligned_box_x
-                    (left + COLUMN_WIDTH * 0.5f,
-                     bottom - COLUMN_WIDTH * column_light_offset.Value,
-                     0.5f,
-                     1.0f,
-                     COLUMN_WIDTH * percent_remaining,
-                     1.0f / percent_remaining)
-                    columnlighting)
-                (Color.White.O4a a)
-                columnlighting
 
     override this.Title = %"noteskin.animations"
 

@@ -70,7 +70,7 @@ type EditNoteskinPage() =
             )
                 .Pos(15)
             |+ PageButton(
-                %"noteskin.animations",
+                %"noteskin.receptors",
                 fun () ->
                     { new AnimationSettingsPage() with
                         override this.OnClose() =
