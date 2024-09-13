@@ -26,7 +26,7 @@ type HoldNoteSettingsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"noteskin.holdnotetrim", Slider(hold_note_trim))
+        |+ PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
             .Help(Help.Info("noteskin.holdnotetrim"))
             .Pos(0)
         |+ PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)

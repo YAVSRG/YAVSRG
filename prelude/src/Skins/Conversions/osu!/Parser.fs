@@ -264,9 +264,9 @@ type Mania =
         Hit300: string
         Hit300g: string
     }
-    static member Default k =
+    static member Default (keys: int) (version: decimal) =
         {
-            Keys = k
+            Keys = keys
             ColumnStart = 136
             ColumnRight = 19
             ColumnSpacing = [ 0 ]
@@ -289,29 +289,29 @@ type Mania =
             KeysUnderNotes = false
             UpsideDown = false
             KeyFlipWhenUpsideDown = true
-            KeyFlipWhenUpsideDownΔ = Array.create k true
+            KeyFlipWhenUpsideDownΔ = Array.create keys true
             NoteFlipWhenUpsideDown = true
-            KeyFlipWhenUpsideDownΔD = Array.create k true
-            NoteFlipWhenUpsideDownΔ = Array.create k true
-            NoteFlipWhenUpsideDownΔH = Array.create k true
-            NoteFlipWhenUpsideDownΔL = Array.create k true
-            NoteFlipWhenUpsideDownΔT = Array.create k true
+            KeyFlipWhenUpsideDownΔD = Array.create keys true
+            NoteFlipWhenUpsideDownΔ = Array.create keys true
+            NoteFlipWhenUpsideDownΔH = Array.create keys true
+            NoteFlipWhenUpsideDownΔL = Array.create keys true
+            NoteFlipWhenUpsideDownΔT = Array.create keys (version >= 2.5m)
             NoteBodyStyle = 1
-            NoteBodyStyleΔ = Array.create k 1
-            ColourΔ = Array.create k Color.Black
-            ColourLightΔ = Array.create k (Color.FromArgb(55, 255, 255))
+            NoteBodyStyleΔ = Array.create keys 1
+            ColourΔ = Array.create keys Color.Black
+            ColourLightΔ = Array.create keys (Color.FromArgb(55, 255, 255))
             ColourColumnLine = Color.White
             ColourBarline = Color.White
             ColourJudgementLine = Color.White
             ColourKeyWarning = Color.Black
             ColourHold = Color.FromArgb(255, 191, 51, 255)
             ColourBreak = Color.Red
-            KeyImageΔ = Array.init k (fun i -> sprintf "mania-key%s" (key_texture k i))
-            KeyImageΔD = Array.init k (fun i -> sprintf "mania-key%sD" (key_texture k i))
-            NoteImageΔ = Array.init k (fun i -> sprintf "mania-note%s" (key_texture k i))
-            NoteImageΔH = Array.init k (fun i -> sprintf "mania-note%sH" (key_texture k i))
-            NoteImageΔL = Array.init k (fun i -> sprintf "mania-note%sL" (key_texture k i))
-            NoteImageΔT = Array.init k (fun i -> sprintf "mania-note%sT" (key_texture k i))
+            KeyImageΔ = Array.init keys (fun i -> sprintf "mania-key%s" (key_texture keys i))
+            KeyImageΔD = Array.init keys (fun i -> sprintf "mania-key%sD" (key_texture keys i))
+            NoteImageΔ = Array.init keys (fun i -> sprintf "mania-note%s" (key_texture keys i))
+            NoteImageΔH = Array.init keys (fun i -> sprintf "mania-note%sH" (key_texture keys i))
+            NoteImageΔL = Array.init keys (fun i -> sprintf "mania-note%sL" (key_texture keys i))
+            NoteImageΔT = Array.init keys (fun i -> sprintf "mania-note%sT" (key_texture keys i))
             StageLeft = "mania-stage-left"
             StageRight = "mania-stage-right"
             StageBottom = "mania-stage-bottom" // ?

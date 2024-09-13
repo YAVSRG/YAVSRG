@@ -568,7 +568,7 @@ type AnimationSettingsPage() =
             Draw.quad
                 (Rect
                     .Box(left, position - COLUMN_WIDTH, preview_width * COLUMN_WIDTH, COLUMN_WIDTH)
-                    .ExpandPercentY(judgement_line_scale.Value - 1.0f)
+                    .ExpandPercentY(judgement_line_scale.Value * 0.5f - 0.5f)
                     .TranslateY(-COLUMN_WIDTH * judgement_line_offset.Value)
                     .AsQuad)
                 Color.White.AsQuad

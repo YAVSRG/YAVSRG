@@ -311,10 +311,15 @@ module OsuSkinConverter =
 
         Directory.CreateDirectory target |> ignore
 
+        let version = 
+            match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> 3.0m
+
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (Mania.Default keymode)
+            |> Option.defaultValue (Mania.Default keymode version)
 
         let mutable combo_font_spacing : float32 option = None
         let mutable accuracy_font_info : ConvertedFont option = None
@@ -476,11 +481,16 @@ module OsuSkinConverter =
             failwith "a folder with this name already exists!"
 
         Directory.CreateDirectory target |> ignore
+        
+        let version = 
+            match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
+            | true, v -> v
+            | false, _ -> 3.0m
 
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (Mania.Default keymode)
+            |> Option.defaultValue (Mania.Default keymode version)
 
         let colors = Array.zeroCreate 10
         let receptor_colors = 
@@ -545,17 +555,6 @@ module OsuSkinConverter =
             Logging.Warn("Error converting note textures", err)
 
         try
-            core_textures
-            |> List.map (fun x -> x.Head)
-            |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-            |> TextureFile.load_animation_frames
-            |> List.map (List.map _.Image)
-            |> if is_arrows then arrow_fix_4k else id
-            |> convert_element_textures target "holdhead"
-        with err ->
-            Logging.Warn("Error converting hold head textures", err)
-
-        try
             let percy_ln_detected =
                 core_textures
                 |> List.map (fun x -> x.Body)
@@ -569,6 +568,18 @@ module OsuSkinConverter =
         with err ->
             Logging.Warn("Error converting hold body textures", err)
 
+        try
+            core_textures
+            |> List.map (fun x -> x.Head)
+            |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
+            |> TextureFile.load_animation_frames
+            |> List.map (List.map _.Image)
+            |> if is_arrows then arrow_fix_4k else id
+            |> convert_element_textures target "holdhead"
+        with err ->
+            Logging.Warn("Error converting hold head textures", err)
+            skip_tail_conversion <- true
+
         if not skip_tail_conversion then
             try
                 core_textures
@@ -578,9 +589,17 @@ module OsuSkinConverter =
                 |> List.map (List.map _.Image)
                 |> convert_element_textures target "holdtail"
             with err ->
-                Logging.Debug("Error in holdtail textures - Using hold head textures for compatibility", err)
+                Logging.Debug("Error in holdtail textures - Using hold head textures instead", err)
+
+                core_textures
+                |> List.map (fun x -> x.Head)
+                |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
+                |> TextureFile.load_animation_frames
+                |> List.map (List.map _.Image)
+                |> if is_arrows then arrow_fix_4k else id
+                |> convert_element_textures target "holdtail"
+
                 flipholdtail <- true
-                useholdtail <- false
 
         // Convert keys to receptors
         try
@@ -649,7 +668,7 @@ module OsuSkinConverter =
             | Some stage_hint ->
                 let image = stage_hint.Load.Image
                 let intended_height_interlude_px = if stage_hint.Is2x then float32 image.Height else float32 image.Height * 2.0f
-                judgement_line_scale <- intended_height_interlude_px / (float32 keymode_settings.ColumnWidth.[0] * 1080f / 512f)
+                judgement_line_scale <- intended_height_interlude_px / (float32 keymode_settings.ColumnWidth.[0] * 1080f / 480f)
                 image.Save(Path.Combine(target, TextureFileName.to_loose "judgementline" (0, 0)))
                 judgement_line <- true
             | None -> ()
@@ -716,7 +735,7 @@ module OsuSkinConverter =
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "noteexplosion" (i, 0)))
                 padded.Dispose()
 
-            note_explosions_scale <- Some (480.0f / float32 max_dim)
+            note_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->
             Logging.Warn("Error converting note explosions", err)
         
@@ -732,7 +751,7 @@ module OsuSkinConverter =
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "holdexplosion" (i, 0)))
                 padded.Dispose()
 
-            hold_explosions_scale <- Some (480.0f / float32 max_dim)
+            hold_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->
             Logging.Warn("Error converting hold explosions", err)
 
@@ -752,7 +771,7 @@ module OsuSkinConverter =
                 UseHoldTailTexture = useholdtail
                 HoldNoteTrim = if skip_tail_conversion then 1.5f else 0.0f
                 PlayfieldColor = keymode_settings.ColourΔ.[0]
-                ColumnWidth = 1080f / 512f * float32 keymode_settings.ColumnWidth.[0]
+                ColumnWidth = 1080f / 480f * float32 keymode_settings.ColumnWidth.[0]
                 AnimationFrameTime = 1000.0 / 60.0
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures

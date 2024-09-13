@@ -28,7 +28,7 @@ type NoteExplosionConfig =
     static member Default =
         {
             Scale = 1.0f
-            AnimationFrameTime = 50.0
+            AnimationFrameTime = 20.0
             Colors = ExplosionColors.Note
             Offset = 0.0f
 
@@ -57,7 +57,7 @@ type HoldExplosionConfig =
     static member Default =
         {
             Scale = 1.0f
-            AnimationFrameTime = 50.0
+            AnimationFrameTime = 20.0
             Colors = ExplosionColors.Note
             Offset = 0.0f
 
