@@ -556,14 +556,6 @@ type AnimationSettingsPage() =
         let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f
 
-        if notes_under_receptors.Value then
-            Draw.quad
-                (Rect
-                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                    .AsQuad)
-                Color.White.AsQuad
-                (Sprite.pick_texture (f_note.Loops, 0) note)
-
         if enable_judgement_line.Value then
             Draw.quad
                 (Rect
@@ -584,14 +576,18 @@ type AnimationSettingsPage() =
                     Color.White.AsQuad
                     (Sprite.pick_texture (f_note.Loops, (if holding then 1 else 0)) receptor)
 
-        receptor()
         if not notes_under_receptors.Value then
-            Draw.quad
-                (Rect
-                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
-                    .AsQuad)
-                Color.White.AsQuad
-                (Sprite.pick_texture (f_note.Loops, 0) note)
+            receptor()
+
+        Draw.quad
+            (Rect
+                .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                .AsQuad)
+            Color.White.AsQuad
+            (Sprite.pick_texture (f_note.Loops, 0) note)
+
+        if notes_under_receptors.Value then
+            receptor()
 
         if enable_column_light.Value then
             left <- left + COLUMN_WIDTH
