@@ -483,6 +483,18 @@ module OsuSkinConverter =
             |> Option.defaultValue (Mania.Default keymode)
 
         let colors = Array.zeroCreate 10
+        let receptor_colors = 
+            [|
+                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|]; 
+                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|]; 
+                [|0; 1; 0; 1; 2; 1; 0; 1; 0|]; [|0; 1; 2; 1; 0; 0; 1; 2; 1; 0|]
+            |]
+        let column_light_colors = 
+            [|
+                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|]; 
+                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|]; 
+                [|0; 1; 0; 1; 2; 1; 0; 1; 0|]; [|0; 1; 2; 1; 0; 0; 1; 2; 1; 0|]
+            |]
 
         let core_textures =
             let result = ResizeArray<ColumnTextures>()
@@ -505,10 +517,17 @@ module OsuSkinConverter =
 
         let mutable flipholdtail = keymode_settings.NoteFlipWhenUpsideDownΔT.[0]
         let mutable useholdtail = true
-        let mutable columnlighting = false
         let mutable stage_textures = false
-        let mutable key_receptors = false
         let mutable skip_tail_conversion = false
+
+        let mutable key_receptors = false
+        let mutable receptor_offset = 0.0f
+
+        let mutable column_lights = false
+        let mutable column_light_offset = 0.0f
+
+        let mutable judgement_line = false
+        let mutable judgement_line_scale = 1.0f
 
         let mutable note_explosions_scale = None
         let mutable hold_explosions_scale = None
@@ -566,8 +585,14 @@ module OsuSkinConverter =
         // Convert keys to receptors
         try
             let key_textures = 
+                let distinct = ResizeArray<string * string>()
                 Array.zip keymode_settings.KeyImageΔ keymode_settings.KeyImageΔD
-                // todo: distinct once receptor texture order exists
+                |> Array.iteri (fun i xs -> 
+                    if not (distinct.Contains xs) then distinct.Add xs
+                    receptor_colors.[keymode - 3].[i] <- distinct.IndexOf xs
+                )
+                
+                distinct
                 |> Seq.map (fun (not_pressed, pressed) -> [not_pressed; pressed])
                 |> List.concat
                 |> List.map (fun id -> TextureFile.find(id, source).Value)
@@ -596,6 +621,11 @@ module OsuSkinConverter =
                 |> Seq.indexed
                 |> Seq.iter (fun (i, img) -> img.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, i))))
                 key_receptors <- true
+                let column_width_osu_px = float32 keymode_settings.ColumnWidth.[0]
+                let top_of_key_osu_px = float32 height / float32 width * column_width_osu_px
+                let hitposition_osu_px = 480f - float32 keymode_settings.HitPosition
+                receptor_offset <- (top_of_key_osu_px - hitposition_osu_px) / column_width_osu_px - 0.5f
+                    
         with err ->
             Logging.Warn("Error converting keys to receptors", err)
             try
@@ -613,6 +643,19 @@ module OsuSkinConverter =
             with err ->
                 Logging.Warn("Error generating placeholder receptors from note textures", err)
 
+        // Convert stage hint
+        try
+            match TextureFile.find (keymode_settings.StageHint, source) with
+            | Some stage_hint ->
+                let image = stage_hint.Load.Image
+                let intended_height_interlude_px = if stage_hint.Is2x then float32 image.Height else float32 image.Height * 2.0f
+                judgement_line_scale <- intended_height_interlude_px / (float32 keymode_settings.ColumnWidth.[0] * 1080f / 512f)
+                image.Save(Path.Combine(target, TextureFileName.to_loose "judgementline" (0, 0)))
+                judgement_line <- true
+            | None -> ()
+        with err ->
+            Logging.Warn("Error converting stage hint to judgement line", err)
+
         // Convert stage textures
         match TextureFile.find (keymode_settings.StageLeft, source) with
         | Some stage_left ->
@@ -629,24 +672,35 @@ module OsuSkinConverter =
         | Some stage_light ->
             use base_image = stage_light.Load.Image
 
+            let distinct_colors = ResizeArray<Color>()
+
             for k = 0 to keymode - 1 do
                 let stage_light_color = keymode_settings.ColourLightΔ.[k]
-                use colored = base_image.Clone()
 
-                let color = SixLabors.ImageSharp.Color.FromRgb(stage_light_color.R, stage_light_color.G, stage_light_color.B)
-                colored.Mutate(fun img -> 
-                    img.Fill(
-                        GraphicsOptions(
-                            ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply, 
-                            AlphaCompositionMode = PixelFormats.PixelAlphaCompositionMode.SrcAtop
-                        ), color
+                if not (distinct_colors.Contains stage_light_color) then
+                    use colored = base_image.Clone()
+
+                    let color = SixLabors.ImageSharp.Color.FromRgb(stage_light_color.R, stage_light_color.G, stage_light_color.B)
+                    colored.Mutate(fun img -> 
+                        img.Fill(
+                            GraphicsOptions(
+                                ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply, 
+                                AlphaCompositionMode = PixelFormats.PixelAlphaCompositionMode.SrcAtop
+                            ), color
+                        )
+                            .Opacity(float32 stage_light_color.A / 255.0f) 
+                        |> ignore
                     )
-                        .Opacity(float32 stage_light_color.A / 255.0f) 
-                    |> ignore
-                )
-                colored.Save(Path.Combine(target, TextureFileName.to_loose "receptorlighting" (0, k)))
+                    colored.Save(Path.Combine(target, TextureFileName.to_loose "receptorlighting" (0, distinct_colors.Count)))
 
-            columnlighting <- true
+                    distinct_colors.Add stage_light_color
+                column_light_colors.[keymode - 3].[k] <- distinct_colors.IndexOf stage_light_color
+
+            column_lights <- true
+            let column_width_osu_px = float32 keymode_settings.ColumnWidth.[0]
+            let light_position_osu_px = 480.0f - float32 keymode_settings.LightPosition
+            let hitposition_osu_px = 480f - float32 keymode_settings.HitPosition
+            column_light_offset <- (light_position_osu_px - hitposition_osu_px) / column_width_osu_px + 0.5f
         | None -> ()
 
         // Convert explosions
@@ -702,8 +756,19 @@ module OsuSkinConverter =
                 AnimationFrameTime = 1000.0 / 60.0
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures
-                EnableColumnLight = columnlighting
+
+                EnableColumnLight = column_lights
+                ColumnLightColors = column_light_colors
+                ColumnLightOffset = column_light_offset
+
+                UseReceptors = true
                 ReceptorStyle = if key_receptors then ReceptorStyle.Keys else ReceptorStyle.Receptors
+                ReceptorColors = receptor_colors
+                ReceptorOffset = receptor_offset
+                NotesUnderReceptors = not keymode_settings.KeysUnderNotes
+
+                UseJudgementLine = judgement_line
+                JudgementLineScale = judgement_line_scale
 
                 UseExplosions = note_explosions_scale.IsSome && hold_explosions_scale.IsSome
                 NoteExplosionSettings =
