@@ -1,359 +1,233 @@
 ﻿namespace Prelude.Data
 
+open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
 
-type Score =
+type internal ChangeTracker<'T> =
     {
-        Timestamp: int64
-        Replay: byte array
-        Rate: float32
-        Mods: ModState
-        IsImported: bool
-        Keys: int
+        Changes: Dictionary<string, 'T>
     }
+    static member Empty = { Changes = Dictionary<string, 'T>() }
 
-module DbScores =
+    member this.Add (chart_id: string) (value: 'T) =
+        lock this <| fun () -> this.Changes.[chart_id] <- value
 
-    let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            CREATE TABLE scores (
-                Id INTEGER PRIMARY KEY NOT NULL,
-                ChartId TEXT NOT NULL,
-                Timestamp INTEGER NOT NULL,
-                Replay BLOB NOT NULL,
-                Rate REAL NOT NULL,
-                Mods TEXT NOT NULL,
-                IsImported INTEGER NOT NULL,
-                Keys INTEGER NOT NULL
-            );
-            """
-        }
+    member this.Dump: (string * 'T) array =
+        lock this
+        <| fun () ->
+            let result = this.Changes |> Seq.map (|KeyValue|) |> Array.ofSeq
+            this.Changes.Clear()
+            result
 
-    let internal CREATE_INDEX: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            CREATE INDEX idx_scores_chartid
-            ON scores (ChartId ASC);
-            """
-        }
+type ChartSaveData(chart_id: string, data: DbChartData, db: UserDatabase) =
+    let mutable offset = data.Offset
+    let mutable last_played = data.LastPlayed
+    let mutable comment = data.Comment
+    let mutable breakpoints = data.Breakpoints
+    let mutable personal_bests = data.PersonalBests
+    let mutable scores : Score list = []
 
-    let private SAVE: NonQuery<string * Score> =
+    // todo: add locks to protect from threads
+
+    member this.Offset
+        with get () = offset
+        and set v =
+            offset <- v
+            db.ChangedOffsets.Add chart_id v
+
+    member this.LastPlayed
+        with get () = last_played
+        and set v =
+            last_played <- v
+            db.ChangedLastPlayed.Add chart_id v
+
+    member this.Comment
+        with get () = comment
+        and set v =
+            comment <- v
+            db.ChangedComments.Add chart_id v
+
+    member this.Breakpoints
+        with get () = breakpoints
+        and set v =
+            breakpoints <- v
+            db.ChangedBreakpoints.Add chart_id v
+
+    member this.PersonalBests
+        with get () = personal_bests
+        and set v =
+            personal_bests <- v
+            db.ChangedPersonalBests.Add chart_id v
+
+    member this.Scores
+        with get () = scores
+        and internal set v = scores <- v
+
+    member this.ScoreByTimestamp (timestamp: int64) =
+        scores |> List.tryFind (fun score -> score.Timestamp = timestamp)
+
+and UserDatabase =
+    internal
         {
-            SQL =
-                """
-                INSERT INTO scores (ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys)
-                VALUES (@ChartId, @Timestamp, @Replay, @Rate, @Mods, @IsImported, @Keys);
-            """
-            Parameters =
-                [
-                    "@ChartId", SqliteType.Text, -1
-                    "@Timestamp", SqliteType.Integer, 8
-                    "@Replay", SqliteType.Blob, -1
-                    "@Rate", SqliteType.Real, 4
-                    "@Mods", SqliteType.Text, -1
-                    "@IsImported", SqliteType.Integer, 1
-                    "@Keys", SqliteType.Integer, 1
-                ]
-            FillParameters =
-                (fun p (chart_id, score) ->
-                    p.String chart_id
-                    p.Int64 score.Timestamp
-                    p.Blob score.Replay
-                    p.Float32 score.Rate
-                    p.Json JSON score.Mods
-                    p.Boolean score.IsImported
-                    p.Byte(byte score.Keys)
-                )
+            Database: Database
+            Cache: Dictionary<string, ChartSaveData>
+            LockObject: obj
+            ChangedOffsets: ChangeTracker<Time>
+            ChangedLastPlayed: ChangeTracker<int64>
+            ChangedComments: ChangeTracker<string>
+            ChangedBreakpoints: ChangeTracker<ChartTime list>
+            ChangedPersonalBests: ChangeTracker<Map<string, Bests>>
+            FastLoaded: bool
         }
 
-    let save (chart_id: string) (score: Score) (db: Database) : unit =
-        SAVE.Execute (chart_id, score) db |> expect |> ignore
+module UserDatabase =
 
-    let save_batch (batched_scores: (string * Score) seq) (db: Database) : unit =
-        SAVE.Batch batched_scores db |> expect |> ignore
+    let get_chart_data_cached (chart_id: string) (db: UserDatabase) : ChartSaveData option =
+        lock db.LockObject
+        <| fun () ->
+            match db.Cache.TryGetValue chart_id with
+            | true, res -> Some res
+            | false, _ -> None
 
-    let private BY_CHART_ID: Query<string, Score> =
-        {
-            SQL = """SELECT Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores WHERE ChartId = @ChartId;"""
-            Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters = fun p chart_id -> p.String chart_id
-            Read =
-                (fun r ->
-                    {
-                        Timestamp = r.Int64
-                        Replay = r.Blob
-                        Rate = r.Float32
-                        Mods = r.Json JSON
-                        IsImported = r.Boolean
-                        Keys = int r.Byte
-                    }
-                )
-        }
+    let get_chart_data (chart_id: string) (db: UserDatabase) : ChartSaveData =
+        lock db.LockObject
+        <| fun () ->
+            match get_chart_data_cached chart_id db with
+            | Some existing -> existing
+            | None ->
+                let new_info =
+                    // Only bother to load from db -> cache if we didn't already fast load everything the database had into cache
+                    if db.FastLoaded then
+                        ChartSaveData(chart_id, DbChartData.DEFAULT, db)
+                    else
+                        let chart_db_data: DbChartData = DbChartData.get chart_id db.Database
+                        let scores = DbScores.by_chart_id chart_id db.Database
+                        ChartSaveData(chart_id, chart_db_data, db, Scores = List.ofArray scores)
 
-    let by_chart_id (chart_id: string) (db: Database) : Score array =
-        BY_CHART_ID.Execute chart_id db |> expect
+                db.Cache.[chart_id] <- new_info
+                new_info
 
-    let private DELETE_BY_TIMESTAMP: NonQuery<string * int64> =
-        {
-            SQL = """DELETE FROM scores WHERE ChartId = @ChartId AND Timestamp = @Timestamp;"""
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@Timestamp", SqliteType.Integer, 8 ]
-            FillParameters =
-                fun p (chart_id, timestamp) ->
-                    p.String chart_id
-                    p.Int64 timestamp
-        }
+    let save_changes (db: UserDatabase) =
+        DbChartData.save_offsets db.ChangedOffsets.Dump db.Database
+        DbChartData.save_last_played db.ChangedLastPlayed.Dump db.Database
+        DbChartData.save_comments db.ChangedComments.Dump db.Database
+        DbChartData.save_breakpoints db.ChangedBreakpoints.Dump db.Database
+        DbChartData.save_personal_bests db.ChangedPersonalBests.Dump db.Database
 
-    let delete_by_timestamp (chart_id: string) (timestamp: int64) (db: Database) =
-        DELETE_BY_TIMESTAMP.Execute (chart_id, timestamp) db |> expect
+    let save_score (chart_id: string) (score: Score) (db: UserDatabase) =
+        lock db.LockObject
+        <| fun () ->
+            DbScores.save chart_id score db.Database |> ignore
 
-    let private FAST_LOAD: Query<int, string * Score> =
-        {
-            SQL =
-                """
-            SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores
-            ORDER BY ChartId ASC
-            LIMIT 1000
-            OFFSET @Offset;
-            """
-            Parameters = [ "@Offset", SqliteType.Integer, 4 ]
-            FillParameters = fun p page -> p.Int32(page * 1000)
-            Read =
-                (fun r ->
-                    r.String,
-                    {
-                        Timestamp = r.Int64
-                        Replay = r.Blob
-                        Rate = r.Float32
-                        Mods = r.Json JSON
-                        IsImported = r.Boolean
-                        Keys = int r.Byte
-                    }
-                )
-        }
+            match get_chart_data_cached chart_id db with
+            | None -> ()
+            | Some existing_data -> existing_data.Scores <- score :: existing_data.Scores
 
-    let fast_load (db: Database) : (string * Score list) seq =
-        let all_scores =
+    let delete_score (chart_id: string) (timestamp: int64) (db: UserDatabase) : bool =
+        lock db.LockObject
+        <| fun () ->
+            if DbScores.delete_by_timestamp chart_id timestamp db.Database > 0 then
+                match get_chart_data_cached chart_id db with
+                | None -> ()
+                | Some existing_data ->
+                    existing_data.Scores <- existing_data.Scores |> List.filter (fun s -> s.Timestamp <> timestamp)
+
+                true
+            else
+                false
+
+    let private fast_load (db: UserDatabase) : UserDatabase =
+        lock db.LockObject
+        <| fun () ->
+            assert (db.Cache.Count = 0)
+
+            for chart_id, chart_db_data in DbChartData.fast_load db.Database do
+                db.Cache.Add(chart_id, ChartSaveData(chart_id, chart_db_data, db))
+
+            let default_db_data = DbChartData.DEFAULT
+
+            for chart_id, scores in DbScores.fast_load db.Database do
+                match get_chart_data_cached chart_id db with
+                | Some existing ->
+                    assert (existing.Scores.IsEmpty)
+                    existing.Scores <- scores
+                | None -> db.Cache.Add(chart_id, ChartSaveData(chart_id, default_db_data, db, Scores = scores))
+
+            db
+
+    let private migrate (db: Database) : Database =
+        Database.migrate "AddScoresTable" (fun db -> DbScores.CREATE_TABLE.Execute () db |> expect |> ignore) db
+        Database.migrate "AddChartDataTable" (fun db -> DbChartData.CREATE_TABLE.Execute () db |> expect |> ignore) db
+
+        Database.migrate
+            "AddChartIdIndexToScores"
+            (fun db -> DbScores.CREATE_INDEX.Execute () db |> expect |> ignore)
+            db
+        
+        Database.migrate
+            "ResetPbDataTimestampsAdded"
+            (fun db -> DbChartData.RESET_PERSONAL_BESTS.Execute () db |> expect |> ignore)
+            db
+
+        db
+
+    let private legacy_migrate (db: UserDatabase) : UserDatabase =
+        match LegacyScoreDatabase.TryLoad() with
+        | None -> db
+        | Some legacy_db ->
+            Logging.Debug("Found and loaded all scores in scores.json ...")
+
             seq {
-                let mutable batch = 0
-                let mutable next_batch = FAST_LOAD.Execute batch db |> expect
-                yield! next_batch
+                for hash in legacy_db.Entries.Keys do
+                    let data = legacy_db.Entries.[hash]
 
-                while next_batch.Length = 1000 do
-                    batch <- batch + 1
-                    next_batch <- FAST_LOAD.Execute batch db |> expect
-                    yield! next_batch
+                    for score in data.Scores do
+                        yield hash, score.Migrate
             }
+            |> fun scores -> DbScores.save_batch scores db.Database
 
-        seq {
-            let mutable current_chart = ""
-            let mutable current = []
+            Logging.Debug("Copied all scores to database in new format")
 
-            for chart_id, score in all_scores do
-                if chart_id <> current_chart then
-                    if current_chart <> "" then
-                        yield current_chart, current
+            for hash in legacy_db.Entries.Keys do
+                let data = legacy_db.Entries.[hash]
 
-                    current <- []
-                    current_chart <- chart_id
+                if data.PersonalBests.Count > 0 then
+                    db.ChangedPersonalBests.Add hash
+                    <| Map.ofSeq (
+                        data.PersonalBests
+                        |> Seq.map (|KeyValue|)
+                        |> Seq.map (fun (k, v) -> (k, v.Migrate))
+                    )
 
-                current <- score :: current
+                if data.LastPlayed.Year > 2000 then
+                    db.ChangedLastPlayed.Add hash <| Timestamp.from_datetime data.LastPlayed
 
-            if current_chart <> "" then
-                yield current_chart, current
-        }
+                if data.Comment <> "" then
+                    db.ChangedComments.Add hash <| data.Comment
 
-type DbChartData =
-    {
-        Offset: Time
-        LastPlayed: int64
-        Comment: string
-        Breakpoints: Time list
-        PersonalBests: Map<string, Bests>
-    }
+            save_changes db
 
-module DbChartData =
+            Logging.Debug("Copied all other things (comments, personal bests, time last played) to database")
+            LegacyScoreDatabase.MarkOld()
+            Logging.Debug("Marked scores.json as old. All done!")
+            db
 
-    let DEFAULT: DbChartData =
-        {
-            Offset = 0.0f<ms>
-            LastPlayed = 0L
-            Comment = ""
-            Breakpoints = []
-            PersonalBests = Map.empty
-        }
-
-    let internal CREATE_TABLE: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            CREATE TABLE chart_data (
-                ChartId TEXT PRIMARY KEY NOT NULL,
-                Offset REAL NOT NULL,
-                LastPlayed INTEGER NOT NULL,
-                Comment TEXT NOT NULL,
-                Breakpoints TEXT NOT NULL,
-                PersonalBests TEXT NOT NULL
-            );
-            """
-        }
-    
-    let internal RESET_PERSONAL_BESTS: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL = """ UPDATE chart_data SET PersonalBests = '[]'; """
-        }
-
-    let private GET: Query<string, DbChartData> =
-        {
-            SQL =
-                """SELECT Offset, LastPlayed, Comment, Breakpoints, PersonalBests FROM chart_data WHERE ChartId = @ChartId;"""
-            Parameters = [ "@ChartId", SqliteType.Text, -1 ]
-            FillParameters = fun p chart_id -> p.String chart_id
-            Read =
-                (fun r ->
-                    {
-                        Offset = r.Float32 |> Time.of_number
-                        LastPlayed = r.Int64
-                        Comment = r.String
-                        Breakpoints = r.Json JSON
-                        PersonalBests = r.Json JSON
-                    }
-                )
-        }
-
-    let get (chart_id: string) (db: Database) =
-        GET.Execute chart_id db
-        |> expect
-        |> Array.tryExactlyOne
-        |> Option.defaultValue DEFAULT
-
-    let private SAVE_OFFSET: NonQuery<string * Time> =
-        {
-            SQL =
-                """
-                INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, @Offset, 0, '', '[]', '{}')
-                ON CONFLICT DO UPDATE SET Offset = excluded.Offset;
-            """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@Offset", SqliteType.Real, 4 ]
-            FillParameters =
-                fun p (chart_id, offset) ->
-                    p.String chart_id
-                    p.Float32(float32 offset)
-        }
-
-    let save_offsets (changes: (string * Time) seq) (db: Database) =
-        SAVE_OFFSET.Batch changes db |> expect |> ignore
-
-    let private SAVE_LAST_PLAYED: NonQuery<string * int64> =
-        {
-            SQL =
-                """
-                INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, 0, @LastPlayed, '', '[]', '{}')
-                ON CONFLICT DO UPDATE SET LastPlayed = excluded.LastPlayed;
-            """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@LastPlayed", SqliteType.Integer, 8 ]
-            FillParameters =
-                fun p (chart_id, last_played) ->
-                    p.String chart_id
-                    p.Int64 last_played
-        }
-
-    let save_last_played (changes: (string * int64) seq) (db: Database) =
-        SAVE_LAST_PLAYED.Batch changes db |> expect |> ignore
-
-    let private SAVE_COMMENT: NonQuery<string * string> =
-        {
-            SQL =
-                """
-                INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, 0, 0, @Comment, '[]', '{}')
-                ON CONFLICT DO UPDATE SET Comment = excluded.Comment;
-            """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@Comment", SqliteType.Text, -1 ]
-            FillParameters =
-                fun p (chart_id, comment) ->
-                    p.String chart_id
-                    p.String comment
-        }
-
-    let save_comments (changes: (string * string) seq) (db: Database) =
-        SAVE_COMMENT.Batch changes db |> expect |> ignore
-
-    let private SAVE_BREAKPOINTS: NonQuery<string * Time list> =
-        {
-            SQL =
-                """
-                INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, 0, 0, '', @Breakpoints, '{}')
-                ON CONFLICT DO UPDATE SET Breakpoints = excluded.Breakpoints;
-            """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@Breakpoints", SqliteType.Text, -1 ]
-            FillParameters =
-                fun p (chart_id, breakpoints) ->
-                    p.String chart_id
-                    p.Json JSON breakpoints
-        }
-
-    let save_breakpoints (changes: (string * Time list) seq) (db: Database) =
-        SAVE_BREAKPOINTS.Batch changes db |> expect |> ignore
-
-    let private SAVE_PERSONAL_BESTS: NonQuery<string * Map<string, Bests>> =
-        {
-            SQL =
-                """
-                INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, 0, 0, '', '[]', @PersonalBests)
-                ON CONFLICT DO UPDATE SET PersonalBests = excluded.PersonalBests;
-            """
-            Parameters = [ "@ChartId", SqliteType.Text, -1; "@PersonalBests", SqliteType.Text, -1 ]
-            FillParameters =
-                fun p (chart_id, bests) ->
-                    p.String chart_id
-                    p.Json JSON bests
-        }
-
-    let save_personal_bests (changes: (string * Map<string, Bests>) seq) (db: Database) =
-        SAVE_PERSONAL_BESTS.Batch changes db |> expect |> ignore
-
-    let private FAST_LOAD: Query<int64, string * DbChartData> =
-        {
-            SQL =
-                """
-            SELECT ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests FROM chart_data
-            LIMIT 1000
-            OFFSET @Offset;
-            """
-            Parameters = [ "@Offset", SqliteType.Integer, 8 ]
-            FillParameters = fun p page -> p.Int64(page * 1000L)
-            Read =
-                (fun r ->
-                    r.String,
-                    {
-                        Offset = r.Float32 |> Time.of_number
-                        LastPlayed = r.Int64
-                        Comment = r.String
-                        Breakpoints = r.Json JSON
-                        PersonalBests = r.Json JSON
-                    }
-                )
-        }
-
-    let fast_load (db: Database) : (string * DbChartData) seq =
-        seq {
-            let mutable batch = 0L
-            let mutable next_batch = FAST_LOAD.Execute batch db |> expect
-            yield! next_batch
-
-            while next_batch.Length = 1000 do
-                batch <- batch + 1L
-                next_batch <- FAST_LOAD.Execute batch db |> expect
-                yield! next_batch
-        }
+    // Fast load true loads the contents of the db into memory (used by game client)
+    // Fast load false may be used for tools that just want to fetch stuff for a couple of charts
+    let create (use_fast_load: bool) (database: Database) : UserDatabase =
+        legacy_migrate
+            {
+                Database = migrate database
+                Cache = Dictionary()
+                LockObject = obj ()
+                ChangedOffsets = ChangeTracker.Empty
+                ChangedLastPlayed = ChangeTracker.Empty
+                ChangedComments = ChangeTracker.Empty
+                ChangedBreakpoints = ChangeTracker.Empty
+                ChangedPersonalBests = ChangeTracker.Empty
+                FastLoaded = use_fast_load
+            }
+        |> if use_fast_load then fast_load else id
