@@ -8,7 +8,6 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Conversions
-open Prelude.Data.Library.Caching
 
 module Imports =
 

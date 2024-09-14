@@ -1,8 +1,6 @@
 ﻿namespace Prelude.Data.Library
 
 open System.Collections.Generic
-open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Caching
 
 type GroupMethod = ChartMeta * LibraryViewContext -> int * string
 
