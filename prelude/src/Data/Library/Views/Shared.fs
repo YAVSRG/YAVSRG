@@ -13,7 +13,7 @@ module internal Shared =
     let first_character (s: string) =
         if s.Length = 0 then
             "?"
-        elif Char.IsLetterOrDigit s.[0] then
+        elif Char.IsAsciiLetterOrDigit s.[0] then
             s.[0].ToString().ToUpper()
         else
             "?"
