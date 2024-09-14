@@ -72,7 +72,7 @@ module Imports =
 
     let convert_song_folder =
         { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
-            override this.Handle((path, config, { Cache = cache })) =
+            override this.Handle((path, config, { Charts = chart_db })) =
                 async {
                     let results = 
                         Directory.EnumerateFiles path

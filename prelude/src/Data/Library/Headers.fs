@@ -43,7 +43,7 @@ type ChartMeta =
         Audio: AssetPath
         PreviewTime: Time
 
-        Folders: Set<string>
+        Folders: Set<string> // todo: rename to 'Packs'
         Origin: ChartOrigin
 
         Keys: int
@@ -73,7 +73,7 @@ type ChartMeta =
             Background =
                 match import_chart.Header.BackgroundFile with
                 | ChartImportAssetPath.Asset s -> AssetPath.Hash s
-                | ChartImportAssetPath.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f))
+                | ChartImportAssetPath.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f)) // todo: it depends. this responsibility should be somewhere else
                 | ChartImportAssetPath.Absolute p -> AssetPath.Absolute p
                 | ChartImportAssetPath.Missing -> AssetPath.Missing
             Audio =

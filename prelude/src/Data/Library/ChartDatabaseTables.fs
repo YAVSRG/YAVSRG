@@ -9,7 +9,7 @@ open Prelude.Charts
 module DbCharts =
 
     // Increment this to recalculate pattern & rating data
-    let internal CALC_VERSION = 0uy
+    let private CALC_VERSION = 0uy
 
     let internal CREATE_TABLE: NonQuery<unit> =
         { NonQuery.without_parameters () with
@@ -54,7 +54,7 @@ module DbCharts =
                     Background, Audio, PreviewTime,
                     Folders, Origin,
                     Keys, Length, BPM,
-                    CalcVersion, DateAdded, Rating, Patterns,
+                    DateAdded, CalcVersion, Rating, Patterns,
                     Chart
                 )
                 VALUES (
@@ -64,7 +64,7 @@ module DbCharts =
                     json(@Background), json(@Audio), @PreviewTime,
                     @Folders, json(@Origin),
                     @Keys, @Length, @BPM,
-                    @CalcVersion, @DateAdded, @Rating, json(@Patterns),
+                    @DateAdded, @CalcVersion, @Rating, json(@Patterns),
                     @Chart)
                 ON CONFLICT DO UPDATE SET
                     DateAdded = excluded.DateAdded,
@@ -143,4 +143,122 @@ module DbCharts =
 
     let save_batch (charts: (ChartMeta * Chart) seq) (db: Database) : unit =
         SAVE.Batch charts db |> expect |> ignore
+
+    let private read_meta (r: RowReaderHelper) : ChartMeta =
+        let mutable calc_version = 0uy
+        {
+            Hash = r.String
+            Title = r.String
+            TitleNative = r.StringOption
+            Artist = r.String
+            ArtistNative = r.StringOption
+            DifficultyName = r.String
+            Subtitle = r.StringOption
+            Source = r.StringOption
+            Creator = r.String
+            Tags = r.Json JSON
+            Background = r.Json JSON
+            Audio = r.Json JSON
+            PreviewTime = r.Float32 |> Time.of_number
+            Folders = r.Json JSON
+            Origin = r.Json JSON
+            Keys = r.Byte |> int32
+            Length = r.Float32 |> Time.of_number
+            BPM = r.Int32
+            DateAdded = r.Int64
+            Rating =
+                calc_version <- r.Byte
+                r.Float32
+            Patterns =
+                if calc_version < CALC_VERSION then
+                    r.String |> ignore
+                    Processing.Patterns.PatternSummary.Info.Default
+                else r.Json JSON
+        }
         
+    let private GET_META: Query<string, ChartMeta> =
+        {
+            SQL =
+                """
+            SELECT 
+                Id,
+                Title, TitleNative, Artist, ArtistNative,
+                DifficultyName, Subtitle, Source, Creator, Tags,
+                Background, Audio, PreviewTime,
+                Folders, Origin,
+                Keys, Length, BPM,
+                DateAdded, CalcVersion, Rating, Patterns
+            FROM charts
+            WHERE Id = @Hash;
+            """
+            Parameters = [ "@Hash", SqliteType.Text, -1 ]
+            FillParameters = fun p hash -> p.String hash
+            Read = read_meta
+        }
+
+    let get_meta (hash: string) (db: Database) : ChartMeta option =
+        GET_META.Execute hash db |> expect |> Array.tryExactlyOne
+
+    let private FAST_LOAD: Query<int, ChartMeta> =
+        {
+            SQL =
+                """
+            SELECT 
+                Id,
+                Title, TitleNative, Artist, ArtistNative,
+                DifficultyName, Subtitle, Source, Creator, Tags,
+                Background, Audio, PreviewTime,
+                Folders, Origin,
+                Keys, Length, BPM,
+                DateAdded, CalcVersion, Rating, Patterns
+            FROM charts
+            LIMIT 1000
+            OFFSET @Offset;
+            """
+            Parameters = [ "@Offset", SqliteType.Integer, 4 ]
+            FillParameters = fun p page -> p.Int32(page * 1000)
+            Read = read_meta
+        }
+
+    let fast_load (db: Database) : ChartMeta seq =
+        seq {
+            let mutable batch = 0
+            let mutable next_batch = FAST_LOAD.Execute batch db |> expect
+            yield! next_batch
+
+            while next_batch.Length = 1000 do
+                batch <- batch + 1
+                next_batch <- FAST_LOAD.Execute batch db |> expect
+                yield! next_batch
+        }
+        
+    let private GET_CHART: Query<string, Result<Chart, string>> =
+        {
+            SQL = """SELECT Keys, Chart FROM charts WHERE Id = @Hash;"""
+            Parameters = [ "@Hash", SqliteType.Text, -1 ]
+            FillParameters = fun p hash -> p.String hash
+            Read = fun r -> 
+                let keys = r.Byte |> int32
+                use stream = r.Stream
+                use br = new BinaryReader(stream)
+                Chart.read_headless keys br
+        }
+
+    let get_chart (hash: string) (db: Database) : Result<Chart, string> =
+        GET_CHART.Execute hash db
+        |> expect
+        |> Array.tryExactlyOne
+        |> function None -> Error "No chart in the database matching this hash" | Some res -> res
+
+    let private DELETE: NonQuery<string> =
+        {
+            SQL = """DELETE FROM charts WHERE Id = @Hash;"""
+            Parameters = [ "@Hash", SqliteType.Text, -1 ]
+            FillParameters = fun p hash -> p.String hash
+        }
+
+    let delete (hash: string) (db: Database) : bool =
+        DELETE.Execute hash db |> expect > 0
+
+    let delete_batch (hashes: string seq) (db: Database) : int =
+        DELETE.Batch hashes db |> expect
