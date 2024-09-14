@@ -75,7 +75,7 @@ module Gameplay =
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
-                    UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
+                    UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.UserData
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
                     if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
@@ -85,11 +85,11 @@ module Gameplay =
                             | None -> Bests.create standardised_score
                         save_data.PersonalBests <- Map.add Rulesets.DEFAULT_HASH new_standard_bests save_data.PersonalBests
 
-                    UserDatabase.save_changes Content.Scores
+                    UserDatabase.save_changes Content.UserData
                 improvement_flags
 
             else
-                UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.Scores
+                UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.UserData
                 ImprovementFlags.None
         else
             ImprovementFlags.None

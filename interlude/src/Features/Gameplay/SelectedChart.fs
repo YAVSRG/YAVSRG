@@ -172,7 +172,7 @@ module SelectedChart =
 
                         Background.load (Cache.background_path chart Content.Cache)
 
-                        let save_data = UserDatabase.get_chart_data cc.Hash Content.Scores
+                        let save_data = UserDatabase.get_chart_data cc.Hash Content.UserData
 
                         yield
                             fun () ->
@@ -433,7 +433,7 @@ module SelectedChart =
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
-                        UserDatabase = Content.Scores
+                        UserDatabase = Content.UserData
                     }
             with
             | Some cc -> change (cc, LibraryContext.None, true)

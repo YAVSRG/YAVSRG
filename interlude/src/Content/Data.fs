@@ -8,7 +8,7 @@ open Prelude.Data.Library
 
 module private Data =
 
-    let mutable database: Database = Unchecked.defaultof<_>
+    let mutable private database: Database = Unchecked.defaultof<_>
     let mutable user_db: UserDatabase = Unchecked.defaultof<_>
     let mutable library: Library = Unchecked.defaultof<_>
 

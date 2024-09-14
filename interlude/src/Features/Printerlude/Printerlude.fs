@@ -73,7 +73,7 @@ module Printerlude =
                     let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
 
                     for chart in table.Charts do
-                        let data = UserDatabase.get_chart_data chart.Hash Content.Scores
+                        let data = UserDatabase.get_chart_data chart.Hash Content.UserData
 
                         match
                             data.PersonalBests
@@ -106,7 +106,7 @@ module Printerlude =
             | None -> ()
 
         let tech_factor (io: IOContext) =
-            Skillsets.find_underperformance Content.Scores Content.Library
+            Skillsets.find_underperformance Content.UserData Content.Library
             match SelectedChart.PATTERNS with
             | Some patterns ->
                 KeymodeSkillBreakdown.tech_factor patterns
