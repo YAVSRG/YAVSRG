@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
 open Interlude.Options
@@ -137,7 +137,7 @@ module Scoreboard =
             {
                 RulesetId: string
                 Ruleset: Ruleset
-                CachedChart: CachedChart
+                CachedChart: ChartMeta
                 CurrentChart: Chart
                 ChartSaveData: ChartSaveData
                 mutable NewBests: Bests option

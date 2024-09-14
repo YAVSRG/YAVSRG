@@ -8,7 +8,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -179,13 +178,6 @@ type LevelSelectScreen() =
     override this.OnEnter prev =
         LevelSelect.exit_gameplay()
         Song.on_finish <- SongFinishAction.LoopFromPreview
-
-        if Cache.recache_service.Status <> Async.ServiceStatus.Idle then
-            Notifications.system_feedback (
-                Icons.ALERT_OCTAGON,
-                %"notification.recache_running.title",
-                %"notification.recache_running.body"
-            )
 
         refresh ()
         DiscordRPC.in_menus ("Choosing a song")

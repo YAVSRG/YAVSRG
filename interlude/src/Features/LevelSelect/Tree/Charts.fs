@@ -9,14 +9,13 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 
 open TreeState
 
-type private ChartItem(group_name: string, cc: CachedChart, context: LibraryContext) =
+type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContext) =
     inherit TreeItem()
 
     let hover = Animation.Fade 0.0f
@@ -57,7 +56,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
         Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)
 
     override this.Selected =
-        selected_chart = cc.Key
+        selected_chart = cc.Hash
         && (context = LibraryContext.None || SelectedChart.LIBRARY_CTX = context)
 
     override this.Spacing = 5.0f

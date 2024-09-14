@@ -18,6 +18,7 @@ type ChartDatabase =
             LockObject: obj
             FastLoaded: bool
             AssetsPath: string
+            mutable RecalculationNeeded: bool
         }
     member this.Entries = this.Cache.Values
 
@@ -120,6 +121,9 @@ module ChartDatabase =
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
 
+    let change_folders (chart_id: string) (folders: Set<string>) (db: ChartDatabase) = 
+        failwith "nyi"
+
     // todo: deleting from just certain folders
     let delete (chart_meta: ChartMeta) (db: ChartDatabase) =
         db.Cache.Remove(chart_meta.Hash) |> ignore
@@ -143,6 +147,9 @@ module ChartDatabase =
 
             for chart_meta in DbCharts.fast_load db.Database do
                 db.Cache.[chart_meta.Hash] <- chart_meta
+
+                if chart_meta.Patterns.Density90 <> 0.0f then
+                    db.RecalculationNeeded <- false
 
             db
 
@@ -187,6 +194,7 @@ module ChartDatabase =
                 LockObject = obj ()
                 FastLoaded = use_fast_load
                 AssetsPath = Path.Combine(get_game_folder "Songs", ".assets")
+                RecalculationNeeded = use_fast_load
             }
         |> if use_fast_load then fast_load else id
 
@@ -267,3 +275,31 @@ module ChartDatabase =
                 Logging.Error(err.Message, err)
                 return false
         }
+    
+    open Prelude.Charts.Processing.Difficulty
+    open Prelude.Charts.Processing.Patterns
+
+    let cache_patterns =
+        { new Async.Service<ChartDatabase, unit>() with
+            override this.Handle(charts_db) =
+                async {
+                    seq {
+                        for entry in charts_db.Entries do
+                            match get_chart entry.Hash charts_db with
+                            | Ok chart ->
+                                yield entry.Hash, float32 (DifficultyRating.calculate 1.0f chart.Notes).Physical, PatternSummary.generate_pattern_data 1.0f chart
+                            | Error reason -> Logging.Warn(sprintf "Error recalculating patterns for %s: %s" entry.Hash reason)
+                    }
+                    |> Seq.chunkBySize 1000
+                    |> Seq.iter (fun chunk ->
+                        DbCharts.update_calculated_data chunk charts_db.Database
+                    )
+                }
+        }
+
+    let cache_patterns_if_needed (db: ChartDatabase) (recache_complete_callback: unit -> unit) : bool =
+        if db.RecalculationNeeded then
+            db.RecalculationNeeded <- false
+            cache_patterns.Request(db, recache_complete_callback)
+            true
+        else false

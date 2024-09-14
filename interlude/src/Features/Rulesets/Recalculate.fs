@@ -14,7 +14,7 @@ module PersonalBests =
         { new Async.Service<(string * Ruleset) array, unit>() with
             override this.Handle(rulesets) =
                 async {
-                    for cc in Content.Cache.Entries.Values |> Seq.toArray do
+                    for cc in Content.Cache.Entries |> Seq.toArray do
                         let data = UserDatabase.get_chart_data cc.Hash Content.UserData
 
                         if not data.Scores.IsEmpty then

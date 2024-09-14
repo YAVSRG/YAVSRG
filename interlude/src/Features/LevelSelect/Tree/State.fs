@@ -19,7 +19,7 @@ module private TreeState =
 
     /// Group's name = this string => Selected chart is in this group
     let mutable selected_group = ""
-    /// Chart's filepath = this string && context_index match => It's the selected chart
+    /// Chart's hash = this string && contexts match => It's the selected chart
     let mutable selected_chart = ""
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
@@ -69,7 +69,7 @@ module private TreeState =
         if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)
             Selection.clear ()
-            selected_chart <- cc.Key
+            selected_chart <- cc.Hash
             expanded_group <- group_name
             selected_group <- group_name
             scroll_to <- ScrollTo.Chart

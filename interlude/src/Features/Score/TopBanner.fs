@@ -35,7 +35,7 @@ type TopBanner(score_info: ScoreInfo) as this =
                 }
         )
         |+ Text(
-            sprintf "%s  •  %s" ([score_info.CachedChart.Folder] %> "score.source") ([score_info.CachedChart.Creator] %> "score.creator"),
+            sprintf "%s  •  %s" ([score_info.CachedChart.Origin.ToString()] %> "score.source") ([score_info.CachedChart.Creator] %> "score.creator"),
             Align = Alignment.LEFT,
             Position =
                 {

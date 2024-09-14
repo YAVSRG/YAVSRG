@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Options
 open Interlude
 open Interlude.Utils
@@ -143,7 +143,7 @@ type MainMenuScreen() as this =
 
         if prev = Screen.Type.SplashScreen then
             if 
-                Cache.cache_patterns_if_needed 
+                ChartDatabase.cache_patterns_if_needed 
                     Content.Cache 
                     (fun () ->
                         Notifications.system_feedback (

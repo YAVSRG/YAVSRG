@@ -26,8 +26,8 @@ module Tree =
 
         for group in groups do
             for chart in group.Items do
-                if chart.Chart.Key = current_cc.Key && (chart.Context = LibraryContext.None || chart.Context = SelectedChart.LIBRARY_CTX) then
-                    selected_chart <- current_cc.Key
+                if chart.Chart.Hash = current_cc.Hash && (chart.Context = LibraryContext.None || chart.Context = SelectedChart.LIBRARY_CTX) then
+                    selected_chart <- current_cc.Hash
                     selected_group <- group.Name
                     expanded_group <- selected_group
                     scroll_to <- ScrollTo.Chart
@@ -65,7 +65,7 @@ module Tree =
             if library_groups.[g].Charts.Length = 1 then
                 let cc, context = library_groups.[g].Charts.[0]
 
-                if cc.Key <> selected_chart then
+                if cc.Hash <> selected_chart then
                     switch_chart (cc, context, snd g)
         // build groups ui
         last_item <- None
@@ -96,7 +96,7 @@ module Tree =
     do
         LevelSelect.on_refresh_all.Add refresh
         LevelSelect.on_refresh_details.Add(fun () -> cache_flag <- cache_flag + 1)
-        SelectedChart.on_chart_change_started.Add(fun info -> if info.CacheInfo.Key <> selected_chart then find_selected_chart_in_tree())
+        SelectedChart.on_chart_change_started.Add(fun info -> if info.CacheInfo.Hash <> selected_chart then find_selected_chart_in_tree())
 
     let previous () =
         match last_item with

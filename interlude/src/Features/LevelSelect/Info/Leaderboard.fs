@@ -11,7 +11,7 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude
 open Interlude.UI
 open Interlude.Options
@@ -171,7 +171,7 @@ module Leaderboard =
                 Ruleset: Ruleset
                 RulesetId: string
                 Hash: string
-                CachedChart: CachedChart
+                CachedChart: ChartMeta
                 Chart: Chart
             }
             override this.ToString() = "<leaderboard calculation>"
@@ -245,7 +245,7 @@ module Leaderboard =
                 member this.Handle(action) = action ()
             }
 
-        let load (cc: CachedChart) (chart: Chart) =
+        let load (cc: ChartMeta) (chart: Chart) =
             if Network.status <> Network.Status.LoggedIn then
                 state.Set State.Offline
             else

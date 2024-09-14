@@ -2,7 +2,7 @@ namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Prelude
 open Prelude.Data
 open Prelude.Data.Library
@@ -22,7 +22,6 @@ module Imports =
     let import_in_progress () =
         WebServices.download_file.Status <> Async.ServiceStatus.Idle
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
-        || Cache.recache_service.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
 
@@ -52,7 +51,7 @@ type LibraryPage() =
             Position = Position.Row(40.0f, Style.PADDING).Shrink(150.0f, 0.0f)
         )
         |+ Text(
-            sprintf "%i charts installed" Content.Library.Cache.Entries.Count,
+            sprintf "%i charts installed" Content.Library.Charts.Entries.Count,
             Color = K Colors.text_subheading,
             Position = Position.Row(65.0f, 30.0f).Shrink(20.0f, 0.0f)
         )
@@ -75,24 +74,10 @@ type LibraryPage() =
             .Pos(2, 2, PageWidth.Full)
         |+ PageButton
             .Once(
-                %"library.recache_charts",
-                fun () ->
-                    Cache.recache_service.Request(
-                        Content.Cache,
-                        fun () ->
-                            Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
-                    )
-
-                    Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
-            )
-            .Help(Help.Info("library.recache_charts"))
-            .Pos(5, 2, PageWidth.Full)
-        |+ PageButton
-            .Once(
                 %"library.recache_patterns",
                 fun () ->
-                    Cache.cache_patterns.Request(
-                        (Content.Cache, true),
+                    ChartDatabase.cache_patterns.Request(
+                        Content.Cache,
                         fun () ->
                             Notifications.system_feedback (
                                 Icons.ALERT_OCTAGON,
@@ -108,19 +93,19 @@ type LibraryPage() =
                     )
             )
             .Help(Help.Info("library.recache_patterns"))
-            .Pos(7, 2, PageWidth.Full)
+            .Pos(5, 2, PageWidth.Full)
         |+ PageButton
             .Once(
                 %"library.recalculate_personal_bests",
                 PersonalBests.recalculate
             )
             .Help(Help.Info("library.recalculate_personal_bests"))
-            .Pos(9, 2, PageWidth.Full)
+            .Pos(7, 2, PageWidth.Full)
         |+ PageButton(
                 %"levelselect.options",
                 (fun () -> LevelSelectPage().Show())
             )
-            .Pos(12, 2, PageWidth.Full)
+            .Pos(10, 2, PageWidth.Full)
         |+ import_info
 
     let mount_options =

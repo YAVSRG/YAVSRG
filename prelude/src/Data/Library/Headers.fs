@@ -24,6 +24,12 @@ type ChartOrigin =
     | Quaver of mapsetid: int * mapid: int
     | Etterna of pack_name: string
     | Unknown
+    override this.ToString() =
+        match this with
+        | Osu _ -> "osu!"
+        | Quaver _ -> "Quaver"
+        | Etterna pack -> pack
+        | Unknown -> "Unknown"
 
 type ChartMeta =
     {

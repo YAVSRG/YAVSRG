@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
@@ -214,25 +214,12 @@ module Settings =
                     %"beatmap_browser",
                     fun () -> BeatmapBrowserPage().Show()
                 )
-            if token_match tokens [|%"library.recache_charts"|] then
-                yield PageButton.Once(
-                    %"library.recache_charts",
-                    fun () ->
-                        Cache.recache_service.Request(
-                            Content.Cache,
-                            fun () ->
-                                Notifications.task_feedback (Icons.FOLDER, %"notification.recache_complete", "")
-                        )
-
-                        Notifications.action_feedback (Icons.FOLDER, %"notification.recache", "")
-                )
-                    .Help(Help.Info("library.recache_charts"))
             if token_match tokens [|%"library.recache_patterns"|] then
                 yield PageButton.Once(
                     %"library.recache_patterns",
                     fun () ->
-                        Cache.cache_patterns.Request(
-                            (Content.Cache, true),
+                        ChartDatabase.cache_patterns.Request(
+                            Content.Cache,
                             fun () ->
                                 Notifications.system_feedback (
                                     Icons.ALERT_OCTAGON,

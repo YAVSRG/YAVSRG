@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
+open Prelude.Charts.Processing.Patterns
 
 module DbCharts =
 
@@ -125,8 +126,8 @@ module DbCharts =
                     p.Byte (byte db_chart.Keys)
                     p.Float32 (float32 db_chart.Length)
                     p.Int32 db_chart.BPM
-                    p.Byte CALC_VERSION
                     p.Int64 db_chart.DateAdded
+                    p.Byte CALC_VERSION
                     p.Float32 db_chart.Rating
                     p.Json JSON db_chart.Patterns
                     p.Blob (
@@ -262,3 +263,31 @@ module DbCharts =
 
     let delete_batch (hashes: string seq) (db: Database) : int =
         DELETE.Batch hashes db |> expect
+
+    let private UPDATE_CALCULATED_DATA: NonQuery<string * float32 * PatternSummary.Info> =
+        {
+            SQL = """
+            UPDATE charts 
+            SET 
+                CalcVersion = @CalcVersion,
+                Rating = @Rating,
+                Patterns = json(@Patterns)
+            WHERE Id = @Hash;
+            """
+            Parameters = [ 
+                "@Hash", SqliteType.Text, -1
+                "@CalcVersion", SqliteType.Integer, 1
+                "@Rating", SqliteType.Real, 4
+                "@Patterns", SqliteType.Text, -1
+            ]
+            FillParameters = 
+                (fun p (hash, rating, patterns) -> 
+                    p.String hash
+                    p.Byte CALC_VERSION
+                    p.Float32 rating
+                    p.Json JSON patterns
+                )
+        }
+
+    let update_calculated_data (chunk: (string * float32 * PatternSummary.Info) seq) (db: Database) =
+        UPDATE_CALCULATED_DATA.Batch chunk db |> expect |> ignore

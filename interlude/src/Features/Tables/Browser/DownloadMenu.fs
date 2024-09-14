@@ -248,7 +248,7 @@ module TableDownloader =
 
                     match ChartDatabase.get_meta chart.Hash Content.Cache with
                     | Some cc ->
-                        ChartDatabase.copy table_name cc Content.Cache
+                        ChartDatabase.change_folders chart.Hash (cc.Folders.Add table_name) Content.Cache
                         defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Cache with
