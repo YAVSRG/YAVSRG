@@ -137,7 +137,7 @@ module Scoreboard =
             {
                 RulesetId: string
                 Ruleset: Ruleset
-                CachedChart: ChartMeta
+                ChartMeta: ChartMeta
                 CurrentChart: Chart
                 ChartSaveData: ChartSaveData
                 mutable NewBests: Bests option
@@ -152,7 +152,7 @@ module Scoreboard =
                     seq {
                         for score in req.ChartSaveData.Scores do
                             let score_info =
-                                ScoreInfo.from_score req.CachedChart req.CurrentChart req.Ruleset score
+                                ScoreInfo.from_score req.ChartMeta req.CurrentChart req.Ruleset score
 
                             if score_info.ModStatus = Mods.ModStatus.Ranked then
                                 req.NewBests <-
@@ -185,7 +185,7 @@ module Scoreboard =
                 {
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
-                    CachedChart = info.CacheInfo
+                    ChartMeta = info.CacheInfo
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
                     NewBests = None

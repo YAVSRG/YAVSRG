@@ -120,7 +120,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             )
             |+ InlaidButton(
                 %"score.chart_actions",
-                (fun () -> ScoreChartContextMenu(score_info.CachedChart).Show()),
+                (fun () -> ScoreChartContextMenu(score_info.ChartMeta).Show()),
                 Icons.SETTINGS,
                 Hotkey = "context_menu"
             )

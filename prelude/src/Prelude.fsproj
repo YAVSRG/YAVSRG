@@ -78,7 +78,6 @@
     <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\Library\ChartDatabaseTables.fs" />
     <Compile Include="Data\Library\ChartDatabase.fs" />
-    <Compile Include="Data\Library\OLD_CACHING.fs" />
     <Compile Include="Data\User\ScoreInfo.fs" />
     <Compile Include="Data\Library\Collections.fs" />
     <Compile Include="Data\Library\Library.fs" />

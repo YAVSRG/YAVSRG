@@ -170,8 +170,7 @@ module Leaderboard =
             {
                 Ruleset: Ruleset
                 RulesetId: string
-                Hash: string
-                CachedChart: ChartMeta
+                ChartMeta: ChartMeta
                 Chart: Chart
             }
             override this.ToString() = "<leaderboard calculation>"
@@ -185,7 +184,7 @@ module Leaderboard =
                         let mutable scores : LeaderboardScore array = [||]
                         let mutable target_state = State.Loading
                         Charts.Scores.Leaderboard.get_async (
-                            req.Hash,
+                            req.ChartMeta.Hash,
                             req.RulesetId,
                             function
                             | Some reply ->
@@ -218,7 +217,7 @@ module Leaderboard =
 
                             let score_info: ScoreInfo =
                                 {
-                                    CachedChart = req.CachedChart
+                                    ChartMeta = req.ChartMeta
                                     Chart = req.Chart
                                     WithMods = with_mods
 
@@ -255,9 +254,8 @@ module Leaderboard =
                     {
                         RulesetId = Content.Rulesets.current_hash
                         Ruleset = Content.Rulesets.current
-                        CachedChart = cc
+                        ChartMeta = cc
                         Chart = chart
-                        Hash = cc.Hash
                     }
 
 open Leaderboard

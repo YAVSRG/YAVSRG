@@ -22,7 +22,7 @@ module Gameplay =
         (replay_data: ReplayData)
         : ScoreInfo =
         {
-            CachedChart = info.CacheInfo
+            ChartMeta = info.CacheInfo
             Chart = info.Chart
             WithMods = info.WithMods
 
@@ -53,7 +53,7 @@ module Gameplay =
                 if Network.status = Network.Status.LoggedIn then
                     Charts.Scores.Save.post (
                         ({
-                            ChartId = score_info.CachedChart.Hash
+                            ChartId = score_info.ChartMeta.Hash
                             Replay = score_info.Replay |> Replay.compress_string
                             Rate = score_info.Rate
                             Mods = score_info.Mods
@@ -76,7 +76,7 @@ module Gameplay =
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
-                    UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.UserData
+                    UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
                     if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
@@ -90,7 +90,7 @@ module Gameplay =
                 improvement_flags
 
             else
-                UserDatabase.save_score score_info.CachedChart.Hash (ScoreInfo.to_score score_info) Content.UserData
+                UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
                 ImprovementFlags.None
         else
             ImprovementFlags.None

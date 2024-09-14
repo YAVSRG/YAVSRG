@@ -13,7 +13,7 @@ type TopBanner(score_info: ScoreInfo) as this =
     do
         this
         |+ Text(
-            score_info.CachedChart.Artist + " - " + score_info.CachedChart.Title,
+            score_info.ChartMeta.Artist + " - " + score_info.ChartMeta.Title,
             Align = Alignment.LEFT,
             Position =
                 {
@@ -24,7 +24,7 @@ type TopBanner(score_info: ScoreInfo) as this =
                 }
         )
         |+ Text(
-            score_info.CachedChart.DifficultyName,
+            score_info.ChartMeta.DifficultyName,
             Align = Alignment.LEFT,
             Position =
                 {
@@ -35,7 +35,7 @@ type TopBanner(score_info: ScoreInfo) as this =
                 }
         )
         |+ Text(
-            sprintf "%s  •  %s" ([score_info.CachedChart.Origin.ToString()] %> "score.source") ([score_info.CachedChart.Creator] %> "score.creator"),
+            sprintf "%s  •  %s" ([score_info.ChartMeta.Origin.ToString()] %> "score.source") ([score_info.ChartMeta.Creator] %> "score.creator"),
             Align = Alignment.LEFT,
             Position =
                 {

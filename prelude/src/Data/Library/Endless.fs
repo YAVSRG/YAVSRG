@@ -46,7 +46,6 @@ module Suggestion =
 
     let private pattern_similarity (total: ScaledTime) (rate: float32, patterns: PatternInfo) (c_rate: float32, c_patterns: PatternInfo) : float32 =
 
-
         let c_total = c_patterns.Patterns |> Seq.sumBy _.Amount
         if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then 0.0f
         else

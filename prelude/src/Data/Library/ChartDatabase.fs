@@ -135,6 +135,7 @@ module ChartDatabase =
         DbCharts.delete_batch deleted db.Database |> ignore
 
     let vacuum (db: ChartDatabase) =
+        // todo: find all charts with no audio file and vacuum them too
         // todo: find all assets not used by the database and delete them
         failwith "nyi"
 
@@ -279,7 +280,7 @@ module ChartDatabase =
     open Prelude.Charts.Processing.Difficulty
     open Prelude.Charts.Processing.Patterns
 
-    let cache_patterns =
+    let recalculate_data =
         { new Async.Service<ChartDatabase, unit>() with
             override this.Handle(charts_db) =
                 async {
@@ -297,9 +298,9 @@ module ChartDatabase =
                 }
         }
 
-    let cache_patterns_if_needed (db: ChartDatabase) (recache_complete_callback: unit -> unit) : bool =
+    let recalculate_if_needed (db: ChartDatabase) (recache_complete_callback: unit -> unit) : bool =
         if db.RecalculationNeeded then
             db.RecalculationNeeded <- false
-            cache_patterns.Request(db, recache_complete_callback)
+            recalculate_data.Request(db, recache_complete_callback)
             true
         else false

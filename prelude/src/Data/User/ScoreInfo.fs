@@ -16,7 +16,7 @@ type ScorePlayedBy =
 // Everything you need to display a score screen or watch a replay of a score
 type ScoreInfo =
     {
-        CachedChart: ChartMeta
+        ChartMeta: ChartMeta
         Chart: Chart
         WithMods: ModdedChart
 
@@ -76,7 +76,7 @@ module ScoreInfo =
         let patterns = PatternSummary.generate_pattern_data score.Rate chart
 
         {
-            CachedChart = cc
+            ChartMeta = cc
             Chart = chart
             WithMods = with_mods
 

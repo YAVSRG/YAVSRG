@@ -143,7 +143,7 @@ type MainMenuScreen() as this =
 
         if prev = Screen.Type.SplashScreen then
             if 
-                ChartDatabase.cache_patterns_if_needed 
+                ChartDatabase.recalculate_if_needed 
                     Content.Cache 
                     (fun () ->
                         Notifications.system_feedback (

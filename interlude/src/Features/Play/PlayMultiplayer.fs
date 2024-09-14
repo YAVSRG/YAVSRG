@@ -50,7 +50,7 @@ module PlayScreenMultiplayer =
                     let replay_data = (liveplay :> IReplayProvider).GetFullReplay()
 
                     {
-                        CachedChart = info.CacheInfo
+                        ChartMeta = info.CacheInfo
                         Chart = info.Chart
                         WithMods = info.WithMods
 

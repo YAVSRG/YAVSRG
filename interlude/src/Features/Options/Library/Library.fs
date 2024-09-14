@@ -76,7 +76,7 @@ type LibraryPage() =
             .Once(
                 %"library.recache_patterns",
                 fun () ->
-                    ChartDatabase.cache_patterns.Request(
+                    ChartDatabase.recalculate_data.Request(
                         Content.Cache,
                         fun () ->
                             Notifications.system_feedback (
