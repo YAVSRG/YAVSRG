@@ -19,7 +19,7 @@ module internal Shared =
         else
             "?"
 
-    let format_date_last_played (cc: CachedChart, ctx: LibraryViewContext) =
+    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) =
         let now = Timestamp.now ()
         let ONE_DAY = 24L * 3600_000L
 
@@ -37,8 +37,8 @@ module internal Shared =
         elif days_ago < 3600 then 8, "A long time ago"
         else 9, "Never"
 
-    let format_date_added (c: CachedChart, _) =
-        let days_ago = (DateTime.Today - c.DateAdded).TotalDays
+    let format_date_added (c: ChartMeta, _) =
+        let days_ago = (DateTime.Today - Timestamp.to_datetime c.DateAdded).TotalDays
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -50,7 +50,7 @@ module internal Shared =
         elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
-    let grade_achieved (cc: CachedChart, ctx: LibraryViewContext) =
+    let grade_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match 
@@ -60,7 +60,7 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
         | None -> -2, "No grade achieved"
 
-    let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
+    let lamp_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match 
@@ -70,28 +70,20 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"
 
-    let has_pattern (pattern: string) (cc: CachedChart, ctx: LibraryViewContext) =
-        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> 
-            report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-            || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-            || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-        | None -> false
+    let has_pattern (pattern: string) (cc: ChartMeta, ctx: LibraryViewContext) =
+        let report = cc.Patterns
+        report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+        || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+        || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
     
-    let below_ln_percent (threshold: float32) (cc: CachedChart, ctx: LibraryViewContext) =
-        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> report.LNPercent < threshold
-        | None -> false
+    let below_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
+        cc.Patterns.LNPercent < threshold
 
-    let above_ln_percent (threshold: float32) (cc: CachedChart, ctx: LibraryViewContext) =
-        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> report.LNPercent > threshold
-        | None -> false
+    let above_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
+        cc.Patterns.LNPercent > threshold
 
-    let has_sv (cc: CachedChart, ctx: LibraryViewContext) =
-        match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-        | Some report -> report.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
-        | None -> false
+    let has_sv (cc: ChartMeta, ctx: LibraryViewContext) =
+        cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]
 [<CustomEquality>]

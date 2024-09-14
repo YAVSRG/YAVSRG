@@ -124,7 +124,7 @@ module Imports =
 
                     let mutable success_count = 0
                     let charts = filter_rates |> Seq.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
-                    Cache.add_new config.PackName charts cache
+                    ChartDatabase.import charts chart_db
                     return {
                         ConvertedCharts = success_count
                         SkippedCharts = filter_rates |> List.choose (function Error skipped -> Some skipped | _ -> None)

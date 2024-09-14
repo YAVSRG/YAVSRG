@@ -261,6 +261,7 @@ module Osu_To_Interlude =
             Ok {
                 Header = header
                 LoadedFromPath = action.Source
+                PackName = action.Config.PackName
                 Chart = {
                     Keys = keys
                     Notes = snaps

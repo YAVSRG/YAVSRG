@@ -55,7 +55,6 @@ type ChartMeta =
     }
     static member FromImport (timestamp: int64) (import_chart: ImportChart) =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
-        let source_folder_name = Path.GetDirectoryName(import_chart.LoadedFromPath) |> Path.GetFileName
         let chart = import_chart.Chart
         {
             Hash = Chart.hash chart
@@ -84,13 +83,13 @@ type ChartMeta =
                 | ChartImportAssetPath.Missing -> AssetPath.Missing
             PreviewTime = import_chart.Header.PreviewTime
 
-            Folders = Set.singleton source_folder_name
+            Folders = Set.singleton import_chart.PackName
             Origin = 
                 match import_chart.Header.ChartSource with
                 | ChartImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)
                 | ChartImportOrigin.Quaver (set, map) -> ChartOrigin.Quaver(set, map)
                 | ChartImportOrigin.Etterna pack -> ChartOrigin.Etterna pack
-                | ChartImportOrigin.Stepmania _ -> ChartOrigin.Etterna source_folder_name
+                | ChartImportOrigin.Stepmania _ -> ChartOrigin.Etterna import_chart.PackName
                 | ChartImportOrigin.Unknown -> ChartOrigin.Unknown
 
             Keys = chart.Keys

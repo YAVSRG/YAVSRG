@@ -10,26 +10,11 @@ open Prelude.Data.Library.Caching
 module Collections =
 
     [<Json.AutoCodec>]
-    [<CustomEquality>]
-    [<CustomComparison>]
     type Entry =
         {
             mutable Hash: string
-            mutable Path: string
         }
-        override this.Equals(other) =
-            match other with
-            | :? Entry as other -> other.Hash = this.Hash || other.Path = this.Path
-            | _ -> false
-
-        override this.GetHashCode() = this.Hash.GetHashCode()
-        static member OfChart(cc: CachedChart) = { Hash = cc.Hash; Path = cc.Key }
-
-        interface IComparable with
-            member this.CompareTo other =
-                match other with
-                | :? Entry as other -> other.Hash.CompareTo this.Hash
-                | _ -> -1
+        static member OfChart(cc: ChartMeta) = { Hash = cc.Hash }
 
     [<Json.AutoCodec>]
     type Folder =
@@ -49,7 +34,7 @@ module Collections =
                 Icon = Setting.simple icon
             }
 
-        member this.Add(chart: CachedChart) : bool =
+        member this.Add(chart: ChartMeta) : bool =
             let entry = Entry.OfChart chart
 
             if this.Charts.Contains entry then
@@ -58,11 +43,11 @@ module Collections =
                 this.Charts.Add entry
                 true
 
-        member this.Remove(chart: CachedChart) : bool =
+        member this.Remove(chart: ChartMeta) : bool =
             let entry = Entry.OfChart chart
             this.Charts.Remove entry
 
-        member this.Contains(chart: CachedChart) : bool =
+        member this.Contains(chart: ChartMeta) : bool =
             let entry = Entry.OfChart chart
             this.Charts.Contains entry
 
@@ -100,13 +85,13 @@ module Collections =
                 Icon = Setting.simple icon
             }
 
-        member this.Add(chart: CachedChart, rate: float32, mods: ModState) =
+        member this.Add(chart: ChartMeta, rate: float32, mods: ModState) =
             let entry = Entry.OfChart chart
             let plEntry = PlaylistEntryInfo.Create(rate, mods)
             this.Charts.Add(entry, plEntry)
             true
 
-        member this.RemoveSingle(chart: CachedChart) =
+        member this.RemoveSingle(chart: ChartMeta) =
             let entry = Entry.OfChart chart
             let found = this.Charts.FindAll(fun (e, _) -> e = entry)
 
@@ -143,7 +128,7 @@ module Collections =
                 this.Charts.Insert(index + 1, item)
                 true
 
-        member this.Contains(chart: CachedChart) : bool =
+        member this.Contains(chart: ChartMeta) : bool =
             let entry = Entry.OfChart chart
             this.Charts |> Seq.tryFind (fun (e, _) -> e = entry) |> Option.isSome
 

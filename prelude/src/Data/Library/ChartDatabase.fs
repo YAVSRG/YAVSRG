@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
+open System.Collections.Concurrent
 open System.Security.Cryptography
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
@@ -13,7 +14,7 @@ type ChartDatabase =
     internal
         {
             Database: Database
-            Cache: Dictionary<string, ChartMeta>
+            Cache: ConcurrentDictionary<string, ChartMeta>
             LockObject: obj
             FastLoaded: bool
             AssetsPath: string
@@ -120,14 +121,12 @@ module ChartDatabase =
 
     // todo: deleting from just certain folders
     let delete (chart_meta: ChartMeta) (db: ChartDatabase) =
-        if db.Cache.Remove chart_meta.Hash || not db.FastLoaded then
-            DbCharts.delete chart_meta.Hash db.Database |> ignore
+        db.Cache.Remove(chart_meta.Hash) |> ignore
+        DbCharts.delete chart_meta.Hash db.Database |> ignore
 
     let delete_many (cs: ChartMeta seq) (db: ChartDatabase) = 
         let deleted = 
-            cs 
-            |> Seq.filter (fun c -> db.Cache.Remove c.Hash || not db.FastLoaded)
-            |> Seq.map (_.Hash)
+            cs |> Seq.map (fun c -> db.Cache.Remove c.Hash |> ignore; c.Hash)
         DbCharts.delete_batch deleted db.Database |> ignore
 
     let vacuum (db: ChartDatabase) =
@@ -142,7 +141,7 @@ module ChartDatabase =
             assert (db.Cache.Count = 0)
 
             for chart_meta in DbCharts.fast_load db.Database do
-                db.Cache.Add(chart_meta.Hash, chart_meta)
+                db.Cache.[chart_meta.Hash] <- chart_meta
 
             db
 
@@ -159,10 +158,11 @@ module ChartDatabase =
 
         seq {
             for folder in Directory.EnumerateDirectories(get_game_folder "Songs") do
+                let folder_name = Path.GetFileName(folder)
                 if folder.ToLower() <> ".assets" then
                     for file in Directory.EnumerateFiles(folder) do
                         if Path.GetExtension(file).ToLower() = ".yav" then
-                            match Chart.from_file file with
+                            match Chart.from_file folder_name file with
                             | Ok chart -> yield ChartMeta.FromImport (File.GetLastWriteTime(file) |> Timestamp.from_datetime) chart, chart.Chart
                             | Error reason -> Logging.Warn(sprintf "Failed to load %s: %s" file reason)
         }
@@ -182,7 +182,7 @@ module ChartDatabase =
         legacy_migrate
             {
                 Database = migrate database
-                Cache = Dictionary()
+                Cache = ConcurrentDictionary()
                 LockObject = obj ()
                 FastLoaded = use_fast_load
                 AssetsPath = Path.Combine(get_game_folder "Songs", ".assets")
@@ -257,8 +257,7 @@ module ChartDatabase =
                         if chart.AudioHash <> actual_audio_hash then
                             failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioHash
 
-                    // todo: there is also a design problem here but it works for now
-                    import [{ LoadedFromPath = Path.Combine(folder, "cdn-download.yav"); Header = header; Chart = chart_data }] db
+                    import [{ PackName = folder; LoadedFromPath = ""; Header = header; Chart = chart_data }] db
 
                     Logging.Debug(sprintf "Installed '%s' from CDN" song.FormattedTitle)
 

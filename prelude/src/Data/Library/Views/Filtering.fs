@@ -4,14 +4,13 @@ open System
 open FParsec
 open Prelude
 open Prelude.Charts.Processing.Patterns
-open Prelude.Data.Library.Caching
 
 type FilterPart =
     | Equals of string * string
     | NotEquals of string * string
-    | LessThan of string * float
-    | MoreThan of string * float
-    | Clamp of string * float
+    | LessThan of string * float32
+    | MoreThan of string * float32
+    | Clamp of string * float32
     | String of string
     | NotString of string
     | Tag of string
@@ -34,9 +33,11 @@ module FilterParts =
     let private notequals =
         string .>>. (pchar '!' >>. pchar '=' >>. (string <|> quoted_string)) |>> NotEquals
 
-    let private less = string .>>. (pchar '<' >>. optional (pchar '=') >>. pfloat) |>> LessThan
-    let private more = string .>>. (pchar '>' >>. optional (pchar '=') >>. pfloat) |>> MoreThan
-    let private clamp = string .>>. (pchar '~' >>. pfloat) |>> Clamp
+    let private pfloat32 = pfloat |>> float32
+
+    let private less = string .>>. (pchar '<' >>. optional (pchar '=') >>. pfloat32) |>> LessThan
+    let private more = string .>>. (pchar '>' >>. optional (pchar '=') >>. pfloat32) |>> MoreThan
+    let private clamp = string .>>. (pchar '~' >>. pfloat32) |>> Clamp
     let private tag = pchar '#' >>. string |>> Tag
 
     let private filter =
@@ -70,8 +71,8 @@ type Filter =
         Keymode: int option
         LengthMin: float32 option
         LengthMax: float32 option
-        DifficultyMin: float option
-        DifficultyMax: float option
+        DifficultyMin: float32 option
+        DifficultyMax: float32 option
         LNPercentMin: float32 option
         LNPercentMax: float32 option
         SV: bool option
@@ -102,7 +103,7 @@ type Filter =
             SearchAntiTerms = [||]
         }
 
-    member this.Compile(ctx: LibraryViewContext) : (CachedChart -> bool) array =
+    member this.Compile(ctx: LibraryViewContext) : (ChartMeta -> bool) array =
         seq {
             match this.Keymode with
             | Some k -> yield fun cc -> cc.Keys = k
@@ -116,22 +117,22 @@ type Filter =
             | None -> ()
 
             match this.DifficultyMin with
-            | Some min_diff -> yield fun cc -> cc.Physical >= min_diff
+            | Some min_diff -> yield fun cc -> cc.Rating >= min_diff
             | None -> ()
             match this.DifficultyMax with
-            | Some max_diff -> yield fun cc -> cc.Physical <= max_diff
+            | Some max_diff -> yield fun cc -> cc.Rating <= max_diff
             | None -> ()
 
             match this.LNPercentMin with
-            | Some min_pc -> yield fun cc -> above_ln_percent min_pc (cc, ctx)
+            | Some min_pc -> yield fun cc -> cc.Patterns.LNPercent > min_pc
             | None -> ()
             match this.LNPercentMax with
-            | Some max_pc -> yield fun cc -> below_ln_percent max_pc (cc, ctx)
+            | Some max_pc -> yield fun cc -> cc.Patterns.LNPercent < max_pc
             | None -> ()
 
             match this.SV with
-            | Some false -> yield fun cc -> not (has_sv (cc, ctx))
-            | Some true -> yield fun cc -> has_sv (cc, ctx)
+            | Some false -> yield fun cc -> not (cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD)
+            | Some true -> yield fun cc -> cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
             | None -> ()
 
             if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
@@ -147,25 +148,22 @@ type Filter =
                             + " "
                             + (cc.Subtitle |> Option.defaultValue "")
                             + " "
-                            + cc.Folder)
+                            + String.concat " " cc.Folders)
                             .ToLowerInvariant()
-                    Array.forall (s.Contains : string -> bool) this.SearchTerms 
+                    Array.forall (s.Contains : string -> bool) this.SearchTerms
                     && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms
 
             if this.PatternTerms.Length <> 0 || this.PatternAntiTerms.Length <> 0 then
                 yield fun cc ->
-                    match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with
-                    | Some report ->
-                        
-                        let matches (pattern: string) =
-                            report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-                            || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-                            || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                    let report = cc.Patterns
 
-                        Array.forall matches this.PatternTerms
-                        && Array.forall (matches >> not) this.PatternAntiTerms
+                    let matches (pattern: string) =
+                        report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                        || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                        || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
 
-                    | None -> false
+                    Array.forall matches this.PatternTerms
+                    && Array.forall (matches >> not) this.PatternAntiTerms
         }
         |> Array.ofSeq
 
@@ -196,16 +194,16 @@ type Filter =
             | LessThan("diff", d) -> filter <- { filter with DifficultyMax = Some d }
 
             | MoreThan("l", l)
-            | MoreThan("length", l) -> filter <- { filter with LengthMin = Some (float32 l) }
+            | MoreThan("length", l) -> filter <- { filter with LengthMin = Some l }
             | LessThan("l", l)
-            | LessThan("length", l) -> filter <- { filter with LengthMax = Some (float32 l) }
+            | LessThan("length", l) -> filter <- { filter with LengthMax = Some l }
 
             | LessThan("ln", pc)
             | LessThan("holds", pc)
-            | LessThan("lns", pc) -> filter <- { filter with LNPercentMin = Some (float32 pc) }
+            | LessThan("lns", pc) -> filter <- { filter with LNPercentMin = Some pc }
             | MoreThan("ln", pc)
             | MoreThan("holds", pc)
-            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMax = Some (float32 pc) }
+            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMax = Some pc }
 
             | Tag "nosv"
             | Tag "nsv" -> filter <- { filter with SV = Some false }
@@ -216,11 +214,11 @@ type Filter =
 
 module Filter =
 
-    let private apply (compiled_filter: (CachedChart -> bool) array) (cc: CachedChart) : bool =
+    let private apply (compiled_filter: (ChartMeta -> bool) array) (cc: ChartMeta) : bool =
         Array.forall (fun f -> f cc) compiled_filter
 
-    let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: CachedChart seq) =
+    let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: ChartMeta seq) =
         Seq.filter (apply (filter.Compile ctx)) charts
 
-    let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (CachedChart * 'T) seq) =
+    let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
         Seq.filter (fun (cc, _) -> apply (filter.Compile ctx) cc) charts

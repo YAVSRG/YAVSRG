@@ -6,7 +6,7 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 
 [<RequireQualifiedAccess>]
 type ScorePlayedBy =
@@ -16,7 +16,7 @@ type ScorePlayedBy =
 // Everything you need to display a score screen or watch a replay of a score
 type ScoreInfo =
     {
-        CachedChart: CachedChart
+        CachedChart: ChartMeta
         Chart: Chart
         WithMods: ModdedChart
 
@@ -65,7 +65,7 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: CachedChart) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = Mods.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 

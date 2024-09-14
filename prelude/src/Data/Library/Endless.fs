@@ -13,7 +13,7 @@ open Prelude.Data.User
 
 type SuggestionContext =
     {
-        BaseChart: CachedChart * float32
+        BaseChart: ChartMeta * float32
         Mods: ModState
         Filter: Filter
         MinimumRate: float32
@@ -66,11 +66,11 @@ module Suggestion =
                     similarity <- similarity + mixed_similarity * bpm_similarity * density_similarity * (p1.Amount / total) * (p2.Amount / c_total)
         similarity
 
-    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : CachedChart option =
+    let get_random (filter_by: Filter) (ctx: LibraryViewContext) : ChartMeta option =
         let rand = Random()
 
         let charts =
-            Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values
+            Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values
             |> Array.ofSeq
 
         if charts.Length > 0 then
@@ -79,13 +79,11 @@ module Suggestion =
         else
             None
 
-    let private get_core_suggestions (ctx: SuggestionContext) : (CachedChart * float32) seq =
+    let private get_core_suggestions (ctx: SuggestionContext) : (ChartMeta * float32) seq =
 
         let base_chart, rate = ctx.BaseChart
         
-        match Cache.patterns_by_hash base_chart.Hash ctx.Library.Cache with
-        | None -> Seq.empty
-        | Some patterns ->
+        let patterns = base_chart.Patterns
 
         recommended_already <- Set.add base_chart.Hash recommended_already
         recommended_already <- Set.add (base_chart.Title.ToLower()) recommended_already
@@ -99,19 +97,16 @@ module Suggestion =
         let THIRTY_DAYS = 30L * 24L * 3600_000L
 
         let candidates =
-            ctx.Library.Cache.Entries.Values
+            ctx.Library.Charts.Cache.Values
             |> Seq.filter (fun cc -> cc.Keys = base_chart.Keys)
             |> Seq.filter (fun cc -> not (recommended_already.Contains cc.Hash))
             |> Seq.filter (fun cc -> not (recommended_already.Contains (cc.Title.ToLower())))
-            |> Seq.choose (fun cc -> 
-                match Cache.patterns_by_hash cc.Hash ctx.Library.Cache with 
-                | None -> None
-                | Some p -> 
-                    let best_rate = target_density / p.Density50
-                    let best_approx_rate = round(best_rate / 0.05f) * 0.05f
-                    if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
-                        Some (cc, (best_approx_rate, p))
-                    else None
+            |> Seq.choose (fun cc ->
+                let best_rate = target_density / cc.Patterns.Density50
+                let best_approx_rate = round(best_rate / 0.05f) * 0.05f
+                if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
+                    Some (cc, (best_approx_rate, cc.Patterns))
+                else None
             )
             |> Seq.filter (fun (cc, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then 
@@ -151,7 +146,7 @@ module Suggestion =
         |> Seq.sortByDescending snd
         |> Seq.map fst
 
-    let get_suggestion (ctx: SuggestionContext) : (CachedChart * float32) option =
+    let get_suggestion (ctx: SuggestionContext) : (ChartMeta * float32) option =
         let rand = Random()
         let best_matches = get_core_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
 
@@ -176,7 +171,7 @@ module Suggestion =
 
 type EndlessModeState =
     internal {
-        mutable Queue: (CachedChart * PlaylistEntryInfo) list
+        mutable Queue: (ChartMeta * PlaylistEntryInfo) list
     }
 
 module EndlessModeState =
@@ -192,7 +187,7 @@ module EndlessModeState =
             playlist.Charts
             |> Seq.skip from
             |> Seq.choose (fun (c, info) ->
-                match Cache.by_hash c.Hash library.Cache with
+                match ChartDatabase.get_meta c.Hash library.Charts with
                 | Some cc -> Some(cc, info)
                 | None -> None
             )
@@ -202,7 +197,7 @@ module EndlessModeState =
         state.Queue <-
             playlist.Charts
             |> Seq.choose (fun (c, info) ->
-                match Cache.by_hash c.Hash library.Cache with
+                match ChartDatabase.get_meta c.Hash library.Charts with
                 | Some cc -> Some(cc, info)
                 | None -> None
             )
@@ -214,7 +209,7 @@ module EndlessModeState =
 
     type Next =
         {
-            Chart: CachedChart
+            Chart: ChartMeta
             Rate: float32
             Mods: ModState
             NextContext: SuggestionContext

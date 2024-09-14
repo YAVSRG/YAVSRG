@@ -4,7 +4,6 @@ open System.Collections.Generic
 open Percyqaz.Data
 open Prelude.Backbeat
 open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Caching
 
 [<RequireQualifiedAccess; Json.AutoCodec>]
 type LibraryView =
@@ -25,14 +24,14 @@ module LibraryView =
 
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
-        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Cache.Entries.Values do
+        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
             let group_key = group_by (cc, ctx)
 
             if found_groups.ContainsKey group_key |> not then
                 found_groups.Add(
                     group_key,
                     {
-                        Charts = ResizeArray<CachedChart * LibraryContext * SortingTag>()
+                        Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
                         Context = LibraryGroupContext.None
                     }
                 )
@@ -55,16 +54,9 @@ module LibraryView =
 
             collection.Charts
             |> Seq.choose (fun entry ->
-                match Cache.by_key entry.Path ctx.Library.Cache with
+                match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
                 | Some cc -> Some(cc, LibraryContext.Folder name)
-                | None ->
-
-                match Cache.by_hash entry.Hash ctx.Library.Cache with
-                | Some cc ->
-                    entry.Path <- cc.Key
-                    Some(cc, LibraryContext.Folder name)
-                | None ->
-                    None
+                | None -> None
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
@@ -85,16 +77,9 @@ module LibraryView =
             playlist.Charts
             |> Seq.indexed
             |> Seq.choose (fun (i, (entry, info)) ->
-                match Cache.by_key entry.Path ctx.Library.Cache with
+                match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
                 | Some cc -> Some(cc, LibraryContext.Playlist(i, name, info))
-                | None ->
-
-                match Cache.by_key entry.Hash ctx.Library.Cache with
-                | Some cc ->
-                    entry.Path <- cc.Key
-                    Some(cc, LibraryContext.Playlist(i, name, info))
-                | None ->
-                    None
+                | None -> None
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> Array.ofSeq
@@ -121,11 +106,9 @@ module LibraryView =
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
             |> Seq.choose (fun (c: TableChart) ->
-                match Cache.by_key (sprintf "%s/%s" table.Info.Name c.Hash) ctx.Library.Cache with
+                match ChartDatabase.get_meta c.Hash ctx.Library.Charts with
                 | Some cc -> Some(cc, LibraryContext.Table level)
-                | None ->
-                    Cache.by_hash c.Hash ctx.Library.Cache
-                    |> Option.map (fun x -> x, LibraryContext.Table level)
+                | None -> None
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))

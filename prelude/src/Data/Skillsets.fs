@@ -13,17 +13,14 @@ module Skillsets =
         let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
-        for cc_key in library.Cache.Entries.Keys do
-            let cc = library.Cache.Entries.[cc_key]
-            match library.Cache.Patterns.TryGetValue cc.Hash with
-            | false, _ -> ()
-            | true, res ->
+        for cc_key in library.Charts.Cache.Keys do
+            let cc = library.Charts.Cache.[cc_key]
 
             let data = UserDatabase.get_chart_data cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
-                    KeymodeSkillBreakdown.score res.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
+                    KeymodeSkillBreakdown.score cc.Patterns.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
             | None -> ()
 
     let find_underperformance (score_db: UserDatabase) (library: Library) =
@@ -33,11 +30,8 @@ module Skillsets =
 
         let ACC_INCREASE = 3.0
 
-        for cc_key in library.Cache.Entries.Keys do
-            let cc = library.Cache.Entries.[cc_key]
-            match library.Cache.Patterns.TryGetValue cc.Hash with
-            | false, _ -> ()
-            | true, res ->
+        for cc_key in library.Charts.Cache.Keys do
+            let cc = library.Charts.Cache.[cc_key]
 
             let data = UserDatabase.get_chart_data cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
@@ -45,7 +39,7 @@ module Skillsets =
                 for (acc, rate, _) in pbs.Accuracy do
                     let better_accuracy = 1.0 - (1.0 - acc) / ACC_INCREASE
                     let better_rate = rate + 0.3f
-                    let improvement = KeymodeSkillBreakdown.what_if res.Patterns better_accuracy better_rate keymode_skills.[cc.Keys - 3]
+                    let improvement = KeymodeSkillBreakdown.what_if cc.Patterns.Patterns better_accuracy better_rate keymode_skills.[cc.Keys - 3]
                     if improvement.Total = 0.0f then
                         printfn "%.2f%% [%.2fx] on %s is an underperformance" (acc * 100.0) rate cc.Title
             | None -> ()

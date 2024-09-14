@@ -83,6 +83,7 @@ type ImportChart =
     {
         Header: ChartImportHeader
         LoadedFromPath: string
+        PackName: string
         Chart: Chart
     }
 
@@ -197,7 +198,7 @@ module Chart =
             }
         with err -> Error err.Message
 
-    let from_file (path: string) : Result<ImportChart, string> =
+    let from_file (pack_name: string) (path: string) : Result<ImportChart, string> =
         try
             use fs = new FileStream(path, FileMode.Open)
             use br = new BinaryReader(fs)
@@ -211,7 +212,13 @@ module Chart =
                     raise err
 
             match read_headless keys br with
-            | Ok chart -> Ok { Header = header; LoadedFromPath = path; Chart = chart }
+            | Ok chart -> 
+                Ok { 
+                    PackName = pack_name
+                    Header = header
+                    LoadedFromPath = path
+                    Chart = chart
+                }
             | Error reason -> Error reason
 
         with err -> Error err.Message
