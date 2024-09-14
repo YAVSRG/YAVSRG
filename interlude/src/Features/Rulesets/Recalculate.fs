@@ -15,7 +15,7 @@ module PersonalBests =
             override this.Handle(rulesets) =
                 async {
                     for cc in Content.Cache.Entries.Values |> Seq.toArray do
-                        let data = ScoreDatabase.get cc.Hash Content.Scores
+                        let data = UserDatabase.get_chart_data cc.Hash Content.Scores
 
                         if not data.Scores.IsEmpty then
                             match Cache.load cc Content.Cache with

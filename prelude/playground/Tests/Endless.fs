@@ -16,7 +16,7 @@ module Endless =
         
         Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
         let library = Library.load()
-        let score_db = ScoreDatabase.create true (Database.from_file "Data/scores.db")
+        let user_db = UserDatabase.create true (Database.from_file "Data/scores.db")
 
         let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
@@ -24,7 +24,7 @@ module Endless =
         let ctx : LibraryViewContext =
             {
                 Library = library
-                ScoreDatabase = score_db
+                UserDatabase = user_db
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
                 Rate = 1.0f
@@ -40,7 +40,7 @@ module Endless =
         let mutable suggestion_ctx = 
             {
                 Library = library
-                ScoreDatabase = score_db
+                UserDatabase = user_db
                 BaseChart = start, 1.0f
                 MinimumRate = 1.0f
                 MaximumRate = 1.5f

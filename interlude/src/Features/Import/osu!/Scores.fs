@@ -162,10 +162,10 @@ module Scores =
                         Keys = chart.Keys
                     }
 
-                if not (ScoreDatabase.delete_score chart_hash score.Timestamp Content.Scores) then
+                if not (UserDatabase.delete_score chart_hash score.Timestamp Content.Scores) then
                     score_count <- score_count + 1
 
-                ScoreDatabase.save_score chart_hash score Content.Scores
+                UserDatabase.save_score chart_hash score Content.Scores
 
         Logging.Info(sprintf "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count)
 

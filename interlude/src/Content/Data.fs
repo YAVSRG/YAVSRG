@@ -9,17 +9,17 @@ open Prelude.Data.Library
 module private Data =
 
     let mutable database: Database = Unchecked.defaultof<_>
-    let mutable score_db: ScoreDatabase = Unchecked.defaultof<_>
+    let mutable user_db: UserDatabase = Unchecked.defaultof<_>
     let mutable library: Library = Unchecked.defaultof<_>
 
     let init_startup () =
         library <- Library.load ()
-        database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db"))
-        score_db <- ScoreDatabase.create true database
+        database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db")) // todo: rename to interlude.db
+        user_db <- UserDatabase.create true database
 
     let deinit () =
-        if not (isNull (score_db :> obj)) then
-            ScoreDatabase.save_changes score_db
+        if not (isNull (user_db :> obj)) then
+            UserDatabase.save_changes user_db
             Library.save library
 
     let charts_updated_ev = Event<unit>()

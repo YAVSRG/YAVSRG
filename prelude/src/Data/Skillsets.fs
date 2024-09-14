@@ -7,7 +7,7 @@ module Skillsets =
 
     let keymode_skills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
 
-    let calculate (score_db: ScoreDatabase) (library: Library) =
+    let calculate (score_db: UserDatabase) (library: Library) =
 
         let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
@@ -18,14 +18,14 @@ module Skillsets =
             | false, _ -> ()
             | true, res ->
 
-            let data = ScoreDatabase.get cc.Hash score_db
+            let data = UserDatabase.get_chart_data cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
                     KeymodeSkillBreakdown.score res.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
             | None -> ()
 
-    let find_underperformance (score_db: ScoreDatabase) (library: Library) =
+    let find_underperformance (score_db: UserDatabase) (library: Library) =
 
         let sc_j4 = Rulesets.SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
@@ -38,7 +38,7 @@ module Skillsets =
             | false, _ -> ()
             | true, res ->
 
-            let data = ScoreDatabase.get cc.Hash score_db
+            let data = UserDatabase.get_chart_data cc.Hash score_db
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do

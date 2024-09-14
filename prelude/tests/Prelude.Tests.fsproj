@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <Compile Include="Database\Helpers.fs" />
-    <Compile Include="Database\ScoreDatabase.fs" />
+    <Compile Include="Database\UserDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />
     <Compile Include="Database\DbChartData.fs" />
     <Compile Include="Noteskins\Helpers.fs" />

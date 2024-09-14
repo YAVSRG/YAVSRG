@@ -47,5 +47,5 @@ type LibraryViewContext =
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
-        ScoreDatabase: ScoreDatabase
+        UserDatabase: UserDatabase
     }

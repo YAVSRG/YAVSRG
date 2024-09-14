@@ -56,7 +56,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         ConfirmPage(
             [ score_name ] %> "misc.confirmdelete",
             fun () ->
-                if ScoreDatabase.delete_score score_info.CachedChart.Hash score_info.TimePlayed Content.Scores then
+                if UserDatabase.delete_score score_info.CachedChart.Hash score_info.TimePlayed Content.Scores then
                     LevelSelect.refresh_all ()
                     Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
                 else

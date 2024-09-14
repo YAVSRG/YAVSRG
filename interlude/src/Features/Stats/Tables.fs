@@ -212,7 +212,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
     let rs_hash = Ruleset.hash ruleset
 
     let score_of (hash: string) =
-        (ScoreDatabase.get hash Content.Scores).PersonalBests
+        (UserDatabase.get_chart_data hash Content.Scores).PersonalBests
         |> Bests.ruleset_best_above rs_hash (_.Accuracy) 1.0f
         |> Option.get
         |> fun (accuracy, _, _) -> accuracy
@@ -344,7 +344,7 @@ type private TableStats() =
         | Some table ->
             Table.ratings
                 (fun chart_id ->
-                    (ScoreDatabase.get chart_id Content.Scores).PersonalBests
+                    (UserDatabase.get_chart_data chart_id Content.Scores).PersonalBests
                     |> Bests.ruleset_best_above table.Info.RulesetId (_.Grade) 1.0f
                     |> Option.map (fun (grade, _, _) -> grade)
                 )

@@ -13,7 +13,7 @@ type Setup() =
     [<OneTimeSetUp>]
     member _.Setup() =
         let db, _conn = Database.in_memory "interlude"
-        ScoreDatabase.create false db |> ignore // ensures migration
+        UserDatabase.create false db |> ignore // ensures migration
         conn <- _conn // in-memory database persists until teardown where it gets disposed
 
     [<OneTimeTearDown>]
@@ -23,4 +23,4 @@ type Setup() =
 module Helpers =
 
     let in_memory () =
-        Percyqaz.Data.Sqlite.Database.in_memory "interlude"
+        Database.in_memory "interlude"

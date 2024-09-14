@@ -73,7 +73,7 @@ module Printerlude =
                     let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
 
                     for chart in table.Charts do
-                        let data = ScoreDatabase.get chart.Hash Content.Scores
+                        let data = UserDatabase.get_chart_data chart.Hash Content.Scores
 
                         match
                             data.PersonalBests

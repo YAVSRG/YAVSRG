@@ -24,7 +24,7 @@ module internal Shared =
         let ONE_DAY = 24L * 3600_000L
 
         let days_ago =
-            (now - (ScoreDatabase.get cc.Hash ctx.ScoreDatabase).LastPlayed) / ONE_DAY
+            (now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed) / ONE_DAY
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -51,7 +51,7 @@ module internal Shared =
         else 8, "A long time ago"
 
     let grade_achieved (cc: CachedChart, ctx: LibraryViewContext) =
-        let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+        let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match 
             data.PersonalBests
@@ -61,7 +61,7 @@ module internal Shared =
         | None -> -2, "No grade achieved"
 
     let lamp_achieved (cc: CachedChart, ctx: LibraryViewContext) =
-        let data = ScoreDatabase.get cc.Hash ctx.ScoreDatabase
+        let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match 
             data.PersonalBests

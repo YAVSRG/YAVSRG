@@ -24,20 +24,20 @@ module Sorting =
                 "date_installed", fun (x, _) -> "", (Timestamp.from_datetime x.DateAdded |> float32), x.Physical
                 "date_played", fun (x, ctx) -> 
                     let date_played =
-                         match ScoreDatabase.get_cached x.Hash ctx.ScoreDatabase with
+                         match UserDatabase.get_chart_data_cached x.Hash ctx.UserDatabase with
                          | Some d -> d.LastPlayed |> float32
                          | None -> 0.0f
                     "", date_played, x.Physical
                 "grade", fun (x, ctx) ->
                     match 
-                        (ScoreDatabase.get x.Hash ctx.ScoreDatabase).PersonalBests
+                        (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
                         |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Physical
                     | None -> "", -2.0f, x.Physical
                 "lamp", fun (x, ctx) ->
                     match 
-                        (ScoreDatabase.get x.Hash ctx.ScoreDatabase).PersonalBests
+                        (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
                         |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Physical

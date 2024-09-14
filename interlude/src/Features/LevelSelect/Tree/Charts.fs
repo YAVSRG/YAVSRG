@@ -32,7 +32,7 @@ type private ChartItem(group_name: string, cc: CachedChart, context: LibraryCont
         last_cached_flag <- cache_flag
 
         if chart_save_data.IsNone then
-            chart_save_data <- Some(ScoreDatabase.get cc.Hash Content.Scores)
+            chart_save_data <- Some(UserDatabase.get_chart_data cc.Hash Content.Scores)
 
         match chart_save_data with
         | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->

@@ -22,7 +22,7 @@ type internal ChangeTracker<'T> =
             this.Changes.Clear()
             result
 
-type ChartSaveData(chart_id: string, data: DbChartData, db: ScoreDatabase) =
+type ChartSaveData(chart_id: string, data: DbChartData, db: UserDatabase) =
     let mutable offset = data.Offset
     let mutable last_played = data.LastPlayed
     let mutable comment = data.Comment
@@ -69,7 +69,7 @@ type ChartSaveData(chart_id: string, data: DbChartData, db: ScoreDatabase) =
     member this.ScoreByTimestamp (timestamp: int64) =
         scores |> List.tryFind (fun score -> score.Timestamp = timestamp)
 
-and ScoreDatabase =
+and UserDatabase =
     internal
         {
             Database: Database
@@ -83,19 +83,19 @@ and ScoreDatabase =
             FastLoaded: bool
         }
 
-module ScoreDatabase =
+module UserDatabase =
 
-    let get_cached (chart_id: string) (db: ScoreDatabase) : ChartSaveData option =
+    let get_chart_data_cached (chart_id: string) (db: UserDatabase) : ChartSaveData option =
         lock db.LockObject
         <| fun () ->
             match db.Cache.TryGetValue chart_id with
             | true, res -> Some res
             | false, _ -> None
 
-    let get (chart_id: string) (db: ScoreDatabase) : ChartSaveData =
+    let get_chart_data (chart_id: string) (db: UserDatabase) : ChartSaveData =
         lock db.LockObject
         <| fun () ->
-            match get_cached chart_id db with
+            match get_chart_data_cached chart_id db with
             | Some existing -> existing
             | None ->
                 let new_info =
@@ -110,27 +110,27 @@ module ScoreDatabase =
                 db.Cache.[chart_id] <- new_info
                 new_info
 
-    let save_changes (db: ScoreDatabase) =
+    let save_changes (db: UserDatabase) =
         DbChartData.save_offsets db.ChangedOffsets.Dump db.Database
         DbChartData.save_last_played db.ChangedLastPlayed.Dump db.Database
         DbChartData.save_comments db.ChangedComments.Dump db.Database
         DbChartData.save_breakpoints db.ChangedBreakpoints.Dump db.Database
         DbChartData.save_personal_bests db.ChangedPersonalBests.Dump db.Database
 
-    let save_score (chart_id: string) (score: Score) (db: ScoreDatabase) =
+    let save_score (chart_id: string) (score: Score) (db: UserDatabase) =
         lock db.LockObject
         <| fun () ->
             DbScores.save chart_id score db.Database |> ignore
 
-            match get_cached chart_id db with
+            match get_chart_data_cached chart_id db with
             | None -> ()
             | Some existing_data -> existing_data.Scores <- score :: existing_data.Scores
 
-    let delete_score (chart_id: string) (timestamp: int64) (db: ScoreDatabase) : bool =
+    let delete_score (chart_id: string) (timestamp: int64) (db: UserDatabase) : bool =
         lock db.LockObject
         <| fun () ->
             if DbScores.delete_by_timestamp chart_id timestamp db.Database > 0 then
-                match get_cached chart_id db with
+                match get_chart_data_cached chart_id db with
                 | None -> ()
                 | Some existing_data ->
                     existing_data.Scores <- existing_data.Scores |> List.filter (fun s -> s.Timestamp <> timestamp)
@@ -139,7 +139,7 @@ module ScoreDatabase =
             else
                 false
 
-    let private fast_load (db: ScoreDatabase) : ScoreDatabase =
+    let private fast_load (db: UserDatabase) : UserDatabase =
         lock db.LockObject
         <| fun () ->
             assert (db.Cache.Count = 0)
@@ -150,7 +150,7 @@ module ScoreDatabase =
             let default_db_data = DbChartData.DEFAULT
 
             for chart_id, scores in DbScores.fast_load db.Database do
-                match get_cached chart_id db with
+                match get_chart_data_cached chart_id db with
                 | Some existing ->
                     assert (existing.Scores.IsEmpty)
                     existing.Scores <- scores
@@ -174,7 +174,7 @@ module ScoreDatabase =
 
         db
 
-    let private legacy_migrate (db: ScoreDatabase) : ScoreDatabase =
+    let private legacy_migrate (db: UserDatabase) : UserDatabase =
         match LegacyScoreDatabase.TryLoad() with
         | None -> db
         | Some legacy_db ->
@@ -215,9 +215,9 @@ module ScoreDatabase =
             Logging.Debug("Marked scores.json as old. All done!")
             db
 
-    // Fast load true loads the contents of the db into memory
+    // Fast load true loads the contents of the db into memory (used by game client)
     // Fast load false may be used for tools that just want to fetch stuff for a couple of charts
-    let create (fast_loaded: bool) (database: Database) : ScoreDatabase =
+    let create (use_fast_load: bool) (database: Database) : UserDatabase =
         legacy_migrate
             {
                 Database = migrate database
@@ -228,6 +228,6 @@ module ScoreDatabase =
                 ChangedComments = ChangeTracker.Empty
                 ChangedBreakpoints = ChangeTracker.Empty
                 ChangedPersonalBests = ChangeTracker.Empty
-                FastLoaded = fast_loaded
+                FastLoaded = use_fast_load
             }
-        |> if fast_loaded then fast_load else id
+        |> if use_fast_load then fast_load else id

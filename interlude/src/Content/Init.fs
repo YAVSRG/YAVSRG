@@ -17,7 +17,7 @@ type Content() =
 
     static member deinit() = Data.deinit ()
 
-    static member Scores = Data.score_db
+    static member Scores = Data.user_db
     static member Library = Data.library
     static member Cache = Data.library.Cache
     static member Collections = Data.library.Collections

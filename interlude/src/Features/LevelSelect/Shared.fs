@@ -110,7 +110,7 @@ module LevelSelect =
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
-                    ScoreDatabase = Content.Scores
+                    UserDatabase = Content.Scores
                 }
             | Some ctx -> ctx
 
@@ -147,7 +147,7 @@ module LevelSelect =
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
                     Library = Content.Library
-                    ScoreDatabase = Content.Scores
+                    UserDatabase = Content.Scores
                 }
 
             match Suggestion.get_random filter ctx with
@@ -169,7 +169,7 @@ module LevelSelect =
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
-                        ScoreDatabase = Content.Scores
+                        UserDatabase = Content.Scores
                     }
 
                 match Suggestion.get_suggestion ctx with
