@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+﻿namespace Prelude.Data.User
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite

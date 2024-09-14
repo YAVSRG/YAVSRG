@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
-open Prelude.Data
+open Prelude.Data.User
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 

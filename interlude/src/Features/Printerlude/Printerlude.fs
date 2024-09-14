@@ -10,6 +10,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Data
+open Prelude.Data.User
 open Prelude.Gameplay
 open Interlude
 open Interlude.Content

@@ -9,7 +9,7 @@ open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.osu
 open Prelude.Gameplay
 open Prelude.Data.``osu!``
-open Prelude.Data
+open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Interlude.Options

@@ -22,7 +22,7 @@ module Imports =
                                 Config = ConversionOptions.Default
                             } do
                         match chart with
-                        | Ok chart ->
+                        | Ok (chart, _) ->
                             match Chart.check chart with
                             | Error msg -> Logging.Error msg
                             | Ok chart -> ()

@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open Percyqaz.Common
-open Prelude.Data
+open Prelude.Data.User
 
 module DbScores =
 

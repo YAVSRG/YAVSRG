@@ -4,6 +4,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Data
+open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Gameplay

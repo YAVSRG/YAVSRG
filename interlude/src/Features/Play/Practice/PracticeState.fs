@@ -3,8 +3,8 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Data
 open Prelude.Gameplay
+open Prelude.Data.User
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play

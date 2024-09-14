@@ -11,11 +11,11 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
+open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
-open Prelude.Data
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI

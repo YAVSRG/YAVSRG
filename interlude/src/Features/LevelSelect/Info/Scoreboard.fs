@@ -4,11 +4,11 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data
+open Prelude.Data.User
 open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI

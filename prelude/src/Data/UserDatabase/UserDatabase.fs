@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+﻿namespace Prelude.Data.User
 
 open System.Collections.Generic
 open Percyqaz.Common

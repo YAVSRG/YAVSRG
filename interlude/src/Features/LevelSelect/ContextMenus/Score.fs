@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
+open Prelude.Data.User
 open Prelude.Data.Library.Caching
 open Prelude.Charts.Processing
 open Interlude.Content

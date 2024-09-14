@@ -3,7 +3,7 @@
 open System
 open NUnit.Framework
 open Percyqaz.Data.Sqlite
-open Prelude.Data
+open Prelude.Data.User
 
 [<SetUpFixture>]
 type Setup() =

@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Data
+open Prelude.Data.User
 open Prelude.Data.Library
 
 module private Data =

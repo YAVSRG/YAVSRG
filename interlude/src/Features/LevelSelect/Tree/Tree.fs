@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay

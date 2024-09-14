@@ -5,7 +5,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Data
+open Prelude.Data.User
 open Prelude.Gameplay
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -39,7 +39,7 @@ module LocalOffset =
         let setting = offset_setting save_data
         setting.Value <- get_automatic state save_data
 
-type LocalOffsetPage(state: PlayState, save_data: Data.ChartSaveData, setting: Setting<float32<ms>>, on_close: unit -> unit) =
+type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Setting<float32<ms>>, on_close: unit -> unit) =
     inherit Page()
 
     let offset_slider =

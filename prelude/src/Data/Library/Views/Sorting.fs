@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.Library.Caching
-open Prelude.Data
+open Prelude.Data.User
 
 type internal SortingTag = string * float32 * float
 type SortMethod = CachedChart * LibraryViewContext -> SortingTag

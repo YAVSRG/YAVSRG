@@ -6,6 +6,7 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Data.User
 open Prelude.Data.Library.Caching
 
 [<RequireQualifiedAccess>]

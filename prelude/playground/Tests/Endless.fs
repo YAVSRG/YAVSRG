@@ -5,10 +5,10 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
+open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Endless
-open Prelude.Data
 
 module Endless =
 

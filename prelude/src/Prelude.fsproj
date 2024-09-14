@@ -75,7 +75,9 @@
     <Compile Include="Data\UserDatabase\UserDatabaseTables.fs" />
     <Compile Include="Data\UserDatabase\LegacyScores.fs" />
     <Compile Include="Data\UserDatabase\UserDatabase.fs" />
-    <Compile Include="Data\Library\Caching.fs" />
+    <Compile Include="Data\ChartDatabase\ChartDatabaseTables.fs" />
+    <Compile Include="Data\ChartDatabase\ChartDatabase.fs" />
+    <Compile Include="Data\Library\OLD_CACHING.fs" />
     <Compile Include="Data\Library\Collections.fs" />
     <Compile Include="Data\Library\Library.fs" />
     <Compile Include="Data\Library\Imports.fs" />
