@@ -1,11 +1,10 @@
-﻿namespace Prelude.Data.Charts
+﻿namespace Prelude.Data.Library
 
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
-open Prelude.Data.Library
 
 module DbCharts =
 

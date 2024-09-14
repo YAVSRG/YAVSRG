@@ -43,7 +43,7 @@ type ChartMeta =
         Audio: AssetPath
         PreviewTime: Time
 
-        Folders: string list
+        Folders: Set<string>
         Origin: ChartOrigin
 
         Keys: int
@@ -84,7 +84,7 @@ type ChartMeta =
                 | ChartImportAssetPath.Missing -> AssetPath.Missing
             PreviewTime = import_chart.Header.PreviewTime
 
-            Folders = [ source_folder_name ]
+            Folders = Set.singleton source_folder_name
             Origin = 
                 match import_chart.Header.ChartSource with
                 | ChartImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)

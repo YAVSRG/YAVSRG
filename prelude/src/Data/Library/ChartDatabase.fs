@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Charts
+﻿namespace Prelude.Data.Library
 
 open System.IO
 open System.Collections.Generic
@@ -6,7 +6,6 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude.Common
 open Prelude.Charts
-open Prelude.Data.Library
 
 type ChartDatabase =
     internal
