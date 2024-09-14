@@ -3,7 +3,6 @@
 open Prelude
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections
-open Prelude.Data.Library.Caching
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -13,7 +12,7 @@ module CollectionActions =
     let collection_modified_ev = Event<unit>()
     let collection_modified = collection_modified_ev.Publish
 
-    let add_to (name: string, collection: Collection, cc: CachedChart) =
+    let add_to (name: string, collection: Collection, cc: ChartMeta) =
         if
             match collection with
             | Folder c -> c.Add cc
@@ -26,7 +25,7 @@ module CollectionActions =
         else
             false
 
-    let remove_from (name: string, collection: Collection, cc: CachedChart, context: LibraryContext) =
+    let remove_from (name: string, collection: Collection, cc: ChartMeta, context: LibraryContext) =
         if
             match collection with
             | Folder c -> c.Remove cc

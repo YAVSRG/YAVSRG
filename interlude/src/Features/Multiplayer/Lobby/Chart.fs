@@ -6,7 +6,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
 open Interlude.Content
@@ -17,7 +16,8 @@ open Interlude.Features.Collections
 open Interlude.Features.Online
 open Interlude.Features.Play.Spectate
 
-type MultiplayerChartContextMenu(cc: CachedChart) =
+// todo: find out when this shows up? if it doesnt then make it do so
+type MultiplayerChartContextMenu(cc: ChartMeta) =
     inherit Page()
 
     override this.Content() =
@@ -66,7 +66,7 @@ module LobbyChart =
                 |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
             )
         | None ->
-            match Cache.by_hash chart.Hash Content.Cache with
+            match ChartDatabase.get_meta chart.Hash Content.Cache with
             | None ->
                 is_loading <- true
                 Logging.Debug("Multiplayer chart not found, downloading")
@@ -78,7 +78,7 @@ module LobbyChart =
                         is_loading <- false
                         Notifications.error(%"notification.multiplayer_chart_not_found.title", %"notification.multiplayer_chart_not_found.body")
                     | true ->
-                        let newly_installed = (Cache.by_hash chart.Hash Content.Cache).Value
+                        let newly_installed = (ChartDatabase.get_meta chart.Hash Content.Cache).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
                         defer
                         <| fun () ->

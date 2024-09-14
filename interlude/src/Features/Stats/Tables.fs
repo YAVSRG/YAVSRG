@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Backbeat
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Online
@@ -122,15 +122,8 @@ type private CompareFriend
                                     let their_score = Map.tryFind chart_id their_scores
 
                                     let name =
-                                        match
-                                            Cache.by_key
-                                                (sprintf "%s/%s" (Content.Table.Value.Info.Name) chart_id)
-                                                Content.Cache
+                                        match ChartDatabase.get_meta chart_id Content.Cache
                                         with
-                                        | Some cc -> cc.Title
-                                        | None ->
-
-                                        match Cache.by_hash chart_id Content.Cache with
                                         | Some cc -> cc.Title
                                         | None -> sprintf "<%s>" chart_id
 
@@ -306,7 +299,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
     inherit StaticWidget(NodeType.None)
 
     let name =
-        match Cache.by_hash chart_id Content.Cache with
+        match ChartDatabase.get_meta chart_id Content.Cache with
         | Some cc -> cc.Title
         | None -> sprintf "<%s>" chart_id
 

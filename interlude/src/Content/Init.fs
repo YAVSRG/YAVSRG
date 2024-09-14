@@ -19,7 +19,7 @@ type Content() =
 
     static member UserData = Data.user_db
     static member Library = Data.library
-    static member Cache = Data.library.Cache
+    static member Cache = Data.library.Charts
     static member Collections = Data.library.Collections
 
     static member Table = Tables.current

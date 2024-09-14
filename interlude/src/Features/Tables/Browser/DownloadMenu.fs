@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI
@@ -66,10 +66,9 @@ module TableDownloader =
         do
             for chart in charts do
                 statuses.[chart.Hash] <-
-                    if (Cache.by_key (sprintf "%s/%s" table.Info.Name chart.Hash) Content.Cache).IsNone then
-                        ChartStatus.Missing
-                    else
-                        ChartStatus.Downloaded
+                    match ChartDatabase.get_meta chart.Hash Content.Cache with
+                    | Some cc when cc.Folders.Contains table.Info.Name -> ChartStatus.Downloaded
+                    | _ -> ChartStatus.Missing
 
             for level in charts_by_level.Keys do
                 let counts =
@@ -247,12 +246,12 @@ module TableDownloader =
                 async {
                     defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
-                    match Cache.by_hash chart.Hash Content.Cache with
+                    match ChartDatabase.get_meta chart.Hash Content.Cache with
                     | Some cc ->
-                        Cache.copy table_name cc Content.Cache
+                        ChartDatabase.copy table_name cc Content.Cache
                         defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
-                        match! Cache.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Cache with
+                        match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Cache with
                         | true -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                         | false -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 

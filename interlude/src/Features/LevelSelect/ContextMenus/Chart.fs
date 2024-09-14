@@ -7,8 +7,6 @@ open Prelude.Backbeat
 open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
-open Prelude.Data.``osu!``
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -17,7 +15,7 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Play
 
-type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
+type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
     inherit Page()
 
     override this.Content() =
@@ -110,13 +108,13 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                     match SelectedChart.CHART with
                     | None -> ()
                     | Some c ->
-                        match create_osz c Content.Cache (get_game_folder "Exports") with
+                        match Exports.create_osz c cc (get_game_folder "Exports") with
                         | Ok () ->
                             open_directory (get_game_folder "Exports")
                             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
                         | Error err ->
                             Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-                            Logging.Error(sprintf "Error exporting '%s' as osz" c.Header.Title, err)
+                            Logging.Error(sprintf "Error exporting '%s' as osz" cc.Title, err)
                 ),
                 Icon = Icons.UPLOAD
             )
@@ -134,23 +132,17 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
                                 |> Mods.in_priority_order
                                 |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
                                 |> String.concat ", "
-                            let chart_with_mods =
-                                { c with
-                                    Notes = m.Notes
-                                    SV = m.SV
-                                    BPM = m.BPM
-                                    Header = 
-                                        { c.Header with
-                                            DiffName = c.Header.DiffName.Trim() + sprintf " (+%s)" mod_string
-                                        }
-                                }
-                            match create_osz chart_with_mods Content.Cache (get_game_folder "Exports") with
+                            let chart_with_mods = 
+                                { c with Notes = m.Notes; SV = m.SV; BPM = m.BPM }
+                            let meta_with_mods =
+                                { cc with DifficultyName = cc.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
+                            match Exports.create_osz chart_with_mods meta_with_mods (get_game_folder "Exports") with
                             | Ok () ->
                                 open_directory (get_game_folder "Exports")
                                 Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
                             | Error err ->
                                 Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-                                Logging.Error(sprintf "Error exporting '%s' as osz" c.Header.Title, err)
+                                Logging.Error(sprintf "Error exporting '%s' as osz" cc.Title, err)
                     ),
                     Icon = Icons.UPLOAD
                 )
@@ -182,7 +174,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) =
         ConfirmPage(
             [ chart_name ] %> "misc.confirmdelete",
             fun () ->
-                Cache.delete cc Content.Cache
+                ChartDatabase.delete cc Content.Cache
                 LevelSelect.refresh_all ()
 
                 if is_submenu then

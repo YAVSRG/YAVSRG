@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Prelude
 open Interlude.Content
 open Interlude.UI
@@ -48,7 +47,7 @@ type Suggestion =
         ChartId: string
         Votes: Map<int, int>
         BackbeatInfo: (Chart * Song) option
-        LocalChart: CachedChart option
+        LocalChart: ChartMeta option
     }
     member this.SongTitle =
         match this.BackbeatInfo with
@@ -133,7 +132,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
                 defer (fun () ->
                     if still_open then
-                        match Cache.by_hash suggestion.ChartId Content.Cache with
+                        match ChartDatabase.get_meta suggestion.ChartId Content.Cache with
                         | Some cc ->
                             SelectedChart.change(cc, LibraryContext.None, true)
                             Menu.Exit()
@@ -210,7 +209,7 @@ type SuggestionsList(table: Table) =
                             ChartId = server_suggestion.ChartId
                             Votes = server_suggestion.Votes
                             BackbeatInfo = server_suggestion.BackbeatInfo
-                            LocalChart = Cache.by_hash server_suggestion.ChartId Interlude.Content.Content.Cache
+                            LocalChart = ChartDatabase.get_meta server_suggestion.ChartId Content.Cache
                         }
                     fc.Add(PageButton(suggestion.FormattedTitle, fun () -> ViewSuggestionPage(table, suggestion).Show()))
 

@@ -3,7 +3,6 @@
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.UI
@@ -35,7 +34,7 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
     override this.Title = name
     override this.OnClose() = ()
 
-type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGroupContext) =
+type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroupContext) =
     inherit Page()
 
     override this.Content() =
@@ -58,7 +57,7 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         ConfirmPage(
             [ group_name ] %> "misc.confirmdelete",
             fun () ->
-                Cache.delete_many charts Content.Cache
+                ChartDatabase.delete_many charts Content.Cache
                 LevelSelect.refresh_all ()
 
                 if is_submenu then

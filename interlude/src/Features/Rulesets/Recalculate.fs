@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 
@@ -18,9 +18,9 @@ module PersonalBests =
                         let data = UserDatabase.get_chart_data cc.Hash Content.UserData
 
                         if not data.Scores.IsEmpty then
-                            match Cache.load cc Content.Cache with
+                            match ChartDatabase.get_chart cc.Hash Content.Cache with
                             | Error reason ->
-                                Logging.Debug(sprintf "Couldn't load %s for pb processing: %s" cc.Key reason)
+                                Logging.Debug(sprintf "Couldn't load %s for pb processing: %s" cc.Hash reason)
                             | Ok chart ->
 
                             let existing_bests = data.PersonalBests

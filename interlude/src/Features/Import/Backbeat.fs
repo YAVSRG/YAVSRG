@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Web.Shared.Requests
 
@@ -12,7 +12,7 @@ module Backbeat =
         { new Async.Service<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
                 async {
-                    match Cache.by_hash chart_id Content.Cache with
+                    match ChartDatabase.get_meta chart_id Content.Cache with
                     | Some cc -> return true
                     | None ->
 
@@ -27,7 +27,7 @@ module Backbeat =
                     | None -> return false
                     | Some found ->
 
-                    let! success = Cache.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
+                    let! success = ChartDatabase.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
                     if success then Content.TriggerChartAdded()
                     return success
                 }

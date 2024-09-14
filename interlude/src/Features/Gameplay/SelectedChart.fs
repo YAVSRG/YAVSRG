@@ -13,7 +13,6 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
 open Interlude.Content
@@ -22,13 +21,13 @@ open Interlude.UI
 
 type LoadingChartInfo =
     {
-        CacheInfo: CachedChart
+        CacheInfo: ChartMeta
         LibraryContext: LibraryContext
     }
 
 type LoadedChartInfo =
     {
-        CacheInfo: CachedChart
+        CacheInfo: ChartMeta
         LibraryContext: LibraryContext
         DurationString: string
         BpmString: string
@@ -51,7 +50,7 @@ module SelectedChart =
     let _rate = Setting.rate 1.0f
     let _selected_mods = options.SelectedMods
 
-    let private format_duration (cc: CachedChart option) =
+    let private format_duration (cc: ChartMeta option) =
         match cc with
         | Some cc -> cc.Length
         | None -> 0.0f<ms>
@@ -59,18 +58,10 @@ module SelectedChart =
         |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
         |> fun (x, y) -> sprintf "%s %i:%02i" Icons.CLOCK x y
 
-    let private format_bpm (cc: CachedChart option) =
+    let private format_bpm (cc: ChartMeta option) =
         match cc with
-        | Some cc -> cc.BPM
-        | None -> (500.0f<ms / beat>, 500.0f<ms / beat>)
-        |> fun (b, a) -> (60000.0f<ms> / a * _rate.Value |> int, 60000.0f<ms> / b * _rate.Value |> int)
-        |> fun (a, b) ->
-            if a > 9000 || b < 0 then
-                sprintf "%s ∞" Icons.MUSIC
-            elif Math.Abs(a - b) < 5 || b > 9000 then
-                sprintf "%s %i" Icons.MUSIC a
-            else
-                sprintf "%s %i-%i" Icons.MUSIC a b
+        | Some cc -> sprintf "%s %i" Icons.MUSIC cc.BPM
+        | None -> sprintf "%s 120" Icons.MUSIC
 
     let private format_notecounts (chart: ModdedChart) =
         let mutable notes = 0
@@ -94,7 +85,7 @@ module SelectedChart =
 
         sprintf "%iK | %i Notes | %s" chart.Keys notes hold_count
 
-    let mutable CACHE_DATA: CachedChart option = None
+    let mutable CACHE_DATA: ChartMeta option = None
     let mutable FMT_DURATION: string = format_duration None
     let mutable FMT_BPM: string = format_bpm None
     let mutable LIBRARY_CTX = LibraryContext.None
@@ -143,7 +134,7 @@ module SelectedChart =
     let mutable private on_load_succeeded = []
 
     type private LoadRequest =
-        | Load of CachedChart * play_audio: bool * rate: float32 * mods: ModState
+        | Load of ChartMeta * play_audio: bool * rate: float32 * mods: ModState
         | Update of bool * rate: float32 * mods: ModState
         | Recolor
 
@@ -153,7 +144,7 @@ module SelectedChart =
                 match req with
                 | Load(cc, play_audio, rate, mods) ->
                     seq {
-                        match Cache.load cc Content.Cache with
+                        match ChartDatabase.get_chart cc.Hash Content.Cache with
                         | Error reason ->
                                 
                             Logging.Error(sprintf "Couldn't load chart: %s" reason)
@@ -170,8 +161,7 @@ module SelectedChart =
                                     chart_change_failed.Trigger ()
                         | Ok chart ->
 
-                        Background.load (Cache.background_path chart Content.Cache)
-
+                        Background.load cc.Background.Path
                         let save_data = UserDatabase.get_chart_data cc.Hash Content.UserData
 
                         yield
@@ -179,10 +169,10 @@ module SelectedChart =
                                 CHART <- Some chart
 
                                 Song.change (
-                                    Cache.audio_path chart Content.Cache,
+                                    cc.Audio.Path,
                                     save_data.Offset,
                                     rate,
-                                    (chart.Header.PreviewTime, chart.LastNote),
+                                    (cc.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
                                             if Screen.current_type = Screen.Type.MainMenu then 
@@ -279,11 +269,11 @@ module SelectedChart =
         | Some cc -> cc.Keys |> enum
         | None -> Keymode.``4K``
 
-    let change (cc: CachedChart, ctx: LibraryContext, auto_play_audio: bool) =
+    let change (cc: ChartMeta, ctx: LibraryContext, auto_play_audio: bool) =
         // todo: show a one-time warning if chart loading takes over 1 second
         CACHE_DATA <- Some cc
         LIBRARY_CTX <- ctx
-        options.CurrentChart.Value <- cc.Key
+        options.CurrentChart.Value <- cc.Hash
 
         CHART <- None
         SAVE_DATA <- None
@@ -374,7 +364,7 @@ module SelectedChart =
     let private presets_on_chart_changed =
         let mutable previous_keymode = None
 
-        fun (cc: CachedChart) ->
+        fun (cc: ChartMeta) ->
             match previous_keymode with
             | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
             | _ -> ()
@@ -420,7 +410,7 @@ module SelectedChart =
 
     let init_window () = 
 
-        match Cache.by_key options.CurrentChart.Value Content.Cache with
+        match ChartDatabase.get_meta options.CurrentChart.Value Content.Cache with
         | Some cc -> change (cc, LibraryContext.None, true)
         | None ->
             Logging.Info("Couldn't find cached chart: " + options.CurrentChart.Value)

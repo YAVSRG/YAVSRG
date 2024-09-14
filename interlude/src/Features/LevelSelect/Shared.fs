@@ -8,7 +8,6 @@ open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
-open Prelude.Data.Library.Caching
 open Interlude.UI
 open Interlude.Content
 open Interlude.Options
@@ -44,7 +43,7 @@ module LevelSelect =
 
     module History =
 
-        let mutable private history: (CachedChart * float32) list = []
+        let mutable private history: (ChartMeta * float32) list = []
 
         let append_current () = 
             match SelectedChart.CACHE_DATA with

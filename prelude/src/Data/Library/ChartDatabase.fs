@@ -19,6 +19,7 @@ type ChartDatabase =
             FastLoaded: bool
             AssetsPath: string
         }
+    member this.Entries = this.Cache.Values
 
 module ChartDatabase =
 

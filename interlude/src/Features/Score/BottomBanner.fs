@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Prelude.Charts.Processing
 open Interlude
 open Interlude.Options
@@ -16,7 +16,7 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Online
 
-type ScoreChartContextMenu(cc: CachedChart) =
+type ScoreChartContextMenu(cc: ChartMeta) =
     inherit Page()
 
     override this.Content() =
@@ -34,7 +34,7 @@ type ScoreChartContextMenu(cc: CachedChart) =
                     let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
                     ConfirmPage(
                         [ chart_name ] %> "misc.confirmdelete",
-                        fun () -> Cache.delete cc Content.Cache
+                        fun () -> ChartDatabase.delete cc Content.Cache
                     )
                         .Show()
                 , Icon = Icons.TRASH

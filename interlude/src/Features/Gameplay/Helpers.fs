@@ -6,7 +6,7 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.User
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Online

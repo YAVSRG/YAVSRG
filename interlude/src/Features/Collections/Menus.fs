@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.UI
@@ -276,7 +276,7 @@ type ManageCollectionsPage() =
             , false
         )
 
-type AddToCollectionPage(cc: CachedChart) =
+type AddToCollectionPage(cc: ChartMeta) =
     inherit
         SelectCollectionPage(
             fun (name, collection) ->
