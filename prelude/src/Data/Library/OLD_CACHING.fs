@@ -379,7 +379,7 @@ module Cache =
             target.Patterns.[entry.Hash] <- patterns
             target.Changed <- true
 
-    let load (entry: CachedChart) (cache: Cache) : Result<Chart, string> = get_path entry cache |> Chart.from_file
+    let load (entry: CachedChart) (cache: Cache) : Result<ImportChart, string> = get_path entry cache |> Chart.from_file
 
     let by_key (key: string) (cache: Cache) : CachedChart option =
         let success, c = cache.Entries.TryGetValue key
@@ -451,7 +451,7 @@ module Cache =
                     use! stream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
                     use br = new BinaryReader(stream)
 
-                    match Chart.read_headless chart.Keys header "" br with
+                    match Chart.read_headless chart.Keys br with
                     | Error reason ->
                         Logging.Error(sprintf "CDN download invalid for %s: %s" hash reason)
                         return false

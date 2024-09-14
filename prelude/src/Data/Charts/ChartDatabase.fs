@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude.Common
 open Prelude.Charts
+open Prelude.Data.Library
 
 type ChartDatabase =
     internal
@@ -80,7 +81,7 @@ module ChartDatabase =
                     for file in Directory.EnumerateFiles(folder) do
                         if Path.GetExtension(file).ToLower() = ".yav" then
                             match Chart.from_file file with
-                            | Ok chart -> yield DbChart.FromChart (File.GetLastWriteTime(file) |> Timestamp.from_datetime) chart, chart
+                            | Ok chart -> yield ChartMeta.FromImport (File.GetLastWriteTime(file) |> Timestamp.from_datetime) chart, chart.Chart
                             | Error reason -> Logging.Warn(sprintf "Failed to load %s: %s" file reason)
         }
         |> Seq.chunkBySize 1000

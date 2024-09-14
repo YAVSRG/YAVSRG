@@ -140,7 +140,7 @@ module StepMania_To_Interlude =
 
         (states |> Array.ofSeq, points |> Array.ofSeq)
 
-    let convert (sm: StepManiaData) (action: ConversionAction) : Result<Chart, SkippedConversion> list =
+    let convert (sm: StepManiaFile) (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
 
         let path = Path.GetDirectoryName action.Source
 
@@ -238,7 +238,7 @@ module StepMania_To_Interlude =
                 original, Some translit
             else translit, Some original
 
-        let convert_difficulty (i: int) (diff: ChartData) : Result<Chart, SkippedConversion> =
+        let convert_difficulty (i: int) (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
                 let keys = diff.STEPSTYPE.Keycount
                 let title, title_native = choose_translit sm.TITLE sm.TITLETRANSLIT
@@ -283,17 +283,6 @@ module StepMania_To_Interlude =
                         ChartSource = Unknown
                     }
 
-                let filepath =
-                    Path.Combine(
-                        path,
-                        diff.STEPSTYPE.ToString()
-                        + " "
-                        + diff.METER.ToString()
-                        + " ["
-                        + (string i)
-                        + "].yav"
-                    )
-
                 let (notes, bpm) =
                     convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
 
@@ -301,13 +290,14 @@ module StepMania_To_Interlude =
                     skip_conversion "StepMania chart has no notes"
 
                 Ok {
-                    Keys = keys
                     Header = header
-                    Notes = notes
-                    BPM = bpm
-                    SV = [||]
-
-                    LoadedFromPath = filepath
+                    LoadedFromPath = action.Source
+                    Chart = {
+                        Keys = keys
+                        Notes = notes
+                        BPM = bpm
+                        SV = [||]
+                    }
                 }
             with
             | :? ConversionSkipException as skip_reason -> 

@@ -138,7 +138,7 @@ type Chart =
 
 module Archive =
 
-    let make_chart_header (chart: Chart, song: Song) : ChartHeader =
+    let make_chart_header (chart: Chart, song: Song) : ChartImportHeader =
         {
             Title = song.Title
             TitleNative = None
@@ -154,10 +154,10 @@ module Archive =
             AudioFile = Asset chart.AudioHash
             ChartSource =
                 match chart.Sources with
-                | Osu d :: _ -> Origin.Osu(d.BeatmapSetId, d.BeatmapId)
-                | Quaver d :: _ -> Origin.Quaver(d.MapsetId, d.MapId)
-                | Etterna pack_name :: _ -> Origin.Etterna pack_name
-                | _ -> Origin.Unknown
+                | Osu d :: _ -> ChartImportOrigin.Osu(d.BeatmapSetId, d.BeatmapId)
+                | Quaver d :: _ -> ChartImportOrigin.Quaver(d.MapsetId, d.MapId)
+                | Etterna pack_name :: _ -> ChartImportOrigin.Etterna pack_name
+                | _ -> ChartImportOrigin.Unknown
         }
 
     module DownloadUrl =

@@ -184,7 +184,7 @@ module Osu_To_Interlude =
 
         bpm |> Array.ofList |> Array.rev, sv |> Array.ofList |> Array.rev
 
-    let convert (b: Beatmap) (action: ConversionAction) : Result<Chart, SkippedConversion> =
+    let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Difficulty.CircleSize |> int
 
@@ -259,21 +259,14 @@ module Osu_To_Interlude =
             let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
 
             Ok {
-                Keys = keys
                 Header = header
-                Notes = snaps
-                BPM = bpm
-                SV = sv
-
-                LoadedFromPath =
-                    Path.Combine(
-                        path,
-                        String.Join(
-                            "_",
-                            (b.Metadata.Title + " [" + b.Metadata.Version + "].yav")
-                                .Split(Path.GetInvalidFileNameChars())
-                        )
-                    )
+                LoadedFromPath = action.Source
+                Chart = {
+                    Keys = keys
+                    Notes = snaps
+                    BPM = bpm
+                    SV = sv
+                }
             }
         with
         | :? ConversionSkipException as skip_reason -> 

@@ -135,7 +135,7 @@ module Quaver_To_Interlude =
         data.[current] <- data.[current] + end_time - t
         data
 
-    let convert (b: QuaverChart) (action: ConversionAction) : Result<Chart, SkippedConversion> =
+    let convert (b: QuaverChart) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Mode
 
@@ -218,21 +218,14 @@ module Quaver_To_Interlude =
                 |> Array.ofSeq
 
             Ok {
-                Keys = keys
                 Header = header
-                Notes = snaps
-                BPM = bpm
-                SV = sv
-
-                LoadedFromPath =
-                    Path.Combine(
-                        path,
-                        String.Join(
-                            "_",
-                            (b.Title + " [" + b.DifficultyName + "].yav")
-                                .Split(Path.GetInvalidFileNameChars())
-                        )
-                    )
+                LoadedFromPath = action.Source
+                Chart = {
+                    Keys = keys
+                    Notes = snaps
+                    BPM = bpm
+                    SV = sv
+                }
             }
         with
         | :? ConversionSkipException as skip_reason -> 

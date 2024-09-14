@@ -1,10 +1,10 @@
-﻿namespace Prelude.Charts.Conversions
+﻿namespace Prelude.Data.Library
 
 open System.IO
+open System.IO.Compression
 open Prelude
-open Prelude.Charts.Formats.osu
-open Prelude.Charts.Formats.StepMania
 open Prelude.Charts
+open Prelude.Charts.Formats.osu
 
 module Interlude_To_Osu =
 
@@ -100,17 +100,16 @@ module Interlude_To_Osu =
 
         tps |> List.ofSeq
 
-    let convert (chart: Chart) : Beatmap =
+    let convert (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
         let general : General =
             {
                 AudioFilename =
-                    match chart.Header.AudioFile with
-                    | Relative s -> s
-                    | Absolute s -> Path.GetFileName s
-                    | Asset _
-                    | Missing -> "audio.mp3"
+                    match chart_meta.Audio with
+                    | AssetPath.Absolute s -> Path.GetFileName s
+                    | AssetPath.Hash _
+                    | AssetPath.Missing -> "audio.mp3"
                 AudioLeadIn = 0
-                PreviewTime = int chart.Header.PreviewTime
+                PreviewTime = int chart_meta.PreviewTime
                 Countdown = Countdown.None
                 SampleSet = SampleSet.Soft
                 StackLeniency = 0.7
@@ -130,12 +129,12 @@ module Interlude_To_Osu =
 
         let meta =
             { Metadata.Default with
-                Title = chart.Header.Title
-                TitleUnicode = Option.defaultValue chart.Header.Title chart.Header.TitleNative
-                Artist = chart.Header.Artist
-                ArtistUnicode = Option.defaultValue chart.Header.Artist chart.Header.ArtistNative
-                Creator = chart.Header.Creator
-                Version = chart.Header.DiffName
+                Title = chart_meta.Title
+                TitleUnicode = Option.defaultValue chart_meta.Title chart_meta.TitleNative
+                Artist = chart_meta.Artist
+                ArtistUnicode = Option.defaultValue chart_meta.Artist chart_meta.ArtistNative
+                Creator = chart_meta.Creator
+                Version = chart_meta.DifficultyName
             }
 
         let diff =
@@ -156,11 +155,10 @@ module Interlude_To_Osu =
             Events =
                 [
                     Background(
-                        (match chart.Header.BackgroundFile with
-                         | Relative s -> s
-                         | Absolute s -> Path.GetFileName s
-                         | Asset _
-                         | Missing -> "bg.png"),
+                        ( match chart_meta.Background with
+                          | AssetPath.Absolute s -> Path.GetFileName s
+                          | AssetPath.Hash _
+                          | AssetPath.Missing -> "bg.png"),
                         0, 0
                     )
                 ]
@@ -168,6 +166,41 @@ module Interlude_To_Osu =
             Timing = convert_timing_points chart.BPM chart.SV (Chart.find_most_common_bpm chart)
         }
 
-module Interlude_To_StepMania =
+module Exports =
 
-    let convert (chart: Chart) : StepManiaData = failwith "nyi"
+    let create_osz (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<unit, exn> =
+        try
+            let beatmap = Interlude_To_Osu.convert chart chart_meta
+            let file_name = beatmap.Filename
+            let archive_path = Path.Combine(export_folder, file_name.Replace(".osu", ".osz"))
+
+            use fs = File.Open(archive_path, FileMode.Create)
+            use archive = new ZipArchive(fs, ZipArchiveMode.Create, false)
+
+            do
+                let osu_file_entry = archive.CreateEntry(file_name)
+                use osu_file_stream = osu_file_entry.Open()
+                beatmap.ToStream osu_file_stream
+
+            do
+                match chart_meta.Background.Path with
+                | Some bg_path ->
+                    use fs = File.Open(bg_path, FileMode.Open)
+                    let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _, _) -> Some bg | _ -> None))
+                    use bg_file_stream = bg_file_entry.Open()
+                    fs.CopyTo(bg_file_stream)
+                | None -> ()
+
+            do
+                match chart_meta.Audio.Path with
+                | Some audio_path ->
+                    use fs =
+                        File.Open(audio_path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
+
+                    let audio_file_entry = archive.CreateEntry(beatmap.General.AudioFilename)
+                    use audio_file_stream = audio_file_entry.Open()
+                    fs.CopyTo(audio_file_stream)
+                | None -> ()
+            Ok ()
+        with err ->
+            Error err

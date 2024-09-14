@@ -110,7 +110,7 @@ module Analysis =
             |> Array.ofSeq
 
         if previous_row.Length = 0 then
-            Logging.Error(sprintf "First row of chart is empty, wtf?\n%A" chart.Header)
+            Logging.Error("First row of chart is empty, wtf?")
             []
         else
 

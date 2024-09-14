@@ -1,8 +1,7 @@
-﻿namespace Prelude.Charts.Formats
+﻿namespace Prelude.Charts.Formats.StepMania
 
 open System.IO
 open FParsec
-open Percyqaz.Common
 open Prelude
 
 //https://github.com/stepmania/stepmania/wiki/sm
@@ -11,73 +10,135 @@ open Prelude
     Parsing tools for reading overall .sm structure
 *)
 
-module StepMania =
+type Header = (string * string list) list
 
-    type Header = (string * string list) list
+type StepManiaDifficultyType =
+    | Beginner = 0
+    | Easy = 1
+    | Medium = 2
+    | Hard = 3
+    | Challenge = 4
+    | Edit = 5
 
-    type DifficultyType =
-        | Beginner = 0
-        | Easy = 1
-        | Medium = 2
-        | Hard = 3
-        | Challenge = 4
-        | Edit = 5
-
-    type ChartType =
+type StepManiaChartType =
+    | Dance_Single
+    | Dance_Double
+    | Dance_Solo
+    | Dance_Couple
+    | Dance_Threepanel
+    | Dance_Routine
+    | Pump_Single
+    | Pump_Halfdouble
+    | Pump_Double
+    | Pump_Couple
+    | Pump_Routine
+    | Kb7_Single
+    | UNKNOWN
+    member this.Keycount =
+        match this with
+        | Dance_Threepanel -> 3
         | Dance_Single
-        | Dance_Double
+        | UNKNOWN -> 4
+        | Pump_Single -> 5
         | Dance_Solo
+        | Pump_Halfdouble -> 6
+        | Kb7_Single -> 7
         | Dance_Couple
-        | Dance_Threepanel
-        | Dance_Routine
-        | Pump_Single
-        | Pump_Halfdouble
-        | Pump_Double
+        | Dance_Double
+        | Dance_Routine -> 8
         | Pump_Couple
-        | Pump_Routine
-        | Kb7_Single
-        | UNKNOWN
-        member this.Keycount =
-            match this with
-            | Dance_Threepanel -> 3
-            | Dance_Single
-            | UNKNOWN -> 4
-            | Pump_Single -> 5
-            | Dance_Solo
-            | Pump_Halfdouble -> 6
-            | Kb7_Single -> 7
-            | Dance_Couple
-            | Dance_Double
-            | Dance_Routine -> 8
-            | Pump_Couple
-            | Pump_Double
-            | Pump_Routine -> 10
+        | Pump_Double
+        | Pump_Routine -> 10
 
-        override this.ToString() = sprintf "%iK" this.Keycount
+    override this.ToString() = sprintf "%iK" this.Keycount
 
-    type Note =
-        | Nothing = '0'
-        | Normal = '1'
-        | Hold_Head = '2'
-        | Hold_Tail = '3'
-        | Roll_Head = '4'
-        | Mine = 'M'
-        | Lift = 'L'
-        | Fake = 'F'
+type StepManiaNote =
+    | Nothing = '0'
+    | Normal = '1'
+    | Hold_Head = '2'
+    | Hold_Tail = '3'
+    | Roll_Head = '4'
+    | Mine = 'M'
+    | Lift = 'L'
+    | Fake = 'F'
 
-    type Measure = string list
+type Measure = string list
 
-    type ChartData =
+type StepManiaChart =
+    {
+        NOTES: Measure list
+        CHARTNAME: string
+        STEPSTYPE: StepManiaChartType
+        DESCRIPTION: string
+        CHARTSTYLE: string
+        DIFFICULTY: StepManiaDifficultyType
+        METER: string
+        CREDIT: string
+    }
+    
+(*
+    Some common tags have been omitted due to having no relevance or poor documentation
+*)
+
+type StepManiaFile =
+    {
+        TITLE: string
+        SUBTITLE: string
+        ARTIST: string
+        TITLETRANSLIT: string
+        SUBTITLETRANSLIT: string
+        ARTISTTRANSLIT: string
+        GENRE: string
+        CREDIT: string
+        BANNER: string
+        BACKGROUND: string
+        CDTITLE: string
+        MUSIC: string
+        OFFSET: float32
+        BPMS: (float32<beat> * float32<beat / minute>) list
+        STOPS: (float32<beat> * float32) list
+        SAMPLESTART: float32
+        SAMPLELENGTH: float32
+        DISPLAYBPM: float32<beat / minute> * float32<beat / minute>
+        SELECTABLE: bool
+        //The following tags are SSC features
+        VERSION: string
+        ORIGIN: string
+        WARPS: (float32<beat> * float32) list
+        DELAYS: (float32<beat> * float32) list
+        TIMESIGNATURES: (float32<beat> * float32<beat>) list
+        Charts: StepManiaChart list
+    }
+    static member Default =
         {
-            NOTES: Measure list
-            CHARTNAME: string
-            STEPSTYPE: ChartType
-            DESCRIPTION: string
-            CHARTSTYLE: string
-            DIFFICULTY: DifficultyType
-            METER: string
-            CREDIT: string
+            TITLE = "Unknown Chart"
+            SUBTITLE = ""
+            ARTIST = ""
+            TITLETRANSLIT = ""
+            SUBTITLETRANSLIT = ""
+            ARTISTTRANSLIT = ""
+            GENRE = ""
+            CREDIT = ""
+            BANNER = ""
+            BACKGROUND = ""
+            CDTITLE = ""
+            MUSIC = ""
+            OFFSET = 0.0f
+            BPMS = [ (0.0f<beat>, 120.0f<beat / minute>) ]
+            STOPS = []
+            SAMPLESTART = 0.0f
+            SAMPLELENGTH = 1.0f
+            DISPLAYBPM = (120.0f<beat / minute>, 120.0f<beat / minute>)
+            SELECTABLE = true
+            VERSION = ""
+            ORIGIN = ""
+            WARPS = []
+            DELAYS = []
+            TIMESIGNATURES = []
+            Charts = []
         }
+
+module StepmaniaParser =
 
     let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
 
@@ -100,69 +161,6 @@ module StepMania =
         (optional (spaces >>. comment .>> spaces))
         >>. (sepBy parse_note_row (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
         .>> eof
-
-    (*
-        Parsing for retrieving specific useful data from the file
-        Some common tags have been omitted due to having no relevance or poor documentation
-    *)
-
-    type StepManiaData =
-        {
-            TITLE: string
-            SUBTITLE: string
-            ARTIST: string
-            TITLETRANSLIT: string
-            SUBTITLETRANSLIT: string
-            ARTISTTRANSLIT: string
-            GENRE: string
-            CREDIT: string
-            BANNER: string
-            BACKGROUND: string
-            CDTITLE: string
-            MUSIC: string
-            OFFSET: float32
-            BPMS: (float32<beat> * float32<beat / minute>) list
-            STOPS: (float32<beat> * float32) list
-            SAMPLESTART: float32
-            SAMPLELENGTH: float32
-            DISPLAYBPM: float32<beat / minute> * float32<beat / minute>
-            SELECTABLE: bool
-            //The following tags are SSC features
-            VERSION: string
-            ORIGIN: string
-            WARPS: (float32<beat> * float32) list
-            DELAYS: (float32<beat> * float32) list
-            TIMESIGNATURES: (float32<beat> * float32<beat>) list
-            Charts: ChartData list
-        }
-        static member Default =
-            {
-                TITLE = "Unknown Chart"
-                SUBTITLE = ""
-                ARTIST = ""
-                TITLETRANSLIT = ""
-                SUBTITLETRANSLIT = ""
-                ARTISTTRANSLIT = ""
-                GENRE = ""
-                CREDIT = ""
-                BANNER = ""
-                BACKGROUND = ""
-                CDTITLE = ""
-                MUSIC = ""
-                OFFSET = 0.0f
-                BPMS = [ (0.0f<beat>, 120.0f<beat / minute>) ]
-                STOPS = []
-                SAMPLESTART = 0.0f
-                SAMPLELENGTH = 1.0f
-                DISPLAYBPM = (120.0f<beat / minute>, 120.0f<beat / minute>)
-                SELECTABLE = true
-                VERSION = ""
-                ORIGIN = ""
-                WARPS = []
-                DELAYS = []
-                TIMESIGNATURES = []
-                Charts = []
-            }
 
     let private parse_pairs =
         (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ',') .>> eof)
@@ -243,7 +241,7 @@ module StepMania =
                                 STEPSTYPE = parse_chart_type chartType
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
-                                DIFFICULTY = DifficultyType.Parse(difficultyType, true)
+                                DIFFICULTY = StepManiaDifficultyType.Parse(difficultyType, true)
                                 METER = footMeter
                                 CREDIT = author
                             }
@@ -252,11 +250,11 @@ module StepMania =
                 | Failure(error_message, _, _) -> failwith error_message
             | _ -> s
 
-        List.fold f StepManiaData.Default header
+        List.fold f StepManiaFile.Default header
 
     let private parse_stepmania_file = parse_header |>> read_stepmania_data
 
-    let stepmania_data_from_file path : Result<StepManiaData, string> =
+    let parse_file path : Result<StepManiaFile, string> =
         try
             match runParserOnFile parse_stepmania_file () path System.Text.Encoding.UTF8 with
             | Success(result, _, _) -> Result.Ok result

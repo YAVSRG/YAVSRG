@@ -10,7 +10,7 @@ open Prelude.Charts.Formats.Quaver
 [<AutoOpen>]
 module Helpers =
 
-    let convert_chart_file (action: ConversionAction) : Result<Chart * string, SkippedConversion> list =
+    let convert_chart_file (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
         match Path.GetExtension(action.Source).ToLower() with
         | ".sm" ->
             let set_pack_source =
@@ -25,7 +25,7 @@ module Helpers =
                 else
                     id
 
-            match stepmania_data_from_file action.Source with
+            match StepmaniaParser.parse_file action.Source with
             | Ok data ->
 
                 StepMania_To_Interlude.convert data action
@@ -57,4 +57,3 @@ module Helpers =
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | _ -> []
-        |> List.map (Result.map (fun c -> c, action.Source))

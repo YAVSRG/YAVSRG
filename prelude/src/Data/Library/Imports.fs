@@ -89,9 +89,9 @@ module Imports =
                         )
                         |> Seq.map (
                             function
-                            | Ok (chart, path) ->
-                                match Chart.check chart with
-                                | Ok chart -> Ok (chart, path)
+                            | Ok import ->
+                                match Chart.check import.Chart with
+                                | Ok chart -> Ok { import with Chart = chart }
                                 | Error reason ->
                                     Logging.Error(sprintf "Conversion produced corrupt chart (%s): %s" path reason)
                                     Error (path, sprintf "Corrupt (%s)" reason)
@@ -103,22 +103,22 @@ module Imports =
                         results 
                         |> List.map (
                             function
-                            | Ok (chart, path) ->
-                                match detect_rate_mod chart.Header.DiffName with
+                            | Ok import ->
+                                match detect_rate_mod import.Header.DiffName with
                                 | Some rate ->
                                     let original =
                                         results
                                         |> List.tryFind (
                                             function 
-                                            | Ok (original, _) -> 
-                                                original.Notes.Length = chart.Notes.Length 
-                                                && abs((chart.LastNote - chart.FirstNote) * rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
+                                            | Ok { Chart = original } -> 
+                                                original.Notes.Length = import.Chart.Notes.Length 
+                                                && abs((import.Chart.LastNote - import.Chart.FirstNote) * rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
                                             | _ -> false
                                         )
                                     if original.IsSome then 
                                         Error (path, sprintf "Skipping %.2fx rate of another map" rate)
-                                    else Ok chart
-                                | None -> Ok chart
+                                    else Ok import
+                                | None -> Ok import
                             | Error skipped_conversion -> Error skipped_conversion
                         )
 
