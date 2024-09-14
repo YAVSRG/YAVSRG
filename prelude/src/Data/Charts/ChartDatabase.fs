@@ -1,8 +1,10 @@
 ﻿namespace Prelude.Data.Charts
 
+open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
+open Prelude.Common
 open Prelude.Charts
 
 type ChartDatabase =
@@ -65,6 +67,31 @@ module ChartDatabase =
         db
 
     let private legacy_migrate (db: ChartDatabase) : ChartDatabase =
+        
+        let cache_file = Path.Combine(get_game_folder "Songs", "cache.json")
+        if not (File.Exists cache_file) then db else
+
+        Logging.Debug("Found old cache.json ...")
+
+        seq {
+            for folder in Directory.EnumerateDirectories(get_game_folder "Songs") do
+                let folder_name = Path.GetFileName folder
+                if folder.ToLower() <> ".assets" then
+                    for file in Directory.EnumerateFiles(folder) do
+                        if Path.GetExtension(file).ToLower() = ".yav" then
+                            match Chart.from_file file with
+                            | Ok chart -> yield DbChart.FromChart (File.GetLastWriteTime(file) |> Timestamp.from_datetime) chart, chart
+                            | Error reason -> Logging.Warn(sprintf "Failed to load %s: %s" file reason)
+        }
+        |> Seq.chunkBySize 1000
+        |> Seq.iter (fun chunk ->
+            DbCharts.save_batch chunk db.Database
+        )
+
+        Logging.Debug("Written charts to database in new format")
+
+        // todo: rename cache.json -> cache.json.old
+        Logging.Debug("(nyi) Marked cache.json as old. All done!")
         db
 
     // Fast load true loads the contents of the db into memory (used by game client)

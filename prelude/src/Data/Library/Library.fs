@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User
+open Prelude.Data.Charts
 open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Collections
 
@@ -17,6 +18,10 @@ type Library =
 module Library =
 
     let load () : Library =
+        
+        let db = Percyqaz.Data.Sqlite.Database.from_file (Path.Combine(get_game_folder "Songs", "charts.db"))
+        let songs_db = ChartDatabase.create true db
+
         let library =
             {
                 Cache = Cache.from_path (get_game_folder "Songs")

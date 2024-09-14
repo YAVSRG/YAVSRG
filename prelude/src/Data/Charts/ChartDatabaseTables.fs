@@ -1,10 +1,13 @@
 ﻿namespace Prelude.Data.Charts
 
+open System.IO
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
+open Prelude.Charts.Processing.Difficulty
+open Prelude.Charts.Processing.Patterns
 
 [<Json.AutoCodec>]
 type DbAssetPath =
@@ -46,6 +49,56 @@ type DbChart =
         DateAdded: int64
         Rating: float32
     }
+    static member FromChart (file_timestamp: int64) (chart: Chart) =
+        let source_folder_path = Path.GetDirectoryName(chart.LoadedFromPath)
+        let source_folder_name = Path.GetDirectoryName(chart.LoadedFromPath) |> Path.GetFileName
+        {
+            Hash = Chart.hash chart
+
+            Title = chart.Header.Title
+            TitleNative = chart.Header.TitleNative
+            Artist = chart.Header.Artist
+            ArtistNative = chart.Header.ArtistNative
+            DifficultyName = chart.Header.DiffName
+            Subtitle = chart.Header.Subtitle
+            Source = chart.Header.Source
+            Creator = chart.Header.Creator
+            Tags = chart.Header.Tags
+
+            Background =
+                match chart.Header.BackgroundFile with
+                | MediaPath.Asset s -> DbAssetPath.Hash s
+                | MediaPath.Relative f -> DbAssetPath.Absolute (Path.Combine(source_folder_path, f))
+                | MediaPath.Absolute p -> DbAssetPath.Absolute p
+                | MediaPath.Missing -> DbAssetPath.Missing
+            Audio =
+                match chart.Header.AudioFile with
+                | MediaPath.Asset s -> DbAssetPath.Hash s
+                | MediaPath.Relative f -> DbAssetPath.Absolute (Path.Combine(source_folder_path, f))
+                | MediaPath.Absolute p -> DbAssetPath.Absolute p
+                | MediaPath.Missing -> DbAssetPath.Missing
+            PreviewTime = chart.Header.PreviewTime
+
+            Folder = source_folder_name
+            Origin = 
+                match chart.Header.ChartSource with
+                | Origin.Osu (set, map) -> DbChartOrigin.Osu(set, map)
+                | Origin.Quaver (set, map) -> DbChartOrigin.Quaver(set, map)
+                | Origin.Etterna pack -> DbChartOrigin.Etterna pack
+                | Origin.Stepmania _ -> DbChartOrigin.Etterna source_folder_name
+                | Origin.Unknown -> DbChartOrigin.Unknown
+
+            Keys = chart.Keys
+            Length = chart.LastNote - chart.FirstNote
+            BPM = 
+                let mspb = Chart.find_most_common_bpm chart
+                let bpm = 60000.0f<ms/minute> / mspb |> float32
+                if System.Single.IsFinite(bpm) then 
+                    bpm |> round |> int 
+                else 0
+            DateAdded = file_timestamp
+            Rating = (DifficultyRating.calculate 1.0f chart.Notes).Physical |> float32
+        }
 
 module DbCharts =
 
@@ -67,12 +120,13 @@ module DbCharts =
                 Background TEXT NOT NULL,
                 Audio TEXT NOT NULL,
                 PreviewTime REAL NOT NULL,
+                Folder TEXT NOT NULL,
+                Origin TEXT NOT NULL,
                 Keys INTEGER NOT NULL,
                 Length REAL NOT NULL,
                 BPM INTEGER NOT NULL,
                 DateAdded INTEGER NOT NULL,
                 Rating REAL NOT NULL,
-                Folder TEXT NOT NULL,
                 Chart BLOB NOT NULL
             );
             """
@@ -82,7 +136,7 @@ module DbCharts =
         {
             SQL =
                 """
-                INSERT INTO songs (Id, Title, TitleNative, Artist, ArtistNative, DifficultyName, Subtitle, Source, Creator, Tags, Background, Audio, PreviewTime, Folder, Origin, Keys, Length, BPM, DateAdded, Rating, Chart)
+                INSERT OR REPLACE INTO charts (Id, Title, TitleNative, Artist, ArtistNative, DifficultyName, Subtitle, Source, Creator, Tags, Background, Audio, PreviewTime, Folder, Origin, Keys, Length, BPM, DateAdded, Rating, Chart)
                 VALUES (@Id, @Title, @TitleNative, @Artist, @ArtistNative, @DifficultyName, @Subtitle, @Source, @Creator, @Tags, @Background, @Audio, @PreviewTime, @Folder, @Origin, @Keys, @Length, @BPM, @DateAdded, @Rating, @Chart);
             """
             Parameters =

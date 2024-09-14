@@ -393,8 +393,6 @@ module Chart =
         (points: TimeArray<BPM>)
         (end_time: Time)
         : Dictionary<float32<ms / beat>, Time> =
-        if Array.isEmpty points then
-            failwith "chart has no bpm points"
 
         let {
                 Time = offset
