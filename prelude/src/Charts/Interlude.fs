@@ -155,6 +155,7 @@ type ChartHeader =
 
 type Chart =
     {
+        // todo: figure out getting rid of the keys/header and just having a headless object
         Keys: int
         Header: ChartHeader
         Notes: TimeArray<NoteRow>

@@ -89,12 +89,12 @@ module Imports =
                         )
                         |> Seq.map (
                             function
-                            | Ok chart ->
+                            | Ok (chart, path) ->
                                 match Chart.check chart with
-                                | Ok chart -> Ok chart
+                                | Ok chart -> Ok (chart, path)
                                 | Error reason ->
-                                    Logging.Error(sprintf "Conversion produced corrupt chart (%s): %s" chart.LoadedFromPath reason)
-                                    Error (chart.LoadedFromPath, sprintf "Corrupt (%s)" reason)
+                                    Logging.Error(sprintf "Conversion produced corrupt chart (%s): %s" path reason)
+                                    Error (path, sprintf "Corrupt (%s)" reason)
                             | Error skipped_conversion -> Error skipped_conversion
                         )
                         |> List.ofSeq
@@ -103,20 +103,20 @@ module Imports =
                         results 
                         |> List.map (
                             function
-                            | Ok chart ->
+                            | Ok (chart, path) ->
                                 match detect_rate_mod chart.Header.DiffName with
                                 | Some rate ->
                                     let original =
                                         results
                                         |> List.tryFind (
                                             function 
-                                            | Ok original -> 
+                                            | Ok (original, _) -> 
                                                 original.Notes.Length = chart.Notes.Length 
                                                 && abs((chart.LastNote - chart.FirstNote) * rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
                                             | _ -> false
                                         )
                                     if original.IsSome then 
-                                        Error (chart.LoadedFromPath, sprintf "Skipping %.2fx rate of another map" rate)
+                                        Error (path, sprintf "Skipping %.2fx rate of another map" rate)
                                     else Ok chart
                                 | None -> Ok chart
                             | Error skipped_conversion -> Error skipped_conversion

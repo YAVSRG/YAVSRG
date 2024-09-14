@@ -10,7 +10,7 @@ open Prelude.Charts.Formats.Quaver
 [<AutoOpen>]
 module Helpers =
 
-    let convert_chart_file (action: ConversionAction) : Result<Chart, SkippedConversion> list =
+    let convert_chart_file (action: ConversionAction) : Result<Chart * string, SkippedConversion> list =
         match Path.GetExtension(action.Source).ToLower() with
         | ".sm" ->
             let set_pack_source =
@@ -57,3 +57,4 @@ module Helpers =
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | _ -> []
+        |> List.map (Result.map (fun c -> c, action.Source))
