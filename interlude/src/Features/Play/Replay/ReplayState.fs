@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Processing
-open Prelude.Data
+open Prelude.Data.User
 
 [<RequireQualifiedAccess>]
 type ReplayMode =

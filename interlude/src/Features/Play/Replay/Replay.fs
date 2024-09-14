@@ -6,8 +6,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Data
 open Prelude.Gameplay
+open Prelude.Data.User
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay

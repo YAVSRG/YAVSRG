@@ -3,9 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude
 open Prelude.Gameplay.Mods
-open Prelude.Data
+open Prelude.Data.User
 open Interlude.UI
 
 #nowarn "3370"

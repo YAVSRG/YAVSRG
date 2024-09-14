@@ -8,6 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Charts.Processing
+open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -53,7 +54,7 @@ module PlayScreenMultiplayer =
                         Chart = info.Chart
                         WithMods = info.WithMods
 
-                        PlayedBy = Data.ScorePlayedBy.You
+                        PlayedBy = ScorePlayedBy.You
                         TimePlayed = Timestamp.now ()
                         Rate = SelectedChart.rate.Value
 

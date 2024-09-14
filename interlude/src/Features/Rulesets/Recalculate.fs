@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay
-open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.Library.Caching
 open Interlude.UI

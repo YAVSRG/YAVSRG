@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library.Caching
 open Prelude.Gameplay
-open Prelude.Data
+open Prelude.Data.User
 open Interlude.Web.Shared
 
 type LobbyInvite =
