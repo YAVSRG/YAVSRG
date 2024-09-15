@@ -2,28 +2,32 @@
 
 open System.Collections.Generic
 
+type GroupFunc = ChartMeta * LibraryViewContext -> int * string
+
 type GroupMethod = 
-    {
-        Func: ChartMeta * LibraryViewContext -> (int * string) seq
-        IsPacks: bool
-    }
+    | Normal of GroupFunc
+    | Packs
+    | Collections
+    | Levels
 
 module Grouping =
 
     let modes: IDictionary<string, GroupMethod> =
         dict
             [
-                "none", { IsPacks = false; Func = fun (c, _) -> [0, "No grouping"] }
-                "pack", { IsPacks = true; Func = fun (c, _) -> c.Packs |> Seq.map (fun p -> 0, p) }
-                "date_played", { IsPacks = false; Func = format_date_last_played >> Seq.singleton }
-                "date_installed", { IsPacks = false; Func = format_date_added >> Seq.singleton }
-                "grade", { IsPacks = false; Func = grade_achieved >> Seq.singleton }
-                "lamp", { IsPacks = false; Func = lamp_achieved >> Seq.singleton }
-                "title", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Title] }
-                "artist", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Artist]  }
-                "creator", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Creator] }
-                "keymode", { IsPacks = false; Func = fun (c, _) -> [c.Keys, c.Keys.ToString() + "K"] }
-                "patterns", { IsPacks = false; Func = fun (c, ctx) -> [0, c.Patterns.Category.Category] }
+                "none", Normal <| fun (c, _) -> 0, "No grouping"
+                "pack", Packs
+                "collection", Collections
+                "level", Levels
+                "date_played", Normal format_date_last_played
+                "date_installed", Normal format_date_added
+                "grade", Normal grade_achieved
+                "lamp", Normal lamp_achieved 
+                "title", Normal <| fun (c, _) -> 0, first_character c.Title
+                "artist", Normal <| fun (c, _) -> 0, first_character c.Artist
+                "creator", Normal <| fun (c, _) -> 0, first_character c.Creator
+                "keymode", Normal <| fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
+                "patterns", Normal <| fun (c, ctx) -> 0, c.Patterns.Category.Category
             ]
 
 type Group =

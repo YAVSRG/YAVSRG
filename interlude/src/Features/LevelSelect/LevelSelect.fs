@@ -66,17 +66,15 @@ type LevelSelectScreen() =
             |+ EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
                 .Conditional(fun () ->
                     search_text.Value = ""
-                    && options.LibraryMode.Value = LibraryView.Table
+                    && options.ChartGroupMode.Value = "level"
                     && Content.Table.IsNone
                 )
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
-                .Conditional(fun () -> search_text.Value = "" && options.LibraryMode.Value = LibraryView.Collections)
+                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value = "collection")
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
-                .Conditional(fun () -> search_text.Value = "" && options.LibraryMode.Value = LibraryView.All)
+                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value <> "collection" && options.ChartGroupMode.Value <> "table")
         )
             .Conditional(fun () -> Tree.is_empty)
-
-        |+ LibraryViewControls()
 
         |+ StylishButton(
             LevelSelect.choose_this_chart,
@@ -117,6 +115,7 @@ type LevelSelectScreen() =
         )
             .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
 
+        |+ LibraryViewControls()
         |* info_panel
 
         LevelSelect.on_refresh_all.Add refresh

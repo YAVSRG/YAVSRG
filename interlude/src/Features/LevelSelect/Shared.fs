@@ -34,7 +34,7 @@ module LevelSelect =
 
         CollectionActions.collection_modified.Add(fun () ->
             // refresh collections if you can see them right now
-            if options.LibraryMode.Value = LibraryView.Collections || options.LibraryMode.Value = LibraryView.All then
+            if options.ChartGroupMode.Value <> "level" then
                 refresh_all ()
             // this is obsolete. only refresh details when liking charts
             //refresh_details ()

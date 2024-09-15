@@ -64,21 +64,6 @@ type private ModeDropdown
 type LibraryViewControls() =
     inherit Container(NodeType.None)
 
-    let group_selector =
-        ModeDropdown(
-            Grouping.modes.Keys
-            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
-            "Group",
-            options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            "group_mode"
-        )
-            .Help(
-                Help
-                    .Info("levelselect.groupby", "group_mode")
-                    .Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode")
-            )
-
     let manage_collections =
         StylishButton(
             (fun () -> Menu.ShowPage ManageCollectionsPage),
@@ -97,39 +82,11 @@ type LibraryViewControls() =
         )
             .Help(Help.Info("library.tables", "group_mode"))
 
-    let swap =
-        SwapContainer(
-            Position =
-                {
-                    Left = 0.8f %+ 0.0f
-                    Top = 0.0f %+ 120.0f
-                    Right = 1.0f %+ 0.0f
-                    Bottom = 0.0f %+ 170.0f
-                }
-        )
-
-    let update_swap () =
-        swap.Current <-
-            match options.LibraryMode.Value with
-            | LibraryView.All -> group_selector
-            | LibraryView.Collections -> manage_collections
-            | LibraryView.Table -> manage_tables
-
     override this.Init(parent) =
         this
-        |+ StylishButton
-            .Selector(
-                sprintf "%s %s:" Icons.FOLDER (%"levelselect.librarymode"),
-                [|
-                    LibraryView.All, %"levelselect.librarymode.all"
-                    LibraryView.Collections, %"levelselect.librarymode.collections"
-                    LibraryView.Table, %"levelselect.librarymode.table"
-                |],
-                options.LibraryMode
-                |> Setting.trigger (fun _ ->
-                    LevelSelect.refresh_all ()
-                    update_swap ()
-                ),
+        |+ StylishButton(
+                ignore,
+                K (sprintf "%s %s" Icons.FOLDER (%"levelselect.librarymode")),
                 !%Palette.DARK_100,
                 Hotkey = "library_mode",
                 Position =
@@ -165,9 +122,27 @@ type LibraryViewControls() =
                     .Hotkey(%"levelselect.sortby.reverse_hint", "reverse_sort_mode")
             )
 
-        |* swap
+        |* ModeDropdown(
+            Grouping.modes.Keys
+            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
+            "Group",
+            options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
+            options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
+            "group_mode",
+            Position =
+                {
+                    Left = 0.8f %+ 0.0f
+                    Top = 0.0f %+ 120.0f
+                    Right = 1.0f %+ 0.0f
+                    Bottom = 0.0f %+ 170.0f
+                }
+        )
+            .Help(
+                Help
+                    .Info("levelselect.groupby", "group_mode")
+                    .Hotkey(%"levelselect.groupby.reverse_hint", "reverse_group_mode")
+            )
 
-        update_swap ()
         base.Init parent
 
 

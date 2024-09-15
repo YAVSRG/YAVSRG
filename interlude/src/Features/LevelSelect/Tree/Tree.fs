@@ -56,35 +56,17 @@ module Tree =
                     UserDatabase = Content.UserData
                     Library = Content.Library
                 }
-
-            match options.LibraryMode.Value with
-            | LibraryView.Collections ->
-                LibraryView.get_collection_groups 
-                    LevelSelect.filter
-                    options.ChartGroupReverse.Value
-                    Sorting.modes.[options.ChartSortMode.Value]
-                    options.ChartSortReverse.Value
-                    ctx
-            | LibraryView.Table ->
-                match Content.Table with
-                | Some table ->
-                    LibraryView.get_table_groups 
-                        LevelSelect.filter
-                        options.ChartGroupReverse.Value
-                        Sorting.modes.[options.ChartSortMode.Value]
-                        options.ChartSortReverse.Value
-                        table
-                        ctx
-                | None -> LibraryView.get_empty_view ()
-            | LibraryView.All ->
-                LibraryView.get_groups
-                    LevelSelect.filter
-                    Grouping.modes.[options.ChartGroupMode.Value]
-                    options.ChartGroupReverse.Value
-                    Sorting.modes.[options.ChartSortMode.Value]
-                    options.ChartSortReverse.Value
-                    ctx
+                
+            LibraryView.get_groups
+                LevelSelect.filter
+                Grouping.modes.[options.ChartGroupMode.Value]
+                options.ChartGroupReverse.Value
+                Sorting.modes.[options.ChartSortMode.Value]
+                options.ChartSortReverse.Value
+                Content.Table
+                ctx
             |> Seq.toArray
+
         // if exactly 1 result, switch to it
         if library_groups.Length = 1 then
             let group_name, group = library_groups.[0]

@@ -175,7 +175,6 @@ module Options =
             ChartSortMode: Setting<string>
             ChartSortReverse: Setting<bool>
             ChartGroupMode: Setting<string>
-            LibraryMode: Setting<LibraryView>
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
             TreeShowGradesOnly: Setting<bool>
@@ -238,7 +237,6 @@ module Options =
                 ChartSortMode = Setting.simple "Title"
                 ChartSortReverse = Setting.simple false
                 ChartGroupMode = Setting.simple "Pack"
-                LibraryMode = Setting.simple LibraryView.All
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
                 TreeShowGradesOnly = Setting.simple true
