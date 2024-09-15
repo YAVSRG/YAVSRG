@@ -97,7 +97,9 @@ type LibraryContext =
     member this.Matches(other: LibraryContext) =
         match this, other with
         | None, None -> true
+        | None, Pack _ -> true
         | Pack p, Pack p2 when p = p2 -> true
+        | Pack _, None -> true
         | Table _, Table _ -> true
         | Folder f, Folder f2 when f = f2 -> true
         | Playlist (i, id, _), Playlist (i2, id2, _) when i = i2 && id = id2 -> true
@@ -108,6 +110,7 @@ type LibraryContext =
         | Pack _, None -> true
         | Table _, None -> true
         | Folder _, None -> true
+        | Folder _, Pack _ -> true
         | _ -> this.Matches other
 
 

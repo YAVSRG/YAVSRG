@@ -37,6 +37,7 @@ module Tree =
         |> Seq.tryHead
         |> function
         | Some (ctx, group) -> 
+            SelectedChart.LIBRARY_CTX <- ctx
             selected_chart <- current_cc.Hash
             selected_group <- group.Name, group.Context
             expanded_group <- selected_group
