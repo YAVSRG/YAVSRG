@@ -68,7 +68,27 @@ module DbCharts =
                     @DateAdded, @CalcVersion, @Rating, json(@Patterns),
                     @Chart)
                 ON CONFLICT DO UPDATE SET
+                    Title = excluded.Title,
+                    TitleNative = excluded.TitleNative,
+                    Artist = excluded.Artist,
+                    ArtistNative = excluded.ArtistNative,
+                    DifficultyName = excluded.DifficultyName,
+                    Subtitle = excluded.Subtitle,
+                    Source = excluded.Source,
+                    Creator = excluded.Creator,
+                    Tags = excluded.Tags,
+                    Background = excluded.Background,
+                    Audio = excluded.Audio,
+                    PreviewTime = excluded.PreviewTime,
                     DateAdded = excluded.DateAdded,
+                    Origin = excluded.Origin,
+                    Length = excluded.Length,
+                    BPM = excluded.BPM,
+                    DateAdded = excluded.DateAdded,
+                    CalcVersion = excluded.CalcVersion,
+                    Rating = excluded.Rating,
+                    Patterns = excluded.Patterns,
+                    Chart = excluded.Chart,
                     Packs = (
                         SELECT json_group_array(value) FROM (
                             SELECT json_each.value

@@ -42,6 +42,31 @@ module DbCharts =
             Patterns = PatternReport.Default
         }
 
+    let TEST_CHART_META_ALT : ChartMeta =
+        {
+            Hash = Chart.hash TEST_CHART
+            Title = "EDM Jumpers"
+            TitleNative = Some "§"
+            Artist = "Camellia ft. Nanahira"
+            ArtistNative = Some "§"
+            DifficultyName = "Jump, crowd!"
+            Subtitle = Some "Are you ready?"
+            Source = None
+            Creator = "Klaius"
+            Tags = ["dump"; "jumpstream"]
+            Background = AssetPath.Absolute "C:/path/to/bg.png"
+            Audio = AssetPath.Absolute "C:/path/to/audio.mp3"
+            PreviewTime = 2000.0f<ms>
+            Packs = Set.singleton "Nanahira Minipack"
+            Origin = ChartOrigin.Etterna "Nanahira Minipack"
+            Keys = 4
+            Length = 1.0f<ms>
+            BPM = 121
+            DateAdded = Timestamp.now() - 100L
+            Rating = 10.00f
+            Patterns = PatternReport.Default
+        }
+
     [<Test>]
     let Get_Meta_DoesntExist () =
         let db, conn = in_memory ()
@@ -54,6 +79,8 @@ module DbCharts =
     [<Test>]
     let RoundTrip_Meta() =
         let db, conn = in_memory ()
+
+        DbCharts.delete TEST_CHART_META.Hash db |> ignore
 
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
@@ -114,5 +141,20 @@ module DbCharts =
         Assert.AreEqual(None, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         Assert.AreEqual(0, DbCharts.delete_batch [TEST_CHART_META.Hash] db)
+
+        conn.Dispose()
+
+    [<Test>]
+    let RoundTrip_Chart_Overwriting() =
+        let db, conn = in_memory ()
+
+        DbCharts.delete TEST_CHART_META.Hash db |> ignore
+
+        DbCharts.save TEST_CHART_META TEST_CHART db
+        Assert.AreEqual(Some TEST_CHART_META, DbCharts.get_meta TEST_CHART_META.Hash db)
+
+        DbCharts.save TEST_CHART_META_ALT TEST_CHART db
+        let with_both_packs = { TEST_CHART_META_ALT with Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs }
+        Assert.AreEqual(Some with_both_packs, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         conn.Dispose()
