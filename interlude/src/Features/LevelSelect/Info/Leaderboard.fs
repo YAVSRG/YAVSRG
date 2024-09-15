@@ -213,7 +213,7 @@ module Leaderboard =
                                     score.Rate
 
                             let rating = DifficultyRating.calculate score.Rate with_mods.Notes
-                            let patterns = PatternSummary.generate_pattern_data score.Rate req.Chart
+                            let patterns = PatternReport.from_chart score.Rate req.Chart
 
                             let score_info: ScoreInfo =
                                 {

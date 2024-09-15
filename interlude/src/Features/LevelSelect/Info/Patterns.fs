@@ -18,8 +18,8 @@ type Display =
 type Patterns(display: Setting<Display>) =
     inherit Container(NodeType.None)
 
-    let mutable patterns: PatternSummary.PatternBreakdown list = []
-    let mutable category: PatternSummary.ChartCategorisation = PatternSummary.ChartCategorisation.Default
+    let mutable patterns: PatternBreakdown list = []
+    let mutable category: ChartCategorisation = ChartCategorisation.Default
 
     override this.Init(parent: Widget) =
         base.Init parent

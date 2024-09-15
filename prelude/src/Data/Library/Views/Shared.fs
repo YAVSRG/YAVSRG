@@ -82,7 +82,7 @@ module internal Shared =
         cc.Patterns.LNPercent > threshold
 
     let has_sv (cc: ChartMeta, ctx: LibraryViewContext) =
-        cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
+        cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]
 [<CustomEquality>]

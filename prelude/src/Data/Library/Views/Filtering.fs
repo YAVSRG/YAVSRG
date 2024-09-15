@@ -131,8 +131,8 @@ type Filter =
             | None -> ()
 
             match this.SV with
-            | Some false -> yield fun cc -> not (cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD)
-            | Some true -> yield fun cc -> cc.Patterns.SVAmount > PatternSummary.SV_AMOUNT_THRESHOLD
+            | Some false -> yield fun cc -> not (cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
+            | Some true -> yield fun cc -> cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
             | None -> ()
 
             if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then

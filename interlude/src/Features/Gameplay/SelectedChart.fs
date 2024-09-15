@@ -38,7 +38,7 @@ type LoadedChartInfo =
         WithMods: ModdedChart
         NotecountsString: string
         Rating: DifficultyRating
-        Patterns: PatternInfo
+        Patterns: PatternReport
 
         WithColors: ColoredChart
     }
@@ -96,7 +96,7 @@ module SelectedChart =
     let mutable WITH_MODS: ModdedChart option = None
     let mutable FMT_NOTECOUNTS: string option = None
     let mutable RATING: DifficultyRating option = None
-    let mutable PATTERNS: PatternInfo option = None
+    let mutable PATTERNS: PatternReport option = None
 
     let mutable WITH_COLORS: ColoredChart option = None
 
@@ -191,7 +191,7 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternSummary.generate_pattern_data rate chart
+                        let patterns = PatternReport.from_chart rate chart
                         let note_counts = format_notecounts with_mods
 
                         yield
@@ -221,7 +221,7 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternSummary.generate_pattern_data rate chart
+                        let patterns = PatternReport.from_chart rate chart
                         let note_counts = format_notecounts with_mods
 
                         yield

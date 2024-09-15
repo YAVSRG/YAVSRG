@@ -28,7 +28,10 @@ type CorePatternType =
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
 
-module Patterns =
+type MatchedCorePattern = { Pattern: CorePatternType; Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32; Mixed: bool }
+type MatchedSpecificPattern = { Pattern: Pattern; Time: ScaledTime; MsPerBeat: float32<ms/beat> }
+
+module PatternFinder =
 
     module Core =
         
@@ -258,9 +261,6 @@ module Patterns =
                 :: _ when x > 1 && y > 1 && z > 1 -> 3
             | _ -> 0
 
-    type MatchedCorePattern = { Pattern: CorePatternType; Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32; Mixed: bool }
-    type MatchedSpecificPattern = { Pattern: Pattern; Time: ScaledTime; MsPerBeat: float32<ms/beat> }
-
     let CORE_PATTERNS = [|
         Stream, Core.STREAM
         Chordstream, Core.CHORDSTREAM
@@ -359,11 +359,11 @@ module Patterns =
 
         full_data, core_matches.ToArray(), specific_matches.ToArray()
 
-    let analyse (rate: float32) (chart: Chart) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
-        let data = Analysis.run rate chart
+    let find_patterns (rate: float32) (chart: Chart) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
+        let primitives = Primitives.process_chart rate chart
         if chart.Keys = 4 then 
-            matches SPECIFIC_PATTERNS_4K data
+            matches SPECIFIC_PATTERNS_4K primitives
         elif chart.Keys = 7 then 
-            matches SPECIFIC_PATTERNS_7K data
+            matches SPECIFIC_PATTERNS_7K primitives
         else
-            matches SPECIFIC_PATTERNS_OTHER data
+            matches SPECIFIC_PATTERNS_OTHER primitives

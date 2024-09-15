@@ -30,7 +30,7 @@ type ScoreInfo =
         mutable Grade: int
 
         Rating: DifficultyRating
-        Patterns: PatternInfo
+        Patterns: PatternReport
         Physical: float
 
         ImportedFromOsu: bool
@@ -73,7 +73,7 @@ module ScoreInfo =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
-        let patterns = PatternSummary.generate_pattern_data score.Rate chart
+        let patterns = PatternReport.from_chart score.Rate chart
 
         {
             ChartMeta = cc

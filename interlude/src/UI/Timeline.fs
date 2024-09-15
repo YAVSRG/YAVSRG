@@ -24,7 +24,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let duration_on_1x = (LAST_NOTE - FIRST_NOTE) |> format_duration_ms
 
     // chord density is notes per second but n simultaneous notes count for 1 instead of n, aka 'chords per second'
-    let note_density, chord_density = Analysis.nps_cps samples with_mods
+    let note_density, chord_density = Density.nps_cps samples with_mods
 
     let note_density, chord_density =
         Array.map float32 note_density, Array.map float32 chord_density

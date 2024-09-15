@@ -173,7 +173,7 @@ module DbCharts =
             Patterns =
                 if calc_version < CALC_VERSION then
                     r.String |> ignore
-                    Processing.Patterns.PatternSummary.Info.Default
+                    PatternReport.Default
                 else r.Json JSON
         }
         
@@ -264,7 +264,7 @@ module DbCharts =
     let delete_batch (hashes: string seq) (db: Database) : int =
         DELETE.Batch hashes db |> expect
 
-    let private UPDATE_CALCULATED_DATA: NonQuery<string * float32 * PatternSummary.Info> =
+    let private UPDATE_CALCULATED_DATA: NonQuery<string * float32 * PatternReport> =
         {
             SQL = """
             UPDATE charts 
@@ -289,5 +289,5 @@ module DbCharts =
                 )
         }
 
-    let update_calculated_data (chunk: (string * float32 * PatternSummary.Info) seq) (db: Database) =
+    let update_calculated_data (chunk: (string * float32 * PatternReport) seq) (db: Database) =
         UPDATE_CALCULATED_DATA.Batch chunk db |> expect |> ignore

@@ -57,7 +57,7 @@ type ChartMeta =
         BPM: int
         DateAdded: int64
         Rating: float32
-        Patterns: PatternSummary.Info
+        Patterns: PatternReport
     }
     static member FromImport (timestamp: int64) (import_chart: ImportChart) =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
@@ -108,5 +108,5 @@ type ChartMeta =
                 else 0
             DateAdded = timestamp
             Rating = (DifficultyRating.calculate 1.0f chart.Notes).Physical |> float32
-            Patterns = (PatternSummary.generate_pattern_data_uncached 1.0f chart)
+            Patterns = (PatternReport.from_chart 1.0f chart)
         }

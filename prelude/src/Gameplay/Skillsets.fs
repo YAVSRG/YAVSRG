@@ -167,7 +167,7 @@ type KeymodeSkillBreakdown =
 
 module KeymodeSkillBreakdown =
 
-    let score (patterns: PatternSummary.PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let score (patterns: PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
         
         let before = skills.Copy
 
@@ -191,7 +191,7 @@ module KeymodeSkillBreakdown =
 
         skills.Minus before
 
-    let what_if (patterns: PatternSummary.PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let what_if (patterns: PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
 
         let potential = skills.Copy
 
@@ -215,7 +215,7 @@ module KeymodeSkillBreakdown =
 
         potential.Minus skills
 
-    let tech_factor (patterns: Patterns.PatternInfo) =
+    let tech_factor (patterns: PatternReport) =
         let mutable total_weight : float32 = 0.00001f
         let mutable total : float32 = 0.0f
         let add_weight res time =

@@ -30,15 +30,14 @@ type RowInfo =
     }
 
 module Density =
+
     let private DENSITY_SENTITIVITY = 0.9f
 
-    let note (time: Time) (d: float32) =
+    let private note (time: Time) (d: float32) =
         let next_d = 1000.0f<ms> / time
         d * DENSITY_SENTITIVITY + next_d * (1.0f - DENSITY_SENTITIVITY)
 
-module Analysis =
-
-    let density_data (rate: float32) (chart: Chart) =
+    let process_chart (rate: float32) (chart: Chart) =
         let column_densities = Array.zeroCreate chart.Keys
         let column_sinces = Array.create chart.Keys -Time.infinity
 
@@ -46,7 +45,7 @@ module Analysis =
             for { Time = t; Data = row } in chart.Notes do
                 for k = 0 to chart.Keys - 1 do
                     if row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD then
-                        column_densities.[k] <- Density.note ((t - column_sinces.[k]) / rate) column_densities.[k]
+                        column_densities.[k] <- note ((t - column_sinces.[k]) / rate) column_densities.[k]
                         column_sinces.[k] <- t
 
                 yield Array.max column_densities
@@ -99,10 +98,17 @@ module Analysis =
 
         notecounts, rowcounts
 
-    let run (rate: float32) (chart: Chart) : RowInfo list =
+    let find_percentile (sorted_densities: float32 array) (percentile: float32) =
+        if sorted_densities.Length = 0 then 0.0f else
+        let index = percentile * float32 sorted_densities.Length |> floor |> int
+        sorted_densities.[index]
+
+module Primitives =
+
+    let process_chart (rate: float32) (chart: Chart) : RowInfo list =
 
         let { Time = first_note; Data = row } = (TimeArray.first chart.Notes).Value
-        let density = density_data rate chart
+        let density = Density.process_chart rate chart
 
         let mutable previous_row =
             seq { 0 .. chart.Keys - 1 }
@@ -164,3 +170,41 @@ module Analysis =
 
         }
         |> List.ofSeq
+
+module Metrics =
+
+    let ln_percent (chart: Chart) : float32 =
+        let mutable notes = 0
+        let mutable lnotes = 0
+
+        for { Data = nr } in chart.Notes do
+            for n in nr do
+                if n = NoteType.NORMAL then
+                    notes <- notes + 1
+                elif n = NoteType.HOLDHEAD then
+                    notes <- notes + 1
+                    lnotes <- lnotes + 1
+
+        float32 lnotes / float32 notes
+
+    let sv_time (chart: Chart) : Time =
+        if chart.SV.Length = 0 then
+            0.0f<ms>
+        else
+
+            let mutable total = 0.0f<ms>
+
+            let mutable time = chart.FirstNote
+            let mutable vel = 1.0f
+
+            for sv in chart.SV do
+                if not (System.Single.IsFinite vel) || abs (vel - 1.0f) > 0.01f then
+                    total <- total + (sv.Time - time)
+
+                vel <- sv.Data
+                time <- sv.Time
+
+            if not (System.Single.IsFinite vel) || abs (vel - 1.0f) > 0.01f then
+                total <- total + (chart.LastNote - time)
+
+            total

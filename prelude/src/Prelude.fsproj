@@ -38,8 +38,11 @@
     <Compile Include="Charts\Conversions\Quaver.fs" />
     <Compile Include="Charts\Conversions\StepMania.fs" />
     <Compile Include="Charts\Conversions\Helpers.fs" />
-    <Compile Include="Charts\Processing\Patterns\Analyser.fs" />
-    <Compile Include="Charts\Processing\Patterns\Patterns.fs" />
+    <Compile Include="Charts\Processing\Patterns\Primitives.fs" />
+    <Compile Include="Charts\Processing\Patterns\PatternFinder.fs" />
+    <Compile Include="Charts\Processing\Patterns\Clustering.fs" />
+    <Compile Include="Charts\Processing\Patterns\Breakdown.fs" />
+    <Compile Include="Charts\Processing\Patterns\Categorise.fs" />
     <Compile Include="Charts\Processing\Patterns\Summary.fs" />
     <Compile Include="Charts\Processing\Difficulty.fs" />
     <Compile Include="Charts\Processing\Mods.fs" />
