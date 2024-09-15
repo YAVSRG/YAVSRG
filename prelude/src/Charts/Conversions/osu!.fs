@@ -235,23 +235,23 @@ module Osu_To_Interlude =
 
                         if File.Exists(Path.Combine(path, r)) then
                             if action.Config.MoveAssets then
-                                ChartImportAssetPath.Relative r
+                                ImportAsset.Relative r
                             else
-                                ChartImportAssetPath.Absolute(Path.Combine(path, r))
+                                ImportAsset.Absolute(Path.Combine(path, r))
                         else
-                            ChartImportAssetPath.Missing
+                            ImportAsset.Missing
                     AudioFile =
                         let r = b.General.AudioFilename
 
                         if File.Exists(Path.Combine(path, r)) then
                             if action.Config.MoveAssets then
-                                ChartImportAssetPath.Relative r
+                                ImportAsset.Relative r
                             else
-                                ChartImportAssetPath.Absolute(Path.Combine(path, r))
+                                ImportAsset.Absolute(Path.Combine(path, r))
                         else
-                            ChartImportAssetPath.Missing
+                            ImportAsset.Missing
 
-                    ChartSource = ChartImportOrigin.Osu(b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
+                    ChartSource = ImportOrigin.Osu(b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
                 }
 
             let snaps = convert_hit_objects b.Objects keys

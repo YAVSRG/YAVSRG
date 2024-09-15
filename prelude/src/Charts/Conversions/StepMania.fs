@@ -263,27 +263,27 @@ module StepMania_To_Interlude =
                             match find_audio () with
                             | Some file ->
                                 if action.Config.MoveAssets then
-                                    ChartImportAssetPath.Relative file
+                                    ImportAsset.Relative file
                                 else
-                                    ChartImportAssetPath.Absolute(Path.Combine(path, file))
+                                    ImportAsset.Absolute(Path.Combine(path, file))
                             | None ->
                                 //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
-                                ChartImportAssetPath.Missing
+                                ImportAsset.Missing
                         BackgroundFile =
                             match find_background () with
                             | Some file ->
                                 if action.Config.MoveAssets then
-                                    ChartImportAssetPath.Relative file
+                                    ImportAsset.Relative file
                                 else
-                                    ChartImportAssetPath.Absolute(Path.Combine(path, file))
+                                    ImportAsset.Absolute(Path.Combine(path, file))
                             | None ->
                                 //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
-                                ChartImportAssetPath.Missing
+                                ImportAsset.Missing
 
                         ChartSource = 
                             match action.Config.EtternaPackName with 
-                            | Some pack -> ChartImportOrigin.Etterna pack
-                            | None -> ChartImportOrigin.Unknown
+                            | Some pack -> ImportOrigin.Etterna pack
+                            | None -> ImportOrigin.Unknown
                     }
 
                 let (notes, bpm) =

@@ -79,26 +79,26 @@ type ChartMeta =
 
             Background =
                 match import_chart.Header.BackgroundFile with
-                | ChartImportAssetPath.Asset s -> AssetPath.Hash s
-                | ChartImportAssetPath.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f)) // todo: it depends. this responsibility should be somewhere else
-                | ChartImportAssetPath.Absolute p -> AssetPath.Absolute p
-                | ChartImportAssetPath.Missing -> AssetPath.Missing
+                | ImportAsset.Asset s -> AssetPath.Hash s
+                | ImportAsset.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f)) // todo: it depends. this responsibility should be somewhere else
+                | ImportAsset.Absolute p -> AssetPath.Absolute p
+                | ImportAsset.Missing -> AssetPath.Missing
             Audio =
                 match import_chart.Header.AudioFile with
-                | ChartImportAssetPath.Asset s -> AssetPath.Hash s
-                | ChartImportAssetPath.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f))
-                | ChartImportAssetPath.Absolute p -> AssetPath.Absolute p
-                | ChartImportAssetPath.Missing -> AssetPath.Missing
+                | ImportAsset.Asset s -> AssetPath.Hash s
+                | ImportAsset.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f))
+                | ImportAsset.Absolute p -> AssetPath.Absolute p
+                | ImportAsset.Missing -> AssetPath.Missing
             PreviewTime = import_chart.Header.PreviewTime
 
             Folders = Set.singleton import_chart.PackName
             Origin = 
                 match import_chart.Header.ChartSource with
-                | ChartImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)
-                | ChartImportOrigin.Quaver (set, map) -> ChartOrigin.Quaver(set, map)
-                | ChartImportOrigin.Etterna pack -> ChartOrigin.Etterna pack
-                | ChartImportOrigin.Stepmania _ -> ChartOrigin.Etterna import_chart.PackName
-                | ChartImportOrigin.Unknown -> ChartOrigin.Unknown
+                | ImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)
+                | ImportOrigin.Quaver (set, map) -> ChartOrigin.Quaver(set, map)
+                | ImportOrigin.Etterna pack -> ChartOrigin.Etterna pack
+                | ImportOrigin.Stepmania _ -> ChartOrigin.Etterna import_chart.PackName
+                | ImportOrigin.Unknown -> ChartOrigin.Unknown
 
             Keys = chart.Keys
             Length = chart.LastNote - chart.FirstNote

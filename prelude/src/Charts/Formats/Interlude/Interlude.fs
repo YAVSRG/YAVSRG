@@ -28,7 +28,7 @@ type Chart =
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
-type ChartImportAssetPath =
+type ImportAsset =
     | Relative of string
     | Absolute of string
     | Asset of string // deprecated
@@ -36,7 +36,7 @@ type ChartImportAssetPath =
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
-type ChartImportOrigin =
+type ImportOrigin =
     | Osu of beatmapsetid: int * beatmapid: int
     | Quaver of mapsetid: int * mapid: int
     | Etterna of pack_name: string
@@ -57,10 +57,10 @@ type ChartImportHeader =
         Tags: string list
 
         PreviewTime: Time
-        BackgroundFile: ChartImportAssetPath
-        AudioFile: ChartImportAssetPath
+        BackgroundFile: ImportAsset
+        AudioFile: ImportAsset
 
-        ChartSource: ChartImportOrigin
+        ChartSource: ImportOrigin
     }
     static member Default =
         {
@@ -75,10 +75,10 @@ type ChartImportHeader =
             Tags = []
 
             PreviewTime = 0.0f<ms>
-            BackgroundFile = ChartImportAssetPath.Missing
-            AudioFile = ChartImportAssetPath.Missing
+            BackgroundFile = ImportAsset.Missing
+            AudioFile = ImportAsset.Missing
 
-            ChartSource = ChartImportOrigin.Unknown
+            ChartSource = ImportOrigin.Unknown
         }
 
 type ImportChart =

@@ -150,14 +150,14 @@ module Archive =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            BackgroundFile = ChartImportAssetPath.Asset chart.BackgroundHash
-            AudioFile = ChartImportAssetPath.Asset chart.AudioHash
+            BackgroundFile = ImportAsset.Asset chart.BackgroundHash
+            AudioFile = ImportAsset.Asset chart.AudioHash
             ChartSource =
                 match chart.Sources with
-                | Osu d :: _ -> ChartImportOrigin.Osu(d.BeatmapSetId, d.BeatmapId)
-                | Quaver d :: _ -> ChartImportOrigin.Quaver(d.MapsetId, d.MapId)
-                | Etterna pack_name :: _ -> ChartImportOrigin.Etterna pack_name
-                | _ -> ChartImportOrigin.Unknown
+                | Osu d :: _ -> ImportOrigin.Osu(d.BeatmapSetId, d.BeatmapId)
+                | Quaver d :: _ -> ImportOrigin.Quaver(d.MapsetId, d.MapId)
+                | Etterna pack_name :: _ -> ImportOrigin.Etterna pack_name
+                | _ -> ImportOrigin.Unknown
         }
 
     module DownloadUrl =
