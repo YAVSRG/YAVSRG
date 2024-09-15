@@ -17,6 +17,13 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     let mutable last_cached_flag = -1
     let select_animation = Animation.Fade(0.0f)
     let mutable label = ""
+    let special_color =
+        match context with
+        | LibraryGroupContext.None -> None
+        | LibraryGroupContext.Pack _ -> None
+        | LibraryGroupContext.Table _ -> None
+        | LibraryGroupContext.Folder _ -> Some (Colors.cyan, Colors.cyan_shadow)
+        | LibraryGroupContext.Playlist _ -> Some (Colors.green, Colors.green_shadow)
 
     let update_cached_info () =
         last_cached_flag <- cache_flag
@@ -65,15 +72,22 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member this.SelectLast() = items.Last().Select()
 
     member private this.OnDraw(bounds: Rect) =
-        Draw.rect (bounds.Translate(10.0f, 10.0f)) (Palette.color (255, 0.2f, 0.0f))
+
+        let color, bg_color =
+            match special_color with
+            | Some (fg, bg) -> if this.Selected then fg.O3, bg else fg.O2, bg.O2
+            | None ->
+                if this.Selected then
+                    Palette.color (120, 0.7f + select_animation.Value * 0.3f, select_animation.Value * 0.3f),
+                    Palette.color (255, 0.2f, 0.0f)
+                else
+                    Palette.color (100, 0.7f, 0.0f),
+                    Palette.color (255, 0.2f, 0.0f)
+
+        Draw.rect (bounds.Translate(10.0f, 10.0f)) bg_color
         Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
 
-        Draw.rect
-            bounds
-            (if this.Selected then
-                    Palette.color (120, 0.7f + select_animation.Value * 0.3f, select_animation.Value * 0.3f)
-                else
-                    Palette.color (100, 0.7f, 0.0f))
+        Draw.rect bounds color
 
         Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)

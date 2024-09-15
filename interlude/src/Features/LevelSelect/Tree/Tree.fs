@@ -58,44 +58,55 @@ module Tree =
 
             match options.LibraryMode.Value with
             | LibraryView.Collections ->
-                LibraryView.get_collection_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] ctx
+                LibraryView.get_collection_groups 
+                    LevelSelect.filter
+                    options.ChartGroupReverse.Value
+                    Sorting.modes.[options.ChartSortMode.Value]
+                    options.ChartSortReverse.Value
+                    ctx
             | LibraryView.Table ->
                 match Content.Table with
                 | Some table ->
-                    LibraryView.get_table_groups LevelSelect.filter Sorting.modes.[options.ChartSortMode.Value] table ctx
+                    LibraryView.get_table_groups 
+                        LevelSelect.filter
+                        options.ChartGroupReverse.Value
+                        Sorting.modes.[options.ChartSortMode.Value]
+                        options.ChartSortReverse.Value
+                        table
+                        ctx
                 | None -> LibraryView.get_empty_view ()
             | LibraryView.All ->
                 LibraryView.get_groups
                     LevelSelect.filter
                     Grouping.modes.[options.ChartGroupMode.Value]
+                    options.ChartGroupReverse.Value
                     Sorting.modes.[options.ChartSortMode.Value]
+                    options.ChartSortReverse.Value
                     ctx
+            |> Seq.toArray
         // if exactly 1 result, switch to it
-        if library_groups.Count = 1 then
-            let g = library_groups.Keys.First()
+        if library_groups.Length = 1 then
+            let group_name, group = library_groups.[0]
 
-            if library_groups.[g].Charts.Length = 1 then
-                let cc, context = library_groups.[g].Charts.[0]
+            if group.Charts.Length = 1 then
+                let cc, context = group.Charts.[0]
 
                 if cc.Hash <> selected_chart then
-                    switch_chart (cc, context, snd g)
+                    switch_chart (cc, context, group_name)
         // build groups ui
         last_item <- None
 
         groups <-
-            library_groups.Keys
-            |> Seq.sortBy (fun (index, group_name) -> (index, group_name.ToLower()))
-            |> if options.ChartGroupReverse.Value then Seq.rev else id
-            |> Seq.map (fun (index, group_name) ->
-                library_groups.[(index, group_name)].Charts
+            library_groups
+            |> Seq.map (fun (group_name, group) ->
+                group.Charts
                 |> Seq.map (fun (cc, context) ->
                     let i = ChartItem(group_name, cc, context)
                     last_item <- Some i
                     i
                 )
-                |> if options.ChartSortReverse.Value then Seq.rev else id
                 |> ResizeArray
-                |> fun l -> GroupItem(group_name, l, library_groups.[(index, group_name)].Context)
+                |> fun l -> GroupItem(group_name, l, group.Context)
             )
             |> List.ofSeq
 

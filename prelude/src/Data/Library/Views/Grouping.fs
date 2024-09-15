@@ -37,12 +37,13 @@ type private GroupWithSorting =
         Charts: ResizeArray<ChartMeta * LibraryContext * SortingTag>
         Context: LibraryGroupContext
     }
-    member this.ToGroup : Group =
+    member this.ToGroup (reverse_sorting: bool) : Group =
         {
             Charts = 
                 this.Charts
                 |> Seq.distinctBy (fun (cc, _, _) -> cc.Hash)
                 |> Seq.sortBy (fun (_, _, key) -> key)
+                |> if reverse_sorting then Seq.rev else id
                 |> Seq.map (fun (cc, ctx, _) -> (cc, ctx))
                 |> Array.ofSeq
             Context = this.Context

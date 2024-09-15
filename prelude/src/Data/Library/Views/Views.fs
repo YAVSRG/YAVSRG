@@ -13,40 +13,11 @@ type LibraryView =
 
 module LibraryView =
 
-    type LexSortedGroups = Dictionary<int * string, Group>
+    type SortedGroups = (string * Group) seq
 
-    let get_groups
-        (filter_by: Filter)
-        (group_by: GroupMethod)
-        (sort_by: SortMethod)
-        (ctx: LibraryViewContext)
-        : LexSortedGroups =
+    let get_collection_groups (filter_by: Filter) (reverse_groups: bool) (sort_by: SortMethod) (reverse_sorting: bool) (ctx: LibraryViewContext) : SortedGroups =
 
-        let found_groups = new Dictionary<int * string, GroupWithSorting>()
-
-        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
-            for group_key in group_by.Func (cc, ctx) do
-                if found_groups.ContainsKey group_key |> not then
-                    found_groups.Add(
-                        group_key,
-                        {
-                            Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
-                            Context = if group_by.IsPacks then LibraryGroupContext.Pack (snd group_key) else LibraryGroupContext.None
-                        }
-                    )
-
-                found_groups.[group_key].Charts.Add(cc, (if group_by.IsPacks then LibraryContext.Pack (snd group_key) else LibraryContext.None), sort_by (cc, ctx))
-
-        let groups = new Dictionary<int * string, Group>()
-
-        for g in found_groups.Keys |> Seq.toArray do
-            groups.[g] <- found_groups.[g].ToGroup
-
-        groups
-
-    let get_collection_groups (filter_by: Filter) (sort_by: SortMethod) (ctx: LibraryViewContext) : LexSortedGroups =
-
-        let groups = new Dictionary<int * string, Group>()
+        let groups = new Dictionary<string, Group>()
 
         for name in ctx.Library.Collections.Folders.Keys do
             let collection = ctx.Library.Collections.Folders.[name]
@@ -59,11 +30,12 @@ module LibraryView =
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
             |> fun x ->
                 if x.Length > 0 then
                     groups.Add(
-                        (0, name),
+                        name,
                         {
                             Charts = x
                             Context = LibraryGroupContext.Folder name
@@ -85,21 +57,26 @@ module LibraryView =
             |> fun x ->
                 if x.Length > 0 then
                     groups.Add(
-                        (0, name),
+                        name,
                         {
                             Charts = x
                             Context = LibraryGroupContext.Playlist name
                         }
                     )
 
-        groups
+        groups 
+        |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())
+        |> if reverse_groups then Seq.rev else id
+        |> Seq.map (|KeyValue|)
 
     let get_table_groups
         (filter_by: Filter)
+        (reverse_groups: bool)
         (sort_by: SortMethod)
+        (reverse_sorting: bool)
         (table: Table)
         (ctx: LibraryViewContext)
-        : LexSortedGroups =
+        : SortedGroups =
         let groups = new Dictionary<int * string, Group>()
 
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
@@ -111,6 +88,7 @@ module LibraryView =
             )
             |> Filter.apply_ctx_seq (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
             |> fun x ->
                 if x.Length > 0 then
@@ -124,6 +102,47 @@ module LibraryView =
                         }
                     )
 
-        groups
+        groups 
+        |> Seq.sortBy (_.Key >> (fun (index, group_name) -> (index, group_name.ToLowerInvariant())))
+        |> if reverse_groups then Seq.rev else id
+        |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value)
+    
+    let get_groups
+        (filter_by: Filter)
+        (group_by: GroupMethod)
+        (reverse_groups: bool)
+        (sort_by: SortMethod)
+        (reverse_sorting: bool)
+        (ctx: LibraryViewContext)
+        : SortedGroups =
 
-    let get_empty_view () = new Dictionary<int * string, Group>()
+        let found_groups = new Dictionary<int * string, GroupWithSorting>()
+
+        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
+            for group_key in group_by.Func (cc, ctx) do
+                if found_groups.ContainsKey group_key |> not then
+                    found_groups.Add(
+                        group_key,
+                        {
+                            Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
+                            Context = if group_by.IsPacks then LibraryGroupContext.Pack (snd group_key) else LibraryGroupContext.None
+                        }
+                    )
+
+                found_groups.[group_key].Charts.Add(
+                    cc, 
+                    (if group_by.IsPacks then LibraryContext.Pack (snd group_key) else LibraryContext.None), 
+                    sort_by (cc, ctx)
+                )
+
+        let collections = get_collection_groups filter_by reverse_groups sort_by reverse_sorting ctx
+
+        let groups =
+            found_groups
+            |> Seq.sortBy (_.Key >> (fun (index, group_name) -> (index, group_name.ToLowerInvariant())))
+            |> if reverse_groups then Seq.rev else id
+            |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value.ToGroup reverse_sorting)
+
+        Seq.concat [collections; groups]
+
+    let get_empty_view () : SortedGroups = Seq.empty
