@@ -63,6 +63,7 @@ module Tree =
                 options.ChartGroupReverse.Value
                 Sorting.modes.[options.ChartSortMode.Value]
                 options.ChartSortReverse.Value
+                options.TreeAlwaysShowCollections.Value
                 Content.Table
                 ctx
             |> Seq.toArray

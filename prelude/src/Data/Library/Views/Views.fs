@@ -165,6 +165,7 @@ module LibraryView =
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
+        (always_show_collections: bool)
         (table: Table option)
         (ctx: LibraryViewContext)
         : SortedGroups =
@@ -180,10 +181,9 @@ module LibraryView =
                 | Some t -> get_table_groups filter_by reverse_groups sort_by reverse_sorting t ctx
                 | None -> Seq.empty
 
-        // todo: setting
         match group_by with
         | Normal _
-        | Packs ->
+        | Packs when always_show_collections ->
             let collections = get_collection_groups filter_by reverse_groups sort_by reverse_sorting ctx
             Seq.concat [collections; groups]
         | _ -> groups
