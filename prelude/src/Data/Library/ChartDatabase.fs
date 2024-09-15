@@ -189,7 +189,8 @@ module ChartDatabase =
         let cache_file = Path.Combine(get_game_folder "Songs", "cache.json")
         if not (File.Exists cache_file) then db else
 
-        Logging.Debug("Found old cache.json ...")
+        Logging.Info("As part of a client update your charts are being upgraded to a new database format")
+        Logging.Info("This could take a few minutes (or as long as a recache normally takes)")
 
         seq {
             for folder in Directory.EnumerateDirectories(get_game_folder "Songs") do
@@ -206,9 +207,9 @@ module ChartDatabase =
             DbCharts.save_batch chunk db.Database
         )
 
-        Logging.Debug("Written charts to database in new format")
+        Logging.Info("Written charts to database in new format")
         File.Move(cache_file, cache_file + ".old")
-        Logging.Debug("Marked cache.json as old. All done!")
+        Logging.Info("Marked cache.json as old. All done!")
         db
 
     // Fast load true loads the contents of the db into memory (used by game client)
