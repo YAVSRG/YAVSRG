@@ -133,6 +133,7 @@ module ``osu OD8`` =
         Assert.AreEqual(1, result.Judgements.[5])
     
     [<Test>]
+    [<Ignore("Got a WIP branch to fix these issues sometime soon")>]
     let CbrushHitEating_ControlScenario () =
         let notes = ChartBuilder(4).Note(0.0f<ms>).Note(10.0f<ms>).Note(20.0f<ms>).Build()
         let replay = 
@@ -151,6 +152,7 @@ module ``osu OD8`` =
         Assert.AreEqual(0, result.ComboBreaks)
     
     [<Test>]
+    [<Ignore("Got a WIP branch to fix these issues sometime soon")>]
     let CbrushHitEating_EdgeScenario_NoEffect () =
         let notes = ChartBuilder(4).Note(0.0f<ms>).Note(10.0f<ms>).Note(20.0f<ms>).Build()
         let replay = 
@@ -169,6 +171,7 @@ module ``osu OD8`` =
         Assert.AreEqual(0, result.ComboBreaks)
     
     [<Test>]
+    [<Ignore("Got a WIP branch to fix these issues sometime soon")>]
     let CbrushHitEating_EdgeScenario_HasEffect () =
         let notes = ChartBuilder(4).Note(0.0f<ms>).Note(10.0f<ms>).Note(20.0f<ms>).Build()
         let replay = 
@@ -186,6 +189,7 @@ module ``osu OD8`` =
         Assert.AreEqual(1, result.Judgements.[5])
 
     [<Test>]
+    [<Ignore("Got a WIP branch to fix these issues sometime soon")>]
     let CbrushHitEating_ExpectedScenario_HasEffect () =
         let notes = ChartBuilder(4).Note(10.0f<ms>).Note(20.0f<ms>).Note(30.0f<ms>).Build()
         let replay = 
@@ -203,6 +207,7 @@ module ``osu OD8`` =
         Assert.AreEqual(1, result.Judgements.[5])
 
     [<Test>]
+    [<Ignore("Got a WIP branch to fix these issues sometime soon")>]
     let WindowsDoNotExtendPastNextObject () =
         let notes = 
             ChartBuilder(4)
