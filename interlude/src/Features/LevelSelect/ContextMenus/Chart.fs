@@ -42,7 +42,9 @@ type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
                 yield PageButton.Once([cc.Packs.Count.ToString()] %> "chart.delete.from_everywhere", fun () -> delete_from_everywhere(); Menu.Back()).Pos(5)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(7)
             | _ ->
-                yield PageButton.Once(%"confirm.yes",  fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
+                yield PageButton.Once(
+                    (if cc.Packs.Count > 1 then [cc.Packs.Count.ToString()] %> "chart.delete.from_everywhere" else %"confirm.yes"),
+                    fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
         }
         |+ Text([ sprintf "%s [%s]" cc.Title cc.DifficultyName ] %> "misc.confirmdelete", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
