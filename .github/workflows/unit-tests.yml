@@ -26,5 +26,5 @@ jobs:
     - name: Unit tests must pass
       run: |
         cd scripts
-        chmod +x ./setup_cli.sh
-        ./setup_cli.sh
+        chmod +x ./run_tests.sh
+        ./run_tests.sh
