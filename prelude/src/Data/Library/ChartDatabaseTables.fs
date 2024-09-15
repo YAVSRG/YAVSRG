@@ -30,7 +30,7 @@ module DbCharts =
                 Background TEXT NOT NULL,
                 Audio TEXT NOT NULL,
                 PreviewTime REAL NOT NULL,
-                Folders TEXT NOT NULL,
+                Packs TEXT NOT NULL,
                 Origin TEXT NOT NULL,
                 Keys INTEGER NOT NULL,
                 Length REAL NOT NULL,
@@ -53,7 +53,7 @@ module DbCharts =
                     Title, TitleNative, Artist, ArtistNative,
                     DifficultyName, Subtitle, Source, Creator, Tags,
                     Background, Audio, PreviewTime,
-                    Folders, Origin,
+                    Packs, Origin,
                     Keys, Length, BPM,
                     DateAdded, CalcVersion, Rating, Patterns,
                     Chart
@@ -63,20 +63,20 @@ module DbCharts =
                     @Title, @TitleNative, @Artist, @ArtistNative,
                     @DifficultyName, @Subtitle, @Source, @Creator, @Tags,
                     json(@Background), json(@Audio), @PreviewTime,
-                    @Folders, json(@Origin),
+                    @Packs, json(@Origin),
                     @Keys, @Length, @BPM,
                     @DateAdded, @CalcVersion, @Rating, json(@Patterns),
                     @Chart)
                 ON CONFLICT DO UPDATE SET
                     DateAdded = excluded.DateAdded,
-                    Folders = (
+                    Packs = (
                         SELECT json_group_array(value) FROM (
                             SELECT json_each.value
-                            FROM charts, json_each(charts.Folders)
+                            FROM charts, json_each(charts.Packs)
                             WHERE charts.Id = excluded.Id
                             UNION
                             SELECT json_each.value
-                            FROM json_each(excluded.Folders)
+                            FROM json_each(excluded.Packs)
                         ) GROUP BY ''
                     );
             """
@@ -95,7 +95,7 @@ module DbCharts =
                     "@Background", SqliteType.Text, -1
                     "@Audio", SqliteType.Text, -1
                     "@PreviewTime", SqliteType.Real, 4
-                    "@Folders", SqliteType.Text, -1
+                    "@Packs", SqliteType.Text, -1
                     "@Origin", SqliteType.Text, -1
                     "@Keys", SqliteType.Integer, 1
                     "@Length", SqliteType.Real, 4
@@ -186,7 +186,7 @@ module DbCharts =
                 Title, TitleNative, Artist, ArtistNative,
                 DifficultyName, Subtitle, Source, Creator, Tags,
                 Background, Audio, PreviewTime,
-                Folders, Origin,
+                Packs, Origin,
                 Keys, Length, BPM,
                 DateAdded, CalcVersion, Rating, Patterns
             FROM charts
@@ -209,7 +209,7 @@ module DbCharts =
                 Title, TitleNative, Artist, ArtistNative,
                 DifficultyName, Subtitle, Source, Creator, Tags,
                 Background, Audio, PreviewTime,
-                Folders, Origin,
+                Packs, Origin,
                 Keys, Length, BPM,
                 DateAdded, CalcVersion, Rating, Patterns
             FROM charts
@@ -297,12 +297,12 @@ module DbCharts =
             SQL = """
             UPDATE charts 
             SET 
-                Folders = json(@Folders)
+                Packs = json(@Packs)
             WHERE Id = @Hash;
             """
             Parameters = [ 
                 "@Hash", SqliteType.Text, -1
-                "@Folders", SqliteType.Text, -1
+                "@Packs", SqliteType.Text, -1
             ]
             FillParameters = 
                 (fun p (hash, packs) -> 
