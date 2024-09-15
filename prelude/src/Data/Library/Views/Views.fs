@@ -25,18 +25,17 @@ module LibraryView =
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
         for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
-            let group_key = group_by (cc, ctx)
+            for group_key in group_by (cc, ctx) do
+                if found_groups.ContainsKey group_key |> not then
+                    found_groups.Add(
+                        group_key,
+                        {
+                            Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
+                            Context = LibraryGroupContext.None
+                        }
+                    )
 
-            if found_groups.ContainsKey group_key |> not then
-                found_groups.Add(
-                    group_key,
-                    {
-                        Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
-                        Context = LibraryGroupContext.None
-                    }
-                )
-
-            found_groups.[group_key].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
+                found_groups.[group_key].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
 
         let groups = new Dictionary<int * string, Group>()
 

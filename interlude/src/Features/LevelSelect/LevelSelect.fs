@@ -39,7 +39,7 @@ type LevelSelectScreen() =
         base.Init parent
 
         Setting.app (fun s -> if Sorting.modes.ContainsKey s then s else "title") options.ChartSortMode
-        Setting.app (fun s -> if Grouping.modes.ContainsKey s then s else "date_played") options.ChartGroupMode
+        Setting.app (fun s -> if Grouping.modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
         |+ CurrentChart(Position = { Position.SliceT(170.0f) with Right = 0.4f %- 0.0f })
