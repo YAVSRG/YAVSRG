@@ -291,3 +291,25 @@ module DbCharts =
 
     let update_calculated_data (chunk: (string * float32 * PatternReport) seq) (db: Database) =
         UPDATE_CALCULATED_DATA.Batch chunk db |> expect |> ignore
+
+    let private UPDATE_PACKS: NonQuery<string * Set<string>> =
+        {
+            SQL = """
+            UPDATE charts 
+            SET 
+                Folders = json(@Folders)
+            WHERE Id = @Hash;
+            """
+            Parameters = [ 
+                "@Hash", SqliteType.Text, -1
+                "@Folders", SqliteType.Text, -1
+            ]
+            FillParameters = 
+                (fun p (hash, packs) -> 
+                    p.String hash
+                    p.Json JSON packs
+                )
+        }
+
+    let update_packs_batch (chunk: (string * Set<string>) seq) (db: Database) =
+        UPDATE_PACKS.Batch chunk db |> expect |> ignore

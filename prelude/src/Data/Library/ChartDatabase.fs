@@ -121,10 +121,6 @@ module ChartDatabase =
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
 
-    let change_folders (chart_id: string) (folders: Set<string>) (db: ChartDatabase) = 
-        failwith "nyi"
-
-    // todo: deleting from just certain folders
     let delete (chart_meta: ChartMeta) (db: ChartDatabase) =
         db.Cache.Remove(chart_meta.Hash) |> ignore
         DbCharts.delete chart_meta.Hash db.Database |> ignore
@@ -133,6 +129,36 @@ module ChartDatabase =
         let deleted = 
             cs |> Seq.map (fun c -> db.Cache.Remove c.Hash |> ignore; c.Hash)
         DbCharts.delete_batch deleted db.Database |> ignore
+
+    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) = 
+        if packs.IsEmpty then
+            delete chart_meta db
+        else
+            db.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
+        DbCharts.update_packs_batch [chart_meta.Hash, packs] db.Database
+
+    let delete_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) =
+        change_packs chart_meta (chart_meta.Packs.Remove pack)
+
+    let delete_many_from_pack (cs: ChartMeta seq) (pack: string) (db: ChartDatabase) =
+        let updated =
+            seq {
+                for c in cs do
+                    let new_packs = c.Packs.Remove pack
+                    if not new_packs.IsEmpty then
+                        db.Cache.[c.Hash] <- { c with Packs = new_packs }
+                        yield c.Hash, new_packs
+            }
+        DbCharts.update_packs_batch updated db.Database
+        let deleted =
+            seq {
+                for c in cs do
+                    let new_packs = c.Packs.Remove pack
+                    if new_packs.IsEmpty then
+                        db.Cache.Remove(c.Hash) |> ignore
+                        yield c.Hash
+            }
+        DbCharts.delete_batch deleted db.Database
 
     let vacuum (db: ChartDatabase) =
         // todo: find all charts with no audio file and vacuum them too
