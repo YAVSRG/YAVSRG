@@ -15,6 +15,8 @@ type private ModeDropdown
     (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
     inherit Container(NodeType.None)
 
+    let LEFT_PERCENT = 0.4f
+
     let mutable display_value =
         Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
@@ -27,7 +29,7 @@ type private ModeDropdown
             K(label + ":"),
             !%Palette.HIGHLIGHT_100,
             Hotkey = bind,
-            Position = Position.SliceL 120.0f
+            Position = { Position.DEFAULT with Right = LEFT_PERCENT %+ 0.0f }
         )
         |+ StylishButton(
             (fun () -> reverse.Value <- not reverse.Value),
@@ -41,7 +43,7 @@ type private ModeDropdown
                          Icons.CHEVRONS_UP)
             ),
             !%Palette.DARK_100,
-            Position = Position.ShrinkL 145.0f
+            Position = { Position.DEFAULT with Left = LEFT_PERCENT %+ 25.0f }
         )
         |* dropdown_wrapper
 
@@ -64,40 +66,21 @@ type private ModeDropdown
 type LibraryViewControls() =
     inherit Container(NodeType.None)
 
-    let manage_collections =
-        StylishButton(
-            (fun () -> Menu.ShowPage ManageCollectionsPage),
-            K(sprintf "%s %s" Icons.FOLDER (%"library.collections")),
-            !%Palette.MAIN_100,
-            Hotkey = "group_mode"
-        )
-            .Help(Help.Info("library.collections", "group_mode"))
-
-    let manage_tables =
-        StylishButton(
-            (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
-            K(sprintf "%s %s" Icons.EDIT_2 (%"library.tables")),
-            !%Palette.MAIN_100,
-            Hotkey = "group_mode"
-        )
-            .Help(Help.Info("library.tables", "group_mode"))
-
     override this.Init(parent) =
         this
         |+ StylishButton(
-                ignore,
-                K (sprintf "%s %s" Icons.FOLDER (%"levelselect.librarymode")),
-                !%Palette.DARK_100,
-                Hotkey = "library_mode",
-                Position =
-                    {
-                        Left = 0.4f %+ 25.0f
-                        Top = 0.0f %+ 120.0f
-                        Right = 0.6f %- 25.0f
-                        Bottom = 0.0f %+ 170.0f
-                    }
-            )
-            .Help(Help.Info("levelselect.librarymode", "library_mode"))
+            (fun () -> LevelSelectOptionsPage().Show()),
+            K Icons.SETTINGS,
+            !%Palette.DARK_100,
+            Hotkey = "level_select_options",
+            Position =
+                {
+                    Left = 0.4f %+ 25.0f
+                    Top = 0.0f %+ 120.0f
+                    Right = 0.4f %+ 85.0f
+                    Bottom = 0.0f %+ 170.0f
+                }
+        )
 
         |+ ModeDropdown(
             Sorting.modes.Keys
@@ -110,9 +93,9 @@ type LibraryViewControls() =
             "sort_mode",
             Position =
                 {
-                    Left = 0.6f %+ 0.0f
+                    Left = 0.4f %+ 110.0f
                     Top = 0.0f %+ 120.0f
-                    Right = 0.8f %- 25.0f
+                    Right = 0.7f %+ 30.0f
                     Bottom = 0.0f %+ 170.0f
                 }
         )
@@ -131,7 +114,7 @@ type LibraryViewControls() =
             "group_mode",
             Position =
                 {
-                    Left = 0.8f %+ 0.0f
+                    Left = 0.7f %+ 55.0f
                     Top = 0.0f %+ 120.0f
                     Right = 1.0f %+ 0.0f
                     Bottom = 0.0f %+ 170.0f

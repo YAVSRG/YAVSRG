@@ -148,11 +148,11 @@ module LibraryView =
                         pack,
                         {
                             Charts = ResizeArray<ChartMeta * LibraryContext * SortingTag>()
-                            Context = LibraryGroupContext.None
+                            Context = LibraryGroupContext.Pack pack
                         }
                     )
 
-                found_groups.[pack].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
+                found_groups.[pack].Charts.Add(cc, LibraryContext.Pack pack, sort_by (cc, ctx))
 
         found_groups
         |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())

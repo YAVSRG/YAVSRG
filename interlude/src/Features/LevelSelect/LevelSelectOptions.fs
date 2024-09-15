@@ -1,12 +1,14 @@
-﻿namespace Interlude.Features.OptionsMenu.Library
+﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Collections
+open Interlude.Features.Tables
 
-type LevelSelectPage() =
+type LevelSelectOptionsPage() =
     inherit Page()
 
     override this.Content() =
@@ -35,8 +37,18 @@ type LevelSelectPage() =
         )
             .Help(Help.Info("levelselect.min_suggestion_rate"))
             .Pos(7)
+        |+ PageButton(
+            %"library.tables",
+            fun () -> SelectTablePage(LevelSelect.refresh_all).Show()
+        )
+            .Pos(10)
+        |+ PageButton(
+            %"library.collections",
+            fun () -> ManageCollectionsPage().Show()
+        )
+            .Pos(12)
         :> Widget
 
-    override this.OnClose() = ()
+    override this.OnClose() = LevelSelect.refresh_all()
 
-    override this.Title = %"levelselect.options"
+    override this.Title = Icons.SETTINGS + " " + %"levelselect.options"

@@ -8,7 +8,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude
 open Prelude.Gameplay.Mods
-open Prelude.Data.Library.Sorting
 open Prelude.Data.Library
 open Interlude
 
@@ -178,6 +177,7 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
             TreeShowGradesOnly: Setting<bool>
+            TreeAlwaysShowCollections: Setting<bool>
             Table: Setting<string option>
             SuggestionsMinRate: Setting.Bounded<float32>
             SuggestionsMaxRate: Setting.Bounded<float32>
@@ -240,6 +240,7 @@ module Options =
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
                 TreeShowGradesOnly = Setting.simple true
+                TreeAlwaysShowCollections = Setting.simple false
                 Table = Content.Tables.selected_id
                 SuggestionsMinRate = Setting.rate 1.0f
                 SuggestionsMaxRate = Setting.rate 1.5f
@@ -351,7 +352,7 @@ module Options =
             Hotkeys.register "player_list" (mk Keys.F9)
             Hotkeys.register "quick_menu" (ctrl Keys.Tab)
 
-            Hotkeys.register "library_mode" (mk Keys.D1)
+            Hotkeys.register "level_select_options" (mk Keys.D1)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
             Hotkeys.register "move_down_in_playlist" (ctrl Keys.Down)
@@ -505,16 +506,6 @@ module Options =
             Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
 
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
-
-        Directory.CreateDirectory(get_game_folder "Songs") |> ignore
-        // todo: similar how tos in Rulesets, Themes, Noteskins
-        File.WriteAllText(
-            Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),
-            "Dragging and dropping things into this folder won't work.\n"
-            + "Instead, drag and drop things onto the *game window* while it's open and it will import, OR use the ingame downloaders.\n"
-            + "> Help! I have files in here, but they don't show up ingame?\n"
-            + "Make sure they are .yav files, if so go to Options > Library > Rebuild cache and let that run, it will re-add anything that's missing."
-        )
 
     let deinit () =
         try

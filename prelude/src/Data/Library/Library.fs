@@ -23,9 +23,7 @@ module Library =
         File.WriteAllText(
             Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),
             "Dragging and dropping things into this folder won't work.\n"
-            + "Instead, drag and drop things onto the *game window* while it's open and it will import.\n\n"
-            + "Does this folder have stuff in, but they don't show up in game?\n"
-            + "In that case, check they are .yav files, and then go to Options > Debug > Rebuild cache and let that run."
+            + "Instead, drag and drop things onto the *game window* while it's open and it will import."
         )
 
         let library =

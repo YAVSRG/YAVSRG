@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Prelude.Data.Library
 open Prelude
 open Prelude.Data
-open Prelude.Data.Library
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -103,7 +102,7 @@ type LibraryPage() =
             .Pos(7, 2, PageWidth.Full)
         |+ PageButton(
                 %"levelselect.options",
-                (fun () -> LevelSelectPage().Show())
+                (fun () -> LevelSelectOptionsPage().Show())
             )
             .Pos(10, 2, PageWidth.Full)
         |+ import_info
