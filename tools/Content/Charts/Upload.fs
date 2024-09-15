@@ -4,7 +4,7 @@ open System.IO
 open System.Net.Http
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Prelude
 open Interlude.Web.Shared
 open Bytewizer.Backblaze.Client
@@ -37,15 +37,15 @@ module Upload =
         let reply = cdn_httpclient.Send(req)
         reply.IsSuccessStatusCode
 
-    let private upload_chart_to_cdn (chart: Chart) : Async<Result<string * int, string>> =
+    let private upload_chart_to_cdn (chart_meta: ChartMeta) (chart: Chart) : Async<Result<string * int, string>> =
         match Chart.check chart with
         | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
         | Ok chart ->
 
         let chart_hash = Chart.hash chart
 
-        match chart.Header.BackgroundFile, chart.Header.AudioFile with
-        | Asset background_hash, Asset audio_hash ->
+        match chart_meta.Background, chart_meta.Audio with
+        | AssetPath.Hash background_hash, AssetPath.Hash audio_hash ->
             let upload_notes =
                 task {
                         let file_name = chart_hash
@@ -77,7 +77,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (Cache.audio_path chart interlude_chart_cache).Value
+                                    File.OpenRead (chart_meta.Audio.Path).Value
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -96,7 +96,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (Cache.background_path chart interlude_chart_cache).Value
+                                    File.OpenRead (chart_meta.Background.Path).Value
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -119,32 +119,31 @@ module Upload =
             }
         | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
-    let create_backbeat_data (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart.Header.AudioFile = Missing then
+    let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
+        if chart_meta.Audio = Missing then
             Error "Missing audio file"
-        elif chart.Header.BackgroundFile = Missing then
+        elif chart_meta.Background = Missing then
             Error "Missing background image"
         else
 
-        match chart.Header.AudioFile, chart.Header.BackgroundFile with
-        | Asset audio_hash, Asset background_hash ->
-            let duration = chart.LastNote - chart.FirstNote
-            if duration < 30000.0f<ms> then
+        match chart_meta.Audio, chart_meta.Background with
+        | AssetPath.Hash audio_hash, AssetPath.Hash background_hash ->
+            if chart_meta.Length < 30000.0f<ms> then
                 Error "Chart is too short"
             else
 
-            if chart.Header.ChartSource = Unknown then
+            if chart_meta.Origin = ChartOrigin.Unknown then
                 Error "Chart has no source"
             else
 
             Ok (
                 {
-                    Creators = [ chart.Header.Creator ]
-                    Keys = chart.Keys
-                    DifficultyName = chart.Header.DiffName
-                    Subtitle = chart.Header.Subtitle
-                    Tags = chart.Header.Tags
-                    Duration = duration
+                    Creators = [ chart_meta.Creator ]
+                    Keys = chart_meta.Keys
+                    DifficultyName = chart_meta.DifficultyName
+                    Subtitle = chart_meta.Subtitle
+                    Tags = chart_meta.Tags
+                    Duration = chart_meta.Length
                     Notecount =
                         let mutable count = 0
 
@@ -154,35 +153,34 @@ module Upload =
                                     count <- count + 1
 
                         count
-                    BPM = Chart.find_min_max_bpm chart
+                    BPM = (60000.0f<ms/beat> / float32 chart_meta.BPM, 60000.0f<ms/beat> / float32 chart_meta.BPM)
                     Sources =
-                        match chart.Header.ChartSource with
+                        match chart_meta.Origin with
                         | Osu(-1, _)
                         | Osu(_, 0)
                         | Quaver(-1, _)
                         | Quaver(_, 0)
                         | Etterna ""
-                        | Stepmania _
                         | Unknown -> []
 
                         | Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
                         | Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
                         | Etterna pack_name -> [ Backbeat.Archive.ChartSource.Etterna pack_name ]
-                    PreviewTime = chart.Header.PreviewTime
+                    PreviewTime = chart_meta.PreviewTime
                     BackgroundHash = background_hash
                     AudioHash = audio_hash
                 },
                 {
-                    Artists = [ chart.Header.Artist.Trim() ]
+                    Artists = [ chart_meta.Artist.Trim() ]
                     OtherArtists = []
                     Remixers = []
-                    Title = Metadata.prune_song_title chart.Header.Title
+                    Title = Metadata.prune_song_title chart_meta.Title
                     AlternativeTitles =
-                        match chart.Header.TitleNative with
+                        match chart_meta.TitleNative with
                         | Some x -> [ Metadata.prune_song_title x ]
                         | None -> []
-                    Source = chart.Header.Source
-                    Tags = Metadata.prune_tags chart.Header.Tags
+                    Source = chart_meta.Source
+                    Tags = Metadata.prune_tags chart_meta.Tags
                 }
             )
         | _ -> Error "Chart should be cached/use assets format"
@@ -200,18 +198,18 @@ module Upload =
             return result
         }
 
-    let private upload_chart (chart: Chart) : Async<Result<unit, string>> =
+    let private upload_chart (chart_meta: ChartMeta) (chart: Chart) : Async<Result<unit, string>> =
         async {
-            match create_backbeat_data chart with
+            match create_backbeat_data chart_meta chart with
             | Error reason -> return Error reason
             | Ok (bb_chart, bb_song) ->
 
-            match! upload_chart_to_cdn chart with
+            match! upload_chart_to_cdn chart_meta chart with
             | Error reason -> return Error reason
             | Ok (hash, files_changed) ->
 
             if files_changed > 0 then
-                Logging.Info(sprintf "Uploaded %i new files for '%s'" files_changed chart.Header.Title)
+                Logging.Info(sprintf "Uploaded %i new files for '%s'" files_changed chart_meta.Title)
 
             match! upload_chart_to_backbeat (hash, bb_chart, bb_song) with
             | Error reason -> return Error reason
@@ -220,12 +218,11 @@ module Upload =
 
     let upload_folder (folder_name: string) =
         seq {
-            for key in interlude_chart_cache.Entries.Keys |> Seq.where (fun key -> key.StartsWith (folder_name + "/")) do
+            for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Folders.Contains folder_name) do
                 async {
-                    let cc = (Cache.by_key key interlude_chart_cache).Value
-                    match Cache.load cc interlude_chart_cache with
+                    match ChartDatabase.get_chart cc.Hash interlude_chart_db with
                     | Ok chart -> 
-                        match! upload_chart chart with
+                        match! upload_chart cc chart with
                         | Ok () -> Logging.Info(sprintf "Uploaded '%s'" cc.Title)
                         | Error reason -> Logging.Warn(sprintf "Upload of '%s' failed: %s" cc.Title reason)
                     | Error reason -> Logging.Error(sprintf "Loading '%s' from disk failed: %s" cc.Title reason)

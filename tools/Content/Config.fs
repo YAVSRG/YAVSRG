@@ -3,8 +3,9 @@
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Data
+open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Data.Library.Caching
+open Prelude.Data.Library
 open Interlude.Web.Shared
 open YAVSRG.CLI
 
@@ -45,6 +46,11 @@ module Config =
             API.Client.authenticate(credentials.Token)
         with err -> printfn "%O" err; failwith "Error initialising backbeat utils"
 
-    let interlude_chart_cache = Cache.from_path (Path.Combine(backbeat_config.InterludePath, "Songs"))
+    let interlude_chart_db =
+        Directory.SetCurrentDirectory(backbeat_config.InterludePath)
+        let db_file = Path.Combine(get_game_folder "Songs", "charts.db")
+        if not (File.Exists db_file) then failwith "Couldn't find your interlude charts.db"
+        let db = Database.from_file db_file
+        ChartDatabase.create true db
 
     let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

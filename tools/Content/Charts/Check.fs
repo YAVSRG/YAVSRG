@@ -1,7 +1,6 @@
 ﻿namespace YAVSRG.CLI.Features.Backbeat
 
 open Percyqaz.Common
-open Prelude.Data.Library.Caching
 open Prelude.Backbeat.Archive
 open Interlude.Web.Shared
 
@@ -20,7 +19,6 @@ module Check =
         loop 0
 
     let test () =
-        printfn "%s" interlude_chart_cache.RootPath
         scan_all_charts (fun (id, song) ->
             let fixed_song =
                 { song with 
