@@ -27,18 +27,18 @@ module Tree =
         seq {
             for group in groups do
                 for chart in group.Items do
+                    if chart.Chart.Hash = current_cc.Hash && chart.Context.Matches SelectedChart.LIBRARY_CTX then
+                        yield chart.Context, group
+            for group in groups do
+                for chart in group.Items do
                     if chart.Chart.Hash = current_cc.Hash && chart.Context.SoftMatches SelectedChart.LIBRARY_CTX then
                         yield chart.Context, group
-                        selected_chart <- current_cc.Hash
-                        selected_group <- group.Name
-                        expanded_group <- selected_group
-                        scroll_to <- ScrollTo.Chart
         }
         |> Seq.tryHead
         |> function
         | Some (ctx, group) -> 
             selected_chart <- current_cc.Hash
-            selected_group <- group.Name
+            selected_group <- group.Name, group.Context
             expanded_group <- selected_group
             scroll_to <- ScrollTo.Chart
         | None -> ()
@@ -92,7 +92,7 @@ module Tree =
                 let cc, context = group.Charts.[0]
 
                 if cc.Hash <> selected_chart then
-                    switch_chart (cc, context, group_name)
+                    switch_chart (cc, context, group_name, group.Context)
         // build groups ui
         last_item <- None
 
@@ -101,7 +101,7 @@ module Tree =
             |> Seq.map (fun (group_name, group) ->
                 group.Charts
                 |> Seq.map (fun (cc, context) ->
-                    let i = ChartItem(group_name, cc, context)
+                    let i = ChartItem(group_name, group.Context, cc, context)
                     last_item <- Some i
                     i
                 )
@@ -229,11 +229,11 @@ module Tree =
             ChartContextMenu(SelectedChart.CACHE_DATA.Value, SelectedChart.LIBRARY_CTX).Show()
         else
 
-            if (%%"up").Tapped() && expanded_group <> "" then
+            if (%%"up").Tapped() && expanded_group <> ("", LibraryGroupContext.None) then
                 scroll_to <- ScrollTo.Pack expanded_group
-                expanded_group <- ""
+                expanded_group <- ("", LibraryGroupContext.None)
 
-            if (%%"down").Tapped() && expanded_group = "" && selected_group <> "" then
+            if (%%"down").Tapped() && expanded_group = ("", LibraryGroupContext.None) && selected_group <> ("", LibraryGroupContext.None) then
                 expanded_group <- selected_group
                 scroll_to <- ScrollTo.Pack expanded_group
 

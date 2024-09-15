@@ -15,7 +15,7 @@ open Interlude.Features.Gameplay
 
 open TreeState
 
-type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContext) =
+type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: ChartMeta, ctx: LibraryContext) =
     inherit TreeItem()
 
     let hover = Animation.Fade 0.0f
@@ -55,18 +55,18 @@ type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContex
     override this.Bounds(top) =
         Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)
 
-    override this.Selected = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches context
+    override this.Selected = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 
     override this.Spacing = 5.0f
     member this.Chart = cc
-    member this.Context = context
+    member this.Context = ctx
 
     member this.PlaylistDuration =
-        match context with
+        match ctx with
         | LibraryContext.Playlist(_, _, data) -> cc.Length / data.Rate.Value
         | _ -> 0.0f<ms>
 
-    member this.Select() = switch_chart (cc, context, group_name)
+    member this.Select() = switch_chart (cc, ctx, group_name, group_ctx)
 
     member private this.OnDraw(bounds: Rect) =
         let {
@@ -174,16 +174,16 @@ type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContex
                 else
                     this.Select()
             elif this.RightClick(origin) then
-                ChartContextMenu(cc, context).Show()
+                ChartContextMenu(cc, ctx).Show()
             elif (%%"delete").Tapped() then
-                ChartDeleteMenu(cc, context, false).Show()
+                ChartDeleteMenu(cc, ctx, false).Show()
         else
             hover.Target <- 0.0f
 
         hover.Update(elapsed_ms) |> ignore
 
     member this.Update(top, origin, originB, elapsed_ms) =
-        if scroll_to = ScrollTo.Chart && group_name = selected_group && this.Selected then
+        if scroll_to = ScrollTo.Chart && (group_name, group_ctx) = selected_group && this.Selected then
             scroll (-top + 500.0f)
             scroll_to <- ScrollTo.Nothing
 

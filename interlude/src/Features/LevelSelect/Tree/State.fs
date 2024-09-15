@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay
+open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Features.Gameplay
 
@@ -13,17 +14,17 @@ open Interlude.Features.Gameplay
 type private ScrollTo =
     | Nothing
     | Chart
-    | Pack of string
+    | Pack of string * LibraryGroupContext
 
 module private TreeState =
 
     /// Group's name = this string => Selected chart is in this group
-    let mutable selected_group = ""
-    /// Chart's hash = this string && contexts match => It's the selected chart
-    let mutable selected_chart = ""
+    let mutable selected_group = "", LibraryGroupContext.None
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
-    let mutable expanded_group = ""
+    let mutable expanded_group = "", LibraryGroupContext.None
+    /// Chart's hash = this string && contexts match => It's the selected chart
+    let mutable selected_chart = ""
 
     let scroll_pos = Animation.Fade 300.0f
 
@@ -65,13 +66,13 @@ module private TreeState =
     let GROUP_HEIGHT = 55.0f
 
     // todo: react to the event of switching instead of doing stuff here
-    let switch_chart (cc, context, group_name) =
+    let switch_chart (cc, context, group_name, group_ctx) =
         if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)
             Selection.clear ()
             selected_chart <- cc.Hash
-            expanded_group <- group_name
-            selected_group <- group_name
+            expanded_group <- group_name, group_ctx
+            selected_group <- group_name, group_ctx
             scroll_to <- ScrollTo.Chart
 
     [<AbstractClass>]

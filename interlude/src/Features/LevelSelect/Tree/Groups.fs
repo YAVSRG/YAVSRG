@@ -61,12 +61,13 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             top + GROUP_HEIGHT
         )
 
-    override this.Selected = selected_group = name
+    override this.Selected = selected_group = (name, context)
     override this.Spacing = 20.0f
 
     member this.Items = items
     member this.Name = name
-    member this.Expanded = expanded_group = name
+    member this.Context = context
+    member this.Expanded = expanded_group = (name, context)
 
     member this.SelectFirst() = items.First().Select()
     member this.SelectLast() = items.Last().Select()
@@ -131,10 +132,10 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
                 if this.Expanded then
-                    expanded_group <- ""
+                    expanded_group <- "", LibraryGroupContext.None
                 else
-                    expanded_group <- name
-                    scroll_to <- ScrollTo.Pack name
+                    expanded_group <- name, context
+                    scroll_to <- ScrollTo.Pack (name, context)
             elif this.RightClick(origin) then
                 GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Tapped() then
@@ -148,7 +149,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         select_animation.Update elapsed_ms
 
         match scroll_to with
-        | ScrollTo.Pack s when s = name ->
+        | ScrollTo.Pack (a, b) when (a, b) = (name, context) ->
             if this.Expanded then
                 scroll (-top + origin + 185.0f)
             else

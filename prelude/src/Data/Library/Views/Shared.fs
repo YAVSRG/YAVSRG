@@ -112,8 +112,6 @@ type LibraryContext =
 
 
 [<RequireQualifiedAccess>]
-[<NoEquality>]
-[<NoComparison>]
 type LibraryGroupContext =
     | None
     | Pack of name: string
