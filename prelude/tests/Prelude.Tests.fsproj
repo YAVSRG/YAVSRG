@@ -13,6 +13,7 @@
     <Compile Include="Database\UserDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />
     <Compile Include="Database\DbChartData.fs" />
+    <Compile Include="Database\DbCharts.fs" />
     <Compile Include="Noteskins\Helpers.fs" />
     <Compile Include="Noteskins\Validation.fs" />
     <Compile Include="Scoring\Helpers.fs" />

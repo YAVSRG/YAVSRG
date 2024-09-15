@@ -13,7 +13,7 @@ module DbChartData =
         let db, conn = in_memory ()
 
         let result = DbChartData.get "doesntexist" db
-        Assert.AreEqual(result, DbChartData.DEFAULT)
+        Assert.AreEqual(DbChartData.DEFAULT, result)
 
         conn.Dispose()
 
@@ -30,7 +30,7 @@ module DbChartData =
             }
         )
 
-        Assert.AreEqual(DbChartData.get "doesntexist" db, DbChartData.DEFAULT)
+        Assert.AreEqual(DbChartData.DEFAULT, DbChartData.get "doesntexist" db)
 
         conn.Dispose()
 
@@ -49,7 +49,7 @@ module DbChartData =
             }
         )
 
-        Assert.AreEqual(DbChartData.get "doesntexist" db, DbChartData.DEFAULT)
+        Assert.AreEqual(DbChartData.DEFAULT, DbChartData.get "doesntexist" db)
 
         conn.Dispose()
 
@@ -66,7 +66,7 @@ module DbChartData =
             }
         )
 
-        Assert.AreEqual(DbChartData.get "doesntexist" db, DbChartData.DEFAULT)
+        Assert.AreEqual(DbChartData.DEFAULT, DbChartData.get "doesntexist" db)
 
         conn.Dispose()
 
@@ -82,8 +82,8 @@ module DbChartData =
                 Breakpoints = [ 0.0f<ms>; 1.0f<ms>; 2.0f<ms> ]
             }
         )
-
-        Assert.AreEqual(DbChartData.get "doesntexist" db, DbChartData.DEFAULT)
+        
+        Assert.AreEqual(DbChartData.DEFAULT, DbChartData.get "doesntexist" db)
 
         conn.Dispose()
 
@@ -110,7 +110,7 @@ module DbChartData =
                 PersonalBests = bests
             }
         )
-
-        Assert.AreEqual(DbChartData.get "doesntexist" db, DbChartData.DEFAULT)
+        
+        Assert.AreEqual(DbChartData.DEFAULT, DbChartData.get "doesntexist" db)
 
         conn.Dispose()
