@@ -174,7 +174,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
         ConfirmPage(
             [ chart_name ] %> "misc.confirmdelete",
             fun () ->
-                ChartDatabase.delete cc Content.Cache
+                ChartDatabase.delete cc Content.Charts
                 LevelSelect.refresh_all ()
 
                 if is_submenu then

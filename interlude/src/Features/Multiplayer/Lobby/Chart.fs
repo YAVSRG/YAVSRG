@@ -66,7 +66,7 @@ module LobbyChart =
                 |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
             )
         | None ->
-            match ChartDatabase.get_meta chart.Hash Content.Cache with
+            match ChartDatabase.get_meta chart.Hash Content.Charts with
             | None ->
                 is_loading <- true
                 Logging.Debug("Multiplayer chart not found, downloading")
@@ -78,7 +78,7 @@ module LobbyChart =
                         is_loading <- false
                         Notifications.error(%"notification.multiplayer_chart_not_found.title", %"notification.multiplayer_chart_not_found.body")
                     | true ->
-                        let newly_installed = (ChartDatabase.get_meta chart.Hash Content.Cache).Value
+                        let newly_installed = (ChartDatabase.get_meta chart.Hash Content.Charts).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
                         defer
                         <| fun () ->

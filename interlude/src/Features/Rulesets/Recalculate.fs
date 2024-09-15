@@ -14,11 +14,11 @@ module PersonalBests =
         { new Async.Service<(string * Ruleset) array, unit>() with
             override this.Handle(rulesets) =
                 async {
-                    for cc in Content.Cache.Entries |> Seq.toArray do
+                    for cc in Content.Charts.Entries |> Seq.toArray do
                         let data = UserDatabase.get_chart_data cc.Hash Content.UserData
 
                         if not data.Scores.IsEmpty then
-                            match ChartDatabase.get_chart cc.Hash Content.Cache with
+                            match ChartDatabase.get_chart cc.Hash Content.Charts with
                             | Error reason ->
                                 Logging.Debug(sprintf "Couldn't load %s for pb processing: %s" cc.Hash reason)
                             | Ok chart ->

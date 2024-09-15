@@ -132,7 +132,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
                 defer (fun () ->
                     if still_open then
-                        match ChartDatabase.get_meta suggestion.ChartId Content.Cache with
+                        match ChartDatabase.get_meta suggestion.ChartId Content.Charts with
                         | Some cc ->
                             SelectedChart.change(cc, LibraryContext.None, true)
                             Menu.Exit()
@@ -209,7 +209,7 @@ type SuggestionsList(table: Table) =
                             ChartId = server_suggestion.ChartId
                             Votes = server_suggestion.Votes
                             BackbeatInfo = server_suggestion.BackbeatInfo
-                            LocalChart = ChartDatabase.get_meta server_suggestion.ChartId Content.Cache
+                            LocalChart = ChartDatabase.get_meta server_suggestion.ChartId Content.Charts
                         }
                     fc.Add(PageButton(suggestion.FormattedTitle, fun () -> ViewSuggestionPage(table, suggestion).Show()))
 

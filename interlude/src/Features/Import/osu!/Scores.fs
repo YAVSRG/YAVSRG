@@ -54,14 +54,14 @@ module Scores =
         let find_matching_chart (beatmap_data: OsuDatabase_Beatmap) (chart: Chart) =
             let chart_hash = Chart.hash chart
 
-            match ChartDatabase.get_meta chart_hash Content.Cache with
+            match ChartDatabase.get_meta chart_hash Content.Charts with
             | None ->
                 match Imports.detect_rate_mod beatmap_data.Difficulty with
                 | Some rate ->
                     let chart = Chart.scale rate chart
                     let chart_hash = Chart.hash chart
                     
-                    match ChartDatabase.get_meta chart_hash Content.Cache with
+                    match ChartDatabase.get_meta chart_hash Content.Charts with
                     | None ->
                         Logging.Warn(
                             sprintf

@@ -8,6 +8,7 @@ open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
+open Interlude.Content
 
 type RatingTile(color: Color, value: float32) =
     inherit StaticWidget(NodeType.None)
@@ -83,7 +84,7 @@ type Skills() =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        Skillsets.calculate Interlude.Content.Content.UserData Interlude.Content.Content.Library
+        Skillsets.calculate Content.UserData Content.Library
         let available_keymodes =
             seq {
                 for i = 3 to 10 do

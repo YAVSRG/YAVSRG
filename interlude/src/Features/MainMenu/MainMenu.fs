@@ -144,7 +144,7 @@ type MainMenuScreen() as this =
         if prev = Screen.Type.SplashScreen then
             if 
                 ChartDatabase.recalculate_if_needed 
-                    Content.Cache 
+                    Content.Charts 
                     (fun () ->
                         Notifications.system_feedback (
                             Icons.ALERT_OCTAGON,

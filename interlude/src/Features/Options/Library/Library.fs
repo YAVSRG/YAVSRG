@@ -77,7 +77,7 @@ type LibraryPage() =
                 %"library.recache_patterns",
                 fun () ->
                     ChartDatabase.recalculate_data.Request(
-                        Content.Cache,
+                        Content.Charts,
                         fun () ->
                             Notifications.system_feedback (
                                 Icons.ALERT_OCTAGON,

@@ -144,7 +144,7 @@ module SelectedChart =
                 match req with
                 | Load(cc, play_audio, rate, mods) ->
                     seq {
-                        match ChartDatabase.get_chart cc.Hash Content.Cache with
+                        match ChartDatabase.get_chart cc.Hash Content.Charts with
                         | Error reason ->
                                 
                             Logging.Error(sprintf "Couldn't load chart: %s" reason)
@@ -410,7 +410,7 @@ module SelectedChart =
 
     let init_window () = 
 
-        match ChartDatabase.get_meta options.CurrentChart.Value Content.Cache with
+        match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
         | Some cc -> change (cc, LibraryContext.None, true)
         | None ->
             Logging.Info("Couldn't find cached chart: " + options.CurrentChart.Value)

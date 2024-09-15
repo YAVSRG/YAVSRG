@@ -57,7 +57,7 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
         ConfirmPage(
             [ group_name ] %> "misc.confirmdelete",
             fun () ->
-                ChartDatabase.delete_many charts Content.Cache
+                ChartDatabase.delete_many charts Content.Charts
                 LevelSelect.refresh_all ()
 
                 if is_submenu then

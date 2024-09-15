@@ -122,7 +122,7 @@ type private CompareFriend
                                     let their_score = Map.tryFind chart_id their_scores
 
                                     let name =
-                                        match ChartDatabase.get_meta chart_id Content.Cache
+                                        match ChartDatabase.get_meta chart_id Content.Charts
                                         with
                                         | Some cc -> cc.Title
                                         | None -> sprintf "<%s>" chart_id
@@ -299,7 +299,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
     inherit StaticWidget(NodeType.None)
 
     let name =
-        match ChartDatabase.get_meta chart_id Content.Cache with
+        match ChartDatabase.get_meta chart_id Content.Charts with
         | Some cc -> cc.Title
         | None -> sprintf "<%s>" chart_id
 

@@ -12,7 +12,7 @@ module Backbeat =
         { new Async.Service<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
                 async {
-                    match ChartDatabase.get_meta chart_id Content.Cache with
+                    match ChartDatabase.get_meta chart_id Content.Charts with
                     | Some cc -> return true
                     | None ->
 
@@ -27,7 +27,7 @@ module Backbeat =
                     | None -> return false
                     | Some found ->
 
-                    let! success = ChartDatabase.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Cache
+                    let! success = ChartDatabase.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Charts
                     if success then Content.TriggerChartAdded()
                     return success
                 }
