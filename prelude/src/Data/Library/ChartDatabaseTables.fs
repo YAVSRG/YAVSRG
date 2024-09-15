@@ -213,11 +213,11 @@ module DbCharts =
                 Keys, Length, BPM,
                 DateAdded, CalcVersion, Rating, Patterns
             FROM charts
-            LIMIT 1000
+            LIMIT 4000
             OFFSET @Offset;
             """
             Parameters = [ "@Offset", SqliteType.Integer, 4 ]
-            FillParameters = fun p page -> p.Int32(page * 1000)
+            FillParameters = fun p page -> p.Int32(page * 4000)
             Read = read_meta
         }
 
@@ -227,7 +227,7 @@ module DbCharts =
             let mutable next_batch = FAST_LOAD.Execute batch db |> expect
             yield! next_batch
 
-            while next_batch.Length = 1000 do
+            while next_batch.Length = 4000 do
                 batch <- batch + 1
                 next_batch <- FAST_LOAD.Execute batch db |> expect
                 yield! next_batch
