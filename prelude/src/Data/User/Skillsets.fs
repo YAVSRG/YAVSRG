@@ -1,7 +1,6 @@
-﻿namespace Prelude.Data
+﻿namespace Prelude.Data.User
 
 open Prelude.Gameplay
-open Prelude.Data.User
 open Prelude.Data.Library
 
 module Skillsets =

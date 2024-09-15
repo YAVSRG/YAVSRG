@@ -78,18 +78,18 @@
     <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\Library\ChartDatabaseTables.fs" />
     <Compile Include="Data\Library\ChartDatabase.fs" />
-    <Compile Include="Data\User\ScoreInfo.fs" />
     <Compile Include="Data\Library\Collections.fs" />
     <Compile Include="Data\Library\Library.fs" />
-    <Compile Include="Data\Library\Imports.fs" />
-    <Compile Include="Data\Library\Exports.fs" />
     <Compile Include="Data\Library\Views\Shared.fs" />
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
+    <Compile Include="Data\Library\Imports.fs" />
+    <Compile Include="Data\Library\Exports.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
     <Compile Include="Data\Library\Endless.fs" />
-    <Compile Include="Data\Skillsets.fs" />
+    <Compile Include="Data\User\ScoreInfo.fs" />
+    <Compile Include="Data\User\Skillsets.fs" />
     <Compile Include="Data\osu!.fs" />
   </ItemGroup>
 
