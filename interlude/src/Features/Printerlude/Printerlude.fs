@@ -11,6 +11,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Data
 open Prelude.Data.User
+open Prelude.Data.Library
 open Prelude.Gameplay
 open Interlude
 open Interlude.Content
@@ -115,6 +116,9 @@ module Printerlude =
                 |> io.WriteLine
             | None -> ()
 
+        let vacuum () = 
+            ChartDatabase.vacuum.Request((Content.Charts, true), ignore)
+
         let register_commands (ctx: ShellContext) =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
@@ -138,6 +142,7 @@ module Printerlude =
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
                 .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
+                .WithCommand("vacuum", "Debug tool for cleaning up chart database", vacuum)
 
         let register_ipc_commands (ctx: ShellContext) =
             ctx.WithIOCommand("version", "Shows info about the current game version", show_version)

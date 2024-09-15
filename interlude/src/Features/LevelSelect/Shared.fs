@@ -33,12 +33,11 @@ module LevelSelect =
         Content.OnChartAdded.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
         CollectionActions.collection_modified.Add(fun () ->
-            // refresh collections if you can see them right now
             if options.ChartGroupMode.Value = "collection" || (options.ChartGroupMode.Value <> "level" && options.TreeAlwaysShowCollections.Value) then
                 refresh_all ()
-            // this is obsolete. only refresh details when liking charts
-            //refresh_details ()
         )
+        // todo: refresh details when liking charts
+        //refresh_details ()
 
     let mutable filter: Filter = Filter.Empty
 
