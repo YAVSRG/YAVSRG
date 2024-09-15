@@ -7,7 +7,6 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Caching
 open Prelude.Data.Library.Endless
 
 module Endless =
@@ -60,8 +59,8 @@ module Endless =
                 printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator next.Rate
 
                 printfn ""
-                match Cache.load next.Chart library.Cache with
+                match ChartDatabase.get_chart next.Chart.Hash library.Charts with
                 | Ok chart ->
-                    printfn "This is classed as: %A [%.2f]" (library.Cache.Patterns.[next.Chart.Hash].Category) (DifficultyRating.calculate 1.0f chart.Notes |> _.Physical)
+                    printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (DifficultyRating.calculate 1.0f chart.Notes |> _.Physical)
                 | Error reason -> ()
         

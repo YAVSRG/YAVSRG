@@ -15,14 +15,14 @@ module Imports =
         for song in Directory.EnumerateDirectories Imports.OSU_SONG_FOLDER do
             for file in Directory.EnumerateFiles song do
                 if file.ToLower().EndsWith(".osu") then
-                    for chart in
+                    for converted in
                         convert_chart_file
                             {
                                 Source = file
                                 Config = ConversionOptions.Default
                             } do
-                        match chart with
-                        | Ok (chart, _) ->
+                        match converted with
+                        | Ok { Chart = chart }  ->
                             match Chart.check chart with
                             | Error msg -> Logging.Error msg
                             | Ok chart -> ()

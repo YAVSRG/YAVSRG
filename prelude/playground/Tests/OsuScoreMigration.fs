@@ -15,7 +15,7 @@ open SevenZip.Compression
 
 module OsuScoreMigration =
 
-    let do_stuff (chart: Chart, replay: ReplayData, rate: float32, score_data: OsuScoreDatabase_Score) =
+    let do_stuff (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: float32, score_data: OsuScoreDatabase_Score) =
         let metric =
             ScoreProcessor.run (``osu!``.create 8.0f ``osu!``.NoMod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
@@ -38,7 +38,7 @@ module OsuScoreMigration =
             |> fun total -> total / sum
 
         if 100.0 * abs (acc - metric.Accuracy) > 0.2 then
-            printfn "Score on %s [%s]\n----" chart.Header.Title chart.Header.DiffName
+            printfn "Score on %s [%s]\n----" header.Title header.DiffName
 
             printfn
                 "Interlude says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
@@ -144,7 +144,7 @@ module OsuScoreMigration =
                         let string_data = output.ToArray() |> System.Text.Encoding.UTF8.GetString
 
                         let interlude_replay: ReplayData =
-                            let mutable time = -chart.Value.FirstNote
+                            let mutable time = -chart.Value.Chart.FirstNote
                             let mutable last_state = 256us
 
                             seq {
@@ -162,7 +162,7 @@ module OsuScoreMigration =
                             |> Array.ofSeq
 
                         match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
-                        | Some(rate, _) -> do_stuff (chart.Value, interlude_replay, rate, replay_data)
+                        | Some(rate, _) -> do_stuff (chart.Value.Chart, chart.Value.Header, interlude_replay, rate, replay_data)
                         | None -> ()
 
                 | None -> ()
