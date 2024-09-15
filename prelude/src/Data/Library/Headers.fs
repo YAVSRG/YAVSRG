@@ -51,7 +51,7 @@ type ChartMeta =
         Audio: AssetPath
         PreviewTime: Time
 
-        Folders: Set<string> // todo: rename to 'Packs'
+        Packs: Set<string>
         Origin: ChartOrigin
 
         Keys: int
@@ -61,6 +61,11 @@ type ChartMeta =
         Rating: float32
         Patterns: PatternReport
     }
+    member this.OriginString =
+        match Seq.tryExactlyOne this.Packs with
+        | Some pack -> pack
+        | None -> this.Origin.ToString()
+
     static member FromImport (timestamp: int64) (import_chart: ImportChart) =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
         let chart = import_chart.Chart
@@ -91,7 +96,7 @@ type ChartMeta =
                 | ImportAsset.Missing -> AssetPath.Missing
             PreviewTime = import_chart.Header.PreviewTime
 
-            Folders = Set.singleton import_chart.PackName
+            Packs = Set.singleton import_chart.PackName
             Origin = 
                 match import_chart.Header.ChartSource with
                 | ImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)

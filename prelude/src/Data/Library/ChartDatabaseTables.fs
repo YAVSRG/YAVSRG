@@ -121,7 +121,7 @@ module DbCharts =
                     p.Json JSON db_chart.Background
                     p.Json JSON db_chart.Audio
                     p.Float32 (float32 db_chart.PreviewTime)
-                    p.Json JSON db_chart.Folders
+                    p.Json JSON db_chart.Packs
                     p.Json JSON db_chart.Origin
                     p.Byte (byte db_chart.Keys)
                     p.Float32 (float32 db_chart.Length)
@@ -161,7 +161,7 @@ module DbCharts =
             Background = r.Json JSON
             Audio = r.Json JSON
             PreviewTime = r.Float32 |> Time.of_number
-            Folders = r.Json JSON
+            Packs = r.Json JSON
             Origin = r.Json JSON
             Keys = r.Byte |> int32
             Length = r.Float32 |> Time.of_number

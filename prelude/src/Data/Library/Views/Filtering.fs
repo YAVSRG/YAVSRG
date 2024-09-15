@@ -148,7 +148,7 @@ type Filter =
                             + " "
                             + (cc.Subtitle |> Option.defaultValue "")
                             + " "
-                            + String.concat " " cc.Folders)
+                            + String.concat " " cc.Packs)
                             .ToLowerInvariant()
                     Array.forall (s.Contains : string -> bool) this.SearchTerms
                     && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms

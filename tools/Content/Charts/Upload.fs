@@ -218,7 +218,7 @@ module Upload =
 
     let upload_folder (folder_name: string) =
         seq {
-            for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Folders.Contains folder_name) do
+            for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
                 async {
                     match ChartDatabase.get_chart cc.Hash interlude_chart_db with
                     | Ok chart -> 

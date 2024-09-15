@@ -67,7 +67,7 @@ module TableDownloader =
             for chart in charts do
                 statuses.[chart.Hash] <-
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
-                    | Some cc when cc.Folders.Contains table.Info.Name -> ChartStatus.Downloaded
+                    | Some cc when cc.Packs.Contains table.Info.Name -> ChartStatus.Downloaded
                     | _ -> ChartStatus.Missing
 
             for level in charts_by_level.Keys do
@@ -248,7 +248,7 @@ module TableDownloader =
 
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
                     | Some cc ->
-                        ChartDatabase.change_folders chart.Hash (cc.Folders.Add table_name) Content.Charts
+                        ChartDatabase.change_folders chart.Hash (cc.Packs.Add table_name) Content.Charts
                         defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Charts with

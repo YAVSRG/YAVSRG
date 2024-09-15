@@ -35,7 +35,7 @@ type TopBanner(score_info: ScoreInfo) as this =
                 }
         )
         |+ Text(
-            sprintf "%s  •  %s" ([score_info.ChartMeta.Origin.ToString()] %> "score.source") ([score_info.ChartMeta.Creator] %> "score.creator"),
+            sprintf "%s  •  %s" ([score_info.ChartMeta.OriginString] %> "score.source") ([score_info.ChartMeta.Creator] %> "score.creator"),
             Align = Alignment.LEFT,
             Position =
                 {
