@@ -102,7 +102,13 @@ type LibraryContext =
         | Folder f, Folder f2 when f = f2 -> true
         | Playlist (i, id, _), Playlist (i2, id2, _) when i = i2 && id = id2 -> true
         | _ -> false
-    member this.SoftMatches(other: LibraryContext) = this.Matches other
+    member this.SoftMatches(other: LibraryContext) =
+        match this, other with
+        | None, _ -> true
+        | Pack _, None -> true
+        | Table _, None -> true
+        | Folder _, None -> true
+        | _ -> this.Matches other
 
 
 [<RequireQualifiedAccess>]

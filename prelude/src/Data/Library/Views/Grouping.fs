@@ -2,24 +2,28 @@
 
 open System.Collections.Generic
 
-type GroupMethod = ChartMeta * LibraryViewContext -> (int * string) seq
+type GroupMethod = 
+    {
+        Func: ChartMeta * LibraryViewContext -> (int * string) seq
+        IsPacks: bool
+    }
 
 module Grouping =
 
     let modes: IDictionary<string, GroupMethod> =
         dict
             [
-                "none", (fun (c, _) -> [0, "No grouping"])
-                "pack", (fun (c, _) -> c.Packs |> Seq.map (fun p -> 0, p))
-                "date_played", format_date_last_played >> Seq.singleton
-                "date_installed", format_date_added >> Seq.singleton
-                "grade", grade_achieved >> Seq.singleton
-                "lamp", lamp_achieved >> Seq.singleton
-                "title", (fun (c, _) -> [0, first_character c.Title])
-                "artist", (fun (c, _) -> [0, first_character c.Artist])
-                "creator", (fun (c, _) -> [0, first_character c.Creator])
-                "keymode", (fun (c, _) -> [c.Keys, c.Keys.ToString() + "K"])
-                "patterns", fun (c, ctx) -> [0, c.Patterns.Category.Category]
+                "none", { IsPacks = false; Func = fun (c, _) -> [0, "No grouping"] }
+                "pack", { IsPacks = true; Func = fun (c, _) -> c.Packs |> Seq.map (fun p -> 0, p) }
+                "date_played", { IsPacks = false; Func = format_date_last_played >> Seq.singleton }
+                "date_installed", { IsPacks = false; Func = format_date_added >> Seq.singleton }
+                "grade", { IsPacks = false; Func = grade_achieved >> Seq.singleton }
+                "lamp", { IsPacks = false; Func = lamp_achieved >> Seq.singleton }
+                "title", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Title] }
+                "artist", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Artist]  }
+                "creator", { IsPacks = false; Func = fun (c, _) -> [0, first_character c.Creator] }
+                "keymode", { IsPacks = false; Func = fun (c, _) -> [c.Keys, c.Keys.ToString() + "K"] }
+                "patterns", { IsPacks = false; Func = fun (c, ctx) -> [0, c.Patterns.Category.Category] }
             ]
 
 type Group =
