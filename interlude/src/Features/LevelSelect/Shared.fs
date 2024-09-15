@@ -33,10 +33,11 @@ module LevelSelect =
         Content.OnChartAdded.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
 
         CollectionActions.collection_modified.Add(fun () ->
-            if options.LibraryMode.Value = LibraryView.Collections then
+            // refresh collections if you can see them right now
+            if options.LibraryMode.Value = LibraryView.Collections || options.LibraryMode.Value = LibraryView.All then
                 refresh_all ()
-            else
-                refresh_details ()
+            // this is obsolete. only refresh details when liking charts
+            //refresh_details ()
         )
 
     let mutable filter: Filter = Filter.Empty
