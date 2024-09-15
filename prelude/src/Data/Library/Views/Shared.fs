@@ -85,31 +85,32 @@ module internal Shared =
         cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]
-[<CustomEquality>]
+[<NoEquality>]
 [<NoComparison>]
 type LibraryContext =
     | None
+    | Pack of name: string
     | Table of level: int
     | Folder of id: string
     | Playlist of index: int * id: string * data: PlaylistEntryInfo
 
-    member internal this.CollectionSource : (string * int) option =
-        match this with
-        | None
-        | Table _ -> Option.None
-        | Folder id -> Some (id, 0)
-        | Playlist(i, id, _) -> Some (id, i)
-
-    override this.Equals(other: obj) =
-        match other with
-        | :? LibraryContext as other -> this.CollectionSource = other.CollectionSource
+    member this.Matches(other: LibraryContext) =
+        match this, other with
+        | None, None -> true
+        | Pack p, Pack p2 when p = p2 -> true
+        | Table _, Table _ -> true
+        | Folder f, Folder f2 when f = f2 -> true
+        | Playlist (i, id, _), Playlist (i2, id2, _) when i = i2 && id = id2 -> true
         | _ -> false
+    member this.SoftMatches(other: LibraryContext) = this.Matches other
 
-    override this.GetHashCode() = this.CollectionSource.GetHashCode()
 
 [<RequireQualifiedAccess>]
+[<NoEquality>]
+[<NoComparison>]
 type LibraryGroupContext =
     | None
+    | Pack of name: string
     | Table of level: int
     | Folder of id: string
     | Playlist of id: string

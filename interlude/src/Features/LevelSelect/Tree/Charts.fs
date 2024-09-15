@@ -55,9 +55,7 @@ type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContex
     override this.Bounds(top) =
         Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)
 
-    override this.Selected =
-        selected_chart = cc.Hash
-        && (context = LibraryContext.None || SelectedChart.LIBRARY_CTX = context)
+    override this.Selected = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches context
 
     override this.Spacing = 5.0f
     member this.Chart = cc
@@ -178,7 +176,7 @@ type private ChartItem(group_name: string, cc: ChartMeta, context: LibraryContex
             elif this.RightClick(origin) then
                 ChartContextMenu(cc, context).Show()
             elif (%%"delete").Tapped() then
-                ChartContextMenu.ConfirmDelete(cc, false)
+                ChartDeleteMenu(cc, context, false).Show()
         else
             hover.Target <- 0.0f
 

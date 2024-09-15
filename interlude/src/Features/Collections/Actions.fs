@@ -49,7 +49,7 @@ module CollectionActions =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
             if Content.Collections.GetPlaylist(id).Value.MoveChartUp index then
-                if SelectedChart.LIBRARY_CTX = context then
+                if SelectedChart.LIBRARY_CTX.Matches context then
                     SelectedChart.LIBRARY_CTX <- LibraryContext.Playlist(index - 1, id, data)
 
                 collection_modified_ev.Trigger()
@@ -62,7 +62,7 @@ module CollectionActions =
         match context with
         | LibraryContext.Playlist(index, id, data) ->
             if Content.Collections.GetPlaylist(id).Value.MoveChartDown index then
-                if SelectedChart.LIBRARY_CTX = context then
+                if SelectedChart.LIBRARY_CTX.Matches context then
                     SelectedChart.LIBRARY_CTX <- LibraryContext.Playlist(index + 1, id, data)
 
                 collection_modified_ev.Trigger()

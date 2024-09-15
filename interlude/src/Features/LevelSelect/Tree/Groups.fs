@@ -41,7 +41,8 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 | None -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
                 sprintf "%s %i" Icons.FOLDER items.Count
-            | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.Pack _ -> sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER_PLUS items.Count
 
     do update_cached_info ()
 
@@ -123,7 +124,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             elif this.RightClick(origin) then
                 GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Tapped() then
-                GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
+                GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context, false)
 
     member this.Update(top, origin, originB, elapsed_ms) =
         if last_cached_flag < cache_flag then

@@ -24,13 +24,25 @@ module Tree =
         | None -> ()
         | Some current_cc ->
 
-        for group in groups do
-            for chart in group.Items do
-                if chart.Chart.Hash = current_cc.Hash && (chart.Context = LibraryContext.None || chart.Context = SelectedChart.LIBRARY_CTX) then
-                    selected_chart <- current_cc.Hash
-                    selected_group <- group.Name
-                    expanded_group <- selected_group
-                    scroll_to <- ScrollTo.Chart
+        seq {
+            for group in groups do
+                for chart in group.Items do
+                    if chart.Chart.Hash = current_cc.Hash && chart.Context.SoftMatches SelectedChart.LIBRARY_CTX then
+                        yield chart.Context, group
+                        selected_chart <- current_cc.Hash
+                        selected_group <- group.Name
+                        expanded_group <- selected_group
+                        scroll_to <- ScrollTo.Chart
+        }
+        |> Seq.tryHead
+        |> function
+        | Some (ctx, group) -> 
+            selected_chart <- current_cc.Hash
+            selected_group <- group.Name
+            expanded_group <- selected_group
+            scroll_to <- ScrollTo.Chart
+        | None -> ()
+
 
     let refresh () =
         // fetch groups

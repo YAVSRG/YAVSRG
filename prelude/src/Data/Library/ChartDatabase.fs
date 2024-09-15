@@ -138,7 +138,7 @@ module ChartDatabase =
         DbCharts.update_packs_batch [chart_meta.Hash, packs] db.Database
 
     let delete_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) =
-        change_packs chart_meta (chart_meta.Packs.Remove pack)
+        change_packs chart_meta (chart_meta.Packs.Remove pack) db
 
     let delete_many_from_pack (cs: ChartMeta seq) (pack: string) (db: ChartDatabase) =
         let updated =
@@ -158,7 +158,7 @@ module ChartDatabase =
                         db.Cache.Remove(c.Hash) |> ignore
                         yield c.Hash
             }
-        DbCharts.delete_batch deleted db.Database
+        DbCharts.delete_batch deleted db.Database |> ignore
 
     let vacuum (db: ChartDatabase) =
         // todo: find all charts with no audio file and vacuum them too

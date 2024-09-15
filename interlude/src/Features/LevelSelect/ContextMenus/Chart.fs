@@ -15,6 +15,42 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Play
 
+type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
+    inherit Page()
+
+    let delete_from_everywhere() =
+        ChartDatabase.delete cc Content.Charts
+        LevelSelect.refresh_all ()
+
+        if is_submenu then
+            Menu.Back()
+
+    override this.Content() =
+        page_container()
+        |+ seq {
+            match context with
+            | LibraryContext.Pack p when cc.Packs.Count > 1 ->
+
+                let delete_from_pack() =
+                    ChartDatabase.delete_from_pack cc p Content.Charts
+                    LevelSelect.refresh_all ()
+
+                    if is_submenu then
+                        Menu.Back()
+
+                yield PageButton.Once([p] %> "chart.delete.from_pack", fun () -> delete_from_pack(); Menu.Back()).Pos(3)
+                yield PageButton.Once([cc.Packs.Count.ToString()] %> "chart.delete.from_everywhere", fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
+                yield PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
+            | _ ->
+                yield PageButton.Once(%"confirm.yes",  fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
+                yield PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
+        }
+        |+ Text([ sprintf "%s [%s]" cc.Title cc.DifficultyName ] %> "misc.confirmdelete", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+        :> Widget
+
+    override this.Title = cc.Title
+    override this.OnClose() = ()
+
 type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
     inherit Page()
 
@@ -26,10 +62,11 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                 (fun () -> AddToCollectionPage(cc).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
-            |+ PageButton(%"chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.TRASH)
+            |+ PageButton(%"chart.delete", (fun () -> ChartDeleteMenu(cc, context, true).Show()), Icon = Icons.TRASH)
 
         match context with
         | LibraryContext.None
+        | LibraryContext.Pack _
         | LibraryContext.Table _ -> ()
         | LibraryContext.Folder name ->
             content
@@ -167,17 +204,3 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
 
     override this.Title = cc.Title
     override this.OnClose() = ()
-
-    static member ConfirmDelete(cc, is_submenu) =
-        let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
-
-        ConfirmPage(
-            [ chart_name ] %> "misc.confirmdelete",
-            fun () ->
-                ChartDatabase.delete cc Content.Charts
-                LevelSelect.refresh_all ()
-
-                if is_submenu then
-                    Menu.Back()
-        )
-            .Show()

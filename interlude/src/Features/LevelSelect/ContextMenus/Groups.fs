@@ -41,7 +41,7 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
         page_container()
         |+ PageButton(
             %"group.delete",
-            (fun () -> GroupContextMenu.ConfirmDelete(name, charts, true)),
+            (fun () -> GroupContextMenu.ConfirmDelete(name, charts, context, true)),
             Icon = Icons.TRASH
         )
             .Help(Help.Info("group.delete"))
@@ -51,13 +51,16 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
     override this.Title = name
     override this.OnClose() = ()
 
-    static member ConfirmDelete(name, charts, is_submenu) =
+    static member ConfirmDelete(name, charts, ctx, is_submenu) =
         let group_name = sprintf "%s (%i charts)" name (Seq.length charts)
 
         ConfirmPage(
             [ group_name ] %> "misc.confirmdelete",
             fun () ->
-                ChartDatabase.delete_many charts Content.Charts
+                match ctx with
+                | LibraryGroupContext.Pack p ->
+                    ChartDatabase.delete_many_from_pack charts p Content.Charts
+                | _ -> ChartDatabase.delete_many charts Content.Charts
                 LevelSelect.refresh_all ()
 
                 if is_submenu then
@@ -67,7 +70,8 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
 
     static member Show(name, charts, context) =
         match context with
-        | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
+        | LibraryGroupContext.None
+        | LibraryGroupContext.Pack _ -> GroupContextMenu(name, charts, context).Show()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Content.Collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Content.Collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
