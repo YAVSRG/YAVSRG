@@ -17,7 +17,6 @@ module Validation =
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -55,7 +54,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -73,7 +71,6 @@ module Validation =
                 .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -94,7 +91,6 @@ module Validation =
                 .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -114,7 +110,6 @@ module Validation =
                 .AddImageFile("holdhead-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail-0-0.png", ONEPIXELIMAGE)
                 .AddImageFile("receptor-0-0.png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting-0-0.png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -187,7 +182,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -217,7 +211,6 @@ module Validation =
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[16x3].png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -247,7 +240,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[16x21].png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -281,7 +273,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[16x2].png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -315,7 +306,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[7x2].png", receptor_grid_bmp)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
@@ -349,7 +339,6 @@ module Validation =
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdtail[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("receptor[1x1].png", ONEPIXELIMAGE)
-                .AddImageFile("receptorlighting[1x1].png", ONEPIXELIMAGE)
                 .Build()
 
         let validation_results = noteskin.Validate() |> Array.ofSeq
