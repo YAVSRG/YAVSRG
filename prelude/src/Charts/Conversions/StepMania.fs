@@ -263,24 +263,27 @@ module StepMania_To_Interlude =
                             match find_audio () with
                             | Some file ->
                                 if action.Config.MoveAssets then
-                                    Relative file
+                                    ChartImportAssetPath.Relative file
                                 else
-                                    Absolute(Path.Combine(path, file))
+                                    ChartImportAssetPath.Absolute(Path.Combine(path, file))
                             | None ->
                                 //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
-                                Missing
+                                ChartImportAssetPath.Missing
                         BackgroundFile =
                             match find_background () with
                             | Some file ->
                                 if action.Config.MoveAssets then
-                                    Relative file
+                                    ChartImportAssetPath.Relative file
                                 else
-                                    Absolute(Path.Combine(path, file))
+                                    ChartImportAssetPath.Absolute(Path.Combine(path, file))
                             | None ->
                                 //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
-                                Missing
+                                ChartImportAssetPath.Missing
 
-                        ChartSource = Unknown
+                        ChartSource = 
+                            match action.Config.EtternaPackName with 
+                            | Some pack -> ChartImportOrigin.Etterna pack
+                            | None -> ChartImportOrigin.Unknown
                     }
 
                 let (notes, bpm) =

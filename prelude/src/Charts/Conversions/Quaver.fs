@@ -162,23 +162,23 @@ module Quaver_To_Interlude =
 
                         if File.Exists(Path.Combine(path, requested_file)) then
                             if action.Config.MoveAssets then
-                                Relative requested_file
+                                ChartImportAssetPath.Relative requested_file
                             else
-                                Absolute(Path.Combine(path, requested_file))
+                                ChartImportAssetPath.Absolute(Path.Combine(path, requested_file))
                         else
-                            Missing
+                            ChartImportAssetPath.Missing
                     AudioFile =
                         let requested_file = b.AudioFile
 
                         if File.Exists(Path.Combine(path, requested_file)) then
                             if action.Config.MoveAssets then
-                                Relative requested_file
+                                ChartImportAssetPath.Relative requested_file
                             else
-                                Absolute(Path.Combine(path, requested_file))
+                                ChartImportAssetPath.Absolute(Path.Combine(path, requested_file))
                         else
-                            Missing
+                            ChartImportAssetPath.Missing
 
-                    ChartSource = Quaver(b.MapSetId, b.MapId)
+                    ChartSource = ChartImportOrigin.Quaver(b.MapSetId, b.MapId)
                 }
 
             let snaps = convert_hit_objects b.HitObjects keys

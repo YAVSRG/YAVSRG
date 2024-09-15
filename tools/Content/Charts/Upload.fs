@@ -120,9 +120,9 @@ module Upload =
         | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart_meta.Audio = Missing then
+        if chart_meta.Audio = AssetPath.Missing then
             Error "Missing audio file"
-        elif chart_meta.Background = Missing then
+        elif chart_meta.Background = AssetPath.Missing then
             Error "Missing background image"
         else
 
@@ -156,16 +156,16 @@ module Upload =
                     BPM = (60000.0f<ms/beat> / float32 chart_meta.BPM, 60000.0f<ms/beat> / float32 chart_meta.BPM)
                     Sources =
                         match chart_meta.Origin with
-                        | Osu(-1, _)
-                        | Osu(_, 0)
-                        | Quaver(-1, _)
-                        | Quaver(_, 0)
-                        | Etterna ""
-                        | Unknown -> []
+                        | ChartOrigin.Osu(-1, _)
+                        | ChartOrigin.Osu(_, 0)
+                        | ChartOrigin.Quaver(-1, _)
+                        | ChartOrigin.Quaver(_, 0)
+                        | ChartOrigin.Etterna ""
+                        | ChartOrigin.Unknown -> []
 
-                        | Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
-                        | Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
-                        | Etterna pack_name -> [ Backbeat.Archive.ChartSource.Etterna pack_name ]
+                        | ChartOrigin.Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
+                        | ChartOrigin.Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
+                        | ChartOrigin.Etterna pack_name -> [ Backbeat.Archive.ChartSource.Etterna pack_name ]
                     PreviewTime = chart_meta.PreviewTime
                     BackgroundHash = background_hash
                     AudioHash = audio_hash

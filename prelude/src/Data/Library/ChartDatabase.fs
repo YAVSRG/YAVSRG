@@ -88,29 +88,29 @@ module ChartDatabase =
                             match chart.Header.BackgroundFile with
                             | ChartImportAssetPath.Relative s ->
                                 if moved_assets.ContainsKey s then
-                                    Asset moved_assets.[s]
+                                    ChartImportAssetPath.Asset moved_assets.[s]
                                 else
                                     let path = Path.Combine(Path.GetDirectoryName chart.LoadedFromPath, s)
                                     if not (File.Exists path) then
-                                        Missing
+                                        ChartImportAssetPath.Missing
                                     else
                                         let hash = hash_asset path db
                                         moved_assets.[s] <- hash
-                                        Asset hash
+                                        ChartImportAssetPath.Asset hash
                             | otherwise -> otherwise
                         AudioFile = 
                             match chart.Header.AudioFile with
                             | ChartImportAssetPath.Relative s ->
                                 if moved_assets.ContainsKey s then
-                                    Asset moved_assets.[s]
+                                    ChartImportAssetPath.Asset moved_assets.[s]
                                 else
                                     let path = Path.Combine(Path.GetDirectoryName chart.LoadedFromPath, s)
                                     if not (File.Exists path) then
-                                        Missing
+                                        ChartImportAssetPath.Missing
                                     else
                                         let hash = hash_asset path db
                                         moved_assets.[s] <- hash
-                                        Asset hash
+                                        ChartImportAssetPath.Asset hash
                             | otherwise -> otherwise
                     }
                 let chart = { chart with Header = header_with_assets_moved }

@@ -150,8 +150,8 @@ module Archive =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            BackgroundFile = Asset chart.BackgroundHash
-            AudioFile = Asset chart.AudioHash
+            BackgroundFile = ChartImportAssetPath.Asset chart.BackgroundHash
+            AudioFile = ChartImportAssetPath.Asset chart.AudioHash
             ChartSource =
                 match chart.Sources with
                 | Osu d :: _ -> ChartImportOrigin.Osu(d.BeatmapSetId, d.BeatmapId)

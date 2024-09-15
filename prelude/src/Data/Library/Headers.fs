@@ -8,6 +8,7 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 
 [<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
 type AssetPath =
     | Absolute of string
     | Hash of string
@@ -19,6 +20,7 @@ type AssetPath =
         | Missing -> None
 
 [<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
 type ChartOrigin =
     | Osu of beatmapsetid: int * beatmapid: int
     | Quaver of mapsetid: int * mapid: int

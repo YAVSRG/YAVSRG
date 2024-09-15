@@ -13,23 +13,10 @@ module Helpers =
     let convert_chart_file (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
         match Path.GetExtension(action.Source).ToLower() with
         | ".sm" ->
-            let set_pack_source =
-                if action.Config.EtternaPackName.IsSome then
-                    fun chart ->
-                        { chart with
-                            Header =
-                                { chart.Header with
-                                    ChartSource = Etterna action.Config.EtternaPackName.Value
-                                }
-                        }
-                else
-                    id
-
             match StepmaniaParser.parse_file action.Source with
             | Ok data ->
 
                 StepMania_To_Interlude.convert data action
-                |> List.map (Result.map set_pack_source)
 
             | Error msg ->
                 Logging.Debug(sprintf "Parse error in SM file %s" action.Source, msg)
