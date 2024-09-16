@@ -57,10 +57,33 @@ module LibraryView =
                         }
                     )
 
-        groups 
-        |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())
-        |> if reverse_groups then Seq.rev else id
-        |> Seq.map (|KeyValue|)
+        let liked_songs : Group option = 
+            ctx.Library.Collections.EnumerateLikes
+            |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
+            |> Filter.apply_seq (filter_by, ctx)
+            |> Seq.sortBy (fun cc -> sort_by (cc, ctx))
+            |> if reverse_sorting then Seq.rev else id
+            |> Seq.map (fun cc -> (cc, LibraryContext.Likes))
+            |> Array.ofSeq
+            |> fun x ->
+                if x.Length > 0 then
+                    Some {
+                        Charts = x
+                        Context = LibraryGroupContext.Likes
+                    }
+                else None
+
+        seq {
+            match liked_songs with
+            | Some likes -> yield "Liked songs", likes
+            | None -> ()
+
+            yield!
+                groups 
+                |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())
+                |> if reverse_groups then Seq.rev else id
+                |> Seq.map (|KeyValue|)
+        }
 
     let private get_table_groups
         (filter_by: Filter)

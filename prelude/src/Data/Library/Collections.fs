@@ -5,6 +5,8 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Gameplay.Mods
 
+// todo: this is user data and should be moved to Prelude.Data.User
+
 module Collections =
 
     [<Json.AutoCodec>]
@@ -68,8 +70,8 @@ module Collections =
         {
             Charts: ResizeArray<Entry * PlaylistEntryInfo>
             Icon: Setting<string>
-        // Maybe in future, info about how the playlist is played or pacemaker targets or stuff
-        // Useful for dans, warmup sets, marathons
+            // Maybe in future, info about how the playlist is played or pacemaker targets or stuff
+            // Useful for dans, warmup sets, marathons
         }
         static member Default =
             {

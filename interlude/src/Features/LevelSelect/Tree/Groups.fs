@@ -14,6 +14,8 @@ open TreeState
 type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
     inherit TreeItem()
 
+    let name = if context = LibraryGroupContext.Likes then %"library.likes" else name
+
     let mutable last_cached_flag = -1
     let select_animation = Animation.Fade(0.0f)
     let mutable label = ""
@@ -22,6 +24,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         | LibraryGroupContext.None -> None
         | LibraryGroupContext.Pack _ -> None
         | LibraryGroupContext.Table _ -> None
+        | LibraryGroupContext.Likes -> Some (Colors.pink, Colors.pink_shadow)
         | LibraryGroupContext.Folder _ -> Some (Colors.cyan, Colors.cyan_shadow)
         | LibraryGroupContext.Playlist _ -> Some (Colors.green, Colors.green_shadow)
 
@@ -48,6 +51,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 | None -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.Table id -> // todo: calc some cool table/folder stats to go here
                 sprintf "%s %i" Icons.FOLDER items.Count
+            | LibraryGroupContext.Likes -> sprintf "%s %i" Icons.HEART_ON items.Count
             | LibraryGroupContext.Pack _ -> sprintf "%s %i" Icons.FOLDER items.Count
             | LibraryGroupContext.None -> sprintf "%s %i" Icons.FOLDER_PLUS items.Count
 

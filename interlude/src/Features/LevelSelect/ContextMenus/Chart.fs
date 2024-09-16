@@ -68,6 +68,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
 
         match context with
         | LibraryContext.None
+        | LibraryContext.Likes
         | LibraryContext.Pack _
         | LibraryContext.Table _ -> ()
         | LibraryContext.Folder name ->

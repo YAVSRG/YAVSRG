@@ -45,7 +45,6 @@ type private GroupWithSorting =
         {
             Charts = 
                 this.Charts
-                |> Seq.distinctBy (fun (cc, _, _) -> cc.Hash)
                 |> Seq.sortBy (fun (_, _, key) -> key)
                 |> if reverse_sorting then Seq.rev else id
                 |> Seq.map (fun (cc, ctx, _) -> (cc, ctx))
