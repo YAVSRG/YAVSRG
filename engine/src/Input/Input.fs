@@ -60,6 +60,8 @@ type Bind =
         | Keys.RightControl -> "RCtrl"
         | Keys.LeftShift -> "LShift"
         | Keys.RightShift -> "RShift"
+        | Keys.LeftBracket -> "["
+        | Keys.RightBracket -> "]"
         | _ -> k.ToString()
 
     static member private ModifierString(ctrl, alt, shift) =
