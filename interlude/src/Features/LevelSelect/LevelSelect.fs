@@ -72,7 +72,7 @@ type LevelSelectScreen() =
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
                 .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value = "collection")
             |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
-                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value <> "collection" && options.ChartGroupMode.Value <> "table")
+                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value <> "collection" && options.ChartGroupMode.Value <> "level")
         )
             .Conditional(fun () -> Tree.is_empty)
 
