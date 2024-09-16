@@ -47,12 +47,6 @@ module private TreeState =
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
     let mutable cache_flag = 0
 
-    // future todo: different color settings?
-    let color_func: Bests option -> Color =
-        function
-        | None -> Colors.grey_2.O2
-        | Some b -> Colors.white.O2
-
     let get_pb (bests: PersonalBests<'T>) (color_func: 'T -> Color) (format: 'T -> string) =
         match PersonalBests.get_best_above SelectedChart.rate.Value bests with
         | Some(v, r, _) -> Some(v, r, color_func v, format v)

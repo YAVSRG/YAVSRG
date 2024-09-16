@@ -22,7 +22,6 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
     let hover = Animation.Fade 0.0f
     let mutable last_cached_flag = -1
-    let mutable color = Color.Transparent
     let mutable chart_save_data = None
     let mutable personal_bests: Bests option = None
     let mutable grade = None
@@ -48,8 +47,6 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 | otherwise -> otherwise
             lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
         | _ -> ()
-
-        color <- color_func personal_bests
 
         markers <-
             match ctx with
@@ -81,18 +78,16 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             } =
             bounds
 
-        // draw base
-        let accent = Palette.color (80 + int (hover.Value * 40.0f), 1.0f, 0.4f)
+        let accent =
+            let alpha = 80 + int (hover.Value * 40.0f)
+            Palette.color (alpha, 1.0f, 0.4f)
+        let color, hover_color =
+            if this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
+            else Colors.shadow_1.O2, Colors.grey_2.O2
 
-        Draw.rect
-            bounds
-            (if this.Selected then
-                    !*Palette.MAIN_100
-                else
-                    Colors.shadow_1.O2)
+        Draw.rect bounds color
 
         let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
-
         Draw.untextured_quad
             (Quad.create
                 <| new Vector2(left, top)
@@ -100,10 +95,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 <| new Vector2(left + stripe_length, bottom - 25.0f)
                 <| new Vector2(left, bottom - 25.0f))
             (Quad.gradient_left_to_right accent Color.Transparent)
-
-        let border_color = if this.Selected then !*Palette.LIGHT else color
-        if border_color.A > 0uy then
-            Draw.rect (bounds.BorderL Style.PADDING) border_color
+        Draw.rect (bounds.BorderL Style.PADDING) hover_color
 
         // draw pbs
         let disp (data: 'T * float32 * Color * string) (pos: float32) =
