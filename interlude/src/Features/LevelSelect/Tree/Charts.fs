@@ -10,8 +10,10 @@ open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Content
+open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Gameplay
+open Interlude.Features.Collections
 
 open TreeState
 
@@ -49,8 +51,10 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         color <- color_func personal_bests
 
-        markers <- ""
-            // todo: icon if chart is liked
+        markers <-
+            match ctx with
+            | LibraryContext.Likes -> ""
+            | _ -> if CollectionActions.is_liked cc then Icons.HEART else ""
 
     override this.Bounds(top) =
         Rect.Create(Viewport.vwidth * 0.4f + Style.PADDING, top, Viewport.vwidth, top + CHART_HEIGHT)

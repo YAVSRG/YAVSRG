@@ -9,8 +9,26 @@ open Interlude.Features.Gameplay
 
 module CollectionActions =
 
-    let collection_modified_ev = Event<unit>()
+    let internal collection_modified_ev = Event<unit>()
     let collection_modified = collection_modified_ev.Publish
+
+    let private likes_modified_ev = Event<unit>()
+    let likes_modified = likes_modified_ev.Publish
+
+    let is_liked (cc: ChartMeta) =
+        Content.Library.Collections.IsLiked cc.Hash
+
+    let like_chart (cc: ChartMeta) =
+        if not (is_liked cc) then
+            Content.Library.Collections.Like cc.Hash
+            likes_modified_ev.Trigger()
+            Notifications.action_feedback (Icons.HEART, [ cc.Title ] %> "collections.liked", "")
+
+    let unlike_chart (cc: ChartMeta) =
+        if is_liked cc then
+            Content.Library.Collections.Unlike cc.Hash
+            likes_modified_ev.Trigger()
+            Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title ] %> "collections.unliked", "")
 
     let add_to (name: string, collection: Collection, cc: ChartMeta) =
         if

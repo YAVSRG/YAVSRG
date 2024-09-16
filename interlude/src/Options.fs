@@ -353,8 +353,8 @@ module Options =
             Hotkeys.register "quick_menu" (ctrl Keys.Tab)
 
             Hotkeys.register "level_select_options" (mk Keys.D1)
-            Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
-            Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
+            Hotkeys.register "like" (mk Keys.RightBracket)
+            Hotkeys.register "unlike" (mk Keys.LeftBracket)
             Hotkeys.register "move_down_in_playlist" (ctrl Keys.Down)
             Hotkeys.register "move_up_in_playlist" (ctrl Keys.Up)
             Hotkeys.register "sort_mode" (mk Keys.D2)
@@ -363,6 +363,13 @@ module Options =
             Hotkeys.register "reverse_group_mode" (shift Keys.D3)
             Hotkeys.register "context_menu" (mk Keys.Period)
             Hotkeys.register "practice_mode" (mk Keys.V)
+            Hotkeys.register "scoreboard" (mk Keys.Z)
+            Hotkeys.register "scoreboard_storage" (mk Keys.Q)
+            Hotkeys.register "scoreboard_sort" (mk Keys.W)
+            Hotkeys.register "scoreboard_filter" (mk Keys.E)
+            Hotkeys.register "table" (mk Keys.X)
+            Hotkeys.register "collections" (mk Keys.C)
+
             Hotkeys.register "accept_offset" (mk Keys.Tab)
             Hotkeys.register "reset_offset" (mk Keys.Backspace)
             Hotkeys.register "hide_replay_overlay" (mk Keys.H)
@@ -375,14 +382,6 @@ module Options =
             Hotkeys.register "downrate_half" (ctrl Keys.Minus)
             Hotkeys.register "uprate_small" (shift Keys.Equal)
             Hotkeys.register "downrate_small" (shift Keys.Minus)
-
-            Hotkeys.register "scoreboard_storage" (mk Keys.Q)
-            Hotkeys.register "scoreboard_sort" (mk Keys.W)
-            Hotkeys.register "scoreboard_filter" (mk Keys.E)
-
-            Hotkeys.register "scoreboard" (mk Keys.Z)
-            Hotkeys.register "table" (mk Keys.X)
-            Hotkeys.register "collections" (mk Keys.C)
 
             Hotkeys.register "preview" (mk Keys.A)
             Hotkeys.register "mods" (mk Keys.S)

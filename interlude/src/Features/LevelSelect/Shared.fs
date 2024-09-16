@@ -36,8 +36,11 @@ module LevelSelect =
             if options.ChartGroupMode.Value = "collection" || (options.ChartGroupMode.Value <> "level" && options.TreeAlwaysShowCollections.Value) then
                 refresh_all ()
         )
-        // todo: refresh details when liking charts
-        //refresh_details ()
+        CollectionActions.likes_modified.Add(fun () ->
+            match SelectedChart.LIBRARY_CTX with
+            | LibraryContext.Likes -> refresh_all()
+            | _ -> refresh_details()
+        )
 
     let mutable filter: Filter = Filter.Empty
 

@@ -14,7 +14,7 @@ open TreeState
 type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
     inherit TreeItem()
 
-    let name = if context = LibraryGroupContext.Likes then %"library.likes" else name
+    let display_name = if context = LibraryGroupContext.Likes then  %"library.likes" else name
 
     let mutable last_cached_flag = -1
     let select_animation = Animation.Fade(0.0f)
@@ -94,7 +94,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
         Draw.rect bounds color
 
-        Text.fill_b (Style.font, name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
     member this.Draw(top, origin, originB) =

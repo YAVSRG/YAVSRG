@@ -137,6 +137,10 @@ type LibraryViewControls() =
                 CollectionActions.reorder_up SelectedChart.LIBRARY_CTX |> ignore // todo: play sound effect
             elif (%%"move_down_in_playlist").Tapped() then
                 CollectionActions.reorder_down SelectedChart.LIBRARY_CTX |> ignore
+            elif (%%"like").Tapped() then
+                CollectionActions.like_chart SelectedChart.CACHE_DATA.Value
+            elif (%%"unlike").Tapped() then
+                CollectionActions.unlike_chart SelectedChart.CACHE_DATA.Value
 
             elif (%%"collections").Tapped() then
                 Menu.ShowPage ManageCollectionsPage

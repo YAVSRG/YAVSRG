@@ -99,11 +99,9 @@ type EditFolderPage(name: string, folder: Folder) =
                 ConfirmPage(
                     [ name ] %> "misc.confirmdelete",
                     fun () ->
+                        // todo: these operations should live in Actions.fs and collection_modified_ev should be private
                         if Content.Collections.Delete name then
                             CollectionActions.collection_modified_ev.Trigger()
-
-                            // todo: unselect collection when deleted
-
                             Menu.Back()
                 )
                     .Show()
@@ -141,9 +139,6 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
                     fun () ->
                         if Content.Collections.Delete name then
                             CollectionActions.collection_modified_ev.Trigger()
-
-                            // todo: unselect collection when deleted
-
                             Menu.Back()
                 )
                     .Show()

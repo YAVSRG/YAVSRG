@@ -12,22 +12,6 @@ open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Gameplay
 open Interlude.Features.OptionsMenu.SystemSettings
 
-type private QuickAction(label, action, hotkey: Bind) =
-    inherit PageButton(label, action)
-
-    override this.Init(parent) =
-        this 
-        |* Text(sprintf "%s: %O" (%"misc.hotkeyhint") hotkey,
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT,
-            Position = Position.Shrink(10.0f, 5.0f)
-        )
-        base.Init parent
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-        if hotkey.Tapped() then action()
-
 type QuickMenuPage() =
     inherit Page()
     
@@ -51,10 +35,10 @@ type QuickMenuPage() =
 
     override this.Content() =
         page_container()
-        |+ QuickAction(%"menu.options", (fun () -> OptionsMenuPage().Show()), Bind.mk Keys.O, Icon = Icons.SETTINGS).Pos(0)
-        |+ QuickAction(%"noteskin.edit", edit_noteskin, Bind.mk Keys.N,  Icon = Icons.IMAGE).Pos(3)
-        |+ QuickAction(%"hud.edit", edit_hud, Bind.mk Keys.H, Icon = Icons.ZAP).Pos(5)
-        |+ QuickAction(%"system.hotkeys", (fun () -> HotkeysPage().Show()), Bind.mk Keys.K).Pos(8)
+        |+ PageButton(%"menu.options", (fun () -> OptionsMenuPage().Show()), Hotkey = Bind.mk Keys.O, Icon = Icons.SETTINGS).Pos(0)
+        |+ PageButton(%"noteskin.edit", edit_noteskin, Hotkey = Bind.mk Keys.N, Icon = Icons.IMAGE).Pos(3)
+        |+ PageButton(%"hud.edit", edit_hud, Hotkey = Bind.mk Keys.H, Icon = Icons.ZAP).Pos(5)
+        |+ PageButton(%"system.hotkeys", (fun () -> HotkeysPage().Show()), Hotkey = Bind.mk Keys.K).Pos(8)
         :> Widget
 
     override this.Header() = 

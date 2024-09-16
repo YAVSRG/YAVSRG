@@ -70,27 +70,13 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
         )
             .Pos(0)
         |+ Text(%"play.localoffset.slider_hint", Align = Alignment.LEFT).Pos(2, 1)
-        |+ (
-            PageButton(
+        |+ PageButton(
                 [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
-                apply_recommended
-            )
-            |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"accept_offset"),
-                Color = K Colors.text_cyan,
-                Align = Alignment.RIGHT,
-                Position = Position.Shrink(10.0f, 5.0f)
-            )
-        ).Pos(3)
-        |+ HotkeyAction("accept_offset", apply_recommended)
-        |+ (
-            PageButton(%"play.localoffset.reset", reset_offset)
-            |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"reset_offset"),
-                Color = K Colors.text_cyan,
-                Align = Alignment.RIGHT,
-                Position = Position.Shrink(10.0f, 5.0f)
-            )
-        ).Pos(5)
-        |+ HotkeyAction("reset_offset", reset_offset)
+                apply_recommended,
+                Hotkey = %%"accept_offset"
+        )
+            .Pos(3)
+        |+ PageButton(%"play.localoffset.reset", reset_offset, Hotkey = %%"reset_offset").Pos(5)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

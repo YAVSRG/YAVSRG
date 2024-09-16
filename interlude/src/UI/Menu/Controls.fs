@@ -55,17 +55,18 @@ type PageSetting(localised_text, widget: Widget) as this =
         base.Update(elapsed_ms, moved)
         widget.Update(elapsed_ms, moved)
 
-type PageButton(localised_text, action) as this =
+type PageButton(localised_text, on_click) as this =
     inherit
         Container(
             NodeType.Button(fun _ ->
                 if not (this.Disabled()) then
                     Style.click.Play()
-                    action ()
+                    on_click ()
             )
         )
 
     member val Icon = "" with get, set
+    member val Hotkey = Bind.Dummy with get, set
 
     override this.Init(parent: Widget) =
         this
@@ -86,9 +87,23 @@ type PageButton(localised_text, action) as this =
             Align = Alignment.LEFT,
             Position = Position.Shrink(Style.PADDING)
         )
-        |* Clickable.Focus this
+        |+ Clickable.Focus this
+        |* seq {
+            if this.Hotkey <> Bind.Dummy then
+                yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey,
+                    Color = K Colors.text_cyan,
+                    Align = Alignment.RIGHT,
+                    Position = Position.Shrink(10.0f, 5.0f)
+                )
+        }
 
         base.Init parent
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        if this.Hotkey.Tapped() && not (this.Disabled()) then
+            Style.click.Play()
+            on_click ()
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
