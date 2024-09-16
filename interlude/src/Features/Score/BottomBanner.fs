@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Score
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
@@ -16,13 +17,31 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Online
 
+#nowarn "40"
+
 type ScoreChartContextMenu(cc: ChartMeta) =
     inherit Page()
 
+    let rec like_button =
+        PageButton(
+            %"chart.add_to_likes",
+            (fun () -> CollectionActions.like_chart cc; like_button_swap.Current <- unlike_button),
+            Icon = Icons.HEART,
+            Hotkey = %%"like"
+        )
+    and unlike_button = 
+        PageButton(
+            %"chart.remove_from_likes",
+            (fun () -> CollectionActions.unlike_chart cc; like_button_swap.Current <- like_button),
+            Icon = Icons.FOLDER_MINUS,
+            Hotkey = %%"unlike"
+        )
+    and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked cc then unlike_button else like_button)
+
     override this.Content() =
         let content =
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
-
+            FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+            |+ like_button_swap
             |+ PageButton(
                 %"chart.add_to_collection",
                 (fun () -> AddToCollectionPage(cc).Show()),
@@ -37,7 +56,7 @@ type ScoreChartContextMenu(cc: ChartMeta) =
                         fun () -> ChartDatabase.delete cc Content.Charts
                     )
                         .Show()
-                , Icon = Icons.TRASH
+                , Icon = Icons.TRASH, Hotkey = %%"delete"
             )
 
         match Content.Table with
@@ -110,7 +129,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
-        |* (
+        |+ (
             GridFlowContainer<Widget>(50.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceB(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
             |+ InlaidButton(
                 %"score.graph.settings",
@@ -139,5 +158,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                 )
             )
         )
+        |+ HotkeyAction("like", fun () -> CollectionActions.like_chart score_info.ChartMeta)
+        |* HotkeyAction("unlike", fun () -> CollectionActions.unlike_chart score_info.ChartMeta)
 
         base.Init parent
