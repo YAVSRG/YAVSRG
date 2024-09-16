@@ -143,7 +143,13 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             elif this.RightClick(origin) then
                 GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Tapped() then
-                GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context, false)
+                match context with
+                | LibraryGroupContext.Folder _
+                | LibraryGroupContext.Playlist _
+                | LibraryGroupContext.Likes
+                | LibraryGroupContext.Table _ -> ()
+                | LibraryGroupContext.Pack _
+                | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context, false)
 
     member this.Update(top, origin, originB, elapsed_ms) =
         if last_cached_flag < cache_flag then

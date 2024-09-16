@@ -71,8 +71,8 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
     static member Show(name, charts, context) =
         match context with
         | LibraryGroupContext.None
-        | LibraryGroupContext.Likes
         | LibraryGroupContext.Pack _ -> GroupContextMenu(name, charts, context).Show()
+        | LibraryGroupContext.Likes -> ()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Content.Collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Content.Collections.GetPlaylist(id).Value).Show()
         | LibraryGroupContext.Table lvl -> ()
