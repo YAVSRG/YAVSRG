@@ -131,11 +131,11 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         // draw text
         Draw.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
-        Text.draw_b (Style.font, cc.Title, 23.0f, left + 7f, top, Colors.text)
+        Text.draw_b (Style.font, (if options.TreeShowNativeText.Value then cc.TitleNative |> Option.defaultValue cc.Title else cc.Title), 23.0f, left + 7f, top, Colors.text)
 
         Text.draw_b (
             Style.font,
-            sprintf "%s  •  %s" cc.Artist cc.Creator,
+            sprintf "%s  •  %s" (if options.TreeShowNativeText.Value then cc.ArtistNative |> Option.defaultValue cc.Artist else cc.Artist) cc.Creator,
             18.0f,
             left + 7f,
             top + 34.0f,

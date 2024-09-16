@@ -470,6 +470,8 @@ levelselect.search=Chart searching
 levelselect.search.tooltip=Type here to search for charts!\nKeywords are separated by spaces. Put text "in quotes" to search for exact text.\nSome useful filters:\n- key=4 will match only 4K charts\n- length>120 will match only charts longer than 2 minutes\n- diff>6 will match only charts harder than 6.00 rating\n- comment="..." will match charts with comments matching the text\n- pattern=jumpstream will match all charts containing mostly jumpstream
 levelselect.selected_mods.downrate.hint=Decrease song speed
 levelselect.selected_mods.uprate.hint=Increase song speed
+levelselect.show_native_text=Show native metadata
+levelselect.show_native_text.tooltip=Prefer displaying the original (non-English) metadata in level select.
 levelselect.sortby=Chart sorting
 levelselect.sortby.artist=Artist
 levelselect.sortby.bpm=BPM

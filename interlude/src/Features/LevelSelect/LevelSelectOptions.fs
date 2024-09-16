@@ -27,35 +27,41 @@ type LevelSelectOptionsPage() =
             .Help(Help.Info("levelselect.always_show_collections"))
             .Pos(2)
         |+ PageSetting(
+            %"levelselect.show_native_text",
+            Checkbox options.TreeShowNativeText
+        )
+            .Help(Help.Info("levelselect.show_native_text"))
+            .Pos(4)
+        |+ PageSetting(
             %"levelselect.only_suggest_new_songs",
             Checkbox options.SuggestionsOnlyNew
         )
             .Help(Help.Info("levelselect.only_suggest_new_songs"))
-            .Pos(5)
+            .Pos(7)
         |+ PageSetting(
             %"levelselect.min_suggestion_rate",
             Slider (options.SuggestionsMinRate |> Setting.trigger (fun v -> options.SuggestionsMaxRate |> Setting.app (max v)))
         )
             .Help(Help.Info("levelselect.min_suggestion_rate"))
-            .Pos(7)
+            .Pos(9)
         |+ PageSetting(
             %"levelselect.min_suggestion_rate",
             Slider (options.SuggestionsMaxRate |> Setting.trigger (fun v -> options.SuggestionsMinRate |> Setting.app (min v)))
         )
             .Help(Help.Info("levelselect.min_suggestion_rate"))
-            .Pos(9)
+            .Pos(11)
         |+ PageButton(
             %"library.tables",
             (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
             Hotkey = %%"table"
         )
-            .Pos(12)
+            .Pos(14)
         |+ PageButton(
             %"library.collections",
             (fun () -> ManageCollectionsPage().Show()),
             Hotkey = %%"collections"
         )
-            .Pos(14)
+            .Pos(16)
         :> Widget
 
     override this.OnClose() = LevelSelect.refresh_all()

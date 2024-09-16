@@ -178,6 +178,7 @@ module Options =
             ScoreSortMode: Setting<int>
             TreeShowGradesOnly: Setting<bool>
             TreeAlwaysShowCollections: Setting<bool>
+            TreeShowNativeText: Setting<bool>
             Table: Setting<string option>
             SuggestionsMinRate: Setting.Bounded<float32>
             SuggestionsMaxRate: Setting.Bounded<float32>
@@ -241,6 +242,7 @@ module Options =
                 ScoreSortMode = Setting.simple 0
                 TreeShowGradesOnly = Setting.simple true
                 TreeAlwaysShowCollections = Setting.simple false
+                TreeShowNativeText = Setting.simple false
                 Table = Content.Tables.selected_id
                 SuggestionsMinRate = Setting.rate 1.0f
                 SuggestionsMaxRate = Setting.rate 1.5f
