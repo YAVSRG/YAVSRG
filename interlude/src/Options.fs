@@ -371,6 +371,9 @@ module Options =
             Hotkeys.register "scoreboard_filter" (mk Keys.E)
             Hotkeys.register "table" (mk Keys.X)
             Hotkeys.register "collections" (mk Keys.C)
+            Hotkeys.register "clear_multi_select" (shift Keys.X)
+            Hotkeys.register "multi_select" (shift Keys.Z)
+            Hotkeys.register "group_multi_select" (ctrl_shift Keys.Z)
 
             Hotkeys.register "accept_offset" (mk Keys.Tab)
             Hotkeys.register "reset_offset" (mk Keys.Backspace)

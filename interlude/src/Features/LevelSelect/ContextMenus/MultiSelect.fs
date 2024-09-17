@@ -118,7 +118,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         page_container()
         |+ PageButton(%"bulk_actions.like", confirm_bulk_like, Icon = Icons.HEART, Hotkey = %%"like").Pos(0)
         |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton(%"bulk_actions.remove_from_folder", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
+        |+ PageButton([folder] %> "bulk_actions.remove_from_collection", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
         :> Widget
 
     override this.Title = %"bulk_actions"
@@ -181,7 +181,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         page_container()
         |+ PageButton(%"bulk_actions.like", confirm_bulk_like, Icon = Icons.HEART, Hotkey = %%"like").Pos(0)
         |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton(%"bulk_actions.remove_from_folder", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
+        |+ PageButton([playlist] %> "bulk_actions.remove_from_collection", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
         :> Widget
 
     override this.Title = %"bulk_actions"

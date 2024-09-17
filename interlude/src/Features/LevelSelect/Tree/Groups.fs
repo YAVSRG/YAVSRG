@@ -194,6 +194,13 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
 
         if this.Expanded then
+
+            if (%%"group_multi_select").Tapped() then
+                match multi_selection with
+                | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
+                    deselect_multiple charts_as_seq
+                | _ -> select_multiple charts_as_seq
+
             let h = CHART_HEIGHT + 5.0f
 
             let mutable index =
@@ -209,5 +216,6 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 index <- index + 1
 
             b + float32 items.Count * (CHART_HEIGHT + 5.0f)
+            
         else
             b

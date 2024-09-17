@@ -170,6 +170,11 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         if last_cached_flag < cache_flag then
             update_cached_info ()
 
+        if this.Selected && (%%"multi_select").Tapped() then
+            match multi_selection with
+            | Some s when s.IsSelected(cc, ctx) -> deselect_multiple [(cc, ctx)]
+            | _ -> select_multiple [(cc, ctx)]
+
         if Mouse.hover bounds then
             hover.Target <- 1.0f
 

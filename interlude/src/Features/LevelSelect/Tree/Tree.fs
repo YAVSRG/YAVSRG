@@ -218,6 +218,7 @@ module Tree =
             match SelectedChart.CACHE_DATA with
             | Some cc -> ChartContextMenu(cc, SelectedChart.LIBRARY_CTX).Show()
             | _ -> ()
+        elif (%%"clear_multi_select").Tapped() then multi_selection <- None
         else
 
             if (%%"up").Tapped() && expanded_group <> ("", LibraryGroupContext.None) then
