@@ -193,7 +193,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 | _ -> ChartContextMenu(cc, ctx).Show()
             elif (%%"delete").Tapped() then
                 match multi_selection with
-                | Some s when s.IsSelected(cc, ctx) -> s.ShowActions() // todo: directly open a bulk delete confirmation
+                | Some s when s.IsSelected(cc, ctx) -> s.ConfirmDelete()
                 | _ -> ChartDeleteMenu(cc, ctx, false).Show()
         else
             hover.Target <- 0.0f

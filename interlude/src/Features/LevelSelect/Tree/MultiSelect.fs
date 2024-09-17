@@ -91,3 +91,8 @@ type private MultiSelection =
         | MultiSelectContext.Folder f -> BatchFolderContextMenu(f, this.Selected).Show()
         | MultiSelectContext.Playlist p -> BatchPlaylistContextMenu(p, this.Selected).Show()
         | MultiSelectContext.Likes -> BatchLikesContextMenu(this.Selected).Show()
+
+    member this.ConfirmDelete() =
+        match this.Context with
+        | MultiSelectContext.Normal -> BulkActions.confirm_bulk_delete this.Selected
+        | _ -> this.ShowActions() // todo: handle other cases like removing from collections with delete key?
