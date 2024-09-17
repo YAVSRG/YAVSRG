@@ -85,3 +85,9 @@ type private MultiSelection =
             this.GroupSelectedCache <- this.GroupSelectedCache.Add ((group_name, group_ctx), result)
             result
 
+    member this.ShowActions() =
+        match this.Context with
+        | MultiSelectContext.Normal -> BatchContextMenu(this.Selected).Show()
+        | MultiSelectContext.Folder f -> BatchFolderContextMenu(f, this.Selected).Show()
+        | MultiSelectContext.Playlist p -> BatchPlaylistContextMenu(p, this.Selected).Show()
+        | MultiSelectContext.Likes -> BatchLikesContextMenu(this.Selected).Show()

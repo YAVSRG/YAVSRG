@@ -40,22 +40,19 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
     override this.Content() =
         page_container()
         |+ PageButton(
-            %"group.delete",
-            (fun () -> GroupContextMenu.ConfirmDelete(name, charts, context, true)),
+            %"bulk_actions.delete",
+            (fun () -> GroupContextMenu.ConfirmDelete(charts, context, true)),
             Icon = Icons.TRASH
         )
-            .Help(Help.Info("group.delete"))
             .Pos(0)
         :> Widget
 
     override this.Title = name
     override this.OnClose() = ()
 
-    static member ConfirmDelete(name, charts, ctx, is_submenu) =
-        let group_name = sprintf "%s (%i charts)" name (Seq.length charts)
-
+    static member ConfirmDelete(charts, ctx, is_submenu) =
         ConfirmPage(
-            [ group_name ] %> "misc.confirmdelete",
+            [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
                 match ctx with
                 | LibraryGroupContext.Pack p ->

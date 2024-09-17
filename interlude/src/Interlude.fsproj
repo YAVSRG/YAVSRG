@@ -202,6 +202,7 @@
     <Compile Include="Features\LevelSelect\LibraryView.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Chart.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Groups.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus\MultiSelect.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\Score.fs" />
     <Compile Include="Features\LevelSelect\Tree\MultiSelect.fs" />
     <Compile Include="Features\LevelSelect\Tree\State.fs" />

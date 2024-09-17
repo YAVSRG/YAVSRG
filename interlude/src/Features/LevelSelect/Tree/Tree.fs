@@ -211,7 +211,13 @@ module Tree =
         if Dialog.exists () then
             ()
         elif (%%"context_menu").Tapped() && SelectedChart.CACHE_DATA.IsSome then
-            ChartContextMenu(SelectedChart.CACHE_DATA.Value, SelectedChart.LIBRARY_CTX).Show()
+            match multi_selection with
+            | Some s -> s.ShowActions()
+            | None ->
+
+            match SelectedChart.CACHE_DATA with
+            | Some cc -> ChartContextMenu(cc, SelectedChart.LIBRARY_CTX).Show()
+            | _ -> ()
         else
 
             if (%%"up").Tapped() && expanded_group <> ("", LibraryGroupContext.None) then

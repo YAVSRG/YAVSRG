@@ -84,6 +84,7 @@ type LevelSelectScreen() =
             Position = Position.SliceB(50.0f).SliceR(250.0f)
         )
             .Help(Help.Info("levelselect.play").Hotkey("select"))
+            .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
             (fun () ->
                 SelectedChart.when_loaded
@@ -97,23 +98,42 @@ type LevelSelectScreen() =
             K Icons.TARGET,
             !%Palette.DARK.O2,
             Hotkey = "practice_mode",
-            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-275.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-275.0f)
         )
             .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
+            .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
-            LevelSelect.random_chart,
+            (fun () -> LevelSelect.random_chart(); TreeState.click_cooldown <- 500.0),
             K Icons.REFRESH_CCW,
             !%Palette.MAIN.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-360.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-360.0f)
         )
             .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart"))
+            .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
             (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
             K Icons.LIST,
             !%Palette.DARK.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).Translate(-445.0f, 0.0f)
+            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-445.0f)
         )
             .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
+            .Conditional(fun () -> TreeState.multi_selection.IsNone)
+
+        |+ StylishButton(
+            (fun () -> TreeState.multi_selection <- None; TreeState.click_cooldown <- 500.0),
+            K (sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection"),
+            !%Palette.DARK.O2,
+            TiltRight = false,
+            Position = Position.SliceB(50.0f).SliceR(300.0f)
+        )
+            .Conditional(fun () -> TreeState.multi_selection.IsSome)
+        |+ StylishButton(
+            (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
+            K (sprintf "%s %s" Icons.LIST %"bulk_actions"),
+            !%Palette.MAIN.O2,
+            Position = Position.SliceB(50.0f).SliceR(300.0f).TranslateX(-325.0f)
+        )
+            .Conditional(fun () -> TreeState.multi_selection.IsSome)
 
         |+ LibraryViewControls()
         |* info_panel
