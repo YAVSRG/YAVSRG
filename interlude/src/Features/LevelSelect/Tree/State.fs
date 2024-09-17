@@ -14,7 +14,7 @@ open Interlude.Features.Gameplay
 type private ScrollTo =
     | Nothing
     | Chart
-    | Pack of string * LibraryGroupContext
+    | Group of string * LibraryGroupContext
 
 module private TreeState =
 
@@ -56,10 +56,6 @@ module private TreeState =
         | Some(v, r, _) -> Some(v, r, Colors.white.O2, format v)
         | None -> None
 
-    let CHART_HEIGHT = 90.0f
-    let GROUP_HEIGHT = 55.0f
-
-    // todo: react to the event of switching instead of doing stuff here
     let switch_chart (cc, context, group_name, group_ctx) =
         if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)
@@ -68,6 +64,9 @@ module private TreeState =
             expanded_group <- group_name, group_ctx
             selected_group <- group_name, group_ctx
             scroll_to <- ScrollTo.Chart
+
+    let CHART_HEIGHT = 90.0f
+    let GROUP_HEIGHT = 55.0f
 
     [<AbstractClass>]
     type TreeItem() =

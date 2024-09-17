@@ -214,12 +214,12 @@ module Tree =
         else
 
             if (%%"up").Tapped() && expanded_group <> ("", LibraryGroupContext.None) then
-                scroll_to <- ScrollTo.Pack expanded_group
+                scroll_to <- ScrollTo.Group expanded_group
                 expanded_group <- ("", LibraryGroupContext.None)
 
             if (%%"down").Tapped() && expanded_group = ("", LibraryGroupContext.None) && selected_group <> ("", LibraryGroupContext.None) then
                 expanded_group <- selected_group
-                scroll_to <- ScrollTo.Pack expanded_group
+                scroll_to <- ScrollTo.Group expanded_group
 
             let bottom_edge =
                 List.fold (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsed_ms)) scroll_pos.Value groups

@@ -139,7 +139,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                     expanded_group <- "", LibraryGroupContext.None
                 else
                     expanded_group <- name, context
-                    scroll_to <- ScrollTo.Pack (name, context)
+                    scroll_to <- ScrollTo.Group (name, context)
             elif this.RightClick(origin) then
                 GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Tapped() then
@@ -159,7 +159,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         select_animation.Update elapsed_ms
 
         match scroll_to with
-        | ScrollTo.Pack (a, b) when (a, b) = (name, context) ->
+        | ScrollTo.Group (a, b) when (a, b) = (name, context) ->
             if this.Expanded then
                 scroll (-top + origin + 185.0f)
             else
