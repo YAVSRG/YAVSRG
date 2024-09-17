@@ -1,11 +1,9 @@
 ﻿namespace Interlude.Features.Score
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Prelude.Data.Library
 open Prelude.Charts.Processing
 open Interlude
 open Interlude.Options
@@ -14,66 +12,7 @@ open Interlude.UI
 open Interlude.Features.Rulesets
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
-open Interlude.Features.Tables
 open Interlude.Features.Online
-
-#nowarn "40"
-
-type ScoreChartContextMenu(cc: ChartMeta) =
-    inherit Page()
-
-    let rec like_button =
-        PageButton(
-            %"chart.add_to_likes",
-            (fun () -> CollectionActions.like_chart cc; like_button_swap.Current <- unlike_button),
-            Icon = Icons.HEART,
-            Hotkey = %%"like"
-        )
-    and unlike_button = 
-        PageButton(
-            %"chart.remove_from_likes",
-            (fun () -> CollectionActions.unlike_chart cc; like_button_swap.Current <- like_button),
-            Icon = Icons.FOLDER_MINUS,
-            Hotkey = %%"unlike"
-        )
-    and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked cc then unlike_button else like_button)
-
-    override this.Content() =
-        let content =
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
-            |+ like_button_swap
-            |+ PageButton(
-                %"chart.add_to_collection",
-                (fun () -> AddToCollectionPage(cc).Show()),
-                Icon = Icons.FOLDER_PLUS
-            )
-            |+ PageButton(
-                %"chart.delete",
-                fun () -> 
-                    let chart_name = sprintf "%s [%s]" cc.Title cc.DifficultyName
-                    ConfirmPage(
-                        [ chart_name ] %> "misc.confirmdelete",
-                        fun () -> ChartDatabase.delete cc Content.Charts
-                    )
-                        .Show()
-                , Icon = Icons.TRASH, Hotkey = %%"delete"
-            )
-
-        match Content.Table with
-        | Some table ->
-            if Network.status = Network.Status.LoggedIn && cc.Keys = table.Info.Keymode then
-                content
-                |* PageButton(
-                    %"chart.suggest_for_table",
-                    (fun () -> SuggestChartPage(table, cc.Hash).Show()),
-                    Icon = Icons.SIDEBAR
-                )
-        | _ -> ()
-
-        content
-
-    override this.Title = cc.Title
-    override this.OnClose() = ()
 
 type RulesetSwitcher(setting: Setting<string>) =
     inherit Container(NodeType.None)
@@ -139,7 +78,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             )
             |+ InlaidButton(
                 %"score.chart_actions",
-                (fun () -> ScoreChartContextMenu(score_info.ChartMeta).Show()),
+                (fun () -> ScoreChartContextMenu(score_info).Show()),
                 Icons.SETTINGS,
                 Hotkey = "context_menu"
             )

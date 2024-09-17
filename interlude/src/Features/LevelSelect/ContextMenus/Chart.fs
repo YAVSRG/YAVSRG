@@ -195,8 +195,8 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                                 |> Mods.in_priority_order
                                 |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
                                 |> String.concat ", "
-                            let chart_with_mods = 
-                                { c with Notes = m.Notes; SV = m.SV; BPM = m.BPM }
+                            let chart_with_mods : Chart = 
+                                { Keys = m.Keys; Notes = m.Notes; SV = m.SV; BPM = m.BPM }
                             let meta_with_mods =
                                 { cc with DifficultyName = cc.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
                             match Exports.create_osz chart_with_mods meta_with_mods (get_game_folder "Exports") with
