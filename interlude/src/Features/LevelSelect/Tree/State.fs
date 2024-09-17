@@ -65,6 +65,22 @@ module private TreeState =
             selected_group <- group_name, group_ctx
             scroll_to <- ScrollTo.Chart
 
+    let mutable multi_selection: MultiSelection option = None
+
+    let select_multiple (items: (ChartMeta * LibraryContext) seq) =
+        match multi_selection with
+        | Some s -> s.Select items
+        | None -> multi_selection <- Some (MultiSelection.Create items)
+
+    let deselect_multiple (items: (ChartMeta * LibraryContext) seq) =
+        match multi_selection with
+        | None -> ()
+        | Some s -> 
+            s.Deselect items
+            if s.IsEmpty then multi_selection <- None
+
+    let MULTI_SELECT_KEY = Bind.mk Keys.LeftShift
+
     let CHART_HEIGHT = 90.0f
     let GROUP_HEIGHT = 55.0f
 

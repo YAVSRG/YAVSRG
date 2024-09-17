@@ -73,9 +73,13 @@ type private MultiSelection =
         | Some already_calculated -> already_calculated
         | None ->
             let mutable some = false
+            let mutable all = true
+            for c in charts do
+                if this.IsSelected c then 
+                    some <- true
+                else all <- false
             let result =
-                if Seq.forall (fun c -> if this.IsSelected c then some <- true; true else false) charts then
-                    AmountSelected.All
+                if all then AmountSelected.All
                 elif some then AmountSelected.Some
                 else AmountSelected.None
             this.GroupSelectedCache <- this.GroupSelectedCache.Add ((group_name, group_ctx), result)

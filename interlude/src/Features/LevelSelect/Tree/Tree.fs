@@ -99,6 +99,7 @@ module Tree =
         is_empty <- List.isEmpty groups
         cache_flag <- 0
         click_cooldown <- 500.0
+        multi_selection <- None
 
     do
         LevelSelect.on_refresh_all.Add refresh

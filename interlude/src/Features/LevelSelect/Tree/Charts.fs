@@ -78,12 +78,16 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             } =
             bounds
 
+        let is_multi_selected = match multi_selection with Some s -> s.IsSelected(cc, ctx) | None -> false
+
         let accent =
             let alpha = 80 + int (hover.Value * 40.0f)
-            Palette.color (alpha, 1.0f, 0.4f)
+            if is_multi_selected then Colors.grey_2.O2a alpha else Palette.color (alpha, 1.0f, 0.4f)
         let color, hover_color =
-            if this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
+            if is_multi_selected then Colors.grey_2.O2, Colors.white.O2
+            elif this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
             else Colors.shadow_1.O2, Colors.grey_2.O2
+
 
         Draw.rect bounds color
 
@@ -131,7 +135,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         // draw text
         Draw.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
-        Text.draw_b (Style.font, (if options.TreeShowNativeText.Value then cc.TitleNative |> Option.defaultValue cc.Title else cc.Title), 23.0f, left + 7f, top, Colors.text)
+        Text.draw_b (Style.font, (if options.TreeShowNativeText.Value then cc.TitleNative |> Option.defaultValue cc.Title else cc.Title), 23.0f, left + 7f, top, if is_multi_selected then Colors.text_yellow_2 else Colors.text)
 
         Text.draw_b (
             Style.font,
@@ -151,7 +155,12 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             Colors.text_subheading
         )
 
-        Text.draw_aligned_b (Style.font, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
+        let icon = 
+            match multi_selection with
+            | Some s -> if s.IsSelected(cc, ctx) then Icons.CHECK_SQUARE else Icons.SQUARE
+            | None -> markers
+
+        Text.draw_aligned_b (Style.font, icon, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
     member this.Draw(top, origin, originB) =
         this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -165,7 +174,11 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             hover.Target <- 1.0f
 
             if this.LeftClick(origin) then
-                if this.Selected then
+                if MULTI_SELECT_KEY.Pressed() then
+                    match multi_selection with
+                    | Some s when s.IsSelected(cc, ctx) -> deselect_multiple [(cc, ctx)]
+                    | _ -> select_multiple [(cc, ctx)]
+                elif this.Selected then
                     LevelSelect.choose_this_chart ()
                 else
                     this.Select()

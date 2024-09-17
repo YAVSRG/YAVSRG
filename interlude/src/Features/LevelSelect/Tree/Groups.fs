@@ -16,6 +16,8 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
     let display_name = if context = LibraryGroupContext.Likes then  %"library.likes" else name
 
+    let charts_as_seq = items |> Seq.map (fun i -> i.Chart, i.Context)
+
     let mutable last_cached_flag = -1
     let select_animation = Animation.Fade(0.0f)
     let mutable label = ""
@@ -79,6 +81,10 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnDraw(bounds: Rect) =
 
         let color, bg_color =
+            match multi_selection with
+            | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None ->
+                Colors.grey_2.O2, Colors.shadow_2.O2
+            | _ ->
             match special_color with
             | Some (fg, bg) -> if this.Selected then fg.O3, bg else fg.O2, bg.O2
             | None ->
@@ -94,8 +100,19 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
         Draw.rect bounds color
 
-        Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
-        Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+        match multi_selection with
+        | Some s ->
+            let filled_icon, name_color =
+                match s.GroupAmountSelected(name, context, charts_as_seq) with
+                | AmountSelected.None -> Icons.SQUARE, Colors.text_subheading
+                | AmountSelected.Some -> Icons.PLUS_SQUARE, Colors.text_yellow_2
+                | AmountSelected.All -> Icons.CHECK_SQUARE, Colors.text_yellow_2
+            Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(150.0f), name_color, Alignment.LEFT)
+            Text.fill_b (Style.font, filled_icon, bounds.Shrink(15.0f, 5.0f), Colors.text, Alignment.RIGHT)
+            Text.fill_b (Style.font, label, bounds.Shrink(65.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
+        | None ->
+            Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
+            Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
     member this.Draw(top, origin, originB) =
         let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -135,7 +152,12 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnUpdate(origin, bounds, elapsed_ms) =
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
-                if this.Expanded then
+                if MULTI_SELECT_KEY.Pressed() then
+                    match multi_selection with
+                    | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
+                        deselect_multiple charts_as_seq
+                    | _ -> select_multiple charts_as_seq
+                elif this.Expanded then
                     expanded_group <- "", LibraryGroupContext.None
                 else
                     expanded_group <- name, context
