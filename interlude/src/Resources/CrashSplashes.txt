@@ -49,3 +49,4 @@ this example is contrived
 who gets the blame?
 you get the blame, and i get the blame
 Give me stuff to break
+Did your string come undone?
