@@ -81,7 +81,7 @@ module Transitions =
         if transition_type = EnterGameplayFadeAudio then 
             Devices.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
 
-        draw_internal transition_type inbound (float32 amount) bounds
+        draw_internal transition_type inbound (float32 amount) (bounds.Expand 1.0f)
 
     let animate (func: unit -> unit, transition_type: Transition) : Animation =
 
