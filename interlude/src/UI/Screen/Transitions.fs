@@ -3,21 +3,25 @@
 open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Audio
 open Prelude
 open Interlude.UI
+open Interlude.Options
 
 module Transitions =
 
     type Transition =
         | Default
         | UnderLogo
-        | EnterGameplay
+        | EnterGameplayNoFadeAudio
+        | EnterGameplayFadeAudio
         | LeaveGameplay
         member this.Duration =
             match this with
             | Default
             | UnderLogo -> 500.0
-            | EnterGameplay
+            | EnterGameplayNoFadeAudio
+            | EnterGameplayFadeAudio
             | LeaveGameplay -> 350.0
 
     let private fancy_transition inbound amount bounds =
@@ -41,7 +45,8 @@ module Transitions =
             Stencil.start_drawing ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
 
-        | EnterGameplay ->
+        | EnterGameplayNoFadeAudio
+        | EnterGameplayFadeAudio ->
             TriangleWipe.draw_downward inbound amount bounds
             Stencil.start_drawing ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
@@ -68,24 +73,26 @@ module Transitions =
                 (if inbound then
                         in_timer.Time / in_timer.Interval
                     else
-                        1.0 - (out_timer.Time / in_timer.Interval)),
+                        1.0 - (out_timer.Time / out_timer.Interval)),
                 0.0,
                 1.0
             )
-            |> float32
 
-        draw_internal transition_type inbound amount bounds
+        if transition_type = EnterGameplayFadeAudio then 
+            Devices.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
 
-    let animate (func: unit -> unit, kind: Transition) : Animation =
+        draw_internal transition_type inbound (float32 amount) bounds
+
+    let animate (func: unit -> unit, transition_type: Transition) : Animation =
 
         match current with
         | Some _ -> 
             failwith "Should not be called while a transition is already in progress"
         | None ->
 
-        current <- Some kind
-        in_timer.Interval <- kind.Duration
-        out_timer.Interval <- kind.Duration
+        current <- Some transition_type
+        in_timer.Interval <- transition_type.Duration
+        out_timer.Interval <- transition_type.Duration
 
         Animation.seq
             [
@@ -99,5 +106,6 @@ module Transitions =
                     in_timer.Reset()
                     out_timer.Reset()
                     current <- None
+                    if transition_type = EnterGameplayFadeAudio then Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
                 )
             ]

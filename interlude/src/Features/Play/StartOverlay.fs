@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Play
 
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -62,7 +63,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
         base.Update(elapsed_ms, moved)
         timer.Update elapsed_ms
 
-        if fade.Target <> 0.0f && timer.Complete then
+        if fade.Target <> 0.0f && (timer.Complete || (%%"skip").Pressed()) then
             on_ready()
             fade.Target <- 0.0f
 

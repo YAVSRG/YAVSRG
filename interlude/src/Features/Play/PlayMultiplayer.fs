@@ -126,7 +126,7 @@ module PlayScreenMultiplayer =
                         |> ScoreScreen
                     )
                     Screen.Type.Score
-                    Transitions.EnterGameplay
+                    Transitions.EnterGameplayNoFadeAudio
             then
                 Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 

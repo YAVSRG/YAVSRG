@@ -87,7 +87,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Song.change_rate SelectedChart.rate.Value
         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
         Song.on_finish <- SongFinishAction.Wait
-        Song.play_leadin ()
+        Song.play_leadin with_colors.FirstNote
         Input.remove_listener ()
         Input.finish_frame_events ()
         Window.defer Window.DisableWindowsKey

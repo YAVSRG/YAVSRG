@@ -8,10 +8,14 @@ open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
+open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 type SkipButton(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
+
+    let SKIP_THRESHOLD = Song.LEADIN_TIME * SelectedChart.rate.Value
+    let SKIP_DISTANCE = 1000.0f<ms> * SelectedChart.rate.Value
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
@@ -44,10 +48,10 @@ type SkipButton(config: HudConfig, state: PlayState) =
 
         if active && Screen.current_type <> Screen.Type.Practice then // hack for HUD editor
 
-            if state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
+            if state.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Tapped() then
                     Song.pause ()
-                    Song.play_from (first_note - Song.LEADIN_TIME)
+                    Song.play_from (first_note - SKIP_DISTANCE)
                     active <- false
             else
                 active <- false

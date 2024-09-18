@@ -48,7 +48,7 @@ module PlayScreen =
                 Screen.change_new
                     (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
                     Screen.Type.Play
-                    Transitions.EnterGameplay
+                    Transitions.EnterGameplayFadeAudio
             then
                 Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
 
@@ -104,7 +104,7 @@ module PlayScreen =
                         |> ScoreScreen
                     )
                     Screen.Type.Score
-                    Transitions.EnterGameplay
+                    Transitions.EnterGameplayNoFadeAudio
             then
                 Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
 

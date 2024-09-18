@@ -87,7 +87,7 @@ module LevelSelect =
                 )
             )
             Screen.Type.Play
-            Transitions.EnterGameplay
+            Transitions.EnterGameplayFadeAudio
         |> function true -> enter_gameplay info.LibraryContext; true | false -> false
 
     // todo: remove the holes from this system by making a proper way to wait for song to load
@@ -209,7 +209,7 @@ module LevelSelect =
                 Screen.change_new
                     (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
                     Screen.Type.Play
-                    Transitions.EnterGameplay
+                    Transitions.EnterGameplayFadeAudio
             then
                 enter_gameplay info.LibraryContext
                 SelectedChart.rate.Set score_info.Rate

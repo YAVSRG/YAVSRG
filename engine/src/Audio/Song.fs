@@ -127,7 +127,8 @@ module Song =
         timer.Restart()
         paused <- false
 
-    let play_leadin () = play_from (-LEADIN_TIME * rate)
+    let play_leadin (first_note: Time) = 
+        play_from (min 0.0f<ms> (first_note - LEADIN_TIME * rate))
 
     let seek (time) =
         if playing () then
