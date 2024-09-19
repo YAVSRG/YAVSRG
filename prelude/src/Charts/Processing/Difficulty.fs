@@ -291,8 +291,8 @@ module DifficultyRating =
             (overallDifficulty physicalData, overallDifficulty technicalData)
 
         {
-            Physical = physical
-            Technical = technical
+            Physical = if Double.IsFinite physical then physical else 0.0
+            Technical = if Double.IsFinite technical then technical else 0.0
 
             PhysicalData = physicalData
             TechnicalData = technicalData

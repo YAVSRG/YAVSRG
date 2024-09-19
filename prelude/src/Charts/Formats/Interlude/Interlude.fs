@@ -132,6 +132,8 @@ module Chart =
             for { Time = time; Data = nr } in chart.Notes do
                 if time <= lastTime then
                     failwithf "Note row appears on or before the previous time (%f, %f)" time lastTime
+                elif not (Single.IsFinite (float32 time)) then
+                    failwithf "Timestamp is invalid value: %f" time
 
                 lastTime <- time
 

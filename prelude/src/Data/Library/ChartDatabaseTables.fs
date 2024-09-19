@@ -9,6 +9,8 @@ open Prelude.Charts.Processing.Patterns
 
 module DbCharts =
 
+    let private no_nan x = if System.Single.IsFinite x then x else 0.0f
+
     // Increment this to recalculate pattern & rating data
     let private CALC_VERSION = 0uy
 
@@ -122,7 +124,7 @@ module DbCharts =
                     "@BPM", SqliteType.Integer, 4
                     "@DateAdded", SqliteType.Integer, 8
                     "@CalcVersion", SqliteType.Integer, 1
-                    "@Rating", SqliteType.Real, 8
+                    "@Rating", SqliteType.Real, 4
                     "@Patterns", SqliteType.Text, -1
                     "@Chart", SqliteType.Blob, -1
                 ]
@@ -140,15 +142,15 @@ module DbCharts =
                     p.Json JSON db_chart.Tags
                     p.Json JSON db_chart.Background
                     p.Json JSON db_chart.Audio
-                    p.Float32 (float32 db_chart.PreviewTime)
+                    p.Float32 (float32 db_chart.PreviewTime |> no_nan)
                     p.Json JSON db_chart.Packs
                     p.Json JSON db_chart.Origin
                     p.Byte (byte db_chart.Keys)
-                    p.Float32 (float32 db_chart.Length)
+                    p.Float32 (float32 db_chart.Length |> no_nan)
                     p.Int32 db_chart.BPM
                     p.Int64 db_chart.DateAdded
                     p.Byte CALC_VERSION
-                    p.Float32 db_chart.Rating
+                    p.Float32 (no_nan db_chart.Rating)
                     p.Json JSON db_chart.Patterns
                     p.Blob (
                         use ms = new MemoryStream()

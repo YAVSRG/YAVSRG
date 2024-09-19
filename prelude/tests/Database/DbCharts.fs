@@ -67,6 +67,20 @@ module DbCharts =
             Patterns = PatternReport.Default
         }
 
+    let TEST_CHART_META_NAN : ChartMeta =
+        { TEST_CHART_META_ALT with
+            PreviewTime = System.Single.NegativeInfinity * 1.0f<ms>
+            Length = System.Single.NaN * 1.0f<ms>
+            Rating = System.Single.PositiveInfinity
+        }
+
+    let TEST_CHART_META_NAN_FIXED : ChartMeta =
+        { TEST_CHART_META_ALT with
+            PreviewTime = 0.0f<ms>
+            Length = 0.0f<ms>
+            Rating = 0.0f
+        }
+
     [<Test>]
     let Get_Meta_DoesntExist () =
         let db, conn = in_memory ()
@@ -87,6 +101,16 @@ module DbCharts =
         Assert.AreEqual(Some TEST_CHART_META, result)
 
         Assert.AreEqual(None, DbCharts.get_meta "doesntexist" db)
+    
+    [<Test>]
+    let RoundTrip_Meta_With_NaN() =
+        let db, conn = in_memory ()
+        
+        DbCharts.delete TEST_CHART_META.Hash db |> ignore
+
+        DbCharts.save TEST_CHART_META_NAN TEST_CHART db
+        let result = DbCharts.get_meta TEST_CHART_META.Hash db
+        Assert.AreEqual(Some TEST_CHART_META_NAN_FIXED, result)
 
     [<Test>]
     let RoundTrip_Chart() =
