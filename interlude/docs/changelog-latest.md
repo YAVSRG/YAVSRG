@@ -1,29 +1,23 @@
-0.7.26.4
+0.7.26.5
 ====
 
-It's like a whole new game (again)
+# Multi-select and bulk actions
 
-# Skinning
-- Added a new 'Judgement line' element, it's a skinnable texture that stretches over your whole hitposition area like osu's `mania-stage-hint`
-- Receptors can be turned off, if you only want to use the judgement line, or having nothing there at all
-- Improved osu! Skin conversion including auto-converting judgement lines
-- Column light colors can now be customised per keymode + vertically offset
-- Receptor colors can now be customised per keymode
-- Option for notes to always go under receptors
+In level select, you can now select multiple charts/groups by holding shift + clicking  
 
-# Chart database
+After doing so, there is a bulk actions button that lets you do stuff like:  
 
-Your charts are now stored in an SQLite database file instead of as folders of .yav files
+- Deleting multiple charts at once
+- Exporting multiple charts to .osz (use with caution when exporting a lot)
+- Adding a batch of charts to a collection/likes
 
-This means:
+# Other new stuff
+- Skip button has been improved to take you closer to the first note
+- Transition into gameplay now fades the audio
+- Info card at the start of gameplay can be dismissed by pressing the skip key
+- You can export as .osz from the score screen chart actions
 
-- Faster disk operations
-- I got to clean up and improve a lot of code
-- It should be impossible for the cache to break and need a recache any more
-- It paved the way for some new level select features (see below)
-
-# New level select features
-- Ability to 'like' charts - They appear when viewing collections and act like a folder
-- Toggle on level select to always show collections at the top alongside other groups/search results
-- Toggle on level select to show native (normally Japanese) artists and titles where available
+# Bug fixes
+- Fixed a chart database issue that broke @Lifly's game. **If you also had this issue, you need to download this update manually and swap your Interlude.exe for the new one**.
+- Fixed a pixel seam in screen transitions
 
