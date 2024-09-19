@@ -92,6 +92,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
                 export_osz_with_mods,
                 Icon = Icons.UPLOAD
             )
+                .Conditional(fun () -> not score_info.WithMods.ModsApplied.IsEmpty)
 
         match Content.Table with
         | Some table ->
