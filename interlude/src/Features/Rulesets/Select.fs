@@ -85,7 +85,8 @@ type SelectRulesetPage() =
                         )
                             .Show()
                     ),
-                    Position = Position.SliceR PRETTYHEIGHT
+                    Position = Position.SliceR PRETTYHEIGHT,
+                    Disabled = K (id = Rulesets.DEFAULT_ID)
                 )
             )
 

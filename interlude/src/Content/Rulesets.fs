@@ -9,7 +9,7 @@ open Prelude.Gameplay.Rulesets
 
 module Rulesets =
 
-    let private DEFAULT_ID = "sc-j4"
+    let DEFAULT_ID = "sc-j4"
     let DEFAULT = SC.create 4
     let DEFAULT_HASH = Ruleset.hash DEFAULT
 
@@ -92,7 +92,7 @@ module Rulesets =
         JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
     let delete (id: string) =
-        if exists id then
+        if id <> DEFAULT_ID && exists id then
             try
                 File.Delete(Path.Combine(get_game_folder "Rulesets", id + ".ruleset"))
                 loaded.Remove id
