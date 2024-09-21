@@ -33,7 +33,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
                 (this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
             (color_func()).AsQuad
 
-        Text.fill_b (Style.font, label_func (), this.Bounds, (if this.Disabled() then Colors.text_greyout elif this.Focused then Colors.text_yellow_2 else this.TextColor()), 0.5f)
+        Text.fill_b (Style.font, label_func (), this.Bounds.ShrinkX(Style.PADDING), (if this.Disabled() then Colors.text_greyout elif this.Focused then Colors.text_yellow_2 else this.TextColor()), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =
