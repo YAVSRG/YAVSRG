@@ -37,8 +37,8 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 .SliceL(box_height)
                 .Shrink(Style.PADDING)
         for k = 0 to state.Chart.Keys - 1 do
-            let key_alpha = 255.0f - 127.0f * (float32 fades.[k].Time / float32 fades.[k].Interval) |> int
-            Draw.rect box (config.InputMeterKeyColor.O3a key_alpha)
+            let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * (float32 fades.[k].Time / float32 fades.[k].Interval)) |> int
+            Draw.rect box (config.InputMeterKeyColor.O4a key_alpha)
             box <- box.Translate(box_height, 0.0f)
 
         if config.InputMeterShowInputs then

@@ -26,7 +26,7 @@ type InputMeterPage(on_close: unit -> unit) =
             .Pos(0)
         |+ PageSetting(%"hud.inputmeter.key_fade_time", Slider(key_fade_time, Step = 5f))
                 .Pos(2)
-        |+ PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, false))
+        |+ PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, true))
             .Pos(4, 3)
         |+ PageSetting(%"hud.inputmeter.scroll_downwards", Checkbox scroll_downwards)
             .Pos(7)
