@@ -12,7 +12,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let grade = ruleset.Value.Grading.Grades.[id]
     let name = Setting.simple grade.Name
     let color = Setting.simple grade.Color
-    let acc_required = Setting.bounded (float32 grade.Accuracy) 0.0f 1.0f |> Setting.roundf 5
+    let acc_required = Setting.bounded (float32 grade.Accuracy) 0.0f 1.0f |> Setting.roundf 6
 
     override this.Content() =
         page_container()
@@ -29,7 +29,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     override this.Title = grade.Name
     override this.OnClose() =
         let new_grades = ruleset.Value.Grading.Grades |> Array.copy
-        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 5) }
+        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
         let new_grading = { ruleset.Value.Grading with Grades = new_grades |> Array.sortBy _.Accuracy }
         ruleset.Set { ruleset.Value with Grading = new_grading }
 
