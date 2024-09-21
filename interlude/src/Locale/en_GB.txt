@@ -320,6 +320,7 @@ hud.generic.percent_spacing.tooltip=Change this to adjust the spacing of the per
 hud.generic.use_font=Custom font
 hud.generic.use_font.tooltip=Enable this to use a custom texture for the font on this element.
 hud.inputmeter=Input meter
+hud.inputmeter.column_padding=Column padding
 hud.inputmeter.input_color=Inputs color
 hud.inputmeter.input_fade_distance=Inputs fade distance
 hud.inputmeter.key_color=Key color

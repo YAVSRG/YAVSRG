@@ -169,6 +169,7 @@ type HudConfig =
         InputMeterScrollSpeed: float32
         InputMeterKeyColor: Color
         InputMeterKeyFadeTime: float32
+        InputMeterColumnPadding: float32
         InputMeterShowInputs: bool
         InputMeterInputColor: Color
         InputMeterInputFadeDistance: float32
@@ -373,6 +374,7 @@ type HudConfig =
             InputMeterScrollSpeed = 0.75f
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterKeyFadeTime = 300.0f
+            InputMeterColumnPadding = 0.25f
             InputMeterShowInputs = true
             InputMeterInputColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterInputFadeDistance = 100.0f

@@ -25,21 +25,21 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 fades.[k].Reset()
 
     override this.Draw() =
-        let box_height = this.Bounds.Width / float32 state.Chart.Keys
+        let column_width = this.Bounds.Width / float32 state.Chart.Keys
 
         let mutable box = 
             (
                 if config.InputMeterScrollDownwards then
-                    this.Bounds.SliceT(box_height)
+                    this.Bounds.SliceT(column_width)
                 else
-                    this.Bounds.SliceB(box_height)
+                    this.Bounds.SliceB(column_width)
             )
-                .SliceL(box_height)
-                .Shrink(Style.PADDING)
+                .SliceL(column_width)
+                .ShrinkPercent(config.InputMeterColumnPadding * 0.5f)
         for k = 0 to state.Chart.Keys - 1 do
             let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * (float32 fades.[k].Time / float32 fades.[k].Interval)) |> int
             Draw.rect box (config.InputMeterKeyColor.O4a key_alpha)
-            box <- box.Translate(box_height, 0.0f)
+            box <- box.Translate(column_width, 0.0f)
 
         if config.InputMeterShowInputs then
             let recent_events = state.Scoring.EnumerateRecentInputs()
@@ -47,13 +47,13 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let now = state.CurrentChartTime()
             let point (time: ChartTime) : float32 * Color = 
                 let time_ago = now - time
-                let height = this.Bounds.Height - box_height
+                let height = this.Bounds.Height - column_width
                 let offset = time_ago * SCROLL_SPEED |> min height
                 
                 if config.InputMeterScrollDownwards then 
-                    this.Bounds.Top + box_height + offset
+                    this.Bounds.Top + column_width + offset
                 else
-                    this.Bounds.Bottom - box_height - offset
+                    this.Bounds.Bottom - column_width - offset
                 ,
                 let mult = 
                     if config.InputMeterInputFadeDistance > 0.0f then
@@ -66,16 +66,16 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 let y2, c2 = point previous
                 Draw.untextured_quad 
                     (Rect.Create(
-                        this.Bounds.Left + Style.PADDING + box_height * float32 k,
+                        this.Bounds.Left + column_width * float32 k,
                         y1,
-                        this.Bounds.Left - Style.PADDING + box_height * (1.0f + float32 k),
+                        this.Bounds.Left + column_width * (1.0f + float32 k),
                         y2
-                    ).AsQuad)
+                    ).SliceX(box.Width).AsQuad)
                     (Quad.gradient_top_to_bottom c1 c2)
         
             let mutable previous = now
-            let cutoff = now - (this.Bounds.Height - box_height) / SCROLL_SPEED
-            let fade_edge = now - (this.Bounds.Height - box_height - config.InputMeterInputFadeDistance) / SCROLL_SPEED
+            let cutoff = now - (this.Bounds.Height - column_width) / SCROLL_SPEED
+            let fade_edge = now - (this.Bounds.Height - column_width - config.InputMeterInputFadeDistance) / SCROLL_SPEED
             for struct (timestamp, keystate) in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
                 for k = 0 to state.Chart.Keys - 1 do
                     if Bitmask.has_key k keystate then
