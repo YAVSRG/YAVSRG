@@ -1,0 +1,9 @@
+Different subdirectories in this repo have different licenses, see LICENSE in those subdirectories for license information.
+
+In general everything is under the MIT License, with two exceptions:
+`interlude/`, the game client itself, is licensed under GPLv3
+`online/`, the game server, is licensed under GPLv3
+
+All other folders are licensed under the MIT license, even if no LICENSE file is indicated in the subdirectory
+
+If unsure contact me
