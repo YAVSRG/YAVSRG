@@ -59,6 +59,11 @@ type SelectRulesetPage() =
             (fun () -> AddRulesetsPage().Show()),
             Icon = Icons.DOWNLOAD
         )
+        |+ PageButton(
+            %"rulesets.open_folder",
+            (fun () -> open_directory (get_game_folder "Rulesets")),
+            Icon = Icons.FOLDER
+        )
         |* Dummy()
 
         for id, ruleset in Rulesets.list () do
