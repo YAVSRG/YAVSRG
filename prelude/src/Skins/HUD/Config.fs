@@ -95,6 +95,7 @@ type HudConfig =
         TimingDisplayGuideThickness: float32
         TimingDisplayShowNonJudgements: bool
         TimingDisplayReleasesExtraHeight: float32
+        TimingDisplayWindowsOpacity: float32
         TimingDisplayHalfScaleReleases: bool
         TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
@@ -217,6 +218,7 @@ type HudConfig =
             TimingDisplayGuideThickness = 1.0f
             TimingDisplayShowNonJudgements = true
             TimingDisplayReleasesExtraHeight = 5.0f
+            TimingDisplayWindowsOpacity = 0.0f
             TimingDisplayHalfScaleReleases = true
             TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
             TimingDisplayMovingAverageSensitivity = 0.75f

@@ -26,6 +26,8 @@ type TimingDisplayPage(on_close: unit -> unit) =
         Setting.simple config.TimingDisplayReleasesExtraHeight
         |> Setting.bound 0.0f 20.0f
 
+    let windows_opacity = Setting.bounded config.TimingDisplayWindowsOpacity 0.0f 0.6f
+
     let half_scale_releases = Setting.simple config.TimingDisplayHalfScaleReleases
 
     let animation_time =
@@ -35,19 +37,6 @@ type TimingDisplayPage(on_close: unit -> unit) =
     let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
     let moving_average_sensitivity = Setting.simple config.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
     let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
-
-    let preview =
-        { new ConfigPreview(0.35f, pos) with
-            override this.DrawComponent(bounds) =
-                Draw.rect
-                    (Rect.Create(
-                        bounds.CenterX - thickness.Value / 2.0f,
-                        bounds.Top,
-                        bounds.CenterX + thickness.Value / 2.0f,
-                        bounds.Bottom
-                    ))
-                    Color.White
-        }
 
     override this.Content() = 
         page_container()
@@ -73,6 +62,9 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
             .Help(Help.Info("hud.timingdisplay.animationtime"))
             .Pos(12)
+        |+ PageSetting(%"hud.timingdisplay.timingwindowsopacity", Slider.Percent(windows_opacity))
+            .Help(Help.Info("hud.timingdisplay.timingwindowsopacity"))
+            .Pos(14)
         |+ PageSetting(%"hud.timingdisplay.moving_average_type", 
             SelectDropdown(
                 [|
@@ -84,21 +76,18 @@ type TimingDisplayPage(on_close: unit -> unit) =
             )
         )
             .Help(Help.Info("hud.timingdisplay.moving_average_type"))
-            .Pos(14)
+            .Pos(16)
         |+ PageSetting(%"hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
             .Help(Help.Info("hud.timingdisplay.moving_average_sensitivity"))
-            .Pos(16)
+            .Pos(18)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         |+ PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
             .Help(Help.Info("hud.timingdisplay.moving_average_color"))
-            .Pos(18, 3)
+            .Pos(20, 3)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
-        |>> Container
-        |+ preview
         :> Widget
 
     override this.Title = %"hud.timingdisplay"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         Skins.save_hud_config
@@ -108,6 +97,8 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayThickness = thickness.Value
                 TimingDisplayGuideThickness = guide_thickness.Value
                 TimingDisplayReleasesExtraHeight = release_thickness.Value
+                TimingDisplayWindowsOpacity = windows_opacity.Value
+                TimingDisplayHalfScaleReleases = half_scale_releases.Value
                 TimingDisplayFadeTime = animation_time.Value
                 TimingDisplayMovingAverageType = moving_average_type.Value
                 TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value

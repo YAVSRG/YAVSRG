@@ -34,6 +34,8 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
     let animation_time = config.TimingDisplayFadeTime * SelectedChart.rate.Value
     let moving_average = Animation.Fade(0.0f)
 
+    let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
+
     do
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
             state.SubscribeToHits(fun ev ->
@@ -92,7 +94,27 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         while hits.Count > 0 && hits.[0].Time + animation_time * 1.0f<ms> < now do
             hits.RemoveAt(0)
 
+    member this.DrawWindows(opacity: int) =
+        let centre = this.Bounds.CenterX
+
+        let ms_to_x =
+            let w = this.Bounds.Width * 0.5f
+            fun time -> centre + time / state.Scoring.Ruleset.Accuracy.MissWindow * w
+
+        let mutable time = -state.Scoring.Ruleset.Accuracy.MissWindow
+        for (time2, j) in state.Scoring.Ruleset.Accuracy.Timegates do
+            Draw.rect 
+                (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom))
+                (state.Scoring.Ruleset.JudgementColor(j).O4a opacity)
+            time <- time2
+        Draw.rect 
+            (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x state.Scoring.Ruleset.Accuracy.MissWindow, this.Bounds.Bottom))
+            (state.Scoring.Ruleset.JudgementColor(state.Scoring.Ruleset.Judgements.Length - 1).O4a opacity)
+
     override this.Draw() =
+        if window_opacity > 0 then
+            this.DrawWindows window_opacity
+
         let centre = this.Bounds.CenterX
 
         if config.TimingDisplayShowGuide then
