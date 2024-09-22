@@ -86,6 +86,7 @@
     <Compile Include="Features\Import\Backbeat.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
     <Compile Include="Features\Import\osu!\Scores.fs" />
+    <Compile Include="Features\Import\osu!\Replays.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Mino.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Components.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Beatmaps.fs" />

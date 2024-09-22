@@ -289,15 +289,21 @@ and Menu(top_level: Page) as this =
 type Page with
     member this.Show() = Menu.ShowPage this
 
-//todo: change into multiple choice page, takes list of choices and actions
-//then confirm is a static constructor
-type ConfirmPage(prompt: string, yes: unit -> unit) =
+type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
     inherit Page()
 
+    new(prompt, if_yes) = ConfirmPage(prompt, [|%"confirm.yes", if_yes; %"confirm.no", ignore|])
+
     override this.Content() =
+        let mutable p = 1
         page_container()
-        |+ PageButton.Once(%"confirm.yes", fork yes Menu.Back).Pos(3)
-        |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
+        |+ (
+            options 
+            |> Seq.map (fun (label, action) -> 
+                p <- p + 2
+                PageButton.Once(label, fork action Menu.Back).Pos(p)
+            )
+        )
         |+ Text(prompt, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
         :> Widget
 

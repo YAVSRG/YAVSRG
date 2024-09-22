@@ -3,7 +3,7 @@
 open System.IO
 
 [<AutoOpen>]
-module IdentifyFolder =
+module IdentifySkinImport =
 
     let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|StepmaniaNoteskinFolder|Unknown|) (path: string) =
         if Directory.Exists path then

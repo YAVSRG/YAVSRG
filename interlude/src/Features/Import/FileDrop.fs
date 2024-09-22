@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
+open Prelude.Data.``osu!``
 open Prelude.Skins.Conversions
 open Interlude.UI
 open Interlude.Content
@@ -58,6 +59,9 @@ module FileDrop =
 
     let mutable on_file_drop : (string -> unit) option = None
 
+    let private replay_dropped_ev = Event<OsuScoreDatabase_Score>()
+    let replay_dropped = replay_dropped_ev.Publish
+
     let handle (path: string) =
         match on_file_drop with
         | Some f -> f path
@@ -86,12 +90,18 @@ module FileDrop =
         | OsuSkinArchive ->
             let id = Path.GetFileNameWithoutExtension(path)
             let target = Path.Combine(get_game_folder "Downloads", id)
+            try Directory.Delete(target, true) with _ -> ()
             ZipFile.ExtractToDirectory(path, target)
             defer 
             <| fun () -> 
                 Menu.Exit()
                 osu.Skins.import_osu_skin target
             // todo: clean up extracted noteskin in downloads
+
+        | _ when Path.GetExtension(path).ToLower() = ".osr" ->
+            match osu.Replays.parse_replay_file path with
+            | Some replay -> defer (fun () -> replay_dropped_ev.Trigger replay)
+            | None -> Notifications.error (%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
 
