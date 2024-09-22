@@ -65,7 +65,7 @@ module Scores =
                     | None ->
                         Logging.Warn(
                             sprintf
-                                "Skipping %.2fx of %s [%s], can't find a matching 1.00x chart"
+                                "Skipping %.2fx of %s [%s], can't find a matching imported 1.00x chart"
                                 rate
                                 beatmap_data.TitleUnicode
                                 beatmap_data.Difficulty
@@ -74,7 +74,7 @@ module Scores =
                         None
                     | Some _ -> Some(chart, chart_hash, rate)
                 | None ->
-                    Logging.Warn(sprintf "%s [%s] skipped" beatmap_data.TitleUnicode beatmap_data.Difficulty)
+                    Logging.Warn(sprintf "%s [%s] skipped, can't find a matching imported chart" beatmap_data.TitleUnicode beatmap_data.Difficulty)
                     None
             | Some _ -> Some(chart, chart_hash, 1.0f)
 
@@ -97,11 +97,11 @@ module Scores =
                             Config = ConversionOptions.Default
                             Source = osu_file
                         }
-                    |> Result.toOption
-                | Error _ -> None
+                    |> function Ok i -> Ok i | Error s -> Error (snd s)
+                | Error reason -> Error reason
             with
-            | None -> ()
-            | Some chart ->
+            | Error reason -> Logging.Warn(sprintf "%s [%s] skipped, conversion failed: %s" beatmap_data.TitleUnicode beatmap_data.Difficulty reason)
+            | Ok chart ->
 
             match find_matching_chart beatmap_data chart.Chart with
             | None -> ()
@@ -139,7 +139,7 @@ module Scores =
 
                 if
                     MathF.Round(combined_rate, 3) <> MathF.Round(combined_rate, 2)
-                    || combined_rate > 2.0f
+                    || combined_rate > 3.0f
                     || combined_rate < 0.5f
                 then
                     Logging.Info(
