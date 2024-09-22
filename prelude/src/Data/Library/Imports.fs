@@ -122,7 +122,7 @@ module Imports =
                         )
 
                     let mutable success_count = 0
-                    let charts = filter_rates |> Seq.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                    let charts = filter_rates |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
                     ChartDatabase.import charts chart_db
                     return {
                         ConvertedCharts = success_count
