@@ -5,7 +5,7 @@ open Percyqaz.Common
 // Maybe it will become its own repo of fsx files
 
 let your_script_here () =
-    Beatmaps.main()
+    OsuReplayReader.read_scores()
 
 [<EntryPoint>]
 let main argv =
