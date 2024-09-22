@@ -10,9 +10,10 @@ open SevenZip.Compression
 let generate_replay (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
     let inputs : (int * int) seq =
         seq {
-            yield -159, -1 // 158 in window // 159 out //158.5 on od10
-            yield 130, 500
-            yield 1000, 1500
+            for i = 0 to 63 do
+                let offset = i * 2
+                let press_time = i * 125 + offset
+                yield (press_time, press_time + 50)
         }
     let input_as_replay_string =
         let mutable previous_time = -1000
@@ -60,7 +61,7 @@ let generate_replay (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
         OnlineScoreID = 0
     }
 
-let replay_writer () =
+let run_experiment () =
 
     Logging.Info "Reading osu database ..."
 
