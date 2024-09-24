@@ -149,7 +149,7 @@ module ``osu!`` =
             Accuracy =
                 {
                     MissWindow = floor (188f - od * 3f) * 1.0f<ms> + 0.5f<ms>
-                    CbrushWindow = floor (151f - od * 3f) * 1.0f<ms> + 0.5f<ms>
+                    CbrushWindow = floor (127f - od * 3f) * 1.0f<ms> + 0.5f<ms>
                     Timegates = windows od mode |> gates_from_windows
                     Points = AccuracyPoints.Weights(300.0, [| 300.0; 300.0; 200.0; 100.0; 50.0; 0.0 |])
                     HoldNoteBehaviour = HoldNoteBehaviour.Osu (ln_windows od mode)

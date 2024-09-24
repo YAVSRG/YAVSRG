@@ -71,7 +71,7 @@ module private HitMechanics =
         else
             NOTFOUND
     
-    let osu (hit_data: InternalScoreData, miss_window: Time, cbrush_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
+    let osu (hit_data: InternalScoreData, miss_window: Time, window_100: Time) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
         let mutable candidate_note_index = -1
         let mutable candidate_note_delta = miss_window
@@ -82,14 +82,10 @@ module private HitMechanics =
             let delta = now - t
 
             // Find earliest unhit note
-            if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) then
-                if candidate_note_index < 0 || delta >= 0.0f<ms> then
-                    candidate_note_index <- i
-                    candidate_note_delta <- delta
-
-                // If in the bad window for this note, look for another, otherwise we're done
-                if delta < 0.0f<ms> then
-                    i <- hit_data.Length
+            if (status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED) && delta <= window_100 then
+                candidate_note_index <- i
+                candidate_note_delta <- delta
+                i <- hit_data.Length
 
             i <- i + 1
 
