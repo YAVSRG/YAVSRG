@@ -392,7 +392,7 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
             let struct (time, keystates) = replay.GetNext()
             this.HandleReplayRow(time, keystates)
 
-    member this.HandleReplayRow(time, keystates) =
+    member private this.HandleReplayRow(time, keystates) =
         for k = 0 to (keys - 1) do
             if Bitmask.has_key k current_pressed_keys && not (Bitmask.has_key k keystates) then
                 this.HandleKeyUp(time, k)

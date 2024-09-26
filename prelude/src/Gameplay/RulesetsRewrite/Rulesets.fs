@@ -52,7 +52,7 @@ type Lamp =
 [<Json.AutoCodec>]
 type AccuracyPoints =
     | WifeCurve of judge: int
-    | PointsPerJudgement of points: float array
+    | PointsPerJudgement of points: float array // todo: change all points, and accuracy, to float32
 
 // Behaviour for hit detection / assigning an input to the correct note to hit
 
@@ -81,13 +81,13 @@ type OsuLnWindows =
 [<Json.AutoCodec>]
 type HeadTailCombineRule =
     | OsuMania of OsuLnWindows
-    | HeadJudgementOr of judgement_if_dropped: int * judgement_if_overheld: int
+    | HeadJudgementOr of early_window: Time * late_window: Time * judgement_if_dropped: int * judgement_if_overheld: int
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type HoldMechanics =
     | CombineHeadAndTail of HeadTailCombineRule
-    | OnlyRequireHold
+    | OnlyRequireHold of release_window: Time
     | JudgeReleasesSeparately of windows: ((Time * Time) option) array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
 
@@ -191,11 +191,14 @@ module RulesetV2 =
                 bw.Write (float32 windows.Window50)
                 bw.Write (float32 windows.WindowOverhold200)
                 bw.Write (float32 windows.WindowOverhold100)
-            | HeadTailCombineRule.HeadJudgementOr (judgement_if_dropped, judgement_if_overheld) ->
+            | HeadTailCombineRule.HeadJudgementOr (early_window, late_window, judgement_if_dropped, judgement_if_overheld) ->
+                bw.Write (float32 early_window)
+                bw.Write (float32 late_window)
                 bw.Write judgement_if_dropped
                 bw.Write judgement_if_overheld
-        | HoldMechanics.OnlyRequireHold ->
+        | HoldMechanics.OnlyRequireHold window ->
             bw.Write 0uy
+            bw.Write (float32 window)
         | HoldMechanics.JudgeReleasesSeparately (judgement_windows, judgement_if_dropped) ->
             for j in judgement_windows do
                 match j with
@@ -217,5 +220,12 @@ module RulesetV2 =
             for p in points do
                 bw.Write p
 
-        let s = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
-        ruleset.Name.Replace(" ", "") + s.Replace("-", "").Substring(0, 6)
+        let first_character = 
+            match ruleset.Name.Trim() with
+            | "" -> "_"
+            | otherwise ->
+                if Char.IsAsciiLetterOrDigit otherwise.[0] then 
+                    otherwise.[0].ToString().ToUpperInvariant()
+                else "_"
+        let hash_string = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
+        first_character + hash_string.Replace("-", "").Substring(0, 8)

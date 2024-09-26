@@ -62,6 +62,7 @@
     <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Gameplay\Skillsets.fs" />
     <Compile Include="Gameplay\RulesetsRewrite\Rulesets.fs" />
+    <Compile Include="Gameplay\RulesetsRewrite\HitMechanics.fs" />
     <Compile Include="Gameplay\RulesetsRewrite\Events.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
