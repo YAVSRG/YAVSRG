@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Data.Library
 
+open System
 open System.Collections.Generic
 open Prelude.Backbeat
 open Prelude.Data.Library.Collections
@@ -7,6 +8,13 @@ open Prelude.Data.Library.Collections
 module LibraryView =
 
     type SortedGroups = (string * Group) seq
+
+    let private group_name_to_smart_sort_list (name: string) : string list =
+        name
+            .ToLowerInvariant()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        |> Seq.map (fun word -> if String.forall Char.IsAsciiDigit word then word.PadLeft(4, '0') else word)
+        |> List.ofSeq
 
     let private get_collection_groups (filter_by: Filter) (reverse_groups: bool) (sort_by: SortMethod) (reverse_sorting: bool) (ctx: LibraryViewContext) : SortedGroups =
 
@@ -80,7 +88,7 @@ module LibraryView =
 
             yield!
                 groups 
-                |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())
+                |> Seq.sortBy (fun kvp -> group_name_to_smart_sort_list kvp.Key)
                 |> if reverse_groups then Seq.rev else id
                 |> Seq.map (|KeyValue|)
         }
@@ -178,7 +186,7 @@ module LibraryView =
                 found_groups.[pack].Charts.Add(cc, LibraryContext.Pack pack, sort_by (cc, ctx))
 
         found_groups
-        |> Seq.sortBy (fun kvp -> kvp.Key.ToLowerInvariant())
+        |> Seq.sortBy (fun kvp -> group_name_to_smart_sort_list kvp.Key)
         |> if reverse_groups then Seq.rev else id
         |> Seq.map (fun kvp -> kvp.Key, kvp.Value.ToGroup reverse_sorting)
     
