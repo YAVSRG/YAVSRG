@@ -422,7 +422,7 @@ module Parser =
         let mania_sections = ResizeArray<Mania>()
 
         let change_state (s: ParserState) =
-            if s = ManiaHeader then mania_sections.Add(Mania.FromMap section_ref.Value)
+            if state = ManiaHeader then mania_sections.Add(Mania.FromMap section_ref.Value)
             state <- s
 
         while reader.Peek() >= 0 do
