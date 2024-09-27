@@ -57,7 +57,7 @@ type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) as this =
         elif Screen.current_type = Screen.Type.LevelSelect && (%%"random_chart").Tapped() then
             LevelSelect.random_chart()
         elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous_random_chart").Tapped() then
-            LevelSelect.History.previous()
+            LevelSelect.History.back()
         else
             SelectedChart.change_rate_hotkeys change_rate
 

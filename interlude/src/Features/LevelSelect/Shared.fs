@@ -47,22 +47,47 @@ module LevelSelect =
     module History =
 
         let mutable private history: (ChartMeta * float32) list = []
+        let mutable private forward_history: (ChartMeta * float32) list = []
 
         let append_current () = 
             match SelectedChart.CACHE_DATA with
-            | Some cc -> history <- (cc, SelectedChart.rate.Value) :: history
+            | Some cc -> 
+                forward_history <- []
+                history <- (cc, SelectedChart.rate.Value) :: history
             | None -> ()
 
-        let previous () =
+        let back () =
             if not (Transitions.in_progress()) then
                 match history with
-                | (cc, rate) :: xs -> 
+                | (cc, rate) :: xs ->
+
+                    match SelectedChart.CACHE_DATA with
+                    | Some cc -> forward_history <- (cc, SelectedChart.rate.Value) :: forward_history
+                    | None -> ()
+
                     history <- xs
                     SelectedChart._rate.Set rate
                     SelectedChart.change(cc, LibraryContext.None, true)
                 | _ -> ()
 
-        let has_previous() = (List.isEmpty >> not) history
+        let can_go_back() = (List.isEmpty >> not) history
+
+        let forward () =
+            if not (Transitions.in_progress()) then
+                match forward_history with
+                | (cc, rate) :: xs ->
+
+                    match SelectedChart.CACHE_DATA with
+                    | Some cc -> history <- (cc, SelectedChart.rate.Value) :: history
+                    | None -> ()
+
+                    forward_history <- xs
+                    SelectedChart._rate.Set rate
+                    SelectedChart.change(cc, LibraryContext.None, true)
+                | _ -> ()
+
+        let can_go_forward() = (List.isEmpty >> not) forward_history
+
 
     let private state: EndlessModeState = EndlessModeState.create()
     let mutable private suggestion_ctx : SuggestionContext option = None

@@ -18,9 +18,9 @@ type Jukebox() =
     override this.Init(parent) =
         this 
         |+ Button(Icons.SKIP_BACK, 
-            LevelSelect.History.previous,
+            LevelSelect.History.back,
             Hotkey = "previous_random_chart",
-            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (LevelSelect.History.has_previous())),
+            Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (LevelSelect.History.can_go_back())),
             Position = Position.Shrink(5.0f).SliceL(45.0f)
         )
         |+ Button(Icons.PAUSE, 
@@ -28,9 +28,9 @@ type Jukebox() =
             Hotkey = "pause_music",
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)
         )
+        |+ HotkeyAction("random_chart", (fun () -> if Screen.current_type <> Screen.Type.Lobby then LevelSelect.random_chart()))
         |* Button(Icons.SKIP_FORWARD,
-            LevelSelect.random_chart,
-            Hotkey = "random_chart",
+            (fun () -> if LevelSelect.History.can_go_forward() then LevelSelect.History.forward() else LevelSelect.random_chart()),
             Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby),
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f)
         )
