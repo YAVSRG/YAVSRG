@@ -1,23 +1,20 @@
-0.7.26.5
+0.7.26.6
 ====
 
-# Multi-select and bulk actions
+Bug fix update + Some minor feature requests
 
-In level select, you can now select multiple charts/groups by holding shift + clicking  
-
-After doing so, there is a bulk actions button that lets you do stuff like:  
-
-- Deleting multiple charts at once
-- Exporting multiple charts to .osz (use with caution when exporting a lot)
-- Adding a batch of charts to a collection/likes
-
-# Other new stuff
-- Skip button has been improved to take you closer to the first note
-- Transition into gameplay now fades the audio
-- Info card at the start of gameplay can be dismissed by pressing the skip key
-- You can export as .osz from the score screen chart actions
+# New features
+- Ruleset editor allows you to set 4 decimal places for grade accuracy requirements
+- Button to open rulesets folder when managing rulesets
+- Timing display can now show timing windows as an underlay
+- Input meter has more customisation around key transparency and padding
+- Clicking the forward button on the jukebox restores songs you went "back" from instead of always picking a new random song
+- Packs with numbers in will now sort correctly by those numbers e.g. Pack 1 < Pack 9 < Pack 10
 
 # Bug fixes
-- Fixed a chart database issue that broke @Lifly's game. **If you also had this issue, you need to download this update manually and swap your Interlude.exe for the new one**.
-- Fixed a pixel seam in screen transitions
+- Fixed an issue with parsing osu! skin.inis that affected skins targeting only one keymode
+- Fixed sliders sometimes displaying '-0%'
+- Prevented deleting the SC (J4) ruleset which could cause a crash
+- Fix BPM indicator on level select not updating when you change rate
+- Fixed text clipping on some buttons
 
