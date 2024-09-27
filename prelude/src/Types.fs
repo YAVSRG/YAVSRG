@@ -35,6 +35,9 @@ module Types =
     type ms = Percyqaz.Common.ms
 
     [<Measure>]
+    type rate
+
+    [<Measure>]
     type beat
 
     [<Measure>]
@@ -48,6 +51,10 @@ module Types =
         let infinity = infinityf * 1.0f<ms>
 
         let abs (t: Time) = if t < 0.0f<ms> then -t else t
+
+    type GameplayTime = float32<ms / rate>
+
+    type Rate = float32<rate>
 
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }

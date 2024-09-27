@@ -15,14 +15,14 @@ type HitFlags =
     | RELEASE_REQUIRED = 4
     | RELEASE_ACCEPTED = 5
 
-type HitFlagData = TimeArray<struct(Time array * HitFlags array)>
+type HitFlagData = TimeArray<struct(GameplayTime array * HitFlags array)>
 
 module HitFlagData =
 
-    let create_gameplay (miss_window: Time) (keys: int) (notes: TimeArray<NoteRow>) : HitFlagData =
+    let create_gameplay (note_window: GameplayTime) (release_window: GameplayTime) (keys: int) (notes: TimeArray<NoteRow>) : HitFlagData =
         notes
         |> TimeArray.map (fun nr ->
-            let times = Array.create keys miss_window
+            let deltas = Array.create keys note_window
             let statuses = Array.create keys HitFlags.NOTHING
 
             for k = 0 to (keys - 1) do
@@ -32,8 +32,9 @@ module HitFlagData =
                     statuses.[k] <- HitFlags.HIT_HOLD_REQUIRED
                 elif nr.[k] = NoteType.HOLDTAIL then
                     statuses.[k] <- HitFlags.RELEASE_REQUIRED
+                    deltas.[k] <- release_window
 
-            struct (times, statuses)
+            struct (deltas, statuses)
         )
 
 // Detect hits
@@ -46,13 +47,15 @@ type private HitDetection =
 
 module private HitMechanics =
 
-    let interlude (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
+    let interlude (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window: Time, rate: Rate) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
         let mutable closest_bad_note_delta = late_window
         let mutable closest_note_index = -1
         let mutable closest_note_delta = late_window
         let end_of_window = now + late_window
-
+        let cbrush_window_raw = cbrush_window / rate
+        
+        assert(cbrush_window >= 0.0f<ms>)
         assert(early_window <= 0.0f<ms>)
         assert(i >= hit_data.Length || hit_data.[i].Time >= now + early_window)
 
@@ -73,7 +76,7 @@ module private HitMechanics =
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif
                 status.[k] = HitFlags.HIT_ACCEPTED
-                && deltas.[k] < -cbrush_window
+                && deltas.[k] < -cbrush_window_raw
             then
                 if Time.abs closest_bad_note_delta > Time.abs delta then
                     closest_bad_note_delta <- delta

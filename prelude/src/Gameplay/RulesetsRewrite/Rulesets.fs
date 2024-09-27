@@ -13,7 +13,7 @@ type Judgement =
         Name: string
         Color: Color
         BreaksCombo: bool
-        TimingWindows: (Time * Time) option
+        TimingWindows: (GameplayTime * GameplayTime) option
     }
 
 // Grades are awarded at the end of a score as a summarising "rank" of how well you did
@@ -68,27 +68,27 @@ type HitMechanics =
 [<Json.AutoCodec>]
 type OsuLnWindows =
     {
-        Window320: Time
-        Window300: Time
-        Window200: Time
-        Window100: Time
-        Window50: Time
-        WindowOverhold200: Time
-        WindowOverhold100: Time
+        Window320: GameplayTime
+        Window300: GameplayTime
+        Window200: GameplayTime
+        Window100: GameplayTime
+        Window50: GameplayTime
+        WindowOverhold200: GameplayTime
+        WindowOverhold100: GameplayTime
     }
     
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type HeadTailCombineRule =
     | OsuMania of OsuLnWindows
-    | HeadJudgementOr of early_window: Time * late_window: Time * judgement_if_dropped: int * judgement_if_overheld: int
+    | HeadJudgementOr of early_window: GameplayTime * late_window: GameplayTime * judgement_if_dropped: int * judgement_if_overheld: int
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type HoldMechanics =
     | CombineHeadAndTail of HeadTailCombineRule
-    | OnlyRequireHold of release_window: Time
-    | JudgeReleasesSeparately of windows: ((Time * Time) option) array * judgement_if_overheld: int
+    | OnlyRequireHold of release_window: GameplayTime
+    | JudgeReleasesSeparately of windows: ((GameplayTime * GameplayTime) option) array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
 
 [<Json.AutoCodec>]
