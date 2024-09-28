@@ -10,23 +10,54 @@ module Helpers =
     type ChartBuilder(keycount: int) =
         let items = ResizeArray<TimeItem<NoteRow>>()
 
-        member this.Note(time: Time) : ChartBuilder =
-            let row = Array.zeroCreate keycount
-            row.[0] <- NoteType.NORMAL
-            items.Add({ Time = time; Data = row })
+        let mutable last_time = -Time.infinity
+
+        member this.Note(time: Time, k: int) : ChartBuilder =
+
+            if time > last_time then
+
+                let row = Array.zeroCreate keycount
+                row.[k] <- NoteType.NORMAL
+                items.Add({ Time = time; Data = row })
+
+                last_time <- time
+
+            elif time = last_time then
+
+                let row = items.[items.Count - 1].Data
+                if row.[k] <> NoteType.NOTHING then failwith "Stacked note"
+                row.[k] <- NoteType.NORMAL
+
+            else failwith "Note timestamps went backwards"
 
             this
 
-        member this.Hold(time: Time, until: Time) : ChartBuilder =
-            let head = Array.zeroCreate keycount
-            head.[0] <- NoteType.HOLDHEAD
-            items.Add({ Time = time; Data = head })
+        member this.Note(time) = this.Note(time, 0)
+
+        member this.Hold(time: Time, until: Time, k: int) : ChartBuilder =
+
+            if time > last_time then
+
+                let head = Array.zeroCreate keycount
+                head.[k] <- NoteType.HOLDHEAD
+                items.Add({ Time = time; Data = head })
+
+            elif time = last_time then
+                
+                let row = items.[items.Count - 1].Data
+                if row.[k] <> NoteType.NOTHING then failwith "Stacked note"
+                row.[k] <- NoteType.HOLDHEAD
+
+            else failwith "Note timestamps went backwards"
 
             let tail = Array.zeroCreate keycount
-            tail.[0] <- NoteType.HOLDTAIL
+            tail.[k] <- NoteType.HOLDTAIL
             items.Add({ Time = until; Data = tail })
+            
+            last_time <- until
 
             this
+        member this.Hold(time, until) = this.Hold(time, until, 0)
 
         member this.Build() : TimeArray<NoteRow> = items.ToArray()
 
@@ -40,18 +71,20 @@ module Helpers =
 
             liveplay.Add(time, state)
             this
+        member this.KeyDown(time) = this.KeyDown(time, 0)
 
         member this.KeyUp(time: Time, k: int) : ReplayBuilder =
             state <- state |> Bitmask.unset_key k
             liveplay.Add(time, state)
 
             this
+        member this.KeyUp(time) = this.KeyUp(time, 0)
 
-        member this.KeyDownUntil(time: Time, until: Time, k: int) =
-            this.KeyDown(time, k).KeyUp(until, k)
+        member this.KeyDownUntil(time: Time, until: Time, k: int) = this.KeyDown(time, k).KeyUp(until, k)
+        member this.KeyDownUntil(time, until) = this.KeyDownUntil(time, until, 0)
 
-        member this.KeyDownFor(time: Time, duration: Time, k: int) =
-            this.KeyDown(time, k).KeyUp(time + duration, k)
+        member this.KeyDownFor(time: Time, duration: Time, k: int) = this.KeyDownUntil(time, time + duration, k)
+        member this.KeyDownFor(time, duration) = this.KeyDownFor(time, duration, 0)
 
         member this.Build() : IReplayProvider = liveplay
 
