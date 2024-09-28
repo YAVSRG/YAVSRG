@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Compile Include="Rulesets\Helpers.fs" />
+    <Compile Include="Rulesets\Validation.fs" />
     <Compile Include="Rulesets\Events.fs" />
     <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\UserDatabase.fs" />
