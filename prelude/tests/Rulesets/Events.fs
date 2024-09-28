@@ -396,3 +396,286 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
+    
+    [<Test>]
+    let HoldNote_Basic_Offset () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(10.0f<ms>, 990.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(10.0f<ms / rate>, false)
+                RELEASE(-10.0f<ms / rate>, false, false, false, 10.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Missed () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, true)
+                RELEASE(180.0f<ms / rate>, true, false, true, 180.0f<ms/rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Overheld () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 2000.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                RELEASE(180.0f<ms / rate>, true, true, false, 0.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Dropped () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 500.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Regrabbed () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 400.0f<ms>)
+                .KeyDownFor(500.0f<ms>, 500.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                REGRAB_HOLD
+                RELEASE(0.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Multiple_Regrabs () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 300.0f<ms>)
+                .KeyDownFor(350.0f<ms>, 100.0f<ms>)
+                .KeyDownFor(500.0f<ms>, 100.0f<ms>)
+                .KeyDownFor(650.0f<ms>, 350.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+        
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map _.Time |> Seq.sort,
+            event_processing.Events |> Seq.map _.Time
+        )
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                REGRAB_HOLD
+                DROP_HOLD
+                REGRAB_HOLD
+                DROP_HOLD
+                REGRAB_HOLD
+                RELEASE(0.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Regrabbed_Overheld () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 400.0f<ms>)
+                .KeyDownFor(500.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                REGRAB_HOLD
+                RELEASE(180.0f<ms / rate>, true, true, true, 0.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_MissedHead_Regrabbed () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(500.0f<ms>, 500.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, true)
+                REGRAB_HOLD
+                RELEASE(0.0f<ms / rate>, false, false, true, 180.0f<ms/rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_MissedHead_HeldEarly () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-500.0f<ms>, 1500.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, true)
+                RELEASE(180.0f<ms / rate>, true, false, true, 180.0f<ms/rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Dropped_IntoNote () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 999.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 500.0f<ms>)
+                .KeyDownFor(990.0f<ms>, 10.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
+                HIT(-10.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_Dropped_IntoHoldNote () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 999.0f<ms>)
+                .Hold(1000.0f<ms>, 1010.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 500.0f<ms>)
+                .KeyDownFor(990.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
+                HOLD(-10.0f<ms / rate>, false)
+                RELEASE(10.0f<ms / rate>, false, false, false, -10.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
