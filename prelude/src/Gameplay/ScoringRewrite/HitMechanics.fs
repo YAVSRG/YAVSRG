@@ -67,13 +67,13 @@ module private HitMechanics =
 
             // Find unhit note that is closer than the current candidate
             if (status.[k] = HitFlags.HIT_REQUIRED || status.[k] = HitFlags.HIT_HOLD_REQUIRED) then
-                if Time.abs closest_note_delta > Time.abs delta then
+                if closest_note_index < 0 || Time.abs closest_note_delta > Time.abs delta then
                     closest_note_index <- i
                     closest_note_delta <- delta
 
                 // If new candidate is within cbrush window, stop looking resulting in earliest match being used
                 // Otherwise keep looking for something closer and allow this note to be missed
-                if Time.abs closest_note_delta <= cbrush_window then
+                if Time.abs closest_note_delta < cbrush_window then
                     i <- hit_data.Length
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif

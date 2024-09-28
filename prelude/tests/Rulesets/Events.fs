@@ -644,6 +644,52 @@ module Events =
         )
     
     [<Test>]
+    let HoldNote_InnerBoundaries () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(180.0f<ms>, 820.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, false)
+                RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
+    let HoldNote_OuterBoundaries () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(-180.0f<ms>, 1180.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(-180.0f<ms / rate>, false)
+                RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
     let HoldNote_Missed () =
         let notes = 
             ChartBuilder(4)
