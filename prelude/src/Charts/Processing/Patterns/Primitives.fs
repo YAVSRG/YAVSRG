@@ -12,8 +12,6 @@ type Direction =
     | Outwards
     | Inwards
 
-type ScaledTime = float32<ms / rate>
-
 type RowInfo =
     {
         RawNotes: int array

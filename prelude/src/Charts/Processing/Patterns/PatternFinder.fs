@@ -28,8 +28,8 @@ type CorePatternType =
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
 
-type MatchedCorePattern = { Pattern: CorePatternType; Time: ScaledTime; MsPerBeat: float32<ms/beat>; Density: float32; Mixed: bool }
-type MatchedSpecificPattern = { Pattern: Pattern; Time: ScaledTime; MsPerBeat: float32<ms/beat> }
+type MatchedCorePattern = { Pattern: CorePatternType; Time: GameplayTime; MsPerBeat: float32<ms/beat>; Density: float32; Mixed: bool }
+type MatchedSpecificPattern = { Pattern: Pattern; Time: GameplayTime; MsPerBeat: float32<ms/beat> }
 
 module PatternFinder =
 

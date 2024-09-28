@@ -25,7 +25,7 @@ module Categorise =
             Mixed: bool // todo: turn 3-pronged with mixed, non mixed, combo of both
             BPM: int option
             Specific: string option
-            Importance: ScaledTime
+            Importance: GameplayTime
         }
         override this.ToString() =
             match this.Specific with

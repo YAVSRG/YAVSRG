@@ -24,7 +24,7 @@ type private BPMCluster =
 
 type private BPMClusteredPattern =
     {
-        Time: ScaledTime
+        Time: GameplayTime
         BPM: BPMCluster
         Density: float32
         Mixed: bool

@@ -9,7 +9,7 @@ type PatternBreakdown =
         Pattern: CorePatternType
         BPM: int
         Mixed: bool
-        Amount: ScaledTime
+        Amount: GameplayTime
         Density10: float32
         Density25: float32
         Density50: float32
@@ -33,11 +33,11 @@ type PatternBreakdown =
 
 module private Breakdown =
 
-    let private pattern_amount (sorted_times: ScaledTime seq) : ScaledTime =
+    let private pattern_amount (sorted_times: GameplayTime seq) : GameplayTime =
 
         let PATTERN_DURATION = 800.0f<ms / rate>
 
-        let mutable total_time: ScaledTime = 0.0f<ms / rate>
+        let mutable total_time: GameplayTime = 0.0f<ms / rate>
 
         let mutable current_start = Seq.head sorted_times
         let mutable current_end = current_start + PATTERN_DURATION
