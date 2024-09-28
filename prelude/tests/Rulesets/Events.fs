@@ -91,6 +91,112 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
+        
+    [<Test(Description = "Interlude's behaviour: When a badly hit note is closer than the next note that would be hit, ignore the input")>]
+    let TapNotes_EarlyBoundary_InterludeCbrushWindow () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(180.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-180.0f<ms>, 30.0f<ms>) // hits note 0
+                .KeyDownFor(0.0f<ms>, 30.0f<ms>) // would be +0ms on note 0, which has a -180ms hit. eat the hit (don't have it hit note 1)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-180.0f<ms / rate>, false)
+                HIT(180.0f<ms / rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test(Description = "Interlude's behaviour: If a hit is at least +-90ms off, look for something better to hit")>]
+    let TapNotes_LateBoundary_InterludeCbrushWindow () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(180.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(180.0f<ms>, 30.0f<ms>) // would be +180ms on note 0, but +0ms on note 1, so hit note 1
+                .KeyDownFor(360.0f<ms>, 30.0f<ms>) // this tap goes nowhere, ghost tap
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(0.0f<ms / rate>, false)
+                HIT(180.0f<ms / rate>, true)
+                GHOST_TAP
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+
+    [<Test>]
+    let TapNotes_EarlyBoundary_OsuMania () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(180.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-180.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(0.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+
+        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-180.0f<ms / rate>, false)
+                HIT(-180.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TapNotes_LateBoundary_OsuMania () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(180.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(180.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(360.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+
+        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(180.0f<ms / rate>, false)
+                HIT(180.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
     
     [<Test>]
     let TapNotes_SplitChords () =
@@ -159,7 +265,124 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Column
         )
+        
+    [<Test>]
+    let TapNotes_ColumnLock_OsuMania () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(300.0f<ms>)
+                .Note(400.0f<ms>)
+                .Note(500.0f<ms>)
+                .Build()
 
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-90.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(10.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(110.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(210.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(310.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(410.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(510.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+
+        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-90.0f<ms / rate>, false)
+                HIT(-90.0f<ms / rate>, false)
+                HIT(-90.0f<ms / rate>, false)
+                HIT(-90.0f<ms / rate>, false)
+                HIT(-90.0f<ms / rate>, false)
+                HIT(-90.0f<ms / rate>, false)
+                GHOST_TAP
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TapNotes_ColumnLock_Interlude () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(300.0f<ms>)
+                .Note(400.0f<ms>)
+                .Note(500.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-90.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(10.0f<ms>, 30.0f<ms>) // this input gets eaten
+                .KeyDownFor(110.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(210.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(310.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(410.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(510.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-90.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TapNotes_ColumnLock_Interlude_Threshold () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(300.0f<ms>)
+                .Note(400.0f<ms>)
+                .Note(500.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-89.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(11.0f<ms>, 30.0f<ms>) // this input does not get eaten
+                .KeyDownFor(111.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(211.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(311.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(411.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(511.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-89.0f<ms / rate>, false)
+                HIT(-89.0f<ms / rate>, false)
+                HIT(-89.0f<ms / rate>, false)
+                HIT(-89.0f<ms / rate>, false)
+                HIT(-89.0f<ms / rate>, false)
+                HIT(-89.0f<ms / rate>, false)
+                GHOST_TAP
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
     
     [<Test>]
     let GhostTap_BetweenNotes () =
@@ -676,6 +899,33 @@ module Events =
                 RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
                 HOLD(-10.0f<ms / rate>, false)
                 RELEASE(10.0f<ms / rate>, false, false, false, -10.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    
+    [<Test>]
+    let HoldNote_VeryLateRegrab () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 500.0f<ms>)
+                .KeyDownFor(1179.0f<ms>, 1.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                DROP_HOLD
+                REGRAB_HOLD
+                RELEASE(180.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
         )
