@@ -276,10 +276,10 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
                         Column = k
                         Action = REGRAB_HOLD
                     }
-            | H_NOTHING, i ->
+            | H_NOTHING, _ when chart_time > 0.0f<ms> ->
                 this.HandleEvent
                     {
-                        Index = i
+                        Index = expired_notes_index
                         Time = chart_time
                         Column = k
                         Action = GHOST_TAP
