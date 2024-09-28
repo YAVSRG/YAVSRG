@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.ScoringV2
 
 open Prelude
 open Prelude.Charts
@@ -26,32 +26,6 @@ type GameplayActionInternal =
     | DROP_HOLD
     | REGRAB_HOLD
     | GHOST_TAP
-
-// todo: move to EventProcessing
-type GameplayAction =
-    | Hit of
-        {|
-            Judgement: (int * float) option
-            Missed: bool
-            Delta: GameplayTime
-        |}
-    | Hold of
-        {|
-            Judgement: (int * float) option
-            Missed: bool
-            Delta: GameplayTime
-        |}
-    | Release of
-        {|
-            Judgement: (int * float) option
-            Missed: bool
-            Delta: GameplayTime
-            Overhold: bool
-            Dropped: bool
-        |}
-    | DropHold
-    | RegrabHold
-    | GhostTap
 
 [<Struct>]
 type private HoldStateInternal =

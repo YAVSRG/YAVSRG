@@ -3,12 +3,13 @@
 open Prelude
 
 [<Struct>]
+[<RequireQualifiedAccess>]
 type private HitDetection =
     | FOUND of index: int * delta: Time
     | BLOCKED
     | NOTFOUND
 
-module private HitMechanics =
+module private HitMechanicsV1 =
 
     let interlude (hit_data: InternalScoreData, miss_window: Time, cbrush_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
@@ -43,11 +44,11 @@ module private HitMechanics =
 
         if closest_note_index >= 0 then
             if Time.abs closest_bad_note_delta < Time.abs closest_note_delta then
-                BLOCKED
+                HitDetection.BLOCKED
             else
-                FOUND (closest_note_index, closest_note_delta)
+                HitDetection.FOUND (closest_note_index, closest_note_delta)
         else
-            NOTFOUND
+            HitDetection.NOTFOUND
 
     let etterna (hit_data: InternalScoreData, miss_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
@@ -67,9 +68,9 @@ module private HitMechanics =
             i <- i + 1
 
         if closest_note_index >= 0 then
-            FOUND (closest_note_index, closest_note_delta)
+            HitDetection.FOUND (closest_note_index, closest_note_delta)
         else
-            NOTFOUND
+            HitDetection.NOTFOUND
     
     let osu (hit_data: InternalScoreData, miss_window: Time, window_100: Time) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
@@ -90,6 +91,6 @@ module private HitMechanics =
             i <- i + 1
 
         if candidate_note_index >= 0 then
-            FOUND (candidate_note_index, candidate_note_delta)
+            HitDetection.FOUND (candidate_note_index, candidate_note_delta)
         else
-            NOTFOUND
+            HitDetection.NOTFOUND

@@ -31,13 +31,13 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
     let hit_mechanics, PREVENT_BACKWARDS_NOTES =
         match ruleset.Accuracy.HoldNoteBehaviour with
         | HoldNoteBehaviour.Osu _ ->
-            HitMechanics.osu (hit_data, miss_window, cbrush_window), true
+            HitMechanicsV1.osu (hit_data, miss_window, cbrush_window), true
         | _ ->
             match ruleset.Accuracy.Points with
             | AccuracyPoints.WifeCurve _ ->
-                HitMechanics.etterna (hit_data, miss_window), false
+                HitMechanicsV1.etterna (hit_data, miss_window), false
             | _ ->
-                HitMechanics.interlude (hit_data, miss_window, cbrush_window), true
+                HitMechanicsV1.interlude (hit_data, miss_window, cbrush_window), true
 
     member this.OnHit = on_hit
 
@@ -242,8 +242,8 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
             note_seek_inputs <- note_seek_inputs + 1
 
         match hit_mechanics (k, note_seek_inputs, now) with
-        | BLOCKED -> ()
-        | FOUND (index, delta) ->
+        | HitDetection. BLOCKED -> ()
+        | HitDetection.FOUND (index, delta) ->
             let struct (t, deltas, status) = hit_data.[index]
             if PREVENT_BACKWARDS_NOTES then this.MissPreviousNotes(k, index, chart_time)
             let is_hold_head = status.[k] <> HitStatus.HIT_REQUIRED
@@ -260,7 +260,7 @@ type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, no
             // Begin tracking if it's a hold note
             if is_hold_head then
                 hold_states.[k] <- Holding, index
-        | NOTFOUND ->
+        | HitDetection.NOTFOUND ->
             // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             hold_states.[k] <-
                 match hold_states.[k] with

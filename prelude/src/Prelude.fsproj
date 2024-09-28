@@ -62,8 +62,10 @@
     <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Gameplay\Skillsets.fs" />
     <Compile Include="Gameplay\RulesetsRewrite\Rulesets.fs" />
-    <Compile Include="Gameplay\RulesetsRewrite\HitMechanics.fs" />
-    <Compile Include="Gameplay\RulesetsRewrite\Events.fs" />
+    <Compile Include="Gameplay\RulesetsRewrite\Presets\SC.fs" />
+    <Compile Include="Gameplay\ScoringRewrite\HitMechanics.fs" />
+    <Compile Include="Gameplay\ScoringRewrite\Events.fs" />
+    <Compile Include="Gameplay\ScoringRewrite\Scoring.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
     <Compile Include="Skins\HUD\Config.fs" />

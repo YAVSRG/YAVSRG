@@ -3,6 +3,7 @@
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
+open Prelude.Gameplay.ScoringV2
 
 module Helpers =
 
@@ -47,3 +48,14 @@ module Helpers =
             this
 
         member this.Build() : IReplayProvider = liveplay
+
+    type GameplayEventCollector(ruleset, keys, replay, notes, rate) =
+        inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
+
+        let events = ResizeArray<GameplayEvent<GameplayActionInternal>>()
+
+        override this.HandleEvent(event) =
+            printfn "%A" event
+            events.Add event
+
+        member this.Events = events.AsReadOnly()

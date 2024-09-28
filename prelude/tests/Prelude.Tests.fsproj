@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Rulesets\Helpers.fs" />
+    <Compile Include="Rulesets\Events.fs" />
     <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\UserDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />
@@ -16,9 +18,8 @@
     <Compile Include="Database\DbCharts.fs" />
     <Compile Include="Noteskins\Helpers.fs" />
     <Compile Include="Noteskins\Validation.fs" />
-    <Compile Include="Scoring\Helpers.fs" />
-    <Compile Include="Scoring\SCJ4.fs" />
-    <Compile Include="Scoring\OsuOd8.fs" />
+    <Compile Include="Scoring_Legacy\SCJ4.fs" />
+    <Compile Include="Scoring_Legacy\OsuOd8.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

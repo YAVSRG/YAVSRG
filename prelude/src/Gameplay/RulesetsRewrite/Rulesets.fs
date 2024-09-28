@@ -60,7 +60,7 @@ type AccuracyPoints =
 [<Json.AutoCodec>]
 type HitMechanics =
     | OsuMania // earliest note
-    | Interlude of cbrush_threshold: Time // earliest note; if hit is off by `cbrush_threshold` try to find a nearer note
+    | Interlude of cbrush_threshold: GameplayTime // earliest note; if hit is off by `cbrush_threshold` try to find a nearer note
     | Etterna // nearest note
 
 // Behaviour for hold notes
@@ -229,3 +229,6 @@ module RulesetV2 =
                 else "_"
         let hash_string = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
         first_character + hash_string.Replace("-", "").Substring(0, 8)
+
+    let check (ruleset: RulesetV2) : Result<unit, string> =
+        Error "Not yet implemented"

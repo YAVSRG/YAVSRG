@@ -12,9 +12,6 @@ type Direction =
     | Outwards
     | Inwards
 
-[<Measure>]
-type rate
-
 type ScaledTime = float32<ms / rate>
 
 type RowInfo =

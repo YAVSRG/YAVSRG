@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.ScoringV2
 
 open Prelude
 open Prelude.Charts
@@ -47,14 +47,14 @@ type private HitDetection =
 
 module private HitMechanics =
 
-    let interlude (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window: Time, rate: Rate) (k: int, start_index: int, now: Time) : HitDetection =
+    let interlude (hit_data: HitFlagData, early_window: Time, late_window: Time, cbrush_window_raw: GameplayTime, rate: Rate) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
         let mutable closest_bad_note_delta = late_window
         let mutable closest_note_index = -1
         let mutable closest_note_delta = late_window
         let start_of_window = now - late_window
         let end_of_window = now - early_window
-        let cbrush_window_raw = cbrush_window / rate
+        let cbrush_window = cbrush_window_raw * rate
         
         assert(cbrush_window >= 0.0f<ms>)
         assert(early_window <= 0.0f<ms>)
