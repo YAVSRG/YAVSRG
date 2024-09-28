@@ -52,12 +52,14 @@ module private HitMechanics =
         let mutable closest_bad_note_delta = late_window
         let mutable closest_note_index = -1
         let mutable closest_note_delta = late_window
-        let end_of_window = now + late_window
+        let start_of_window = now - late_window
+        let end_of_window = now - early_window
         let cbrush_window_raw = cbrush_window / rate
         
         assert(cbrush_window >= 0.0f<ms>)
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= now + early_window)
+        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
         while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time
@@ -95,12 +97,14 @@ module private HitMechanics =
         let mutable i = start_index
         let mutable closest_note_index = -1
         let mutable closest_note_delta = 0.0f<ms>
-        let end_of_search = now + late_window
+        let start_of_window = now - late_window
+        let end_of_window = now - early_window
         
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= now + early_window)
+        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
-        while i < hit_data.Length && hit_data.[i].Time <= end_of_search do
+        while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time
             let struct (_, status) = hit_data.[i].Data
 
@@ -121,12 +125,14 @@ module private HitMechanics =
         let mutable i = start_index
         let mutable candidate_note_index = -1
         let mutable candidate_note_delta = 0.0f<ms>
-        let end_of_search = now + late_window
+        let start_of_window = now - late_window
+        let end_of_window = now - early_window
         
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= now + early_window)
+        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
-        while i < hit_data.Length && hit_data.[i].Time <= end_of_search do
+        while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time
             let struct (_, status) = hit_data.[i].Data
 

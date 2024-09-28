@@ -130,7 +130,6 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
     //let max_window_raw = max max_note_window_raw max_release_window_raw
     //let max_window_scaled = max max_note_window_scaled max_release_window_scaled
 
-
     let hold_states = Array.create keys (H_NOTHING, -1)
 
     let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw keys notes
@@ -145,7 +144,6 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
             HitMechanics.etterna (hit_data, early_note_window_scaled, late_note_window_scaled), false
 
     let mutable expired_notes_index = 0
-    let mutable note_seek_inputs = 0
 
     //member this.ScaledMissWindow = max_note_window_scaled
     member this.EnumerateRecentInputs() = replay.EnumerateRecentEvents()
@@ -179,12 +177,13 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
     member this.Finished = expired_notes_index = hit_data.Length
 
     /// Result of calling this: 
-    ///  All unhit notes >[EARLY NOTE WINDOW] into the past are marked as misses as they can no longer be hit
-    ///  All unreleased releases >[EARLY RELEASE WINDOW] into the past are marked as misses as they can no longer be released
+    ///  notes.[expired_notes_index - 1].Time < now - LATE WINDOW
+    ///  notes.[expired_notes_index].Time >= now - LATE WINDOW
+    ///  All notes on rows before `expired_notes_index` now have an action assigned - if there wasn't one before, it is now marked as missed
 
     member private this.MissUnhitExpiredNotes(chart_time: ChartTime) =
         let now = first_note + chart_time
-        let end_of_search = now + early_window_scaled
+        let end_of_search = now - late_window_scaled
 
         while expired_notes_index < hit_data.Length
               && hit_data.[expired_notes_index].Time < end_of_search do
@@ -216,25 +215,15 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
 
                 elif status.[k] = HitFlags.RELEASE_REQUIRED then
                     let overhold =
-                        match hold_states.[k] with
-                        | H_REGRABBED, i
-                        | H_HOLDING, i
-                        | H_MISSED_HEAD_REGRABBED, i when i <= expired_notes_index -> Bitmask.has_key k this.KeyState //todo: is guard needed
+                        match fst hold_states.[k] with
+                        | H_REGRABBED
+                        | H_HOLDING
+                        | H_MISSED_HEAD_REGRABBED -> Bitmask.has_key k this.KeyState
                         | _ -> false
 
-                    let dropped =
-                        match hold_states.[k] with
-                        | H_DROPPED, _
-                        | H_REGRABBED, _
-                        | H_MISSED_HEAD_DROPPED, _
-                        | H_MISSED_HEAD_REGRABBED, _ -> true
-                        | _ -> false
+                    let dropped = (fst hold_states.[k]).IsDropped
 
-                    let missed_head =
-                        match hold_states.[k] with
-                        | H_MISSED_HEAD_DROPPED, _
-                        | H_MISSED_HEAD_REGRABBED, _ -> true
-                        | _ -> false
+                    let missed_head = (fst hold_states.[k]).MissedHead
 
                     let { Data = struct (head_deltas, _) } = hit_data.[snd hold_states.[k]]
 
@@ -260,18 +249,22 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
     member private this.MissBackwardsNotes(k: int, before_index: int, chart_time: Time) =
         ()
         // ILL FIGURE IT OUT IN A BIT
+        // ln correctness/linearity is the hard bit
 
     override this.HandleKeyDown(chart_time: ChartTime, k: int) =
         this.MissUnhitExpiredNotes chart_time
         let now = first_note + chart_time
 
-        while note_seek_inputs < hit_data.Length
-              && hit_data.[note_seek_inputs].Time < now - late_note_window_scaled do
-            note_seek_inputs <- note_seek_inputs + 1
+        let mutable start_of_search_index = expired_notes_index
 
-        match hit_mechanics (k, note_seek_inputs, now) with
+        while start_of_search_index < hit_data.Length
+              && hit_data.[start_of_search_index].Time < now - late_note_window_scaled do
+            start_of_search_index <- start_of_search_index + 1
+
+        match hit_mechanics (k, start_of_search_index, now) with
         | BLOCKED -> ()
         | FOUND (index, delta) ->
+            // todo: if we already had a hold state, remove that and miss the release
             if PREVENT_BACKWARDS_NOTES then this.MissBackwardsNotes(k, index, chart_time)
             let { Data = struct (deltas, status) } = hit_data.[index]
             let is_hold_head = status.[k] <> HitFlags.HIT_REQUIRED
@@ -328,29 +321,33 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
         | H_REGRABBED, head_index
         | H_MISSED_HEAD_REGRABBED, head_index ->
 
-            let mutable i = head_index
-            let mutable delta = late_note_window_scaled
+            let mutable tail_search_index = head_index
+            let mutable delta = 0.0f<ms>
             let mutable found = -1
-            let target = now + late_note_window_scaled
 
-            while i < hit_data.Length && hit_data.[i].Time <= target do
-                let { Time = t; Data = struct (_, status) } = hit_data.[i]
+            while tail_search_index < hit_data.Length && hit_data.[tail_search_index].Time <= now - early_window_scaled do
+                let { Time = t; Data = struct (_, status) } = hit_data.[tail_search_index]
                 let d = now - t
 
-                assert(status.[k] <> HitFlags.RELEASE_ACCEPTED) // we should never pass one tail and find another tail by mistake
+                assert(status.[k] <> HitFlags.RELEASE_ACCEPTED)
 
                 if status.[k] = HitFlags.RELEASE_REQUIRED then
-                    // Get the first unreleased hold tail we see, after the head of the hold we're tracking
-                    found <- i
+                    found <- tail_search_index
                     delta <- d
-                    i <- hit_data.Length
+                    tail_search_index <- hit_data.Length
 
-                i <- i + 1
+                tail_search_index <- tail_search_index + 1
 
-            if found >= 0 then
+            if found >= 0 && delta >= early_release_window_scaled then
                 let { Data = struct (deltas, status) } = hit_data.[found]
                 status.[k] <- HitFlags.RELEASE_ACCEPTED
-                deltas.[k] <- delta / rate
+
+                let overhold =
+                    if delta > late_release_window_scaled then
+                        true
+                    else 
+                        deltas.[k] <- delta / rate
+                        false
 
                 let { Data = struct (head_deltas, _) } = hit_data.[head_index]
 
@@ -364,8 +361,8 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
                         Action =
                             RELEASE(
                                 deltas.[k],
-                                false,
-                                false,
+                                overhold,
+                                overhold,
                                 hold_state.IsDropped,
                                 head_deltas.[k],
                                 hold_state.MissedHead
@@ -373,8 +370,8 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
                     }
 
                 hold_states.[k] <- H_NOTHING, head_index
-            else // If we released but too early (no sign of the tail within range) make the long note dropped
-                
+            else
+                // Early release! Mark hold as dropped
                 match hold_states.[k] with
                 | H_HOLDING, i
                 | H_REGRABBED, i ->
@@ -403,7 +400,7 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
     /// - Notes where the time has passed to hit them, with no input mapping to them, have been processed as misses
     
     /// Expected to be called with monotonically increasing values of `chart_time` during gameplay for live scoring
-    /// For processing an entire score instantly pass in Time.infinity or any time higher than the duration of the chart + latest hit window
+    /// For processing an entire score instantly pass in Time.infinity or any time higher than the duration of the chart + late window
 
     member this.Update(chart_time: ChartTime) =
         this.PollReplay chart_time // Process all key presses and releases up until now
