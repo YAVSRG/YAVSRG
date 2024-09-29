@@ -56,6 +56,8 @@ module Scoring =
 
         let stepper = ScoreProcessor.create RULESET 4 replay notes 1.0f<rate>
 
+        stepper.OnEvent.Add (printfn "%A")
+
         let step time =
             printfn "STEPPING TO %.1fms:" time
 
@@ -127,3 +129,8 @@ module Scoring =
         Assert.AreEqual(0, stepper.CurrentCombo)
         Assert.AreEqual(4, stepper.BestCombo)
         Assert.AreEqual(5, stepper.MaxPossibleCombo)
+
+    // todo: test all ln combinations for Interlude ruleset
+    // todo: test all ln combinations for osu! ruleset
+    // todo: test all ln combinations for osu! score v2 ruleset
+    // todo: test simple combinations for Etterna ruleset

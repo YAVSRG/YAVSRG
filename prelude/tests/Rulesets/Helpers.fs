@@ -101,3 +101,16 @@ module Helpers =
             events.Add event
 
         member this.Events = events.AsReadOnly()
+
+    type ScoringEventCollector(ruleset, keys, replay, notes, rate) as this =
+        inherit ScoreProcessor(ruleset, keys, replay, notes, rate)
+
+        let events = ResizeArray<GameplayEvent<GameplayAction>>()
+
+        do
+            this.OnEvent.Add(fun event ->
+                printfn "%A" event
+                events.Add event
+            )
+
+        member this.Events = events.AsReadOnly()
