@@ -69,7 +69,6 @@ type Beatmap =
             yield ""
         }
 
-
 type Storyboard =
     {
         // todo: Variables
@@ -360,9 +359,27 @@ type Beatmap with
             Error err.Message
     member this.ToFile(path: string) =
         this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents, Encoding.UTF8)
-    member this.ToStream(stream: Stream) =
-        use writer = new StreamWriter(stream, Encoding.UTF8)
+    member this.ToStream(stream: Stream, leave_stream_open: bool) =
+        use writer = new StreamWriter(stream, Encoding.UTF8, leaveOpen = leave_stream_open)
         this.ToLines |> Seq.iter writer.WriteLine
+
+    /// The internal hash osu! uses for a .osu file
+    static member Hash(stream: Stream) =
+        let md5 = System.Security.Cryptography.MD5.Create()
+        md5.ComputeHash(stream) |> Convert.ToHexString |> _.ToLower()
+
+    static member Hash(beatmap: Beatmap) =
+        use ms = new MemoryStream()
+        beatmap.ToStream(ms, true)
+        ms.Position <- 0
+        Beatmap.Hash ms
+
+    static member HashFromFile(path: string) : Result<string, string> =
+        try
+            use fs = File.OpenRead(path)
+            Ok(Beatmap.Hash fs)
+        with err -> 
+            Error err.Message
 
 type Storyboard with
     // todo: there is currently no support for reading a storyboard file, only generating one

@@ -168,11 +168,12 @@ module Interlude_To_Osu =
 
 module Exports =
 
-    let create_osz (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<unit, exn> =
+    let create_osz (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<Beatmap * string, exn> =
         try
             let beatmap = Interlude_To_Osu.convert chart chart_meta
             let file_name = beatmap.Filename
-            let archive_path = Path.Combine(export_folder, file_name.Replace(".osu", ".osz"))
+            let archive_file_name = beatmap.Filename.Replace(".osu", ".osz")
+            let archive_path = Path.Combine(export_folder, archive_file_name)
 
             use fs = File.Open(archive_path, FileMode.Create)
             use archive = new ZipArchive(fs, ZipArchiveMode.Create, false)
@@ -180,7 +181,7 @@ module Exports =
             do
                 let osu_file_entry = archive.CreateEntry(file_name)
                 use osu_file_stream = osu_file_entry.Open()
-                beatmap.ToStream osu_file_stream
+                beatmap.ToStream (osu_file_stream, false)
 
             do
                 match chart_meta.Background.Path with
@@ -201,6 +202,6 @@ module Exports =
                     use audio_file_stream = audio_file_entry.Open()
                     fs.CopyTo(audio_file_stream)
                 | None -> ()
-            Ok ()
+            Ok (beatmap, archive_file_name)
         with err ->
             Error err

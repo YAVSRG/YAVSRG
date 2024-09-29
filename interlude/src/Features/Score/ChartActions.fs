@@ -37,7 +37,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
 
     let export_osz() =
         match Exports.create_osz score_info.Chart score_info.ChartMeta (get_game_folder "Exports") with
-        | Ok () ->
+        | Ok _ ->
             open_directory (get_game_folder "Exports")
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
         | Error err ->
@@ -55,7 +55,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
         let meta_with_mods =
             { score_info.ChartMeta with DifficultyName = score_info.ChartMeta.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
         match Exports.create_osz chart_with_mods meta_with_mods (get_game_folder "Exports") with
-        | Ok () ->
+        | Ok _ ->
             open_directory (get_game_folder "Exports")
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
         | Error err ->

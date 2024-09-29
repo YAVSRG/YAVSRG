@@ -17,7 +17,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 🔥 = New developer-facing feature
 🧱 = New codebase feature that doesn't (yet) affect users
 🧹 = Code refactoring/cleanup/formatting
-⚡️ = Automation (CI pipelines, automated tests, developer tooling)
+⚡ = Automation (CI pipelines, automated tests, developer tooling)
 📘 = Documentation for users
 📕 = Documentation for developers
 🎓 = Localisation changes

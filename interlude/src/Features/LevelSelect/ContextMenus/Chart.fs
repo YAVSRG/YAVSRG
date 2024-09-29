@@ -172,7 +172,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                     | None -> ()
                     | Some c ->
                         match Exports.create_osz c cc (get_game_folder "Exports") with
-                        | Ok () ->
+                        | Ok _ ->
                             open_directory (get_game_folder "Exports")
                             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
                         | Error err ->
@@ -200,7 +200,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                             let meta_with_mods =
                                 { cc with DifficultyName = cc.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
                             match Exports.create_osz chart_with_mods meta_with_mods (get_game_folder "Exports") with
-                            | Ok () ->
+                            | Ok _ ->
                                 open_directory (get_game_folder "Exports")
                                 Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
                             | Error err ->

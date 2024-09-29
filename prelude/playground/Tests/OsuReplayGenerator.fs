@@ -3,88 +3,133 @@
 open System
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Data
+open Prelude
+open Prelude.Charts
+open Prelude.Charts.Formats.osu
+open Prelude.Gameplay
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
-open SevenZip.Compression
+open Prelude.Tests.Rulesets
 
-let generate_replay (mods: Mods) (hash: string) : OsuScoreDatabase_Score =
-    let inputs : (int * int) seq =
-        seq {
-            for i = 0 to 63 do
-                let offset = i * 2
-                let press_time = i * 125 + offset
-                yield (press_time, press_time + 50)
+let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
+
+    let chart : Chart = 
+        {
+            Keys = 4
+            Notes = notes
+            BPM = [|{ Time = 0.0f<ms>; Data = { Meter = 4<beat>; MsPerBeat = 500.0f<ms / beat> } }|]
+            SV = [||]
         }
-    let input_as_replay_string =
-        let mutable previous_time = -1000
-        inputs 
-        |> Seq.map (fun (press, release) -> 
-            let t = previous_time
-            previous_time <- release
-            sprintf "%i|1|1|0,%i|0|1|0" (press - t) (release - press)
-        )
-        |> String.concat ","
-    let raw =
-        sprintf
-            "0|256|500|0,0|256|500|0,-1000|0|1|0,%s,-12345|0|0|32767"
-            input_as_replay_string
-        |> Text.Encoding.UTF8.GetBytes
 
-    use input = new MemoryStream(raw)
-    use output = new MemoryStream()
+    let chart_meta : ChartMeta =
+        {
+            Hash = ""
+            Title = "Auto-generated test scenario"
+            TitleNative = None
+            Artist = "Prelude"
+            ArtistNative = None
+            DifficultyName = "Auto-generated test scenario"
+            Subtitle = None
+            Source = Some "YAVSRG"
+            Creator = "Percyqaz"
+            Tags = ["Yet"; "Another"; "Vertically"; "Scrolling"; "Rhythm"; "Game"]
 
-    let encode = new LZMA.Encoder()
-    encode.WriteCoderProperties(output)
-    output.Write(BitConverter.GetBytes(input.Length), 0, 8)
-    encode.Code(input, output, input.Length, -1, null)
-    output.Flush()
+            Background = AssetPath.Missing
+            Audio = AssetPath.Missing
+            PreviewTime = 0.0f<ms>
 
+            Packs = Set.empty
+            Origin = ChartOrigin.Unknown
+
+            Keys = 4
+            Length = 0.0f<ms>
+            BPM = 0
+            DateAdded = 0L
+            Rating = 0.0f
+            Patterns = Unchecked.defaultof<_>
+        }
+
+    match Exports.create_osz chart chart_meta "." with
+    | Error exn -> failwithf "Couldn't export .osz: %s" exn.Message
+    | Ok (beatmap, file_name) ->
+
+    // requires osu! to be open already
+
+    Diagnostics.Process
+        .Start(new Diagnostics.ProcessStartInfo(file_name, UseShellExecute = true))
+        .WaitForExit()
+    |> ignore
+
+    let beatmap_hash = Beatmap.Hash beatmap
+    let osu_replay = OsuReplay.encode_replay replay Mods.None beatmap_hash
+    use fs = File.Open("replay.osr", FileMode.Create)
+    use bw = new BinaryWriter(fs)
+    osu_replay.Write bw
+    bw.Flush()
+    bw.Close()
+    
+    Diagnostics.Process
+        .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
+        .WaitForExit()
+
+[<Json.AutoCodec(false)>]
+type GosuMemoryData =
     {
-        Mode = 3uy
-        Version = 20220216
-        BeatmapHash = hash
-        Player = "Percyqaz"
-        ReplayHash = hash
-        Count300 = 1s
-        Count100 = 0s
-        Count50 = 0s
-        CountGeki = 0s
-        CountKatu = 0s
-        CountMiss = 0s
-        Score = 1000001
-        MaxCombo = 727s
-        PerfectCombo = true
-        ModsUsed = mods
-        LifeBarGraph = ""
-        Timestamp = DateTime.UtcNow.ToFileTimeUtc()
-        CompressedReplayBytes = Some <| output.ToArray()
-        OnlineScoreID = 0
+        gameplay: {|
+            accuracy: float
+            combo: {|
+                current: int
+                max: int
+            |}
+            hits: {|
+                ``0``: int
+                ``50``: int
+                ``100``: int
+                ``300``: int
+                geki: int // 320
+                katu: int // 200
+                sliderBreaks: int
+                hitErrorArray: int array
+            |}
+        |}
+    }
+    override this.ToString() =
+        [
+            sprintf "%.2f%% %ix/%ix" this.gameplay.accuracy this.gameplay.combo.current this.gameplay.combo.max
+            sprintf "%i | %i | %i | %i | %i | %i" this.gameplay.hits.geki this.gameplay.hits.``300`` this.gameplay.hits.katu this.gameplay.hits.``100`` this.gameplay.hits.``50`` this.gameplay.hits.``0``
+            this.gameplay.hits.hitErrorArray |> Seq.map (sprintf "%ims") |> String.concat ", "
+        ]
+        |> String.concat "\n"
+
+let collect_results () =
+    async {
+        match! Prelude.Data.WebServices.download_json_async<GosuMemoryData> "http://localhost:24050/json" with
+        | Data.WebResult.Ok d ->
+            Logging.Info(sprintf "Experiment results:\n%O" d)
+        | Data.WebResult.HttpError c -> printfn "Error getting GosuMemory data or it isn't running (HTTP ERROR %i)" c
+        | Data.WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
     }
 
 let run_experiment () =
 
-    Logging.Info "Reading osu database ..."
+    // have osu! and GosuMemory running
 
-    use file = Path.Combine(Imports.OSU_SONG_FOLDER, "..", "osu!.db") |> File.OpenRead
+    for step = 0 to 10 do
 
-    use reader = new BinaryReader(file, Text.Encoding.UTF8)
-    let main_db = OsuDatabase.Read(reader)
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
 
-    match
-        main_db.Beatmaps
-        |> Seq.tryFind (fun b -> b.Difficulty = "thanks for holding")
-    with
-    | Some osu_db_beatmap ->
+        let replay =
+            ReplayBuilder()
+                .KeyDownUntil(20.0f<ms>, 1000.0f<ms> + 10.0f<ms> * float32 step)
+                .Build()
+                .GetFullReplay()
 
-        let replay = generate_replay Mods.None osu_db_beatmap.Hash
-        use fs = File.Open("replay.osr", FileMode.Create)
-        use bw = new BinaryWriter(fs)
-        replay.Write bw
-        bw.Flush()
-        bw.Close()
-
-        Diagnostics.Process
-            .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
-            .WaitForExit()
-
-    | None -> printfn "didnt find the map"
+        Logging.Info(sprintf "Experiment: Overholding LN by %ims" (step * 10))
+        generate_scenario notes replay
+        printfn "Press any key once the replay has been viewed ..."
+        Console.ReadKey() |> ignore
+        collect_results () |> Async.RunSynchronously
