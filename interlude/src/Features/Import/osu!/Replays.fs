@@ -5,7 +5,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Gameplay
-open Prelude.Data.``osu!``
+open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Data.User
 open Interlude.Content
@@ -27,14 +27,14 @@ module Replays =
         | Some(rate, mods) ->
 
         try 
-            let replay_data = decode_replay (replay, chart, rate)
+            let replay_data = OsuReplay.decode_replay(replay, chart, rate) |> expect
 
             Ok {
                 Timestamp =
                     DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
                 Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(rate, 2)
+                Rate = MathF.Round(float32 rate, 2)
                 Mods = mods
                 IsImported = true
                 Keys = chart.Keys

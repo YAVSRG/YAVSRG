@@ -7,22 +7,23 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.osu
-open Prelude.Data.``osu!``
+open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.ScoringV2
 open SevenZip.Compression
 
-let compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: float32, chart_od: float, score_data: OsuScoreDatabase_Score) =
+let compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
 
     let ruleset_mod = 
-        if score_data.ModsUsed &&& Mods.Easy <> Mods.None then ``osu!``.Easy
-        elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then ``osu!``.HardRock
-        else ``osu!``.NoMod
+        if score_data.ModsUsed &&& Mods.Easy <> Mods.None then OsuMania.Easy
+        elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then OsuMania.HardRock
+        else OsuMania.NoMod
 
     let metric =
-
-        ScoreProcessor.run (``osu!``.create (float32 chart_od) ruleset_mod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
+        ScoreProcessor.run (OsuMania.create (float32 chart_od) ruleset_mod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
     let sum =
         300.0
@@ -47,13 +48,13 @@ let compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHe
     printfn
         "Interlude says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
         (metric.Accuracy * 100.0)
-        metric.State.Judgements.[0]
-        metric.State.Judgements.[1]
-        metric.State.Judgements.[2]
-        metric.State.Judgements.[3]
-        metric.State.Judgements.[4]
-        metric.State.Judgements.[5]
-        metric.State.BestCombo
+        metric.JudgementCounts.[0]
+        metric.JudgementCounts.[1]
+        metric.JudgementCounts.[2]
+        metric.JudgementCounts.[3]
+        metric.JudgementCounts.[4]
+        metric.JudgementCounts.[5]
+        metric.BestCombo
 
     printfn
         "osu! says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"

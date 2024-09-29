@@ -4,11 +4,12 @@ open System
 open System.IO
 open System.Text
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.osu
 open Prelude.Gameplay
-open Prelude.Data.``osu!``
+open Prelude.Data.OsuClientInterop
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Options
@@ -135,7 +136,7 @@ module Scores =
                 | None -> () // score is invalid for import in some way, skip
                 | Some(rate2, mods) ->
 
-                let combined_rate = rate2 * rate
+                let combined_rate = float32 rate2 * rate
 
                 if
                     MathF.Round(combined_rate, 3) <> MathF.Round(combined_rate, 2)
@@ -147,7 +148,7 @@ module Scores =
                     )
                 else
 
-                let replay_data = decode_replay (replay_info, chart, rate)
+                let replay_data = OsuReplay.decode_replay (replay_info, chart, rate * 1.0f<rate>) |> expect
 
                 let score: Score =
                     {

@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Percyqaz.Common
-open Prelude.Data.``osu!``
+open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open SevenZip.Compression
 
