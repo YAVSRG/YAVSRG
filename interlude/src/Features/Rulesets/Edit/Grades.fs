@@ -70,7 +70,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Grades = ruleset.Value.Grading.Grades |> Array.append [| new_grade |] 
             }
         ruleset.Set { ruleset.Value with Grading = new_grading }
-        refresh()
+        defer refresh
 
     and delete_grade(i: int) : unit =
         let new_grading = { ruleset.Value.Grading with Grades = ruleset.Value.Grading.Grades |> Array.removeAt i }

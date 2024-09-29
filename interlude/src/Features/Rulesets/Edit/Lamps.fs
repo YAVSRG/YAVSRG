@@ -97,7 +97,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                 Lamps = ruleset.Value.Grading.Lamps |> Array.append [| new_lamp |] 
             }
         ruleset.Set { ruleset.Value with Grading = new_grading }
-        refresh()
+        defer refresh
 
     and delete_lamp(i: int) : unit =
         let new_grading = { ruleset.Value.Grading with Lamps = ruleset.Value.Grading.Lamps |> Array.removeAt i }
