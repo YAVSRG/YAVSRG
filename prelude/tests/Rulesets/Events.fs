@@ -321,7 +321,7 @@ module Events =
 
         let replay = 
             ReplayBuilder()
-                .KeyDownFor(-90.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(-90.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(10.0f<ms>, 30.0f<ms>) // this input gets eaten
                 .KeyDownFor(110.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(210.0f<ms>, 30.0f<ms>)
@@ -331,6 +331,82 @@ module Events =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-90.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TapNotes_ColumnLock_Interlude_HalfRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(50.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(150.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(250.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-45.0f<ms>, 15.0f<ms>)
+                .KeyDownFor(5.0f<ms>, 15.0f<ms>) // eaten like in `TapNotes_ColumnLock_Interlude`
+                .KeyDownFor(55.0f<ms>, 15.0f<ms>)
+                .KeyDownFor(105.0f<ms>, 15.0f<ms>)
+                .KeyDownFor(155.0f<ms>, 15.0f<ms>)
+                .KeyDownFor(205.0f<ms>, 15.0f<ms>)
+                .KeyDownFor(255.0f<ms>, 15.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 0.5f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-90.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+                HIT(10.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TapNotes_ColumnLock_Interlude_DoubleRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(200.0f<ms>)
+                .Note(400.0f<ms>)
+                .Note(600.0f<ms>)
+                .Note(800.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(-180.0f<ms>, 60.0f<ms>)
+                .KeyDownFor(20.0f<ms>, 60.0f<ms>) // eaten like in `TapNotes_ColumnLock_Interlude`
+                .KeyDownFor(220.0f<ms>, 60.0f<ms>)
+                .KeyDownFor(420.0f<ms>, 60.0f<ms>)
+                .KeyDownFor(620.0f<ms>, 60.0f<ms>)
+                .KeyDownFor(820.0f<ms>, 60.0f<ms>)
+                .KeyDownFor(1020.0f<ms>, 60.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 2.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -679,6 +755,98 @@ module Events =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(-180.0f<ms / rate>, false)
+                RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_InnerBoundaries_HalfRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(90.0f<ms>, 910.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 0.5f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, false)
+                RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
+    let HoldNote_OuterBoundaries_HalfRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(-90.0f<ms>, 1090.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 0.5f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(-180.0f<ms / rate>, false)
+                RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let HoldNote_InnerBoundaries_DoubleRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(360.0f<ms>, 640.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 2.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(180.0f<ms / rate>, false)
+                RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
+    let HoldNote_OuterBoundaries_DoubleRate () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownUntil(-360.0f<ms>, 1360.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 2.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
