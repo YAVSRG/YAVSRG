@@ -1,10 +1,9 @@
-﻿namespace Prelude.Tests.Scoring
+﻿namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
-open Helpers
 
 module ``SC J4`` =
 

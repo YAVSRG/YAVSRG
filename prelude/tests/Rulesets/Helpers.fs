@@ -1,10 +1,11 @@
-﻿namespace Prelude.Tests.Scoring
+﻿namespace Prelude.Tests.Rulesets
 
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Gameplay.ScoringV2
 
+[<AutoOpen>]
 module Helpers =
 
     type ChartBuilder(keycount: int) =

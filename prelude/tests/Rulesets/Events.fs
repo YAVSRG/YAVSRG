@@ -1,11 +1,10 @@
-﻿namespace Prelude.Tests.Scoring // todo: rename to Rulesets
+﻿namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.RulesetsV2
 open Prelude.Gameplay.ScoringV2
-open Helpers
 
 module Events =
 
