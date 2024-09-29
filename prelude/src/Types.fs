@@ -50,9 +50,6 @@ module Types =
         let inline of_number (f: ^T) = float32 f * 1.0f<ms>
         let infinity = infinityf * 1.0f<ms>
 
-        // todo: remove. abs already works
-        let abs (t: Time) = if t < 0.0f<ms> then -t else t
-
     type GameplayTime = float32<ms / rate>
 
     type Rate = float32<rate>

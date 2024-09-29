@@ -12,8 +12,8 @@ module ``osu!`` =
         (overhold: bool)
         (dropped: bool)
         : JudgementId =
-        let tail_delta_abs = Time.abs tail_delta
-        let head_delta_abs = Time.abs head_delta
+        let tail_delta_abs = abs tail_delta
+        let head_delta_abs = abs head_delta
 
         if not dropped && not overhold then
 

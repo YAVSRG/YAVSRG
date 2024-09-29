@@ -67,26 +67,26 @@ module private HitMechanics =
 
             // Find unhit note that is closer than the current candidate
             if (status.[k] = HitFlags.HIT_REQUIRED || status.[k] = HitFlags.HIT_HOLD_REQUIRED) then
-                if closest_note_index < 0 || Time.abs closest_note_delta > Time.abs delta then
+                if closest_note_index < 0 || abs closest_note_delta > abs delta then
                     closest_note_index <- i
                     closest_note_delta <- delta
 
                 // If new candidate is within cbrush window, stop looking resulting in earliest match being used
                 // Otherwise keep looking for something closer and allow this note to be missed
-                if Time.abs closest_note_delta < cbrush_window then
+                if abs closest_note_delta < cbrush_window then
                     i <- hit_data.Length
             // Find hit note that got hit earlier than the cbrush window, and track how close it is
             elif
                 status.[k] = HitFlags.HIT_ACCEPTED
                 && deltas.[k] <= -cbrush_window_raw
             then
-                if Time.abs closest_bad_note_delta > Time.abs delta then
+                if abs closest_bad_note_delta > abs delta then
                     closest_bad_note_delta <- delta
 
             i <- i + 1
 
         if closest_note_index >= 0 then
-            if Time.abs closest_bad_note_delta < Time.abs closest_note_delta then
+            if abs closest_bad_note_delta < abs closest_note_delta then
                 BLOCKED
             else
                 FOUND (closest_note_index, closest_note_delta)
@@ -110,7 +110,7 @@ module private HitMechanics =
 
             // Find closest unhit note
             if (status.[k] = HitFlags.HIT_REQUIRED || status.[k] = HitFlags.HIT_HOLD_REQUIRED) then
-                if closest_note_index < 0 || Time.abs closest_note_delta > Time.abs delta then
+                if closest_note_index < 0 || abs closest_note_delta > abs delta then
                     closest_note_index <- i
                     closest_note_delta <- delta
 

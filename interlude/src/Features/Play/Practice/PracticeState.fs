@@ -82,7 +82,7 @@ module PracticeState =
         state.SyncSuggestions <-
             Some
                 {
-                    LooksAboutRight = Time.abs mean < 5.0f<ms>
+                    LooksAboutRight = abs mean < 5.0f<ms>
                     AudioOffset = local_audio_offset_suggestion
                     VisualOffset = visual_offset_suggestion
                     HitPosition = hit_position_suggestion

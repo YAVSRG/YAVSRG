@@ -78,7 +78,7 @@ type ColorConfig =
 module NoteColors =
 
     let private roughly_divisible (a: Time) (b: Time) =
-        Time.abs (a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
+        abs (a - b * float32 (round (float <| a / b))) < 3.0f<ms>
 
     let private ddr_func (delta: Time) (ms_per_beat: float32<ms / beat>) : int =
         List.tryFind ((fun i -> ColorScheme.DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
