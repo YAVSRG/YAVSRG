@@ -81,16 +81,54 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
 
     let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw keys notes
 
-    let hit_mechanics, PREVENT_BACKWARDS_NOTES =
+    let hit_mechanics =
         match ruleset.HitMechanics with
         | HitMechanics.Interlude cbrush_window ->
-            HitMechanics.interlude (hit_data, early_note_window_scaled, late_note_window_scaled, cbrush_window, rate), true
+            HitMechanics.interlude (hit_data, early_note_window_scaled, late_note_window_scaled, cbrush_window, rate)
         | HitMechanics.OsuMania ->
-            HitMechanics.osu_mania (hit_data, early_note_window_scaled, late_note_window_scaled), true
+            HitMechanics.osu_mania (hit_data, early_note_window_scaled, late_note_window_scaled)
         | HitMechanics.Etterna ->
-            HitMechanics.etterna (hit_data, early_note_window_scaled, late_note_window_scaled), false
+            HitMechanics.etterna (hit_data, early_note_window_scaled, late_note_window_scaled)
 
     let mutable expired_notes_index = 0
+
+    member private this.KillExistingHold (chart_time: ChartTime) (k: int) =
+        match hold_states.[k] with
+        | H_NOTHING, _ -> ()
+        | hold_state, head_index ->
+            let mutable tail_search_index = head_index
+
+            while tail_search_index < hit_data.Length do
+                let { Data = struct (_, status) } = hit_data.[tail_search_index]
+
+                assert(status.[k] <> HitFlags.RELEASE_ACCEPTED)
+
+                if status.[k] = HitFlags.RELEASE_REQUIRED then
+                    
+                    status.[k] <- HitFlags.RELEASE_ACCEPTED
+                    hold_states.[k] <- H_NOTHING, head_index
+
+                    let { Data = struct (head_deltas, _) } = hit_data.[head_index]
+
+                    this.HandleEvent
+                        {
+                            Index = tail_search_index
+                            Time = chart_time
+                            Column = k
+                            Action =
+                                RELEASE(
+                                    late_release_window_raw,
+                                    true,
+                                    false,
+                                    true,
+                                    head_deltas.[k],
+                                    hold_state.MissedHead
+                                )
+                        }
+
+                    tail_search_index <- hit_data.Length
+
+                tail_search_index <- tail_search_index + 1
 
     member this.EnumerateRecentInputs() = replay.EnumerateRecentEvents()
     member this.Ruleset = ruleset
@@ -188,15 +226,6 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
 
             expired_notes_index <- expired_notes_index + 1
 
-    /// Some hit mechanics allow hitting a later note first, while an earlier note is still hittable
-    /// To prevent another input then hitting the earlier note, all earlier notes are marked as missed
-    /// See `PREVENT_BACKWARDS_NOTES`
-
-    member private this.MissBackwardsNotes(k: int, before_index: int, chart_time: Time) =
-        ()
-        // ILL FIGURE IT OUT IN A BIT
-        // ln correctness/linearity is the hard bit
-
     override this.HandleKeyDown(chart_time: ChartTime, k: int) =
         this.MissUnhitExpiredNotes chart_time
         let now = first_note + chart_time
@@ -210,8 +239,7 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
         match hit_mechanics (k, start_of_search_index, now) with
         | BLOCKED -> ()
         | FOUND (index, delta) ->
-            // todo: if we already had a hold state, remove that and miss the release
-            if PREVENT_BACKWARDS_NOTES then this.MissBackwardsNotes(k, index, chart_time)
+            this.KillExistingHold chart_time k
             let { Data = struct (deltas, status) } = hit_data.[index]
             let is_hold_head = status.[k] <> HitFlags.HIT_REQUIRED
             status.[k] <- HitFlags.HIT_ACCEPTED
