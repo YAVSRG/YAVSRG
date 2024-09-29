@@ -155,7 +155,7 @@ type OsuDatabase_Beatmap =
         DrainTimeSeconds: int
         TotalTimeMilliseconds: int
         PreviewTimeMilliseconds: int
-        TimingPoints: unit array // data is discarded cause i dont care
+        TimingPoints: unit array // Data is discarded because it's not very useful
         DifficultyID: int
         BeatmapID: int
         ThreadID: int
@@ -294,7 +294,7 @@ type OsuScoreDatabase_Score =
         Timestamp: int64
         CompressedReplayBytes: byte array option
         OnlineScoreID: int64
-    // if you have target practice scores in your database, suck it up
+        // Incomplete / may crash if you have target practice scores in your database
     }
     static member Read(br: BinaryReader) =
         {

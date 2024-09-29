@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\Prelude.fsproj" />
+    <ProjectReference Include="..\tests\Prelude.Tests.fsproj" />
   </ItemGroup>
 
 </Project>

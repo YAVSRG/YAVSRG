@@ -10,12 +10,10 @@ open Prelude.Charts.Formats.osu
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Gameplay
-open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.RulesetsV2
 open Prelude.Gameplay.ScoringV2
-open SevenZip.Compression
 
-let compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
+let private compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
 
     let ruleset_mod = 
         if score_data.ModsUsed &&& Mods.Easy <> Mods.None then OsuMania.Easy
@@ -124,46 +122,7 @@ let read_scores () =
                     use br = new BinaryReader(file)
                     let replay_data = OsuScoreDatabase_Score.Read br
 
-                    let input = new MemoryStream(replay_data.CompressedReplayBytes.Value)
-                    let output = new MemoryStream()
-
-                    let props = Array.zeroCreate 5
-                    input.Read(props, 0, 5) |> ignore
-
-                    let lengthBytes = Array.zeroCreate 8
-                    input.Read(lengthBytes, 0, 8) |> ignore
-
-                    let dec = LZMA.Decoder()
-                    dec.SetDecoderProperties props
-
-                    dec.Code(
-                        input,
-                        output,
-                        replay_data.CompressedReplayBytes.Value.Length,
-                        BitConverter.ToInt64(lengthBytes, 0),
-                        null
-                    )
-
-                    output.Flush()
-                    let string_data = output.ToArray() |> System.Text.Encoding.UTF8.GetString
-
-                    let interlude_replay: ReplayData =
-                        let mutable time = -chart.Value.Chart.FirstNote
-                        let mutable last_state = 256us
-
-                        seq {
-                            for entry in string_data.Split(",", StringSplitOptions.RemoveEmptyEntries) do
-                                let parts = entry.Split("|")
-
-                                if parts.[0] <> "-12345" then
-                                    time <- time + float32 parts.[0] * 1.0f<ms>
-                                    let state = uint16 parts.[1]
-
-                                    if state <> last_state then
-                                        yield struct (time, uint16 parts.[1])
-                                        last_state <- state
-                        }
-                        |> Array.ofSeq
+                    let interlude_replay = OsuReplay.decode_replay (replay_data, chart.Value.Chart, 1.0f<rate>)
 
                     match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
                     | Some(rate, _) -> compare_interlude_implementation_to_osu (chart.Value.Chart, chart.Value.Header, interlude_replay, rate, od, replay_data)
