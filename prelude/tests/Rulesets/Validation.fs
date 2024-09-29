@@ -21,8 +21,32 @@ module Validation =
             let ruleset = SC.create judge
 
             match RulesetV2.check ruleset with
-            | Ok _ -> printfn "Judge %i valid" judge
+            | Ok _ -> printfn "%s: valid" ruleset.Name
             | Error reason -> Assert.Fail(reason)
+
+        Assert.Pass()
+    
+    [<Test>]
+    let OsuOd8_Valid () =
+        let ruleset = OsuMania.create 8.0f (OsuMania.Mode.NoMod)
+
+        match RulesetV2.check ruleset with
+        | Ok _ -> Assert.Pass()
+        | Error reason -> Assert.Fail(reason)
+
+    [<Test>]
+    let Osu_AllVariations_Valid () =
+
+        for step = 0 to 20 do
+            let od = 0.5f * float32 step
+
+            for mode in [ OsuMania.Mode.NoMod; OsuMania.Mode.Easy; OsuMania.Mode.HardRock ] do
+                
+                let ruleset = OsuMania.create od mode
+
+                match RulesetV2.check ruleset with
+                | Ok _ -> printfn "%s: valid" ruleset.Name
+                | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
 

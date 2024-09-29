@@ -63,6 +63,7 @@
     <Compile Include="Gameplay\Skillsets.fs" />
     <Compile Include="Gameplay\RulesetsRewrite\Rulesets.fs" />
     <Compile Include="Gameplay\RulesetsRewrite\Presets\SC.fs" />
+    <Compile Include="Gameplay\RulesetsRewrite\Presets\osu!.fs" />
     <Compile Include="Gameplay\ScoringRewrite\HitMechanics.fs" />
     <Compile Include="Gameplay\ScoringRewrite\Events.fs" />
     <Compile Include="Gameplay\ScoringRewrite\WifeCurve.fs" />
