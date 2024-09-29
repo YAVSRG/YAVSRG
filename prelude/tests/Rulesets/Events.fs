@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.RulesetsV2
 open Prelude.Gameplay.ScoringV2
 
@@ -141,7 +140,6 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
 
     [<Test>]
     let TapNotes_EarlyBoundary_OsuMania () =
@@ -1116,7 +1114,6 @@ module Events =
             event_processing.Events |> Seq.map _.Action
         )
 
-    
     [<Test>]
     let HoldNote_VeryLateRegrab () =
         let notes = 
@@ -1141,4 +1138,124 @@ module Events =
                 RELEASE(180.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
+        )
+    
+    [<Test>]
+    let TimeStepping_Normal () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Hold(500.0f<ms>, 1000.0f<ms>)
+                .Note(1500.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(500.0f<ms>, 200.0f<ms>)
+                .KeyDownFor(800.0f<ms>, 200.0f<ms>)
+                .KeyDownFor(1480.0f<ms>, 20.0f<ms>)
+                .Build()
+
+        let event_step_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+
+        let mutable prev_expected = 0
+        let step time expected_event_count =
+            printfn "STEPPING TO %.1fms (expecting %i new event(s)):" time (expected_event_count - prev_expected)
+            prev_expected <- expected_event_count
+            event_step_processing.Update time
+            Assert.AreEqual(expected_event_count, event_step_processing.Events.Count)
+
+        step -1000.0f<ms> 0
+        step -1.0f<ms> 0
+        step 0.0f<ms> 0
+        step 179.9f<ms> 0
+        step 180.0f<ms> 0
+        step 180.1f<ms> 1
+        step 499.9f<ms> 1
+        step 500.0f<ms> 2
+        step 699.9f<ms> 2
+        step 700.0f<ms> 3
+        step 799.9f<ms> 3
+        step 800.0f<ms> 4
+        step 999.9f<ms> 4
+        step 1000.0f<ms> 5
+        step 1480.0f<ms> 6
+        step 1500.0f<ms> 6
+        step 5000.0f<ms> 6
+        step Time.infinity 6
+
+        printfn "Now stepping all at once:"
+
+        let rewind_replay = replay.GetFullReplay() |> Prelude.Gameplay.StoredReplayProvider
+
+        let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            event_step_processing.Events,
+            event_processing.Events
+        )
+
+    [<Test(Description = "Passing in decreasing timestamps should perhaps crash in future, currently parts of the client rely on it not doing anything")>]
+    let TimeStepping_BackwardsHasNoEffect () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Hold(500.0f<ms>, 1000.0f<ms>)
+                .Note(1500.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(500.0f<ms>, 200.0f<ms>)
+                .KeyDownFor(800.0f<ms>, 200.0f<ms>)
+                .KeyDownFor(1480.0f<ms>, 20.0f<ms>)
+                .Build()
+
+        let event_step_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+
+        let mutable prev_expected = 0
+        let step time expected_event_count =
+            printfn "STEPPING TO %.1fms (expecting %i new event(s)):" time (expected_event_count - prev_expected)
+            prev_expected <- expected_event_count
+            event_step_processing.Update time
+            Assert.AreEqual(expected_event_count, event_step_processing.Events.Count)
+
+        step -1000.0f<ms> 0
+        step -1.0f<ms> 0
+        step 0.0f<ms> 0
+        step 179.9f<ms> 0
+        step 180.0f<ms> 0
+        step 180.1f<ms> 1
+        step 499.9f<ms> 1
+        step 500.0f<ms> 2
+        step 699.9f<ms> 2
+        step 700.0f<ms> 3
+
+        step 500.0f<ms> 3
+        step 180.0f<ms> 3
+        step 0.0f<ms> 3
+        step -180.0f<ms> 3
+        step -5000.0f<ms> 3
+        step -Time.infinity 3
+
+        step 799.9f<ms> 3
+        step 800.0f<ms> 4
+        step 999.9f<ms> 4
+        step 1000.0f<ms> 5
+        step 1480.0f<ms> 6
+        step 1500.0f<ms> 6
+        step 5000.0f<ms> 6
+        step Time.infinity 6
+
+        printfn "Now stepping all at once:"
+
+        let rewind_replay = replay.GetFullReplay() |> Prelude.Gameplay.StoredReplayProvider
+
+        let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            event_step_processing.Events,
+            event_processing.Events
         )

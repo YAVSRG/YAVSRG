@@ -87,7 +87,9 @@ module Helpers =
         member this.KeyDownFor(time: Time, duration: Time, k: int) = this.KeyDownUntil(time, time + duration, k)
         member this.KeyDownFor(time, duration) = this.KeyDownFor(time, duration, 0)
 
-        member this.Build() : IReplayProvider = liveplay
+        member this.Build() : IReplayProvider =
+            liveplay.Finish()
+            liveplay
 
     type GameplayEventCollector(ruleset, keys, replay, notes, rate) =
         inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
