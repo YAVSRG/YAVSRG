@@ -122,24 +122,177 @@ type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, note
                 |}
 
     member private this.ProcessHold(delta, is_missed) : GameplayAction =
-        Hold {| Delta = delta; Judgement = None; Missed = is_missed |}
 
-    member private this.ProcessRelease(release_delta, missed, overhold, dropped, head_delta, missed_head) : GameplayAction =
-        Release {| 
-            Delta = release_delta
-            Judgement = None
-            Missed = missed
-            Overhold = overhold
-            Dropped = dropped
-        |}
+        match ruleset.HoldMechanics with
+        | HoldMechanics.OnlyRequireHold _
+        | HoldMechanics.JudgeReleasesSeparately _ ->
+            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let points = judgement_to_points delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Hold
+                {|
+                    Delta = delta
+                    Judgement = Some (judgement, points)
+                    Missed = is_missed
+                |}
+
+        | HoldMechanics.CombineHeadAndTail _
+        | HoldMechanics.OnlyJudgeReleases _ ->
+            if is_missed then break_combo(true) else incr_combo()
+            Hold
+                {|
+                    Delta = delta
+                    Judgement = None
+                    Missed = is_missed
+                |}
+
+    member private this.ProcessRelease(release_delta, missed, overheld, dropped, head_delta, missed_head) : GameplayAction =
+        match ruleset.HoldMechanics with
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
+            let judgement =
+                if missed && missed_head then
+                    ruleset.DefaultJudgement
+                else 
+                    OsuHolds.ln_judgement windows head_delta release_delta overheld dropped
+
+            let points = judgement_to_points head_delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (_, _, judgement_if_dropped, judgement_if_overheld)) ->
+            let head_judgement = ms_to_judgement head_delta
+            let judgement =
+                if overheld && not dropped then
+                    max head_judgement judgement_if_overheld
+                elif missed || dropped then
+                    max head_judgement judgement_if_dropped
+                else
+                    head_judgement
+
+            let points = judgement_to_points head_delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.OnlyRequireHold _ ->
+            if (not overheld) && (missed || dropped) then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = None
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_overheld) ->
+            let judgement =
+                if overheld then judgement_if_overheld
+                elif missed then ruleset.DefaultJudgement 
+                else
+                    assert(windows.Length = ruleset.Judgements.Length)
+                    let mutable j = 0
+                    while 
+                        j + 1 < ruleset.Judgements.Length 
+                        && (
+                            match windows.[j] with 
+                            | None -> true 
+                            | Some (early, late) -> release_delta < early || release_delta > late
+                        )
+                        do
+                        j <- j + 1
+                    j
+                    
+            let points = judgement_to_points release_delta judgement
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
+            let judgement = 
+                if missed then
+                    ruleset.DefaultJudgement
+                else
+                    ms_to_judgement release_delta
+                    |> if dropped || overheld then max judgement_if_dropped else id
+
+            let points = judgement_to_points release_delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
 
     member private this.ProcessDropHold() : GameplayAction =
+        break_combo (false)
         DropHold
 
     member private this.ProcessRegrabHold() : GameplayAction =
         RegrabHold
 
     member private this.ProcessGhostTap() : GameplayAction =
+        // todo: rulesets can specify ghost tap judgements
         GhostTap
 
     override this.HandleEvent (internal_event: GameplayEvent<GameplayActionInternal>) =

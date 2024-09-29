@@ -277,8 +277,15 @@ module RulesetV2 =
 
             match ruleset.HoldMechanics with
             | HoldMechanics.CombineHeadAndTail rule ->
+
+                match ruleset.Accuracy with 
+                | AccuracyPoints.PointsPerJudgement _ -> ()
+                | _ -> failwith "CombineHeadAndTail rules must be used with PointsPerJudgement accuracy"
+
                 match rule with
                 | HeadTailCombineRule.OsuMania windows ->
+
+                    if ruleset.Judgements.Length <> 6 then failwith "osu!mania ln mechanics must be used with exactly 6 judgements"
                     
                     if negative(windows.Window320) then failwith "osu!mania ln Window320 must be non-negative"
                     if negative(windows.Window300) then failwith "osu!mania ln Window300 must be non-negative"
@@ -299,10 +306,11 @@ module RulesetV2 =
 
             | HoldMechanics.OnlyRequireHold window ->
                 if window < 0.0f<ms / rate> then failwith "OnlyRequireHold window must be non-negative"
-            | HoldMechanics.JudgeReleasesSeparately (judgement_windows, judgement_if_dropped) ->
+            | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_dropped) ->
+                if windows.Length <> ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `windows` must match judgement count"
                 let mutable w_min = 0.0f<ms / rate>
                 let mutable w_max = 0.0f<ms / rate>
-                for w in judgement_windows do
+                for w in windows do
                     match w with
                     | Some (early, late) ->
                         if early > w_min then failwithf "Early release window %.3fms must be %.3fms or earlier" early w_min
