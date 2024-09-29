@@ -21,7 +21,10 @@ module Validation =
             let ruleset = SC.create judge
 
             match RulesetV2.check ruleset with
-            | Ok _ -> printfn "%s: valid" ruleset.Name
+            | Ok _ -> 
+                printfn "%s: valid" ruleset.Name
+                printfn "Note windows: %A" ruleset.NoteWindows
+                printfn "Release windows: %A" ruleset.ReleaseWindows
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -45,7 +48,10 @@ module Validation =
                 let ruleset = OsuMania.create od mode
 
                 match RulesetV2.check ruleset with
-                | Ok _ -> printfn "%s: valid" ruleset.Name
+                | Ok _ -> 
+                    printfn "%s: valid" ruleset.Name
+                    printfn "Note windows: %A" ruleset.NoteWindows
+                    printfn "Release windows: %A" ruleset.ReleaseWindows
                 | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()

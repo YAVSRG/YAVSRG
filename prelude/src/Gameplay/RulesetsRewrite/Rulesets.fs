@@ -139,6 +139,26 @@ type RulesetV2 =
         if i < 0 || i >= this.Judgements.Length then Color.Gray
         else this.Judgements.[i].Color
 
+    member this.NoteWindows : GameplayTime * GameplayTime =
+        match this.Judgements |> Seq.rev |> Seq.tryPick _.TimingWindows with
+        | Some (early, late) -> early, late
+        | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
+    
+    member this.ReleaseWindows : GameplayTime * GameplayTime =
+        match this.HoldMechanics with
+        | HoldMechanics.OnlyRequireHold window -> 
+            -window, window
+        | HoldMechanics.JudgeReleasesSeparately (windows, _) ->
+            match windows |> Seq.rev |> Seq.tryPick id with
+            | Some (early, late) -> early, late
+            | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
+        | HoldMechanics.OnlyJudgeReleases _ -> 
+            this.NoteWindows
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
+            -w.Window50, w.Window100
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
+            early, late
+
 module RulesetV2 =
 
     open System.IO

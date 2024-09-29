@@ -68,41 +68,14 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
 
     let first_note = (TimeArray.first notes).Value.Time
 
-    let early_note_window_raw, late_note_window_raw = 
-        match ruleset.Judgements |> Seq.rev |> Seq.tryPick _.TimingWindows with
-        | Some (early, late) -> early, late
-        | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
-    
-    let early_release_window_raw, late_release_window_raw = 
-        match ruleset.HoldMechanics with
-        | HoldMechanics.OnlyRequireHold window -> 
-            -window, window
-        | HoldMechanics.JudgeReleasesSeparately (windows, _) ->
-            match windows |> Seq.rev |> Seq.tryPick id with
-            | Some (early, late) -> early, late
-            | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
-        | HoldMechanics.OnlyJudgeReleases _ -> 
-            early_note_window_raw, late_note_window_raw
-        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
-            -w.Window50, w.Window100
-        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
-            early, late
+    let early_note_window_raw, late_note_window_raw = ruleset.NoteWindows
+    let early_release_window_raw, late_release_window_raw = ruleset.ReleaseWindows
 
     let early_note_window_scaled, late_note_window_scaled = early_note_window_raw * rate, late_note_window_raw * rate
-
-    //let max_note_window_raw = max (abs early_note_window_raw) late_note_window_raw
-    //let max_note_window_scaled = max_note_window_raw * rate
-
     let early_release_window_scaled, late_release_window_scaled = early_release_window_raw * rate, late_release_window_raw * rate
 
     let early_window_scaled = min early_release_window_scaled early_note_window_scaled
     let late_window_scaled = max late_release_window_scaled late_note_window_scaled
-
-    //let max_release_window_raw = max (abs early_release_window_raw) late_release_window_raw
-    //let max_release_window_scaled = max_release_window_raw * rate
-
-    //let max_window_raw = max max_note_window_raw max_release_window_raw
-    //let max_window_scaled = max max_note_window_scaled max_release_window_scaled
 
     let hold_states = Array.create keys (H_NOTHING, -1)
 
@@ -119,7 +92,6 @@ type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvid
 
     let mutable expired_notes_index = 0
 
-    //member this.ScaledMissWindow = max_note_window_scaled
     member this.EnumerateRecentInputs() = replay.EnumerateRecentEvents()
     member this.Ruleset = ruleset
 
