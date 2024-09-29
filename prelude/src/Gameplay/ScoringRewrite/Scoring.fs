@@ -38,10 +38,88 @@ type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, note
     let on_hit_ev = Event<GameplayEvent<GameplayAction>>()
     let on_hit = on_hit_ev.Publish
 
-    // todo: state and all the goop inside
+    let judgement_counts = Array.zeroCreate ruleset.Judgements.Length
+    let mutable points_scored = 0.0
+    let mutable max_possible_points = 0.0
+
+    let mutable current_combo = 0
+    let mutable best_combo = 0
+    let mutable combo_breaks = 0
+    let mutable max_possible_combo = 0
+
+    let break_combo(would_have_increased_combo: bool) =
+        if would_have_increased_combo then max_possible_combo <- max_possible_combo + 1
+        combo_breaks <- combo_breaks + 1
+        current_combo <- 0
+
+    let incr_combo () =
+        max_possible_combo <- max_possible_combo + 1
+        current_combo <- current_combo + 1
+        best_combo <- max best_combo current_combo
+
+    let score_points(judgement_points, judgement) =
+        max_possible_points <- max_possible_points + 1.0
+        points_scored <- points_scored + judgement_points
+        judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
+
+    let add_judgement(judgement) =
+        judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
+
+    let ms_to_judgement (delta: GameplayTime) : int =
+        let mutable j = 0
+        while 
+            j + 1 < ruleset.Judgements.Length 
+            && (
+                match ruleset.Judgements.[j].TimingWindows with 
+                | None -> true 
+                | Some (early, late) -> delta < early || delta > late
+            )
+            do
+            j <- j + 1
+        j
+
+    let judgement_to_points : GameplayTime -> int -> float =
+        match ruleset.Accuracy with
+        | AccuracyPoints.WifeCurve j -> 
+            fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
+        | AccuracyPoints.PointsPerJudgement weights ->
+            fun _ (judgement: int) -> weights.[judgement]
+
+    member this.JudgementCounts = judgement_counts
+    member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
+    member this.CurrentCombo = current_combo
+    member this.BestCombo = best_combo
+    member this.ComboBreaks = combo_breaks
+    member this.MaxPossibleCombo = max_possible_combo
 
     member private this.ProcessHit(delta, is_missed) : GameplayAction =
-        Hit {| Delta = delta; Judgement = None; Missed = is_missed |}
+            
+        match ruleset.HoldMechanics with 
+        | HoldMechanics.OnlyJudgeReleases _ ->
+            if is_missed then break_combo(true) else incr_combo()
+            Hit
+                {|
+                    Delta = delta
+                    Judgement = None
+                    Missed = is_missed
+                |}
+        | _ ->
+            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let points = judgement_to_points delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Hit
+                {|
+                    Delta = delta
+                    Judgement = Some (judgement, points)
+                    Missed = is_missed
+                |}
 
     member private this.ProcessHold(delta, is_missed) : GameplayAction =
         Hold {| Delta = delta; Judgement = None; Missed = is_missed |}

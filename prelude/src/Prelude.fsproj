@@ -65,6 +65,7 @@
     <Compile Include="Gameplay\RulesetsRewrite\Presets\SC.fs" />
     <Compile Include="Gameplay\ScoringRewrite\HitMechanics.fs" />
     <Compile Include="Gameplay\ScoringRewrite\Events.fs" />
+    <Compile Include="Gameplay\ScoringRewrite\WifeCurve.fs" />
     <Compile Include="Gameplay\ScoringRewrite\Scoring.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
