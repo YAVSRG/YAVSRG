@@ -15,62 +15,49 @@ open Prelude.Gameplay.ScoringV2
 
 let private compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
 
-    let ruleset_mod = 
+    let window_modifier = 
         if score_data.ModsUsed &&& Mods.Easy <> Mods.None then OsuMania.Easy
         elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then OsuMania.HardRock
         else OsuMania.NoMod
 
     let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
 
-    let metric =
-        ScoreProcessor.run (OsuMania.create (float32 chart_od) ruleset_mod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
+    let metric = ScoreProcessor.run (OsuMania.create (float32 chart_od) window_modifier) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
-    let g_300 = if score_v2 then 305.0 else 300.0
+    let osu_accuracy =
+        let g_300 = if score_v2 then 305.0 else 300.0
 
-    let sum =
-        g_300
-        * float (
-            score_data.CountGeki
-            + score_data.Count300
-            + score_data.CountKatu
-            + score_data.Count100
-            + score_data.Count50
-            + score_data.CountMiss
-        )
-
-    let acc =
+        let sum =
+            g_300
+            * float (
+                score_data.CountGeki
+                + score_data.Count300
+                + score_data.CountKatu
+                + score_data.Count100
+                + score_data.Count50
+                + score_data.CountMiss
+            )
         g_300 * float (score_data.CountGeki)
         + 300.0 * float (score_data.Count300)
         + 200.0 * float score_data.CountKatu
         + 100.0 * float score_data.Count100
         + 50.0 * float score_data.Count50
-        |> fun total -> total / sum
+        |> fun total -> total / sum * 100.0
+    let osu_judgements = (int score_data.CountGeki, int score_data.Count300, int score_data.CountKatu, int score_data.Count100, int score_data.Count50, int score_data.CountMiss)
 
-    printfn "Score on %s [%s] -- od%.1f%s +%A\n----" header.Title header.DiffName chart_od (if score_v2 then "V2" else "") ruleset_mod
+    let interlude_accuracy = metric.Accuracy * 100.0
+    let interlude_judgements = (metric.JudgementCounts.[0], metric.JudgementCounts.[1], metric.JudgementCounts.[2], metric.JudgementCounts.[3], metric.JudgementCounts.[4], metric.JudgementCounts.[5])
 
-    printfn
-        "Interlude says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
-        (metric.Accuracy * 100.0)
-        metric.JudgementCounts.[0]
-        metric.JudgementCounts.[1]
-        metric.JudgementCounts.[2]
-        metric.JudgementCounts.[3]
-        metric.JudgementCounts.[4]
-        metric.JudgementCounts.[5]
-        metric.BestCombo
-
-    printfn
-        "osu! says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
-        (acc * 100.0)
-        score_data.CountGeki
-        score_data.Count300
-        score_data.CountKatu
-        score_data.Count100
-        score_data.Count50
-        score_data.CountMiss
-        score_data.MaxCombo
-
-    Console.ReadLine() |> ignore
+    printfn "\nScore on %s [%s] -- od%.1f%s +%A" header.Title header.DiffName chart_od (if score_v2 then "V2" else "") window_modifier
+    printfn " Interlude: %.2f%%\tosu!: %.2f%%" interlude_accuracy osu_accuracy
+    if score_v2 then
+        printfn " Skipping because scorev2 isn't supported yet ..."
+    elif osu_judgements <> interlude_judgements then
+        printfn " !! Not an exact match of judgements !!"
+        printfn " Interlude: %A\tosu!: %A" interlude_judgements osu_judgements
+        Console.ReadLine() |> ignore
+    else
+        printfn " Exact match, well done"
 
 let read_scores () =
 
@@ -135,4 +122,5 @@ let read_scores () =
 
             | None -> ()
 
+    printfn "All scores processed!"
     Console.ReadLine() |> ignore

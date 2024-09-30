@@ -3,6 +3,7 @@
 open System
 open System.IO
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
 open Prelude.Data.OsuClientInterop
@@ -27,7 +28,7 @@ module Replays =
         | Some(rate, mods) ->
 
         try 
-            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, rate)
+            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, 1.0f<rate>)
 
             Ok {
                 Timestamp =

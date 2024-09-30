@@ -14,7 +14,7 @@ open Prelude.Tests.Rulesets
 
 let mutable recent_beatmap_hash = ""
 
-let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
+let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (mods: Mods) =
 
     let chart : Chart = 
         {
@@ -69,7 +69,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
         Threading.Thread.Sleep(1000)
         recent_beatmap_hash <- beatmap_hash
 
-    let osu_replay = OsuReplay.encode_replay replay notes.[0].Time Mods.None beatmap_hash
+    let osu_replay = OsuReplay.encode_replay replay notes.[0].Time mods beatmap_hash
     use fs = File.Open("replay.osr", FileMode.Create)
     use bw = new BinaryWriter(fs)
     osu_replay.Write bw
@@ -124,18 +124,17 @@ let run_experiment () =
 
     let notes = 
         ChartBuilder(4)
-            .Note(0.0f<ms>)
-            .Note(2000.0f<ms>)
+            .Hold(0.0f<ms>, 1000.0f<ms>)
             .Build()
 
     let replay =
         ReplayBuilder()
-            .KeyDownFor(73.0f<ms>, 300.0f<ms>)
+            .KeyDownUntil(10.0f<ms>, 990.0f<ms>)
             .Build()
             .GetFullReplay()
 
-    Logging.Info(sprintf "Experiment: Recreate 100 windows issue")
+    Logging.Info(sprintf "Experiment: Recreate DT issues")
 
-    generate_scenario notes replay
+    generate_scenario notes replay Mods.DoubleTime
     Console.ReadKey() |> ignore
     collect_results () |> Async.RunSynchronously

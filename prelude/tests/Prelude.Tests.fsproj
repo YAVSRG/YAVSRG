@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Data\Hachi - DONUT HOLE (Raveille) [Filling].osu">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
