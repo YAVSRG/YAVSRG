@@ -189,8 +189,8 @@ module OsuClientParity =
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
-                HIT(97.5f<ms / rate>, true)
                 HIT(-28.0f<ms / rate>, false)
+                HIT(96.5f<ms / rate>, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -219,8 +219,8 @@ module OsuClientParity =
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
-                HIT(103.5f<ms / rate>, true)
-                HIT(-28.0f<ms / rate>, false)
+                HIT(-22.0f<ms / rate>, false)
+                HIT(102.5f<ms / rate>, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -250,7 +250,7 @@ module OsuClientParity =
             [
                 HIT(78.0f<ms / rate>, false)
                 HIT(102.0f<ms / rate>, false)
-                HIT(103.5f<ms / rate>, true)
+                HIT(102.5f<ms / rate>, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action

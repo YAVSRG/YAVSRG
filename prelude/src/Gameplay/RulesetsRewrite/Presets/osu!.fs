@@ -49,6 +49,7 @@ module OsuMania =
             Window100 = OK
             Window50 = MEH
             // todo: this matches experimental data but I must not be understanding something about LNs
+            // todo: investiagate if the 1ms edge window thing affects releasing on the edge
             WindowOverhold200 = 
                 let base_window = floor (43f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
                 match mode with
@@ -95,22 +96,25 @@ module OsuMania =
                         TimingWindows = Some (-GOOD, GOOD)
                         BreaksCombo = false
                     }
+                    // 50 and MISS have no late window
+                    // Yes, this is not a mistake (maybe by peppy), the late window is 1ms shorter
+                    // Hitting exactly the border of the 100 window does not hit the note
                     {
                         Name = "100"
                         Color = Color.FromArgb(0, 160, 255)
-                        TimingWindows = Some (-OK, OK)
+                        TimingWindows = Some (-OK, OK - 1.0f<ms / rate>)
                         BreaksCombo = false
                     }
                     {
                         Name = "50"
                         Color = Color.FromArgb(160, 160, 160)
-                        TimingWindows = Some (-MEH, OK) // 50 and Miss have no late window
+                        TimingWindows = Some (-MEH, OK - 1.0f<ms / rate>)
                         BreaksCombo = false
                     }
                     {
                         Name = "MISS"
                         Color = Color.FromArgb(255, 80, 80)
-                        TimingWindows = Some (-MISS, OK)
+                        TimingWindows = Some (-MISS, OK - 1.0f<ms / rate>)
                         BreaksCombo = true
                     }
                 |]
