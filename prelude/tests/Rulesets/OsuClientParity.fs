@@ -126,7 +126,7 @@ module OsuClientParity =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoringEventCollector(as_interlude_ruleset, TEST_CHART.Keys, (StoredReplayProvider(as_interlude_replay)), TEST_CHART.Notes, 1.0f<rate>)
+        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, (StoredReplayProvider(as_interlude_replay)), TEST_CHART.Notes, 1.0f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
@@ -292,7 +292,6 @@ module OsuClientParity =
 
         let event_deltas =
             score.Events
-            |> Seq.map debug
             |> Seq.map (_.Action)
             |> Seq.choose (
                 function
@@ -302,7 +301,6 @@ module OsuClientParity =
                 | _ -> None
             )
             |> Seq.map (fun f -> f * 1.5f |> float32 |> int)
-            |> Seq.map debug
 
         // Obtained with GosuMemory
         let EXPECTED_DATA =

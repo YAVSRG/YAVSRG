@@ -33,8 +33,6 @@
     <Compile Include="Database\DbCharts.fs" />
     <Compile Include="Noteskins\Helpers.fs" />
     <Compile Include="Noteskins\Validation.fs" />
-    <Compile Include="Scoring_Legacy\SCJ4.fs" />
-    <Compile Include="Scoring_Legacy\OsuOd8.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
