@@ -25,8 +25,10 @@ let private compare_interlude_implementation_to_osu (chart: Chart, header: Chart
     let metric =
         ScoreProcessor.run (OsuMania.create (float32 chart_od) ruleset_mod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
+    let g_300 = if score_v2 then 305.0 else 300.0
+
     let sum =
-        300.0
+        g_300
         * float (
             score_data.CountGeki
             + score_data.Count300
@@ -37,7 +39,8 @@ let private compare_interlude_implementation_to_osu (chart: Chart, header: Chart
         )
 
     let acc =
-        300.0 * float (score_data.CountGeki + score_data.Count300)
+        g_300 * float (score_data.CountGeki)
+        + 300.0 * float (score_data.Count300)
         + 200.0 * float score_data.CountKatu
         + 100.0 * float score_data.Count100
         + 50.0 * float score_data.Count50
@@ -124,7 +127,7 @@ let read_scores () =
                     use br = new BinaryReader(file)
                     let replay_data = OsuScoreDatabase_Score.Read br
 
-                    let interlude_replay = OsuReplay.decode_replay (replay_data, chart.Value.Chart, 1.0f<rate>)
+                    let interlude_replay = OsuReplay.decode_replay (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
                     match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
                     | Some(rate, _) -> compare_interlude_implementation_to_osu (chart.Value.Chart, chart.Value.Header, interlude_replay, rate, od, replay_data)

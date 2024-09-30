@@ -27,7 +27,7 @@ module Replays =
         | Some(rate, mods) ->
 
         try 
-            let replay_data = OsuReplay.decode_replay(replay, chart, rate)
+            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, rate)
 
             Ok {
                 Timestamp =

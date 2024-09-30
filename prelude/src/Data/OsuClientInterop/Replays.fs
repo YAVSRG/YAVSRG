@@ -10,7 +10,7 @@ open Prelude.Gameplay
 
 module OsuReplay =
 
-    let decode_replay (replay: OsuScoreDatabase_Score, chart: Chart, rate: Rate) : ReplayData =
+    let decode_replay (replay: OsuScoreDatabase_Score, first_note: Time, rate: Rate) : ReplayData =
 
         if replay.CompressedReplayBytes.IsNone then 
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
@@ -31,7 +31,7 @@ module OsuReplay =
         output.Flush()
         let string_data = output.ToArray() |> Encoding.UTF8.GetString
 
-        let mutable time = -chart.FirstNote
+        let mutable time = -first_note
         let mutable last_state = 256us
 
         seq {

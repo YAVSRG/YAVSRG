@@ -125,20 +125,19 @@ let run_experiment () =
     let notes = 
         ChartBuilder(4)
             .Note(0.0f<ms>)
-            .Note(108.0f<ms>)
-            .Note(222.0f<ms>)
+            .Note(125.0f<ms>)
+            .Note(375.0f<ms>)
             .Build()
 
     let replay =
         ReplayBuilder()
-            .KeyDownFor(-71.0f<ms>, 30.0f<ms>)
-            .KeyDownFor(108.0f<ms> - 121.0f<ms>, 30.0f<ms>)
-            .KeyDownFor(222.0f<ms> - 125.0f<ms>, 30.0f<ms>)
-            .KeyDownFor(222.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(78.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(228.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(366.0f<ms>, 30.0f<ms>)
             .Build()
             .GetFullReplay()
 
-    Logging.Info(sprintf "Experiment: Recreate Lylcaruis issue")
+    Logging.Info(sprintf "Experiment: Recreate column lock issue")
 
     generate_scenario notes replay
     Console.ReadKey() |> ignore

@@ -148,7 +148,7 @@ module Scores =
                     )
                 else
 
-                let replay_data = OsuReplay.decode_replay (replay_info, chart, rate * 1.0f<rate>)
+                let replay_data = OsuReplay.decode_replay (replay_info, chart.FirstNote, rate * 1.0f<rate>)
 
                 let score: Score =
                     {

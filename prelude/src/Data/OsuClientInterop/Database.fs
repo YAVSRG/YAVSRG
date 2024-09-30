@@ -320,6 +320,10 @@ type OsuScoreDatabase_Score =
                 if length < 0 then None else Some <| br.ReadBytes length
             OnlineScoreID = read_long br
         }
+    static member ReadReplay(path: string) =
+        use file = File.OpenRead path
+        use br = new BinaryReader(file)
+        OsuScoreDatabase_Score.Read(br)
 
     member this.Write(bw: BinaryWriter) =
         bw.Write this.Mode
