@@ -90,7 +90,7 @@ type GosuMemoryData =
                 geki: int // 320
                 katu: int // 200
                 sliderBreaks: int
-                hitErrorArray: int array
+                hitErrorArray: int array option
             |}
         |}
     }
@@ -98,7 +98,7 @@ type GosuMemoryData =
         [
             sprintf "%.2f%% %ix/%ix" this.gameplay.accuracy this.gameplay.combo.current this.gameplay.combo.max
             sprintf "%i | %i | %i | %i | %i | %i" this.gameplay.hits.geki this.gameplay.hits.``300`` this.gameplay.hits.katu this.gameplay.hits.``100`` this.gameplay.hits.``50`` this.gameplay.hits.``0``
-            this.gameplay.hits.hitErrorArray |> Seq.map (sprintf "%ims") |> String.concat ", "
+            this.gameplay.hits.hitErrorArray |> Option.defaultValue [||] |> Seq.map (sprintf "%ims") |> String.concat ", "
         ]
         |> String.concat "\n"
 
@@ -115,7 +115,7 @@ let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    for step = 0 to 10 do
+    for hold_time in [1.0f<ms>; 40.0f<ms>; 73.0f<ms>; 103.0f<ms>; 127.0f<ms>; 164.0f<ms>; 165.0f<ms>] do
 
         let notes = 
             ChartBuilder(4)
@@ -124,12 +124,12 @@ let run_experiment () =
 
         let replay =
             ReplayBuilder()
-                .KeyDownUntil(20.0f<ms>, 1000.0f<ms> + 10.0f<ms> * float32 step)
+                .KeyDownFor(0.0f<ms>, hold_time)
                 .Build()
                 .GetFullReplay()
 
-        Logging.Info(sprintf "Experiment: Overholding LN by %ims" (step * 10))
+        Logging.Info(sprintf "Experiment: Release after %.0fms" hold_time)
+
         generate_scenario notes replay
-        printfn "Press any key once the replay has been viewed ..."
         Console.ReadKey() |> ignore
         collect_results () |> Async.RunSynchronously

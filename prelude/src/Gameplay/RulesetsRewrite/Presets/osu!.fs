@@ -41,7 +41,6 @@ module OsuMania =
         let GOOD = good_window od |> mode.Apply
         let OK = ok_window od |> mode.Apply
         let MEH = meh_window od |> mode.Apply
-        let MISS = miss_window od |> mode.Apply // todo: figure out release mechanics for this, currently undocumented?
 
         {
             Window320 = floor (PERFECT * 1.2f<rate / ms>) * 1.0f<ms / rate> + 0.5f<ms / rate>

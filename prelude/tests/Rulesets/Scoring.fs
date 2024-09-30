@@ -133,4 +133,4 @@ module Scoring =
     // todo: test all ln combinations for Interlude ruleset
     // todo: test all ln combinations for osu! ruleset
     // todo: test all ln combinations for osu! score v2 ruleset
-    // todo: test simple combinations for Etterna ruleset
+    // todo: test simple ln combinations for Etterna ruleset

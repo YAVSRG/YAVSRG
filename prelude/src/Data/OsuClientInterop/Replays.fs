@@ -36,6 +36,7 @@ module OsuReplay =
 
         seq {
             for entry in string_data.Split(",", StringSplitOptions.RemoveEmptyEntries) do
+
                 let parts = entry.Split("|")
 
                 if parts.[0] <> "-12345" then
@@ -48,10 +49,12 @@ module OsuReplay =
         }
         |> Array.ofSeq
 
-    let encode_replay (replay: ReplayData) (mods: Mods) (beatmap_hash: string) =
+    let encode_replay (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) =
+
+        let first_note = first_note |> float32 |> round |> int
 
         let input_as_replay_string =
-            let mutable previous_time = -1000
+            let mutable previous_time = -first_note
             replay
             |> Seq.map (fun (struct (timestamp, key_state)) ->
                 let t = previous_time
@@ -63,7 +66,7 @@ module OsuReplay =
 
         let raw =
             sprintf
-                "0|256|500|0,0|256|500|0,-1000|0|1|0,%s,-12345|0|0|32767"
+                "0|256|500|0,0|256|500|0,%s,-12345|0|0|32767"
                 input_as_replay_string
             |> Text.Encoding.UTF8.GetBytes
 
