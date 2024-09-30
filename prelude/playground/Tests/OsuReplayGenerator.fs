@@ -62,7 +62,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
     |> ignore
 
     let beatmap_hash = Beatmap.Hash beatmap
-    let osu_replay = OsuReplay.encode_replay replay Mods.None beatmap_hash
+    let osu_replay = OsuReplay.encode_replay replay notes.[0].Time Mods.None beatmap_hash
     use fs = File.Open("replay.osr", FileMode.Create)
     use bw = new BinaryWriter(fs)
     osu_replay.Write bw
