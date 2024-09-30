@@ -1,4 +1,4 @@
-name: Release Interlude
+name: Check suite
 
 on:
   push:
