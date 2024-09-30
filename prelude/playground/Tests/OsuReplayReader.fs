@@ -20,6 +20,8 @@ let private compare_interlude_implementation_to_osu (chart: Chart, header: Chart
         elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then OsuMania.HardRock
         else OsuMania.NoMod
 
+    let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
+
     let metric =
         ScoreProcessor.run (OsuMania.create (float32 chart_od) ruleset_mod) chart.Keys (StoredReplayProvider(replay)) chart.Notes rate
 
@@ -41,7 +43,7 @@ let private compare_interlude_implementation_to_osu (chart: Chart, header: Chart
         + 50.0 * float score_data.Count50
         |> fun total -> total / sum
 
-    printfn "Score on %s [%s] -- od%.1f +%A\n----" header.Title header.DiffName chart_od ruleset_mod
+    printfn "Score on %s [%s] -- od%.1f%s +%A\n----" header.Title header.DiffName chart_od (if score_v2 then "V2" else "") ruleset_mod
 
     printfn
         "Interlude says: %.2f%% accuracy\n%04i|%04i|%04i|%04i|%04i|%04i\n%ix\n----"
