@@ -12,6 +12,8 @@ open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Tests.Rulesets
 
+let mutable recent_beatmap_hash = ""
+
 let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
 
     let chart : Chart = 
@@ -62,6 +64,11 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) =
     |> ignore
 
     let beatmap_hash = Beatmap.Hash beatmap
+
+    if recent_beatmap_hash <> beatmap_hash then
+        Threading.Thread.Sleep(1000)
+        recent_beatmap_hash <- beatmap_hash
+
     let osu_replay = OsuReplay.encode_replay replay notes.[0].Time Mods.None beatmap_hash
     use fs = File.Open("replay.osr", FileMode.Create)
     use bw = new BinaryWriter(fs)
@@ -115,21 +122,24 @@ let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    for hold_time in [1.0f<ms>; 40.0f<ms>; 73.0f<ms>; 103.0f<ms>; 127.0f<ms>; 164.0f<ms>; 165.0f<ms>] do
+    let notes = 
+        ChartBuilder(4)
+            .Note(0.0f<ms>)
+            .Note(108.0f<ms>)
+            .Note(222.0f<ms>)
+            .Build()
 
-        let notes = 
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
-                .Build()
+    let replay =
+        ReplayBuilder()
+            .KeyDownFor(-71.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(108.0f<ms> - 121.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(222.0f<ms> - 125.0f<ms>, 30.0f<ms>)
+            .KeyDownFor(222.0f<ms>, 30.0f<ms>)
+            .Build()
+            .GetFullReplay()
 
-        let replay =
-            ReplayBuilder()
-                .KeyDownFor(0.0f<ms>, hold_time)
-                .Build()
-                .GetFullReplay()
+    Logging.Info(sprintf "Experiment: Recreate Lylcaruis issue")
 
-        Logging.Info(sprintf "Experiment: Release after %.0fms" hold_time)
-
-        generate_scenario notes replay
-        Console.ReadKey() |> ignore
-        collect_results () |> Async.RunSynchronously
+    generate_scenario notes replay
+    Console.ReadKey() |> ignore
+    collect_results () |> Async.RunSynchronously

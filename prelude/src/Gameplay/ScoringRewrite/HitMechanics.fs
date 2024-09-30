@@ -125,6 +125,7 @@ module private HitMechanics =
         let mutable i = start_index
         let mutable candidate_note_index = -1
         let mutable candidate_note_delta = 0.0f<ms>
+        let mutable blocked = false
         let start_of_window = now - late_window
         let end_of_window = now - early_window
         
@@ -136,6 +137,10 @@ module private HitMechanics =
             let delta = now - hit_data.[i].Time
             let struct (_, status) = hit_data.[i].Data
 
+            if (status.[k] = HitFlags.HIT_ACCEPTED && delta < 0.0f<ms>) then
+                blocked <- true
+                i <- hit_data.Length
+
             // Find earliest unhit note
             if (status.[k] = HitFlags.HIT_REQUIRED || status.[k] = HitFlags.HIT_HOLD_REQUIRED) then
                 candidate_note_index <- i
@@ -144,7 +149,9 @@ module private HitMechanics =
 
             i <- i + 1
 
-        if candidate_note_index >= 0 then
+        if blocked then
+            BLOCKED
+        elif candidate_note_index >= 0 then
             FOUND (candidate_note_index, candidate_note_delta)
         else
             NOTFOUND

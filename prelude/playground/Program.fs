@@ -1,4 +1,5 @@
 ﻿open System
+open System.IO
 open Percyqaz.Common
 
 // This project is for a bunch of loose scripts/ad-hoc testing
@@ -10,10 +11,9 @@ let your_script_here () =
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    Logging.Info "=== Prelude experiments/playground ==="
+    Logging.LogFile <- Some(Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
 
     your_script_here ()
 
-    Logging.Info "Complete"
     Logging.Shutdown()
     0
