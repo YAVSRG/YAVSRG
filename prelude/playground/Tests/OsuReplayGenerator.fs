@@ -122,19 +122,23 @@ let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    let notes = 
-        ChartBuilder(4)
-            .Hold(0.0f<ms>, 1000.0f<ms>)
-            .Build()
+    for offset in [24.0f<ms>; 25.0f<ms>; 60.0f<ms>; 61.0f<ms>; 109.0f<ms>; 110.0f<ms>; 111.0f<ms>; 153.0f<ms>; 154.0f<ms>; 155.0f<ms>] do
 
-    let replay =
-        ReplayBuilder()
-            .KeyDownUntil(10.0f<ms>, 990.0f<ms>)
-            .Build()
-            .GetFullReplay()
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
 
-    Logging.Info(sprintf "Experiment: Recreate DT issues")
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms> + offset, 30.0f<ms>)
+                .KeyDownFor(1000.0f<ms> - offset, 30.0f<ms>)
+                .Build()
+                .GetFullReplay()
 
-    generate_scenario notes replay Mods.DoubleTime
-    Console.ReadKey() |> ignore
-    collect_results () |> Async.RunSynchronously
+        Logging.Info(sprintf "Experiment: DT windows experiment (%.0fms)" offset)
+
+        generate_scenario notes replay Mods.DoubleTime
+        Console.ReadKey() |> ignore
+        collect_results () |> Async.RunSynchronously

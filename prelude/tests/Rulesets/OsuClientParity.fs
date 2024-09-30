@@ -169,11 +169,13 @@ module OsuClientParity =
         let event_processing = GameplayEventCollector(OD10_RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
+        let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.NoteWindows
+
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
                 HIT(-28.0f<ms / rate>, false)
-                HIT(96.5f<ms / rate>, true)
+                HIT(CONVENTIONAL_LATE_WINDOW, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -199,11 +201,13 @@ module OsuClientParity =
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
+
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
                 HIT(-22.0f<ms / rate>, false)
-                HIT(102.5f<ms / rate>, true)
+                HIT(CONVENTIONAL_LATE_WINDOW, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -229,11 +233,13 @@ module OsuClientParity =
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
+
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
                 HIT(102.0f<ms / rate>, false)
-                HIT(102.5f<ms / rate>, true)
+                HIT(CONVENTIONAL_LATE_WINDOW, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
