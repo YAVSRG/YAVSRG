@@ -3,9 +3,11 @@
 open Prelude
 open Prelude.Gameplay.RulesetsV2
 
-module SC =
+module Wife3 =
 
     let create (judge: int) : RulesetV2 =
+
+        if judge > 9 || judge < 4 then failwithf "Judge must be between 4 and 9, '%i' is not supported" judge
 
         let PERFECT_WINDOW = 
             if judge = 9 then 9.0f<ms / rate>
@@ -13,25 +15,13 @@ module SC =
                 let scale = (10.0f - float32 judge) / 6.0f
                 45.0f<ms / rate> * scale
 
-        let MISS_PENALTY_POINTS =
-            match judge with
-            | 2 -> -0.4
-            | 3 -> -0.6
-            | 4 -> -1.0
-            | 5 -> -1.6
-            | 6 -> -2.6
-            | 7 -> -4.7
-            | 8 -> -10.0
-            | 9 -> -20.0
-            | _ -> failwithf "Judge must be between 2 and 9, '%i' is not supported" judge
-
         {
-            Name = sprintf "SC (J%i)" judge
-            Description = "The 'official' scoring system of Interlude, tuned for a balanced experience"
+            Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 (J%i)" judge
+            Description = "Simulates Etterna's scoring system, Wife3"
             Judgements =
                 [|
                     {
-                        Name = "Marvellous"
+                        Name = "Marvelous"
                         Color = Color.Aqua
                         BreaksCombo = false
                         TimingWindows = Some(-PERFECT_WINDOW * 0.5f, PERFECT_WINDOW * 0.5f)
@@ -58,7 +48,7 @@ module SC =
                         Name = "Bad"
                         Color = Color.Fuchsia
                         BreaksCombo = true
-                        TimingWindows = Some(-PERFECT_WINDOW * 4.0f |> min -180.0f<ms / rate>, PERFECT_WINDOW * 4.0f |> max 180.0f<ms / rate>)
+                        TimingWindows = Some(-180.0f<ms / rate>, 180.0f<ms / rate>)
                     }
                     {
                         Name = "Miss"
@@ -72,57 +62,82 @@ module SC =
                     {
                         Name = "D"
                         Accuracy = 0.0
-                        Color = Color.FromArgb(200, 163, 155)
-                    }
-                    {
-                        Name = "C-"
-                        Accuracy = 0.89995
-                        Color = Color.FromArgb(194, 162, 182)
+                        Color = Color.Red
                     }
                     {
                         Name = "C"
-                        Accuracy = 0.90995
-                        Color = Color.FromArgb(202, 153, 183)
-                    }
-                    {
-                        Name = "B-"
-                        Accuracy = 0.91995
-                        Color = Color.FromArgb(163, 190, 207)
+                        Accuracy = 0.6
+                        Color = Color.Purple
                     }
                     {
                         Name = "B"
-                        Accuracy = 0.92995
-                        Color = Color.FromArgb(149, 193, 220)
-                    }
-                    {
-                        Name = "A-"
-                        Accuracy = 0.93995
-                        Color = Color.FromArgb(148, 210, 180)
+                        Accuracy = 0.7
+                        Color = Color.Blue
                     }
                     {
                         Name = "A"
-                        Accuracy = 0.94995
-                        Color = Color.FromArgb(134, 227, 183)
+                        Accuracy = 0.8
+                        Color = Color.Lime
                     }
                     {
-                        Name = "A+"
-                        Accuracy = 0.95995
-                        Color = Color.FromArgb(127, 231, 139)
+                        Name = "A."
+                        Accuracy = 0.85
+                        Color = Color.Lime
                     }
                     {
-                        Name = "S-"
-                        Accuracy = 0.96995
-                        Color = Color.FromArgb(237, 205, 140)
+                        Name = "A:"
+                        Accuracy = 0.9
+                        Color = Color.Lime
                     }
                     {
-                        Name = "S"
-                        Accuracy = 0.97995
-                        Color = Color.FromArgb(246, 234, 128)
+                        Name = "AA"
+                        Accuracy = 0.93
+                        Color = Color.Lime
                     }
                     {
-                        Name = "S+"
-                        Accuracy = 0.98995
-                        Color = Color.FromArgb(235, 200, 220)
+                        Name = "AA."
+                        Accuracy = 0.965
+                        Color = Color.Lime
+                    }
+                    {
+                        Name = "AA:"
+                        Accuracy = 0.99
+                        Color = Color.Lime
+                    }
+                    {
+                        Name = "AAA"
+                        Accuracy = 0.997
+                        Color = Color.Gold
+                    }
+                    {
+                        Name = "AAA."
+                        Accuracy = 0.998
+                        Color = Color.Gold
+                    }
+                    {
+                        Name = "AAA:"
+                        Accuracy = 0.999
+                        Color = Color.Gold
+                    }
+                    {
+                        Name = "AAAA"
+                        Accuracy = 0.99955
+                        Color = Color.Cyan
+                    }
+                    {
+                        Name = "AAAA."
+                        Accuracy = 0.9997
+                        Color = Color.Cyan
+                    }
+                    {
+                        Name = "AAAA:"
+                        Accuracy = 0.9998
+                        Color = Color.Cyan
+                    }
+                    {
+                        Name = "AAAAA"
+                        Accuracy = 0.999935
+                        Color = Color.White
                     }
                 |]
             Lamps =
@@ -133,7 +148,7 @@ module SC =
                         Color = Color.FromArgb(255, 160, 160)
                     }
                     {
-                        Name = "1CB"
+                        Name = "MF"
                         Requirement = LampRequirement.ComboBreaksAtMost 1
                         Color = Color.FromArgb(160, 160, 160)
                     }
@@ -148,7 +163,7 @@ module SC =
                         Color = Color.FromArgb(160, 255, 160)
                     }
                     {
-                        Name = "1G"
+                        Name = "BF"
                         Requirement = LampRequirement.JudgementAtMost (2, 1)
                         Color = Color.FromArgb(200, 160, 255)
                     }
@@ -163,7 +178,7 @@ module SC =
                         Color = Color.FromArgb(255, 255, 160)
                     }
                     {
-                        Name = "1P"
+                        Name = "WF"
                         Requirement = LampRequirement.JudgementAtMost (1, 1)
                         Color = Color.FromArgb(255, 160, 255)
                     }
@@ -173,7 +188,7 @@ module SC =
                         Color = Color.FromArgb(160, 255, 255)
                     }
                 |]
-            Accuracy = AccuracyPoints.PointsPerJudgement [| 1.0; 0.9; 0.5; -0.5; MISS_PENALTY_POINTS; MISS_PENALTY_POINTS |]
-            HitMechanics = HitMechanics.Interlude 90.0f<ms / rate>
-            HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (-180.0f<ms / rate>, 180.0f<ms / rate>, 3, 3))
+            Accuracy = AccuracyPoints.WifeCurve judge
+            HitMechanics = HitMechanics.Etterna
+            HoldMechanics = HoldMechanics.OnlyRequireHold 180.0f<ms / rate>
         }

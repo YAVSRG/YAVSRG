@@ -58,6 +58,31 @@ module Validation =
 
         Assert.Pass()
 
+    [<Test>]
+    let Wife3_J4_Valid () =
+        let ruleset = Wife3.create 4
+
+        match RulesetV2.check ruleset with
+        | Ok _ -> Assert.Pass()
+        | Error reason -> Assert.Fail(reason)
+
+    [<Test>]
+    let Wife3_AllJudges_Valid () =
+
+        for judge = 4 to 9 do
+                
+            let ruleset = Wife3.create judge
+
+            match RulesetV2.check ruleset with
+            | Ok _ -> 
+                printfn "%s: valid" ruleset.Name
+                printfn " Note windows: %A" ruleset.NoteWindows
+                printfn " Release windows: %A" ruleset.ReleaseWindows
+                printfn " Hash: %s" (RulesetV2.hash ruleset)
+            | Error reason -> Assert.Fail(reason)
+
+        Assert.Pass()
+
     let VALID_RULESET = SC.create 4
 
     [<Test>]

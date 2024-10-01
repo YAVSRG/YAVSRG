@@ -51,7 +51,8 @@
     <Compile Include="Gameplay\Replays.fs" />
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\Rulesets\Presets\SC.fs" />
-    <Compile Include="Gameplay\Rulesets\Presets\osu!.fs" />
+    <Compile Include="Gameplay\Rulesets\Presets\osu!mania.fs" />
+    <Compile Include="Gameplay\Rulesets\Presets\Wife3.fs" />
     <Compile Include="Gameplay\Scoring\Grades.fs" />
     <Compile Include="Gameplay\Scoring\Lamps.fs" />
     <Compile Include="Gameplay\Scoring\HitMechanics.fs" />
