@@ -48,9 +48,6 @@ module OsuClientParity =
         let back_as_osu_replay = OsuReplay.encode_replay as_interlude_replay TEST_CHART.FirstNote Mods.None TEST_OSU_FILE_HASH
         let return_as_interlude_replay = OsuReplay.decode_replay (back_as_osu_replay, TEST_CHART.FirstNote, 1.0f<rate>)
 
-        printfn "%A" as_interlude_replay
-        printfn "%A" return_as_interlude_replay
-
         Assert.AreEqual(as_interlude_replay, return_as_interlude_replay)
 
     [<Test>]

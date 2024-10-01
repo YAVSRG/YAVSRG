@@ -23,9 +23,9 @@ module Validation =
             match RulesetV2.check ruleset with
             | Ok _ -> 
                 printfn "%s: valid" ruleset.Name
-                printfn "Note windows: %A" ruleset.NoteWindows
-                printfn "Release windows: %A" ruleset.ReleaseWindows
-                printfn "Hash: %s" (RulesetV2.hash ruleset)
+                printfn " Note windows: %A" ruleset.NoteWindows
+                printfn " Release windows: %A" ruleset.ReleaseWindows
+                printfn " Hash: %s" (RulesetV2.hash ruleset)
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -51,9 +51,9 @@ module Validation =
                 match RulesetV2.check ruleset with
                 | Ok _ -> 
                     printfn "%s: valid" ruleset.Name
-                    printfn "Note windows: %A" ruleset.NoteWindows
-                    printfn "Release windows: %A" ruleset.ReleaseWindows
-                    printfn "Hash: %s" (RulesetV2.hash ruleset)
+                    printfn " Note windows: %A" ruleset.NoteWindows
+                    printfn " Release windows: %A" ruleset.ReleaseWindows
+                    printfn " Hash: %s" (RulesetV2.hash ruleset)
                 | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()

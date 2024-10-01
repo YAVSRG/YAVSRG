@@ -54,14 +54,14 @@ module ScoreScreenStats =
         let GRAPH_POINT_COUNT = 200
         let graph_points = ResizeArray<GraphPoint>()
 
-        let taps = ref 1
+        let taps = ref 0
         let early_taps = ref 0
         let tap_sum = ref 0.0f<ms / rate>
         let tap_sumOfSq = ref 0.0f<ms / rate> // f# type system bug
         let earliest_tap = ref 0.0f<ms / rate>
         let latest_tap = ref 0.0f<ms / rate>
 
-        let releases = ref 1
+        let releases = ref 0
         let early_releases = ref 0
         let release_sum = ref 0.0f<ms / rate>
         let release_sumOfSq = ref 0.0f<ms / rate>
@@ -151,6 +151,33 @@ module ScoreScreenStats =
             | DropHold -> ()
             | RegrabHold -> ()
 
+        let add_graph_points (chart_time: ChartTime) (new_graph_points_needed: int) =
+            let last_point_timestamp = if graph_points.Count > 0 then graph_points.[0].Time else 0.0f<ms>
+
+            let mean = tap_sum.Value / float32 (max 1 taps.Value)
+            let standard_deviation =
+                sqrt(
+                    ((tap_sumOfSq.Value / float32 (max 1 taps.Value) * 1.0f<ms / rate>)
+                        - mean * mean)
+                    |> float32
+                )
+                * 1.0f<ms / rate>
+            let lamp = Lamp.calculate score_processor.Ruleset.Lamps score_processor.JudgementCounts score_processor.ComboBreaks
+
+            for i = 1 to new_graph_points_needed do
+                let this_point_timestamp = 
+                    last_point_timestamp + (chart_time - last_point_timestamp) * (float32 i / float32 new_graph_points_needed)
+                graph_points.Add
+                    {
+                        Time = this_point_timestamp
+                        PointsScored = scored_points
+                        MaxPointsScored = max_points
+                        Lamp = lamp
+                        Mean = mean
+                        StandardDeviation = standard_deviation
+                        Judgements = filtered_judgements |> Array.copy
+                    }
+
         for ev in score_processor.Events |> Seq.where(fun ev -> column_filter.[ev.Column]) do
             add_action ev
 
@@ -165,34 +192,12 @@ module ScoreScreenStats =
                     |> min GRAPH_POINT_COUNT
                     |> (fun target_count -> target_count - graph_points.Count)
 
-            let last_point_timestamp = if graph_points.Count > 0 then graph_points.[0].Time else 0.0f<ms>
+            add_graph_points ev.Time new_graph_points_needed
 
-            let mean = tap_sum.Value / float32 taps.Value
-            let standard_deviation =
-                sqrt(
-                    ((tap_sumOfSq.Value / float32 taps.Value * 1.0f<ms / rate>)
-                        - mean * mean)
-                    |> float32
-                )
-                * 1.0f<ms / rate>
-            let lamp = Lamp.calculate score_processor.Ruleset.Lamps score_processor.JudgementCounts score_processor.ComboBreaks
+        add_graph_points score_processor.Duration (GRAPH_POINT_COUNT - graph_points.Count)
 
-            for i = 1 to new_graph_points_needed do
-                let this_point_timestamp = 
-                    last_point_timestamp + (ev.Time - last_point_timestamp) * (float32 i / float32 new_graph_points_needed)
-                graph_points.Add
-                    {
-                        Time = this_point_timestamp
-                        PointsScored = scored_points
-                        MaxPointsScored = max_points
-                        Lamp = lamp
-                        Mean = mean
-                        StandardDeviation = standard_deviation
-                        Judgements = filtered_judgements |> Array.copy
-                    }
-
-        let tap_mean = tap_sum.Value / float32 taps.Value
-        let release_mean = release_sum.Value / float32 releases.Value
+        let tap_mean = tap_sum.Value / float32 (max 1 taps.Value)
+        let release_mean = release_sum.Value / float32 (max 1 releases.Value)
 
         {
             Notes = notes_hit.Value, notes_count.Value
@@ -203,23 +208,23 @@ module ScoreScreenStats =
             TapMean = tap_mean
             TapStandardDeviation =
                 sqrt(
-                    ((tap_sumOfSq.Value / float32 taps.Value * 1.0f<ms / rate>)
+                    ((tap_sumOfSq.Value / float32 (max 1 taps.Value) * 1.0f<ms / rate>)
                      - tap_mean * tap_mean)
                     |> float32
                 )
                 * 1.0f<ms / rate>
-            TapEarlyPercent = float early_taps.Value / float taps.Value
+            TapEarlyPercent = float early_taps.Value / float (max 1 taps.Value)
             TapRange = earliest_tap.Value, latest_tap.Value
 
             ReleaseMean = release_mean
             ReleaseStandardDeviation =
                 sqrt(
-                    ((release_sumOfSq.Value / float32 releases.Value * 1.0f<ms / rate>)
+                    ((release_sumOfSq.Value / float32 (max 1 releases.Value) * 1.0f<ms / rate>)
                      - release_mean * release_mean)
                     |> float32
                 )
                 * 1.0f<ms / rate>
-            ReleaseEarlyPercent = float early_releases.Value / float releases.Value
+            ReleaseEarlyPercent = float early_releases.Value / float (max 1 releases.Value)
             ReleaseRange = earliest_release.Value, latest_release.Value
 
             Judgements = filtered_judgements
@@ -235,7 +240,7 @@ module ScoreScreenStats =
                 let gr = if filtered_judgements.Length > 2 then filtered_judgements.[2] else 0
                 if gr = 0 then sprintf "%.1f:0" (float pf) else sprintf "%.1f:1" (float pf / float gr)
 
-            GraphPoints = [||]
+            GraphPoints = graph_points.ToArray()
             
             ColumnFilterApplied = column_filter |> Array.forall id |> not
         }

@@ -27,6 +27,7 @@
     <Compile Include="Rulesets\Grades.fs" />
     <Compile Include="Rulesets\Events.fs" />
     <Compile Include="Rulesets\Scoring.fs" />
+    <Compile Include="Rulesets\Graph.fs" />
     <Compile Include="Rulesets\OsuClientParity.fs" />
     <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\UserDatabase.fs" />
