@@ -1,5 +1,7 @@
 ﻿namespace Prelude
 
+open System
+
 [<AutoOpen>]
 module Types =
 
@@ -43,6 +45,9 @@ module Types =
     [<Measure>]
     type minute
 
+    [<Measure>]
+    type second
+
     type Time = Percyqaz.Common.Time
 
     module Time =
@@ -53,6 +58,14 @@ module Types =
     type GameplayTime = float32<ms / rate>
 
     type Rate = float32<rate>
+
+    module Setting =
+        open Percyqaz.Common.Setting
+        let rate x = 
+            let setting = bounded x 0.5f<rate> 3.0f<rate>
+            { setting with
+                Set = fun r -> setting.Set(MathF.Round(float32 r, 2) * 1.0f<rate>)
+            }
 
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }

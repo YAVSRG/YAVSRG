@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Data.User
 
+open Prelude
 open Prelude.Gameplay
 open Prelude.Data.Library
 
@@ -37,7 +38,7 @@ module Skillsets =
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
                     let better_accuracy = 1.0 - (1.0 - acc) / ACC_INCREASE
-                    let better_rate = rate + 0.3f
+                    let better_rate = rate + 0.3f<rate>
                     let improvement = KeymodeSkillBreakdown.what_if cc.Patterns.Patterns better_accuracy better_rate keymode_skills.[cc.Keys - 3]
                     if improvement.Total = 0.0f then
                         printfn "%.2f%% [%.2fx] on %s is an underperformance" (acc * 100.0) rate cc.Title

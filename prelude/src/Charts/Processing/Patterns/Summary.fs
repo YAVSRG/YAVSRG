@@ -11,11 +11,11 @@ type PatternReport =
         LNPercent: float32
         SVAmount: Time
         Category: ChartCategorisation
-        Density10: float32
-        Density25: float32
-        Density50: float32
-        Density75: float32
-        Density90: float32
+        Density10: float32</second>
+        Density25: float32</second>
+        Density50: float32</second>
+        Density75: float32</second>
+        Density90: float32</second>
     }
     static member Default = 
         { 
@@ -23,22 +23,22 @@ type PatternReport =
             LNPercent = 0.0f
             SVAmount = 0.0f<ms>
             Category = ChartCategorisation.Default
-            Density10 = 0.0f
-            Density25 = 0.0f
-            Density50 = 0.0f
-            Density75 = 0.0f
-            Density90 = 0.0f
+            Density10 = 0.0f</second>
+            Density25 = 0.0f</second>
+            Density50 = 0.0f</second>
+            Density75 = 0.0f</second>
+            Density90 = 0.0f</second>
         }
 
 module PatternReport =
 
-    let from_chart_uncached (rate: float32) (chart: Chart) : PatternReport =
-        let raw_data, core_patterns, specific_patterns = PatternFinder.find_patterns rate chart
+    let from_chart_uncached (chart: Chart) : PatternReport =
+        let raw_data, core_patterns, specific_patterns = PatternFinder.find_patterns chart
 
         let breakdown =
             core_patterns
             |> Clustering.cluster_pattern_bpms
-            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70)
+            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70<beat / minute>)
             |> Breakdown.generate specific_patterns
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> List.ofSeq

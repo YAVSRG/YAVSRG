@@ -2,7 +2,7 @@
 
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.RulesetsV2
 
 type GameplayAction =
@@ -29,6 +29,10 @@ type GameplayAction =
     | DropHold
     | RegrabHold
     | GhostTap
+
+/// This processor extends GameplayEventProcessor, taking its series of raw `GameplayEvent<GameplayActionInternal>` event markers 
+/// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
+/// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
 
 type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
     inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
@@ -87,6 +91,7 @@ type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, note
 
     member val Duration = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
     member val JudgementCounts = judgement_counts
+    member val Rate = rate
     member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
     member this.CurrentCombo = current_combo
     member this.BestCombo = best_combo

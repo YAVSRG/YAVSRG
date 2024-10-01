@@ -74,10 +74,6 @@ module Common =
         override this.Default(ctx: Json.Context) =
             fun () -> Collections.Concurrent.ConcurrentDictionary()
 
-    module Setting =
-        open Percyqaz.Common.Setting
-        let rate x = bounded x 0.5f 3.0f |> roundf 2
-
     (*
         Localisation
     *)
@@ -134,7 +130,26 @@ module Common =
             .WithCodec<ColorCodec>()
             .WithCodec<ConcurrentDictionaryCodec<_, _>>()
 
-    let internal cached (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
+    /// Takes a function and returns an equivalent function BUT if given the same input repeatedly it will reuse the previous value instead of recalculating
+    /// Used to optimise repeated calls to chart calculations where you are likely to make several for one selected chart before changing to another
+    let internal cached (f: 'A -> 'B) : 'A -> 'B =
+        let LOCK_OBJ = obj()
+        let mutable previous : ('A * 'B) option = None
+        fun (x: 'A) ->
+            match
+                lock LOCK_OBJ (fun () ->
+                    match previous with
+                    | Some (_x, _y) when x = _x -> Some _y
+                    | _ -> None
+                )
+            with
+            | Some cached_calculation -> cached_calculation
+            | None ->
+                let res = f x
+                lock LOCK_OBJ (fun () -> previous <- Some (x, res))
+                res
+
+    let internal cached2 (f: 'A -> 'B -> 'C) : 'A -> 'B -> 'C =
         let LOCK_OBJ = obj()
         let mutable previous : ('A * 'B * 'C) option = None
         fun (a: 'A) (b: 'B) ->

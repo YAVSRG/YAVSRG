@@ -2,7 +2,7 @@
 
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.ScoringV2
 
 type ChartBuilder(keycount: int) =

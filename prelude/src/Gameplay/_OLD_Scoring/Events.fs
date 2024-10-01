@@ -1,6 +1,62 @@
 ﻿namespace Prelude.Gameplay
 
 open Prelude
+open Prelude.Charts
+open Prelude.Gameplay.Replays
+
+type HitStatus =
+    | NOTHING = 0
+
+    | HIT_REQUIRED = 1
+    | HIT_HOLD_REQUIRED = 2
+    | HIT_ACCEPTED = 3
+
+    | RELEASE_REQUIRED = 4
+    | RELEASE_ACCEPTED = 5
+
+// this data is in-memory only and not exposed much to other parts of the code
+// the flags in particular need never be exposed anywhere else, while the hit deltas can be used on the score screen to give useful data
+// most interesting things should come out of a specific score system implementation
+
+type InternalScoreDataRow = (struct (Time * Time array * HitStatus array))
+type InternalScoreData = InternalScoreDataRow array
+
+module InternalScore =
+
+    let inline offsetOf (struct (t, _, _): InternalScoreDataRow) = t
+
+    let create_gameplay (miss_window: Time) (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+        notes
+        |> Array.map (fun { Time = time; Data = nr } ->
+            let times = Array.create keys miss_window
+            let statuses = Array.create keys HitStatus.NOTHING
+
+            for k = 0 to (keys - 1) do
+                if nr.[k] = NoteType.NORMAL then
+                    statuses.[k] <- HitStatus.HIT_REQUIRED
+                elif nr.[k] = NoteType.HOLDHEAD then
+                    statuses.[k] <- HitStatus.HIT_HOLD_REQUIRED
+                elif nr.[k] = NoteType.HOLDTAIL then
+                    statuses.[k] <- HitStatus.RELEASE_REQUIRED
+
+            struct (time, times, statuses)
+        )
+
+    // used for debugging and test rigs as what the internal data should look like after a "perfect" play
+    let create_autoplay (keys: int) (notes: TimeArray<NoteRow>) : InternalScoreData =
+        notes
+        |> Array.map (fun { Time = time; Data = nr } ->
+            let times = Array.zeroCreate keys
+            let statuses = Array.create keys HitStatus.NOTHING
+
+            for k = 0 to (keys - 1) do
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                    statuses.[k] <- HitStatus.HIT_ACCEPTED
+                elif nr.[k] = NoteType.HOLDTAIL then
+                    statuses.[k] <- HitStatus.RELEASE_ACCEPTED
+
+            struct (time, times, statuses)
+        )
 
 type HitEventGutsInternal =
     | Hit_ of delta: Time * is_hold_head: bool * missed: bool

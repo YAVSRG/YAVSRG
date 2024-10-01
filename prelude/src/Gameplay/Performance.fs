@@ -2,11 +2,12 @@
 
 open System
 open Prelude
+open Prelude.Gameplay.ScoringV2
 open Prelude.Charts.Processing.Difficulty
 
 module Performance =
 
-    let private confidence_value (delta: Time) =
+    let private confidence_value (delta: GameplayTime) =
         let delta = float delta
 
         let phi x =
@@ -25,36 +26,39 @@ module Performance =
 
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
 
-    let private performance_func b value deviation delta =
+    let private performance_func b value deviation (delta: GameplayTime) =
         DifficultyRating.stamina_func b (value * confidence_value deviation) delta
 
-    let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessorBase) =
-        let lastTimes = Array.create keys 0.0f<ms>
+    let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessor) =
+        let last_times = Array.create keys 0.0f<ms>
         let mutable pv = 0.01
         let mutable tv = 0.01
         let pvs = Array.zeroCreate keys
         let tvs = Array.zeroCreate keys
 
-        for (i, (time, deltas, hit)) in Array.indexed scoring.HitData do
-            let mutable p = 0.0
-            let mutable t = 0.0
-            let mutable c = 0.0
+        for ev in scoring.Events do
+            match ev.Action with
+            | Hit e ->
 
-            for k = 0 to (keys - 1) do
-                if hit.[k] = HitStatus.HIT_ACCEPTED then
-                    pvs.[k] <-
-                        performance_func (pvs.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                let mutable p = 0.0
+                let mutable t = 0.0
+                let mutable c = 0.0
+                
+                pvs.[ev.Column] <-
+                    performance_func (pvs.[ev.Column]) (rr.PhysicalComposite.[ev.Index, ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
-                    tvs.[k] <-
-                        performance_func (tvs.[k]) (rr.TechnicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                tvs.[ev.Column] <-
+                    performance_func (tvs.[ev.Column]) (rr.TechnicalComposite.[ev.Index, ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
-                    lastTimes.[k] <- time
-                    c <- c + 1.0
-                    p <- p + pvs.[k]
-                    t <- t + tvs.[k]
+                last_times.[ev.Column] <- ev.Time
+                c <- c + 1.0
+                p <- p + pvs.[ev.Column]
+                t <- t + tvs.[ev.Column]
 
-            let p, t = if c = 0.0 then 0.0, 0.0 else p / c, t / c
-            pv <- pv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(p / pv)))
-            tv <- tv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(t / tv)))
+                let p, t = if c = 0.0 then 0.0, 0.0 else p / c, t / c
+                pv <- pv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(p / pv)))
+                tv <- tv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(t / tv)))
+
+            | _ -> ()
 
         (Math.Pow(pv, 0.6) * 2.5), (tv)

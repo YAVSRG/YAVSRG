@@ -12,11 +12,11 @@ open Prelude.Data.User
 
 type SuggestionContext =
     {
-        BaseChart: ChartMeta * float32
+        BaseChart: ChartMeta * Rate
         Mods: ModState
         Filter: Filter
-        MinimumRate: float32
-        MaximumRate: float32
+        MinimumRate: Rate
+        MaximumRate: Rate
         OnlyNewCharts: bool
         RulesetId: string
         Ruleset: Ruleset
@@ -36,7 +36,7 @@ module Suggestion =
 
     let mutable recommended_already = Set.empty
 
-    let most_common_pattern (total: GameplayTime) (patterns: PatternReport) =
+    let most_common_pattern (total: Time) (patterns: PatternReport) =
         if patterns.Patterns = [] then Stream else
         patterns.Patterns
         |> Seq.groupBy _.Pattern
@@ -44,7 +44,7 @@ module Suggestion =
         |> Seq.maxBy snd
         |> fst
 
-    let private pattern_similarity (total: GameplayTime) (rate: float32, patterns: PatternReport) (c_rate: float32, c_patterns: PatternReport) : float32 =
+    let private pattern_similarity (total: Time) (rate: Rate, patterns: PatternReport) (c_rate: Rate, c_patterns: PatternReport) : float32 =
 
         let c_total = c_patterns.Patterns |> Seq.sumBy _.Amount
         if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then 0.0f
@@ -77,7 +77,7 @@ module Suggestion =
         else
             None
 
-    let private get_core_suggestions (ctx: SuggestionContext) : (ChartMeta * float32) seq =
+    let private get_core_suggestions (ctx: SuggestionContext) : (ChartMeta * Rate) seq =
 
         let base_chart, rate = ctx.BaseChart
         
@@ -101,7 +101,7 @@ module Suggestion =
             |> Seq.filter (fun cc -> not (recommended_already.Contains (cc.Title.ToLower())))
             |> Seq.choose (fun cc ->
                 let best_rate = target_density / cc.Patterns.Density50
-                let best_approx_rate = round(best_rate / 0.05f) * 0.05f
+                let best_approx_rate = round(best_rate / 0.05f<rate>) * 0.05f<rate>
                 if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
                     Some (cc, (best_approx_rate, cc.Patterns))
                 else None
@@ -144,7 +144,7 @@ module Suggestion =
         |> Seq.sortByDescending snd
         |> Seq.map fst
 
-    let get_suggestion (ctx: SuggestionContext) : (ChartMeta * float32) option =
+    let get_suggestion (ctx: SuggestionContext) : (ChartMeta * Rate) option =
         let rand = Random()
         let best_matches = get_core_suggestions ctx |> Seq.truncate 50 |> Array.ofSeq
 
@@ -208,7 +208,7 @@ module EndlessModeState =
     type Next =
         {
             Chart: ChartMeta
-            Rate: float32
+            Rate: Rate
             Mods: ModState
             NextContext: SuggestionContext
         }

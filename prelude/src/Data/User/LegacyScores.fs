@@ -9,6 +9,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Mods
 
 [<Json.AutoCodec(true)>]
@@ -35,7 +36,7 @@ type LegacyScore =
         {
             Timestamp = Timestamp.from_datetime this.time
             Replay = Replay.compressed_string_to_bytes this.replay
-            Rate = this.rate
+            Rate = this.rate * 1.0f<rate>
             Mods = this.selectedMods
             IsImported = this.layout = Layout.LeftTwo
             Keys = this.keycount

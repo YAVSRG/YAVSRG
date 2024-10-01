@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open Percyqaz.Common
+open Prelude
 open Prelude.Data.User
 
 module DbScores =
@@ -13,7 +14,7 @@ module DbScores =
         let score_1 =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.0f
+                Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
@@ -23,7 +24,7 @@ module DbScores =
         let score_2 =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.2f
+                Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true
@@ -50,7 +51,7 @@ module DbScores =
         let score_1 =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.0f
+                Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
@@ -60,7 +61,7 @@ module DbScores =
         let score_2 =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.2f
+                Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true
@@ -88,7 +89,7 @@ module DbScores =
         let score_1 =
             {
                 Timestamp = ts
-                Rate = 1.0f
+                Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
@@ -98,7 +99,7 @@ module DbScores =
         let score_2 =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.2f
+                Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true

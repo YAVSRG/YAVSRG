@@ -181,7 +181,7 @@ module DifficultyRating =
 
             Math.Pow(sumpow / count, 1.0 / power)
 
-    let stamina_func value input delta =
+    let stamina_func value input (delta: GameplayTime) =
         let staminaBaseFunc ratio = 1.0 + 0.105 * ratio
         let staminaDecayFunc delta = Math.Exp(-0.00044 * delta)
         let v = Math.Max(value * staminaDecayFunc (float delta), 0.01)
@@ -194,7 +194,7 @@ module DifficultyRating =
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
 
-    let private calculate_uncached (rate: float32) (notes: TimeArray<NoteRow>) : DifficultyRating =
+    let private calculate_uncached (rate: Rate) (notes: TimeArray<NoteRow>) : DifficultyRating =
 
         let keys = notes.[0].Data.Length
 
@@ -224,7 +224,7 @@ module DifficultyRating =
                     jack.[index, column] <- Math.Pow(jackCurve (delta.[index, column]), OHTNERF)
                     delta.[index, column]
                 else
-                    10000.0f<ms>
+                    10000.0f<ms / rate>
 
             for k in Bitmask.toSeq s do
                 if fingers.[k] > 0.0f<ms> then

@@ -51,7 +51,7 @@ module Library =
 
 type LibraryViewContext =
     {
-        Rate: float32
+        Rate: Rate
         RulesetId: string
         Ruleset: Ruleset
         Library: Library

@@ -114,6 +114,6 @@ type ChartMeta =
                     bpm |> round |> int 
                 else 0
             DateAdded = timestamp
-            Rating = (DifficultyRating.calculate 1.0f chart.Notes).Physical |> float32
-            Patterns = (PatternReport.from_chart 1.0f chart)
+            Rating = (DifficultyRating.calculate 1.0f<rate> chart.Notes).Physical |> float32
+            Patterns = (PatternReport.from_chart chart)
         }

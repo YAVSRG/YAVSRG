@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Gameplay.ScoringV2
 
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.RulesetsV2
 
 type GraphPoint =

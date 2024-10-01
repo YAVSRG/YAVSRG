@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Data
 open Percyqaz.Common
+open Prelude
 open Prelude.Gameplay.Mods
 
 // todo: this is user data and should be moved to Prelude.Data.User
@@ -55,15 +56,15 @@ module Collections =
     type PlaylistEntryInfo =
         {
             Mods: Setting<ModState>
-            Rate: Setting.Bounded<float32>
+            Rate: Setting.Bounded<Rate>
         }
         static member Create(rate, mods) =
             {
                 Mods = Setting.simple mods
-                Rate = Prelude.Common.Setting.rate rate
+                Rate = Setting.rate rate
             }
 
-        static member Default = PlaylistEntryInfo.Create(1.0f, Map.empty)
+        static member Default = PlaylistEntryInfo.Create(1.0f<rate>, Map.empty)
 
     [<Json.AutoCodec>]
     type Playlist =
@@ -85,7 +86,7 @@ module Collections =
                 Icon = Setting.simple icon
             }
 
-        member this.Add(chart: ChartMeta, rate: float32, mods: ModState) =
+        member this.Add(chart: ChartMeta, rate: Rate, mods: ModState) =
             let entry = Entry.OfChart chart
             let plEntry = PlaylistEntryInfo.Create(rate, mods)
             this.Charts.Add(entry, plEntry)

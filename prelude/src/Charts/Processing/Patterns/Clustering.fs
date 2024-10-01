@@ -10,7 +10,7 @@ type private BPMCluster =
         mutable SumMs: float32<ms / beat>
         mutable OriginalMsPerBeat: float32<ms / beat>
         mutable Count: int
-        mutable BPM: int option
+        mutable BPM: int<beat/minute> option
     }
     member this.Add value =
         this.Count <- this.Count + 1
@@ -18,15 +18,15 @@ type private BPMCluster =
 
     member this.Calculate() =
         let average = this.SumMs / float32 this.Count
-        this.BPM <- 60000.0f<ms / minute> / average |> float32 |> round |> int |> Some
+        this.BPM <- 60000.0f<ms / minute> / average |> float32 |> round |> int |> fun x -> x * 1<beat / minute> |> Some
 
     member this.Value = this.BPM.Value
 
 type private BPMClusteredPattern =
     {
-        Time: GameplayTime
+        Time: Time
         BPM: BPMCluster
-        Density: float32
+        Density: float32</second>
         Mixed: bool
     }
 

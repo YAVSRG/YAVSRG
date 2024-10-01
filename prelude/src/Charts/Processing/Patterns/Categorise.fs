@@ -23,9 +23,9 @@ module Categorise =
         {
             Pattern: CorePatternType
             Mixed: bool // todo: turn 3-pronged with mixed, non mixed, combo of both
-            BPM: int option
+            BPM: int<beat / minute> option
             Specific: string option
-            Importance: GameplayTime
+            Importance: Time
         }
         override this.ToString() =
             match this.Specific with
@@ -66,10 +66,10 @@ module Categorise =
 
     let categorise_chart (keys: int) (patterns: PatternBreakdown list) (sv_amount: Time) : ChartCategorisation =
 
-        let total = 0.01f<ms/rate> + (patterns |> List.sumBy (fun e -> e.Amount))
+        let total = 0.01f<ms> + (patterns |> List.sumBy (fun e -> e.Amount))
         let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
 
-        let importance (density: float32) (amount: float32<ms/rate>) =
+        let importance (density: float32</second>) (amount: Time) =
             density / average_density * amount
 
         let fragments =
@@ -98,7 +98,7 @@ module Categorise =
 
                 let backup_for_core_pattern (c: CorePatternType) =
                     let ps = patterns |> List.filter (fun e -> e.Pattern = c) 
-                    let ps_total = 0.01f<ms/rate> + (ps |> List.sumBy (fun e -> e.Amount))
+                    let ps_total = 0.01f<ms> + (ps |> List.sumBy (fun e -> e.Amount))
                     {
                         Pattern = c
                         Mixed = true
@@ -142,10 +142,10 @@ module Categorise =
         let minor_specific (spec: string) =
             minor |> List.tryFind (fun x -> x.Specific = Some spec)
 
-        let notable_jacks (list: CategoryFragment list) (bpm: int option) =
+        let notable_jacks (list: CategoryFragment list) (bpm: int<beat / minute> option) =
             match bpm with
             | Some b ->
-                let threshold = b / 2 + 5
+                let threshold = b / 2 + 5<beat / minute>
                 list |> List.exists (fun x -> x.Pattern = Jack && (x.BPM.IsNone || x.BPM.Value > threshold))
             | None -> list |> List.exists (fun x -> x.Pattern = Jack)
 
@@ -198,7 +198,7 @@ module Categorise =
                         else
                             let s = major |> List.tryFind (fun x -> x.Pattern = Chordstream)
                             let j = major |> List.find (fun x -> x.Pattern = Jack)
-                            s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5 + s.Value.BPM.Value / 2 < j.BPM.Value)
+                            s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5<beat / minute> + s.Value.BPM.Value / 2 < j.BPM.Value)
                     else false
 
                 if has_streams && has_notable_jacks then

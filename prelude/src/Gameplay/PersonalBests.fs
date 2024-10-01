@@ -1,11 +1,12 @@
 ﻿namespace Prelude.Gameplay
 
 open Percyqaz.Data
+open Prelude
 
 [<RequireQualifiedAccess>]
 type Improvement<'T> =
-    | FasterBetter of rate_increase: float32 * improvement: 'T
-    | Faster of rate_increase: float32
+    | FasterBetter of rate_increase: Rate * improvement: 'T
+    | Faster of rate_increase: Rate
     | Better of improvement: 'T
     | New
     | None
@@ -30,12 +31,12 @@ type ImprovementFlags =
             Grade = Improvement.New
         }
 
-type PersonalBestEntry<'T> = 'T * float32 * int64 // Value, Rate, Timestamp
+type PersonalBestEntry<'T> = 'T * Rate * int64 // Value, Rate, Timestamp
 type PersonalBests<'T> = PersonalBestEntry<'T> list
 
 module PersonalBests =
 
-    let rec get_best_above (minimum_rate: float32) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
+    let rec get_best_above (minimum_rate: Rate) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
         match bests with
         | [] -> None
         | (value, rate, timestamp) :: xs ->
@@ -49,7 +50,7 @@ module PersonalBests =
                     | None -> Some(value, rate, timestamp)
                     | Some x -> Some x
 
-    let rec get_best_below (maximum_rate: float32) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
+    let rec get_best_below (maximum_rate: Rate) (bests: PersonalBests<'T>) : PersonalBestEntry<'T> option =
         match bests with
         | [] -> None
         | (value, rate, timestamp) :: xs ->
@@ -58,9 +59,9 @@ module PersonalBests =
             else
                 Some(value, rate, timestamp)
 
-    let create (value: 'T, rate: float32, timestamp: int64) : PersonalBests<'T> = [ value, rate, timestamp ]
+    let create (value: 'T, rate: Rate, timestamp: int64) : PersonalBests<'T> = [ value, rate, timestamp ]
 
-    let inline update (value: 'T, rate: float32, timestamp: int64) (bests: PersonalBests<'T>) : PersonalBests<'T> * Improvement<'T> =
+    let inline update (value: 'T, rate: Rate, timestamp: int64) (bests: PersonalBests<'T>) : PersonalBests<'T> * Improvement<'T> =
         let rec remove_worse_breakpoints (v: 'T) (bests: PersonalBests<'T>) =
             match bests with
             | [] -> []
@@ -99,12 +100,12 @@ type Bests =
 
 module Bests =
     
-    let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: float32) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
+    let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: Rate) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_below maximum_rate (property bests)
     
-    let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: float32) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
+    let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: Rate) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_above minimum_rate (property bests)

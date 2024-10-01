@@ -11,9 +11,9 @@ type CorePatternType =
     | Jack
     member this.DensityToBPM =
         match this with
-        | Stream -> 52.5f
-        | Chordstream -> 35f
-        | Jack -> 17.5f
+        | Stream -> 52.5f<second * beat / minute>
+        | Chordstream -> 35f<second * beat / minute>
+        | Jack -> 17.5f<second * beat / minute>
     member this.RatingMultiplier =
         match this with
         | Stream -> 1f / 3f
@@ -28,8 +28,8 @@ type CorePatternType =
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
 
-type MatchedCorePattern = { Pattern: CorePatternType; Time: GameplayTime; MsPerBeat: float32<ms/beat>; Density: float32; Mixed: bool }
-type MatchedSpecificPattern = { Pattern: Pattern; Time: GameplayTime; MsPerBeat: float32<ms/beat> }
+type MatchedCorePattern = { Pattern: CorePatternType; Time: Time; MsPerBeat: float32<ms/beat>; Density: float32</second>; Mixed: bool }
+type MatchedSpecificPattern = { Pattern: Pattern; Time: Time; MsPerBeat: float32<ms/beat> }
 
 module PatternFinder =
 
@@ -359,8 +359,8 @@ module PatternFinder =
 
         full_data, core_matches.ToArray(), specific_matches.ToArray()
 
-    let find_patterns (rate: float32) (chart: Chart) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
-        let primitives = Primitives.process_chart rate chart
+    let find_patterns (chart: Chart) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
+        let primitives = Primitives.process_chart chart
         if chart.Keys = 4 then 
             matches SPECIFIC_PATTERNS_4K primitives
         elif chart.Keys = 7 then 

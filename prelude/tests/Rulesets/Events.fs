@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open Prelude
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.RulesetsV2
 open Prelude.Gameplay.ScoringV2
 
@@ -1186,7 +1187,7 @@ module Events =
 
         printfn "Now stepping all at once:"
 
-        let rewind_replay = replay.GetFullReplay() |> Prelude.Gameplay.StoredReplayProvider
+        let rewind_replay = replay.GetFullReplay() |> StoredReplayProvider
 
         let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
@@ -1250,7 +1251,7 @@ module Events =
 
         printfn "Now stepping all at once:"
 
-        let rewind_replay = replay.GetFullReplay() |> Prelude.Gameplay.StoredReplayProvider
+        let rewind_replay = replay.GetFullReplay() |> StoredReplayProvider
 
         let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity

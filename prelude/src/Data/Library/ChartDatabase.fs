@@ -7,6 +7,7 @@ open System.Collections.Concurrent
 open System.Security.Cryptography
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
+open Prelude
 open Prelude.Common
 open Prelude.Charts
 
@@ -170,7 +171,7 @@ module ChartDatabase =
             for chart_meta in DbCharts.fast_load db.Database do
                 db.Cache.[chart_meta.Hash] <- chart_meta
 
-                if chart_meta.Patterns.Density90 <> 0.0f then
+                if chart_meta.Length > 0.0f<ms> && chart_meta.Patterns.Density90 <> 0.0f</second> then
                     db.RecalculationNeeded <- false
 
             db
@@ -363,7 +364,7 @@ module ChartDatabase =
                         for entry in charts_db.Entries do
                             match get_chart entry.Hash charts_db with
                             | Ok chart ->
-                                yield entry.Hash, float32 (DifficultyRating.calculate 1.0f chart.Notes).Physical, PatternReport.from_chart 1.0f chart
+                                yield entry.Hash, float32 (DifficultyRating.calculate 1.0f<rate> chart.Notes).Physical, PatternReport.from_chart chart
                             | Error reason -> Logging.Warn(sprintf "Error recalculating patterns for %s: %s" entry.Hash reason)
                     }
                     |> Seq.chunkBySize 1000

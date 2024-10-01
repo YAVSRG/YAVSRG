@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 
 type internal ChangeTracker<'T> =
     {

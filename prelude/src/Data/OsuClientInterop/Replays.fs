@@ -5,12 +5,11 @@ open System.IO
 open System.Text
 open SevenZip.Compression
 open Prelude
-open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 
 module OsuReplay =
 
-    let decode_replay (replay: OsuScoreDatabase_Score, first_note: Time, rate: Rate) : ReplayData =
+    let decode_replay (replay: OsuScoreDatabase_Score, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
 
         if replay.CompressedReplayBytes.IsNone then 
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
@@ -40,7 +39,7 @@ module OsuReplay =
                 let parts = entry.Split("|")
 
                 if parts.[0] <> "-12345" then
-                    time <- time + float32 parts.[0] * rate * 1.0f<ms / rate>
+                    time <- time + float32 parts.[0] * rate_relative_to_chart * 1.0f<ms / rate>
                     let state = uint16 parts.[1]
 
                     if state <> last_state then

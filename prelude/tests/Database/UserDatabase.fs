@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open Percyqaz.Common
+open Prelude
 open Prelude.Data.User
 
 module UserDatabase =
@@ -26,7 +27,7 @@ module UserDatabase =
         let score =
             {
                 Timestamp = Timestamp.now ()
-                Rate = 1.0f
+                Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false

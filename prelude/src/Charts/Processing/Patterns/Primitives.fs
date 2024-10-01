@@ -19,20 +19,20 @@ type RowInfo =
         Jacks: int
         Direction: Direction
         Roll: bool
-        Time: float32<ms / rate>
+        Time: Time
         MsPerBeat: float32<ms / beat>
-        Density: float32
+        Density: float32</second>
     }
 
 module Density =
 
-    let private DENSITY_SENTITIVITY = 0.9f
+    let private DENSITY_SENSITIVITY = 0.9f
 
-    let private note (time: Time) (d: float32) =
-        let next_d = 1000.0f<ms> / time
-        d * DENSITY_SENTITIVITY + next_d * (1.0f - DENSITY_SENTITIVITY)
+    let private note (time: Time) (d: float32</second>) =
+        let next_d = 1000.0f<ms / second> / time
+        d * DENSITY_SENSITIVITY + next_d * (1.0f - DENSITY_SENSITIVITY)
 
-    let process_chart (rate: float32) (chart: Chart) =
+    let process_chart (chart: Chart) : float32</second> array =
         let column_densities = Array.zeroCreate chart.Keys
         let column_sinces = Array.create chart.Keys -Time.infinity
 
@@ -40,7 +40,7 @@ module Density =
             for { Time = t; Data = row } in chart.Notes do
                 for k = 0 to chart.Keys - 1 do
                     if row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD then
-                        column_densities.[k] <- note ((t - column_sinces.[k]) / rate) column_densities.[k]
+                        column_densities.[k] <- note ((t - column_sinces.[k])) column_densities.[k]
                         column_sinces.[k] <- t
 
                 yield Array.max column_densities
@@ -93,17 +93,17 @@ module Density =
 
         notecounts, rowcounts
 
-    let find_percentile (sorted_densities: float32 array) (percentile: float32) =
-        if sorted_densities.Length = 0 then 0.0f else
+    let find_percentile (sorted_densities: float32</second> array) (percentile: float32) : float32</second> =
+        if sorted_densities.Length = 0 then 0.0f</second> else
         let index = percentile * float32 sorted_densities.Length |> floor |> int
         sorted_densities.[index]
 
 module Primitives =
 
-    let process_chart (rate: float32) (chart: Chart) : RowInfo list =
+    let process_chart (chart: Chart) : RowInfo list =
 
         let { Time = first_note; Data = row } = (TimeArray.first chart.Notes).Value
-        let density = Density.process_chart rate chart
+        let density = Density.process_chart chart
 
         let mutable previous_row =
             seq { 0 .. chart.Keys - 1 }
@@ -155,8 +155,8 @@ module Primitives =
                                 else
                                     Direction.None
                             Roll = pmin > cmax || pmax < cmin
-                            Time = (t - first_note) / (rate * 1.0f<rate>)
-                            MsPerBeat = (t - previous_time) * 4.0f< / beat> / rate
+                            Time = (t - first_note)
+                            MsPerBeat = (t - previous_time) * 4.0f< / beat>
                             Density = density.[index]
                         }
 

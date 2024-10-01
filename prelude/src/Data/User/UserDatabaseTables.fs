@@ -10,7 +10,7 @@ type Score =
     {
         Timestamp: int64
         Replay: byte array
-        Rate: float32
+        Rate: Rate
         Mods: ModState
         IsImported: bool
         Keys: int
@@ -66,7 +66,7 @@ module DbScores =
                     p.String chart_id
                     p.Int64 score.Timestamp
                     p.Blob score.Replay
-                    p.Float32 score.Rate
+                    p.Float32 (float32 score.Rate)
                     p.Json JSON score.Mods
                     p.Boolean score.IsImported
                     p.Byte(byte score.Keys)
@@ -89,7 +89,7 @@ module DbScores =
                     {
                         Timestamp = r.Int64
                         Replay = r.Blob
-                        Rate = r.Float32
+                        Rate = 1.0f<rate> * r.Float32
                         Mods = r.Json JSON
                         IsImported = r.Boolean
                         Keys = int r.Byte
@@ -130,7 +130,7 @@ module DbScores =
                     {
                         Timestamp = r.Int64
                         Replay = r.Blob
-                        Rate = r.Float32
+                        Rate = 1.0f<rate> * r.Float32
                         Mods = r.Json JSON
                         IsImported = r.Boolean
                         Keys = int r.Byte

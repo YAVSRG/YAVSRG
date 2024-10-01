@@ -210,7 +210,7 @@ module Mods =
             Status = status
         }
 
-    let format (rate: float32, mods: ModState, autoplay: bool) =
+    let format (rate: Rate, mods: ModState, autoplay: bool) =
         String.Join(
             ", ",
             sprintf "%.2fx" rate

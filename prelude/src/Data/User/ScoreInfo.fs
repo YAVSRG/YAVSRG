@@ -1,11 +1,15 @@
 ﻿namespace Prelude.Data.User
 
+open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.ScoringV2
 open Prelude.Data.Library
 
 [<RequireQualifiedAccess>]
@@ -22,7 +26,7 @@ type ScoreInfo =
 
         PlayedBy: ScorePlayedBy
         TimePlayed: int64
-        Rate: float32
+        Rate: Rate
 
         Replay: ReplayData
         mutable Scoring: ScoreProcessor
@@ -42,17 +46,17 @@ type ScoreInfo =
                 ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
 
             this.Scoring <- scoring
-            this.Lamp <- Lamp.calculate ruleset.Grading.Lamps scoring.State
-            this.Grade <- Grade.calculate ruleset.Grading.Grades scoring.State
+            this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
     
-    member this.WithRuleset (ruleset: Ruleset) =
+    member this.WithRuleset (ruleset: RulesetV2) =
         let scoring =
             ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
 
         { this with
             Scoring = scoring
-            Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
-            Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+            Lamp = Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset.Grades scoring.Accuracy
         }
 
     member this.Accuracy = this.Scoring.Accuracy
@@ -65,7 +69,7 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: RulesetV2) (score: Score) : ScoreInfo =
         let with_mods = Mods.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 
@@ -73,7 +77,7 @@ module ScoreInfo =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
-        let patterns = PatternReport.from_chart score.Rate chart
+        let patterns = PatternReport.from_chart chart
 
         {
             ChartMeta = cc
@@ -86,12 +90,12 @@ module ScoreInfo =
 
             Replay = replay_data
             Scoring = scoring
-            Lamp = Lamp.calculate ruleset.Grading.Lamps scoring.State
-            Grade = Grade.calculate ruleset.Grading.Grades scoring.State
+            Lamp = Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
             Patterns = patterns
-            Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
+            Physical = 0.0 // todo: Performance.calculate difficulty with_mods.Keys scoring |> fst
 
             ImportedFromOsu = score.IsImported
         }

@@ -6,13 +6,13 @@ open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 
 [<Json.AutoCodec>]
-type PatternStatPoint = { BPM: int; Duration: Time }
+type PatternStatPoint = { BPM: int; Duration: GameplayTime }
 type PatternStatLine = PatternStatPoint list
 
 module PatternStatLine =
 
-    let add (bpm: int, duration: Time) (stats: PatternStatLine) : PatternStatLine =
-        let rec remove_worse_points (duration: Time) (bests: PatternStatLine) =
+    let add (bpm: int, duration: GameplayTime) (stats: PatternStatLine) : PatternStatLine =
+        let rec remove_worse_points (duration: GameplayTime) (bests: PatternStatLine) =
             match bests with
             | [] -> []
             | { Duration = time } :: xs when time <= duration -> remove_worse_points duration xs
@@ -35,9 +35,9 @@ module PatternStatLine =
                 else
                     { BPM = bpm; Duration = duration } :: existing :: xs//, Improvement.New
 
-        if duration > 500.0f<ms> then loop stats else stats
+        if duration > 500.0f<ms / rate> then loop stats else stats
 
-    let rec get_duration_at (bpm: int) (stats: PatternStatLine) : Time option =
+    let rec get_duration_at (bpm: int) (stats: PatternStatLine) : GameplayTime option =
         match stats with
         | [] -> None
         | x :: xs ->
@@ -52,8 +52,8 @@ module PatternStatLine =
                     | Some better_duration -> Some better_duration
 
     let value (stats: PatternStatLine) =
-        let ONE_MINUTE = 60000f<ms>
-        let duration_value (duration: Time) =
+        let ONE_MINUTE = 60000f<ms / rate>
+        let duration_value (duration: GameplayTime) =
             if duration > ONE_MINUTE then
                 1.0f + ((duration - ONE_MINUTE) / ONE_MINUTE * 0.01f)
             else duration / ONE_MINUTE
@@ -102,7 +102,7 @@ module PatternSkillBreakdown =
         else 
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-    let private observe_octave (pattern_type: Patterns.CorePatternType) (density, accuracy, duration: Time) (breakdown: PatternSkillBreakdown) : unit =
+    let private observe_octave (pattern_type: Patterns.CorePatternType) (density, accuracy, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
         let feels_like_bpm = pattern_type.DensityToBPM * density |> int
 
         let acc_threshold, ctrl_threshold, push_threshold = pattern_type.AccuracyBreakpoints
@@ -121,9 +121,9 @@ module PatternSkillBreakdown =
             1.3f, 0.125f
         |]
 
-    let observe pattern_type (density: float32, accuracy: float, duration: Time) (breakdown: PatternSkillBreakdown) : unit =
+    let observe pattern_type (density: float32<rate / second>, accuracy: float, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
         for octave, time_mult in OCTAVES do
-            observe_octave pattern_type (density * octave, accuracy, Time.of_number (duration * time_mult)) breakdown
+            observe_octave pattern_type (density * octave, accuracy, duration * time_mult) breakdown
 
 type KeymodeSkillIncrease =
     {
@@ -167,7 +167,7 @@ type KeymodeSkillBreakdown =
 
 module KeymodeSkillBreakdown =
 
-    let score (patterns: PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let score (patterns: PatternBreakdown list) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
         
         let before = skills.Copy
 
@@ -183,15 +183,15 @@ module KeymodeSkillBreakdown =
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
                 
-            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, Time.of_number (time / rate * 1.8f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, Time.of_number (time / rate * 0.2f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, time / rate * 1.8f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, time / rate * 1.5f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, time / rate) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, time / rate * 0.5f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, time / rate * 0.2f) skill
 
         skills.Minus before
 
-    let what_if (patterns: PatternBreakdown list) (accuracy: float) (rate: float32) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let what_if (patterns: PatternBreakdown list) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
 
         let potential = skills.Copy
 
@@ -207,35 +207,35 @@ module KeymodeSkillBreakdown =
                 | Chordstream -> potential.Chordstream
                 | Stream -> potential.Stream
 
-            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, Time.of_number (time / rate * 1.8f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, Time.of_number (time / rate * 1.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, Time.of_number (time / rate)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, Time.of_number (time / rate * 0.5f)) skill
-            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, Time.of_number (time / rate * 0.2f)) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, time / rate * 1.8f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, time / rate * 1.5f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, time / rate) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density75 * rate, accuracy, time / rate * 0.5f) skill
+            PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, time / rate * 0.2f) skill
 
         potential.Minus skills
 
     let tech_factor (patterns: PatternReport) =
-        let mutable total_weight : float32 = 0.00001f
-        let mutable total : float32 = 0.0f
+        let mutable total_weight = 0.00001f<ms>
+        let mutable total = 0.0f<ms>
         let add_weight res time =
             total <- total + res * time
             total_weight <- total_weight + time
 
-        let factor (bpm: int) (feels_like_bpm: float32) =
-            System.MathF.Log2(feels_like_bpm / float32 bpm) |> abs
+        let factor (bpm: int<beat / minute>) (feels_like_bpm: float32<beat / minute>) =
+            System.MathF.Log2(float32 feels_like_bpm / float32 bpm) |> abs
 
-        let f (pattern_type: Patterns.CorePatternType) (density: float32) (bpm: int) (time: float32) =
+        let f (pattern_type: Patterns.CorePatternType) (density: float32</second>) (bpm: int<beat / minute>) (time: Time) =
             let feels_like_bpm = pattern_type.DensityToBPM * density
             let x = factor bpm feels_like_bpm
             add_weight x time
 
         for p in patterns.Patterns do
         
-            f p.Pattern p.Density10 p.BPM (float32 (p.Amount * 1.8f))
-            f p.Pattern p.Density25 p.BPM (float32 (p.Amount * 1.5f))
-            f p.Pattern p.Density50 p.BPM (float32 (p.Amount * 1.0f))
-            f p.Pattern p.Density75 p.BPM (float32 (p.Amount * 0.5f))
-            f p.Pattern p.Density90 p.BPM (float32 (p.Amount * 0.2f))
+            f p.Pattern p.Density10 p.BPM (p.Amount * 1.8f)
+            f p.Pattern p.Density25 p.BPM (p.Amount * 1.5f)
+            f p.Pattern p.Density50 p.BPM (p.Amount * 1.0f)
+            f p.Pattern p.Density75 p.BPM (p.Amount * 0.5f)
+            f p.Pattern p.Density90 p.BPM (p.Amount * 0.2f)
 
         total / total_weight

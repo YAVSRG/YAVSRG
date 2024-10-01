@@ -3,6 +3,7 @@
 open System
 open Prelude
 open Prelude.Charts
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
 [<AbstractClass>]

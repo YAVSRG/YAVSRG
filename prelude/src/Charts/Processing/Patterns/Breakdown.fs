@@ -7,37 +7,37 @@ open Prelude
 type PatternBreakdown =
     {
         Pattern: CorePatternType
-        BPM: int
+        BPM: int<beat / minute>
         Mixed: bool
-        Amount: GameplayTime
-        Density10: float32
-        Density25: float32
-        Density50: float32
-        Density75: float32
-        Density90: float32
+        Amount: Time
+        Density10: float32</second>
+        Density25: float32</second>
+        Density50: float32</second>
+        Density75: float32</second>
+        Density90: float32</second>
         Specifics: (string * int) array
     }
     static member Default =
         { 
             Pattern = Jack
-            BPM = 100
+            BPM = 100<beat / minute>
             Mixed = false
-            Amount = 0.0f<ms/rate>
-            Density10 = 0.0f
-            Density25 = 0.0f
-            Density50 = 0.0f
-            Density75 = 0.0f
-            Density90 = 0.0f
+            Amount = 0.0f<ms>
+            Density10 = 0.0f</second>
+            Density25 = 0.0f</second>
+            Density50 = 0.0f</second>
+            Density75 = 0.0f</second>
+            Density90 = 0.0f</second>
             Specifics = [||]
         }
 
 module private Breakdown =
 
-    let private pattern_amount (sorted_times: GameplayTime seq) : GameplayTime =
+    let private pattern_amount (sorted_times: Time seq) : Time =
 
-        let PATTERN_DURATION = 800.0f<ms / rate>
+        let PATTERN_DURATION = 800.0f<ms>
 
-        let mutable total_time: GameplayTime = 0.0f<ms / rate>
+        let mutable total_time: Time = 0.0f<ms>
 
         let mutable current_start = Seq.head sorted_times
         let mutable current_end = current_start + PATTERN_DURATION
