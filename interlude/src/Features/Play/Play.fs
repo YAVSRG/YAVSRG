@@ -7,6 +7,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Charts.Processing
 open Interlude.Options
 open Interlude.Content
@@ -32,9 +34,10 @@ module PlayScreen =
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
 
-        scoring.OnHit.Add(fun h ->
-            match h.Guts with
+        scoring.OnEvent.Add(fun h ->
+            match h.Action with
             | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
             | _ -> ()
         )
 
@@ -67,7 +70,7 @@ module PlayScreen =
             if Gameplay.continue_endless_mode() then Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
         
         let give_up () =
-            let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
+            let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
             if 
                 if is_giving_up_play then

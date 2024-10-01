@@ -26,13 +26,13 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             flag_position.Target <- 1.0f
         elif ahead_by > -AHEAD_BY_SCALE then
             flag_position.Target <- (ahead_by + AHEAD_BY_SCALE) / AHEAD_BY_SCALE / 2.0 |> float32
-
-            if ahead_by > 0.0 then
-                color.Target <- Color.FromHsv(140.0f / 360.0f, ahead_by / AHEAD_BY_SCALE |> float32, 1.0f)
-            else
-                color.Target <- Color.FromHsv(340.0f / 360.0f, ahead_by / -AHEAD_BY_SCALE |> float32, 1.0f)
         else
             flag_position.Target <- 0.0f
+
+        if ahead_by > 0.0 then
+            color.Target <- Color.FromHsv(140.0f / 360.0f, ahead_by / AHEAD_BY_SCALE |> float32 |> min 1.0f, 1.0f)
+        else
+            color.Target <- Color.FromHsv(340.0f / 360.0f, ahead_by / -AHEAD_BY_SCALE |> float32 |> min 1.0f, 1.0f)
 
     do
         match state.Pacemaker with
@@ -40,11 +40,9 @@ type Pacemaker(config: HudConfig, state: PlayState) =
         | PacemakerState.Accuracy _
         | PacemakerState.Replay _ -> ()
         | PacemakerState.Judgement(judgement, _) ->
-            color.Target <-
-                if judgement = -1 then
-                    Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
-                else
-                    Rulesets.current.Judgements.[judgement].Color
+            color.Target <- Rulesets.current.Judgements.[judgement].Color
+        | PacemakerState.ComboBreaks _ ->
+            color.Target <- Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -53,22 +51,23 @@ type Pacemaker(config: HudConfig, state: PlayState) =
         | PacemakerState.None -> ()
         | PacemakerState.Accuracy x ->
             if position_cooldown.Complete then
-                ahead_by <- state.Scoring.State.PointsScored - state.Scoring.State.MaxPointsScored * x
+                ahead_by <- state.Scoring.PointsScored - state.Scoring.MaxPossiblePoints * x
                 update_flag_position ()
                 position_cooldown.Reset()
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
-        | PacemakerState.Replay (_, score) ->
+        | PacemakerState.Replay (_, opposing_score) ->
             if position_cooldown.Complete then
-                score.Update(state.CurrentChartTime())
-                ahead_by <- state.Scoring.State.PointsScored - score.State.PointsScored
+                opposing_score.Update(state.CurrentChartTime())
+                ahead_by <- state.Scoring.PointsScored - opposing_score.PointsScored
                 update_flag_position ()
                 position_cooldown.Reset()
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
-        | PacemakerState.Judgement(_, _) -> ()
+        | PacemakerState.Judgement _
+        | PacemakerState.ComboBreaks _ -> ()
 
         color.Update elapsed_ms
 
@@ -99,18 +98,32 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             )
         | PacemakerState.Judgement(judgement, count) ->
             let actual =
-                if judgement = -1 then
-                    state.Scoring.State.ComboBreaks
-                else
-                    let mutable c = state.Scoring.State.Judgements.[judgement]
+                let mutable c = state.Scoring.JudgementCounts.[judgement]
 
-                    for j = judgement + 1 to state.Scoring.State.Judgements.Length - 1 do
-                        if state.Scoring.State.Judgements.[j] > 0 then
-                            c <- 1000000
+                for j = judgement + 1 to state.Scoring.JudgementCounts.Length - 1 do
+                    if state.Scoring.JudgementCounts.[j] > 0 then
+                        c <- 1000000
 
-                    c
+                c
 
             let _hearts = 1 + count - actual
+
+            if _hearts < hearts then
+                color.Value <- Color.White
+
+            hearts <- _hearts
+
+            let display =
+                if hearts > 5 then
+                    sprintf "%s x%i" (String.replicate 5 Icons.HEART_ON) hearts
+                elif hearts > 0 then
+                    (String.replicate hearts Icons.HEART_ON)
+                else
+                    Icons.X
+
+            Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
+        | PacemakerState.ComboBreaks count ->
+            let _hearts = 1 + count - state.Scoring.ComboBreaks
 
             if _hearts < hearts then
                 color.Value <- Color.White

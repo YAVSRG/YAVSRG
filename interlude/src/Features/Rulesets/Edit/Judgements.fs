@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Interlude.UI
 
 type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
@@ -27,7 +27,7 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
     override this.Title = judgement.Name
     override this.OnClose() =
         let new_js = ruleset.Value.Judgements |> Array.copy
-        new_js.[id] <- { Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
+        new_js.[id] <- { judgement with Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
         ruleset.Set { ruleset.Value with Judgements = new_js }
 
 type EditJudgementsPage(ruleset: Setting<Ruleset>) =

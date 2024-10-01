@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Gameplay.Rulesets
 
 open System
+open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 
@@ -36,12 +37,12 @@ type Grade =
 type LampRequirement =
     | JudgementAtMost of judgement_id: int * count: int
     | ComboBreaksAtMost of count: int
+    member this.SortKey =
+        match this with
+        | ComboBreaksAtMost n -> System.Int32.MaxValue, n
+        | JudgementAtMost (j, n) -> j, n
     member this.IsStricterThan(other: LampRequirement) =
-        match this, other with
-        | JudgementAtMost _, ComboBreaksAtMost _ -> true
-        | ComboBreaksAtMost _, JudgementAtMost _ -> false
-        | ComboBreaksAtMost n, ComboBreaksAtMost m -> n < m
-        | JudgementAtMost (j, n), JudgementAtMost (j2, m) -> j < j2 || (j = j2 && n < m)
+        this.SortKey < other.SortKey
 
 [<Json.AutoCodec>]
 type Lamp =
@@ -158,6 +159,13 @@ type Ruleset =
             -w.Window50, w.Window100
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
             early, late
+
+    member this.LargestWindow : GameplayTime =
+        let n_early, n_late = this.NoteWindows
+        let r_early, r_late = this.ReleaseWindows
+        max
+            (max (abs n_early) n_late)
+            (max (abs r_early) r_late)
 
 module Ruleset =
 

@@ -7,6 +7,8 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Charts.Processing
 open Prelude.Data.User
 open Interlude.Options
@@ -60,8 +62,8 @@ module PlayScreenMultiplayer =
 
                         Replay = replay_data
                         Scoring = scoring
-                        Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                        Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+                        Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                        Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                         Rating = info.Rating
                         Patterns = info.Patterns
@@ -72,9 +74,10 @@ module PlayScreenMultiplayer =
             }
         )
 
-        scoring.OnHit.Add(fun h ->
-            match h.Guts with
+        scoring.OnEvent.Add(fun h ->
+            match h.Action with
             | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
             | _ -> ()
         )
 
@@ -86,7 +89,7 @@ module PlayScreenMultiplayer =
             packet_count <- packet_count + 1
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) * SelectedChart.rate.Value > 15000f<ms>
+            let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
             if 
                 if is_giving_up_play then

@@ -4,7 +4,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Skins.Noteskins
@@ -156,7 +156,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // SETUP CONSTANTS AND DRAW METHODS
 
-        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value * 1.0f< / ms>
+        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value * 1.0f<rate / ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
@@ -269,7 +269,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let now =
             Song.time_with_offset ()
             + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-            + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
+            + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
 
         if now < time then
             handle_seek_back_in_time ()

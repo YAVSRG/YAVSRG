@@ -5,7 +5,8 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -18,7 +19,7 @@ open Interlude.Features.Play.Practice
 
 module PracticeScreen =
 
-    let UNPAUSE_NOTE_LEADWAY = 800.0f<ms>
+    let UNPAUSE_NOTE_LEADWAY = 800.0f<ms / rate>
 
     let practice_screen (info: LoadedChartInfo, start_at: Time) =
 
@@ -27,7 +28,7 @@ module PracticeScreen =
         let mutable resume_from_current_place = false
 
         let last_allowed_practice_point =
-            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
+            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * 1.0f</rate> * SelectedChart.rate.Value
 
         let state: PracticeState =
             {
@@ -52,20 +53,22 @@ module PracticeScreen =
 
             let mutable i = 0
 
-            while i < scoring.HitData.Length
-                  && let struct (t, _, _) = scoring.HitData.[i] in
-                     t < ignore_notes_before_time do
-                let struct (_, deltas, flags) = scoring.HitData.[i]
+            // todo: move inside event processing
+            //while i < scoring.HitData.Length
+            //      && let struct (t, _, _) = scoring.HitData.[i] in
+            //         t < ignore_notes_before_time do
+            //    let struct (_, deltas, flags) = scoring.HitData.[i]
 
-                for k = 0 to info.WithMods.Keys - 1 do
-                    flags.[k] <- HitStatus.HIT_ACCEPTED
-                    deltas.[k] <- -Time.infinity
+            //    for k = 0 to info.WithMods.Keys - 1 do
+            //        flags.[k] <- HitStatus.HIT_ACCEPTED
+            //        deltas.[k] <- -Time.infinity
 
-                i <- i + 1
+            //    i <- i + 1
 
-            scoring.OnHit.Add(fun h ->
-                match h.Guts with
+            scoring.OnEvent.Add(fun h ->
+                match h.Action with
                 | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+                | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
                 | _ -> ()
             )
 

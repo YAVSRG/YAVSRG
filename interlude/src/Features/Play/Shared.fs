@@ -1,15 +1,13 @@
 ﻿namespace Interlude.Features.Play
 
-open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 open Interlude.Options
@@ -41,7 +39,7 @@ module Utils =
             if pos.RelativeToPlayfield then playfield.Add w else screen.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerState, scoring: ScoreProcessorBase) as this
+type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerState, scoring: ScoreProcessor) as this
     =
     inherit Screen()
 
@@ -84,7 +82,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
-        Song.change_rate SelectedChart.rate.Value
+        Song.change_rate (float32 SelectedChart.rate.Value)
         Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
         Song.on_finish <- SongFinishAction.Wait
         Song.play_leadin with_colors.FirstNote

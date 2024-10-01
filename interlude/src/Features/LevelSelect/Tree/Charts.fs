@@ -65,7 +65,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
     member this.PlaylistDuration =
         match ctx with
         | LibraryContext.Playlist(_, _, data) -> cc.Length / data.Rate.Value
-        | _ -> 0.0f<ms>
+        | _ -> 0.0f<ms / rate>
 
     member this.Select() = switch_chart (cc, ctx, group_name, group_ctx)
 
@@ -102,7 +102,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         Draw.rect (bounds.BorderL Style.PADDING) hover_color
 
         // draw pbs
-        let disp (data: 'T * float32 * Color * string) (pos: float32) =
+        let disp (data: 'T * Rate * Color * string) (pos: float32) =
             let _, rate, color, formatted = data
             let rate_label = sprintf "(%.2fx)" rate
 

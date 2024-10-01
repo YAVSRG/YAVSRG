@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open Prelude.Data
 open Prelude.Data.Library

@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -45,12 +45,15 @@ module PracticeState =
 
     let update_suggestions (scoring: ScoreProcessor) (state: PracticeState) =
 
-        let mutable sum = 0.0f<ms>
+        let mutable sum = 0.0f<ms / rate>
         let mutable count = 1.0f
 
-        for ev in scoring.HitEvents do
-            match ev.Guts with
+        for ev in scoring.Events do
+            match ev.Action with
             | Hit x when not x.Missed ->
+                sum <- sum + x.Delta
+                count <- count + 1.0f
+            | Hold x when not x.Missed ->
                 sum <- sum + x.Delta
                 count <- count + 1.0f
             | _ -> ()

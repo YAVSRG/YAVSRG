@@ -3,7 +3,7 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
@@ -69,13 +69,20 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
     override this.Init(parent) =
         state.SubscribeToHits(fun h ->
-            match h.Guts with
+            match h.Action with
             | Hit x ->
-                if x.Judgement.IsSome then
-                    judgement_animations[x.Judgement.Value].Reset()
+                match x.Judgement with
+                | Some (j, _) -> judgement_animations[j].Reset()
+                | None -> ()
+            | Hold x ->
+                match x.Judgement with
+                | Some (j, _) -> judgement_animations[j].Reset()
+                | None -> ()
             | Release x ->
-                if x.Judgement.IsSome then
-                    judgement_animations[x.Judgement.Value].Reset()
+                match x.Judgement with
+                | Some (j, _) -> judgement_animations[j].Reset()
+                | None -> ()
+            | _ -> ()
         )
 
         let background = config.JudgementCounterBackground
@@ -110,7 +117,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
             let j = state.Ruleset.Judgements.[i]
 
-            if not judgement_animations.[i].Complete && state.Scoring.State.Judgements.[i] > 0 then
+            if not judgement_animations.[i].Complete && state.Scoring.JudgementCounts.[i] > 0 then
                 Draw.rect
                     r
                     (Color.FromArgb(
@@ -130,11 +137,11 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
                 Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
             if config.JudgementCounterUseFont then
-                JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.State.Judgements.[i], config.JudgementCounterFontSpacing)
+                JudgementCounter.draw_count_right_aligned(font, r.Shrink(5.0f), Color.White, state.Scoring.JudgementCounts.[i], config.JudgementCounterFontSpacing)
             else
                 Text.fill_b (
                     Style.font,
-                    state.Scoring.State.Judgements.[i].ToString(),
+                    state.Scoring.JudgementCounts.[i].ToString(),
                     r.Shrink(5.0f),
                     (Color.White, Color.Black),
                     Alignment.RIGHT
@@ -142,8 +149,8 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
             r <- r.Translate(0.0f, h)
 
-        if config.JudgementCounterShowRatio && state.Scoring.State.Judgements.Length > 1 then
-            let ratio = state.Scoring.State.Judgements.[0], state.Scoring.State.Judgements.[1]
+        if config.JudgementCounterShowRatio && state.Scoring.JudgementCounts.Length > 1 then
+            let ratio = state.Scoring.JudgementCounts.[0], state.Scoring.JudgementCounts.[1]
             if config.JudgementCounterUseFont then
                 JudgementCounter.draw_ratio_centered(
                     font,

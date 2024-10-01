@@ -4,7 +4,7 @@ open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
@@ -44,7 +44,7 @@ type Combo(config: HudConfig, state: PlayState) =
 
             if (config.ComboLampColors && hits > 50) then
                 color.Target <-
-                    Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
+                    Lamp.calculate state.Ruleset.Lamps state.Scoring.JudgementCounts state.Scoring.ComboBreaks
                     |> state.Ruleset.LampColor
 
             pop_animation.Value <- config.ComboPop
@@ -56,7 +56,7 @@ type Combo(config: HudConfig, state: PlayState) =
         pop_animation.Update elapsed_ms
 
     override this.Draw() =
-        let combo = state.Scoring.State.CurrentCombo
+        let combo = state.Scoring.CurrentCombo
 
         let amt =
             pop_animation.Value

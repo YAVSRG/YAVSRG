@@ -3,12 +3,13 @@
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
+open Prelude
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type Preview(info: LoadedChartInfo, change_rate: float32 -> unit) as this =
+type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     inherit Dialog()
 
     let mutable playfield =

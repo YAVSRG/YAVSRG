@@ -4,13 +4,14 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
+open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.UI
 
 #nowarn "3370"
 
-type Grade(grade: Grade.GradeResult ref, score_info: ScoreInfo) =
+type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
@@ -32,7 +33,7 @@ type Grade(grade: Grade.GradeResult ref, score_info: ScoreInfo) =
 
 type Accuracy
     (
-        grade: Grade.GradeResult ref,
+        grade: GradeResult ref,
         improvements: ImprovementFlags ref,
         previous_personal_bests: Bests option ref,
         score_info: ScoreInfo
@@ -48,7 +49,7 @@ type Accuracy
     override this.Init(parent) =
         this
         |* Text(
-            (fun () -> score_info.Scoring.FormatAccuracy()),
+            (fun () -> format_accuracy score_info.Scoring.Accuracy),
             Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
             Position = Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE)
         )
@@ -71,7 +72,7 @@ type Accuracy
 
         Text.fill_b (
             Style.font,
-            score_info.Scoring.FormatAccuracy(),
+            format_accuracy score_info.Scoring.Accuracy,
             this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
             (grade_color, Colors.black),
             Alignment.CENTER
@@ -80,10 +81,10 @@ type Accuracy
         let text, color =
             match (!improvements).Accuracy with
             | Improvement.New -> new_record, Colors.text_yellow_2
-            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(r, 2)), Colors.text_cyan_2
+            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), Colors.text_cyan_2
             | Improvement.Better b -> sprintf "%s  •  +%.2f%%" new_record (b * 100.0), Colors.text_green_2
             | Improvement.FasterBetter(r, b) ->
-                sprintf "%s  •  +%.2f%%  •  +%gx" new_record (b * 100.0) (System.MathF.Round(r, 2)), Colors.text_pink_2
+                sprintf "%s  •  +%.2f%%  •  +%gx" new_record (b * 100.0) (System.MathF.Round(float32 r, 2)), Colors.text_pink_2
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs ->
@@ -123,7 +124,7 @@ type Accuracy
 
 type Lamp
     (
-        lamp: Lamp.LampResult ref,
+        lamp: LampResult ref,
         improvements: ImprovementFlags ref,
         previous_personal_bests: Bests option ref,
         score_info: ScoreInfo
@@ -163,7 +164,7 @@ type Lamp
         let text, color =
             match (!improvements).Lamp with
             | Improvement.New -> new_record, (Colors.text_yellow_2)
-            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(r, 2)), (Colors.text_cyan_2)
+            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), (Colors.text_cyan_2)
             | Improvement.Better b ->
                 let new_lamp = score_info.Ruleset.LampName (!lamp).Lamp
                 let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
@@ -172,7 +173,7 @@ type Lamp
                 let new_lamp = score_info.Ruleset.LampName (!lamp).Lamp
                 let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
 
-                sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(r, 2)),
+                sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(float32 r, 2)),
                 (Colors.text_pink_2)
             | Improvement.None ->
                 match (!previous_personal_bests) with
@@ -201,7 +202,7 @@ type Lamp
 
             Text.fill_b (
                 Style.font,
-                sprintf "%.1f raw" (score_info.Scoring.State.MaxPointsScored - score_info.Scoring.State.PointsScored),
+                sprintf "%.1f raw" (score_info.Scoring.MaxPossiblePoints - score_info.Scoring.PointsScored),
                 raw_greats_tooltip.Shrink(10.0f, 5.0f),
                 Colors.text,
                 Alignment.CENTER

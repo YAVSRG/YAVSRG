@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Data.User
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Interlude.UI
 open Interlude.Features.Gameplay
 
@@ -18,11 +18,11 @@ module LocalOffset =
         |> Setting.trigger Song.set_local_offset
 
     let get_automatic (state: PlayState) (save_data: ChartSaveData) =
-        let mutable sum = 0.0f<ms>
+        let mutable sum = 0.0f<ms / rate>
         let mutable count = 1.0f
 
-        for ev in state.Scoring.HitEvents do
-            match ev.Guts with
+        for ev in state.Scoring.Events do
+            match ev.Action with
             | Hit x when not x.Missed ->
                 sum <- sum + x.Delta
                 count <- count + 1.0f

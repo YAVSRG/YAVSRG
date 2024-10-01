@@ -4,7 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
@@ -14,7 +15,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
 
     let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
 
-    let SCROLL_SPEED = config.InputMeterScrollSpeed * 1.0f</ms> / SelectedChart.rate.Value
+    let SCROLL_SPEED = config.InputMeterScrollSpeed * 1.0f<rate / ms> / SelectedChart.rate.Value
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

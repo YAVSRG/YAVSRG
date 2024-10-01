@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Patterns
 
-type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bounded<float32>) =
+type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bounded<Rate>) =
     inherit StaticWidget(NodeType.None)
 
     let HEIGHT = 60.0f
@@ -84,7 +84,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
         Text.draw_b(Style.font, now, 24.0f, b.Left + 10.0f, b.Bottom - 40.0f, Colors.text)
         Text.draw_aligned_b(Style.font, duration, 24.0f, b.Right - 10.0f, b.Bottom - 40.0f, Colors.text, Alignment.RIGHT)
 
-        if rate.Value <> 1.0f then
+        if rate.Value <> 1.0f<rate> then
             Text.draw_b(Style.font, now_on_1x, 14.0f, b.Left + 10.0f, b.Bottom - 60.0f, Colors.text_greyout)
             Text.draw_aligned_b(Style.font, duration_on_1x, 14.0f, b.Right - 10.0f, b.Bottom - 60.0f, Colors.text_greyout, Alignment.RIGHT)
 

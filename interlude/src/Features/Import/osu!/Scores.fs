@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.osu
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -17,6 +17,7 @@ open Interlude.Content
 
 module Scores =
 
+    // todo: move all of this to prelude
     let private import_osu_scores () =
         match options.OsuMount.Value with
         | None -> Logging.Warn "Requires osu! Songs folder to be mounted"
@@ -156,7 +157,7 @@ module Scores =
                             DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime()
                             |> Timestamp.from_datetime
                         Replay = Replay.compress_bytes replay_data
-                        Rate = MathF.Round(combined_rate, 2)
+                        Rate = MathF.Round(combined_rate, 2) * 1.0f<rate>
                         Mods = mods
                         IsImported = true
                         Keys = chart.Keys

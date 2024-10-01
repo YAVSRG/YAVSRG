@@ -5,7 +5,7 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Data.User
@@ -35,7 +35,7 @@ module Replays =
                     DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
                 Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(float32 rate, 2)
+                Rate = MathF.Round(float32 rate, 2) * 1.0f<rate>
                 Mods = mods
                 IsImported = true
                 Keys = chart.Keys

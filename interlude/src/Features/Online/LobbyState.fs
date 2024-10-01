@@ -6,7 +6,8 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.Web.Shared
 
@@ -30,7 +31,7 @@ type LobbyPlayer =
 type LobbyPlayerReplayInfo =
     {
         Replay: IReplayProvider
-        ScoreMetric: ScoreProcessorBase
+        ScoreMetric: ScoreProcessor // todo: rename from ScoreMetric
         GetScoreInfo: unit -> ScoreInfo
     }
 
@@ -162,7 +163,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member this.SendReplayData (timestamp: float32, data: byte array) = client.Send(Upstream.PLAY_DATA (timestamp, data))
     member this.FinishPlaying() = client.Send(Upstream.FINISH_PLAYING false)
     member this.AbandonPlaying() = client.Send(Upstream.FINISH_PLAYING true)
-    member this.SelectChart (cc: ChartMeta, rate: float32, mods: ModState) =
+    member this.SelectChart (cc: ChartMeta, rate: Rate, mods: ModState) =
         if this.YouAreHost then
             client.Send(
                 Upstream.SELECT_CHART
@@ -171,7 +172,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
                         Artist = cc.Artist
                         Title = cc.Title
                         Creator = cc.Creator
-                        Rate = rate
+                        Rate = float32 rate
                         Mods = Map.toArray mods
                     }
             )

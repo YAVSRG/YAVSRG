@@ -142,7 +142,7 @@ module Options =
     [<Json.AutoCodec(false)>]
     type GameOptions =
         {
-            VisualOffset: Setting.Bounded<float32>
+            VisualOffset: Setting.Bounded<float32> // todo: change to ms / rate
             AudioOffset: Setting.Bounded<float32>
             AudioVolume: Setting.Bounded<float>
             AudioPitchRates: Setting<bool>
@@ -180,8 +180,8 @@ module Options =
             TreeAlwaysShowCollections: Setting<bool>
             TreeShowNativeText: Setting<bool>
             Table: Setting<string option>
-            SuggestionsMinRate: Setting.Bounded<float32>
-            SuggestionsMaxRate: Setting.Bounded<float32>
+            SuggestionsMinRate: Setting.Bounded<Rate>
+            SuggestionsMaxRate: Setting.Bounded<Rate>
             SuggestionsOnlyNew: Setting<bool>
 
             EnableConsole: Setting<bool>
@@ -244,8 +244,8 @@ module Options =
                 TreeAlwaysShowCollections = Setting.simple false
                 TreeShowNativeText = Setting.simple false
                 Table = Content.Tables.selected_id
-                SuggestionsMinRate = Setting.rate 1.0f
-                SuggestionsMaxRate = Setting.rate 1.5f
+                SuggestionsMinRate = Setting.rate 1.0f<rate>
+                SuggestionsMaxRate = Setting.rate 1.5f<rate>
                 SuggestionsOnlyNew = Setting.simple true
 
                 EnableConsole = Setting.simple false

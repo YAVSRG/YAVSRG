@@ -311,15 +311,16 @@ module Common =
 
         File.Move(write, path)
 
-    let format_duration_ms (ms: Time) =
-        if ms > 3600_000f<ms> then
+    let inline format_duration_ms (ms: 'T) =
+        let ms = float32 ms
+        if ms > 3600_000f then
             sprintf
                 "%i:%02i:%02i"
-                (ms / 3600_000f<ms> |> floor |> int)
-                ((ms / 60_000f<ms>) % 60f |> floor |> int)
-                ((ms / 1_000f<ms>) % 60f |> floor |> int)
+                (ms / 3600_000f |> floor |> int)
+                ((ms / 60_000f) % 60f |> floor |> int)
+                ((ms / 1_000f) % 60f |> floor |> int)
         else
-            sprintf "%i:%02i" ((ms / 60_000f<ms>) % 60f |> floor |> int) ((ms / 1_000f<ms>) % 60f |> floor |> int)
+            sprintf "%i:%02i" ((ms / 60_000f) % 60f |> floor |> int) ((ms / 1_000f) % 60f |> floor |> int)
 
     let format_timespan (ts: TimeSpan) =
 
@@ -340,6 +341,7 @@ module Common =
         else
             sprintf "%.0fs" ts.TotalSeconds
 
+    // todo: replace with method on rulesets that formats accuracy
     let format_accuracy (accuracy: float) =
         if accuracy = 1.0 then
             "100.00%"

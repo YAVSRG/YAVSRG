@@ -4,12 +4,13 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Interlude.UI
 
 type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     inherit Page()
 
-    let grade = ruleset.Value.Grading.Grades.[id]
+    let grade = ruleset.Value.Grades.[id]
     let name = Setting.simple grade.Name
     let color = Setting.simple grade.Color
     let acc_required = Setting.bounded (float32 grade.Accuracy) 0.0f 1.0f |> Setting.roundf 6
@@ -28,10 +29,9 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
 
     override this.Title = grade.Name
     override this.OnClose() =
-        let new_grades = ruleset.Value.Grading.Grades |> Array.copy
+        let new_grades = ruleset.Value.Grades |> Array.copy
         new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
-        let new_grading = { ruleset.Value.Grading with Grades = new_grades |> Array.sortBy _.Accuracy }
-        ruleset.Set { ruleset.Value with Grading = new_grading }
+        ruleset.Set { ruleset.Value with Grades = new_grades }
 
 type EditGradesPage(ruleset: Setting<Ruleset>) =
     inherit Page()
@@ -54,7 +54,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
 
     and refresh() =
         container.Clear()
-        for i, g in ruleset.Value.Grading.Grades |> Seq.indexed |> Seq.rev do
+        for i, g in ruleset.Value.Grades |> Seq.indexed |> Seq.rev do
             container.Add (grade_controls (i, g))
         container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.grade.add", add_grade)
 
@@ -65,16 +65,11 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Color = Color.White
                 Accuracy = 0.0
             }
-        let new_grading = 
-            { ruleset.Value.Grading with 
-                Grades = ruleset.Value.Grading.Grades |> Array.append [| new_grade |] 
-            }
-        ruleset.Set { ruleset.Value with Grading = new_grading }
+        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |]  }
         defer refresh
 
     and delete_grade(i: int) : unit =
-        let new_grading = { ruleset.Value.Grading with Grades = ruleset.Value.Grading.Grades |> Array.removeAt i }
-        ruleset.Set { ruleset.Value with Grading = new_grading }
+        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i }
         refresh()
 
     override this.Content() =

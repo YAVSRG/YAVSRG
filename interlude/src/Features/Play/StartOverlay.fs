@@ -49,13 +49,17 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
             | PacemakerState.Accuracy acc -> sprintf "%s Target: %s" Icons.FLAG (format_accuracy acc)
             | PacemakerState.Replay (acc, _) -> sprintf "%s Beat score: %s" Icons.FLAG (format_accuracy acc)
             | PacemakerState.Judgement (j, count) ->
-                let jname = 
-                    if j < 0 then "combo break"
-                    else Rulesets.current.JudgementName j
+                let jname = Rulesets.current.JudgementName j
                 if count = 0 then 
                     sprintf "%s Get 0x %s" Icons.FLAG jname
                 else 
                     sprintf "%s Get %ix %s or better" Icons.FLAG count jname
+            | PacemakerState.ComboBreaks count ->
+                if count = 0 then 
+                    sprintf "%s Get a full combo" Icons.FLAG
+                else 
+                    sprintf "%s Get %ix combo break or better" Icons.FLAG count
+                
 
         Text.fill_b(Style.font, pacemaker_desc, song_title.TranslateY(170.0f).SliceT(60.0f), (Colors.yellow_accent.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 

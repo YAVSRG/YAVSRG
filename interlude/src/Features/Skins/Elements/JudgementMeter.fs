@@ -4,7 +4,7 @@ open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
@@ -24,21 +24,19 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
                 config.JudgementMeterDuration
             else
                 config.JudgementMeterFrameTime * float32 texture.Columns
-        ) * SelectedChart.rate.Value * 1.0f<ms>
+        ) * SelectedChart.rate.Value * 1.0f<ms / rate>
 
     do
         state.SubscribeToHits(fun ev ->
-            let (judge, _) =
-                match ev.Guts with
-                | Hit e -> (e.Judgement, e.Delta)
-                | Release e -> (e.Judgement, e.Delta)
+            let judge =
+                match ev.Action with
+                | Hit e -> e.Judgement |> Option.map fst
+                | Hold e -> e.Judgement |> Option.map fst
+                | Release e -> e.Judgement |> Option.map fst
+                | _ -> None
 
-            if
-                judge.IsSome
-                && (not config.JudgementMeterIgnorePerfect || judge.Value > 0)
-            then
-                let j = judge.Value in
-
+            match judge with
+            | Some j when not config.JudgementMeterIgnorePerfect || j > 0 ->
                 if
                     not config.JudgementMeterPrioritiseLower
                     || j >= tier
@@ -47,6 +45,7 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
                 then
                     tier <- j
                     time <- ev.Time
+            | _ -> ()
         )
 
     override this.Draw() =

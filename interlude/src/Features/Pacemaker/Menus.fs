@@ -34,7 +34,7 @@ type PacemakerOptionsPage() =
     override this.Content() = 
         let lamps =
             seq {
-                let lamp_count = Rulesets.current.Grading.Lamps.Length
+                let lamp_count = Rulesets.current.Lamps.Length
                 for i in 0 .. lamp_count - 1 do
                     yield i, Rulesets.current.LampName i
                 if lamp_count = 0 then

@@ -11,26 +11,20 @@ type ModStatus = Processing.ModStatus
 
 type ModState = Map<string, int>
 
-(*
-    Mods (Modifiers) are a set of optional effects that can be enabled for a chart before playing it
-    They will change something about the chart that can vary gameplay in interesting ways
-    Mods will have an integer "state" passed to them when they are applied - This allows some sub-behaviours within mods
-    RandomSeed indicates that state should be randomised and is used to seed random behaviour for the mod
-        (This number is then saved so the mod/score can be replicated for replay purposes)
+/// Mods (Modifiers) are a set of optional effects that can be enabled for a chart before playing it
+/// They will change something about the chart that can vary gameplay in interesting ways
 
-    Sanity rules
-        - 'Check' should not modify anything about the Chart passed
-        - 'Apply' should not modify the header of the Chart passed
-*)
 type Mod =
     {
         Status: ModStatus
+        /// Mods can have an integer "state" passed to them when they are applied - This allows some sub-behaviours within mods
         States: int
+        /// If true, state should be a randomised seed
         RandomSeed: bool
+        /// List of mod ids this mod cannot be used with
         Exclusions: string list
-        // Returns resulting chart + flag
-        // flag is true if the mod made meaningful changes to the chart
-        // The resulting chart can still be modified in ways that don't affect gameplay such as changing BPMs
+        /// Returns resulting chart + flag
+        /// flag is true if the mod made meaningful changes to the chart and the mod should be considered 'applied'
         Apply: int -> ModdedChartInternal -> ModdedChartInternal * bool
     }
     static member internal Default =

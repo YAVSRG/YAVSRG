@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Online
 
 open Percyqaz.Common
+open Prelude
 open DiscordRPC
 
 module DiscordRPC =
@@ -53,7 +54,7 @@ module DiscordRPC =
 
             client.SetPresence(rp)
 
-    let playing_timed (mode: string, song: string, time_left: Time) =
+    let playing_timed (mode: string, song: string, time_left: GameplayTime) =
         if not client.IsDisposed then
 
             let rp =

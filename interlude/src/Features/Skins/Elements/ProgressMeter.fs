@@ -73,13 +73,13 @@ module ProgressMeter =
                 Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-    let fmt_time_left (time_left: float32<ms>) =
+    let fmt_time_left (time_left: float32<ms / rate>) =
         sprintf
             "%i:%02i"
-            (time_left / 60000.0f<ms> |> floor |> int)
-            ((time_left % 60000.0f<ms>) / 1000.0f<ms> |> floor |> int)
+            (time_left / 60000.0f<ms / rate> |> floor |> int)
+            ((time_left % 60000.0f<ms / rate>) / 1000.0f<ms / rate> |> floor |> int)
 
-    let draw_countdown_centered(texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms>, spacing: float32, colon_spacing: float32) =
+    let draw_countdown_centered(texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) =
         let time_left_text = fmt_time_left time_left
 
         let char_width = float32 texture.Width
@@ -123,7 +123,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
 
             match config.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
-                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
+                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
                         this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
@@ -148,7 +148,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
             let text =
                 match config.ProgressMeterLabel with
                 | ProgressMeterLabel.Countdown ->
-                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms>
+                    let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.fmt_time_left time_left
                 | ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
                 | _ -> ""

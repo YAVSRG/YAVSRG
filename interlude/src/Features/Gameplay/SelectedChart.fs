@@ -47,7 +47,7 @@ module SelectedChart =
 
     let mutable autoplay = false
 
-    let _rate = Setting.rate 1.0f
+    let _rate = Setting.rate 1.0f<rate>
     let _selected_mods = options.SelectedMods
 
     let private format_duration (cc: ChartMeta option) =
@@ -118,7 +118,6 @@ module SelectedChart =
             WithColors = WITH_COLORS.Value
         }
 
-
     let private chart_update_finished = Event<LoadedChartInfo>()
     let on_chart_update_finished = chart_update_finished.Publish
 
@@ -134,8 +133,8 @@ module SelectedChart =
     let mutable private on_load_succeeded = []
 
     type private LoadRequest =
-        | Load of ChartMeta * play_audio: bool * rate: float32 * mods: ModState
-        | Update of bool * rate: float32 * mods: ModState
+        | Load of ChartMeta * play_audio: bool * rate: Rate * mods: ModState
+        | Update of bool * rate: Rate * mods: ModState
         | Recolor
 
     let private chart_loader =
@@ -171,7 +170,7 @@ module SelectedChart =
                                 Song.change (
                                     cc.Audio.Path,
                                     save_data.Offset,
-                                    rate,
+                                    float32 rate,
                                     (cc.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
@@ -191,7 +190,7 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternReport.from_chart rate chart
+                        let patterns = PatternReport.from_chart chart // todo: no need to recalc when rates change any more. or in fact ever because it's in CC
                         let note_counts = format_notecounts with_mods
 
                         yield
@@ -221,7 +220,7 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternReport.from_chart rate chart
+                        let patterns = PatternReport.from_chart chart // todo: no need to recalc
                         let note_counts = format_notecounts with_mods
 
                         yield
@@ -340,7 +339,7 @@ module SelectedChart =
         else
             on_load_succeeded <- (fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
 
-    let private collections_on_rate_changed (library_ctx: LibraryContext) (v: float32) =
+    let private collections_on_rate_changed (library_ctx: LibraryContext) (v: Rate) =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
         | _ -> ()
@@ -352,7 +351,7 @@ module SelectedChart =
 
     let private collections_on_chart_changed
         (library_ctx: LibraryContext)
-        (rate: Setting.Bounded<float32>)
+        (rate: Setting.Bounded<Rate>)
         (mods: Setting<ModState>)
         =
         match library_ctx with
@@ -377,7 +376,7 @@ module SelectedChart =
             if_loading
             <| fun info ->
                 collections_on_rate_changed info.LibraryContext v
-                Song.change_rate v
+                Song.change_rate (float32 v)
                 update ()
         )
 
@@ -390,23 +389,23 @@ module SelectedChart =
                 update ()
         )
 
-    let change_rate_hotkeys(change_rate_by: float32 -> unit) =
+    let change_rate_hotkeys(change_rate_by: Rate -> unit) =
         if (%%"uprate_small").Tapped() then
-            change_rate_by (0.01f)
+            change_rate_by (0.01f<rate>)
         elif (%%"uprate_half").Tapped() then
-            change_rate_by (0.05f)
+            change_rate_by (0.05f<rate>)
         elif (%%"uprate_big").Tapped() then
-            change_rate_by (0.25f)
+            change_rate_by (0.25f<rate>)
         elif (%%"uprate").Tapped() then
-            change_rate_by (0.1f)
+            change_rate_by (0.1f<rate>)
         elif (%%"downrate_small").Tapped() then
-            change_rate_by (-0.01f)
+            change_rate_by (-0.01f<rate>)
         elif (%%"downrate_half").Tapped() then
-            change_rate_by (-0.05f)
+            change_rate_by (-0.05f<rate>)
         elif (%%"downrate_big").Tapped() then
-            change_rate_by (-0.25f)
+            change_rate_by (-0.25f<rate>)
         elif (%%"downrate").Tapped() then
-            change_rate_by (-0.1f)
+            change_rate_by (-0.1f<rate>)
 
     let init_window () = 
 

@@ -3,6 +3,8 @@
 open Percyqaz.Common
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
 open Prelude.Data
 open Prelude.Data.User
@@ -32,8 +34,8 @@ module Gameplay =
 
             Replay = replay_data
             Scoring = scoring
-            Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-            Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+            Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+            Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
             Rating = info.Rating
             Patterns = info.Patterns
@@ -55,7 +57,7 @@ module Gameplay =
                         ({
                             ChartId = score_info.ChartMeta.Hash
                             Replay = score_info.Replay |> Replay.compress_string
-                            Rate = score_info.Rate
+                            Rate = float32 score_info.Rate
                             Mods = score_info.Mods
                             Timestamp = score_info.TimePlayed |> Timestamp.to_datetime
                         }),

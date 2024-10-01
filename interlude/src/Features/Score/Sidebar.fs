@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.UI
 
@@ -41,7 +42,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Align = Alignment.LEFT
         )
         |+ Text(
-            (fun () -> sprintf "%ix" score_info.Scoring.State.BestCombo),
+            (fun () -> sprintf "%ix" score_info.Scoring.BestCombo),
             Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f),
             Align = Alignment.CENTER
         )

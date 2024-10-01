@@ -7,6 +7,7 @@ open Prelude
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Scoring
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -36,7 +37,7 @@ type PersonalBests() =
             let accuracy = 
                 match pbs.Accuracy |> PersonalBests.get_best_above SelectedChart.rate.Value with
                 | Some (acc, rate, timestamp) -> 
-                    let grade = (Grade.calculate_with_target Rulesets.current.Grading.Grades acc).Grade
+                    let grade = Grade.calculate Rulesets.current.Grades acc
                     let color = Rulesets.current.GradeColor grade
                     Some (acc, rate, timestamp, color)
                 | None ->

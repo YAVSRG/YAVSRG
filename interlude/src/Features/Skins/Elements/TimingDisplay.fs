@@ -4,7 +4,7 @@ open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
@@ -15,7 +15,7 @@ type private TimingDisplayHit =
         Time: Time
         Position: float32
         IsRelease: bool
-        Judgement: JudgementId option
+        Judgement: int option
     }
 
 type TimingDisplay(config: HudConfig, state: PlayState) =
@@ -36,44 +36,63 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
+    let MAX_WINDOW = state.Ruleset.LargestWindow
+
     do
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
             state.SubscribeToHits(fun ev ->
-                match ev.Guts with
+                match ev.Action with
                 | Hit e ->
                     if not e.Missed then
                         moving_average.Target <- 
                             Percyqaz.Flux.Utils.lerp 
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
-                                (e.Delta / state.Scoring.MissWindow * w * 0.5f)
+                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                | Hold e ->
+                    if not e.Missed then
+                        moving_average.Target <- 
+                            Percyqaz.Flux.Utils.lerp 
+                                config.TimingDisplayMovingAverageSensitivity
+                                moving_average.Target 
+                                (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Release e ->
                     if not e.Missed then
                         moving_average.Target <- 
                             Percyqaz.Flux.Utils.lerp 
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
-                                (e.Delta / state.Scoring.MissWindow * w * ln_mult)
+                                (e.Delta / MAX_WINDOW * w * ln_mult)
+                | _ -> ()
             )
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
             state.SubscribeToHits(fun ev ->
-                match ev.Guts with
+                match ev.Action with
                 | Hit e ->
                     hits.Add
                         {
                             Time = ev.Time
-                            Position = e.Delta / state.Scoring.MissWindow * w * 0.5f
+                            Position = e.Delta / MAX_WINDOW * w * 0.5f
                             IsRelease = false
-                            Judgement = e.Judgement
+                            Judgement = e.Judgement |> Option.map fst
+                        }
+                | Hold e ->
+                    hits.Add
+                        {
+                            Time = ev.Time
+                            Position = e.Delta / MAX_WINDOW * w * 0.5f
+                            IsRelease = false
+                            Judgement = e.Judgement |> Option.map fst
                         }
                 | Release e ->
                     hits.Add
                         {
                             Time = ev.Time
-                            Position = e.Delta / state.Scoring.MissWindow * w * ln_mult
+                            Position = e.Delta / MAX_WINDOW * w * ln_mult
                             IsRelease = true
-                            Judgement = e.Judgement
+                            Judgement = e.Judgement |> Option.map fst
                         }
+                | _ -> ()
             )
 
     override this.Update(elapsed_ms, moved) =
@@ -91,25 +110,26 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
         last_seen_time <- now
 
-        while hits.Count > 0 && hits.[0].Time + animation_time * 1.0f<ms> < now do
+        while hits.Count > 0 && hits.[0].Time + animation_time * 1.0f<ms / rate> < now do
             hits.RemoveAt(0)
 
     member this.DrawWindows(opacity: int) =
-        let centre = this.Bounds.CenterX
+        () // todo:
+        //let centre = this.Bounds.CenterX
 
-        let ms_to_x =
-            let w = this.Bounds.Width * 0.5f
-            fun time -> centre + time / state.Scoring.Ruleset.Accuracy.MissWindow * w
+        //let ms_to_x =
+        //    let w = this.Bounds.Width * 0.5f
+        //    fun time -> centre + time / MAX_WINDOW * w
 
-        let mutable time = -state.Scoring.Ruleset.Accuracy.MissWindow
-        for (time2, j) in state.Scoring.Ruleset.Accuracy.Timegates do
-            Draw.rect 
-                (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom))
-                (state.Scoring.Ruleset.JudgementColor(j).O4a opacity)
-            time <- time2
-        Draw.rect 
-            (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x state.Scoring.Ruleset.Accuracy.MissWindow, this.Bounds.Bottom))
-            (state.Scoring.Ruleset.JudgementColor(state.Scoring.Ruleset.Judgements.Length - 1).O4a opacity)
+        //let mutable time = -MAX_WINDOW
+        //for (time2, j) in state.Scoring.Ruleset.Accuracy.Timegates do
+        //    Draw.rect 
+        //        (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom))
+        //        (state.Scoring.Ruleset.JudgementColor(j).O4a opacity)
+        //    time <- time2
+        //Draw.rect 
+        //    (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x MAX_WINDOW, this.Bounds.Bottom))
+        //    (state.Scoring.Ruleset.JudgementColor(state.Scoring.Ruleset.Judgements.Length - 1).O4a opacity)
 
     override this.Draw() =
         if window_opacity > 0 then

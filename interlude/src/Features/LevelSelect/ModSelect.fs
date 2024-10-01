@@ -68,7 +68,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
         base.Draw()
 
-type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit) =
+type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
     inherit Page()
 
     let mutable last_seen_mod_status = ModStatus.Ranked
@@ -113,7 +113,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
 
         page_container()
         |+ PageSetting(%"gameplay.rate",
-            Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f) * 0.05f), 
+            Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate> |> Setting.uom), 
             Format = sprintf "%.02fx")
         )
             .Help(
@@ -169,7 +169,7 @@ type private ModSelectPage(change_rate: float32 -> unit, on_close: unit -> unit)
     override this.Title = sprintf "%s %s" Icons.ZAP (%"mods")
     override this.OnClose() = on_close ()
 
-type ModSelect(change_rate: float32 -> unit, on_menu_close: unit -> unit) =
+type ModSelect(change_rate: Rate -> unit, on_menu_close: unit -> unit) =
     inherit
         StylishButton(
             (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),

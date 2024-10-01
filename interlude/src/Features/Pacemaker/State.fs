@@ -1,8 +1,11 @@
 ﻿namespace Interlude.Features.Pacemaker
 
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
+open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
@@ -12,8 +15,9 @@ open Interlude.Features.Gameplay
 type PacemakerState =
     | None
     | Accuracy of float
-    | Replay of float * ScoreProcessorBase
-    | Judgement of target: JudgementId * max_count: int
+    | Replay of float * ScoreProcessor
+    | Judgement of target: int * max_count: int
+    | ComboBreaks of max_count: int
 
 [<RequireQualifiedAccess>]
 type PacemakerCreationContext =
@@ -23,7 +27,7 @@ type PacemakerCreationContext =
 
 module PacemakerState =
 
-    let pacemaker_met (scoring: ScoreProcessorBase) (state: PacemakerState) =
+    let pacemaker_met (scoring: ScoreProcessor) (state: PacemakerState) =
         match state with
         | PacemakerState.None -> true
         | PacemakerState.Accuracy x -> scoring.Accuracy >= x
@@ -32,17 +36,16 @@ module PacemakerState =
             scoring.Accuracy >= r.Accuracy
         | PacemakerState.Judgement(judgement, count) ->
             let actual =
-                if judgement = -1 then
-                    scoring.State.ComboBreaks
-                else
-                    let mutable c = scoring.State.Judgements.[judgement]
+                let mutable c = scoring.JudgementCounts.[judgement]
 
-                    for j = judgement + 1 to scoring.State.Judgements.Length - 1 do
-                        if scoring.State.Judgements.[j] > 0 then
-                            c <- 1000000
+                for j = judgement + 1 to scoring.JudgementCounts.Length - 1 do
+                    if scoring.JudgementCounts.[j] > 0 then
+                        c <- System.Int32.MaxValue
 
-                    c
+                c
             actual <= count
+        | PacemakerState.ComboBreaks count ->
+            scoring.ComboBreaks <= count
 
     let create (info: LoadedChartInfo) (ctx: PacemakerCreationContext) =
         match ctx with
@@ -92,8 +95,9 @@ module PacemakerState =
                     else
                         setting.Lamp
 
-                if lamp >= Rulesets.current.Grading.Lamps.Length || lamp < 0 then
+                if lamp >= Rulesets.current.Lamps.Length || lamp < 0 then
                     PacemakerState.None
                 else
-                    let rs_lamp = Rulesets.current.Grading.Lamps.[lamp]
-                    PacemakerState.Judgement(rs_lamp.Judgement, rs_lamp.JudgementThreshold)
+                    match Rulesets.current.Lamps.[lamp].Requirement with
+                    | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks n
+                    | LampRequirement.JudgementAtMost (j, n) -> PacemakerState.Judgement (j, n)

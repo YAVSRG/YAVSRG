@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
@@ -20,13 +21,13 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
 
     let grade =
         ref
-        <| Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy
+        <| Grade.calculate_with_target score_info.Ruleset.Grades score_info.Accuracy
 
     let lamp =
         ref
-        <| Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
+        <| Lamp.calculate_with_target score_info.Ruleset.Lamps score_info.Scoring.JudgementCounts score_info.Scoring.ComboBreaks
 
-    let stats = ref <| ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
+    let stats = ref <| ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
 
     let previous_personal_bests =
         match SelectedChart.SAVE_DATA with
@@ -43,12 +44,12 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         personal_bests := ImprovementFlags.None
 
         grade
-        := Grade.calculate_with_target score_info.Ruleset.Grading.Grades score_info.Accuracy
+        := Grade.calculate_with_target score_info.Ruleset.Grades score_info.Accuracy
 
         lamp
-        := Lamp.calculate_with_target score_info.Ruleset.Grading.Lamps score_info.Scoring.State
+        := Lamp.calculate_with_target score_info.Ruleset.Lamps score_info.Scoring.JudgementCounts score_info.Scoring.ComboBreaks
 
-        stats := ScoreScreenStats.Generate score_info.Scoring.State.Judgements score_info.Scoring.HitEvents GraphSettings.column_filter
+        stats := ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
         previous_personal_bests := None
         graph.Refresh()
 

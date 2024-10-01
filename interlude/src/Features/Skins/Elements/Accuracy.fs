@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
@@ -41,7 +41,7 @@ module Accuracy =
 type Accuracy(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
-    let grades = state.Ruleset.Grading.Grades
+    let grades = state.Ruleset.Grades
 
     let color =
         Animation.Color(
@@ -56,14 +56,14 @@ type Accuracy(config: HudConfig, state: PlayState) =
     override this.Init(parent) =
         if config.AccuracyGradeColors then
             state.SubscribeToHits(fun _ ->
-                color.Target <- Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor
+                color.Target <- Grade.calculate grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
             )
 
         
         if not config.AccuracyUseFont then
             this
             |* Text(
-                (fun () -> state.Scoring.FormatAccuracy()),
+                (fun () -> format_accuracy state.Scoring.Accuracy),
                 Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position =
@@ -75,7 +75,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
         if config.AccuracyShowName then
             this
             |* Text(
-                (fun () -> state.Scoring.Name),
+                K state.Ruleset.Name,
                 Color = K Colors.text_subheading,
                 Align = Alignment.CENTER,
                 Position =

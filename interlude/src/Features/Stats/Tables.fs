@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -206,7 +207,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
 
     let score_of (hash: string) =
         (UserDatabase.get_chart_data hash Content.UserData).PersonalBests
-        |> Bests.ruleset_best_above rs_hash (_.Accuracy) 1.0f
+        |> Bests.ruleset_best_above rs_hash (_.Accuracy) 1.0f<rate>
         |> Option.get
         |> fun (accuracy, _, _) -> accuracy
 
@@ -338,7 +339,7 @@ type private TableStats() =
             Table.ratings
                 (fun chart_id ->
                     (UserDatabase.get_chart_data chart_id Content.UserData).PersonalBests
-                    |> Bests.ruleset_best_above table.Info.RulesetId (_.Grade) 1.0f
+                    |> Bests.ruleset_best_above table.Info.RulesetId (_.Grade) 1.0f<rate>
                     |> Option.map (fun (grade, _, _) -> grade)
                 )
                 table

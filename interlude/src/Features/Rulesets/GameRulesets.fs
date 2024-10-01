@@ -11,7 +11,7 @@ type OsuRulesetPage() =
     inherit Page()
 
     let od = Setting.bounded 8.0f 0.0f 10.0f
-    let mode = Setting.simple ``osu!``.NoMod
+    let mode = Setting.simple OsuMania.NoMod
 
     let create () =
         let ruleset_id = 
@@ -19,11 +19,11 @@ type OsuRulesetPage() =
                 od.Value
                 (
                     match mode.Value with 
-                    | ``osu!``.NoMod -> "" 
-                    | ``osu!``.HardRock -> "-hr" 
-                    | ``osu!``.Easy -> "-ez"
+                    | OsuMania.NoMod -> "" 
+                    | OsuMania.HardRock -> "-hr" 
+                    | OsuMania.Easy -> "-ez"
                 )
-        Rulesets.install_or_update ruleset_id (``osu!``.create od.Value mode.Value)
+        Rulesets.install_or_update ruleset_id (OsuMania.create od.Value mode.Value)
         Menu.Back()
         Menu.Back()
 
@@ -34,9 +34,9 @@ type OsuRulesetPage() =
             %"ruleset.osu_modifier", 
             Selector(
                 [| 
-                    ``osu!``.NoMod, %"ruleset.osu_modifier.nomod"
-                    ``osu!``.HardRock, %"ruleset.osu_modifier.hardrock"
-                    ``osu!``.Easy, %"ruleset.osu_modifier.easy"
+                    OsuMania.NoMod, %"ruleset.osu_modifier.nomod"
+                    OsuMania.HardRock, %"ruleset.osu_modifier.hardrock"
+                    OsuMania.Easy, %"ruleset.osu_modifier.easy"
                 |], 
                 mode
             )
@@ -64,8 +64,6 @@ type WifeRulesetPage() =
         |+ PageSetting(%"ruleset.wife_judge",
             SelectDropdown(
                 [| 
-                    2, "2"
-                    3, "3"
                     4, "4"
                     5, "5"
                     6, "6"

@@ -5,7 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
@@ -41,7 +41,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
                 let y t =
                     float32 options.HitPosition.Value
-                    + float32 (t - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                    + (t - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
                     + playfield.ColumnWidth * 0.5f
 
                 Rect
@@ -58,7 +58,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
             let now =
                 state.CurrentChartTime()
                 + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-                + options.VisualOffset.Value * 1.0f<ms> * SelectedChart.rate.Value
+                + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
 
             while replay_data.Length - 1 > seek
                   && let struct (t, _) = replay_data.[seek + 1] in
@@ -66,7 +66,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 seek <- seek + 1
 
             let until_time =
-                now + 1080.0f<ms> / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                now + 1080.0f<ms / rate> / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
             let mutable peek = seek
             let struct (t, b) = replay_data.[peek]

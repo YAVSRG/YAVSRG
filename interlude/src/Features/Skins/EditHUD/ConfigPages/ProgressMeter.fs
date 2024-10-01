@@ -38,7 +38,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
 
                     match label.Value  with
                         | ProgressMeterLabel.Countdown ->
-                            let time_left = 447000.0f<ms>
+                            let time_left = 447000.0f<ms / rate>
                             ProgressMeter.draw_countdown_centered (
                                 font_texture,
                                 bounds.SliceB(bounds.Width * label_size.Value), 

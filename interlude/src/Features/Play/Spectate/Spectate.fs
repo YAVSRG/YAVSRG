@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Interlude.Web.Shared.Packets
 open Interlude.Content
 open Interlude.UI

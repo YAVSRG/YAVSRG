@@ -3,7 +3,7 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.Features.Play
@@ -11,7 +11,7 @@ open Interlude.Features.Gameplay
 
 type EarlyLateMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms>
+    let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms / rate>
     let mutable early = false
     let mutable time = -Time.infinity
 
@@ -19,14 +19,18 @@ type EarlyLateMeter(config: HudConfig, state: PlayState) =
 
     do
         state.SubscribeToHits(fun ev ->
-            let (judge, delta) =
-                match ev.Guts with
-                | Hit e -> (e.Judgement, e.Delta)
-                | Release e -> (e.Judgement, e.Delta)
+            let x =
+                match ev.Action with
+                | Hit e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
+                | Hold e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
+                | Release e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
+                | _ -> ValueNone
 
-            if judge.IsSome && judge.Value > 0 then
-                early <- delta < 0.0f<ms>
+            match x with
+            | ValueSome (judge, delta) when judge > 0 ->
+                early <- delta < 0.0f<ms / rate>
                 time <- ev.Time
+            | _ -> ()
         )
 
     override this.Draw() =

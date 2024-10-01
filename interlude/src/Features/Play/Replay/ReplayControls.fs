@@ -25,7 +25,7 @@ type private ReplayModeSettingsPage() =
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"replay.settings")
     override this.OnClose() = ()
 
-type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32, on_seek: Time -> unit) =
+type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, on_seek: Time -> unit) =
     inherit Container(NodeType.None)
 
     let fade = Animation.Fade(1.0f)
@@ -33,9 +33,9 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: float32
     let mutable show_cooldown = 0.0
     
     let playback_speed = 
-        Setting.bounded rate 0.25f 3.0f
+        Setting.bounded rate 0.25f<rate> 3.0f<rate>
         |> Setting.trigger (fun r -> 
-            Song.change_rate r
+            Song.change_rate (float32 r)
             fade.Target <- 1.0f
             Toolbar.show_cursor ()
             auto_hide_timer <- 1500.0

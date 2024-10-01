@@ -98,6 +98,9 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member this.ComboBreaks = combo_breaks
     member this.MaxPossibleCombo = max_possible_combo
 
+    member this.MaxPossiblePoints = max_possible_points
+    member this.PointsScored = points_scored
+
     member private this.ProcessHit(delta, is_missed) : GameplayAction =
             
         match ruleset.HoldMechanics with 

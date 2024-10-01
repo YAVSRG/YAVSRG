@@ -33,7 +33,10 @@ module Rulesets =
                 let id = Path.GetFileNameWithoutExtension(f)
 
                 match JSON.FromFile<Ruleset>(f) with
-                | Ok rs -> loaded.Add(id, rs.Validate)
+                | Ok rs -> 
+                    match Ruleset.check rs with
+                    | Ok rs -> loaded.Add(id, rs)
+                    | Error reason -> Logging.Error(sprintf "Error validating ruleset '%s': %s" id reason)
                 | Error e -> Logging.Error(sprintf "Error loading ruleset '%s'" id, e)
 
         if not (loaded.ContainsKey DEFAULT_ID) then

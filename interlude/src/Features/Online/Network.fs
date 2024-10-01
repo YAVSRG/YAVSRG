@@ -6,6 +6,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay.Replays
 open Interlude.UI
 open Interlude.Web.Shared
 
@@ -237,7 +238,7 @@ module Network =
                         | Some replay_info ->
                             use ms = new MemoryStream(data)
                             use br = new BinaryReader(ms)
-                            (replay_info.Replay :?> Gameplay.OnlineReplayProvider).ImportLiveBlock(Time.of_number timestamp, br)
+                            (replay_info.Replay :?> OnlineReplayProvider).ImportLiveBlock(Time.of_number timestamp, br)
 
     let client = new NetworkClient()
 

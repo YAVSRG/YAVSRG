@@ -46,8 +46,8 @@ module LevelSelect =
 
     module History =
 
-        let mutable private history: (ChartMeta * float32) list = []
-        let mutable private forward_history: (ChartMeta * float32) list = []
+        let mutable private history: (ChartMeta * Rate) list = []
+        let mutable private forward_history: (ChartMeta * Rate) list = []
 
         let append_current () = 
             match SelectedChart.CACHE_DATA with

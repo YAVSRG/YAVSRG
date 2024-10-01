@@ -2,7 +2,8 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.UI
@@ -10,6 +11,7 @@ open Interlude.Content
 
 module PersonalBests =
 
+    // todo: move to prelude
     let private personal_best_fixer =
         { new Async.Service<(string * Ruleset) array, unit>() with
             override this.Handle(rulesets) =
@@ -30,7 +32,7 @@ module PersonalBests =
                                 let _, initial_ruleset = rulesets.[0]
                                 let score_info = ScoreInfo.from_score cc chart initial_ruleset score
 
-                                if score_info.ModStatus = Mods.ModStatus.Ranked then
+                                if score_info.ModStatus = ModStatus.Ranked then
 
                                     for ruleset_id, ruleset in rulesets do
                                         score_info.Ruleset <- ruleset

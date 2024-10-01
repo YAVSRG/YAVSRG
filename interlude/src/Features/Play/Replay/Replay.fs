@@ -6,6 +6,8 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Processing
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.Content
@@ -109,7 +111,7 @@ module ReplayScreen =
 
             override this.OnExit p =
                 base.OnExit p
-                Song.change_rate SelectedChart.rate.Value
+                Song.change_rate (float32 SelectedChart.rate.Value)
                 Toolbar.show_cursor ()
                 Song.resume()
 

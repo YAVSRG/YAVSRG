@@ -4,7 +4,8 @@ open System
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Percyqaz.Flux.Audio
 open Interlude.Content
 open Interlude.Features.Gameplay
@@ -14,7 +15,7 @@ type PlayState =
     {
         Chart: Chart
         WithColors: ColoredChart
-        mutable Scoring: ScoreProcessorBase
+        mutable Scoring: ScoreProcessor
         ScoringChanged: Event<unit>
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerState
@@ -36,12 +37,13 @@ type PlayState =
             Pacemaker = PacemakerState.None
         }
 
-    member this.SubscribeToHits(handler: HitEvent<HitEventGuts> -> unit) =
-        let mutable obj: IDisposable = this.Scoring.OnHit.Subscribe handler
+    // todo: rename to SubscribeEvents
+    member this.SubscribeToHits(handler: GameplayEvent<GameplayAction> -> unit) =
+        let mutable obj: IDisposable = this.Scoring.OnEvent.Subscribe handler
 
         this.ScoringChanged.Publish.Add(fun () ->
             obj.Dispose()
-            obj <- this.Scoring.OnHit.Subscribe handler
+            obj <- this.Scoring.OnEvent.Subscribe handler
         )
 
     member this.ChangeScoring(scoring) =
