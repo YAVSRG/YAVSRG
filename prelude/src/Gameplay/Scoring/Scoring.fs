@@ -85,7 +85,8 @@ type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, note
         | AccuracyPoints.PointsPerJudgement weights ->
             fun _ (judgement: int) -> weights.[judgement]
 
-    member this.JudgementCounts = judgement_counts
+    member val Duration = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
+    member val JudgementCounts = judgement_counts
     member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
     member this.CurrentCombo = current_combo
     member this.BestCombo = best_combo

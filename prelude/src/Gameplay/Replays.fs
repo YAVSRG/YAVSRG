@@ -7,6 +7,8 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 
+// todo: HitStatus array stuff is unused and can be deleted when old rulesets are
+
 // internally, a score is made up of flags on what a player has to do here
 
 type HitStatus =

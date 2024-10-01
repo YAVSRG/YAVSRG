@@ -52,11 +52,14 @@
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\Rulesets\Presets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\Presets\osu!.fs" />
+    <Compile Include="Gameplay\Scoring\Grades.fs" />
+    <Compile Include="Gameplay\Scoring\Lamps.fs" />
     <Compile Include="Gameplay\Scoring\HitMechanics.fs" />
     <Compile Include="Gameplay\Scoring\Events.fs" />
     <Compile Include="Gameplay\Scoring\WifeCurve.fs" />
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
     <Compile Include="Gameplay\Scoring\Scoring.fs" />
+    <Compile Include="Gameplay\Scoring\Graph.fs" />
     <Compile Include="Gameplay\_OLD_Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\_OLD_Rulesets\Templates\Shared.fs" />
     <Compile Include="Gameplay\_OLD_Rulesets\Templates\SC.fs" />
