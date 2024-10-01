@@ -14,10 +14,11 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 👽️ = Bug fix
 🌸 = UI improvement
 ✨ = New user-facing feature
-🔥 = New developer-facing feature
+🔥 = New developer-facing feature/tooling
 🧱 = New codebase feature that doesn't (yet) affect users
 🧹 = Code refactoring/cleanup/formatting
-⚡ = Automation (CI pipelines, automated tests, developer tooling)
+💡 = Automated tests
+⚡ = CI pipelines
 📘 = Documentation for users
 📕 = Documentation for developers
 🎓 = Localisation changes

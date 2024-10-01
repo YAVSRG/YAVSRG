@@ -25,6 +25,7 @@ module Validation =
                 printfn "%s: valid" ruleset.Name
                 printfn "Note windows: %A" ruleset.NoteWindows
                 printfn "Release windows: %A" ruleset.ReleaseWindows
+                printfn "Hash: %s" (RulesetV2.hash ruleset)
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
@@ -52,6 +53,7 @@ module Validation =
                     printfn "%s: valid" ruleset.Name
                     printfn "Note windows: %A" ruleset.NoteWindows
                     printfn "Release windows: %A" ruleset.ReleaseWindows
+                    printfn "Hash: %s" (RulesetV2.hash ruleset)
                 | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()

@@ -65,6 +65,9 @@ module OsuMania =
         }
 
     let create (od: float32) (mode: Mode) : RulesetV2 =
+
+        let od = round (od * 10.0f) / 10.0f
+        if od < 0.0f || od > 10.0f then failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od
         
         let PERFECT = perfect_window od |> mode.Apply
         let GREAT = great_window od |> mode.Apply
