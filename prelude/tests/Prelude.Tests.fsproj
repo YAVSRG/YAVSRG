@@ -24,6 +24,7 @@
     <Compile Include="Rulesets\Helpers.fs" />
     <Compile Include="Rulesets\Validation.fs" />
     <Compile Include="Rulesets\Lamps.fs" />
+    <Compile Include="Rulesets\Grades.fs" />
     <Compile Include="Rulesets\Events.fs" />
     <Compile Include="Rulesets\Scoring.fs" />
     <Compile Include="Rulesets\OsuClientParity.fs" />
