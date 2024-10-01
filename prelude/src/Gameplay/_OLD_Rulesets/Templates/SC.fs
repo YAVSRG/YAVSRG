@@ -1,7 +1,6 @@
-﻿namespace Prelude.Gameplay.Rulesets
+﻿namespace Prelude.Gameplay.Rulesets.OLD
 
 open Prelude
-open Prelude.Gameplay
 
 module SC =
 

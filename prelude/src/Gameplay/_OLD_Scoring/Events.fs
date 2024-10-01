@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Gameplay.Rulesets.OLD
 
 open Prelude
 open Prelude.Charts

@@ -1,8 +1,7 @@
-﻿namespace Prelude.Gameplay.Rulesets
+﻿namespace Prelude.Gameplay.Rulesets.OLD
 
 open System
 open Prelude
-open Prelude.Gameplay
 
 module Wife3 =
 
