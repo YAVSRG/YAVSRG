@@ -1,565 +1,330 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Gameplay.ScoringV2
 
-open System
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay
+open Prelude.Gameplay.RulesetsV2
 
-[<AbstractClass>]
-type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =
-    inherit ReplayConsumer(keys, replay)
+type GameplayAction =
+    | Hit of
+        {|
+            Delta: GameplayTime
+            Judgement: (int * float) option
+            Missed: bool
+        |}
+    | Hold of
+        {|
+            Delta: GameplayTime
+            Judgement: (int * float) option
+            Missed: bool
+        |}
+    | Release of
+        {|
+            Delta: GameplayTime
+            Judgement: (int * float) option
+            Missed: bool
+            Overhold: bool
+            Dropped: bool
+        |}
+    | DropHold
+    | RegrabHold
+    | GhostTap
 
-    let first_note = (TimeArray.first notes).Value.Time
-    let last_note = (TimeArray.last notes).Value.Time
-    let duration = last_note - first_note
-    let miss_window = ruleset.Accuracy.MissWindow * rate
-    let cbrush_window = ruleset.Accuracy.CbrushWindow * rate
+type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
+    inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
 
-    // having two seekers improves performance when processing entire scores
-    let mutable note_seek_misses = 0
-    let mutable note_seek_inputs = 0
+    let hit_events = ResizeArray<GameplayEvent<GameplayAction>>()
 
-    let hold_states = Array.create keys (Nothing, -1)
-
-    let snapshots = ResizeArray<ScoreMetricSnapshot>()
-    let hit_data = InternalScore.create_gameplay ruleset.Accuracy.MissWindow keys notes
-    let hit_events = ResizeArray<HitEvent<HitEventGuts>>()
-
-    let on_hit_ev = Event<HitEvent<HitEventGuts>>()
+    let on_hit_ev = Event<GameplayEvent<GameplayAction>>()
     let on_hit = on_hit_ev.Publish
 
-    let hit_mechanics, PREVENT_BACKWARDS_NOTES =
-        match ruleset.Accuracy.HoldNoteBehaviour with
-        | HoldNoteBehaviour.Osu _ ->
-            HitMechanicsV1.osu (hit_data, miss_window, cbrush_window), true
-        | _ ->
-            match ruleset.Accuracy.Points with
-            | AccuracyPoints.WifeCurve _ ->
-                HitMechanicsV1.etterna (hit_data, miss_window), false
-            | _ ->
-                HitMechanicsV1.interlude (hit_data, miss_window, cbrush_window), true
+    let judgement_counts = Array.zeroCreate ruleset.Judgements.Length
+    let mutable points_scored = 0.0
+    let mutable max_possible_points = 0.0
 
-    member this.OnHit = on_hit
+    let mutable current_combo = 0
+    let mutable best_combo = 0
+    let mutable combo_breaks = 0
+    let mutable max_possible_combo = 0
 
-    member val State : AccuracySystemState =
-        {
-            Judgements = Array.zeroCreate ruleset.Judgements.Length
-            PointsScored = 0.0
-            MaxPointsScored = 0.0
-            CurrentCombo = 0
-            BestCombo = 0
-            ComboBreaks = 0
-            MaxPossibleCombo = 0
-            Sxx = 0.0f<ms * ms>
-            Sx = 0.0f<ms>
-            N = 0.0f
-        }
+    let break_combo(would_have_increased_combo: bool) =
+        if would_have_increased_combo then max_possible_combo <- max_possible_combo + 1
+        combo_breaks <- combo_breaks + 1
+        current_combo <- 0
 
-    member this.Name = ruleset.Name
+    let incr_combo () =
+        max_possible_combo <- max_possible_combo + 1
+        current_combo <- current_combo + 1
+        best_combo <- max best_combo current_combo
 
-    member this.Accuracy =
-        let v = this.State.PointsScored / this.State.MaxPointsScored
-        if Double.IsNaN v then 1.0 else v
+    let score_points(judgement_points, judgement) =
+        max_possible_points <- max_possible_points + 1.0
+        points_scored <- points_scored + judgement_points
+        judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
 
-    member this.FormatAccuracy() = format_accuracy this.Accuracy
-    member this.MissWindow = ruleset.Accuracy.MissWindow
-    member this.ScaledMissWindow = miss_window
-    member this.Ruleset = ruleset
-    member this.EnumerateRecentInputs() = replay.EnumerateRecentEvents()
+    let add_judgement(judgement) =
+        judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
 
-    member this.HoldState (index: int) (k: int) =
-        let state, i = hold_states.[k]
+    let ms_to_judgement (delta: GameplayTime) : int =
+        let mutable j = 0
+        while 
+            j + 1 < ruleset.Judgements.Length 
+            && (
+                match ruleset.Judgements.[j].TimingWindows with 
+                | None -> true 
+                | Some (early, late) -> delta < early || delta > late
+            )
+            do
+            j <- j + 1
+        j
 
-        if i = index then
-            match state with
-            | Nothing -> HoldState.Released
-            | Holding -> HoldState.Holding
-            | Dropped -> HoldState.Dropped
-            | MissedHead
-            | MissedHeadThenHeld -> HoldState.MissedHead
-        elif i > index then
-            let struct (_, _, flags) = hit_data.[index]
+    let judgement_to_points : GameplayTime -> int -> float =
+        match ruleset.Accuracy with
+        | AccuracyPoints.WifeCurve j -> 
+            fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
+        | AccuracyPoints.PointsPerJudgement weights ->
+            fun _ (judgement: int) -> weights.[judgement]
 
-            if flags.[k] <> HitStatus.HIT_HOLD_REQUIRED then
-                HoldState.Released
-            else
-                HoldState.MissedHead
-        else
-            HoldState.InTheFuture
+    member this.JudgementCounts = judgement_counts
+    member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
+    member this.CurrentCombo = current_combo
+    member this.BestCombo = best_combo
+    member this.ComboBreaks = combo_breaks
+    member this.MaxPossibleCombo = max_possible_combo
 
-    member this.IsNoteHit (index: int) (k: int) =
-        let struct (_, _, flags) = hit_data.[index]
-        flags.[k] = HitStatus.HIT_ACCEPTED
-
-    member this.HitData = hit_data // todo: stop exposing this
-
-    member this.Finished = note_seek_misses = hit_data.Length
-
-    member this.HitEvents = hit_events.AsReadOnly()
-    member this.Snapshots = snapshots.AsReadOnly()
-
-    // correctness guaranteed up to the time you update, no matter how you update
-    // call Update with Time.infinity to do a correct feeding of the whole replay
-    member this.Update(chart_time: ChartTime) =
-        this.PollReplay chart_time // calls HandleKeyDown and HandleKeyUp appropriately
-        this.HandleMissedNotes chart_time
-
-    member private this.UpdateStateSnapshots(chart_time: ChartTime) =
-        let snapshot_target_count =
-            if chart_time > duration then 
-                ScoreMetricSnapshot.COUNT
-            else
-                (float32 ScoreMetricSnapshot.COUNT * chart_time) / duration
-                |> ceil
-                |> int
-                |> max 0
-                |> min ScoreMetricSnapshot.COUNT
-
-        while snapshots.Count < snapshot_target_count do
-            snapshots.Add
-                {
-                    Time = float32 (snapshots.Count + 1) / float32 ScoreMetricSnapshot.COUNT * duration
-                    PointsScored = this.State.PointsScored
-                    MaxPointsScored = this.State.MaxPointsScored
-                    Combo = this.State.CurrentCombo
-                    Lamp = Lamp.calculate ruleset.Grading.Lamps this.State
-                    Mean = this.State.Mean
-                    StandardDeviation = this.State.StandardDeviation
-                    Judgements = this.State.Judgements |> Array.copy
-                }
-
-    member private this.HandleMissedNotes(chart_time: ChartTime) =
-        let now = first_note + chart_time
-        let target = now - miss_window
-
-        while note_seek_misses < hit_data.Length
-              && InternalScore.offsetOf hit_data.[note_seek_misses] <= target do
-            let struct (t, deltas, status) = hit_data.[note_seek_misses]
-
-            for k = 0 to (keys - 1) do
-
-                if status.[k] = HitStatus.HIT_REQUIRED then
-                    this._HandleEvent
-                        {
-                            Index = note_seek_misses
-                            Time = t - first_note + miss_window
-                            Column = k
-                            Guts = Hit_(deltas.[k], false, true)
-                        }
-                    status.[k] <- HitStatus.HIT_ACCEPTED
-
-                elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                    hold_states.[k] <- MissedHead, note_seek_misses
-
-                    this._HandleEvent
-                        {
-                            Index = note_seek_misses
-                            Time = t - first_note + miss_window
-                            Column = k
-                            Guts = Hit_(deltas.[k], true, true)
-                        }
-                    status.[k] <- HitStatus.HIT_ACCEPTED
-
-                elif status.[k] = HitStatus.RELEASE_REQUIRED then
-                    let overhold =
-                        match hold_states.[k] with
-                        | Dropped, i
-                        | Holding, i when i <= note_seek_misses -> Bitmask.has_key k this.KeyState
-                        | _ -> false
-
-                    let dropped =
-                        match hold_states.[k] with
-                        | Dropped, _
-                        | MissedHeadThenHeld, _
-                        | MissedHead, _ -> true
-                        | _ -> false
-
-                    let missed_head =
-                        match hold_states.[k] with
-                        | MissedHeadThenHeld, _ -> true
-                        | _ -> false
-
-                    this._HandleEvent
-                        {
-                            Index = note_seek_misses
-                            Time = t - first_note + miss_window
-                            Column = k
-                            Guts = Release_(deltas.[k], true, overhold, dropped, missed_head)
-                        }
-                    status.[k] <- HitStatus.RELEASE_ACCEPTED
-
-                    match hold_states.[k] with
-                    | _, i when i < note_seek_misses -> hold_states.[k] <- Nothing, note_seek_misses
-                    | _ -> ()
-
-            note_seek_misses <- note_seek_misses + 1
-
-        this.UpdateStateSnapshots(chart_time)
-
-    member private this.MissPreviousNotes(k: int, before_index: int, chart_time: Time) =
-        let mutable i = note_seek_misses
-        while i < before_index do
-            let struct (t, deltas, status) = hit_data.[i]
-
-            if status.[k] = HitStatus.HIT_REQUIRED then
-                this._HandleEvent
-                    {
-                        Index = i
-                        Time = chart_time
-                        Column = k
-                        Guts = Hit_(deltas.[k], false, true)
-                    }
-                status.[k] <- HitStatus.HIT_ACCEPTED
-
-            elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                this._HandleEvent
-                    {
-                        Index = i
-                        Time = chart_time
-                        Column = k
-                        Guts = Hit_(deltas.[k], true, true)
-                    }
-                status.[k] <- HitStatus.HIT_ACCEPTED
-
-            elif status.[k] = HitStatus.RELEASE_REQUIRED then
-                this._HandleEvent
-                    {
-                        Index = i
-                        Time = chart_time
-                        Column = k
-                        Guts = Release_(deltas.[k], true, false, true, true)
-                    }
-                status.[k] <- HitStatus.RELEASE_ACCEPTED
-
-            i <- i + 1
-
-    override this.HandleKeyDown(chart_time: ChartTime, k: int) =
-        this.HandleMissedNotes chart_time
-        let now = first_note + chart_time
-
-        while note_seek_inputs < hit_data.Length
-              && InternalScore.offsetOf hit_data.[note_seek_inputs] < now - miss_window do
-            note_seek_inputs <- note_seek_inputs + 1
-
-        match hit_mechanics (k, note_seek_inputs, now) with
-        | HitDetection. BLOCKED -> ()
-        | HitDetection.FOUND (index, delta) ->
-            let struct (t, deltas, status) = hit_data.[index]
-            if PREVENT_BACKWARDS_NOTES then this.MissPreviousNotes(k, index, chart_time)
-            let is_hold_head = status.[k] <> HitStatus.HIT_REQUIRED
-            status.[k] <- HitStatus.HIT_ACCEPTED
-            deltas.[k] <- delta / rate
-
-            this._HandleEvent
-                {
-                    Index = index
-                    Time = chart_time
-                    Column = k
-                    Guts = Hit_(deltas.[k], is_hold_head, false)
-                }
-            // Begin tracking if it's a hold note
-            if is_hold_head then
-                hold_states.[k] <- Holding, index
-        | HitDetection.NOTFOUND ->
-            // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
-            hold_states.[k] <-
-                match hold_states.[k] with
-                | MissedHead, i -> MissedHeadThenHeld, i
-                | x -> x
-
-    override this.HandleKeyUp(chart_time: ChartTime, k: int) =
-        this.HandleMissedNotes chart_time
-        let now = first_note + chart_time
-
-        match hold_states.[k] with
-        | Holding, head_index
-        | Dropped, head_index
-        | MissedHeadThenHeld, head_index ->
-
-            let mutable i = head_index
-            let mutable delta = miss_window
-            let mutable found = -1
-            let target = now + miss_window
-
-            while i < hit_data.Length && InternalScore.offsetOf hit_data.[i] <= target do
-                let struct (t, _, status) = hit_data.[i]
-                let d = now - t
-
-                if status.[k] = HitStatus.RELEASE_REQUIRED then
-                    // Get the first unreleased hold tail we see, after the head of the hold we're tracking
-                    found <- i
-                    delta <- d
-                    i <- hit_data.Length
-
-                i <- i + 1
-
-            if found >= 0 then
-                let struct (_, deltas, status) = hit_data.[found]
-                status.[k] <- HitStatus.RELEASE_ACCEPTED
-                deltas.[k] <- delta / rate
-
-                this._HandleEvent
-                    {
-                        Index = found
-                        Time = chart_time
-                        Column = k
-                        Guts =
-                            Release_(
-                                deltas.[k],
-                                false,
-                                false,
-                                fst hold_states.[k] = Dropped || fst hold_states.[k] = MissedHeadThenHeld,
-                                fst hold_states.[k] = MissedHeadThenHeld
-                            )
-                    }
-
-                hold_states.[k] <- Nothing, head_index
-            else // If we released but too early (no sign of the tail within range) make the long note dropped
-                hold_states.[k] <-
-                    match hold_states.[k] with
-                    | Holding, i -> Dropped, i
-                    | x -> x
-
-                match ruleset.Accuracy.HoldNoteBehaviour with
-                | HoldNoteBehaviour.Osu _ -> this.State.BreakCombo(false)
-                | _ -> ()
-        | MissedHead, _
-        | Nothing, _ -> ()
-
-    abstract member HandleEvent: HitEvent<HitEventGutsInternal> -> HitEvent<HitEventGuts>
-
-    member private this._HandleEvent ev =
-        let ev = this.HandleEvent ev
-        hit_events.Add ev
-        on_hit_ev.Trigger ev
-
-module Helpers =
-
-    let ms_to_judgement (default_judgement: JudgementId) (gates: (Time * JudgementId) list) (delta: Time) : JudgementId =
-        let rec loop gates =
-            match gates with
-            | [] -> default_judgement
-            | (w, j) :: xs -> if delta < w then j else loop xs
-
-        loop gates
-
-    let judgement_to_points (conf: Ruleset) (delta: Time) (judge: JudgementId) : float =
-        match conf.Accuracy.Points with
-        | AccuracyPoints.WifeCurve j -> Wife3.wife_curve j delta
-        | AccuracyPoints.Weights(maxweight, weights) -> weights.[judge] / maxweight
-
-type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =
-    inherit ScoreProcessorBase(ruleset, keys, replay, notes, rate)
-
-    let head_judgements = Array.create keys ruleset.DefaultJudgement
-    let head_deltas = Array.create keys ruleset.Accuracy.MissWindow
-
-    let judgement_to_points = Helpers.judgement_to_points ruleset
-
-    let ms_to_judgement = Helpers.ms_to_judgement ruleset.DefaultJudgement ruleset.Accuracy.Timegates
-
-    member this.HandleTap (delta: Time, is_miss: bool) =
-
-        if not is_miss then
-            this.State.AddDelta delta
+    member private this.ProcessHit(delta, is_missed) : GameplayAction =
             
-        match ruleset.Accuracy.HoldNoteBehaviour with 
-        | HoldNoteBehaviour.OnlyJudgeReleases _ ->
-            if is_miss then this.State.BreakCombo true else this.State.IncrCombo()
+        match ruleset.HoldMechanics with 
+        | HoldMechanics.OnlyJudgeReleases _ ->
+            if is_missed then break_combo(true) else incr_combo()
             Hit
                 {|
-                    Judgement = None
-                    Missed = is_miss
                     Delta = delta
-                    IsHold = false
+                    Judgement = None
+                    Missed = is_missed
                 |}
         | _ ->
-            let judgement = if is_miss then ruleset.DefaultJudgement else ms_to_judgement delta
+            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let points = judgement_to_points delta judgement
 
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
-
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                this.State.BreakCombo true
-            else
-                this.State.IncrCombo()
-
-            Hit
-                {|
-                    Judgement = Some judgement
-                    Missed = is_miss
-                    Delta = delta
-                    IsHold = false
-                |}
-
-    member this.HandleHoldHead (column: int, delta: Time, is_miss: bool) =
-        let judgement = if is_miss then ruleset.DefaultJudgement else ms_to_judgement delta
-
-        if not is_miss then
-            this.State.AddDelta delta
-
-        head_judgements.[column] <- judgement
-        head_deltas.[column] <- delta
-
-        match ruleset.Accuracy.HoldNoteBehaviour with
-        | HoldNoteBehaviour.JustBreakCombo
-        | HoldNoteBehaviour.JudgeReleases _ ->
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
+            score_points(points, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
-                this.State.BreakCombo true
+                break_combo(true)
             else
-                this.State.IncrCombo()
+                incr_combo()
 
             Hit
                 {|
-                    Judgement = Some judgement
-                    Missed = is_miss
                     Delta = delta
-                    IsHold = true
+                    Judgement = Some (judgement, points)
+                    Missed = is_missed
                 |}
 
-        | HoldNoteBehaviour.Osu _
-        | HoldNoteBehaviour.Normal _
-        | HoldNoteBehaviour.OnlyJudgeReleases _ ->
-            Hit
+    member private this.ProcessHold(delta, is_missed) : GameplayAction =
+
+        match ruleset.HoldMechanics with
+        | HoldMechanics.OnlyRequireHold _
+        | HoldMechanics.JudgeReleasesSeparately _ ->
+            let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
+            let points = judgement_to_points delta judgement
+
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Hold
                 {|
+                    Delta = delta
+                    Judgement = Some (judgement, points)
+                    Missed = is_missed
+                |}
+
+        | HoldMechanics.CombineHeadAndTail _
+        | HoldMechanics.OnlyJudgeReleases _ ->
+            if is_missed then break_combo(true) else incr_combo()
+            Hold
+                {|
+                    Delta = delta
                     Judgement = None
-                    Missed = is_miss
-                    Delta = delta
-                    IsHold = true
+                    Missed = is_missed
                 |}
 
-    member this.HandleHoldTail (column: int, delta: Time, is_miss: bool, is_overhold: bool, is_dropped: bool, is_head_missed: bool) =
-        match ruleset.Accuracy.HoldNoteBehaviour with
-        | HoldNoteBehaviour.Osu windows ->
+    member private this.ProcessRelease(release_delta, missed, overheld, dropped, head_delta, missed_head) : GameplayAction =
+        match ruleset.HoldMechanics with
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
             let judgement =
-                if is_miss && is_head_missed then
+                if missed && missed_head then
                     ruleset.DefaultJudgement
                 else 
-                    ``osu!``.ln_judgement windows head_deltas.[column] delta is_overhold is_dropped
+                    OsuHolds.ln_judgement windows head_delta release_delta overheld dropped
 
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
+            let points = judgement_to_points head_delta judgement
 
-            if ruleset.Judgements.[judgement].BreaksCombo || is_head_missed then
-                this.State.BreakCombo true
-            else
-                this.State.IncrCombo()
-
-            Release
-                {|
-                    Judgement = Some judgement
-                    Missed = is_miss
-                    Delta = delta
-                    Overhold = is_overhold
-                    Dropped = is_dropped
-                |}
-
-        | HoldNoteBehaviour.JustBreakCombo ->
-            if (not is_overhold) && (is_miss || is_dropped) then
-                this.State.BreakCombo true
-            else
-                this.State.IncrCombo()
-
-            Release
-                {|
-                    Judgement = None
-                    Missed = is_miss
-                    Delta = delta
-                    Overhold = is_overhold
-                    Dropped = is_dropped
-                |}
-
-        | HoldNoteBehaviour.JudgeReleases data ->
-            let judgement = if is_miss then ruleset.DefaultJudgement else Helpers.ms_to_judgement ruleset.DefaultJudgement data.Timegates delta
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
+            score_points(points, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
-                this.State.BreakCombo true
+                break_combo(true)
             else
-                this.State.IncrCombo()
+                incr_combo()
 
             Release
                 {|
-                    Judgement = Some judgement
-                    Missed = is_miss
-                    Delta = delta
-                    Overhold = is_overhold
-                    Dropped = is_dropped
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
                 |}
 
-        | HoldNoteBehaviour.Normal rules ->
-            let head_judgement = head_judgements.[column]
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (_, _, judgement_if_dropped, judgement_if_overheld)) ->
+            let head_judgement = ms_to_judgement head_delta
             let judgement =
-                if is_overhold && not is_dropped then
-                    max head_judgement rules.JudgementIfOverheld
-                elif is_miss || is_dropped then
-                    max head_judgement rules.JudgementIfDropped
+                if overheld && not dropped then
+                    max head_judgement judgement_if_overheld
+                elif missed || dropped then
+                    max head_judgement judgement_if_dropped
                 else
                     head_judgement
 
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
+            let points = judgement_to_points head_delta judgement
+
+            score_points(points, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
-                this.State.BreakCombo true
+                break_combo(true)
             else
-                this.State.IncrCombo()
+                incr_combo()
 
             Release
                 {|
-                    Judgement = Some judgement
-                    Missed = is_miss
-                    Delta = delta
-                    Overhold = is_overhold
-                    Dropped = is_dropped
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
                 |}
 
-        | HoldNoteBehaviour.OnlyJudgeReleases judgement_if_dropped ->
+        | HoldMechanics.OnlyRequireHold _ ->
+            if (not overheld) && (missed || dropped) then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = None
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_overheld) ->
+            let judgement =
+                if overheld then judgement_if_overheld
+                elif missed then ruleset.DefaultJudgement 
+                else
+                    assert(windows.Length = ruleset.Judgements.Length)
+                    let mutable j = 0
+                    while 
+                        j + 1 < ruleset.Judgements.Length 
+                        && (
+                            match windows.[j] with 
+                            | None -> true 
+                            | Some (early, late) -> release_delta < early || release_delta > late
+                        )
+                        do
+                        j <- j + 1
+                    j
+                    
+            let points = judgement_to_points release_delta judgement
+            score_points(points, judgement)
+
+            if ruleset.Judgements.[judgement].BreaksCombo then
+                break_combo(true)
+            else
+                incr_combo()
+
+            Release
+                {|
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
+                |}
+
+        | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
             let judgement = 
-                if is_miss then
+                if missed then
                     ruleset.DefaultJudgement
-                elif is_overhold || is_dropped then 
-                    judgement_if_dropped 
-                else 
-                    ms_to_judgement delta
-            this.State.Add(judgement_to_points delta judgement, 1.0, judgement)
+                else
+                    ms_to_judgement release_delta
+                    |> if dropped || overheld then max judgement_if_dropped else id
+
+            let points = judgement_to_points release_delta judgement
+
+            score_points(points, judgement)
 
             if ruleset.Judgements.[judgement].BreaksCombo then
-                this.State.BreakCombo true
+                break_combo(true)
             else
-                this.State.IncrCombo()
+                incr_combo()
 
             Release
                 {|
-                    Judgement = Some judgement
-                    Missed = is_miss
-                    Delta = delta
-                    Overhold = is_overhold
-                    Dropped = is_dropped
+                    Delta = release_delta
+                    Judgement = Some (judgement, points)
+                    Missed = missed
+                    Overhold = overheld
+                    Dropped = dropped
                 |}
 
-    override this.HandleEvent ev =
-        {
-            Index = ev.Index
-            Time = ev.Time
-            Column = ev.Column
-            Guts =
-                match ev.Guts with
-                | Hit_(delta, is_hold, is_missed) ->
-                    if is_hold then
-                        this.HandleHoldHead(ev.Column, delta, is_missed)
-                    else 
-                        this.HandleTap(delta, is_missed)
+    member private this.ProcessDropHold() : GameplayAction =
+        break_combo (false)
+        DropHold
 
-                | Release_(delta, is_miss, is_overhold, is_dropped, is_head_missed) ->
-                    this.HandleHoldTail(ev.Column, delta, is_miss, is_overhold, is_dropped, is_head_missed)
-        }
+    member private this.ProcessRegrabHold() : GameplayAction =
+        RegrabHold
+
+    member private this.ProcessGhostTap() : GameplayAction =
+        // todo: rulesets can specify ghost tap judgements
+        GhostTap
+
+    override this.HandleEvent (internal_event: GameplayEvent<GameplayActionInternal>) =
+        let exposed_event : GameplayEvent<GameplayAction> =
+            {
+                Index = internal_event.Index
+                Time = internal_event.Time
+                Column = internal_event.Column
+                Action =
+                    match internal_event.Action with
+                    | HIT(delta, is_missed) ->
+                        this.ProcessHit(delta, is_missed)
+                    | HOLD(delta, is_missed) ->
+                        this.ProcessHold(delta, is_missed)
+                    | RELEASE(release_delta, missed, overhold, dropped, head_delta, missed_head) ->
+                        this.ProcessRelease(release_delta, missed, overhold, dropped, head_delta, missed_head)
+                    | DROP_HOLD -> this.ProcessDropHold()
+                    | REGRAB_HOLD -> this.ProcessRegrabHold()
+                    | GHOST_TAP -> this.ProcessGhostTap()
+            }
+        hit_events.Add exposed_event
+        on_hit_ev.Trigger exposed_event
+
+    member this.Events = hit_events.AsReadOnly()
+    member this.OnEvent = on_hit
 
 module ScoreProcessor =
 
-    let create (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) notes rate : ScoreProcessor =
+    let create (ruleset: RulesetV2) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
         ScoreProcessor(ruleset, keys, replay, notes, rate)
 
-    let run (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) notes rate : ScoreProcessor =
+    let run (ruleset: RulesetV2) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
         let scoring = ScoreProcessor(ruleset, keys, replay, notes, rate)
         scoring.Update Time.infinity
         scoring
@@ -568,4 +333,4 @@ module ScoreProcessor =
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
         let ruleset = SC.create 4
-        create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
+        create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f<rate>

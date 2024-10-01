@@ -1,140 +1,24 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Gameplay.RulesetsV2
 
 open System
-open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 
-type JudgementId = int
+// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
+// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)
 
-type AccuracySystemState =
-    {
-        Judgements: int array
-        mutable PointsScored: float
-        mutable MaxPointsScored: float
-        mutable CurrentCombo: int
-        mutable BestCombo: int
-        mutable MaxPossibleCombo: int
-        mutable ComboBreaks: int
-        mutable Sxx: float32<ms^2>
-        mutable Sx: Time
-        mutable N: float32
-    }
-    member this.BreakCombo(would_have_increased_combo: bool) =
-        if would_have_increased_combo then
-            this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
-
-        this.CurrentCombo <- 0
-        this.ComboBreaks <- this.ComboBreaks + 1
-
-    member this.IncrCombo() =
-        this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
-        this.CurrentCombo <- this.CurrentCombo + 1
-        this.BestCombo <- max this.CurrentCombo this.BestCombo
-
-    member this.Add(points: float, maxpoints: float, judge: JudgementId) =
-        this.PointsScored <- this.PointsScored + points
-        this.MaxPointsScored <- this.MaxPointsScored + maxpoints
-        this.Judgements.[judge] <- this.Judgements.[judge] + 1
-
-    member this.AddDelta(ms_delta: Time) =
-        this.N <- this.N + 1.0f
-        this.Sx <- this.Sx + ms_delta
-        this.Sxx <- this.Sxx + ms_delta * ms_delta
-
-    member this.Mean = if this.N = 0.0f then 0.0f<ms> else this.Sx / this.N
-    member this.StandardDeviation =
-        let mean = this.Mean
-        if this.N = 0.0f then 0.0f<ms> else MathF.Sqrt(this.Sxx / this.N - mean * mean |> float32) * 1.0f<ms>
-
-/// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
-/// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)
 [<Json.AutoCodec>]
 type Judgement =
     {
         Name: string
         Color: Color
         BreaksCombo: bool
+        TimingWindows: (GameplayTime * GameplayTime) option
     }
 
-/// Assignment of points per hit
-/// Your total points are the sum of the points for each note you hit
-/// Your % accuracy is number of points you get / max points possible
-[<RequireQualifiedAccess>]
-[<Json.AutoCodec>]
-type AccuracyPoints =
-    | WifeCurve of judge: int
-    | Weights of maxweight: float * weights: float array
-    member this.Validate name jcount =
-        match this with
-        | Weights(_, w) ->
-            if w.Length <> jcount then
-                Logging.Error(
-                    sprintf
-                        "Problem with ruleset '%s': %i accuracy weights given for %i judgements"
-                        name
-                        w.Length
-                        jcount
-                )
+// Grades are awarded at the end of a score as a summarising "rank" of how well you did
+// They typically follow lettering systems similar to academic exam grades
 
-            this
-        | _ -> this
-
-[<Json.AutoCodec>]
-type OsuLnWindows =
-    {
-        Window320: Time
-        Window300: Time
-        Window200: Time
-        Window100: Time
-        Window50: Time
-        WindowOverhold200: Time
-        WindowOverhold100: Time
-    }
-
-/// Behaviour for hold notes
-[<RequireQualifiedAccess>]
-[<Json.AutoCodec>]
-type HoldNoteBehaviour =
-    | Osu of OsuLnWindows
-    | JustBreakCombo
-    | Normal of
-        {|
-            JudgementIfDropped: JudgementId
-            JudgementIfOverheld: JudgementId
-        |}
-    | JudgeReleases of
-        {|
-            Timegates: (Time * JudgementId) list
-        |}
-    | OnlyJudgeReleases of judgement_if_dropped: JudgementId // uses base timegates
-    member this.Validate name jcount =
-        match this with
-        | Normal d ->
-            if d.JudgementIfDropped >= jcount || d.JudgementIfDropped < 0 then
-                Logging.Error(sprintf "Problem with ruleset '%s': JudgementIfDropped is not a valid judgement" name)
-
-            if d.JudgementIfOverheld >= jcount || d.JudgementIfOverheld < 0 then
-                Logging.Error(sprintf "Problem with ruleset '%s': JudgementIfOverheld is not a valid judgement" name)
-
-            Normal d
-        | JudgeReleases d ->
-            let mutable last_time = -Time.infinity
-
-            for (time, j) in d.Timegates do
-                if time <= last_time then
-                    Logging.Error(sprintf "Problem with ruleset '%s': Release timegates are in the wrong order" name)
-
-                if j >= jcount || j < 0 then
-                    Logging.Error(sprintf "Problem with ruleset '%s': Release timegates judgement is not valid" name)
-
-                last_time <- time
-
-            JudgeReleases d
-        | _ -> this // todo: validate osu windows
-
-/// Grades are awarded at the end of a score as a summarising "rank" of how well you did
-/// They typically follow lettering systems similar to academic exam grades
 [<Json.AutoCodec>]
 type Grade =
     {
@@ -143,261 +27,327 @@ type Grade =
         Color: Color
     }
 
-module Grade =
+// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
+// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag
+// These provide alternative accomplishments to grades that can provide different challenges
 
-    type GradeResult =
-        {
-            Grade: int
-            /// Improvement needed to get next grade; None if you got the best grade
-            AccuracyNeeded: float option
-        }
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type LampRequirement =
+    | JudgementAtMost of judgement_id: int * count: int
+    | ComboBreaksAtMost of count: int
+    member this.IsStricterThan(other: LampRequirement) =
+        match this, other with
+        | JudgementAtMost _, ComboBreaksAtMost _ -> true
+        | ComboBreaksAtMost _, JudgementAtMost _ -> false
+        | ComboBreaksAtMost n, ComboBreaksAtMost m -> n < m
+        | JudgementAtMost (j, n), JudgementAtMost (j2, m) -> j < j2 || (j = j2 && n < m)
 
-    let calculate_with_target (grades: Grade array) (percent: float) : GradeResult =
-
-        let rec loop (achieved: int) =
-            if achieved + 1 = grades.Length then // got max grade already
-                {
-                    Grade = achieved
-                    AccuracyNeeded = None
-                }
-            else
-                let accuracy_needed = grades.[achieved + 1].Accuracy - percent
-
-                if accuracy_needed > 0.0 then
-                    {
-                        Grade = achieved
-                        AccuracyNeeded = Some accuracy_needed
-                    }
-                else
-                    loop (achieved + 1)
-
-        loop -1
-
-    let calculate (grades: Grade array) (state: AccuracySystemState) =
-        (calculate_with_target grades (state.PointsScored / state.MaxPointsScored))
-            .Grade
-
-/// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
-/// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag
-/// These provide alternative accomplishments to grades that can provide different challenge
 [<Json.AutoCodec>]
 type Lamp =
     {
         Name: string
-        Judgement: JudgementId
-        JudgementThreshold: int
+        Requirement: LampRequirement
         Color: Color
     }
 
-module Lamp =
+// Assignment of points per hit
+// Your % accuracy is number of points you get / max points possible
 
-    type LampResult =
-        {
-            Lamp: int
-            /// Improvement needed to get next lamp; None if you got the best lamp
-            ImprovementNeeded:
-                {|
-                    Judgement: JudgementId
-                    LessNeeded: int
-                |} option
-        }
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type AccuracyPoints =
+    | WifeCurve of judge: int
+    | PointsPerJudgement of points: float array // todo: change all points, and accuracy, to float32
 
-    let calculate_with_target (lamps: Lamp array) (state: AccuracySystemState) : LampResult =
+// Behaviour for hit detection / assigning an input to the correct note to hit
 
-        let worst_judgement =
-            let mutable w = -1
-            let mutable i = 0
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type HitMechanics =
+    | OsuMania // earliest note
+    | Interlude of cbrush_threshold: GameplayTime // earliest note; if hit is off by `cbrush_threshold` try to find a nearer note
+    | Etterna // nearest note
 
-            while i < state.Judgements.Length do
-                if state.Judgements.[i] > 0 then
-                    w <- i
-
-                i <- i + 1
-
-            w
-
-        let rec loop (achieved: int) =
-            if achieved + 1 = lamps.Length then // got max grade already
-                {
-                    Lamp = achieved
-                    ImprovementNeeded = None
-                }
-            else
-                let next_lamp = lamps.[achieved + 1]
-
-                if next_lamp.Judgement < 0 then // then it refers to cbs
-                    if state.ComboBreaks > next_lamp.JudgementThreshold then
-                        {
-                            Lamp = achieved
-                            ImprovementNeeded =
-                                Some
-                                    {|
-                                        Judgement = -1
-                                        LessNeeded = state.ComboBreaks - next_lamp.JudgementThreshold
-                                    |}
-                        }
-                    else
-                        loop (achieved + 1)
-                else if worst_judgement > next_lamp.Judgement then
-                    {
-                        Lamp = achieved
-                        ImprovementNeeded =
-                            Some
-                                {|
-                                    Judgement = worst_judgement
-                                    LessNeeded = state.Judgements.[worst_judgement]
-                                |}
-                    }
-                elif state.Judgements.[next_lamp.Judgement] > next_lamp.JudgementThreshold then
-                    {
-                        Lamp = achieved
-                        ImprovementNeeded =
-                            Some
-                                {|
-                                    Judgement = next_lamp.Judgement
-                                    LessNeeded = state.Judgements.[next_lamp.Judgement] - next_lamp.JudgementThreshold
-                                |}
-                    }
-                else
-                    loop (achieved + 1)
-
-        loop -1
-
-    let calculate (lamps: Lamp array) (state: AccuracySystemState) : int =
-        (calculate_with_target lamps state).Lamp
+// Behaviour for hold notes
 
 [<Json.AutoCodec>]
-type GradingConfig =
+type OsuLnWindows =
     {
-        Grades: Grade array
-        Lamps: Lamp array
+        Window320: GameplayTime
+        Window300: GameplayTime
+        Window200: GameplayTime
+        Window100: GameplayTime
+        Window50: GameplayTime
+        WindowOverhold200: GameplayTime
+        WindowOverhold100: GameplayTime
     }
-    member this.Validate jcount = this // todo: could validate lamps against judgements
+    
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type HeadTailCombineRule =
+    | OsuMania of OsuLnWindows
+    | HeadJudgementOr of early_window: GameplayTime * late_window: GameplayTime * judgement_if_dropped: int * judgement_if_overheld: int
+
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type HoldMechanics =
+    | CombineHeadAndTail of HeadTailCombineRule
+    | OnlyRequireHold of release_window: GameplayTime
+    | JudgeReleasesSeparately of windows: ((GameplayTime * GameplayTime) option) array * judgement_if_overheld: int
+    | OnlyJudgeReleases of judgement_if_dropped: int
 
 [<Json.AutoCodec>]
-type AccuracyConfig =
-    {
-        MissWindow: Time
-        CbrushWindow: Time
-        Timegates: (Time * JudgementId) list
-        Points: AccuracyPoints
-        HoldNoteBehaviour: HoldNoteBehaviour
-    }
-    member this.Validate name jcount =
-        { this with
-            Timegates =
-                let mutable last_time = -Time.infinity
-
-                for (time, j) in this.Timegates do
-                    if time <= last_time then
-                        Logging.Error(sprintf "Problem with ruleset '%s': Timegates are in the wrong order" name)
-
-                    if j >= jcount || j < 0 then
-                        Logging.Error(sprintf "Problem with ruleset '%s': Timegates judgement is not valid" name)
-
-                    last_time <- time
-
-                this.Timegates
-            Points = this.Points.Validate name jcount
-            HoldNoteBehaviour = this.HoldNoteBehaviour.Validate name jcount
-        }
-
-[<Json.AutoCodec>]
-type Ruleset =
+type RulesetV2 =
     {
         Name: string
         Description: string
 
         Judgements: Judgement array
-        Accuracy: AccuracyConfig
-        Grading: GradingConfig
+        Lamps: Lamp array
+        Grades: Grade array
+        HitMechanics: HitMechanics
+        HoldMechanics: HoldMechanics
+        Accuracy: AccuracyPoints
     }
-    member this.DefaultJudgement: JudgementId = this.Judgements.Length - 1
+    member this.DefaultJudgement: int = this.Judgements.Length - 1
 
     member this.GradeName i =
         if i < 0 then "F"
-        else if i >= this.Grading.Grades.Length then "??"
-        else this.Grading.Grades.[i].Name
-
+        else if i >= this.Grades.Length then "??"
+        else this.Grades.[i].Name
     member this.GradeColor i =
-        if i < 0 || i >= this.Grading.Grades.Length then
+        if i < 0 || i >= this.Grades.Length then
             Color.Gray
         else
-            this.Grading.Grades.[i].Color
+            this.Grades.[i].Color
 
     member this.LampName i =
         if i < 0 then "NONE"
-        else if i >= this.Grading.Lamps.Length then "??"
-        else this.Grading.Lamps.[i].Name
-
+        else if i >= this.Lamps.Length then "??"
+        else this.Lamps.[i].Name
     member this.LampColor i =
-        if i < 0 || i >= this.Grading.Grades.Length then
+        if i < 0 || i >= this.Grades.Length then
             Color.White
         else
-            this.Grading.Lamps.[i].Color
+            this.Lamps.[i].Color
 
-    member this.JudgementName i = this.Judgements.[i].Name
-    member this.JudgementColor i = this.Judgements.[i].Color
+    member this.JudgementName i = 
+        if i < 0 || i >= this.Judgements.Length then "??"
+        else this.Judgements.[i].Name
+    member this.JudgementColor i = 
+        if i < 0 || i >= this.Judgements.Length then Color.Gray
+        else this.Judgements.[i].Color
 
-    member this.Validate =
-        { this with
-            Accuracy = this.Accuracy.Validate this.Name this.Judgements.Length
-            Grading = this.Grading.Validate this.Judgements.Length
-        }
+    member this.NoteWindows : GameplayTime * GameplayTime =
+        match this.Judgements |> Seq.rev |> Seq.tryPick _.TimingWindows with
+        | Some (early, late) -> early, late
+        | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
+    
+    member this.ReleaseWindows : GameplayTime * GameplayTime =
+        match this.HoldMechanics with
+        | HoldMechanics.OnlyRequireHold window -> 
+            -window, window
+        | HoldMechanics.JudgeReleasesSeparately (windows, _) ->
+            match windows |> Seq.rev |> Seq.tryPick id with
+            | Some (early, late) -> early, late
+            | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
+        | HoldMechanics.OnlyJudgeReleases _ -> 
+            this.NoteWindows
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
+            -w.Window50, w.Window100
+        | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
+            early, late
 
-module Ruleset =
+module RulesetV2 =
 
     open System.IO
     open System.Security.Cryptography
 
-    let hash (config: Ruleset) =
+    /// The 'hash' of a ruleset is used to identify it
+    /// The ruleset is rendered to an array of bytes, then a hash is computed
+    /// Any change to a ruleset that changes how it functions changes the bytes, and the hash will change
+    /// Any change is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
+
+    let hash (ruleset: RulesetV2) =
         let h = SHA256.Create()
         use ms = new MemoryStream()
         use bw = new BinaryWriter(ms)
 
-        for j in config.Judgements do
+        for j in ruleset.Judgements do
             bw.Write j.BreaksCombo
+            match j.TimingWindows with
+            | Some (early, late) -> 
+                bw.Write (float32 early)
+                bw.Write (float32 late)
+            | None ->
+                bw.Write 0.0f
+                bw.Write 0.0f
 
-        bw.Write(float32 config.Accuracy.MissWindow)
-        bw.Write(float32 config.Accuracy.CbrushWindow)
-
-        for t, j in config.Accuracy.Timegates do
-            bw.Write(float32 t)
-            bw.Write j
-
-        match config.Accuracy.Points with
-        | AccuracyPoints.WifeCurve j -> bw.Write j
-        | AccuracyPoints.Weights(max, pts) ->
-            bw.Write max
-
-            for p in pts do
-                bw.Write p
-
-        match config.Accuracy.HoldNoteBehaviour with
-        | HoldNoteBehaviour.Osu windows -> 
-            bw.Write (float32 windows.Window320)
-            bw.Write (float32 windows.Window300)
-            bw.Write (float32 windows.Window200)
-            bw.Write (float32 windows.Window100)
-            bw.Write (float32 windows.Window50)
-            bw.Write (float32 windows.WindowOverhold200)
-            bw.Write (float32 windows.WindowOverhold100)
-        | HoldNoteBehaviour.JustBreakCombo -> bw.Write 0s
-        | HoldNoteBehaviour.Normal rules ->
-            bw.Write rules.JudgementIfDropped
-            bw.Write rules.JudgementIfOverheld
-        | HoldNoteBehaviour.JudgeReleases d ->
-            for t, j in d.Timegates do
-                bw.Write(float32 t)
-                bw.Write j
-        | HoldNoteBehaviour.OnlyJudgeReleases j -> bw.Write j
-
-        for g in config.Grading.Grades do
+        for g in ruleset.Grades do
             bw.Write g.Accuracy
 
-        for l in config.Grading.Lamps do
-            bw.Write l.Judgement
-            bw.Write l.JudgementThreshold
+        for l in ruleset.Lamps do
+            match l.Requirement with
+            | LampRequirement.JudgementAtMost (j, c) ->
+                bw.Write 0uy
+                bw.Write j
+                bw.Write c
+            | LampRequirement.ComboBreaksAtMost c -> 
+                bw.Write 1uy
+                bw.Write c
 
-        let s = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
-        config.Name.Replace(" ", "") + s.Replace("-", "").Substring(0, 6)
+        match ruleset.HitMechanics with
+        | HitMechanics.OsuMania ->
+            bw.Write 0uy
+        | HitMechanics.Interlude cbrush_threshold ->
+            bw.Write 1uy
+            bw.Write (float32 cbrush_threshold)
+        | HitMechanics.Etterna ->
+            bw.Write 2uy
+
+        match ruleset.HoldMechanics with
+        | HoldMechanics.CombineHeadAndTail rule ->
+            match rule with
+            | HeadTailCombineRule.OsuMania windows ->
+                bw.Write (float32 windows.Window320)
+                bw.Write (float32 windows.Window300)
+                bw.Write (float32 windows.Window200)
+                bw.Write (float32 windows.Window100)
+                bw.Write (float32 windows.Window50)
+                bw.Write (float32 windows.WindowOverhold200)
+                bw.Write (float32 windows.WindowOverhold100)
+            | HeadTailCombineRule.HeadJudgementOr (early_window, late_window, judgement_if_dropped, judgement_if_overheld) ->
+                bw.Write (float32 early_window)
+                bw.Write (float32 late_window)
+                bw.Write judgement_if_dropped
+                bw.Write judgement_if_overheld
+        | HoldMechanics.OnlyRequireHold window ->
+            bw.Write 0uy
+            bw.Write (float32 window)
+        | HoldMechanics.JudgeReleasesSeparately (judgement_windows, judgement_if_dropped) ->
+            for j in judgement_windows do
+                match j with
+                | Some (early, late) -> 
+                    bw.Write (float32 early)
+                    bw.Write (float32 late)
+                | None ->
+                    bw.Write 0.0f
+                    bw.Write 0.0f
+            bw.Write judgement_if_dropped
+        | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
+            bw.Write 1uy
+            bw.Write judgement_if_dropped
+
+        match ruleset.Accuracy with
+        | AccuracyPoints.WifeCurve judge ->
+            bw.Write judge
+        | AccuracyPoints.PointsPerJudgement points ->
+            for p in points do
+                bw.Write p
+
+        let first_character = 
+            match ruleset.Name.Trim() with
+            | "" -> "_"
+            | otherwise ->
+                if Char.IsAsciiLetterOrDigit otherwise.[0] then 
+                    otherwise.[0].ToString().ToUpperInvariant()
+                else "_"
+        let hash_string = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
+        first_character + hash_string.Replace("-", "").Substring(0, 8)
+
+    let check (ruleset: RulesetV2) : Result<RulesetV2, string> =
+        let inline valid (x: GameplayTime) = x |> float32 |> Single.IsFinite
+        let invalid = valid >> not
+        let inline negative (x: GameplayTime) = invalid x || x < 0.0f<ms / rate>
+        let inline positive (x: GameplayTime) = invalid x || x > 0.0f<ms / rate>
+
+        try
+            if ruleset.Judgements.Length = 0 then failwith "Must have at least one judgement"
+
+            let mutable w_min = 0.0f<ms / rate>
+            let mutable w_max = 0.0f<ms / rate>
+            for j in ruleset.Judgements do
+                match j.TimingWindows with
+                | Some (early, late) ->
+                    if invalid(early) then failwithf "Invalid floating point early window for '%s'" j.Name
+                    if early > w_min then failwithf "Early window %.3fms for '%s' must be %.3fms or earlier" early j.Name w_min
+                    w_min <- early
+                    if invalid(late) then failwithf "Invalid floating point late window for '%s'" j.Name
+                    if late < w_max then failwithf "Late window %.3fms for '%s' must be %.3fms or late" late j.Name w_max
+                    w_max <- late
+                | None -> ()
+
+            let mutable g_acc = -infinity
+            for g in ruleset.Grades do
+                if g.Accuracy <= g_acc then failwithf "Grade boundary %.6f for '%s' must be at least %.6f" g.Accuracy g.Name g_acc
+                g_acc <- g.Accuracy
+
+            let mutable l_req = LampRequirement.ComboBreaksAtMost Int32.MaxValue
+            for l in ruleset.Lamps do
+                if not (l.Requirement.IsStricterThan l_req) then
+                    failwithf "Lamp requirement %A for '%s' must be stricter than %A" l.Requirement l.Name l_req
+                l_req <- l.Requirement
+
+            match ruleset.HitMechanics with
+            | HitMechanics.OsuMania -> ()
+            | HitMechanics.Interlude cbrush_threshold ->
+                if cbrush_threshold < 0.0f<ms / rate> then failwith "Interlude `cbrush_threshold` must be non-negative"
+            | HitMechanics.Etterna -> ()
+
+            match ruleset.HoldMechanics with
+            | HoldMechanics.CombineHeadAndTail rule ->
+
+                match ruleset.Accuracy with 
+                | AccuracyPoints.PointsPerJudgement _ -> ()
+                | _ -> failwith "CombineHeadAndTail rules must be used with PointsPerJudgement accuracy"
+
+                match rule with
+                | HeadTailCombineRule.OsuMania windows ->
+
+                    if ruleset.Judgements.Length <> 6 then failwith "osu!mania ln mechanics must be used with exactly 6 judgements"
+                    
+                    if negative(windows.Window320) then failwith "osu!mania ln Window320 must be non-negative"
+                    if negative(windows.Window300) then failwith "osu!mania ln Window300 must be non-negative"
+                    if negative(windows.Window200) then failwith "osu!mania ln Window200 must be non-negative"
+                    if negative(windows.Window100) then failwith "osu!mania ln Window100 must be non-negative"
+                    if negative(windows.Window50) then failwith "osu!mania ln Window50 must be non-negative"
+                    if negative(windows.WindowOverhold200) then failwith "osu!mania ln WindowOverhold200 must be non-negative"
+                    if negative(windows.WindowOverhold100) then failwith "osu!mania ln WindowOverhold100 must be non-negative"
+
+                    // todo: make sure they are ordered in some way
+
+                | HeadTailCombineRule.HeadJudgementOr (early_window, late_window, judgement_if_dropped, judgement_if_overheld) ->
+
+                    if positive(early_window) then failwith "HeadJudgementOr `early_window` must be non-positive"
+                    if negative(late_window) then failwith "HeadJudgementOr `late_window` must be non-negative"
+                    if judgement_if_dropped >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
+                    if judgement_if_overheld >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
+
+            | HoldMechanics.OnlyRequireHold window ->
+                if window < 0.0f<ms / rate> then failwith "OnlyRequireHold window must be non-negative"
+            | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_dropped) ->
+                if windows.Length <> ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `windows` must match judgement count"
+                let mutable w_min = 0.0f<ms / rate>
+                let mutable w_max = 0.0f<ms / rate>
+                for w in windows do
+                    match w with
+                    | Some (early, late) ->
+                        if early > w_min then failwithf "Early release window %.3fms must be %.3fms or earlier" early w_min
+                        w_min <- early
+                        if late < w_max then failwithf "Late release window %.3fms must be %.3fms or late" late w_max
+                        w_max <- late
+                    | None -> ()
+                if judgement_if_dropped >= ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `judgement_if_dropped` must be a valid judgement"
+            | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
+                if judgement_if_dropped >= ruleset.Judgements.Length then failwith "OnlyJudgeReleases `judgement_if_dropped` must be a valid judgement"
+
+            match ruleset.Accuracy with
+            | AccuracyPoints.WifeCurve judge -> if judge < 2 || judge > 9 then failwith "WifeCurve `judge` must be a valid judge value"
+            | AccuracyPoints.PointsPerJudgement points ->
+                for p in points do
+                    if not (Double.IsFinite p) then failwith "PointsPerJudgement `points` contains invalid floating point values"
+
+            Ok ruleset
+        with err ->
+            Error err.Message
