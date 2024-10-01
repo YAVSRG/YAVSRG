@@ -1,7 +1,7 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.Rulesets
 
 open Prelude
-open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.Rulesets
 
 module OsuMania =
 
@@ -64,7 +64,7 @@ module OsuMania =
                 | NoMod -> base_window
         }
 
-    let create (od: float32) (mode: Mode) : RulesetV2 =
+    let create (od: float32) (mode: Mode) : Ruleset =
 
         let od = round (od * 10.0f) / 10.0f
         if od < 0.0f || od > 10.0f then failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od

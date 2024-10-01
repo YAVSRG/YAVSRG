@@ -8,8 +8,8 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.RulesetsV2
-open Prelude.Gameplay.ScoringV2
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
 open Prelude.Data.Library
 
 [<RequireQualifiedAccess>]
@@ -49,7 +49,7 @@ type ScoreInfo =
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
     
-    member this.WithRuleset (ruleset: RulesetV2) =
+    member this.WithRuleset (ruleset: Ruleset) =
         let scoring =
             ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
 
@@ -69,7 +69,7 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: RulesetV2) (score: Score) : ScoreInfo =
+    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = Mods.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 

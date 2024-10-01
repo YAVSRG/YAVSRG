@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library.Collections
 

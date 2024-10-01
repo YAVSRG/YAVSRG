@@ -1,7 +1,7 @@
-﻿namespace Prelude.Gameplay.ScoringV2
+﻿namespace Prelude.Gameplay.Scoring
 
 open Prelude
-open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.Rulesets
 
 module OsuHolds =
 

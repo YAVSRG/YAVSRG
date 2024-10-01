@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Skins
 
 [<RequireQualifiedAccess>]

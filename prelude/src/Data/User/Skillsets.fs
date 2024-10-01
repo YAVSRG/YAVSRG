@@ -2,6 +2,7 @@
 
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
 
 module Skillsets =
@@ -10,7 +11,7 @@ module Skillsets =
 
     let calculate (score_db: UserDatabase) (library: Library) =
 
-        let sc_j4 = Rulesets.SC.create 4
+        let sc_j4 = SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
         for cc_key in library.Charts.Cache.Keys do
@@ -25,7 +26,7 @@ module Skillsets =
 
     let find_underperformance (score_db: UserDatabase) (library: Library) =
 
-        let sc_j4 = Rulesets.SC.create 4
+        let sc_j4 = SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
         let ACC_INCREASE = 3.0

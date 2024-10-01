@@ -1,11 +1,11 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.Rulesets
 
 open Prelude
-open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.Rulesets
 
 module Wife3 =
 
-    let create (judge: int) : RulesetV2 =
+    let create (judge: int) : Ruleset =
 
         if judge > 9 || judge < 4 then failwithf "Judge must be between 4 and 9, '%i' is not supported" judge
 

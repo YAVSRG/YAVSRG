@@ -3,7 +3,7 @@
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.ScoringV2
+open Prelude.Gameplay.Scoring
 
 type ChartBuilder(keycount: int) =
     let items = ResizeArray<TimeItem<NoteRow>>()

@@ -1,11 +1,10 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.Rulesets
 
 open Prelude
-open Prelude.Gameplay.RulesetsV2
 
 module SC =
 
-    let create (judge: int) : RulesetV2 =
+    let create (judge: int) : Ruleset =
 
         let PERFECT_WINDOW = 
             if judge = 9 then 9.0f<ms / rate>

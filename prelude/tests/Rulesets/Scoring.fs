@@ -2,8 +2,8 @@
 
 open NUnit.Framework
 open Prelude
-open Prelude.Gameplay.RulesetsV2
-open Prelude.Gameplay.ScoringV2
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
 
 module Scoring =
 

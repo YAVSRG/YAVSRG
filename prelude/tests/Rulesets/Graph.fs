@@ -7,8 +7,8 @@ open Prelude.Charts.Formats.osu
 open Prelude.Charts.Conversions
 open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.RulesetsV2
-open Prelude.Gameplay.ScoringV2
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
 
 module Graph =
 

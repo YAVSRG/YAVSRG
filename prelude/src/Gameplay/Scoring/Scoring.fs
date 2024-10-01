@@ -1,9 +1,9 @@
-﻿namespace Prelude.Gameplay.ScoringV2
+﻿namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.Rulesets
 
 type GameplayAction =
     | Hit of
@@ -34,7 +34,7 @@ type GameplayAction =
 /// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
 /// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
 
-type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
+type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
     inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
 
     let hit_events = ResizeArray<GameplayEvent<GameplayAction>>()
@@ -327,10 +327,10 @@ type ScoreProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, note
 
 module ScoreProcessor =
 
-    let create (ruleset: RulesetV2) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
+    let create (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
         ScoreProcessor(ruleset, keys, replay, notes, rate)
 
-    let run (ruleset: RulesetV2) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
+    let run (ruleset: Ruleset) (keys: int) (replay: IReplayProvider) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
         let scoring = ScoreProcessor(ruleset, keys, replay, notes, rate)
         scoring.Update Time.infinity
         scoring

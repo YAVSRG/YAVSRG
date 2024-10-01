@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 open Percyqaz.Data
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 
 [<Json.AutoCodec>]
 type RulesetRepo =

@@ -4,7 +4,6 @@ open System
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.Rulesets
 
 [<AbstractClass>]
 type ScoreProcessorBase(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: float32) =

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.RulesetsV2
+﻿namespace Prelude.Gameplay.Rulesets
 
 open System
 open Percyqaz.Data
@@ -98,7 +98,7 @@ type HoldMechanics =
     | OnlyJudgeReleases of judgement_if_dropped: int
 
 [<Json.AutoCodec>]
-type RulesetV2 =
+type Ruleset =
     {
         Name: string
         Description: string
@@ -159,7 +159,7 @@ type RulesetV2 =
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
             early, late
 
-module RulesetV2 =
+module Ruleset =
 
     open System.IO
     open System.Security.Cryptography
@@ -169,7 +169,7 @@ module RulesetV2 =
     /// Any change to a ruleset that changes how it functions changes the bytes, and the hash will change
     /// Any change is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
 
-    let hash (ruleset: RulesetV2) =
+    let hash (ruleset: Ruleset) =
         let h = SHA256.Create()
         use ms = new MemoryStream()
         use bw = new BinaryWriter(ms)
@@ -256,7 +256,7 @@ module RulesetV2 =
         let hash_string = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
         first_character + hash_string.Replace("-", "").Substring(0, 8)
 
-    let check (ruleset: RulesetV2) : Result<RulesetV2, string> =
+    let check (ruleset: Ruleset) : Result<Ruleset, string> =
         let inline valid (x: GameplayTime) = x |> float32 |> Single.IsFinite
         let invalid = valid >> not
         let inline negative (x: GameplayTime) = invalid x || x < 0.0f<ms / rate>

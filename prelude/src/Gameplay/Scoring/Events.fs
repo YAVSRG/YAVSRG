@@ -1,9 +1,9 @@
-﻿namespace Prelude.Gameplay.ScoringV2
+﻿namespace Prelude.Gameplay.Scoring
 
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
-open Prelude.Gameplay.RulesetsV2
+open Prelude.Gameplay.Rulesets
 
 type GameplayEvent<'Guts> =
     {
@@ -63,7 +63,7 @@ type HoldState =
 /// These internal actions are then processed further by rulesets to calculate accuracy, combo, score, etc
 
 [<AbstractClass>]
-type GameplayEventProcessor(ruleset: RulesetV2, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
+type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
     inherit ReplayConsumer(keys, replay)
 
     let first_note = (TimeArray.first notes).Value.Time

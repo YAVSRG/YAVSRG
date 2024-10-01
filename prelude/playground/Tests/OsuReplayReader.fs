@@ -10,8 +10,8 @@ open Prelude.Charts.Formats.osu
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Gameplay
-open Prelude.Gameplay.RulesetsV2
-open Prelude.Gameplay.ScoringV2
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
 
 let private compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
 

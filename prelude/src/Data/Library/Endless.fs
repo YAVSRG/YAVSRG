@@ -3,8 +3,8 @@
 open System
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Rulesets
 open Prelude.Charts.Processing.Patterns
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections
