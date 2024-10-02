@@ -10,6 +10,9 @@ open Prelude.Charts.Processing.Difficulty
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Rulesets
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude
@@ -84,7 +87,7 @@ module Leaderboard =
 
             this
             |+ Text(
-                K(sprintf "#%i %s  •  %s" score.Rank score.Username (score_info.Scoring.FormatAccuracy())),
+                K(sprintf "#%i %s  •  %s" score.Rank score.Username (format_accuracy score_info.Scoring.Accuracy)),
                 Color = text_color,
                 Align = Alignment.LEFT,
                 Position =
@@ -101,7 +104,7 @@ module Leaderboard =
                     sprintf
                         "%s  •  %ix  •  %.2f"
                         (score_info.Ruleset.LampName score_info.Lamp)
-                        score_info.Scoring.State.BestCombo
+                        score_info.Scoring.BestCombo
                         score_info.Physical
                 ),
                 Color = text_subcolor,
@@ -210,10 +213,10 @@ module Leaderboard =
                                     with_mods.Keys
                                     (StoredReplayProvider replay_data)
                                     with_mods.Notes
-                                    score.Rate
+                                    (score.Rate * 1.0f<rate>)
 
-                            let rating = DifficultyRating.calculate score.Rate with_mods.Notes
-                            let patterns = PatternReport.from_chart score.Rate req.Chart
+                            let rating = DifficultyRating.calculate (score.Rate * 1.0f<rate>) with_mods.Notes
+                            let patterns = PatternReport.from_chart req.Chart
 
                             let score_info: ScoreInfo =
                                 {
@@ -223,12 +226,12 @@ module Leaderboard =
 
                                     PlayedBy = ScorePlayedBy.Username score.Username
                                     TimePlayed = score.Timestamp |> Timestamp.from_datetime
-                                    Rate = score.Rate
+                                    Rate = score.Rate * 1.0f<rate>
 
                                     Replay = replay_data
                                     Scoring = scoring
-                                    Lamp = Lamp.calculate req.Ruleset.Grading.Lamps scoring.State
-                                    Grade = Grade.calculate req.Ruleset.Grading.Grades scoring.State
+                                    Lamp = Lamp.calculate req.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                                    Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
 
                                     Rating = rating
                                     Patterns = patterns

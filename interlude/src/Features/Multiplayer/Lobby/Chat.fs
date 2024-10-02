@@ -126,7 +126,7 @@ type Chat(lobby: Lobby) =
                         Align = Alignment.LEFT
                     )
                     |+ Text(
-                        sprintf "%s" (data.Scoring.FormatAccuracy()),
+                        sprintf "%s" (format_accuracy data.Scoring.Accuracy),
                         Color = K(data.Ruleset.GradeColor grade, Colors.shadow_1),
                         Align = Alignment.CENTER
                     )
@@ -136,7 +136,7 @@ type Chat(lobby: Lobby) =
                         Align = 0.75f
                     )
                     |+ Text(
-                        sprintf "%ix" (data.Scoring.State.BestCombo),
+                        sprintf "%ix" (data.Scoring.BestCombo),
                         Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1),
                         Align = Alignment.RIGHT
                     )

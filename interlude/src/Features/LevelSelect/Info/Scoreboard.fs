@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Content
@@ -72,7 +73,7 @@ module Scoreboard =
 
             this
             |+ Text(
-                fun () -> score_info.Scoring.FormatAccuracy()
+                fun () -> format_accuracy score_info.Scoring.Accuracy
                 , Color = text_color
                 , Align = Alignment.LEFT
                 , Position = upper
@@ -83,7 +84,7 @@ module Scoreboard =
                     sprintf
                         "%s  •  %ix  •  %.2f"
                         (score_info.Ruleset.LampName score_info.Lamp)
-                        score_info.Scoring.State.BestCombo
+                        score_info.Scoring.BestCombo
                         score_info.Physical
                 , Color = text_subcolor
                 , Align = Alignment.LEFT

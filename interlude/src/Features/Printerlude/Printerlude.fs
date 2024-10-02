@@ -13,6 +13,7 @@ open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Interlude
 open Interlude.Content
 open Interlude.Features.Gameplay
@@ -79,7 +80,7 @@ module Printerlude =
 
                         match
                             data.PersonalBests
-                            |> Bests.ruleset_best_above table.Info.RulesetId (_.Accuracy) 1.0f
+                            |> Bests.ruleset_best_above table.Info.RulesetId (_.Accuracy) 1.0f<rate>
                         with
                         | Some (acc, _, _) when acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0) ->
                             for score in data.Scores do
@@ -87,7 +88,7 @@ module Printerlude =
                                     ({
                                         ChartId = chart.Hash
                                         Replay = score.Replay |> Replay.compressed_bytes_to_string
-                                        Rate = score.Rate
+                                        Rate = float32 score.Rate
                                         Mods = score.Mods
                                         Timestamp = Timestamp.to_datetime score.Timestamp
                                     }

@@ -58,7 +58,7 @@ module LobbyChart =
 
         match info_if_selected() with
         | Some _ ->
-            SelectedChart.rate.Set chart.Rate
+            SelectedChart.rate.Set (chart.Rate * 1.0f<rate>)
 
             SelectedChart.selected_mods.Set(
                 chart.Mods
@@ -83,7 +83,7 @@ module LobbyChart =
                         defer
                         <| fun () ->
                         SelectedChart.change (newly_installed, LibraryContext.None, true)
-                        SelectedChart.rate.Set chart.Rate
+                        SelectedChart.rate.Set (chart.Rate * 1.0f<rate>)
                         SelectedChart.selected_mods.Set(
                             chart.Mods
                             |> Map.ofArray
@@ -92,7 +92,7 @@ module LobbyChart =
                 )
             | Some cc ->
                 SelectedChart.change (cc, LibraryContext.None, true)
-                SelectedChart.rate.Set chart.Rate
+                SelectedChart.rate.Set (chart.Rate * 1.0f<rate>)
 
                 SelectedChart.selected_mods.Set(
                     chart.Mods

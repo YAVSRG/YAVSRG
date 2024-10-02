@@ -113,8 +113,12 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
 
         page_container()
         |+ PageSetting(%"gameplay.rate",
-            Slider(SelectedChart.rate |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate> |> Setting.uom), 
-            Format = sprintf "%.02fx")
+            Slider(
+                SelectedChart.rate 
+                |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>) 
+                |> Setting.uom, 
+                Format = sprintf "%.02fx"
+            )
         )
             .Help(
                 Help.Info("gameplay.rate")

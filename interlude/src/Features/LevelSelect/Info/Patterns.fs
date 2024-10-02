@@ -86,10 +86,10 @@ type Patterns(display: Setting<Display>) =
             Draw.rect (b.SliceL(5.0f).SliceT(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
             Draw.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
-            let density_color (nps: float32) =
+            let density_color (nps: float32</second>) =
                 nps * 2.0f |> float |> DifficultyRating.physical_color
 
-            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / 100.0f)
+            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms> / 100.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
                 Draw.untextured_quad

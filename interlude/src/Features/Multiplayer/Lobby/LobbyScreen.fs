@@ -5,6 +5,8 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.Content
 open Interlude.Web.Shared
@@ -178,8 +180,8 @@ type LobbyUI(lobby: Lobby) =
 
                                 Replay = replay_data
                                 Scoring = scoring
-                                Lamp = Lamp.calculate scoring.Ruleset.Grading.Lamps scoring.State
-                                Grade = Grade.calculate scoring.Ruleset.Grading.Grades scoring.State
+                                Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                                Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                                 Rating = info.Rating
                                 Patterns = info.Patterns
