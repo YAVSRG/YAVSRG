@@ -55,7 +55,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
 
     override this.Init(parent) =
         if config.AccuracyGradeColors then
-            state.SubscribeToHits(fun _ ->
+            state.SubscribeEvents(fun _ ->
                 color.Target <- Grade.calculate grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
             )
 

@@ -18,7 +18,7 @@ type EarlyLateMeter(config: HudConfig, state: PlayState) =
     let texture = Content.Texture "early-late"
 
     do
-        state.SubscribeToHits(fun ev ->
+        state.SubscribeEvents(fun ev ->
             let x =
                 match ev.Action with
                 | Hit e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone

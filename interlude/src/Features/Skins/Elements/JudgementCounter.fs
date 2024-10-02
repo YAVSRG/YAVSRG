@@ -68,7 +68,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
     let font = Content.Texture "judgement-counter-font"
 
     override this.Init(parent) =
-        state.SubscribeToHits(fun h ->
+        state.SubscribeEvents(fun h ->
             match h.Action with
             | Hit x ->
                 match x.Judgement with

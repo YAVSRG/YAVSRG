@@ -27,7 +27,7 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
         ) * SelectedChart.rate.Value * 1.0f<ms / rate>
 
     do
-        state.SubscribeToHits(fun ev ->
+        state.SubscribeEvents(fun ev ->
             let judge =
                 match ev.Action with
                 | Hit e -> e.Judgement |> Option.map fst

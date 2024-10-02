@@ -40,7 +40,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
     do
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
-            state.SubscribeToHits(fun ev ->
+            state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     if not e.Missed then
@@ -66,7 +66,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                 | _ -> ()
             )
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
-            state.SubscribeToHits(fun ev ->
+            state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     hits.Add

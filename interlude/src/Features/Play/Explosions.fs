@@ -154,7 +154,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
         | _ -> ()
 
     do
-        state.SubscribeToHits handle_event
+        state.SubscribeEvents handle_event
 
     override this.Draw() =
         let now = state.CurrentChartTime()

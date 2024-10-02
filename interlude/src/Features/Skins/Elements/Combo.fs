@@ -39,7 +39,7 @@ type Combo(config: HudConfig, state: PlayState) =
     let font_texture = Content.Texture "combo-font"
 
     do
-        state.SubscribeToHits(fun _ ->
+        state.SubscribeEvents(fun _ ->
             hits <- hits + 1
 
             if (config.ComboLampColors && hits > 50) then
