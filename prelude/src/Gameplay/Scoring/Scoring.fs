@@ -30,6 +30,21 @@ type GameplayAction =
     | RegrabHold
     | GhostTap
 
+[<Struct>]
+type ComboAction =
+    | Increase
+    | Break of instead_of_increase: bool
+    | NoChange
+
+type GameplayEvent =
+    {
+        Index: int
+        Time: ChartTime
+        Column: int
+        Action: GameplayAction
+        Combo: ComboAction
+    }
+
 /// This processor extends GameplayEventProcessor, taking its series of raw `GameplayEvent<GameplayActionInternal>` event markers 
 /// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
 /// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
@@ -37,10 +52,10 @@ type GameplayAction =
 type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
     inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
 
-    let hit_events = ResizeArray<GameplayEvent<GameplayAction>>()
+    let hit_events = ResizeArray<GameplayEvent>()
 
-    let on_hit_ev = Event<GameplayEvent<GameplayAction>>()
-    let on_hit = on_hit_ev.Publish
+    let on_event_ev = Event<GameplayEvent>()
+    let on_event = on_event_ev.Publish
 
     let judgement_counts = Array.zeroCreate ruleset.Judgements.Length
     let mutable points_scored = 0.0
@@ -101,11 +116,14 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member this.MaxPossiblePoints = max_possible_points
     member this.PointsScored = points_scored
 
-    member private this.ProcessHit(delta, is_missed) : GameplayAction =
+    member this.Events = hit_events.AsReadOnly()
+    member this.OnEvent = on_event
+
+    member private this.ProcessHit(delta, is_missed) : ComboAction * GameplayAction =
             
         match ruleset.HoldMechanics with 
         | HoldMechanics.OnlyJudgeReleases _ ->
-            if is_missed then break_combo(true) else incr_combo()
+            (if is_missed then Break true else Increase),
             Hit
                 {|
                     Delta = delta
@@ -118,11 +136,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
             score_points(points, judgement)
 
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Hit
                 {|
                     Delta = delta
@@ -130,7 +144,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     Missed = is_missed
                 |}
 
-    member private this.ProcessHold(delta, is_missed) : GameplayAction =
+    member private this.ProcessHold(delta, is_missed) : ComboAction * GameplayAction =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyRequireHold _
@@ -139,12 +153,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let points = judgement_to_points delta judgement
 
             score_points(points, judgement)
-
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Hold
                 {|
                     Delta = delta
@@ -154,7 +164,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
         | HoldMechanics.CombineHeadAndTail _
         | HoldMechanics.OnlyJudgeReleases _ ->
-            if is_missed then break_combo(true) else incr_combo()
+            (if is_missed then Break true else Increase),
             Hold
                 {|
                     Delta = delta
@@ -162,7 +172,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     Missed = is_missed
                 |}
 
-    member private this.ProcessRelease(release_delta, missed, overheld, dropped, head_delta, missed_head) : GameplayAction =
+    member private this.ProcessRelease(release_delta, missed, overheld, dropped, head_delta, missed_head) : ComboAction * GameplayAction =
         match ruleset.HoldMechanics with
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
             let judgement =
@@ -174,12 +184,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let points = judgement_to_points head_delta judgement
 
             score_points(points, judgement)
-
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
                     Delta = release_delta
@@ -202,12 +208,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let points = judgement_to_points head_delta judgement
 
             score_points(points, judgement)
-
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
                     Delta = release_delta
@@ -218,11 +220,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
 
         | HoldMechanics.OnlyRequireHold _ ->
-            if (not overheld) && (missed || dropped) then
-                break_combo(true)
-            else
-                incr_combo()
-
+        
+            (if (not overheld) && (missed || dropped) then Break true else Increase),
             Release
                 {|
                     Delta = release_delta
@@ -252,12 +251,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     
             let points = judgement_to_points release_delta judgement
             score_points(points, judgement)
-
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
                     Delta = release_delta
@@ -279,11 +274,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
             score_points(points, judgement)
 
-            if ruleset.Judgements.[judgement].BreaksCombo then
-                break_combo(true)
-            else
-                incr_combo()
-
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
                     Delta = release_delta
@@ -293,40 +284,48 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     Dropped = dropped
                 |}
 
-    member private this.ProcessDropHold() : GameplayAction =
-        break_combo (false)
+    member private this.ProcessDropHold() : ComboAction * GameplayAction =
+        Break false,
         DropHold
 
-    member private this.ProcessRegrabHold() : GameplayAction =
+    member private this.ProcessRegrabHold() : ComboAction * GameplayAction =
+        NoChange,
         RegrabHold
 
-    member private this.ProcessGhostTap() : GameplayAction =
+    member private this.ProcessGhostTap() : ComboAction * GameplayAction =
         // todo: rulesets can specify ghost tap judgements
+        NoChange,
         GhostTap
 
-    override this.HandleEvent (internal_event: GameplayEvent<GameplayActionInternal>) =
-        let exposed_event : GameplayEvent<GameplayAction> =
+    override this.HandleEvent (internal_event: GameplayEventInternal) =
+        let combo_action, gameplay_action = 
+            match internal_event.Action with
+            | HIT(delta, is_missed) ->
+                this.ProcessHit(delta, is_missed)
+            | HOLD(delta, is_missed) ->
+                this.ProcessHold(delta, is_missed)
+            | RELEASE(release_delta, missed, overhold, dropped, head_delta, missed_head) ->
+                this.ProcessRelease(release_delta, missed, overhold, dropped, head_delta, missed_head)
+            | DROP_HOLD -> this.ProcessDropHold()
+            | REGRAB_HOLD -> this.ProcessRegrabHold()
+            | GHOST_TAP -> this.ProcessGhostTap()
+
+        match combo_action with
+        | NoChange -> ()
+        | Increase -> incr_combo ()
+        | Break instead_of_increase -> break_combo instead_of_increase
+
+        let gameplay_event : GameplayEvent =
             {
                 Index = internal_event.Index
                 Time = internal_event.Time
                 Column = internal_event.Column
-                Action =
-                    match internal_event.Action with
-                    | HIT(delta, is_missed) ->
-                        this.ProcessHit(delta, is_missed)
-                    | HOLD(delta, is_missed) ->
-                        this.ProcessHold(delta, is_missed)
-                    | RELEASE(release_delta, missed, overhold, dropped, head_delta, missed_head) ->
-                        this.ProcessRelease(release_delta, missed, overhold, dropped, head_delta, missed_head)
-                    | DROP_HOLD -> this.ProcessDropHold()
-                    | REGRAB_HOLD -> this.ProcessRegrabHold()
-                    | GHOST_TAP -> this.ProcessGhostTap()
+                Action = gameplay_action
+                Combo = combo_action
             }
-        hit_events.Add exposed_event
-        on_hit_ev.Trigger exposed_event
 
-    member this.Events = hit_events.AsReadOnly()
-    member this.OnEvent = on_hit
+        hit_events.Add gameplay_event
+        on_event_ev.Trigger gameplay_event
 
 module ScoreProcessor =
 

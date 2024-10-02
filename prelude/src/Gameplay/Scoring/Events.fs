@@ -5,14 +5,6 @@ open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
-type GameplayEvent<'Guts> =
-    {
-        Index: int
-        Time: ChartTime
-        Column: int
-        Action: 'Guts
-    }
-
 type GameplayActionInternal =
     | HIT of delta: GameplayTime * missed: bool
     | HOLD of delta: GameplayTime * missed: bool
@@ -26,6 +18,14 @@ type GameplayActionInternal =
     | DROP_HOLD
     | REGRAB_HOLD
     | GHOST_TAP
+
+type GameplayEventInternal =
+    {
+        Index: int
+        Time: ChartTime
+        Column: int
+        Action: GameplayActionInternal
+    }
 
 [<Struct>]
 type private HoldStateInternal =
@@ -380,4 +380,4 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
         this.PollReplay chart_time // Process all key presses and releases up until now
         this.MissUnhitExpiredNotes chart_time // Then process any missed notes up until now if needed
 
-    abstract member HandleEvent: GameplayEvent<GameplayActionInternal> -> unit
+    abstract member HandleEvent: GameplayEventInternal -> unit

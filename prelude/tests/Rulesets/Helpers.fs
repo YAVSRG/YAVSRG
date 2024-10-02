@@ -91,7 +91,7 @@ type ReplayBuilder() =
 type GameplayEventCollector(ruleset, keys, replay, notes, rate) =
     inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
 
-    let events = ResizeArray<GameplayEvent<GameplayActionInternal>>()
+    let events = ResizeArray<GameplayEventInternal>()
 
     override this.HandleEvent(event) =
         printfn "%A" event
@@ -102,7 +102,7 @@ type GameplayEventCollector(ruleset, keys, replay, notes, rate) =
 type ScoringEventCollector(ruleset, keys, replay, notes, rate) as this =
     inherit ScoreProcessor(ruleset, keys, replay, notes, rate)
 
-    let events = ResizeArray<GameplayEvent<GameplayAction>>()
+    let events = ResizeArray<GameplayEvent>()
 
     do
         this.OnEvent.Add(fun event ->

@@ -9,6 +9,7 @@ type GraphPoint =
         Time: ChartTime
         PointsScored: float
         MaxPointsScored: float
+        Combo: int
         Lamp: int
         Mean: GameplayTime
         StandardDeviation: GameplayTime
@@ -77,10 +78,11 @@ module ScoreScreenStats =
 
         let ghost_taps = ref 0
 
+        let mutable combo = 0
         let mutable max_points = 0.0
         let mutable scored_points = 0.0
 
-        let add_action(ev: GameplayEvent<GameplayAction>) =
+        let add_action(ev: GameplayEvent) =
             match ev.Action with
             | Hit e ->
                 if not e.Missed then
@@ -151,6 +153,11 @@ module ScoreScreenStats =
             | DropHold -> ()
             | RegrabHold -> ()
 
+            match ev.Combo with
+            | NoChange -> ()
+            | Increase -> combo <- combo + 1
+            | Break _ -> combo <- 0
+
         let add_graph_points (chart_time: ChartTime) (new_graph_points_needed: int) =
             let last_point_timestamp = if graph_points.Count > 0 then graph_points.[graph_points.Count - 1].Time else 0.0f<ms>
 
@@ -172,6 +179,7 @@ module ScoreScreenStats =
                         Time = this_point_timestamp
                         PointsScored = scored_points
                         MaxPointsScored = max_points
+                        Combo = combo
                         Lamp = lamp
                         Mean = mean
                         StandardDeviation = standard_deviation
