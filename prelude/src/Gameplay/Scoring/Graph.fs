@@ -205,7 +205,7 @@ module ScoreScreenStats =
 
             add_graph_points ev.Time new_graph_points_needed
 
-        add_graph_points score_processor.Duration 1
+        add_graph_points (if score_processor.Events.Count > 0 then score_processor.Events.[score_processor.Events.Count - 1].Time else score_processor.Duration) 1
 
         let tap_mean = tap_sum.Value / float32 (max 1 taps.Value)
         let release_mean = release_sum.Value / float32 (max 1 releases.Value)
