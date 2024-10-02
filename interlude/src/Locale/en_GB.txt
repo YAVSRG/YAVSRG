@@ -876,6 +876,7 @@ replay.end_of_data=No more replay data available
 replay.ghost_tap=Ghost tap
 replay.hide_overlay=Hide overlay
 replay.hit_overlay=Hit overlay
+replay.hit_overlay_labels=Hit overlay labels
 replay.input_overlay=Input overlay
 replay.original_rate=Original rate
 replay.pause=Pause

@@ -15,4 +15,5 @@ module private ReplayModeSettings =
     
     let show_input_overlay = Setting.simple false
     let show_hit_overlay = Setting.simple false
+    let show_hit_overlay_labels = Setting.simple true
     let playfield_dim: Setting.Bounded<float32> = Setting.percentf 0.5f

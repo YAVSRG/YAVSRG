@@ -85,16 +85,14 @@ module ReplayScreen =
                     with_colors.Keys,
                     replay_data.GetFullReplay(),
                     this.State,
-                    this.Playfield,
-                    show_input_overlay
+                    this.Playfield
                 )
                 |+ HitOverlay(
                     rate,
                     with_colors.Source,
                     replay_data.GetFullReplay(),
                     this.State,
-                    this.Playfield,
-                    show_hit_overlay
+                    this.Playfield
                 )
                 |+ Text(
                     %"replay.end_of_data",

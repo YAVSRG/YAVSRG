@@ -19,8 +19,7 @@ type private HitOverlay
         chart: ModdedChart,
         replay_data: ReplayData,
         state: PlayState,
-        playfield: Playfield,
-        enable: Setting<bool>
+        playfield: Playfield
     ) =
     inherit StaticWidget(NodeType.None)
 
@@ -91,32 +90,34 @@ type private HitOverlay
         |> fun a -> Draw.rect a color
 
     let label_before (column: int) (y: float32) (text: string) (color: Color) =
-        Rect
-            .Create(
-                playfield.Bounds.Left + playfield.ColumnPositions.[column],
-                y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
-                y
-            )
-            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentT(0.45f).ShrinkPercentT(0.5f)
-        |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+        if show_hit_overlay_labels.Value then
+            Rect
+                .Create(
+                    playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                    y,
+                    playfield.Bounds.Left
+                    + playfield.ColumnPositions.[column]
+                    + playfield.ColumnWidth,
+                    y
+                )
+                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentT(0.45f).ShrinkPercentT(0.5f)
+            |> scroll_direction_pos playfield.Bounds.Bottom
+            |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
 
     let label_after (column: int) (y: float32) (text: string) (color: Color) =
-        Rect
-            .Create(
-                playfield.Bounds.Left + playfield.ColumnPositions.[column],
-                y,
-                playfield.Bounds.Left
-                + playfield.ColumnPositions.[column]
-                + playfield.ColumnWidth,
-                y
-            )
-            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentB(0.45f).ShrinkPercentB(0.5f)
-        |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+        if show_hit_overlay_labels.Value then
+            Rect
+                .Create(
+                    playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                    y,
+                    playfield.Bounds.Left
+                    + playfield.ColumnPositions.[column]
+                    + playfield.ColumnWidth,
+                    y
+                )
+                .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentB(0.45f).ShrinkPercentB(0.5f)
+            |> scroll_direction_pos playfield.Bounds.Bottom
+            |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
 
     let draw_icon (column: int) (y: float32) (icon: string) (color: Color) =
         Rect
@@ -205,23 +206,22 @@ type private HitOverlay
         base.Init parent
 
     override this.Draw() =
-        if not enable.Value then () else
+        if show_hit_overlay.Value then
+            let now =
+                state.CurrentChartTime()
+                + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
+                + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
 
-        let now =
-            state.CurrentChartTime()
-            + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-            + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
+            while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
+                seek <- seek + 1
 
-        while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
-            seek <- seek + 1
+            let until_time =
+                now
+                + (1080.0f<ms / rate> + MAX_WINDOW)
+                    / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
-        let until_time =
-            now
-            + (1080.0f<ms / rate> + MAX_WINDOW)
-                / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+            let mutable peek = seek
 
-        let mutable peek = seek
-
-        while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
-            draw_event now hit_events.[peek]
-            peek <- peek + 1
+            while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
+                draw_event now hit_events.[peek]
+                peek <- peek + 1

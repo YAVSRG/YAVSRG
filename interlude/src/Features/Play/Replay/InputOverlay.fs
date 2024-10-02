@@ -10,7 +10,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield, enable: Setting<bool>)
+type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield)
     =
     inherit StaticWidget(NodeType.None)
 
@@ -37,7 +37,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
 
     override this.Draw() =
 
-        if enable.Value then
+        if show_input_overlay.Value then
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
                 let y t =
                     float32 options.HitPosition.Value

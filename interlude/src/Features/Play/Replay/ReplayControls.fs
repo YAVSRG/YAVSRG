@@ -17,9 +17,12 @@ type private ReplayModeSettingsPage() =
         page_container()
         |+ PageSetting(%"replay.input_overlay", Checkbox show_input_overlay).Pos(0)
         |+ PageSetting(%"replay.hit_overlay", Checkbox show_hit_overlay).Pos(2)
+        |+ PageSetting(%"replay.hit_overlay_labels", Checkbox show_hit_overlay_labels)
+            .Conditional(show_hit_overlay.Get)
+            .Pos(4)
         |+ PageSetting(%"replay.playfield_dim", Slider.Percent playfield_dim)
             .Conditional(fun () -> show_input_overlay.Value || show_hit_overlay.Value)
-            .Pos(4)
+            .Pos(6)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"replay.settings")
