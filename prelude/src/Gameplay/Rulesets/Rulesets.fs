@@ -109,7 +109,10 @@ type Ruleset =
         Grades: Grade array
         HitMechanics: HitMechanics
         HoldMechanics: HoldMechanics
-        Accuracy: AccuracyPoints
+        Accuracy: AccuracyPoints 
+        // todo: judgements are always worth points as fallbacks for certain LN mechanics, even when using wife curve
+        // todo: decimal place formatting
+        // todo: ghost tap ruling
     }
     member this.DefaultJudgement: int = this.Judgements.Length - 1
 
@@ -282,7 +285,7 @@ module Ruleset =
                     if early > w_min then failwithf "Early window %.3fms for '%s' must be %.3fms or earlier" early j.Name w_min
                     w_min <- early
                     if invalid(late) then failwithf "Invalid floating point late window for '%s'" j.Name
-                    if late < w_max then failwithf "Late window %.3fms for '%s' must be %.3fms or late" late j.Name w_max
+                    if late < w_max then failwithf "Late window %.3fms for '%s' must be %.3fms or later" late j.Name w_max
                     w_max <- late
                 | None -> ()
 
@@ -300,7 +303,10 @@ module Ruleset =
             match ruleset.HitMechanics with
             | HitMechanics.OsuMania -> ()
             | HitMechanics.Interlude cbrush_threshold ->
+
                 if cbrush_threshold < 0.0f<ms / rate> then failwith "Interlude `cbrush_threshold` must be non-negative"
+                if cbrush_threshold > w_max || cbrush_threshold > abs w_min then failwith "Interlude `cbrush_threshold` must not exceed timing windows"
+
             | HitMechanics.Etterna -> ()
 
             match ruleset.HoldMechanics with
@@ -343,7 +349,7 @@ module Ruleset =
                     | Some (early, late) ->
                         if early > w_min then failwithf "Early release window %.3fms must be %.3fms or earlier" early w_min
                         w_min <- early
-                        if late < w_max then failwithf "Late release window %.3fms must be %.3fms or late" late w_max
+                        if late < w_max then failwithf "Late release window %.3fms must be %.3fms or later" late w_max
                         w_max <- late
                     | None -> ()
                 if judgement_if_dropped >= ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `judgement_if_dropped` must be a valid judgement"
@@ -355,6 +361,8 @@ module Ruleset =
             | AccuracyPoints.PointsPerJudgement points ->
                 for p in points do
                     if not (Double.IsFinite p) then failwith "PointsPerJudgement `points` contains invalid floating point values"
+
+            if ruleset.LargestWindow > 500.0f<ms / rate> then failwithf "Timing window maximum is 500ms, this ruleset contains a largest window of %f" ruleset.LargestWindow
 
             Ok ruleset
         with err ->
