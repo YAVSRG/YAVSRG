@@ -196,46 +196,56 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             draw_line (x1, y1) (x2, y2) (color_func snapshots.[i]).O3
 
     member private this.DrawWindows() =
-        () // todo: 
-        //let h = 0.5f * this.Bounds.Height
-        //let c = this.Bounds.CenterY
-        //let ms_to_y (time: Time) = c - System.Math.Clamp(time * GraphSettings.scale.Value / score_info.Ruleset.Accuracy.MissWindow, -1.0f, 1.0f) * h
+        let h = 0.5f * this.Bounds.Height
+        let c = this.Bounds.CenterY
+        let ms_to_y (time: GameplayTime) = c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
-        //let mutable time = -score_info.Ruleset.Accuracy.MissWindow
-        //for (time2, j) in score_info.Ruleset.Accuracy.Timegates do
-        //    Draw.rect (Rect.Create(this.Bounds.Left, ms_to_y time2, this.Bounds.Right, ms_to_y time)) (score_info.Ruleset.JudgementColor(j).O4a 100)
-        //    time <- time2
-        //Draw.rect
-        //    (Rect.Create(this.Bounds.Left, ms_to_y score_info.Ruleset.Accuracy.MissWindow, this.Bounds.Right, ms_to_y time))
-        //    (score_info.Ruleset.JudgementColor(score_info.Ruleset.Judgements.Length - 1).O4a 100)
+        let mutable previous_early = 0.0f<ms / rate>
+        let mutable previous_late = 0.0f<ms / rate>
+
+        for j in score_info.Ruleset.Judgements do
+            match j.TimingWindows with
+            | Some (early, late) ->
+                Draw.rect 
+                    (Rect.Create(this.Bounds.Left, ms_to_y previous_early, this.Bounds.Right, ms_to_y early))
+                    (j.Color.O4a 100)
+                previous_early <- early
+                Draw.rect 
+                    (Rect.Create(this.Bounds.Left, ms_to_y late, this.Bounds.Right, ms_to_y previous_late))
+                    (j.Color.O4a 100)
+                previous_late <- late
+            | None -> ()
 
     member private this.DrawLabels(color: Color * Color) =
-          // todo: 
-        //if expanded && options.ScoreGraphWindowBackground.Value then
-        //    let h = 0.5f * this.Bounds.Height
-        //    let c = this.Bounds.CenterY
-        //    let ms_to_y (time: Time) = c - System.Math.Clamp(time * GraphSettings.scale.Value / score_info.Ruleset.Accuracy.MissWindow, -1.0f, 1.0f) * h
+        if expanded && options.ScoreGraphWindowBackground.Value then
+            let h = 0.5f * this.Bounds.Height
+            let c = this.Bounds.CenterY
+            let ms_to_y (time: GameplayTime) = c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
-        //    for (time, _) in score_info.Ruleset.Accuracy.Timegates do
-        //        let label = if time < 0.0f<ms> then sprintf "%gms" time else sprintf "+%gms" time
-        //        Text.draw_b(Style.font, label, 15.0f, this.Bounds.Left + 5.0f, ms_to_y time - (if time < 0.0f<ms> then 24.0f else 0.0f), color)
-        //else
-        //    Text.draw_b (
-        //            Style.font, 
-        //            sprintf "%s (-%.0fms)" (%"score.graph.early") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
-        //            24.0f,
-        //            this.Bounds.Left + 10.0f,
-        //            this.Bounds.Bottom - 40.0f,
-        //            color
-        //        )
-        //    Text.draw_b (
-        //        Style.font,
-        //        sprintf "%s (+%.0fms)" (%"score.graph.late") (score_info.Ruleset.Accuracy.MissWindow / GraphSettings.scale.Value), 
-        //        24.0f,
-        //        this.Bounds.Left + 10.0f,
-        //        this.Bounds.Top + 3.0f,
-        //        color
-        //    )
+            // todo: prevent labels from stacking at the top/bottom
+            for j in score_info.Ruleset.Judgements do
+                match j.TimingWindows with
+                | Some (early, late) ->
+                    Text.draw_b(Style.font, sprintf "%gms" early, 15.0f, this.Bounds.Left + 5.0f, ms_to_y early - 24.0f, color)
+                    Text.draw_b(Style.font, sprintf "+%gms" late, 15.0f, this.Bounds.Left + 5.0f, ms_to_y late, color)
+                | None -> ()
+        else
+            Text.draw_b (
+                    Style.font, 
+                    sprintf "%s (-%.0fms)" (%"score.graph.early") (MAX_WINDOW / GraphSettings.scale.Value), 
+                    24.0f,
+                    this.Bounds.Left + 10.0f,
+                    this.Bounds.Bottom - 40.0f,
+                    color
+                )
+            Text.draw_b (
+                Style.font,
+                sprintf "%s (+%.0fms)" (%"score.graph.late") (MAX_WINDOW / GraphSettings.scale.Value), 
+                24.0f,
+                this.Bounds.Left + 10.0f,
+                this.Bounds.Top + 3.0f,
+                color
+            )
         Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, color, Alignment.RIGHT)
 
     member private this.DrawLineGraph() =

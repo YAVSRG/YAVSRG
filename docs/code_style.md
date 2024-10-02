@@ -15,7 +15,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 🌸 = UI improvement
 ✨ = New user-facing feature
 🔥 = New developer-facing feature/tooling
-🧱 = New codebase feature that doesn't (yet) affect users
+🏗️ = Stuff that is WIP/hidden from users
 🧹 = Code refactoring/cleanup/formatting
 💡 = Automated tests
 ⚡ = CI pipelines
