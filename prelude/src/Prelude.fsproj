@@ -68,9 +68,6 @@
     <Compile Include="Gameplay\_OLD_Rulesets\Templates\osu!.fs" />
     <Compile Include="Gameplay\_OLD_Rulesets\Templates\Wife3.fs" />
     <Compile Include="Gameplay\_OLD_Rulesets\Templates\Noodles.fs" />
-    <Compile Include="Gameplay\_OLD_Scoring\Events.fs" />
-    <Compile Include="Gameplay\_OLD_Scoring\HitMechanics.fs" />
-    <Compile Include="Gameplay\_OLD_Scoring\Scoring.fs" />
     <Compile Include="Gameplay\Performance.fs" />
     <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Gameplay\Skillsets.fs" />

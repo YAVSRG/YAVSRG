@@ -585,9 +585,3 @@ let frame_times =
 //        }
 
 //    beatmap_to_file osu_file result
-
-(* todo list
-
-bouncing stars
-
-*)

@@ -115,7 +115,7 @@ module ChartDatabase =
                             | otherwise -> otherwise
                     }
                 let chart = { chart with Header = header_with_assets_moved }
-                // todo: there should be an alterative to ChartMeta.FromImport that does the asset movement rather than the above hack
+                // todo: there should be an alternative to ChartMeta.FromImport that does the asset movement rather than the above hack
                 let chart_meta = (ChartMeta.FromImport now chart)
                 db.Cache.[chart_meta.Hash] <- chart_meta
                 yield chart_meta, chart.Chart
