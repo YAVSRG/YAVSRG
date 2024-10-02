@@ -95,7 +95,7 @@ module ScoreInfo =
 
             Rating = difficulty
             Patterns = patterns
-            Physical = 0.0 // todo: Performance.calculate difficulty with_mods.Keys scoring |> fst
+            Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
 
             ImportedFromOsu = score.IsImported
         }

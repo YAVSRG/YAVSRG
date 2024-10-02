@@ -26,8 +26,8 @@ module Performance =
 
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
 
-    let private performance_func b value deviation (delta: GameplayTime) =
-        DifficultyRating.stamina_func b (value * confidence_value deviation) delta
+    let private performance_func b value hit_delta (time_delta: GameplayTime) =
+        DifficultyRating.stamina_func b (value * confidence_value hit_delta) time_delta
 
     let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessor) =
         let last_times = Array.create keys 0.0f<ms>
@@ -38,7 +38,8 @@ module Performance =
 
         for ev in scoring.Events do
             match ev.Action with
-            | Hit e ->
+            | Hit e
+            | Hold e ->
 
                 let mutable p = 0.0
                 let mutable t = 0.0
