@@ -4,6 +4,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Replays
@@ -35,6 +36,8 @@ module ReplayScreen =
 
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
+
+        let replay_ended_fade = Animation.Fade 0.0f
 
         let mutable replay_data = replay_data
 
@@ -93,6 +96,11 @@ module ReplayScreen =
                     this.Playfield,
                     show_hit_overlay
                 )
+                |+ Text(
+                    %"replay.end_of_data",
+                    Color = (fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha),
+                    Position = Position.ShrinkB(100.0f).SliceB(60.0f)
+                )
                 |* ReplayControls(
                     with_colors.Source,
                     is_auto,
@@ -117,13 +125,14 @@ module ReplayScreen =
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
+                replay_ended_fade.Target <- if replay_data.Finished then 1.0f else 0.0f
+                replay_ended_fade.Update elapsed_ms
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE
 
-                if not replay_data.Finished then
-                    scoring.Update chart_time
+                scoring.Update chart_time
 
-                if replay_data.Finished then
+                if replay_data.Finished && now > chart.LastNote then
                     match mode with
                     | ReplayMode.Auto _ -> Screen.back Transitions.LeaveGameplay |> ignore
                     | ReplayMode.Replay(score_info, _) ->
