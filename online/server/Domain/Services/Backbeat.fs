@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude.Data
-open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server
@@ -14,7 +14,7 @@ module Backbeat =
     let rulesets = Dictionary<string, Ruleset>()
     do
         for judge = 3 to 6 do
-            let rs = Rulesets.SC.create judge
+            let rs = SC.create judge
             rulesets.[Ruleset.hash rs] <- rs
 
     let init () =

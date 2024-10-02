@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Web.Server.API.Tables
 
 open NetCoreServer
+open Prelude.Gameplay.Scoring
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
@@ -51,11 +52,7 @@ module Records =
                                     {
                                         Hash = chart
                                         Score = scores.[chart]
-                                        Grade =
-                                            (Prelude.Gameplay.Grade.calculate_with_target
-                                                ruleset.Grading.Grades
-                                                scores.[chart])
-                                                .Grade
+                                        Grade =Grade.calculate ruleset.Grades scores.[chart]
                                     }
                                     : Score
                                 )

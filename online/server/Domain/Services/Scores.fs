@@ -1,8 +1,10 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Scoring
 open Prelude.Gameplay.Mods
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
@@ -80,7 +82,7 @@ module Scores =
                 let ruleset = Backbeat.rulesets.[ruleset_id]
 
                 let scoring =
-                    ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
+                    ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes (rate * 1.0f<rate>)
 
                 let accuracy = scoring.Accuracy
 
@@ -98,8 +100,8 @@ module Scores =
                             mods,
                             is_ranked,
                             accuracy,
-                            Grade.calculate ruleset.Grading.Grades scoring.State,
-                            Lamp.calculate ruleset.Grading.Lamps scoring.State
+                            Grade.calculate ruleset.Grades scoring.Accuracy,
+                            Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                         )
 
                     let is_new_leaderboard_score =

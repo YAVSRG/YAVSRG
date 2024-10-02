@@ -3,7 +3,7 @@
 open NUnit.Framework
 
 open Percyqaz.Common
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 

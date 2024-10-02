@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Interlude.Web.Server
 
 type Replay =

@@ -3,7 +3,6 @@
 open System.IO
 open System.Collections.Generic
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open YAVSRG.CLI.Utils
@@ -12,8 +11,7 @@ module Rulesets =
 
     let RULESETS_PATH = Path.Combine(YAVSRG_PATH, "backbeat", "rulesets")
 
-    let DEFAULT_RULESETS =
-        [ "noodles", Noodles.RULESET ]
+    let DEFAULT_RULESETS = []
 
     let generate_index () =
         let data: RulesetRepo =
