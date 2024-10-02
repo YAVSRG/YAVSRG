@@ -45,6 +45,8 @@ type ScoreScreenStats =
     }
 
 module ScoreScreenStats =
+        
+    let GRAPH_POINT_COUNT = 1000
 
     let calculate (score_processor: ScoreProcessor) (column_filter: bool array) =
 
@@ -52,7 +54,6 @@ module ScoreScreenStats =
         let (++) (x: GameplayTime ref) (t: GameplayTime) = x.Value <- x.Value + t
 
         let filtered_judgements = Array.zeroCreate score_processor.Ruleset.Judgements.Length
-        let GRAPH_POINT_COUNT = 200
         let graph_points = ResizeArray<GraphPoint>()
 
         let taps = ref 0
@@ -191,7 +192,8 @@ module ScoreScreenStats =
             add_action ev
 
             let new_graph_points_needed =
-                if ev.Time >= score_processor.Duration then 
+                if score_processor.Events.Count <= GRAPH_POINT_COUNT then 1
+                elif ev.Time >= score_processor.Duration then 
                     0
                 else
                     (float32 GRAPH_POINT_COUNT * ev.Time) / score_processor.Duration
@@ -203,7 +205,7 @@ module ScoreScreenStats =
 
             add_graph_points ev.Time new_graph_points_needed
 
-        add_graph_points score_processor.Duration (GRAPH_POINT_COUNT - graph_points.Count)
+        add_graph_points score_processor.Duration 1
 
         let tap_mean = tap_sum.Value / float32 (max 1 taps.Value)
         let release_mean = release_sum.Value / float32 (max 1 releases.Value)
