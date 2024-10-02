@@ -17,7 +17,6 @@
     <Compile Include="Tests\OsuReplayGenerator.fs" />
     <Compile Include="Tests\Sail.fs" />
     <Compile Include="Tests\Trendy.fs" />
-    <Compile Include="Tests\Wife3.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

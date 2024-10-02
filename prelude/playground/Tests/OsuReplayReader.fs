@@ -9,7 +9,7 @@ open Prelude.Charts.Conversions
 open Prelude.Charts.Formats.osu
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
-open Prelude.Gameplay
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 

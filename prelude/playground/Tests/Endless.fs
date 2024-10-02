@@ -3,8 +3,10 @@
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
+open Prelude
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Endless
@@ -26,7 +28,7 @@ module Endless =
                 UserDatabase = user_db
                 Ruleset = sc_j4
                 RulesetId = sc_j4_id
-                Rate = 1.0f
+                Rate = 1.0f<rate>
             }
 
         let search = "icyworld sa'eed"
@@ -40,9 +42,9 @@ module Endless =
             {
                 Library = library
                 UserDatabase = user_db
-                BaseChart = start, 1.0f
-                MinimumRate = 1.0f
-                MaximumRate = 1.5f
+                BaseChart = start, 1.0f<rate>
+                MinimumRate = 1.0f<rate>
+                MaximumRate = 1.5f<rate>
                 OnlyNewCharts = false
                 Filter = Filter.Empty
                 Ruleset = sc_j4
@@ -61,6 +63,6 @@ module Endless =
                 printfn ""
                 match ChartDatabase.get_chart next.Chart.Hash library.Charts with
                 | Ok chart ->
-                    printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (DifficultyRating.calculate 1.0f chart.Notes |> _.Physical)
+                    printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (DifficultyRating.calculate 1.0f<rate> chart.Notes |> _.Physical)
                 | Error reason -> ()
         
