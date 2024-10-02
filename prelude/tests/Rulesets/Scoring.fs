@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Tests.Rulesets
 
+open System
 open NUnit.Framework
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -129,6 +130,232 @@ module Scoring =
         Assert.AreEqual(0, stepper.CurrentCombo)
         Assert.AreEqual(4, stepper.BestCombo)
         Assert.AreEqual(5, stepper.MaxPossibleCombo)
+
+    [<Test>]
+    let SCJ4_Note_ExpectedJudgements () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 0; 22.5f<ms>, 0; -22.5f<ms>, 0
+                22.6f<ms>, 1; -22.6f<ms>, 1; 45.0f<ms>, 1; -45.0f<ms>, 1
+                45.1f<ms>, 2; -45.1f<ms>, 2; 90.0f<ms>, 2; -90.0f<ms>, 2
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 5; -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Note(0.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownFor(offset, 1.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            Assert.AreEqual(1, event_processing.JudgementCounts.[expected_judgement])
+    
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_ExactRelease () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 0; 22.5f<ms>, 0; -22.5f<ms>, 0
+                22.6f<ms>, 1; -22.6f<ms>, 1; 45.0f<ms>, 1; -45.0f<ms>, 1
+                45.1f<ms>, 2; -45.1f<ms>, 2; 90.0f<ms>, 2; -90.0f<ms>, 2
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 4; 
+                -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 1000.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+            
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_LatestPossibleRelease () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 0; 22.5f<ms>, 0; -22.5f<ms>, 0
+                22.6f<ms>, 1; -22.6f<ms>, 1; 45.0f<ms>, 1; -45.0f<ms>, 1
+                45.1f<ms>, 2; -45.1f<ms>, 2; 90.0f<ms>, 2; -90.0f<ms>, 2
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 4;
+                -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 1180.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+            
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_EarliestPossibleRelease () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 0; 22.5f<ms>, 0; -22.5f<ms>, 0
+                22.6f<ms>, 1; -22.6f<ms>, 1; 45.0f<ms>, 1; -45.0f<ms>, 1
+                45.1f<ms>, 2; -45.1f<ms>, 2; 90.0f<ms>, 2; -90.0f<ms>, 2
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 4
+                -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 820.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_Dropped () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 3; 22.5f<ms>, 3; -22.5f<ms>, 3
+                22.6f<ms>, 3; -22.6f<ms>, 3; 45.0f<ms>, 3; -45.0f<ms>, 3
+                45.1f<ms>, 3; -45.1f<ms>, 3; 90.0f<ms>, 3; -90.0f<ms>, 3
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 5
+                -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 500.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_Regrabbed () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 3; 22.5f<ms>, 3; -22.5f<ms>, 3
+                22.6f<ms>, 3; -22.6f<ms>, 3; 45.0f<ms>, 3; -45.0f<ms>, 3
+                45.1f<ms>, 3; -45.1f<ms>, 3; 90.0f<ms>, 3; -90.0f<ms>, 3
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 4
+                -180.1f<ms>, 4
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 500.0f<ms>)
+                    .KeyDownUntil(501.0f<ms>, 1000.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_ExpectedJudgements_Overheld () =
+        let TEST_CASES =
+            [
+                0.0f<ms>, 3; 22.5f<ms>, 3; -22.5f<ms>, 3
+                22.6f<ms>, 3; -22.6f<ms>, 3; 45.0f<ms>, 3; -45.0f<ms>, 3
+                45.1f<ms>, 3; -45.1f<ms>, 3; 90.0f<ms>, 3; -90.0f<ms>, 3
+                90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
+                135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
+                180.1f<ms>, 5
+                -180.1f<ms>, 5
+            ]
+
+        for offset, expected_judgement in TEST_CASES do
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 1000.0f<ms>)
+                    .Build()
+
+            let replay = 
+                ReplayBuilder()
+                    .KeyDownUntil(offset, 1500.0f<ms>)
+                    .Build()
+                
+            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
+
+    [<Test>]
+    let SCJ4_HoldNote_CompletelyMissed () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .Build()
+                
+        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual([|0; 0; 0; 0; 0; 1|], event_processing.JudgementCounts)
 
     // todo: test all ln combinations for Interlude ruleset
     // todo: test all ln combinations for osu! ruleset

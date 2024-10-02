@@ -1260,3 +1260,93 @@ module Events =
             event_step_processing.Events,
             event_processing.Events
         )
+    
+    [<Test(Description = "Interlude's cbrush window mechanic means you can hit notes in reverse order. Documented so it isn't reported as a bug")>]
+    let SCJ4_BackwardsNotes () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(100.0f<ms>, 1.0f<ms>)
+                .KeyDownFor(102.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(0.0f<ms / rate>, false)
+                HIT(102.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+
+    [<Test(Description = "It is impossible to hit notes backwards in osu!mania (stable)")>]
+    let OsuOd8_NoBackwardsNotes () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(100.0f<ms>, 1.0f<ms>)
+                .KeyDownFor(102.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(100.0f<ms / rate>, false)
+                HIT(2.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+    
+    [<Test(Description = "Etterna uses nearest note, it is known that you can hit notes backwards")>]
+    let Wife3_BackwardsNotes () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(51.0f<ms>, 1.0f<ms>)
+                .KeyDownFor(53.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-49.0f<ms / rate>, false)
+                HIT(53.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )

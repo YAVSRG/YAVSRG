@@ -198,12 +198,10 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (_, _, judgement_if_dropped, judgement_if_overheld)) ->
             let head_judgement = ms_to_judgement head_delta
             let judgement =
-                if overheld && not dropped then
-                    max head_judgement judgement_if_overheld
-                elif missed || dropped then
-                    max head_judgement judgement_if_dropped
-                else
-                    head_judgement
+                if missed_head && missed then ruleset.DefaultJudgement
+                elif overheld && not dropped then max head_judgement judgement_if_overheld
+                elif dropped then max head_judgement judgement_if_dropped
+                else head_judgement
 
             let points = judgement_to_points head_delta judgement
 
