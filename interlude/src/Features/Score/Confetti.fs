@@ -14,6 +14,7 @@ type private Confetto =
         mutable YVel: float32
         Color: int
     }
+
 type Confetti () =
     inherit StaticWidget(NodeType.None)
 

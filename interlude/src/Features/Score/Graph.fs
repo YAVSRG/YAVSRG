@@ -136,12 +136,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Draw.rect line_rect Colors.white.O1
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
+        let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
 
         Text.fill_b (
             Style.font,
             sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) 727,// todo: info.Combo,
             text_b,
-            Colors.text,
+            text_color,
             Alignment.LEFT
         )
 
@@ -149,7 +150,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Style.font,
             info.Mean |> sprintf "M: %.2fms",
             text_b.Translate(0.0f, row_height),
-            Colors.text,
+            text_color,
             Alignment.LEFT
         )
 
@@ -157,7 +158,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Style.font,
             info.StandardDeviation |> sprintf "SD: %.2fms",
             text_b.Translate(0.0f, row_height * 2.0f),
-            Colors.text,
+            text_color,
             Alignment.LEFT
         )
 
@@ -165,7 +166,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Style.font,
             info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ",
             text_b.Translate(0.0f, row_height * 3.0f),
-            Colors.text,
+            text_color,
             Alignment.LEFT
         )
 
@@ -319,11 +320,14 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         for ev in events do
             let dot : (float32 * Color) voption =
                 match ev.Action with
-                | Hit evData ->
+                | Hit evData
+                | Hold evData ->
 
                     match evData.Judgement with
                     | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - System.Math.Clamp(h * evData.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
+                        let y = 
+                            if evData.Missed then THICKNESS
+                            else h - System.Math.Clamp(h * evData.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor judgement)
 
                     | _ -> ValueNone
@@ -332,7 +336,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     match evData.Judgement with
                     | Some (judgement, _) when GraphSettings.column_filter.[ev.Column] ->
-                        let y = h - System.Math.Clamp(evData.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
+                        // todo: figure something out about half-scale releases
+                        let y = 
+                            if evData.Missed then THICKNESS
+                            else h - System.Math.Clamp(evData.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
 
                     | _ -> ValueNone
