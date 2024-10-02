@@ -152,7 +152,7 @@ module ScoreScreenStats =
             | RegrabHold -> ()
 
         let add_graph_points (chart_time: ChartTime) (new_graph_points_needed: int) =
-            let last_point_timestamp = if graph_points.Count > 0 then graph_points.[0].Time else 0.0f<ms>
+            let last_point_timestamp = if graph_points.Count > 0 then graph_points.[graph_points.Count - 1].Time else 0.0f<ms>
 
             let mean = tap_sum.Value / float32 (max 1 taps.Value)
             let standard_deviation =
