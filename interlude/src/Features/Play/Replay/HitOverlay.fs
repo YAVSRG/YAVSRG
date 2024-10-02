@@ -133,7 +133,7 @@ type private HitOverlay
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
     
-    let draw_event (now: ChartTime) (ev: GameplayEvent<GameplayAction>) =
+    let draw_event (now: ChartTime) (ev: GameplayEvent) =
         let ms_to_y (time: Time) =
             float32 options.HitPosition.Value
             + (time - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)

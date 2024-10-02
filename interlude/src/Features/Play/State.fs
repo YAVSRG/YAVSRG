@@ -38,7 +38,7 @@ type PlayState =
         }
 
     // todo: rename to SubscribeEvents
-    member this.SubscribeToHits(handler: GameplayEvent<GameplayAction> -> unit) =
+    member this.SubscribeToHits(handler: GameplayEvent -> unit) =
         let mutable obj: IDisposable = this.Scoring.OnEvent.Subscribe handler
 
         this.ScoringChanged.Publish.Add(fun () ->

@@ -114,7 +114,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
                 v
             )
 
-    let handle_event (ev: GameplayEvent<GameplayAction>) =
+    let handle_event (ev: GameplayEvent) =
         match ev.Action with
         | Hold e when not e.Missed ->
             hold_colors.[ev.Column] <-
@@ -141,23 +141,20 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
 
             add_release_explosion (ev.Column, color)
             holding.[ev.Column] <- false
+
+        | DropHold ->
+            let color =
+                match ns.HoldExplosionSettings.Colors with
+                | ExplosionColors.Note -> hold_colors.[ev.Column]
+                | ExplosionColors.Judgements -> -1
+
+            add_release_explosion (ev.Column, color)
+            holding.[ev.Column] <- false
+
         | _ -> ()
 
     do
         state.SubscribeToHits handle_event
-
-    override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-
-        for k = 0 to (keys - 1) do
-            if holding.[k] && state.Scoring.KeyState |> Bitmask.has_key k |> not then
-                let color =
-                    match ns.HoldExplosionSettings.Colors with
-                    | ExplosionColors.Note -> hold_colors.[k]
-                    | ExplosionColors.Judgements -> -1
-
-                add_release_explosion (k, color)
-                holding.[k] <- false
 
     override this.Draw() =
         let now = state.CurrentChartTime()

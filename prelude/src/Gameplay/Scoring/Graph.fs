@@ -79,6 +79,7 @@ module ScoreScreenStats =
         let ghost_taps = ref 0
 
         let mutable combo = 0
+        let mutable combo_breaks = 0
         let mutable max_points = 0.0
         let mutable scored_points = 0.0
 
@@ -156,7 +157,7 @@ module ScoreScreenStats =
             match ev.Combo with
             | NoChange -> ()
             | Increase -> combo <- combo + 1
-            | Break _ -> combo <- 0
+            | Break _ -> combo <- 0; combo_breaks <- combo_breaks + 1
 
         let add_graph_points (chart_time: ChartTime) (new_graph_points_needed: int) =
             let last_point_timestamp = if graph_points.Count > 0 then graph_points.[graph_points.Count - 1].Time else 0.0f<ms>
@@ -169,7 +170,7 @@ module ScoreScreenStats =
                     |> float32
                 )
                 * 1.0f<ms / rate>
-            let lamp = Lamp.calculate score_processor.Ruleset.Lamps score_processor.JudgementCounts score_processor.ComboBreaks
+            let lamp = Lamp.calculate score_processor.Ruleset.Lamps filtered_judgements combo_breaks
 
             for i = 1 to new_graph_points_needed do
                 let this_point_timestamp = 

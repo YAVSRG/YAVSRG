@@ -140,7 +140,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) 727,// todo: info.Combo,
+            sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) info.Combo,
             text_b,
             text_color,
             Alignment.LEFT
@@ -263,7 +263,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         match options.ScoreGraphLineMode.Value with
         | ScoreGraphLineMode.Combo when stats.Value.GraphPoints.Length > 0 ->
 
-            let y_func (snapshot: GraphPoint) = 0.6f// todo: float32 snapshot.Combo / float32 score_info.Scoring.State.BestCombo
+            let y_func (snapshot: GraphPoint) = float32 snapshot.Combo / float32 score_info.Scoring.BestCombo
             this.PlotLine(y_func, line_color)
         
         | ScoreGraphLineMode.Mean when stats.Value.GraphPoints.Length > 0 ->
