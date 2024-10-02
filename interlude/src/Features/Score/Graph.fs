@@ -101,7 +101,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     let duration = (score_info.WithMods.LastNote - score_info.WithMods.FirstNote) / score_info.Rate |> format_duration_ms
 
-    let MAX_WINDOW = score_info.Ruleset.LargestWindow
+    let mutable MAX_WINDOW = score_info.Ruleset.LargestWindow
 
     do fbo.Unbind()
 
@@ -354,6 +354,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     member private this.Redraw() =
         refresh <- false
+        MAX_WINDOW <- score_info.Ruleset.LargestWindow
         let h = 0.5f * this.Bounds.Height
         fbo.Bind true
 
