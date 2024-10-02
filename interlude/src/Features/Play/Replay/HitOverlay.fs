@@ -46,124 +46,182 @@ type private HitOverlay
                     }
 
     let MAX_WINDOW = state.Ruleset.LargestWindow
+    let GHOST_TAP_ANNOTATION = %"replay.ghost_tap"
+    let DROP_HOLD_ANNOTATION = %"replay.drop_hold"
+    let REGRAB_HOLD_ANNOTATION = %"replay.regrab_hold"
+
+    let draw_delta (column: int) (action_y: float32) (note_y: float32) (color: Color) =
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                note_y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                note_y
+            )
+            .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Draw.rect a Colors.grey_2.O2
+
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                action_y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                note_y
+            )
+            .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Draw.rect a color
+
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                action_y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                action_y
+            )
+            .Shrink(20.0f, -2.5f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Draw.rect a color
+
+    let label_before (column: int) (y: float32) (text: string) (color: Color) =
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                y
+            )
+            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentT(0.45f).ShrinkPercentT(0.5f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+
+    let label_after (column: int) (y: float32) (text: string) (color: Color) =
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                y
+            )
+            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).SlicePercentB(0.45f).ShrinkPercentB(0.5f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
+
+    let draw_icon (column: int) (y: float32) (icon: string) (color: Color) =
+        Rect
+            .Create(
+                playfield.Bounds.Left + playfield.ColumnPositions.[column],
+                y,
+                playfield.Bounds.Left
+                + playfield.ColumnPositions.[column]
+                + playfield.ColumnWidth,
+                y
+            )
+            .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).ShrinkPercent(0.15f)
+        |> scroll_direction_pos playfield.Bounds.Bottom
+        |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
+    
+    let draw_event (now: ChartTime) (ev: GameplayEvent<GameplayAction>) =
+        let ms_to_y (time: Time) =
+            float32 options.HitPosition.Value
+            + (time - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+            + playfield.ColumnWidth * 0.5f
+
+        match ev.Action with
+
+        | Hit x
+        | Hold x ->
+            let color =
+                match x.Judgement with
+                | None -> Colors.grey_1.O2
+                | Some (i, _) -> state.Ruleset.JudgementColor i
+
+            let note_y = ms_to_y (ev.Time - x.Delta * SelectedChart.rate.Value)
+
+            if x.Missed then
+                draw_icon ev.Column note_y Icons.X color
+            else
+                let action_y = ms_to_y ev.Time
+                draw_delta ev.Column action_y note_y color
+
+                if x.Delta < 0.0f<ms / rate> then 
+                    label_before ev.Column action_y (sprintf "%.1fms" x.Delta) color
+                else 
+                    label_after ev.Column action_y (sprintf "+%.1fms" x.Delta) color
+
+        | Release x ->
+            let color =
+                match x.Judgement with
+                | None -> Colors.grey_1.O2
+                | Some (i, _) -> state.Ruleset.JudgementColor i
+
+            let note_y = ms_to_y (ev.Time - x.Delta * SelectedChart.rate.Value)
+
+            if x.Missed then
+                draw_icon ev.Column note_y Icons.X color
+            else
+                let action_y = ms_to_y ev.Time
+                draw_delta ev.Column action_y note_y color
+
+                if x.Delta < 0.0f<ms / rate> then 
+                    label_before ev.Column action_y (sprintf "%s  %.1fms" Icons.CHEVRON_UP x.Delta) color
+                else 
+                    label_after ev.Column action_y (sprintf "%s  +%.1fms" Icons.CHEVRON_UP x.Delta) color
+
+        | DropHold ->
+            let color = Colors.red_accent.O2
+            let action_y = ms_to_y ev.Time
+
+            draw_delta ev.Column action_y action_y color
+            label_after ev.Column action_y (sprintf "%s  %s" Icons.CHEVRONS_UP DROP_HOLD_ANNOTATION) color
+
+        | RegrabHold ->
+            let color = Colors.red_accent.O2
+            let action_y = ms_to_y ev.Time
+
+            draw_delta ev.Column action_y action_y color
+            label_after ev.Column action_y (sprintf "%s  %s" Icons.CHEVRONS_DOWN REGRAB_HOLD_ANNOTATION) color
+
+        | GhostTap ->
+            let color = Colors.red_accent.O2
+            let action_y = ms_to_y ev.Time
+
+            draw_delta ev.Column action_y action_y color
+            label_after ev.Column action_y (sprintf "%s  %s" Icons.ARROW_DOWN GHOST_TAP_ANNOTATION) color
 
     override this.Init(parent) =
         state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
         base.Init parent
 
     override this.Draw() =
+        if not enable.Value then () else
 
-        if not enable.Value then
-            ()
-        else
-            let draw_event (now: ChartTime) (ev: GameplayEvent<GameplayAction>) =
-                let y t =
-                    float32 options.HitPosition.Value
-                    + (t - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
-                    + playfield.ColumnWidth * 0.5f
+        let now =
+            state.CurrentChartTime()
+            + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
+            + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
 
-                // todo: properly match on all events
+        while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
+            seek <- seek + 1
 
-                let delta =
-                    match ev.Action with
-                    | Hit x -> x.Delta
-                    | Hold x -> x.Delta
-                    | Release x -> x.Delta
-                    | _ -> 0.0f<ms / rate>
+        let until_time =
+            now
+            + (1080.0f<ms / rate> + MAX_WINDOW)
+                / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
-                let is_miss =
-                    match ev.Action with
-                    | Hit x -> x.Missed
-                    | Hold x -> x.Missed
-                    | Release x -> x.Missed
-                    | _ -> false
+        let mutable peek = seek
 
-                let color =
-                    match ev.Action with
-                    | Hit x ->
-                        match x.Judgement with
-                        | None -> Colors.grey_1.O2
-                        | Some (i, _) -> state.Ruleset.JudgementColor i
-                    | Hold x ->
-                        match x.Judgement with
-                        | None -> Colors.grey_1.O2
-                        | Some (i, _) -> state.Ruleset.JudgementColor i
-                    | Release x ->
-                        match x.Judgement with
-                        | None -> Colors.grey_1.O2
-                        | Some (i, _) -> state.Ruleset.JudgementColor i
-                    | DropHold -> Colors.pink
-                    | RegrabHold -> Colors.blue
-                    | GhostTap -> Colors.green
-
-                if is_miss then
-                    Rect
-                        .Create(
-                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                            y (ev.Time - delta * SelectedChart.rate.Value),
-                            playfield.Bounds.Left
-                            + playfield.ColumnPositions.[ev.Column]
-                            + playfield.ColumnWidth,
-                            y (ev.Time - delta * SelectedChart.rate.Value)
-                        )
-                        .Shrink(0.0f, -playfield.ColumnWidth * 0.5f)
-                    |> scroll_direction_pos playfield.Bounds.Bottom
-                    |> fun a -> Text.fill_b (Style.font, Icons.X, a, (color, Colors.black), 0.5f)
-                else
-                    Rect
-                        .Create(
-                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                            y (ev.Time - delta * SelectedChart.rate.Value),
-                            playfield.Bounds.Left
-                            + playfield.ColumnPositions.[ev.Column]
-                            + playfield.ColumnWidth,
-                            y (ev.Time - delta * SelectedChart.rate.Value)
-                        )
-                        .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
-                    |> scroll_direction_pos playfield.Bounds.Bottom
-                    |> fun a -> Draw.rect a Colors.grey_2.O2
-
-                    Rect
-                        .Create(
-                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                            y ev.Time,
-                            playfield.Bounds.Left
-                            + playfield.ColumnPositions.[ev.Column]
-                            + playfield.ColumnWidth,
-                            y (ev.Time - delta * SelectedChart.rate.Value)
-                        )
-                        .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
-                    |> scroll_direction_pos playfield.Bounds.Bottom
-                    |> fun a -> Draw.rect a color
-
-                    Rect
-                        .Create(
-                            playfield.Bounds.Left + playfield.ColumnPositions.[ev.Column],
-                            y ev.Time,
-                            playfield.Bounds.Left
-                            + playfield.ColumnPositions.[ev.Column]
-                            + playfield.ColumnWidth,
-                            y ev.Time
-                        )
-                        .Shrink(20.0f, -2.5f)
-                    |> scroll_direction_pos playfield.Bounds.Bottom
-                    |> fun a -> Draw.rect a color
-
-            let now =
-                state.CurrentChartTime()
-                + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-                + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
-
-            while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
-                seek <- seek + 1
-
-            let until_time =
-                now
-                + (1080.0f<ms / rate> + MAX_WINDOW)
-                  / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
-
-            let mutable peek = seek
-
-            while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
-                draw_event now hit_events.[peek]
-                peek <- peek + 1
+        while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
+            draw_event now hit_events.[peek]
+            peek <- peek + 1
