@@ -10,24 +10,6 @@ open Prelude.Charts.Processing
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type private ReplayModeSettingsPage() =
-    inherit Page()
-
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"replay.input_overlay", Checkbox show_input_overlay).Pos(0)
-        |+ PageSetting(%"replay.hit_overlay", Checkbox show_hit_overlay).Pos(2)
-        |+ PageSetting(%"replay.hit_overlay_labels", Checkbox show_hit_overlay_labels)
-            .Conditional(show_hit_overlay.Get)
-            .Pos(4)
-        |+ PageSetting(%"replay.playfield_dim", Slider.Percent playfield_dim)
-            .Conditional(fun () -> show_input_overlay.Value || show_hit_overlay.Value)
-            .Pos(6)
-        :> Widget
-
-    override this.Title = sprintf "%s %s" Icons.SETTINGS (%"replay.settings")
-    override this.OnClose() = ()
-
 type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, on_seek: Time -> unit) =
     inherit Container(NodeType.None)
 
@@ -36,13 +18,25 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
     let mutable show_cooldown = 0.0
     
     let playback_speed = 
-        Setting.bounded rate 0.25f<rate> 3.0f<rate>
-        |> Setting.trigger (fun r -> 
-            Song.change_rate (float32 r)
-            fade.Target <- 1.0f
-            Toolbar.show_cursor ()
-            auto_hide_timer <- 1500.0
-        )
+        let setting = Setting.bounded rate 0.25f<rate> 3.0f<rate>
+        { setting with
+            Set = fun v ->
+
+                if fixed_scroll_speed.Value then
+                    SelectedChart.rate.Set v
+                    setting.Set SelectedChart.rate.Value
+                else
+                    SelectedChart.rate.Set rate
+                    Song.change_rate (float32 v)
+                    setting.Set v
+
+                fade.Target <- 1.0f
+                Toolbar.show_cursor ()
+                auto_hide_timer <- 1500.0
+        }
+
+    let refresh_playback_speed () =
+        playback_speed.Set playback_speed.Value
 
     override this.Init(parent) =
         this
@@ -53,10 +47,10 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
         )
         |+ PageButton(
             sprintf "%s %s" Icons.SETTINGS (%"replay.settings"), 
-            (fun () -> ReplayModeSettingsPage().Show()),
+            (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show()),
             Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
-        |+ HotkeyAction("options", (fun () -> ReplayModeSettingsPage().Show()))
+        |+ HotkeyAction("options", (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show()))
         |+ Text(
             sprintf "%s: %O" (%"replay.hide_overlay") (%%"hide_replay_overlay"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
