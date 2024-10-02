@@ -168,9 +168,18 @@ module Interlude_To_Osu =
 
 module Exports =
 
-    let create_osz (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<Beatmap * string, exn> =
+    let create_osz (chart: Chart) (chart_meta: ChartMeta) (od: float32) (export_folder: string) : Result<Beatmap * string, exn> =
         try
             let beatmap = Interlude_To_Osu.convert chart chart_meta
+
+            let beatmap =
+                { beatmap with
+                     Difficulty = 
+                        { beatmap.Difficulty with
+                            OverallDifficulty = float od
+                        }
+                }
+
             let file_name = beatmap.Filename
             let archive_file_name = beatmap.Filename.Replace(".osu", ".osz")
             let archive_path = Path.Combine(export_folder, archive_file_name)

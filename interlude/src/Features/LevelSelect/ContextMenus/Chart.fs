@@ -171,7 +171,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                     match SelectedChart.CHART with
                     | None -> ()
                     | Some c ->
-                        match Exports.create_osz c cc (get_game_folder "Exports") with
+                        match Exports.create_osz c cc 8.0f (get_game_folder "Exports") with
                         | Ok _ ->
                             open_directory (get_game_folder "Exports")
                             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
@@ -199,7 +199,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                                 { Keys = m.Keys; Notes = m.Notes; SV = m.SV; BPM = m.BPM }
                             let meta_with_mods =
                                 { cc with DifficultyName = cc.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
-                            match Exports.create_osz chart_with_mods meta_with_mods (get_game_folder "Exports") with
+                            match Exports.create_osz chart_with_mods meta_with_mods 8.0f (get_game_folder "Exports") with
                             | Ok _ ->
                                 open_directory (get_game_folder "Exports")
                                 Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")

@@ -47,7 +47,7 @@ module BulkActions =
                     for cc, _ in charts do
                         match ChartDatabase.get_chart cc.Hash Content.Library.Charts with
                         | Ok chart ->
-                            match Exports.create_osz chart cc export_path with
+                            match Exports.create_osz chart cc 8.0f export_path with
                             | Ok _ ->
                                 ok <- ok + 1
                             | Error err ->

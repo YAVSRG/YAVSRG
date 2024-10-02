@@ -8,13 +8,14 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Formats.osu
 open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
 open Prelude.Tests.Rulesets
 
 let mutable recent_beatmap_hash = ""
 
-let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (mods: Mods) =
+let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: float32) (mods: Mods) =
 
     let chart : Chart = 
         {
@@ -52,7 +53,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (mods: Mo
             Patterns = Unchecked.defaultof<_>
         }
 
-    match Exports.create_osz chart chart_meta "." with
+    match Exports.create_osz chart chart_meta od "." with
     | Error exn -> failwithf "Couldn't export .osz: %s" exn.Message
     | Ok (beatmap, file_name) ->
 
@@ -122,23 +123,31 @@ let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    for offset in [24.0f<ms>; 25.0f<ms>; 60.0f<ms>; 61.0f<ms>; 109.0f<ms>; 110.0f<ms>; 111.0f<ms>; 153.0f<ms>; 154.0f<ms>; 155.0f<ms>] do
+    let od = 8.0f
 
-        let notes = 
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
-                .Note(1000.0f<ms>)
-                .Build()
+    let window_on_dt (w: float32<ms/rate>) = floor(floor (float32 w) * 1.5f) * 1.0f<ms> + 0.5f<ms>
 
-        let replay =
-            ReplayBuilder()
-                .KeyDownFor(0.0f<ms> + offset, 30.0f<ms>)
-                .KeyDownFor(1000.0f<ms> - offset, 30.0f<ms>)
-                .Build()
-                .GetFullReplay()
+    let target_window = window_on_dt (OsuMania.ok_window od)
 
-        Logging.Info(sprintf "Experiment: DT windows experiment (%.0fms)" offset)
+    let notes = 
+        ChartBuilder(4)
+            .Note(0.0f<ms>)
+            .Note(1000.0f<ms>)
+            .Note(2000.0f<ms>)
+            .Note(3000.0f<ms>)
+            .Build()
 
-        generate_scenario notes replay Mods.DoubleTime
-        Console.ReadKey() |> ignore
-        collect_results () |> Async.RunSynchronously
+    let replay =
+        ReplayBuilder()
+            .KeyDownFor(0.0f<ms>    - (target_window - 1.5f<ms>), 30.0f<ms>)
+            .KeyDownFor(1000.0f<ms> - (target_window - 0.5f<ms>), 30.0f<ms>)
+            .KeyDownFor(2000.0f<ms> - (target_window + 0.5f<ms>), 30.0f<ms>)
+            .KeyDownFor(3000.0f<ms> - (target_window + 1.5f<ms>), 30.0f<ms>)
+            .Build()
+            .GetFullReplay()
+
+    Logging.Info(sprintf "Experiment: DT early windows experiment: OD%.1f, %.1fms" od target_window)
+
+    generate_scenario notes replay od Mods.DoubleTime
+    Console.ReadKey() |> ignore
+    collect_results () |> Async.RunSynchronously
