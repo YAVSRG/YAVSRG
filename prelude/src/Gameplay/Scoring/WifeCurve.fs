@@ -50,5 +50,3 @@ module Wife3Curve =
             (delta - zero) * miss_weight / (boo_window - zero)
         else
             miss_weight
-
-        // todo: check end-of-window-by-convention correctly gives miss weight

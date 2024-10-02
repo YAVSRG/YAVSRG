@@ -357,7 +357,40 @@ module Scoring =
 
         Assert.AreEqual([|0; 0; 0; 0; 0; 1|], event_processing.JudgementCounts)
 
-    // todo: test all ln combinations for Interlude ruleset
-    // todo: test all ln combinations for osu! ruleset
-    // todo: test all ln combinations for osu! score v2 ruleset
-    // todo: test simple ln combinations for Etterna ruleset
+    [<Test>]
+    let WifeCurve_J4_Monotonic () =
+        let wife_points =
+            seq {
+                for i = 0 to 200 do
+                    let offset = float32 i * 1.0f<ms / rate>
+                    let result = Wife3Curve.calculate 4 offset
+
+                    printfn "%.0fms -> %.5f" offset result
+
+                    yield result
+            }
+            |> Array.ofSeq
+
+        Assert.AreEqual(wife_points, Array.sortDescending wife_points)
+
+    [<Test>]
+    let WifeCurve_AllJudges_Monotonic () =
+        for judge = 4 to 9 do
+
+            let wife_points =
+                seq {
+                    for i = 0 to 200 do
+                        let offset = float32 i * 1.0f<ms / rate>
+                        let result = Wife3Curve.calculate judge offset
+
+                        yield result
+                }
+                |> Array.ofSeq
+
+            Assert.AreEqual(wife_points, Array.sortDescending wife_points)
+    
+    [<Test>]
+    let WifeCurve_Symmetrical () =
+        for judge = 4 to 9 do
+            let offset = 31.415f<ms / rate>
+            Assert.AreEqual(Wife3Curve.calculate judge offset, Wife3Curve.calculate judge -offset)
