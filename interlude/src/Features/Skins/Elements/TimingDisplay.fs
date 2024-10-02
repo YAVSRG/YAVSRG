@@ -114,22 +114,27 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
             hits.RemoveAt(0)
 
     member this.DrawWindows(opacity: int) =
-        () // todo:
-        //let centre = this.Bounds.CenterX
+        let centre = this.Bounds.CenterX
 
-        //let ms_to_x =
-        //    let w = this.Bounds.Width * 0.5f
-        //    fun time -> centre + time / MAX_WINDOW * w
+        let ms_to_x =
+            let w = this.Bounds.Width * 0.5f
+            fun time -> centre + time / MAX_WINDOW * w
 
-        //let mutable time = -MAX_WINDOW
-        //for (time2, j) in state.Scoring.Ruleset.Accuracy.Timegates do
-        //    Draw.rect 
-        //        (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom))
-        //        (state.Scoring.Ruleset.JudgementColor(j).O4a opacity)
-        //    time <- time2
-        //Draw.rect 
-        //    (Rect.Create(ms_to_x time, this.Bounds.Top, ms_to_x MAX_WINDOW, this.Bounds.Bottom))
-        //    (state.Scoring.Ruleset.JudgementColor(state.Scoring.Ruleset.Judgements.Length - 1).O4a opacity)
+        let mutable previous_early = 0.0f<ms / rate>
+        let mutable previous_late = 0.0f<ms / rate>
+
+        for j in state.Scoring.Ruleset.Judgements do
+            match j.TimingWindows with
+            | Some (early, late) ->
+                Draw.rect 
+                    (Rect.Create(ms_to_x early, this.Bounds.Top, ms_to_x previous_early, this.Bounds.Bottom))
+                    (j.Color.O4a opacity)
+                previous_early <- early
+                Draw.rect 
+                    (Rect.Create(ms_to_x previous_late, this.Bounds.Top, ms_to_x late, this.Bounds.Bottom))
+                    (j.Color.O4a opacity)
+                previous_late <- late
+            | None -> ()
 
     override this.Draw() =
         if window_opacity > 0 then
