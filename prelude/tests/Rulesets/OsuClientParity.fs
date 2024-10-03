@@ -308,3 +308,90 @@ module OsuClientParity =
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
         Assert.AreEqual(EXPECTED_DATA, event_deltas)
+
+    [<Test>]
+    let OsuRuleset_EarlyMissWindowBehaviour () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Note(2000.0f<ms>)
+                .Note(3000.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms> - 166.0f<ms>, 30.0f<ms>) // this hit is too early to register on the note
+                .KeyDownFor(0.0f<ms>, 30.0f<ms>)
+
+                .KeyDownFor(1000.0f<ms> - 165.0f<ms>, 30.0f<ms>) // so is this one
+                .KeyDownFor(1000.0f<ms>, 30.0f<ms>)
+
+                .KeyDownFor(2000.0f<ms> - 164.0f<ms>, 30.0f<ms>) // 164 is the exact border where it hits and so the perfect hit is ignored
+                .KeyDownFor(2000.0f<ms>, 30.0f<ms>)
+
+                .KeyDownFor(3000.0f<ms> - 163.0f<ms>, 30.0f<ms>) // 1ms inside border
+                .KeyDownFor(3000.0f<ms>, 30.0f<ms>)
+                .Build()
+        
+        let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+        
+        Assert.AreEqual(
+            [
+                HIT(0.0f<ms / rate>, false)
+
+                GHOST_TAP
+                HIT(0.0f<ms / rate>, false)
+
+                HIT(-164.0f<ms / rate>, false)
+                GHOST_TAP
+
+                HIT(-163.0f<ms / rate>, false)
+                GHOST_TAP
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test(Description = "Documents a possible bug (or intentional behaviour) of osu!stable on the very edge of the late window")>]
+    let OsuRuleset_LateOkWindowBehaviour () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Note(2000.0f<ms>)
+                .Note(3000.0f<ms>)
+                .Build()
+
+        // end of 100 window is allegedly 103 according to wiki but check this out:
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms> + 105.0f<ms>, 30.0f<ms>) // this hit is too late to register on the note
+
+                .KeyDownFor(1000.0f<ms> + 104.0f<ms>, 30.0f<ms>) // so is this one
+
+                .KeyDownFor(2000.0f<ms> + 103.0f<ms>, 30.0f<ms>) // according to osu! wiki this should hit, but it doesn't, I have checked
+
+                .KeyDownFor(3000.0f<ms> + 102.0f<ms>, 30.0f<ms>) // 1ms inside border, but actually this is the latest ms you can hit the note
+                .Build()
+
+        let ruleset = OsuMania.create 8.0f OsuMania.NoMod
+        
+        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        let LATE_WINDOW_ON_MISS = snd ruleset.NoteWindows
+        
+        Assert.AreEqual(
+            [
+                HIT(LATE_WINDOW_ON_MISS, true)
+
+                HIT(LATE_WINDOW_ON_MISS, true)
+
+                HIT(LATE_WINDOW_ON_MISS, true) // a +103ms hit still misses the note!
+
+                HIT(102.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
+        )
