@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Gameplay.Rulesets
 
+open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Rulesets
 
@@ -13,17 +14,23 @@ module OsuMania =
     // e.g. on OD0, an exactly +64ms hit IS inside the great window and gives you a yellow 300
 
     let perfect_window (_: float32) : GameplayTime = 16.5f<ms / rate>
-    let great_window (od: float32) : GameplayTime = floor (64.0f - 3.0f * od) * 1.0f<ms / rate> + 0.5f<ms / rate>
-    let good_window (od: float32) : GameplayTime = floor (97.0f - 3.0f * od) * 1.0f<ms / rate> + 0.5f<ms / rate>
-    let ok_window (od: float32) : GameplayTime = floor (127.0f - 3.0f * od) * 1.0f<ms / rate> + 0.5f<ms / rate>
-    let meh_window (od: float32) : GameplayTime = floor (151.0f - 3.0f * od) * 1.0f<ms / rate> + 0.5f<ms / rate>
-    let miss_window (od: float32) : GameplayTime = floor (188.0f - 3.0f * od) * 1.0f<ms / rate> + 0.5f<ms / rate>
+    let great_window (od: float32) : GameplayTime = floor_uom (64.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
+    let good_window (od: float32) : GameplayTime = floor_uom (97.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
+    let ok_window (od: float32) : GameplayTime = floor_uom (127.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
+    let meh_window (od: float32) : GameplayTime = floor_uom (151.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
+    let miss_window (od: float32) : GameplayTime = floor_uom (188.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
 
     let to_hard_rock_window (window: GameplayTime) =
-        floor (5f / 7f<ms / rate> * window) * 1.0f<ms / rate> + 0.5f<ms / rate>
+        floor_uom (5f / 7f * floor_uom window) + 0.5f<ms / rate>
 
     let to_easy_window (window: GameplayTime) =
-        floor (7f / 5f<ms / rate> * window) * 1.0f<ms / rate> + 0.5f<ms / rate>
+        floor_uom (7f / 5f * floor_uom window) + 0.5f<ms / rate>
+
+    let to_dt_window (window: GameplayTime) =
+        (floor_uom (1.5f * floor_uom window) + 0.5f<ms / rate>) / 1.5f
+
+    let to_ht_window (window: GameplayTime) =
+        (floor_uom (0.75f * floor_uom window) + 0.5f<ms / rate>) / 0.75f
 
     type Mode =
         | Easy
