@@ -27,10 +27,25 @@ module OsuMania =
         floor_uom (7f / 5f * floor_uom window) + 0.5f<ms / rate>
 
     let to_dt_window (window: GameplayTime) =
-        (floor_uom (1.5f * floor_uom window) + 0.5f<ms / rate>) / 1.5f
+        floor_uom (1.5f<rate> * floor_uom window) + 0.5f<ms>
 
     let to_ht_window (window: GameplayTime) =
-        (floor_uom (0.75f * floor_uom window) + 0.5f<ms / rate>) / 0.75f
+        floor_uom (0.75f<rate> * floor_uom window) + 0.5f<ms>
+
+    let to_perfect_ln_head_window (window: GameplayTime) =
+        floor_uom (1.2f * floor_uom window) + 0.5f<ms / rate>
+
+    let to_great_ln_head_window (window: GameplayTime) =
+        floor_uom (1.1f * floor_uom window) + 0.5f<ms / rate>
+
+    let to_perfect_ln_combined_window (window: GameplayTime) =
+        floor_uom (2.4f * floor_uom window) + 0.5f<ms / rate>
+
+    let to_great_ln_combined_window (window: GameplayTime) =
+        floor_uom (2.2f * floor_uom window) + 0.5f<ms / rate>
+
+    let to_ln_combined_window (window: GameplayTime) =
+        floor_uom (2.2f * floor_uom window) + 0.5f<ms / rate>
 
     type Mode =
         | Easy

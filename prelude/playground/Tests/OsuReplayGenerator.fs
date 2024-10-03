@@ -10,6 +10,7 @@ open Prelude.Charts.Formats.osu
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.OsuClientInterop
+open Prelude.Data
 open Prelude.Data.Library
 open Prelude.Tests.Rulesets
 
@@ -112,42 +113,48 @@ type GosuMemoryData =
 
 let collect_results () =
     async {
-        match! Prelude.Data.WebServices.download_json_async<GosuMemoryData> "http://localhost:24050/json" with
-        | Data.WebResult.Ok d ->
+        match! WebServices.download_json_async<GosuMemoryData> "http://localhost:24050/json" with
+        | WebResult.Ok d ->
             Logging.Info(sprintf "Experiment results:\n%O" d)
-        | Data.WebResult.HttpError c -> printfn "Error getting GosuMemory data or it isn't running (HTTP ERROR %i)" c
-        | Data.WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
+        | WebResult.HttpError c -> printfn "Error getting GosuMemory data or it isn't running (HTTP ERROR %i)" c
+        | WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
     }
+
+let HANDS_FREE_AUTOMATION = true
 
 let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    let od = 8.0f
+    for od in [0.8f; 6.4f; 9.2f; 3.6f; 8.0f] do
 
-    let window_on_dt (w: float32<ms/rate>) = floor(floor (float32 w) * 1.5f) * 1.0f<ms> + 0.5f<ms>
+        let window_raw = (64.0f<ms / rate> - 3.0f<ms / rate> * od) * 0.75f<rate> / 1.4f
+        let window = if round (float32 window_raw) = float32 window_raw && int window_raw % 2 = 0 then window_raw - 1.0f<ms> else floor_uom window_raw
 
-    let target_window = window_on_dt (OsuMania.ok_window od)
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
 
-    let notes = 
-        ChartBuilder(4)
-            .Note(0.0f<ms>)
-            .Note(1000.0f<ms>)
-            .Note(2000.0f<ms>)
-            .Note(3000.0f<ms>)
-            .Build()
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms> + window, 30.0f<ms>)
+                .KeyDownFor(1000.0f<ms> + window + 1.0f<ms>, 30.0f<ms>)
+                .Build()
+                .GetFullReplay()
 
-    let replay =
-        ReplayBuilder()
-            .KeyDownFor(0.0f<ms>    - (target_window - 1.5f<ms>), 30.0f<ms>)
-            .KeyDownFor(1000.0f<ms> - (target_window - 0.5f<ms>), 30.0f<ms>)
-            .KeyDownFor(2000.0f<ms> - (target_window + 0.5f<ms>), 30.0f<ms>)
-            .KeyDownFor(3000.0f<ms> - (target_window + 1.5f<ms>), 30.0f<ms>)
-            .Build()
-            .GetFullReplay()
+        Logging.Info(sprintf "Experiment: HTHR windows experiment: OD%.1f" od)
 
-    Logging.Info(sprintf "Experiment: DT early windows experiment: OD%.1f, %.1fms" od target_window)
+        generate_scenario notes replay od (Mods.HalfTime ||| Mods.HardRock)
+        
+        Threading.Thread.Sleep(2000)
+        if HANDS_FREE_AUTOMATION then
+            Diagnostics.Process
+                .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
+                .WaitForExit()
+            Threading.Thread.Sleep(8000)
+        else
+            Console.ReadKey() |> ignore
 
-    generate_scenario notes replay od Mods.DoubleTime
-    Console.ReadKey() |> ignore
-    collect_results () |> Async.RunSynchronously
+        collect_results () |> Async.RunSynchronously
