@@ -207,4 +207,5 @@ module OsuMania =
             Accuracy = AccuracyPoints.PointsPerJudgement([| 1.0; 1.0; 2.0/3.0; 1.0/3.0; 1.0/6.0; 0.0 |])
             HitMechanics = HitMechanics.OsuMania
             HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania (ln_windows od mode))
+            Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }

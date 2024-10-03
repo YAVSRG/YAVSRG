@@ -98,6 +98,17 @@ type HoldMechanics =
     | JudgeReleasesSeparately of windows: ((GameplayTime * GameplayTime) option) array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
 
+type DecimalPlaces =
+    | TWO = 2
+    | THREE = 3
+    | FOUR = 4
+
+[<Json.AutoCodec>]
+type RulesetFormatting =
+    {
+        DecimalPlaces: DecimalPlaces
+    }
+
 [<Json.AutoCodec>]
 type Ruleset =
     {
@@ -109,9 +120,9 @@ type Ruleset =
         Grades: Grade array
         HitMechanics: HitMechanics
         HoldMechanics: HoldMechanics
-        Accuracy: AccuracyPoints 
+        Accuracy: AccuracyPoints
+        Formatting: RulesetFormatting
         // todo: judgements are always worth points as fallbacks for certain LN mechanics, even when using wife curve
-        // todo: decimal place formatting
         // todo: ghost tap ruling
     }
     member this.DefaultJudgement: int = this.Judgements.Length - 1
@@ -169,6 +180,26 @@ type Ruleset =
         max
             (max (abs n_early) n_late)
             (max (abs r_early) r_late)
+
+    member this.FormatAccuracy(accuracy: float) =
+        match this.Formatting.DecimalPlaces with
+        | DecimalPlaces.FOUR -> sprintf "%.4f%%" (accuracy * 100.0)
+        | DecimalPlaces.THREE ->
+            if accuracy = 1.0 then
+                "100.000%"
+            elif accuracy > 0.99998 then
+                sprintf "%.4f%%" (accuracy * 100.0)
+            else
+                sprintf "%.3f%%" (accuracy * 100.0)
+        | _ ->
+            if accuracy = 1.0 then
+                "100.00%"
+            elif accuracy > 0.99998 then
+                sprintf "%.4f%%" (accuracy * 100.0)
+            elif accuracy > 0.9998 then
+                sprintf "%.3f%%" (accuracy * 100.0)
+            else
+                sprintf "%.2f%%" (accuracy * 100.0)
 
 module Ruleset =
 
@@ -361,6 +392,9 @@ module Ruleset =
             | AccuracyPoints.PointsPerJudgement points ->
                 for p in points do
                     if not (Double.IsFinite p) then failwith "PointsPerJudgement `points` contains invalid floating point values"
+
+            if not (Enum.IsDefined ruleset.Formatting.DecimalPlaces) then
+                failwithf "Unsupported decimal places formatting: %O" ruleset.Formatting.DecimalPlaces
 
             if ruleset.LargestWindow > 500.0f<ms / rate> then failwithf "Timing window maximum is 500ms, this ruleset contains a largest window of %f" ruleset.LargestWindow
 

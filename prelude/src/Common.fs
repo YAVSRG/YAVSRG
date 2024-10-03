@@ -340,14 +340,3 @@ module Common =
             sprintf "%.0fm" ts.TotalMinutes
         else
             sprintf "%.0fs" ts.TotalSeconds
-
-    // todo: replace with method on rulesets that formats accuracy
-    let format_accuracy (accuracy: float) =
-        if accuracy = 1.0 then
-            "100.00%"
-        elif accuracy > 0.99998 then
-            sprintf "%.4f%%" (accuracy * 100.0)
-        elif accuracy > 0.9998 then
-            sprintf "%.3f%%" (accuracy * 100.0)
-        else
-            sprintf "%.2f%%" (accuracy * 100.0)

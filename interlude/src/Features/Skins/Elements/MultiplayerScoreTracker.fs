@@ -28,7 +28,7 @@ type MultiplayerScoreTracker(config: HudConfig, state: PlayState, replays: Dicti
                     Color.White
 
             Text.draw (Style.font, username, 20.0f, x, y, color)
-            Text.draw_aligned (Style.font, format_accuracy replay_info.ScoreMetric.Accuracy, 20.0f, x - 10.0f, y, color, 1.0f)
+            Text.draw_aligned (Style.font, replay_info.ScoreMetric.FormattedAccuracy, 20.0f, x - 10.0f, y, color, 1.0f)
             y <- y + 25.0f
         )
 

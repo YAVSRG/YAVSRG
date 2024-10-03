@@ -62,7 +62,7 @@ type PersonalBests() =
             | Some (acc, rate, timestamp, color) ->
                 Draw.rect accuracy_bounds Colors.shadow_2.O2
                 let time_ago = System.DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset timestamp
-                Text.fill_b (Style.font, format_accuracy acc, accuracy_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
+                Text.fill_b (Style.font, Rulesets.current.FormatAccuracy acc, accuracy_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), accuracy_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
             | None -> ()
 

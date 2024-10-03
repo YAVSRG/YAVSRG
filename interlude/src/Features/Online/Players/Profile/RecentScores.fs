@@ -40,7 +40,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b (
                 Style.font,
-                format_accuracy score.Score,
+                sprintf "%.2f%%" (score.Score * 100.0),
                 b.ShrinkR(h * 3.5f).SliceR(h * 2.0f).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.RIGHT

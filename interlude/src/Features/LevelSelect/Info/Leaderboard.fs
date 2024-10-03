@@ -87,7 +87,7 @@ module Leaderboard =
 
             this
             |+ Text(
-                K(sprintf "#%i %s  •  %s" score.Rank score.Username (format_accuracy score_info.Scoring.Accuracy)),
+                K(sprintf "#%i %s  •  %s" score.Rank score.Username score_info.Scoring.FormattedAccuracy),
                 Color = text_color,
                 Align = Alignment.LEFT,
                 Position =

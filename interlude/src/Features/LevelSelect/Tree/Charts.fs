@@ -40,7 +40,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             grade <- 
                 match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
                 | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match get_pb personal_bests.Value.Accuracy (K Colors.white) format_accuracy with
+                    match get_pb personal_bests.Value.Accuracy (K Colors.white) Rulesets.current.FormatAccuracy with
                     | Some (accuracy, accuracy_rate, _, text) ->
                         Some (grade, accuracy_rate, color, text)
                     | None -> Some (grade, grade_rate, color, text)

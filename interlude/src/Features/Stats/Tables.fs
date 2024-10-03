@@ -140,7 +140,7 @@ type private CompareFriend
                                         |+ Text(
                                             (match your_score with
                                              | None -> "--"
-                                             | Some(_, acc) -> format_accuracy acc),
+                                             | Some(_, acc) -> ruleset.FormatAccuracy acc),
                                             Color =
                                                 K(
                                                     ruleset.GradeColor(
@@ -164,7 +164,7 @@ type private CompareFriend
                                         |+ Text(
                                             (match their_score with
                                              | None -> "--"
-                                             | Some(_, acc) -> format_accuracy acc),
+                                             | Some(_, acc) -> ruleset.FormatAccuracy acc),
                                             Color =
                                                 K(
                                                     ruleset.GradeColor(

@@ -45,13 +45,13 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         :> Widget
 
     override this.Title =
-        sprintf "%s | %s" (format_accuracy score_info.Scoring.Accuracy) (score_info.Ruleset.LampName score_info.Lamp)
+        sprintf "%s | %s" (score_info.Scoring.FormattedAccuracy) (score_info.Ruleset.LampName score_info.Lamp)
 
     override this.OnClose() = ()
 
     static member ConfirmDeleteScore(score_info, is_submenu) =
         let score_name =
-            sprintf "%s | %s" (format_accuracy score_info.Scoring.Accuracy) (score_info.Ruleset.LampName score_info.Lamp)
+            sprintf "%s | %s" (score_info.Scoring.FormattedAccuracy) (score_info.Ruleset.LampName score_info.Lamp)
 
         ConfirmPage(
             [ score_name ] %> "misc.confirmdelete",

@@ -46,8 +46,8 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
         let pacemaker_desc =
             match pacemaker with
             | PacemakerState.None -> ""
-            | PacemakerState.Accuracy acc -> sprintf "%s Target: %s" Icons.FLAG (format_accuracy acc)
-            | PacemakerState.Replay (acc, _) -> sprintf "%s Beat score: %s" Icons.FLAG (format_accuracy acc)
+            | PacemakerState.Accuracy acc -> sprintf "%s Target: %s" Icons.FLAG (Rulesets.current.FormatAccuracy acc)
+            | PacemakerState.Replay (acc, _) -> sprintf "%s Beat score: %s" Icons.FLAG (Rulesets.current.FormatAccuracy acc)
             | PacemakerState.Judgement (j, count) ->
                 let jname = Rulesets.current.JudgementName j
                 if count = 0 then 

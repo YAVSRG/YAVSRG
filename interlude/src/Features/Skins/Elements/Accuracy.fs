@@ -11,8 +11,7 @@ open Interlude.Features.Play
 
 module Accuracy =
 
-    let draw_accuracy_centered(texture: Sprite, bounds: Rect, color: Color, accuracy: float, spacing: float32, dot_spacing: float32, percent_spacing: float32) =
-        let accuracy_text = format_accuracy (max 0.0 accuracy)
+    let draw_accuracy_centered(texture: Sprite, bounds: Rect, color: Color, accuracy_text: string, spacing: float32, dot_spacing: float32, percent_spacing: float32) =
         let char_width = float32 texture.Width
         let width = (dot_spacing * 2.0f + percent_spacing + float32 accuracy_text.Length + (float32 accuracy_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height
@@ -63,7 +62,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
         if not config.AccuracyUseFont then
             this
             |* Text(
-                (fun () -> format_accuracy state.Scoring.Accuracy),
+                (fun () -> state.Scoring.FormattedAccuracy),
                 Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position =
@@ -93,7 +92,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
                 font_texture,
                 text_bounds,
                 color.Value,
-                state.Scoring.Accuracy,
+                state.Scoring.FormattedAccuracy,
                 config.AccuracyFontSpacing,
                 config.AccuracyDotExtraSpacing,
                 config.AccuracyPercentExtraSpacing

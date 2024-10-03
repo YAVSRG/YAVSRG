@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play.HUD
@@ -31,13 +30,13 @@ type AccuracyPage(on_close: unit -> unit) =
                         texture,
                         bounds.ShrinkB(bounds.Height * 0.4f),
                         Color.White,
-                        0.9672,
+                        Rulesets.current.FormatAccuracy 0.9672,
                         font_spacing.Value,
                         font_dot_spacing.Value,
                         font_percent_spacing.Value
                     )
                 else
-                    Text.fill (Style.font, "96.72%", bounds.ShrinkB(bounds.Height * 0.3f), Color.White, 0.5f)
+                    Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.9672, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, 0.5f)
 
                 if show_name.Value then
                     Text.fill (Style.font, "SC J4", bounds.SliceB(bounds.Height * 0.4f), Color.White, 0.5f)

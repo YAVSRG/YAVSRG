@@ -126,7 +126,7 @@ type Chat(lobby: Lobby) =
                         Align = Alignment.LEFT
                     )
                     |+ Text(
-                        sprintf "%s" (format_accuracy data.Scoring.Accuracy),
+                        data.Scoring.FormattedAccuracy,
                         Color = K(data.Ruleset.GradeColor grade, Colors.shadow_1),
                         Align = Alignment.CENTER
                     )

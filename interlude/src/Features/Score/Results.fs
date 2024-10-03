@@ -49,7 +49,7 @@ type Accuracy
     override this.Init(parent) =
         this
         |* Text(
-            (fun () -> format_accuracy score_info.Scoring.Accuracy),
+            (fun () -> score_info.Scoring.FormattedAccuracy),
             Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
             Position = Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE)
         )
@@ -72,7 +72,7 @@ type Accuracy
 
         Text.fill_b (
             Style.font,
-            format_accuracy score_info.Scoring.Accuracy,
+            score_info.Scoring.FormattedAccuracy,
             this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
             (grade_color, Colors.black),
             Alignment.CENTER
@@ -93,9 +93,9 @@ type Accuracy
 
                         let summary, distance_from_pb =
                             if r > score_info.Rate then
-                                sprintf "%s (%.2fx)" (format_accuracy v) r, (v - score_info.Scoring.Accuracy)
+                                sprintf "%s (%.2fx)" (score_info.Ruleset.FormatAccuracy v) r, (v - score_info.Scoring.Accuracy)
                             else
-                                format_accuracy v, (v - score_info.Scoring.Accuracy)
+                                score_info.Ruleset.FormatAccuracy v, (v - score_info.Scoring.Accuracy)
 
                         if distance_from_pb < 0.0001 then
                             [summary] %> "score.your_record", (Colors.grey_2.O2, Colors.black)

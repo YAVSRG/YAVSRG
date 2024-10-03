@@ -73,7 +73,7 @@ module Scoreboard =
 
             this
             |+ Text(
-                fun () -> format_accuracy score_info.Scoring.Accuracy
+                fun () -> score_info.Scoring.FormattedAccuracy
                 , Color = text_color
                 , Align = Alignment.LEFT
                 , Position = upper

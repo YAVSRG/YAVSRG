@@ -175,4 +175,5 @@ module SC =
             Accuracy = AccuracyPoints.PointsPerJudgement [| 1.0; 0.9; 0.5; -0.5; MISS_PENALTY_POINTS; MISS_PENALTY_POINTS |]
             HitMechanics = HitMechanics.Interlude 90.0f<ms / rate>
             HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (-180.0f<ms / rate>, 180.0f<ms / rate>, 3, 3))
+            Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }
