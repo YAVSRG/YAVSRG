@@ -7,11 +7,20 @@ open Prelude.Gameplay.Rulesets
 module OsuMania =
 
     // Most info found from https://osu.ppy.sh/wiki/en/Gameplay/Judgement/osu!mania but it is not a thorough documentation of edge cases
-    // The floor + 0.5ms stuff is exact as found through experimental evidence with the osu! stable client
 
     // osu! snaps all hit objects and all inputs to integer ms values, so your delta will always be an integer
-    // the +0.5 on hit windows make it very clear that landing EXACTLY on the integer hit window will count as that judgement
-    // e.g. on OD0, an exactly +64ms hit IS inside the great window and gives you a yellow 300
+    // The means a REAL LIFE +16.4.ms hit gets rounded down to 16 ms, and then 16 is in the border of 300g and 17 is out
+    // So for equivalent behaviour on floating point time the windows used are with +0.5ms
+
+    // In general the osu ruling is:
+    // Windows actually act as quoted by the wiki, with no +0.5
+    // round(delta) <= floor(window) with some exceptions that use <
+
+    // Example: good window = 97.0 - 3.0 * od
+    // On OD6.4 good window = 77.8
+    // A hit at 77.4ms rounds to 77 <= floor(77.8)
+    // A hit at 77.6ms rounds to 78 > floor(77.8)
+    // So the OD6.4 good window includes 77 but not 78
 
     let perfect_window (_: float32) : GameplayTime = 16.5f<ms / rate>
     let great_window (od: float32) : GameplayTime = floor_uom (64.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
@@ -122,7 +131,7 @@ module OsuMania =
                         BreaksCombo = false
                     }
                     // 50 and MISS have no late window
-                    // Yes, this is not a mistake (maybe by peppy), the late window is 1ms shorter
+                    // Yes, this is not a mistake by me (maybe by peppy), the late window is 1ms shorter
                     // Hitting exactly the border of the 100 window does not hit the note
                     {
                         Name = "100"
