@@ -131,7 +131,7 @@ module Options =
             Mode: PresetMode
 
             VisualOffset: float32
-            ScrollSpeed: float32
+            ScrollSpeed: float32<rate/ms>
             HitPosition: float32
             Upscroll: bool
             LaneCover: LaneCoverPresetOptions
@@ -149,7 +149,7 @@ module Options =
             CurrentChart: Setting<string>
             Theme: Setting<string>
 
-            ScrollSpeed: Setting.Bounded<float32>
+            ScrollSpeed: Setting.Bounded<float32<rate/ms>>
             HitPosition: Setting.Bounded<float32>
             HitLighting: Setting<bool>
             Upscroll: Setting<bool>
@@ -213,7 +213,7 @@ module Options =
                 CurrentChart = Setting.simple ""
                 Theme = Content.Themes.selected_id
 
-                ScrollSpeed = Setting.bounded 2.05f 1.0f 5.0f |> Setting.roundf 2
+                ScrollSpeed = Setting.bounded 2.05f<rate/ms> 1.0f<rate/ms> 5.0f<rate/ms> |> Setting.roundf_uom 2
                 HitPosition = Setting.bounded 0.0f -300.0f 600.0f
                 HitLighting = Setting.simple false
                 Upscroll = Setting.simple false

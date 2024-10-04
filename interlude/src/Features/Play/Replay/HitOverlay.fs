@@ -135,8 +135,8 @@ type private HitOverlay
     
     let draw_event (now: ChartTime) (ev: GameplayEvent) =
         let ms_to_y (time: Time) =
-            float32 options.HitPosition.Value
-            + (time - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+            options.HitPosition.Value
+            + (time - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
             + playfield.ColumnWidth * 0.5f
 
         match ev.Action with
@@ -219,9 +219,7 @@ type private HitOverlay
                 seek <- seek + 1
 
             let until_time =
-                now
-                + (1080.0f<ms / rate> + MAX_WINDOW)
-                    / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value) + MAX_WINDOW * SelectedChart.rate.Value
 
             let mutable peek = seek
 

@@ -27,7 +27,7 @@ type SyncSuggestions =
         LooksAboutRight: bool
         VisualOffset: float32
         HitPosition: float32
-        ScrollSpeed: float32
+        ScrollSpeed: float32<rate / ms>
         AudioOffset: Time
     }
 
@@ -61,12 +61,12 @@ module PracticeState =
         let mean = sum / count * SelectedChart.rate.Value
 
         let hit_position_suggestion =
-            options.HitPosition.Value - mean * options.ScrollSpeed.Value * 1.0f< / ms>
+            options.HitPosition.Value - mean * options.ScrollSpeed.Value * 1.0f</rate>
 
         let expected_pixels = (1080.0f - options.HitPosition.Value) * 0.6f
-        let current_lead_time = expected_pixels / (options.ScrollSpeed.Value * 1.0f< / ms>)
+        let current_lead_time = expected_pixels / (options.ScrollSpeed.Value * 1.0f</rate>)
         let desired_lead_time = current_lead_time - mean
-        let scroll_speed_suggestion = expected_pixels / float32 desired_lead_time
+        let scroll_speed_suggestion = expected_pixels / desired_lead_time * 1.0f<rate>
 
         let visual_offset_suggestion =
             if options.AudioVolume.Value = 0.0 then
@@ -85,7 +85,7 @@ module PracticeState =
         state.SyncSuggestions <-
             Some
                 {
-                    LooksAboutRight = abs mean < 5.0f<ms>
+                    LooksAboutRight = abs (sum / count) < 5.0f<ms / rate>
                     AudioOffset = local_audio_offset_suggestion
                     VisualOffset = visual_offset_suggestion
                     HitPosition = hit_position_suggestion
@@ -100,7 +100,7 @@ module PracticeState =
         match state.SyncMode.Value with
         | SyncMode.AUDIO_OFFSET -> (LocalOffset.offset_setting state.SaveData).Set suggestions.AudioOffset
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set suggestions.HitPosition
-        | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set suggestions.ScrollSpeed
+        | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf_uom 2).Set suggestions.ScrollSpeed
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set suggestions.VisualOffset
 
         state.SyncSuggestions <- None
@@ -109,7 +109,7 @@ module PracticeState =
         match state.SyncMode.Value with
         | SyncMode.AUDIO_OFFSET -> (LocalOffset.offset_setting state.SaveData).Set 0.0f<ms>
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set 0.0f
-        | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf 2).Set 2.05f
+        | SyncMode.SCROLL_SPEED -> (options.ScrollSpeed |> Setting.roundf_uom 2).Set 2.05f<rate / ms>
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf 0).Set 0.0f
 
         state.SyncSuggestions <- None

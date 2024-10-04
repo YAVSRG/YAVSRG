@@ -20,6 +20,7 @@ type PlayState =
         CurrentChartTime: unit -> ChartTime
         Pacemaker: PacemakerState
     }
+    // todo: remove references to SelectedChart.rate.Value in all HUD elements -> member this.Rate = this.Scoring.Rate
     member this.Ruleset = this.Scoring.Ruleset
 
     static member Dummy(info: LoadedChartInfo) =

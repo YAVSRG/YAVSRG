@@ -156,7 +156,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // SETUP CONSTANTS AND DRAW METHODS
 
-        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value * 1.0f<rate / ms>
+        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value
         let hitposition = float32 options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)

@@ -40,8 +40,8 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
         if show_input_overlay.Value then
             let draw_press (k, now: ChartTime, start: ChartTime, finish: ChartTime) =
                 let y t =
-                    float32 options.HitPosition.Value
-                    + (t - now) * 1.0f<rate / ms> * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                    options.HitPosition.Value
+                    + (t - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
                     + playfield.ColumnWidth * 0.5f
 
                 Rect
@@ -66,7 +66,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 seek <- seek + 1
 
             let until_time =
-                now + 1080.0f<ms / rate> / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+                now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
             let mutable peek = seek
             let struct (t, b) = replay_data.[peek]

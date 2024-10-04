@@ -17,16 +17,16 @@ type GameplayPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"gameplay.scrollspeed", Slider.Percent(options.ScrollSpeed))
+        |+ PageSetting(%"gameplay.scrollspeed", Slider.Percent(Setting.uom options.ScrollSpeed))
             .Help(Help.Info("gameplay.scrollspeed"))
             .Pos(0)
         |+ Text(
             (fun () ->
                 [
-                    ((1080.0f - options.HitPosition.Value) / options.ScrollSpeed.Value).ToString("F0")
-                    (options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
-                    (options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                    "C" + (60000.0f * options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")
+                    ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
+                    (float32 options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
+                    (float32 options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
+                    "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")
                 ]
                 %> "gameplay.scrollspeed.info"
             ),
