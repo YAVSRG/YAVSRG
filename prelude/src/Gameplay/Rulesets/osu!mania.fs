@@ -22,39 +22,18 @@ module OsuMania =
     // A hit at 77.6ms rounds to 78 > floor(77.8)
     // So the OD6.4 good window includes 77 but not 78
 
-    let perfect_window (_: float32) : GameplayTime = 16.5f<ms / rate>
-    let great_window (od: float32) : GameplayTime = floor_uom (64.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
-    let good_window (od: float32) : GameplayTime = floor_uom (97.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
-    let ok_window (od: float32) : GameplayTime = floor_uom (127.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
-    let meh_window (od: float32) : GameplayTime = floor_uom (151.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
-    let miss_window (od: float32) : GameplayTime = floor_uom (188.0f<ms / rate> - 3.0f<ms / rate> * od) + 0.5f<ms / rate>
+    let perfect_window (_: float32) : GameplayTime = 16.0f<ms / rate>
+    let great_window (od: float32) : GameplayTime = 64.0f<ms / rate> - 3.0f<ms / rate> * od
+    let good_window (od: float32) : GameplayTime = 97.0f<ms / rate> - 3.0f<ms / rate> * od
+    let ok_window (od: float32) : GameplayTime = 127.0f<ms / rate> - 3.0f<ms / rate> * od
+    let meh_window (od: float32) : GameplayTime = 151.0f<ms / rate> - 3.0f<ms / rate> * od
+    let miss_window (od: float32) : GameplayTime = 188.0f<ms / rate> - 3.0f<ms / rate> * od
 
-    let to_hard_rock_window (window: GameplayTime) =
-        floor_uom (5f / 7f * floor_uom window) + 0.5f<ms / rate>
+    let to_hard_rock_window (unclipped_window: GameplayTime) = unclipped_window / 1.4f
 
-    let to_easy_window (window: GameplayTime) =
-        floor_uom (7f / 5f * floor_uom window) + 0.5f<ms / rate>
+    let to_easy_window (unclipped_window: GameplayTime) = unclipped_window * 1.4f
 
-    let to_dt_window (window: GameplayTime) =
-        floor_uom (1.5f<rate> * floor_uom window) + 0.5f<ms>
-
-    let to_ht_window (window: GameplayTime) =
-        floor_uom (0.75f<rate> * floor_uom window) + 0.5f<ms>
-
-    let to_perfect_ln_head_window (window: GameplayTime) =
-        floor_uom (1.2f * floor_uom window) + 0.5f<ms / rate>
-
-    let to_great_ln_head_window (window: GameplayTime) =
-        floor_uom (1.1f * floor_uom window) + 0.5f<ms / rate>
-
-    let to_perfect_ln_combined_window (window: GameplayTime) =
-        floor_uom (2.4f * floor_uom window) + 0.5f<ms / rate>
-
-    let to_great_ln_combined_window (window: GameplayTime) =
-        floor_uom (2.2f * floor_uom window) + 0.5f<ms / rate>
-
-    let to_ln_combined_window (window: GameplayTime) =
-        floor_uom (2.2f * floor_uom window) + 0.5f<ms / rate>
+    let clipped (window: GameplayTime) = floor_uom window + 0.5f<ms / rate>
 
     type Mode =
         | Easy
@@ -74,11 +53,11 @@ module OsuMania =
         let MEH = meh_window od |> mode.Apply
 
         {
-            Window320 = floor (PERFECT * 1.2f<rate / ms>) * 1.0f<ms / rate> + 0.5f<ms / rate>
-            Window300 = floor (GREAT * 1.1f<rate / ms>) * 1.0f<ms / rate> + 0.5f<ms / rate>
-            Window200 = GOOD
-            Window100 = OK
-            Window50 = MEH
+            Window320 = clipped (PERFECT * 1.2f)
+            Window300 = clipped (GREAT * 1.1f)
+            Window200 = clipped GOOD
+            Window100 = clipped OK
+            Window50 = clipped MEH
             // todo: this matches experimental data but I must not be understanding something about LNs
             // todo: investiagate if the 1ms edge window thing affects releasing on the edge
             WindowOverhold200 = 
@@ -100,12 +79,12 @@ module OsuMania =
         let od = round (od * 10.0f) / 10.0f
         if od < 0.0f || od > 10.0f then failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od
         
-        let PERFECT = perfect_window od |> mode.Apply
-        let GREAT = great_window od |> mode.Apply
-        let GOOD = good_window od |> mode.Apply
-        let OK = ok_window od |> mode.Apply
-        let MEH = meh_window od |> mode.Apply
-        let MISS = miss_window od |> mode.Apply
+        let PERFECT = perfect_window od |> mode.Apply |> clipped
+        let GREAT = great_window od |> mode.Apply |> clipped
+        let GOOD = good_window od |> mode.Apply |> clipped
+        let OK = ok_window od |> mode.Apply |> clipped
+        let MEH = meh_window od |> mode.Apply |> clipped
+        let MISS = miss_window od |> mode.Apply |> clipped
 
         {
             Name = sprintf "osu! (OD%.1f%s)" od (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")

@@ -156,7 +156,7 @@ module Events =
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+        let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
@@ -182,8 +182,8 @@ module Events =
                 .KeyDownFor(180.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(360.0f<ms>, 30.0f<ms>)
                 .Build()
-
-        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+                
+        let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
@@ -286,8 +286,8 @@ module Events =
                 .KeyDownFor(410.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(510.0f<ms>, 30.0f<ms>)
                 .Build()
-
-        let ruleset = { RULESET with HitMechanics = HitMechanics.OsuMania }
+                
+        let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
