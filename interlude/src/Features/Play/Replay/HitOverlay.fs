@@ -212,8 +212,10 @@ type private HitOverlay
         if show_hit_overlay.Value then
             let now =
                 state.CurrentChartTime()
-                + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-                + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
+                + (
+                    (if Song.playing() then Performance.frame_compensation () else 0.0f<ms / rate>)
+                    + options.VisualOffset.Value
+                ) * SelectedChart.rate.Value
 
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1

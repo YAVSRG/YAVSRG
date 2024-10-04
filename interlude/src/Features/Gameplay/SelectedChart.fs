@@ -170,7 +170,7 @@ module SelectedChart =
                                 Song.change (
                                     cc.Audio.Path,
                                     save_data.Offset,
-                                    float32 rate,
+                                    rate,
                                     (cc.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
@@ -376,7 +376,7 @@ module SelectedChart =
             if_loading
             <| fun info ->
                 collections_on_rate_changed info.LibraryContext v
-                Song.change_rate (float32 v)
+                Song.change_rate v
                 update ()
         )
 

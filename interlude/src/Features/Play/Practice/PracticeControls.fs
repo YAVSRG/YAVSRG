@@ -30,7 +30,7 @@ type SyncSuggestionControls(state: PracticeState) =
     let local_audio_offset =
         LocalOffset.offset_setting state.SaveData
         |> Setting.bound -200.0f<ms> 200.0f<ms>
-    let visual_offset = options.VisualOffset |> Setting.roundf 0
+    let visual_offset = options.VisualOffset |> Setting.roundf_uom 0
     let scroll_speed = options.ScrollSpeed |> Setting.roundf_uom 2
     let hit_position = options.HitPosition |> Setting.roundf 0
 

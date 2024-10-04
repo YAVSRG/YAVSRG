@@ -76,7 +76,7 @@ type SongLoadAction =
 
 module Song =
 
-    let LEADIN_TIME = 3000.0f<ms>
+    let LEADIN_TIME = 3000.0f<ms / rate>
 
     let mutable load_path: string option = None
     let mutable loading = false
@@ -86,9 +86,9 @@ module Song =
     let mutable private timer_start = 0.0f<ms>
     let mutable private channel_playing = false
     let mutable private paused = false
-    let mutable private rate = 1.0f
+    let mutable private rate = 1.0f<rate>
     let mutable _local_offset = 0.0f<ms>
-    let mutable private _global_offset = 0.0f<ms>
+    let mutable private _global_offset = 0.0f<ms / rate>
     let mutable on_finish = SongFinishAction.Wait
     let mutable private preview_point = 0.0f<ms>
     let mutable private last_note = 0.0f<ms>
@@ -100,7 +100,7 @@ module Song =
     let duration () = now_playing.Duration
 
     let time () =
-        rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms>) + timer_start
+        rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
 
     let time_with_offset () =
         time () + _local_offset + _global_offset * rate
@@ -174,7 +174,7 @@ module Song =
             Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0)
             |> display_bass_error
 
-        Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * rate)
+        Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * float32 rate)
         |> display_bass_error
 
         if rate_changed then
@@ -219,7 +219,7 @@ module Song =
                 | SongLoadAction.Wait -> ()
         }
 
-    let change (path: string option, offset: Time, new_rate: float32, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
+    let change (path: string option, offset: Time, new_rate: float32<rate>, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
         let path_changed = path <> load_path
         load_path <- path
         preview_point <- preview

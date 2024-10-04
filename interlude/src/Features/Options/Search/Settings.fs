@@ -87,10 +87,10 @@ module Settings =
             if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
                     %"system.audiooffset",
-                    { new Slider(options.AudioOffset, Step = 1f) with
+                    { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
                         override this.OnDeselected(by_mouse: bool) =
                             base.OnDeselected by_mouse
-                            Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
+                            Song.set_global_offset options.AudioOffset.Value
                     }
                 )
                     .Help(Help.Info("system.audiooffset"))
@@ -115,7 +115,7 @@ module Settings =
                     .Help(Help.Info("system.menus_muffle_song"))
             
             if token_match tokens [|%"system.visualoffset"|] then
-                yield PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+                yield PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
                     .Help(Help.Info("system.visualoffset"))
                 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then

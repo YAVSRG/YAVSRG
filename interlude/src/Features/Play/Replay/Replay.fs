@@ -117,7 +117,7 @@ module ReplayScreen =
 
             override this.OnExit p =
                 base.OnExit p
-                Song.change_rate (float32 SelectedChart.rate.Value)
+                Song.change_rate SelectedChart.rate.Value
                 Toolbar.show_cursor ()
                 Song.resume()
 

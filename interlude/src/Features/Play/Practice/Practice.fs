@@ -28,7 +28,7 @@ module PracticeScreen =
         let mutable resume_from_current_place = false
 
         let last_allowed_practice_point =
-            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * 1.0f</rate> * SelectedChart.rate.Value
+            info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
 
         let state: PracticeState =
             {

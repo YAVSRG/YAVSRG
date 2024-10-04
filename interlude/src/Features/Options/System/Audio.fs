@@ -46,10 +46,10 @@ type AudioPage() =
             .Pos(7)
         |+ PageSetting(
             %"system.audiooffset",
-            { new Slider(options.AudioOffset, Step = 1f) with
+            { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
                 override this.OnDeselected(by_mouse: bool) =
                     base.OnDeselected by_mouse
-                    Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
+                    Song.set_global_offset options.AudioOffset.Value
             }
         )
             .Help(Help.Info("system.audiooffset"))

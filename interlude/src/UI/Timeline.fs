@@ -36,8 +36,9 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
     override this.Draw() =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
-        let start = with_mods.FirstNote - Song.LEADIN_TIME
-        let offset = b.Width * Song.LEADIN_TIME / LAST_NOTE
+        let LEADIN_TIME = Song.LEADIN_TIME * rate.Value
+        let start = with_mods.FirstNote - LEADIN_TIME
+        let offset = b.Width * LEADIN_TIME / LAST_NOTE
 
         let w = (b.Width - offset) / float32 note_density.Length
 
@@ -101,7 +102,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let percent =
                 (Mouse.x () - 10.0f) / (Viewport.vwidth - 20.0f) |> min 1.0f |> max 0.0f
 
-            let start = FIRST_NOTE - Song.LEADIN_TIME
+            let start = FIRST_NOTE - Song.LEADIN_TIME * rate.Value
             let new_time = start + (LAST_NOTE - start) * percent
             on_seek new_time
 

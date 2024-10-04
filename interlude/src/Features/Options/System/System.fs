@@ -228,7 +228,7 @@ type SystemPage() =
             .Help(Help.Info("system.videomode"))
             .Pos(11)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
-        |+ PageSetting(%"system.visualoffset", Slider(options.VisualOffset, Step = 1f))
+        |+ PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
             .Help(Help.Info("system.visualoffset"))
             .Pos(13)
         :> Widget

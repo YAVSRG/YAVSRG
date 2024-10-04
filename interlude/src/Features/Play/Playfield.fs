@@ -268,8 +268,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let now =
             Song.time_with_offset ()
-            + (if Song.playing() then Performance.frame_compensation () else 0.0f<ms>)
-            + options.VisualOffset.Value * 1.0f<ms / rate> * SelectedChart.rate.Value
+            + (
+                (if Song.playing() then Performance.frame_compensation () else 0.0f<ms / rate>)
+                + options.VisualOffset.Value
+            ) * SelectedChart.rate.Value
 
         if now < time then
             handle_seek_back_in_time ()

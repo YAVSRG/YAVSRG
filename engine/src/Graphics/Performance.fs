@@ -11,4 +11,4 @@ module Performance =
     let mutable draw_time = 0.0
     let mutable elapsed_ms = 0.0
 
-    let mutable frame_compensation: unit -> Time = K 0.0f<ms>
+    let mutable frame_compensation: unit -> float32<ms / rate> = K 0.0f<ms / rate>

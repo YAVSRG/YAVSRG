@@ -130,7 +130,7 @@ module Options =
             Name: string
             Mode: PresetMode
 
-            VisualOffset: float32
+            VisualOffset: GameplayTime
             ScrollSpeed: float32<rate/ms>
             HitPosition: float32
             Upscroll: bool
@@ -142,8 +142,8 @@ module Options =
     [<Json.AutoCodec(false)>]
     type GameOptions =
         {
-            VisualOffset: Setting.Bounded<float32> // todo: change to ms / rate
-            AudioOffset: Setting.Bounded<float32>
+            VisualOffset: Setting.Bounded<GameplayTime>
+            AudioOffset: Setting.Bounded<GameplayTime>
             AudioVolume: Setting.Bounded<float>
             AudioPitchRates: Setting<bool>
             CurrentChart: Setting<string>
@@ -206,8 +206,8 @@ module Options =
         }
         static member Default =
             {
-                VisualOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
-                AudioOffset = Setting.bounded 0.0f -500.0f 500.0f |> Setting.roundf 0
+                VisualOffset = Setting.bounded 0.0f<ms / rate> -500.0f<ms / rate> 500.0f<ms / rate> |> Setting.roundf_uom 0
+                AudioOffset = Setting.bounded 0.0f<ms / rate> -500.0f<ms / rate> 500.0f<ms / rate> |> Setting.roundf_uom 0
                 AudioVolume = Setting.percent 0.05
                 AudioPitchRates = Setting.simple true
                 CurrentChart = Setting.simple ""

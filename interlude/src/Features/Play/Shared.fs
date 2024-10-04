@@ -82,8 +82,8 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
-        Song.change_rate (float32 SelectedChart.rate.Value)
-        Song.set_global_offset (options.AudioOffset.Value * 1.0f<ms>)
+        Song.change_rate SelectedChart.rate.Value
+        Song.set_global_offset options.AudioOffset.Value
         Song.on_finish <- SongFinishAction.Wait
         Song.play_leadin with_colors.FirstNote
         Input.remove_listener ()

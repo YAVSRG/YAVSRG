@@ -77,7 +77,7 @@ type PerformanceSettingsPage() =
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
 
         for i = 0 to 10 do
-            let anti_jitter = Performance.frame_compensation () / 1.0f<ms>
+            let anti_jitter = Performance.frame_compensation () / 1.0f<ms / rate>
             let y = (float32 (cycle.Time / cycle.Interval) + (float32 i / 10.0f)) % 1.0f
             Draw.sprite 
                 (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))

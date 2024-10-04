@@ -446,9 +446,9 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         Performance.frame_compensation <-
             fun () ->
                 if strategy <> Unlimited && anti_jitter then
-                    float32 (estimated_next_frame - now ()) * 1.0f<ms>
+                    float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
                 else
-                    0.0f<ms>
+                    0.0f<ms / rate>
 
         ui_root.Init()
         after_init ()
