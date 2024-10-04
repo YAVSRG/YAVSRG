@@ -1,4 +1,4 @@
-﻿namespace Prelude.Test
+﻿namespace Prelude.Tools
 
 open System.IO
 open Percyqaz.Common

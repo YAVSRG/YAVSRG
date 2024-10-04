@@ -1,4 +1,4 @@
-﻿namespace Prelude.Test
+﻿namespace Prelude.Scripts
 
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing

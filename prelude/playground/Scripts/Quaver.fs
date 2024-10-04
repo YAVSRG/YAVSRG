@@ -1,4 +1,4 @@
-﻿namespace Prelude.Test
+﻿namespace Prelude.Scripts
 
 open System.IO
 open Prelude.Charts.Formats.Quaver

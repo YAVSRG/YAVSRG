@@ -6,17 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests\Beatmaps.fs" />
-    <Compile Include="Tests\Polyrhythm.fs" />
-    <Compile Include="Tests\Quaver.fs" />
-    <Compile Include="Tests\Images.fs" />
-    <Compile Include="Tests\Endless.fs" />
-    <Compile Include="Tests\Caramell.fs" />
-    <Compile Include="Tests\Imports.fs" />
-    <Compile Include="Tests\OsuReplayReader.fs" />
-    <Compile Include="Tests\OsuReplayGenerator.fs" />
-    <Compile Include="Tests\Sail.fs" />
-    <Compile Include="Tests\Trendy.fs" />
+    <Compile Include="Scripts\Polyrhythm.fs" />
+    <Compile Include="Scripts\Quaver.fs" />
+    <Compile Include="Scripts\Images.fs" />
+    <Compile Include="Scripts\Caramell.fs" />
+    <Compile Include="Scripts\Sail.fs" />
+    <Compile Include="Scripts\Trendy.fs" />
+    <Compile Include="Tools\Beatmaps.fs" />
+    <Compile Include="Tools\Endless.fs" />
+    <Compile Include="Tools\Imports.fs" />
+    <Compile Include="Tools\OsuReplayReader.fs" />
+    <Compile Include="Tools\OsuReplayGenerator.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
