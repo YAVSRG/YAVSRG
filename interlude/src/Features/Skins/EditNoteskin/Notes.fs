@@ -165,7 +165,7 @@ type NotesSettingsPage() =
     let use_rotation = Setting.simple data.UseRotation
 
     let note_animation_time =
-        Setting.bounded data.AnimationFrameTime 10.0 1000.0 |> Setting.round 0
+        Setting.bounded data.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate> |> Setting.roundf_uom 0
 
     let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
@@ -259,7 +259,7 @@ type NotesSettingsPage() =
         |+ PageSetting(%"noteskin.rotations", rotations)
             .Pos(12, 3, PageWidth.Full)
 
-        |+ PageSetting(%"noteskin.animationtime", Slider(note_animation_time |> Setting.f32))
+        |+ PageSetting(%"noteskin.animationtime", Slider(Setting.uom note_animation_time))
             .Help(Help.Info("noteskin.animationtime"))
             .Pos(16)
         :> Widget

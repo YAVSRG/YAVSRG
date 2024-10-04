@@ -22,7 +22,7 @@ type HoldNoteSettingsPage() =
     let head = Content.Texture "holdhead"
     let body = Content.Texture "holdbody"
     let tail = Content.Texture "holdtail"
-    let animation = Animation.Counter(data.AnimationFrameTime)
+    let animation = Animation.Counter(float data.AnimationFrameTime)
 
     override this.Content() =
         page_container()

@@ -11,7 +11,7 @@ open Interlude.Features.Gameplay
 
 type EarlyLateMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value * 1.0f<ms / rate>
+    let duration = config.EarlyLateMeterDuration * SelectedChart.rate.Value
     let mutable early = false
     let mutable time = -Time.infinity
 
@@ -44,7 +44,7 @@ type EarlyLateMeter(config: HudConfig, state: PlayState) =
                     Draw.quad 
                         ((Sprite.fill this.Bounds texture).AsQuad)
                         Color.White.AsQuad
-                        (Sprite.pick_texture (float32 time_ago / config.EarlyLateMeterFrameTime |> floor |> int, if early then 0 else 1) texture)
+                        (Sprite.pick_texture (time_ago / config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int, if early then 0 else 1) texture)
                 else
                     Text.fill (
                         Style.font,

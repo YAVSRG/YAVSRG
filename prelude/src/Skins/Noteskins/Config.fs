@@ -17,23 +17,23 @@ type ExplosionColors =
 type NoteExplosionConfig =
     {
         Scale: float32
-        AnimationFrameTime: float
+        AnimationFrameTime: float32<ms / rate>
         Colors: ExplosionColors
         Offset: float32
 
         UseBuiltInAnimation: bool
-        Duration: float
+        Duration: float32<ms / rate>
         ExpandAmount: float32
     }
     static member Default =
         {
             Scale = 1.0f
-            AnimationFrameTime = 20.0
+            AnimationFrameTime = 20.0f<ms / rate>
             Colors = ExplosionColors.Note
             Offset = 0.0f
 
             UseBuiltInAnimation = true
-            Duration = 300.0
+            Duration = 300.0f<ms / rate>
             ExpandAmount = 0.15f
         }
 
@@ -42,13 +42,13 @@ type HoldExplosionConfig =
     {
         // todo: second scale, frametime, colors for release explosion IF people ask for it
         Scale: float32
-        AnimationFrameTime: float
+        AnimationFrameTime: float32<ms / rate>
         Colors: ExplosionColors
         Offset: float32
 
         UseReleaseExplosion: bool
         ReleaseUseBuiltInAnimation: bool
-        Duration: float
+        Duration: float32<ms / rate>
         ExpandAmount: float32
     }
     member this.UseBuiltInAnimation =
@@ -57,13 +57,13 @@ type HoldExplosionConfig =
     static member Default =
         {
             Scale = 1.0f
-            AnimationFrameTime = 20.0
+            AnimationFrameTime = 20.0f<ms / rate>
             Colors = ExplosionColors.Note
             Offset = 0.0f
 
             UseReleaseExplosion = false
             ReleaseUseBuiltInAnimation = true
-            Duration = 300.0
+            Duration = 300.0f<ms / rate>
             ExpandAmount = 0.15f
         }
 
@@ -86,7 +86,7 @@ type NoteskinConfig =
         /// Sets the color that hold notes should turn when they are not being held
         DroppedHoldColor: Color
         /// Millisecond duration of each frame on note/hold texture animations
-        AnimationFrameTime: float
+        AnimationFrameTime: float32<ms / rate>
 
         /// Sets the color of the playfield behind notes
         PlayfieldColor: Color
@@ -149,7 +149,7 @@ type NoteskinConfig =
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
-            AnimationFrameTime = 200.0
+            AnimationFrameTime = 200.0f<ms / rate>
 
             PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
             PlayfieldAlignment = 0.5f, 0.5f

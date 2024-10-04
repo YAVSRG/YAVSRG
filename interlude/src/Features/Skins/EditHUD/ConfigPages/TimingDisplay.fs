@@ -32,7 +32,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
 
     let animation_time =
         Setting.simple config.TimingDisplayFadeTime
-        |> Setting.bound 100.0f 2000.0f
+        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
 
     let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
     let moving_average_sensitivity = Setting.simple config.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
@@ -59,7 +59,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
             .Help(Help.Info("hud.timingdisplay.releasesextraheight"))
             .Pos(10)
-        |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(animation_time, Step = 5f))
+        |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(Setting.uom animation_time, Step = 5f))
             .Help(Help.Info("hud.timingdisplay.animationtime"))
             .Pos(12)
         |+ PageSetting(%"hud.timingdisplay.timingwindowsopacity", Slider.Percent(windows_opacity))

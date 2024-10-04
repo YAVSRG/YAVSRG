@@ -14,7 +14,7 @@ module LocalOffset =
 
     let offset_setting (save_data: ChartSaveData) =
         Setting.make save_data.set_Offset save_data.get_Offset
-        |> Setting.roundt 0
+        |> Setting.roundf_uom 0
         |> Setting.trigger Song.set_local_offset
 
     let get_automatic (state: PlayState) (save_data: ChartSaveData) =

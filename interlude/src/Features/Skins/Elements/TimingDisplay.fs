@@ -124,7 +124,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
         last_seen_time <- now
 
-        while hits.Count > 0 && hits.[0].Time + animation_time * 1.0f<ms / rate> < now do
+        while hits.Count > 0 && hits.[0].Time + animation_time < now do
             hits.RemoveAt(0)
 
     member this.DrawWindows(opacity: int) =

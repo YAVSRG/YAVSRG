@@ -6,6 +6,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Data
+open Prelude
 open Prelude.Skins
 
 module NoteskinExplosionMigration =
@@ -45,7 +46,7 @@ module NoteskinExplosionMigration =
                 UseExplosions = explosions.Enable |> Option.defaultValue true
                 NoteExplosionSettings =
                     {
-                        AnimationFrameTime = explosions.AnimationFrameTime
+                        AnimationFrameTime = float32 explosions.AnimationFrameTime * 1.0f<ms / rate>
                         UseBuiltInAnimation = true
                         Scale = explosions.Scale
                         Offset = 0.0f
@@ -54,11 +55,11 @@ module NoteskinExplosionMigration =
                             match explosions.Colors with
                             | ExplosionColorsOld.Column -> ExplosionColors.Note
                             | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
-                        Duration = 300.0
+                        Duration = 300.0f<ms / rate>
                     }
                 HoldExplosionSettings =
                     {
-                        AnimationFrameTime = explosions.AnimationFrameTime
+                        AnimationFrameTime = float32 explosions.AnimationFrameTime * 1.0f<ms / rate>
                         ReleaseUseBuiltInAnimation = true
                         UseReleaseExplosion = false
                         Scale = explosions.Scale
@@ -68,7 +69,7 @@ module NoteskinExplosionMigration =
                             match explosions.Colors with
                             | ExplosionColorsOld.Column -> ExplosionColors.Note
                             | ExplosionColorsOld.Judgements -> ExplosionColors.Judgements
-                        Duration = 300.0
+                        Duration = 300.0f<ms / rate>
                     }
             }
         | None -> config

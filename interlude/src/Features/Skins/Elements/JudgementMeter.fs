@@ -24,7 +24,7 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
                 config.JudgementMeterDuration
             else
                 config.JudgementMeterFrameTime * float32 texture.Columns
-        ) * SelectedChart.rate.Value * 1.0f<ms / rate>
+        ) * SelectedChart.rate.Value
 
     do
         state.SubscribeEvents(fun ev ->
@@ -73,4 +73,4 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
                     Draw.quad 
                         ((Sprite.fill bounds texture).AsQuad)
                         (Color.White.O4a alpha).AsQuad
-                        (Sprite.pick_texture (float32 time_ago / config.JudgementMeterFrameTime |> floor |> int, y) texture)
+                        (Sprite.pick_texture (time_ago / config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)

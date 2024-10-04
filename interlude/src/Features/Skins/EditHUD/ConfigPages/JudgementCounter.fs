@@ -121,7 +121,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
     let animation_time =
         Setting.simple config.JudgementCounterFadeTime
-        |> Setting.bound 100.0 1000.0
+        |> Setting.bound 100.0f<ms / rate> 1000.0f<ms / rate>
     let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
     let use_background = Setting.simple config.JudgementCounterBackground.Enable
@@ -204,7 +204,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.judgementcounter.animationtime", Slider(animation_time |> Setting.f32, Step = 5f))
+        |+ PageSetting(%"hud.judgementcounter.animationtime", Slider(Setting.uom animation_time, Step = 5f))
             .Help(Help.Info("hud.judgementcounter.animationtime"))
             .Pos(0)
         |+ PageSetting(%"hud.judgementcounter.showratio", Checkbox show_ratio)

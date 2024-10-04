@@ -100,11 +100,11 @@ type JudgementMeterPage(on_close: unit -> unit) =
 
     let duration =
         Setting.simple config.JudgementMeterDuration
-        |> Setting.bound 100.0f 2000.0f
+        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
 
     let frame_time =
         Setting.simple config.JudgementMeterFrameTime
-        |> Setting.bound 2.0f 500.0f
+        |> Setting.bound 2.0f<ms / rate> 500.0f<ms / rate>
 
     let use_animation =
         Setting.simple config.JudgementMeterUseBuiltInAnimation
@@ -138,7 +138,7 @@ type JudgementMeterPage(on_close: unit -> unit) =
         )
             .Help(Help.Info("hud.judgementmeter.prioritiselowerjudgements"))
             .Pos(2)
-        |+ PageSetting(%"hud.judgementmeter.duration", Slider(duration, Step = 5f))
+        |+ PageSetting(%"hud.judgementmeter.duration", Slider(Setting.uom duration, Step = 5f))
             .Help(Help.Info("hud.judgementmeter.duration"))
             .Pos(4)
             .Conditional(fun () -> not use_texture.Value || use_animation.Value)
@@ -152,7 +152,7 @@ type JudgementMeterPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.judgementmeter.useanimation"))
             .Pos(8)
             .Conditional(use_texture.Get)
-        |+ PageSetting(%"hud.judgementmeter.frametime", Slider(frame_time, Step = 5f))
+        |+ PageSetting(%"hud.judgementmeter.frametime", Slider(Setting.uom frame_time, Step = 5f))
             .Help(Help.Info("hud.judgementmeter.frametime"))
             .Pos(10)
             .Conditional(use_texture.Get)

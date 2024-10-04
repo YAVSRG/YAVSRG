@@ -13,11 +13,11 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
 
     let duration =
         Setting.simple config.EarlyLateMeterDuration
-        |> Setting.bound 100.0f 2000.0f
+        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
 
     let frame_time =
         Setting.simple config.EarlyLateMeterFrameTime
-        |> Setting.bound 2.0f 500.0f
+        |> Setting.bound 2.0f<ms / rate> 500.0f<ms / rate>
 
     let use_texture = Setting.simple config.EarlyLateMeterUseTexture
 
@@ -28,13 +28,13 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.earlylatemeter.duration", Slider(duration, Step = 5f))
+        |+ PageSetting(%"hud.earlylatemeter.duration", Slider(duration |> Setting.uom, Step = 5f))
             .Help(Help.Info("hud.earlylatemeter.duration"))
             .Pos(0)
         |+ PageSetting(%"hud.earlylatemeter.usetexture", Checkbox use_texture)
             .Help(Help.Info("hud.earlylatemeter.usetexture"))
             .Pos(2)
-        |+ PageSetting(%"hud.earlylatemeter.frametime", Slider(frame_time, Step = 5f))
+        |+ PageSetting(%"hud.earlylatemeter.frametime", Slider(frame_time |> Setting.uom, Step = 5f))
             .Help(Help.Info("hud.earlylatemeter.frametime"))
             .Pos(4)
             .Conditional(use_texture.Get)

@@ -441,7 +441,7 @@ module OsuSkinConverter =
 
         let config: HudConfig =
             { HudConfig.Default with
-                JudgementMeterFrameTime = 16.7f
+                JudgementMeterFrameTime = 16.7f<ms / rate>
                 JudgementMeterUseTexture = judgement_textures
                 JudgementMeterCustomDisplay =
                     if judgement_textures then 
@@ -772,7 +772,7 @@ module OsuSkinConverter =
                 HoldNoteTrim = if skip_tail_conversion then 1.5f else 0.0f
                 PlayfieldColor = keymode_settings.ColourΔ.[0]
                 ColumnWidth = 1080f / 480f * float32 keymode_settings.ColumnWidth.[0]
-                AnimationFrameTime = 1000.0 / 60.0
+                AnimationFrameTime = 16.7f<ms / rate>
                 UseRotation = is_arrows
                 EnableStageTextures = stage_textures
 

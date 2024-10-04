@@ -162,15 +162,15 @@ type AnimationSettingsPage() =
 
     let mutable holding = false
     let test_events = Animation.Counter 1000.0
-    let f_note = Animation.Counter(data.AnimationFrameTime)
+    let f_note = Animation.Counter(float data.AnimationFrameTime)
 
     let t_columnlight = Animation.Delay(data.ColumnLightDuration)
 
-    let f_note_ex = Animation.Counter(data.NoteExplosionSettings.AnimationFrameTime)
-    let t_note_ex = Animation.Delay(data.NoteExplosionSettings.Duration)
+    let f_note_ex = Animation.Counter(float data.NoteExplosionSettings.AnimationFrameTime)
+    let t_note_ex = Animation.Delay(float data.NoteExplosionSettings.Duration)
 
-    let f_hold_ex = Animation.Counter(data.HoldExplosionSettings.AnimationFrameTime)
-    let t_hold_ex = Animation.Delay(data.HoldExplosionSettings.Duration)
+    let f_hold_ex = Animation.Counter(float data.HoldExplosionSettings.AnimationFrameTime)
+    let t_hold_ex = Animation.Delay(float data.HoldExplosionSettings.Duration)
 
     let NOTE_SCALE = (PRETTYWIDTH - PRETTYTEXTWIDTH) / 10.0f
 
@@ -339,9 +339,9 @@ type AnimationSettingsPage() =
     let enable_explosions = Setting.simple data.UseExplosions
 
     let explosion_frame_time_note =
-        Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0 1000.0
-        |> Setting.round 0
-        |> Setting.trigger f_note_ex.set_Interval
+        Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate>
+        |> Setting.roundf_uom 0
+        |> Setting.trigger (float >> f_note_ex.set_Interval)
 
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
 
@@ -352,9 +352,9 @@ type AnimationSettingsPage() =
         Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
 
     let explosion_duration_note =
-        Setting.bounded data.NoteExplosionSettings.Duration 50.0 1000
-        |> Setting.round 0
-        |> Setting.trigger t_note_ex.set_Interval
+        Setting.bounded data.NoteExplosionSettings.Duration 50.0f<ms / rate> 1000f<ms / rate>
+        |> Setting.roundf_uom 0
+        |> Setting.trigger (float >> t_note_ex.set_Interval)
 
     let explosion_scale_note =
         Setting.bounded data.NoteExplosionSettings.Scale 0.5f 5.0f
@@ -362,9 +362,9 @@ type AnimationSettingsPage() =
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
     let explosion_frame_time_hold =
-        Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0 1000.0
-        |> Setting.round 0
-        |> Setting.trigger f_hold_ex.set_Interval
+        Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate>
+        |> Setting.roundf_uom 0
+        |> Setting.trigger (float >> f_hold_ex.set_Interval)
 
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
 
@@ -378,9 +378,9 @@ type AnimationSettingsPage() =
         Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
 
     let explosion_duration_hold =
-        Setting.bounded data.HoldExplosionSettings.Duration 50.0 1000
-        |> Setting.round 0
-        |> Setting.trigger t_hold_ex.set_Interval
+        Setting.bounded data.HoldExplosionSettings.Duration 50.0f<ms / rate> 1000f<ms / rate>
+        |> Setting.roundf_uom 0
+        |> Setting.trigger (float >> t_hold_ex.set_Interval)
 
     let explosion_scale_hold =
         Setting.bounded data.HoldExplosionSettings.Scale 0.5f 5.0f
@@ -391,7 +391,7 @@ type AnimationSettingsPage() =
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageSetting(
             %"noteskin.explosionanimationtime",
-            Slider(explosion_frame_time_note |> Setting.f32, Step = 1f)
+            Slider(Setting.uom explosion_frame_time_note, Step = 1f)
         )
             .Help(Help.Info("noteskin.explosionanimationtime"))
             .Pos(0)
@@ -415,7 +415,7 @@ type AnimationSettingsPage() =
             .Pos(8)
         |+ PageSetting(
             %"noteskin.explosionduration",
-            Slider(explosion_duration_note |> Setting.f32, Step = 1f)
+            Slider(Setting.uom explosion_duration_note, Step = 1f)
         )
             .Help(Help.Info("noteskin.explosionduration"))
             .Pos(10)
@@ -429,7 +429,7 @@ type AnimationSettingsPage() =
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageSetting(
             %"noteskin.explosionanimationtime",
-            Slider(explosion_frame_time_hold |> Setting.f32, Step = 1f)
+            Slider(Setting.uom explosion_frame_time_hold, Step = 1f)
         )
             .Help(Help.Info("noteskin.explosionanimationtime"))
             .Pos(0)
@@ -457,7 +457,7 @@ type AnimationSettingsPage() =
             .Conditional(explosion_hold_use_release.Get)
         |+ PageSetting(
             %"noteskin.explosionduration",
-            Slider(explosion_duration_hold |> Setting.f32, Step = 1f)
+            Slider(Setting.uom explosion_duration_hold, Step = 1f)
         )
             .Help(Help.Info("noteskin.explosionduration"))
             .Pos(12)
@@ -622,7 +622,7 @@ type AnimationSettingsPage() =
 
             let percent_remaining =
                 if explosion_builtin_note.Value then
-                    1.0 - (t_note_ex.Time / explosion_duration_note.Value)
+                    1.0 - (t_note_ex.Time / float explosion_duration_note.Value)
                     |> min 1.0
                     |> max 0.0
                     |> float32
@@ -652,7 +652,7 @@ type AnimationSettingsPage() =
                     if holding then
                         1.0f
                     else
-                        1.0 - (t_hold_ex.Time / explosion_duration_hold.Value)
+                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value)
                         |> min 1.0
                         |> max 0.0
                         |> float32
@@ -673,7 +673,7 @@ type AnimationSettingsPage() =
 
                 let percent_remaining =
                     if explosion_builtin_release.Value then
-                        1.0 - (t_hold_ex.Time / explosion_duration_hold.Value)
+                        1.0 - (t_hold_ex.Time / float explosion_duration_hold.Value)
                         |> min 1.0
                         |> max 0.0
                         |> float32

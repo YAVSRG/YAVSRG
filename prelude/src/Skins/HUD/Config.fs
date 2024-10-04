@@ -89,7 +89,7 @@ type HudConfig =
 
         TimingDisplayEnabled: bool
         TimingDisplayPosition: HudPosition
-        TimingDisplayFadeTime: float32
+        TimingDisplayFadeTime: float32<ms/rate>
         TimingDisplayThickness: float32
         TimingDisplayShowGuide: bool
         TimingDisplayGuideThickness: float32
@@ -117,17 +117,17 @@ type HudConfig =
         JudgementMeterPosition: HudPosition
         JudgementMeterIgnorePerfect: bool
         JudgementMeterPrioritiseLower: bool
-        JudgementMeterDuration: float32
-        JudgementMeterFrameTime: float32
+        JudgementMeterDuration: float32<ms/rate>
+        JudgementMeterFrameTime: float32<ms/rate>
         JudgementMeterUseTexture: bool
         JudgementMeterUseBuiltInAnimation: bool
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
         EarlyLateMeterEnabled: bool
         EarlyLateMeterPosition: HudPosition
-        EarlyLateMeterDuration: float32
+        EarlyLateMeterDuration: float32<ms/rate>
         EarlyLateMeterUseTexture: bool
-        EarlyLateMeterFrameTime: float32
+        EarlyLateMeterFrameTime: float32<ms/rate>
         EarlyLateMeterEarlyText: string
         EarlyLateMeterLateText: string
         EarlyLateMeterEarlyColor: Color
@@ -148,7 +148,7 @@ type HudConfig =
 
         JudgementCounterEnabled: bool
         JudgementCounterPosition: HudPosition
-        JudgementCounterFadeTime: float
+        JudgementCounterFadeTime: float32<ms/rate>
         JudgementCounterShowRatio: bool
         JudgementCounterBackground: BackgroundTextureOptions
         JudgementCounterUseFont: bool
@@ -167,9 +167,9 @@ type HudConfig =
 
         InputMeterEnabled: bool
         InputMeterPosition: HudPosition
-        InputMeterScrollSpeed: float32
+        InputMeterScrollSpeed: float32<rate/ms>
         InputMeterKeyColor: Color
-        InputMeterKeyFadeTime: float32
+        InputMeterKeyFadeTime: float32<ms/rate>
         InputMeterColumnPadding: float32
         InputMeterShowInputs: bool
         InputMeterInputColor: Color
@@ -183,7 +183,7 @@ type HudConfig =
         
         CustomImageEnabled: bool
         CustomImagePosition: HudPosition
-        CustomImageFrameTime: float32
+        CustomImageFrameTime: float32<ms/rate>
     }
     static member Default =
         {
@@ -212,7 +212,7 @@ type HudConfig =
                     Right = 300.0f, 0.5f
                     Bottom = 25.0f, 0.5f
                 }
-            TimingDisplayFadeTime = 1000.0f
+            TimingDisplayFadeTime = 1000.0f<ms / rate>
             TimingDisplayThickness = 5.0f
             TimingDisplayShowGuide = true
             TimingDisplayGuideThickness = 1.0f
@@ -270,8 +270,8 @@ type HudConfig =
             JudgementMeterPrioritiseLower = false
             JudgementMeterUseTexture = false
             JudgementMeterUseBuiltInAnimation = true
-            JudgementMeterDuration = 300.0f
-            JudgementMeterFrameTime = 50f
+            JudgementMeterDuration = 300.0f<ms / rate>
+            JudgementMeterFrameTime = 50f<ms / rate>
             JudgementMeterCustomDisplay = Map.empty
 
             EarlyLateMeterEnabled = false
@@ -283,9 +283,9 @@ type HudConfig =
                     Right = 128.0f, 0.5f
                     Bottom = -150.0f, 0.5f
                 }
-            EarlyLateMeterDuration = 200.0f
+            EarlyLateMeterDuration = 200.0f<ms / rate>
             EarlyLateMeterUseTexture = false
-            EarlyLateMeterFrameTime = 20.0f
+            EarlyLateMeterFrameTime = 20.0f<ms / rate>
             EarlyLateMeterEarlyText = "Fast"
             EarlyLateMeterLateText = "Slow"
             EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)
@@ -327,7 +327,7 @@ type HudConfig =
                     Right = 220.0f, 0.0f
                     Bottom = -20.0f, 1.0f
                 }
-            JudgementCounterFadeTime = 200.0
+            JudgementCounterFadeTime = 200.0f<ms / rate>
             JudgementCounterBackground =
                 {
                     Enable = false
@@ -373,9 +373,9 @@ type HudConfig =
                     Right = 200.0f, 1.0f
                     Bottom = -100.0f, 1.0f
                 }
-            InputMeterScrollSpeed = 0.75f
+            InputMeterScrollSpeed = 0.75f<rate/ms>
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
-            InputMeterKeyFadeTime = 300.0f
+            InputMeterKeyFadeTime = 300.0f<ms / rate>
             InputMeterColumnPadding = 0.25f
             InputMeterShowInputs = true
             InputMeterInputColor = Color.FromArgb(127, 255, 255, 255)
@@ -410,7 +410,7 @@ type HudConfig =
                     Right = 100.0f, 0.5f
                     Bottom = 400.0f, 0.0f
                 }
-            CustomImageFrameTime = 200.0f
+            CustomImageFrameTime = 200.0f<ms / rate>
         }
 
     member this.GetJudgementCounterDisplay(for_ruleset: Ruleset) : int option array =

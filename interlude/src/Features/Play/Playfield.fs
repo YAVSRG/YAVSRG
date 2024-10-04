@@ -72,7 +72,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holdhead = Content.Texture "holdhead"
     let holdbody = Content.Texture "holdbody"
     let note = Content.Texture "note"
-    let animation = Animation.Counter(noteskin_config.AnimationFrameTime)
+    let animation = Animation.Counter(float noteskin_config.AnimationFrameTime)
 
     let sv = chart.SV
     let mutable note_seek = 0

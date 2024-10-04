@@ -11,8 +11,8 @@ type InputMeterPage(on_close: unit -> unit) =
 
     let config = Content.HUD
 
-    let scroll_speed = Setting.bounded config.InputMeterScrollSpeed 0.5f 3.0f
-    let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f 1000.0f
+    let scroll_speed = Setting.bounded config.InputMeterScrollSpeed 0.5f<rate / ms> 3.0f<rate / ms>
+    let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f<ms / rate> 1000.0f<ms / rate>
     let key_color = Setting.simple config.InputMeterKeyColor
     let column_padding = Setting.bounded config.InputMeterColumnPadding 0.0f 0.8f
 
@@ -23,9 +23,9 @@ type InputMeterPage(on_close: unit -> unit) =
     
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.inputmeter.scroll_speed", Slider.Percent scroll_speed)
+        |+ PageSetting(%"hud.inputmeter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
             .Pos(0)
-        |+ PageSetting(%"hud.inputmeter.key_fade_time", Slider(key_fade_time, Step = 5f))
+        |+ PageSetting(%"hud.inputmeter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
                 .Pos(2)
         |+ PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, true))
             .Pos(4, 3)
