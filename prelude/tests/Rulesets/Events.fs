@@ -1527,3 +1527,75 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
+    
+    [<Test>]
+    let FirstNoteIndependence () =
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(22.5f<ms>, 30.0f<ms>)
+                .KeyDownFor(90.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(200.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        printfn "FIRST NOTE AT 0ms"
+
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        printfn "FIRST NOTE AT 1000ms"
+
+        let notes_2 = 
+            ChartBuilder(4)
+                .Note(1000.0f<ms>)
+                .Note(1100.0f<ms>)
+                .Note(1200.0f<ms>)
+                .Build()
+                
+        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
+        event_processing_2.Update Time.infinity
+
+        Assert.AreEqual(event_processing.Events, event_processing_2.Events)
+
+    [<Test>]
+    let FirstNoteIndependence_IgnoreNotesBefore () =
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(22.5f<ms>, 30.0f<ms>)
+                .KeyDownFor(90.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(200.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        printfn "FIRST NOTE AT 0ms"
+
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(100.0f<ms>)
+                .Note(200.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.IgnoreNotesBefore 100.0f<ms>
+        event_processing.Update Time.infinity
+
+        printfn "FIRST NOTE AT 1000ms"
+
+        let notes_2 = 
+            ChartBuilder(4)
+                .Note(1000.0f<ms>)
+                .Note(1100.0f<ms>)
+                .Note(1200.0f<ms>)
+                .Build()
+                
+        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
+        event_processing_2.IgnoreNotesBefore 1100.0f<ms>
+        event_processing_2.Update Time.infinity
+
+        Assert.AreEqual(event_processing.Events, event_processing_2.Events)

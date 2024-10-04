@@ -48,22 +48,8 @@ module PracticeScreen =
             scoring <-
                 ScoreProcessor.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
-            let ignore_notes_before_time =
-                state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
-
-            let mutable i = 0
-
-            // todo: move inside event processing
-            //while i < scoring.HitData.Length
-            //      && let struct (t, _, _) = scoring.HitData.[i] in
-            //         t < ignore_notes_before_time do
-            //    let struct (_, deltas, flags) = scoring.HitData.[i]
-
-            //    for k = 0 to info.WithMods.Keys - 1 do
-            //        flags.[k] <- HitStatus.HIT_ACCEPTED
-            //        deltas.[k] <- -Time.infinity
-
-            //    i <- i + 1
+            let ignore_notes_before_time : Time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
+            scoring.IgnoreNotesBefore ignore_notes_before_time
 
             scoring.OnEvent.Add(fun h ->
                 match h.Action with

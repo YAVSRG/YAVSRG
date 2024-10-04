@@ -381,3 +381,17 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
         this.MissUnhitExpiredNotes chart_time // Then process any missed notes up until now if needed
 
     abstract member HandleEvent: GameplayEventInternal -> unit
+
+    /// Used by practice mode in the client to enter gameplay midway through a song
+    /// Prevents accumulating misses for every single note before this point or column locking on the way in
+    member this.IgnoreNotesBefore(time: Time) =
+        let mutable i = 0
+
+        while i < hit_data.Length && hit_data.[i].Time < time do
+            let { Data = struct (deltas, flags) } = hit_data.[i]
+
+            for k = 0 to keys - 1 do
+                flags.[k] <- HitFlags.HIT_ACCEPTED
+                deltas.[k] <- -infinityf * 1.0f<ms / rate>
+
+            i <- i + 1
