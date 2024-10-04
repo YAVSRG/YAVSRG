@@ -46,11 +46,11 @@ module OsuMania =
             | HardRock -> to_hard_rock_window
 
     let private ln_windows (od: float32) (mode: Mode) : OsuLnWindows =
-        let PERFECT = perfect_window od |> mode.Apply
-        let GREAT = great_window od |> mode.Apply
-        let GOOD = good_window od |> mode.Apply
-        let OK = ok_window od |> mode.Apply
-        let MEH = meh_window od |> mode.Apply
+        let PERFECT = perfect_window od |> mode.Apply |> floor_uom
+        let GREAT = great_window od |> mode.Apply |> floor_uom
+        let GOOD = good_window od |> mode.Apply |> floor_uom
+        let OK = ok_window od |> mode.Apply |> floor_uom
+        let MEH = meh_window od |> mode.Apply |> floor_uom
 
         {
             Window320 = clipped (PERFECT * 1.2f)
