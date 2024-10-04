@@ -39,7 +39,7 @@ type LampRequirement =
     | ComboBreaksAtMost of count: int
     member this.SortKey =
         match this with
-        | ComboBreaksAtMost n -> System.Int32.MaxValue, n
+        | ComboBreaksAtMost n -> Int32.MaxValue, n
         | JudgementAtMost (j, n) -> j, n
     member this.IsStricterThan(other: LampRequirement) =
         this.SortKey < other.SortKey
@@ -65,10 +65,17 @@ type AccuracyPoints =
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
-type HitMechanics =
+type NotePriority =
     | OsuMania // earliest note
     | Interlude of cbrush_threshold: GameplayTime // earliest note; if hit is off by `cbrush_threshold` try to find a nearer note
     | Etterna // nearest note
+    
+[<Json.AutoCodec>]
+type HitMechanics =
+    {
+        NotePriority: NotePriority
+        GhostTapJudgement: int option
+    }
 
 // Behaviour for hold notes
 
@@ -239,13 +246,17 @@ module Ruleset =
                 bw.Write 1uy
                 bw.Write c
 
-        match ruleset.HitMechanics with
-        | HitMechanics.OsuMania ->
+        match ruleset.HitMechanics.GhostTapJudgement with
+        | Some j -> bw.Write j
+        | None -> bw.Write 0uy
+
+        match ruleset.HitMechanics.NotePriority with
+        | NotePriority.OsuMania ->
             bw.Write 0uy
-        | HitMechanics.Interlude cbrush_threshold ->
+        | NotePriority.Interlude cbrush_threshold ->
             bw.Write 1uy
             bw.Write (float32 cbrush_threshold)
-        | HitMechanics.Etterna ->
+        | NotePriority.Etterna ->
             bw.Write 2uy
 
         match ruleset.HoldMechanics with
@@ -331,21 +342,31 @@ module Ruleset =
                     failwithf "Lamp requirement %A for '%s' must be stricter than %A" l.Requirement l.Name l_req
                 l_req <- l.Requirement
 
-            match ruleset.HitMechanics with
-            | HitMechanics.OsuMania -> ()
-            | HitMechanics.Interlude cbrush_threshold ->
+            match ruleset.HitMechanics.GhostTapJudgement with
+            | Some judgement -> 
+                
+                match ruleset.Accuracy with 
+                | AccuracyPoints.PointsPerJudgement _ -> ()
+                | _ -> failwith "GhostTapJudgement must be used with PointsPerJudgement accuracy (otherwise it isn't clear what points it's worth)"
+
+                if judgement < 0 || judgement >= ruleset.Judgements.Length then failwith "GhostTapJudgement must be a valid judgement"
+            | None -> ()
+
+            match ruleset.HitMechanics.NotePriority with
+            | NotePriority.OsuMania -> ()
+            | NotePriority.Interlude cbrush_threshold ->
 
                 if cbrush_threshold < 0.0f<ms / rate> then failwith "Interlude `cbrush_threshold` must be non-negative"
                 if cbrush_threshold > w_max || cbrush_threshold > abs w_min then failwith "Interlude `cbrush_threshold` must not exceed timing windows"
 
-            | HitMechanics.Etterna -> ()
+            | NotePriority.Etterna -> ()
 
             match ruleset.HoldMechanics with
             | HoldMechanics.CombineHeadAndTail rule ->
 
                 match ruleset.Accuracy with 
                 | AccuracyPoints.PointsPerJudgement _ -> ()
-                | _ -> failwith "CombineHeadAndTail rules must be used with PointsPerJudgement accuracy"
+                | _ -> failwith "CombineHeadAndTail rules must be used with PointsPerJudgement accuracy (otherwise it isn't clear what points you give overholds)"
 
                 match rule with
                 | HeadTailCombineRule.OsuMania windows ->
@@ -366,8 +387,8 @@ module Ruleset =
 
                     if positive(early_window) then failwith "HeadJudgementOr `early_window` must be non-positive"
                     if negative(late_window) then failwith "HeadJudgementOr `late_window` must be non-negative"
-                    if judgement_if_dropped >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
-                    if judgement_if_overheld >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
+                    if judgement_if_dropped < 0 || judgement_if_dropped >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
+                    if judgement_if_overheld < 0 || judgement_if_overheld >= ruleset.Judgements.Length then failwith "HeadJudgementOr `judgement_if_dropped` must be a valid judgement"
 
             | HoldMechanics.OnlyRequireHold window ->
                 if window < 0.0f<ms / rate> then failwith "OnlyRequireHold window must be non-negative"
@@ -383,9 +404,9 @@ module Ruleset =
                         if late < w_max then failwithf "Late release window %.3fms must be %.3fms or later" late w_max
                         w_max <- late
                     | None -> ()
-                if judgement_if_dropped >= ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `judgement_if_dropped` must be a valid judgement"
+                if judgement_if_dropped < 0 || judgement_if_dropped >= ruleset.Judgements.Length then failwith "JudgeReleasesSeparately `judgement_if_dropped` must be a valid judgement"
             | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
-                if judgement_if_dropped >= ruleset.Judgements.Length then failwith "OnlyJudgeReleases `judgement_if_dropped` must be a valid judgement"
+                if judgement_if_dropped < 0 || judgement_if_dropped >= ruleset.Judgements.Length then failwith "OnlyJudgeReleases `judgement_if_dropped` must be a valid judgement"
 
             match ruleset.Accuracy with
             | AccuracyPoints.WifeCurve judge -> if judge < 2 || judge > 9 then failwith "WifeCurve `judge` must be a valid judge value"

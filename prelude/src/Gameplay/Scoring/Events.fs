@@ -82,12 +82,12 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
     let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw keys notes
 
     let hit_mechanics =
-        match ruleset.HitMechanics with
-        | HitMechanics.Interlude cbrush_window ->
+        match ruleset.HitMechanics.NotePriority with
+        | NotePriority.Interlude cbrush_window ->
             HitMechanics.interlude (hit_data, early_note_window_scaled, late_note_window_scaled, cbrush_window, rate)
-        | HitMechanics.OsuMania ->
+        | NotePriority.OsuMania ->
             HitMechanics.osu_mania (hit_data, early_note_window_scaled, late_note_window_scaled)
-        | HitMechanics.Etterna ->
+        | NotePriority.Etterna ->
             HitMechanics.etterna (hit_data, early_note_window_scaled, late_note_window_scaled)
 
     let mutable expired_notes_index = 0

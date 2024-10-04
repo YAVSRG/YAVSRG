@@ -189,7 +189,11 @@ module Wife3 =
                     }
                 |]
             Accuracy = AccuracyPoints.WifeCurve judge
-            HitMechanics = HitMechanics.Etterna
+            HitMechanics = 
+                { 
+                    NotePriority = NotePriority.Etterna
+                    GhostTapJudgement = None
+                }
             HoldMechanics = HoldMechanics.OnlyRequireHold 180.0f<ms / rate>
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }

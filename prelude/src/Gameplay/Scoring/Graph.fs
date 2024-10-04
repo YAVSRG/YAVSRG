@@ -150,7 +150,14 @@ module ScoreScreenStats =
                     max_points <- max_points + 1.0
                 | None -> ()
 
-            | GhostTap -> inc ghost_taps
+            | GhostTap e -> 
+                inc ghost_taps
+                match e.Judgement with
+                | Some (j, points) ->
+                    filtered_judgements.[j] <- filtered_judgements.[j] + 1
+                    scored_points <- scored_points + points
+                    max_points <- max_points + 1.0
+                | None -> ()
 
             | DropHold -> ()
             | RegrabHold -> ()

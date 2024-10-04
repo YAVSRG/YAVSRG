@@ -63,7 +63,9 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / MAX_WINDOW * w * ln_mult)
-                | _ -> ()
+                | GhostTap _
+                | DropHold
+                | RegrabHold -> ()
             )
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
             state.SubscribeEvents(fun ev ->
@@ -92,7 +94,19 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                             IsRelease = true
                             Judgement = e.Judgement |> Option.map fst
                         }
-                | _ -> ()
+                | GhostTap e ->
+                    match e.Judgement with
+                    | Some (j, _) ->
+                        hits.Add
+                            {
+                                Time = ev.Time
+                                Position = -w * 0.5f
+                                IsRelease = false
+                                Judgement = Some j
+                            }
+                    | None -> ()
+                | DropHold
+                | RegrabHold -> ()
             )
 
     override this.Update(elapsed_ms, moved) =

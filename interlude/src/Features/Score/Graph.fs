@@ -320,31 +320,39 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         for ev in events do
             let dot : (float32 * Color) voption =
                 match ev.Action with
-                | Hit evData
-                | Hold evData ->
+                | Hit e
+                | Hold e ->
 
-                    match evData.Judgement with
+                    match e.Judgement with
                     | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
                         let y = 
-                            if evData.Missed then THICKNESS
-                            else h - System.Math.Clamp(h * evData.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
+                            if e.Missed then THICKNESS
+                            else h - System.Math.Clamp(h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor judgement)
 
                     | _ -> ValueNone
 
-                | Release evData ->
+                | Release e ->
 
-                    match evData.Judgement with
+                    match e.Judgement with
                     | Some (judgement, _) when GraphSettings.column_filter.[ev.Column] ->
                         // todo: figure something out about half-scale releases
                         let y = 
-                            if evData.Missed then THICKNESS
-                            else h - System.Math.Clamp(evData.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
+                            if e.Missed then THICKNESS
+                            else h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
                         ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
 
                     | _ -> ValueNone
 
-                | _ -> ValueNone
+                | GhostTap e -> 
+                    match e.Judgement with
+                    | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
+                        let y = 2f * h - THICKNESS
+                        ValueSome(y, score_info.Ruleset.JudgementColor judgement)
+                    | _ -> ValueNone
+
+                | DropHold
+                | RegrabHold -> ValueNone
 
             match dot with
             | ValueNone -> ()

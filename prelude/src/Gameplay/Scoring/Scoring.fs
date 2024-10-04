@@ -28,7 +28,7 @@ type GameplayAction =
         |}
     | DropHold
     | RegrabHold
-    | GhostTap
+    | GhostTap of {| Judgement: (int * float) option |}
 
 [<Struct>]
 type ComboAction =
@@ -294,9 +294,17 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         RegrabHold
 
     member private this.ProcessGhostTap() : ComboAction * GameplayAction =
-        // todo: rulesets can specify ghost tap judgements
+        match ruleset.HitMechanics.GhostTapJudgement with
+        | Some judgement ->
+            let points = judgement_to_points (infinityf * 1.0f<ms/rate>) judgement // todo: make better design decisions
+
+            score_points(points, judgement)
+
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
+            GhostTap {| Judgement = Some (judgement, points) |}
+        | None ->
         NoChange,
-        GhostTap
+        GhostTap {| Judgement = None |}
 
     override this.HandleEvent (internal_event: GameplayEventInternal) =
         let combo_action, gameplay_action = 

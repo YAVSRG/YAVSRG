@@ -180,6 +180,16 @@ type private HitOverlay
                 else 
                     label_after ev.Column action_y (sprintf "%s  +%.1fms" Icons.CHEVRON_UP x.Delta) color
 
+        | GhostTap x ->
+            let color =
+                match x.Judgement with
+                | None -> Colors.red_accent.O2
+                | Some (i, _) -> state.Ruleset.JudgementColor i
+            let action_y = ms_to_y ev.Time
+
+            draw_delta ev.Column action_y action_y color
+            label_after ev.Column action_y (sprintf "%s  %s" Icons.ARROW_DOWN GHOST_TAP_ANNOTATION) color
+
         | DropHold ->
             let color = Colors.red_accent.O2
             let action_y = ms_to_y ev.Time
@@ -193,13 +203,6 @@ type private HitOverlay
 
             draw_delta ev.Column action_y action_y color
             label_after ev.Column action_y (sprintf "%s  %s" Icons.CHEVRONS_DOWN REGRAB_HOLD_ANNOTATION) color
-
-        | GhostTap ->
-            let color = Colors.red_accent.O2
-            let action_y = ms_to_y ev.Time
-
-            draw_delta ev.Column action_y action_y color
-            label_after ev.Column action_y (sprintf "%s  %s" Icons.ARROW_DOWN GHOST_TAP_ANNOTATION) color
 
     override this.Init(parent) =
         state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
