@@ -78,7 +78,15 @@ type Slider(setting: Setting.Bounded<float32>) =
     member val Format : float32 -> string = (fun x -> x.ToString("n" + decimal_places.ToString())) with get, set
 
     static member Percent(setting) =
-        Slider(setting, Format = (fun x -> sprintf "%.0f%%" (x * 100.0f |> round)))
+        Slider(
+            setting, 
+            Format = (fun x -> 
+                let percent = x * 100.0f |> round
+                // handle what the F# foundation couldn't: -0 floating point value
+                if percent = 0.0f then sprintf "%.0f%%" 0.0f
+                else sprintf "%.0f%%" percent
+            )
+        )
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
