@@ -6,7 +6,8 @@ open Percyqaz.Common
 // Maybe it will become its own repo of fsx files
 
 let your_script_here () =
-    OsuReplayGenerator.run_experiment()
+    //OsuReplayGenerator.run_experiment()
+    OsuReplayReader.read_scores()
 
 [<EntryPoint>]
 let main argv =

@@ -120,71 +120,49 @@ let collect_results () =
         | WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
     }
 
-let HANDS_FREE_AUTOMATION = true
+let HANDS_FREE_AUTOMATION = false
 
 let run_experiment () =
 
     // have osu! and GosuMemory running
-
-    for od = 0 to 20 do
         
-        let od = float32 od * 0.5f
+    let od = 8.0f
 
-        let perfect = floor_uom (OsuMania.perfect_window od) * 1.2f * 1.0f<rate> |> floor_uom
-        let great = floor_uom (OsuMania.great_window od) * 1.1f * 1.0f<rate> |> floor_uom
-        let good = floor_uom (OsuMania.good_window od) * 1.0f<rate> |> floor_uom
-        let ok = floor_uom (OsuMania.ok_window od) * 1.0f<rate> |> floor_uom
-        let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
+    let perfect = floor_uom (OsuMania.perfect_window od) * 1.2f * 1.0f<rate> |> floor_uom
+    let great = floor_uom (OsuMania.great_window od) * 1.1f * 1.0f<rate> |> floor_uom
+    let good = floor_uom (OsuMania.good_window od) * 1.0f<rate> |> floor_uom
+    let ok = floor_uom (OsuMania.ok_window od) * 1.0f<rate> |> floor_uom
+    let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
+    let miss = floor_uom (OsuMania.miss_window od) * 1.0f<rate> |> floor_uom
 
-        let notes = 
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 100.0f<ms>)
-                .Hold(200.0f<ms>, 300.0f<ms>)
+    let notes = 
+        ChartBuilder(4)
+            .Hold(0.0f<ms>, 1.0f<ms>)
+            .Hold(200.0f<ms>, 201.0f<ms>)
+            .Hold(400.0f<ms>, 401.0f<ms>)
+            .Build()
 
-                .Hold(400.0f<ms>, 500.0f<ms>)
-                .Hold(600.0f<ms>, 700.0f<ms>)
+    let replay =
+        ReplayBuilder()
+            .KeyDownFor(0.0f<ms> + ok - 1.0f<ms>, 1.0f<ms>)
+            .KeyDownFor(200.0f<ms> + ok, 1.0f<ms>)
+            .KeyDownFor(400.0f<ms> + ok + 1.0f<ms>, 1.0f<ms>)
+            .Build()
+            .GetFullReplay()
 
-                .Hold(800.0f<ms>, 900.0f<ms>)
-                .Hold(1000.0f<ms>, 1100.0f<ms>)
+    printfn "%.0f" ok
 
-                .Hold(1300.0f<ms>, 1400.0f<ms>)
-                .Hold(1600.0f<ms>, 1700.0f<ms>)
+    Logging.Info(sprintf "Experiment: nomod LN windows experiment: OD%.1f" od)
 
-                .Hold(1900.0f<ms>, 2000.0f<ms>)
-                .Hold(2200.0f<ms>, 2300.0f<ms>)
-                .Build()
-
-        let replay =
-            ReplayBuilder()
-                .KeyDownUntil(0.0f<ms> - perfect, 100.0f<ms>)
-                .KeyDownUntil(200.0f<ms> - perfect - 1.0f<ms>, 300.0f<ms>)
-
-                .KeyDownUntil(400.0f<ms> - great, 500.0f<ms>)
-                .KeyDownUntil(600.0f<ms> - great - 1.0f<ms>, 700.0f<ms>)
-
-                .KeyDownUntil(800.0f<ms> - good, 900.0f<ms>)
-                .KeyDownUntil(1000.0f<ms> - good - 1.0f<ms>, 1100.0f<ms>)
-
-                .KeyDownUntil(1300.0f<ms> - ok, 1400.0f<ms>)
-                .KeyDownUntil(1600.0f<ms> - ok - 1.0f<ms>, 1700.0f<ms>)
-
-                .KeyDownUntil(1900.0f<ms> - meh, 2000.0f<ms>)
-                .KeyDownUntil(2200.0f<ms> - meh - 1.0f<ms>, 2300.0f<ms>)
-
-                .Build()
-                .GetFullReplay()
-
-        Logging.Info(sprintf "Experiment: nomod LN windows experiment: OD%.1f" od)
-
-        generate_scenario notes replay od Mods.None
+    generate_scenario notes replay od Mods.None
         
-        Threading.Thread.Sleep(2000)
-        if HANDS_FREE_AUTOMATION then
-            Diagnostics.Process
-                .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
-                .WaitForExit()
-            Threading.Thread.Sleep(8000)
-        else
-            Console.ReadKey() |> ignore
+    Threading.Thread.Sleep(2000)
+    if HANDS_FREE_AUTOMATION then
+        Diagnostics.Process
+            .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
+            .WaitForExit()
+        Threading.Thread.Sleep(8000)
+    else
+        Console.ReadKey() |> ignore
 
-        collect_results () |> Async.RunSynchronously
+    collect_results () |> Async.RunSynchronously

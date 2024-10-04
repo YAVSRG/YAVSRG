@@ -1350,3 +1350,180 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
+    
+    [<Test>]
+    let Wife3_TouchingWindows () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(360.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(180.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(180.0f<ms / rate>, false)
+                HIT(180.0f<ms / rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+
+    [<Test>]
+    let SCJ4_TouchingWindows () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(360.0f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(180.0f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(180.0f<ms / rate>, false)
+                HIT(180.0f<ms / rate>, true)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+    
+    [<Test>]
+    let ExpiredNoteMarkedBeforeTapProcessed () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(360.5f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(180.5f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                0, HIT(180.0f<ms / rate>, true)
+                1, HIT(-180.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+
+    let SIMPLE_RULESET : Ruleset =
+        {
+            Name = "SIMPLE"
+            Description = "SIMPLE"
+            Judgements =
+                [|
+                    {
+                        Name = "HIT"
+                        Color = Color.White
+                        TimingWindows = Some (-180.0f<ms / rate>, 90.0f<ms / rate>)
+                        BreaksCombo = false
+                    }
+                    {
+                        Name = "MISS"
+                        Color = Color.Red
+                        TimingWindows = None
+                        BreaksCombo = true
+                    }
+                |]
+            Grades = [||]
+            Lamps = [||]
+            HitMechanics = { NotePriority = NotePriority.Etterna; GhostTapJudgement = None }
+            HoldMechanics = HoldMechanics.OnlyRequireHold 90.0f<ms / rate>
+            Accuracy = AccuracyPoints.PointsPerJudgement [|1.0; 0.0|]
+            Formatting = { DecimalPlaces = DecimalPlaces.TWO }
+        }
+    
+    [<Test>]
+    let ExpiredNoteMarkedBeforeTapProcessed_AsymmetricalWindows () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(90.5f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(90.5f<ms>, 30.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(SIMPLE_RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                0, HIT(90.0f<ms / rate>, true)
+                1, HIT(0.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )
+    
+    [<Test>]
+    let ExpiredNoteMarkedBeforeTapProcessed_WiderWindowsDueToReleases () =
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(90.5f<ms>)
+                .Build()
+
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(90.5f<ms>, 30.0f<ms>)
+                .Build()
+
+        let ruleset =
+            { SIMPLE_RULESET with
+                HoldMechanics = HoldMechanics.OnlyRequireHold 180.0f<ms / rate>
+            }
+                
+        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                1, HIT(0.0f<ms / rate>, false)
+                0, HIT(90.0f<ms / rate>, true)
+            ],
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+        )
+
+        Assert.AreEqual(
+            event_processing.Events |> Seq.map (_.Time),
+            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+        )

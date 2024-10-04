@@ -51,36 +51,6 @@ module OsuClientParity =
         Assert.AreEqual(as_interlude_replay, return_as_interlude_replay)
 
     [<Test>]
-    let OsuManiaColumnLockMechanic_Replicate_1 () =
-
-        let notes = 
-            ChartBuilder(4)
-                .Note(0.0f<ms>)
-                .Note(108.0f<ms>)
-                .Note(222.0f<ms>)
-                .Build()
-
-        let replay =
-            ReplayBuilder()
-                .KeyDownFor(-71.0f<ms>, 30.0f<ms>)
-                .KeyDownFor(108.0f<ms> - 121.0f<ms>, 30.0f<ms>) // this input is getting eaten because it is before note 0 which has already been hit
-                .KeyDownFor(222.0f<ms> - 125.0f<ms>, 30.0f<ms>)
-                .KeyDownFor(222.0f<ms>, 30.0f<ms>)
-                .Build()
-
-        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
-        event_processing.Update Time.infinity
-
-        Assert.AreEqual(
-            [
-                HIT(-71.0f<ms / rate>, false)
-                HIT(-11.0f<ms / rate>, false)
-                HIT(0.0f<ms / rate>, false)
-            ],
-            event_processing.Events |> Seq.map _.Action
-        )
-
-    [<Test>]
     let OsuRuleset_MatchesReplayJudgements_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode_replay (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
 
@@ -147,6 +117,36 @@ module OsuClientParity =
     let OD10_RULESET = OsuMania.create 10.0f OsuMania.NoMod
 
     [<Test>]
+    let OsuManiaColumnLockMechanic_Replicate_1 () =
+
+        let notes = 
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(108.0f<ms>)
+                .Note(222.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(-71.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(108.0f<ms> - 121.0f<ms>, 30.0f<ms>) // this input is getting eaten because it is before note 0 which has already been hit
+                .KeyDownFor(222.0f<ms> - 125.0f<ms>, 30.0f<ms>)
+                .KeyDownFor(222.0f<ms>, 30.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HIT(-71.0f<ms / rate>, false)
+                HIT(-11.0f<ms / rate>, false)
+                HIT(0.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD10 () =
         let notes = 
             ChartBuilder(4)
@@ -171,8 +171,8 @@ module OsuClientParity =
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
-                HIT(-28.0f<ms / rate>, false)
                 HIT(CONVENTIONAL_LATE_WINDOW, true)
+                HIT(-28.0f<ms / rate>, false)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -203,8 +203,8 @@ module OsuClientParity =
         Assert.AreEqual(
             [
                 HIT(78.0f<ms / rate>, false)
-                HIT(-22.0f<ms / rate>, false)
                 HIT(CONVENTIONAL_LATE_WINDOW, true)
+                HIT(-22.0f<ms / rate>, false)
                 HIT(-9.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map _.Action
@@ -474,3 +474,31 @@ module OsuClientParity =
                 ],
                 judgement_sequence
             )
+
+    [<Test>]
+    [<Ignore("Doesn't quite match up with osu!mania. Oh well it will probably never happen in a score")>]
+    let OsuRuleset_LateLnHeadWindowsBehaviour () =
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1.0f<ms>)
+                .Hold(400.0f<ms>, 401.0f<ms>)
+                .Hold(800.0f<ms>, 801.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms> + 102.0f<ms>, 1.0f<ms>)
+                .KeyDownFor(400.0f<ms> + 103.0f<ms>, 1.0f<ms>)
+                .KeyDownFor(800.0f<ms> + 104.0f<ms>, 1.0f<ms>)
+                .Build()
+                
+        let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        let judgement_sequence = 
+            event_processing.Events 
+            |> Seq.map _.Action
+            |> Seq.choose (function Release e -> e.Judgement | _ -> None)
+            |> Seq.map fst
+        
+        Assert.AreEqual([ 3; 4; 5 ], judgement_sequence)

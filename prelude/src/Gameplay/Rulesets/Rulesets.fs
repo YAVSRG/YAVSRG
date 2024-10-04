@@ -177,7 +177,7 @@ type Ruleset =
         | HoldMechanics.OnlyJudgeReleases _ -> 
             this.NoteWindows
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
-            -w.Window50, w.Window100
+            -w.Window50, w.Window100 - 1.0f<ms / rate>
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
             early, late
 

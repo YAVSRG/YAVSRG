@@ -179,7 +179,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                     this.HandleEvent
                         {
                             Index = expired_notes_index
-                            Time = t - first_note + late_note_window_scaled
+                            Time = t - first_note + late_window_scaled
                             Column = k
                             Action = HIT(deltas.[k], true)
                         }
@@ -191,7 +191,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                     this.HandleEvent
                         {
                             Index = expired_notes_index
-                            Time = t - first_note + late_note_window_scaled
+                            Time = t - first_note + late_window_scaled
                             Column = k
                             Action = HOLD(deltas.[k], true)
                         }
@@ -214,7 +214,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                     this.HandleEvent
                         {
                             Index = expired_notes_index
-                            Time = t - first_note + late_release_window_scaled
+                            Time = t - first_note + late_window_scaled
                             Column = k
                             Action = RELEASE(deltas.[k], true, overhold, dropped, head_deltas.[k], missed_head)
                         }
