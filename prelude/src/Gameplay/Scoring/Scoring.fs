@@ -97,12 +97,17 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             j <- j + 1
         j
 
-    let judgement_to_points : GameplayTime -> int -> float =
+    let judgement_or_ms_to_points : GameplayTime -> int -> float =
         match ruleset.Accuracy with
         | AccuracyPoints.WifeCurve j -> 
             fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
         | AccuracyPoints.PointsPerJudgement weights ->
             fun _ (judgement: int) -> weights.[judgement]
+
+    let judgement_to_points (judgement: int) =
+        match ruleset.Accuracy with
+        | AccuracyPoints.PointsPerJudgement weights -> weights.[judgement]
+        | _ -> failwith "Ruleset isn't using PointsPerJudgement + a feature that expects it to be used. This line should be unreachable if the ruleset was validated"
 
     member val Duration = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
     member val JudgementCounts = judgement_counts
@@ -135,7 +140,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
         | _ ->
             let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
-            let points = judgement_to_points delta judgement
+            let points = judgement_or_ms_to_points delta judgement
 
             score_points(points, judgement)
 
@@ -153,7 +158,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         | HoldMechanics.OnlyRequireHold _
         | HoldMechanics.JudgeReleasesSeparately _ ->
             let judgement = if is_missed then ruleset.DefaultJudgement else ms_to_judgement delta
-            let points = judgement_to_points delta judgement
+            let points = judgement_or_ms_to_points delta judgement
 
             score_points(points, judgement)
             
@@ -184,7 +189,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 else 
                     OsuHolds.ln_judgement windows head_delta release_delta overheld dropped
 
-            let points = judgement_to_points head_delta judgement
+            let points = judgement_to_points judgement
 
             score_points(points, judgement)
             
@@ -206,7 +211,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 elif dropped then max head_judgement judgement_if_dropped
                 else head_judgement
 
-            let points = judgement_to_points head_delta judgement
+            let points = judgement_to_points judgement
 
             score_points(points, judgement)
             
@@ -250,7 +255,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                         j <- j + 1
                     j
                     
-            let points = judgement_to_points release_delta judgement
+            let points = judgement_or_ms_to_points release_delta judgement
             score_points(points, judgement)
             
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
@@ -271,7 +276,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     ms_to_judgement release_delta
                     |> if dropped || overheld then max judgement_if_dropped else id
 
-            let points = judgement_to_points release_delta judgement
+            let points = judgement_or_ms_to_points release_delta judgement
 
             score_points(points, judgement)
 
@@ -296,7 +301,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member private this.ProcessGhostTap() : ComboAction * GameplayAction =
         match ruleset.HitMechanics.GhostTapJudgement with
         | Some judgement ->
-            let points = judgement_to_points (infinityf * 1.0f<ms/rate>) judgement // todo: make better design decisions
+            let points = judgement_to_points judgement
 
             score_points(points, judgement)
 
