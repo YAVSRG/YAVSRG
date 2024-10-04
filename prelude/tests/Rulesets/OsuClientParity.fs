@@ -395,3 +395,82 @@ module OsuClientParity =
             ],
             event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
         )
+
+    [<Test>]
+    let OsuRuleset_LnEarlyHeadPerfectReleaseWindows () =
+        for step = 0 to 20 do
+        
+            let od = float32 step * 0.5f
+
+            let perfect = floor_uom (OsuMania.perfect_window od) * 1.2f * 1.0f<rate> |> floor_uom
+            let great = floor_uom (OsuMania.great_window od) * 1.1f * 1.0f<rate> |> floor_uom
+            let good = floor_uom (OsuMania.good_window od) * 1.0f<rate> |> floor_uom
+            let ok = floor_uom (OsuMania.ok_window od) * 1.0f<rate> |> floor_uom
+            let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
+
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 100.0f<ms>)
+                    .Hold(200.0f<ms>, 300.0f<ms>)
+
+                    .Hold(400.0f<ms>, 500.0f<ms>)
+                    .Hold(600.0f<ms>, 700.0f<ms>)
+
+                    .Hold(800.0f<ms>, 900.0f<ms>)
+                    .Hold(1000.0f<ms>, 1100.0f<ms>)
+
+                    .Hold(1300.0f<ms>, 1400.0f<ms>)
+                    .Hold(1600.0f<ms>, 1700.0f<ms>)
+
+                    .Hold(1900.0f<ms>, 2000.0f<ms>)
+                    //.Hold(2200.0f<ms>, 2300.0f<ms>)
+                    .Build()
+
+            let replay =
+                ReplayBuilder()
+                    .KeyDownUntil(0.0f<ms> - perfect, 100.0f<ms>) // WITHIN perfect window, gets 300g
+                    .KeyDownUntil(200.0f<ms> - perfect - 1.0f<ms>, 300.0f<ms>) // gets 300
+
+                    .KeyDownUntil(400.0f<ms> - great, 500.0f<ms>) // 300
+                    .KeyDownUntil(600.0f<ms> - great - 1.0f<ms>, 700.0f<ms>) // 200
+
+                    .KeyDownUntil(800.0f<ms> - good, 900.0f<ms>) // 200
+                    .KeyDownUntil(1000.0f<ms> - good - 1.0f<ms>, 1100.0f<ms>) // 100
+
+                    .KeyDownUntil(1300.0f<ms> - ok, 1400.0f<ms>) // 100
+                    .KeyDownUntil(1600.0f<ms> - ok - 1.0f<ms>, 1700.0f<ms>) // 50
+
+                    .KeyDownUntil(1900.0f<ms> - meh, 2000.0f<ms>) // 50
+                    //.KeyDownUntil(2200.0f<ms> - meh - 1.0f<ms>, 2300.0f<ms>) // gets 100 again for some reason
+
+                    .Build()
+
+            let ruleset = OsuMania.create od OsuMania.NoMod
+        
+            printfn "TRYING OD %.1f\n" od
+
+            let event_processing = ScoreProcessor(ruleset, 4, replay, notes, 1.0f<rate>)
+            event_processing.Update Time.infinity
+
+            let judgement_sequence = 
+                event_processing.Events 
+                |> Seq.map _.Action
+                |> Seq.choose (function Release e -> e.Judgement | _ -> None)
+                |> Seq.map fst
+                |> Seq.map debug
+        
+            Assert.AreEqual(
+                [
+                    0
+                    1
+                    1
+                    2
+                    2
+                    3
+                    3
+                    4
+                    4
+                    //3
+                ],
+                judgement_sequence
+            )

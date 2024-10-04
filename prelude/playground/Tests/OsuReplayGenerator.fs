@@ -126,27 +126,57 @@ let run_experiment () =
 
     // have osu! and GosuMemory running
 
-    for od in [0.8f; 6.4f; 9.2f; 3.6f; 8.0f] do
+    for od = 0 to 20 do
+        
+        let od = float32 od * 0.5f
 
-        let window_raw = (64.0f<ms / rate> - 3.0f<ms / rate> * od) * 0.75f<rate> / 1.4f
-        let window = if round (float32 window_raw) = float32 window_raw && int window_raw % 2 = 0 then window_raw - 1.0f<ms> else floor_uom window_raw
+        let perfect = floor_uom (OsuMania.perfect_window od) * 1.2f * 1.0f<rate> |> floor_uom
+        let great = floor_uom (OsuMania.great_window od) * 1.1f * 1.0f<rate> |> floor_uom
+        let good = floor_uom (OsuMania.good_window od) * 1.0f<rate> |> floor_uom
+        let ok = floor_uom (OsuMania.ok_window od) * 1.0f<rate> |> floor_uom
+        let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
 
         let notes = 
             ChartBuilder(4)
-                .Note(0.0f<ms>)
-                .Note(1000.0f<ms>)
+                .Hold(0.0f<ms>, 100.0f<ms>)
+                .Hold(200.0f<ms>, 300.0f<ms>)
+
+                .Hold(400.0f<ms>, 500.0f<ms>)
+                .Hold(600.0f<ms>, 700.0f<ms>)
+
+                .Hold(800.0f<ms>, 900.0f<ms>)
+                .Hold(1000.0f<ms>, 1100.0f<ms>)
+
+                .Hold(1300.0f<ms>, 1400.0f<ms>)
+                .Hold(1600.0f<ms>, 1700.0f<ms>)
+
+                .Hold(1900.0f<ms>, 2000.0f<ms>)
+                .Hold(2200.0f<ms>, 2300.0f<ms>)
                 .Build()
 
         let replay =
             ReplayBuilder()
-                .KeyDownFor(0.0f<ms> + window, 30.0f<ms>)
-                .KeyDownFor(1000.0f<ms> + window + 1.0f<ms>, 30.0f<ms>)
+                .KeyDownUntil(0.0f<ms> - perfect, 100.0f<ms>)
+                .KeyDownUntil(200.0f<ms> - perfect - 1.0f<ms>, 300.0f<ms>)
+
+                .KeyDownUntil(400.0f<ms> - great, 500.0f<ms>)
+                .KeyDownUntil(600.0f<ms> - great - 1.0f<ms>, 700.0f<ms>)
+
+                .KeyDownUntil(800.0f<ms> - good, 900.0f<ms>)
+                .KeyDownUntil(1000.0f<ms> - good - 1.0f<ms>, 1100.0f<ms>)
+
+                .KeyDownUntil(1300.0f<ms> - ok, 1400.0f<ms>)
+                .KeyDownUntil(1600.0f<ms> - ok - 1.0f<ms>, 1700.0f<ms>)
+
+                .KeyDownUntil(1900.0f<ms> - meh, 2000.0f<ms>)
+                .KeyDownUntil(2200.0f<ms> - meh - 1.0f<ms>, 2300.0f<ms>)
+
                 .Build()
                 .GetFullReplay()
 
-        Logging.Info(sprintf "Experiment: HTHR windows experiment: OD%.1f" od)
+        Logging.Info(sprintf "Experiment: nomod LN windows experiment: OD%.1f" od)
 
-        generate_scenario notes replay od (Mods.HalfTime ||| Mods.HardRock)
+        generate_scenario notes replay od Mods.None
         
         Threading.Thread.Sleep(2000)
         if HANDS_FREE_AUTOMATION then
