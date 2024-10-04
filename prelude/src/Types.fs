@@ -37,7 +37,7 @@ module Types =
     type ms = Percyqaz.Common.ms
 
     [<Measure>]
-    type rate
+    type rate = Percyqaz.Common.rate
 
     [<Measure>]
     type beat
