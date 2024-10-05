@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Gameplay.Rulesets
 
 open System
-open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 
@@ -129,8 +128,6 @@ type Ruleset =
         HoldMechanics: HoldMechanics
         Accuracy: AccuracyPoints
         Formatting: RulesetFormatting
-        // todo: judgements are always worth points as fallbacks for certain LN mechanics, even when using wife curve
-        // todo: ghost tap ruling
     }
     member this.DefaultJudgement: int = this.Judgements.Length - 1
 

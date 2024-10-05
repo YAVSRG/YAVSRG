@@ -38,7 +38,6 @@ type LoadedChartInfo =
         WithMods: ModdedChart
         NotecountsString: string
         Rating: DifficultyRating
-        Patterns: PatternReport
 
         WithColors: ColoredChart
     }
@@ -96,7 +95,6 @@ module SelectedChart =
     let mutable WITH_MODS: ModdedChart option = None
     let mutable FMT_NOTECOUNTS: string option = None
     let mutable RATING: DifficultyRating option = None
-    let mutable PATTERNS: PatternReport option = None
 
     let mutable WITH_COLORS: ColoredChart option = None
 
@@ -113,7 +111,6 @@ module SelectedChart =
             WithMods = WITH_MODS.Value
             NotecountsString = FMT_NOTECOUNTS.Value
             Rating = RATING.Value
-            Patterns = PATTERNS.Value
 
             WithColors = WITH_COLORS.Value
         }
@@ -190,7 +187,6 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternReport.from_chart chart // todo: no need to recalc when rates change any more. or in fact ever because it's in CC
                         let note_counts = format_notecounts with_mods
 
                         yield
@@ -198,7 +194,6 @@ module SelectedChart =
                                 WITH_MODS <- Some with_mods
                                 WITH_COLORS <- Some with_colors
                                 RATING <- Some rating
-                                PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
                                 chart_change_finished.Trigger(create_loaded_chart_info ())
 
@@ -220,7 +215,6 @@ module SelectedChart =
 
                         let rating = DifficultyRating.calculate rate with_mods.Notes
 
-                        let patterns = PatternReport.from_chart chart // todo: no need to recalc
                         let note_counts = format_notecounts with_mods
 
                         yield
@@ -228,7 +222,6 @@ module SelectedChart =
                                 WITH_MODS <- Some with_mods
                                 WITH_COLORS <- Some with_colors
                                 RATING <- Some rating
-                                PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
 
                                 if is_interrupted_load then
@@ -280,7 +273,6 @@ module SelectedChart =
         WITH_MODS <- None
         FMT_NOTECOUNTS <- None
         RATING <- None
-        PATTERNS <- None
 
         WITH_COLORS <- None
 
@@ -308,7 +300,6 @@ module SelectedChart =
             WITH_MODS <- None
             FMT_NOTECOUNTS <- None
             RATING <- None
-            PATTERNS <- None
 
             WITH_COLORS <- None
 

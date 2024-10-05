@@ -216,7 +216,6 @@ module Leaderboard =
                                     (score.Rate * 1.0f<rate>)
 
                             let rating = DifficultyRating.calculate (score.Rate * 1.0f<rate>) with_mods.Notes
-                            let patterns = PatternReport.from_chart req.Chart
 
                             let score_info: ScoreInfo =
                                 {
@@ -234,7 +233,6 @@ module Leaderboard =
                                     Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
 
                                     Rating = rating
-                                    Patterns = patterns
                                     Physical = Performance.calculate rating with_mods.Keys scoring |> fst
 
                                     ImportedFromOsu = false

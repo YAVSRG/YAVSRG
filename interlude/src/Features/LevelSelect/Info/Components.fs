@@ -20,7 +20,7 @@ type PersonalBests() =
 
     let refresh(info: LoadedChartInfo) =
         save_data <- Some info.SaveData
-        patterns <- Some info.Patterns
+        patterns <- Some info.CacheInfo.Patterns
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_finished.Add refresh

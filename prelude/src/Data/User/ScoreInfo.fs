@@ -4,7 +4,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
@@ -17,7 +16,7 @@ type ScorePlayedBy =
     | You
     | Username of string
 
-// Everything you need to display a score screen or watch a replay of a score
+/// Everything you need to display a score screen or watch a replay of a score
 type ScoreInfo =
     {
         ChartMeta: ChartMeta
@@ -34,7 +33,6 @@ type ScoreInfo =
         mutable Grade: int
 
         Rating: DifficultyRating
-        Patterns: PatternReport
         Physical: float
 
         ImportedFromOsu: bool
@@ -77,7 +75,6 @@ module ScoreInfo =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
         let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
-        let patterns = PatternReport.from_chart chart
 
         {
             ChartMeta = cc
@@ -94,7 +91,6 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
-            Patterns = patterns
             Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
 
             ImportedFromOsu = score.IsImported

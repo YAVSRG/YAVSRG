@@ -18,7 +18,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     let mod_string = Mods.format (score_info.Rate, score_info.Mods, false)
 
     let category, main_elements, minor_elements =
-        let c =  score_info.Patterns.Category
+        let c =  score_info.ChartMeta.Patterns.Category
         c.Category,
         String.concat ", " c.MajorFeatures |> (function "" -> "--" | x -> x),
         String.concat ", " c.MinorFeatures |> (function "" -> "--" | x -> x)

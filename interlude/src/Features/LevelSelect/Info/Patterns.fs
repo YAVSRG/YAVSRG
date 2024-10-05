@@ -121,5 +121,5 @@ type Patterns(display: Setting<Display>) =
         )
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
-        patterns <- info.Patterns.Patterns |> List.truncate 6
-        category <- info.Patterns.Category
+        patterns <- info.CacheInfo.Patterns.Patterns |> List.truncate 6
+        category <- info.CacheInfo.Patterns.Category

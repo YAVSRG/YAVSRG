@@ -38,7 +38,6 @@ module Gameplay =
             Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
             Rating = info.Rating
-            Patterns = info.Patterns
             Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
             ImportedFromOsu = false
@@ -69,7 +68,7 @@ module Gameplay =
                         score_info.WithRuleset Rulesets.DEFAULT
                     else score_info
 
-                KeymodeSkillBreakdown.score standardised_score.Patterns.Patterns standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
+                KeymodeSkillBreakdown.score standardised_score.ChartMeta.Patterns.Patterns standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
                 |> ignore //|> printfn "%O"
 
                 let new_bests, improvement_flags =
