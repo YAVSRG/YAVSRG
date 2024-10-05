@@ -86,6 +86,7 @@ type OsuLnWindows =
         Window200: GameplayTime
         Window100: GameplayTime
         Window50: GameplayTime
+        Window0: GameplayTime
         WindowOverhold200: GameplayTime
         WindowOverhold100: GameplayTime
     }
@@ -174,7 +175,7 @@ type Ruleset =
         | HoldMechanics.OnlyJudgeReleases _ -> 
             this.NoteWindows
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
-            -w.Window50, w.Window100 - 1.0f<ms / rate>
+            -w.Window0, w.Window100 - 1.0f<ms / rate>
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, _, _)) ->
             early, late
 

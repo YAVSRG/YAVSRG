@@ -120,7 +120,7 @@ let collect_results () =
         | WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
     }
 
-let HANDS_FREE_AUTOMATION = false
+let HANDS_FREE_AUTOMATION = true
 
 let run_experiment () =
 
@@ -135,34 +135,32 @@ let run_experiment () =
     let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
     let miss = floor_uom (OsuMania.miss_window od) * 1.0f<rate> |> floor_uom
 
-    let notes = 
-        ChartBuilder(4)
-            .Hold(0.0f<ms>, 1.0f<ms>)
-            .Hold(200.0f<ms>, 201.0f<ms>)
-            .Hold(400.0f<ms>, 401.0f<ms>)
-            .Build()
+    for head in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
 
-    let replay =
-        ReplayBuilder()
-            .KeyDownFor(0.0f<ms> + ok - 1.0f<ms>, 1.0f<ms>)
-            .KeyDownFor(200.0f<ms> + ok, 1.0f<ms>)
-            .KeyDownFor(400.0f<ms> + ok + 1.0f<ms>, 1.0f<ms>)
-            .Build()
-            .GetFullReplay()
+        for tail in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
 
-    printfn "%.0f" ok
+            let notes = 
+                ChartBuilder(4)
+                    .Hold(0.0f<ms>, 800.0f<ms>)
+                    .Build()
 
-    Logging.Info(sprintf "Experiment: nomod LN windows experiment: OD%.1f" od)
+            let replay =
+                ReplayBuilder()
+                    .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
+                    .Build()
+                    .GetFullReplay()
 
-    generate_scenario notes replay od Mods.None
+            Logging.Info(sprintf "Experiment: LN combination experiment: OD%.1f; Head %.1fms; Tail %.1fms" od head tail)
+
+            generate_scenario notes replay od Mods.None
         
-    Threading.Thread.Sleep(2000)
-    if HANDS_FREE_AUTOMATION then
-        Diagnostics.Process
-            .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
-            .WaitForExit()
-        Threading.Thread.Sleep(8000)
-    else
-        Console.ReadKey() |> ignore
+            Threading.Thread.Sleep(2000)
+            if HANDS_FREE_AUTOMATION then
+                Diagnostics.Process
+                    .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
+                    .WaitForExit()
+                Threading.Thread.Sleep(8000)
+            else
+                Console.ReadKey() |> ignore
 
-    collect_results () |> Async.RunSynchronously
+            collect_results () |> Async.RunSynchronously

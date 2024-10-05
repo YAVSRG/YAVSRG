@@ -51,6 +51,7 @@ module OsuMania =
         let GOOD = good_window od |> mode.Apply |> floor_uom
         let OK = ok_window od |> mode.Apply |> floor_uom
         let MEH = meh_window od |> mode.Apply |> floor_uom
+        let MISS = miss_window od |> mode.Apply |> floor_uom
 
         {
             Window320 = clipped (PERFECT * 1.2f)
@@ -58,6 +59,7 @@ module OsuMania =
             Window200 = clipped GOOD
             Window100 = clipped OK
             Window50 = clipped MEH
+            Window0 = clipped MISS
             // todo: this matches experimental data but I must not be understanding something about LNs
             // todo: investiagate if the 1ms edge window thing affects releasing on the edge
             WindowOverhold200 = 

@@ -25,12 +25,12 @@ module OsuHolds =
             elif head_delta_abs < windows.Window300 && mean < windows.Window300 then 1 // 300
             elif head_delta_abs < windows.Window200 && mean < windows.Window200 then 2 // 200
             elif head_delta_abs < windows.Window100 && mean < windows.Window100 then 3 // 100
-            elif head_delta_abs < windows.Window50 && mean < windows.Window50 then 4 // 50
-            else 5 // miss
+            elif tail_delta < -windows.Window50 then 5 // miss
+            else 4 // 50
 
         elif dropped then
 
-            if tail_delta_abs < windows.Window50 then 4 else 5
+            if tail_delta < -windows.Window50 then 5 else 4
 
         else
 
