@@ -34,15 +34,19 @@ type Combo(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let pop_animation = Animation.Fade(0.0f)
     let color = Animation.Color(Color.White)
-    let mutable hits = 0
+    let mutable event_count = 0
 
     let font_texture = Content.Texture "combo-font"
 
     do
-        state.SubscribeEvents(fun _ ->
-            hits <- hits + 1
+        state.SubscribeEvents(fun ev ->
+            match ev.Combo with
+            | NoChange -> ()
+            | _ ->
 
-            if (config.ComboLampColors && hits > 50) then
+            event_count <- event_count + 1
+
+            if (config.ComboLampColors && event_count > 50) then
                 color.Target <-
                     Lamp.calculate state.Ruleset.Lamps state.Scoring.JudgementCounts state.Scoring.ComboBreaks
                     |> state.Ruleset.LampColor
