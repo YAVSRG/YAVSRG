@@ -61,7 +61,6 @@ module OsuMania =
             Window50 = clipped MEH
             Window0 = clipped MISS
             // todo: this matches experimental data but I must not be understanding something about LNs
-            // todo: investiagate if the 1ms edge window thing affects releasing on the edge
             WindowOverhold200 = 
                 let base_window = floor (43f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
                 match mode with

@@ -902,7 +902,7 @@ module OsuClientParity =
 
         for head, tail, expected_judgement in TEST_DATA do
         
-            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
+            //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes = 
                 ChartBuilder(4)
@@ -947,7 +947,7 @@ module OsuClientParity =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
+            //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes = 
                 ChartBuilder(4)
@@ -992,7 +992,7 @@ module OsuClientParity =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
+            //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes = 
                 ChartBuilder(4)
