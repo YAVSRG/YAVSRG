@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Data\replay.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Hachi - DONUT HOLE (Raveille) [Filling].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -21,6 +24,7 @@
     <None Include="Data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Compile Include="Replays\Replays.fs" />
     <Compile Include="Rulesets\Helpers.fs" />
     <Compile Include="Rulesets\Validation.fs" />
     <Compile Include="Rulesets\Lamps.fs" />

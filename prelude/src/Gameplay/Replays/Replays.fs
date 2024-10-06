@@ -90,7 +90,7 @@ module Replay =
             for i = 0 to (count - 1) do
                 let time = br.ReadSingle()
 
-                if Single.IsNaN time || Single.IsInfinity time then
+                if not (Single.IsFinite time) then
                     failwith "replay contains invalid float value"
 
                 if time < last_time then
