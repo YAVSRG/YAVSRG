@@ -266,6 +266,7 @@ module Ruleset =
                 bw.Write (float32 windows.Window200)
                 bw.Write (float32 windows.Window100)
                 bw.Write (float32 windows.Window50)
+                bw.Write (float32 windows.Window0)
                 bw.Write (float32 windows.WindowOverhold200)
                 bw.Write (float32 windows.WindowOverhold100)
             | HeadTailCombineRule.HeadJudgementOr (early_window, late_window, judgement_if_dropped, judgement_if_overheld) ->
@@ -376,6 +377,7 @@ module Ruleset =
                     if negative(windows.Window200) then failwith "osu!mania ln Window200 must be non-negative"
                     if negative(windows.Window100) then failwith "osu!mania ln Window100 must be non-negative"
                     if negative(windows.Window50) then failwith "osu!mania ln Window50 must be non-negative"
+                    if negative(windows.Window0) then failwith "osu!mania ln Window50 must be non-negative"
                     if negative(windows.WindowOverhold200) then failwith "osu!mania ln WindowOverhold200 must be non-negative"
                     if negative(windows.WindowOverhold100) then failwith "osu!mania ln WindowOverhold100 must be non-negative"
 
