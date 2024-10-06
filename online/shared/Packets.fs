@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open Prelude
 
 [<AutoOpen>]
 module Packets =
@@ -29,7 +30,7 @@ module Packets =
             Artist: string
             Title: string
             Creator: string
-            Rate: float32
+            Rate: Rate
             Mods: (string * int) array
         }
         member this.Write(bw: BinaryWriter) =
@@ -37,7 +38,7 @@ module Packets =
             bw.Write this.Artist
             bw.Write this.Title
             bw.Write this.Creator
-            bw.Write this.Rate
+            bw.Write (float32 this.Rate)
             bw.Write(byte this.Mods.Length)
 
             for (id, state) in this.Mods do
@@ -50,7 +51,7 @@ module Packets =
                 Artist = br.ReadString()
                 Title = br.ReadString()
                 Creator = br.ReadString()
-                Rate = br.ReadSingle()
+                Rate = br.ReadSingle() * 1.0f<rate>
                 Mods = Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32())
             }
 

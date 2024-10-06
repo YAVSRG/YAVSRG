@@ -6,7 +6,6 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
-open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Content
@@ -56,7 +55,7 @@ module Gameplay =
                         ({
                             ChartId = score_info.ChartMeta.Hash
                             Replay = score_info.Replay |> Replay.compress_string
-                            Rate = float32 score_info.Rate
+                            Rate = score_info.Rate
                             Mods = score_info.Mods
                             Timestamp = score_info.TimePlayed |> Timestamp.to_datetime
                         }),

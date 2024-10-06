@@ -1,6 +1,8 @@
 ﻿namespace Interlude.Web.Shared.Requests
 
 open Percyqaz.Data
+open Prelude
+open Prelude.Gameplay.Mods
 open Interlude.Web.Shared.API
 
 module Health =
@@ -79,8 +81,8 @@ module Charts =
                 {
                     ChartId: string
                     Replay: string
-                    Rate: float32
-                    Mods: Prelude.Gameplay.Mods.ModState
+                    Rate: Rate
+                    Mods: ModState
                     Timestamp: System.DateTime
                 }
 
@@ -126,8 +128,8 @@ module Charts =
                     Username: string
                     Rank: int
                     Replay: string
-                    Rate: float32
-                    Mods: Prelude.Gameplay.Mods.ModState
+                    Rate: Rate
+                    Mods: ModState
                     Timestamp: System.DateTime
                 }
 

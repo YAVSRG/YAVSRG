@@ -39,13 +39,13 @@ module Scores =
             user_id: int64,
             chart_id: string,
             replay_untrusted_string: string,
-            rate: float32,
+            rate: Rate,
             mods: ModState,
             timestamp: int64
         ) =
         async {
 
-            if rate < 0.5f || rate > 2.0f then
+            if rate < 0.5f<rate> || rate > 2.0f<rate> then
                 return ScoreUploadOutcome.UploadFailed
             else
 
@@ -66,7 +66,7 @@ module Scores =
                 return ScoreUploadOutcome.UploadFailed
             | Ok replay ->
 
-            let is_ranked = rate >= 1.0f && mod_ranked_status = ModStatus.Ranked
+            let is_ranked = rate >= 1.0f<rate> && mod_ranked_status = ModStatus.Ranked
 
             let mod_chart = Mods.apply mods chart
 
@@ -82,7 +82,7 @@ module Scores =
                 let ruleset = Backbeat.rulesets.[ruleset_id]
 
                 let scoring =
-                    ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes (rate * 1.0f<rate>)
+                    ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
 
                 let accuracy = scoring.Accuracy
 

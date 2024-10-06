@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Tests.Domain.Core
 
 open NUnit.Framework
-
+open Prelude
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server.Domain.Core
 
@@ -23,7 +23,7 @@ module Scores =
         let user_id = User.create ("RecentScoreRoundTrip", 0uL) |> User.save_new
 
         let score =
-            Score.create (user_id, CRESCENT_MOON, SCJ4, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+            Score.create (user_id, CRESCENT_MOON, SCJ4, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
         let score_id = Score.save score
 
@@ -52,7 +52,7 @@ module Scores =
 
         let scoreA =
             Score
-                .create(user1_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+                .create(user1_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
@@ -65,7 +65,7 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
@@ -108,7 +108,7 @@ module Scores =
 
         let scoreA =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
@@ -121,7 +121,7 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
@@ -157,14 +157,14 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
         let _ = Score.save scoreB
 
         let scoreA =
-            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
         let _ = Score.save scoreA
 
@@ -198,7 +198,7 @@ module Scores =
 
         let scoreA =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
@@ -211,7 +211,7 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
@@ -243,14 +243,14 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
         let _ = Score.save scoreB
 
         let scoreA =
-            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
         let _ = Score.save scoreA
 
@@ -278,7 +278,7 @@ module Scores =
 
         let scoreA =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f, Map.empty, true, 0.98, 1, 3)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
@@ -291,7 +291,7 @@ module Scores =
 
         let scoreB =
             Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f, Map.empty, true, 0.99, 0, 2)
+                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
@@ -342,7 +342,7 @@ module Scores =
                         chart_id,
                         "AggregateGrades",
                         time,
-                        1.05f,
+                        1.05f<rate>,
                         Map.empty,
                         true,
                         0.99 - 0.01 * float grade,
@@ -392,7 +392,7 @@ module Scores =
                         chart_id,
                         "AggregateScores",
                         time,
-                        1.05f,
+                        1.05f<rate>,
                         Map.empty,
                         true,
                         0.99 - 0.01 * float grade,

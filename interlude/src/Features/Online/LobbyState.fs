@@ -172,7 +172,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
                         Artist = cc.Artist
                         Title = cc.Title
                         Creator = cc.Creator
-                        Rate = float32 rate
+                        Rate = rate
                         Mods = Map.toArray mods
                     }
             )

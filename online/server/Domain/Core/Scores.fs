@@ -14,7 +14,7 @@ type Score =
         RulesetId: string
         TimePlayed: int64
         TimeUploaded: int64
-        Rate: float32
+        Rate: Rate
         Mods: Mods.ModState
         Ranked: bool // precomputed; true only if mod state is valid and rate >= 1
         Accuracy: float
@@ -57,7 +57,7 @@ module Score =
             chart_id: string,
             ruleset_id: string,
             time_played: int64,
-            rate: float32,
+            rate: Rate,
             mods: Mods.ModState,
             is_ranked: bool,
             accuracy: float,
@@ -70,7 +70,7 @@ module Score =
             RulesetId = ruleset_id
             TimePlayed = time_played
             TimeUploaded = Timestamp.now ()
-            Rate = MathF.Round(rate, 2)
+            Rate = MathF.Round(float32 rate, 2) * 1.0f<rate>
             Mods = mods
             Ranked = is_ranked
             Accuracy = accuracy
@@ -110,7 +110,7 @@ module Score =
                     p.String score.RulesetId
                     p.Int64 score.TimePlayed
                     p.Int64 score.TimeUploaded
-                    p.Float32 score.Rate
+                    p.Float32 (float32 score.Rate)
                     p.Json JSON score.Mods
                     p.Boolean score.Ranked
                     p.Float64 score.Accuracy
@@ -131,7 +131,7 @@ module Score =
             Id: int64
             ChartId: string
             TimePlayed: int64
-            Rate: float32
+            Rate: Rate
             Mods: Mods.ModState
             Accuracy: float
             Grade: int
@@ -155,7 +155,7 @@ module Score =
                         Id = r.Int64
                         ChartId = r.String
                         TimePlayed = r.Int64
-                        Rate = r.Float32
+                        Rate = r.Float32 * 1.0f<rate>
                         Mods = r.Json JSON
                         Accuracy = r.Float64
                         Grade = r.Int32
@@ -171,7 +171,7 @@ module Score =
         {
             UserId: int64
             TimePlayed: int64
-            Rate: float32
+            Rate: Rate
             Mods: Mods.ModState
             Accuracy: float
             Grade: int
@@ -206,7 +206,7 @@ module Score =
                     {
                         UserId = r.Int64
                         TimePlayed = r.Int64
-                        Rate = r.Float32
+                        Rate = r.Float32 * 1.0f<rate>
                         Mods = r.Json JSON
                         Accuracy = r.Float64
                         Grade = r.Int32
@@ -222,7 +222,7 @@ module Score =
     type UserLeaderboardScore =
         {
             TimePlayed: int64
-            Rate: float32
+            Rate: Rate
             Mods: Mods.ModState
             Accuracy: float
             Grade: int
@@ -255,7 +255,7 @@ module Score =
                 (fun r ->
                     {
                         TimePlayed = r.Int64
-                        Rate = r.Float32
+                        Rate = r.Float32 * 1.0f<rate>
                         Mods = r.Json JSON
                         Accuracy = r.Float64
                         Grade = r.Int32

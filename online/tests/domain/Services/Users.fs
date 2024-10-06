@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Tests.Domain.Services
 
 open NUnit.Framework
-
+open Prelude
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
@@ -30,7 +30,7 @@ module Users =
                     Scores.CRESCENT_MOON,
                     "RulesetId",
                     Scores.TIMEPLAYED,
-                    1.0f,
+                    1.0f<rate>,
                     Map.empty,
                     true,
                     0.98,

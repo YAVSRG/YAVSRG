@@ -88,7 +88,7 @@ module Printerlude =
                                     ({
                                         ChartId = chart.Hash
                                         Replay = score.Replay |> Replay.compressed_bytes_to_string
-                                        Rate = float32 score.Rate
+                                        Rate = score.Rate
                                         Mods = score.Mods
                                         Timestamp = Timestamp.to_datetime score.Timestamp
                                     }

@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Tests.Domain.Services
 
 open NUnit.Framework
-
+open Prelude
 open Percyqaz.Common
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server.Domain.Core
@@ -27,7 +27,7 @@ module Scores =
                 user_id,
                 Scores.CRESCENT_MOON,
                 Scores.CRESCENT_MOON_REPLAY_STRING,
-                1.0f,
+                1.0f<rate>,
                 Map.empty,
                 Scores.TIMEPLAYED
             )
@@ -45,7 +45,7 @@ module Scores =
                 user_id,
                 Scores.CRESCENT_MOON,
                 "FAKEREPLAYDATAFAKEREPLAYDATA",
-                1.0f,
+                1.0f<rate>,
                 Map.empty,
                 Scores.TIMEPLAYED
             )
@@ -63,7 +63,7 @@ module Scores =
                 user_id,
                 Scores.CRESCENT_MOON,
                 Scores.CRESCENT_MOON_REPLAY_STRING,
-                1.0f,
+                1.0f<rate>,
                 Map.ofList [ "invalid", 999 ],
                 Scores.TIMEPLAYED
             )

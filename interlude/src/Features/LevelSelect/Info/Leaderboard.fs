@@ -213,9 +213,9 @@ module Leaderboard =
                                     with_mods.Keys
                                     (StoredReplayProvider replay_data)
                                     with_mods.Notes
-                                    (score.Rate * 1.0f<rate>)
+                                    score.Rate
 
-                            let rating = DifficultyRating.calculate (score.Rate * 1.0f<rate>) with_mods.Notes
+                            let rating = DifficultyRating.calculate score.Rate with_mods.Notes
 
                             let score_info: ScoreInfo =
                                 {
@@ -225,7 +225,7 @@ module Leaderboard =
 
                                     PlayedBy = ScorePlayedBy.Username score.Username
                                     TimePlayed = score.Timestamp |> Timestamp.from_datetime
-                                    Rate = score.Rate * 1.0f<rate>
+                                    Rate = score.Rate
 
                                     Replay = replay_data
                                     Scoring = scoring
