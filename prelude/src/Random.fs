@@ -2,11 +2,11 @@
 
 open System
 
-// Pseudorandom number generator for use in modifiers for charts
-// Its purpose:
-//   Be satisfactorily 'random' feeling for gameplay
-//   Be so simple you could reimplement it in any language without needing to speak with me (if ever needed)
-//   Be future proof, it will not change like Microsoft's System.Random could and so a score with Interlude's Random mod set in 2024 can be understood in 2034
+/// Pseudorandom number generator for use in modifiers for charts
+/// Its purpose:
+///   Be satisfactorily 'random' feeling for gameplay
+///   Be so simple you could reimplement it in any language without needing to speak with me (if ever needed)
+///   Be future proof, it will not change like Microsoft's System.Random could and so a score with Interlude's Random mod set in 2024 can be understood in 2034
 
 type PseudoRandom =
     private {
@@ -20,7 +20,7 @@ type PseudoRandom =
             else 
                 this.State >>> 1
 
-    // returns number in the range [0 .. max)
+    /// Returns number in the range [0 .. max)
     member this.Next(max: int) =
         for i = 1 to 8 do
             this.Step()
@@ -29,10 +29,10 @@ type PseudoRandom =
         let non_negative = if as_int = Int32.MinValue then Int32.MaxValue else abs as_int
         non_negative % max
 
-    // returns number in the range [min .. max)
+    /// Returns number in the range [min .. max)
     member this.Next(min: int, max: int) = this.Next (max - min) + min
 
-    member this.Shuffle<'T>(items: 'T array) =
+    member this.Shuffle<'T>(items: 'T array) : unit =
         for i = items.Length - 1 downto 1 do
             let j = this.Next(i)
             let swap = items.[i]

@@ -300,3 +300,9 @@ module Chart =
     let find_min_max_bpm (chart: Chart) : float32<ms / beat> * float32<ms / beat> =
         let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)
+
+    let pretty_print (chart: Chart) =
+        chart.Notes
+        |> Array.iter (fun nr ->
+            printfn "%06.1f | %s" nr.Time (NoteRow.pretty_print nr.Data)
+        )
