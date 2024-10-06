@@ -2,7 +2,11 @@
 
 open System
 open NUnit.Framework
+open Percyqaz.Common
 open Prelude
+open Prelude.Charts.Formats.osu
+open Prelude.Charts.Conversions
+open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
@@ -394,3 +398,25 @@ module Scoring =
         for judge = 4 to 9 do
             let offset = 31.415f<ms / rate>
             Assert.AreEqual(Wife3Curve.calculate judge offset, Wife3Curve.calculate judge -offset)
+
+    let DONUT_HOLE_CHART =
+        let beatmap = Beatmap.FromFile "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" |> expect
+        (Osu_To_Interlude.convert beatmap { Config = ConversionOptions.Default; Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" } |> expect).Chart
+
+    [<Test>]
+    let Autoplay_PerfectScores() =
+        
+        let perfect_replay = Replay.perfect_replay DONUT_HOLE_CHART.Keys DONUT_HOLE_CHART.Notes
+
+        let result_scj4 = ScoreProcessor.run (SC.create 4) DONUT_HOLE_CHART.Keys (StoredReplayProvider(perfect_replay)) DONUT_HOLE_CHART.Notes 1.0f<rate>
+        let result_osumania = ScoreProcessor.run (OsuMania.create 10.0f OsuMania.NoMod) DONUT_HOLE_CHART.Keys (StoredReplayProvider(perfect_replay)) DONUT_HOLE_CHART.Notes 1.0f<rate>
+        let result_etterna = ScoreProcessor.run (Wife3.create 4) DONUT_HOLE_CHART.Keys (StoredReplayProvider(perfect_replay)) DONUT_HOLE_CHART.Notes 1.0f<rate>
+
+        Assert.AreEqual(1.0, result_scj4.Accuracy)
+        Assert.AreEqual(0, result_scj4.ComboBreaks)
+
+        Assert.AreEqual(1.0, result_osumania.Accuracy)
+        Assert.AreEqual(0, result_osumania.ComboBreaks)
+
+        Assert.AreEqual(1.0, result_etterna.Accuracy)
+        Assert.AreEqual(0, result_etterna.ComboBreaks)
