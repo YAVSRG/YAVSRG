@@ -16,13 +16,17 @@ type ComboPage(on_close: unit -> unit) =
     let lamp_colors = Setting.simple config.ComboLampColors
 
     let pop_amount =
-        Setting.simple config.ComboPop |> Setting.bound 0.0f 20.0f
+        config.ComboPop
+        |> Setting.bounded (0.0f, 20.0f)
 
     let growth_amount =
-        Setting.simple config.ComboGrowth |> Setting.bound 0.0f 0.05f
+        config.ComboGrowth
+        |> Setting.bounded (0.0f, 0.05f)
 
     let use_font = Setting.simple config.ComboUseFont
-    let font_spacing = Setting.simple config.ComboFontSpacing |> Setting.bound -1.0f 1.0f
+    let font_spacing = 
+        config.ComboFontSpacing
+        |> Setting.bounded (-1.0f, 1.0f)
 
     let texture = Content.Texture "combo-font"
     let preview =

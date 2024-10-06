@@ -15,7 +15,7 @@ type SkipButtonPage(on_close: unit -> unit) =
     let config = Content.HUD
 
     let use_background = Setting.simple config.SkipButtonBackground.Enable
-    let background_scale = Setting.simple config.SkipButtonBackground.Scale |> Setting.bound 0.5f 2.0f
+    let background_scale = config.SkipButtonBackground.Scale |> Setting.bounded (0.5f, 2.0f)
     let background_offset_x = Setting.percentf config.SkipButtonBackground.AlignmentX
     let background_offset_y = Setting.percentf config.SkipButtonBackground.AlignmentY
 

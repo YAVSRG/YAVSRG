@@ -14,7 +14,7 @@ type HoldNoteSettingsPage() =
 
     let data = Content.NoteskinConfig
 
-    let hold_note_trim = Setting.bounded data.HoldNoteTrim -1.0f 2.0f |> Setting.roundf 2
+    let hold_note_trim = data.HoldNoteTrim |> Setting.bounded (-1.0f, 2.0f) |> Setting.roundf 2
     let use_tail_texture = Setting.simple data.UseHoldTailTexture
     let flip_hold_tail = Setting.simple data.FlipHoldTail
     let dropped_color = Setting.simple data.DroppedHoldColor

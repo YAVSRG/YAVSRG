@@ -61,11 +61,7 @@ module Types =
 
     module Setting =
         open Percyqaz.Common.Setting
-        let rate x = 
-            let setting = bounded x 0.5f<rate> 3.0f<rate>
-            { setting with
-                Set = fun r -> setting.Set(MathF.Round(float32 r, 2) * 1.0f<rate>)
-            }
+        let rate x = x |> bounded (0.5f<rate>, 3.0f<rate>) |> roundf_uom 2
 
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }

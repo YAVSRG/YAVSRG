@@ -18,7 +18,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
     let mutable show_cooldown = 0.0
     
     let playback_speed = 
-        let setting = Setting.bounded rate 0.25f<rate> 3.0f<rate>
+        let setting = rate |> Setting.bounded (0.25f<rate>, 3.0f<rate>)
         { setting with
             Set = fun v ->
 

@@ -120,19 +120,19 @@ type JudgementCounterPage(on_close: unit -> unit) =
     let pos = Setting.simple config.JudgementCounterPosition
 
     let animation_time =
-        Setting.simple config.JudgementCounterFadeTime
-        |> Setting.bound 100.0f<ms / rate> 1000.0f<ms / rate>
+        config.JudgementCounterFadeTime
+        |> Setting.bounded (100.0f<ms / rate>, 1000.0f<ms / rate>)
     let show_ratio = Setting.simple config.JudgementCounterShowRatio
 
     let use_background = Setting.simple config.JudgementCounterBackground.Enable
-    let background_scale = Setting.simple config.JudgementCounterBackground.Scale |> Setting.bound 0.5f 2.0f
+    let background_scale = config.JudgementCounterBackground.Scale |> Setting.bounded (0.5f, 2.0f)
     let background_offset_x = Setting.percentf config.JudgementCounterBackground.AlignmentX
     let background_offset_y = Setting.percentf config.JudgementCounterBackground.AlignmentY
 
     let use_font = Setting.simple config.JudgementCounterUseFont
-    let font_spacing = Setting.simple config.JudgementCounterFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_dot_spacing = Setting.simple config.JudgementCounterDotExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_colon_spacing = Setting.simple config.JudgementCounterColonExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_spacing = config.JudgementCounterFontSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_dot_spacing = config.JudgementCounterDotExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_colon_spacing = config.JudgementCounterColonExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
 
     let texture = Content.Texture "judgement-counter-judgements"
     let use_texture = Setting.simple config.JudgementCounterUseJudgementTextures

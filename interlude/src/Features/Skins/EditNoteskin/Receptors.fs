@@ -178,7 +178,7 @@ type AnimationSettingsPage() =
 
     let enable_receptors = Setting.simple data.UseReceptors
     let receptor_style = Setting.simple data.ReceptorStyle
-    let receptor_offset = Setting.bounded data.ReceptorOffset -1.0f 1.0f
+    let receptor_offset = data.ReceptorOffset |> Setting.bounded (-1.0f, 1.0f)
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let receptors_tab =
@@ -249,8 +249,8 @@ type AnimationSettingsPage() =
     (* Judgement line *)
 
     let enable_judgement_line = Setting.simple data.UseJudgementLine
-    let judgement_line_scale = Setting.bounded data.JudgementLineScale 0.1f 3f
-    let judgement_line_offset = Setting.bounded data.JudgementLineOffset -1.0f 1.0f
+    let judgement_line_scale = data.JudgementLineScale |> Setting.bounded (0.1f, 3f)
+    let judgement_line_offset = data.JudgementLineOffset |> Setting.bounded(-1.0f, 1.0f)
     
     let judgement_line_tab =
         NavigationContainer.Column(WrapNavigation = false)
@@ -276,9 +276,10 @@ type AnimationSettingsPage() =
     (* Column lighting *)
 
     let enable_column_light = Setting.simple data.EnableColumnLight
-    let column_light_offset = Setting.bounded data.ColumnLightOffset -1.0f 1.0f
+    let column_light_offset = data.ColumnLightOffset |> Setting.bounded (-1.0f, 1.0f)
     let column_light_duration =
-        Setting.bounded data.ColumnLightDuration 0.0 1000.0
+        data.ColumnLightDuration 
+        |> Setting.bounded (0.0, 1000.0)
         |> Setting.round 0
         |> Setting.trigger t_columnlight.set_Interval
 
@@ -339,37 +340,43 @@ type AnimationSettingsPage() =
     let enable_explosions = Setting.simple data.UseExplosions
 
     let explosion_frame_time_note =
-        Setting.bounded data.NoteExplosionSettings.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate>
+        data.NoteExplosionSettings.AnimationFrameTime
+        |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> f_note_ex.set_Interval)
 
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
 
     let explosion_offset_note =
-        Setting.bounded data.NoteExplosionSettings.Offset -1.0f 1.0f
+        data.NoteExplosionSettings.Offset 
+        |> Setting.bounded (-1.0f, 1.0f)
 
     let explosion_builtin_note =
         Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
 
     let explosion_duration_note =
-        Setting.bounded data.NoteExplosionSettings.Duration 50.0f<ms / rate> 1000f<ms / rate>
+        data.NoteExplosionSettings.Duration 
+        |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> t_note_ex.set_Interval)
 
     let explosion_scale_note =
-        Setting.bounded data.NoteExplosionSettings.Scale 0.5f 5.0f
+        data.NoteExplosionSettings.Scale 
+        |> Setting.bounded (0.5f, 5.0f)
 
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
     let explosion_frame_time_hold =
-        Setting.bounded data.HoldExplosionSettings.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate>
+        data.HoldExplosionSettings.AnimationFrameTime 
+        |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> f_hold_ex.set_Interval)
 
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
 
     let explosion_offset_hold =
-        Setting.bounded data.HoldExplosionSettings.Offset -1.0f 1.0f
+        data.HoldExplosionSettings.Offset 
+        |> Setting.bounded (-1.0f, 1.0f)
 
     let explosion_hold_use_release =
         Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
@@ -378,12 +385,14 @@ type AnimationSettingsPage() =
         Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
 
     let explosion_duration_hold =
-        Setting.bounded data.HoldExplosionSettings.Duration 50.0f<ms / rate> 1000f<ms / rate>
+        data.HoldExplosionSettings.Duration 
+        |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> t_hold_ex.set_Interval)
 
     let explosion_scale_hold =
-        Setting.bounded data.HoldExplosionSettings.Scale 0.5f 5.0f
+        data.HoldExplosionSettings.Scale 
+        |> Setting.bounded (0.5f, 5.0f)
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 

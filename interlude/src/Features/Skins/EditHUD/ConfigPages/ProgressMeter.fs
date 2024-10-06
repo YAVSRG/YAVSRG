@@ -23,9 +23,9 @@ type ProgressMeterPage(on_close: unit -> unit) =
     let label_size = Setting.percentf config.ProgressMeterLabelSize
 
     let use_font = Setting.simple config.ProgressMeterUseFont
-    let font_spacing = Setting.simple config.ProgressMeterFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_colon_spacing = Setting.simple config.ProgressMeterColonExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_percent_spacing = Setting.simple config.ProgressMeterPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_spacing = config.ProgressMeterFontSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_colon_spacing = config.ProgressMeterColonExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_percent_spacing = config.ProgressMeterPercentExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
 
     let font_texture = Content.Texture "progress-meter-font"
 

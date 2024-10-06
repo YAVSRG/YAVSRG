@@ -99,12 +99,12 @@ type JudgementMeterPage(on_close: unit -> unit) =
         Setting.simple config.JudgementMeterPrioritiseLower
 
     let duration =
-        Setting.simple config.JudgementMeterDuration
-        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
+        config.JudgementMeterDuration
+        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let frame_time =
-        Setting.simple config.JudgementMeterFrameTime
-        |> Setting.bound 2.0f<ms / rate> 500.0f<ms / rate>
+        config.JudgementMeterFrameTime
+        |> Setting.bounded (2.0f<ms / rate>, 500.0f<ms / rate>)
 
     let use_animation =
         Setting.simple config.JudgementMeterUseBuiltInAnimation

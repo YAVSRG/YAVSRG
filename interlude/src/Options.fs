@@ -113,7 +113,7 @@ module Options =
                 DrawUnderReceptors = Setting.simple false
                 Sudden = Setting.percentf 0.0f
                 Hidden = Setting.percentf 0.45f
-                FadeLength = Setting.bounded 200f 0f 500f
+                FadeLength = Setting.bounded (0f, 500f) 200f
                 Color = Setting.simple Color.Black
             }
 
@@ -206,15 +206,15 @@ module Options =
         }
         static member Default =
             {
-                VisualOffset = Setting.bounded 0.0f<ms / rate> -500.0f<ms / rate> 500.0f<ms / rate> |> Setting.roundf_uom 0
-                AudioOffset = Setting.bounded 0.0f<ms / rate> -500.0f<ms / rate> 500.0f<ms / rate> |> Setting.roundf_uom 0
+                VisualOffset = 0.0f<ms / rate> |> Setting.bounded  (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
+                AudioOffset =  0.0f<ms / rate> |> Setting.bounded (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
                 AudioVolume = Setting.percent 0.05
                 AudioPitchRates = Setting.simple true
                 CurrentChart = Setting.simple ""
                 Theme = Content.Themes.selected_id
 
-                ScrollSpeed = Setting.bounded 2.05f<rate/ms> 1.0f<rate/ms> 5.0f<rate/ms> |> Setting.roundf_uom 2
-                HitPosition = Setting.bounded 0.0f -300.0f 600.0f
+                ScrollSpeed = 2.05f<rate/ms> |> Setting.bounded (1.0f<rate/ms>, 5.0f<rate/ms>) |> Setting.roundf_uom 2
+                HitPosition = 0.0f |> Setting.bounded (-300.0f, 600.0f)
                 HitLighting = Setting.simple false
                 Upscroll = Setting.simple false
                 BackgroundDim = Setting.percentf 0.5f

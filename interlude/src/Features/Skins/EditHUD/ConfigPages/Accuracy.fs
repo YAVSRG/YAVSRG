@@ -17,9 +17,9 @@ type AccuracyPage(on_close: unit -> unit) =
     let show_name = Setting.simple config.AccuracyShowName
 
     let use_font = Setting.simple config.AccuracyUseFont
-    let font_spacing = Setting.simple config.AccuracyFontSpacing |> Setting.bound -1.0f 1.0f
-    let font_dot_spacing = Setting.simple config.AccuracyDotExtraSpacing |> Setting.bound -1.0f 1.0f
-    let font_percent_spacing = Setting.simple config.AccuracyPercentExtraSpacing |> Setting.bound -1.0f 1.0f
+    let font_spacing = config.AccuracyFontSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_dot_spacing = config.AccuracyDotExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
+    let font_percent_spacing = config.AccuracyPercentExtraSpacing |> Setting.bounded (-1.0f, 1.0f)
 
     let texture = Content.Texture "accuracy-font"
     let preview =

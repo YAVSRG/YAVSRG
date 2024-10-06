@@ -80,10 +80,10 @@ type PlayfieldSettingsPage() =
     let playfield_color = Setting.simple data.PlayfieldColor
     let use_stage_textures = Setting.simple data.EnableStageTextures
 
-    let column_width = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
+    let column_width = data.ColumnWidth |> Setting.bounded (10.0f, 300.0f) |> Setting.roundf 0
 
     let column_spacing =
-        Setting.bounded data.ColumnSpacing -150.0f 300.0f |> Setting.roundf 0
+        data.ColumnSpacing |> Setting.bounded (-150.0f, 300.0f) |> Setting.roundf 0
 
     let use_advanced_column_spacing = Setting.simple data.UseAdvancedColumnSpacing
     let fill_gaps = Setting.simple data.FillColumnGaps
@@ -93,8 +93,8 @@ type PlayfieldSettingsPage() =
         let k = int keymode - 3
 
         Setting.make (fun v -> spacing.[k].[i] <- v) (fun () -> spacing.[k].[i])
+        |> Setting.bound (-150.0f, 300.0f)
         |> Setting.roundf 0
-        |> Setting.bound -150.0f 300.0f
 
     let NOTE_WIDTH = 120.0f
 

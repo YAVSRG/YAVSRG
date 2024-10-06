@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.Content
@@ -13,29 +12,27 @@ type TimingDisplayPage(on_close: unit -> unit) =
 
     let config = Content.HUD
 
-    let pos = Setting.simple config.TimingDisplayPosition
-
     let show_guide = Setting.simple config.TimingDisplayShowGuide
     let guide_thickness = Setting.percentf config.TimingDisplayGuideThickness
     let show_non_judgements = Setting.simple config.TimingDisplayShowNonJudgements
 
     let thickness =
-        Setting.simple config.TimingDisplayThickness |> Setting.bound 1.0f 25.0f
+        config.TimingDisplayThickness |> Setting.bounded (1.0f, 25.0f)
 
     let release_thickness =
-        Setting.simple config.TimingDisplayReleasesExtraHeight
-        |> Setting.bound 0.0f 20.0f
+        config.TimingDisplayReleasesExtraHeight
+        |> Setting.bounded (0.0f, 20.0f)
 
-    let windows_opacity = Setting.bounded config.TimingDisplayWindowsOpacity 0.0f 0.6f
+    let windows_opacity = config.TimingDisplayWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
 
     let half_scale_releases = Setting.simple config.TimingDisplayHalfScaleReleases
 
     let animation_time =
-        Setting.simple config.TimingDisplayFadeTime
-        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
+        config.TimingDisplayFadeTime
+        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
-    let moving_average_sensitivity = Setting.simple config.TimingDisplayMovingAverageSensitivity |> Setting.bound 0.01f 0.5f
+    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 0.5f)
     let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
 
     override this.Content() = 

@@ -11,14 +11,14 @@ type InputMeterPage(on_close: unit -> unit) =
 
     let config = Content.HUD
 
-    let scroll_speed = Setting.bounded config.InputMeterScrollSpeed 0.5f<rate / ms> 3.0f<rate / ms>
-    let key_fade_time = Setting.bounded config.InputMeterKeyFadeTime 0.0f<ms / rate> 1000.0f<ms / rate>
+    let scroll_speed = Setting.bounded (0.5f<rate / ms>, 3.0f<rate / ms>) config.InputMeterScrollSpeed
+    let key_fade_time = Setting.bounded (0.0f<ms / rate>, 1000.0f<ms / rate>) config.InputMeterKeyFadeTime
     let key_color = Setting.simple config.InputMeterKeyColor
-    let column_padding = Setting.bounded config.InputMeterColumnPadding 0.0f 0.8f
+    let column_padding = Setting.bounded (0.0f, 0.8f) config.InputMeterColumnPadding
 
     let show_inputs = Setting.simple config.InputMeterShowInputs
     let input_color = Setting.simple config.InputMeterInputColor
-    let input_fade_distance = Setting.bounded config.InputMeterInputFadeDistance 0.0f 1000.0f
+    let input_fade_distance = Setting.bounded (0.0f, 1000.0f) config.InputMeterInputFadeDistance
     let scroll_downwards = Setting.simple config.InputMeterScrollDownwards
     
     override this.Content() =

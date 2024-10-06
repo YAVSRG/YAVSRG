@@ -23,8 +23,7 @@ type PacemakerOptionsPage() =
 
     let accuracy = 
         existing.Accuracy
-        |> Setting.simple
-        |> Setting.bound 0.0 1.0
+        |> Setting.bounded (0.0, 1.0)
         |> Setting.round 3
 
     let lamp = Setting.simple existing.Lamp

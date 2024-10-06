@@ -37,7 +37,7 @@ module PracticeScreen =
                 Paused = Setting.simple true
                 SyncMode = Setting.simple SyncMode.AUDIO_OFFSET
                 SyncSuggestions = None
-                PracticePoint = Setting.bounded start_at 0.0f<ms> last_allowed_practice_point
+                PracticePoint = start_at |> Setting.bounded (0.0f<ms>, last_allowed_practice_point)
             }
 
         let FIRST_NOTE = info.WithMods.FirstNote

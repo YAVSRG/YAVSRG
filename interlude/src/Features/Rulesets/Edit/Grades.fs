@@ -13,7 +13,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let grade = ruleset.Value.Grades.[id]
     let name = Setting.simple grade.Name
     let color = Setting.simple grade.Color
-    let acc_required = Setting.bounded (float32 grade.Accuracy) 0.0f 1.0f |> Setting.roundf 6
+    let acc_required = float32 grade.Accuracy |> Setting.bounded (0.0f, 1.0f) |> Setting.roundf 6
 
     override this.Content() =
         page_container()

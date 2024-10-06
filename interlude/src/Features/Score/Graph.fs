@@ -14,7 +14,7 @@ module GraphSettings =
 
     let only_releases = Setting.simple false
     let column_filter = Array.create 10 true
-    let scale = Setting.bounded 1.0f 1.0f 6.0f
+    let scale = 1.0f |> Setting.bounded (1.0f, 6.0f)
 
 type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()

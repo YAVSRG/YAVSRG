@@ -165,7 +165,7 @@ type NotesSettingsPage() =
     let use_rotation = Setting.simple data.UseRotation
 
     let note_animation_time =
-        Setting.bounded data.AnimationFrameTime 10.0f<ms / rate> 1000.0f<ms / rate> |> Setting.roundf_uom 0
+        data.AnimationFrameTime |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>) |> Setting.roundf_uom 0
 
     let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 

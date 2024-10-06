@@ -46,7 +46,7 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
         Slider(
             setting
             |> Setting.map float32 (fun x -> x * 1.0f<ms>)
-            |> Setting.bound -200.0f 200.0f,
+            |> Setting.bound (-200.0f, 200.0f),
             Step = 1f,
             Format = (fun v -> sprintf "%.0fms" v)
         )

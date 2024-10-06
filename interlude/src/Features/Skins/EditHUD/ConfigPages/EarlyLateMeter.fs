@@ -12,12 +12,12 @@ type EarlyLateMeterPage(on_close: unit -> unit) =
     let config = Content.HUD
 
     let duration =
-        Setting.simple config.EarlyLateMeterDuration
-        |> Setting.bound 100.0f<ms / rate> 2000.0f<ms / rate>
+        config.EarlyLateMeterDuration
+        |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let frame_time =
-        Setting.simple config.EarlyLateMeterFrameTime
-        |> Setting.bound 2.0f<ms / rate> 500.0f<ms / rate>
+        config.EarlyLateMeterFrameTime
+        |> Setting.bounded (2.0f<ms / rate>, 500.0f<ms / rate>)
 
     let use_texture = Setting.simple config.EarlyLateMeterUseTexture
 

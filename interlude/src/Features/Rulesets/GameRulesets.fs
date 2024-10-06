@@ -10,7 +10,7 @@ open Interlude.UI
 type OsuRulesetPage() =
     inherit Page()
 
-    let od = Setting.bounded 8.0f 0.0f 10.0f
+    let od = 8.0f |> Setting.bounded (0.0f, 10.0f)
     let mode = Setting.simple OsuMania.NoMod
 
     let create () =
