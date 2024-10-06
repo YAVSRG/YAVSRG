@@ -184,7 +184,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         match ruleset.HoldMechanics with
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
             let judgement =
-                if missed && missed_head then
+                if missed && missed_head && not overheld then
                     ruleset.DefaultJudgement
                 else 
                     OsuHolds.ln_judgement windows head_delta release_delta overheld dropped

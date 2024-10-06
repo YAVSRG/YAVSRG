@@ -135,7 +135,7 @@ let run_experiment () =
     let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
     let miss = floor_uom (OsuMania.miss_window od) * 1.0f<rate> |> floor_uom
 
-    for head in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
+    for head in [104.0f<ms>] do
 
         for tail in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
 

@@ -881,6 +881,7 @@ module OsuClientParity =
             Assert.AreEqual(Some expected_judgement, judgement)
 
     [<Test>]
+    [<Ignore("Horrible osu!mania bug where +103 hits on notes are ignored but +103 hits on a hold head are legit and don't lock you to a max judgement of MEH, but +104 hits do")>]
     let OsuRuleset_LnCombinedJudgementBehaviour_10 () =
         
         let TEST_DATA =
@@ -900,6 +901,8 @@ module OsuClientParity =
             ]
 
         for head, tail, expected_judgement in TEST_DATA do
+        
+            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes = 
                 ChartBuilder(4)
@@ -944,6 +947,8 @@ module OsuClientParity =
 
         for head, tail, expected_judgement in TEST_DATA do
 
+            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
+
             let notes = 
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 800.0f<ms>)
@@ -986,6 +991,8 @@ module OsuClientParity =
             ]
 
         for head, tail, expected_judgement in TEST_DATA do
+
+            printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes = 
                 ChartBuilder(4)
