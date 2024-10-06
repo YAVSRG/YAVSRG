@@ -74,7 +74,7 @@ module ChartFuzzBuilder =
     let generate (keys: int, seed: int) : Chart =
         let bpm, sv = generate_bpm_sv seed 100
         {
-            Keys = 4
+            Keys = keys
             BPM = bpm
             SV = sv
             Notes = generate_notes seed keys 100

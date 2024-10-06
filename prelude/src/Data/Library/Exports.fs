@@ -8,7 +8,7 @@ open Prelude.Charts.Formats.osu
 
 module Interlude_To_Osu =
 
-    let private notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) =
+    let notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) =
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
             match snaps with
             | { Time = offset; Data = nr } :: ss ->
@@ -34,71 +34,54 @@ module Interlude_To_Osu =
 
         convert (notes |> Array.toList) |> List.ofSeq
 
-    let private convert_timing_points
+    let convert_timing_points
         (bpm: TimeArray<BPM>)
         (sv: TimeArray<float32>)
         (most_common_mspb: float32<ms / beat>)
-        =
+        : TimingPoint list =
 
-        let corrective_sv offset mult =
-            if sv.Length = 0 then
-                None
+        let result = ResizeArray<TimingPoint>()
+
+        let mutable bpm_i = 0
+        let mutable sv_i = 0
+
+        let mutable bpm_multiplier = 1.0f
+        let mutable intended_scroll_multiplier = 1.0f
+
+        while bpm_i < bpm.Length && sv_i < sv.Length do
+            
+            let next_bpm = bpm.[bpm_i]
+            let next_sv = sv.[sv_i]
+
+            if next_bpm.Time <= next_sv.Time then
+                bpm_multiplier <- most_common_mspb / next_bpm.Data.MsPerBeat
+                bpm_i <- bpm_i + 1
+                result.Add(TimingPoint.CreateBPM(next_bpm.Time, next_bpm.Data.MsPerBeat, next_bpm.Data.Meter))
+                result.Add(TimingPoint.CreateSV(next_bpm.Time, intended_scroll_multiplier / bpm_multiplier))
+
             else
-                let index = TimeArray.find_left offset sv
+                sv_i <- sv_i + 1
+                intended_scroll_multiplier <- next_sv.Data
+                result.Add(TimingPoint.CreateSV(next_sv.Time, intended_scroll_multiplier / bpm_multiplier))
 
-                if index < 0 then
-                    None
-                else
-                    let { Time = time; Data = value } = sv.[index]
+        // now we have run out of either svs or bpms
 
-                    if time = offset then
-                        None
-                    else
-                        Some(TimingPoint.CreateSV(time, mult * value))
+        while bpm_i < bpm.Length do
+            
+            let next_bpm = bpm.[bpm_i]
+            bpm_multiplier <- most_common_mspb / next_bpm.Data.MsPerBeat
+            bpm_i <- bpm_i + 1
+            result.Add(TimingPoint.CreateBPM(next_bpm.Time, next_bpm.Data.MsPerBeat, next_bpm.Data.Meter))
+            result.Add(TimingPoint.CreateSV(next_bpm.Time, intended_scroll_multiplier / bpm_multiplier))
 
-        let svs time1 time2 mult =
-            seq {
-                match corrective_sv time1 mult with
-                | None -> ()
-                | Some x -> yield x
+        while sv_i < sv.Length do
+        
+            let next_sv = sv.[sv_i]
+            sv_i <- sv_i + 1
+            intended_scroll_multiplier <- next_sv.Data
+            result.Add(TimingPoint.CreateSV(next_sv.Time, intended_scroll_multiplier / bpm_multiplier))
 
-                for { Time = offset; Data = value } in TimeArray.between time1 time2 sv do
-                    yield TimingPoint.CreateSV(offset, mult * value)
-            }
-
-        let tps =
-            seq {
-                let mutable bs = bpm |> List.ofArray
-
-                if List.isEmpty bs then
-                    ()
-                else
-
-                    yield! svs (-Time.infinity) (List.head bs).Time 1.0f
-
-                    while not (List.isEmpty bs) do
-                        match bs with
-                        | {
-                              Time = offset
-                              Data = { Meter = meter; MsPerBeat = mspb }
-                          } :: { Time = offset2 } :: rs ->
-                            yield TimingPoint.CreateBPM(offset, mspb, meter)
-                            yield! svs offset offset2 (most_common_mspb / mspb)
-                            bs <- List.tail bs
-                        | {
-                              Time = offset
-                              Data = {
-                                         Meter = meter
-                                         MsPerBeat = mspb
-                                     }
-                          } :: [] ->
-                            yield TimingPoint.CreateBPM(offset, mspb, meter)
-                            yield! svs offset Time.infinity (most_common_mspb / mspb)
-                            bs <- List.tail bs
-                        | [] -> failwith "impossible by loop condition"
-            }
-
-        tps |> List.ofSeq
+        List.ofSeq result
 
     let convert (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
         let general : General =

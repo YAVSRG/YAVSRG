@@ -26,6 +26,7 @@
     </None>
     <Compile Include="Charts\Helpers.fs" />
     <Compile Include="Charts\Charts.fs" />
+    <Compile Include="Charts\Conversions.fs" />
     <Compile Include="Replays\Replays.fs" />
     <Compile Include="Rulesets\Helpers.fs" />
     <Compile Include="Rulesets\Validation.fs" />

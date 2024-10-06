@@ -11,7 +11,7 @@ open Prelude.Charts
 
 module Osu_To_Interlude =
 
-    let private convert_hit_objects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
+    let convert_hit_objects (objects: HitObject list) (keys: int) : TimeArray<NoteRow> =
         let output = List<TimeItem<NoteRow>>()
         let holding_until: Time option array = Array.zeroCreate keys
         let mutable last_row: TimeItem<NoteRow> = { Time = -Time.infinity; Data = [||] }
@@ -113,76 +113,77 @@ module Osu_To_Interlude =
         finish_holds Time.infinity
         output.ToArray()
 
-    let rec private find_bpm_durations
-        (points: TimingPoint list)
-        (end_time: Time)
-        : Dictionary<float32<ms / beat>, Time> =
-        if List.isEmpty points then
-            skip_conversion "Beatmap has no BPM points set"
+    let private find_bpm_durations (points: TimingPoint list) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 
-        match List.head points with
-        | Uninherited b ->
-            let mutable current: float32<ms / beat> = Time.of_number b.MsPerBeat / 1f<beat>
-            let mutable t: Time = Time.of_number b.Time
-            let data = new Dictionary<float32<ms / beat>, Time>()
+        let data = new Dictionary<float32<ms / beat>, Time>()
 
-            for p in points do
+        let uninherited = 
+            points
+            |> Seq.choose (function Uninherited b -> Some b | _ -> None)
+            |> List.ofSeq
+
+        match uninherited with
+        | [] -> skip_conversion "Beatmap has no BPM points set"
+        | x :: xs ->
+            let mutable current: float32<ms / beat> = float32 x.MsPerBeat * 1.0f<ms / beat>
+            let mutable time = Time.of_number x.Time
+            
+            for b in xs do
                 if (not (data.ContainsKey current)) then
                     data.Add(current, 0.0f<ms>)
 
-                match p with
-                | Uninherited b2 ->
-                    data.[current] <- data.[current] + Time.of_number b2.Time - t
-                    t <- Time.of_number b2.Time
-                    current <- Time.of_number b2.MsPerBeat / 1f<beat>
-                | _ -> ()
-
+                data.[current] <- data.[current] + Time.of_number b.Time - time
+                time <- Time.of_number b.Time
+                current <- float32 b.MsPerBeat * 1.0f<ms / beat>
+                
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
 
-            data.[current] <- data.[current] + end_time - t
-            data
-        | _ -> find_bpm_durations (List.tail points) end_time
+            data.[current] <- data.[current] + max (end_time - time) 0.0f<ms>
+        
+        data
 
-    let private convert_timing_points
-        (points: TimingPoint list)
-        (end_time: Time)
-        : TimeArray<BPM> * TimeArray<float32> =
-        let most_common_bpm =
+    let convert_timing_points (points: TimingPoint list) (end_time: Time) : TimeArray<BPM> * TimeArray<float32> =
+
+        let most_common_mspb =
             (find_bpm_durations points end_time)
                 .OrderByDescending(fun p -> p.Value)
                 .First()
                 .Key
 
-        let add_sv_value (offset, new_speed) sv =
-            match sv with
-            | [] -> [ { Time = offset; Data = new_speed } ]
-            | { Time = time; Data = current_speed } :: s ->
-                if current_speed = new_speed then
-                    sv
-                else
-                    { Time = offset; Data = new_speed } :: sv
+        let sv = ResizeArray<TimeItem<float32>>()
+        let bpm = ResizeArray<TimeItem<BPM>>()
 
-        let (bpm, sv, _) =
-            let func
-                ((bpm, sv, scroll): (TimeItem<BPM> list * TimeItem<float32> list * float32))
-                (point: TimingPoint)
-                : (TimeItem<BPM> list * TimeItem<float32> list * float32) =
-                match point with
-                | Uninherited b ->
-                    let mspb = Time.of_number b.MsPerBeat / 1f<beat>
-                    {
-                        Time = (Time.of_number b.Time)
-                        Data = { Meter = b.Meter * 1<beat>; MsPerBeat = mspb }
-                    }
-                    :: bpm,
-                    add_sv_value (Time.of_number b.Time, most_common_bpm / mspb) sv,
-                    most_common_bpm / mspb
-                | Inherited s -> bpm, add_sv_value (Time.of_number s.Time, float32 s.Multiplier * scroll) sv, scroll
+        // in osu!, an inherited point before an uninherited point stops the file from being playable or playtestable in the editor
+        // so 1.0f is a suitable placeholder
+        let mutable current_bpm_mult = 1.0f
 
-            List.fold func ([], [], 1.0f) points
+        for p in points do
+            match p with
+            | Uninherited b ->
+                let mspb = float32 b.MsPerBeat * 1.0f<ms / beat>
+                bpm.Add { Time = Time.of_number b.Time; Data = { Meter = b.Meter * 1<beat>; MsPerBeat = mspb } }
+                current_bpm_mult <- most_common_mspb / mspb
+                sv.Add { Time = Time.of_number b.Time; Data = current_bpm_mult }
+            | Inherited s ->
+                sv.Add { Time = Time.of_number s.Time; Data = current_bpm_mult * float32 s.Multiplier }
 
-        bpm |> Array.ofList |> Array.rev, sv |> Array.ofList |> Array.rev
+        let cleaned_sv =
+            seq {
+                let deduped =
+                    sv.ToArray()
+                    |> Array.rev
+                    |> Array.distinctBy _.Time
+                    |> Array.rev
+                let mutable previous_value = 1.0f
+                for s in deduped do
+                    if abs (s.Data - previous_value) > 0.005f then
+                        yield s
+                        previous_value <- s.Data
+            }
+            |> Array.ofSeq
+
+        bpm.ToArray(), cleaned_sv
 
     let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try

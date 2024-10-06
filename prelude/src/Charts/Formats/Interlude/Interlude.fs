@@ -259,36 +259,31 @@ module Chart =
             SV = TimeArray.scale scale chart.SV
         }
 
-    let rec private find_bpm_durations
-        (points: TimeArray<BPM>)
-        (end_time: Time)
-        : Dictionary<float32<ms / beat>, Time> =
+    let private find_bpm_durations (points: TimeArray<BPM>) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 
-        let {
-                Time = offset
-                Data = { MsPerBeat = mspb }
-            } =
-            points.[0]
-
-        let mutable current: float32<ms / beat> = mspb
-        let mutable t: Time = offset
         let data = new Dictionary<float32<ms / beat>, Time>()
 
-        for {
-                Time = offset
-                Data = { MsPerBeat = mspb }
-            } in points do
+        let points = points |> List.ofSeq
+
+        match points with
+        | [] -> failwith "Impossible for a valid chart"
+        | x :: xs ->
+            let mutable current: float32<ms / beat> = x.Data.MsPerBeat
+            let mutable time = Time.of_number x.Time
+            
+            for b in xs do
+                if (not (data.ContainsKey current)) then
+                    data.Add(current, 0.0f<ms>)
+
+                data.[current] <- data.[current] + Time.of_number b.Time - time
+                time <- Time.of_number b.Time
+                current <- b.Data.MsPerBeat
+                
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
 
-            data.[current] <- data.[current] + offset - t
-            t <- offset
-            current <- mspb
-
-        if (not (data.ContainsKey current)) then
-            data.Add(current, 0.0f<ms>)
-
-        data.[current] <- data.[current] + end_time - t
+            data.[current] <- data.[current] + max (end_time - time) 0.0f<ms>
+        
         data
 
     let find_most_common_bpm (chart: Chart) : float32<ms / beat> =
