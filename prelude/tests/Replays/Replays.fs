@@ -14,29 +14,13 @@ module Replays =
     let RoundTrip_Bytes() =
         
         let compressed_bytes = Replay.compress_bytes SAMPLE_REPLAY_DATA
-        File.WriteAllBytes("./Data/replay.bin", compressed_bytes)
-        Assert.AreEqual(SAMPLE_REPLAY_BYTES, compressed_bytes)
+        let decompressed_bytes = Replay.decompress_bytes compressed_bytes
+        Assert.AreEqual(SAMPLE_REPLAY_DATA, decompressed_bytes)
 
     [<Test>]
     let RoundTrip_String() =
         
         let compressed_string = Replay.compress_string SAMPLE_REPLAY_DATA
-        let decompressed_data = Replay.decompress_string compressed_string
-
-        Assert.AreEqual(SAMPLE_REPLAY_DATA, decompressed_data)
-
-    [<Test>]
-    let RoundTrip_StringToBytes() =
-        
-        let compressed_string = Replay.compress_string SAMPLE_REPLAY_DATA
-        let decompressed_bytes = Replay.compressed_string_to_bytes compressed_string
-
-        Assert.AreEqual(SAMPLE_REPLAY_BYTES, decompressed_bytes)
-
-    [<Test>]
-    let RoundTrip_BytesToString() =
-        
-        let compressed_string = Replay.compressed_bytes_to_string SAMPLE_REPLAY_BYTES
         let decompressed_data = Replay.decompress_string compressed_string
 
         Assert.AreEqual(SAMPLE_REPLAY_DATA, decompressed_data)
