@@ -896,6 +896,7 @@ ruleset.wife_judge=Judge
 rulesets=Manage rulesets
 rulesets.add=Add a ruleset
 rulesets.browser.error=Error getting community rulesets list :(
+rulesets.confirm_copy=Create copy of '%0'?
 rulesets.confirm_delete=Really PERMANENTLY delete ruleset '%0'?
 rulesets.create=Create
 rulesets.create.osu=Create osu! ruleset

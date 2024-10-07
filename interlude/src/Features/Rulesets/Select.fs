@@ -72,7 +72,24 @@ type SelectRulesetPage() =
                 |+ RulesetButton(
                     ruleset.Name,
                     (fun () -> options.SelectedRuleset.Set id),
-                    Position = Position.ShrinkR(PRETTYHEIGHT * 2.0f)
+                    Position = Position.ShrinkR(PRETTYHEIGHT * 3.0f)
+                )
+                |+ Button(
+                    Icons.COPY,
+                    (fun () -> 
+                        ConfirmPage(
+                            [ruleset.Name] %> "rulesets.confirm_copy",
+                            fun () -> 
+                                let new_id =
+                                    if Rulesets.exists (id + "_copy") then
+                                        sprintf "%s_copy_%i" id (Timestamp.now())
+                                    else id + "_copy"
+
+                                Rulesets.install_or_update new_id { Rulesets.current with Name = Rulesets.current.Name + " (Copy)" }
+                        )
+                            .Show()
+                    ),
+                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT * 2.0f)
                 )
                 |+ Button(
                     Icons.EDIT,
