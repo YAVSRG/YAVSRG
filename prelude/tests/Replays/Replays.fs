@@ -14,6 +14,7 @@ module Replays =
     let RoundTrip_Bytes() =
         
         let compressed_bytes = Replay.compress_bytes SAMPLE_REPLAY_DATA
+        File.WriteAllBytes("./Data/replay.bin", compressed_bytes)
         Assert.AreEqual(SAMPLE_REPLAY_BYTES, compressed_bytes)
 
     [<Test>]

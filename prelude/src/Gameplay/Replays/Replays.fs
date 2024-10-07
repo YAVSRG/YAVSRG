@@ -23,7 +23,7 @@ type ReplayData = ReplayRow array
 module Replay =
 
     let compress_to (output_stream: Stream) (data: ReplayData) =
-        use gzip_stream = new GZipStream(output_stream, CompressionLevel.Optimal)
+        use gzip_stream = new GZipStream(output_stream, CompressionLevel.SmallestSize)
         use bw = new BinaryWriter(gzip_stream)
 
         bw.Write data.Length
