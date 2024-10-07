@@ -4,7 +4,6 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
 
 module Rulesets =
