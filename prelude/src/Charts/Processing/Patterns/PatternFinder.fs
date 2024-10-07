@@ -11,9 +11,9 @@ type CorePatternType =
     | Jack
     member this.DensityToBPM =
         match this with
-        | Stream -> 52.5f<second * beat / minute>
-        | Chordstream -> 35f<second * beat / minute>
-        | Jack -> 17.5f<second * beat / minute>
+        | Stream -> 52.5f<beat / minute>
+        | Chordstream -> 35f<beat / minute>
+        | Jack -> 17.5f<beat / minute>
     member this.RatingMultiplier =
         match this with
         | Stream -> 1f / 3f
@@ -28,7 +28,7 @@ type CorePatternType =
 type Pattern = CorePatternType * string
 type PatternRecogniser = RowInfo list -> int
 
-type MatchedCorePattern = { Pattern: CorePatternType; Time: Time; MsPerBeat: float32<ms/beat>; Density: float32</second>; Mixed: bool }
+type MatchedCorePattern = { Pattern: CorePatternType; Time: Time; MsPerBeat: float32<ms/beat>; Density: float32</rate>; Mixed: bool }
 type MatchedSpecificPattern = { Pattern: Pattern; Time: Time; MsPerBeat: float32<ms/beat> }
 
 module PatternFinder =

@@ -62,14 +62,14 @@ type Patterns(display: Setting<Display>) =
                 Alignment.LEFT
             )
 
-            let feels_like_bpm = entry.Pattern.DensityToBPM * entry.Density50 |> int
+            let feels_like_bpm = entry.Pattern.DensityToBPM * entry.Density50 * SelectedChart.rate.Value |> int
 
             Text.fill_b (
                 Style.font,
                 (if entry.Mixed then
-                     sprintf "Mixed, ~%i BPM (feels like %i)" entry.BPM feels_like_bpm
+                     sprintf "Mixed, ~%.0f BPM (feels like %i)" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm
                  else
-                     sprintf "%i BPM (feels like %i)" entry.BPM feels_like_bpm),
+                     sprintf "%.0f BPM (feels like %i)" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm),
                 b.SliceB(30.0f).SliceL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
@@ -86,8 +86,8 @@ type Patterns(display: Setting<Display>) =
             Draw.rect (b.SliceL(5.0f).SliceT(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
             Draw.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
-            let density_color (nps: float32</second>) =
-                nps * 2.0f |> float |> DifficultyRating.physical_color
+            let density_color (nps: float32</rate>) =
+                nps * 2.0f * SelectedChart.rate.Value |> float |> DifficultyRating.physical_color
 
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms> / 100.0f)
 

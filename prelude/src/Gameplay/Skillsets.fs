@@ -121,7 +121,7 @@ module PatternSkillBreakdown =
             1.3f, 0.125f
         |]
 
-    let observe pattern_type (density: float32<rate / second>, accuracy: float, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
+    let observe pattern_type (density: float32, accuracy: float, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
         for octave, time_mult in OCTAVES do
             observe_octave pattern_type (density * octave, accuracy, duration * time_mult) breakdown
 
@@ -222,10 +222,10 @@ module KeymodeSkillBreakdown =
             total <- total + res * time
             total_weight <- total_weight + time
 
-        let factor (bpm: int<beat / minute>) (feels_like_bpm: float32<beat / minute>) =
+        let factor (bpm: int<beat / minute / rate>) (feels_like_bpm: float32<beat / minute / rate>) =
             System.MathF.Log2(float32 feels_like_bpm / float32 bpm) |> abs
 
-        let f (pattern_type: Patterns.CorePatternType) (density: float32</second>) (bpm: int<beat / minute>) (time: Time) =
+        let f (pattern_type: Patterns.CorePatternType) (density: float32</rate>) (bpm: int<beat / minute / rate>) (time: Time) =
             let feels_like_bpm = pattern_type.DensityToBPM * density
             let x = factor bpm feels_like_bpm
             add_weight x time

@@ -23,7 +23,7 @@ module Categorise =
         {
             Pattern: CorePatternType
             Mixed: bool // todo: turn 3-pronged with mixed, non mixed, combo of both
-            BPM: int<beat / minute> option
+            BPM: int<beat / minute / rate> option
             Specific: string option
             Importance: Time
         }
@@ -69,7 +69,7 @@ module Categorise =
         let total = 0.01f<ms> + (patterns |> List.sumBy (fun e -> e.Amount))
         let average_density = (patterns |> List.sumBy (fun e -> e.Density50 * e.Amount)) / total
 
-        let importance (density: float32</second>) (amount: Time) =
+        let importance (density: float32</rate>) (amount: Time) =
             density / average_density * amount
 
         let fragments =
@@ -142,10 +142,10 @@ module Categorise =
         let minor_specific (spec: string) =
             minor |> List.tryFind (fun x -> x.Specific = Some spec)
 
-        let notable_jacks (list: CategoryFragment list) (bpm: int<beat / minute> option) =
+        let notable_jacks (list: CategoryFragment list) (bpm: int<beat / minute / rate> option) =
             match bpm with
             | Some b ->
-                let threshold = b / 2 + 5<beat / minute>
+                let threshold = b / 2 + 5<beat / minute / rate>
                 list |> List.exists (fun x -> x.Pattern = Jack && (x.BPM.IsNone || x.BPM.Value > threshold))
             | None -> list |> List.exists (fun x -> x.Pattern = Jack)
 
@@ -198,7 +198,7 @@ module Categorise =
                         else
                             let s = major |> List.tryFind (fun x -> x.Pattern = Chordstream)
                             let j = major |> List.find (fun x -> x.Pattern = Jack)
-                            s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5<beat / minute> + s.Value.BPM.Value / 2 < j.BPM.Value)
+                            s.IsNone || s.Value.BPM.IsNone || j.BPM.IsNone || (5<beat / minute / rate> + s.Value.BPM.Value / 2 < j.BPM.Value)
                     else false
 
                 if has_streams && has_notable_jacks then

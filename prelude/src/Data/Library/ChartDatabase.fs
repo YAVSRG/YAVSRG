@@ -171,7 +171,7 @@ module ChartDatabase =
             for chart_meta in DbCharts.fast_load db.Database do
                 db.Cache.[chart_meta.Hash] <- chart_meta
 
-                if chart_meta.Length > 0.0f<ms> && chart_meta.Patterns.Density90 <> 0.0f</second> then
+                if chart_meta.Length > 0.0f<ms> && chart_meta.Patterns.Density90 <> 0.0f</rate> then
                     db.RecalculationNeeded <- false
 
             db

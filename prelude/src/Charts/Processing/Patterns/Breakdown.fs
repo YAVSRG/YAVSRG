@@ -7,27 +7,27 @@ open Prelude
 type PatternBreakdown =
     {
         Pattern: CorePatternType
-        BPM: int<beat / minute>
+        BPM: int<beat / minute / rate>
         Mixed: bool
         Amount: Time
-        Density10: float32</second>
-        Density25: float32</second>
-        Density50: float32</second>
-        Density75: float32</second>
-        Density90: float32</second>
+        Density10: float32</rate>
+        Density25: float32</rate>
+        Density50: float32</rate>
+        Density75: float32</rate>
+        Density90: float32</rate>
         Specifics: (string * int) array
     }
     static member Default =
         { 
             Pattern = Jack
-            BPM = 100<beat / minute>
+            BPM = 100<beat / minute / rate>
             Mixed = false
             Amount = 0.0f<ms>
-            Density10 = 0.0f</second>
-            Density25 = 0.0f</second>
-            Density50 = 0.0f</second>
-            Density75 = 0.0f</second>
-            Density90 = 0.0f</second>
+            Density10 = 0.0f</rate>
+            Density25 = 0.0f</rate>
+            Density50 = 0.0f</rate>
+            Density75 = 0.0f</rate>
+            Density90 = 0.0f</rate>
             Specifics = [||]
         }
 
@@ -74,7 +74,7 @@ module private Breakdown =
 
                 let amount = pattern_amount times
 
-                let approx_mspb = 60000.0f<ms> / (float32 bpm * 1.0f<beat>)
+                let approx_mspb = 60000.0f<ms / minute> / (float32 bpm * 1.0f<beat / minute>)
 
                 let matching_specifics =
                     specific_patterns

@@ -11,11 +11,11 @@ type PatternReport =
         LNPercent: float32
         SVAmount: Time
         Category: ChartCategorisation
-        Density10: float32</second>
-        Density25: float32</second>
-        Density50: float32</second>
-        Density75: float32</second>
-        Density90: float32</second>
+        Density10: float32</rate>
+        Density25: float32</rate>
+        Density50: float32</rate>
+        Density75: float32</rate>
+        Density90: float32</rate>
     }
     static member Default = 
         { 
@@ -23,11 +23,11 @@ type PatternReport =
             LNPercent = 0.0f
             SVAmount = 0.0f<ms>
             Category = ChartCategorisation.Default
-            Density10 = 0.0f</second>
-            Density25 = 0.0f</second>
-            Density50 = 0.0f</second>
-            Density75 = 0.0f</second>
-            Density90 = 0.0f</second>
+            Density10 = 0.0f</rate>
+            Density25 = 0.0f</rate>
+            Density50 = 0.0f</rate>
+            Density75 = 0.0f</rate>
+            Density90 = 0.0f</rate>
         }
 
 module PatternReport =
@@ -38,7 +38,7 @@ module PatternReport =
         let breakdown =
             core_patterns
             |> Clustering.cluster_pattern_bpms
-            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 70<beat / minute>)
+            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 40<beat / minute / rate>)
             |> Breakdown.generate specific_patterns
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> List.ofSeq
