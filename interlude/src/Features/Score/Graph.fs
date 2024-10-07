@@ -76,6 +76,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let fbo = FBO.create ()
     let mutable refresh = true
     let mutable expanded = false
+    let mutable snapshot_index = 0
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
@@ -117,23 +118,23 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     member this.Keys : int = score_info.WithMods.Keys
 
     member private this.DrawSnapshotInfo(bounds: Rect, info: GraphPoint) =
-        let outline_thickness = 5.0f 
-    
-        let outline_bounds = bounds.Expand(outline_thickness)
 
+        let black_cutoff_area = this.Bounds.SlicePercentR(1.0f - info.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+        Draw.rect black_cutoff_area Colors.black.O2
+    
+        let white_line =
+            Rect.Create(
+                black_cutoff_area.Left, 
+                bounds.Bottom,               
+                black_cutoff_area.Left + Style.PADDING,                   
+                this.Bounds.Bottom
+            )
+        Draw.rect white_line Colors.white.O1
+
+        let outline_bounds = bounds.Expand(Style.PADDING)
         Draw.rect outline_bounds Colors.white.O4
         Draw.rect bounds Colors.shadow_2.O4
-        let mouse_x = Mouse.x()
-        let start_y = outline_bounds.Bottom
-        let end_y = this.Bounds.Bottom
-        let line_rect =
-            Rect.Box(
-                mouse_x - outline_thickness / 2.0f, 
-                start_y,               
-                outline_thickness,                   
-                end_y - start_y
-        )
-        Draw.rect line_rect Colors.white.O1
+
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
@@ -425,10 +426,19 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Draw.rect this.Bounds Colors.black.O3
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
-        if this.Bounds.Contains(Mouse.pos ()) && stats.Value.GraphPoints.Length > 0 then
-            let snapshots = stats.Value.GraphPoints
+        let snapshots = stats.Value.GraphPoints
+        if this.Bounds.Contains(Mouse.pos ()) && snapshots.Length > 0 then
             let percent = (Mouse.x () - this.Bounds.Left) / this.Bounds.Width
-            let snapshot_index = percent * float32 snapshots.Length |> int |> max 0 |> min (snapshots.Length - 1)
+            let time = percent * snapshots.[snapshots.Length - 1].Time
+
+            if snapshot_index >= snapshots.Length then
+                snapshot_index <- int (percent * float32 snapshots.Length) |> max 0 |> min (snapshots.Length - 1)
+
+            while snapshot_index > 0 && snapshots.[snapshot_index].Time > time do
+                snapshot_index <- snapshot_index - 1
+            while snapshot_index + 1 < snapshots.Length && snapshots.[snapshot_index + 1].Time <= time do
+                snapshot_index <- snapshot_index + 1
+
             let current_snapshot = snapshots.[snapshot_index]
 
             let box =

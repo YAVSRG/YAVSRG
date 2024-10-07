@@ -195,15 +195,15 @@ module ScoreScreenStats =
                         Judgements = filtered_judgements |> Array.copy
                     }
 
+        let time_of_last_ev = if score_processor.Events.Count > 0 then score_processor.Events.[score_processor.Events.Count - 1].Time else score_processor.Duration
+
         for ev in score_processor.Events |> Seq.where(fun ev -> column_filter.[ev.Column]) do
             add_action ev
 
             let new_graph_points_needed =
                 if score_processor.Events.Count <= GRAPH_POINT_COUNT then 1
-                elif ev.Time >= score_processor.Duration then 
-                    0
                 else
-                    (float32 GRAPH_POINT_COUNT * ev.Time) / score_processor.Duration
+                    (float32 GRAPH_POINT_COUNT * ev.Time) / time_of_last_ev
                     |> ceil
                     |> int
                     |> max 0
@@ -212,7 +212,7 @@ module ScoreScreenStats =
 
             add_graph_points ev.Time new_graph_points_needed
 
-        add_graph_points (if score_processor.Events.Count > 0 then score_processor.Events.[score_processor.Events.Count - 1].Time else score_processor.Duration) 1
+        add_graph_points time_of_last_ev 1
 
         let tap_mean = tap_sum.Value / float32 (max 1 taps.Value)
         let release_mean = release_sum.Value / float32 (max 1 releases.Value)
