@@ -71,9 +71,9 @@ module internal Shared =
 
     let has_pattern (pattern: string) (cc: ChartMeta, ctx: LibraryViewContext) =
         let report = cc.Patterns
-        report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-        || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-        || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+        report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+        //|| (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+        //|| (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
     
     let below_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
         cc.Patterns.LNPercent < threshold

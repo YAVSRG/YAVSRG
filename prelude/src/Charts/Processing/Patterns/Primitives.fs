@@ -12,6 +12,8 @@ type Direction =
     | Outwards
     | Inwards
 
+type Density = float32</rate>
+
 type RowInfo =
     {
         RawNotes: int array
@@ -21,18 +23,19 @@ type RowInfo =
         Roll: bool
         Time: Time
         MsPerBeat: float32<ms / beat>
-        Density: float32</rate>
+        Density: Density
     }
+
 
 module Density =
 
     let private DENSITY_SENSITIVITY = 0.9f
 
-    let private note (time: Time) (d: float32</rate>) =
+    let private note (time: Time) (d: Density) =
         let next_d = 1000.0f<ms / rate> / time
         d * DENSITY_SENSITIVITY + next_d * (1.0f - DENSITY_SENSITIVITY)
 
-    let process_chart (chart: Chart) : float32</rate> array =
+    let process_chart (chart: Chart) : Density array =
         let column_densities = Array.zeroCreate chart.Keys
         let column_sinces = Array.create chart.Keys -Time.infinity
 
@@ -93,14 +96,9 @@ module Density =
 
         notecounts, rowcounts
 
-    let find_percentile (sorted_densities: float32</rate> array) (percentile: float32) : float32</rate> =
-        if sorted_densities.Length = 0 then 0.0f</rate> else
-        let index = percentile * float32 sorted_densities.Length |> floor |> int
-        sorted_densities.[index]
-
 module Primitives =
 
-    let process_chart (chart: Chart) : RowInfo list =
+    let process_chart (chart: Chart) : Density array * RowInfo list =
 
         let { Time = first_note; Data = row } = (TimeArray.first chart.Notes).Value
         let density = Density.process_chart chart
@@ -112,13 +110,14 @@ module Primitives =
 
         if previous_row.Length = 0 then
             Logging.Error("First row of chart is empty, wtf?")
-            []
+            density, []
         else
 
         let mutable previous_time = first_note
 
         let mutable index = 0
 
+        density,
         seq {
             for { Time = t; Data = row } in (chart.Notes |> Seq.skip 1) do
                 index <- index + 1

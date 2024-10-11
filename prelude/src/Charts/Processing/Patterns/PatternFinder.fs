@@ -5,7 +5,7 @@ open Prelude
 open Prelude.Charts
 
 [<Json.AutoCodec>]
-type CorePatternType =
+type CorePattern =
     | Stream
     | Chordstream
     | Jack
@@ -25,11 +25,17 @@ type CorePatternType =
         | Chordstream -> ( 0.985, 0.95, 0.915 )
         | Jack -> ( 0.99, 0.96, 0.93 )
 
-type Pattern = CorePatternType * string
-type PatternRecogniser = RowInfo list -> int
+type MatchedPattern = 
+    { 
+        Pattern: CorePattern
+        SpecificType: string option
+        Time: Time
+        MsPerBeat: float32<ms/beat>
+        Density: float32</rate>
+        Mixed: bool
+    }
 
-type MatchedCorePattern = { Pattern: CorePatternType; Time: Time; MsPerBeat: float32<ms/beat>; Density: float32</rate>; Mixed: bool }
-type MatchedSpecificPattern = { Pattern: Pattern; Time: Time; MsPerBeat: float32<ms/beat> }
+type PatternRecogniser = RowInfo list -> int
 
 module PatternFinder =
 
@@ -81,6 +87,20 @@ module PatternFinder =
             |   { Jacks = x }
                 :: { Jacks = 0 } 
                 :: _ when x > 0 -> 2
+            | _ -> 0
+
+        let LONGJACKS : PatternRecogniser =
+            function
+            |   { Jacks = a; RawNotes = ra }
+                :: { Jacks = b; RawNotes = rb }
+                :: { Jacks = c; RawNotes = rc }
+                :: { Jacks = d; RawNotes = rd }
+                :: { Jacks = e; RawNotes = re }
+                :: _ when a > 0 && b > 0 && c > 0 && d > 0 && e > 0 ->
+                    if Array.exists (fun x -> Array.contains x rb && Array.contains x rc && Array.contains x rd && Array.contains x re) ra then
+                        5
+                    else 
+                        0
             | _ -> 0
 
     module Jacks_4K =
@@ -282,6 +302,7 @@ module PatternFinder =
         Jack, "Chordjacks", Jacks.CHORDJACKS
         Jack, "Gluts", Jacks.GLUTS
         Jack, "Minijacks", Jacks.MINIJACKS
+        Jack, "Longjacks", Jacks.LONGJACKS
         Jack, "Quadstream", Jacks_4K.QUADSTREAM
     |]
     
@@ -294,6 +315,7 @@ module PatternFinder =
     
         Jack, "Chordjacks", Jacks.CHORDJACKS
         Jack, "Minijacks", Jacks.MINIJACKS
+        Jack, "Longjacks", Jacks.LONGJACKS
     |]
     
     let SPECIFIC_PATTERNS_OTHER = [|
@@ -304,24 +326,24 @@ module PatternFinder =
     
         Jack, "Chordjacks", Jacks.CHORDJACKS
         Jack, "Minijacks", Jacks.MINIJACKS
+        Jack, "Longjacks", Jacks.LONGJACKS
     |]
-    
     
     let private PATTERN_STABILITY_THRESHOLD = 5.0f<ms/beat>
 
-    let private matches (specific_patterns: (CorePatternType * string * PatternRecogniser) array) (full_data: RowInfo list) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
+    let private matches (specific_patterns: (CorePattern * string * PatternRecogniser) array) (full_data: RowInfo list) : MatchedPattern array =
         let mutable remaining_data = full_data
 
-        let core_matches = ResizeArray()
-        let specific_matches = ResizeArray()
+        let results = ResizeArray()
 
         while not remaining_data.IsEmpty do
             for pattern_type, pattern in CORE_PATTERNS do
                 match pattern remaining_data with
                 | 0 -> ()
                 | 1 -> 
-                    core_matches.Add {
+                    results.Add {
                         Pattern = pattern_type
+                        SpecificType = None
                         Time = remaining_data.Head.Time
                         MsPerBeat = remaining_data.Head.MsPerBeat
                         Density = remaining_data.Head.Density
@@ -331,36 +353,46 @@ module PatternFinder =
                     let d = List.take n remaining_data
                     let mean_mspb = d |> List.averageBy _.MsPerBeat
 
-                    core_matches.Add {
+                    results.Add {
                         Pattern = pattern_type
+                        SpecificType = None
                         Time = remaining_data.Head.Time
                         MsPerBeat = mean_mspb
                         Density = d |> List.averageBy _.Density
                         Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
                     }
-            for pattern_type, pattern_name, pattern in specific_patterns do
+            for pattern_type, specific_type, pattern in specific_patterns do
                 match pattern remaining_data with
                 | 0 -> ()
                 | 1 -> 
-                    specific_matches.Add {
-                        Pattern = pattern_type, pattern_name
+                    results.Add {
+                        Pattern = pattern_type
+                        SpecificType = Some specific_type
                         Time = remaining_data.Head.Time
                         MsPerBeat = remaining_data.Head.MsPerBeat
+                        Density = remaining_data.Head.Density
+                        Mixed = false
                     }
                 | n ->
-                    let mean_mspb = List.take n remaining_data |> List.averageBy _.MsPerBeat
+                    let d = List.take n remaining_data
+                    let mean_mspb = d |> List.averageBy _.MsPerBeat
 
-                    specific_matches.Add { 
-                        Pattern = pattern_type, pattern_name
+                    results.Add { 
+                        Pattern = pattern_type
+                        SpecificType = Some specific_type
                         Time = remaining_data.Head.Time
                         MsPerBeat = mean_mspb
+                        Density = d |> List.averageBy _.Density
+                        Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
                     }
             remaining_data <- List.tail remaining_data
 
-        full_data, core_matches.ToArray(), specific_matches.ToArray()
+        results.ToArray()
 
-    let find_patterns (chart: Chart) : RowInfo list * MatchedCorePattern array * MatchedSpecificPattern array =
-        let primitives = Primitives.process_chart chart
+    let find_patterns (chart: Chart) : Density array * MatchedPattern array =
+        let density, primitives = Primitives.process_chart chart
+
+        density,
         if chart.Keys = 4 then 
             matches SPECIFIC_PATTERNS_4K primitives
         elif chart.Keys = 7 then 

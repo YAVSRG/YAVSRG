@@ -41,7 +41,6 @@
     <Compile Include="Charts\Processing\Patterns\Primitives.fs" />
     <Compile Include="Charts\Processing\Patterns\PatternFinder.fs" />
     <Compile Include="Charts\Processing\Patterns\Clustering.fs" />
-    <Compile Include="Charts\Processing\Patterns\Breakdown.fs" />
     <Compile Include="Charts\Processing\Patterns\Categorise.fs" />
     <Compile Include="Charts\Processing\Patterns\Summary.fs" />
     <Compile Include="Charts\Processing\Difficulty.fs" />

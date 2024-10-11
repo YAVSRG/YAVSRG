@@ -8,7 +8,6 @@ open System.Security.Cryptography
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Common
 open Prelude.Charts
 
 type ChartDatabase =

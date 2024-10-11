@@ -102,7 +102,7 @@ module PatternSkillBreakdown =
         else 
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-    let private observe_octave (pattern_type: Patterns.CorePatternType) (density, accuracy, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
+    let private observe_octave (pattern_type: Patterns.CorePattern) (density, accuracy, duration: GameplayTime) (breakdown: PatternSkillBreakdown) : unit =
         let feels_like_bpm = pattern_type.DensityToBPM * density |> int
 
         let acc_threshold, ctrl_threshold, push_threshold = pattern_type.AccuracyBreakpoints
@@ -167,11 +167,12 @@ type KeymodeSkillBreakdown =
 
 module KeymodeSkillBreakdown =
 
-    let score (patterns: PatternBreakdown list) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let score (patterns: Cluster array) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
         
         let before = skills.Copy
 
-        for p in patterns do
+        for p in patterns |> Seq.where (fun p -> p.SpecificType.IsNone) do
+
             let time = 
                 patterns 
                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
@@ -191,11 +192,11 @@ module KeymodeSkillBreakdown =
 
         skills.Minus before
 
-    let what_if (patterns: PatternBreakdown list) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
+    let what_if (patterns: Cluster array) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
 
         let potential = skills.Copy
 
-        for p in patterns do
+        for p in patterns |> Seq.where (fun p -> p.SpecificType.IsNone) do
             let time = 
                 patterns 
                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
@@ -214,28 +215,3 @@ module KeymodeSkillBreakdown =
             PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, time / rate * 0.2f) skill
 
         potential.Minus skills
-
-    let tech_factor (patterns: PatternReport) =
-        let mutable total_weight = 0.00001f<ms>
-        let mutable total = 0.0f<ms>
-        let add_weight res time =
-            total <- total + res * time
-            total_weight <- total_weight + time
-
-        let factor (bpm: int<beat / minute / rate>) (feels_like_bpm: float32<beat / minute / rate>) =
-            System.MathF.Log2(float32 feels_like_bpm / float32 bpm) |> abs
-
-        let f (pattern_type: Patterns.CorePatternType) (density: float32</rate>) (bpm: int<beat / minute / rate>) (time: Time) =
-            let feels_like_bpm = pattern_type.DensityToBPM * density
-            let x = factor bpm feels_like_bpm
-            add_weight x time
-
-        for p in patterns.Patterns do
-        
-            f p.Pattern p.Density10 p.BPM (p.Amount * 1.8f)
-            f p.Pattern p.Density25 p.BPM (p.Amount * 1.5f)
-            f p.Pattern p.Density50 p.BPM (p.Amount * 1.0f)
-            f p.Pattern p.Density75 p.BPM (p.Amount * 0.5f)
-            f p.Pattern p.Density90 p.BPM (p.Amount * 0.2f)
-
-        total / total_weight

@@ -63,7 +63,7 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
             Draw.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
 
-    static member Create(pattern: CorePatternType, data: PatternSkillBreakdown) =
+    static member Create(pattern: CorePattern, data: PatternSkillBreakdown) =
         if data = PatternSkillBreakdown.Default then
             EmptyState(Icons.X, "No data") :> Widget
         else

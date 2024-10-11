@@ -66,7 +66,7 @@ type Filter =
         PatternTerms: string array
         PatternAntiTerms: string array
 
-        BPMClamp: (CorePatternType * float) option
+        BPMClamp: (CorePattern * float) option
 
         Keymode: int option
         LengthMin: float32 option
@@ -158,9 +158,9 @@ type Filter =
                     let report = cc.Patterns
 
                     let matches (pattern: string) =
-                        report.Category.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-                        || (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-                        || (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                        report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                        //|| (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                        //|| (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
 
                     Array.forall matches this.PatternTerms
                     && Array.forall (matches >> not) this.PatternAntiTerms

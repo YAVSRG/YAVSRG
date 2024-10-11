@@ -7,22 +7,24 @@ open Prelude.Charts
 [<Json.AutoCodec>]
 type PatternReport =
     {
-        Patterns: PatternBreakdown list
+        Clusters: Cluster array
+        Category: string
         LNPercent: float32
         SVAmount: Time
-        Category: ChartCategorisation
-        Density10: float32</rate>
-        Density25: float32</rate>
-        Density50: float32</rate>
-        Density75: float32</rate>
-        Density90: float32</rate>
+
+        Density10: Density
+        Density25: Density
+        Density50: Density
+        Density75: Density
+        Density90: Density
     }
     static member Default = 
         { 
-            Patterns = []
+            Clusters = [||]
             LNPercent = 0.0f
             SVAmount = 0.0f<ms>
-            Category = ChartCategorisation.Default
+            Category = "Unknown"
+
             Density10 = 0.0f</rate>
             Density25 = 0.0f</rate>
             Density50 = 0.0f</rate>
@@ -33,41 +35,37 @@ type PatternReport =
 module PatternReport =
 
     let from_chart_uncached (chart: Chart) : PatternReport =
-        let raw_data, core_patterns, specific_patterns = PatternFinder.find_patterns chart
+        let density, patterns = PatternFinder.find_patterns chart
+        let clusters = 
+            Clustering.calculate_clustered_patterns patterns
+            |> Array.sortByDescending (fun x -> x.Amount)
 
-        let breakdown =
-            core_patterns
-            |> Clustering.cluster_pattern_bpms
-            |> Seq.filter (fun (_, info) -> info.BPM.Value >= 40<beat / minute / rate>)
-            |> Breakdown.generate specific_patterns
-            |> Seq.sortByDescending (fun x -> x.Amount)
-            |> List.ofSeq
-
-        let is_useless (pattern: PatternBreakdown) =
-            breakdown
-            |> Seq.exists (fun p ->
-                p.Pattern = pattern.Pattern
-                && p.Amount * 0.5f > pattern.Amount
-                && p.Density75 > pattern.Density75
-                && p.BPM > pattern.BPM
-                && p.Mixed = pattern.Mixed
+        let can_be_pruned (cluster: Cluster) =
+            clusters
+            |> Percyqaz.Common.Combinators.debug
+            |> Seq.exists (fun other ->
+                other.Pattern = cluster.Pattern
+                && (other.SpecificType.IsNone || other.SpecificType = cluster.SpecificType)
+                && other.Amount * 0.5f > cluster.Amount
+                && other.Density75 > cluster.Density75
+                && other.BPM > cluster.BPM
             )
 
-        let patterns = breakdown |> List.filter (is_useless >> not)
+        let pruned_clusters = clusters |> Array.filter (can_be_pruned >> not)
         let sv_amount = Metrics.sv_time chart
 
-        let sorted_densities = raw_data |> Seq.map _.Density |> Array.ofSeq |> Array.sort
+        let sorted_densities = density |> Array.sort
 
         {
-            Patterns = patterns
+            Clusters = pruned_clusters
             LNPercent = Metrics.ln_percent chart
             SVAmount = sv_amount
-            Category = Categorise.categorise_chart chart.Keys patterns sv_amount
-            Density10 = Density.find_percentile sorted_densities 0.1f
-            Density25 = Density.find_percentile sorted_densities 0.25f
-            Density50 = Density.find_percentile sorted_densities 0.5f
-            Density75 = Density.find_percentile sorted_densities 0.75f
-            Density90 = Density.find_percentile sorted_densities 0.9f
+            Category = Categorise.categorise_chart chart.Keys pruned_clusters sv_amount
+            Density10 = Clustering.find_percentile 0.1f sorted_densities
+            Density25 = Clustering.find_percentile 0.25f sorted_densities
+            Density50 = Clustering.find_percentile 0.5f sorted_densities
+            Density75 = Clustering.find_percentile 0.75f sorted_densities
+            Density90 = Clustering.find_percentile 0.9f sorted_densities
         }
 
     let from_chart = from_chart_uncached |> cached
