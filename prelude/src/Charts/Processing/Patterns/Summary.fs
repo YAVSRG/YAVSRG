@@ -38,18 +38,26 @@ module PatternReport =
         let density, patterns = PatternFinder.find_patterns chart
         let clusters = 
             Clustering.calculate_clustered_patterns patterns
-            |> Array.sortByDescending (fun x -> x.Amount)
+            |> Seq.sortByDescending (fun x -> x.Amount)
+            |> Array.ofSeq
 
         let can_be_pruned (cluster: Cluster) =
             clusters
             |> Seq.exists (fun other ->
                 other.Pattern = cluster.Pattern
                 && other.Amount * 0.5f > cluster.Amount
-                && other.Density75 > cluster.Density75
                 && other.BPM > cluster.BPM
             )
 
-        let pruned_clusters = clusters |> Array.filter (can_be_pruned >> not)
+        let pruned_clusters = 
+            seq {
+                let clusters = clusters |> Seq.filter (can_be_pruned >> not) |> Array.ofSeq
+                yield! clusters |> Seq.filter (fun x -> x.Pattern = Stream) |> Seq.truncate 3
+                yield! clusters |> Seq.filter (fun x -> x.Pattern = Chordstream) |> Seq.truncate 3
+                yield! clusters |> Seq.filter (fun x -> x.Pattern = Jack) |> Seq.truncate 3
+            }
+            |> Seq.sortByDescending (fun x -> x.Amount * x.Pattern.RatingMultiplier * float32 x.BPM)
+            |> Array.ofSeq
         let sv_amount = Metrics.sv_time chart
 
         let sorted_densities = density |> Array.sort
