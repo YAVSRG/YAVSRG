@@ -171,7 +171,7 @@ module KeymodeSkillBreakdown =
         
         let before = skills.Copy
 
-        for p in patterns |> Seq.where (fun p -> p.SpecificType.IsNone) do
+        for p in patterns do
 
             let time = 
                 patterns 
@@ -196,7 +196,7 @@ module KeymodeSkillBreakdown =
 
         let potential = skills.Copy
 
-        for p in patterns |> Seq.where (fun p -> p.SpecificType.IsNone) do
+        for p in patterns do
             let time = 
                 patterns 
                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)

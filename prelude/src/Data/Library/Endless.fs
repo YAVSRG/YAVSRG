@@ -43,13 +43,13 @@ module Suggestion =
 
     let private pattern_similarity (total: Time) (rate: Rate, patterns: PatternReport) (c_rate: Rate, c_patterns: PatternReport) : float32 =
 
-        let c_total = c_patterns.Clusters |> Seq.where (fun p -> p.SpecificType.IsNone) |> Seq.sumBy _.Amount
+        let c_total = c_patterns.Clusters |> Seq.sumBy _.Amount
         if most_common_pattern total patterns <> most_common_pattern c_total c_patterns then 0.0f
         else
 
         let mutable similarity = 0.0f
-        for p2 in c_patterns.Clusters |> Seq.where (fun p -> p.SpecificType.IsNone) do
-            for p1 in patterns.Clusters |> Seq.where (fun p -> p.SpecificType.IsNone) do
+        for p2 in c_patterns.Clusters do
+            for p1 in patterns.Clusters do
                 if p1.Pattern = p2.Pattern then
                     let mixed_similarity = if p1.Mixed = p2.Mixed then 1.0f else 0.5f
                     let bpm_similarity =
@@ -112,7 +112,7 @@ module Suggestion =
                 id
             |> Filter.apply_ctx_seq (ctx.Filter, ctx.LibraryViewContext)
 
-        let total_pattern_amount = patterns.Clusters |> Seq.where (fun p -> p.SpecificType.IsNone) |> Seq.sumBy _.Amount
+        let total_pattern_amount = patterns.Clusters |> Seq.sumBy _.Amount
         let spikiness = patterns.Density90 / patterns.Density50
 
         seq {

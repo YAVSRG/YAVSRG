@@ -25,7 +25,7 @@ type private ClusterBuilder =
 type Cluster =
     {
         Pattern: CorePattern
-        SpecificType: string option
+        SpecificTypes: (string * float32) list
         BPM: int<beat / minute / rate>
         Mixed: bool
 
@@ -44,7 +44,7 @@ type Cluster =
     static member Default =
         {
             Pattern = Jack
-            SpecificType = None
+            SpecificTypes = []
             BPM = 120<beat / minute / rate>
             Mixed = false
 
@@ -149,14 +149,24 @@ module private Clustering =
 
         patterns_with_clusters
         |> Array.groupBy (fun (pattern, c) ->
-            pattern.Pattern, pattern.SpecificType, pattern.Mixed, c.Value
+            pattern.Pattern, pattern.Mixed, c.Value
         )
-        |> Array.map (fun ((pattern, specific_type, mixed, bpm), data) ->
+        |> Array.map (fun ((pattern, mixed, bpm), data) ->
             let times = data |> Array.map (fst >> _.Time)
             let densities = data |> Array.map (fst >> _.Density) |> Array.sort
+
+            let data_count = float32 data.Length
+            let specific_types =
+                data 
+                |> Array.choose (fst >> _.SpecificType)
+                |> Array.countBy id
+                |> Seq.map (fun (specific_type, count) -> (specific_type, float32 count / data_count))
+                |> Seq.sortByDescending snd
+                |> List.ofSeq
+
             {
                 Pattern = pattern
-                SpecificType = specific_type
+                SpecificTypes = specific_types
                 BPM = bpm
                 Mixed = mixed
                 

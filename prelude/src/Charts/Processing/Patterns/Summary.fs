@@ -42,10 +42,8 @@ module PatternReport =
 
         let can_be_pruned (cluster: Cluster) =
             clusters
-            |> Percyqaz.Common.Combinators.debug
             |> Seq.exists (fun other ->
                 other.Pattern = cluster.Pattern
-                && (other.SpecificType.IsNone || other.SpecificType = cluster.SpecificType)
                 && other.Amount * 0.5f > cluster.Amount
                 && other.Density75 > cluster.Density75
                 && other.BPM > cluster.BPM
