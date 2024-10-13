@@ -8,22 +8,22 @@ open Prelude.Charts
 type CorePattern =
     | Stream
     | Chordstream
-    | Jack
+    | Jacks
     member this.DensityToBPM =
         match this with
         | Stream -> 52.5f<beat / minute>
         | Chordstream -> 35f<beat / minute>
-        | Jack -> 17.5f<beat / minute>
+        | Jacks -> 17.5f<beat / minute>
     member this.RatingMultiplier =
         match this with
         | Stream -> 1f / 3f
         | Chordstream -> 0.5f
-        | Jack -> 1.0f
+        | Jacks -> 1.0f
     member this.AccuracyBreakpoints =
         match this with
         | Stream -> ( 0.98, 0.94, 0.90 )
         | Chordstream -> ( 0.985, 0.95, 0.915 )
-        | Jack -> ( 0.99, 0.96, 0.93 )
+        | Jacks -> ( 0.99, 0.96, 0.93 )
 
 type MatchedPattern = 
     { 
@@ -99,7 +99,7 @@ module PatternFinder =
                 let mean_mspb = d |> List.averageBy _.MsPerBeat
 
                 results.Add {
-                    Pattern = Jack
+                    Pattern = Jacks
                     SpecificType = specific_type
                     Time = remaining_data.Head.Time
                     MsPerBeat = mean_mspb

@@ -20,10 +20,10 @@ module Categorise =
 
         let is_hybrid =
             match cluster_2 with
-            | Some { Pattern = Jack } when cluster_1.Pattern = Stream -> true
-            | Some { Pattern = Jack } when cluster_1.Pattern = Chordstream -> true
-            | Some { Pattern = Stream } when cluster_1.Pattern = Jack -> true
-            | Some { Pattern = Chordstream } when cluster_1.Pattern = Jack -> true
+            | Some { Pattern = Jacks } when cluster_1.Pattern = Stream -> true
+            | Some { Pattern = Jacks } when cluster_1.Pattern = Chordstream -> true
+            | Some { Pattern = Stream } when cluster_1.Pattern = Jacks -> true
+            | Some { Pattern = Chordstream } when cluster_1.Pattern = Jacks -> true
             | _ -> false
 
         let is_tech = cluster_1.Mixed

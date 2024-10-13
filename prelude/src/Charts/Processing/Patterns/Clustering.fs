@@ -44,7 +44,7 @@ type Cluster =
 
     static member Default =
         {
-            Pattern = Jack
+            Pattern = Jacks
             SpecificTypes = []
             BPM = 120<beat / minute / rate>
             Mixed = false

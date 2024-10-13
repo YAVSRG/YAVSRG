@@ -180,7 +180,7 @@ module KeymodeSkillBreakdown =
 
             let skill =
                 match p.Pattern with
-                | Jack -> skills.Jack
+                | Jacks -> skills.Jack
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
                 
@@ -204,7 +204,7 @@ module KeymodeSkillBreakdown =
 
             let skill =
                 match p.Pattern with
-                | Jack -> potential.Jack
+                | Jacks -> potential.Jack
                 | Chordstream -> potential.Chordstream
                 | Stream -> potential.Stream
 

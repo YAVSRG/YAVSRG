@@ -62,7 +62,7 @@ module PatternReport =
                 let clusters = clusters |> Seq.filter (can_be_pruned >> not) |> Array.ofSeq
                 yield! clusters |> Seq.filter (fun x -> x.Pattern = Stream) |> Seq.truncate 3
                 yield! clusters |> Seq.filter (fun x -> x.Pattern = Chordstream) |> Seq.truncate 3
-                yield! clusters |> Seq.filter (fun x -> x.Pattern = Jack) |> Seq.truncate 3
+                yield! clusters |> Seq.filter (fun x -> x.Pattern = Jacks) |> Seq.truncate 3
             }
             |> Seq.sortByDescending (fun x -> x.Importance)
             |> Array.ofSeq

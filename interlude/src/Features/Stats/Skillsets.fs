@@ -96,15 +96,15 @@ type Skills() =
         let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
 
         let keymode = Setting.simple available_keymodes.[0]
-        let skill = Setting.simple Jack
+        let skill = Setting.simple Jacks
 
-        let graph_container = SwapContainer(SkillsetGraph.Create(Jack, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Shrink(20.0f))
+        let graph_container = SwapContainer(SkillsetGraph.Create(Jacks, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Shrink(20.0f))
 
         let refresh_graph() =
             let skills = Skillsets.keymode_skills.[keymode.Value - 3]
             let skill_data = 
                 match skill.Value with
-                | Jack -> skills.Jack
+                | Jacks -> skills.Jack
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
             graph_container.Current <- SkillsetGraph.Create(skill.Value, skill_data)
@@ -123,7 +123,7 @@ type Skills() =
             InlaidButton(
                 (fun () -> sprintf "%O" skill.Value),
                 (fun () ->
-                    skill.Value <- match skill.Value with Jack -> Chordstream | Chordstream -> Stream | Stream -> Jack
+                    skill.Value <- match skill.Value with Jacks -> Chordstream | Chordstream -> Stream | Stream -> Jacks
                     refresh_graph()
                 ),
                 ""
