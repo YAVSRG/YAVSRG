@@ -159,8 +159,15 @@ type Filter =
 
                     let matches (pattern: string) =
                         report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
-                        //|| (report.Category.MajorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
-                        //|| (report.Category.MinorFeatures |> List.exists (fun f -> f.Contains(pattern, StringComparison.OrdinalIgnoreCase)))
+                        || (
+                            report.Clusters
+                            |> Array.exists (fun f -> 
+                                f.SpecificTypes
+                                |> List.exists (fun (p, amount) -> 
+                                    amount * f.Amount / cc.Length > 0.1f && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                                )
+                            )
+                        )
 
                     Array.forall matches this.PatternTerms
                     && Array.forall (matches >> not) this.PatternAntiTerms
