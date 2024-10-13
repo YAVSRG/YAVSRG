@@ -44,30 +44,21 @@ module PatternFinder =
 
         let results = ResizeArray()
 
-        let specific_type (specific_types: (string * PatternRecogniser) list) =
-            specific_types
-            |> List.tryFind (fun (name, p) -> p remaining_data > 0)
-            |> Option.map fst
-
         while not remaining_data.IsEmpty do
             match Core.STREAM remaining_data with
             | 0 -> ()
-            | 1 -> 
-                results.Add {
-                    Pattern = Stream
-                    SpecificType = specific_type specific_patterns.Stream
-                    Time = remaining_data.Head.Time
-                    MsPerBeat = remaining_data.Head.MsPerBeat
-                    Density = remaining_data.Head.Density
-                    Mixed = false
-                }
             | n ->
+                let n, specific_type =
+                    specific_patterns.Stream
+                    |> List.tryPick (fun (name, p) -> p remaining_data |> function 0 -> None | n -> Some (n, name))
+                    |> function None -> (n, None) | Some (m, specific_type) -> max n m, Some specific_type
+
                 let d = List.take n remaining_data
                 let mean_mspb = d |> List.averageBy _.MsPerBeat
 
                 results.Add {
                     Pattern = Stream
-                    SpecificType = specific_type specific_patterns.Stream
+                    SpecificType = specific_type
                     Time = remaining_data.Head.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
@@ -77,22 +68,18 @@ module PatternFinder =
             
             match Core.CHORDSTREAM remaining_data with
             | 0 -> ()
-            | 1 -> 
-                results.Add {
-                    Pattern = Chordstream
-                    SpecificType = specific_type specific_patterns.Chordstream
-                    Time = remaining_data.Head.Time
-                    MsPerBeat = remaining_data.Head.MsPerBeat
-                    Density = remaining_data.Head.Density
-                    Mixed = false
-                }
             | n ->
+                let n, specific_type =
+                    specific_patterns.Chordstream
+                    |> List.tryPick (fun (name, p) -> p remaining_data |> function 0 -> None | n -> Some (n, name))
+                    |> function None -> (n, None) | Some (m, specific_type) -> max n m, Some specific_type
+
                 let d = List.take n remaining_data
                 let mean_mspb = d |> List.averageBy _.MsPerBeat
 
                 results.Add {
                     Pattern = Chordstream
-                    SpecificType = specific_type specific_patterns.Chordstream
+                    SpecificType = specific_type
                     Time = remaining_data.Head.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
@@ -102,22 +89,18 @@ module PatternFinder =
             
             match Core.JACKS remaining_data with
             | 0 -> ()
-            | 1 -> 
-                results.Add {
-                    Pattern = Jack
-                    SpecificType = specific_type specific_patterns.Jack
-                    Time = remaining_data.Head.Time
-                    MsPerBeat = remaining_data.Head.MsPerBeat
-                    Density = remaining_data.Head.Density
-                    Mixed = false
-                }
             | n ->
+                let n, specific_type =
+                    specific_patterns.Jack
+                    |> List.tryPick (fun (name, p) -> p remaining_data |> function 0 -> None | n -> Some (n, name))
+                    |> function None -> (n, None) | Some (m, specific_type) -> max n m, Some specific_type
+
                 let d = List.take n remaining_data
                 let mean_mspb = d |> List.averageBy _.MsPerBeat
 
                 results.Add {
                     Pattern = Jack
-                    SpecificType = specific_type specific_patterns.Jack
+                    SpecificType = specific_type
                     Time = remaining_data.Head.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density

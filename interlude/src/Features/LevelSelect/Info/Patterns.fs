@@ -18,8 +18,8 @@ type Display =
 type Patterns(display: Setting<Display>) =
     inherit Container(NodeType.None)
 
-    let mutable patterns: PatternBreakdown list = []
-    let mutable category: ChartCategorisation = ChartCategorisation.Default
+    let mutable patterns: Cluster array = [||]
+    let mutable category: string = ""
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -56,7 +56,7 @@ type Patterns(display: Setting<Display>) =
         for entry in patterns do
             Text.fill_b (
                 Style.font,
-                (sprintf "%O" entry.Pattern),
+                (sprintf "%s%O" (if entry.Mixed then "Mixed " else "") entry.Pattern),
                 b.ShrinkB(25.0f).SliceL(TEXT_WIDTH),
                 Colors.text,
                 Alignment.LEFT
@@ -67,9 +67,9 @@ type Patterns(display: Setting<Display>) =
             Text.fill_b (
                 Style.font,
                 (if entry.Mixed then
-                     sprintf "Mixed, ~%.0f BPM (feels like %i)" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm
+                     sprintf "~%.0f BPM / %i" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm
                  else
-                     sprintf "%.0f BPM (feels like %i)" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm),
+                     sprintf "%.0f BPM / %i" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm),
                 b.SliceB(30.0f).SliceL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
@@ -77,7 +77,7 @@ type Patterns(display: Setting<Display>) =
 
             Text.fill_b (
                 Style.font,
-                String.concat ", " (entry.Specifics |> Seq.map fst),
+                String.concat ", " (entry.SpecificTypes |> Seq.truncate 3 |> Seq.map (fun (p, amount) -> sprintf "%.0f%% %s" (amount * 100.0f) p)),
                 b.SliceB(30.0f).ShrinkL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
@@ -89,7 +89,7 @@ type Patterns(display: Setting<Display>) =
             let density_color (nps: float32</rate>) =
                 nps * 2.0f * SelectedChart.rate.Value |> float |> DifficultyRating.physical_color
 
-            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms> / 100.0f)
+            let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
                 Draw.untextured_quad
@@ -111,15 +111,7 @@ type Patterns(display: Setting<Display>) =
             bar (0.9f, entry.Density90, 1.0f, entry.Density90)
 
             b <- b.Translate(0.0f, 60.0f)
-        
-        Text.fill_b (
-            Style.font,
-            String.concat ", " category.MinorFeatures,
-            this.Bounds.SliceB(30.0f).Shrink(20.0f, 0.0f),
-            Colors.text_greyout,
-            Alignment.LEFT
-        )
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
-        patterns <- info.CacheInfo.Patterns.Patterns |> List.truncate 6
+        patterns <- info.CacheInfo.Patterns.Clusters |> Array.truncate 6
         category <- info.CacheInfo.Patterns.Category

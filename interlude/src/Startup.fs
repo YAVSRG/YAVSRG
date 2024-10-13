@@ -67,7 +67,7 @@ module Startup =
                         [|
                             "Yes, view it!", fun () -> 
                                 Screen.change_new
-                                    (fun () -> ScoreScreen(ScoreInfo.from_score cc chart Rulesets.current score, Prelude.Gameplay.ImprovementFlags.None, false))
+                                    (fun () -> ScoreScreen(ScoreInfo.from_score cc chart Rulesets.current score, Gameplay.ImprovementFlags.None, false))
                                     Screen.Type.Score
                                     Transitions.EnterGameplayNoFadeAudio
                                 |> ignore

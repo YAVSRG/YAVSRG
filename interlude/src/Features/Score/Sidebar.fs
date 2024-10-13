@@ -17,11 +17,10 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     let mod_string = Mods.format (score_info.Rate, score_info.Mods, false)
 
-    let category, main_elements, minor_elements =
-        let c =  score_info.ChartMeta.Patterns.Category
+    let category, main_clusters =
+        let c = score_info.ChartMeta.Patterns
         c.Category,
-        String.concat ", " c.MajorFeatures |> (function "" -> "--" | x -> x),
-        String.concat ", " c.MinorFeatures |> (function "" -> "--" | x -> x)
+        c.ImportantClusters |> Seq.truncate 3 |> Seq.map (sprintf "%O") |> String.concat ", "
 
     override this.Init(parent) =
         this
@@ -66,16 +65,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         )
             .Conditional(show_more_info.Get >> not)
         |+ Text(
-            main_elements,
+            main_clusters,
             Position = Position.ShrinkB(50.0f).SliceB(40.0f).ShrinkX(25.0f),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT
-        )
-            .Conditional(show_more_info.Get >> not)
-        |+ Text(
-            minor_elements,
-            Position = Position.ShrinkB(20.0f).SliceB(30.0f).ShrinkX(25.0f),
-            Color = K Colors.text_greyout,
             Align = Alignment.LEFT
         )
             .Conditional(show_more_info.Get >> not)

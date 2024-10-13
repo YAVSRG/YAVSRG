@@ -64,16 +64,21 @@ module Jacks_4K =
     let QUADSTREAM : PatternRecogniser =
         function
         |   { Notes = 4 }
-            :: { Jacks = 1 } 
+            :: _
             :: { Jacks = 0 }
             :: { Jacks = 0 } :: _ -> 4
         | _ -> 0
 
     let GLUTS : PatternRecogniser =
         function
-        |   { Notes = a }
-            :: { Jacks = 1 } 
-            :: _ when a > 1 -> 2
+        |   { RawNotes = ra }
+            :: { Jacks = 1; RawNotes = rb }
+            :: { Jacks = 1; RawNotes = rc }
+            :: _ ->
+                if Array.exists (fun x -> Array.contains x rb && Array.contains x rc) ra then
+                    0
+                else 
+                    3
         | _ -> 0
 
 module Chordstream_4K =
@@ -267,10 +272,10 @@ type SpecificPatterns =
                 ]
             Jack =
                 [
+                    "Longjacks", Jacks.LONGJACKS
                     "Quadstream", Jacks_4K.QUADSTREAM
                     "Gluts", Jacks_4K.GLUTS
                     "Chordjacks", Jacks.CHORDJACKS
-                    "Longjacks", Jacks.LONGJACKS
                     "Minijacks", Jacks.MINIJACKS
                 ]
         }
@@ -288,8 +293,8 @@ type SpecificPatterns =
                 ]
             Jack = 
                 [
-                    "Chordjacks", Jacks.CHORDJACKS
                     "Longjacks", Jacks.LONGJACKS
+                    "Chordjacks", Jacks.CHORDJACKS
                     "Minijacks", Jacks.MINIJACKS
                 ]
         }
@@ -306,8 +311,8 @@ type SpecificPatterns =
                 ]
             Jack =
                 [
-                    "Chordjacks", Jacks.CHORDJACKS
                     "Longjacks", Jacks.LONGJACKS
+                    "Chordjacks", Jacks.CHORDJACKS
                     "Minijacks", Jacks.MINIJACKS
                 ]
         }

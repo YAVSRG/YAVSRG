@@ -103,18 +103,9 @@ module Printerlude =
             | Some cc ->
                 let skills = Skillsets.keymode_skills.[(SelectedChart.keymode() |> int) - 3]
                 for p in [ 0.92; 0.93; 0.94; 0.95; 0.96; 0.97; 0.98; 0.99; 1.0 ] do
-                    KeymodeSkillBreakdown.what_if cc.Patterns.Patterns p SelectedChart.rate.Value skills
+                    KeymodeSkillBreakdown.what_if cc.Patterns.Clusters p SelectedChart.rate.Value skills
                     |> sprintf "What if you got %.0f%%: %O" (p * 100.0)
                     |> io.WriteLine
-            | None -> ()
-
-        let tech_factor (io: IOContext) =
-            Skillsets.find_underperformance Content.UserData Content.Library
-            match SelectedChart.CACHE_DATA with
-            | Some cc ->
-                KeymodeSkillBreakdown.tech_factor cc.Patterns
-                |> sprintf "%A"
-                |> io.WriteLine
             | None -> ()
 
         let vacuum () = 
@@ -127,7 +118,6 @@ module Printerlude =
                 .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
-                .WithIOCommand("tech", "Experimental tech factor", tech_factor)
                 .WithIOCommand(
                     "local_server",
                     "Switch to local development server",

@@ -31,6 +31,13 @@ type PatternReport =
             Density75 = 0.0f</rate>
             Density90 = 0.0f</rate>
         }
+    member this.ImportantClusters =
+        match Array.tryHead this.Clusters with
+        | None -> Seq.empty
+        | Some c -> 
+        
+        let importance = c.Importance
+        this.Clusters |> Seq.takeWhile (fun c -> c.Importance / importance > 0.5f)
 
 module PatternReport =
 
@@ -38,6 +45,7 @@ module PatternReport =
         let density, patterns = PatternFinder.find_patterns chart
         let clusters = 
             Clustering.calculate_clustered_patterns patterns
+            |> Seq.filter (fun c -> c.BPM > 25<beat / minute / rate>)
             |> Seq.sortByDescending (fun x -> x.Amount)
             |> Array.ofSeq
 
@@ -56,7 +64,7 @@ module PatternReport =
                 yield! clusters |> Seq.filter (fun x -> x.Pattern = Chordstream) |> Seq.truncate 3
                 yield! clusters |> Seq.filter (fun x -> x.Pattern = Jack) |> Seq.truncate 3
             }
-            |> Seq.sortByDescending (fun x -> x.Amount * x.Pattern.RatingMultiplier * float32 x.BPM)
+            |> Seq.sortByDescending (fun x -> x.Importance)
             |> Array.ofSeq
         let sv_amount = Metrics.sv_time chart
 

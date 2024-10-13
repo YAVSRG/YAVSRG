@@ -41,6 +41,7 @@ type Cluster =
         Time50: Time
         Time90: Time
     }
+
     static member Default =
         {
             Pattern = Jack
@@ -60,6 +61,21 @@ type Cluster =
             Time50 = 1.0f<ms>
             Time90 = 2.0f<ms>
         }
+
+    member this.Importance =
+        this.Amount * this.Pattern.RatingMultiplier * float32 this.BPM
+
+    override this.ToString() =
+
+        let name =
+            match this.SpecificTypes with
+            | (t, amount) :: _ when amount > 0.4f -> t
+            | _ -> this.Pattern.ToString()
+
+        if this.Mixed then
+            sprintf "~%iBPM Mixed %s" this.BPM name
+        else
+            sprintf "%iBPM %s" this.BPM name
 
 module private Clustering =
 

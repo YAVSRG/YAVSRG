@@ -16,11 +16,13 @@ type PersonalBests() =
     inherit Container(NodeType.None)
 
     let mutable save_data = None
-    let mutable patterns = None
+    let mutable category = "Uncategorised"
+    let mutable specific_patterns = ""
 
     let refresh(info: LoadedChartInfo) =
         save_data <- Some info.SaveData
-        patterns <- Some info.CacheInfo.Patterns
+        category <- info.CacheInfo.Patterns.Category
+        specific_patterns <- info.CacheInfo.Patterns.ImportantClusters |> Seq.truncate 2 |> Seq.map (sprintf "%O") |> String.concat ", "
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_finished.Add refresh
@@ -81,17 +83,12 @@ type PersonalBests() =
             Text.fill_b (Style.font, %"levelselect.no_personal_best", no_pb_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text_greyout, Alignment.CENTER)
             Text.fill_b (Style.font, %"levelselect.no_personal_best.subtitle", no_pb_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), Colors.text_greyout, Alignment.CENTER)
 
-        match patterns with
-        | None -> ()
-        | Some info ->
-
         let pattern_bounds = this.Bounds.ShrinkR(360.0f).Shrink(10.0f)
         Draw.rect pattern_bounds Colors.shadow_2.O2
-        let category = info.Category
 
         Text.fill_b (
             Style.font,
-            category.Category,
+            category,
             pattern_bounds.SliceT(50.0f).Shrink(20.0f, 0.0f),
             Colors.text,
             Alignment.CENTER
@@ -99,7 +96,7 @@ type PersonalBests() =
 
         Text.fill_b (
             Style.font,
-            String.concat ", " category.MajorFeatures,
+            specific_patterns,
             pattern_bounds.SliceB(30.0f).Translate(0.0f, -8.0f).Shrink(20.0f, 0.0f),
             Colors.text_subheading,
             Alignment.CENTER
