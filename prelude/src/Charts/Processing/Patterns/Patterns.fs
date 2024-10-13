@@ -264,10 +264,10 @@ type SpecificPatterns =
             Chordstream =
                 [
                     "Handstream", Chordstream_4K.HANDSTREAM
-                    "Split trill", Chordstream_4K.SPLITTRILL
+                    "Split Trill", Chordstream_4K.SPLITTRILL
                     "Jumptrill", Chordstream_4K.JUMPTRILL
-                    "Triple jumpstream", Chordstream_4K.TRIPLE_JUMPSTREAM
-                    "Double jumpstream", Chordstream_4K.DOUBLE_JUMPSTREAM
+                    //"Triple Jumpstream", Chordstream_4K.TRIPLE_JUMPSTREAM
+                    //"Double Jumpstream", Chordstream_4K.DOUBLE_JUMPSTREAM
                     "Jumpstream", Chordstream_4K.JUMPSTREAM
                 ]
             Jack =
@@ -286,10 +286,10 @@ type SpecificPatterns =
             Chordstream = 
                 [
                     "Brackets", Chordstream_7K.BRACKETS
-                    "Chord rolls", Chordstream_7K.CHORD_ROLL
-                    "Double streams", Chordstream_7K.DOUBLE_STREAMS
-                    "Dense chordstream", Chordstream_7K.DENSE_CHORDSTREAM
-                    "Light chordstream", Chordstream_7K.LIGHT_CHORDSTREAM
+                    "Chord Rolls", Chordstream_7K.CHORD_ROLL
+                    "Double Stream", Chordstream_7K.DOUBLE_STREAMS
+                    "Dense Chordstream", Chordstream_7K.DENSE_CHORDSTREAM
+                    "Light Chordstream", Chordstream_7K.LIGHT_CHORDSTREAM
                 ]
             Jack = 
                 [
