@@ -12,7 +12,7 @@ module DbCharts =
     let private no_nan x = if System.Single.IsFinite x then x else 0.0f
 
     // Increment this to recalculate pattern & rating data
-    let private CALC_VERSION = 2uy
+    let private CALC_VERSION = 3uy
 
     let internal CREATE_TABLE: NonQuery<unit> =
         { NonQuery.without_parameters () with

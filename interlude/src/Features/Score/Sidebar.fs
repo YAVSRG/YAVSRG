@@ -20,7 +20,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     let category, main_clusters =
         let c = score_info.ChartMeta.Patterns
         c.Category,
-        c.ImportantClusters |> Seq.truncate 3 |> Seq.map (sprintf "%O") |> String.concat ", "
+        c.ImportantClusters |> Seq.truncate 3 |> Seq.map (fun c -> c.Format score_info.Rate) |> String.concat ", "
 
     override this.Init(parent) =
         this

@@ -304,10 +304,10 @@ type SpecificPatterns =
             Stream = []
             Chordstream =
                 [
-                    "Chord rolls", Chordstream_Other.CHORD_ROLL
-                    "Double streams", Chordstream_Other.DOUBLE_STREAMS
-                    "Dense chordstream", Chordstream_Other.DENSE_CHORDSTREAM
-                    "Light chordstream", Chordstream_Other.LIGHT_CHORDSTREAM
+                    "Chord Rolls", Chordstream_Other.CHORD_ROLL
+                    "Double Stream", Chordstream_Other.DOUBLE_STREAMS
+                    "Dense Chordstream", Chordstream_Other.DENSE_CHORDSTREAM
+                    "Light Chordstream", Chordstream_Other.LIGHT_CHORDSTREAM
                 ]
             Jack =
                 [

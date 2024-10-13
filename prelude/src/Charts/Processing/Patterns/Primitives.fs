@@ -98,6 +98,8 @@ module Density =
 
 module Primitives =
 
+    // todo: LN coverage calculation
+
     let process_chart (chart: Chart) : Density array * RowInfo list =
 
         let { Time = first_note; Data = row } = (TimeArray.first chart.Notes).Value

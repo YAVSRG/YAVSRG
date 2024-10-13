@@ -65,7 +65,7 @@ type Cluster =
     member this.Importance =
         this.Amount * this.Pattern.RatingMultiplier * float32 this.BPM
 
-    override this.ToString() =
+    member this.Format (rate: Rate) =
 
         let name =
             match this.SpecificTypes with
@@ -73,9 +73,9 @@ type Cluster =
             | _ -> this.Pattern.ToString()
 
         if this.Mixed then
-            sprintf "~%iBPM Mixed %s" this.BPM name
+            sprintf "~%.0fBPM Mixed %s" (float32 this.BPM * rate) name
         else
-            sprintf "%iBPM %s" this.BPM name
+            sprintf "%.0fBPM %s" (float32 this.BPM * rate) name
 
 module private Clustering =
 
