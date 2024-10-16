@@ -171,6 +171,9 @@ module KeymodeSkillBreakdown =
         
         let before = skills.Copy
 
+        // todo: combine clusters of same core types together and factor those in too
+        // todo: introduce a 'combined' category
+
         for p in patterns do
 
             let time = 

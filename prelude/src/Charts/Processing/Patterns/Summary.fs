@@ -17,6 +17,7 @@ type PatternReport =
         Density50: Density
         Density75: Density
         Density90: Density
+        // todo: maybe store duration here because it's useful
     }
     static member Default = 
         { 
