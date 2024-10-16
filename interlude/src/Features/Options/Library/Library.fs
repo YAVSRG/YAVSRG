@@ -6,6 +6,7 @@ open Prelude.Data.Library
 open Prelude
 open Prelude.Data
 open Prelude.Data.Maintenance
+open Prelude.Data.OsuClientInterop
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -13,7 +14,6 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
-open Interlude.Features.Rulesets
 open Interlude.Features.Import.osu
 open Interlude.Features.Tables.Browser
 

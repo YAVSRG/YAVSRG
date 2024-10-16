@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Tests.Charts
 
 open NUnit.Framework
+open Prelude
 open Prelude.Charts
 
 module Charts =
@@ -46,8 +47,8 @@ module Charts =
     let Scale() =
 
         let chart = ChartFuzzBuilder.generate (4, 123)
-        let twice_as_long = Chart.scale 2.0f chart
-        let scaled_to_original = Chart.scale 0.5f twice_as_long
+        let twice_as_long = Chart.scale 2.0f<rate> chart
+        let scaled_to_original = Chart.scale 0.5f<rate> twice_as_long
 
         Assert.AreNotEqual(Chart.hash twice_as_long, Chart.hash chart)
         Assert.AreEqual(Chart.hash scaled_to_original, Chart.hash chart)

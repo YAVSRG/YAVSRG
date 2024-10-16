@@ -252,7 +252,7 @@ module Chart =
 
         printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
 
-    let scale (scale: float32) (chart: Chart) =
+    let scale (scale: Rate) (chart: Chart) =
         { chart with
             Notes = TimeArray.scale scale chart.Notes
             BPM = TimeArray.scale scale chart.BPM

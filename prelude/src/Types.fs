@@ -82,9 +82,9 @@ module Types =
         let first (arr: TimeArray<'T>) =
             if arr.Length > 0 then Some arr.[0] else None
 
-        let scale (scale: float32) (arr: TimeArray<'T>) =
+        let scale (scale: float32<'u>) (arr: TimeArray<'T>) =
             arr
-            |> Array.map (fun { Time = time; Data = d } -> { Time = time * scale; Data = d })
+            |> Array.map (fun { Time = time; Data = d } -> { Time = time * float32 scale; Data = d })
 
         // greatest index i where arr.[i] <= time
         // if no such index because you are before all events, -1

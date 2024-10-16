@@ -794,6 +794,7 @@ notification.reload_content=Theme, Skins and Rulesets have been reloaded
 notification.reload_content_hint=Close this menu before reloading content!
 notification.score_import_queued=Score import queued!
 notification.score_import_success=Score import successful!
+notification.score_import_success.body=%0 new scores from %1 beatmaps
 notification.score_recalculation_complete.title=Score calculation complete!
 notification.score_recalculation_started.body=This may take a couple of minutes.
 notification.score_recalculation_started.title=Score calculation started!

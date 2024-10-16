@@ -1,8 +1,10 @@
 ﻿namespace Interlude.Features.Mounts
 
+open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Data.Library
+open Prelude.Data.OsuClientInterop
 open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.UI
@@ -47,13 +49,17 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 PageButton.Once(
                     %"mount.import_osu_scores",
                     fun () ->
-                        osu.Scores.import_osu_scores_service.Request(
-                            (),
-                            fun () ->
+                        Scores.import_osu_scores_service.Request(
+                            { 
+                                UserDatabase = Content.UserData
+                                ChartDatabase = Content.Charts
+                                OsuRootPath = Path.GetDirectoryName mount.SourceFolder
+                            },
+                            fun (score_count, chart_count) ->
                                 Notifications.task_feedback (
                                     Icons.FOLDER_PLUS,
                                     %"notification.score_import_success",
-                                    ""
+                                    [ score_count.ToString(); chart_count.ToString() ] %> "notification.score_import_success.body"
                                 )
                         )
 

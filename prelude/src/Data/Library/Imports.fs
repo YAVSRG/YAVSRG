@@ -57,14 +57,14 @@ module Imports =
             """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
         )
 
-    let detect_rate_mod (difficulty_name: string) : float32 option =
+    let detect_rate_mod (difficulty_name: string) : float32<rate> option =
         let m = RATE_REGEX.Match difficulty_name
 
         if m.Success then
             let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
 
             match Single.TryParse r with
-            | true, r -> Some r
+            | true, r -> Some (r * 1.0f<rate>)
             | false, _ -> None
         else
             None
@@ -111,7 +111,7 @@ module Imports =
                                             function 
                                             | Ok { Chart = original } -> 
                                                 original.Notes.Length = import.Chart.Notes.Length 
-                                                && abs((import.Chart.LastNote - import.Chart.FirstNote) * rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
+                                                && abs((import.Chart.LastNote - import.Chart.FirstNote) * float32 rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
                                             | _ -> false
                                         )
                                     if original.IsSome then 
