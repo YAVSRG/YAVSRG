@@ -11,6 +11,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
+open Interlude.Features.OptionsMenu.Library
 open Interlude.Features.Pacemaker
 open Interlude.Features.Rulesets
 open Interlude.Features.Collections

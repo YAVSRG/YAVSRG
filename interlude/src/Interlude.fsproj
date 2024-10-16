@@ -100,7 +100,6 @@
     <Compile Include="Features\Mounts\Edit.fs" />
     <Compile Include="Features\Mounts\Display.fs" />
     <Compile Include="Features\Mounts\Mounts.fs" />
-    <Compile Include="Features\Rulesets\Recalculate.fs" />
     <Compile Include="Features\Rulesets\Edit\Shared.fs" />
     <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
     <Compile Include="Features\Rulesets\Edit\Grades.fs" />
@@ -227,6 +226,7 @@
     <Compile Include="Features\Options\Gameplay\Keybinds.fs" />
     <Compile Include="Features\Options\Gameplay\Lanecover.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
+    <Compile Include="Features\Options\Library\PersonalBests.fs" />
     <Compile Include="Features\Options\Library\Library.fs" />
     <Compile Include="Features\Options\Search\Core.fs" />
     <Compile Include="Features\Options\Search\Settings.fs" />

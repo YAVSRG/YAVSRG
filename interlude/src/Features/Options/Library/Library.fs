@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude.Data.Library
 open Prelude
 open Prelude.Data
+open Prelude.Data.Maintenance
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -23,6 +24,7 @@ module Imports =
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
+        || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle
 
 type LibraryPage() =
     inherit Page()
