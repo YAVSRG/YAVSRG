@@ -77,8 +77,6 @@ module Suggestion =
     let private get_core_suggestions (ctx: SuggestionContext) : (ChartMeta * Rate) seq =
 
         let base_chart, rate = ctx.BaseChart
-        
-        PatternReport.from_chart_uncached (ChartDatabase.get_chart base_chart.Hash ctx.Library.Charts |> expect) |> printfn "%A"
 
         let patterns = base_chart.Patterns
 
