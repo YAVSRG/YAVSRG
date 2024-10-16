@@ -47,15 +47,6 @@ module private TreeState =
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
     let mutable cache_flag = 0
 
-    let get_pb (bests: PersonalBests<'T>) (color_func: 'T -> Color) (format: 'T -> string) =
-        match PersonalBests.get_best_above SelectedChart.rate.Value bests with
-        | Some(v, r, _) -> Some(v, r, color_func v, format v)
-        | None ->
-
-        match PersonalBests.get_best_below SelectedChart.rate.Value bests with
-        | Some(v, r, _) -> Some(v, r, Colors.white.O2, format v)
-        | None -> None
-
     let switch_chart (cc, context, group_name, group_ctx) =
         if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)

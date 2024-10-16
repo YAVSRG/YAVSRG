@@ -28,6 +28,15 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
     let mutable lamp = None
     let mutable markers = ""
 
+    let get_pb (bests: PersonalBests<'T>) (rate: Rate) (color_func: 'T -> Color) (format: 'T -> string) =
+        match PersonalBests.get_best_above rate bests with
+        | Some(v, r, _) -> Some(v, r, color_func v, format v)
+        | None ->
+
+        match PersonalBests.get_best_below rate bests with
+        | Some(v, r, _) -> Some(v, r, Colors.white.O2, format v)
+        | None -> None
+
     let update_cached_info () =
         last_cached_flag <- cache_flag
 
@@ -36,16 +45,21 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         match chart_save_data with
         | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
+            let rate =
+                match ctx with
+                | LibraryContext.Playlist (_, _, d) -> d.Rate.Value
+                | _ -> SelectedChart.rate.Value
+
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
             grade <- 
-                match get_pb personal_bests.Value.Grade Rulesets.current.GradeColor Rulesets.current.GradeName with
+                match get_pb personal_bests.Value.Grade rate Rulesets.current.GradeColor Rulesets.current.GradeName with
                 | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match get_pb personal_bests.Value.Accuracy (K Colors.white) Rulesets.current.FormatAccuracy with
+                    match get_pb personal_bests.Value.Accuracy rate (K Colors.white) Rulesets.current.FormatAccuracy with
                     | Some (accuracy, accuracy_rate, _, text) ->
                         Some (grade, accuracy_rate, color, text)
                     | None -> Some (grade, grade_rate, color, text)
                 | otherwise -> otherwise
-            lamp <- get_pb personal_bests.Value.Lamp Rulesets.current.LampColor Rulesets.current.LampName
+            lamp <- get_pb personal_bests.Value.Lamp rate Rulesets.current.LampColor Rulesets.current.LampName
         | _ -> ()
 
         markers <-
