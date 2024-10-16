@@ -1599,3 +1599,30 @@ module Events =
         event_processing_2.Update Time.infinity
 
         Assert.AreEqual(event_processing.Events, event_processing_2.Events)
+
+    
+    [<Test>]
+    let IgnoreNotesBefore_NoPartialHolds () =
+        let replay = 
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 1000.0f<ms>)
+                .KeyDownFor(2000.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let notes = 
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Hold(2000.0f<ms>, 3000.0f<ms>)
+                .Build()
+                
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.IgnoreNotesBefore 500.0f<ms>
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(0.0f<ms / rate>, false)
+                RELEASE(0.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map (fun e -> e.Action)
+        )
