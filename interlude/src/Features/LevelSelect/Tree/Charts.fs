@@ -200,11 +200,14 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 elif this.Selected then
                     LevelSelect.choose_this_chart ()
                 else
+                    if not (Transitions.in_progress()) then LevelSelect.History.append_current ()
                     this.Select()
+
             elif this.RightClick(origin) then
                 match multi_selection with
                 | Some s when s.IsSelected(cc, ctx) -> s.ShowActions()
                 | _ -> ChartContextMenu(cc, ctx).Show()
+
             elif (%%"delete").Tapped() then
                 match multi_selection with
                 | Some s when s.IsSelected(cc, ctx) -> s.ConfirmDelete()
