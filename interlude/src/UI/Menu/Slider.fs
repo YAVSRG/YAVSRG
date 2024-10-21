@@ -82,7 +82,7 @@ type Slider(setting: Setting.Bounded<float32>) =
             setting, 
             Format = (fun x -> 
                 let percent = x * 100.0f |> round
-                // handle what the F# foundation couldn't: -0 floating point value
+                // handles what the F# foundation couldn't: -0 floating point value
                 if percent = 0.0f then sprintf "%.0f%%" 0.0f
                 else sprintf "%.0f%%" percent
             )
