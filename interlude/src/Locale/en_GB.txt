@@ -921,6 +921,7 @@ rulesets.grade.add=Add grade
 rulesets.grade.color=Color
 rulesets.grade.confirm_delete=Really delete grade '%0'?
 rulesets.grade.name=Name
+rulesets.judgement.add=Add judgement
 rulesets.judgement.breaks_combo=Breaks combo
 rulesets.judgement.color=Color
 rulesets.judgement.confirm_delete=Really delete judgement '%0'?

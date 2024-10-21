@@ -337,6 +337,11 @@ module Ruleset =
 
             let mutable l_req = LampRequirement.ComboBreaksAtMost Int32.MaxValue
             for l in ruleset.Lamps do
+                match l.Requirement with
+                | LampRequirement.JudgementAtMost(j, _) when j >= ruleset.Judgements.Length ->
+                    failwithf "Lamp requirement %A for '%s' refers to an invalid judgement" l.Requirement l.Name
+                | _ -> ()
+
                 if not (l.Requirement.IsStricterThan l_req) then
                     failwithf "Lamp requirement %A for '%s' must be stricter than %A" l.Requirement l.Name l_req
                 l_req <- l.Requirement
@@ -422,3 +427,78 @@ module Ruleset =
             Ok ruleset
         with err ->
             Error err.Message
+
+    let remove_judgement (j: int) (ruleset: Ruleset) =
+        let replace_judgement = function x when x = j -> ruleset.Judgements.Length - 2 | x when x > j -> x - 1 | x -> x
+
+        let latest_window = 
+            seq { 
+                yield 0.0f<ms / rate>
+                for j in ruleset.Judgements |> Array.removeAt j do 
+                    match j.TimingWindows with 
+                    | Some(_, l) -> yield l
+                    | None -> ()
+            }
+            |> Seq.max
+
+        let earliest_window = 
+            seq { 
+                yield 0.0f<ms / rate>
+                for j in ruleset.Judgements |> Array.removeAt j do 
+                    match j.TimingWindows with 
+                    | Some(e, _) -> yield e
+                    | None -> ()
+            }
+            |> Seq.min
+
+        assert(ruleset.Judgements.Length > 1)
+        assert(j >= 0)
+        assert(j < ruleset.Judgements.Length)
+
+        {
+            Name = ruleset.Name
+            Description = ruleset.Description
+            Judgements = Array.removeAt j ruleset.Judgements
+            Lamps = 
+                ruleset.Lamps
+                |> Array.choose (fun l -> 
+                    match l.Requirement with 
+                    | LampRequirement.JudgementAtMost(x, _) when x = j -> None
+                    | LampRequirement.JudgementAtMost(x, c) when x > j -> Some { l with Requirement = LampRequirement.JudgementAtMost(x - 1, c) }
+                    | _ -> Some l
+                )
+            Grades = ruleset.Grades
+            HitMechanics =
+                {
+                    GhostTapJudgement =
+                        match ruleset.HitMechanics.GhostTapJudgement with
+                        | Some x when x = j -> None
+                        | Some x when x > j -> Some (x - 1)
+                        | Some x -> Some x
+                        | None -> None
+                    NotePriority = 
+                        match ruleset.HitMechanics.NotePriority with
+                        | NotePriority.Interlude w ->
+                            let max_window = min (abs earliest_window) latest_window
+                            if w > max_window then 
+                                NotePriority.Interlude 0.0f<ms / rate>
+                            else
+                                NotePriority.Interlude w
+                        | NotePriority.OsuMania -> NotePriority.OsuMania
+                        | NotePriority.Etterna -> NotePriority.Etterna
+                }
+            HoldMechanics =
+                match ruleset.HoldMechanics with
+                | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) -> HoldMechanics.OnlyRequireHold w.Window0
+                | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, if_dropped, if_overheld)) ->
+                    HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, replace_judgement if_dropped, replace_judgement if_overheld))
+                | HoldMechanics.OnlyRequireHold w -> HoldMechanics.OnlyRequireHold w
+                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) -> 
+                    HoldMechanics.JudgeReleasesSeparately (Array.removeAt j windows, replace_judgement if_overheld)
+                | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
+            Accuracy = 
+                match ruleset.Accuracy with
+                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (Array.removeAt j ps)
+                | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
+            Formatting = { DecimalPlaces = ruleset.Formatting.DecimalPlaces }
+        }

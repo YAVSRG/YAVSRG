@@ -94,7 +94,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                 Color = Color.White
                 Requirement = LampRequirement.ComboBreaksAtMost System.Int32.MaxValue
             }
-        ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.append [| new_lamp |]  }
+        ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.append [| new_lamp |] }
         defer refresh
 
     and delete_lamp(i: int) : unit =

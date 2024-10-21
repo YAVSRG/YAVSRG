@@ -55,7 +55,7 @@ module NumberEntry =
 
         let text_setting =
             Setting.simple (setting.Value.ToString("R"))
-            |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.') |> Array.ofSeq |> String)
+            |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> String)
 
         let entry = 
             { new TextEntry(text_setting |> Setting.trigger try_parse, "none", false, Position = Position.ShrinkX 15.0f) with 

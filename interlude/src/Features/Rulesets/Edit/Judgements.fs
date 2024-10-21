@@ -46,7 +46,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
                     fun () -> delete_judgement i
                 ).Show()
             ),
-            Disabled = K true,
+            Disabled = (fun () -> ruleset.Value.Judgements.Length <= 1),
             Position = Position.SliceR PRETTYHEIGHT
         )
 
@@ -54,9 +54,21 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
         container.Clear()
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             container.Add (judgement_controls (i, j))
+        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.judgement.add", add_judgement)
+
+    and add_judgement() =
+        let new_judgement =
+            {
+                Name = "???"
+                Color = Color.White
+                BreaksCombo = false
+                TimingWindows = None
+            }
+        ruleset.Set { ruleset.Value with Judgements = Array.append ruleset.Value.Judgements [| new_judgement |] }
+        defer refresh
 
     and delete_judgement (i: int) : unit =
-        ruleset.Set { ruleset.Value with Judgements = ruleset.Value.Judgements |> Array.removeAt i }
+        ruleset.Set (Ruleset.remove_judgement i ruleset.Value)
         refresh()
 
     override this.Content() =

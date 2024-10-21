@@ -65,7 +65,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Color = Color.White
                 Accuracy = 0.0
             }
-        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |]  }
+        ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |] }
         defer refresh
 
     and delete_grade(i: int) : unit =
