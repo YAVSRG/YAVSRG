@@ -99,10 +99,11 @@
     <Compile Include="Features\Mounts\Edit.fs" />
     <Compile Include="Features\Mounts\Display.fs" />
     <Compile Include="Features\Mounts\Mounts.fs" />
-    <Compile Include="Features\Rulesets\Edit\Mechanics.fs" />
     <Compile Include="Features\Rulesets\Edit\Shared.fs" />
+    <Compile Include="Features\Rulesets\Edit\Mechanics.fs" />
     <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
     <Compile Include="Features\Rulesets\Edit\Accuracy.fs" />
+    <Compile Include="Features\Rulesets\Edit\Windows.fs" />
     <Compile Include="Features\Rulesets\Edit\Grades.fs" />
     <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
     <Compile Include="Features\Rulesets\Edit\RulesetEditor.fs" />

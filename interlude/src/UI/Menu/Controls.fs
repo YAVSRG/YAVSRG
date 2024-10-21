@@ -143,7 +143,12 @@ type PageTextEntry(name, setting) =
     inherit
         PageSetting(
             name,
-            let entry = TextEntry(setting, "none", false) in
+            let entry = 
+                { new TextEntry(setting, "none", false) with
+                    override this.OnFocus by_mouse =
+                        base.OnFocus by_mouse
+                        Style.hover.Play()
+                }
 
             entry
             |+ Frame(

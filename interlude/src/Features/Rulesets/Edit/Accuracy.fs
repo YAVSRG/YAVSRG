@@ -37,9 +37,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
                     (fun v -> points_per_judgement.[i] <- v)
                     (fun () -> points_per_judgement.[i])
                 |> Setting.bound (-10.0, 1.0)
-                |> Setting.round 6
-                |> Setting.f32
-            judgements_container.Add (PageSetting(j.Name, Slider(setting, Format = sprintf "%.6f")))
+            judgements_container.Add (PageSetting(j.Name, NumberEntry.create setting))
 
         page_container()
         |+ PageSetting(%"rulesets.accuracy.decimal_places", SelectDropdown([| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |], decimal_places))

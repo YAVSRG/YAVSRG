@@ -75,6 +75,13 @@ type SelectRulesetPage() =
                     Position = Position.ShrinkR(PRETTYHEIGHT * 3.0f)
                 )
                 |+ Button(
+                    Icons.EDIT,
+                    (fun () -> 
+                        RulesetEditorPage(id, ruleset).Show()
+                    ),
+                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT * 2.0f)
+                )
+                |+ Button(
                     Icons.COPY,
                     (fun () -> 
                         ConfirmPage(
@@ -88,13 +95,6 @@ type SelectRulesetPage() =
                                 Rulesets.install_or_update new_id { Rulesets.current with Name = Rulesets.current.Name + " (Copy)" }
                         )
                             .Show()
-                    ),
-                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT * 2.0f)
-                )
-                |+ Button(
-                    Icons.EDIT,
-                    (fun () -> 
-                        RulesetEditorPage(id, ruleset).Show()
                     ),
                     Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT)
                 )

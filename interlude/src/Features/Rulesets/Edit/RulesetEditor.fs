@@ -10,7 +10,29 @@ open Interlude.Content
 type RulesetEditorPage(id: string, original: Ruleset) =
     inherit Page()
 
-    let ruleset = Setting.simple original |> Setting.trigger (fun rs -> assert(match Ruleset.check rs with Ok _ -> true | Error reason -> printfn "%s" reason; false))
+    let validation_message = SwapContainer()
+
+    let ruleset = 
+        Setting.simple original
+        |> Setting.trigger (fun rs -> 
+            match Ruleset.check rs with
+            | Ok _ -> validation_message.Current <- Dummy()
+            | Error reason ->
+                let card = 
+                    CalloutCard(
+                        (Callout
+                            .Normal
+                            .Icon(Icons.ALERT_OCTAGON)
+                            .Title(%"rulesets.edit.validation_error.title")
+                            .Body(reason)
+                            .Body(%"rulesets.edit.validation_error.body")
+                        ),
+                        Colors.red_accent,
+                        Colors.red.O3
+                    )
+                card.Position <- Position.Box(0.0f, 0.0f, 0.0f, 0.0f, (card :> IWidth).Width, (card :> IHeight).Height)
+                validation_message.Current <- card
+        )
 
     let name = Setting.simple ruleset.Value.Name
 
@@ -20,7 +42,7 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             .Pos(0)
         |+ PageButton(%"rulesets.edit.judgements", fun () -> EditJudgementsPage(ruleset).Show())
             .Pos(3)
-        |+ PageButton(%"rulesets.edit.windows", ignore)
+        |+ PageButton(%"rulesets.edit.windows", fun () -> EditWindowsPage(ruleset).Show())
             .Pos(5)
         |+ PageButton(%"rulesets.edit.accuracy", fun () -> ConfigureAccuracyPage(ruleset).Show())
             .Pos(7)
@@ -30,9 +52,14 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             .Pos(12)
         |+ PageButton(%"rulesets.edit.lamps", fun () -> EditLampsPage(ruleset).Show())
             .Pos(14)
+        |+ validation_message.Pos(17, PAGE_BOTTOM - 17)
         :> Widget
 
     override this.Title = original.Name
     override this.OnClose() =
-        if System.Object.ReferenceEquals(original, ruleset.Value) |> not || name.Value <> original.Name then
+        let has_changed = System.Object.ReferenceEquals(original, ruleset.Value) |> not || name.Value <> original.Name
+        let has_error = match validation_message.Current with :? Dummy -> false | _ -> true
+        if has_changed && not has_error then
             Rulesets.install_or_update id { ruleset.Value with Name = name.Value.Trim() }
+        else
+            ruleset.Set original
