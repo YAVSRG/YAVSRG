@@ -416,6 +416,7 @@ module Ruleset =
             match ruleset.Accuracy with
             | AccuracyPoints.WifeCurve judge -> if judge < 2 || judge > 9 then failwith "WifeCurve `judge` must be a valid judge value"
             | AccuracyPoints.PointsPerJudgement points ->
+                if points.Length <> ruleset.Judgements.Length then failwithf "PointsPerJudgement `points` provides %i values but there are %i judgements" points.Length ruleset.Judgements.Length
                 for p in points do
                     if not (Double.IsFinite p) then failwith "PointsPerJudgement `points` contains invalid floating point values"
 
@@ -428,7 +429,53 @@ module Ruleset =
         with err ->
             Error err.Message
 
-    let remove_judgement (j: int) (ruleset: Ruleset) =
+    let duplicate_judgement (j: int) (ruleset: Ruleset) : Ruleset =
+        let replace_judgement = function x when x > j -> x + 1 | x -> x
+
+        let duplicate (xs: 'T array) = Array.concat [ Array.take (j + 1) xs; [| xs.[j] |]; Array.skip (j + 1) xs ]
+        
+        assert(j >= 0)
+        assert(j < ruleset.Judgements.Length)
+
+        {
+            Name = ruleset.Name
+            Description = ruleset.Description
+            Judgements = 
+                Array.concat [ 
+                    Array.take (j + 1) ruleset.Judgements
+                    [| { ruleset.Judgements.[j] with Name = ruleset.Judgements.[j].Name + "'" } |]
+                    Array.skip (j + 1) ruleset.Judgements
+                ]
+            Lamps = 
+                ruleset.Lamps
+                |> Array.map (fun l ->
+                    match l.Requirement with
+                    | LampRequirement.JudgementAtMost(x, c) -> { l with Requirement = LampRequirement.JudgementAtMost(replace_judgement x, c) }
+                    | LampRequirement.ComboBreaksAtMost n -> l
+                )
+            Grades = ruleset.Grades
+            HitMechanics =
+                {
+                    GhostTapJudgement = Option.map replace_judgement ruleset.HitMechanics.GhostTapJudgement
+                    NotePriority = ruleset.HitMechanics.NotePriority
+                }
+            HoldMechanics =
+                match ruleset.HoldMechanics with
+                | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) -> HoldMechanics.OnlyRequireHold w.Window0
+                | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, if_dropped, if_overheld)) ->
+                    HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, replace_judgement if_dropped, replace_judgement if_overheld))
+                | HoldMechanics.OnlyRequireHold w -> HoldMechanics.OnlyRequireHold w
+                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) -> 
+                    HoldMechanics.JudgeReleasesSeparately (duplicate windows, replace_judgement if_overheld)
+                | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
+            Accuracy = 
+                match ruleset.Accuracy with
+                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (duplicate ps)
+                | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
+            Formatting = { DecimalPlaces = ruleset.Formatting.DecimalPlaces }
+        }
+
+    let remove_judgement (j: int) (ruleset: Ruleset) : Ruleset =
         let replace_judgement = function x when x = j -> ruleset.Judgements.Length - 2 | x when x > j -> x - 1 | x -> x
 
         let latest_window = 

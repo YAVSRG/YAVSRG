@@ -32,3 +32,33 @@ module Editing =
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
+
+    [<Test>]
+    let SCJ4_DuplicatingPerfectTwice () =
+        let mutable ruleset = SC.create 4
+
+        for i = 0 to 1 do
+
+            ruleset <- Ruleset.duplicate_judgement 1 ruleset
+            printfn "%A" ruleset
+
+            match Ruleset.check ruleset with
+            | Ok _ -> ()
+            | Error reason -> Assert.Fail(reason)
+
+        Assert.Pass()
+        
+    [<Test>]
+    let SCJ4_DuplicatingAllJudgements () =
+        let mutable ruleset = SC.create 4
+
+        for i = 5 downto 0 do
+
+            ruleset <- Ruleset.duplicate_judgement i ruleset
+            printfn "%A" ruleset
+
+            match Ruleset.check ruleset with
+            | Ok _ -> ()
+            | Error reason -> Assert.Fail(reason)
+
+        Assert.Pass()

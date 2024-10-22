@@ -37,7 +37,17 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     let rec judgement_controls (i: int, j: Judgement) =
         NavigationContainer.Row()
-        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR(PRETTYHEIGHT * 2.0f))
+        |+ Button(
+            Icons.COPY,
+            (fun () -> 
+                ConfirmPage(
+                    [j.Name] %> "rulesets.judgement.confirm_duplicate",
+                    fun () -> duplicate_judgement i
+                ).Show()
+            ),
+            Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT)
+        )
         |+ Button(
             Icons.TRASH,
             (fun () -> 
@@ -54,17 +64,9 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
         container.Clear()
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             container.Add (judgement_controls (i, j))
-        container.Add <| Button(sprintf "%s %s" Icons.PLUS_CIRCLE %"rulesets.judgement.add", add_judgement)
 
-    and add_judgement() =
-        let new_judgement =
-            {
-                Name = "???"
-                Color = Color.White
-                BreaksCombo = false
-                TimingWindows = None
-            }
-        ruleset.Set { ruleset.Value with Judgements = Array.append ruleset.Value.Judgements [| new_judgement |] }
+    and duplicate_judgement(i: int) : unit =
+        ruleset.Set (Ruleset.duplicate_judgement i ruleset.Value)
         defer refresh
 
     and delete_judgement (i: int) : unit =
