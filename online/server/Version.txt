@@ -1,1 +1,1 @@
-﻿Fixed login from another location bug + multiplayer protocol protection
+﻿Rulesets update
