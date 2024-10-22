@@ -45,10 +45,10 @@ type LevelSelectOptionsPage() =
             .Help(Help.Info("levelselect.min_suggestion_rate"))
             .Pos(9)
         |+ PageSetting(
-            %"levelselect.min_suggestion_rate",
+            %"levelselect.max_suggestion_rate",
             Slider (options.SuggestionsMaxRate |> Setting.trigger (fun v -> options.SuggestionsMinRate |> Setting.app (min v)) |> Setting.uom)
         )
-            .Help(Help.Info("levelselect.min_suggestion_rate"))
+            .Help(Help.Info("levelselect.max_suggestion_rate"))
             .Pos(11)
         |+ PageButton(
             %"library.tables",
