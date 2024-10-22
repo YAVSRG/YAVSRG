@@ -92,7 +92,7 @@ type SelectRulesetPage() =
                                         sprintf "%s_copy_%i" id (Timestamp.now())
                                     else id + "_copy"
 
-                                Rulesets.install_or_update new_id { Rulesets.current with Name = Rulesets.current.Name + " (Copy)" }
+                                Rulesets.install_or_update new_id { ruleset with Name = ruleset.Name + " (Copy)" }
                         )
                             .Show()
                     ),
