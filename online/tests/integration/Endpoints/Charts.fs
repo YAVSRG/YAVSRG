@@ -52,7 +52,7 @@ module Charts =
                 Option.get
                 >> fun (res: Charts.Scores.Leaderboard.Response) ->
                     Assert.AreEqual(SCJ4, res.RulesetId)
-                    printfn "%A" res.Scores
+                    printfn "%A" res
                     done_signal.Set() |> ignore
             )
 
@@ -69,7 +69,7 @@ module Charts =
                 Option.get
                 >> fun (res: Charts.Scores.Leaderboard.Response) ->
                     Assert.AreEqual(SCJ4, res.RulesetId)
-                    printfn "%A" res.Scores
+                    printfn "%A" res
                     done_signal.Set() |> ignore
             )
 
