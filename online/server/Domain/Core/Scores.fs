@@ -124,7 +124,7 @@ module Score =
     let save (score: Score) : int64 =
         SAVE.Execute score core_db |> expect |> Array.exactlyOne
 
-    let PRIMARY_RULESET = "SC(J4)548E5A"
+    let PRIMARY_RULESET = "SAE1C74D1"
 
     type RecentScore =
         {
@@ -143,7 +143,7 @@ module Score =
             SQL =
                 """
             SELECT Id, ChartId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp FROM scores
-            WHERE UserId = @UserId AND RulesetId = 'SC(J4)548E5A'
+            WHERE UserId = @UserId AND RulesetId = 'SAE1C74D1'
             ORDER BY TimePlayed DESC
             LIMIT 10;
             """

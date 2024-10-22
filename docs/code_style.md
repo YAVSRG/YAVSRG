@@ -23,7 +23,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 📕 = Documentation for developers
 🎓 = Localisation changes
 🏷️ = Releases
-💚 = Community content & Automated commits
+💚 = Community content
 
 ### Development principles
 

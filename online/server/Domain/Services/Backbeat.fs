@@ -13,23 +13,12 @@ module Backbeat =
 
     let rulesets = Dictionary<string, Ruleset>()
     do
-        for judge = 3 to 6 do
-            let rs = SC.create judge
-            rulesets.[Ruleset.hash rs] <- rs
+        let add_ruleset (ruleset: Ruleset) =
+            rulesets.[Ruleset.hash ruleset] <- ruleset
 
-    let init () =
-        async {
-            match!
-                WebServices.download_json_async
-                    "https://raw.githubusercontent.com/YAVSRG/YAVSRG/main/backbeat/rulesets/rulesets.json"
-            with
-            | WebResult.Ok(archive: RulesetRepo) ->
-                Logging.Info(sprintf "Backbeat downloads complete")
-
-                for rs in archive.Rulesets.Values do
-                    rulesets.[Ruleset.hash rs] <- rs
-            | otherwise -> failwithf "Failed to download backbeat rulesets: %O" otherwise
-        }
+        add_ruleset (SC.create 4)
+        add_ruleset (OsuMania.create 8.0f OsuMania.NoMod)
+        add_ruleset (Wife3.create 4)
 
     module Tables =
 
