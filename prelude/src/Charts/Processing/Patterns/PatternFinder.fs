@@ -29,7 +29,8 @@ type MatchedPattern =
     { 
         Pattern: CorePattern
         SpecificType: string option
-        Time: Time
+        Start: Time
+        End: Time
         MsPerBeat: float32<ms/beat>
         Density: float32</rate>
         Mixed: bool
@@ -39,7 +40,7 @@ module PatternFinder =
     
     let private PATTERN_STABILITY_THRESHOLD = 5.0f<ms/beat>
 
-    let private matches (specific_patterns: SpecificPatterns) (full_data: RowInfo list) : MatchedPattern array =
+    let private matches (last_note: Time) (specific_patterns: SpecificPatterns) (full_data: RowInfo list) : MatchedPattern array =
         let mutable remaining_data = full_data
 
         let results = ResizeArray()
@@ -59,7 +60,8 @@ module PatternFinder =
                 results.Add {
                     Pattern = Stream
                     SpecificType = specific_type
-                    Time = remaining_data.Head.Time
+                    Start = remaining_data.Head.Time
+                    End = remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
@@ -80,7 +82,8 @@ module PatternFinder =
                 results.Add {
                     Pattern = Chordstream
                     SpecificType = specific_type
-                    Time = remaining_data.Head.Time
+                    Start = remaining_data.Head.Time
+                    End = remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
@@ -101,7 +104,8 @@ module PatternFinder =
                 results.Add {
                     Pattern = Jacks
                     SpecificType = specific_type
-                    Time = remaining_data.Head.Time
+                    Start = remaining_data.Head.Time
+                    End = remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
@@ -116,8 +120,8 @@ module PatternFinder =
 
         density,
         if chart.Keys = 4 then 
-            matches SpecificPatterns.SPECIFIC_4K primitives
+            matches chart.LastNote SpecificPatterns.SPECIFIC_4K primitives
         elif chart.Keys = 7 then 
-            matches SpecificPatterns.SPECIFIC_7K primitives
+            matches chart.LastNote SpecificPatterns.SPECIFIC_7K primitives
         else
-            matches SpecificPatterns.SPECIFIC_OTHER primitives
+            matches chart.LastNote SpecificPatterns.SPECIFIC_OTHER primitives

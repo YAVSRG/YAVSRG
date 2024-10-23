@@ -86,24 +86,23 @@ module private Clustering =
         let index = percentile * float32 sorted_values.Length |> floor |> int
         sorted_values.[index]
 
-    let private pattern_amount (sorted_times: Time array) : Time =
-
-        // todo: scale this inversely off the bpm of the cluster for consistency-over-rates
-        let PATTERN_DURATION = 800.0f<ms>
+    let private pattern_amount (sorted_starts_ends: (Time * Time) array) : Time =
 
         let mutable total_time: Time = 0.0f<ms>
 
-        let mutable current_start = Seq.head sorted_times
-        let mutable current_end = current_start + PATTERN_DURATION
+        let a, b = Array.head sorted_starts_ends
 
-        for time in sorted_times do
-            if current_end < time then
+        let mutable current_start = a
+        let mutable current_end = b
+
+        for start, _end in sorted_starts_ends do
+            if current_end < _end then
                 total_time <- total_time + (current_end - current_start)
 
-                current_start <- time
-                current_end <- current_start + PATTERN_DURATION
+                current_start <- start
+                current_end <- _end
             else
-                current_end <- time + PATTERN_DURATION
+                current_end <- max current_end _end
 
         total_time <- total_time +  (current_end - current_start)
 
@@ -168,7 +167,8 @@ module private Clustering =
             pattern.Pattern, pattern.Mixed, c.Value
         )
         |> Array.map (fun ((pattern, mixed, bpm), data) ->
-            let times = data |> Array.map (fst >> _.Time)
+            let starts_ends = data |> Array.map (fun (m, _) -> m.Start, m.End)
+            let times = starts_ends |> Array.map fst
             let densities = data |> Array.map (fst >> _.Density) |> Array.sort
 
             let data_count = float32 data.Length
@@ -192,7 +192,7 @@ module private Clustering =
                 Density75 = find_percentile 0.75f densities
                 Density90 = find_percentile 0.9f densities
 
-                Amount = pattern_amount times
+                Amount = pattern_amount starts_ends
 
                 Time10 = find_percentile 0.1f times
                 Time50 = find_percentile 0.5f times
