@@ -103,7 +103,7 @@ module Printerlude =
             | Some cc ->
                 let skills = Skillsets.keymode_skills.[(SelectedChart.keymode() |> int) - 3]
                 for p in [ 0.92; 0.93; 0.94; 0.95; 0.96; 0.97; 0.98; 0.99; 1.0 ] do
-                    KeymodeSkillBreakdown.what_if cc.Patterns.Clusters p SelectedChart.rate.Value skills
+                    KeymodeSkillBreakdown.what_if cc.Patterns p SelectedChart.rate.Value skills
                     |> sprintf "What if you got %.0f%%: %O" (p * 100.0)
                     |> io.WriteLine
             | None -> ()

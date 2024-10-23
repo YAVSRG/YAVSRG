@@ -21,7 +21,7 @@ module Skillsets =
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
-                    KeymodeSkillBreakdown.score cc.Patterns.Clusters acc rate keymode_skills.[cc.Keys - 3] |> ignore
+                    KeymodeSkillBreakdown.score cc.Patterns acc rate keymode_skills.[cc.Keys - 3] |> ignore
             | None -> ()
 
     let find_underperformance (score_db: UserDatabase) (library: Library) =
@@ -40,7 +40,7 @@ module Skillsets =
                 for (acc, rate, _) in pbs.Accuracy do
                     let better_accuracy = 1.0 - (1.0 - acc) / ACC_INCREASE
                     let better_rate = rate + 0.3f<rate>
-                    let improvement = KeymodeSkillBreakdown.what_if cc.Patterns.Clusters better_accuracy better_rate keymode_skills.[cc.Keys - 3]
+                    let improvement = KeymodeSkillBreakdown.what_if cc.Patterns better_accuracy better_rate keymode_skills.[cc.Keys - 3]
                     if improvement.Total = 0.0f then
                         printfn "%.2f%% [%.2fx] on %s is an underperformance" (acc * 100.0) rate cc.Title
             | None -> ()

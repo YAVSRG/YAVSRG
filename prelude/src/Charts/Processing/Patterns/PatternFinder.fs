@@ -21,8 +21,8 @@ type CorePattern =
         | Jacks -> 1.0f
     member this.AccuracyBreakpoints =
         match this with
-        | Stream -> ( 0.98, 0.94, 0.90 )
-        | Chordstream -> ( 0.985, 0.95, 0.915 )
+        | Stream -> ( 0.97, 0.935, 0.90 )
+        | Chordstream -> ( 0.98, 0.95, 0.91 )
         | Jacks -> ( 0.99, 0.96, 0.93 )
 
 type MatchedPattern = 

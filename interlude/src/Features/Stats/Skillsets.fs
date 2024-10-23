@@ -98,13 +98,13 @@ type Skills() =
         let keymode = Setting.simple available_keymodes.[0]
         let skill = Setting.simple Jacks
 
-        let graph_container = SwapContainer(SkillsetGraph.Create(Jacks, Skillsets.keymode_skills.[keymode.Value - 3].Jack), Position = Position.Shrink(20.0f))
+        let graph_container = SwapContainer(SkillsetGraph.Create(Jacks, Skillsets.keymode_skills.[keymode.Value - 3].Jacks), Position = Position.Shrink(20.0f))
 
         let refresh_graph() =
             let skills = Skillsets.keymode_skills.[keymode.Value - 3]
             let skill_data = 
                 match skill.Value with
-                | Jacks -> skills.Jack
+                | Jacks -> skills.Jacks
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
             graph_container.Current <- SkillsetGraph.Create(skill.Value, skill_data)

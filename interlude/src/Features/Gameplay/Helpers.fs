@@ -67,8 +67,8 @@ module Gameplay =
                         score_info.WithRuleset Rulesets.DEFAULT
                     else score_info
 
-                KeymodeSkillBreakdown.score standardised_score.ChartMeta.Patterns.Clusters standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
-                |> ignore //|> printfn "%O"
+                KeymodeSkillBreakdown.score standardised_score.ChartMeta.Patterns standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
+                |> printfn "%O"
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with

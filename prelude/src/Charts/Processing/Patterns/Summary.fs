@@ -17,7 +17,8 @@ type PatternReport =
         Density50: Density
         Density75: Density
         Density90: Density
-        // todo: maybe store duration here because it's useful
+
+        Duration: Time
     }
     static member Default = 
         { 
@@ -31,6 +32,8 @@ type PatternReport =
             Density50 = 0.0f</rate>
             Density75 = 0.0f</rate>
             Density90 = 0.0f</rate>
+
+            Duration = 0.0f<ms>
         }
     member this.ImportantClusters =
         match Array.tryHead this.Clusters with
@@ -81,6 +84,8 @@ module PatternReport =
             Density50 = Clustering.find_percentile 0.5f sorted_densities
             Density75 = Clustering.find_percentile 0.75f sorted_densities
             Density90 = Clustering.find_percentile 0.9f sorted_densities
+
+            Duration = chart.LastNote - chart.FirstNote
         }
 
     let from_chart = from_chart_uncached |> cached
