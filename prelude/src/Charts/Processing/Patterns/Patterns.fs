@@ -16,8 +16,8 @@ module Core =
 
     let JACKS : PatternRecogniser = 
         function
-        |   { Jacks = x }
-            :: _ when x > 1 -> 1
+        |   { Jacks = x; MsPerBeat = mspb }
+            :: _ when x > 1 && mspb < 2000.0f<_> -> 1
         | _ -> 0
 
     let CHORDSTREAM : PatternRecogniser =

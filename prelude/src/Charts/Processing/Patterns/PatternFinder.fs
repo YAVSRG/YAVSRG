@@ -105,7 +105,10 @@ module PatternFinder =
                     Pattern = Jacks
                     SpecificType = specific_type
                     Start = remaining_data.Head.Time
-                    End = remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time
+                    End = 
+                        max
+                            (remaining_data.Head.Time + remaining_data.Head.MsPerBeat * 0.5f<beat>)
+                            (remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time)
                     MsPerBeat = mean_mspb
                     Density = d |> List.averageBy _.Density
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not

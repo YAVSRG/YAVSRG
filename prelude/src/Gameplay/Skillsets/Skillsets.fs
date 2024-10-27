@@ -51,13 +51,26 @@ type KeymodeSkillBreakdown =
 
 module KeymodeSkillBreakdown =
 
+    let COMBINED_MULTIPLIER_SCALE_CONSTANT = sqrt 2.0f
+
     let private skill_increase (patterns: PatternReport) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : unit =
 
-        CombinedSkillBreakdown.observe (patterns.Density10 * rate, accuracy, patterns.Duration / rate * 1.8f) skills.Combined
-        CombinedSkillBreakdown.observe (patterns.Density25 * rate, accuracy, patterns.Duration / rate * 1.5f) skills.Combined
-        CombinedSkillBreakdown.observe (patterns.Density50 * rate, accuracy, patterns.Duration / rate) skills.Combined
-        CombinedSkillBreakdown.observe (patterns.Density75 * rate, accuracy, patterns.Duration / rate * 0.5f) skills.Combined
-        CombinedSkillBreakdown.observe (patterns.Density90 * rate, accuracy, patterns.Duration / rate * 0.2f) skills.Combined
+        let total_stream = patterns.Clusters |> Seq.where(fun c -> c.Pattern = Stream) |> Seq.sumBy _.Amount
+        let total_chordstream = patterns.Clusters |> Seq.where(fun c -> c.Pattern = Chordstream) |> Seq.sumBy _.Amount
+        let total_jacks = patterns.Clusters |> Seq.where(fun c -> c.Pattern = Jacks) |> Seq.sumBy _.Amount
+
+        let combined_multiplier = 
+            (
+                sqrt (total_stream / patterns.Duration)
+                + sqrt (total_chordstream / patterns.Duration)
+                + sqrt (total_jacks / patterns.Duration)
+            ) / COMBINED_MULTIPLIER_SCALE_CONSTANT
+
+        CombinedSkillBreakdown.observe (patterns.Density10 * rate * combined_multiplier, accuracy, patterns.Duration / rate * 1.8f) skills.Combined
+        CombinedSkillBreakdown.observe (patterns.Density25 * rate * combined_multiplier, accuracy, patterns.Duration / rate * 1.5f) skills.Combined
+        CombinedSkillBreakdown.observe (patterns.Density50 * rate * combined_multiplier, accuracy, patterns.Duration / rate) skills.Combined
+        CombinedSkillBreakdown.observe (patterns.Density75 * rate * combined_multiplier, accuracy, patterns.Duration / rate * 0.5f) skills.Combined
+        CombinedSkillBreakdown.observe (patterns.Density90 * rate * combined_multiplier, accuracy, patterns.Duration / rate * 0.2f) skills.Combined
 
         for p in patterns.Clusters do
 
