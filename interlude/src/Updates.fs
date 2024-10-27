@@ -21,12 +21,18 @@ module Updates =
         else
             v.Version.ToString(3)
 
+    /// Github commit SHA
+    let short_hash =
+        let informational_version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+        let hash = informational_version.Substring(informational_version.IndexOf('+') + 1)
+        hash.Substring(0, min hash.Length 8)
+
     /// Full version string e.g. "Interlude 0.5.16"
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
-
+        
         if DEV_MODE then
-            sprintf "%s %s (dev build)" v.Name short_version
+            sprintf "%s %s-%s" v.Name short_version short_hash
         else
             sprintf "%s %s" v.Name short_version
 
