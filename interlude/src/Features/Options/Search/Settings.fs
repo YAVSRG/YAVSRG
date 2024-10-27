@@ -161,17 +161,17 @@ module Settings =
                 yield PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
                     .Help(Help.Info("gameplay.backgrounddim"))
             if token_match tokens [|%"gameplay.lanecover"|] then
-                yield PageButton(%"gameplay.lanecover", (fun () -> LanecoverPage().Show()))
+                yield PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show())
                     .Help(Help.Info("gameplay.lanecover"))
             if token_match tokens [|%"gameplay.pacemaker"|] then
-                yield PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()))
+                yield PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
             if token_match tokens [|%"rulesets"|] then
-                yield PageButton(%"rulesets", (fun () -> SelectRulesetPage().Show()))
+                yield PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
                     .Help(Help.Info("rulesets"))
             if token_match tokens [|%"rulesets.add"|] then
-                yield PageButton(%"rulesets.add", (fun () -> AddRulesetsPage().Show()))
+                yield PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show())
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
-                yield PageSetting(%"gameplay.keybinds", GameplayKeybinder.KeymodeAndKeybinder())
+                yield PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
                     .Help(Help.Info("gameplay.keybinds"))
                 , 2, 2, PageWidth.Full
             

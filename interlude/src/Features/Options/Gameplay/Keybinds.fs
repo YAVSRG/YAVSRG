@@ -1,25 +1,23 @@
 ﻿namespace Interlude.Features.OptionsMenu.Gameplay
 
-open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
+open Prelude
 open Interlude.Options
-open Interlude.Features.Gameplay
 open Interlude.UI
 
-type GameplayKeybinder(keymode: Setting<Keymode>) as this =
+type GameplayKeybinder(keymode: Keymode) as this =
     inherit Container(NodeType.FocusTrap)
 
     let mutable progress = 0
 
     let mutable text =
-        options.GameplayBinds.[int keymode.Value - 3]
+        options.GameplayBinds.[int keymode - 3]
         |> Seq.map (sprintf "%O")
         |> String.concat ",  "
 
     let refresh_text () : unit =
-        let binds = options.GameplayBinds.[int keymode.Value - 3]
+        let binds = options.GameplayBinds.[int keymode - 3]
 
         if not this.Selected then
             text <- binds |> Seq.map (sprintf "%O") |> String.concat ",  "
@@ -32,7 +30,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             text <- text + "..."
 
     let rec input_callback (b) =
-        let binds = options.GameplayBinds.[int keymode.Value - 3]
+        let binds = options.GameplayBinds.[int keymode - 3]
 
         match b with
         | Bind.Key(k, _) ->
@@ -40,7 +38,7 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
             binds.[progress] <- Bind.Key(k, (false, false, false))
             progress <- progress + 1
 
-            if progress = int keymode.Value then
+            if progress = int keymode then
                 this.Focus false
             else
                 Input.listen_to_next_key input_callback
@@ -85,22 +83,26 @@ type GameplayKeybinder(keymode: Setting<Keymode>) as this =
         Input.remove_listener ()
 
         text <-
-            options.GameplayBinds.[int keymode.Value - 3]
+            options.GameplayBinds.[int keymode - 3]
             |> Seq.map (sprintf "%O")
             |> String.concat ",  "
 
     member this.OnKeymodeChanged() = refresh_text ()
 
-    static member KeymodeAndKeybinder() =
-        let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
-        let binder = GameplayKeybinder(keymode, Position = Position.ShrinkL 100.0f)
-        binder.Add { new StaticWidget(NodeType.None) with
-            override this.Draw() = if binder.Focused then Draw.rect (this.Bounds.BorderB(Style.PADDING).SliceL(50.0f)) Colors.yellow_accent
-        }
-        let keymode_selector = Selector.FromEnum(keymode |> Setting.trigger (ignore >> binder.OnKeymodeChanged), Position = Position.SliceL 100.0f)
-        keymode_selector.Add { new StaticWidget(NodeType.None) with
-            override this.Draw() = if keymode_selector.Focused then Draw.rect (this.Bounds.BorderB(Style.PADDING).SliceL(50.0f)) Colors.yellow_accent
-        }
-        NavigationContainer.Row()
-        |+ binder
-        |+ keymode_selector
+type GameplayBindsPage() =
+    inherit Page()
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting("3K", GameplayKeybinder Keymode.``3K``).Pos(0, 2, PageWidth.Full)
+        |+ PageSetting("4K", GameplayKeybinder Keymode.``4K``).Pos(2, 2, PageWidth.Full)
+        |+ PageSetting("5K", GameplayKeybinder Keymode.``5K``).Pos(4, 2, PageWidth.Full)
+        |+ PageSetting("6K", GameplayKeybinder Keymode.``6K``).Pos(6, 2, PageWidth.Full)
+        |+ PageSetting("7K", GameplayKeybinder Keymode.``7K``).Pos(8, 2, PageWidth.Full)
+        |+ PageSetting("8K", GameplayKeybinder Keymode.``8K``).Pos(10, 2, PageWidth.Full)
+        |+ PageSetting("9K", GameplayKeybinder Keymode.``9K``).Pos(12, 2, PageWidth.Full)
+        |+ PageSetting("10K", GameplayKeybinder Keymode.``10K``).Pos(14, 2, PageWidth.Full)
+        :> Widget
+
+    override this.Title = %"gameplay.keybinds"
+    override this.OnClose() = ()
