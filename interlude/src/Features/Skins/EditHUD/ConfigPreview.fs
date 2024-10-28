@@ -25,7 +25,7 @@ type ConfigPreview(scale: float32, config: Setting<HudPosition>) =
                 let cfg = Content.NoteskinConfig
 
                 let width =
-                    (cfg.ColumnWidth * float32 keycount
+                    (cfg.KeymodeColumnWidth keycount * float32 keycount
                      + Array.sum (cfg.KeymodeColumnSpacing keycount))
                     * scale
 
@@ -133,7 +133,7 @@ type ConfigPreviewNew(position: HudPosition) =
                 let cfg = Content.NoteskinConfig
 
                 let width =
-                    (cfg.ColumnWidth * float32 keycount
+                    (cfg.KeymodeColumnWidth keycount * float32 keycount
                         + Array.sum (cfg.KeymodeColumnSpacing keycount))
 
                 Rect

@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
-open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
 open Interlude.Features.Skins
 open Interlude.Features.Rulesets
@@ -26,7 +25,7 @@ type GameplayPage() =
                     ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
                     (float32 options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
                     (float32 options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                    "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.ColumnWidth).ToString("F0")
+                    "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                 ]
                 %> "gameplay.scrollspeed.info"
             ),

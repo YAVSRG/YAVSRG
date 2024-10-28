@@ -43,7 +43,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
     let keys = chart.Keys
 
-    let column_width = noteskin_config.ColumnWidth
+    let column_width = noteskin_config.KeymodeColumnWidth keys
     let column_spacing = noteskin_config.KeymodeColumnSpacing keys
 
     let column_positions =

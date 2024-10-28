@@ -94,6 +94,10 @@ type NoteskinConfig =
         PlayfieldAlignment: float32 * float32
         /// Sets the width of columns, in pixels
         ColumnWidth: float32
+        /// If true, game uses KeymodeSpecificColumnWidth instead of ColumnWidth for column width
+        UseKeymodeSpecificColumnWidth: bool
+        /// Stores column width information for keymodes. Only applied when KeymodeSpecificColumnWidth is true
+        KeymodeSpecificColumnWidth: float32 array
         /// Sets the spacing of columns, in pixels
         ColumnSpacing: float32
         /// If true, game uses AdvancedColumnSpacing instead of ColumnSpacing for column spacing
@@ -154,6 +158,18 @@ type NoteskinConfig =
             PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
             PlayfieldAlignment = 0.5f, 0.5f
             ColumnWidth = 150.0f
+            UseKeymodeSpecificColumnWidth = false
+            KeymodeSpecificColumnWidth = 
+                [|
+                    150.0f
+                    150.0f
+                    150.0f
+                    150.0f
+                    150.0f
+                    150.0f
+                    150.0f
+                    150.0f
+                |]
             ColumnSpacing = 0.0f
             UseAdvancedColumnSpacing = false
             AdvancedColumnSpacing =
@@ -288,6 +304,14 @@ type NoteskinConfig =
             this.AdvancedColumnSpacing.[keymode - 3]
         else
             Array.create (keymode - 1) this.ColumnSpacing
+
+    member this.KeymodeColumnWidth(keymode: int) : float32 =
+        if this.UseKeymodeSpecificColumnWidth then
+            this.KeymodeSpecificColumnWidth.[keymode - 3]
+        else
+            this.ColumnWidth
+
+    member this.DefaultColumnWidth = this.KeymodeColumnWidth 4
 
 type NoteskinTextureRules =
     {

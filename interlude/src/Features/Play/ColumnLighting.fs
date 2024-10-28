@@ -14,9 +14,10 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
     let sprite = Content.Texture "receptorlighting"
 
     let column_spacing = ns.KeymodeColumnSpacing keys
+    let column_width = ns.KeymodeColumnWidth keys
     let column_light_colors = ns.ColumnLightColors.[keys - 3]
 
-    let offset = ns.ColumnLightOffset * ns.ColumnWidth
+    let offset = ns.ColumnLightOffset * column_width
 
     let column_positions =
         let mutable x = 0.0f
@@ -27,7 +28,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                 let v = x
 
                 if i + 1 < keys then
-                    x <- x + ns.ColumnWidth + column_spacing.[i]
+                    x <- x + column_width + column_spacing.[i]
 
                 v
             )
@@ -53,7 +54,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                 let a = 255.0f * percent_remaining |> int
 
                 Draw.quad
-                    (let x = ns.ColumnWidth * 0.5f + column_positions.[k]
+                    (let x = column_width * 0.5f + column_positions.[k]
 
                      if options.Upscroll.Value then
                          Sprite.aligned_box_x
@@ -61,7 +62,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                               this.Bounds.Top + options.HitPosition.Value + offset,
                               0.5f,
                               1.0f,
-                              ns.ColumnWidth * percent_remaining,
+                              column_width * percent_remaining,
                               -1.0f / percent_remaining)
                              sprite
                      else
@@ -70,7 +71,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
                               this.Bounds.Bottom - options.HitPosition.Value - offset,
                               0.5f,
                               1.0f,
-                              ns.ColumnWidth * percent_remaining,
+                              column_width * percent_remaining,
                               1.0f / percent_remaining)
                              sprite)
                         .AsQuad

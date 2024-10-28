@@ -97,7 +97,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
 
     let rotation = Skins.note_rotation keys
 
-    let column_width = ns.ColumnWidth
+    let column_width = ns.KeymodeColumnWidth keys
 
     let column_positions =
         let column_spacing = ns.KeymodeColumnSpacing keys
