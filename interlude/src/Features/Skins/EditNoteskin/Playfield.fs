@@ -14,9 +14,8 @@ open Interlude.Options
 type SpacingPicker(spacing: Setting.Bounded<float32>) =
     inherit Container(NodeType.Leaf)
 
-    let add (amount) =
+    let add (amount: float32) =
         Setting.app (fun x -> x + amount) spacing
-        Style.click.Play()
 
     override this.Init(parent: Widget) =
         this
@@ -25,6 +24,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
             (fun () ->
                 this.Select true
                 add 5.0f
+                Style.click.Play()
             ),
             OnHover =
                 (fun b ->
@@ -39,6 +39,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
                         this.Select true
 
                     add -5.0f
+                    Style.click.Play()
         )
 
         base.Init parent
@@ -61,12 +62,19 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
         if this.Selected then
             if (%%"up").Tapped() then
                 add 5.0f
+                Style.click.Play()
             elif (%%"down").Tapped() then
                 add -5.0f
+                Style.click.Play()
             elif (%%"left").Tapped() then
                 add -1.0f
+                Style.click.Play()
             elif (%%"right").Tapped() then
                 add 1.0f
+                Style.click.Play()
+        
+        if Mouse.hover this.Bounds then
+            add (Mouse.scroll())
 
 type PlayfieldSettingsPage() =
     inherit Page()
@@ -80,14 +88,22 @@ type PlayfieldSettingsPage() =
     let playfield_color = Setting.simple data.PlayfieldColor
     let use_stage_textures = Setting.simple data.EnableStageTextures
 
-    let column_width = data.ColumnWidth |> Setting.bounded (10.0f, 300.0f) |> Setting.roundf 0
+    let column_width = 
+        data.ColumnWidth
+        |> Setting.bounded (10.0f, 300.0f)
+        |> Setting.roundf 0
+
+    let use_specific_column_widths = Setting.simple data.UseKeymodeSpecificColumnWidth
+    let column_widths = data.KeymodeSpecificColumnWidth
 
     let column_spacing =
-        data.ColumnSpacing |> Setting.bounded (-150.0f, 300.0f) |> Setting.roundf 0
+        data.ColumnSpacing
+        |> Setting.bounded (-150.0f, 300.0f)
+        |> Setting.roundf 0
 
     let use_advanced_column_spacing = Setting.simple data.UseAdvancedColumnSpacing
-    let fill_gaps = Setting.simple data.FillColumnGaps
     let spacing = data.AdvancedColumnSpacing
+    let fill_gaps = Setting.simple data.FillColumnGaps
 
     let spacing_setting keymode i =
         let k = int keymode - 3
@@ -96,7 +112,14 @@ type PlayfieldSettingsPage() =
         |> Setting.bound (-150.0f, 300.0f)
         |> Setting.roundf 0
 
-    let NOTE_WIDTH = 120.0f
+    let width_setting =
+        Setting.make 
+            (fun v -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] <- v else column_width.Set v)
+            (fun () -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] else column_width.Value)
+        |> Setting.bound (10.0f, 300.0f)
+        |> Setting.roundf 0
+
+    let PICKER_WIDTH = 120.0f
 
     let _spacings, refresh_spacings =
         refreshable_row
@@ -109,8 +132,8 @@ type PlayfieldSettingsPage() =
                     spacing_setting keymode.Value i,
                     Position =
                         { Position.DEFAULT with
-                            Left = 0.5f %+ (x + NOTE_WIDTH * n)
-                            Right = 0.5f %+ (x + NOTE_WIDTH * n + NOTE_WIDTH)
+                            Left = 0.5f %+ (x + PICKER_WIDTH * n)
+                            Right = 0.5f %+ (x + PICKER_WIDTH * n + PICKER_WIDTH)
                         }
                 )
             )
@@ -128,31 +151,33 @@ type PlayfieldSettingsPage() =
             .Pos(4)
         |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(playfield_color, true))
             .Pos(6, 3)
-        |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
-            .Help(Help.Info("gameplay.hitposition"))
-            .Pos(10)
-        |+ PageSetting(%"noteskin.columnwidth", Slider(column_width, Step = 1f))
-            .Help(Help.Info("noteskin.columnwidth"))
-            .Pos(12)
-        |+ PageSetting(%"noteskin.fillcolumngaps", Checkbox fill_gaps)
-            .Help(Help.Info("noteskin.fillcolumngaps"))
-            .Pos(14)
-        |+ PageSetting(%"noteskin.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
-            .Help(Help.Info("noteskin.useadvancedcolumnspacing"))
-            .Pos(16)
-        |+ PageSetting(%"noteskin.columnspacing", Slider(column_spacing, Step = 1f))
-            .Help(Help.Info("noteskin.columnspacing"))
-            .Pos(18)
-            .Conditional(use_advanced_column_spacing.Get >> not)
+
         |+ PageSetting(
                 %"generic.keymode",
                 Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
+            .Pos(10)
+            .Conditional(fun () -> use_specific_column_widths.Value || use_advanced_column_spacing.Value)
+
+        |+ PageSetting(%"noteskin.keymode_specific_column_widths", Checkbox use_specific_column_widths)
+            .Pos(14)
+        |+ PageSetting(%"noteskin.columnwidth", Slider(width_setting, Step = 1f))
+            .Help(Help.Info("noteskin.columnwidth"))
+            .Pos(16)
+
+        |+ PageSetting(%"noteskin.fillcolumngaps", Checkbox fill_gaps)
+            .Help(Help.Info("noteskin.fillcolumngaps"))
             .Pos(18)
-            .Conditional(use_advanced_column_spacing.Get)
+        |+ PageSetting(%"noteskin.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
+            .Help(Help.Info("noteskin.useadvancedcolumnspacing"))
+            .Pos(20)
+        |+ PageSetting(%"noteskin.columnspacing", Slider(column_spacing, Step = 1f))
+            .Help(Help.Info("noteskin.columnspacing"))
+            .Pos(22)
+            .Conditional(use_advanced_column_spacing.Get >> not)
         |+ PageSetting(%"noteskin.advancedcolumnspacing", _spacings)
             .Help(Help.Info("noteskin.advancedcolumnspacing"))
-            .Pos(20, 2, PageWidth.Full)
+            .Pos(22, 2, PageWidth.Full)
             .Conditional(use_advanced_column_spacing.Get)
         :> Widget
 
@@ -178,7 +203,7 @@ type PlayfieldSettingsPage() =
         Draw.rect (frame.SliceB Style.PADDING) Colors.white
 
         let pw =
-            (float32 keys * column_width.Value
+            (float32 keys * width_setting.Value
              + if use_advanced_column_spacing.Value then
                    Array.sum spacing.[keys - 3]
                else
@@ -193,7 +218,7 @@ type PlayfieldSettingsPage() =
         else
             for i = 1 to keys do
                 Draw.rect
-                    (preview_bounds.ShrinkL(left).SliceL(column_width.Value * PREVIEW_SCALE))
+                    (preview_bounds.ShrinkL(left).SliceL(width_setting.Value * PREVIEW_SCALE))
                     playfield_color.Value
 
                 if i < keys then
@@ -203,7 +228,7 @@ type PlayfieldSettingsPage() =
                         else
                             column_spacing.Value
 
-                    left <- left + (column_width.Value + s) * PREVIEW_SCALE
+                    left <- left + (width_setting.Value + s) * PREVIEW_SCALE
 
         Draw.rect
         <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f)
@@ -232,7 +257,9 @@ type PlayfieldSettingsPage() =
     override this.OnClose() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
+                UseKeymodeSpecificColumnWidth = use_specific_column_widths.Value
                 ColumnWidth = column_width.Value
+                KeymodeSpecificColumnWidth = column_widths
                 ColumnSpacing = column_spacing.Value
                 FillColumnGaps = fill_gaps.Value
                 PlayfieldColor = playfield_color.Value
