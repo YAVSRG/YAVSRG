@@ -61,8 +61,6 @@ module FilterParts =
 
 type Filter =
     internal {
-        SearchTerms: string array
-        SearchAntiTerms: string array
         PatternTerms: string array
         PatternAntiTerms: string array
 
@@ -80,8 +78,6 @@ type Filter =
 
     static member Empty =
         {
-            SearchTerms = [||]
-            SearchAntiTerms = [||]
             PatternTerms = [||]
             PatternAntiTerms = [||]
 
@@ -95,12 +91,6 @@ type Filter =
             LNPercentMin = None
             LNPercentMax = None
             SV = None
-        }
-
-    member this.WithoutSearchTerms =
-        { this with
-            SearchTerms = [||]
-            SearchAntiTerms = [||]
         }
 
     member this.Compile(ctx: LibraryViewContext) : (ChartMeta -> bool) array =
@@ -135,24 +125,6 @@ type Filter =
             | Some true -> yield fun cc -> cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
             | None -> ()
 
-            if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
-                yield fun cc ->
-                    let s =
-                        (cc.Title
-                            + " "
-                            + cc.Artist
-                            + " "
-                            + cc.Creator
-                            + " "
-                            + cc.DifficultyName
-                            + " "
-                            + (cc.Subtitle |> Option.defaultValue "")
-                            + " "
-                            + String.concat " " cc.Packs)
-                            .ToLowerInvariant()
-                    Array.forall (s.Contains : string -> bool) this.SearchTerms
-                    && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms
-
             if this.PatternTerms.Length <> 0 || this.PatternAntiTerms.Length <> 0 then
                 yield fun cc ->
                     let report = cc.Patterns
@@ -174,15 +146,11 @@ type Filter =
         }
         |> Array.ofSeq
 
-    static member FromParts(parts: FilterPart list) : Filter =
+    static member Build (parts: FilterPart list) : Filter =
         let mutable filter = Filter.Empty
 
         for p in parts do
             match p with
-            | Impossible -> filter <- { filter with SearchAntiTerms = [|""|] }
-            | String str -> filter <- { filter with SearchTerms = Array.append filter.SearchTerms [| str |] }
-            | NotString str -> filter <- { filter with SearchAntiTerms = Array.append filter.SearchAntiTerms [| str |] }
-
             | Equals("p", str)
             | Equals("pattern", str) -> filter <- { filter with PatternTerms = Array.append filter.PatternTerms [| str |] }
             | NotEquals("p", str)
@@ -219,13 +187,67 @@ type Filter =
             | _ -> ()
         filter
 
+type FilteredSearch =
+    {
+        SearchTerms: string array
+        SearchAntiTerms: string array
+
+        Filter: Filter
+    }
+
+    member this.Compile (ctx: LibraryViewContext) =
+        if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
+            [| fun cc ->
+                let s =
+                    (cc.Title
+                        + " "
+                        + cc.Artist
+                        + " "
+                        + cc.Creator
+                        + " "
+                        + cc.DifficultyName
+                        + " "
+                        + (cc.Subtitle |> Option.defaultValue "")
+                        + " "
+                        + String.concat " " cc.Packs)
+                        .ToLowerInvariant()
+                Array.forall (s.Contains : string -> bool) this.SearchTerms
+                && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms
+            |]
+        else [||]
+        |> Array.append (this.Filter.Compile ctx)
+
+    static member Build (parts: FilterPart list) : FilteredSearch =
+        let mutable filtered_search =
+            {
+                SearchTerms = [||]
+                SearchAntiTerms = [||]
+                Filter = Filter.Build parts
+            }
+
+        for p in parts do
+            match p with
+            | Impossible -> filtered_search <- { filtered_search with SearchAntiTerms = [|""|] }
+            | String str -> filtered_search <- { filtered_search with SearchTerms = Array.append filtered_search.SearchTerms [| str |] }
+            | NotString str -> filtered_search <- { filtered_search with SearchAntiTerms = Array.append filtered_search.SearchAntiTerms [| str |] }
+
+            | _ -> ()
+
+        filtered_search
+
 module Filter =
 
-    let private apply (compiled_filter: (ChartMeta -> bool) array) (cc: ChartMeta) : bool =
+    let private apply_compiled (compiled_filter: (ChartMeta -> bool) array) (cc: ChartMeta) : bool =
         Array.forall (fun f -> f cc) compiled_filter
 
-    let apply_seq (filter: Filter, ctx: LibraryViewContext) (charts: ChartMeta seq) =
-        Seq.filter (apply (filter.Compile ctx)) charts
+    let apply (filter: Filter, ctx: LibraryViewContext) (charts: ChartMeta seq) =
+        Seq.filter (apply_compiled (filter.Compile ctx)) charts
 
-    let apply_ctx_seq (filter: Filter, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
-        Seq.filter (fun (cc, _) -> apply (filter.Compile ctx) cc) charts
+    let apply_with (filter: Filter, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
+        Seq.filter (fun (cc, _) -> apply_compiled (filter.Compile ctx) cc) charts
+
+    let apply_search (filter: FilteredSearch, ctx: LibraryViewContext) (charts: ChartMeta seq) =
+        Seq.filter (apply_compiled (filter.Compile ctx)) charts
+
+    let apply_search_with (filter: FilteredSearch, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
+        Seq.filter (fun (cc, _) -> apply_compiled (filter.Compile ctx) cc) charts

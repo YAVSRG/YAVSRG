@@ -29,7 +29,7 @@ let test() =
         }
 
     let search = "getty jumper"
-    let search_result = LibraryView.get_groups (FilterParts.parse search |> Filter.FromParts) Grouping.modes.["pack"] false Sorting.modes.["difficulty"] false false None ctx
+    let search_result = LibraryView.get_groups (FilterParts.parse search |> Filter.Build) Grouping.modes.["pack"] false Sorting.modes.["difficulty"] false false None ctx
     let start = search_result |> Seq.head |> snd |> fun group -> fst group.Charts.[0]
 
     printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator

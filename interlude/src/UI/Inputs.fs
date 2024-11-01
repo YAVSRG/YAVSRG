@@ -90,7 +90,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     member val DebounceTime = 400L with get, set
 
     new(query_text: Setting<string>, callback: FilterPart list -> unit) = SearchBox(query_text, (fun (query: string) -> callback (FilterParts.parse query)))
-    new(query_text: Setting<string>, callback: Filter -> unit) = SearchBox(query_text, (fun (query: string) -> callback (FilterParts.parse query |> Filter.FromParts)))
+    new(query_text: Setting<string>, callback: FilteredSearch -> unit) = SearchBox(query_text, (fun (query: string) -> callback (FilterParts.parse query |> FilteredSearch.Build)))
 
     member private this.StartSearch() = search_timer.Restart()
 

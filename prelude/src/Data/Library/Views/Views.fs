@@ -16,7 +16,13 @@ module LibraryView =
         |> Seq.map (fun word -> if String.forall Char.IsAsciiDigit word then word.PadLeft(4, '0') else word)
         |> List.ofSeq
 
-    let private get_collection_groups (filter_by: Filter) (reverse_groups: bool) (sort_by: SortMethod) (reverse_sorting: bool) (ctx: LibraryViewContext) : SortedGroups =
+    let private get_collection_groups
+        (filter_by: FilteredSearch)
+        (reverse_groups: bool)
+        (sort_by: SortMethod)
+        (reverse_sorting: bool)
+        (ctx: LibraryViewContext)
+        : SortedGroups =
 
         let groups = new Dictionary<string, Group>()
 
@@ -29,7 +35,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Folder name)
                 | None -> None
             )
-            |> Filter.apply_ctx_seq (filter_by, ctx)
+            |> Filter.apply_search_with (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
@@ -53,7 +59,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Playlist(i, name, info))
                 | None -> None
             )
-            |> Filter.apply_ctx_seq (filter_by, ctx)
+            |> Filter.apply_search_with (filter_by, ctx)
             |> Array.ofSeq
             |> fun x ->
                 if x.Length > 0 then
@@ -68,7 +74,7 @@ module LibraryView =
         let liked_songs : Group option = 
             ctx.Library.Collections.EnumerateLikes
             |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
-            |> Filter.apply_seq (filter_by, ctx)
+            |> Filter.apply_search (filter_by, ctx)
             |> Seq.sortBy (fun cc -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Seq.map (fun cc -> (cc, LibraryContext.Likes))
@@ -94,7 +100,7 @@ module LibraryView =
         }
 
     let private get_table_groups
-        (filter_by: Filter)
+        (filter_by: FilteredSearch)
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
@@ -110,7 +116,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Table level)
                 | None -> None
             )
-            |> Filter.apply_ctx_seq (filter_by, ctx)
+            |> Filter.apply_search_with (filter_by, ctx)
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
@@ -132,7 +138,7 @@ module LibraryView =
         |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value)
 
     let private get_normal_groups
-        (filter_by: Filter)
+        (filter_by: FilteredSearch)
         (group_by: GroupFunc)
         (reverse_groups: bool)
         (sort_by: SortMethod)
@@ -142,7 +148,7 @@ module LibraryView =
 
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
-        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
+        for cc in Filter.apply_search (filter_by, ctx) ctx.Library.Charts.Cache.Values do
             let group_key = group_by (cc, ctx)
 
             if found_groups.ContainsKey group_key |> not then
@@ -162,7 +168,7 @@ module LibraryView =
         |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value.ToGroup reverse_sorting)
     
     let private get_packs
-        (filter_by: Filter)
+        (filter_by: FilteredSearch)
         (reverse_groups: bool)
         (sort_by: SortMethod)
         (reverse_sorting: bool)
@@ -171,7 +177,7 @@ module LibraryView =
 
         let found_groups = new Dictionary<string, GroupWithSorting>()
 
-        for cc in Filter.apply_seq (filter_by, ctx) ctx.Library.Charts.Cache.Values do
+        for cc in Filter.apply_search (filter_by, ctx) ctx.Library.Charts.Cache.Values do
             for pack in cc.Packs do
 
                 if found_groups.ContainsKey pack |> not then
@@ -191,7 +197,7 @@ module LibraryView =
         |> Seq.map (fun kvp -> kvp.Key, kvp.Value.ToGroup reverse_sorting)
     
     let get_groups
-        (filter_by: Filter)
+        (filter_by: FilteredSearch)
         (group_by: GroupMethod)
         (reverse_groups: bool)
         (sort_by: SortMethod)

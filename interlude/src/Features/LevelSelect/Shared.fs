@@ -42,7 +42,7 @@ module LevelSelect =
             | _ -> refresh_details()
         )
 
-    let mutable filter: Filter = Filter.Empty
+    let mutable filter: FilteredSearch = { SearchTerms = [||]; SearchAntiTerms = [||]; Filter = Filter.Empty }
 
     module History =
 
@@ -131,7 +131,7 @@ module LevelSelect =
                     MinimumRate = options.SuggestionsMinRate.Value
                     MaximumRate = options.SuggestionsMaxRate.Value
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
-                    Filter = filter.WithoutSearchTerms
+                    Filter = filter.Filter
                     Mods = SelectedChart.selected_mods.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
@@ -176,7 +176,7 @@ module LevelSelect =
                     UserDatabase = Content.UserData
                 }
 
-            match Suggestion.get_random filter ctx with
+            match Suggestion.get_random filter.Filter ctx with
             | Some cc ->
                 History.append_current()
                 SelectedChart.change(cc, LibraryContext.None, true)
@@ -190,7 +190,7 @@ module LevelSelect =
                         MinimumRate = options.SuggestionsMinRate.Value
                         MaximumRate = options.SuggestionsMaxRate.Value
                         OnlyNewCharts = false
-                        Filter = filter.WithoutSearchTerms
+                        Filter = filter.Filter
                         Mods = SelectedChart.selected_mods.Value
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
