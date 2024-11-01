@@ -65,7 +65,7 @@ module Suggestion =
         let rand = Random()
 
         let charts =
-            Filter.apply (filter_by, ctx) ctx.Library.Charts.Cache.Values
+            filter_by.Apply ctx.Library.Charts.Cache.Values
             |> Array.ofSeq
 
         if charts.Length > 0 then
@@ -108,7 +108,7 @@ module Suggestion =
                 Seq.filter (fun (cc, (rate, p)) -> now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS) 
                else 
                 id
-            |> Filter.apply_with (ctx.Filter, ctx.LibraryViewContext)
+            |> ctx.Filter.Apply
 
         let total_pattern_amount = patterns.Clusters |> Seq.sumBy _.Amount
         let spikiness = patterns.Density90 / patterns.Density50

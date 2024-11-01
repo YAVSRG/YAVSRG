@@ -93,7 +93,7 @@ type Filter =
             SV = None
         }
 
-    member this.Compile(ctx: LibraryViewContext) : (ChartMeta -> bool) array =
+    member internal this.Compile : ChartMeta -> bool =
         seq {
             match this.Keymode with
             | Some k -> yield fun cc -> cc.Keys = k
@@ -145,6 +145,13 @@ type Filter =
                     && Array.forall (matches >> not) this.PatternAntiTerms
         }
         |> Array.ofSeq
+        |> fun checks -> (fun (cc: ChartMeta) -> Array.forall (fun f -> f cc) checks)
+
+    member this.Apply (charts: ChartMeta seq) =
+        Seq.filter this.Compile charts
+
+    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) =
+        Seq.filter (fst >> this.Compile) charts
 
     static member Build (parts: FilterPart list) : Filter =
         let mutable filter = Filter.Empty
@@ -195,9 +202,14 @@ type FilteredSearch =
         Filter: Filter
     }
 
-    member this.Compile (ctx: LibraryViewContext) =
+    member internal this.Compile : ChartMeta -> bool =
+        let matches_filter = this.Filter.Compile
+
         if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
-            [| fun cc ->
+
+            fun cc ->
+                if not (matches_filter cc) then false else
+
                 let s =
                     (cc.Title
                         + " "
@@ -213,9 +225,14 @@ type FilteredSearch =
                         .ToLowerInvariant()
                 Array.forall (s.Contains : string -> bool) this.SearchTerms
                 && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms
-            |]
-        else [||]
-        |> Array.append (this.Filter.Compile ctx)
+
+        else matches_filter
+
+    member this.Apply (charts: ChartMeta seq) =
+        Seq.filter this.Compile charts
+
+    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) =
+        Seq.filter (fst >> this.Compile) charts
 
     static member Build (parts: FilterPart list) : FilteredSearch =
         let mutable filtered_search =
@@ -234,20 +251,3 @@ type FilteredSearch =
             | _ -> ()
 
         filtered_search
-
-module Filter =
-
-    let private apply_compiled (compiled_filter: (ChartMeta -> bool) array) (cc: ChartMeta) : bool =
-        Array.forall (fun f -> f cc) compiled_filter
-
-    let apply (filter: Filter, ctx: LibraryViewContext) (charts: ChartMeta seq) =
-        Seq.filter (apply_compiled (filter.Compile ctx)) charts
-
-    let apply_with (filter: Filter, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
-        Seq.filter (fun (cc, _) -> apply_compiled (filter.Compile ctx) cc) charts
-
-    let apply_search (filter: FilteredSearch, ctx: LibraryViewContext) (charts: ChartMeta seq) =
-        Seq.filter (apply_compiled (filter.Compile ctx)) charts
-
-    let apply_search_with (filter: FilteredSearch, ctx: LibraryViewContext) (charts: (ChartMeta * 'T) seq) =
-        Seq.filter (fun (cc, _) -> apply_compiled (filter.Compile ctx) cc) charts

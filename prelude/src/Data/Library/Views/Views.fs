@@ -35,7 +35,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Folder name)
                 | None -> None
             )
-            |> Filter.apply_search_with (filter_by, ctx)
+            |> filter_by.Apply
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
@@ -59,7 +59,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Playlist(i, name, info))
                 | None -> None
             )
-            |> Filter.apply_search_with (filter_by, ctx)
+            |> filter_by.Apply
             |> Array.ofSeq
             |> fun x ->
                 if x.Length > 0 then
@@ -74,7 +74,7 @@ module LibraryView =
         let liked_songs : Group option = 
             ctx.Library.Collections.EnumerateLikes
             |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
-            |> Filter.apply_search (filter_by, ctx)
+            |> filter_by.Apply
             |> Seq.sortBy (fun cc -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Seq.map (fun cc -> (cc, LibraryContext.Likes))
@@ -116,7 +116,7 @@ module LibraryView =
                 | Some cc -> Some(cc, LibraryContext.Table level)
                 | None -> None
             )
-            |> Filter.apply_search_with (filter_by, ctx)
+            |> filter_by.Apply
             |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
@@ -148,7 +148,7 @@ module LibraryView =
 
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
-        for cc in Filter.apply_search (filter_by, ctx) ctx.Library.Charts.Cache.Values do
+        for cc in filter_by.Apply ctx.Library.Charts.Cache.Values do
             let group_key = group_by (cc, ctx)
 
             if found_groups.ContainsKey group_key |> not then
@@ -177,7 +177,7 @@ module LibraryView =
 
         let found_groups = new Dictionary<string, GroupWithSorting>()
 
-        for cc in Filter.apply_search (filter_by, ctx) ctx.Library.Charts.Cache.Values do
+        for cc in filter_by.Apply ctx.Library.Charts.Cache.Values do
             for pack in cc.Packs do
 
                 if found_groups.ContainsKey pack |> not then
