@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>YAVSRG</title>
   <meta content="Interlude" property="og:title" />
   <meta content="A free to play, open source, keyboard rhythm game.
 
-Built to be as fun as possible, for both casual and serious rhythm gamers." property="og:description" />
+Built for fun, for both casual and serious rhythm gamers." property="og:description" />
   <meta content="https://yavsrg.net/banner.png" property="og:image" />
   <meta content="#43E0EF" data-react-helmet="true" name="theme-color" />
   <link type="application/json+oembed" href="https://yavsrg.net/discord-embed.json" />
@@ -14,27 +15,39 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
   <link href="style.css" rel="stylesheet">
   <link rel="icon" type="image/x-icon" href="favicon.png">
 </head>
+
 <body class="background-2 akrobat">
+
+  <div class="flex flex-col top-0 w-full fixed">
+    <div class="flex flex-row w-full items-center justify-between py-4 sticky-header">
+
+      <div class="frame flex flex-row text-2xl lg:text-3xl items-center px-4 mx-10">
+        <img class="h-8 mr-2 lg:mr-4" src="favicon.png"/>
+        Yet another vertically scrolling rhythm game
+      </div>
+
+      <a href="download.html" class="button text-2xl text-center text-green px-4 h-8 w-32 mr-10">
+        Download
+      </a>
+    </div>
+
+    <div class="h-10 header-gradient"></div>
+
+  </div>
+
   <div class="flex flex-col h-screen justify-between">
 
-    <!-- content -->
-		<div class="py-1 header text-2xl lg:text-4xl">
-      <div class="flex items-center justify-between container mx-auto px-4">
-        <div class="flex flex-row lg:text-4xl items-center">
-          <img class="h-8 mr-4" src="favicon.png"/>
-          Yet another vertically scrolling rhythm game
+    <div class="w-full py-10">
+
+      <div class="flex flex-col my-20">
+
+        <p class="text-5xl text-center">the most based rhythm game</h2>
+
+        <div class="text-2xl p-4 flex flex-col lg:flex-row mx-auto w-full items-center justify-center">
+            <iframe class="frame" width="100%" style="max-width:800px; aspect-ratio: 16/9;" src="https://www.youtube.com/embed/sYY4wgmu1vk?si=Tqqpvy6XXvJWXqit" title="Open beta trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
-        <a href="download.html" class="button text-2xl text-center text-green px-4 h-8 w-32">
-          Download
-        </a>
-      </div>
-		</div>
 
-    <div class="w-full p-10">
-
-      <div class="container mx-auto flex flex-col">
-
-        <div class="frame-top text-2xl w-full py-4 px-4">
+        <div class="text-2xl w-full py-4 px-4 container mx-auto">
           <div class="flex flex-row space-x-8 items-center justify-between">
 
             <div class="text-center text-2xl w-40 p-4 flex flex-col justify-center">
@@ -43,70 +56,63 @@ Built to be as fun as possible, for both casual and serious rhythm gamers." prop
               <p class="leading-8 py-2">Maker of Interlude</p>
             </div>
 
-            <p class="lg:text-3xl">
-              Interlude is a VSRG hobby project I've been working on for fun since 2018.
+            <p class="text-xl lg:text-2xl">
+              Interlude is an open-source keyboard VSRG client I've been working on as a hobby project since 2018.
               <br/>
-              Its goal is to be an ultra-convenient client full of quality-of-life features to help you have as much fun as possible.
               <br/>
-              It's designed to work just the way I like it - If you like the same things as me, you will surely like this client too.
+              <span class="akrobat">Motivation:</span>
+              <br/>
+              - Consolidate my favourite features and charts from multiple similar VSRGs
+              <br/>
+              - Creative freedom to try some of my own ideas out
+              <br/>
+              - Explore my interest in game development
             </p>
 
           </div>
         </div>
 
-        <div class="frame-middle-3 text-2xl p-4 lg:p-8 flex flex-col lg:flex-row items-center justify-between gap-x-8">
-          <div class="text-center w-full">
-            <h3 class="text-5xl">Now in open beta!</h3>
-            <p class="hidden lg:block text-3xl">
-              The game is free to anyone wants to try it out.
-              <br/>
-              I regularly release feature updates, improvements and bug fixes based on player feedback.
-              <br/><br/>
-              Like the game? Tell your friends!
-            </p>
+        <div class="frame container mx-auto">
+
+          <div class="text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
+            <img src="import.png" style="width:560px; border-radius:5px" alt="..."/>
+            <div class="text-center lg:text-left w-full">
+              <h3 class="text-4xl">Make yourself at home</h3>
+              <ul>
+                <li>Import your songs, scores and skins from osu!mania</li>
+                <li>Import your songs from Etterna</li>
+                <li>Tools for getting offset and scroll speed right</li>
+              </ul>
+            </div>
           </div>
-          <div>
-            <iframe class="frame" width="560" height="315" src="https://www.youtube.com/embed/sYY4wgmu1vk?si=Tqqpvy6XXvJWXqit" title="Open beta trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-          </div>  
+
+          <div class="text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
+            <img src="tooltips.png" style="width:560px; border-radius:5px" alt="..."/>
+            <div class="text-center lg:text-left w-full">
+              <h3 class="text-4xl">Ease of use</h3>
+              <ul>
+                <li>Ingame downloads for songs, noteskins and more</li>
+                <li>Edit your noteskin ingame</li>
+                <li>Built in tooltips and wiki</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
+            <img src="levelselect.jpg" style="width:560px; border-radius:5px" alt="..."/>
+            <div class="text-center lg:text-left w-full">
+              <h3 class="text-4xl">Just play</h3>
+              <ul>
+                <li>All your songs in one place</li>
+                <li>Intelligent suggestions on what to play next</li>
+                <li>'Endless mode' system to play back-to-back</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
 
-        <div class="frame-middle-2 text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
-          <img src="import.png" style="width:560px; border-radius:5px" alt="..."/>
-          <div class="text-center lg:text-left w-full">
-            <h3 class="text-4xl">Make yourself at home</h3>
-            <ul>
-              <li>Import your songs, scores and skins from osu!mania</li>
-              <li>Import your songs from Etterna</li>
-              <li>Tools for getting offset and scroll speed right</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="frame-middle text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
-          <img src="tooltips.png" style="width:560px; border-radius:5px" alt="..."/>
-          <div class="text-center lg:text-left w-full">
-            <h3 class="text-4xl">Ease of use</h3>
-            <ul>
-              <li>Ingame downloads for songs, noteskins and more</li>
-              <li>Edit your noteskin ingame</li>
-              <li>Built in tooltips and wiki</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="frame-middle-2 text-2xl p-8 flex flex-col lg:flex-row items-center justify-center gap-x-20 gap-y-4">
-          <img src="levelselect.jpg" style="width:560px; border-radius:5px" alt="..."/>
-          <div class="text-center lg:text-left w-full">
-            <h3 class="text-4xl">Just play</h3>
-            <ul>
-              <li>All your songs in one place</li>
-              <li>Intelligent suggestions on what to play next</li>
-              <li>'Endless mode' system to play back-to-back</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="frame-bottom text-2xl text-center p-4">
+        <div class="text-2xl text-center p-4">
 
           <h1 class="text-4xl">Like what you see?</h1>
 

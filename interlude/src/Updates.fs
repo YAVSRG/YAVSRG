@@ -23,8 +23,14 @@ module Updates =
 
     /// Github commit SHA
     let short_hash =
-        let informational_version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+        let informational_version =
+            Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                .InformationalVersion
+
         let hash = informational_version.Substring(informational_version.IndexOf('+') + 1)
+        hash.Substring(0, min hash.Length 6)
         hash.Substring(0, min hash.Length 6)
 
     /// Full version string e.g. "Interlude 0.5.16"
@@ -33,6 +39,7 @@ module Updates =
 
         if DEV_MODE then
             sprintf "%s %s (%s)" v.Name short_version short_hash
+            sprintf "%s %s (b%s)" v.Name short_version short_hash
         else
             sprintf "%s %s" v.Name short_version
 
@@ -116,7 +123,7 @@ module Updates =
             WebServices.download_json (
                 "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
                 function
-                | WebResult.Ok (d: GithubRelease) -> handle_update d
+                | WebResult.Ok(d: GithubRelease) -> handle_update d
                 | _ -> ()
             )
 
@@ -142,8 +149,14 @@ module Updates =
                 // todo: other platforms eventually
                 "interlude-win64.zip"
 
-            match latest_release.Value.assets |> List.tryFind (fun asset -> asset.name.ToLower().StartsWith(asset_name)) with
-            | None -> Logging.Error("Update failed: The github release doesn't have a download for your platform. Report this to Percyqaz!")
+            match
+                latest_release.Value.assets
+                |> List.tryFind (fun asset -> asset.name.ToLower().StartsWith(asset_name))
+            with
+            | None ->
+                Logging.Error(
+                    "Update failed: The github release doesn't have a download for your platform. Report this to Percyqaz!"
+                )
             | Some asset ->
 
             let download_url = asset.browser_download_url

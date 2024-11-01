@@ -17,6 +17,7 @@
     --cyan-accent: #43e0ef;
     --cyan-shadow: #084251;
     --cyan-shadow-2a: #084251AA;
+    --cyan-shadow-0a: #08425100;
     --cyan-shadow-dark: #042125;
     --green-accent: #43ef70;
     --green: #1d9d4b;
@@ -68,13 +69,13 @@ li {
 }
 
 .button {
-    background-color: var(--cyan-shadow);
+    background-color: var(--cyan-2);
     border-radius: 5px;
     box-shadow: var(--shadow-2-3a) 5px 5px 0;
 }
 
 .button:hover {
-    background-color: var(--cyan-shadow-2a);
+    background-color: var(--cyan);
     color: var(--yellow-accent);
 }
 
@@ -93,6 +94,10 @@ li {
 
 .background-2 {
     background-color: var(--cyan-shadow);
+}
+
+.background-3 {
+    background-color: var(--cyan-shadow-dark);
 }
 
 .frame {
@@ -163,13 +168,6 @@ li {
     border-top: 5px solid var(--cyan-accent);
 }
 
-.sidebar {
-    background-color: var(--cyan);
-    border-right: 5px solid var(--cyan-accent);
-    box-shadow: var(--shadow-2-3a) 5px 5px 0;
-    width: 300px;
-}
-
 .overlay {
     position: absolute;
     left: 0;
@@ -200,3 +198,12 @@ hr {
 a:hover {
     color: var(--yellow-accent);
 }
+
+.sticky-header {
+    background: var(--cyan-shadow-2a);
+}
+
+.header-gradient {
+    background: linear-gradient(var(--cyan-shadow-2a), var(--cyan-shadow-0a));
+}
+  
