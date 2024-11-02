@@ -142,8 +142,11 @@ type LibraryViewControls() =
             elif (%%"unlike").Tapped() then
                 CollectionActions.unlike_chart SelectedChart.CACHE_DATA.Value
 
+            //elif (%%"skip").Tapped() then
+            //    FiltersPage().Show()
+
             elif (%%"collections").Tapped() then
-                Menu.ShowPage ManageCollectionsPage
+                ManageCollectionsPage().Show()
             elif (%%"table").Tapped() then
                 SelectTablePage(LevelSelect.refresh_all).Show()
             elif (%%"reverse_sort_mode").Tapped() then

@@ -60,7 +60,7 @@ module FilterParts =
         | Failure(f, _, _) -> [ Impossible ]
 
 type Filter =
-    internal {
+    {
         PatternTerms: string array
         PatternAntiTerms: string array
 
