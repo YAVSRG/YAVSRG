@@ -25,7 +25,7 @@ module SC =
             | _ -> failwithf "Judge must be between 2 and 9, '%i' is not supported" judge
 
         {
-            Name = sprintf "SC (J%i)" judge
+            Name = sprintf "SC J%i" judge
             Description = "The 'official' scoring system of Interlude, tuned for a balanced experience"
             Judgements =
                 [|

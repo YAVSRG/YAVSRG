@@ -88,7 +88,7 @@ module OsuMania =
         let MISS = miss_window od |> mode.Apply |> clipped
 
         {
-            Name = sprintf "osu! (OD%.1f%s)" od (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
+            Name = sprintf "osu! OD%s%s" (od.ToString("R")) (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
             Description = "Simulates osu!'s scoring system"
             Judgements =
                 [|

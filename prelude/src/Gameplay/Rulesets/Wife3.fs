@@ -16,7 +16,7 @@ module Wife3 =
                 45.0f<ms / rate> * scale
 
         {
-            Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 (J%i)" judge
+            Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 J%i" judge
             Description = "Simulates Etterna's scoring system, Wife3"
             Judgements =
                 [|
