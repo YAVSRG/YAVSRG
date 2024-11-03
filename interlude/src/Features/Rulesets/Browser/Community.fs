@@ -64,12 +64,12 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
             ConfirmPage(
                 "Update this ruleset? (If you made changes yourself, they will be lost)",
                 fun () ->
-                    Rulesets.install_or_update id ruleset
+                    Rulesets.update id ruleset
                     status <- UpToDate
             )
                 .Show()
         | NotInstalled ->
-            Rulesets.install_or_update id ruleset
+            Rulesets.install ruleset
             status <- UpToDate
 
     override this.Draw() =

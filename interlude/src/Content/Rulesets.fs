@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Content
 
+open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
@@ -83,15 +84,54 @@ module Rulesets =
 
     let exists = loaded.ContainsKey
 
-    let install_or_update (new_id: string) (ruleset: Ruleset) =
-        loaded.Remove new_id |> ignore
+    let install (ruleset: Ruleset) =
+        
+        let new_id : string = 
+            ruleset.Name
+            |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
+            |> Array.ofSeq
+            |> String
+            |> fun s -> s.ToLowerInvariant()
+            |> fun s -> s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
+
+        let new_id = if exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
+
+        assert(not (loaded.ContainsKey new_id))
+
         loaded.Add(new_id, ruleset)
 
-        if _selected_id.Value = new_id then
-            current <- ruleset
-            current_hash <- Ruleset.hash current
-
         JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
+
+    let update (existing_id: string) (ruleset: Ruleset) =
+
+        let new_id : string = 
+            ruleset.Name
+            |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
+            |> Array.ofSeq
+            |> String
+            |> fun s -> s.ToLowerInvariant()
+            |> fun s -> s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
+        
+        let new_id = if new_id <> existing_id && exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
+
+        let new_id =
+            try
+                if new_id <> existing_id then
+                    File.Move(Path.Combine(get_game_folder "Rulesets", existing_id + ".ruleset"), Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
+                new_id
+            with err ->
+                Logging.Error(sprintf "Failed to move ruleset file from '%s' to '%s'" existing_id new_id, err)
+                existing_id
+
+        if loaded.Remove(existing_id) then
+            loaded.Add(new_id, ruleset)
+            
+            if _selected_id.Value = existing_id then
+                _selected_id.Value <- new_id
+                current <- ruleset
+                current_hash <- Ruleset.hash current
+
+            JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
     let delete (id: string) =
         if id <> DEFAULT_ID && exists id then

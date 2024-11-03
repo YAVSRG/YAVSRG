@@ -60,6 +60,6 @@ type RulesetEditorPage(id: string, original: Ruleset) =
         let has_changed = System.Object.ReferenceEquals(original, ruleset.Value) |> not || name.Value <> original.Name
         let has_error = match validation_message.Current with :? Dummy -> false | _ -> true
         if has_changed && not has_error then
-            Rulesets.install_or_update id { ruleset.Value with Name = name.Value.Trim() }
+            Rulesets.update id { ruleset.Value with Name = name.Value.Trim() }
         else
             ruleset.Set original

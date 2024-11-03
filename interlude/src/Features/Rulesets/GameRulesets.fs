@@ -14,16 +14,7 @@ type OsuRulesetPage() =
     let mode = Setting.simple OsuMania.NoMod
 
     let create () =
-        let ruleset_id = 
-            sprintf "osu-od-%.1f%s" 
-                od.Value
-                (
-                    match mode.Value with 
-                    | OsuMania.NoMod -> "" 
-                    | OsuMania.HardRock -> "-hr" 
-                    | OsuMania.Easy -> "-ez"
-                )
-        Rulesets.install_or_update ruleset_id (OsuMania.create od.Value mode.Value)
+        Rulesets.install (OsuMania.create od.Value mode.Value)
         Menu.Back()
         Menu.Back()
 
@@ -53,9 +44,7 @@ type WifeRulesetPage() =
     let judge = Setting.simple 4
 
     let create () =
-        let ruleset_id = 
-            sprintf "wife-j%i" judge.Value
-        Rulesets.install_or_update ruleset_id (Wife3.create judge.Value)
+        Rulesets.install (Wife3.create judge.Value)
         Menu.Back()
         Menu.Back()
 
@@ -86,9 +75,7 @@ type SCRulesetPage() =
     let judge = Setting.simple 4
 
     let create () =
-        let ruleset_id = 
-            sprintf "sc-j%i" judge.Value
-        Rulesets.install_or_update ruleset_id (SC.create judge.Value)
+        Rulesets.install (SC.create judge.Value)
         Menu.Back()
         Menu.Back()
 
