@@ -17,8 +17,9 @@ type Pacemaker(config: HudConfig, state: PlayState) =
 
     let color = Animation.Color(Color.White)
     let flag_position = Animation.Fade(0.5f)
-    let position_cooldown = Animation.Delay(1500.0)
+    let position_cooldown = Animation.Delay(250.0)
     let mutable ahead_by = 0.0
+    let mutable time_last_frame = 0.0f<ms>
     let mutable hearts = -1
 
     let update_flag_position () =
@@ -59,10 +60,11 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             position_cooldown.Update elapsed_ms
         | PacemakerState.Replay (_, opposing_score) ->
             if position_cooldown.Complete then
-                opposing_score.Update(state.CurrentChartTime())
+                opposing_score.Update(time_last_frame)
                 ahead_by <- state.Scoring.PointsScored - opposing_score.PointsScored
                 update_flag_position ()
                 position_cooldown.Reset()
+            time_last_frame <- state.CurrentChartTime()
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
