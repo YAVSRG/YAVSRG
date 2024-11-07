@@ -3,7 +3,6 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
