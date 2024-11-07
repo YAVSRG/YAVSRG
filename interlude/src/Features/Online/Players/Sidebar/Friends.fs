@@ -23,12 +23,11 @@ type private FriendList() =
                 else
                     this.Offline()
             , fun _ data ->
-                let contents = FlowContainer.Vertical<Widget>(60.0f)
+                let contents = FlowContainer.Vertical<Widget>(60.0f, Spacing = Style.PADDING)
 
                 for player in data.Friends do
                     contents.Add(
-                        Container(NodeType.None)
-                        |+ PlayerButton(player.Username, player.Color)
+                        PlayerButton(player.Username, player.Color)
                         |+ Text(
                             (if player.Online then %"online.players.status.online" else %"online.players.status.offline"),
                             Color =
@@ -49,7 +48,3 @@ type private FriendList() =
     override this.Init(parent) =
         base.Init parent
         Players.friends_changed <- this.Reload
-
-    override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
-        base.Draw()

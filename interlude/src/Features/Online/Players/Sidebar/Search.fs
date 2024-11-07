@@ -2,18 +2,16 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-type private SearchList() =
-    inherit Container(NodeType.None)
+module SearchList =
 
-    let query = Setting.simple ""
+    let create(position: Position) =
 
-    override this.Init(parent) =
+        let query = Setting.simple ""
         let searcher =
             WebRequestContainer<Players.Search.Response>(
                 fun this ->
@@ -34,7 +32,7 @@ type private SearchList() =
                         this.SetData { Matches = [||] }
                 , fun _ data ->
                     if data.Matches.Length > 0 then
-                        let contents = FlowContainer.Vertical<Widget>(60.0f)
+                        let contents = FlowContainer.Vertical<Widget>(60.0f, Spacing = Style.PADDING)
 
                         for player in data.Matches do
                             contents.Add(PlayerButton(player.Username, player.Color))
@@ -51,12 +49,6 @@ type private SearchList() =
                 , Position = Position.ShrinkT(60.0f)
             )
 
-        this
-        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.ShrinkT(5.0f).SliceT(50.0f))
-        |* searcher
-
-        base.Init parent
-
-    override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
-        base.Draw()
+        NavigationContainer.Column()
+        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.Shrink(5.0f).SliceT(50.0f))
+        |+ searcher

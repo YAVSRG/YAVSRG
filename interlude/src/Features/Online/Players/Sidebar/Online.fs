@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
@@ -21,14 +20,10 @@ type private OnlineList() =
                 else
                     this.Offline()
             , fun _ data ->
-                let contents = FlowContainer.Vertical<Widget>(60.0f)
+                let contents = FlowContainer.Vertical<Widget>(60.0f, Spacing = Style.PADDING)
 
                 for player in data.Players do
                     contents.Add(PlayerButton(player.Username, player.Color))
 
                 ScrollContainer(contents) :> Widget
         )
-
-    override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
-        base.Draw()
