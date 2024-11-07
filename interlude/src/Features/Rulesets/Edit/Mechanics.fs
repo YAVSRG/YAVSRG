@@ -75,7 +75,6 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         match ruleset.Value.HoldMechanics with
         | HoldMechanics.JudgeReleasesSeparately (w, _) -> w
         | _ -> ruleset.Value.Judgements |> Array.map (_.TimingWindows)
-        |> Setting.simple
 
     override this.Content() =
         let ghost_tap_judgement_options : (int option * string) array =
@@ -100,35 +99,35 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 |], note_priority))
             .Help(Help.Info("rulesets.mechanics.note_priority"))
             .Pos(2)
-        |+ PageSetting(%"rulesets.mechanics.cbrush_window", Slider (Setting.uom cbrush_window))
+        |+ PageSetting(%"rulesets.mechanics.cbrush_window", NumberEntry.create_uom "ms" cbrush_window)
             .Help(Help.Info("rulesets.mechanics.cbrush_window"))
             .Conditional(fun () -> note_priority.Value = 0)
             .Pos(4)
         |+ PageSetting(%"rulesets.mechanics.hold_mechanics", 
             SelectDropdown(
                 if hold_mechanics_type.Value = 0 then
-                    [| 0, "osu!mania" |]
+                    [| 0, %"rulesets.mechanics.osu_mania" |]
                 else
                     [| 
-                        1, "Penalise judgements"
-                        2, "Only affects combo"
-                        3, "Judge releases separately"
-                        4, "Judge releases only"
+                        1, %"rulesets.mechanics.head_judgement_or"
+                        2, %"rulesets.mechanics.just_require_hold"
+                        3, %"rulesets.mechanics.judge_releases_separately"
+                        4, %"rulesets.mechanics.judge_releases_only"
                     |]
                 , hold_mechanics_type
             )
         )
             .Pos(7)
 
-        |+ Text("Cannot currently be edited", Align = Alignment.LEFT, Color = K Colors.text_subheading)
+        |+ Text(%"rulesets.mechanics.cannot_edit", Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = Position.Shrink(Style.PADDING))
             .Conditional(fun () -> hold_mechanics_type.Value = 0)
             .Pos(9)
 
-        |+ PageSetting(%"rulesets.mechanics.early_release_window", Slider (Setting.uom release_early_window))
+        |+ PageSetting(%"rulesets.mechanics.early_release_window", NumberEntry.create_uom "ms" release_early_window)
             .Help(Help.Info("rulesets.mechanics.early_release_window"))
             .Conditional(fun () -> hold_mechanics_type.Value = 1)
             .Pos(9)
-        |+ PageSetting(%"rulesets.mechanics.late_release_window", Slider (Setting.uom release_late_window))
+        |+ PageSetting(%"rulesets.mechanics.late_release_window", NumberEntry.create_uom "ms" release_late_window)
             .Help(Help.Info("rulesets.mechanics.late_release_window"))
             .Conditional(fun () -> hold_mechanics_type.Value = 1)
             .Pos(11)
@@ -140,26 +139,53 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
             .Conditional(fun () -> hold_mechanics_type.Value = 1)
             .Pos(15)
+        |+ (
+            Callout.frame 
+                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.head_judgement_or").Body(%"rulesets.mechanics.head_judgement_or.desc"))
+                (fun (w, h) -> pretty_pos(18, 5, PageWidth.Custom w))
+        )
+            .Conditional(fun () -> hold_mechanics_type.Value = 1)
 
-        |+ PageSetting(%"rulesets.mechanics.release_window", Slider (Setting.uom release_window))
+        |+ PageSetting(%"rulesets.mechanics.release_window", NumberEntry.create_uom "ms" release_window)
             .Help(Help.Info("rulesets.mechanics.release_window"))
             .Conditional(fun () -> hold_mechanics_type.Value = 2)
             .Pos(9)
+        |+ (
+            Callout.frame 
+                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.just_require_hold").Body(%"rulesets.mechanics.just_require_hold.desc"))
+                (fun (w, h) -> pretty_pos(12, 5, PageWidth.Custom w))
+        )
+            .Conditional(fun () -> hold_mechanics_type.Value = 2)
 
         |+ PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
             .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
             .Conditional(fun () -> hold_mechanics_type.Value = 3)
             .Pos(9)
-        // button to edit windows
+        |+ PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.release_windows(ruleset.Value.Judgements, release_timing_windows).Show())
+            .Conditional(fun () -> hold_mechanics_type.Value = 3)
+            .Pos(11)
+        |+ (
+            Callout.frame 
+                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_separately").Body(%"rulesets.mechanics.judge_releases_separately.desc"))
+                (fun (w, h) -> pretty_pos(14, 6, PageWidth.Custom w))
+        )
+            .Conditional(fun () -> hold_mechanics_type.Value = 3)
         
         |+ PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
             .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
             .Conditional(fun () -> hold_mechanics_type.Value = 4)
             .Pos(9)
-        |+ PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindowsPage(ruleset).Show())
+        |+ PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.notes_windows_as_release_windows(ruleset).Show())
             .Conditional(fun () -> hold_mechanics_type.Value = 4)
             .Pos(11)
+        |+ (
+            Callout.frame 
+                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_only").Body(%"rulesets.mechanics.judge_releases_only.desc"))
+                (fun (w, h) -> pretty_pos(14, 5, PageWidth.Custom w))
+        )
+            .Conditional(fun () -> hold_mechanics_type.Value = 4)
 
+            
         :> Widget
         
     override this.Title = %"rulesets.edit.mechanics"
@@ -185,7 +211,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                             )
                         )
                     | 2 -> HoldMechanics.OnlyRequireHold release_window.Value
-                    | 3 -> HoldMechanics.JudgeReleasesSeparately (release_timing_windows.Value, judgement_if_overheld.Value)
+                    | 3 -> HoldMechanics.JudgeReleasesSeparately (release_timing_windows, judgement_if_overheld.Value)
                     | 4 -> HoldMechanics.OnlyJudgeReleases (judgement_if_dropped.Value)
                     | _ -> ruleset.Value.HoldMechanics
             }
