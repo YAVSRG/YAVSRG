@@ -35,4 +35,4 @@ jobs:
       with:
         webhook-url: ${{ secrets.DEV_WEBHOOK_URL }}
         content: |
-          @Percyqaz hey idiot you broke the build, imagine being so foolish
+          <@165506274820096000> You broke the build. Skill issue exists between chair and keyboard

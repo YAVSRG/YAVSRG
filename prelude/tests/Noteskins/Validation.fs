@@ -356,7 +356,3 @@ module Validation =
         with
         | None -> Assert.Fail("Expected an error message for image size on 'note' texture")
         | _ -> ()
-
-    [<Test>]
-    let FailingTest() =
-        Assert.Fail()
