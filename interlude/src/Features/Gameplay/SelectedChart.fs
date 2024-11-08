@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Gameplay
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
@@ -8,7 +7,6 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
-open Prelude.Charts.Processing.Patterns
 open Prelude.Charts.Processing.Difficulty
 open Prelude.Gameplay.Mods
 open Prelude.Data.User

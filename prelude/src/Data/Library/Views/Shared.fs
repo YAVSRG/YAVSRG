@@ -18,12 +18,21 @@ module internal Shared =
         else
             "?"
 
-    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) =
-        let now = Timestamp.now ()
-        let ONE_DAY = 24L * 3600_000L
+    // A new day starts at 4am, your machine local time
+    let days_ago (timestamp: int64) =
+        let local_date_now = 
+            DateTime.Now
+                .Subtract(TimeSpan.FromHours(4.0))
+                .Date
+        let local_date = 
+            Timestamp.to_datetime(timestamp)
+                .ToLocalTime()
+                .Subtract(TimeSpan.FromHours(4.0))
+                .Date
+        (local_date_now - local_date).TotalDays |> floor |> int
 
-        let days_ago =
-            (now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed) / ONE_DAY
+    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) =
+        let days_ago = days_ago (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -37,7 +46,7 @@ module internal Shared =
         else 9, "Never"
 
     let format_date_added (c: ChartMeta, _) =
-        let days_ago = (DateTime.Today - Timestamp.to_datetime c.DateAdded).TotalDays
+        let days_ago = days_ago c.DateAdded
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
