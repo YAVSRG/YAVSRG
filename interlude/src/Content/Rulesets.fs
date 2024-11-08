@@ -18,6 +18,8 @@ module Rulesets =
     let mutable current = DEFAULT
     let mutable current_hash = DEFAULT_HASH
     let private _selected_id = Setting.simple DEFAULT_ID
+    let private on_changed_ev = Event<Ruleset>()
+    let on_changed = on_changed_ev.Publish
 
     let load () =
         loaded.Clear()
@@ -65,6 +67,7 @@ module Rulesets =
 
                     current <- loaded.[_selected_id.Value]
                     current_hash <- Ruleset.hash current
+                    on_changed_ev.Trigger current
                 else
                     _selected_id.Value <- new_id
             )
@@ -130,6 +133,7 @@ module Rulesets =
                 _selected_id.Value <- new_id
                 current <- ruleset
                 current_hash <- Ruleset.hash current
+                on_changed_ev.Trigger current
 
             JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 

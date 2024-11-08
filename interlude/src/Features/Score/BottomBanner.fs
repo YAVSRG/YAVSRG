@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Data.User
 open Prelude.Charts.Processing
 open Interlude
-open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Rulesets
@@ -14,7 +13,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
 
-type RulesetSwitcher(setting: Setting<string>) =
+type RulesetSwitcher(setting: Setting<string>, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.BorderT(min d.Height 500.0f).Shrink(Style.PADDING, 0.0f).Translate(0.0f, -10.0f))
@@ -22,7 +21,7 @@ type RulesetSwitcher(setting: Setting<string>) =
     override this.Init(parent: Widget) =
         this
         |+ InlaidButton(
-            (fun () -> Rulesets.current.Name),
+            (fun () -> score_info.Ruleset.Name),
             (fun () -> this.ToggleDropdown()),
             "",
             Hotkey = "ruleset_switch",
@@ -90,11 +89,12 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                 Icons.FILM
             )
             |+ RulesetSwitcher(
-                options.SelectedRuleset
-                |> Setting.trigger (fun _ ->
-                    score_info.Ruleset <- Rulesets.current
+                Setting.simple Rulesets.selected_id.Value
+                |> Setting.trigger (fun id ->
+                    score_info.Ruleset <- Rulesets.by_id id
                     refresh ()
-                )
+                ),
+                score_info
             )
         )
         |+ HotkeyAction("like", fun () -> CollectionActions.like_chart score_info.ChartMeta)

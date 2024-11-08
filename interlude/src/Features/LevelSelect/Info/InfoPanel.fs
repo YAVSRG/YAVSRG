@@ -51,7 +51,7 @@ type InfoPanel() as this =
 
         |+ ModSelect(
             change_rate,
-            scoreboard.Refresh,
+            scoreboard.ModsChanged,
             Position =
                 {
                     Left = 0.33f %+ 0.0f
@@ -63,7 +63,7 @@ type InfoPanel() as this =
             .Help(Help.Info("levelselect.mods", "mods"))
 
         |* RulesetSwitcher(
-            options.SelectedRuleset |> Setting.trigger (ignore >> LevelSelect.refresh_all),
+            options.SelectedRuleset,
             Position =
                 {
                     Left = 0.66f %+ 0.0f
@@ -88,7 +88,7 @@ type InfoPanel() as this =
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
         match display.Value with
-        | Display.Local -> scoreboard.OnChartUpdated(info)
+        | Display.Local -> ()
         | Display.Online -> online.OnChartUpdated(info)
         | Display.Patterns -> patterns.OnChartUpdated(info)
 

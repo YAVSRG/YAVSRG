@@ -139,6 +139,12 @@ type LevelSelectScreen() =
         |* info_panel
 
         LevelSelect.on_refresh_all.Add refresh
+        Rulesets.on_changed.Add (fun _ ->
+            match options.ChartGroupMode.Value with
+            | "grade"
+            | "lamp" -> LevelSelect.refresh_all()
+            | _ -> LevelSelect.refresh_details()
+        )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

@@ -235,9 +235,9 @@ module Options =
                 StepmaniaMount = Setting.simple None
                 EtternaMount = Setting.simple None
 
-                ChartSortMode = Setting.simple "Title"
+                ChartSortMode = Setting.simple "title"
                 ChartSortReverse = Setting.simple false
-                ChartGroupMode = Setting.simple "Pack"
+                ChartGroupMode = Setting.simple "pack"
                 ChartGroupReverse = Setting.simple false
                 ScoreSortMode = Setting.simple 0
                 TreeShowGradesOnly = Setting.simple true

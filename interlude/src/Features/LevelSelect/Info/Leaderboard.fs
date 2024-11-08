@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays

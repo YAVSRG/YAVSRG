@@ -10,7 +10,7 @@ open Interlude.Features.Gameplay
 
 module LocalScores =
 
-    type private Request =
+    type Request =
         {
             RulesetId: string
             Ruleset: Ruleset
@@ -27,10 +27,8 @@ module LocalScores =
     let private score_loaded_ev = Event<ScoreInfo>()
     let score_loaded = score_loaded_ev.Publish
 
-    let private personal_bests_updated_ev = Event<unit>()
-    let personal_bests_updated = personal_bests_updated_ev.Publish
-
-    // on ruleset changed: update local scores
+    let private scores_loaded_ev = Event<unit>()
+    let scores_loaded = scores_loaded_ev.Publish
 
     let private load_score (score_info: ScoreInfo) =
         if score_info.Ruleset <> Rulesets.current then
@@ -38,7 +36,7 @@ module LocalScores =
         local_scores.Add score_info
         score_loaded_ev.Trigger score_info
 
-    let private recalculate_pbs () =
+    let private finish_loading () =
         let mutable new_bests = None
         for score_info in local_scores do
             assert(score_info.Ruleset = Rulesets.current)
@@ -56,17 +54,19 @@ module LocalScores =
 
             if new_bests <> old_bests then
                 save_data.PersonalBests <- new_bests
-                personal_bests_updated_ev.Trigger ()
+                LevelSelect.refresh_details()
         | _ -> ()
+        scores_loaded_ev.Trigger ()
 
-    let private score_loader =
+
+    let score_loader =
         { new Async.SwitchServiceSeq<Request, unit -> unit>() with
             member this.Process(req: Request) =
                 seq {
                     for score in req.ChartSaveData.Scores do
                         let score_info = ScoreInfo.from_score req.ChartMeta req.CurrentChart req.Ruleset score
                         yield fun () -> load_score score_info
-                    yield recalculate_pbs
+                    yield finish_loading
                 }
 
             member this.Handle(action) = action ()
@@ -87,4 +87,9 @@ module LocalScores =
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
                 }
+        )
+
+        Rulesets.on_changed.Add (fun ruleset ->
+            for score_info in local_scores do
+                score_info.Ruleset <- ruleset
         )

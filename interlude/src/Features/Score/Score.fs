@@ -36,8 +36,6 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         | _ -> None
         |> ref
 
-    let original_ruleset = options.SelectedRuleset.Value
-
     let graph = new ScoreGraph(score_info, stats)
 
     let refresh () =
@@ -52,6 +50,8 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         stats := ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
         previous_personal_bests := None
         graph.Refresh()
+
+    let on_ruleset_changed = Rulesets.on_changed.Subscribe (fun _ -> defer refresh)
 
     let bottom_info =
         BottomBanner(
@@ -106,9 +106,9 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         DiscordRPC.in_menus ("Admiring a score")
 
     override this.OnExit next =
-        options.SelectedRuleset.Set original_ruleset
         score_info.Ruleset <- Rulesets.current
         (graph :> System.IDisposable).Dispose()
+        on_ruleset_changed.Dispose()
         Toolbar.show ()
 
     override this.OnBack() =

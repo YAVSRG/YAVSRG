@@ -9,12 +9,6 @@ open Prelude.Charts.Processing.Difficulty
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-[<RequireQualifiedAccess>]
-type Display =
-    | Local
-    | Online
-    | Patterns
-
 type Patterns(display: Setting<Display>) =
     inherit Container(NodeType.None)
 
