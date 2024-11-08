@@ -9,14 +9,14 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type ChartInfo() as this =
+type InfoPanel() as this =
     inherit Container(NodeType.None)
 
     let display = Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
 
-    let scoreboard = Scoreboard(display, Position = Position.ShrinkB(BottomInfo.HEIGHT + 55.0f))
-    let online = Leaderboard(display, Position = Position.ShrinkB(BottomInfo.HEIGHT + 55.0f))
-    let patterns = Patterns(display, Position = Position.ShrinkB(BottomInfo.HEIGHT + 55.0f))
+    let scoreboard = Scoreboard(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
+    let online = Leaderboard(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
+    let patterns = Patterns(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
 
     override this.Init(parent) =
         let change_rate change_rate_by =
@@ -31,7 +31,7 @@ type ChartInfo() as this =
         |+ online.Conditional(fun () -> display.Value = Display.Online)
         |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
 
-        |+ BottomInfo(Position = Position.SliceB(BottomInfo.HEIGHT).TranslateY(-50.0f))
+        |+ ChartDetails(Position = Position.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f))
 
         |+ StylishButton(
             (fun () -> SelectedChart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
@@ -81,7 +81,7 @@ type ChartInfo() as this =
         base.Init(parent)
 
     override this.Draw() =
-        let info_area = this.Bounds.SliceB(BottomInfo.HEIGHT).TranslateY(-50.0f)
+        let info_area = this.Bounds.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f)
         Draw.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
         Draw.rect info_area (!*Palette.DARK_100)
         base.Draw()

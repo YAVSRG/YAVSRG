@@ -21,7 +21,7 @@ type LevelSelectScreen() =
     let search_text = Setting.simple ""
 
     let info_panel =
-        ChartInfo(
+        InfoPanel(
             Position =
                 {
                     Left = 0.0f %+ 0.0f

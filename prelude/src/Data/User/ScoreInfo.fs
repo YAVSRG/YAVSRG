@@ -109,6 +109,7 @@ module ScoreInfo =
 module Bests =
 
     let update (score_info: ScoreInfo) (existing: Bests) : Bests * ImprovementFlags =
+        assert(score_info.ModStatus = ModStatus.Ranked)
         let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate, score_info.TimePlayed) existing.Lamp
 
         let a, ap =
@@ -119,6 +120,7 @@ module Bests =
         { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
 
     let create (score_info: ScoreInfo) : Bests =
+        assert(score_info.ModStatus = ModStatus.Ranked)
         {
             Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate, score_info.TimePlayed)
             Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate, score_info.TimePlayed)

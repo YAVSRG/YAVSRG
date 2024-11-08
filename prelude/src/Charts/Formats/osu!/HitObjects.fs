@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Charts.Formats.osu
 
 open System.Globalization
-open Percyqaz.Common
 
 type HitSample = 
     {
