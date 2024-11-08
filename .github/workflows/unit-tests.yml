@@ -28,3 +28,11 @@ jobs:
         cd scripts
         chmod +x ./run_tests.sh
         ./run_tests.sh
+        
+    - name: Post failure message via webhook
+      if: failure()
+      uses: tsickert/discord-webhook@v5.3.0
+      with:
+        webhook-url: ${{ secrets.DEV_WEBHOOK_URL }}
+        content: |
+          @Percyqaz hey idiot you broke the build, imagine being so foolish
