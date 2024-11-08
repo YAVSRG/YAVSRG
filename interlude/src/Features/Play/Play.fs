@@ -156,7 +156,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
-                //|+ HotkeyAction("skip", fun () -> this |* FailOverlay())
+                //|+ HotkeyAction("accept_offset", fun () -> this |* FailOverlay(ignore, ignore, ignore))
                 |* HotkeyAction("offset", fun () -> change_offset this.State)
 
             override this.OnEnter(previous) =
@@ -178,6 +178,7 @@ module PlayScreen =
                     LocalOffset.apply_automatic this.State info.SaveData
                 Toolbar.show_cursor ()
                 Background.set_parallax_amount 40.0f
+                Song.set_low_pass 0.0f
 
                 base.OnExit(next)
 
