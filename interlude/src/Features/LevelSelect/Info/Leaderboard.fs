@@ -235,6 +235,7 @@ module Leaderboard =
                                     Physical = Performance.calculate rating with_mods.Keys scoring |> fst
 
                                     ImportedFromOsu = false
+                                    IsFailed = false
                                 }
 
                             let lc = LeaderboardCard(score, score_info)

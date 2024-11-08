@@ -37,12 +37,14 @@ module PlayScreenMultiplayer =
         let mutable key_state = 0us
         let mutable packet_count = 0
 
+        let mutable quit_out_early = false
+
         lobby.StartPlaying()
         lobby.AddReplayInfo(
             Network.credentials.Username,
             { 
                 Replay = liveplay
-                ScoreMetric = scoring
+                ScoreProcessor = scoring
                 GetScoreInfo = fun () ->
                     if not (liveplay :> IReplayProvider).Finished then
                         liveplay.Finish()
@@ -69,6 +71,7 @@ module PlayScreenMultiplayer =
                         Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
                         ImportedFromOsu = false
+                        IsFailed = quit_out_early
                     }
             }
         )
@@ -89,6 +92,7 @@ module PlayScreenMultiplayer =
 
         let give_up () =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            quit_out_early <- true
 
             if 
                 if is_giving_up_play then
@@ -101,6 +105,7 @@ module PlayScreenMultiplayer =
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
+                                    quit_out_early
                             ScoreScreen(score_info, ImprovementFlags.None, true)
                         )
                         Screen.Type.Score
@@ -123,6 +128,7 @@ module PlayScreenMultiplayer =
                                 info
                                 scoring
                                 ((liveplay :> IReplayProvider).GetFullReplay())
+                                false
 
                         (score_info, Gameplay.set_score true score_info info.SaveData, true)
                         |> ScoreScreen

@@ -31,6 +31,7 @@ module UserDatabase =
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
+                IsFailed = false
                 Keys = 4
             }
 

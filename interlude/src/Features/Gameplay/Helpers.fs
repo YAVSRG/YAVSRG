@@ -21,6 +21,7 @@ module Gameplay =
         (info: LoadedChartInfo)
         (scoring: ScoreProcessor)
         (replay_data: ReplayData)
+        (failed: bool)
         : ScoreInfo =
         {
             ChartMeta = info.CacheInfo
@@ -40,6 +41,7 @@ module Gameplay =
             Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
             ImportedFromOsu = false
+            IsFailed = failed
         }
 
     let set_score (met_pacemaker: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =

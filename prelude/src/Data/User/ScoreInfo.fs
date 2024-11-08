@@ -36,6 +36,7 @@ type ScoreInfo =
         Physical: float
 
         ImportedFromOsu: bool
+        IsFailed: bool
     }
     member this.Ruleset
         with get () = this.Scoring.Ruleset
@@ -94,6 +95,7 @@ module ScoreInfo =
             Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
 
             ImportedFromOsu = score.IsImported
+            IsFailed = score.IsFailed
         }
 
     let to_score (score_info: ScoreInfo) : Score =
@@ -103,6 +105,7 @@ module ScoreInfo =
             Rate = score_info.Rate
             Mods = score_info.Mods
             IsImported = score_info.ImportedFromOsu
+            IsFailed = score_info.IsFailed
             Keys = score_info.WithMods.Keys
         }
 

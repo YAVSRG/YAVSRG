@@ -68,7 +68,7 @@ type Chat(lobby: Lobby) =
                 replays.Keys
                 |> Seq.map (fun username ->
                     let replay_info = replays.[username]
-                    replay_info.ScoreMetric.Update Time.infinity
+                    replay_info.ScoreProcessor.Update Time.infinity
                     username, replay_info.GetScoreInfo()
                 )
                 |> Seq.sortByDescending (fun (_, s) -> s.Scoring.Accuracy)

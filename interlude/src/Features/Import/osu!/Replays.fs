@@ -22,6 +22,7 @@ module Replays =
             Logging.Error(sprintf "Error loading replay file %s" replay_path, err)
             None
 
+    // todo: should this be in prelude?
     let convert_replay_to_score (replay: OsuScoreDatabase_Score) (chart: Chart) : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
@@ -38,6 +39,7 @@ module Replays =
                 Rate = MathF.Round(float32 rate, 2) * 1.0f<rate>
                 Mods = mods
                 IsImported = true
+                IsFailed = false
                 Keys = chart.Keys
             }
         with err -> Error err.Message

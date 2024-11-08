@@ -97,6 +97,7 @@ module Scores =
                 Rate = MathF.Round(combined_rate, 2) * 1.0f<rate>
                 Mods = mods
                 IsImported = true
+                IsFailed = false
                 Keys = chart.Keys
             }
 

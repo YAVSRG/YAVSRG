@@ -24,15 +24,20 @@ module ReplayScreen =
 
     let replay_screen (chart: Chart, mode: ReplayMode) =
 
-        let replay_data, is_auto, rate, with_colors =
+        let replay_data, is_auto, rate, with_colors, is_failed =
             match mode with
             | ReplayMode.Auto with_colors ->
                 StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplayProvider,
                 true,
                 SelectedChart.rate.Value,
-                with_colors
+                with_colors,
+                false
             | ReplayMode.Replay(score_info, with_colors) ->
-                StoredReplayProvider(score_info.Replay) :> IReplayProvider, false, score_info.Rate, with_colors
+                StoredReplayProvider(score_info.Replay) :> IReplayProvider,
+                false,
+                score_info.Rate,
+                with_colors,
+                score_info.IsFailed
 
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
@@ -123,7 +128,7 @@ module ReplayScreen =
 
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
-                replay_ended_fade.Target <- if replay_data.Finished then 1.0f else 0.0f
+                replay_ended_fade.Target <- if is_failed && replay_data.Finished then 1.0f else 0.0f
                 replay_ended_fade.Update elapsed_ms
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE

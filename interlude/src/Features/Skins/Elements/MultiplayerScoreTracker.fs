@@ -19,7 +19,7 @@ type MultiplayerScoreTracker(config: HudConfig, state: PlayState, replays: Dicti
 
         replays
         |> Seq.map (|KeyValue|)
-        |> Seq.sortByDescending (fun (_: string, replay_info: LobbyPlayerReplayInfo) -> replay_info.ScoreMetric.Accuracy)
+        |> Seq.sortByDescending (fun (_: string, replay_info: LobbyPlayerReplayInfo) -> replay_info.ScoreProcessor.Accuracy)
         |> Seq.iter (fun (username: string, replay_info: LobbyPlayerReplayInfo) ->
             let color =
                 if username = Network.credentials.Username then
@@ -28,7 +28,7 @@ type MultiplayerScoreTracker(config: HudConfig, state: PlayState, replays: Dicti
                     Color.White
 
             Text.draw (Style.font, username, 20.0f, x, y, color)
-            Text.draw_aligned (Style.font, replay_info.ScoreMetric.FormattedAccuracy, 20.0f, x - 10.0f, y, color, 1.0f)
+            Text.draw_aligned (Style.font, replay_info.ScoreProcessor.FormattedAccuracy, 20.0f, x - 10.0f, y, color, 1.0f)
             y <- y + 25.0f
         )
 
@@ -36,7 +36,7 @@ type MultiplayerScoreTracker(config: HudConfig, state: PlayState, replays: Dicti
         base.Update(elapsed_ms, moved)
 
         for replay_info in replays.Values do
-            replay_info.ScoreMetric.Update(
+            replay_info.ScoreProcessor.Update(
                 state.CurrentChartTime()
                 - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>
             )

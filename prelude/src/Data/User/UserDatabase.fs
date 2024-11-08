@@ -173,6 +173,11 @@ module UserDatabase =
             (fun db -> DbChartData.RESET_PERSONAL_BESTS.Execute () db |> expect |> ignore)
             db
 
+        Database.migrate
+            "AddIsFailedColumnToScores"
+            (fun db -> DbScores.ADD_FAILED_COLUMN.Execute () db |> expect |> ignore)
+            db
+
         db
 
     let private legacy_migrate (db: UserDatabase) : UserDatabase =

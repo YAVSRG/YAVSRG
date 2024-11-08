@@ -39,6 +39,7 @@ type LegacyScore =
             Rate = this.rate * 1.0f<rate>
             Mods = this.selectedMods
             IsImported = this.layout = Layout.LeftTwo
+            IsFailed = false
             Keys = this.keycount
         }
 

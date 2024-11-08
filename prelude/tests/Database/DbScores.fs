@@ -18,6 +18,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
+                IsFailed = true
                 Keys = 4
             }
 
@@ -28,6 +29,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true
+                IsFailed = false
                 Keys = 4
             }
 
@@ -55,6 +57,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
+                IsFailed = true
                 Keys = 4
             }
 
@@ -65,6 +68,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true
+                IsFailed = false
                 Keys = 4
             }
 
@@ -93,6 +97,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 0uy |]
                 IsImported = false
+                IsFailed = true
                 Keys = 4
             }
 
@@ -103,6 +108,7 @@ module DbScores =
                 Mods = Map.empty
                 Replay = [| 1uy |]
                 IsImported = true
+                IsFailed = false
                 Keys = 4
             }
 

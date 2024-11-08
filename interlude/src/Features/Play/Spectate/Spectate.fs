@@ -18,7 +18,7 @@ module Spectate =
     let spectate_screen (info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) =
 
         let mutable currently_spectating = username
-        let mutable scoring = replay_info.ScoreMetric
+        let mutable scoring = replay_info.ScoreProcessor
         let mutable replay_data : OnlineReplayProvider = replay_info.Replay :?> OnlineReplayProvider
 
         let cycle_spectator (screen: IPlayScreen) =
@@ -35,7 +35,7 @@ module Spectate =
             match lobby.GetReplayInfo next_user with
             | Some replay_info ->
                 currently_spectating <- next_user
-                scoring <- replay_info.ScoreMetric
+                scoring <- replay_info.ScoreProcessor
                 replay_data <- replay_info.Replay :?> OnlineReplayProvider
                 Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
                 screen.State.ChangeScoring scoring

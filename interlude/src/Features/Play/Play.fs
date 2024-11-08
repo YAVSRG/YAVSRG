@@ -83,6 +83,7 @@ module PlayScreen =
                                     info
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
+                                    true
                             ScoreScreen(score_info, ImprovementFlags.None, true)
                         )
                         Screen.Type.Score
@@ -102,6 +103,7 @@ module PlayScreen =
                                 info
                                 scoring
                                 ((liveplay :> IReplayProvider).GetFullReplay())
+                                false
 
                         (score_info, Gameplay.set_score (PacemakerState.pacemaker_met scoring pacemaker_state) score_info info.SaveData, true)
                         |> ScoreScreen

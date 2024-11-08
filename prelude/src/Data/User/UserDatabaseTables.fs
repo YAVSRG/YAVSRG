@@ -13,6 +13,7 @@ type Score =
         Rate: Rate
         Mods: ModState
         IsImported: bool
+        IsFailed: bool
         Keys: int
     }
 
@@ -35,6 +36,11 @@ module DbScores =
             """
         }
 
+    let internal ADD_FAILED_COLUMN: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL = """ALTER TABLE scores ADD COLUMN IsFailed INTEGER NOT NULL DEFAULT 0;"""
+        }
+
     let internal CREATE_INDEX: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =
@@ -48,8 +54,8 @@ module DbScores =
         {
             SQL =
                 """
-                INSERT INTO scores (ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys)
-                VALUES (@ChartId, @Timestamp, @Replay, @Rate, @Mods, @IsImported, @Keys);
+                INSERT INTO scores (ChartId, Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys)
+                VALUES (@ChartId, @Timestamp, @Replay, @Rate, json(@Mods), @IsImported, @IsFailed, @Keys);
             """
             Parameters =
                 [
@@ -59,6 +65,7 @@ module DbScores =
                     "@Rate", SqliteType.Real, 4
                     "@Mods", SqliteType.Text, -1
                     "@IsImported", SqliteType.Integer, 1
+                    "@IsFailed", SqliteType.Integer, 1
                     "@Keys", SqliteType.Integer, 1
                 ]
             FillParameters =
@@ -69,6 +76,7 @@ module DbScores =
                     p.Float32 (float32 score.Rate)
                     p.Json JSON score.Mods
                     p.Boolean score.IsImported
+                    p.Boolean score.IsFailed
                     p.Byte(byte score.Keys)
                 )
         }
@@ -81,7 +89,7 @@ module DbScores =
 
     let private BY_CHART_ID: Query<string, Score> =
         {
-            SQL = """SELECT Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores WHERE ChartId = @ChartId;"""
+            SQL = """SELECT Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys FROM scores WHERE ChartId = @ChartId;"""
             Parameters = [ "@ChartId", SqliteType.Text, -1 ]
             FillParameters = fun p chart_id -> p.String chart_id
             Read =
@@ -92,6 +100,7 @@ module DbScores =
                         Rate = 1.0f<rate> * r.Float32
                         Mods = r.Json JSON
                         IsImported = r.Boolean
+                        IsFailed = r.Boolean
                         Keys = int r.Byte
                     }
                 )
@@ -117,7 +126,7 @@ module DbScores =
         {
             SQL =
                 """
-            SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, Keys FROM scores
+            SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys FROM scores
             ORDER BY ChartId ASC
             LIMIT 1000
             OFFSET @Offset;
@@ -133,6 +142,7 @@ module DbScores =
                         Rate = 1.0f<rate> * r.Float32
                         Mods = r.Json JSON
                         IsImported = r.Boolean
+                        IsFailed = r.Boolean
                         Keys = int r.Byte
                     }
                 )
@@ -310,7 +320,7 @@ module DbChartData =
             SQL =
                 """
                 INSERT INTO chart_data (ChartId, Offset, LastPlayed, Comment, Breakpoints, PersonalBests)
-                VALUES (@ChartId, 0, 0, '', '[]', @PersonalBests)
+                VALUES (@ChartId, 0, 0, '', '[]', json(@PersonalBests))
                 ON CONFLICT DO UPDATE SET PersonalBests = excluded.PersonalBests;
             """
             Parameters = [ "@ChartId", SqliteType.Text, -1; "@PersonalBests", SqliteType.Text, -1 ]

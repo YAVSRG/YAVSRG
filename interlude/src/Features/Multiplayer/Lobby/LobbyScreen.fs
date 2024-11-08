@@ -161,7 +161,7 @@ type LobbyUI(lobby: Lobby) =
                 let replay_info =
                     {
                         Replay = replay
-                        ScoreMetric = scoring
+                        ScoreProcessor = scoring
                         GetScoreInfo = fun () ->
                             if not (replay :> IReplayProvider).Finished then
                                 replay.Finish()
@@ -187,6 +187,10 @@ type LobbyUI(lobby: Lobby) =
                                 Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
 
                                 ImportedFromOsu = false
+                                IsFailed =
+                                    match lobby.Players.TryGetValue username with
+                                    | true, player -> player.Status = LobbyPlayerStatus.AbandonedPlay
+                                    | false, _ -> true
                             }
                     }
                 lobby.AddReplayInfo(username, replay_info)
