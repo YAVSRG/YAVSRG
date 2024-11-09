@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Gameplay
 
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
@@ -10,12 +11,19 @@ open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.Options
+open Interlude.UI
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
 // todo: consider making 'Gameplay' folder into some kind of State management folder, outside of Features
 
 module Gameplay =
+
+    let private score_saved_ev = Event<ScoreInfo>()
+    let score_saved = score_saved_ev.Publish
+
+    let private score_deleted_ev = Event<int64>()
+    let score_deleted = score_deleted_ev.Publish
 
     let score_info_from_gameplay
         (info: LoadedChartInfo)
@@ -79,6 +87,7 @@ module Gameplay =
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
                     UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
+                    score_saved_ev.Trigger score_info
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
                     if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
@@ -93,9 +102,20 @@ module Gameplay =
 
             else
                 UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
+                score_saved_ev.Trigger score_info
                 ImprovementFlags.None
         else
             ImprovementFlags.None
+
+    let delete_score (score_info: ScoreInfo) =
+        let score_name =
+            sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)
+
+        if UserDatabase.delete_score score_info.ChartMeta.Hash score_info.TimePlayed Content.UserData then
+            score_deleted_ev.Trigger score_info.TimePlayed
+            Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
+        else
+            Logging.Debug("Couldn't find score matching timestamp to delete")
 
     let mutable watch_replay: ScoreInfo * ColoredChart -> unit = ignore
     let mutable continue_endless_mode: unit -> bool = fun () -> false

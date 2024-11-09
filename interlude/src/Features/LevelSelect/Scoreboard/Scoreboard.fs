@@ -60,6 +60,7 @@ type Scoreboard(display: Setting<Display>) =
         SelectedChart.on_chart_change_finished.Add(fun _ -> container.Clear(); count <- 0)
         Rulesets.on_changed.Add (fun _ -> defer (fun () -> container.Sort <- sorter ()))
         SelectedChart.on_chart_update_finished.Add(fun _ -> refresh_filter())
+        Gameplay.score_deleted.Add (fun timestamp -> container.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then defer (fun () -> container.Remove sc)))
         container.Sort <- sorter ()
 
         this

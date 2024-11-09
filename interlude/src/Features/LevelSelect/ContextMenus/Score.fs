@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Prelude.Data.Library
 open Prelude.Charts.Processing
 open Interlude.Content
 open Interlude.UI
@@ -45,23 +44,18 @@ type ScoreContextMenu(score_info: ScoreInfo) =
         :> Widget
 
     override this.Title =
-        sprintf "%s | %s" (score_info.Scoring.FormattedAccuracy) (score_info.Ruleset.LampName score_info.Lamp)
+        sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)
 
     override this.OnClose() = ()
 
     static member ConfirmDeleteScore(score_info, is_submenu) =
         let score_name =
-            sprintf "%s | %s" (score_info.Scoring.FormattedAccuracy) (score_info.Ruleset.LampName score_info.Lamp)
+            sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)
 
         ConfirmPage(
             [ score_name ] %> "misc.confirmdelete",
             fun () ->
-                if UserDatabase.delete_score score_info.ChartMeta.Hash score_info.TimePlayed Content.UserData then
-                    LevelSelect.refresh_all ()
-                    Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
-                else
-                    Logging.Debug("Couldn't find score matching timestamp to delete")
-
+                Gameplay.delete_score score_info
                 if is_submenu then
                     Menu.Back()
         )

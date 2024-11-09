@@ -58,7 +58,6 @@ module LocalScores =
         | _ -> ()
         scores_loaded_ev.Trigger ()
 
-
     let score_loader =
         { new Async.SwitchServiceSeq<Request, unit -> unit>() with
             member this.Process(req: Request) =
@@ -93,3 +92,6 @@ module LocalScores =
             for score_info in local_scores do
                 score_info.Ruleset <- ruleset
         )
+
+        Gameplay.score_saved.Add load_score
+        Gameplay.score_deleted.Add (fun timestamp -> local_scores.RemoveAll(fun score_info -> score_info.TimePlayed = timestamp) |> ignore)

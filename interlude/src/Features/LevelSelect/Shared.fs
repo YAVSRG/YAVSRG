@@ -251,3 +251,10 @@ module LevelSelect =
                 Transitions.Default
         then
             SelectedChart.rate.Value <- score_info.Rate
+
+// todo: rename; relocate
+[<RequireQualifiedAccess>]
+type Display =
+    | Local
+    | Online
+    | Patterns

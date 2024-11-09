@@ -23,10 +23,3 @@ type CurrentChart() =
             | None -> "--"
             | Some c -> c.OriginString
         Text.fill_b (Style.font, diff_text, this.Bounds.Shrink(30.0f, 20.0f).SliceB(50.0f), Colors.text, Alignment.CENTER)
-
-// todo: rename; relocate
-[<RequireQualifiedAccess>]
-type Display =
-    | Local
-    | Online
-    | Patterns
