@@ -14,7 +14,7 @@ open Interlude.Features.Play
 type SkipButton(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
-    let SKIP_THRESHOLD = Song.LEADIN_TIME * SelectedChart.rate.Value
+    let SKIP_THRESHOLD = 1500.0f<ms / rate> * SelectedChart.rate.Value
     let SKIP_DISTANCE = 1000.0f<ms / rate> * SelectedChart.rate.Value
 
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
