@@ -91,6 +91,8 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
         defer (fun () -> initial_focus.Focus false)
 
     override this.Draw() =
+        let old_m = Alpha.change_multiplier 1.0f
+
         let alpha = main_fade.Alpha
 
         let text_color = (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha)
@@ -102,6 +104,8 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
         Text.fill_b(Style.font, pacemaker_desc, this.Bounds.SliceY(70.0f).TranslateY(-50.0f - 50f * main_fade.Value), (Colors.yellow_accent.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
         base.Draw()
+
+        Alpha.change_multiplier old_m |> ignore
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

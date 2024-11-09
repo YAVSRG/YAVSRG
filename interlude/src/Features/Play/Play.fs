@@ -115,7 +115,8 @@ module PlayScreen =
                         Transitions.EnterGameplayNoFadeAudio
                 then
                     Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
-
+                    
+            fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
         let finish_play(this: IPlayScreen) =
@@ -144,6 +145,7 @@ module PlayScreen =
             if pacemaker_met then
                 view_score()
             else
+                fade_in.Target <- 0.5f
                 this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
 
