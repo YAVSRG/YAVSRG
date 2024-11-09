@@ -24,7 +24,7 @@ type private Filter =
 type Scoreboard(display: Setting<Display>) =
     inherit Container(NodeType.None)
 
-    let mutable count = -1
+    let mutable count = 0
     let mutable loading = true
 
     let filter = Setting.simple Filter.None
