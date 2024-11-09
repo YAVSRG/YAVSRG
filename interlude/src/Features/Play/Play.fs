@@ -114,7 +114,7 @@ module PlayScreen =
                         Screen.Type.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+                    Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
