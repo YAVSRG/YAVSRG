@@ -73,12 +73,14 @@ type private ScoreCard(score_info: ScoreInfo) =
         )
 
         |+ Text(
-            K(
-                format_timespan (DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset score_info.TimePlayed)
-                + if score_info.ImportedFromOsu then
-                        " " + Icons.DOWNLOAD
-                    else
-                        ""
+            (
+                let normal_text = 
+                    (if score_info.ImportedFromOsu then Icons.DOWNLOAD + " " else "") +
+                    format_timespan (DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset score_info.TimePlayed)
+                fun () ->
+                    if this.Focused then
+                        if this.FocusedByMouse then %"scoreboard.view_hint_mouse" else [(%%"select").ToString()] %> "scoreboard.view_hint_keyboard"
+                    else normal_text
             ),
             Color = text_subcolor,
             Align = Alignment.RIGHT,
@@ -116,3 +118,12 @@ type private ScoreCard(score_info: ScoreInfo) =
             ScoreContextMenu.ConfirmDeleteScore(score_info, false)
         elif this.Focused && (%%"context_menu").Tapped() then
             ScoreContextMenu(score_info).Show()
+        elif this.Focused && (%%"select").Tapped() then
+            if this.FocusedByMouse then 
+                LevelSelect.choose_this_chart() 
+            else 
+                Screen.change_new
+                        (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
+                        Screen.Type.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                    |> ignore
