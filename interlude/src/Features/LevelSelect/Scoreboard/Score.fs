@@ -9,6 +9,7 @@ open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.UI
 open Interlude.Features.Score
+open Interlude.Features.Gameplay
 
 type private ScoreCard(score_info: ScoreInfo) =
     inherit
@@ -33,7 +34,7 @@ type private ScoreCard(score_info: ScoreInfo) =
                 if this.Focused then
                     Colors.yellow_accent.O1a fade.Alpha
                 else
-                    (!*Palette.DARK).O2a fade.Alpha
+                    (!*Palette.DARK).O1a fade.Alpha
 
         this.Border <-
             fun () ->
@@ -48,13 +49,13 @@ type private ScoreCard(score_info: ScoreInfo) =
         let text_subcolor =
             fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
 
-        let upper = Position.SliceT(47.5f).Shrink(10.0f, 1f).Translate(0.0f, -2.0f)
-        let lower = Position.ShrinkT(37.5f).Shrink(10.0f, 1f).Translate(0.0f, -1.0f)
+        let upper = Position.SliceT(47.5f).Shrink(10.0f, 1f).TranslateY(-2.0f)
+        let lower = Position.ShrinkT(37.5f).Shrink(10.0f, 1f).TranslateY(-1.0f)
 
         this
         |+ Text(
             fun () -> score_info.Scoring.FormattedAccuracy
-            , Color = text_color
+            , Color = (fun () -> let a = fade.Alpha in (score_info.Ruleset.GradeColor score_info.Grade).O4a a, Colors.shadow_2.O4a a)
             , Align = Alignment.LEFT
             , Position = upper
         )
@@ -85,7 +86,11 @@ type private ScoreCard(score_info: ScoreInfo) =
         )
 
         |+ Text(
-            score_info.ModString(),
+            (let ms = score_info.ModString() in fun () -> 
+                if score_info.Rate > SelectedChart.rate.Value then Icons.CHEVRONS_UP + "" + ms
+                elif score_info.Rate < SelectedChart.rate.Value then Icons.CHEVRONS_DOWN + "" + ms
+                else ms
+            ),
             Color = text_color,
             Align = Alignment.RIGHT,
             Position = upper
