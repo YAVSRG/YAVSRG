@@ -100,6 +100,7 @@ module PlayScreen =
                 if
                     Screen.change_new
                         (fun () ->
+                            scoring.Update Time.infinity
                             let score_info =
                                 Gameplay.score_info_from_gameplay
                                     info
