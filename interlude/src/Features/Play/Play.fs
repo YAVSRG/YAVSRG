@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Charts.Processing
@@ -21,6 +20,8 @@ open Interlude.Features.Score
 open Interlude.Features.Play.HUD
 
 module PlayScreen =
+
+    let SHOW_START_OVERLAY = true
 
     let rec play_screen (info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) =
 
@@ -55,7 +56,6 @@ module PlayScreen =
             then
                 Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
 
-        let SHOW_START_OVERLAY = true
         let fade_in = Animation.Fade (if SHOW_START_OVERLAY then 0.0f else 1.0f)
         let start_overlay = StartOverlay(
             info,
