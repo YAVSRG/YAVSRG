@@ -58,7 +58,7 @@ type Lamp =
 [<Json.AutoCodec>]
 type AccuracyPoints =
     | WifeCurve of judge: int
-    | PointsPerJudgement of points: float array // todo: change all points, and accuracy, to float32
+    | PointsPerJudgement of points: float array
 
 // Behaviour for hit detection / assigning an input to the correct note to hit
 

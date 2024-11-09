@@ -212,14 +212,13 @@ type LobbyUI(lobby: Lobby) =
 type LobbyScreen() =
     inherit Screen()
 
-    // todo: rename ui when lobby changes
-    let swap = SwapContainer()
+    let current_lobby_ui = SwapContainer()
     let current_lobby = None
 
     do
         NetworkEvents.join_lobby.Add(fun lobby -> 
             let lobby_ui = LobbyUI(lobby)
-            swap.Current <- lobby_ui
+            current_lobby_ui.Current <- lobby_ui
         )
 
     override this.OnEnter(_) =
@@ -240,7 +239,7 @@ type LobbyScreen() =
         | None -> Some Screen.Type.LevelSelect
 
     override this.Init(parent) =
-        this |* swap
+        this |* current_lobby_ui
 
         base.Init parent
 
