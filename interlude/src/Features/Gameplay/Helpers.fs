@@ -52,12 +52,11 @@ module Gameplay =
             IsFailed = failed
         }
 
-    let set_score (met_pacemaker: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
+    let set_score (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
         let mod_status = score_info.ModStatus
 
         if
             mod_status < ModStatus.Unstored
-            && (options.SaveScoreIfUnderPace.Value || met_pacemaker)
         then
             if mod_status = ModStatus.Ranked then
                 if Network.status = Network.Status.LoggedIn then

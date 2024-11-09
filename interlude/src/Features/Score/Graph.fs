@@ -218,7 +218,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 previous_late <- late
             | None -> ()
 
-    member private this.DrawLabels(color: Color * Color) =
+    member private this.DrawLabels(translucent: bool) =
+        let color = if translucent then Colors.white.O1, Color.Transparent else Colors.text
+
         if expanded && options.ScoreGraphWindowBackground.Value then
             let h = 0.5f * this.Bounds.Height
             let c = this.Bounds.CenterY
@@ -231,6 +233,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     Text.draw_b(Style.font, sprintf "%gms" early, 15.0f, this.Bounds.Left + 5.0f, ms_to_y early - 24.0f, color)
                     Text.draw_b(Style.font, sprintf "+%gms" late, 15.0f, this.Bounds.Left + 5.0f, ms_to_y late, color)
                 | None -> ()
+
         else
             Text.draw_b (
                     Style.font, 
@@ -249,6 +252,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 color
             )
         Text.draw_aligned_b (Style.font, duration, 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Bottom - 40.0f, color, Alignment.RIGHT)
+        if score_info.IsFailed then
+            let color = if translucent then Colors.red.O1, Color.Transparent else Colors.text_red
+            Text.draw_aligned_b (Style.font, %"score.graph.failed", 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Top + 3.0f, color, Alignment.RIGHT)
 
     member private this.DrawLineGraph() =
         let line_color =
@@ -451,9 +457,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
             this.DrawSnapshotInfo(box, current_snapshot)
 
-            this.DrawLabels((Colors.white.O1, Color.Transparent))
+            this.DrawLabels true
         else
-            this.DrawLabels(Colors.text)
+            this.DrawLabels false
 
     interface System.IDisposable with
         override this.Dispose() = 

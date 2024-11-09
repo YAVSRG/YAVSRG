@@ -4,12 +4,10 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
-open Prelude
 open Prelude.Gameplay.Mods
 open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Pacemaker
-open Interlude.Content
 
 type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: unit -> unit) =
     inherit StaticWidget(NodeType.None)
@@ -20,6 +18,8 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
 
     let timer = Animation.Delay (float Song.LEADIN_TIME * 0.5)
     let fade = Animation.Fade 1.0f
+
+    let pacemaker_desc = PacemakerState.description pacemaker
 
     override this.Draw() =
         let alpha = fade.Alpha
@@ -42,26 +42,6 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
         Text.fill_b(Style.font, info.CacheInfo.Title, song_title, text_color, Alignment.CENTER)
         Text.fill_b(Style.font, info.CacheInfo.Artist + "  •  " + info.CacheInfo.Creator, song_title.TranslateY(70.0f).SliceT(40.0f), text_subheading_color, Alignment.CENTER)
         Text.fill_b(Style.font, mod_string, song_title.TranslateY(70.0f).SliceB(40.0f), text_subheading_color, Alignment.CENTER)
-
-        // todo: localise
-        let pacemaker_desc =
-            match pacemaker with
-            | PacemakerState.None -> ""
-            | PacemakerState.Accuracy acc -> sprintf "%s Target: %s" Icons.FLAG (Rulesets.current.FormatAccuracy acc)
-            | PacemakerState.Replay (acc, _) -> sprintf "%s Beat score: %s" Icons.FLAG (Rulesets.current.FormatAccuracy acc)
-            | PacemakerState.Judgement (j, count) ->
-                let jname = Rulesets.current.JudgementName j
-                if count = 0 then 
-                    sprintf "%s Get 0x %s" Icons.FLAG jname
-                else 
-                    sprintf "%s Get %ix %s or better" Icons.FLAG count jname
-            | PacemakerState.ComboBreaks count ->
-                if count = 0 then 
-                    sprintf "%s Get a full combo" Icons.FLAG
-                else 
-                    sprintf "%s Get %ix combo break or better" Icons.FLAG count
-                
-
         Text.fill_b(Style.font, pacemaker_desc, song_title.TranslateY(170.0f).SliceT(60.0f), (Colors.yellow_accent.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
     override this.Update(elapsed_ms, moved) =

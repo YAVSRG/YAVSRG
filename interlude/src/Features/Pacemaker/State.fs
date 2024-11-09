@@ -10,6 +10,7 @@ open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Gameplay
+open Interlude.UI
 
 [<RequireQualifiedAccess>]
 type PacemakerState =
@@ -26,6 +27,24 @@ type PacemakerCreationContext =
     | FromUserSetting
 
 module PacemakerState =
+
+    let pacemaker_failed (scoring: ScoreProcessor) (state: PacemakerState) =
+        match state with
+        | PacemakerState.None -> false
+        | PacemakerState.Accuracy x -> false
+        | PacemakerState.Replay (_, r) -> false
+        | PacemakerState.Judgement(judgement, count) ->
+            let actual =
+                let mutable c = scoring.JudgementCounts.[judgement]
+
+                for j = judgement + 1 to scoring.JudgementCounts.Length - 1 do
+                    if scoring.JudgementCounts.[j] > 0 then
+                        c <- System.Int32.MaxValue
+
+                c
+            actual > count
+        | PacemakerState.ComboBreaks count ->
+            scoring.ComboBreaks > count
 
     let pacemaker_met (scoring: ScoreProcessor) (state: PacemakerState) =
         match state with
@@ -101,3 +120,21 @@ module PacemakerState =
                     match Rulesets.current.Lamps.[lamp].Requirement with
                     | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks n
                     | LampRequirement.JudgementAtMost (j, n) -> PacemakerState.Judgement (j, n)
+
+    let description (pacemaker: PacemakerState) =
+        match pacemaker with
+        | PacemakerState.None -> ""
+        | PacemakerState.Accuracy acc -> 
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (Rulesets.current.FormatAccuracy acc)
+        | PacemakerState.Replay (acc, _) -> sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (Rulesets.current.FormatAccuracy acc)
+        | PacemakerState.Judgement (j, count) ->
+            let jname = Rulesets.current.JudgementName j
+            if count = 0 then 
+                sprintf "%s %s" Icons.FLAG ([jname] %> "pacemaker.zero_judgements")
+            else 
+                sprintf "%s %s" Icons.FLAG ([count.ToString(); jname] %> "pacemaker.n_judgements")
+        | PacemakerState.ComboBreaks count ->
+            if count = 0 then 
+                sprintf "%s %s" Icons.FLAG (%"pacemaker.full_combo")
+            else 
+                sprintf "%s %s" Icons.FLAG ([count.ToString()] %> "pacemaker.n_combo_breaks")

@@ -93,25 +93,58 @@ module PlayScreen =
             then
                 Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
 
-        let finish_play() =
+        let fail_midway(this: IPlayScreen) =
             liveplay.Finish()
-            if
-                Screen.change_new
-                    (fun () ->
-                        let score_info =
-                            Gameplay.score_info_from_gameplay
-                                info
-                                scoring
-                                ((liveplay :> IReplayProvider).GetFullReplay())
-                                false
 
-                        (score_info, Gameplay.set_score (PacemakerState.pacemaker_met scoring pacemaker_state) score_info info.SaveData, true)
-                        |> ScoreScreen
-                    )
-                    Screen.Type.Score
-                    Transitions.EnterGameplayNoFadeAudio
-            then
-                Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+            let view_score() =
+                if
+                    Screen.change_new
+                        (fun () ->
+                            let score_info =
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+                                    true
+
+                            (score_info, Gameplay.set_score score_info info.SaveData, true)
+                            |> ScoreScreen
+                        )
+                        Screen.Type.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                then
+                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+
+            this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
+
+        let finish_play(this: IPlayScreen) =
+            liveplay.Finish()
+            let pacemaker_met = PacemakerState.pacemaker_met scoring pacemaker_state
+
+            let view_score() =
+                if
+                    Screen.change_new
+                        (fun () ->
+                            let score_info =
+                                Gameplay.score_info_from_gameplay
+                                    info
+                                    scoring
+                                    ((liveplay :> IReplayProvider).GetFullReplay())
+                                    false
+
+                            (score_info, Gameplay.set_score score_info info.SaveData, true)
+                            |> ScoreScreen
+                        )
+                        Screen.Type.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                then
+                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+
+            if pacemaker_met then
+                view_score()
+            else
+                this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
+
 
         let change_offset(state) =
             Song.pause()
@@ -156,8 +189,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
-                //|+ HotkeyAction("accept_offset", fun () -> this |* FailOverlay(ignore, ignore, ignore))
-                |* HotkeyAction("offset", fun () -> change_offset this.State)
+                |* HotkeyAction("offset", fun () -> if not (liveplay :> IReplayProvider).Finished then change_offset this.State)
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
@@ -205,7 +237,8 @@ module PlayScreen =
 
                     this.State.Scoring.Update chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play()
+                    if options.EnablePacemakerFailMidway.Value && PacemakerState.pacemaker_failed scoring pacemaker_state then fail_midway this
+                    if this.State.Scoring.Finished then finish_play this
 
                 if fade_in.Value < 1.0f then
                     start_overlay.Update(elapsed_ms, moved)

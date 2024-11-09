@@ -130,7 +130,7 @@ module PlayScreenMultiplayer =
                                 ((liveplay :> IReplayProvider).GetFullReplay())
                                 false
 
-                        (score_info, Gameplay.set_score true score_info info.SaveData, true)
+                        (score_info, Gameplay.set_score score_info info.SaveData, true)
                         |> ScoreScreen
                     )
                     Screen.Type.Score

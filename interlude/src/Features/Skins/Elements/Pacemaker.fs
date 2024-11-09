@@ -110,7 +110,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             let _hearts = 1 + count - actual
 
             if _hearts < hearts then
-                color.Value <- Color.White
+                color.Value <- color.Value.O0
 
             hearts <- _hearts
 
@@ -127,7 +127,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             let _hearts = 1 + count - state.Scoring.ComboBreaks
 
             if _hearts < hearts then
-                color.Value <- Color.White
+                color.Value <- color.Value.O0
 
             hearts <- _hearts
 

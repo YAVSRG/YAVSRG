@@ -162,7 +162,7 @@ module Options =
             FailCondition: Setting<FailType>
             Pacemaker: Dictionary<string, PacemakerSettings>
             EnablePacemaker: Setting<bool>
-            SaveScoreIfUnderPace: Setting<bool>
+            EnablePacemakerFailMidway: Setting<bool>
             OnlySaveNewRecords: Setting<bool>
             SelectedMods: Setting<ModState>
 
@@ -226,7 +226,7 @@ module Options =
                 FailCondition = Setting.simple FailType.EndOfSong
                 Pacemaker = Dictionary<string, PacemakerSettings>()
                 EnablePacemaker = Setting.simple false
-                SaveScoreIfUnderPace = Setting.simple true
+                EnablePacemakerFailMidway = Setting.simple true
                 OnlySaveNewRecords = Setting.simple false
                 SelectedMods = Setting.simple Map.empty
 
@@ -400,6 +400,7 @@ module Options =
             Hotkeys.register "retry" (ctrl Keys.R)
             Hotkeys.register "next_song" (ctrl_shift Keys.R)
             Hotkeys.register "offset" (ctrl Keys.O)
+            Hotkeys.register "save_score" (ctrl Keys.S)
 
             Hotkeys.register "preset1" (ctrl Keys.F1)
             Hotkeys.register "preset2" (ctrl Keys.F2)
