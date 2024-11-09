@@ -109,7 +109,7 @@ module PacemakerState =
                 let lamp =
                     if setting.UsePersonalBest then
                         match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
-                        | Some (best_lamp, _, _) -> best_lamp
+                        | Some (best_lamp, _, _) -> max 0 best_lamp
                         | None -> setting.Lamp
                     else
                         setting.Lamp
