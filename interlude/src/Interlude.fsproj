@@ -94,6 +94,7 @@
     <Compile Include="Features\Import\Etterna\Components.fs" />
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
+    <Compile Include="Features\Export\Osz.fs" />
     <Compile Include="Features\Mounts\Types.fs" />
     <Compile Include="Features\Mounts\Create.fs" />
     <Compile Include="Features\Mounts\Edit.fs" />

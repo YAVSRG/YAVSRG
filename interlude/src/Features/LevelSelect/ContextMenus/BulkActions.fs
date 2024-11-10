@@ -10,6 +10,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
+open Interlude.Features.Export
 
 module BulkActions =
 
@@ -32,35 +33,16 @@ module BulkActions =
             .Show()
 
     let confirm_bulk_export(charts: (ChartMeta * LibraryContext) seq) =
-        ConfirmPage(
+        OsuExportOptionsPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_export",
-            fun () ->
-                try
-                    let export_path = System.IO.Path.Combine(get_game_folder "Exports", sprintf "export-%i" (Timestamp.now()))
-                    System.IO.Directory.CreateDirectory export_path |> ignore
-
-                    open_directory export_path
-
-                    let mutable ok = 0
-                    let mutable failed = 0
-
-                    for cc, _ in charts do
-                        match ChartDatabase.get_chart cc.Hash Content.Library.Charts with
-                        | Ok chart ->
-                            match Exports.create_osz OsuExportOptions.Default chart cc export_path with
-                            | Ok _ ->
-                                ok <- ok + 1
-                            | Error err ->
-                                failed <- failed + 1
-                                Logging.Error(sprintf "Error exporting '%s' as osz" cc.Title, err)
-                        | Error reason ->
-                            failed <- failed + 1
-                            Logging.Error(sprintf "Error fetching chart for '%s' to export: %s" cc.Hash reason)
-
-                    Notifications.action_feedback(Icons.CHECK, %"notification.bulk_exported.title", [ok.ToString(); failed.ToString()] %> "notification.bulk_exported.body")
-                with err ->
-                    Logging.Error(sprintf "Unexpected error bulk exporting charts", err)
-                Menu.Exit()
+            Map.empty,
+            fun _ options ->
+                let loaded_charts =
+                    seq {
+                        for cc, _ in charts do
+                            yield ChartDatabase.get_chart cc.Hash Content.Library.Charts, cc
+                    }
+                OsuExport.bulk_export loaded_charts options
         )
             .Show()
 

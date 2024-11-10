@@ -6,7 +6,6 @@ open Percyqaz.Flux.UI
 open Prelude.Charts
 open Prelude.Backbeat
 open Prelude
-open Prelude.Gameplay.Mods
 open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
@@ -15,6 +14,7 @@ open Interlude.Features.Online
 open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Play
+open Interlude.Features.Export
 
 type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
     inherit Page()
@@ -168,48 +168,20 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |* PageButton.Once(
                 %"chart.export_osz",
                 (fun () ->
-                    match SelectedChart.CHART with
-                    | None -> ()
-                    | Some c ->
-                        match Exports.create_osz OsuExportOptions.Default c cc (get_game_folder "Exports") with
-                        | Ok _ ->
-                            open_directory (get_game_folder "Exports")
-                            Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
-                        | Error err ->
-                            Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-                            Logging.Error(sprintf "Error exporting '%s' as osz" cc.Title, err)
+                    match SelectedChart.CHART, SelectedChart.WITH_MODS with
+                    | Some c, Some m ->
+                        OsuExportOptionsPage(
+                            %"chart.export_osz",
+                            m.ModsApplied,
+                            function
+                            | true -> OsuExport.export_chart_with_mods m cc
+                            | false -> OsuExport.export_chart_without_mods c cc
+                        )
+                            .Show()
+                    | _ -> ()
                 ),
                 Icon = Icons.UPLOAD
             )
-            match SelectedChart.WITH_MODS with
-            | Some m when m.ModsApplied <> Map.empty ->
-                content
-                |* PageButton.Once(
-                    %"chart.export_osz_mods",
-                    (fun () ->
-                        match SelectedChart.CHART with
-                        | None -> ()
-                        | Some c ->
-                            let mod_string =
-                                m.ModsApplied
-                                |> Mods.in_priority_order
-                                |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
-                                |> String.concat ", "
-                            let chart_with_mods : Chart = 
-                                { Keys = m.Keys; Notes = m.Notes; SV = m.SV; BPM = m.BPM }
-                            let meta_with_mods =
-                                { cc with DifficultyName = cc.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
-                            match Exports.create_osz OsuExportOptions.Default chart_with_mods meta_with_mods (get_game_folder "Exports") with
-                            | Ok _ ->
-                                open_directory (get_game_folder "Exports")
-                                Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
-                            | Error err ->
-                                Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-                                Logging.Error(sprintf "Error exporting '%s' as osz" cc.Title, err)
-                    ),
-                    Icon = Icons.UPLOAD
-                )
-            | _ -> ()
 
         match Content.Table, SelectedChart.CHART with
         | Some table, Some chart ->
