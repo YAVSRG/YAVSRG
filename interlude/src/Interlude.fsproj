@@ -80,9 +80,11 @@
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />
     <Compile Include="Features\Stats\Stats.fs" />
-    <Compile Include="Features\Stats\Tables.fs" />
-    <Compile Include="Features\Stats\Skillsets.fs" />
-    <Compile Include="Features\Stats\Screen.fs" />
+    <Compile Include="Features\Stats\Session\Activity.fs" />
+    <Compile Include="Features\Stats\Session\StatsPage.fs" />
+    <Compile Include="Features\Stats\Screen\Tables.fs" />
+    <Compile Include="Features\Stats\Screen\Skillsets.fs" />
+    <Compile Include="Features\Stats\Screen\Screen.fs" />
     <Compile Include="Features\Import\Backbeat.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
     <Compile Include="Features\Import\osu!\Replays.fs" />

@@ -92,8 +92,7 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.stats",
                 (fun () ->
-                    Screen.change_new StatsScreen Screen.Type.Stats Transitions.Default
-                    |> ignore
+                    StatsPage().Show()
                 ),
                 Icons.TRENDING_UP
             )

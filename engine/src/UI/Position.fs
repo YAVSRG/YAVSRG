@@ -128,6 +128,13 @@ type Position with
     static member inline SliceX width = Position.DEFAULT.SliceX width
     static member inline SliceY height = Position.DEFAULT.SliceY height
 
+    static member inline SliceLPercent percent = { Position.DEFAULT with Right = percent %+ 0.0f }
+    static member inline SliceTPercent percent = { Position.DEFAULT with Bottom = percent %+ 0.0f }
+    static member inline SliceRPercent percent = { Position.DEFAULT with Left = (1.0f - percent) %+ 0.0f }
+    static member inline SliceBPercent percent = { Position.DEFAULT with Top = (1.0f - percent) %+ 0.0f }
+    static member inline SliceXPercent percent = { Position.DEFAULT with Left = ((1.0f - percent) * 0.5f) %+ 0.0f; Right = ((1.0f + percent) * 0.5f) %+ 0.0f }
+    static member inline SliceYPercent percent = { Position.DEFAULT with Top = ((1.0f - percent) * 0.5f) %+ 0.0f; Bottom = ((1.0f + percent) * 0.5f) %+ 0.0f }
+
     member inline this.BorderL amount =
         { this with
             Left = this.Left ^- amount

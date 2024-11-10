@@ -62,7 +62,7 @@ open Prelude.Data.Library
 
 module Stats =
 
-    let calculate (library: Library) (database: UserDatabase) =
+    let calculate (library: Library) (database: UserDatabase) : ArchivedSession array =
         let scores =
             seq {
                 for chart_id in database.Cache.Keys do
@@ -74,25 +74,44 @@ module Stats =
 
         let first_score_length = 
             match ChartDatabase.get_meta (fst scores.[0]) library.Charts with
-            | Some cc -> cc.Length |> int64
+            | Some cc -> cc.Length / (snd scores.[0]).Rate |> int64
             | None -> 2L * 60L * 1000L
 
         let mutable session_start_time = (snd scores.[0]).Timestamp - first_score_length
+        let mutable session_playing_time = 0.0f<ms / rate>
         let mutable last_time = session_start_time
         let mutable score_count = 0
 
-        for chart_id, score in scores do
-            let score_length = 
-                match ChartDatabase.get_meta chart_id library.Charts with
-                | Some cc -> cc.Length |> int64
-                | None -> 2L * 60L * 1000L
-            if score.Timestamp - last_time > 7200_000L then
-                // start of new session
-                printfn "Session: %O with %i scores lasting %O" (Timestamp.to_datetime(session_start_time)) score_count (System.TimeSpan.FromMilliseconds(last_time - session_start_time |> float))
-                session_start_time <- score.Timestamp - score_length
-                score_count <- 1
-            else
-                score_count <- score_count + 1
-            last_time <- score.Timestamp
+        seq {
+            for chart_id, score in scores do
+                let score_length = 
+                    match ChartDatabase.get_meta chart_id library.Charts with
+                    | Some cc -> 
+                        session_playing_time <- session_playing_time + cc.Length / score.Rate
+                        cc.Length / score.Rate |> int64
+                    | None -> 2L * 60L * 1000L
+                if score.Timestamp - last_time > 7200_000L then
+                    // start of new session
+                    yield { 
+                        Start = session_start_time
+                        End = last_time
+                        Keymode = 4
 
-        printfn "Current session: %O with %i scores" (Timestamp.to_datetime(session_start_time)) score_count
+                        PlayTime = session_playing_time |> float
+                        PracticeTime = 0.0
+                        GameTime = float (last_time - session_start_time)
+                        NotesHit = 0
+                        PlaysStarted = score_count
+                        PlaysCompleted = score_count
+                        PlaysQuit = 0
+                        PlaysRetried = 0
+                    }
+                    session_start_time <- score.Timestamp - score_length
+                    session_playing_time <- 0.0f<ms / rate>
+                    score_count <- 1
+                else
+                    score_count <- score_count + 1
+                last_time <- score.Timestamp
+            //printfn "Current session: %O with %i scores" (Timestamp.to_datetime(session_start_time)) score_count
+        }
+        |> Seq.toArray
