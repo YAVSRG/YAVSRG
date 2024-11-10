@@ -1,30 +1,23 @@
-0.7.26.8
+0.7.26.9
 ====
 
-Major rulesets update!
+Bug fix and quality of life update. Enjoy :)
 
-Rulesets have been rewritten and **your old rulesets will no longer load**.  
-In exchange, the ruleset editor is much more powerful so you'll be able to recreate your ruleset in about 10 minutes
+# New features
+- You can now edit (most) hold mechanics in the ingame ruleset editor
+- Noteskins support keymode-specific column widths
+- With pacemaker on, you can now fail a song if you miss your target
+- Failed/quit scores can be saved and viewed like any other score
 
-# New ruleset features
-- Built in osu!mania rulesets are now extremely accurate to the stable client, rice notes on nomod in particular are 100% exact to what osu! would give you
-- New option for rulesets to display accuracy to 3 or 4 decimal places instead of 2
-- New option for rulesets to award a penalty judgement when you ghost tap
-- Ruleset editor now allows you to add/remove judgements, customise timing windows and more without editing the .ruleset directly
-- Ability to clone a ruleset
-
-The rewrite has had some other knock-on improvements to other connected features
-
-# Other new features
-- Score graph data is now more granular and hover info is more accurate to your mouse position
-- Songs you click through on level select are added to history, shift + R takes you back
-- Improvements to pattern analysis and chart categorisation
-- New 'annotations' overlay when viewing a replay, showing exact ms deviations of hits, ghost taps and more
-- Replay mode has an option to keep the same perceived scroll speed when changing playback speed
+# Improvements
+- Some UI improvements for: changing gameplay binds, local scores list, online player list
+- You can choose what OD/HP to use when exporting charts as .osz
+- Grouping by date played/installed works on actual "day boundaries" rather than rounding how many minutes ago to an integer
+- Pattern calculation has changed slightly again
 
 # Bug fixes
-- Fixed dozens of small issues where times would not scale on rates across various HUD elements and animations
-- Fixed a bug causing performance rating to scale incorrectly on rates
-- Fixed exporting charts to osu! not normalising BPMs correctly
-- Playlists in level select now show PB info for the rate set by the playlist
+- Fixed alignment of background image during the song start overlay
+- Fixed pacemaker not working if set to use your lamp PB, and your PB is NONE
+- Rulesets with the same name no longer overwrite each other
+- Fixed several bugs where switching rulesets in certain scenarios doesn't work
 
