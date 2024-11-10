@@ -116,7 +116,7 @@ type private ScoreCard(score_info: ScoreInfo) =
 
         if Mouse.hover this.Bounds && (%%"delete").Tapped() then
             ScoreContextMenu.ConfirmDeleteScore(score_info, false)
-        elif this.Focused && (%%"context_menu").Tapped() then
+        elif this.Focused && not this.FocusedByMouse && (%%"context_menu").Tapped() then
             ScoreContextMenu(score_info).Show()
         elif this.Focused && (%%"select").Tapped() then
             if this.FocusedByMouse then 

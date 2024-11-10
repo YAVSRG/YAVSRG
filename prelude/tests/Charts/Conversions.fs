@@ -16,7 +16,7 @@ module Conversions =
 
             let chart = ChartFuzzBuilder.generate (keys, seed)
 
-            let osu_notes = Interlude_To_Osu.notes_to_hitobjects chart.Notes chart.Keys
+            let osu_notes = OsuExport.notes_to_hitobjects chart.Notes chart.Keys
             let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes chart.Keys
 
             Assert.AreEqual(chart.Notes, interlude_notes)
@@ -39,7 +39,7 @@ module Conversions =
             let chart = ChartFuzzBuilder.generate (keys, seed)
 
             let most_common_mspb = Chart.find_most_common_bpm chart
-            let osu_points = Interlude_To_Osu.convert_timing_points chart.BPM chart.SV most_common_mspb
+            let osu_points = OsuExport.convert_timing_points chart.BPM chart.SV most_common_mspb
             let interlude_bpm, interlude_sv = Osu_To_Interlude.convert_timing_points osu_points chart.LastNote
 
             Assert.AreEqual(chart.BPM, interlude_bpm)
@@ -50,7 +50,7 @@ module Conversions =
 
         let one_bpm = [|{ Time = 10f<ms>; Data = { MsPerBeat = 500.0f<ms / beat>; Meter = 4<beat> } }|]
 
-        let osu_points = Interlude_To_Osu.convert_timing_points one_bpm [||] 500.0f<ms / beat>
+        let osu_points = OsuExport.convert_timing_points one_bpm [||] 500.0f<ms / beat>
         let interlude_bpm, interlude_sv = Osu_To_Interlude.convert_timing_points osu_points 1000.0f<ms>
 
         printfn "%A" osu_points
@@ -70,7 +70,7 @@ module Conversions =
                 { Time = 110f<ms>; Data = { MsPerBeat = 500.0f<ms / beat>; Meter = 4<beat> } }
             |]
 
-        let osu_points = Interlude_To_Osu.convert_timing_points many_bpms [||] 500.0f<ms / beat>
+        let osu_points = OsuExport.convert_timing_points many_bpms [||] 500.0f<ms / beat>
         let interlude_bpm, interlude_sv = Osu_To_Interlude.convert_timing_points osu_points 1000.0f<ms>
 
         printfn "%A" osu_points

@@ -54,7 +54,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
             Patterns = Unchecked.defaultof<_>
         }
 
-    match Exports.create_osz chart chart_meta od "." with
+    match Exports.create_osz { OD = float od; HP = 8.0 } chart chart_meta "." with
     | Error exn -> failwithf "Couldn't export .osz: %s" exn.Message
     | Ok (beatmap, file_name) ->
 

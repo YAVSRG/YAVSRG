@@ -36,7 +36,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
     and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked score_info.ChartMeta then unlike_button else like_button)
 
     let export_osz() =
-        match Exports.create_osz score_info.Chart score_info.ChartMeta 8.0f (get_game_folder "Exports") with
+        match Exports.create_osz OsuExportOptions.Default score_info.Chart score_info.ChartMeta (get_game_folder "Exports") with
         | Ok _ ->
             open_directory (get_game_folder "Exports")
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
@@ -54,7 +54,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
             { Keys = score_info.WithMods.Keys; Notes = score_info.WithMods.Notes; SV = score_info.WithMods.SV; BPM = score_info.WithMods.BPM }
         let meta_with_mods =
             { score_info.ChartMeta with DifficultyName = score_info.ChartMeta.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
-        match Exports.create_osz chart_with_mods meta_with_mods 8.0f (get_game_folder "Exports") with
+        match Exports.create_osz OsuExportOptions.Default chart_with_mods meta_with_mods (get_game_folder "Exports") with
         | Ok _ ->
             open_directory (get_game_folder "Exports")
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")

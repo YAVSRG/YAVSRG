@@ -6,7 +6,14 @@ open Prelude
 open Prelude.Charts
 open Prelude.Charts.Formats.osu
 
-module Interlude_To_Osu =
+type OsuExportOptions =
+    {
+        OD: float
+        HP: float
+    }
+    static member Default = { OD = 8.0; HP = 8.0 }
+
+module OsuExport =
 
     let notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) =
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
@@ -83,7 +90,7 @@ module Interlude_To_Osu =
 
         List.ofSeq result
 
-    let convert (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
+    let convert (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) : Beatmap =
         let general : General =
             {
                 AudioFilename =
@@ -123,8 +130,8 @@ module Interlude_To_Osu =
         let diff =
             {
                 CircleSize = float chart.Keys
-                OverallDifficulty = 8.0
-                HPDrainRate = 8.0
+                OverallDifficulty = System.Math.Round(options.OD, 1) |> max 0.0 |> min 10.0
+                HPDrainRate = System.Math.Round(options.HP, 1) |> max 0.0 |> min 10.0
                 ApproachRate = 5.0
                 SliderMultiplier = 1.4
                 SliderTickRate = 1.0
@@ -151,17 +158,9 @@ module Interlude_To_Osu =
 
 module Exports =
 
-    let create_osz (chart: Chart) (chart_meta: ChartMeta) (od: float32) (export_folder: string) : Result<Beatmap * string, exn> =
+    let create_osz (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<Beatmap * string, exn> =
         try
-            let beatmap = Interlude_To_Osu.convert chart chart_meta
-
-            let beatmap =
-                { beatmap with
-                     Difficulty = 
-                        { beatmap.Difficulty with
-                            OverallDifficulty = float od
-                        }
-                }
+            let beatmap = OsuExport.convert options chart chart_meta
 
             let file_name = beatmap.Filename
             let archive_file_name = beatmap.Filename.Replace(".osu", ".osz")

@@ -118,7 +118,7 @@ module Leaderboard =
             )
 
             |+ Text(
-                K(format_timespan (DateTime.UtcNow - Timestamp.to_datetime score_info.TimePlayed)),
+                K(format_timespan (Timestamp.since score_info.TimePlayed)),
                 Color = text_subcolor,
                 Align = Alignment.RIGHT,
                 Position =
