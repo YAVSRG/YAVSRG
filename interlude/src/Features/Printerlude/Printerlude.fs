@@ -108,6 +108,8 @@ module Printerlude =
                     |> io.WriteLine
             | None -> ()
 
+        let sessions () = Stats.calculate Content.Library Content.UserData
+
         let vacuum () = 
             ChartDatabase.vacuum.Request((Content.Charts, true), ignore)
 
@@ -117,6 +119,7 @@ module Printerlude =
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
+                .WithCommand("sessions", "Experimental session calculation", sessions)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
                 .WithIOCommand(
                     "local_server",
