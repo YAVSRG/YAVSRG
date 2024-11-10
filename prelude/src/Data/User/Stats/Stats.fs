@@ -42,7 +42,6 @@ type ArchivedSession =
     {
         Start: int64
         End: int64
-        Keymode: int
 
         PlayTime: float
         PracticeTime: float
@@ -95,7 +94,6 @@ module Stats =
                     yield { 
                         Start = session_start_time
                         End = last_time
-                        Keymode = 4
 
                         PlayTime = session_playing_time |> float
                         PracticeTime = 0.0

@@ -95,11 +95,13 @@ module Glint =
         Draw.untextured_quad (Quad.rotate_about o 180.0 q) c.AsQuad
         Draw.untextured_quad (Quad.rotate_about o 180.0 q2) c.AsQuad
 
-module private Wedge =
+module Wedge =
 
-    let draw (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
+    let draw (x: float32, y: float32) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
         let segments = int ((a2 - a1) / 0.10)
         let segsize = (a2 - a1) / float segments
+
+        let centre = new Vector2(x, y)
 
         for i = 1 to segments do
             let a2 = a1 + float i * segsize
@@ -112,7 +114,7 @@ module private Wedge =
                 col.AsQuad
 
     let draw_centered =
-        draw <| new Vector2(Render.width() * 0.5f, Render.height() * 0.5f)
+        draw (Render.width() * 0.5f, Render.height() * 0.5f)
 
     let variant_1 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
@@ -132,7 +134,7 @@ module Bubble =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
         let head = float32 (Math.Pow(pos, 0.5)) * (r2 - r1) + r1
         let tail = float32 (Math.Pow(pos, 2.0)) * (r2 - r1) + r1
-        Wedge.draw (new Vector2(x, y)) tail head 0.0 (Math.PI * 2.0) col
+        Wedge.draw (x, y) tail head 0.0 (Math.PI * 2.0) col
 
 module DiamondsWipe =
 

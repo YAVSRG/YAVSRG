@@ -80,7 +80,10 @@
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />
     <Compile Include="Features\Stats\Stats.fs" />
+    <Compile Include="Features\Stats\Session\Current.fs" />
     <Compile Include="Features\Stats\Session\Activity.fs" />
+    <Compile Include="Features\Stats\Session\Playtime.fs" />
+    <Compile Include="Features\Stats\Session\Playcount.fs" />
     <Compile Include="Features\Stats\Session\StatsPage.fs" />
     <Compile Include="Features\Stats\Screen\Tables.fs" />
     <Compile Include="Features\Stats\Screen\Skillsets.fs" />

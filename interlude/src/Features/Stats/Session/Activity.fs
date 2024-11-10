@@ -8,8 +8,9 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.User
 open Interlude.Content
+open Interlude.UI
 
-type ActivityFeed(selected: Setting<DateOnly>) =
+type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: ArchivedSession array -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let session_dates = Stats.calculate Content.Library Content.UserData |> Array.groupBy (_.Start >> timestamp_to_local_day >> DateOnly.FromDateTime) |> Map.ofArray
@@ -51,8 +52,10 @@ type ActivityFeed(selected: Setting<DateOnly>) =
 
         match hovered_day with
         | Some d ->
-            Text.draw_aligned_b(Style.font, d.ToString("dddd, dd MMMM yyyy"), 20.0f, this.Bounds.Right, this.Bounds.Top - 35.0f, Colors.text_subheading, Alignment.RIGHT)
+            Text.draw_aligned_b(Style.font, d.ToString("dddd, dd MMMM yyyy"), 20.0f, this.Bounds.Right - 10.0f, this.Bounds.Top - 35.0f, Colors.text_subheading, Alignment.RIGHT)
         | None -> ()
+        Text.draw_b(Style.font, "Activity", 30.0f, this.Bounds.Left + 15.0f, this.Bounds.Top - 50.0f, Colors.text)
+        Text.draw_b(Style.font, Icons.ARROW_LEFT + " View older", 20.0f, this.Bounds.Left + 15.0f, this.Bounds.Bottom + 5.0f, Colors.text)
     
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -73,7 +76,9 @@ type ActivityFeed(selected: Setting<DateOnly>) =
 
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
-                    | Some sessions -> printfn "%A" sessions
+                    | Some sessions -> 
+                        selected.Set day
+                        on_day_selected sessions
                     | _ -> ()
 
                 day <- today.AddDays 1
