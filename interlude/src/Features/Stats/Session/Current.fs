@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Interlude.Features.Stats
+open Prelude.Data.User
 
 type Placeholder() =
     inherit StaticWidget(NodeType.None) 
@@ -23,7 +23,7 @@ type ScorePlaceholder() =
 type CurrentSession() =
     inherit Container(NodeType.None)
 
-    let current_session = Stats.session
+    let current_session = Stats.CURRENT_SESSION
     let scores = FlowContainer.Vertical<ScorePlaceholder>(60.0f, Spacing = 15.0f)
 
     override this.Init(parent: Widget) =

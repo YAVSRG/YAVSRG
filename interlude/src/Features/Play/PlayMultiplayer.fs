@@ -17,7 +17,6 @@ open Interlude.UI
 open Interlude.Web.Shared
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
-open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
@@ -78,8 +77,8 @@ module PlayScreenMultiplayer =
 
         scoring.OnEvent.Add(fun h ->
             match h.Action with
-            | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
-            | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+            | Hit d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
             | _ -> ()
         )
 
@@ -114,7 +113,7 @@ module PlayScreenMultiplayer =
                     Screen.back Transitions.LeaveGameplay
             then
                 lobby.AbandonPlaying()
-                Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+                Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
 
         let finish_play(chart_time: ChartTime) =
             liveplay.Finish()
@@ -136,7 +135,7 @@ module PlayScreenMultiplayer =
                     Screen.Type.Score
                     Transitions.EnterGameplayNoFadeAudio
             then
-                Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+                Stats.CURRENT_SESSION.PlaysCompleted <- Stats.CURRENT_SESSION.PlaysCompleted + 1
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
@@ -168,7 +167,8 @@ module PlayScreenMultiplayer =
                 )
 
             override this.OnEnter(previous) =
-                Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
+                Stats.CURRENT_SESSION.PlaysStarted <- Stats.CURRENT_SESSION.PlaysStarted + 1
+                Stats.save_current_session Content.UserData
                 info.SaveData.LastPlayed <- Timestamp.now ()
                 Toolbar.hide_cursor ()
 
@@ -188,7 +188,7 @@ module PlayScreenMultiplayer =
                 base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
-                Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
+                Stats.CURRENT_SESSION.PlayTime <- Stats.CURRENT_SESSION.PlayTime + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chart_time : ChartTime = now - first_note

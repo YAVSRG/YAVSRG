@@ -19,26 +19,6 @@ open Interlude.Features.Online
 open Interlude.Features.Score
 
 module Startup =
-    let MIGRATION_VERSION = 2
-
-    let migrate () =
-
-        if Stats.total.MigrationVersion.IsNone then
-            if Content.Charts.Entries.Count > 0 then
-                Stats.total.MigrationVersion <- Some 0
-            else
-                Stats.total.MigrationVersion <- Some MIGRATION_VERSION
-
-        match Stats.total.MigrationVersion with
-        | None -> failwith "impossible"
-        | Some i ->
-            if i < 1 then
-                // Originally a migration here for migrating to new hash format from before 0.7.2
-                Stats.total.MigrationVersion <- Some 1
-
-            if i < 2 then
-                // Originally a migration here for generating pattern data
-                Stats.total.MigrationVersion <- Some 2
 
     let init_startup (instance) =
         Options.init_startup instance
@@ -90,7 +70,6 @@ module Startup =
                 Printerlude.init_window (instance)
                 Content.init_window ()
                 DiscordRPC.init_window ()
-                migrate ()
                 SelectedChart.init_window ()
                 Network.init_window ()
                 Mounts.init_window ()

@@ -6,15 +6,15 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Charts.Processing
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Charts.Processing
+open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
-open Interlude.Features.Stats
 open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
@@ -37,8 +37,8 @@ module PlayScreen =
 
         scoring.OnEvent.Add(fun h ->
             match h.Action with
-            | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
-            | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+            | Hit d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
             | _ -> ()
         )
 
@@ -54,7 +54,7 @@ module PlayScreen =
                     Screen.Type.Play
                     Transitions.EnterGameplayFadeAudio
             then
-                Stats.session.PlaysRetried <- Stats.session.PlaysRetried + 1
+                Stats.CURRENT_SESSION.PlaysRetried <- Stats.CURRENT_SESSION.PlaysRetried + 1
 
         let fade_in = Animation.Fade (if SHOW_START_OVERLAY then 0.0f else 1.0f)
         let start_overlay = StartOverlay(
@@ -67,7 +67,7 @@ module PlayScreen =
         )
 
         let skip_song () =
-            if Gameplay.continue_endless_mode() then Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+            if Gameplay.continue_endless_mode() then Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
         
         let give_up () =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
@@ -91,7 +91,7 @@ module PlayScreen =
                 else
                     Screen.back Transitions.LeaveGameplay
             then
-                Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+                Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
 
         let fail_midway(this: IPlayScreen) =
             liveplay.Finish()
@@ -114,7 +114,7 @@ module PlayScreen =
                         Screen.Type.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    Stats.session.PlaysQuit <- Stats.session.PlaysQuit + 1
+                    Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
                     
             fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
@@ -140,7 +140,7 @@ module PlayScreen =
                         Screen.Type.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    Stats.session.PlaysCompleted <- Stats.session.PlaysCompleted + 1
+                    Stats.CURRENT_SESSION.PlaysCompleted <- Stats.CURRENT_SESSION.PlaysCompleted + 1
 
             if pacemaker_met then
                 view_score()
@@ -196,7 +196,8 @@ module PlayScreen =
 
             override this.OnEnter(previous) =
                 if previous <> Screen.Type.Play then
-                    Stats.session.PlaysStarted <- Stats.session.PlaysStarted + 1
+                    Stats.CURRENT_SESSION.PlaysStarted <- Stats.CURRENT_SESSION.PlaysStarted + 1
+                Stats.save_current_session Content.UserData
                 info.SaveData.LastPlayed <- Timestamp.now ()
                 Toolbar.hide_cursor ()
 
@@ -222,7 +223,7 @@ module PlayScreen =
                 start_overlay.Init this
 
             override this.Update(elapsed_ms, moved) =
-                Stats.session.PlayTime <- Stats.session.PlayTime + elapsed_ms
+                Stats.CURRENT_SESSION.PlayTime <- Stats.CURRENT_SESSION.PlayTime + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chart_time = now - first_note

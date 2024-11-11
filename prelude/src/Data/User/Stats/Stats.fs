@@ -271,10 +271,11 @@ module Stats =
         }
 
     let QUIT_PENALTY = 100L
-    let quitter_penalty () =
+    let quitter_penalty (database: UserDatabase) =
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore - QUIT_PENALTY |> max 0L
+        save_current_session database
 
-    let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) =
+    let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) =
         if score_info.TimePlayed - int64 (score_info.ChartMeta.Length / score_info.Rate) - STREAK_TIMEOUT > CURRENT_SESSION.LastPlay then
             CURRENT_SESSION.Streak <- CURRENT_SESSION.Streak + 1
         else
@@ -315,6 +316,10 @@ module Stats =
                 score_info.Accuracy
                 score_info.Rate
                 TOTAL_STATS.KeymodeSkills.[score_info.WithMods.Keys - 3]
+
+        save_current_session database
+        DbSingletons.save<TotalStats> "total_stats" TOTAL_STATS database.Database
+
         printfn "%O" skill_up
         // todo: calculate session-level skill improvement
         // todo: xp for session-level skill improvement
@@ -327,6 +332,7 @@ module Stats =
         }
 
     let init (library: Library) (database: UserDatabase) =
+
         TOTAL_STATS <- DbSingletons.get_or_default "total_stats" TotalStats.Default database.Database
         CURRENT_SESSION <- DbSingletons.get_or_default "current_session" CurrentSession.StartNew database.Database
         PREVIOUS_SESSIONS <-
@@ -341,12 +347,21 @@ module Stats =
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error("System clock changes could break your session stats")
             end_current_session database
-        
-        // on init
-        //  check for legacy data
-        //  if legacy data, calculate all old sessions, then assume new session starting now
-        // otherwise
-        //  if now is before the timestamp of the session, fuck you for changing your system clock. archive old and start a new session
-        //  if now is 2 hours after last session was played, end that one and archive it, start a new one
 
-        // out of scope: care about what happens if you leave your game open for 6 hours
+        if TOTAL_STATS.PlayTime = 0.0 then
+            let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
+            TOTAL_STATS <-
+                {
+                    PlayTime = TOTAL_STATS.PlayTime + legacy_stats.PlayTime
+                    PracticeTime = TOTAL_STATS.PracticeTime + legacy_stats.PracticeTime
+                    GameTime = TOTAL_STATS.GameTime + legacy_stats.GameTime
+                    NotesHit = TOTAL_STATS.NotesHit + legacy_stats.NotesHit
+
+                    PlaysStarted = TOTAL_STATS.PlaysStarted + legacy_stats.PlaysStarted
+                    PlaysRetried = TOTAL_STATS.PlaysRetried + legacy_stats.PlaysRetried
+                    PlaysCompleted = TOTAL_STATS.PlaysCompleted + legacy_stats.PlaysCompleted
+                    PlaysQuit = TOTAL_STATS.PlaysQuit + legacy_stats.PlaysQuit
+
+                    XP = TOTAL_STATS.XP
+                    KeymodeSkills = TOTAL_STATS.KeymodeSkills
+                }

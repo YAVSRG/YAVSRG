@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
+open Prelude.Data.User
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -53,8 +54,8 @@ module PracticeScreen =
 
             scoring.OnEvent.Add(fun h ->
                 match h.Action with
-                | Hit d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
-                | Hold d when not d.Missed -> Stats.session.NotesHit <- Stats.session.NotesHit + 1
+                | Hit d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
+                | Hold d when not d.Missed -> Stats.CURRENT_SESSION.NotesHit <- Stats.CURRENT_SESSION.NotesHit + 1
                 | _ -> ()
             )
 
@@ -174,7 +175,7 @@ module PracticeScreen =
                     this.State.Scoring.Update chart_time
 
                 if not state.Paused.Value then
-                    Stats.session.PracticeTime <- Stats.session.PracticeTime + elapsed_ms
+                    Stats.CURRENT_SESSION.PracticeTime <- Stats.CURRENT_SESSION.PracticeTime + elapsed_ms
                     Input.finish_frame_events()
 
                 base.Update(elapsed_ms, moved)

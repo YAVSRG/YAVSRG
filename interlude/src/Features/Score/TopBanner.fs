@@ -60,7 +60,7 @@ type TopBanner(score_info: ScoreInfo) as this =
         |* Text(
             match score_info.PlayedBy with
             | ScorePlayedBy.Username p -> K([p] %> "score.played_by")
-            | ScorePlayedBy.You -> (fun () -> [Stats.format_short_time Stats.session.GameTime; Stats.format_short_time Stats.session.PlayTime] %> "score.session_time")
+            | ScorePlayedBy.You -> (fun () -> [Stats.format_short_time Stats.CURRENT_SESSION.GameTime; Stats.format_short_time Stats.CURRENT_SESSION.PlayTime] %> "score.session_time")
             , Align = Alignment.RIGHT
             , Position =
                 {

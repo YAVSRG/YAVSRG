@@ -31,17 +31,17 @@ type StatsPage() =
         |+ Playtime(
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.GameTime
+                | Current -> Stats.CURRENT_SESSION.GameTime
                 | Archived a -> a.GameTime
             ),
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PlayTime
+                | Current -> Stats.CURRENT_SESSION.PlayTime
                 | Archived a -> a.PlayTime
             ),
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PracticeTime
+                | Current -> Stats.CURRENT_SESSION.PracticeTime
                 | Archived a -> a.PracticeTime
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(500.0f).SliceT(200.0f).ShrinkX(40.0f))
@@ -49,22 +49,22 @@ type StatsPage() =
         |+ Playcount(
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PlaysStarted
+                | Current -> Stats.CURRENT_SESSION.PlaysStarted
                 | Archived a -> a.PlaysStarted
             ),
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PlaysCompleted
+                | Current -> Stats.CURRENT_SESSION.PlaysCompleted
                 | Archived a -> a.PlaysCompleted
             ),
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PlaysRetried
+                | Current -> Stats.CURRENT_SESSION.PlaysRetried
                 | Archived a -> a.PlaysRetried
             ),
             (fun () ->
                 match selected_session with
-                | Current -> Stats.session.PlaysQuit
+                | Current -> Stats.CURRENT_SESSION.PlaysQuit
                 | Archived a -> a.PlaysQuit
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(800.0f).SliceT(200.0f).ShrinkX(40.0f))
