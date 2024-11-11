@@ -7,13 +7,12 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.User
-open Interlude.Content
 open Interlude.UI
 
-type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session array -> unit) =
+type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
     inherit StaticWidget(NodeType.None)
 
-    let session_dates = Stats.calculate Content.Library Content.UserData |> Array.groupBy (_.Start >> timestamp_to_local_day >> DateOnly.FromDateTime) |> Map.ofArray
+    let session_dates = Stats.PREVIOUS_SESSIONS
 
     let today, day_of_week = 
         let today_datetime = Timestamp.now() |> timestamp_to_local_day

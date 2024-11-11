@@ -1,12 +1,17 @@
 ﻿namespace Prelude.Data.User
 
+open System
 open Percyqaz.Common
 open Percyqaz.Data
+open Prelude
+open Prelude.Gameplay
 
 [<Json.AutoCodec(false)>]
 type CurrentSession =
     {
-        mutable Start: int64 option
+        mutable Start: int64
+        mutable LastPlay: int64
+        mutable LastTime: int64
 
         mutable PlayTime: float
         mutable PracticeTime: float
@@ -18,8 +23,50 @@ type CurrentSession =
         mutable PlaysCompleted: int
         mutable PlaysQuit: int
 
-        mutable SessionScore: int
+        mutable SessionScore: int64
+        mutable Streak: int
     }
+
+    static member StartNew =
+        let now = Timestamp.now()
+        {
+            Start = now
+            LastPlay = now
+            LastTime = now
+
+            PlayTime = 0.0
+            PracticeTime = 0.0
+            GameTime = 0.0
+            NotesHit = 0
+
+            PlaysStarted = 0
+            PlaysRetried = 0
+            PlaysCompleted = 0
+            PlaysQuit = 0
+
+            SessionScore = 0L
+            Streak = 0
+        }
+
+    static member Default =
+        {
+            Start = 0L
+            LastPlay = 0L
+            LastTime = 0L
+
+            PlayTime = 0.0
+            PracticeTime = 0.0
+            GameTime = 0.0
+            NotesHit = 0
+
+            PlaysStarted = 0
+            PlaysRetried = 0
+            PlaysCompleted = 0
+            PlaysQuit = 0
+
+            SessionScore = 0L
+            Streak = 0
+        }
 
 [<Json.AutoCodec(false)>]
 type TotalStats =
@@ -34,8 +81,23 @@ type TotalStats =
         PlaysCompleted: int
         PlaysQuit: int
 
-        XP: int
+        XP: int64
+        KeymodeSkills: KeymodeSkillBreakdown array
     }
+    static member Default =
+        {
+            PlayTime = 0.0
+            PracticeTime = 0.0
+            GameTime = 0.0
+            NotesHit = 0
+            PlaysStarted = 0
+            PlaysRetried = 0
+            PlaysCompleted = 0
+            PlaysQuit = 0
+
+            XP = 0L
+            KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
+        }
 
 [<Json.AutoCodec(false)>]
 type Session =
@@ -53,7 +115,7 @@ type Session =
         PlaysCompleted: int
         PlaysQuit: int
 
-        SessionScore: int
+        SessionScore: int64
         // todo: skillset improvement
         // todo: snapshot of skillset values at end of session
     }
@@ -62,7 +124,72 @@ open Prelude.Data.Library
 
 module Stats =
 
-    let calculate (library: Library) (database: UserDatabase) : Session array =
+    let SESSION_TIMEOUT = 2L * 60L * 60L * 1000L // 2 hours
+    let STREAK_TIMEOUT = 60L * 1000L // 1 minute
+
+    let mutable TOTAL_STATS : TotalStats = Unchecked.defaultof<_>
+    let mutable CURRENT_SESSION : CurrentSession = Unchecked.defaultof<_>
+    let mutable PREVIOUS_SESSIONS : Map<System.DateOnly, Session list> = Map.empty
+
+    let private end_current_session (database: UserDatabase) =
+        TOTAL_STATS <-
+            {
+                PlayTime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
+                PracticeTime = TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime
+                GameTime = TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime
+                NotesHit = TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit
+
+                PlaysStarted = TOTAL_STATS.PlaysStarted + CURRENT_SESSION.PlaysStarted
+                PlaysRetried = TOTAL_STATS.PlaysRetried + CURRENT_SESSION.PlaysRetried
+                PlaysCompleted = TOTAL_STATS.PlaysCompleted + CURRENT_SESSION.PlaysCompleted
+                PlaysQuit = TOTAL_STATS.PlaysQuit + CURRENT_SESSION.PlaysQuit
+
+                XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
+                KeymodeSkills = TOTAL_STATS.KeymodeSkills
+            }
+        if CURRENT_SESSION.PlaysStarted > 0 then
+            let session : Session =
+                {
+                    Start = CURRENT_SESSION.Start
+                    End = CURRENT_SESSION.LastTime
+
+                    PlayTime = CURRENT_SESSION.PlayTime
+                    PracticeTime = CURRENT_SESSION.PracticeTime
+                    GameTime = CURRENT_SESSION.GameTime
+                    NotesHit = CURRENT_SESSION.NotesHit
+
+                    PlaysStarted = CURRENT_SESSION.PlaysStarted
+                    PlaysRetried = CURRENT_SESSION.PlaysRetried
+                    PlaysCompleted = CURRENT_SESSION.PlaysCompleted
+                    PlaysQuit = CURRENT_SESSION.PlaysQuit
+
+                    SessionScore = CURRENT_SESSION.SessionScore
+                }
+            let date = timestamp_to_local_day session.Start |> DateOnly.FromDateTime
+            match PREVIOUS_SESSIONS.TryFind date with
+            | Some sessions ->
+                PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, session :: sessions)
+            | None ->
+                PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, [session])
+            // todo: save to db
+
+        CURRENT_SESSION <- CurrentSession.StartNew
+        // todo: DbSingletons.save_together method for data integrity
+        DbSingletons.save<TotalStats> "total_stats" TOTAL_STATS database.Database
+        DbSingletons.save<CurrentSession> "current_session" CURRENT_SESSION database.Database
+
+    let save_current_session (database: UserDatabase) =
+        let now = Timestamp.now()
+        CURRENT_SESSION.LastTime <- now
+        if now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
+            end_current_session database
+        elif now < CURRENT_SESSION.LastTime then
+            Logging.Error("System clock changes could break your session stats")
+            end_current_session database
+        else
+            DbSingletons.save<CurrentSession> "current_session" CURRENT_SESSION database.Database
+
+    let private calculate (library: Library) (database: UserDatabase) : Session array =
         let scores =
             seq {
                 for chart_id in database.Cache.Keys do
@@ -84,13 +211,15 @@ module Stats =
 
         seq {
             for chart_id, score in scores do
+
                 let score_length = 
                     match ChartDatabase.get_meta chart_id library.Charts with
                     | Some cc -> 
                         session_playing_time <- session_playing_time + cc.Length / score.Rate
                         cc.Length / score.Rate |> int64
                     | None -> 2L * 60L * 1000L
-                if score.Timestamp - last_time > 7200_000L then
+
+                if score.Timestamp - last_time > SESSION_TIMEOUT then
                     // start of new session
                     yield { 
                         Start = session_start_time
@@ -113,6 +242,111 @@ module Stats =
                 else
                     score_count <- score_count + 1
                 last_time <- score.Timestamp
-            //printfn "Current session: %O with %i scores" (Timestamp.to_datetime(session_start_time)) score_count
+
+            yield { 
+                Start = session_start_time
+                End = last_time
+
+                PlayTime = session_playing_time |> float
+                PracticeTime = 0.0
+                GameTime = float (last_time - session_start_time)
+                NotesHit = 0
+                PlaysStarted = score_count
+                PlaysCompleted = score_count
+                PlaysQuit = 0
+                PlaysRetried = 0
+
+                SessionScore = 0
+            }
         }
         |> Seq.toArray
+
+    type SessionScoreIncrease =
+        {
+            QuitterPenalty: int64
+            BaseXP: int64
+            LampXP: int64
+            AccXP: int64
+            SkillXP: int64
+        }
+
+    let QUIT_PENALTY = 100L
+    let quitter_penalty () =
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore - QUIT_PENALTY |> max 0L
+
+    let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) =
+        if score_info.TimePlayed - int64 (score_info.ChartMeta.Length / score_info.Rate) - STREAK_TIMEOUT > CURRENT_SESSION.LastPlay then
+            CURRENT_SESSION.Streak <- CURRENT_SESSION.Streak + 1
+        else
+            CURRENT_SESSION.Streak <- 1
+        CURRENT_SESSION.LastPlay <- max CURRENT_SESSION.LastPlay score_info.TimePlayed
+
+        let base_xp = score_info.Scoring.JudgementCounts |> Array.truncate 5 |> Array.sum
+        let streak_bonus = float32 (CURRENT_SESSION.Streak - 1) * 0.1f |> max 0.0f |> min 1.0f
+
+        let lamp_bonus_flat, lamp_bonus_mult = 
+            match improvement.Lamp with
+            | Improvement.None -> 0L, 0.0f
+            | Improvement.New
+            | Improvement.Faster _ -> 100L, 0.1f
+            | Improvement.Better _ -> 200L, 0.4f
+            | Improvement.FasterBetter _ -> 200L, 0.9f
+
+        let acc_bonus_flat, acc_bonus_mult =
+            match improvement.Accuracy with
+            | Improvement.None -> 0L, 0.0f
+            | Improvement.New
+            | Improvement.Faster _ -> 100L, 0.1f
+            | Improvement.Better _ -> 200L, 0.2f
+            | Improvement.FasterBetter _ -> 200L, 0.3f
+
+        let base_xp = int64 base_xp + int64 (float32 base_xp * streak_bonus)
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + base_xp
+
+        let lamp_xp = lamp_bonus_flat + int64 (float32 base_xp * lamp_bonus_mult)
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + lamp_xp
+
+        let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + acc_xp
+
+        let skill_up = 
+            KeymodeSkillBreakdown.score 
+                score_info.ChartMeta.Patterns
+                score_info.Accuracy
+                score_info.Rate
+                TOTAL_STATS.KeymodeSkills.[score_info.WithMods.Keys - 3]
+        printfn "%O" skill_up
+        // todo: calculate session-level skill improvement
+        // todo: xp for session-level skill improvement
+        {
+            QuitterPenalty = 0
+            BaseXP = base_xp
+            LampXP = lamp_xp
+            AccXP = acc_xp
+            SkillXP = 0
+        }
+
+    let init (library: Library) (database: UserDatabase) =
+        TOTAL_STATS <- DbSingletons.get_or_default "total_stats" TotalStats.Default database.Database
+        CURRENT_SESSION <- DbSingletons.get_or_default "current_session" CurrentSession.StartNew database.Database
+        PREVIOUS_SESSIONS <-
+            calculate library database
+            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+            |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
+            |> Map.ofSeq
+        
+        let now = Timestamp.now()
+        if Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
+            end_current_session database
+        elif now < CURRENT_SESSION.LastTime then
+            Logging.Error("System clock changes could break your session stats")
+            end_current_session database
+        
+        // on init
+        //  check for legacy data
+        //  if legacy data, calculate all old sessions, then assume new session starting now
+        // otherwise
+        //  if now is before the timestamp of the session, fuck you for changing your system clock. archive old and start a new session
+        //  if now is 2 hours after last session was played, end that one and archive it, start a new one
+
+        // out of scope: care about what happens if you leave your game open for 6 hours

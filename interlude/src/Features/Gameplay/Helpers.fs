@@ -76,13 +76,12 @@ module Gameplay =
                         score_info.WithRuleset Rulesets.DEFAULT
                     else score_info
 
-                KeymodeSkillBreakdown.score standardised_score.ChartMeta.Patterns standardised_score.Accuracy standardised_score.Rate Skillsets.keymode_skills.[standardised_score.WithMods.Keys - 3]
-                |> ignore //|> printfn "%O"
-
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
+
+                Stats.handle_score standardised_score improvement_flags |> printfn "%A"
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
                     UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData

@@ -45,5 +45,6 @@ module DbSingletons =
                 p.Json JSON data
         }
 
-    let save (id: string) (value: 'T) (db: Database) =
+    [<RequiresExplicitTypeArguments>] 
+    let save<'T> (id: string) (value: 'T) (db: Database) =
         SAVE.Execute (id, value) db |> expect |> ignore

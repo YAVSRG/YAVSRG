@@ -43,8 +43,8 @@ module Startup =
     let init_startup (instance) =
         Options.init_startup instance
         Options.Hotkeys.init_startup Options.options.Hotkeys
-        Stats.init_startup ()
         Content.init_startup ()
+        Stats.init_startup ()
 
     let init_window (instance) =
         Screen.init_window

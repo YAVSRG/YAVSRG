@@ -3,6 +3,8 @@
 open System.IO
 open Percyqaz.Data
 open Prelude
+open Prelude.Data.User
+open Interlude.Content
 
 [<Json.AutoCodec(false)>]
 type Stats =
@@ -43,8 +45,10 @@ module Stats =
 
     let init_startup () =
         total <- load_important_json_file "Stats" (Path.Combine(get_game_folder "Data", "stats.json")) false
+        Stats.init Content.Library Content.UserData
 
     let deinit () =
+        Stats.save_current_session Content.UserData
         total.PlayTime <- total.PlayTime + session.PlayTime
         total.PracticeTime <- total.PracticeTime + session.PracticeTime
         total.GameTime <- total.GameTime + session.GameTime
