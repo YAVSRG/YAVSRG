@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude.Data.User
 open Interlude.UI
 
 type Playtime(total_time: unit -> float, play_time: unit -> float, practice_time: unit -> float) =

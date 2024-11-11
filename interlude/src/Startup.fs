@@ -8,7 +8,6 @@ open Interlude
 open Interlude.Content
 open Interlude.Features.Import
 open Interlude.Features.Gameplay
-open Interlude.Features.Stats
 open Interlude.Features.MainMenu
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
@@ -24,7 +23,7 @@ module Startup =
         Options.init_startup instance
         Options.Hotkeys.init_startup Options.options.Hotkeys
         Content.init_startup ()
-        Stats.init_startup ()
+        Stats.init_startup Content.Library Content.UserData
 
     let init_window (instance) =
         Screen.init_window
@@ -88,7 +87,7 @@ module Startup =
             ()
         else
             has_shutdown <- true
-            Stats.deinit ()
+            Stats.save_current_session Content.UserData
             Content.deinit ()
             Options.deinit ()
             Network.deinit ()

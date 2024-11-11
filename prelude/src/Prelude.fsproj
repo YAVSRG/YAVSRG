@@ -102,7 +102,6 @@
     <Compile Include="Data\Library\Endless.fs" />
     <Compile Include="Data\User\ScoreInfo.fs" />
     <Compile Include="Data\User\Stats\Stats.fs" />
-    <Compile Include="Data\User\Stats\Skillsets.fs" />
     <Compile Include="Data\Maintenance\PersonalBests.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />

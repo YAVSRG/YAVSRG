@@ -79,7 +79,6 @@
     <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />
-    <Compile Include="Features\Stats\Stats.fs" />
     <Compile Include="Features\Stats\Session\Current.fs" />
     <Compile Include="Features\Stats\Session\Activity.fs" />
     <Compile Include="Features\Stats\Session\Playtime.fs" />

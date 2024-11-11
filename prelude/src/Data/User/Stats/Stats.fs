@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 
 [<Json.AutoCodec(false)>]
 type CurrentSession =
@@ -190,6 +191,22 @@ module Stats =
             DbSingletons.save<CurrentSession> "current_session" CURRENT_SESSION database.Database
 
     let private calculate (library: Library) (database: UserDatabase) : Session array =
+        
+        // calculate skillsets
+        let sc_j4 = SC.create 4
+        let sc_j4_id = Ruleset.hash sc_j4
+
+        for cc_key in library.Charts.Cache.Keys do
+            let cc = library.Charts.Cache.[cc_key]
+
+            let data = UserDatabase.get_chart_data cc.Hash database
+            match data.PersonalBests.TryFind(sc_j4_id) with
+            | Some pbs ->
+                for (acc, rate, _) in pbs.Accuracy do
+                    KeymodeSkillBreakdown.score cc.Patterns acc rate TOTAL_STATS.KeymodeSkills.[cc.Keys - 3] |> ignore
+            | None -> ()
+
+        // calculate session
         let scores =
             seq {
                 for chart_id in database.Cache.Keys do
@@ -331,7 +348,7 @@ module Stats =
             SkillXP = 0
         }
 
-    let init (library: Library) (database: UserDatabase) =
+    let init_startup (library: Library) (database: UserDatabase) =
 
         TOTAL_STATS <- DbSingletons.get_or_default "total_stats" TotalStats.Default database.Database
         CURRENT_SESSION <- DbSingletons.get_or_default "current_session" CurrentSession.StartNew database.Database
@@ -362,6 +379,29 @@ module Stats =
                     PlaysCompleted = TOTAL_STATS.PlaysCompleted + legacy_stats.PlaysCompleted
                     PlaysQuit = TOTAL_STATS.PlaysQuit + legacy_stats.PlaysQuit
 
-                    XP = TOTAL_STATS.XP
+                    XP = TOTAL_STATS.XP + int64 legacy_stats.NotesHit
                     KeymodeSkills = TOTAL_STATS.KeymodeSkills
                 }
+
+    let format_long_time (time: float) =
+        let seconds = time / 1000.0
+        let minutes = seconds / 60.0
+        let hours = minutes / 60.0
+        let days = hours / 24.0
+
+        if days > 1 then
+            sprintf "%id %02ih %02im" (floor days |> int) (floor (hours % 24.0) |> int) (floor (minutes % 60.0) |> int)
+        elif hours > 1 then
+            sprintf "%ih %02im" (floor hours |> int) (floor (minutes % 60.0) |> int)
+        else
+            sprintf "%im %02is" (floor minutes |> int) (floor (seconds % 60.0) |> int)
+
+    let format_short_time (time: float) =
+        let seconds = time / 1000.0
+        let minutes = seconds / 60.0
+        let hours = minutes / 60.0
+
+        if hours > 1 then
+            sprintf "%i:%02i:%02i" (floor hours |> int) (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
+        else
+            sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
