@@ -38,7 +38,7 @@ type TotalStats =
     }
 
 [<Json.AutoCodec(false)>]
-type ArchivedSession =
+type Session =
     {
         Start: int64
         End: int64
@@ -53,6 +53,7 @@ type ArchivedSession =
         PlaysCompleted: int
         PlaysQuit: int
 
+        SessionScore: int
         // todo: skillset improvement
         // todo: snapshot of skillset values at end of session
     }
@@ -61,7 +62,7 @@ open Prelude.Data.Library
 
 module Stats =
 
-    let calculate (library: Library) (database: UserDatabase) : ArchivedSession array =
+    let calculate (library: Library) (database: UserDatabase) : Session array =
         let scores =
             seq {
                 for chart_id in database.Cache.Keys do
@@ -103,6 +104,8 @@ module Stats =
                         PlaysCompleted = score_count
                         PlaysQuit = 0
                         PlaysRetried = 0
+
+                        SessionScore = 0
                     }
                     session_start_time <- score.Timestamp - score_length
                     session_playing_time <- 0.0f<ms / rate>

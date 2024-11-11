@@ -9,7 +9,7 @@ open Interlude.UI
 
 type private SelectedSession =
     | Current
-    | Archived of ArchivedSession
+    | Archived of Session
 
 type StatsPage() =
     inherit Page()
@@ -17,7 +17,7 @@ type StatsPage() =
     let selected_day = Setting.simple (Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime)
     let mutable selected_session = Current
 
-    let select_sessions (sessions: ArchivedSession array) =
+    let select_sessions (sessions: Session array) =
         printfn "%A" sessions
         selected_session <- Archived sessions.[0]
 

@@ -178,6 +178,16 @@ module UserDatabase =
             (fun db -> DbScores.ADD_FAILED_COLUMN.Execute () db |> expect |> ignore)
             db
 
+        Database.migrate
+            "AddTimestampIndexToScores"
+            (fun db -> DbScores.CREATE_TIMESTAMP_INDEX.Execute () db |> expect |> ignore)
+            db
+
+        Database.migrate
+            "AddSingletons"
+            (fun db -> DbSingletons.CREATE_TABLE.Execute () db |> expect |> ignore)
+            db
+
         db
 
     let private legacy_migrate (db: UserDatabase) : UserDatabase =

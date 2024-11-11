@@ -82,7 +82,9 @@
     <Compile Include="Backbeat\Rulesets.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
-    <Compile Include="Data\User\UserDatabaseTables.fs" />
+    <Compile Include="Data\User\Singletons.fs" />
+    <Compile Include="Data\User\Scores.fs" />
+    <Compile Include="Data\User\Charts.fs" />
     <Compile Include="Data\User\LegacyScores.fs" />
     <Compile Include="Data\User\UserDatabase.fs" />
     <Compile Include="Data\Library\Headers.fs" />

@@ -10,7 +10,7 @@ open Prelude.Data.User
 open Interlude.Content
 open Interlude.UI
 
-type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: ArchivedSession array -> unit) =
+type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session array -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let session_dates = Stats.calculate Content.Library Content.UserData |> Array.groupBy (_.Start >> timestamp_to_local_day >> DateOnly.FromDateTime) |> Map.ofArray
