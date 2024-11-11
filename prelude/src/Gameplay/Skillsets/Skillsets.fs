@@ -24,6 +24,15 @@ type KeymodeSkillIncrease =
         |> String.concat "\n"
 
 [<Json.AutoCodec>]
+type KeymodeTinyBreakdown =
+    {
+        Jacks: float32
+        Chordstream: float32
+        Stream: float32
+        Combined: float32
+    }
+
+[<Json.AutoCodec>]
 type KeymodeSkillBreakdown =
     {
         Jacks: PatternSkillBreakdown
@@ -48,10 +57,31 @@ type KeymodeSkillBreakdown =
             Stream = this.Stream.CompareImprovement CorePattern.Stream.RatingMultiplier other.Stream
             Combined = this.Combined.CompareImprovement other.Combined
         }
+    
+    member this.Scale (multiplier: float32) =
+        {
+            Jacks = this.Jacks.Scale multiplier
+            Chordstream = this.Chordstream.Scale multiplier
+            Stream = this.Stream.Scale multiplier
+            Combined = this.Combined.Scale multiplier
+        }
+
+    member this.Tiny : KeymodeTinyBreakdown =
+        {
+            Jacks = this.Jacks.CompareImprovement CorePattern.Jacks.RatingMultiplier PatternSkillBreakdown.Default |> _.Total
+            Chordstream = this.Chordstream.CompareImprovement CorePattern.Chordstream.RatingMultiplier PatternSkillBreakdown.Default |> _.Total
+            Stream = this.Stream.CompareImprovement CorePattern.Stream.RatingMultiplier PatternSkillBreakdown.Default |> _.Total
+            Combined = this.Combined.CompareImprovement CombinedSkillBreakdown.Default |> _.Total
+        }
 
 module KeymodeSkillBreakdown =
 
-    let COMBINED_MULTIPLIER_SCALE_CONSTANT = sqrt 2.0f
+    let private COMBINED_MULTIPLIER_SCALE_CONSTANT = sqrt 2.0f
+    let private DAILY_DECAY_CONSTANT = -0.105360515
+
+    let decay_over_time (before: int64) (now: int64) =
+        let days = float (now - before) / 86_400_000.0
+        exp (DAILY_DECAY_CONSTANT * days) |> float32
 
     let private skill_increase (patterns: PatternReport) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : unit =
 

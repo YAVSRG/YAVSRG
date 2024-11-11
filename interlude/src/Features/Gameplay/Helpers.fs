@@ -81,7 +81,7 @@ module Gameplay =
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
-                Stats.handle_score standardised_score improvement_flags |> printfn "%A"
+                Stats.handle_score standardised_score improvement_flags Content.UserData |> printfn "%A"
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
                     UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData

@@ -66,6 +66,9 @@ module CombinedStatLine =
             | [] -> 0.0f
         v stats * 150.0f
 
+    let scale (multiplier: float32) (stats: CombinedStatLine) =
+        stats |> List.map (fun { Density = d; Duration = duration } -> { Density = d; Duration = duration * multiplier })
+
 type CombinedSkillIncrease =
     {
         Accuracy: float32
@@ -90,6 +93,12 @@ type CombinedSkillBreakdown =
             Accuracy = CombinedStatLine.value this.Accuracy - CombinedStatLine.value other.Accuracy
             Control = CombinedStatLine.value this.Control - CombinedStatLine.value other.Control
             Push = CombinedStatLine.value this.Push - CombinedStatLine.value other.Push
+        }
+    member this.Scale (multiplier: float32) =
+        {
+            Accuracy = CombinedStatLine.scale multiplier this.Accuracy
+            Control = CombinedStatLine.scale multiplier this.Control
+            Push = CombinedStatLine.scale multiplier this.Push
         }
 
 module CombinedSkillBreakdown =

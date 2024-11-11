@@ -67,6 +67,9 @@ module PatternStatLine =
             | [] -> 0.0f
         v stats * 10.0f
 
+    let scale (multiplier: float32) (stats: PatternStatLine) =
+        stats |> List.map (fun { BPM = bpm; Duration = duration } -> { BPM = bpm; Duration = duration * multiplier })
+
 type PatternSkillIncrease =
     {
         Accuracy: float32
@@ -91,6 +94,12 @@ type PatternSkillBreakdown =
             Accuracy = (PatternStatLine.value this.Accuracy - PatternStatLine.value other.Accuracy) * mult
             Control = (PatternStatLine.value this.Control - PatternStatLine.value other.Control) * mult
             Push = (PatternStatLine.value this.Push - PatternStatLine.value other.Push) * mult
+        }
+    member this.Scale (multiplier: float32) =
+        {
+            Accuracy = PatternStatLine.scale multiplier this.Accuracy
+            Control = PatternStatLine.scale multiplier this.Control
+            Push = PatternStatLine.scale multiplier this.Push
         }
 
 module PatternSkillBreakdown =

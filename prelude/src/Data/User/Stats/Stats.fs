@@ -26,9 +26,10 @@ type CurrentSession =
 
         mutable SessionScore: int64
         mutable Streak: int
+        KeymodeSkills: KeymodeSkillBreakdown array
     }
 
-    static member StartNew =
+    static member StartNew (end_of_last_session: int64) (previous_skills: KeymodeSkillBreakdown array) =
         let now = Timestamp.now()
         {
             Start = now
@@ -47,13 +48,17 @@ type CurrentSession =
 
             SessionScore = 0L
             Streak = 0
+            KeymodeSkills = 
+                let d = KeymodeSkillBreakdown.decay_over_time end_of_last_session now
+                previous_skills |> Array.map (fun k -> k.Scale d)
         }
 
     static member Default =
+        let now = Timestamp.now()
         {
-            Start = 0L
-            LastPlay = 0L
-            LastTime = 0L
+            Start = now
+            LastPlay = now
+            LastTime = now
 
             PlayTime = 0.0
             PracticeTime = 0.0
@@ -67,6 +72,7 @@ type CurrentSession =
 
             SessionScore = 0L
             Streak = 0
+            KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
         }
 
 [<Json.AutoCodec(false)>]
@@ -117,8 +123,7 @@ type Session =
         PlaysQuit: int
 
         SessionScore: int64
-        // todo: skillset improvement
-        // todo: snapshot of skillset values at end of session
+        KeymodeSkills: KeymodeTinyBreakdown array
     }
 
 open Prelude.Data.Library
@@ -130,7 +135,7 @@ module Stats =
 
     let mutable TOTAL_STATS : TotalStats = Unchecked.defaultof<_>
     let mutable CURRENT_SESSION : CurrentSession = Unchecked.defaultof<_>
-    let mutable PREVIOUS_SESSIONS : Map<System.DateOnly, Session list> = Map.empty
+    let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
 
     let private end_current_session (database: UserDatabase) =
         TOTAL_STATS <-
@@ -165,6 +170,7 @@ module Stats =
                     PlaysQuit = CURRENT_SESSION.PlaysQuit
 
                     SessionScore = CURRENT_SESSION.SessionScore
+                    KeymodeSkills = CURRENT_SESSION.KeymodeSkills |> Array.map _.Tiny
                 }
             let date = timestamp_to_local_day session.Start |> DateOnly.FromDateTime
             match PREVIOUS_SESSIONS.TryFind date with
@@ -174,7 +180,7 @@ module Stats =
                 PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, [session])
             // todo: save to db
 
-        CURRENT_SESSION <- CurrentSession.StartNew
+        CURRENT_SESSION <- CurrentSession.StartNew CURRENT_SESSION.LastTime CURRENT_SESSION.KeymodeSkills
         // todo: DbSingletons.save_together method for data integrity
         DbSingletons.save<TotalStats> "total_stats" TOTAL_STATS database.Database
         DbSingletons.save<CurrentSession> "current_session" CURRENT_SESSION database.Database
@@ -190,7 +196,7 @@ module Stats =
         else
             DbSingletons.save<CurrentSession> "current_session" CURRENT_SESSION database.Database
 
-    let private calculate (library: Library) (database: UserDatabase) : Session array =
+    let private calculate (library: Library) (database: UserDatabase) : Session array * KeymodeSkillBreakdown array =
         
         // calculate skillsets
         let sc_j4 = SC.create 4
@@ -225,6 +231,7 @@ module Stats =
         let mutable session_playing_time = 0.0f<ms / rate>
         let mutable last_time = session_start_time
         let mutable score_count = 0
+        let skills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
 
         seq {
             for chart_id, score in scores do
@@ -232,6 +239,16 @@ module Stats =
                 let score_length = 
                     match ChartDatabase.get_meta chart_id library.Charts with
                     | Some cc -> 
+                        
+                        let data = UserDatabase.get_chart_data cc.Hash database
+                        match data.PersonalBests.TryFind(sc_j4_id) with
+                        | Some pbs ->
+                            match PersonalBests.get_best_above score.Rate pbs.Accuracy with
+                            | Some (acc, rate, _) ->
+                                KeymodeSkillBreakdown.score cc.Patterns acc score.Rate skills.[cc.Keys - 3] |> ignore
+                            | None -> ()
+                        | None -> ()
+
                         session_playing_time <- session_playing_time + cc.Length / score.Rate
                         cc.Length / score.Rate |> int64
                     | None -> 2L * 60L * 1000L
@@ -252,10 +269,14 @@ module Stats =
                         PlaysRetried = 0
 
                         SessionScore = 0
+                        KeymodeSkills = skills |> Array.map _.Tiny
                     }
                     session_start_time <- score.Timestamp - score_length
                     session_playing_time <- 0.0f<ms / rate>
                     score_count <- 1
+                    let d = KeymodeSkillBreakdown.decay_over_time last_time session_start_time
+                    for i = 0 to skills.Length - 1 do
+                        skills.[i] <- skills.[i].Scale d
                 else
                     score_count <- score_count + 1
                 last_time <- score.Timestamp
@@ -272,11 +293,16 @@ module Stats =
                 PlaysCompleted = score_count
                 PlaysQuit = 0
                 PlaysRetried = 0
+                KeymodeSkills = skills |> Array.map _.Tiny
 
                 SessionScore = 0
             }
+            let d = KeymodeSkillBreakdown.decay_over_time last_time (Timestamp.now())
+            for i = 0 to skills.Length - 1 do
+                skills.[i] <- skills.[i].Scale d
         }
-        |> Seq.toArray
+        |> Seq.toArray,
+        skills
 
     type SessionScoreIncrease =
         {
@@ -287,9 +313,9 @@ module Stats =
             SkillXP: int64
         }
 
-    let QUIT_PENALTY = 100L
+    let QUIT_PENALTY = -100L
     let quitter_penalty (database: UserDatabase) =
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore - QUIT_PENALTY |> max 0L
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + QUIT_PENALTY |> max 0L
         save_current_session database
 
     let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) =
@@ -327,61 +353,71 @@ module Stats =
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + acc_xp
 
-        let skill_up = 
-            KeymodeSkillBreakdown.score 
+        let all_time_skill_up = 
+            KeymodeSkillBreakdown.score
                 score_info.ChartMeta.Patterns
                 score_info.Accuracy
                 score_info.Rate
                 TOTAL_STATS.KeymodeSkills.[score_info.WithMods.Keys - 3]
 
+        let session_skill_up = 
+            KeymodeSkillBreakdown.score
+                score_info.ChartMeta.Patterns
+                score_info.Accuracy
+                score_info.Rate
+                CURRENT_SESSION.KeymodeSkills.[score_info.WithMods.Keys - 3]
+
         save_current_session database
         DbSingletons.save<TotalStats> "total_stats" TOTAL_STATS database.Database
 
-        printfn "%O" skill_up
-        // todo: calculate session-level skill improvement
-        // todo: xp for session-level skill improvement
+        printfn "All-time skill up: %O" all_time_skill_up
+        printfn "Session skill up: %O" session_skill_up
+        
+        let skill_xp_mult = (float32 TOTAL_STATS.XP / 100_000f - 1.0f) |> max 0.0f |> min 1.0f
+        let skill_xp =
+            int64 (session_skill_up.Total * skill_xp_mult) 
+            + int64 (all_time_skill_up.Total * 10.0f * skill_xp_mult)
+        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + skill_xp
+
         {
-            QuitterPenalty = 0
-            BaseXP = base_xp
+            QuitterPenalty = 0L
+            BaseXP = base_xp // todo: separate into base + streak
             LampXP = lamp_xp
             AccXP = acc_xp
-            SkillXP = 0
+            SkillXP = skill_xp // todo: separate into session/all time
         }
 
     let init_startup (library: Library) (database: UserDatabase) =
 
-        TOTAL_STATS <- DbSingletons.get_or_default "total_stats" TotalStats.Default database.Database
-        CURRENT_SESSION <- DbSingletons.get_or_default "current_session" CurrentSession.StartNew database.Database
-        PREVIOUS_SESSIONS <-
-            calculate library database
-            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
-            |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
-            |> Map.ofSeq
+        // todo: load previous sessions from db if exist
+
+        if PREVIOUS_SESSIONS = Map.empty then
+
+            TOTAL_STATS <- TotalStats.Default
+            CURRENT_SESSION <- CurrentSession.Default
+
+            let sessions, current_skills = calculate library database
+            PREVIOUS_SESSIONS <- 
+                sessions
+                |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+                |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
+                |> Map.ofSeq
+            CURRENT_SESSION <- { CURRENT_SESSION with KeymodeSkills = current_skills }
+
+            let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
+            TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit; KeymodeSkills = TOTAL_STATS.KeymodeSkills }
+
+        else
         
+            TOTAL_STATS <- DbSingletons.get_or_default "total_stats" TotalStats.Default database.Database
+            CURRENT_SESSION <- DbSingletons.get_or_default "current_session" CurrentSession.Default database.Database
+
         let now = Timestamp.now()
         if Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session database
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error("System clock changes could break your session stats")
             end_current_session database
-
-        if TOTAL_STATS.PlayTime = 0.0 then
-            let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
-            TOTAL_STATS <-
-                {
-                    PlayTime = TOTAL_STATS.PlayTime + legacy_stats.PlayTime
-                    PracticeTime = TOTAL_STATS.PracticeTime + legacy_stats.PracticeTime
-                    GameTime = TOTAL_STATS.GameTime + legacy_stats.GameTime
-                    NotesHit = TOTAL_STATS.NotesHit + legacy_stats.NotesHit
-
-                    PlaysStarted = TOTAL_STATS.PlaysStarted + legacy_stats.PlaysStarted
-                    PlaysRetried = TOTAL_STATS.PlaysRetried + legacy_stats.PlaysRetried
-                    PlaysCompleted = TOTAL_STATS.PlaysCompleted + legacy_stats.PlaysCompleted
-                    PlaysQuit = TOTAL_STATS.PlaysQuit + legacy_stats.PlaysQuit
-
-                    XP = TOTAL_STATS.XP + int64 legacy_stats.NotesHit
-                    KeymodeSkills = TOTAL_STATS.KeymodeSkills
-                }
 
     let format_long_time (time: float) =
         let seconds = time / 1000.0
