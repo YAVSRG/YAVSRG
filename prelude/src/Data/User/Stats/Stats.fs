@@ -141,7 +141,7 @@ module Stats =
                 XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
                 KeymodeSkills = TOTAL_STATS.KeymodeSkills
             }
-        if CURRENT_SESSION.PlaysStarted > 0 then
+        if CURRENT_SESSION.NotesHit > 0 then
             let session : Session =
                 {
                     Start = CURRENT_SESSION.Start
@@ -411,6 +411,8 @@ module Stats =
             TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit; KeymodeSkills = TOTAL_STATS.KeymodeSkills }
         
         let now = Timestamp.now()
+        if CURRENT_SESSION.NotesHit = 0 then
+            end_current_session database
         if Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session database
         elif now < CURRENT_SESSION.LastTime then
@@ -439,3 +441,9 @@ module Stats =
             sprintf "%i:%02i:%02i" (floor hours |> int) (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
         else
             sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
+
+    let current_level (xp: int64) =
+        (float xp / 1000.0 |> sqrt |> floor |> int) + 1
+
+    let xp_for_level (level: int) =
+        int64 (level - 1) * int64 (level - 1) * 1000L
