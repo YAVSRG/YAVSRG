@@ -44,10 +44,10 @@ type Scoreboard(display: Setting<Display>) =
         | Filter.CurrentMods -> (fun a -> a.Data.Mods = SelectedChart.selected_mods.Value)
         | _ -> K true
     
-    let container = FlowContainer.Vertical<ScoreCard>(70.0f, Spacing = Style.PADDING * 3.0f)
+    let container = FlowContainer.Vertical<ScoreCard>(50.0f, Spacing = Style.PADDING)
 
     let scroll_container =
-        ScrollContainer(container, Margin = Style.PADDING, Position = Position.ShrinkT(50.0f))
+        ScrollContainer(container, Position = Position.ShrinkT(50.0f))
 
     do
         LocalScores.score_loaded.Add (fun score_info -> score_info |> ScoreCard |> container.Add; count <- count + 1)
