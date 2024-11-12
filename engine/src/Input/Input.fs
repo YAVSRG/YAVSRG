@@ -165,7 +165,7 @@ module internal InputThread =
                     )
                 ) |> Bind.Key, 
                 action, 
-                Song.time_with_offset ()
+                Song.time_with_offset () |> float32 |> round |> LanguagePrimitives.Float32WithMeasure
             )
         lock LOCK_OBJ (fun () -> 
             if GLFW.GetTime() - last_typed > 0.050 then
