@@ -44,7 +44,7 @@ type StatsPage() =
                 | Current -> Stats.CURRENT_SESSION.PracticeTime
                 | Archived a -> a.PracticeTime
             ),
-            Position = Position.SliceLPercent(0.4f).ShrinkT(500.0f).SliceT(200.0f).ShrinkX(40.0f))
+            Position = Position.SliceLPercent(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |+ Playcount(
             (fun () ->
@@ -67,7 +67,7 @@ type StatsPage() =
                 | Current -> Stats.CURRENT_SESSION.PlaysQuit
                 | Archived a -> a.PlaysQuit
             ),
-            Position = Position.SliceLPercent(0.4f).ShrinkT(800.0f).SliceT(200.0f).ShrinkX(40.0f))
+            Position = Position.SliceLPercent(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |+ session_panel
         :> Widget

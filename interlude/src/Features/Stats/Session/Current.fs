@@ -30,10 +30,13 @@ type CurrentSession() =
         this
         |+ Text("Current session", Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
         |+ Text((fun () -> sprintf "Notes hit: %i" current_session.NotesHit), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.ShrinkT(70.0f).SliceT(40.0f))
+        |+ Text((fun () -> sprintf "Playing for %s, since %O" (Stats.format_short_time current_session.GameTime) ((Timestamp.to_datetime current_session.Start).ToLocalTime().ToShortTimeString())), Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.ShrinkT(105.0f).SliceT(40.0f))
         |+ Placeholder(Position = Position.ShrinkT(160.0f))
         |* ScrollContainer(scores, Position = Position.ShrinkT(160.0f).Shrink(20.0f), Margin = 5.0f)
 
         for i = 0 to 10 do
             scores.Add(ScorePlaceholder())
+
+        // todo: export as playlist
 
         base.Init parent
