@@ -84,7 +84,7 @@ module PlayScreen =
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
                                     true
-                            ScoreScreen(score_info, Gameplay.set_score score_info info.SaveData, true)
+                            ScoreScreen(score_info, Gameplay.set_score true score_info info.SaveData, true)
                         )
                         Screen.Type.Score
                         Transitions.LeaveGameplay
@@ -108,7 +108,7 @@ module PlayScreen =
                                     ((liveplay :> IReplayProvider).GetFullReplay())
                                     true
 
-                            (score_info, Gameplay.set_score score_info info.SaveData, true)
+                            (score_info, Gameplay.set_score false score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score
@@ -134,7 +134,7 @@ module PlayScreen =
                                     ((liveplay :> IReplayProvider).GetFullReplay())
                                     false
 
-                            (score_info, Gameplay.set_score score_info info.SaveData, true)
+                            (score_info, Gameplay.set_score false score_info info.SaveData, true)
                             |> ScoreScreen
                         )
                         Screen.Type.Score

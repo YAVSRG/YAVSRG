@@ -213,7 +213,6 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
 
     override this.Init(parent) =
         this
-        //|+ SessionScoreBar(Position = Position.Row(220.0f, 40.0f).ShrinkX(40.0f))
         |+ Grade(grade, score_info, Position = Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
         |+ Accuracy(
             grade,

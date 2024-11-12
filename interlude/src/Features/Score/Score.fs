@@ -13,9 +13,11 @@ open Interlude.Features.Online
 
 #nowarn "3370"
 
-type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: bool) =
+// todo: refactor to a score-results object that is optional (played_just_now can be implied by it being Some)
+type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGain option, played_just_now: bool) =
     inherit Screen()
 
+    let pbs, xp_gain = results
     let personal_bests = ref pbs
 
     let grade =
@@ -94,6 +96,13 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         |+ bottom_info
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
+
+        match xp_gain with
+        | Some x -> 
+            SessionScoreBar(x, Position = Position.SliceRPercent(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
+            |> this.Add
+        | None -> ()
+
         base.Init parent
 
     override this.Update(elapsed_ms, moved) = 

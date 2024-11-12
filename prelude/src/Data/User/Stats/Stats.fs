@@ -116,6 +116,16 @@ type Stats =
     }
     static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default }
 
+type SessionXPGain =
+    {
+        QuitPenalty: int64
+        BaseXP: int64
+        LampXP: int64
+        AccXP: int64
+        SkillXP: int64
+    }
+    member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP + this.SkillXP
+
 module Stats =
 
     let SESSION_TIMEOUT = 2L * 60L * 60L * 1000L // 2 hours
@@ -181,15 +191,6 @@ module Stats =
             end_current_session database
         else
             DbSingletons.save<Stats> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION } database.Database
-
-    type SessionScoreIncrease =
-        {
-            QuitPenalty: int64
-            BaseXP: int64
-            LampXP: int64
-            AccXP: int64
-            SkillXP: int64
-        }
 
     let QUIT_PENALTY = -100L
     let quitter_penalty (database: UserDatabase) =
@@ -443,7 +444,7 @@ module Stats =
             sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
 
     let current_level (xp: int64) =
-        (float xp / 1000.0 |> sqrt |> floor |> int) + 1
+        (float xp / 999.0 |> sqrt |> floor |> int) + 1
 
     let xp_for_level (level: int) =
-        int64 (level - 1) * int64 (level - 1) * 1000L
+        int64 (level - 1) * int64 (level - 1) * 999L

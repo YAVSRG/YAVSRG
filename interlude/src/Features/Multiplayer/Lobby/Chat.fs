@@ -102,7 +102,7 @@ type Chat(lobby: Lobby) =
                     |+ Clickable(
                         (fun () ->
                             Screen.change_new
-                                (fun () -> ScoreScreen(data, ImprovementFlags.None, false) :> Screen)
+                                (fun () -> ScoreScreen(data, (ImprovementFlags.None, None), false) :> Screen)
                                 Screen.Type.Score
                                 Transitions.EnterGameplayNoFadeAudio
                             |> ignore

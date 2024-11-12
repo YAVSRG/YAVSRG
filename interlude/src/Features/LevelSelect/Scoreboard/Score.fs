@@ -18,7 +18,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             NodeType.Button(
                 (fun () ->
                     Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
+                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                         Screen.Type.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore
@@ -135,7 +135,7 @@ type private ScoreCard(score_info: ScoreInfo) =
                 LevelSelect.choose_this_chart() 
             else 
                 Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
+                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                         Screen.Type.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore

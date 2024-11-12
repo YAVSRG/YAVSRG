@@ -139,7 +139,7 @@ module ReplayScreen =
                     | ReplayMode.Auto _ -> Screen.back Transitions.LeaveGameplay |> ignore
                     | ReplayMode.Replay(score_info, _) ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(score_info, ImprovementFlags.None, false) :> Screen)
+                            (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                             Screen.Type.Score
                             Transitions.EnterGameplayNoFadeAudio
                         |> ignore

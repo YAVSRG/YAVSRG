@@ -52,7 +52,7 @@ module Gameplay =
             IsFailed = failed
         }
 
-    let set_score (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags =
+    let set_score (quit_out: bool) (score_info: ScoreInfo) (save_data: ChartSaveData)  : ImprovementFlags * SessionXPGain option =
         let mod_status = score_info.ModStatus
 
         if
@@ -81,7 +81,11 @@ module Gameplay =
                     | Some existing_bests -> Bests.update score_info existing_bests
                     | None -> Bests.create score_info, ImprovementFlags.New
 
-                Stats.handle_score standardised_score improvement_flags Content.UserData |> printfn "%A"
+                let xp_gain =
+                    if quit_out then
+                        Stats.quitter_penalty Content.UserData
+                    else
+                        Stats.handle_score standardised_score improvement_flags Content.UserData
 
                 if not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None then
                     UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
@@ -96,14 +100,14 @@ module Gameplay =
                         save_data.PersonalBests <- Map.add Rulesets.DEFAULT_HASH new_standard_bests save_data.PersonalBests
 
                     UserDatabase.save_changes Content.UserData
-                improvement_flags
+                improvement_flags, Some xp_gain
 
             else
                 UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
                 score_saved_ev.Trigger score_info
-                ImprovementFlags.None
+                ImprovementFlags.None, None
         else
-            ImprovementFlags.None
+            ImprovementFlags.None, None
 
     let delete_score (score_info: ScoreInfo) =
         let score_name =

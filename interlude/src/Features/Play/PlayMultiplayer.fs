@@ -105,7 +105,7 @@ module PlayScreenMultiplayer =
                                     scoring
                                     ((liveplay :> IReplayProvider).GetFullReplay())
                                     quit_out_early
-                            ScoreScreen(score_info, ImprovementFlags.None, true)
+                            ScoreScreen(score_info, (ImprovementFlags.None, None), true)
                         )
                         Screen.Type.Score
                         Transitions.LeaveGameplay
@@ -129,7 +129,7 @@ module PlayScreenMultiplayer =
                                 ((liveplay :> IReplayProvider).GetFullReplay())
                                 false
 
-                        (score_info, Gameplay.set_score score_info info.SaveData, true)
+                        (score_info, Gameplay.set_score false score_info info.SaveData, true)
                         |> ScoreScreen
                     )
                     Screen.Type.Score
