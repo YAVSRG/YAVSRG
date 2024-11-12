@@ -188,6 +188,14 @@ module UserDatabase =
             (fun db -> DbSingletons.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
 
+        Database.migrate
+            "AddSessions"
+            (fun db -> 
+                Database.create_table DbSessions.TABLE db |> expect |> ignore
+                DbSessions.CREATE_INDEX.Execute () db |> expect |> ignore
+            )
+            db
+
         db
 
     let private legacy_migrate (db: UserDatabase) : UserDatabase =
