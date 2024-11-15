@@ -45,7 +45,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         Style.hover.Play()
 
     override this.Draw() =
-        let bounds = this.Bounds//.TranslateX(-this.Bounds.Width * (1.0f - fade.Value))
+        let bounds = this.Bounds
 
         let alpha = fade.Alpha
 
@@ -118,7 +118,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             Style.font,
             (sprintf "%.2f" score_info.Physical),
             box.ShrinkY(5.0f),
-            (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
+            (Colors.white.O4a alpha, (Charts.Processing.Difficulty.DifficultyRating.physical_color score_info.Physical).O4a alpha),
             Alignment.CENTER
         )
 
