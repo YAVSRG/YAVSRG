@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -79,6 +79,7 @@
     <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />
+    <Compile Include="Features\Stats\Session\ScoreList.fs" />
     <Compile Include="Features\Stats\Session\Current.fs" />
     <Compile Include="Features\Stats\Session\Activity.fs" />
     <Compile Include="Features\Stats\Session\Playtime.fs" />

@@ -183,3 +183,31 @@ module DbScores =
             if current_chart <> "" then
                 yield current_chart, current
         }
+
+    let private GET_BETWEEN: Query<int64 * int64, string * Score> =
+        {
+            SQL =
+                """
+            SELECT ChartId, Timestamp, Replay, Rate, Mods, IsImported, IsFailed, Keys FROM scores
+            WHERE Timestamp >= @StartTime AND Timestamp <= @EndTime
+            ORDER BY Timestamp ASC;
+            """
+            Parameters = [ "@StartTime", SqliteType.Integer, 8; "@EndTime", SqliteType.Integer, 8 ]
+            FillParameters = fun p (start_time, end_time) -> p.Int64 start_time; p.Int64 end_time
+            Read =
+                (fun r ->
+                    r.String,
+                    {
+                        Timestamp = r.Int64
+                        Replay = r.Blob
+                        Rate = 1.0f<rate> * r.Float32
+                        Mods = r.Json JSON
+                        IsImported = r.Boolean
+                        IsFailed = r.Boolean
+                        Keys = int r.Byte
+                    }
+                )
+        }
+
+    let get_between (start_time: int64) (end_time: int64) (db: Database) : (string * Score) array =
+        GET_BETWEEN.Execute (start_time, end_time) db |> expect

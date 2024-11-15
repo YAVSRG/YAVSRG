@@ -140,6 +140,9 @@ module UserDatabase =
             else
                 false
 
+    let get_scores_between (start_time: int64) (end_time: int64) (db: UserDatabase) =
+        DbScores.get_between start_time end_time db.Database
+
     let private fast_load (db: UserDatabase) : UserDatabase =
         lock db.LockObject
         <| fun () ->

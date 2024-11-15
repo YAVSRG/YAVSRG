@@ -125,3 +125,72 @@ module DbScores =
         Assert.Contains(score_2, result)
 
         conn.Dispose()
+
+    [<Test>]
+    let GetBetween_NoResults() =
+        let db, conn = in_memory ()
+
+        let score_1 =
+            {
+                Timestamp = 20L
+                Rate = 1.0f<rate>
+                Mods = Map.empty
+                Replay = [| 0uy |]
+                IsImported = false
+                IsFailed = true
+                Keys = 4
+            }
+
+        let score_2 =
+            {
+                Timestamp = 40L
+                Rate = 1.2f<rate>
+                Mods = Map.empty
+                Replay = [| 1uy |]
+                IsImported = true
+                IsFailed = false
+                Keys = 4
+            }
+
+        DbScores.save "between" score_1 db
+        DbScores.save "between" score_2 db
+
+        let result = DbScores.get_between 0L 0L db
+        Assert.AreEqual(0, result.Length)
+
+        conn.Dispose()
+    
+    [<Test>]
+    let GetBetween_CorrectResult() =
+        let db, conn = in_memory ()
+
+        let score_1 =
+            {
+                Timestamp = 20L
+                Rate = 1.0f<rate>
+                Mods = Map.empty
+                Replay = [| 0uy |]
+                IsImported = false
+                IsFailed = true
+                Keys = 4
+            }
+
+        let score_2 =
+            {
+                Timestamp = 40L
+                Rate = 1.2f<rate>
+                Mods = Map.empty
+                Replay = [| 1uy |]
+                IsImported = true
+                IsFailed = false
+                Keys = 4
+            }
+
+        DbScores.save "between" score_1 db
+        DbScores.save "between" score_2 db
+
+        let result = DbScores.get_between 20L 30L db
+        Assert.AreEqual(1, result.Length)
+        Assert.Contains(("between", score_1), result)
+
+        conn.Dispose()
