@@ -14,14 +14,19 @@ type private SelectedSession =
 type StatsPage() =
     inherit Page()
 
+    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkX(40.0f))
     let selected_day = Setting.simple (Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime)
     let mutable selected_session = Current
 
     let select_sessions (sessions: Session list) =
-        printfn "%A" sessions
-        selected_session <- Archived sessions.[0]
-
-    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkX(40.0f))
+        match selected_session with
+        | Archived s ->
+            let i = (List.tryFindIndex (fun s2 -> s2 = s) sessions |> Option.defaultValue -1 |> (+) 1) % sessions.Length
+            selected_session <- Archived sessions.[i]
+            session_panel.Current <- PreviousSession(sessions.[i])
+        | _ -> 
+            selected_session <- Archived sessions.[0]
+            session_panel.Current <- PreviousSession(sessions.[0])
 
     override this.Content() =
         Container(NodeType.Leaf)

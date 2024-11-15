@@ -33,7 +33,11 @@ type MissingScore() =
         Draw.rect this.Bounds fill_color
         Draw.rect (this.Bounds.BorderL Style.PADDING) border_color
 
-        Text.fill_b(Style.font, "<Missing chart>", this.Bounds.SliceY(50.0f), Colors.text_greyout, Alignment.CENTER)
+        Text.fill_b(Style.font, "<Missing the chart for this score>", this.Bounds.SliceY(50.0f), (Colors.grey_2.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        fade.Update elapsed_ms
 
 type Score(score_info: ScoreInfo) =
     inherit Container(NodeType.None)
@@ -153,7 +157,7 @@ module private ScoreList =
                                 let score_info = ScoreInfo.from_score cc chart ruleset score
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
-                        | _ -> callback(MissingScore())
+                        | _ -> yield fun () -> callback(MissingScore())
                 }
 
             member this.Handle(action) = action ()
