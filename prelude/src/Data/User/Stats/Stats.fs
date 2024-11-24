@@ -254,9 +254,6 @@ module Stats =
                 CURRENT_SESSION.KeymodeSkills.[score_info.WithMods.Keys - 3]
 
         save_current_session database
-
-        printfn "All-time skill up: %O" all_time_skill_up
-        printfn "Session skill up: %O" session_skill_up
         
         let skill_xp_mult = (float32 TOTAL_STATS.XP / 100_000f - 1.0f) |> max 0.0f |> min 1.0f
         let skill_xp =

@@ -12,7 +12,17 @@ open Interlude.UI
 type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
     inherit StaticWidget(NodeType.None)
 
-    let session_dates = Stats.PREVIOUS_SESSIONS
+    let session_dates = 
+        Stats.PREVIOUS_SESSIONS
+        |> Map.map (fun _ sessions -> 
+            let day_playtime_hours = (sessions |> List.sumBy (_.PlayTime)) / 3600_000.0
+            let color = 
+                if day_playtime_hours < 0.25 then Colors.cyan.O2
+                elif day_playtime_hours < 0.5 then Colors.cyan.O3
+                elif day_playtime_hours < 0.75 then Colors.cyan
+                else Colors.cyan_accent
+            sessions, color
+        )
 
     let today, day_of_week = 
         let today_datetime = Timestamp.now() |> timestamp_to_local_day
@@ -35,8 +45,7 @@ type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session list -> 
 
             let color = 
                 match session_dates.TryFind day with
-                | Some sessions when sessions.Length = 1 -> Colors.cyan
-                | Some _ -> Colors.cyan_accent
+                | Some (_, color) -> color
                 | None -> Colors.black
 
             if day = selected.Value then
@@ -75,7 +84,7 @@ type ActivityFeed(selected: Setting<DateOnly>, on_day_selected: Session list -> 
 
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
-                    | Some sessions -> 
+                    | Some (sessions, _) -> 
                         selected.Set day
                         on_day_selected sessions
                     | _ -> ()
