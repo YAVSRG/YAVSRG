@@ -66,33 +66,52 @@ type private ScoreCard(score_info: ScoreInfo) =
         Draw.rect bounds fill_color
         Draw.rect (bounds.BorderB Style.PADDING) border_color
 
-        Text.fill_b (
-            Style.font, 
+        let mod_text = 
             if score_info.Rate > SelectedChart.rate.Value then Icons.CHEVRONS_UP + "" + mod_string
             elif score_info.Rate < SelectedChart.rate.Value then Icons.CHEVRONS_DOWN + "" + mod_string
             else mod_string
-            ,
-            bounds.SlicePercentT(0.6f).ShrinkL(410.0f).ShrinkR(10.0f),
-            (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
-            Alignment.RIGHT
-        )
+
+        if this.Focused then
+
+            Text.fill_b (
+                Style.font, 
+                mod_text,
+                bounds.SlicePercentT(0.6f).ShrinkL(450.0f).ShrinkR(10.0f),
+                (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
+                Alignment.RIGHT
+            )
+
+            Text.fill_b (
+                Style.font,
+                if this.FocusedByMouse then %"scoreboard.view_hint_mouse" else [(%%"select").ToString()] %> "scoreboard.view_hint_keyboard"
+                ,
+                bounds.SlicePercentB(0.45f).ShrinkL(450.0f).ShrinkR(10.0f).TranslateY(-2.0f),
+                (Colors.grey_1.O4a alpha, Colors.shadow_2.O4a alpha),
+                Alignment.RIGHT
+            )
+        else
+
+            Text.fill_b (
+                Style.font, 
+                mod_text,
+                bounds.ShrinkL(440.0f).Shrink(10.0f, 5.0f),
+                (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
+                Alignment.RIGHT
+            )
 
         Text.fill_b (
             Style.font,
-            if this.Focused then
-                if this.FocusedByMouse then %"scoreboard.view_hint_mouse" else [(%%"select").ToString()] %> "scoreboard.view_hint_keyboard"
-            else 
-                (if score_info.ImportedFromOsu then Icons.DOWNLOAD + " " else "") +
-                format_timespan (DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset score_info.TimePlayed)
+            (if score_info.ImportedFromOsu then Icons.DOWNLOAD + " " else "") +
+            format_timespan (DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset score_info.TimePlayed)
             ,
-            bounds.SlicePercentB(0.45f).ShrinkL(410.0f).ShrinkR(10.0f).TranslateY(-2.0f),
+            bounds.SliceL(80.0f).Shrink(10.0f, 5.0f),
             (Colors.grey_1.O4a alpha, Colors.shadow_2.O4a alpha),
-            Alignment.RIGHT
+            Alignment.CENTER
         )
 
         let box_color = Colors.shadow_2.O1a alpha
         
-        let box = bounds.SliceL(140.0f).TranslateX(10.0f)
+        let box = bounds.SliceL(140.0f).TranslateX(80.0f)
         Draw.rect box box_color
         Text.fill_b (
             Style.font,
@@ -102,7 +121,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             Alignment.CENTER
         )
         
-        let box = bounds.SliceL(100.0f).TranslateX(160.0f)
+        let box = bounds.SliceL(100.0f).TranslateX(230.0f)
         Draw.rect box box_color
         Text.fill_b (
             Style.font,
@@ -112,7 +131,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             Alignment.CENTER
         )
 
-        let box = bounds.SliceL(100.0f).TranslateX(270.0f)
+        let box = bounds.SliceL(100.0f).TranslateX(340.0f)
         Draw.rect box box_color
         Text.fill_b (
             Style.font,
