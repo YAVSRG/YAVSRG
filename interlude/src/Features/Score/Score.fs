@@ -97,11 +97,11 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
 
-        match xp_gain with
-        | Some x -> 
-            SessionScoreBar(x, Position = Position.SliceRPercent(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
-            |> this.Add
-        | None -> ()
+        //match xp_gain with
+        //| Some x -> 
+        //    SessionScoreBar(x, Position = Position.SliceRPercent(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
+        //    |> this.Add
+        //| None -> ()
 
         base.Init parent
 

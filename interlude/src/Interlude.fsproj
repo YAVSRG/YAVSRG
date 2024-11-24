@@ -119,7 +119,7 @@
     <Compile Include="Features\Rulesets\Select.fs" />
     <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
-    <Compile Include="Features\Gameplay\Helpers.fs" />
+    <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />
     <Compile Include="Features\Tables\Browser\Tables.fs" />
     <Compile Include="Features\Tables\ChooseLevel.fs" />
