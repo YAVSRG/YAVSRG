@@ -10,8 +10,8 @@ type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
     let dump_profiling = Bind.Key(Keys.F2, (true, true, true))
-    let all_bind = Bind.Key(Keys.F3, (true, true, true))
-    let graph_bind = Bind.Key(Keys.F4, (true, true, true))
+    let fps_bind = Bind.Key(Keys.F3, (false, false, false))
+    let graph_bind = Bind.Key(Keys.F4, (false, false, false))
 
     let mutable enable = false
     let mutable enable_graph = false
@@ -28,15 +28,13 @@ type PerformanceMonitor() =
         if dump_profiling.Tapped() then
             dump_profiling_info ()
 
-        if all_bind.Tapped() then
-            enable <- not enable
-            enable_graph <- enable
+        if fps_bind.Tapped() then
+            enable <- enable_graph || not enable
+            enable_graph <- false
 
         if graph_bind.Tapped() then
-            if enable then
-                enable_graph <- not enable_graph
-            else
-                enable <- true
+            enable <- not enable_graph || not enable
+            enable_graph <- enable
 
         if enable then
 
@@ -80,7 +78,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%O to hide overlay" all_bind,
+                sprintf "%O to show fps" fps_bind,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 150.0f,
@@ -89,7 +87,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%O to toggle graph" graph_bind,
+                sprintf "%O to show fps + graph" graph_bind,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 190.0f,
