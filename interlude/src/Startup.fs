@@ -87,7 +87,7 @@ module Startup =
             ()
         else
             has_shutdown <- true
-            Stats.save_current_session Content.UserData
+            Stats.save_current_session (Timestamp.now()) Content.UserData
             Content.deinit ()
             Options.deinit ()
             Network.deinit ()

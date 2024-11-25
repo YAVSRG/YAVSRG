@@ -167,9 +167,10 @@ module PlayScreenMultiplayer =
                 )
 
             override this.OnEnter(previous) =
+                let now = Timestamp.now()
                 Stats.CURRENT_SESSION.PlaysStarted <- Stats.CURRENT_SESSION.PlaysStarted + 1
-                Stats.save_current_session Content.UserData
-                info.SaveData.LastPlayed <- Timestamp.now ()
+                Stats.save_current_session now Content.UserData
+                info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
 
                 base.OnEnter(previous)

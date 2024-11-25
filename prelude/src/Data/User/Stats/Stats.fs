@@ -29,8 +29,7 @@ type CurrentSession =
         KeymodeSkills: KeymodeSkillBreakdown array
     }
 
-    static member StartNew (end_of_last_session: int64) (previous_skills: KeymodeSkillBreakdown array) =
-        let now = Timestamp.now()
+    static member StartNew (now: int64) (end_of_last_session: int64) (previous_skills: KeymodeSkillBreakdown array) =
         {
             Start = now
             LastPlay = now
@@ -135,7 +134,7 @@ module Stats =
     let mutable CURRENT_SESSION : CurrentSession = Unchecked.defaultof<_>
     let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
 
-    let private end_current_session (database: UserDatabase) =
+    let private end_current_session (now: int64) (database: UserDatabase) =
         TOTAL_STATS <-
             {
                 PlayTime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
@@ -178,24 +177,23 @@ module Stats =
                 PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, [session])
             DbSessions.save session database.Database
 
-        CURRENT_SESSION <- CurrentSession.StartNew CURRENT_SESSION.LastTime CURRENT_SESSION.KeymodeSkills
+        CURRENT_SESSION <- CurrentSession.StartNew now CURRENT_SESSION.LastTime CURRENT_SESSION.KeymodeSkills
         DbSingletons.save<Stats> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION } database.Database
 
-    let save_current_session (database: UserDatabase) =
-        let now = Timestamp.now()
+    let save_current_session (now: int64) (database: UserDatabase) =
         CURRENT_SESSION.LastTime <- now
         if now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
-            end_current_session database
+            end_current_session now database
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error("System clock changes could break your session stats")
-            end_current_session database
+            end_current_session now database
         else
             DbSingletons.save<Stats> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION } database.Database
 
     let QUIT_PENALTY = -100L
     let quitter_penalty (database: UserDatabase) =
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + QUIT_PENALTY |> max 0L
-        save_current_session database
+        save_current_session (Timestamp.now()) database
         {
             QuitPenalty = QUIT_PENALTY
             BaseXP = 0L
@@ -253,7 +251,7 @@ module Stats =
                 score_info.Rate
                 CURRENT_SESSION.KeymodeSkills.[score_info.WithMods.Keys - 3]
 
-        save_current_session database
+        save_current_session (Timestamp.now()) database
         
         let skill_xp_mult = (float32 TOTAL_STATS.XP / 100_000f - 1.0f) |> max 0.0f |> min 1.0f
         let skill_xp =
@@ -410,12 +408,12 @@ module Stats =
         
         let now = Timestamp.now()
         if CURRENT_SESSION.NotesHit = 0 then
-            end_current_session database
+            end_current_session now database
         if Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
-            end_current_session database
+            end_current_session now database
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error("System clock changes could break your session stats")
-            end_current_session database
+            end_current_session now database
 
     let format_long_time (time: float) =
         let seconds = time / 1000.0
