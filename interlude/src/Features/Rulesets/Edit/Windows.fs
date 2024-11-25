@@ -2,12 +2,23 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
 
 type private EditWindowsPage(judgements: Judgement array, windows: Setting<(GameplayTime * GameplayTime) option> array) =
     inherit Page()
+
+    let tab = Bind.mk Keys.Tab
+    let entry_chain = System.Collections.Generic.Dictionary<Widget, Widget>()
+
+    let rec next_entry (current: Widget) =
+        match entry_chain.TryGetValue current with
+        | true, next ->
+            if next.Focusable then next.Select false
+            else next_entry next
+        | false, _ -> ()
 
     do
         assert(judgements.Length = windows.Length)
@@ -63,6 +74,14 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
     override this.Content() =
         let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
 
+        let mutable last_entry = None
+        let add_entry (e: Widget) : Widget =
+            match last_entry with
+            | Some l -> entry_chain.Add(l, e)
+            | None -> ()
+            last_entry <- Some e
+            e
+
         for i, j in judgements |> Array.indexed do
 
             let early_window = early_window i
@@ -87,8 +106,8 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                             late_window.Set (infinityf * 1.0f<_>)
                     ),
                     Position = Position.SliceL 100.0f)
-                |+ early.Conditional(fun () -> windows.[i].Value.IsSome)
-                |+ late.Conditional(fun () -> windows.[i].Value.IsSome)
+                |+ add_entry(early.Conditional(fun () -> windows.[i].Value.IsSome))
+                |+ add_entry(late.Conditional(fun () -> windows.[i].Value.IsSome))
             
             container.Add (PageSetting(j.Name, c))
 
@@ -96,6 +115,15 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
         |+ ScrollContainer(container)
             .Pos(0, PAGE_BOTTOM)
         :> Widget
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if tab.Tapped() then
+            match Selection.get_focused_element() with
+            | Some (:? Widget as w) ->
+                next_entry (w.Parent.Parent)
+            | _ -> ()
         
     override this.Title = %"rulesets.edit.windows"
     override this.OnClose() = ()

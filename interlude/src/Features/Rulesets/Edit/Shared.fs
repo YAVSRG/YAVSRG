@@ -58,7 +58,7 @@ module NumberEntry =
             |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> String)
 
         let entry = 
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", false, Position = Position.ShrinkX 15.0f) with 
+            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true, Position = Position.ShrinkX 15.0f) with 
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
@@ -97,7 +97,7 @@ module NumberEntry =
             |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> String)
 
         let entry = 
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", false, Position = Position.ShrinkX(15.0f).ShrinkR 100.0f) with 
+            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true, Position = Position.ShrinkX(15.0f).ShrinkR 100.0f) with 
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
