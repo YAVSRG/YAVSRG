@@ -61,7 +61,6 @@ module ReplayScreen =
                     add_widget (this, this.Playfield, this.State, hud_config) position constructor
 
                 if hud_config.ComboEnabled then add_widget hud_config.ComboPosition Combo
-                if hud_config.SkipButtonEnabled then add_widget hud_config.SkipButtonPosition SkipButton
                 if hud_config.ProgressMeterEnabled then add_widget hud_config.ProgressMeterPosition ProgressMeter
 
                 if not is_auto then
