@@ -111,7 +111,7 @@ gameplay.rate.hotkey_hint_ii=The song speed can be changed without opening this 
 gameplay.rate.tooltip=Change this to speed up or slow down a song!\nUseful for practice or challenging yourself.
 gameplay.scrollspeed=Scroll speed
 gameplay.scrollspeed.info=%0ms = %1 on osu! = %2 on Quaver = %3 on Etterna*
-gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.\n\n*Etterna scroll speed equivalent is only correct if your columns are the same width.
+gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1/1080th of the screen height per millisecond.\nOn 1080p fullscreen this means 100% = 1 pixel per second.\n\n*Etterna scroll speed equivalent is only correct if your columns are the same width.
 gameplay.upscroll=Upscroll
 gameplay.upscroll.tooltip=Set this to true if you want notes to scroll upwards instead of downwards.
 generic.keymode=Keymode
