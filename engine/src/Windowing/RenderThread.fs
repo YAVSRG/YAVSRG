@@ -296,6 +296,7 @@ type Strategy =
 [<AutoOpen>]
 module SmartCapConstants =
     
+    let mutable no_compositor = false
     let mutable anti_jitter = false
     let mutable tearline_position = 0.75
     let mutable framerate_multiplier = 8.0
@@ -329,6 +330,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         resized <- true
 
     member this.RenderModeChanged(fullscreen: bool) =
+        no_compositor <- fullscreen
         strategy <-
             if OperatingSystem.IsWindows() then
                 // On windows:

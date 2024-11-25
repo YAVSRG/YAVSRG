@@ -262,7 +262,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         <| fun () ->
             render_thread.RenderModeChanged(
                 config.WindowMode.Value = WindowType.Fullscreen
-                || config.WindowMode.Value = WindowType.``Borderless Fullscreen``
+                || monitor.ClientArea.Size = this.Bounds.Size
             )
 
             anti_jitter <- config.SmartCapAntiJitter.Value
