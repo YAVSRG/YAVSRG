@@ -52,7 +52,7 @@ type SessionsTab() =
 
     override this.Init(parent) =
         this
-        |+ ActivityFeed(selected_day, select_sessions,
+        |+ RecentActivityGrid(selected_day, select_sessions,
             Position = Position.SliceLPercent(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
 
         |+ Playtime(

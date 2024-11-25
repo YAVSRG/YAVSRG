@@ -92,7 +92,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
         child.Position <- Position.Shrink(this.Margin)
         child.Init this
 
-        content_height <- child.Height
+        content_height <- child.Height + this.Margin * 2.0f
         match child :> obj with
         | :? IResize as r -> r.OnSizeChanged <- fun () -> content_height <- child.Height + this.Margin * 2.0f
         | _ -> ()

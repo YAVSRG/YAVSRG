@@ -36,7 +36,15 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
     override this.Init(parent: Widget) =
         this
         |+ Text(sprintf "Session on %O" ((session.Start |> timestamp_to_local_day).ToShortDateString()), Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
-        |+ Text(sprintf "Notes hit: %i" session.NotesHit, Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.ShrinkT(70.0f).SliceT(40.0f))
+        |+ Text(
+            if session.NotesHit > 0 then
+                sprintf "Notes hit: %i" session.NotesHit
+            else
+                sprintf "%s Session data calculated from scores, not all stats are accurate" Icons.ALERT_CIRCLE
+            ,
+            Color = K Colors.text_subheading, Align = Alignment.LEFT,
+            Position = Position.ShrinkT(70.0f).SliceT(40.0f)
+        )
         |+ Text(
             (fun () -> 
                 sprintf "%s of playtime over %s, session started at %s"
