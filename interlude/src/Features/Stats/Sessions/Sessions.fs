@@ -5,7 +5,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Interlude.UI
 
 type private SelectedSession =
     | Current
@@ -55,7 +54,7 @@ type SessionsTab() =
         |+ RecentActivityGrid(selected_day, select_sessions,
             Position = Position.SliceLPercent(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
 
-        |+ Playtime(
+        |+ SessionTime(
             (fun () ->
                 match selected_session with
                 | Current -> Stats.CURRENT_SESSION.GameTime
@@ -73,7 +72,7 @@ type SessionsTab() =
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
 
-        |+ Playcount(
+        |+ PlayCount(
             (fun () ->
                 match selected_session with
                 | Current -> Stats.CURRENT_SESSION.PlaysStarted
@@ -99,28 +98,3 @@ type SessionsTab() =
         |* session_panel
 
         base.Init parent
-
-type StatsPage() =
-    inherit Page()
-
-    let all_time_stats = Dummy()
-    let session_stats = SessionsTab()
-    let swap = SwapContainer(session_stats)
-
-    override this.Header() =
-        let tabs =
-            RadioButtons.create_tabs {
-                Setting = Setting.make swap.set_Current swap.get_Current
-                Options = [|
-                    session_stats, "Session stats", K false
-                    all_time_stats, "All time stats", K false
-                |]
-                Height = 50.0f
-            }
-        tabs.Position <- Position.SliceLPercent(0.4f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
-        tabs
-
-    override this.Content() = swap
-
-    override this.Title = %"menu.stats"
-    override this.OnClose() = ()
