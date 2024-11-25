@@ -463,7 +463,7 @@ module Mouse =
     let MIDDLE = MouseButton.Middle
 
     let pos () =
-        (Input.this_frame.MouseX, Input.last_frame.MouseY)
+        (Input.this_frame.MouseX, Input.this_frame.MouseY)
 
     let x () = fst (pos ())
     let y () = snd (pos ())
