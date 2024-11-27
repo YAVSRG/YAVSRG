@@ -116,10 +116,11 @@ module private Image =
             PixelFormats.Rgba32(this.R, this.G, this.B, new_alpha)
 
     let remove_black_bg (image: Bitmap) : Bitmap =
+        let newImage = new Bitmap(image.Width, image.Height)
         for x = 0 to image.Width - 1 do
             for y = 0 to image.Height - 1 do
-                image.[x, y] <- image.[x, y].BlackToTransparent
-        image
+                newImage.[x, y] <- image.[x, y].BlackToTransparent
+        newImage
 
 module OsuSkinConverter =
 
