@@ -39,6 +39,7 @@ type MissingScore() =
         base.Update(elapsed_ms, moved)
         fade.Update elapsed_ms
 
+// todo: clicking loads the song + opens score screen
 type Score(score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 

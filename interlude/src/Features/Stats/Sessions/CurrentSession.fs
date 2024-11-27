@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Data.User
+open Interlude.UI
 
 type CurrentSession() =
     inherit Container(NodeType.None)
@@ -25,5 +26,8 @@ type CurrentSession() =
             Position = Position.ShrinkT(105.0f).SliceT(40.0f)
         )
         |* ScoreList(current_session.Start, Timestamp.now(), Position = Position.ShrinkT(160.0f))
+
+        if Stats.CURRENT_SESSION.LastPlay <= Stats.CURRENT_SESSION.Start then
+            this |* EmptyState(Icons.LIST, "No scores this session", Position = Position.ShrinkT(160.0f))
 
         base.Init parent

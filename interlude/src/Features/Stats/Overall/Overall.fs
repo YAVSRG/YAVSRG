@@ -6,7 +6,7 @@ open Prelude.Data.User
 type OverallTab() =
     inherit Container(NodeType.Leaf)
 
-    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkX(40.0f))
+    let content_panel = SwapContainer(Skills(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkT(160.0f).ShrinkX(40.0f))
     
     override this.Init(parent) =
         this
@@ -23,6 +23,6 @@ type OverallTab() =
             (fun () -> Stats.TOTAL_STATS.PlaysQuit + Stats.CURRENT_SESSION.PlaysQuit),
             Position = Position.SliceLPercent(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f)
         )
-        |* session_panel
+        |* content_panel
 
         base.Init parent

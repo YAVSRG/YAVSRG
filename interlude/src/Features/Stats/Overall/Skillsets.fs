@@ -8,7 +8,6 @@ open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
-open Interlude.Content
 
 type RatingTile(color: Color, value: float32) =
     inherit StaticWidget(NodeType.None)

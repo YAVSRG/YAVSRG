@@ -42,18 +42,18 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let tab_buttons =
         DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.SliceY(60.0f))
         |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.AIRPLAY (%"system"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.System),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
-            Keybind = Bind.mk Keys.D1
-        )
-        |+ OptionsMenuButton(
             sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
             IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
             Keybind = Bind.mk Keys.D2
+        )
+        |+ OptionsMenuButton(
+            sprintf "%s %s" Icons.AIRPLAY (%"system"),
+            200.0f,
+            (fun () -> current_tab.Set OptionsMenuTab.System),
+            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
+            Keybind = Bind.mk Keys.D1
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"skins"),

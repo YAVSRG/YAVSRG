@@ -86,11 +86,11 @@
     <Compile Include="Features\Stats\Sessions\PreviousSession.fs" />
     <Compile Include="Features\Stats\Sessions\CurrentSession.fs" />
     <Compile Include="Features\Stats\Sessions\Sessions.fs" />
+    <Compile Include="Features\Stats\Overall\Skillsets.fs" />
     <Compile Include="Features\Stats\Overall\OverallTime.fs" />
     <Compile Include="Features\Stats\Overall\Overall.fs" />
     <Compile Include="Features\Stats\StatsPage.fs" />
     <Compile Include="Features\Stats\Screen\Tables.fs" />
-    <Compile Include="Features\Stats\Screen\Skillsets.fs" />
     <Compile Include="Features\Stats\Screen\Screen.fs" />
     <Compile Include="Features\Import\Backbeat.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
