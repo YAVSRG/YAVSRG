@@ -65,35 +65,44 @@ type internal Batch =
         this.active <- false
 
     static member Create (capacity: int) =
+        assert(capacity > 0)
+
         let VERTICES_PER_ELEMENT = 6
         let vertex_count = VERTICES_PER_ELEMENT * capacity
 
         let vertices: Vertex array = Array.zeroCreate vertex_count
         let elements: int array = Array.init vertex_count id
 
-        let ebo = Buffer.create(BufferTarget.ElementArrayBuffer, elements)
-        let vbo = Buffer.create(BufferTarget.ArrayBuffer, vertices)
-        let vao = VertexArrayObject.create (vbo, ebo)
+        let ebo = GL.GenBuffer()
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo)
+        GL.BufferData(BufferTarget.ElementArrayBuffer, vertex_count * sizeof<int>, elements, BufferUsageHint.DynamicDraw)
+
+        let vbo = GL.GenBuffer()
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vbo)
+        GL.BufferData(BufferTarget.ArrayBuffer, vertex_count * sizeof<Vertex>, vertices, BufferUsageHint.DynamicDraw)
+
+        let vao = GL.GenVertexArray()
+        GL.BindVertexArray vao
 
         let VERTEX_SIZE = sizeof<Vertex>
         // 2 floats in slot 0, for pos
-        VertexArrayObject.vertex_attrib_pointer
-            (0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
+        GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
+        GL.EnableVertexAttribArray 0
         // 2 floats in slot 1, for uv
-        VertexArrayObject.vertex_attrib_pointer 
-            (1, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 2)
+        GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 2)
+        GL.EnableVertexAttribArray 1
         // 4 bytes in slot 2, for color
-        VertexArrayObject.vertex_attrib_pointer
-            (2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
-        // 1 int in slot 3, for texture layer - using an int makes 20 bytes total
-        VertexArrayObject.vertex_attrib_pointer 
-            (3, 1, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
+        GL.VertexAttribPointer(2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
+        GL.EnableVertexAttribArray 2
+        // 1 int in slot 3, for texture layer
+        GL.VertexAttribPointer(3, 1, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
+        GL.EnableVertexAttribArray 3
 
         {
             capacity = capacity
-            element_buffer = ebo.Handle
-            vertex_buffer = vbo.Handle
-            vertex_array_object = vao.Handle
+            element_buffer = ebo
+            vertex_buffer = vbo
+            vertex_array_object = vao
             vertices = vertices
             active = false
             vcount = 0
