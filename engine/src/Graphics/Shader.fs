@@ -2,7 +2,6 @@
 
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
-open Percyqaz.Common
 open Percyqaz.Flux.Utils
 
 module private Shader =
@@ -27,8 +26,6 @@ module private Shader =
         GL.GetUniformLocation(shader, uniform)
 
     let private compile_and_use (vsh: string, fsh: string) : int =
-        printfn "compiling too early"
-
         let vert = compile_shader (ShaderType.VertexShader, vsh)
         let frag = compile_shader (ShaderType.FragmentShader, fsh)
         let program = GL.CreateProgram()
@@ -49,15 +46,6 @@ module private Shader =
 
         program
 
-    let set_uniform_mat4 (location: int, value: Matrix4) =
-        GL.UniformMatrix4(location, false, ref value)
-
-    let set_uniform_f32 (location: int, value: float32) =
-        GL.Uniform1(location, value)
-
-    let set_uniform_i32 (location: int, value: int) =
-        GL.Uniform1(location, value)
-
     let mutable projection_loc = 0
     let mutable alpha_mult_loc = 0
     let mutable alpha_masking_loc = 0
@@ -69,3 +57,12 @@ module private Shader =
         alpha_mult_loc <- get_uniform_location("alphaMult", program)
         alpha_masking_loc <- get_uniform_location("alphaMasking", program)
         sampler_loc <- get_uniform_location("sampler", program)
+
+    let set_uniform_mat4 (location: int, value: Matrix4) =
+        GL.UniformMatrix4(location, false, ref value)
+
+    let set_uniform_f32 (location: int, value: float32) =
+        GL.Uniform1(location, value)
+
+    let set_uniform_i32 (location: int, value: int) =
+        GL.Uniform1(location, value)

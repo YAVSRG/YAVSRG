@@ -414,7 +414,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         let before_draw = now ()
         Render.start ()
 
-        if Viewport.rheight > 0 then
+        if Viewport.viewport_height > 0 then
             ui_root.Draw()
 
         Render.finish ()

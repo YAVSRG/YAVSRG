@@ -54,12 +54,12 @@ type Confetti () =
             taken_screenshot_cooldown <- 2000.0
         let dt = float32 elapsed_ms
         for i = 0 to confetti.Length - 1 do
-            if confetti.[i].X > 0.0f && confetti.[i].Y < Viewport.vheight then
+            if confetti.[i].X > 0.0f && confetti.[i].Y < Viewport.virtual_screen_height then
                 confetti.[i].X <- confetti.[i].X + confetti.[i].XVel * dt
                 confetti.[i].Y <- confetti.[i].Y + confetti.[i].YVel * dt
                 confetti.[i].YVel <- confetti.[i].YVel + 0.0075f * dt
 
     override this.Draw() =
         for i = 0 to confetti.Length - 1 do
-            if confetti.[i].X > 0.0f && confetti.[i].Y > 0.0f && confetti.[i].Y < Viewport.vheight then
+            if confetti.[i].X > 0.0f && confetti.[i].Y > 0.0f && confetti.[i].Y < Viewport.virtual_screen_height then
                 Draw.rect (Rect.Box(confetti.[i].X, confetti.[i].Y, 12.0f, 12.0f)) colors.[confetti.[i].Color]

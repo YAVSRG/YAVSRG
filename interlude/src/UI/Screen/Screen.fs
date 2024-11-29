@@ -32,7 +32,7 @@ module Toolbar =
     let take_screenshot () =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
-        let img = Render.screenshot ()
+        let img = Render.take_screenshot ()
         ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
         Notifications.action_feedback_button (
@@ -170,9 +170,9 @@ module Screen =
             if current_type <> Type.Play || Dialog.exists () then
                 Notifications.display.Update(elapsed_ms, moved)
 
-            if Viewport.vwidth > 0.0f then
+            if Viewport.virtual_screen_width > 0.0f then
                 let x, y = Mouse.pos ()
-                Background.set_parallax_pos (x / Viewport.vwidth, y / Viewport.vheight)
+                Background.set_parallax_pos (x / Viewport.virtual_screen_width, y / Viewport.virtual_screen_height)
 
             Dialog.display.Update(elapsed_ms, moved)
 

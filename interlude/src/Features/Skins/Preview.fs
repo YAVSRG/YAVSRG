@@ -152,8 +152,8 @@ type SkinPreview(position: Position) as this =
         fbo.Dispose()
 
     static member LEFT_HAND_SIDE (scale: float32) : Position =
-        let w = Viewport.vwidth * scale
-        let h = Viewport.vheight * scale
+        let w = Viewport.virtual_screen_width * scale
+        let h = Viewport.virtual_screen_height * scale
         {
             Left = 0.0f %+ 50.0f
             Top = 0.5f %- (h * 0.5f)
@@ -162,8 +162,8 @@ type SkinPreview(position: Position) as this =
         }
 
     static member RIGHT_HAND_SIDE (scale: float32) : Position =
-        let w = Viewport.vwidth * scale
-        let h = Viewport.vheight * scale
+        let w = Viewport.virtual_screen_width * scale
+        let h = Viewport.virtual_screen_height * scale
         {
             Left = 1.0f %- (50.0f + w)
             Top = 0.5f %- (h * 0.5f)

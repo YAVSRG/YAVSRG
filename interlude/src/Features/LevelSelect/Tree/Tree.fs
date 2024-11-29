@@ -239,9 +239,9 @@ module Tree =
 
             if currently_drag_scrolling then
                 update_drag_scroll (origin, total_height, tree_height)
-            elif mx > Viewport.vwidth * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
+            elif mx > Viewport.virtual_screen_width * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
                 start_drag_scroll ()
-            elif mx < Viewport.vwidth * 0.2f then
+            elif mx < Viewport.virtual_screen_width * 0.2f then
                 if not scroll_to_chart_once then
                     scroll_to <- ScrollTo.Chart
                     scroll_to_chart_once <- true
@@ -264,7 +264,7 @@ module Tree =
 
         Stencil.start_stencilling false
 
-        Draw.rect (Rect.Create(0.0f, origin, Viewport.vwidth, originB)) Color.Transparent
+        Draw.rect (Rect.Create(0.0f, origin, Viewport.virtual_screen_width, originB)) Color.Transparent
 
         Stencil.start_drawing ()
 
