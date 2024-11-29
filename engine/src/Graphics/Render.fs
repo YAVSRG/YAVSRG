@@ -49,7 +49,7 @@ module FBO =
             Batch.draw ()
 
             if List.isEmpty stack then
-                Shader.set_uniform_mat4 ("uProjection", create_projection false) Shader.main
+                Shader.set_uniform_mat4 (Shader.projection_loc, create_projection false)
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
 
@@ -64,7 +64,7 @@ module FBO =
 
             if List.isEmpty stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-                Shader.set_uniform_mat4 ("uProjection", create_projection true) Shader.main
+                Shader.set_uniform_mat4 (Shader.projection_loc, create_projection true)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
 
@@ -221,7 +221,7 @@ module Render =
         vwidth <- (width / height) * 1080.0f
         vheight <- 1080.0f
 
-        Shader.set_uniform_mat4 ("uProjection", create_projection true) Shader.main
+        Shader.set_uniform_mat4 (Shader.projection_loc, create_projection true)
 
         bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight)
 
@@ -259,7 +259,7 @@ module Render =
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
-        Shader.on Shader.main
+        Shader.init()
         Alpha.change_multiplier 1.0f |> ignore
 
     open SixLabors.ImageSharp
@@ -306,7 +306,7 @@ module Draw =
             if t.TextureUnit = 0 then
                 GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
 
-            Shader.set_uniform_i32 ("sampler", t.TextureUnit) Shader.main
+            Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
             last_texture_handle <- t.Handle
 
         Batch.vertex p1 u1 c1 layer

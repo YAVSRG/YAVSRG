@@ -13,7 +13,7 @@ module Stencil =
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.StencilMask(0xFF)
             GL.ColorMask(false, false, false, false)
-            Shader.set_uniform_i32 ("alphaMasking", (if alpha_masking then 1 else 0)) Shader.main
+            Shader.set_uniform_i32 (Shader.alpha_masking_loc, (if alpha_masking then 1 else 0))
 
         GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
@@ -35,7 +35,7 @@ module Stencil =
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.Disable(EnableCap.StencilTest)
             GL.StencilMask(0x00)
-            Shader.set_uniform_i32 ("alphaMasking", 0) Shader.main
+            Shader.set_uniform_i32 (Shader.alpha_masking_loc, 0)
         else
             GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
 
@@ -46,7 +46,7 @@ module Alpha =
     let change_multiplier (m: float32) : float32 =
         if m <> mult then
             Batch.draw()
-            Shader.set_uniform_f32 ("alphaMult", m) Shader.main
+            Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
             let previous_mult = mult
             mult <- m
             previous_mult

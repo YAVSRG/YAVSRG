@@ -5,11 +5,9 @@ open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Utils
 
-type private Shader = int
-
 module private Shader =
 
-    let compile (stype: ShaderType) (src: string) : Shader =
+    let private compile_shader (stype: ShaderType, src: string) : int =
         let handle = GL.CreateShader stype
         GL.ShaderSource(handle, src)
         GL.CompileShader handle
@@ -21,39 +19,18 @@ module private Shader =
             let output = GL.GetShaderInfoLog handle
 
             if output <> null && output <> "" then
-                Logging.Critical(sprintf "Error compiling shader type %O: %s" stype output)
+                failwithf "Error compiling shader type %O: %s" stype output
 
         handle
 
-    let set_uniform_mat4 (id: string, value: Matrix4) (shader: Shader) =
-        let loc = GL.GetUniformLocation(shader, id)
+    let private get_uniform_location(uniform: string, shader: int) : int =
+        GL.GetUniformLocation(shader, uniform)
 
-        if loc < -1 then
-            Logging.Error(sprintf "Uniform %s not found in this shader" id)
+    let private compile_and_use (vsh: string, fsh: string) : int =
+        printfn "compiling too early"
 
-        GL.UniformMatrix4(loc, false, ref value)
-
-    let set_uniform_f32 (id: string, value: float32) (shader: Shader) =
-        let loc = GL.GetUniformLocation(shader, id)
-
-        if loc < -1 then
-            Logging.Error(sprintf "Uniform %s not found in this shader" id)
-
-        GL.Uniform1(loc, value)
-
-    let set_uniform_i32 (id: string, value: int) (shader: Shader) =
-        let loc = GL.GetUniformLocation(shader, id)
-
-        if loc < -1 then
-            Logging.Error(sprintf "Uniform %s not found in this shader" id)
-
-        GL.Uniform1(loc, value)
-
-    let destroy (shader: Shader) = GL.DeleteProgram shader
-
-    let create (vsh: string) (fsh: string) =
-        let vert = compile ShaderType.VertexShader vsh
-        let frag = compile ShaderType.FragmentShader fsh
+        let vert = compile_shader (ShaderType.VertexShader, vsh)
+        let frag = compile_shader (ShaderType.FragmentShader, fsh)
         let program = GL.CreateProgram()
         GL.AttachShader(program, vert)
         GL.AttachShader(program, frag)
@@ -61,16 +38,34 @@ module private Shader =
         let status = GL.GetProgram(program, GetProgramParameterName.LinkStatus)
 
         if status = 0 then
-            Logging.Critical(sprintf "Program failed to link: %s" (GL.GetProgramInfoLog program))
+            failwithf "Program failed to link: %s" (GL.GetProgramInfoLog program)
 
         GL.DetachShader(program, vert)
         GL.DetachShader(program, frag)
         GL.DeleteShader vert
         GL.DeleteShader frag
 
+        GL.UseProgram program
+
         program
 
-    let on (shader: Shader) = GL.UseProgram shader
+    let set_uniform_mat4 (location: int, value: Matrix4) =
+        GL.UniformMatrix4(location, false, ref value)
 
-    let main =
-        create (get_resource_text "shader.vert") (get_resource_text "shader.frag")
+    let set_uniform_f32 (location: int, value: float32) =
+        GL.Uniform1(location, value)
+
+    let set_uniform_i32 (location: int, value: int) =
+        GL.Uniform1(location, value)
+
+    let mutable projection_loc = 0
+    let mutable alpha_mult_loc = 0
+    let mutable alpha_masking_loc = 0
+    let mutable sampler_loc = 0
+
+    let init() =
+        let program = compile_and_use (get_resource_text "shader.vert", get_resource_text "shader.frag")
+        projection_loc <- get_uniform_location("uProjection", program)
+        alpha_mult_loc <- get_uniform_location("alphaMult", program)
+        alpha_masking_loc <- get_uniform_location("alphaMasking", program)
+        sampler_loc <- get_uniform_location("sampler", program)

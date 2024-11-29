@@ -32,8 +32,8 @@ module Batch =
     let private vertices: Vertex array = Array.zeroCreate VERTEX_COUNT
     let private elements: int array = Array.init VERTEX_COUNT id
 
-    let private ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
-    let private vbo = Buffer.create BufferTarget.ArrayBuffer vertices
+    let private ebo = Buffer.create(BufferTarget.ElementArrayBuffer, elements)
+    let private vbo = Buffer.create(BufferTarget.ArrayBuffer, vertices)
     let private vao = VertexArrayObject.create (vbo, ebo)
 
     // 2 floats in slot 0, for pos
@@ -71,7 +71,7 @@ module Batch =
 
     let internal draw () =
         if vcount > 0 then
-            Buffer.data vertices vcount vbo
+            Buffer.vertex_data(vertices, vcount, vbo)
             GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
 
         vcount <- 0

@@ -2,25 +2,29 @@
 
 open OpenTK.Graphics.OpenGL
 
-type private Buffer = BufferTarget * int
+[<Struct>]
+type private Buffer = 
+    {
+        Target: BufferTarget
+        Handle: int
+    }
 
 module private Buffer =
 
-    let create (btype: BufferTarget) (data: 'Vertex array) : Buffer =
+    let create (btype: BufferTarget, initial_data: 'T array) : Buffer =
         let handle = GL.GenBuffer()
         GL.BindBuffer(btype, handle)
-        GL.BufferData(btype, data.Length * sizeof<'Vertex>, data, BufferUsageHint.DynamicDraw)
-        (btype, handle)
+        GL.BufferData(btype, initial_data.Length * sizeof<'T>, initial_data, BufferUsageHint.DynamicDraw)
+        { Target = btype; Handle = handle }
 
-    let destroy (buf: Buffer) = GL.DeleteBuffer(snd buf)
+    let destroy (buffer: Buffer) = GL.DeleteBuffer(buffer.Handle)
+    let bind (buffer: Buffer) = GL.BindBuffer(buffer.Target, buffer.Handle)
 
-    let bind ((btype, handle): Buffer) = GL.BindBuffer(btype, handle)
-
-    /// Needs to be bound first
-    let data (data: 'Vertex array) (count: int) ((btype, handle): Buffer) =
-        GL.BufferSubData(btype, 0, nativeint (count * sizeof<'Vertex>), data)
-
-type private VertexArrayObject = int
+    let vertex_data (data: 'Vertex array, count: int, buffer: Buffer) =
+        GL.BufferSubData(buffer.Target, 0, nativeint (count * sizeof<'Vertex>), data)
+        
+[<Struct>]
+type private VertexArrayObject = { Handle: int }
 
 module private VertexArrayObject =
 
@@ -29,9 +33,9 @@ module private VertexArrayObject =
         GL.BindVertexArray handle
         Buffer.bind vbo
         Buffer.bind ebo
-        handle
+        { Handle = handle }
 
-    let destroy (vao: VertexArrayObject) = GL.DeleteVertexArray vao
+    let destroy (vao: VertexArrayObject) = GL.DeleteVertexArray vao.Handle
 
     let vertex_attrib_pointer
         (
@@ -42,8 +46,7 @@ module private VertexArrayObject =
             vertex_size: int,
             offset: int
         ) =
-        //Logging.Debug (sprintf "Attribute %i: %i %Os at offset %i; Total stride %i" index count vtype offset vertexSize)
         GL.VertexAttribPointer(index, count, vtype, normalise, vertex_size, offset)
         GL.EnableVertexAttribArray index
 
-    let bind (vao: VertexArrayObject) = GL.BindVertexArray vao
+    let bind (vao: VertexArrayObject) = GL.BindVertexArray vao.Handle
