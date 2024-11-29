@@ -6,10 +6,11 @@ type WindowType =
     | Windowed = 0
     | Borderless = 1
     | Fullscreen = 2
-    | ``Borderless Fullscreen`` = 3
+    | BorderlessNoTaskbar = 3
 
 module WindowResolution =
-    let presets: (int * int) array =
+
+    let PRESETS: (int * int) array =
         [|
             800, 600
             1024, 768
@@ -38,7 +39,6 @@ type FrameLimit =
 type Config =
     {
         WorkingDirectory: string
-        Locale: string
         WindowMode: Setting<WindowType>
         WindowResolution: Setting<int * int>
         FullscreenVideoMode: Setting<FullscreenVideoMode>
@@ -55,7 +55,6 @@ type Config =
     static member Default =
         {
             WorkingDirectory = ""
-            Locale = "en_GB.txt"
             WindowMode = Setting.simple WindowType.Fullscreen
             WindowResolution = Setting.simple (1024, 768)
             FullscreenVideoMode =

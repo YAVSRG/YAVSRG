@@ -24,7 +24,7 @@ type WindowedResolution(setting: Setting<int * int>) as this =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
-                    Items = WindowResolution.presets |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                    Items = WindowResolution.PRESETS |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
                     ColorFunc = K Colors.text
                     Setting = setting
                 }

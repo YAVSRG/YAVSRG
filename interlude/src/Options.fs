@@ -142,6 +142,8 @@ module Options =
     [<Json.AutoCodec(false)>]
     type GameOptions =
         {
+            Language: Setting<string>
+
             VisualOffset: Setting.Bounded<GameplayTime>
             AudioOffset: Setting.Bounded<GameplayTime>
             AudioVolume: Setting.Bounded<float>
@@ -206,6 +208,8 @@ module Options =
         }
         static member Default =
             {
+                Language = Setting.simple "en_GB"
+
                 VisualOffset = 0.0f<ms / rate> |> Setting.bounded  (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
                 AudioOffset =  0.0f<ms / rate> |> Setting.bounded (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
                 AudioVolume = Setting.percent 0.05
@@ -499,7 +503,6 @@ module Options =
         |> ignore
 
         config <- load_important_json_file "Config" CONFIG_PATH true
-        Localisation.load_file config.Locale
 
         if config.WorkingDirectory <> "" then
             Directory.SetCurrentDirectory config.WorkingDirectory
@@ -511,6 +514,7 @@ module Options =
             Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
 
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
+        Localisation.load_language options.Language.Value
 
     let deinit () =
         try

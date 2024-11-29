@@ -177,7 +177,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 GLFW.ShowWindow(this.WindowPtr)
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
-            | WindowType.``Borderless Fullscreen`` ->
+            | WindowType.BorderlessNoTaskbar ->
                 GLFW.SetWindowMonitor(
                     this.WindowPtr,
                     NativePtr.nullPtr<Monitor>,
@@ -229,7 +229,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
                 GLFW.ShowWindow(this.WindowPtr)
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
-            | WindowType.``Borderless Fullscreen`` ->
+            | WindowType.BorderlessNoTaskbar ->
                 base.WindowBorder <- WindowBorder.Hidden
                 GLFW.SetWindowPos(this.WindowPtr, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
                 GLFW.SetWindowSize(this.WindowPtr, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
