@@ -150,7 +150,7 @@ type SkinPreview(position: Position) as this =
 
     member this.Destroy() = 
         instances <- instances |> List.except [this]
-        fbo.Dispose()
+        (fbo :> System.IDisposable).Dispose()
 
     static member LEFT_HAND_SIDE (scale: float32) : Position =
         let w = Render.width() * scale

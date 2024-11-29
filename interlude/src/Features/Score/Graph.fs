@@ -464,4 +464,4 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     interface System.IDisposable with
         override this.Dispose() = 
             for i = 0 to 9 do GraphSettings.column_filter.[i] <- true
-            fbo.Dispose()
+            (fbo :> System.IDisposable).Dispose()

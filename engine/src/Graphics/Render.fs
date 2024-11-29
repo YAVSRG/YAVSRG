@@ -79,8 +79,9 @@ module Render =
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
-
-        member this.Dispose() = in_use.[this.fbo_index] <- false
+                
+        interface System.IDisposable with
+            override this.Dispose() = in_use.[this.fbo_index] <- false
 
     let private initialise_fbos () =
         for i in 0 .. (FBO_POOL_SIZE - 1) do
@@ -170,7 +171,7 @@ module Render =
         { 0 .. (FBO_POOL_SIZE - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
-            | None -> failwith "Ran out of FBOs! (6 max) - Some are likely not being disposed after use"
+            | None -> failwithf "Ran out of FBOs! (%i max) - Some are likely not being disposed after use" FBO_POOL_SIZE
             | Some i ->
                 let texture: Texture =
                     {
@@ -295,26 +296,49 @@ module Render =
         assert(alpha_mult = 1.0f)
         GL.Flush()
 
-    let internal init (width, height) =
-        let mutable major = 0
-        let mutable minor = 0
-        let mutable rev = 0
-        GLFW.GetVersion(&major, &minor, &rev)
+    // todo: collect all this stuff as a method on the Window + what settings user has for the window
+    let debug_info() : string =
 
-        Logging.Debug(
-            sprintf
-                "GL %s | %s | U:%i T:%i L:%i | GLFW %i.%i.%i | C:%i"
-                (GL.GetString StringName.Version)
-                (GL.GetString StringName.Renderer)
+        let glfw_version =
+            let mutable major = 0
+            let mutable minor = 0
+            let mutable rev = 0
+            GLFW.GetVersion(&major, &minor, &rev)
+            sprintf "%i.%i.%i" major minor rev
+
+        let texture_units =
+            sprintf 
+                "%i units; %i max size; %i max layers"
                 Texture.MAX_TEXTURE_UNITS
                 Texture.MAX_TEXTURE_SIZE
                 Texture.MAX_ARRAY_TEXTURE_LAYERS
-                major
-                minor
-                rev
-                Environment.ProcessorCount
-        )
 
+        let specs =
+            sprintf 
+                "x64: %A Cores: %i Memory: %i" 
+                Environment.Is64BitProcess
+                Environment.ProcessorCount
+                Environment.WorkingSet
+
+        sprintf 
+            """-- DEBUG INFO (%s) --
+            GLFW Version: %s
+            GL Version: %s
+            GL Renderer: %s
+            Texture units: %s
+            OS: %s
+            Process: %s
+            """
+            (DateTime.UtcNow.ToLongTimeString())
+            glfw_version
+            (GL.GetString StringName.Version)
+            (GL.GetString StringName.Renderer)
+            texture_units
+            Environment.OSVersion.VersionString
+            specs
+
+    let internal init (width, height) =
+        Logging.Debug(debug_info())
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
