@@ -23,6 +23,7 @@ module Render =
     let mutable internal _height = snd DEFAULT_SCREEN |> float32
 
     let mutable internal _bounds = Rect.ZERO
+    let mutable internal _batch : Batch = Unchecked.defaultof<_> // todo: make private
 
     let width() = _width
     let height() = _height
@@ -57,7 +58,7 @@ module Render =
         member this.Sprite = this.sprite
 
         member this.Bind(clear) =
-            Batch.draw ()
+            _batch.Draw ()
 
             if List.isEmpty fbo_stack then
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_projection(_width, _height))
@@ -70,7 +71,7 @@ module Render =
             fbo_stack <- this.fbo_id :: fbo_stack
 
         member this.Unbind() =
-            Batch.draw ()
+            _batch.Draw ()
             fbo_stack <- List.tail fbo_stack
 
             if List.isEmpty fbo_stack then
@@ -231,7 +232,7 @@ module Render =
     let mutable private stencil_depth = 0
 
     let stencil_create (use_alpha_masking) =
-        Batch.draw ()
+        _batch.Draw ()
 
         if stencil_depth = 0 then
             GL.Enable(EnableCap.StencilTest)
@@ -245,14 +246,14 @@ module Render =
         stencil_depth <- stencil_depth + 1
 
     let stencil_begin_draw () =
-        Batch.draw ()
+        _batch.Draw ()
 
         GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
 
     let stencil_finish () =
-        Batch.draw ()
+        _batch.Draw ()
 
         stencil_depth <- stencil_depth - 1
 
@@ -269,7 +270,7 @@ module Render =
     let alpha_multiplier_begin (m: float32) : float32 =
         assert(m >= 0.0f && m <= 1.0f)
         if m <> alpha_mult then
-            Batch.draw()
+            _batch.Draw ()
             Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
             let previous_mult = alpha_mult
             alpha_mult <- m
@@ -279,17 +280,17 @@ module Render =
     let alpha_multiplier_restore (m: float32) =
         assert(m >= 0.0f && m <= 1.0f)
         if m <> alpha_mult then
-            Batch.draw()
+            _batch.Draw ()
             Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
             let previous_mult = alpha_mult
             alpha_mult <- m
 
     let internal start () =
         GL.Clear(ClearBufferMask.ColorBufferBit)
-        Batch.start ()
+        _batch.Start ()
 
     let internal finish () =
-        Batch.finish ()
+        _batch.Finish ()
         assert(stencil_depth = 0)
         assert(alpha_mult = 1.0f)
         GL.Flush()
@@ -329,6 +330,7 @@ module Render =
         viewport_resized(width, height)
 
         Shader.init()
+        _batch <- Batch.Create(1024)
         alpha_multiplier_restore 1.0f
 
     open SixLabors.ImageSharp
@@ -355,13 +357,12 @@ module Draw =
     let mutable private last_texture_handle = -1
 
     let untextured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) =
-
-        Batch.vertex p1 Vector2.Zero c1 0
-        Batch.vertex p2 Vector2.Zero c2 0
-        Batch.vertex p3 Vector2.Zero c3 0
-        Batch.vertex p1 Vector2.Zero c1 0
-        Batch.vertex p3 Vector2.Zero c3 0
-        Batch.vertex p4 Vector2.Zero c4 0
+        Render._batch.Vertex(p1, Vector2.Zero, c1, 0)
+        Render._batch.Vertex(p2, Vector2.Zero, c2, 0)
+        Render._batch.Vertex(p3, Vector2.Zero, c3, 0)
+        Render._batch.Vertex(p1, Vector2.Zero, c1, 0)
+        Render._batch.Vertex(p3, Vector2.Zero, c3, 0)
+        Render._batch.Vertex(p4, Vector2.Zero, c4, 0)
 
     let quad
         (struct (p1, p2, p3, p4): Quad)
@@ -370,20 +371,20 @@ module Draw =
         =
 
         if last_texture_handle <> t.Handle then
-            Batch.draw ()
+            Render._batch.Draw ()
 
             if t.TextureUnit = 0 then
                 GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
 
             Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
             last_texture_handle <- t.Handle
-
-        Batch.vertex p1 u1 c1 layer
-        Batch.vertex p2 u2 c2 layer
-        Batch.vertex p3 u3 c3 layer
-        Batch.vertex p1 u1 c1 layer
-        Batch.vertex p3 u3 c3 layer
-        Batch.vertex p4 u4 c4 layer
+            
+        Render._batch.Vertex(p1, u1, c1, layer)
+        Render._batch.Vertex(p2, u2, c2, layer)
+        Render._batch.Vertex(p3, u3, c3, layer)
+        Render._batch.Vertex(p1, u1, c1, layer)
+        Render._batch.Vertex(p3, u3, c3, layer)
+        Render._batch.Vertex(p4, u4, c4, layer)
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
