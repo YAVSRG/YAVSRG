@@ -59,14 +59,14 @@ module Glint =
     let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) =
         if percent <= 0.0f || percent >= 1.0f then () else
 
-        Stencil.start_stencilling false
+        Render.stencil_create false
         Draw.rect bounds Color.Transparent
 
-        Stencil.start_drawing ()
+        Render.stencil_begin_draw ()
 
         draw percent bounds color
 
-        Stencil.finish()
+        Render.stencil_finish()
 
     let spot_draw (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
         let t = 4.0f * (time - time * time)

@@ -118,7 +118,7 @@ module Logo =
 
                     /// STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
 
-                    Stencil.start_stencilling (true)
+                    Render.stencil_create (true)
 
                     // center triangle
                     Draw.untextured_quad
@@ -139,7 +139,7 @@ module Logo =
 
                     /// RENDER VISUALISER AND RAIN INSIDE STENCIL
 
-                    Stencil.start_drawing ()
+                    Render.stencil_begin_draw ()
                     Draw.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.Texture "rain"
                     let v = float32 counter.Time
@@ -185,7 +185,7 @@ module Logo =
 
                         prev <- level
 
-                    Stencil.finish ()
+                    Render.stencil_finish ()
                     Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
         override this.Update(elapsed_ms, moved) =

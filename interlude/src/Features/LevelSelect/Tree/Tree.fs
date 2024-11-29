@@ -264,16 +264,16 @@ module Tree =
 
         let screen_bounds = Render.bounds()
 
-        Stencil.start_stencilling false
+        Render.stencil_create false
 
         Draw.rect (Rect.Create(0.0f, origin, screen_bounds.Width, originB)) Color.Transparent
 
-        Stencil.start_drawing ()
+        Render.stencil_begin_draw ()
 
         let bottom_edge =
             List.fold (fun t (i: GroupItem) -> i.Draw(t, origin, originB)) scroll_pos.Value groups
 
-        Stencil.finish ()
+        Render.stencil_finish ()
 
         Draw.rect 
             (Rect.Create(

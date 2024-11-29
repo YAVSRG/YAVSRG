@@ -228,6 +228,51 @@ module Render =
 
         initialise_fbos ()
 
+    let mutable private stencil_depth = 0
+
+    let stencil_create (alpha_masking) =
+        Batch.draw ()
+
+        if stencil_depth = 0 then
+            GL.Enable(EnableCap.StencilTest)
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.StencilMask(0xFF)
+            GL.ColorMask(false, false, false, false)
+            Shader.set_uniform_i32 (Shader.alpha_masking_loc, (if alpha_masking then 1 else 0))
+
+        GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
+        stencil_depth <- stencil_depth + 1
+
+    let stencil_begin_draw () =
+        Batch.draw ()
+
+        GL.ColorMask(true, true, true, true)
+        GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
+
+    let stencil_finish () =
+        Batch.draw ()
+
+        stencil_depth <- stencil_depth - 1
+
+        if stencil_depth = 0 then
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.Disable(EnableCap.StencilTest)
+            GL.StencilMask(0x00)
+            Shader.set_uniform_i32 (Shader.alpha_masking_loc, 0)
+        else
+            GL.StencilFunc(StencilFunction.Lequal, stencil_depth, 0xFF)
+
+    let internal start () =
+        GL.Clear(ClearBufferMask.ColorBufferBit)
+        Batch.start ()
+
+    let internal finish () =
+        Batch.finish ()
+        assert(stencil_depth = 0)
+        GL.Flush()
+
     let internal init (width, height) =
         let mutable major = 0
         let mutable minor = 0
@@ -264,14 +309,6 @@ module Render =
 
         Shader.init()
         Alpha.change_multiplier 1.0f |> ignore
-
-    let internal start () =
-        GL.Clear(ClearBufferMask.ColorBufferBit)
-        Batch.start ()
-
-    let internal finish () =
-        Batch.finish ()
-        GL.Flush()
 
     open SixLabors.ImageSharp
     open SixLabors.ImageSharp.Processing

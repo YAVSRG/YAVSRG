@@ -50,9 +50,9 @@ type Jukebox() =
 
         let song_title_width = Text.measure(Style.font, song_title) * 25.0f
 
-        Stencil.start_stencilling false
+        Render.stencil_create false
         Draw.rect carousel_bounds Color.Transparent
-        Stencil.start_drawing ()
+        Render.stencil_begin_draw ()
         
         if song_title_width + CAROUSEL_GAP < carousel_bounds.Width then
             Text.draw_b(Style.font, song_title, 25.0f, carousel_bounds.Left + (carousel_bounds.Width - song_title_width) * 0.5f, this.Bounds.Top + 7.0f, Colors.text_subheading)
@@ -61,7 +61,7 @@ type Jukebox() =
             Text.draw_b(Style.font, song_title, 25.0f, carousel_bounds.Left - x, this.Bounds.Top + 7.0f, Colors.text_subheading)
             Text.draw_b(Style.font, song_title, 25.0f, carousel_bounds.Left + song_title_width + CAROUSEL_GAP - x, this.Bounds.Top + 7.0f, Colors.text_subheading)
 
-        Stencil.finish()
+        Render.stencil_finish()
 
 
     override this.Update(elapsed_ms, moved) =

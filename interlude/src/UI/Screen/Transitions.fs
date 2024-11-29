@@ -37,26 +37,26 @@ module Transitions =
         Bubble.draw (1400.0f, 700.0f) 50.0f 75.0f Color.White 1.4f 1.7f amount
 
     let private draw_internal (t: Transition) inbound amount bounds =
-        Stencil.start_stencilling false
+        Render.stencil_create false
         match t with
         | Default
         | UnderLogo ->
             DiamondsWipe.draw inbound amount bounds
-            Stencil.start_drawing ()
+            Render.stencil_begin_draw ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
 
         | EnterGameplayNoFadeAudio
         | EnterGameplayFadeAudio ->
             TriangleWipe.draw_downward inbound amount bounds
-            Stencil.start_drawing ()
+            Render.stencil_begin_draw ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
 
         | LeaveGameplay ->
             TriangleWipe.draw_upward inbound amount bounds
-            Stencil.start_drawing ()
+            Render.stencil_begin_draw ()
             Background.draw (bounds, Palette.color (255.0f * amount |> int, 0.3f, 0.5f), 1.0f)
 
-        Stencil.finish ()
+        Render.stencil_finish ()
 
     let private in_timer = Animation.Delay 500.0
     let private out_timer = Animation.Delay 500.0

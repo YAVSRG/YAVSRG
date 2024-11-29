@@ -114,32 +114,32 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         let before_alpha = Alpha.change_multiplier 1.0f
         match transition with
         | Transition.In ->
-            Stencil.start_stencilling false
+            Render.stencil_create false
             let pc = (transition_timer.Time / transition_timer.Interval |> float32)
             let pc2 = pc * pc
             StripeWipe.draw_left_to_right 0.0f pc (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 
-            Stencil.start_drawing()
+            Render.stencil_begin_draw()
             Draw.rect this.Bounds Colors.shadow_2.O1
             Draw.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan_accent.O2
             base.Draw()
             StripeWipe.draw_left_to_right (pc2 - 0.05f) pc this.Bounds Colors.cyan
 
-            Stencil.finish()
+            Render.stencil_finish()
 
         | Transition.Out ->
-            Stencil.start_stencilling false
+            Render.stencil_create false
             let pc = (transition_timer.Time / transition_timer.Interval |> float32)
             let pc2 = (2.0f - pc) * pc
             StripeWipe.draw_left_to_right pc 1.0f (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 
-            Stencil.start_drawing()
+            Render.stencil_begin_draw()
             Draw.rect this.Bounds Colors.shadow_2.O1
             Draw.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan_accent.O2
             base.Draw()
             StripeWipe.draw_left_to_right (pc - 0.05f) pc2 this.Bounds Colors.cyan
 
-            Stencil.finish()
+            Render.stencil_finish()
 
         | Transition.Shown ->
             Draw.rect this.Bounds Colors.shadow_2.O1
