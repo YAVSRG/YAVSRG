@@ -73,7 +73,7 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
 and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     inherit StaticWidget(NodeType.None)
 
-    let fbo = FBO.create ()
+    let fbo = Render.borrow_fbo()
     let mutable refresh = true
     let mutable expanded = false
     let mutable snapshot_index = 0
@@ -430,7 +430,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white
 
         Draw.rect this.Bounds Colors.black.O3
-        Draw.sprite Viewport.bounds Color.White fbo.sprite
+        Draw.sprite (Render.bounds()) Color.White fbo.Sprite
 
         let snapshots = stats.Value.GraphPoints
         if this.Bounds.Contains(Mouse.pos ()) && snapshots.Length > 0 then

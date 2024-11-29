@@ -93,11 +93,11 @@ module Screen =
             if moved then
                 this.Bounds <-
                     if Toolbar.hidden then
-                        Viewport.bounds
+                        Render.bounds()
                     else
-                        Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
+                        Render.bounds().Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
 
-                this.VisibleBounds <- Viewport.bounds
+                this.VisibleBounds <- Render.bounds()
 
             current.Update(elapsed_ms, moved)
 
@@ -106,11 +106,11 @@ module Screen =
 
             this.Bounds <-
                 if Toolbar.hidden then
-                    Viewport.bounds
+                    Render.bounds()
                 else
-                    Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
+                    Render.bounds().Shrink(0.0f, Toolbar.HEIGHT * Toolbar.slideout_amount.Value)
 
-            this.VisibleBounds <- Viewport.bounds
+            this.VisibleBounds <- Render.bounds()
             current.Init this
 
         override this.Draw() = current.Draw()
@@ -170,9 +170,9 @@ module Screen =
             if current_type <> Type.Play || Dialog.exists () then
                 Notifications.display.Update(elapsed_ms, moved)
 
-            if Viewport.virtual_screen_width > 0.0f then
-                let x, y = Mouse.pos ()
-                Background.set_parallax_pos (x / Viewport.virtual_screen_width, y / Viewport.virtual_screen_height)
+            assert(Render.width() > 0.0f)
+            let x, y = Mouse.pos ()
+            Background.set_parallax_pos (x / Render.width(), y / Render.height())
 
             Dialog.display.Update(elapsed_ms, moved)
 

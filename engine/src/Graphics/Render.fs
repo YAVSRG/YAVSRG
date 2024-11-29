@@ -11,13 +11,25 @@ open Percyqaz.Common
 (*
     Render handling to be used from Game
 *)
-module Viewport =
 
-    let DEFAULT_SCREEN = (1920, 1080)
-    let mutable (viewport_width, viewport_height) = DEFAULT_SCREEN
-    let mutable (virtual_screen_width, virtual_screen_height) = (1920.0f, 1080.0f)
-    let mutable bounds = Rect.ZERO
+module Render =
 
+    let internal DEFAULT_SCREEN = (1920, 1080)
+
+    let mutable internal _viewport_width = fst DEFAULT_SCREEN
+    let mutable internal _viewport_height = snd DEFAULT_SCREEN
+
+    let mutable internal _width = fst DEFAULT_SCREEN |> float32
+    let mutable internal _height = snd DEFAULT_SCREEN |> float32
+
+    let mutable internal _bounds = Rect.ZERO
+
+    let width() = _width
+    let height() = _height
+    let bounds() = _bounds
+
+    let viewport_size() = _viewport_width, _viewport_height
+    
     let create_flipped_projection (width: float32, height: float32) =
         Matrix4.Identity
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
@@ -29,29 +41,26 @@ module Viewport =
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
 
-open Viewport
-
-module FBO =
-
-    let private POOL_SIZE = 6
-    let private fbo_ids = Array.zeroCreate<int> POOL_SIZE
-    let private texture_ids = Array.zeroCreate<int> POOL_SIZE
-    let private in_use = Array.zeroCreate<bool> POOL_SIZE
+    let private FBO_POOL_SIZE = 6
+    let private fbo_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private texture_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private in_use = Array.zeroCreate<bool> FBO_POOL_SIZE
 
     let mutable private fbo_stack: int list = []
 
     type FBO =
-        {
+        internal {
             sprite: Sprite
             fbo_id: int
             fbo_index: int
         }
+        member this.Sprite = this.sprite
 
         member this.Bind(clear) =
             Batch.draw ()
 
             if List.isEmpty fbo_stack then
-                Shader.set_uniform_mat4 (Shader.projection_loc, create_projection(virtual_screen_width, virtual_screen_height))
+                Shader.set_uniform_mat4 (Shader.projection_loc, create_projection(_width, _height))
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
 
@@ -66,14 +75,14 @@ module FBO =
 
             if List.isEmpty fbo_stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-                Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(virtual_screen_width, virtual_screen_height))
+                Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
 
         member this.Dispose() = in_use.[this.fbo_index] <- false
 
-    let internal init () =
-        for i in 0 .. (POOL_SIZE - 1) do
+    let private initialise_fbos () =
+        for i in 0 .. (FBO_POOL_SIZE - 1) do
             if (texture_ids.[i] <> 0) then
                 GL.DeleteTexture(texture_ids.[i])
                 texture_ids.[i] <- 0
@@ -89,8 +98,8 @@ module FBO =
                 TextureTarget.Texture2DArray,
                 0,
                 PixelInternalFormat.Rgba,
-                viewport_width,
-                viewport_height,
+                _viewport_width,
+                _viewport_height,
                 2,
                 0,
                 PixelFormat.Rgba,
@@ -142,8 +151,8 @@ module FBO =
             GL.RenderbufferStorage(
                 RenderbufferTarget.RenderbufferExt,
                 RenderbufferStorage.Depth24Stencil8,
-                viewport_width,
-                viewport_height
+                _viewport_width,
+                _viewport_height
             )
 
             GL.FramebufferTextureLayer(
@@ -156,8 +165,8 @@ module FBO =
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
 
-    let create () =
-        { 0 .. (POOL_SIZE - 1) }
+    let borrow_fbo () =
+        { 0 .. (FBO_POOL_SIZE - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
             | None -> failwith "Ran out of FBOs! (6 max) - Some are likely not being disposed after use"
@@ -167,8 +176,8 @@ module FBO =
                         Handle = texture_ids.[i]
                         TextureUnit = 0
 
-                        Width = viewport_width
-                        Height = viewport_height
+                        Width = _viewport_width
+                        Height = _viewport_height
                         Layers = 1
 
                         References = -1
@@ -182,8 +191,8 @@ module FBO =
                         Y = 0
                         Z = 1
 
-                        GridWidth = viewport_width
-                        GridHeight = viewport_height
+                        GridWidth = _viewport_width
+                        GridHeight = _viewport_height
 
                         Rows = 1
                         Columns = 1
@@ -203,25 +212,23 @@ module FBO =
                 fbo.Bind true
                 fbo
 
-module Render =
-
-    let internal resize (width, height) =
+    let internal viewport_resized (width, height) =
         assert(width <> 0 && height <> 0)
         
-        viewport_width <- width
-        viewport_height <- height
+        _viewport_width <- width
+        _viewport_height <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
         let width, height = float32 width, float32 height
-        virtual_screen_width <- (width / height) * 1080.0f
-        virtual_screen_height <- 1080.0f
+        _width <- (width / height) * 1080.0f
+        _height <- 1080.0f
 
-        Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(virtual_screen_width, virtual_screen_height))
+        Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
 
-        bounds <- Rect.Box(0.0f, 0.0f, virtual_screen_width, virtual_screen_height)
+        _bounds <- Rect.Box(0.0f, 0.0f, _width, _height)
 
-        FBO.init ()
+        initialise_fbos ()
 
-    let internal init () =
+    let internal init (width, height) =
         let mutable major = 0
         let mutable minor = 0
         let mutable rev = 0
@@ -247,6 +254,14 @@ module Render =
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
+
+        let width, height =
+            if width <= 0 || height <= 0 then
+                DEFAULT_SCREEN
+            else width, height
+
+        viewport_resized(width, height)
+
         Shader.init()
         Alpha.change_multiplier 1.0f |> ignore
 
@@ -262,13 +277,13 @@ module Render =
     open SixLabors.ImageSharp.Processing
 
     let take_screenshot () : Image<Rgba32> =
-        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(viewport_width * viewport_height * 4)
+        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
 
-        GL.ReadPixels(0, 0, viewport_width, viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        GL.ReadPixels(0, 0, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
 
         let image: Image<Rgba32> =
             Image<Rgba32>
-                .LoadPixelData(new Span<byte>(data.ToPointer(), (viewport_width * viewport_height * 4)), viewport_width, viewport_height)
+                .LoadPixelData(new Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
 
         image.Mutate(fun i -> i.RotateFlip(RotateMode.Rotate180, FlipMode.Horizontal) |> ignore)
         image

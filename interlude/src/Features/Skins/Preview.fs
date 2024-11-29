@@ -17,7 +17,7 @@ type SkinPreview(position: Position) as this =
 
     static let mutable instances = []
 
-    let fbo = FBO.create ()
+    let fbo = Render.borrow_fbo ()
 
     let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
         if (HudElement.enabled_setting elem).Value then
@@ -119,7 +119,7 @@ type SkinPreview(position: Position) as this =
         for instance in instances do instance.Refresh()
 
     override this.Update(elapsed_ms, moved) =
-        this.Bounds <- Viewport.bounds
+        this.Bounds <- Render.bounds()
         renderer.Update(elapsed_ms, moved)
         base.Update(elapsed_ms, moved)
         if (Mouse.hover bounds_placeholder.Bounds && Mouse.left_click()) || (%%"preview").Tapped() then
@@ -134,17 +134,18 @@ type SkinPreview(position: Position) as this =
 
     override this.Draw() =
         fbo.Bind true
-        Background.draw (Viewport.bounds, Colors.white, 1.0f)
-        Draw.rect Viewport.bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
+        let screen_bounds = Render.bounds()
+        Background.draw (screen_bounds, Colors.white, 1.0f)
+        Draw.rect screen_bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()
         Draw.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
-        Draw.sprite bounds_placeholder.Bounds Color.White fbo.sprite
+        Draw.sprite bounds_placeholder.Bounds Color.White fbo.Sprite
         base.Draw()
 
     override this.Init(parent: Widget) =
         base.Init parent
-        this.Bounds <- Viewport.bounds
+        this.Bounds <- Render.bounds()
         renderer.Init this
 
     member this.Destroy() = 
@@ -152,8 +153,8 @@ type SkinPreview(position: Position) as this =
         fbo.Dispose()
 
     static member LEFT_HAND_SIDE (scale: float32) : Position =
-        let w = Viewport.virtual_screen_width * scale
-        let h = Viewport.virtual_screen_height * scale
+        let w = Render.width() * scale
+        let h = Render.height() * scale
         {
             Left = 0.0f %+ 50.0f
             Top = 0.5f %- (h * 0.5f)
@@ -162,8 +163,8 @@ type SkinPreview(position: Position) as this =
         }
 
     static member RIGHT_HAND_SIDE (scale: float32) : Position =
-        let w = Viewport.virtual_screen_width * scale
-        let h = Viewport.virtual_screen_height * scale
+        let w = Render.width() * scale
+        let h = Render.height() * scale
         {
             Left = 1.0f %- (50.0f + w)
             Top = 0.5f %- (h * 0.5f)

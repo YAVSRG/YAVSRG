@@ -68,7 +68,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             | _ -> if CollectionActions.is_liked cc then Icons.HEART else ""
 
     override this.Bounds(top) =
-        Rect.Create(Viewport.virtual_screen_width * 0.4f + Style.PADDING, top, Viewport.virtual_screen_width, top + CHART_HEIGHT)
+        Rect.Create(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
 
     override this.Selected = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 

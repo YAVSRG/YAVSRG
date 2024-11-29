@@ -139,10 +139,10 @@ type ConfigPreviewNew(position: HudPosition) =
                 Rect
                     .Box(0.0f, 0.0f,
                         width,
-                        Viewport.bounds.Height
+                        Render.height()
                     )
             else
-                Viewport.bounds
+                Render.bounds()
         let bounds = Position.calculate { Left = position.Left; Top = position.Top; Right = position.Right; Bottom = position.Bottom } container
         bounds.Width, bounds.Height
 

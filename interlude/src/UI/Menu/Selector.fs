@@ -68,7 +68,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
     let dropdown_wrapper = DropdownWrapper(fun d ->
-        let height = min d.Height (Viewport.virtual_screen_height - this.Bounds.Bottom - Style.PADDING * 2.0f)
+        let height = min d.Height (Render.height() - this.Bounds.Bottom - Style.PADDING * 2.0f)
         Position.BorderB(height + 2.0f * Style.PADDING).Shrink(Style.PADDING)
     )
 

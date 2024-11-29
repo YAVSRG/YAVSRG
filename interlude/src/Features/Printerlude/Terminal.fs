@@ -138,7 +138,7 @@ module Terminal =
             ()
         else
 
-        let bounds = Viewport.bounds.Shrink(100.0f)
+        let bounds = Render.bounds().Shrink(100.0f)
 
         Draw.rect (bounds.Expand 5.0f) (Colors.white.O2)
         Draw.rect (bounds.ShrinkB 70.0f) (Colors.shadow_1.O3)

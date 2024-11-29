@@ -239,9 +239,9 @@ module Tree =
 
             if currently_drag_scrolling then
                 update_drag_scroll (origin, total_height, tree_height)
-            elif mx > Viewport.virtual_screen_width * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
+            elif mx > Render.width() * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
                 start_drag_scroll ()
-            elif mx < Viewport.virtual_screen_width * 0.2f then
+            elif mx < Render.width() * 0.2f then
                 if not scroll_to_chart_once then
                     scroll_to <- ScrollTo.Chart
                     scroll_to_chart_once <- true
@@ -262,9 +262,11 @@ module Tree =
 
     let draw (origin: float32, originB: float32) =
 
+        let screen_bounds = Render.bounds()
+
         Stencil.start_stencilling false
 
-        Draw.rect (Rect.Create(0.0f, origin, Viewport.virtual_screen_width, originB)) Color.Transparent
+        Draw.rect (Rect.Create(0.0f, origin, screen_bounds.Width, originB)) Color.Transparent
 
         Stencil.start_drawing ()
 
@@ -275,9 +277,9 @@ module Tree =
 
         Draw.rect 
             (Rect.Create(
-                Viewport.bounds.Right - 10.0f,
+                screen_bounds.Right - 10.0f,
                 origin + 5.0f,
-                Viewport.bounds.Right,
+                screen_bounds.Right,
                 originB - 50.0f
             ))
             (Colors.shadow_2.O3a scroll_fade.Alpha)
@@ -290,9 +292,9 @@ module Tree =
 
         Draw.rect
             (Rect.Create(
-                Viewport.bounds.Right - 10.0f,
+                screen_bounds.Right - 10.0f,
                 origin + 5.0f + scroll_bar_pos,
-                Viewport.bounds.Right,
+                screen_bounds.Right,
                 origin + 30.0f + scroll_bar_pos
             ))
             Colors.white

@@ -112,7 +112,7 @@ module private Wedge =
                 col.AsQuad
 
     let draw_centered =
-        draw <| new Vector2(Viewport.virtual_screen_width * 0.5f, Viewport.virtual_screen_height * 0.5f)
+        draw <| new Vector2(Render.width() * 0.5f, Render.height() * 0.5f)
 
     let variant_1 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float

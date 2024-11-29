@@ -11,13 +11,13 @@ type Overlay(node_type: NodeType) =
 
     override this.Init(parent: Widget) =
         base.Init parent
-        this.Bounds <- Viewport.bounds
-        this.VisibleBounds <- Viewport.bounds
+        this.Bounds <- Render._bounds
+        this.VisibleBounds <- Render._bounds
 
     override this.Update(elapsed_ms, moved) =
         if moved then
-            this.Bounds <- Viewport.bounds
-            this.VisibleBounds <- Viewport.bounds
+            this.Bounds <- Render._bounds
+            this.VisibleBounds <- Render._bounds
 
 [<Sealed>]
 type OverlayContainer(child: Widget) as this =

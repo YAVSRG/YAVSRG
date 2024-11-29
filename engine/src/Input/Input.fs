@@ -142,8 +142,8 @@ module internal InputThread =
 
     let private cursor_pos_callback (_: nativeptr<Window>) (x: float) (y: float) =
         lock LOCK_OBJ (fun () -> 
-            mouse_x <- Math.Clamp(Viewport.virtual_screen_width / float32 Viewport.viewport_width * float32 x, 0.0f, Viewport.virtual_screen_width)
-            mouse_y <- Math.Clamp(Viewport.virtual_screen_height / float32 Viewport.viewport_height * float32 y, 0.0f, Viewport.virtual_screen_height)
+            mouse_x <- Math.Clamp(Render._width / float32 Render._viewport_width * float32 x, 0.0f, Render._width)
+            mouse_y <- Math.Clamp(Render._height / float32 Render._viewport_height * float32 y, 0.0f, Render._height)
         )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 

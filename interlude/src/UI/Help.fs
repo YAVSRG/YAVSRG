@@ -30,6 +30,8 @@ module HelpOverlay =
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)
 
+            let screen_bounds = Render.bounds()
+
             match current_info with
             | None -> ()
             | Some t ->
@@ -41,16 +43,16 @@ module HelpOverlay =
                 else 
                     t.Fade.Update elapsed_ms
 
-                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
                 let width, height = t.Size
 
                 let x =
                     outline.CenterX - width * 0.5f
-                    |> min (Viewport.bounds.Width - width - SPACING)
+                    |> min (screen_bounds.Width - width - SPACING)
                     |> max SPACING
 
                 let y =
-                    if outline.Top > Viewport.bounds.CenterY then
+                    if outline.Top > screen_bounds.CenterY then
                         outline.Top - SPACING - height
                     else
                         outline.Bottom + SPACING
@@ -64,7 +66,8 @@ module HelpOverlay =
             match current_info with
             | None -> ()
             | Some t ->
-                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let screen_bounds = Render.bounds()
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
                 
                 let alpha = t.Fade.Alpha
 
@@ -73,18 +76,18 @@ module HelpOverlay =
                     LoadingAnimation.draw_border_piece outline 0.0f (min 0.99999f t.Fade.Value) (Colors.yellow_accent.O3a alpha)
 
                     // blackout effect
-                    Draw.rect (Viewport.bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
-                    Draw.rect (Viewport.bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
+                    Draw.rect (screen_bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
+                    Draw.rect (screen_bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
 
                     Draw.rect
-                        (Viewport.bounds
+                        (screen_bounds
                             .ShrinkL(outline.Left)
                             .SliceL(outline.Width)
                             .SliceT(outline.Top))
                         (Colors.shadow_2.O3a alpha)
 
                     Draw.rect
-                        (Viewport.bounds
+                        (screen_bounds
                             .ShrinkL(outline.Left)
                             .SliceL(outline.Width)
                             .ShrinkT(outline.Bottom))
@@ -95,11 +98,11 @@ module HelpOverlay =
 
                 let x =
                     outline.CenterX - width * 0.5f
-                    |> min (Viewport.bounds.Width - width - SPACING)
+                    |> min (screen_bounds.Width - width - SPACING)
                     |> max SPACING
 
                 let y =
-                    if outline.Top > Viewport.bounds.CenterY then
+                    if outline.Top > screen_bounds.CenterY then
                         outline.Top - SPACING - height
                     else
                         outline.Bottom + SPACING

@@ -61,9 +61,9 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
     override this.Bounds(top) =
         Rect.Create(
-            Viewport.virtual_screen_width * (0.5f - 0.05f * select_animation.Value),
+            Render.width() * (0.5f - 0.05f * select_animation.Value),
             top,
-            Viewport.virtual_screen_width - 25.0f,
+            Render.width() - 25.0f,
             top + GROUP_HEIGHT
         )
 
@@ -139,7 +139,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                     Style.font,
                     name,
                     20.0f,
-                    Viewport.virtual_screen_width - 20f,
+                    Render.width() - 20f,
                     origin + 10.0f,
                     Colors.text,
                     Alignment.RIGHT

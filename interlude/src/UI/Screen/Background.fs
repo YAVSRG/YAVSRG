@@ -69,8 +69,10 @@ module Background =
                                         else
                                             Content.ThemeConfig.DefaultAccentColor
 
-                            if bmp.Width * 3 / 4 > Viewport.viewport_width && Viewport.viewport_width > 0 then
-                                bmp.Mutate(fun img -> img.Resize(Viewport.viewport_width, 0) |> ignore)
+                            let true_screen_width = fst (Render.viewport_size())
+
+                            if bmp.Width * 3 / 4 > true_screen_width && true_screen_width > 0 then
+                                bmp.Mutate(fun img -> img.Resize(true_screen_width, 0) |> ignore)
                             let new_bmp = new Bitmap(bmp.Width, bmp.Height, SixLabors.ImageSharp.PixelFormats.Rgba32(0uy, 0uy, 0uy, 255uy))
                             new_bmp.Mutate(fun img -> img.DrawImage(bmp, 1.0f) |> ignore)
 
@@ -135,8 +137,8 @@ module Background =
         List.iter
             (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
                 let color = color.O4a fade.Alpha
-                let pwidth = Viewport.virtual_screen_width + parallaxZ.Value * depth
-                let pheight = Viewport.virtual_screen_height + parallaxZ.Value * depth
+                let pwidth = Render.width() + parallaxZ.Value * depth
+                let pheight = Render.height() + parallaxZ.Value * depth
                 let x = -parallaxX.Value * parallaxZ.Value * depth
                 let y = -parallaxY.Value * parallaxZ.Value * depth
                 let screenaspect = pwidth / pheight

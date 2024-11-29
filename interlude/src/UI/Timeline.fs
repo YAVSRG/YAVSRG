@@ -100,7 +100,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
         if dragging then
             let percent =
-                (Mouse.x () - 10.0f) / (Viewport.virtual_screen_width - 20.0f) |> min 1.0f |> max 0.0f
+                (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
 
             let start = FIRST_NOTE - Song.LEADIN_TIME * rate.Value
             let new_time = start + (LAST_NOTE - start) * percent

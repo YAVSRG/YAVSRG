@@ -326,7 +326,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
     member val RenderMode = FrameLimit.Smart with get, set
 
     member this.OnResize(width, height) =
-        Render.resize (width, height)
+        Render.viewport_resized (width, height)
         resized <- true
 
     member this.RenderModeChanged(fullscreen: bool) =
@@ -414,7 +414,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         let before_draw = now ()
         Render.start ()
 
-        if Viewport.viewport_height > 0 then
+        if Render._viewport_height > 0 then
             ui_root.Draw()
 
         Render.finish ()
@@ -438,10 +438,9 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
 
     member this.Init() =
         Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
-        Render.init ()
         let window_x, window_y = window.ClientSize.X, window.ClientSize.Y
-        if window_x = 0 || window_y = 0 then Viewport.DEFAULT_SCREEN else (window_x, window_y)
-        |> Render.resize
+        if window_x = 0 || window_y = 0 then Render.DEFAULT_SCREEN else (window_x, window_y)
+        |> Render.init
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
 

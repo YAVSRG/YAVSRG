@@ -32,13 +32,13 @@ type Root() =
     abstract member Init: unit -> unit
 
     default this.Init() =
-        this.Bounds <- Viewport.bounds
-        this.VisibleBounds <- Viewport.bounds
+        this.Bounds <- Render._bounds
+        this.VisibleBounds <- Render._bounds
         ROOT_ANIMATION.Add Palette.accent_color
 
     override this.FocusTree = []
 
     override this.Update(elapsed_ms, moved) =
         if moved then
-            this.Bounds <- Viewport.bounds
-            this.VisibleBounds <- Viewport.bounds
+            this.Bounds <- Render._bounds
+            this.VisibleBounds <- Render._bounds
