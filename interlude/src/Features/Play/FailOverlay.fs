@@ -91,7 +91,7 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
         defer (fun () -> initial_focus.Focus false)
 
     override this.Draw() =
-        let old_m = Alpha.change_multiplier 1.0f
+        let old_m = Render.alpha_multiplier_begin 1.0f
 
         let alpha = main_fade.Alpha
 
@@ -105,7 +105,7 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
 
         base.Draw()
 
-        Alpha.change_multiplier old_m |> ignore
+        Render.alpha_multiplier_restore old_m
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

@@ -230,7 +230,7 @@ module Render =
 
     let mutable private stencil_depth = 0
 
-    let stencil_create (alpha_masking) =
+    let stencil_create (use_alpha_masking) =
         Batch.draw ()
 
         if stencil_depth = 0 then
@@ -238,7 +238,7 @@ module Render =
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.StencilMask(0xFF)
             GL.ColorMask(false, false, false, false)
-            Shader.set_uniform_i32 (Shader.alpha_masking_loc, (if alpha_masking then 1 else 0))
+            Shader.set_uniform_i32 (Shader.alpha_masking_loc, (if use_alpha_masking then 1 else 0))
 
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
@@ -264,6 +264,26 @@ module Render =
         else
             GL.StencilFunc(StencilFunction.Lequal, stencil_depth, 0xFF)
 
+    let mutable private alpha_mult = 0.0f
+
+    let alpha_multiplier_begin (m: float32) : float32 =
+        assert(m >= 0.0f && m <= 1.0f)
+        if m <> alpha_mult then
+            Batch.draw()
+            Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
+            let previous_mult = alpha_mult
+            alpha_mult <- m
+            previous_mult
+        else m
+
+    let alpha_multiplier_restore (m: float32) =
+        assert(m >= 0.0f && m <= 1.0f)
+        if m <> alpha_mult then
+            Batch.draw()
+            Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
+            let previous_mult = alpha_mult
+            alpha_mult <- m
+
     let internal start () =
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start ()
@@ -271,6 +291,7 @@ module Render =
     let internal finish () =
         Batch.finish ()
         assert(stencil_depth = 0)
+        assert(alpha_mult = 1.0f)
         GL.Flush()
 
     let internal init (width, height) =
@@ -308,7 +329,7 @@ module Render =
         viewport_resized(width, height)
 
         Shader.init()
-        Alpha.change_multiplier 1.0f |> ignore
+        alpha_multiplier_restore 1.0f
 
     open SixLabors.ImageSharp
     open SixLabors.ImageSharp.Processing

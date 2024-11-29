@@ -111,7 +111,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         | _ -> ()
 
     override this.Draw() =
-        let before_alpha = Alpha.change_multiplier 1.0f
+        let before_alpha = Render.alpha_multiplier_begin 1.0f
         match transition with
         | Transition.In ->
             Render.stencil_create false
@@ -147,7 +147,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             base.Draw()
 
         | Transition.Hidden -> ()
-        Alpha.change_multiplier before_alpha |> ignore
+        Render.alpha_multiplier_restore before_alpha
 
     member this.Hide() =
         transition_timer.Reset()

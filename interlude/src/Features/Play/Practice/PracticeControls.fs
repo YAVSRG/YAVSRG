@@ -179,9 +179,9 @@ type PracticeControls(state: PracticeState, with_mods, on_seek) =
 
     override this.Draw() =
         if fade.Alpha > 0 then
-            let old_m = Alpha.change_multiplier fade.Value
+            let old_m = Render.alpha_multiplier_begin fade.Value
             base.Draw()
-            Alpha.change_multiplier old_m |> ignore
+            Render.alpha_multiplier_restore old_m
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

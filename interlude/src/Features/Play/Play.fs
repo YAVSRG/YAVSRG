@@ -250,9 +250,9 @@ module PlayScreen =
             override this.Draw() =
                 
                 if fade_in.Value < 1.0f then
-                    let old_m = Alpha.change_multiplier fade_in.Value
+                    let old_m = Render.alpha_multiplier_begin fade_in.Value
                     base.Draw()
-                    Alpha.change_multiplier old_m |> ignore
+                    Render.alpha_multiplier_restore old_m
                     start_overlay.Draw()
                 else
                     base.Draw()

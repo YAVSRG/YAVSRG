@@ -234,9 +234,9 @@ and Menu(top_level: Page) as this =
             let a = stack.[i].Value.Opacity.Alpha
             if a < 1 then ()
             elif a < 255 then
-                let before_alpha = Alpha.change_multiplier stack.[i].Value.Opacity.Value
+                let before_alpha = Render.alpha_multiplier_begin stack.[i].Value.Opacity.Value
                 stack.[i].Value.Draw()
-                Alpha.change_multiplier before_alpha |> ignore
+                Render.alpha_multiplier_restore before_alpha
             else
                 stack.[i].Value.Draw()
             i <- i + 1

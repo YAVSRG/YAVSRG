@@ -18,7 +18,6 @@
 	  <Compile Include="Graphics\Shader.fs" />
 	  <Compile Include="Graphics\Sprite.fs" />
 	  <Compile Include="Graphics\Batch.fs" />
-	  <Compile Include="Graphics\Stencil.fs" />
 	  <Compile Include="Graphics\Render.fs" />
 	  <Compile Include="Graphics\Text.fs" />
 	  <Compile Include="Audio\Shared.fs" />
