@@ -16,7 +16,6 @@ open Percyqaz.Flux.Graphics
 module WindowThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
-    let mutable private render_thread: RenderThread = Unchecked.defaultof<_>
     let private LOCK_OBJ = obj()
 
     (*
@@ -222,24 +221,18 @@ module WindowThread =
             // todo: grabbed on macos?
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
-        if OperatingSystem.IsWindows() then
-            FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
-
         let x, y = GLFW.GetWindowPos(window)
         let width, height = GLFW.GetWindowSize(window)
+        let is_entire_monitor =
+            config.WindowMode = WindowType.Fullscreen || 
+            (
+                monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width 
+                && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
+            )
 
         RenderThread.defer
         <| fun () ->
-            render_thread.RenderMode <- config.RenderMode
-            render_thread.RenderModeChanged(
-                config.WindowMode = WindowType.Fullscreen
-                || 
-                (
-                    monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width 
-                    && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
-                )
-            )
-
+            RenderThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
             anti_jitter <- config.SmartCapAntiJitter
             tearline_position <- config.SmartCapTearlinePosition
             framerate_multiplier <- config.SmartCapFramerateMultiplier
@@ -290,10 +283,8 @@ module WindowThread =
 
     let private resize_callback (window: nativeptr<Window>) (_: int) (_: int) =
         let width, height = GLFW.GetFramebufferSize(window)
-        RenderThread.defer (fun () ->
-            if width <> 0 && height <> 0 then
-                render_thread.OnResize(width, height)
-        )
+        if width <> 0 && height <> 0 then
+            RenderThread.defer (fun () -> RenderThread.viewport_resized(width, height))
         
     let private resize_callback_d = GLFWCallbacks.WindowSizeCallback resize_callback
 
@@ -353,15 +344,7 @@ module WindowThread =
         GL.LoadBindings(bindings)
         context.MakeNoneCurrent()
 
-        render_thread <- RenderThread(
-            window,
-            context,
-            config.AudioDevice,
-            config.AudioDevicePeriod,
-            config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier,
-            ui_root
-        )
-
+        RenderThread.init(window, ui_root, config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
         resize_callback window INITIAL_SIZE INITIAL_SIZE
 
         Input.init window
@@ -388,7 +371,7 @@ module WindowThread =
     let internal run() =
         apply_config last_applied_config
         Fonts.init()
-        render_thread.Start()
+        RenderThread.start()
 
         if last_applied_config.InputCPUSaver && OperatingSystem.IsWindows() then
             Thread.CurrentThread.Priority <- ThreadPriority.Highest
@@ -404,4 +387,4 @@ module WindowThread =
         GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GLFW.Terminate()
 
-        if render_thread.HasFatalError then Error() else Ok()
+        if RenderThread.has_fatal_error() then Error() else Ok()

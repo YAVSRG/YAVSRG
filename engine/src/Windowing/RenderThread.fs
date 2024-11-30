@@ -3,289 +3,12 @@
 open System
 open System.Threading
 open System.Diagnostics
-open System.Runtime.InteropServices
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Common
-
-module private FrameTimeStrategies =
-
-    //https://github.com/glfw/glfw/issues/1157
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
-    type _LUID =
-        {
-            mutable LowPart: uint32
-            mutable HighPart: int32
-        }
-
-    type MonitorEnumProc = delegate of IntPtr * IntPtr * IntPtr * IntPtr -> bool
-    [<DllImport("user32.dll")>]
-    extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData)
-
-    [<DllImport("gdi32.dll", SetLastError = true)>]
-    extern IntPtr CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData)
-
-    [<DllImport("gdi32.dll", SetLastError = true)>]
-    extern bool DeleteDC(IntPtr hdc)
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
-    type D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME =
-        {
-            [<MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)>]
-            pDeviceName: string
-            mutable hAdapter: uint
-            mutable AdapterLuid: _LUID
-            mutable VinPnSourceId: uint32
-        }
-
-    [<DllImport("gdi32.dll")>]
-    extern int64 D3DKMTOpenAdapterFromGdiDisplayName(D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME& info)
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
-    type D3DKMT_OPENADAPTERFROMHDC =
-        {
-            hDc: IntPtr
-            mutable hAdapter: uint
-            mutable AdapterLuid: _LUID
-            mutable VinPnSourceId: uint
-        }
-
-    [<DllImport("gdi32.dll")>]
-    extern int64 D3DKMTOpenAdapterFromHdc(D3DKMT_OPENADAPTERFROMHDC& info)
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)>]
-    type D3DKMT_CLOSEADAPTER = { hAdapter: uint }
-
-    [<DllImport("gdi32.dll")>]
-    extern int64 D3DKMTCloseAdapter(D3DKMT_CLOSEADAPTER& info)
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential)>]
-    type D3DKMT_GETSCANLINE =
-        {
-            hAdapter: uint32
-            VinPnSourceId: uint32
-            mutable InVerticalBlank: uint32 // actually only 1 byte but alignment
-            mutable ScanLine: uint32
-        }
-
-    [<DllImport("gdi32.dll")>]
-    extern int64 D3DKMTGetScanLine(D3DKMT_GETSCANLINE& info)
-
-    [<Struct>]
-    [<StructLayout(LayoutKind.Sequential)>]
-    type D3DKMT_WAITFORVERTICALBLANKEVENT =
-        {
-            hAdapter: uint
-            hDevice: uint
-            VinPnSourceId: uint
-        }
-
-    [<DllImport("gdi32.dll")>]
-    extern int64 D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
-
-    [<DllImport("winmm.dll")>]
-    extern int64 private timeBeginPeriod(int msec)
-
-    [<DllImport("winmm.dll")>]
-    extern int64 private timeEndPeriod(int msec)
-
-    // https://stackoverflow.com/questions/49244480/correct-way-to-wait-for-vblank-on-windows-10-in-windowed-mode
-    [<DllImport("dwmapi.dll")>]
-    extern int64 DwmFlush()
-
-    (* GET DISPLAY HANDLE INFO *)
-
-    let get_display_handle (glfw_monitor_name: string) =
-
-        let mutable handles = List.empty
-        let mutable i = 0
-
-        let f =
-            MonitorEnumProc(fun h _ _ _ ->
-                i <- i + 1
-                handles <- ((sprintf "\\\\.\\DISPLAY%i" i), h) :: handles
-                true
-            )
-
-        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, f, IntPtr.Zero) |> ignore
-
-        match handles |> List.tryFind (fun (name, h) -> glfw_monitor_name.StartsWith name) with
-        | Some(name, h) ->
-            let hDc = CreateDC(null, name, null, 0)
-
-            if hDc = 0 then
-                Logging.Error("Failed to get hDC for monitor")
-
-            hDc
-        | None -> 0
-
-    (* THREAD SLEEPING STRATEGIES *)
-
-    let NATIVE_SLEEP_TRUST_THRESHOLD_MS =
-        if OperatingSystem.IsWindows() then 1.0 else 0.125
-
-    let spin_wait = SpinWait()
-
-    /// Sleep the thread until a stopwatch time is reached
-    /// Strategy is to natively sleep the thread as far as it can be trusted, then spin-wait until it's time
-    /// Native sleep can still wake up much later if threads are busy
-    /// CPU intensive
-    /// Works on all operating systems
-    let sleep_accurate: Stopwatch * float -> unit =
-        if OperatingSystem.IsWindows() then
-
-            fun (timer: Stopwatch, until: float) ->
-                let delta = until - timer.Elapsed.TotalMilliseconds
-
-                if delta > NATIVE_SLEEP_TRUST_THRESHOLD_MS then
-                    timeBeginPeriod 1 |> ignore
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delta - NATIVE_SLEEP_TRUST_THRESHOLD_MS))
-                    timeEndPeriod 1 |> ignore
-
-                while timer.Elapsed.TotalMilliseconds < until do
-                    spin_wait.SpinOnce -1
-
-        else
-
-            fun (timer: Stopwatch, until: float) ->
-                let delta = until - timer.Elapsed.TotalMilliseconds
-
-                if delta > NATIVE_SLEEP_TRUST_THRESHOLD_MS then
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delta - NATIVE_SLEEP_TRUST_THRESHOLD_MS))
-
-                while timer.Elapsed.TotalMilliseconds < until do
-                    spin_wait.SpinOnce -1
-
-    module VBlankThread =
-
-        let mutable private _hAdapter = 0u
-        let mutable private _VinPnSourceId = 0u
-
-        let private close_adapter () =
-            if _hAdapter <> 0u then
-                let mutable info = { hAdapter = _hAdapter }
-
-                if D3DKMTCloseAdapter(&info) <> 0l then
-                    Logging.Error("Error closing adapter after use")
-
-        let private open_adapter (gdi_adapter_name: string) (glfw_monitor_name: string) =
-            close_adapter ()
-            let hDc = get_display_handle glfw_monitor_name
-
-            if hDc = 0 then
-                let mutable info =
-                    { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMGDIDISPLAYNAME> with
-                        pDeviceName = gdi_adapter_name
-                    }
-
-                if D3DKMTOpenAdapterFromGdiDisplayName &info <> 0l then
-                    Logging.Error("Error getting adapter handle by GDI name")
-
-                _hAdapter <- info.hAdapter
-                _VinPnSourceId <- info.VinPnSourceId
-            else
-                let mutable info =
-                    { Unchecked.defaultof<D3DKMT_OPENADAPTERFROMHDC> with
-                        hDc = hDc
-                    }
-
-                if D3DKMTOpenAdapterFromHdc &info <> 0l then
-                    Logging.Error("Error getting adapter handle by hDc")
-
-                _hAdapter <- info.hAdapter
-                _VinPnSourceId <- info.VinPnSourceId
-
-                if not (DeleteDC hDc) then
-                    Logging.Error("Error deleting hDc after use")
-
-        (* USING OPEN ADAPTER TO GET SYNC INFORMATION *)
-
-        let private get_scanline () =
-            let mutable info =
-                { Unchecked.defaultof<D3DKMT_GETSCANLINE> with
-                    hAdapter = _hAdapter
-                    VinPnSourceId = _VinPnSourceId
-                }
-
-            if D3DKMTGetScanLine &info <> 0l then
-                Logging.Error("Error getting scanline from video adapter")
-                None
-            else
-                Some(info.ScanLine, info.InVerticalBlank)
-
-        let private wait_for_vblank () =
-            let mutable info =
-                {
-                    hAdapter = _hAdapter
-                    hDevice = 0u
-                    VinPnSourceId = _VinPnSourceId
-                }
-
-            let status = D3DKMTWaitForVerticalBlankEvent &info
-
-            if status <> 0l then
-                Logging.Error(sprintf "Error waiting for vblank (%i)" status)
-                false
-            else
-                true
-
-        (* LOOP *)
-
-        let private LOCK_OBJ = obj()
-        let mutable private _last_time = 0.0 // in thread
-        let mutable private _vblank_number = 0uL
-        let mutable private last_time = 0.0 // shared
-        let mutable private vblank_number = 0uL // shared
-        let mutable private est_period = 0.0
-        let mutable private sync_broken = true
-        let mutable private action_queue : (unit -> unit) list = []
-        let mutable private looping = true
-
-        let private loop (sw: Stopwatch) =
-            while looping do
-                if not sync_broken then
-                    let before = sw.Elapsed.TotalMilliseconds
-                    if not (wait_for_vblank()) then sync_broken <- true
-                    _last_time <- sw.Elapsed.TotalMilliseconds
-                    if _vblank_number > 240uL && abs (before + est_period - _last_time) > 1.0 then
-                        _last_time <- before + est_period
-                    else
-                        est_period <- est_period * 0.95 + (_last_time - before) * 0.05
-                    _vblank_number <- _vblank_number + 1uL
-                lock LOCK_OBJ <| fun () ->
-                    last_time <- _last_time
-                    vblank_number <- _vblank_number
-                    for action in action_queue do action()
-                    action_queue <- []
-
-        let start (sw: Stopwatch) =
-            Thread(fun () ->
-                loop sw
-            ).Start()
-
-        let stop () = looping <- false
-
-        let switch (period: float) (gdi_adapter_name: string) (glfw_monitor_name: string) =
-            lock LOCK_OBJ <| fun () ->
-                action_queue <- (fun () -> _vblank_number <- 0uL; sync_broken <- false; est_period <- period; open_adapter gdi_adapter_name glfw_monitor_name) :: action_queue
-
-        let get (sync_adjustment: float, sw: Stopwatch) =
-            lock LOCK_OBJ <| fun () ->
-            if sync_broken then 0uL, sw.Elapsed.TotalMilliseconds, est_period
-            else 
-                let adjusted_last_time = last_time + sync_adjustment * est_period
-                if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
-                    vblank_number - 0uL, adjusted_last_time - est_period, est_period
-                else vblank_number, adjusted_last_time, est_period
 
 type UIEntryPoint =
     abstract member ShouldExit: bool
@@ -308,17 +31,29 @@ module SmartCapConstants =
 
 module RenderThread =
 
-    let after_init_ev = Event<unit>()
-    let after_init = after_init_ev.Publish
+    let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
+    let mutable private ui_root: UIEntryPoint = Unchecked.defaultof<_>
 
     let private LOCK_OBJ = obj()
+    
+    (*
+        Action queuing
+        
+        Most of the game runs from the 'render thread' where draws and updates take place
+        `defer` can be used to queue up an action to be executed before the next frame update
+        Used for: 
+        - Queuing actions to take place on this thread from other threads
+        - Deferring an action to be done at the start of the next frame for other logic/UI reasons
+
+        Deferred actions are fire-and-forget, they will execute in the order they are queued
+    *)
 
     let mutable internal UI_THREAD_ID = -1
     let is_ui_thread() =
-        Thread.CurrentThread.ManagedThreadId = UI_THREAD_ID
+        UI_THREAD_ID = -1 || Thread.CurrentThread.ManagedThreadId = UI_THREAD_ID
 
     let mutable private action_queue : (unit -> unit) list = []
-    let run_action_queue() =
+    let private run_action_queue() =
         lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
     let defer (action: unit -> unit) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
@@ -326,8 +61,18 @@ module RenderThread =
     let inline ensure_ui_thread (action: unit -> unit) =
         if is_ui_thread () then action () else defer action
 
+    (*
+        Events
 
-type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsContext, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: UIEntryPoint) =
+        Triggers for an application to hook into for initialisation and shutdown logic
+    *)
+
+    let after_init_ev = Event<unit>()
+    let after_init = after_init_ev.Publish
+
+    (*
+        
+    *)
 
     let mutable resized = false
     let mutable fps_count = 0
@@ -340,63 +85,43 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
     let mutable frame_is_ready = 0.0
     let mutable strategy = Unlimited
 
-    let mutable fatal_error = false
+    let private now () = total_frame_timer.Elapsed.TotalMilliseconds
 
-    let now () =
-        total_frame_timer.Elapsed.TotalMilliseconds
+    let mutable private fatal_error = false
+    let has_fatal_error () =
+        fatal_error
 
-    member this.HasFatalError = fatal_error
-
-    member val RenderMode = FrameLimit.Smart with get, set
-
-    member this.OnResize(width, height) =
+    let viewport_resized(width, height) =
+        assert(is_ui_thread())
         Render.viewport_resized (width, height)
         resized <- true
 
-    member this.RenderModeChanged(fullscreen: bool) =
-        no_compositor <- fullscreen
+    let change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
+        assert(is_ui_thread())
+        no_compositor <- entire_monitor
         strategy <-
             if OperatingSystem.IsWindows() then
                 // On windows:
                 //  Smart = Custom frame pacing strategies
                 //  Unlimited = Unlimited
-                if this.RenderMode = FrameLimit.Smart then
-                    if fullscreen then WindowsVblankSync else WindowsDwmFlush
+                GLFW.SwapInterval(0)
+                if frame_limit = FrameLimit.Smart then
+                    FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor) (GLFW.GetWin32Monitor monitor)
+                    if entire_monitor then WindowsVblankSync else WindowsDwmFlush
                 else
                     Unlimited
             else
                 // On non-windows:
                 //  Smart = GLFW's default Vsync
                 //  Unlimited = Unlimited
-                if this.RenderMode = FrameLimit.Smart then
-                    context.SwapInterval <- 1
+                if frame_limit = FrameLimit.Smart then
+                    GLFW.SwapInterval(1)
                     Unlimited
                 else
-                    context.SwapInterval <- 0
+                    GLFW.SwapInterval(0)
                     Unlimited
 
-    member private this.Loop() =
-        context.MakeCurrent()
-        this.Init()
-        fps_timer.Start()
-
-        try
-            Console.hide()
-            while not (GLFW.WindowShouldClose window) do
-                this.DispatchFrame()
-        with fatal_err ->
-            fatal_error <- true
-            Logging.Critical("Fatal crash in UI thread", fatal_err)
-            Console.restore()
-            GLFW.SetWindowShouldClose(window, true)
-        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
-
-    member this.Start() =
-        let thread = Thread(this.Loop)
-        RenderThread.UI_THREAD_ID <- thread.ManagedThreadId
-        thread.Start()
-
-    member this.DispatchFrame() =
+    let private dispatch_frame() =
 
         Performance.visual_latency_lo <- frame_is_ready - real_next_frame
         Performance.visual_latency_hi <- start_of_frame - real_next_frame
@@ -424,7 +149,7 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
         // Update
         start_of_frame <- now ()
         Input.begin_frame_events ()
-        RenderThread.run_action_queue()
+        run_action_queue()
         ui_root.Update(elapsed_ms, resized)
         resized <- false
         Input.finish_frame_events ()
@@ -446,7 +171,7 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
         Performance.draw_time <- frame_is_ready - before_draw
 
         if not ui_root.ShouldExit then
-            context.SwapBuffers()
+            GLFW.SwapBuffers(window)
             real_next_frame <- now ()
 
         // Performance profiling
@@ -460,13 +185,38 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
 
         Performance.elapsed_ms <- elapsed_ms
 
-    member this.Init() =
-        Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
+    let private main_loop () =
+        GLFW.MakeContextCurrent(window)
         let width, height = GLFW.GetFramebufferSize(window)
         if width = 0 || height = 0 then Render.DEFAULT_SCREEN else (width, height)
         |> Render.init
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
+
+        ui_root.Init()
+        after_init_ev.Trigger()
+        fps_timer.Start()
+
+        try
+            Console.hide()
+            while not (GLFW.WindowShouldClose window) do
+                dispatch_frame()
+        with fatal_err ->
+            fatal_error <- true
+            Logging.Critical("Fatal crash in UI thread", fatal_err)
+            Console.restore()
+            GLFW.SetWindowShouldClose(window, true)
+
+        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
+
+    let private thread = Thread(main_loop)
+
+    let internal init(_window: nativeptr<Window>, _ui_root: UIEntryPoint, audio_device: int, audio_device_period: int, audio_device_buffer_length: int) =
+        UI_THREAD_ID <- thread.ManagedThreadId
+        window <- _window
+        ui_root <- _ui_root
+
+        Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
 
         Performance.frame_compensation <-
             fun () ->
@@ -475,5 +225,5 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
                 else
                     0.0f<ms / rate>
 
-        ui_root.Init()
-        RenderThread.after_init_ev.Trigger()
+    let internal start() =
+        thread.Start()
