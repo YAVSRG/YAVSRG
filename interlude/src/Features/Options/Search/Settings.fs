@@ -42,12 +42,12 @@ module Settings =
                         |],
                         config.WindowMode
                         |> Setting.trigger window_mode_changed
-                        |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot))
+                        |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions))
                     )
                 )
                 yield PageSetting(
                     %"system.windowresolution",
-                    WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot)))
+                    WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions)))
                 )
                     .Help(Help.Info("system.windowresolution"))
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
@@ -57,14 +57,14 @@ module Settings =
                     SelectDropdown(
                         monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                         config.Display 
-                        |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot))
+                        |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions))
                     )
                 )
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
                     %"system.videomode",
                     VideoMode(
-                        config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot)),
+                        config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions)),
                         get_current_supported_video_modes
                     )
                 )

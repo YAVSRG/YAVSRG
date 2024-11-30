@@ -2,24 +2,42 @@
 
 open System
 open System.Threading
+open System.Runtime.InteropServices
 open FSharp.NativeInterop
 open OpenTK.Windowing.Desktop
 open OpenTK.Graphics.OpenGL
+open Percyqaz.Flux.UI
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 
 #nowarn "9"
 
 module WindowThread =
 
-    open System.Runtime.InteropServices
-
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
     let mutable private render_thread: RenderThread = Unchecked.defaultof<_>
     let private LOCK_OBJ = obj()
+
+    (*
+        Action queuing
+        
+        Most of the game runs from the 'render thread' where draws and updates take place
+        `defer` can be used to queue up an action that needs to execute on the window thread
+
+        Deferred actions are fire-and-forget, they will execute in the order they are queued
+    *)
+    
+    let mutable internal WINDOW_THREAD_ID = -1
+    let is_window_thread() =
+        Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
+
+    let mutable private action_queue : (unit -> unit) list = []
+    let private run_action_queue() =
+        lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
+    let w_defer (action: unit -> unit) =
+        lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
 
     (*
         Monitor detection
@@ -64,34 +82,15 @@ module WindowThread =
     let get_monitors() = lock (LOCK_OBJ) (fun () -> detected_monitors)
 
     (*
-        Action queuing
-        
-        Most of the game runs from the 'render thread' where draws and updates take place
-        `defer` can be used to queue up an action that needs to execute on the window thread
-
-        Deferred actions are fire-and-forget, they will execute in the order they are queued
-    *)
-    
-    let mutable internal WINDOW_THREAD_ID = -1
-    let is_window_thread() =
-        Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
-
-    let mutable private action_queue : (unit -> unit) list = []
-    let private run_action_queue() =
-        lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
-    let w_defer (action: unit -> unit) =
-        lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
-
-    (*
         Window config
         
         todo: move the snapshot object here and remove the original
     *)
 
-    let mutable private last_applied_config : WindowingUserOptionsSnapshot = Unchecked.defaultof<_>
+    let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
     let mutable private refresh_rate = 60
 
-    let apply_config(config: WindowingUserOptionsSnapshot) =
+    let apply_config(config: WindowOptions) =
         assert(is_window_thread())
         detect_monitors()
 
@@ -218,6 +217,11 @@ module WindowThread =
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
+        
+        if config.EnableCursor then 
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
+        else
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
         if OperatingSystem.IsWindows() then
             FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor_ptr) (GLFW.GetWin32Monitor monitor_ptr)
@@ -309,7 +313,7 @@ module WindowThread =
     let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
 
     // todo: extract out ui_root
-    let internal init(config: WindowingUserOptionsSnapshot, title: string, ui_root: Root) =
+    let internal init(config: WindowOptions, title: string, ui_root: Root, icon: Percyqaz.Flux.Utils.Bitmap option) =
         last_applied_config <- config
         WINDOW_THREAD_ID <- Environment.CurrentManagedThreadId
 
@@ -359,6 +363,16 @@ module WindowThread =
 
         Input.init window
 
+        match icon with
+        | Some icon ->
+            let mutable pixel_data = System.Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
+            let success = icon.TryGetSinglePixelSpan(&pixel_data)
+            if not success then failwithf "Couldn't get pixel span for icon"
+            use pixel_data_ref = fixed &(pixel_data.GetPinnableReference())
+            let image_array = [| new Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt) |]
+            GLFW.SetWindowIcon(window, System.Span<Image>(image_array))
+        | None -> ()
+
         GLFW.SetDropCallback(window, file_drop_callback_d) |> ignore
         GLFW.SetWindowSizeCallback(window, resize_callback_d) |> ignore
         GLFW.SetWindowFocusCallback(window, focus_callback_d) |> ignore
@@ -382,6 +396,9 @@ module WindowThread =
                 GLFW.WaitEventsTimeout(0.5)
             else
                 GLFW.PollEvents()
-
+                
+        WindowsKey.enable()
         GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GLFW.Terminate()
+
+        if render_thread.HasFatalError then Error() else Ok()

@@ -188,11 +188,11 @@ module Screen =
                 this.ShouldExit <- true
 
         override this.Draw() =
-            //if
-            //    current_type <> Type.Play
-            //    || Background.dim_percent.Value < 1.0f
-            //then
-            //    Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
+            if
+                current_type <> Type.Play
+                || Background.dim_percent.Value < 1.0f
+            then
+                Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
 
             screen_container.Draw()
             logo.Draw()

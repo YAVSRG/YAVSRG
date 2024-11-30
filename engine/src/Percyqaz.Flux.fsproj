@@ -51,7 +51,6 @@
     <Compile Include="Windowing\Console.fs" />
     <Compile Include="Windowing\RenderThread.fs" />
     <Compile Include="Windowing\WindowThread.fs" />
-    <Compile Include="Windowing\Window.fs" />
     <Compile Include="Launch.fs" />
   </ItemGroup>
 

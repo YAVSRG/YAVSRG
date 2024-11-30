@@ -49,7 +49,7 @@ let launch (instance: int) =
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
         let icon = Bitmap.from_stream true icon_stream
-        let result = Launch.entry_point (Options.config, "Interlude", Startup.init_window instance, icon)
+        let result = Launch.entry_point (Options.config.ToOptions, "Interlude", Startup.init_window instance, icon)
 
         Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) crash_splash
 

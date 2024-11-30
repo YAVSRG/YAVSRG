@@ -326,8 +326,6 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
 
     member this.HasFatalError = fatal_error
 
-    member val IsFocused = true with get, set
-
     member val RenderMode = FrameLimit.Smart with get, set
 
     member this.OnResize(width, height) =

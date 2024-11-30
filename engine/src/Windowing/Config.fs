@@ -36,9 +36,8 @@ type FrameLimit =
     | Unlimited = 0
     | Smart = 1
 
-type WindowingUserOptionsSnapshot =
-    internal {
-        WorkingDirectory: string
+type WindowOptions =
+    {
         WindowMode: WindowType
         WindowResolution: int * int
         FullscreenVideoMode: FullscreenVideoMode
@@ -51,9 +50,11 @@ type WindowingUserOptionsSnapshot =
         AudioDevicePeriod: int
         AudioDeviceBufferLengthMultiplier: int
         InputCPUSaver: bool
+        EnableCursor: bool
     }
 
-type WindowingUserOptions =
+// todo: move out into Interlude startup logic
+type WindowSettings =
     {
         WorkingDirectory: string
         WindowMode: Setting<WindowType>
@@ -93,9 +94,8 @@ type WindowingUserOptions =
             InputCPUSaver = Setting.simple false
         }
 
-    member this.Snapshot : WindowingUserOptionsSnapshot =
+    member this.ToOptions : WindowOptions =
         {
-            WorkingDirectory = this.WorkingDirectory
             WindowMode = this.WindowMode.Value
             WindowResolution = this.WindowResolution.Value
             FullscreenVideoMode = this.FullscreenVideoMode.Value
@@ -108,4 +108,5 @@ type WindowingUserOptions =
             AudioDevicePeriod = this.AudioDevicePeriod.Value
             AudioDeviceBufferLengthMultiplier = this.AudioDeviceBufferLengthMultiplier.Value
             InputCPUSaver = this.InputCPUSaver.Value
+            EnableCursor = false
         }
