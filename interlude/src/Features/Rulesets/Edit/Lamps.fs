@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -95,7 +96,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                 Requirement = LampRequirement.ComboBreaksAtMost System.Int32.MaxValue
             }
         ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.append [| new_lamp |] }
-        defer refresh
+        RenderThread.defer refresh
 
     and delete_lamp(i: int) : unit =
         ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.removeAt i }

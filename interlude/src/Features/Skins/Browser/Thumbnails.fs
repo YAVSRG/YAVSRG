@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Skins.Browser
 
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 
@@ -42,5 +43,5 @@ type Thumbnail() =
 
     override this.Finalize() =
         match loaded_thumbnail with
-        | Some i -> defer (fun () -> Sprite.destroy i |> ignore)
+        | Some i -> RenderThread.defer (fun () -> Sprite.destroy i |> ignore)
         | None -> ()

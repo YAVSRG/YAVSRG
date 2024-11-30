@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Content
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 
 type Content() =
 
@@ -33,4 +33,4 @@ type Content() =
     static member Texture(id: string) = Sprites.get id
 
     static member OnChartAdded = Data.charts_updated
-    static member TriggerChartAdded() = ensure_ui_thread Data.charts_updated_ev.Trigger
+    static member TriggerChartAdded() = RenderThread.ensure_ui_thread Data.charts_updated_ev.Trigger

@@ -3,7 +3,7 @@
 open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 
 type private GridFlowItem<'T when 'T :> Widget> =
     {
@@ -27,7 +27,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable content_height = 0.0f
 
     member this.Clear() =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         children.Clear()
 
     member val Floating = false with get, set
@@ -325,7 +325,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 c.Draw()
 
     member this.Add(child: 'T) : unit =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
 
         children.Add
             {

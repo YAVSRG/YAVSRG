@@ -1,10 +1,10 @@
 ﻿namespace Interlude.Features.Printerlude
 
 open System
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Interlude.Options
 open Interlude.UI
@@ -112,7 +112,7 @@ module Terminal =
                 false,
                 fun () ->
                     if shown then
-                        defer add_input
+                        RenderThread.defer add_input
             )
 
         add_input ()

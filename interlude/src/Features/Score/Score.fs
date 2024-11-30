@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Score
 
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude.Gameplay
@@ -49,7 +50,7 @@ type ScoreScreen(score_info: ScoreInfo, pbs: ImprovementFlags, played_just_now: 
         previous_personal_bests := None
         graph.Refresh()
 
-    let on_ruleset_changed = Rulesets.on_changed.Subscribe (fun _ -> defer refresh)
+    let on_ruleset_changed = Rulesets.on_changed.Subscribe (fun _ -> RenderThread.defer refresh)
 
     let bottom_info =
         BottomBanner(

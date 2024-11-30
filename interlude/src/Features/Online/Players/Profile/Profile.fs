@@ -2,6 +2,7 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
@@ -19,7 +20,7 @@ type private Profile() =
                 Players.Profile.View.get (
                     p,
                     fun response ->
-                        defer
+                        RenderThread.defer
                         <| fun () ->
                             match response with
                             | Some result -> container.SetData result
@@ -27,7 +28,7 @@ type private Profile() =
                 )
             | None ->
                 Players.Profile.View.get_me (fun response ->
-                    defer
+                    RenderThread.defer
                     <| fun () ->
                         match response with
                         | Some result -> container.SetData result
@@ -54,7 +55,7 @@ type private Profile() =
                 Players.Profile.Options.post (
                     { Color = color },
                     function
-                    | Some true -> defer <| fun () -> container.SetData({ data with Color = color })
+                    | Some true -> RenderThread.defer <| fun () -> container.SetData({ data with Color = color })
                     | _ -> Notifications.error (%"notification.network_action_failed", "")
                 )
 
@@ -74,7 +75,7 @@ type private Profile() =
                 data.Username,
                 function
                 | Some true ->
-                    defer
+                    RenderThread.defer
                     <| fun () ->
                         container.SetData(
                             { data with
@@ -92,7 +93,7 @@ type private Profile() =
                 { User = data.Username },
                 function
                 | Some true ->
-                    defer
+                    RenderThread.defer
                     <| fun () ->
                         container.SetData({ data with IsFriend = true })
                         Players.update_friends_list ()

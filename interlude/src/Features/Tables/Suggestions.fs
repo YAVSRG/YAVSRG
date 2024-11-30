@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Tables
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude.Backbeat
 open Prelude.Backbeat.Archive
@@ -130,7 +131,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             function
             | true -> 
                 Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
-                defer (fun () ->
+                RenderThread.defer (fun () ->
                     if still_open then
                         match ChartDatabase.get_meta suggestion.ChartId Content.Charts with
                         | Some cc ->
@@ -192,7 +193,7 @@ type SuggestionsList(table: Table) =
                     Tables.Suggestions.List.get (
                         table.Id,
                         fun response ->
-                            defer
+                            RenderThread.defer
                             <| fun () ->
                                 match response with
                                 | Some result -> this.SetData result
@@ -213,7 +214,7 @@ type SuggestionsList(table: Table) =
                         }
                     fc.Add(PageButton(suggestion.FormattedTitle, fun () -> ViewSuggestionPage(table, suggestion).Show()))
 
-                defer (fun () -> fc.Focus false)
+                RenderThread.defer (fun () -> fc.Focus false)
 
                 ScrollContainer(fc, Position = Position.Shrink(100.0f, 200.0f), Margin = 5.0f)
         )

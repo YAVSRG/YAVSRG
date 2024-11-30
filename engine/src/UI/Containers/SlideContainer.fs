@@ -1,6 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 
 type private SlideablePosition(pos: Position) =
     let mutable pos = pos
@@ -106,7 +106,7 @@ type SlideContainer(node_type) =
             children.[i].Update(elapsed_ms, moved)
 
     member this.Add(child: #Widget) =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         children.Add child
 
         if this.Initialised then

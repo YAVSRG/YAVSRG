@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Charts.Processing
 open Prelude.Data.User
@@ -23,8 +23,8 @@ module LevelSelect =
     let private refresh_all_event = Event<unit>()
     let private refresh_details_event = Event<unit>()
 
-    let refresh_all () = defer (refresh_all_event.Trigger)
-    let refresh_details () = defer (refresh_details_event.Trigger)
+    let refresh_all () = RenderThread.defer refresh_all_event.Trigger
+    let refresh_details () = RenderThread.defer refresh_details_event.Trigger
 
     let on_refresh_all = refresh_all_event.Publish
     let on_refresh_details = refresh_details_event.Publish
@@ -118,7 +118,7 @@ module LevelSelect =
     // todo: remove the holes from this system by making a proper way to wait for song to load
     let rec private retry_until_song_loaded (info: LoadedChartInfo) (action: LoadedChartInfo -> bool) =
         if not (action info) then
-            defer (fun () -> retry_until_song_loaded info action)
+            RenderThread.defer (fun () -> retry_until_song_loaded info action)
 
     let continue_endless_mode () : bool =
         if Transitions.in_progress() then false else

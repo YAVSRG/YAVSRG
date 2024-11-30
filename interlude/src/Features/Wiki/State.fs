@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Data.Markdown
-open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude.Data
 
 [<Json.AutoCodec>]
@@ -136,7 +136,7 @@ module private WikiState =
                 fun md ->
                     loaded_content <- Some md
                     loading <- false
-                    defer page_changed
+                    RenderThread.defer page_changed
             )
 
     do

@@ -1,6 +1,7 @@
 namespace Interlude.Features.Import.Etterna
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
@@ -95,7 +96,7 @@ type EtternaPacksBrowserPage() =
             Setting.simple "",
             (fun (f: FilterPart list) ->
                 filter <- f
-                defer (fun () -> begin_search filter)
+                RenderThread.defer (fun () -> begin_search filter)
             ),
             Position = Position.SliceX(1400.0f).SliceT(60.0f).Translate(0.0f, 20.0f)
         )

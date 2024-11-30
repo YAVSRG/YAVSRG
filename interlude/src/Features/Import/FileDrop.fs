@@ -3,6 +3,7 @@
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
@@ -69,13 +70,13 @@ module FileDrop =
 
         match path with
         | OsuSkinFolder -> 
-            defer 
+            RenderThread.defer 
             <| fun () -> 
                 Menu.Exit()
                 osu.Skins.import_osu_skin path
 
         | StepmaniaNoteskinFolder ->
-            defer
+            RenderThread.defer
             <| fun () ->
                 Menu.Exit()
                 Etterna.Skins.import_stepmania_noteskin path
@@ -83,7 +84,7 @@ module FileDrop =
         | InterludeSkinArchive ->
             try
                 File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName path))
-                defer Skins.load
+                RenderThread.defer Skins.load
             with err ->
                 Logging.Error("Something went wrong when moving this skin!", err)
 
@@ -92,7 +93,7 @@ module FileDrop =
             let target = Path.Combine(get_game_folder "Downloads", id)
             try Directory.Delete(target, true) with _ -> ()
             ZipFile.ExtractToDirectory(path, target)
-            defer 
+            RenderThread.defer 
             <| fun () -> 
                 Menu.Exit()
                 osu.Skins.import_osu_skin target
@@ -100,13 +101,13 @@ module FileDrop =
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match osu.Replays.parse_replay_file path with
-            | Some replay -> defer (fun () -> replay_dropped_ev.Trigger replay)
+            | Some replay -> RenderThread.defer (fun () -> replay_dropped_ev.Trigger replay)
             | None -> Notifications.error (%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
 
             if Directory.Exists path && Path.GetFileName path = "Songs" then
-                defer
+                RenderThread.defer
                 <| fun () ->
                     Menu.Exit()
                     ConfirmUnlinkedSongsImport(path).Show()

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -119,14 +120,14 @@ type RulesetSearch() as this =
             fun data ->
                 match data with
                 | WebResult.Ok (d: RulesetRepo) ->
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         for id in d.Rulesets.Keys do
                             grid.Add(RulesetCard(id, d.Rulesets.[id]))
 
                         loading <- false
                     )
                 | _ ->
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         failed <- true
                         loading <- false
                     )

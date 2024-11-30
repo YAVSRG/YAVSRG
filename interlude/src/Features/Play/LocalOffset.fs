@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
@@ -61,7 +62,7 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
         setting.Set 0.0f<ms>
 
     override this.Content() =
-        defer (fun () -> offset_slider.Select false)
+        RenderThread.defer (fun () -> offset_slider.Select false)
 
         page_container()
         |+ PageSetting(

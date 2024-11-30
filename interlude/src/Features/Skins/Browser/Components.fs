@@ -3,6 +3,7 @@ namespace Interlude.Features.Skins.Browser
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Repo
@@ -72,7 +73,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                 ImageServices.get_cached_image.Request(
                     version.Preview,
                     function
-                    | Some img -> defer (fun () -> this.FinishLoading img)
+                    | Some img -> RenderThread.defer (fun () -> this.FinishLoading img)
                     | None -> Logging.Warn("Failed to load noteskin preview", version.Preview)
                 )
         }
@@ -98,7 +99,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     (version.Download, target, ignore),
                     fun success ->
                         if success then
-                            defer Skins.load
+                            RenderThread.defer Skins.load
                             Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_skin", group.Name)
                             status <- Installed
                         else
@@ -151,7 +152,7 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                 ImageServices.get_cached_image.Request(
                     group.Thumbnail,
                     function
-                    | Some img -> defer (fun () -> this.FinishLoading img)
+                    | Some img -> RenderThread.defer (fun () -> this.FinishLoading img)
                     | None -> Logging.Warn("Failed to load noteskin thumbnail", group.Thumbnail)
                 )
         }

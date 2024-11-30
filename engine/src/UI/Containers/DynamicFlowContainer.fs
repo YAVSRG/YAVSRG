@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 
 /// Container that automatically positions its contents stacked in Vertical/Horizontal arrangements
 /// Each item requests a size (height or width respectively depending on container direction) and can optionally signal to the container that this size has changed
@@ -105,7 +105,7 @@ module DynamicFlowContainer =
         member val AllowNavigation = true with get, set
 
         member this.Clear() =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
             this.Iter(fun c -> match c :> obj with :? IResize as r -> r.OnSizeChanged <- ignore | _ -> ())
             children.Clear()
 
@@ -143,7 +143,7 @@ module DynamicFlowContainer =
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
         member this.Add(child: 'T) =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
 
             children.Add
                 {
@@ -163,7 +163,7 @@ module DynamicFlowContainer =
                 refresh <- true
 
         member this.Remove(child: 'T) =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
 
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
@@ -185,7 +185,7 @@ module DynamicFlowContainer =
                 | _ -> ()
 
         member this.Iter(f: 'T -> unit) =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
 
             for { Widget = c } in children do
                 f c

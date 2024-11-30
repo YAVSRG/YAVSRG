@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Data.Markdown
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data
 open Interlude.UI
@@ -186,7 +187,7 @@ type private Image(width, title, url) as this =
             url,
             function
             | Some bmp ->
-                defer (fun () ->
+                RenderThread.defer (fun () ->
                     sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )

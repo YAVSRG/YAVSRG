@@ -1,6 +1,7 @@
 namespace Interlude.Features.Tables.Browser
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
@@ -84,7 +85,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 online_table.Id,
                 function
                 | Some charts ->
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         let table =
                             {
                                 Id = online_table.Id
@@ -105,7 +106,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | None ->
                     Logging.Error("Error getting charts for table")
                     // error toast
-                    defer (fun () -> status <- current_status)
+                    RenderThread.defer (fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
         | TableStatus.Installed ->
@@ -123,7 +124,7 @@ type TableBrowserPage() =
                 function
                 | Some tables ->
                     for table in tables.Tables do
-                        defer (fun () -> flow.Add(TableCard(table)))
+                        RenderThread.defer (fun () -> flow.Add(TableCard(table)))
                 | None -> Logging.Error("Error getting online tables list")
             )
 

@@ -1,9 +1,10 @@
 ﻿namespace Interlude.Features.Play
 
-open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
 open Interlude.Features.Pacemaker
@@ -88,7 +89,7 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
             | FailButtonType.SCORE_SCREEN -> b_score_screen
             | FailButtonType.CONTINUE -> b_next_song
             | _ -> b_none
-        defer (fun () -> initial_focus.Focus false)
+        RenderThread.defer (fun () -> initial_focus.Focus false)
 
     override this.Draw() =
         let old_m = Render.alpha_multiplier_begin 1.0f

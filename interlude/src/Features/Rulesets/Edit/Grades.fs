@@ -1,9 +1,9 @@
 ﻿namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
 
@@ -66,7 +66,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Accuracy = 0.0
             }
         ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |] }
-        defer refresh
+        RenderThread.defer refresh
 
     and delete_grade(i: int) : unit =
         ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i }

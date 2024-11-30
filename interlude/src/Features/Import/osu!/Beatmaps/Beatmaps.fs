@@ -2,6 +2,7 @@ namespace Interlude.Features.Import.osu
 
 open System
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
@@ -174,7 +175,7 @@ type BeatmapBrowserPage() =
                 Setting.simple "",
                 (fun (f: FilterPart list) ->
                     filter <- f
-                    defer (fun () -> begin_search filter)
+                    RenderThread.defer (fun () -> begin_search filter)
                 ),
                 Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,

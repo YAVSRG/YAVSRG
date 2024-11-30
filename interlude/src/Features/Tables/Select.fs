@@ -1,8 +1,9 @@
 namespace Interlude.Features.Tables
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
 open Interlude.Content
@@ -72,7 +73,7 @@ type SelectTablePage(refresh_table_view) =
                     if options.ChartGroupMode.Value = "level" && Screen.current_type = Screen.Type.LevelSelect then
                         refresh_table_view()
 
-                    defer refresh
+                    RenderThread.defer refresh
             )
 
         match Content.Table with

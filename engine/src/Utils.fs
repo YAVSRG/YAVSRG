@@ -2,7 +2,6 @@
 
 open System.IO
 open System.Reflection
-open System.Threading
 open SixLabors.ImageSharp
 
 module Utils =
@@ -22,10 +21,3 @@ module Utils =
     //do Configuration.Default.PreferContiguousImageBuffers <- true
 
     let lerp x a b : float32 = (b - a) * x + a
-
-    let mutable internal UI_THREAD = -1
-
-    let is_ui_thread () =
-        UI_THREAD < 0 || Thread.CurrentThread.ManagedThreadId = UI_THREAD
-
-    let inline require_ui_thread () = assert (is_ui_thread ())

@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude.UI
 
@@ -30,20 +30,20 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
     member private this.Content = content
 
     member this.Offline() =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         status <- WebRequestState.Offline
 
     member this.ServerError() =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         status <- WebRequestState.ServerError
 
     member this.SetData result =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         status <- WebRequestState.Loaded
         data.Value <- result
 
     member this.Reload() =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         status <- WebRequestState.Loading
         load this
 

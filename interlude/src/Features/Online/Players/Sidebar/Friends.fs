@@ -1,8 +1,8 @@
 ﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.UI
 open Interlude.Web.Shared.Requests
@@ -14,7 +14,7 @@ type private FriendList() =
             fun this ->
                 if Network.status = Network.Status.LoggedIn then
                     Friends.List.get (fun response ->
-                        defer
+                        RenderThread.defer
                         <| fun () ->
                             match response with
                             | Some result -> this.SetData result

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
@@ -84,7 +85,7 @@ type HotkeysPage() =
                     TextColor = K Colors.text_cyan) with
                 override this.OnFocus by_mouse =
                     base.OnFocus by_mouse
-                    if not by_mouse then defer (fun () -> this.Select false)
+                    if not by_mouse then RenderThread.defer (fun () -> this.Select false)
             }
 
         let hotkey_editor (hotkey: Hotkey) =

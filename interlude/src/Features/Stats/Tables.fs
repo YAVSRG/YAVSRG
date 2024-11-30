@@ -1,8 +1,9 @@
 ﻿namespace Interlude.Features.Stats
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Rulesets
@@ -34,7 +35,7 @@ type private Leaderboard() =
             Tables.Leaderboard.get (
                 Content.Table.Value.Id,
                 fun response ->
-                    defer
+                    RenderThread.defer
                     <| fun () ->
                         match response with
                         | Some data ->
@@ -99,7 +100,7 @@ type private CompareFriend
                 name,
                 table.Id,
                 fun response ->
-                    defer
+                    RenderThread.defer
                     <| fun () ->
                         match response with
                         | Some data ->
@@ -238,7 +239,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
 
         if Network.status = Network.Status.LoggedIn then
             Friends.List.get (fun response ->
-                defer
+                RenderThread.defer
                 <| fun () ->
                     match response with
                     | Some data ->

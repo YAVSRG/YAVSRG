@@ -3,8 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Charts.Processing
@@ -508,7 +509,7 @@ and PositionerContext =
             this.Positioners <- this.Positioners.Add(e, p)
 
             if this.Selected = e then
-                if p.Initialised then p.Focus true else defer(fun () -> p.Focus true)
+                if p.Initialised then p.Focus true else RenderThread.defer (fun () -> p.Focus true)
 
     member this.Select(e: HudElement) =
         if this.Selected <> e then
@@ -574,7 +575,7 @@ type PositionerInfo(ctx: PositionerContext) =
             (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE + " " + %"hud.editor.enabled" else Icons.CIRCLE + " " + %"hud.editor.disabled"),
             (fun () ->
                 Setting.app not (HudElement.enabled_setting ctx.Selected)
-                defer (fun () -> ctx.Create ctx.Selected)
+                RenderThread.defer (fun () -> ctx.Create ctx.Selected)
             ),
             Disabled = (fun () -> HudElement.can_toggle ctx.Selected |> not),
             Position = Position.Row(100.0f, 60.0f).Shrink(10.0f, 5.0f)
@@ -583,7 +584,7 @@ type PositionerInfo(ctx: PositionerContext) =
             Icons.REFRESH_CW + " " + %"hud.editor.reset_position",
             (fun () ->
                 HudElement.position_setting(ctx.Selected).Set(HudElement.default_position ctx.Selected)
-                defer (fun () -> ctx.Create ctx.Selected)
+                RenderThread.defer (fun () -> ctx.Create ctx.Selected)
             ),
             Position = Position.Row(160.0f, 60.0f).Shrink(10.0f, 5.0f)
         )

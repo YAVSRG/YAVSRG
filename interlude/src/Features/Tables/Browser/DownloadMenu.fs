@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
@@ -244,16 +245,16 @@ module TableDownloader =
         { new Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
-                    defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
+                    RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
                     | Some cc ->
                         ChartDatabase.change_packs cc (cc.Packs.Add table_name) Content.Charts
-                        defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Charts with
-                        | true -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                        | false -> defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                        | true -> RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | false -> RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 
                     return ()
                 }
@@ -489,7 +490,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 | Some charts ->
                     let state = DownloaderState(table, charts.Charts, download_service)
 
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         match existing_states.TryFind table.Id with
                         | Some state -> () // do nothing if they spam clicked the table button
                         | None ->

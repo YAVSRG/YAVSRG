@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
@@ -139,7 +140,7 @@ module private Presets =
                                 fun () ->
                                     Presets.load preset_id |> ignore
                                     SkinPreview.RefreshAll()
-                                    defer <| EditPresetPage(preset_id, setting).Show
+                                    RenderThread.defer <| EditPresetPage(preset_id, setting).Show
                             )
                                 .Show()
                         else

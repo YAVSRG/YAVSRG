@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Rulesets
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
@@ -34,7 +35,7 @@ module RulesetSwitcher =
                             else
                                 let inner_items = items |> Array.map (fun (id, rs) -> (fun () -> setting.Set id), rs.Name)
                                 let inner_dropdown = DropdownMenu { Items = inner_items }
-                                yield ((fun () -> defer (fun () -> w.Show inner_dropdown)), name + " >")
+                                yield ((fun () -> RenderThread.defer (fun () -> w.Show inner_dropdown)), name + " >")
                     }
                 DropdownMenu
                     {

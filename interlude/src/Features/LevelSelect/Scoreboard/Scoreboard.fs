@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
@@ -58,9 +59,9 @@ type Scoreboard(display: Setting<Display>) =
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()); loading <- true)
         SelectedChart.on_chart_change_finished.Add(fun _ -> container.Clear(); count <- 0)
-        Rulesets.on_changed.Add (fun _ -> defer (fun () -> container.Sort <- sorter ()))
+        Rulesets.on_changed.Add (fun _ -> RenderThread.defer (fun () -> container.Sort <- sorter ()))
         SelectedChart.on_chart_update_finished.Add(fun _ -> refresh_filter())
-        Gameplay.score_deleted.Add (fun timestamp -> container.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then defer (fun () -> container.Remove sc)))
+        Gameplay.score_deleted.Add (fun timestamp -> container.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then RenderThread.defer (fun () -> container.Remove sc)))
         container.Sort <- sorter ()
 
         this

@@ -422,4 +422,4 @@ module SelectedChart =
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
         on_chart_change_started.Add(fun info -> presets_on_chart_changed info.CacheInfo)
 
-        add_to_update_loop chart_loader.Join
+        Screen.animations.Add(Animation.ActionLoop(chart_loader.Join)) // todo: tidy up

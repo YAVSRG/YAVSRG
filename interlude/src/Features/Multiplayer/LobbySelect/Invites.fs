@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Multiplayer
 
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.Features.Online
@@ -13,14 +14,14 @@ type InviteCard(invite: LobbyInvite) =
         |+ Button(
             Icons.CHECK,
             (fun () ->
-                defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
+                RenderThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
                 Network.join_lobby invite.LobbyId
             ),
             Position = Position.ShrinkR(50.0f).SliceR(50.0f)
         )
         |* Button(
             Icons.X,
-            (fun () -> defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
+            (fun () -> RenderThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
             Position = Position.SliceR(50.0f)
         )
 

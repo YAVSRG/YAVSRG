@@ -1,6 +1,7 @@
 namespace Interlude.Features.Skins.Browser
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Repo
@@ -56,14 +57,14 @@ type SkinsBrowserPage() =
             fun data ->
                 match data with
                 | WebResult.Ok(d: SkinRepo) ->
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         for group in d.Skins do
                             let is_selected = Setting.make (fun _ -> select_group group) (fun _ -> selected_group = Some group)
                             noteskin_items.Add <| GroupDisplay(group, is_selected)
                         loading <- false
                     )
                 | _ ->
-                    defer (fun () ->
+                    RenderThread.defer (fun () ->
                         error <- true
                         loading <- false
                     )

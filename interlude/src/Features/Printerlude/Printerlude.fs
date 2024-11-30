@@ -6,7 +6,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
-open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Charts
 open Prelude.Data
@@ -45,6 +45,10 @@ module Printerlude =
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Updates.version)
             io.WriteLine(sprintf "The latest version online is %s" Updates.latest_version_name)
+
+        let focus_window (io: IOContext) =
+            WindowThread.w_defer WindowThread.focus_window
+            io.WriteLine(sprintf "Message to focus game window sent")
 
         let timescale (io: IOContext) (v: float) =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
@@ -117,7 +121,7 @@ module Printerlude =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithCommand("crash", "Crashes the game", fun () -> defer (fun () -> failwith "Deliberate debug crash"))
+                .WithCommand("crash", "Crashes the game", fun () -> RenderThread.defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithCommand("sessions", "Experimental session calculation", sessions)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
@@ -139,7 +143,9 @@ module Printerlude =
                 .WithCommand("vacuum", "Debug tool for cleaning up chart database", vacuum)
 
         let register_ipc_commands (ctx: ShellContext) =
-            ctx.WithIOCommand("version", "Shows info about the current game version", show_version)
+            ctx
+                .WithIOCommand("version", "Shows info about the current game version", show_version)
+                .WithIOCommand("focus", "Focuses the game window", focus_window)
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)

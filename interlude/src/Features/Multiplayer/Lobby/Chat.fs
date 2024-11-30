@@ -1,11 +1,11 @@
 ﻿namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data
 open Prelude.Gameplay
 open Interlude.Web.Shared
 open Interlude.UI
@@ -48,7 +48,7 @@ type Chat(lobby: Lobby) =
         match last_msg with
         | Some m ->
             if m.Bounds.Top - message_history.RemainingScrollAnimation - message_history.Bounds.Bottom < 200.0f then
-                defer (fun () -> message_history.Scroll infinityf)
+                RenderThread.defer (fun () -> message_history.Scroll infinityf)
         | None -> ()
 
         last_msg <- Some w

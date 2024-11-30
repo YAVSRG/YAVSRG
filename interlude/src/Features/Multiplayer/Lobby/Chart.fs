@@ -1,9 +1,10 @@
 ﻿namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
 open Prelude.Gameplay.Mods
@@ -80,7 +81,7 @@ module LobbyChart =
                     | true ->
                         let newly_installed = (ChartDatabase.get_meta chart.Hash Content.Charts).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
-                        defer
+                        RenderThread.defer
                         <| fun () ->
                         SelectedChart.change (newly_installed, LibraryContext.None, true)
                         SelectedChart.rate.Set chart.Rate

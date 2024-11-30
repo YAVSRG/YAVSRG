@@ -9,7 +9,6 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.UI
 open Percyqaz.Common
 
 module private FrameTimeStrategies =
@@ -287,6 +286,12 @@ module private FrameTimeStrategies =
                 if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
                     vblank_number - 0uL, adjusted_last_time - est_period, est_period
                 else vblank_number, adjusted_last_time, est_period
+
+type UIEntryPoint =
+    abstract member ShouldExit: bool
+    abstract member Init: unit -> unit
+    abstract member Update: float * bool -> unit
+    abstract member Draw: unit -> unit
             
 type Strategy =
     | Unlimited
@@ -305,6 +310,22 @@ module RenderThread =
 
     let after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
+
+    let private LOCK_OBJ = obj()
+
+    let mutable internal UI_THREAD_ID = -1
+    let is_ui_thread() =
+        Thread.CurrentThread.ManagedThreadId = UI_THREAD_ID
+
+    let mutable private action_queue : (unit -> unit) list = []
+    let run_action_queue() =
+        lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
+    let defer (action: unit -> unit) =
+        lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
+
+    let inline ensure_ui_thread (action: unit -> unit) =
+        if is_ui_thread () then action () else defer action
+
 
 type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsContext, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: UIEntryPoint) =
 
@@ -372,7 +393,7 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
 
     member this.Start() =
         let thread = Thread(this.Loop)
-        Percyqaz.Flux.Utils.UI_THREAD <- thread.ManagedThreadId
+        RenderThread.UI_THREAD_ID <- thread.ManagedThreadId
         thread.Start()
 
     member this.DispatchFrame() =
@@ -403,7 +424,7 @@ type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsConte
         // Update
         start_of_frame <- now ()
         Input.begin_frame_events ()
-        ROOT_ANIMATION.Update elapsed_ms
+        RenderThread.run_action_queue()
         ui_root.Update(elapsed_ms, resized)
         resized <- false
         Input.finish_frame_events ()

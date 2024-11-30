@@ -6,7 +6,6 @@ open System.Runtime.InteropServices
 open FSharp.NativeInterop
 open OpenTK.Windowing.Desktop
 open OpenTK.Graphics.OpenGL
-open Percyqaz.Flux.UI
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -82,9 +81,9 @@ module WindowThread =
     let get_monitors() = lock (LOCK_OBJ) (fun () -> detected_monitors)
 
     (*
-        Window config
+        Window options
         
-        todo: move the snapshot object here and remove the original
+        `apply_config` applies all the settings in the "video settings" object
     *)
 
     let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
@@ -221,6 +220,7 @@ module WindowThread =
         if config.EnableCursor then 
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
         else
+            // todo: grabbed on macos?
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
         if OperatingSystem.IsWindows() then
@@ -229,7 +229,7 @@ module WindowThread =
         let x, y = GLFW.GetWindowPos(window)
         let width, height = GLFW.GetWindowSize(window)
 
-        defer
+        RenderThread.defer
         <| fun () ->
             render_thread.RenderModeChanged(
                 config.WindowMode = WindowType.Fullscreen
@@ -276,6 +276,10 @@ module WindowThread =
         GLFW windowing logic
     *)
 
+    let focus_window() =
+        assert(is_window_thread())
+        GLFW.FocusWindow(window)
+
     let private focus_callback (_: nativeptr<Window>) (focused: bool) =
         is_focused <- focused
         if should_disable_windows_key() then 
@@ -286,7 +290,7 @@ module WindowThread =
 
     let private resize_callback (window: nativeptr<Window>) (_: int) (_: int) =
         let width, height = GLFW.GetFramebufferSize(window)
-        defer (fun () ->
+        RenderThread.defer (fun () ->
             if width <> 0 && height <> 0 then
                 render_thread.OnResize(width, height)
         )
@@ -303,7 +307,7 @@ module WindowThread =
                 paths_array.[i] <- Marshal.PtrToStringUTF8(NativePtr.toNativeInt (NativePtr.get paths i))
         with err ->
             Logging.Critical("Error getting dropped file paths", err)
-        defer (fun () -> file_drop_ev.Trigger paths_array)
+        RenderThread.defer (fun () -> file_drop_ev.Trigger paths_array)
 
     let private file_drop_callback_d = GLFWCallbacks.DropCallback file_drop_callback
 
@@ -312,7 +316,6 @@ module WindowThread =
 
     let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
 
-    // todo: extract out ui_root
     let internal init(config: WindowOptions, title: string, ui_root: UIEntryPoint, icon: Percyqaz.Flux.Utils.Bitmap option) =
         last_applied_config <- config
         WINDOW_THREAD_ID <- Environment.CurrentManagedThreadId

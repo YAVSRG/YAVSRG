@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Rulesets.Edit
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -67,7 +68,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     and duplicate_judgement(i: int) : unit =
         ruleset.Set (Ruleset.duplicate_judgement i ruleset.Value)
-        defer refresh
+        RenderThread.defer refresh
 
     and delete_judgement (i: int) : unit =
         ruleset.Set (Ruleset.remove_judgement i ruleset.Value)

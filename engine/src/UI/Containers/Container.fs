@@ -1,6 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 
 type Container(node_type) =
     inherit StaticWidget(node_type)
@@ -28,14 +28,14 @@ type Container(node_type) =
             children.[i].Update(elapsed_ms, moved)
 
     member this.Add(child: #Widget) =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         children.Add child
 
         if this.Initialised then
             child.Init this
 
     member this.Remove(child: Widget) : bool =
-        require_ui_thread ()
+        assert(RenderThread.is_ui_thread())
         children.Remove child
 
     override this.Init(parent: Widget) =

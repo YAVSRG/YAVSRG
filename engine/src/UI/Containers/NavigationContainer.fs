@@ -3,7 +3,7 @@
 open System.Linq
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Utils
+open Percyqaz.Flux.Windowing
 
 /// Container that provides navigation and selection using arrow keys + enter
 /// Content is assumed to be positioned in a layout that fits the navigation
@@ -96,7 +96,7 @@ module NavigationContainer =
                 this.Navigate()
 
         member this.Add(child: Widget) =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
             children.Add child
 
             if this.Initialised then
@@ -109,7 +109,7 @@ module NavigationContainer =
                 c.Init this
 
         member this.Clear() =
-            require_ui_thread ()
+            assert(RenderThread.is_ui_thread())
             children.Clear()
 
         static member (|+)(parent: #Base, child: Widget) =
