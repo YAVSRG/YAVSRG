@@ -19,6 +19,12 @@ module Root =
     let inline ensure_ui_thread action =
         if is_ui_thread () then action () else defer action
 
+type UIEntryPoint =
+    abstract member ShouldExit: bool
+    abstract member Init: unit -> unit
+    abstract member Update: float * bool -> unit
+    abstract member Draw: unit -> unit
+
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)
@@ -42,3 +48,9 @@ type Root() =
         if moved then
             this.Bounds <- Render._bounds
             this.VisibleBounds <- Render._bounds
+
+    interface UIEntryPoint with
+        member this.ShouldExit = this.ShouldExit
+        member this.Init() = this.Init()
+        member this.Update(elapsed_ms, moved) = this.Update(elapsed_ms, moved)
+        member this.Draw() = this.Draw()

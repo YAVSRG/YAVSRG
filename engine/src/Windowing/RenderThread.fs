@@ -306,7 +306,7 @@ module RenderThread =
     let after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
 
-type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsContext, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: Root) =
+type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsContext, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: UIEntryPoint) =
 
     let mutable resized = false
     let mutable fps_count = 0

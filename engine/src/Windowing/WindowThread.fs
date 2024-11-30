@@ -313,7 +313,7 @@ module WindowThread =
     let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
 
     // todo: extract out ui_root
-    let internal init(config: WindowOptions, title: string, ui_root: Root, icon: Percyqaz.Flux.Utils.Bitmap option) =
+    let internal init(config: WindowOptions, title: string, ui_root: UIEntryPoint, icon: Percyqaz.Flux.Utils.Bitmap option) =
         last_applied_config <- config
         WINDOW_THREAD_ID <- Environment.CurrentManagedThreadId
 

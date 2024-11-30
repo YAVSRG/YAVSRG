@@ -9,7 +9,7 @@ open Percyqaz.Flux.UI
 
 module Launch =
 
-    let entry_point (config: WindowOptions, name: string, ui_root: Root, icon: Utils.Bitmap option) =
+    let entry_point (config: WindowOptions, name: string, ui_root: UIEntryPoint, icon: Utils.Bitmap option) =
         
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 
