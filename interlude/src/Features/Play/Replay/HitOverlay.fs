@@ -1,9 +1,9 @@
 ﻿namespace Interlude.Features.Play.Replay
 
-open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
-open Percyqaz.Common
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Replays
@@ -213,7 +213,7 @@ type private HitOverlay
             let now =
                 state.CurrentChartTime()
                 + (
-                    (if Song.playing() then Performance.frame_compensation () else 0.0f<ms / rate>)
+                    (if Song.playing() then RenderThread.frame_compensation () else 0.0f<ms / rate>)
                     + options.VisualOffset.Value
                 ) * SelectedChart.rate.Value
 

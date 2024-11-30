@@ -16,13 +16,13 @@ type PerformanceSettingsPage() =
     let mutable closed = false
     let cycle = Animation.Counter(1500.0)
     let texture = Content.Texture "note"
-    let screen_tear_alignment = config.SmartCapTearlinePosition |> Setting.trigger (fun v -> tearline_position <- v) |> Setting.f32
-    let framerate_multiplier = config.SmartCapFramerateMultiplier |> Setting.trigger (fun v -> framerate_multiplier <- v)
+    let screen_tear_alignment = config.SmartCapTearlinePosition |> Setting.trigger (fun v -> RenderThread.tearline_position <- v) |> Setting.f32
+    let framerate_multiplier = config.SmartCapFramerateMultiplier |> Setting.trigger (fun v -> RenderThread.framerate_multiplier <- v)
 
     let is_windows = OperatingSystem.IsWindows()
     let show_tearline_settings () =
         is_windows 
-        && no_compositor
+        && not RenderThread.uses_compositor
         && config.RenderMode.Value = FrameLimit.Smart
         && config.SmartCapAntiJitter.Value
 
@@ -49,7 +49,7 @@ type PerformanceSettingsPage() =
         |+ PageSetting(%"system.performance.antijitter", 
             Checkbox(
                 config.SmartCapAntiJitter
-                |> Setting.trigger (fun v -> anti_jitter <- v)
+                |> Setting.trigger (fun v -> RenderThread.anti_jitter <- v)
             )
         )
             .Help(Help.Info("system.performance.antijitter"))
@@ -85,7 +85,7 @@ type PerformanceSettingsPage() =
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
 
         for i = 0 to 10 do
-            let anti_jitter = Performance.frame_compensation () / 1.0f<ms / rate>
+            let anti_jitter = RenderThread.frame_compensation () / 1.0f<ms / rate>
             let y = (float32 (cycle.Time / cycle.Interval) + (float32 i / 10.0f)) % 1.0f
             Draw.sprite 
                 (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))

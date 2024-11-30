@@ -8,6 +8,7 @@ open OpenTK.Windowing.Desktop
 open OpenTK.Graphics.OpenGL
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 
@@ -233,9 +234,9 @@ module WindowThread =
         RenderThread.defer
         <| fun () ->
             RenderThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
-            anti_jitter <- config.SmartCapAntiJitter
-            tearline_position <- config.SmartCapTearlinePosition
-            framerate_multiplier <- config.SmartCapFramerateMultiplier
+            RenderThread.anti_jitter <- config.SmartCapAntiJitter
+            RenderThread.tearline_position <- config.SmartCapTearlinePosition
+            RenderThread.framerate_multiplier <- config.SmartCapFramerateMultiplier
 
     (*
         Disabling windows key & Focus
@@ -344,7 +345,8 @@ module WindowThread =
         GL.LoadBindings(bindings)
         context.MakeNoneCurrent()
 
-        RenderThread.init(window, ui_root, config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
+        RenderThread.init(window, ui_root)
+        Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
         resize_callback window INITIAL_SIZE INITIAL_SIZE
 
         Input.init window

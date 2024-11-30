@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Scoring
@@ -269,7 +270,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let now =
             Song.time_with_offset ()
             + (
-                (if Song.playing() then Performance.frame_compensation () else 0.0f<ms / rate>)
+                (if Song.playing() then RenderThread.frame_compensation () else 0.0f<ms / rate>)
                 + options.VisualOffset.Value
             ) * SelectedChart.rate.Value
 

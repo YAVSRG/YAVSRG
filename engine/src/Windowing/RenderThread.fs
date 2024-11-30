@@ -3,7 +3,6 @@
 open System
 open System.Threading
 open System.Diagnostics
-open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -20,14 +19,6 @@ type Strategy =
     | Unlimited
     | WindowsDwmFlush
     | WindowsVblankSync
-
-[<AutoOpen>]
-module SmartCapConstants =
-    
-    let mutable no_compositor = false
-    let mutable anti_jitter = false
-    let mutable tearline_position = 0.75
-    let mutable framerate_multiplier = 8.0
 
 module RenderThread =
 
@@ -60,45 +51,65 @@ module RenderThread =
 
     let inline ensure_ui_thread (action: unit -> unit) =
         if is_ui_thread () then action () else defer action
-
-    (*
-        Events
-
-        Triggers for an application to hook into for initialisation and shutdown logic
-    *)
-
-    let after_init_ev = Event<unit>()
+        
+    let private after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
 
     (*
-        
+        State
     *)
 
-    let mutable resized = false
-    let mutable fps_count = 0
-    let fps_timer = Stopwatch()
-    let last_frame_timer = Stopwatch()
-    let total_frame_timer = Stopwatch.StartNew()
-    let mutable estimated_next_frame = 0.0
-    let mutable real_next_frame = 0.0
-    let mutable start_of_frame = 0.0
-    let mutable frame_is_ready = 0.0
-    let mutable strategy = Unlimited
+    let mutable private resized = false
+    let mutable private fps_count = 0
+    let private fps_timer = Stopwatch()
+    let private last_frame_timer = Stopwatch()
+    let private total_frame_timer = Stopwatch.StartNew()
+    let mutable private estimated_next_frame = 0.0
+    let mutable private real_next_frame = 0.0
+    let mutable private start_of_frame = 0.0
+    let mutable private frame_is_ready = 0.0
+    let mutable private strategy = Unlimited
 
     let private now () = total_frame_timer.Elapsed.TotalMilliseconds
+
+    (*
+        Global variables (to be refactored)
+        These can be read from the game thread
+    *)
+    
+    let mutable uses_compositor = false
+    let mutable anti_jitter = false
+    let mutable tearline_position = 0.75
+    let mutable framerate_multiplier = 8.0
+    let mutable framecount_tickcount = (0, 1L)
+    let mutable visual_latency_lo = 0.0
+    let mutable visual_latency_hi = 0.0
+    let mutable update_time = 0.0
+    let mutable draw_time = 0.0
+    let mutable update_draw_elapsed_ms = 0.0
+
+    let frame_compensation () =
+        if strategy <> Unlimited && anti_jitter then
+            float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
+        else
+            0.0f<ms / rate>
+
+    (*
+        Main loop
+    *)
 
     let mutable private fatal_error = false
     let has_fatal_error () =
         fatal_error
 
-    let viewport_resized(width, height) =
+    let internal viewport_resized(width, height) =
         assert(is_ui_thread())
         Render.viewport_resized (width, height)
         resized <- true
 
-    let change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
+    let internal change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
         assert(is_ui_thread())
-        no_compositor <- entire_monitor
+        uses_compositor <- not entire_monitor
         strategy <-
             if OperatingSystem.IsWindows() then
                 // On windows:
@@ -123,8 +134,8 @@ module RenderThread =
 
     let private dispatch_frame() =
 
-        Performance.visual_latency_lo <- frame_is_ready - real_next_frame
-        Performance.visual_latency_hi <- start_of_frame - real_next_frame
+        visual_latency_lo <- frame_is_ready - real_next_frame
+        visual_latency_hi <- start_of_frame - real_next_frame
 
         match strategy with
 
@@ -154,7 +165,7 @@ module RenderThread =
         resized <- false
         Input.finish_frame_events ()
         Devices.update elapsed_ms
-        Performance.update_time <- now () - start_of_frame
+        update_time <- now () - start_of_frame
 
         if ui_root.ShouldExit then
             GLFW.SetWindowShouldClose(window, true)
@@ -168,7 +179,7 @@ module RenderThread =
 
         Render.finish ()
         frame_is_ready <- now ()
-        Performance.draw_time <- frame_is_ready - before_draw
+        draw_time <- frame_is_ready - before_draw
 
         if not ui_root.ShouldExit then
             GLFW.SwapBuffers(window)
@@ -179,11 +190,11 @@ module RenderThread =
         let time = fps_timer.ElapsedTicks
 
         if time > Stopwatch.Frequency then
-            Performance.framecount_tickcount <- (fps_count, time)
+            framecount_tickcount <- (fps_count, time)
             fps_timer.Restart()
             fps_count <- 0
 
-        Performance.elapsed_ms <- elapsed_ms
+        update_draw_elapsed_ms <- elapsed_ms
 
     let private main_loop () =
         GLFW.MakeContextCurrent(window)
@@ -211,19 +222,14 @@ module RenderThread =
 
     let private thread = Thread(main_loop)
 
-    let internal init(_window: nativeptr<Window>, _ui_root: UIEntryPoint, audio_device: int, audio_device_period: int, audio_device_buffer_length: int) =
+    (*
+        Initialisation
+    *)
+
+    let internal init(_window: nativeptr<Window>, _ui_root: UIEntryPoint) =
         UI_THREAD_ID <- thread.ManagedThreadId
         window <- _window
         ui_root <- _ui_root
-
-        Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
-
-        Performance.frame_compensation <-
-            fun () ->
-                if strategy <> Unlimited && anti_jitter then
-                    float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
-                else
-                    0.0f<ms / rate>
 
     let internal start() =
         thread.Start()
