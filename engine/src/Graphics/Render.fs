@@ -322,13 +322,12 @@ module Render =
 
         sprintf 
             """-- DEBUG INFO (%s) --
-            GLFW Version: %s
-            GL Version: %s
-            GL Renderer: %s
-            Texture units: %s
-            OS: %s
-            Process: %s
-            """
+GLFW Version: %s
+GL Version: %s
+GL Renderer: %s
+Texture units: %s
+OS: %s
+Process: %s"""
             (DateTime.UtcNow.ToLongTimeString())
             glfw_version
             (GL.GetString StringName.Version)
@@ -338,7 +337,6 @@ module Render =
             specs
 
     let internal init (width, height) =
-        Logging.Debug(debug_info())
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)

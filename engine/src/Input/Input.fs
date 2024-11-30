@@ -2,7 +2,6 @@
 
 open System
 open OpenTK
-open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -207,12 +206,13 @@ module internal InputThread =
     let enable_typing (v: bool) =
         lock LOCK_OBJ (fun () -> typing <- v)
 
-    let init (win: NativeWindow) =
-        GLFW.SetCharCallback(win.WindowPtr, char_callback_d) |> ignore
-        GLFW.SetKeyCallback(win.WindowPtr, key_callback_d) |> ignore
-        GLFW.SetMouseButtonCallback(win.WindowPtr, mouse_button_callback_d) |> ignore
-        GLFW.SetScrollCallback(win.WindowPtr, scroll_callback_d) |> ignore
-        GLFW.SetCursorPosCallback(win.WindowPtr, cursor_pos_callback_d) |> ignore
+    let init (window: nativeptr<Window>) =
+        GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true);
+        GLFW.SetCharCallback(window, char_callback_d) |> ignore
+        GLFW.SetKeyCallback(window, key_callback_d) |> ignore
+        GLFW.SetMouseButtonCallback(window, mouse_button_callback_d) |> ignore
+        GLFW.SetScrollCallback(window, scroll_callback_d) |> ignore
+        GLFW.SetCursorPosCallback(window, cursor_pos_callback_d) |> ignore
         GLFW.SetErrorCallback(error_callback_d) |> ignore
 
     let fetch (events_this_frame: InputEv list byref, this_frame: FrameEvents byref) =
@@ -257,7 +257,7 @@ module Input =
 
     let mutable internal scrolled_this_frame = 0f
 
-    let mutable internal gw: NativeWindow = null
+    let mutable internal window: nativeptr<Window> = Unchecked.defaultof<_>
 
     /// Stops listening to text input OR to the next button pressed, if system previously was
     let remove_listener () =
@@ -369,9 +369,9 @@ module Input =
         | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
         | Bind.Dummy -> false
 
-    let init (win: NativeWindow) =
-        gw <- win
-        InputThread.init gw
+    let init (_window: nativeptr<Window>) =
+        window <- _window
+        InputThread.init window
 
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
     let private DELETE_WORD = Bind.ctrl Keys.Backspace
@@ -395,13 +395,13 @@ module Input =
                     Array.take (parts.Length - 1) parts |> String.concat " "
 
             elif pop_matching(COPY, InputEvType.Press).IsSome then
-                gw.ClipboardString <- s.Value
+                GLFW.SetClipboardString(window, s.Value)
 
             elif pop_matching(PASTE, InputEvType.Press).IsSome then
                 s.Value <-
                     s.Value
                     + try
-                        gw.ClipboardString
+                        GLFW.GetClipboardString(window)
                       with _ ->
                           ""
 

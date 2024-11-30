@@ -50,6 +50,7 @@
     <Compile Include="Windowing\Config.fs" />
     <Compile Include="Windowing\Console.fs" />
     <Compile Include="Windowing\RenderThread.fs" />
+    <Compile Include="Windowing\NewWindow.fs" />
     <Compile Include="Windowing\Window.fs" />
     <Compile Include="Launch.fs" />
   </ItemGroup>

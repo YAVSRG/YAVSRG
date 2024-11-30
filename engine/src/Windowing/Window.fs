@@ -40,7 +40,7 @@ module Window =
     let mutable internal action_queue = []
 
     type WindowAction =
-        | ApplyConfig of Config
+        | ApplyConfig of WindowingUserOptions
         | EnableResize of callback: ((int * int) -> unit)
         | DisableResize
         | DisableWindowsKey
@@ -55,7 +55,7 @@ module Window =
 
 
 [<Sealed>]
-type Window(config: Config, title: string, ui_root: Root) as this =
+type Window(config: WindowingUserOptions, title: string, ui_root: Root) as this =
     inherit
         NativeWindow(
             NativeWindowSettings(
@@ -68,7 +68,8 @@ type Window(config: Config, title: string, ui_root: Root) as this =
 
     let render_thread =
         RenderThread(
-            this, 
+            this.WindowPtr,
+            this.Context,
             config.AudioDevice.Value,
             config.AudioDevicePeriod.Value,
             config.AudioDevicePeriod.Value * config.AudioDeviceBufferLengthMultiplier.Value,
@@ -99,7 +100,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
         && not input_cpu_saver 
         && OperatingSystem.IsWindows()
 
-    member this.ApplyConfig(config: Config) =
+    member this.ApplyConfig(config: WindowingUserOptions) =
 
         let monitor_list = Monitors.GetMonitors()
 
@@ -346,7 +347,7 @@ type Window(config: Config, title: string, ui_root: Root) as this =
     member this.OnLoad() =
         this.ApplyConfig config
         Fonts.init ()
-        Input.init this
+        Input.init this.WindowPtr
         WindowEvents.on_load.Trigger()
         base.IsVisible <- true
 

@@ -301,7 +301,7 @@ module SmartCapConstants =
     let mutable tearline_position = 0.75
     let mutable framerate_multiplier = 8.0
 
-type private RenderThread(window: NativeWindow, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: Root, after_init: unit -> unit) =
+type private RenderThread(window: nativeptr<Window>, context: IGLFWGraphicsContext, audio_device: int, audio_device_period: int, audio_device_buffer_length: int, ui_root: Root, after_init: unit -> unit) =
 
     let mutable resized = false
     let mutable fps_count = 0
@@ -345,26 +345,26 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
                 //  Smart = GLFW's default Vsync
                 //  Unlimited = Unlimited
                 if this.RenderMode = FrameLimit.Smart then
-                    window.Context.SwapInterval <- 1
+                    context.SwapInterval <- 1
                     Unlimited
                 else
-                    window.Context.SwapInterval <- 0
+                    context.SwapInterval <- 0
                     Unlimited
 
     member private this.Loop() =
-        window.Context.MakeCurrent()
+        context.MakeCurrent()
         this.Init()
         fps_timer.Start()
 
         try
             Console.hide()
-            while not (GLFW.WindowShouldClose window.WindowPtr) do
+            while not (GLFW.WindowShouldClose window) do
                 this.DispatchFrame()
         with fatal_err ->
             fatal_error <- true
             Logging.Critical("Fatal crash in UI thread", fatal_err)
             Console.restore()
-            window.Close()
+            GLFW.SetWindowShouldClose(window, true)
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
 
     member this.Start() =
@@ -408,7 +408,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         Performance.update_time <- now () - start_of_frame
 
         if ui_root.ShouldExit then
-            window.Close()
+            GLFW.SetWindowShouldClose(window, true)
 
         // Draw
         let before_draw = now ()
@@ -422,7 +422,7 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
         Performance.draw_time <- frame_is_ready - before_draw
 
         if not ui_root.ShouldExit then
-            window.Context.SwapBuffers()
+            context.SwapBuffers()
             real_next_frame <- now ()
 
         // Performance profiling
@@ -438,8 +438,8 @@ type private RenderThread(window: NativeWindow, audio_device: int, audio_device_
 
     member this.Init() =
         Devices.init(audio_device, audio_device_period, audio_device_buffer_length)
-        let window_x, window_y = window.ClientSize.X, window.ClientSize.Y
-        if window_x = 0 || window_y = 0 then Render.DEFAULT_SCREEN else (window_x, window_y)
+        let width, height = GLFW.GetFramebufferSize(window)
+        if width = 0 || height = 0 then Render.DEFAULT_SCREEN else (width, height)
         |> Render.init
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer

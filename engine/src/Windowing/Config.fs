@@ -36,7 +36,24 @@ type FrameLimit =
     | Unlimited = 0
     | Smart = 1
 
-type Config =
+type WindowingUserOptionsSnapshot =
+    internal {
+        WorkingDirectory: string
+        WindowMode: WindowType
+        WindowResolution: int * int
+        FullscreenVideoMode: FullscreenVideoMode
+        RenderMode: FrameLimit
+        SmartCapAntiJitter: bool
+        SmartCapFramerateMultiplier: float
+        SmartCapTearlinePosition: float
+        Display: int
+        AudioDevice: int
+        AudioDevicePeriod: int
+        AudioDeviceBufferLengthMultiplier: int
+        InputCPUSaver: bool
+    }
+
+type WindowingUserOptions =
     {
         WorkingDirectory: string
         WindowMode: Setting<WindowType>
@@ -52,6 +69,7 @@ type Config =
         AudioDeviceBufferLengthMultiplier: Setting<int>
         InputCPUSaver: Setting<bool>
     }
+
     static member Default =
         {
             WorkingDirectory = ""
@@ -73,4 +91,21 @@ type Config =
             AudioDevicePeriod = Setting.simple 2
             AudioDeviceBufferLengthMultiplier = Setting.simple 2
             InputCPUSaver = Setting.simple false
+        }
+
+    member this.Snapshot : WindowingUserOptionsSnapshot =
+        {
+            WorkingDirectory = this.WorkingDirectory
+            WindowMode = this.WindowMode.Value
+            WindowResolution = this.WindowResolution.Value
+            FullscreenVideoMode = this.FullscreenVideoMode.Value
+            RenderMode = this.RenderMode.Value
+            SmartCapAntiJitter = this.SmartCapAntiJitter.Value
+            SmartCapFramerateMultiplier = this.SmartCapFramerateMultiplier.Value
+            SmartCapTearlinePosition = this.SmartCapTearlinePosition.Value
+            Display = this.Display.Value
+            AudioDevice = this.AudioDevice.Value
+            AudioDevicePeriod = this.AudioDevicePeriod.Value
+            AudioDeviceBufferLengthMultiplier = this.AudioDeviceBufferLengthMultiplier.Value
+            InputCPUSaver = this.InputCPUSaver.Value
         }

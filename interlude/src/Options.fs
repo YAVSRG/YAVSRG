@@ -328,7 +328,7 @@ module Options =
                 MenusMuffleSong = Setting.simple true
             }
 
-    let mutable internal config: Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
+    let mutable internal config: Percyqaz.Flux.Windowing.WindowingUserOptions = Unchecked.defaultof<_>
 
     let mutable options: GameOptions = Unchecked.defaultof<_>
 
@@ -497,7 +497,7 @@ module Options =
     let init_startup (instance: int) =
         // Register decoding rules for Percyqaz.Flux config
         JSON
-            .WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
+            .WithAutoCodec<Percyqaz.Flux.Windowing.WindowingUserOptions>(false)
             .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
             .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
         |> ignore
