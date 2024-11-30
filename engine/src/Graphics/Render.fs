@@ -6,7 +6,6 @@ open SixLabors.ImageSharp.PixelFormats
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
-open Percyqaz.Common
 
 (*
     Render handling to be used from Game

@@ -126,10 +126,6 @@ module internal InputThread =
 
     let private LOCK_OBJ = Object()
 
-    let private error_callback (code: ErrorCode) (desc: string) =
-        Logging.Debug(sprintf "GLFW Error (%O): %s" code desc)
-    let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
-
     let private char_callback (_: nativeptr<Window>) (char: uint32) =
         if typing then
             last_typed <- GLFW.GetTime()
@@ -213,7 +209,6 @@ module internal InputThread =
         GLFW.SetMouseButtonCallback(window, mouse_button_callback_d) |> ignore
         GLFW.SetScrollCallback(window, scroll_callback_d) |> ignore
         GLFW.SetCursorPosCallback(window, cursor_pos_callback_d) |> ignore
-        GLFW.SetErrorCallback(error_callback_d) |> ignore
 
     let fetch (events_this_frame: InputEv list byref, this_frame: FrameEvents byref) =
         let a, b =

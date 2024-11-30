@@ -3,7 +3,6 @@
 open System
 open System.Diagnostics
 open System.Runtime.InteropServices
-open OpenTK.Windowing.GraphicsLibraryFramework
 
 module WindowsKey =
 
@@ -35,7 +34,8 @@ module WindowsKey =
             CallNextHookEx(hook, nCode, wParam, lParam)
     let private hook_callback_delegate = LowLevelKeyboardProc(hook_callback)
 
-    let disable () : unit = 
+    let disable () : unit =
+        assert(OperatingSystem.IsWindows())
         if hook = -1n then
             use current_process = Process.GetCurrentProcess()
             use current_module = current_process.MainModule

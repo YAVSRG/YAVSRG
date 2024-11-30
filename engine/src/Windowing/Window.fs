@@ -22,17 +22,11 @@ type MonitorDetails =
 
 module private WindowEvents =
 
-    let on_load = Event<unit>()
-    let after_init = Event<unit>()
-    let on_unload = Event<unit>()
     let on_file_drop = Event<string>()
     let on_resize = Event<unit>()
 
-module Window =
+module private Window =
 
-    let on_load = WindowEvents.on_load.Publish
-    let after_init = WindowEvents.after_init.Publish
-    let on_unload = WindowEvents.on_unload.Publish
     let on_file_drop = WindowEvents.on_file_drop.Publish
     let on_resize = WindowEvents.on_resize.Publish
 
@@ -46,7 +40,7 @@ module Window =
         | DisableWindowsKey
         | EnableWindowsKey
 
-    let defer (a: WindowAction) =
+    let private defer (a: WindowAction) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ a ])
 
     let mutable internal _monitors: MonitorDetails list = []
@@ -73,8 +67,7 @@ type Window(config: WindowingUserOptions, title: string, ui_root: Root) as this 
             config.AudioDevice.Value,
             config.AudioDevicePeriod.Value,
             config.AudioDevicePeriod.Value * config.AudioDeviceBufferLengthMultiplier.Value,
-            ui_root,
-            WindowEvents.after_init.Trigger
+            ui_root
         )
 
     let mutable resize_callback = fun (w, h) -> ()
@@ -95,9 +88,9 @@ type Window(config: WindowingUserOptions, title: string, ui_root: Root) as this 
                 CursorState.Hidden
 
     let should_disable_windows_key() = 
-        disable_windows_key 
-        && render_thread.IsFocused 
-        && not input_cpu_saver 
+        disable_windows_key
+        && render_thread.IsFocused
+        && not input_cpu_saver
         && OperatingSystem.IsWindows()
 
     member this.ApplyConfig(config: WindowingUserOptions) =
@@ -338,7 +331,6 @@ type Window(config: WindowingUserOptions, title: string, ui_root: Root) as this 
             else
                 GLFW.PollEvents()
 
-        this.OnUnload()
         this.Close()
 
         WindowsKey.enable()
@@ -348,7 +340,4 @@ type Window(config: WindowingUserOptions, title: string, ui_root: Root) as this 
         this.ApplyConfig config
         Fonts.init ()
         Input.init this.WindowPtr
-        WindowEvents.on_load.Trigger()
         base.IsVisible <- true
-
-    member this.OnUnload() = WindowEvents.on_unload.Trigger()

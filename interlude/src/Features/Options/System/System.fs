@@ -133,7 +133,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
 [<AutoOpen>]
 module Monitors =
 
-    let monitors = Window.get_monitors ()
+    let monitors = WindowThread.get_monitors ()
 
     let get_current_supported_video_modes () =
         let reported_modes = monitors.[config.Display.Value].DisplayModes
@@ -159,11 +159,7 @@ module Monitors =
             Logging.Debug("Error setting fullscreen video mode - Possibly invalid display selected", err)
 
     let window_mode_changed (wm: WindowType) =
-        if wm = WindowType.Windowed then
-            Window.defer (Window.EnableResize config.WindowResolution.Set)
-        else
-            Window.defer (Window.DisableResize)
-
+        // todo: better ui for windowed mode since you can no longer do custom res
         if wm = WindowType.Fullscreen then
             select_fullscreen_size ()
 
@@ -197,13 +193,13 @@ type SystemPage() =
                 |],
                 config.WindowMode
                 |> Setting.trigger window_mode_changed
-                |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config))
+                |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot))
             )
         )
             .Pos(7)
         |+ PageSetting(
             %"system.windowresolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)))
+            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot)))
         )
             .Help(Help.Info("system.windowresolution"))
             .Pos(9)
@@ -213,7 +209,7 @@ type SystemPage() =
             SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display 
-                |> Setting.trigger (fun _ -> select_fullscreen_size (); Window.defer (Window.ApplyConfig config))
+                |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot))
             )
         )
             .Pos(9)
@@ -221,7 +217,7 @@ type SystemPage() =
         |+ PageSetting(
             %"system.videomode",
             VideoMode(
-                config.FullscreenVideoMode |> Setting.trigger (fun _ -> Window.defer (Window.ApplyConfig config)),
+                config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.Snapshot)),
                 get_current_supported_video_modes
             )
         )
@@ -233,7 +229,6 @@ type SystemPage() =
             .Pos(13)
         :> Widget
 
-    override this.OnClose() =
-        Window.defer (Window.DisableResize)
+    override this.OnClose() = ()
 
     override this.Title = %"system"

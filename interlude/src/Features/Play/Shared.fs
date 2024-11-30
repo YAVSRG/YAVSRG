@@ -88,7 +88,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Song.play_leadin with_colors.FirstNote
         Input.remove_listener ()
         Input.finish_frame_events ()
-        Window.defer Window.DisableWindowsKey
+        WindowThread.w_defer WindowThread.disable_windows_key
 
     override this.OnExit next =
         Background.dim 0.7f
@@ -97,7 +97,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
             Toolbar.show ()
 
         if next <> Screen.Type.Play then
-            Window.defer Window.EnableWindowsKey
+            WindowThread.w_defer WindowThread.enable_windows_key
 
     override this.OnBack() =
         if Network.lobby.IsSome then

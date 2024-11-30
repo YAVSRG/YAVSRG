@@ -42,11 +42,10 @@ let launch (instance: int) =
 
     if successful_startup then
 
-        Window.after_init.Add(fun () ->
-            AppDomain.CurrentDomain.ProcessExit.Add(fun args -> Startup.deinit Startup.ExternalCrash crash_splash)
+        RenderThread.after_init.Add(fun () ->
+            AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
         )
-
-        Window.on_file_drop.Add(Import.FileDrop.handle)
+        WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])
 
         use icon_stream = Utils.get_resource_stream ("icon.png")
         let icon = Bitmap.from_stream true icon_stream
@@ -96,7 +95,7 @@ let main argv =
             printfn "Error: Interlude is not running!"
             m.ReleaseMutex()
 
-        else if argv.Length > 0 then
+        else
             match Shell.IPC.send "Interlude" (String.concat " " argv) with
             | Some success -> printfn "%s" success
             | None -> printfn "Error: Connection timed out!"
@@ -127,7 +126,7 @@ let main argv =
         let instances = Process.GetProcessesByName "Interlude" |> Array.length
         launch (instances - 1)
     else
-        // todo: command to maximise/show Interlude window when already running
-        printfn "Interlude is already running!"
-
+        match Shell.IPC.send "Interlude" "focus" with
+        | Some success -> printfn "%s" success
+        | None -> printfn "Error: Connection timed out!"
     0
