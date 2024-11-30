@@ -85,7 +85,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                 TextColor = K Colors.text_cyan) with
             override this.OnFocus by_mouse =
                 base.OnFocus by_mouse
-                if not by_mouse then RenderThread.defer (fun () -> this.Select false)
+                if not by_mouse then GameThread.defer (fun () -> this.Select false)
         }
 
     let transition_timer = Animation.Delay(400.0)

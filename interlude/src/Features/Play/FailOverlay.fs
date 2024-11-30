@@ -89,7 +89,7 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
             | FailButtonType.SCORE_SCREEN -> b_score_screen
             | FailButtonType.CONTINUE -> b_next_song
             | _ -> b_none
-        RenderThread.defer (fun () -> initial_focus.Focus false)
+        GameThread.defer (fun () -> initial_focus.Focus false)
 
     override this.Draw() =
         let old_m = Render.alpha_multiplier_begin 1.0f

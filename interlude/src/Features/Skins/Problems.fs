@@ -47,7 +47,7 @@ module Problems =
 
         let rec refresh () =
             problems_list.Clear()
-            problems_loader.Request(noteskin, problems_list, fun () -> Skins.reload_current_noteskin(); RenderThread.defer refresh)
+            problems_loader.Request(noteskin, problems_list, fun () -> Skins.reload_current_noteskin(); GameThread.defer refresh)
 
         ScrollContainer(
             problems_list,
@@ -61,7 +61,7 @@ module Problems =
 
         let rec refresh () =
             problems_list.Clear()
-            problems_loader.Request(hud, problems_list, fun () -> Skins.reload_current_hud(); RenderThread.defer refresh)
+            problems_loader.Request(hud, problems_list, fun () -> Skins.reload_current_hud(); GameThread.defer refresh)
 
         ScrollContainer(
             problems_list,

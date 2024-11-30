@@ -106,7 +106,7 @@ type SlideContainer(node_type) =
             children.[i].Update(elapsed_ms, moved)
 
     member this.Add(child: #Widget) =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         children.Add child
 
         if this.Initialised then

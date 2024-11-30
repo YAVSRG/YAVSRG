@@ -105,7 +105,7 @@ module DynamicFlowContainer =
         member val AllowNavigation = true with get, set
 
         member this.Clear() =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
             this.Iter(fun c -> match c :> obj with :? IResize as r -> r.OnSizeChanged <- ignore | _ -> ())
             children.Clear()
 
@@ -143,7 +143,7 @@ module DynamicFlowContainer =
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
         member this.Add(child: 'T) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             children.Add
                 {
@@ -163,7 +163,7 @@ module DynamicFlowContainer =
                 refresh <- true
 
         member this.Remove(child: 'T) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
@@ -185,7 +185,7 @@ module DynamicFlowContainer =
                 | _ -> ()
 
         member this.Iter(f: 'T -> unit) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             for { Widget = c } in children do
                 f c

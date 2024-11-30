@@ -42,7 +42,7 @@ let launch (instance: int) =
 
     if successful_startup then
 
-        RenderThread.after_init.Add(fun () ->
+        GameThread.after_init.Add(fun () ->
             AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
         )
         WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])

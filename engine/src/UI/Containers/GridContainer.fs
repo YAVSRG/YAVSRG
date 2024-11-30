@@ -27,7 +27,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     let mutable content_height = 0.0f
 
     member this.Clear() =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         children.Clear()
 
     member val Floating = false with get, set
@@ -325,7 +325,7 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
                 c.Draw()
 
     member this.Add(child: 'T) : unit =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
 
         children.Add
             {

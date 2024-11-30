@@ -20,7 +20,7 @@ type private Profile() =
                 Players.Profile.View.get (
                     p,
                     fun response ->
-                        RenderThread.defer
+                        GameThread.defer
                         <| fun () ->
                             match response with
                             | Some result -> container.SetData result
@@ -28,7 +28,7 @@ type private Profile() =
                 )
             | None ->
                 Players.Profile.View.get_me (fun response ->
-                    RenderThread.defer
+                    GameThread.defer
                     <| fun () ->
                         match response with
                         | Some result -> container.SetData result
@@ -55,7 +55,7 @@ type private Profile() =
                 Players.Profile.Options.post (
                     { Color = color },
                     function
-                    | Some true -> RenderThread.defer <| fun () -> container.SetData({ data with Color = color })
+                    | Some true -> GameThread.defer <| fun () -> container.SetData({ data with Color = color })
                     | _ -> Notifications.error (%"notification.network_action_failed", "")
                 )
 
@@ -75,7 +75,7 @@ type private Profile() =
                 data.Username,
                 function
                 | Some true ->
-                    RenderThread.defer
+                    GameThread.defer
                     <| fun () ->
                         container.SetData(
                             { data with
@@ -93,7 +93,7 @@ type private Profile() =
                 { User = data.Username },
                 function
                 | Some true ->
-                    RenderThread.defer
+                    GameThread.defer
                     <| fun () ->
                         container.SetData({ data with IsFriend = true })
                         Players.update_friends_list ()

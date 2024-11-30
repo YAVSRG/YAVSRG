@@ -136,7 +136,7 @@ module private WikiState =
                 fun md ->
                     loaded_content <- Some md
                     loading <- false
-                    RenderThread.defer page_changed
+                    GameThread.defer page_changed
             )
 
     do

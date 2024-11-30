@@ -85,7 +85,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 online_table.Id,
                 function
                 | Some charts ->
-                    RenderThread.defer (fun () ->
+                    GameThread.defer (fun () ->
                         let table =
                             {
                                 Id = online_table.Id
@@ -106,7 +106,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | None ->
                     Logging.Error("Error getting charts for table")
                     // error toast
-                    RenderThread.defer (fun () -> status <- current_status)
+                    GameThread.defer (fun () -> status <- current_status)
             )
         | TableStatus.Installing -> ()
         | TableStatus.Installed ->
@@ -124,7 +124,7 @@ type TableBrowserPage() =
                 function
                 | Some tables ->
                     for table in tables.Tables do
-                        RenderThread.defer (fun () -> flow.Add(TableCard(table)))
+                        GameThread.defer (fun () -> flow.Add(TableCard(table)))
                 | None -> Logging.Error("Error getting online tables list")
             )
 

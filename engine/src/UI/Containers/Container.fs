@@ -28,14 +28,14 @@ type Container(node_type) =
             children.[i].Update(elapsed_ms, moved)
 
     member this.Add(child: #Widget) =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         children.Add child
 
         if this.Initialised then
             child.Init this
 
     member this.Remove(child: Widget) : bool =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         children.Remove child
 
     override this.Init(parent: Widget) =

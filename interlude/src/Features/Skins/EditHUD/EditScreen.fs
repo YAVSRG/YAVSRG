@@ -509,7 +509,7 @@ and PositionerContext =
             this.Positioners <- this.Positioners.Add(e, p)
 
             if this.Selected = e then
-                if p.Initialised then p.Focus true else RenderThread.defer (fun () -> p.Focus true)
+                if p.Initialised then p.Focus true else GameThread.defer (fun () -> p.Focus true)
 
     member this.Select(e: HudElement) =
         if this.Selected <> e then
@@ -575,7 +575,7 @@ type PositionerInfo(ctx: PositionerContext) =
             (fun () -> if (HudElement.enabled_setting ctx.Selected).Value then Icons.CHECK_CIRCLE + " " + %"hud.editor.enabled" else Icons.CIRCLE + " " + %"hud.editor.disabled"),
             (fun () ->
                 Setting.app not (HudElement.enabled_setting ctx.Selected)
-                RenderThread.defer (fun () -> ctx.Create ctx.Selected)
+                GameThread.defer (fun () -> ctx.Create ctx.Selected)
             ),
             Disabled = (fun () -> HudElement.can_toggle ctx.Selected |> not),
             Position = Position.Row(100.0f, 60.0f).Shrink(10.0f, 5.0f)
@@ -584,7 +584,7 @@ type PositionerInfo(ctx: PositionerContext) =
             Icons.REFRESH_CW + " " + %"hud.editor.reset_position",
             (fun () ->
                 HudElement.position_setting(ctx.Selected).Set(HudElement.default_position ctx.Selected)
-                RenderThread.defer (fun () -> ctx.Create ctx.Selected)
+                GameThread.defer (fun () -> ctx.Create ctx.Selected)
             ),
             Position = Position.Row(160.0f, 60.0f).Shrink(10.0f, 5.0f)
         )

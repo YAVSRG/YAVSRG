@@ -30,20 +30,20 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
     member private this.Content = content
 
     member this.Offline() =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         status <- WebRequestState.Offline
 
     member this.ServerError() =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         status <- WebRequestState.ServerError
 
     member this.SetData result =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         status <- WebRequestState.Loaded
         data.Value <- result
 
     member this.Reload() =
-        assert(RenderThread.is_ui_thread())
+        assert(GameThread.is_game_thread())
         status <- WebRequestState.Loading
         load this
 

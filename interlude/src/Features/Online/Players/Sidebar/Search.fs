@@ -21,7 +21,7 @@ module SearchList =
                             Players.Search.get (
                                 query.Value,
                                 fun response ->
-                                    RenderThread.defer
+                                    GameThread.defer
                                     <| fun () ->
                                         match response with
                                         | Some result -> this.SetData result

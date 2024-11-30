@@ -14,14 +14,14 @@ type InviteCard(invite: LobbyInvite) =
         |+ Button(
             Icons.CHECK,
             (fun () ->
-                RenderThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
+                GameThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
                 Network.join_lobby invite.LobbyId
             ),
             Position = Position.ShrinkR(50.0f).SliceR(50.0f)
         )
         |* Button(
             Icons.X,
-            (fun () -> RenderThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
+            (fun () -> GameThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
             Position = Position.SliceR(50.0f)
         )
 

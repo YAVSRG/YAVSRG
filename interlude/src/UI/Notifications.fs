@@ -49,7 +49,7 @@ module Notifications =
                     if i.Duration <= 0.0 then
                         i.Fade.Target <- 0.0f
                 elif i.Fade.Value < 0.01f then
-                    RenderThread.defer (fun () -> displayed_notifications.Remove i |> ignore)
+                    GameThread.defer (fun () -> displayed_notifications.Remove i |> ignore)
 
         override this.Draw() =
             let mutable y = this.Bounds.Top + 80.0f
@@ -82,7 +82,7 @@ module Notifications =
     let display : Widget = Display()
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        RenderThread.ensure_ui_thread
+        GameThread.on_game_thread
         <| fun () ->
             let n: Notification =
                 {
@@ -97,7 +97,7 @@ module Notifications =
             displayed_notifications.Add n
 
     let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) =
-        RenderThread.ensure_ui_thread
+        GameThread.on_game_thread
         <| fun () ->
             let n: Notification =
                 {
@@ -113,11 +113,11 @@ module Notifications =
 
     let task_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
-        RenderThread.ensure_ui_thread Style.notify_task.Play
+        GameThread.on_game_thread Style.notify_task.Play
 
     let action_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
-        RenderThread.ensure_ui_thread Style.notify_info.Play
+        GameThread.on_game_thread Style.notify_info.Play
 
     let action_feedback_button
         (
@@ -137,11 +137,11 @@ module Notifications =
             Colors.text
         )
 
-        RenderThread.ensure_ui_thread Style.notify_info.Play
+        GameThread.on_game_thread Style.notify_info.Play
 
     let system_feedback (icon: string, title: string, description: string) =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
-        RenderThread.ensure_ui_thread Style.notify_system.Play
+        GameThread.on_game_thread Style.notify_system.Play
 
     let error (title, description) =
         add_long (
@@ -150,4 +150,4 @@ module Notifications =
             Colors.text
         )
 
-        RenderThread.ensure_ui_thread Style.notify_error.Play
+        GameThread.on_game_thread Style.notify_error.Play

@@ -62,7 +62,7 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
         setting.Set 0.0f<ms>
 
     override this.Content() =
-        RenderThread.defer (fun () -> offset_slider.Select false)
+        GameThread.defer (fun () -> offset_slider.Select false)
 
         page_container()
         |+ PageSetting(

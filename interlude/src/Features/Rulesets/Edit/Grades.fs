@@ -66,7 +66,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                 Accuracy = 0.0
             }
         ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.append [| new_grade |] }
-        RenderThread.defer refresh
+        GameThread.defer refresh
 
     and delete_grade(i: int) : unit =
         ruleset.Set { ruleset.Value with Grades = ruleset.Value.Grades |> Array.removeAt i }

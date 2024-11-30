@@ -96,7 +96,7 @@ module NavigationContainer =
                 this.Navigate()
 
         member this.Add(child: Widget) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
             children.Add child
 
             if this.Initialised then
@@ -109,7 +109,7 @@ module NavigationContainer =
                 c.Init this
 
         member this.Clear() =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
             children.Clear()
 
         static member (|+)(parent: #Base, child: Widget) =

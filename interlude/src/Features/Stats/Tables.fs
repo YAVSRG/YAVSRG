@@ -35,7 +35,7 @@ type private Leaderboard() =
             Tables.Leaderboard.get (
                 Content.Table.Value.Id,
                 fun response ->
-                    RenderThread.defer
+                    GameThread.defer
                     <| fun () ->
                         match response with
                         | Some data ->
@@ -100,7 +100,7 @@ type private CompareFriend
                 name,
                 table.Id,
                 fun response ->
-                    RenderThread.defer
+                    GameThread.defer
                     <| fun () ->
                         match response with
                         | Some data ->
@@ -239,7 +239,7 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
 
         if Network.status = Network.Status.LoggedIn then
             Friends.List.get (fun response ->
-                RenderThread.defer
+                GameThread.defer
                 <| fun () ->
                     match response with
                     | Some data ->

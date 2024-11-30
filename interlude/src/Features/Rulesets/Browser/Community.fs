@@ -120,14 +120,14 @@ type RulesetSearch() as this =
             fun data ->
                 match data with
                 | WebResult.Ok (d: RulesetRepo) ->
-                    RenderThread.defer (fun () ->
+                    GameThread.defer (fun () ->
                         for id in d.Rulesets.Keys do
                             grid.Add(RulesetCard(id, d.Rulesets.[id]))
 
                         loading <- false
                     )
                 | _ ->
-                    RenderThread.defer (fun () ->
+                    GameThread.defer (fun () ->
                         failed <- true
                         loading <- false
                     )

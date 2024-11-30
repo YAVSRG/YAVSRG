@@ -245,16 +245,16 @@ module TableDownloader =
         { new Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
-                    RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
+                    GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
                     | Some cc ->
                         ChartDatabase.change_packs cc (cc.Packs.Add table_name) Content.Charts
-                        RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Charts with
-                        | true -> RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                        | false -> RenderThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                        | true -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | false -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 
                     return ()
                 }
@@ -490,7 +490,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 | Some charts ->
                     let state = DownloaderState(table, charts.Charts, download_service)
 
-                    RenderThread.defer (fun () ->
+                    GameThread.defer (fun () ->
                         match existing_states.TryFind table.Id with
                         | Some state -> () // do nothing if they spam clicked the table button
                         | None ->

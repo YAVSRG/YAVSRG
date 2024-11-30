@@ -131,7 +131,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             function
             | true -> 
                 Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
-                RenderThread.defer (fun () ->
+                GameThread.defer (fun () ->
                     if still_open then
                         match ChartDatabase.get_meta suggestion.ChartId Content.Charts with
                         | Some cc ->
@@ -193,7 +193,7 @@ type SuggestionsList(table: Table) =
                     Tables.Suggestions.List.get (
                         table.Id,
                         fun response ->
-                            RenderThread.defer
+                            GameThread.defer
                             <| fun () ->
                                 match response with
                                 | Some result -> this.SetData result
@@ -214,7 +214,7 @@ type SuggestionsList(table: Table) =
                         }
                     fc.Add(PageButton(suggestion.FormattedTitle, fun () -> ViewSuggestionPage(table, suggestion).Show()))
 
-                RenderThread.defer (fun () -> fc.Focus false)
+                GameThread.defer (fun () -> fc.Focus false)
 
                 ScrollContainer(fc, Position = Position.Shrink(100.0f, 200.0f), Margin = 5.0f)
         )

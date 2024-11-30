@@ -15,12 +15,12 @@ type UIEntryPoint =
     abstract member Update: float * bool -> unit
     abstract member Draw: unit -> unit
             
-type Strategy =
+type private Strategy =
     | Unlimited
     | WindowsDwmFlush
     | WindowsVblankSync
 
-module RenderThread =
+module GameThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
     let mutable private ui_root: UIEntryPoint = Unchecked.defaultof<_>
@@ -39,9 +39,9 @@ module RenderThread =
         Deferred actions are fire-and-forget, they will execute in the order they are queued
     *)
 
-    let mutable internal UI_THREAD_ID = -1
-    let is_ui_thread() =
-        UI_THREAD_ID = -1 || Thread.CurrentThread.ManagedThreadId = UI_THREAD_ID
+    let mutable internal GAME_THREAD_ID = -1
+    let is_game_thread() =
+        GAME_THREAD_ID = -1 || Thread.CurrentThread.ManagedThreadId = GAME_THREAD_ID
 
     let mutable private action_queue : (unit -> unit) list = []
     let private run_action_queue() =
@@ -49,8 +49,8 @@ module RenderThread =
     let defer (action: unit -> unit) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
 
-    let inline ensure_ui_thread (action: unit -> unit) =
-        if is_ui_thread () then action () else defer action
+    let inline on_game_thread (action: unit -> unit) =
+        if is_game_thread () then action () else defer action
         
     let private after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
@@ -103,12 +103,12 @@ module RenderThread =
         fatal_error
 
     let internal viewport_resized(width, height) =
-        assert(is_ui_thread())
+        assert(is_game_thread())
         Render.viewport_resized (width, height)
         resized <- true
 
     let internal change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
-        assert(is_ui_thread())
+        assert(is_game_thread())
         uses_compositor <- not entire_monitor
         strategy <-
             if OperatingSystem.IsWindows() then
@@ -227,7 +227,7 @@ module RenderThread =
     *)
 
     let internal init(_window: nativeptr<Window>, _ui_root: UIEntryPoint) =
-        UI_THREAD_ID <- thread.ManagedThreadId
+        GAME_THREAD_ID <- thread.ManagedThreadId
         window <- _window
         ui_root <- _ui_root
 

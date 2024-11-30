@@ -73,7 +73,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                 ImageServices.get_cached_image.Request(
                     version.Preview,
                     function
-                    | Some img -> RenderThread.defer (fun () -> this.FinishLoading img)
+                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
                     | None -> Logging.Warn("Failed to load noteskin preview", version.Preview)
                 )
         }
@@ -99,7 +99,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     (version.Download, target, ignore),
                     fun success ->
                         if success then
-                            RenderThread.defer Skins.load
+                            GameThread.defer Skins.load
                             Notifications.task_feedback (Icons.DOWNLOAD, %"notification.install_skin", group.Name)
                             status <- Installed
                         else
@@ -152,7 +152,7 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                 ImageServices.get_cached_image.Request(
                     group.Thumbnail,
                     function
-                    | Some img -> RenderThread.defer (fun () -> this.FinishLoading img)
+                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
                     | None -> Logging.Warn("Failed to load noteskin thumbnail", group.Thumbnail)
                 )
         }

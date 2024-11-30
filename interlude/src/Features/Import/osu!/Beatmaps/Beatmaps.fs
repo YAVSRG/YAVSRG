@@ -175,7 +175,7 @@ type BeatmapBrowserPage() =
                 Setting.simple "",
                 (fun (f: FilterPart list) ->
                     filter <- f
-                    RenderThread.defer (fun () -> begin_search filter)
+                    GameThread.defer (fun () -> begin_search filter)
                 ),
                 Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,

@@ -187,7 +187,7 @@ type private Image(width, title, url) as this =
             url,
             function
             | Some bmp ->
-                RenderThread.defer (fun () ->
+                GameThread.defer (fun () ->
                     sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )

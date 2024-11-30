@@ -43,5 +43,5 @@ type Thumbnail() =
 
     override this.Finalize() =
         match loaded_thumbnail with
-        | Some i -> RenderThread.defer (fun () -> Sprite.destroy i |> ignore)
+        | Some i -> GameThread.defer (fun () -> Sprite.destroy i |> ignore)
         | None -> ()

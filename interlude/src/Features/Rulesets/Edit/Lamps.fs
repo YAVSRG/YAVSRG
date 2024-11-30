@@ -96,7 +96,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                 Requirement = LampRequirement.ComboBreaksAtMost System.Int32.MaxValue
             }
         ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.append [| new_lamp |] }
-        RenderThread.defer refresh
+        GameThread.defer refresh
 
     and delete_lamp(i: int) : unit =
         ruleset.Set { ruleset.Value with Lamps = ruleset.Value.Lamps |> Array.removeAt i }

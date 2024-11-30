@@ -140,7 +140,7 @@ module private Presets =
                                 fun () ->
                                     Presets.load preset_id |> ignore
                                     SkinPreview.RefreshAll()
-                                    RenderThread.defer <| EditPresetPage(preset_id, setting).Show
+                                    GameThread.defer <| EditPresetPage(preset_id, setting).Show
                             )
                                 .Show()
                         else

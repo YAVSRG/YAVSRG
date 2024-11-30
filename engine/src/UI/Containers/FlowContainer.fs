@@ -113,7 +113,7 @@ module FlowContainer =
         member val AllowNavigation = true with get, set
 
         member this.Clear() =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
             children.Clear()
             refresh <- true
 
@@ -145,7 +145,7 @@ module FlowContainer =
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
         member this.Add(child: 'T) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             children.Add
                 {
@@ -162,7 +162,7 @@ module FlowContainer =
                 refresh <- true
 
         member this.Remove(child: 'T) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
@@ -178,7 +178,7 @@ module FlowContainer =
                 c.Init this
 
         member this.Iter(f: 'T -> unit) =
-            assert(RenderThread.is_ui_thread())
+            assert(GameThread.is_game_thread())
 
             for { Widget = c } in children do
                 f c

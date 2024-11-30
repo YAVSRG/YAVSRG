@@ -112,7 +112,7 @@ module Terminal =
                 false,
                 fun () ->
                     if shown then
-                        RenderThread.defer add_input
+                        GameThread.defer add_input
             )
 
         add_input ()

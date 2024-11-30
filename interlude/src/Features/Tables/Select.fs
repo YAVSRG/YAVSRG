@@ -73,7 +73,7 @@ type SelectTablePage(refresh_table_view) =
                     if options.ChartGroupMode.Value = "level" && Screen.current_type = Screen.Type.LevelSelect then
                         refresh_table_view()
 
-                    RenderThread.defer refresh
+                    GameThread.defer refresh
             )
 
         match Content.Table with

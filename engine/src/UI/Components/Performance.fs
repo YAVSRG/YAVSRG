@@ -40,12 +40,12 @@ type PerformanceMonitor() =
         if enable then
 
             i <- (i + 599) % 600
-            frame_times.[i] <- RenderThread.update_draw_elapsed_ms
-            draw_times.[i] <- RenderThread.draw_time * 2.0
-            update_times.[i] <- RenderThread.update_time * 10.0
-            latencies.[i] <- RenderThread.visual_latency_hi
+            frame_times.[i] <- GameThread.update_draw_elapsed_ms
+            draw_times.[i] <- GameThread.draw_time * 2.0
+            update_times.[i] <- GameThread.update_time * 10.0
+            latencies.[i] <- GameThread.visual_latency_hi
 
-            let (frames, ticks) = RenderThread.framecount_tickcount
+            let (frames, ticks) = GameThread.framecount_tickcount
             fps <- float frames / (float ticks / float Stopwatch.Frequency)
 
     override this.Draw() =
@@ -61,7 +61,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%.1f - %.1fms playfield latency" RenderThread.visual_latency_lo RenderThread.visual_latency_hi,
+                sprintf "%.1f - %.1fms playfield latency" GameThread.visual_latency_lo GameThread.visual_latency_hi,
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 60.0f,
@@ -70,7 +70,7 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
-                sprintf "%.1fms frame compensation" (RenderThread.frame_compensation ()),
+                sprintf "%.1fms frame compensation" (GameThread.frame_compensation ()),
                 30.0f,
                 this.Bounds.Left + 20.0f,
                 this.Bounds.Top + 100.0f,

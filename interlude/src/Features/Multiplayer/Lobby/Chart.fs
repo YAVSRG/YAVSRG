@@ -81,7 +81,7 @@ module LobbyChart =
                     | true ->
                         let newly_installed = (ChartDatabase.get_meta chart.Hash Content.Charts).Value
                         Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", newly_installed.Title)
-                        RenderThread.defer
+                        GameThread.defer
                         <| fun () ->
                         SelectedChart.change (newly_installed, LibraryContext.None, true)
                         SelectedChart.rate.Set chart.Rate

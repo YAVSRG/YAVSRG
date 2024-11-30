@@ -33,4 +33,4 @@ type Content() =
     static member Texture(id: string) = Sprites.get id
 
     static member OnChartAdded = Data.charts_updated
-    static member TriggerChartAdded() = RenderThread.ensure_ui_thread Data.charts_updated_ev.Trigger
+    static member TriggerChartAdded() = GameThread.on_game_thread Data.charts_updated_ev.Trigger

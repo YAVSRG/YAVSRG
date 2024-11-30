@@ -47,7 +47,7 @@ module Launch =
 
         if init_success then
             let mutable crashed = false
-            RenderThread.after_init.Add (fun () -> Console.hide())
+            GameThread.after_init.Add (fun () -> Console.hide())
 
             try
                 crashed <- WindowThread.run() <> Ok()

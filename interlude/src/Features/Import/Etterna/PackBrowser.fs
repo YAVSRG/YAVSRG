@@ -96,7 +96,7 @@ type EtternaPacksBrowserPage() =
             Setting.simple "",
             (fun (f: FilterPart list) ->
                 filter <- f
-                RenderThread.defer (fun () -> begin_search filter)
+                GameThread.defer (fun () -> begin_search filter)
             ),
             Position = Position.SliceX(1400.0f).SliceT(60.0f).Translate(0.0f, 20.0f)
         )

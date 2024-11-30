@@ -22,7 +22,7 @@ module WindowThread =
     (*
         Action queuing
         
-        Most of the game runs from the 'render thread' where draws and updates take place
+        Most of the game runs from the 'game thread' where draws and updates take place
         `defer` can be used to queue up an action that needs to execute on the window thread
 
         Deferred actions are fire-and-forget, they will execute in the order they are queued
@@ -231,12 +231,12 @@ module WindowThread =
                 && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
             )
 
-        RenderThread.defer
+        GameThread.defer
         <| fun () ->
-            RenderThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
-            RenderThread.anti_jitter <- config.SmartCapAntiJitter
-            RenderThread.tearline_position <- config.SmartCapTearlinePosition
-            RenderThread.framerate_multiplier <- config.SmartCapFramerateMultiplier
+            GameThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
+            GameThread.anti_jitter <- config.SmartCapAntiJitter
+            GameThread.tearline_position <- config.SmartCapTearlinePosition
+            GameThread.framerate_multiplier <- config.SmartCapFramerateMultiplier
 
     (*
         Disabling windows key & Focus
@@ -285,7 +285,7 @@ module WindowThread =
     let private resize_callback (window: nativeptr<Window>) (_: int) (_: int) =
         let width, height = GLFW.GetFramebufferSize(window)
         if width <> 0 && height <> 0 then
-            RenderThread.defer (fun () -> RenderThread.viewport_resized(width, height))
+            GameThread.defer (fun () -> GameThread.viewport_resized(width, height))
         
     let private resize_callback_d = GLFWCallbacks.WindowSizeCallback resize_callback
 
@@ -299,7 +299,7 @@ module WindowThread =
                 paths_array.[i] <- Marshal.PtrToStringUTF8(NativePtr.toNativeInt (NativePtr.get paths i))
         with err ->
             Logging.Critical("Error getting dropped file paths", err)
-        RenderThread.defer (fun () -> file_drop_ev.Trigger paths_array)
+        GameThread.defer (fun () -> file_drop_ev.Trigger paths_array)
 
     let private file_drop_callback_d = GLFWCallbacks.DropCallback file_drop_callback
 
@@ -345,7 +345,7 @@ module WindowThread =
         GL.LoadBindings(bindings)
         context.MakeNoneCurrent()
 
-        RenderThread.init(window, ui_root)
+        GameThread.init(window, ui_root)
         Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
         resize_callback window INITIAL_SIZE INITIAL_SIZE
 
@@ -373,7 +373,7 @@ module WindowThread =
     let internal run() =
         apply_config last_applied_config
         Fonts.init()
-        RenderThread.start()
+        GameThread.start()
 
         if last_applied_config.InputCPUSaver && OperatingSystem.IsWindows() then
             Thread.CurrentThread.Priority <- ThreadPriority.Highest
@@ -389,4 +389,4 @@ module WindowThread =
         GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GLFW.Terminate()
 
-        if RenderThread.has_fatal_error() then Error() else Ok()
+        if GameThread.has_fatal_error() then Error() else Ok()
