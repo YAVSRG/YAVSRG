@@ -35,7 +35,7 @@ type PerformanceSettingsPage() =
                     FrameLimit.Unlimited, %"system.framelimit.unlimited"
                     FrameLimit.Smart, %"system.framelimit.smart"
                 |],
-                config.RenderMode |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions))
+                config.RenderMode |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
             )
         )
             .Help(Help.Info("system.framelimit"))

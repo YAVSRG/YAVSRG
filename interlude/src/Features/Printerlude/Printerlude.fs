@@ -47,7 +47,7 @@ module Printerlude =
             io.WriteLine(sprintf "The latest version online is %s" Updates.latest_version_name)
 
         let focus_window (io: IOContext) =
-            WindowThread.w_defer WindowThread.focus_window
+            WindowThread.defer WindowThread.focus_window
             io.WriteLine(sprintf "Message to focus game window sent")
 
         let timescale (io: IOContext) (v: float) =

@@ -35,7 +35,7 @@ module WindowThread =
     let mutable private action_queue : (unit -> unit) list = []
     let private run_action_queue() =
         lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
-    let w_defer (action: unit -> unit) =
+    let defer (action: unit -> unit) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
 
     (*
@@ -94,7 +94,6 @@ module WindowThread =
         detect_monitors()
 
         last_applied_config <- config
-        render_thread.RenderMode <- config.RenderMode
 
         let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
 
@@ -231,6 +230,7 @@ module WindowThread =
 
         RenderThread.defer
         <| fun () ->
+            render_thread.RenderMode <- config.RenderMode
             render_thread.RenderModeChanged(
                 config.WindowMode = WindowType.Fullscreen
                 || 
@@ -245,7 +245,7 @@ module WindowThread =
             framerate_multiplier <- config.SmartCapFramerateMultiplier
 
     (*
-        Disabling windows key
+        Disabling windows key & Focus
         
         Hitting the windows key and having it unfocus the game/bring up the start menu can ruin gameplay
         On windows only, calling `disable_windows_key` will disable the windows key while the window is focused
@@ -272,10 +272,6 @@ module WindowThread =
         disabled_windows_key <- false
         WindowsKey.enable()
 
-    (* 
-        GLFW windowing logic
-    *)
-
     let focus_window() =
         assert(is_window_thread())
         GLFW.FocusWindow(window)
@@ -287,6 +283,10 @@ module WindowThread =
         else WindowsKey.enable()
         
     let private focus_callback_d = GLFWCallbacks.WindowFocusCallback focus_callback
+
+    (*
+        GLFW initialisation
+    *)
 
     let private resize_callback (window: nativeptr<Window>) (_: int) (_: int) =
         let width, height = GLFW.GetFramebufferSize(window)

@@ -193,13 +193,13 @@ type SystemPage() =
                 |],
                 config.WindowMode
                 |> Setting.trigger window_mode_changed
-                |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions))
+                |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
             )
         )
             .Pos(7)
         |+ PageSetting(
             %"system.windowresolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions)))
+            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions)))
         )
             .Help(Help.Info("system.windowresolution"))
             .Pos(9)
@@ -209,7 +209,7 @@ type SystemPage() =
             SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display 
-                |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions))
+                |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
             )
         )
             .Pos(9)
@@ -217,7 +217,7 @@ type SystemPage() =
         |+ PageSetting(
             %"system.videomode",
             VideoMode(
-                config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.w_defer (fun () -> WindowThread.apply_config config.ToOptions)),
+                config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions)),
                 get_current_supported_video_modes
             )
         )
