@@ -294,11 +294,12 @@ module Stats =
             |> Array.ofSeq
 
         let first_score_length = 
+            if scores.Length = 0 then 0L else
             match ChartDatabase.get_meta (fst scores.[0]) library.Charts with
             | Some cc -> cc.Length / (snd scores.[0]).Rate |> int64
             | None -> 2L * 60L * 1000L
 
-        let mutable session_start_time = (snd scores.[0]).Timestamp - first_score_length
+        let mutable session_start_time = if scores.Length = 0 then 0L else (snd scores.[0]).Timestamp - first_score_length
         let mutable session_playing_time = 0.0f<ms / rate>
         let mutable last_time = session_start_time
         let mutable score_count = 0
