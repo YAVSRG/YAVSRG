@@ -63,15 +63,15 @@ module Startup =
         Gameplay.retry <- fun () -> SelectedChart.if_loaded (LevelSelect.try_play >> ignore)
 
         Updates.check_for_updates ()
+        Printerlude.init_window (instance)
+        Content.init_window ()
+        DiscordRPC.init_window ()
+        SelectedChart.init_window ()
+        Network.init_window ()
+        Mounts.init_window ()
 
         { new Screen.ScreenRoot(Toolbar()) with
             override this.Init() =
-                Printerlude.init_window (instance)
-                Content.init_window ()
-                DiscordRPC.init_window ()
-                SelectedChart.init_window ()
-                Network.init_window ()
-                Mounts.init_window ()
                 base.Init()
         }
 

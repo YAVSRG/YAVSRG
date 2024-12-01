@@ -34,7 +34,12 @@ module WindowThread =
 
     let mutable private action_queue : (unit -> unit) list = []
     let private run_action_queue() =
-        lock (LOCK_OBJ) (fun () -> (for action in action_queue do action()); action_queue <- [])
+        lock (LOCK_OBJ) (fun () ->
+            while not (List.isEmpty action_queue) do
+                let actions = action_queue
+                action_queue <- []
+                (for action in actions do action())
+        )
     let defer (action: unit -> unit) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
 

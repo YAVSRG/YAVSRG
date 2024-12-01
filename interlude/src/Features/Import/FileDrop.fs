@@ -101,7 +101,7 @@ module FileDrop =
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match osu.Replays.parse_replay_file path with
-            | Some replay -> GameThread.defer (fun () -> replay_dropped_ev.Trigger replay)
+            | Some replay -> replay_dropped_ev.Trigger replay
             | None -> Notifications.error (%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import
