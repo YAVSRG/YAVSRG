@@ -357,7 +357,7 @@ module WindowThread =
             let mutable pixel_data = System.Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
             let success = icon.TryGetSinglePixelSpan(&pixel_data)
             if not success then failwithf "Couldn't get pixel span for icon"
-            use pixel_data_ref = fixed &(pixel_data.GetPinnableReference())
+            use pixel_data_ref = fixed pixel_data
             let image_array = [| new Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt) |]
             GLFW.SetWindowIcon(window, System.Span<Image>(image_array))
         | None -> ()
