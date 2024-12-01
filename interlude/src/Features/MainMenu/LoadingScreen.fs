@@ -3,7 +3,8 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Interlude
+open Interlude.Content
+open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Online
 
@@ -23,7 +24,7 @@ type LoadingScreen() =
 
         match prev with
         | Screen.Type.SplashScreen ->
-            animation.Add(Animation.Action(fun () -> Content.Sounds.get("hello").Play()))
+            animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 1000.0)
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
             animation.Add(Animation.Delay 1200.0)
@@ -42,7 +43,7 @@ type LoadingScreen() =
 
     override this.OnExit _ =
         if not closing then
-            Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
+            Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -51,8 +52,8 @@ type LoadingScreen() =
         background_fade.Update elapsed_ms
 
         Devices.change_volume (
-            Options.options.AudioVolume.Value,
-            Options.options.AudioVolume.Value * float audio_fade.Value
+            options.AudioVolume.Value,
+            options.AudioVolume.Value * float audio_fade.Value
         )
 
     override this.Draw() =

@@ -4,6 +4,7 @@ open Prelude
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
+open Interlude.Options
 open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.Browser
@@ -55,11 +56,11 @@ module Skins =
                     .Help(Help.Info("hud.edit"))
 
             if token_match tokens [|%"themes.theme"; %"themes.showthemesfolder"|] then
-                yield PageSetting(%"themes.theme", 
-                    SelectDropdown(Themes.list (), Interlude.Options.options.Theme)
+                yield PageSetting(%"themes.theme",
+                    SelectDropdown(Themes.list (), options.Theme)
                 )
                 yield PageButton(
-                    %"themes.showthemesfolder", 
+                    %"themes.showthemesfolder",
                     (fun () -> open_directory (get_game_folder "Themes"))
                 )
         }

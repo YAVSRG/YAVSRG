@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Data.User
-open Interlude
+open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Import
 open Interlude.Features.Gameplay
@@ -24,7 +24,6 @@ module Startup =
 
     let init_startup (instance) =
         Options.init_startup ()
-        Options.Hotkeys.init_startup Options.options.Hotkeys
         Content.init_startup ()
         Stats.init_startup Content.Library Content.UserData
 
@@ -37,8 +36,8 @@ module Startup =
                 LevelSelectScreen()
             |]
 
-        Devices.change_volume (Options.options.AudioVolume.Value, Options.options.AudioVolume.Value)
-        Song.set_pitch_rates_enabled Options.options.AudioPitchRates.Value
+        Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+        Song.set_pitch_rates_enabled options.AudioPitchRates.Value
 
         FileDrop.replay_dropped.Add(fun replay ->
             match SelectedChart.CACHE_DATA, SelectedChart.CHART with
@@ -47,7 +46,7 @@ module Startup =
                 | Ok score ->
                     ConfirmPage("Is this replay for the chart currently selected?",
                         [|
-                            "Yes, view it!", fun () -> 
+                            "Yes, view it!", fun () ->
                                 Screen.change_new
                                     (fun () -> ScoreScreen(ScoreInfo.from_score cc chart Rulesets.current score, (Gameplay.ImprovementFlags.None, None), false))
                                     Screen.Type.Score
@@ -65,7 +64,7 @@ module Startup =
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
         Gameplay.retry <- fun () -> SelectedChart.if_loaded (LevelSelect.try_play >> ignore)
 
-        Updates.check_for_updates ()
+        Interlude.Updates.check_for_updates ()
         Printerlude.init_window (instance)
         Content.init_window ()
         DiscordRPC.init_window ()
@@ -98,7 +97,7 @@ module Startup =
 
             match shutdown_type with
             | Normal -> Logging.Info("Thank you for playing")
-            | InternalCrash -> 
+            | InternalCrash ->
                 crash_splash ()
                 Logging.Shutdown()
                 Option.iter open_directory Logging.LogFile

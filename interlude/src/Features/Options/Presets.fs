@@ -114,7 +114,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
 module private Presets =
 
     let preset_buttons (preset_id: int) (setting: Setting<Preset option>) =
-        
+
         let create_preset_button =
             Button(
                 (fun () ->
@@ -234,7 +234,7 @@ module private Presets =
                         .Shrink(40.0f, 0.0f)
             )
 
-        let lower_buttons = 
+        let lower_buttons =
             NavigationContainer.Row(WrapNavigation = false)
             |+ load_preset_button
                 .Conditional(fun () ->

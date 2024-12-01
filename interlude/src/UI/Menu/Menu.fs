@@ -6,12 +6,13 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
+open Interlude.Options
 
 [<RequireQualifiedAccess>]
 type PageEasing =
     | Up
     | Down
-    | Left 
+    | Left
     | Right
     | None
     member this.Reverse =
@@ -149,7 +150,7 @@ and PageHeaderBase() =
             if not first then
                 Text.fill_b (Style.font, Icons.ARROW_RIGHT, bounds.BorderL GAP_BETWEEN_BOXES, Colors.text_greyout, Alignment.CENTER)
             first <- false
-        
+
 and Menu(top_level: Page) as this =
     inherit Dialog()
 
@@ -224,7 +225,7 @@ and Menu(top_level: Page) as this =
         volume.Init this
         exit_key.Init this
         this.ShowPage top_level
-        if Interlude.Options.options.MenusMuffleSong.Value then Song.set_low_pass 1.0f
+        if options.MenusMuffleSong.Value then Song.set_low_pass 1.0f
 
     override this.Draw() =
         volume.Draw()
@@ -281,7 +282,7 @@ and Menu(top_level: Page) as this =
         Song.set_low_pass 0.0f
 
     member private this.PageTitles() = namestack
-    static member PageTitles() = 
+    static member PageTitles() =
         match _instance with
         | None -> []
         | Some menu -> menu.PageTitles()
@@ -298,8 +299,8 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
         let mutable p = 1
         page_container()
         |+ (
-            options 
-            |> Seq.map (fun (label, action) -> 
+            options
+            |> Seq.map (fun (label, action) ->
                 p <- p + 2
                 PageButton.Once(label, fork action Menu.Back).Pos(p)
             )

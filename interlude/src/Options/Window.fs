@@ -1,4 +1,4 @@
-﻿namespace Interlude
+﻿namespace Interlude.Options
 
 open Percyqaz.Common
 open Percyqaz.Data

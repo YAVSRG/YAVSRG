@@ -7,6 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Options
 open Interlude
@@ -28,7 +29,7 @@ type private MenuButton(on_click, label: string, pos: Position) =
         )
 
     override this.Init(parent) =
-        this 
+        this
         |+ Clickable.Focus this
         |* Text(
             label,
@@ -82,17 +83,17 @@ type MainMenuScreen() as this =
     let play_action () =
         Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
 
-    let play =
+    let play_button =
         MenuButton(play_action, %"menu.play", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
 
-    let options =
+    let options_button =
         MenuButton(
             (fun () -> OptionsMenuPage().Show()),
             %"menu.options",
             Position.Box(0.0f, 0.5f, -300.0f, -50.0f, 1430.0f, 100.0f)
         )
 
-    let quit =
+    let quit_button =
         MenuButton(
             (fun () ->
                 if Screen.back Transitions.UnderLogo then
@@ -116,9 +117,9 @@ type MainMenuScreen() as this =
 
     do
         this
-        |+ play
-        |+ options
-        |+ quit
+        |+ play_button
+        |+ options_button
+        |+ quit_button
         |+ (StylishButton(
             WikiBrowserPage.ShowChangelog,
             K(Icons.STAR + " " + %"menu.changelog"),
@@ -142,9 +143,9 @@ type MainMenuScreen() as this =
             )
 
         if prev = Screen.Type.SplashScreen then
-            if 
-                ChartDatabase.recalculate_if_needed 
-                    Content.Charts 
+            if
+                ChartDatabase.recalculate_if_needed
+                    Content.Charts
                     (fun () ->
                         Notifications.system_feedback (
                             Icons.ALERT_OCTAGON,
@@ -158,15 +159,15 @@ type MainMenuScreen() as this =
                     %"notification.pattern_cache_started.title",
                     %"notification.pattern_cache_started.body"
                 )
-            if first_launch then
+            if Stats.TOTAL_STATS.NotesHit = 0 then
                 WikiBrowserPage.Show()
 
         splash_text <- choose_splash ()
         Logo.move_menu ()
         Background.dim 0.0f
         Toolbar.show ()
-        Song.on_finish <- 
-            SongFinishAction.Custom (fun () -> 
+        Song.on_finish <-
+            SongFinishAction.Custom (fun () ->
                 LevelSelect.random_chart ()
                 splash_text <- choose_splash ()
             )
@@ -174,11 +175,11 @@ type MainMenuScreen() as this =
         button_sequence.Add
         <| Animation.seq
             [
-                Animation.Action play.Show
+                Animation.Action play_button.Show
                 Animation.Delay 50.0
-                Animation.Action options.Show
+                Animation.Action options_button.Show
                 Animation.Delay 50.0
-                Animation.Action quit.Show
+                Animation.Action quit_button.Show
                 Animation.Delay 200.0
                 Animation.Action(fun () -> splash_fade.Target <- 1.0f)
             ]
@@ -191,13 +192,13 @@ type MainMenuScreen() as this =
 
         splash_fade.Target <- 0.0f
         splash_fade.Snap()
-        play.Hide()
-        options.Hide()
-        quit.Hide()
+        play_button.Hide()
+        options_button.Hide()
+        quit_button.Hide()
         Background.dim 0.7f
 
     override this.OnBack() =
-        if not Interlude.Options.options.ConfirmExit.Value || confirmed_exit then
+        if not options.ConfirmExit.Value || confirmed_exit then
             Some Screen.Type.SplashScreen
         else
             ConfirmPage(

@@ -8,6 +8,7 @@ open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude
+open Interlude.Options
 open Interlude.UI
 open Interlude.Features
 
@@ -35,7 +36,7 @@ let launch (instance: int) =
 
     WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])
 
-    let icon = 
+    let icon =
         use icon_stream = Utils.get_resource_stream ("icon.png")
         Bitmap.from_stream true icon_stream
 

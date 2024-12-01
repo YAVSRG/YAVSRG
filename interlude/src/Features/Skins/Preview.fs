@@ -9,6 +9,7 @@ open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
+open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
@@ -40,7 +41,7 @@ type SkinPreview(position: Position) as this =
         let noteskin_config = Content.NoteskinConfig
         let playfield =
             Playfield(info.WithColors, state, noteskin_config, false)
-        
+
         if noteskin_config.EnableColumnLight then
             playfield.Add(new ColumnLighting(info.WithColors.Keys, noteskin_config, state))
 
@@ -50,11 +51,11 @@ type SkinPreview(position: Position) as this =
         playfield.Add(LanecoverOverReceptors())
         let overlay_items = Container(NodeType.None)
 
-        let elements = 
-            HudElement.FULL_LIST 
-            |> Seq.except (seq { 
+        let elements =
+            HudElement.FULL_LIST
+            |> Seq.except (seq {
                 yield HudElement.SkipButton
-                if not Interlude.Options.options.EnablePacemaker.Value then yield HudElement.Pacemaker 
+                if not options.EnablePacemaker.Value then yield HudElement.Pacemaker
             })
         for elem in elements do
             construct_hud_element state elem playfield overlay_items
@@ -136,7 +137,7 @@ type SkinPreview(position: Position) as this =
         fbo.Bind true
         let screen_bounds = Render.bounds()
         Background.draw (screen_bounds, Colors.white, 1.0f)
-        Render.rect screen_bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
+        Render.rect screen_bounds (Color.Black.O4a(options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()
         Render.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
@@ -148,7 +149,7 @@ type SkinPreview(position: Position) as this =
         this.Bounds <- Render.bounds()
         renderer.Init this
 
-    member this.Destroy() = 
+    member this.Destroy() =
         instances <- instances |> List.except [this]
         (fbo :> System.IDisposable).Dispose()
 
