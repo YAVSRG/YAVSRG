@@ -76,7 +76,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
         Draw.untextured_quad
             (saturation_value_picker.AsQuad)
-            (struct (Color.White, Color.FromHsv(H, 1.0f, 1.0f), Color.Black, Color.Black))
+            { TopLeft = Color.White; TopRight = Color.FromHsv(H, 1.0f, 1.0f); BottomRight = Color.Black; BottomLeft = Color.Black }
 
         let x = saturation_value_picker.Left + S * saturation_value_picker.Width
         let y = saturation_value_picker.Bottom - V * saturation_value_picker.Height

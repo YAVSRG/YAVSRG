@@ -374,18 +374,18 @@ module Draw =
 
     let mutable private last_texture_handle = -1
 
-    let untextured_quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) =
-        Render._batch.Vertex(p1, Vector2.Zero, c1, 0)
-        Render._batch.Vertex(p2, Vector2.Zero, c2, 0)
-        Render._batch.Vertex(p3, Vector2.Zero, c3, 0)
-        Render._batch.Vertex(p1, Vector2.Zero, c1, 0)
-        Render._batch.Vertex(p3, Vector2.Zero, c3, 0)
-        Render._batch.Vertex(p4, Vector2.Zero, c4, 0)
+    let untextured_quad (q: Quad) (c: QuadColors) =
+        Render._batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
+        Render._batch.Vertex(q.TopRight, Vector2.Zero, c.TopRight, 0)
+        Render._batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
+        Render._batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
+        Render._batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
+        Render._batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
 
     let quad
-        (struct (p1, p2, p3, p4): Quad)
-        (struct (c1, c2, c3, c4): QuadColors)
-        ({ Texture = t; Layer = layer; UV = struct (u1, u2, u3, u4) } : QuadTexture)
+        (q: Quad)
+        (c: QuadColors)
+        ({ Texture = t; Layer = layer; UV = uv } : QuadTexture)
         =
 
         if last_texture_handle <> t.Handle then
@@ -397,12 +397,12 @@ module Draw =
             Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
             last_texture_handle <- t.Handle
             
-        Render._batch.Vertex(p1, u1, c1, layer)
-        Render._batch.Vertex(p2, u2, c2, layer)
-        Render._batch.Vertex(p3, u3, c3, layer)
-        Render._batch.Vertex(p1, u1, c1, layer)
-        Render._batch.Vertex(p3, u3, c3, layer)
-        Render._batch.Vertex(p4, u4, c4, layer)
+        Render._batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
+        Render._batch.Vertex(q.TopRight, uv.TopRight, c.TopRight, layer)
+        Render._batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
+        Render._batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
+        Render._batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
+        Render._batch.Vertex(q.BottomLeft, uv.BottomLeft, c.BottomLeft, layer)
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s

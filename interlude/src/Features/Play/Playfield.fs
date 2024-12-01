@@ -237,12 +237,12 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
             let clip_percent = (clip - pos) / note_height
 
-            let quad_clip_correction (struct (lt, rt, rb, lb): Quad) =
+            let quad_clip_correction (q: Quad) : Quad =
                 if clip_percent > 0.0f then
-                    let height = rb.Y - rt.Y
+                    let height = q.BottomRight.Y - q.TopRight.Y
                     let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
-                    struct (lt + correction, rt + correction, rb, lb)
-                else struct (lt, rt, rb, lb)
+                    Quad.create (q.TopLeft + correction) (q.TopRight + correction) q.BottomRight q.BottomLeft
+                else q
 
             Draw.quad
                 (

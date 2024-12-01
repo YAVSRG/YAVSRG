@@ -55,8 +55,8 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
 
         let counter = this.Bounds.BorderB(60.0f).SliceR(220.0f)
         let counterq = 
-            let struct (a, b, c, d) = counter.AsQuad
-            struct (a - OpenTK.Mathematics.Vector2(30.0f, 0.0f), b, c, d)
+            let q = counter.AsQuad
+            { q with TopLeft = q.TopLeft - OpenTK.Mathematics.Vector2(30.0f, 0.0f) }
         Draw.untextured_quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black.AsQuad
         Background.drawq (counterq, (Color.FromArgb(40, 40, 40)), 2.0f)
         Draw.untextured_quad counterq (!*Palette.MAIN_100).AsQuad

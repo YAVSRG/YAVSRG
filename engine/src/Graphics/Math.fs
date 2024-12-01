@@ -34,12 +34,6 @@ type Rect =
             Bottom = t + h
         }
 
-    member inline this.AsQuad =
-        struct (new Vector2(this.Left, this.Top),
-                new Vector2(this.Right, this.Top),
-                new Vector2(this.Right, this.Bottom),
-                new Vector2(this.Left, this.Bottom))
-
     member inline this.Width = this.Right - this.Left
     member inline this.Height = this.Bottom - this.Top
 
@@ -261,47 +255,58 @@ module Rect =
     Simple storage of vertices to render as a quad
 *)
 
-type Quad = (struct (Vector2 * Vector2 * Vector2 * Vector2))
-type QuadColors = (struct (Color * Color * Color * Color))
-
-[<AutoOpen>]
-module QuadColorExtensions =
-
-    type Color with
-        member inline this.AsQuad = struct (this, this, this, this)
+[<Struct>]
+type Quad = { TopLeft: Vector2; TopRight: Vector2; BottomRight: Vector2; BottomLeft: Vector2 }
+[<Struct>]
+type QuadColors = { TopLeft: Color; TopRight: Color; BottomRight: Color; BottomLeft: Color }
 
 module Quad =
 
-    let parallelogram (amount: float32) (r: Rect) : Quad =
+    let inline parallelogram (amount: float32) (r: Rect) : Quad =
         let a = r.Height * 0.5f * amount
 
-        struct (new Vector2(r.Left + a, r.Top),
-                new Vector2(r.Right + a, r.Top),
-                new Vector2(r.Right - a, r.Bottom),
-                new Vector2(r.Left - a, r.Bottom))
+        {
+            TopLeft = new Vector2(r.Left + a, r.Top)
+            TopRight = new Vector2(r.Right + a, r.Top)
+            BottomRight =  new Vector2(r.Right - a, r.Bottom)
+            BottomLeft = new Vector2(r.Left - a, r.Bottom)
+        }
 
-    let create c1 c2 c3 c4 : Quad = struct (c1, c2, c3, c4)
+    let inline create a b c d : Quad = { TopLeft = a; TopRight = b; BottomRight = c; BottomLeft = d }
 
-    let inline createv (c1x, c1y) (c2x, c2y) (c3x, c3y) (c4x, c4y) : Quad =
-        struct (new Vector2(c1x, c1y), new Vector2(c2x, c2y), new Vector2(c3x, c3y), new Vector2(c4x, c4y))
+    let inline createv (ax, ay) (bx, by) (cx, cy) (dx, dy) : Quad =
+        create (new Vector2(ax, ay)) (new Vector2(bx, by)) (new Vector2(cx, cy)) (new Vector2(dx, dy))
 
-    let inline gradient_left_to_right (left: Color) (right: Color) = struct(left, right, right, left)
-    let inline gradient_top_to_bottom (top: Color) (bottom: Color) = struct(top, top, bottom, bottom)
+    let inline gradient_left_to_right (left: Color) (right: Color) : QuadColors = { TopLeft = left; TopRight = right; BottomRight = right; BottomLeft = left }
+    let inline gradient_top_to_bottom (top: Color) (bottom: Color) : QuadColors = { TopLeft = top; TopRight = top; BottomRight = bottom; BottomLeft = bottom }
 
-    let flip_vertical (struct (c1, c2, c3, c4): Quad) : Quad = struct (c4, c3, c2, c1)
+    let inline flip_vertical (q: Quad) : Quad = { TopLeft = q.BottomLeft; TopRight = q.BottomRight; BottomRight = q.TopRight; BottomLeft = q.TopLeft }
 
-    let map f (struct (c1, c2, c3, c4): Quad) : Quad = struct (f c1, f c2, f c3, f c4)
+    let inline map f (q: Quad) : Quad = { TopLeft = f q.TopLeft; TopRight = f q.TopRight; BottomRight = f q.BottomRight; BottomLeft = f q.BottomLeft }
 
-    let translate (x, y) (struct (c1, c2, c3, c4): Quad) : Quad =
+    let inline translate (x, y) : Quad -> Quad =
         let v = new Vector2(x, y)
-        struct (c1 + v, c2 + v, c3 + v, c4 + v)
+        map ((+) v)
 
-    let rotate_about origin degrees (struct (c1, c2, c3, c4): Quad) : Quad =
+    let inline rotate_about origin degrees : Quad -> Quad =
         let mat = Matrix2.CreateRotation(-(float32 (degrees / 180.0 * Math.PI)))
+        map ((fun c -> c - origin) >> (fun c -> mat * c) >> (fun c -> c + origin))
 
-        struct (c1, c2, c3, c4)
-        |> map ((fun c -> c - origin) >> (fun c -> mat * c) >> (fun c -> c + origin))
+    let inline rotate degrees (q: Quad) : Quad =
+        let center = (q.TopLeft + q.TopRight + q.BottomRight + q.BottomLeft) * 0.25f
+        rotate_about center degrees q
 
-    let rotate degrees (struct (c1, c2, c3, c4): Quad) : Quad =
-        let center = (c1 + c2 + c3 + c4) * 0.25f
-        rotate_about center degrees struct (c1, c2, c3, c4)
+[<AutoOpen>]
+module AsQuadExtensions =
+
+    type Color with
+        member inline this.AsQuad : QuadColors = { TopLeft = this; TopRight = this; BottomRight = this; BottomLeft = this }
+    
+    type Rect with
+        member inline this.AsQuad : Quad = 
+            { 
+                TopLeft = new Vector2(this.Left, this.Top)
+                TopRight = new Vector2(this.Right, this.Top)
+                BottomRight = new Vector2(this.Right, this.Bottom)
+                BottomLeft = new Vector2(this.Left, this.Bottom)
+            }
