@@ -210,8 +210,7 @@ module GameThread =
         | _ -> ()
 
         match
-            try 
-                Thread.Sleep(1000)
+            try
                 let root = ui_initialiser()
                 root.Init()
                 Ok(root)

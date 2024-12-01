@@ -12,16 +12,12 @@ open Interlude.UI
 open Interlude.Features
 
 let crash_text_file(message: string) =
-    let path = Path.GetTempFileName()
+    let path = Path.ChangeExtension(Path.GetTempFileName(), ".txt")
     File.WriteAllText(path, message)
     open_directory(path)
 
 let launch (instance: int) =
-    Logging.Verbosity <-
-        if DEV_MODE then
-            LoggingLevel.DEBUG
-        else
-            LoggingLevel.INFO
+    Logging.Verbosity <- if DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
 
     Logging.LogFile <- Some(Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
 
