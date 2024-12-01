@@ -136,11 +136,11 @@ type SkinPreview(position: Position) as this =
         fbo.Bind true
         let screen_bounds = Render.bounds()
         Background.draw (screen_bounds, Colors.white, 1.0f)
-        Draw.rect screen_bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
+        Render.rect screen_bounds (Color.Black.O4a(Interlude.Options.options.BackgroundDim.Value * 255.0f |> int))
         renderer.Draw()
         fbo.Unbind()
-        Draw.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
-        Draw.sprite bounds_placeholder.Bounds Color.White fbo.Sprite
+        Render.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
+        Render.sprite bounds_placeholder.Bounds Color.White fbo.Sprite
         base.Draw()
 
     override this.Init(parent: Widget) =

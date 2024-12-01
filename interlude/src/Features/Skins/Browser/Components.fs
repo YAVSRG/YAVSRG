@@ -108,7 +108,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
             ).Show()
 
     override this.Draw() =
-        if this.Focused then Draw.rect this.Bounds Colors.shadow_2.O2
+        if this.Focused then Render.rect this.Bounds Colors.shadow_2.O2
         base.Draw()
 
 type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
@@ -165,9 +165,9 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
 
     override this.Draw() =
         if selected.Value then
-            Draw.rect this.Bounds Colors.pink_accent.O1
+            Render.rect this.Bounds Colors.pink_accent.O1
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 

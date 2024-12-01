@@ -337,21 +337,21 @@ type SelectedChart(lobby: Lobby) =
 
     override this.Draw() =
         let is_loaded = LobbyChart.is_loaded_or_loading()
-        Draw.rect
+        Render.rect
             (this.Bounds.SliceT(70.0f))
             (if is_loaded then
                  (!*Palette.DARK).O4a 180
              else
                  Color.FromArgb(180, 100, 100, 100))
 
-        Draw.rect
+        Render.rect
             (this.Bounds.SliceT(100.0f).SliceB(30.0f))
             (if is_loaded then
                  (!*Palette.DARKER).O4a 180
              else
                  Color.FromArgb(180, 50, 50, 50))
 
-        Draw.rect
+        Render.rect
             (this.Bounds.SliceT(100.0f).SliceL(5.0f))
             (if is_loaded then
                  !*Palette.MAIN

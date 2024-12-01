@@ -13,9 +13,9 @@ type RatingTile(color: Color, value: float32) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black.O3
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black.O3
         Background.draw (this.Bounds, Colors.grey_2, 0.8f)
-        Draw.rect this.Bounds color.O1
+        Render.rect this.Bounds color.O1
         Text.fill_b (Style.font, sprintf "%.0f" value, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.CENTER)
 
 type SkillsetGraph(target: PatternSkillBreakdown) =
@@ -39,27 +39,27 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
         let y d = bottom - d / max_duration * height
         let mutable last = min_bpm
         for point in push do
-            Draw.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.blue
+            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.blue
             last <- float32 point.BPM
         
         let mutable last = min_bpm
         for point in control do
-            Draw.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.green
+            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.green
             last <- float32 point.BPM
         
         let mutable last = min_bpm
         for point in accuracy do
-            Draw.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.yellow_accent
+            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.yellow_accent
             last <- float32 point.BPM
 
-        Draw.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
+        Render.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
 
-        Draw.rect (this.Bounds.SliceB(AXIS_HEIGHT)) Colors.shadow_2.O1
+        Render.rect (this.Bounds.SliceB(AXIS_HEIGHT)) Colors.shadow_2.O1
         let SPACING = floor(max_bpm / 200.0f) * 10.0f |> max 10.0f
         let mutable bpm = round(min_bpm / SPACING) * SPACING
         while bpm < max_bpm - SPACING * 1.5f do
             bpm <- bpm + SPACING
-            Draw.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+            Render.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
 
     static member Create(pattern: CorePattern, data: PatternSkillBreakdown) =

@@ -44,22 +44,22 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
         let xp_progress = (xp_display.Value - xp_start) / (xp_end - xp_start)
 
         // box
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
-        Draw.rect this.Bounds (!*Palette.MAIN_100)
+        Render.rect this.Bounds (!*Palette.MAIN_100)
 
         // bar
         let bar = this.Bounds.SliceY(20.0f).ShrinkX(10.0f)
-        Draw.rect bar Colors.shadow_2.O2
-        Draw.rect (bar.SlicePercentL(xp_progress)) (!*Palette.HIGHLIGHT_100).O4
+        Render.rect bar Colors.shadow_2.O2
+        Render.rect (bar.SlicePercentL(xp_progress)) (!*Palette.HIGHLIGHT_100).O4
 
         let counter = this.Bounds.BorderB(60.0f).SliceR(220.0f)
         let counterq = 
             let q = counter.AsQuad
             { q with TopLeft = q.TopLeft - OpenTK.Mathematics.Vector2(30.0f, 0.0f) }
-        Draw.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black.AsQuad
+        Render.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black.AsQuad
         Background.drawq (counterq, (Color.FromArgb(40, 40, 40)), 2.0f)
-        Draw.quad counterq (!*Palette.MAIN_100).AsQuad
+        Render.quad counterq (!*Palette.MAIN_100).AsQuad
 
         Text.fill_b(Style.font, sprintf "%.0f" xp_display.Value, counter, Colors.text, Alignment.CENTER)
         Text.fill_b(Style.font, sprintf "Level %i" level, counter.BorderB(40.0f).TranslateY(10.0f), Colors.text, Alignment.CENTER)

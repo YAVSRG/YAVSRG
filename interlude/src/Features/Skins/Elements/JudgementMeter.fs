@@ -70,7 +70,7 @@ type JudgementMeter(config: HudConfig, state: PlayState) =
                         Alignment.CENTER
                     )
                 | JudgementDisplayType.Texture y ->
-                    Draw.tex_quad 
+                    Render.tex_quad 
                         ((Sprite.fill bounds texture).AsQuad)
                         (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (time_ago / config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)

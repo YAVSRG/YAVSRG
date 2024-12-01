@@ -20,7 +20,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
         )
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
         let h = this.Bounds.Height / 10.0f
         let mutable y = 0.0f
 

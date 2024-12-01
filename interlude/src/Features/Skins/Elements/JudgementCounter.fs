@@ -26,7 +26,7 @@ module JudgementCounter =
             )
 
         for c in count_text do
-            Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+            Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
     let draw_ratio_centered(texture: Sprite, bounds: Rect, color: Color, (mv, pf) : int * int, spacing: float32, dot_spacing: float32, colon_spacing: float32) =
@@ -47,14 +47,14 @@ module JudgementCounter =
         for c in ratio_text do
             if c = '.' then
                 char_bounds <- char_bounds.Translate(scale * dot_spacing * char_width, 0.0f)
-                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
+                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + dot_spacing + spacing) * char_width, 0.0f)
             elif c = ':' then
                 char_bounds <- char_bounds.Translate(scale * colon_spacing * char_width, 0.0f)
-                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
+                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + colon_spacing + spacing) * char_width, 0.0f)
             else
-                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
         
 type JudgementCounter(config: HudConfig, state: PlayState) =
@@ -118,7 +118,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
             let j = state.Ruleset.Judgements.[i]
 
             if not judgement_animations.[i].Complete && state.Scoring.JudgementCounts.[i] > 0 then
-                Draw.rect
+                Render.rect
                     r
                     (Color.FromArgb(
                         127
@@ -128,12 +128,12 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
             match display.[i] with
             | Some texture_index ->
-                Draw.tex_quad 
+                Render.tex_quad 
                         ((Sprite.fill_left (r.Shrink(5.0f)) texture).AsQuad)
                         Color.White.AsQuad
                         (Sprite.pick_texture (0, texture_index) texture)
             | None ->
-                Draw.rect (r.SliceL(5.0f)) j.Color
+                Render.rect (r.SliceL(5.0f)) j.Color
                 Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
             if config.JudgementCounterUseFont then

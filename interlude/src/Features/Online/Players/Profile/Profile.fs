@@ -199,5 +199,5 @@ type private Profile() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds !*Palette.DARK_100
+        Render.rect this.Bounds !*Palette.DARK_100
         base.Draw()

@@ -197,8 +197,8 @@ type private CollectionButton(icon, name, action) as this =
         let color = if this.Focused then Colors.pink_accent else Colors.shadow_1
         let color = if this.Disabled then color.O3 else color
 
-        Draw.rect this.Bounds color.O3
-        Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceB(5.0f)) color
+        Render.rect this.Bounds color.O3
+        Render.rect (this.Bounds.Expand(0.0f, 5.0f).SliceB(5.0f)) color
 
         base.Draw()
 

@@ -72,9 +72,9 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
     override this.Draw() =
         if this.Parent.Focused then
             if hover then
-                Draw.rect this.Bounds Colors.white.O3
+                Render.rect this.Bounds Colors.white.O3
             else
-                Draw.rect this.Bounds Colors.white.O1
+                Render.rect this.Bounds Colors.white.O1
 
 type Positioner(elem: HudElement, ctx: PositionerContext) =
     inherit Container(NodeType.FocusTrap)
@@ -420,11 +420,11 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
             let left_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Left
             let right_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Right
 
-            Draw.rect
+            Render.rect
                 (Rect.Create(left_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom))
                 Colors.red_accent.O1
 
-            Draw.rect
+            Render.rect
                 (Rect.Create(right_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom))
                 Colors.red_accent.O1
 
@@ -438,7 +438,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                 let other_center_x, other_center_y = other_positioner.Bounds.Center
 
                 if abs (this_center_x - other_center_x) < 5.0f then
-                    Draw.rect
+                    Render.rect
                         (Rect.Create(
                             other_center_x - 2.5f,
                             min this.Bounds.Top other_positioner.Bounds.Top,
@@ -448,7 +448,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         Colors.green_accent.O1
 
                 if abs (this_center_y - other_center_y) < 5.0f then
-                    Draw.rect
+                    Render.rect
                         (Rect.Create(
                             min this.Bounds.Left other_positioner.Bounds.Left,
                             other_center_y - 2.5f,
@@ -460,15 +460,15 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
         base.Draw()
 
         if this.Focused then
-            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.yellow_accent
-            Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.yellow_accent
+            Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.yellow_accent
+            Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.yellow_accent
+            Render.rect (this.Bounds.BorderL Style.PADDING) Colors.yellow_accent
+            Render.rect (this.Bounds.BorderR Style.PADDING) Colors.yellow_accent
         elif hover then
-            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.white.O2
-            Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.white.O2
+            Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white.O2
+            Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white.O2
+            Render.rect (this.Bounds.BorderL Style.PADDING) Colors.white.O2
+            Render.rect (this.Bounds.BorderR Style.PADDING) Colors.white.O2
 
 and PositionerContext =
     {

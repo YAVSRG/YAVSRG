@@ -30,8 +30,8 @@ type MissingScore() =
             else
                 (!*Palette.LIGHT).O2a alpha
 
-        Draw.rect this.Bounds fill_color
-        Draw.rect (this.Bounds.BorderL Style.PADDING) border_color
+        Render.rect this.Bounds fill_color
+        Render.rect (this.Bounds.BorderL Style.PADDING) border_color
 
         Text.fill_b(Style.font, "<Missing the chart for this score>", this.Bounds.SliceY(50.0f), (Colors.grey_2.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
@@ -62,8 +62,8 @@ type Score(score_info: ScoreInfo) =
             else
                 (!*Palette.LIGHT).O2a alpha
 
-        Draw.rect this.Bounds fill_color
-        Draw.rect (this.Bounds.BorderL Style.PADDING) border_color
+        Render.rect this.Bounds fill_color
+        Render.rect (this.Bounds.BorderL Style.PADDING) border_color
 
         Text.fill_b (
             Style.font,
@@ -92,7 +92,7 @@ type Score(score_info: ScoreInfo) =
 
         let box_color = Colors.shadow_2.O1a alpha
         let box = this.Bounds.SliceR(360.0f).ShrinkT(50.0f).TranslateX(-10.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             if this.Focused then
@@ -106,7 +106,7 @@ type Score(score_info: ScoreInfo) =
         )
         
         let box = this.Bounds.SliceR(140.0f).SliceT(45.0f).TranslateX(-230.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             score_info.Scoring.FormattedAccuracy,
@@ -116,7 +116,7 @@ type Score(score_info: ScoreInfo) =
         )
         
         let box = this.Bounds.SliceR(100.0f).SliceT(45.0f).TranslateX(-120.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             score_info.Ruleset.LampName score_info.Lamp,
@@ -126,7 +126,7 @@ type Score(score_info: ScoreInfo) =
         )
 
         let box = this.Bounds.SliceR(100.0f).SliceT(45.0f).TranslateX(-10.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             (sprintf "%.2f" score_info.Physical),
@@ -180,7 +180,7 @@ type ScoreList(start_time: int64, end_time: int64) =
         // todo: export as playlist
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
         base.Draw()
 
     override this.Update(elapsed_ms, moved) =

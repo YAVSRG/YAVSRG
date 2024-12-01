@@ -111,9 +111,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         base.Init(parent)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, Colors.white, 2.0f)
-        Draw.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
+        Render.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
         base.Draw()
 
         // accuracy info
@@ -126,9 +126,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
         for i, j in judgements do
             let b = Rect.Create(counters.Left, y, counters.Right, y + h)
-            Draw.rect b j.Color.O1
+            Render.rect b j.Color.O1
 
-            Draw.rect
+            Render.rect
                 (b.SliceL(
                     counters.Width
                     * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)

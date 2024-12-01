@@ -93,7 +93,7 @@ type Chat(lobby: Lobby) =
                         { new Container(NodeType.Leaf) with
                             override this.Draw() =
                                 if this.Focused then
-                                    Draw.rect this.Bounds Colors.grey_2.O1
+                                    Render.rect this.Bounds Colors.grey_2.O1
 
                                 base.Draw()
                         }
@@ -215,8 +215,8 @@ type Chat(lobby: Lobby) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.ShrinkB 60.0f) Colors.shadow_2.O3
-        Draw.rect (this.Bounds.SliceB 50.0f) Colors.shadow_2.O3
+        Render.rect (this.Bounds.ShrinkB 60.0f) Colors.shadow_2.O3
+        Render.rect (this.Bounds.SliceB 50.0f) Colors.shadow_2.O3
         base.Draw()
 
     override this.Update(elapsed_ms, moved) =

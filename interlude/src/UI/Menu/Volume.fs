@@ -42,5 +42,5 @@ type Volume() =
 
     override this.Draw() =
         let r = this.Bounds.SliceB 5.0f
-        Draw.rect r (Palette.color (fade.Alpha, 0.4f, 0.0f))
-        Draw.rect (r.SliceL(slider.Value * r.Width)) (Palette.color (fade.Alpha, 1.0f, 0.0f))
+        Render.rect r (Palette.color (fade.Alpha, 0.4f, 0.0f))
+        Render.rect (r.SliceL(slider.Value * r.Width)) (Palette.color (fade.Alpha, 1.0f, 0.0f))

@@ -144,8 +144,8 @@ type Toolbar() =
                 } =
                 this.Bounds
 
-            Draw.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
-            Draw.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
+            Render.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
+            Render.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
 
             if Toolbar.slideout_amount.Value > 0.01f then
                 let s = this.Bounds.Width / 48.0f
@@ -154,11 +154,11 @@ type Toolbar() =
                     let level =
                         System.Math.Min((Devices.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
 
-                    Draw.rect
+                    Render.rect
                         (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level))
                         (Palette.color (int level, 1.0f, 0.5f))
 
-                    Draw.rect
+                    Render.rect
                         (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b))
                         (Palette.color (int level, 1.0f, 0.5f))
 

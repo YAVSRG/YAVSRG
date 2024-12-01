@@ -75,7 +75,7 @@ type private Leaderboard() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.black.O2
+        Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
 type private CompareFriend
@@ -277,14 +277,14 @@ type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int op
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.black.O2
+        Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
 type private TableLevelStats(level_name: string, data: (int * int) array, ruleset: Ruleset, scale: float32) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.black.O2
+        Render.rect this.Bounds Colors.black.O2
         let b = this.Bounds.Shrink(20.0f, 0.0f)
         Text.fill_b (Style.font, level_name, b.SliceL(150.0f), Colors.text_subheading, Alignment.CENTER)
 
@@ -294,7 +294,7 @@ type private TableLevelStats(level_name: string, data: (int * int) array, rulese
 
         for (grade, count) in data do
             let w = b.Width * float32 count / total * scale
-            Draw.rect (Rect.Create(x, b.Top, x + w, b.Bottom)) (ruleset.GradeColor grade)
+            Render.rect (Rect.Create(x, b.Top, x + w, b.Bottom)) (ruleset.GradeColor grade)
             x <- x + w
 
 type private TableScore(position: int, chart_id: string, grade: int, rating: float, ruleset: Ruleset) =
@@ -309,7 +309,7 @@ type private TableScore(position: int, chart_id: string, grade: int, rating: flo
     let grade_color = ruleset.GradeColor grade
 
     override this.Draw() =
-        Draw.rect
+        Render.rect
             this.Bounds
             (if position % 10 < 5 then
                  Colors.black.O2

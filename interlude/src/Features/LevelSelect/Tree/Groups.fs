@@ -95,10 +95,10 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                     Palette.color (100, 0.7f, 0.0f),
                     Palette.color (255, 0.2f, 0.0f)
 
-        Draw.rect (bounds.Translate(10.0f, 10.0f)) bg_color
+        Render.rect (bounds.Translate(10.0f, 10.0f)) bg_color
         Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
 
-        Draw.rect bounds color
+        Render.rect bounds color
 
         match multi_selection with
         | Some s ->

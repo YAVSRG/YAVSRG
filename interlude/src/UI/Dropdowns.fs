@@ -31,9 +31,9 @@ module private Dropdown =
 
         override this.Draw() =
             if is_odd then
-                Draw.rect this.Bounds (Colors.shadow_1.O1a 100)
+                Render.rect this.Bounds (Colors.shadow_1.O1a 100)
             if this.Focused then
-                Draw.rect this.Bounds (!*Palette.HOVER)
+                Render.rect this.Bounds (!*Palette.HOVER)
 
             base.Draw()
 

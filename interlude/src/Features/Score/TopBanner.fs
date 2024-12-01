@@ -73,7 +73,7 @@ type TopBanner(score_info: ScoreInfo) as this =
 
     override this.Draw() =
 
-        Draw.rect (this.Bounds.ShrinkB 5.0f) (Palette.color (127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceB 5.0f) Colors.white.O2
+        Render.rect (this.Bounds.ShrinkB 5.0f) (Palette.color (127, 0.5f, 0.0f))
+        Render.rect (this.Bounds.SliceB 5.0f) Colors.white.O2
 
         base.Draw()

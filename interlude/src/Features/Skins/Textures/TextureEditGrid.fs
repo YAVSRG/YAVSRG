@@ -55,7 +55,7 @@ type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool 
 
     override this.Draw() =
         base.Draw()
-        Draw.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (x, y) sprite)
+        Render.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (x, y) sprite)
 
 type private DeleteButton(on_click) =
     inherit Button(K Icons.TRASH, on_click, Floating = true)
@@ -64,7 +64,7 @@ type private DeleteButton(on_click) =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect (this.Bounds.Expand(0.0f, this.VerticalPad)) Colors.yellow_accent.O2
+            Render.rect (this.Bounds.Expand(0.0f, this.VerticalPad)) Colors.yellow_accent.O2
 
         base.Draw()
 
@@ -209,7 +209,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                              Position = Position.Shrink(0.0f, -50.0f).SliceB(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
-                            Draw.rect this.Bounds Colors.yellow_accent.O2
+                            Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
                 },
@@ -241,7 +241,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                              Position = Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)) with
                     override this.Draw() =
                         if this.Focused then
-                            Draw.rect this.Bounds Colors.yellow_accent.O2
+                            Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
                 },

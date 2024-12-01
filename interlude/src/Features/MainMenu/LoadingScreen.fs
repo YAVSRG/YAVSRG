@@ -58,10 +58,10 @@ type LoadingScreen() =
     override this.Draw() =
         if closing then
             let alpha = 255.0 * (1.0 - background_fade.Time / background_fade.Interval) |> int
-            Draw.rect this.Bounds (Colors.black.O4a alpha)
+            Render.rect this.Bounds (Colors.black.O4a alpha)
         else
             let alpha = 255.0 * (background_fade.Time / background_fade.Interval) |> int
-            Draw.rect this.Bounds (Colors.black.O4a alpha)
+            Render.rect this.Bounds (Colors.black.O4a alpha)
 
         let (x, y) = this.Bounds.Center
 

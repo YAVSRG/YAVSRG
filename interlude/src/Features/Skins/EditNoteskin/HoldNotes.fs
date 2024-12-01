@@ -51,7 +51,7 @@ type HoldNoteSettingsPage() =
 
         let draw_ln_preview (label: string, color: Color, downscroll: bool) =
 
-            Draw.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
+            Render.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
 
             let headpos = if downscroll then bottom - COLUMN_WIDTH else top
 
@@ -61,7 +61,7 @@ type HoldNoteSettingsPage() =
                 else
                     bottom - COLUMN_WIDTH - hold_note_trim.Value * COLUMN_WIDTH
 
-            Draw.tex_quad
+            Render.tex_quad
                 (Rect
                     .Create(
                         left,
@@ -73,12 +73,12 @@ type HoldNoteSettingsPage() =
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) body)
 
-            Draw.tex_quad
+            Render.tex_quad
                 (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) head)
 
-            Draw.tex_quad
+            Render.tex_quad
                 (Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
                  |> if flip_hold_tail.Value && downscroll && use_tail_texture.Value then
                         fun (r: Rect) -> r.ShrinkY(r.Height)

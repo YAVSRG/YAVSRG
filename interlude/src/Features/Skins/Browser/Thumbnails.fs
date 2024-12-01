@@ -26,7 +26,7 @@ type Thumbnail() =
 
         match loaded_thumbnail with
         | Some p -> 
-            Draw.sprite 
+            Render.sprite 
                 (Sprite.fill this.Bounds p) 
                 (Colors.white.O4a fade.Alpha) p
         | None -> ()

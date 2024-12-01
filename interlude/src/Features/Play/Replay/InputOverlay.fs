@@ -53,7 +53,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                     )
                     .Shrink(20.0f, 0.0f)
                 |> scroll_direction_pos playfield.Bounds.Bottom
-                |> fun a -> Draw.rect a Colors.grey_2.O2
+                |> fun a -> Render.rect a Colors.grey_2.O2
 
             let now =
                 state.CurrentChartTime()

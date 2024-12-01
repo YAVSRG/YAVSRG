@@ -59,7 +59,7 @@ type PersonalBests() =
             let accuracy_bounds = this.Bounds.SliceR(180.0f).Shrink(10.0f)
             match accuracy with
             | Some (acc, rate, timestamp, color) ->
-                Draw.rect accuracy_bounds Colors.shadow_2.O2
+                Render.rect accuracy_bounds Colors.shadow_2.O2
                 let time_ago = System.DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset timestamp
                 Text.fill_b (Style.font, Rulesets.current.FormatAccuracy acc, accuracy_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), accuracy_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
@@ -68,7 +68,7 @@ type PersonalBests() =
             let lamp_bounds = accuracy_bounds.Translate(-180.0f, 0.0f)
             match lamp with
             | Some (lamp, rate, timestamp, color) ->
-                Draw.rect lamp_bounds Colors.shadow_2.O2
+                Render.rect lamp_bounds Colors.shadow_2.O2
                 let time_ago = System.DateTimeOffset.UtcNow - Timestamp.to_datetimeoffset timestamp
                 Text.fill_b (Style.font, Rulesets.current.LampName lamp, lamp_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), (color, Colors.shadow_2), Alignment.CENTER)
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), lamp_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
@@ -76,12 +76,12 @@ type PersonalBests() =
 
         | _ ->
             let no_pb_bounds = this.Bounds.SliceR(360.0f).Shrink(10.0f)
-            Draw.rect no_pb_bounds Colors.shadow_2.O2
+            Render.rect no_pb_bounds Colors.shadow_2.O2
             Text.fill_b (Style.font, %"levelselect.no_personal_best", no_pb_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text_greyout, Alignment.CENTER)
             Text.fill_b (Style.font, %"levelselect.no_personal_best.subtitle", no_pb_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), Colors.text_greyout, Alignment.CENTER)
 
         let pattern_bounds = this.Bounds.ShrinkR(360.0f).Shrink(10.0f)
-        Draw.rect pattern_bounds Colors.shadow_2.O2
+        Render.rect pattern_bounds Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font,

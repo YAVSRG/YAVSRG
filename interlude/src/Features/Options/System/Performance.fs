@@ -80,14 +80,14 @@ type PerformanceSettingsPage() =
     override this.Draw() =
         base.Draw()
         if closed then () else
-        Draw.rect 
+        Render.rect 
             (this.Bounds.SliceR(200.0f).Shrink(20.0f))
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
 
         for i = 0 to 10 do
             let anti_jitter = GameThread.frame_compensation () / 1.0f<ms / rate>
             let y = (float32 (cycle.Time / cycle.Interval) + (float32 i / 10.0f)) % 1.0f
-            Draw.sprite 
+            Render.sprite 
                 (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
                 Color.White
                 texture

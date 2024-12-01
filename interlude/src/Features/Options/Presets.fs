@@ -36,12 +36,12 @@ type private PresetKeymodeCheckbox(preset_id: int, keymode: int) as this =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect (this.Bounds.Shrink(5.0f)) Colors.yellow_accent.O1
+            Render.rect (this.Bounds.Shrink(5.0f)) Colors.yellow_accent.O1
 
         base.Draw()
 
         if options.KeymodePreferredPresets.[keymode - 3] = Some preset_id then
-            Draw.rect (this.Bounds.SliceB(5.0f)) Colors.yellow_accent
+            Render.rect (this.Bounds.SliceB(5.0f)) Colors.yellow_accent
 
 type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
     inherit Page()

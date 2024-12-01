@@ -61,11 +61,11 @@ type RotationPicker(rotation: Setting<float>) as this =
 
     override this.Draw() =
         if this.Selected then
-            Draw.rect this.Bounds Colors.pink_accent.O2
+            Render.rect this.Bounds Colors.pink_accent.O2
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O2
+            Render.rect this.Bounds Colors.yellow_accent.O2
 
-        Draw.tex_quad
+        Render.tex_quad
             (this.Bounds.AsQuad |> Quad.rotate rotation.Value)
             Color.White.AsQuad
             (Sprite.pick_texture (3, 0) sprite)
@@ -138,11 +138,11 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
         base.Draw()
 
         if this.Selected then
-            Draw.rect this.Bounds Colors.pink_accent.O2
+            Render.rect this.Bounds Colors.pink_accent.O2
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O2
+            Render.rect this.Bounds Colors.yellow_accent.O2
 
-        Draw.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (3, int color.Value) sprite)
+        Render.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (3, int color.Value) sprite)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

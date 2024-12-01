@@ -130,7 +130,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         base.Draw()
 
         if progress > 0.0f then
-            Draw.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
+            Render.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
 
     member this.Data = data
 

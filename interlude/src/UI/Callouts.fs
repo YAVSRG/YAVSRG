@@ -194,7 +194,7 @@ module Callout =
                 let tsize = text_size c.Size
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.Box(x, y, width, button_size)
-                Draw.rect bounds (Colors.shadow_2.O2a a)
+                Render.rect bounds (Colors.shadow_2.O2a a)
 
                 let text_col =
                     if bounds.Contains(Mouse.pos ()) then
@@ -258,12 +258,12 @@ module Callout =
 
         override this.Draw() =
 
-            Draw.rect (this.Bounds.BorderCornersT Style.PADDING) border
-            Draw.rect (this.Bounds.BorderCornersB Style.PADDING) border
-            Draw.rect (this.Bounds.BorderL Style.PADDING) border
-            Draw.rect (this.Bounds.BorderR Style.PADDING) border
+            Render.rect (this.Bounds.BorderCornersT Style.PADDING) border
+            Render.rect (this.Bounds.BorderCornersB Style.PADDING) border
+            Render.rect (this.Bounds.BorderL Style.PADDING) border
+            Render.rect (this.Bounds.BorderR Style.PADDING) border
 
-            Draw.rect this.Bounds fill
+            Render.rect this.Bounds fill
 
             draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)
 

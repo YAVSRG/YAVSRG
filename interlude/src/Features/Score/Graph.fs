@@ -120,7 +120,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     member private this.DrawSnapshotInfo(bounds: Rect, info: GraphPoint) =
 
         let black_cutoff_area = this.Bounds.SlicePercentR(1.0f - info.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
-        Draw.rect black_cutoff_area Colors.black.O2
+        Render.rect black_cutoff_area Colors.black.O2
     
         let white_line =
             Rect.Create(
@@ -129,11 +129,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 black_cutoff_area.Left + Style.PADDING,                   
                 this.Bounds.Bottom
             )
-        Draw.rect white_line Colors.white.O1
+        Render.rect white_line Colors.white.O1
 
         let outline_bounds = bounds.Expand(Style.PADDING)
-        Draw.rect outline_bounds Colors.white.O4
-        Draw.rect bounds Colors.shadow_2.O4
+        Render.rect outline_bounds Colors.white.O4
+        Render.rect bounds Colors.shadow_2.O4
 
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
@@ -178,7 +178,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let dy = -HTHICKNESS * System.MathF.Cos theta
             let dx = HTHICKNESS * System.MathF.Sin theta
 
-            Draw.quad
+            Render.quad
                 (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
                 color.AsQuad
 
@@ -208,11 +208,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         for j in score_info.Ruleset.Judgements do
             match j.TimingWindows with
             | Some (early, late) ->
-                Draw.rect 
+                Render.rect 
                     (Rect.Create(this.Bounds.Left, ms_to_y previous_early, this.Bounds.Right, ms_to_y early))
                     (j.Color.O4a 100)
                 previous_early <- early
-                Draw.rect 
+                Render.rect 
                     (Rect.Create(this.Bounds.Left, ms_to_y late, this.Bounds.Right, ms_to_y previous_late))
                     (j.Color.O4a 100)
                 previous_late <- late
@@ -365,7 +365,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | ValueNone -> ()
             | ValueSome (y, col) ->
                 let x = this.Bounds.Left + 5.0f + ev.Time * xscale
-                Draw.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
+                Render.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
 
     member private this.Redraw() =
         refresh <- false
@@ -376,9 +376,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if options.ScoreGraphWindowBackground.Value then
             this.DrawWindows()
         else 
-            Draw.rect this.Bounds Colors.black.O1
+            Render.rect this.Bounds Colors.black.O1
 
-        Draw.rect
+        Render.rect
             (Rect.Create(
                 this.Bounds.Left,
                 (this.Bounds.Top + h - 2.5f),
@@ -424,13 +424,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if refresh then
             this.Redraw()
             
-        Draw.rect (this.Bounds.BorderL Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderR Style.PADDING) Colors.white
-        Draw.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white
+        Render.rect (this.Bounds.BorderL Style.PADDING) Colors.white
+        Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white
+        Render.rect (this.Bounds.BorderR Style.PADDING) Colors.white
+        Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white
 
-        Draw.rect this.Bounds Colors.black.O3
-        Draw.sprite (Render.bounds()) Color.White fbo.Sprite
+        Render.rect this.Bounds Colors.black.O3
+        Render.sprite (Render.bounds()) Color.White fbo.Sprite
 
         let snapshots = stats.Value.GraphPoints
         if this.Bounds.Contains(Mouse.pos ()) && snapshots.Length > 0 then

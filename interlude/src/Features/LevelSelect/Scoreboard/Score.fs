@@ -63,8 +63,8 @@ type private ScoreCard(score_info: ScoreInfo) =
 
         // todo: dot the values that are your PBs
 
-        Draw.rect bounds fill_color
-        Draw.rect (bounds.BorderB Style.PADDING) border_color
+        Render.rect bounds fill_color
+        Render.rect (bounds.BorderB Style.PADDING) border_color
 
         let mod_text = 
             if score_info.Rate > SelectedChart.rate.Value then Icons.CHEVRONS_UP + "" + mod_string
@@ -112,7 +112,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         let box_color = Colors.shadow_2.O1a alpha
         
         let box = bounds.SliceL(140.0f).TranslateX(80.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             score_info.Scoring.FormattedAccuracy,
@@ -122,7 +122,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         )
         
         let box = bounds.SliceL(100.0f).TranslateX(230.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             score_info.Ruleset.LampName score_info.Lamp,
@@ -132,7 +132,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         )
 
         let box = bounds.SliceL(100.0f).TranslateX(340.0f)
-        Draw.rect box box_color
+        Render.rect box box_color
         Text.fill_b (
             Style.font,
             (sprintf "%.2f" score_info.Physical),

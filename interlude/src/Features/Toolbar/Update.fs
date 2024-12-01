@@ -13,7 +13,7 @@ type Updater() as this =
 
     override this.Draw() =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
-        Draw.rect area (Colors.shadow_1.O2)
+        Render.rect area (Colors.shadow_1.O2)
 
         if Updates.update_complete then
             Text.fill_b (

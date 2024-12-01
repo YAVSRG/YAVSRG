@@ -103,17 +103,17 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             else Colors.shadow_1.O2, Colors.grey_2.O2
 
 
-        Draw.rect bounds color
+        Render.rect bounds color
 
         let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
-        Draw.quad
+        Render.quad
             (Quad.create
                 <| new Vector2(left, top)
                 <| new Vector2(left + stripe_length, top)
                 <| new Vector2(left + stripe_length, bottom - 25.0f)
                 <| new Vector2(left, bottom - 25.0f))
             (Quad.gradient_left_to_right accent Color.Transparent)
-        Draw.rect (bounds.BorderL Style.PADDING) hover_color
+        Render.rect (bounds.BorderL Style.PADDING) hover_color
 
         // draw pbs
         let disp (data: 'T * Rate * Color * string) (pos: float32) =
@@ -121,7 +121,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             let rate_label = sprintf "(%.2fx)" rate
 
             if color.A > 0uy then
-                Draw.rect (Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
+                Render.rect (Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
 
                 Text.draw_aligned_b (
                     Style.font,
@@ -148,7 +148,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             disp lamp.Value 165.0f
 
         // draw text
-        Draw.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
+        Render.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
         Text.draw_b (Style.font, (if options.TreeShowNativeText.Value then cc.TitleNative |> Option.defaultValue cc.Title else cc.Title), 23.0f, left + 7f, top, if is_multi_selected then Colors.text_yellow_2 else Colors.text)
 
         Text.draw_b (

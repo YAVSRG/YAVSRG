@@ -40,7 +40,7 @@ type private ColoredButton(label, color, action) =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 

@@ -50,9 +50,9 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
 
     override this.Draw() =
         if this.Selected then
-            Draw.rect this.Bounds Colors.pink_accent.O2
+            Render.rect this.Bounds Colors.pink_accent.O2
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O2
+            Render.rect this.Bounds Colors.yellow_accent.O2
 
         base.Draw()
 
@@ -197,10 +197,10 @@ type PlayfieldSettingsPage() =
         let keys = int keymode.Value
 
         let frame = preview_bounds.Expand Style.PADDING
-        Draw.rect (frame.SliceL Style.PADDING) Colors.white
-        Draw.rect (frame.SliceT Style.PADDING) Colors.white
-        Draw.rect (frame.SliceR Style.PADDING) Colors.white
-        Draw.rect (frame.SliceB Style.PADDING) Colors.white
+        Render.rect (frame.SliceL Style.PADDING) Colors.white
+        Render.rect (frame.SliceT Style.PADDING) Colors.white
+        Render.rect (frame.SliceR Style.PADDING) Colors.white
+        Render.rect (frame.SliceB Style.PADDING) Colors.white
 
         let pw =
             (float32 keys * width_setting.Value
@@ -214,10 +214,10 @@ type PlayfieldSettingsPage() =
         let mutable left = start
 
         if fill_gaps.Value then
-            Draw.rect (preview_bounds.ShrinkL(left).SliceL(pw)) playfield_color.Value
+            Render.rect (preview_bounds.ShrinkL(left).SliceL(pw)) playfield_color.Value
         else
             for i = 1 to keys do
-                Draw.rect
+                Render.rect
                     (preview_bounds.ShrinkL(left).SliceL(width_setting.Value * PREVIEW_SCALE))
                     playfield_color.Value
 
@@ -230,11 +230,11 @@ type PlayfieldSettingsPage() =
 
                     left <- left + (width_setting.Value + s) * PREVIEW_SCALE
 
-        Draw.rect
+        Render.rect
         <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f)
         <| Colors.cyan_accent.O2
 
-        Draw.rect
+        Render.rect
         <| Rect.Box(
             preview_bounds.Left + start + pw,
             preview_bounds.CenterY - 2.5f,
@@ -243,7 +243,7 @@ type PlayfieldSettingsPage() =
         )
         <| Colors.red_accent.O2
 
-        Draw.rect
+        Render.rect
         <| Rect.Box(
             preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f,
             preview_bounds.Top,

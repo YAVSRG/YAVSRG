@@ -25,10 +25,10 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
-        Draw.rect this.Bounds grade_color.O1
+        Render.rect this.Bounds grade_color.O1
         base.Draw()
 
 type Accuracy
@@ -62,11 +62,11 @@ type Accuracy
         base.Update(elapsed_ms, moved)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
-        Draw.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
-        Draw.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
+        Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
+        Render.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
 
         Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
@@ -111,8 +111,8 @@ type Accuracy
 
         if hover then
             let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
-            Draw.rect (acc_tooltip.Expand(Style.PADDING)) Colors.white
-            Draw.rect acc_tooltip Colors.shadow_2
+            Render.rect (acc_tooltip.Expand(Style.PADDING)) Colors.white
+            Render.rect acc_tooltip Colors.shadow_2
 
             Text.fill_b (
                 Style.font,
@@ -154,10 +154,10 @@ type Lamp
         base.Update(elapsed_ms, moved)
 
     override this.Draw() =
-        Draw.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
-        Draw.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
-        Draw.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
+        Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
+        Render.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
 
         Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
@@ -197,8 +197,8 @@ type Lamp
         
         if hover then
             let raw_greats_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
-            Draw.rect (raw_greats_tooltip.Expand(Style.PADDING)) Colors.white
-            Draw.rect raw_greats_tooltip Colors.shadow_2
+            Render.rect (raw_greats_tooltip.Expand(Style.PADDING)) Colors.white
+            Render.rect raw_greats_tooltip Colors.shadow_2
 
             Text.fill_b (
                 Style.font,

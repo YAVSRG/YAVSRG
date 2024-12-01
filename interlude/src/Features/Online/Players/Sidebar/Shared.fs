@@ -34,8 +34,8 @@ type private PlayerButton(username, color) =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
         else
-            Draw.rect this.Bounds Colors.shadow_2.O2
+            Render.rect this.Bounds Colors.shadow_2.O2
 
         base.Draw()

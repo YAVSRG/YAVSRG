@@ -140,14 +140,14 @@ type Slider(setting: Setting.Bounded<float32>) =
 
         let cursor_x = bounds.Left + bounds.Width * v
 
-        Draw.rect
+        Render.rect
             (Rect.Create(cursor_x, (bounds.Top + 10.0f), bounds.Right, (bounds.Bottom - 10.0f)))
             (if this.Selected then
                  Colors.pink_shadow.O3
              else
                  Colors.grey_2.O2)
 
-        Draw.rect
+        Render.rect
             (Rect.Create(bounds.Left, (bounds.Top + 10.0f), cursor_x, (bounds.Bottom - 10.0f)))
             (if this.Selected then Colors.pink_accent else Colors.grey_2)
 

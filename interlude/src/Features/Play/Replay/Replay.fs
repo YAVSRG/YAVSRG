@@ -81,7 +81,7 @@ module ReplayScreen =
                 |+ { new StaticWidget(NodeType.None) with
                        override _.Draw() =
                            if show_input_overlay.Value || show_hit_overlay.Value then
-                               Draw.rect
+                               Render.rect
                                    this.Playfield.Bounds
                                    (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
                    }

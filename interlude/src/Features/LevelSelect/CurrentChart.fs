@@ -10,7 +10,7 @@ type CurrentChart() =
 
     override this.Draw() =
         
-        Draw.rect (this.Bounds.Shrink(20.0f, 0.0f).ShrinkT(20.0f)) Colors.shadow_2.O2
+        Render.rect (this.Bounds.Shrink(20.0f, 0.0f).ShrinkT(20.0f)) Colors.shadow_2.O2
 
         let title_text =
             match SelectedChart.CACHE_DATA with

@@ -252,7 +252,7 @@ type private Tabs() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.ShrinkT(50.0f)) !*Palette.DARK_100
+        Render.rect (this.Bounds.ShrinkT(50.0f)) !*Palette.DARK_100
         base.Draw()
 
 

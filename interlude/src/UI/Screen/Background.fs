@@ -144,7 +144,7 @@ module Background =
                 let screenaspect = pwidth / pheight
                 let bgaspect = float32 bg.Width / float32 bg.Height
 
-                Draw.tex_quad
+                Render.tex_quad
                     q
                     color.AsQuad
                     (Sprite.tiling
@@ -165,4 +165,4 @@ module Background =
 
     let draw_with_dim (bounds: Rect, color, depth) =
         draw (bounds, color, depth)
-        Draw.rect bounds (Color.Black.O4a dim_percent.Alpha)
+        Render.rect bounds (Color.Black.O4a dim_percent.Alpha)

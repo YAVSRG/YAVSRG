@@ -19,7 +19,7 @@ type SessionTime(total_time: unit -> float, play_time: unit -> float, practice_t
     let CONTENT_GAP = 100.0f
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
 
         let graph_radius = this.Bounds.Height * 0.4f
         let midpoint = this.Bounds.CenterX - (CONTENT_WIDTH - graph_radius * 2.0f) * 0.5f
@@ -39,15 +39,15 @@ type SessionTime(total_time: unit -> float, play_time: unit -> float, practice_t
         Text.fill_b(Style.font, "Session time: " + Stats.format_short_time total, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
 
         let row = content_bounds.ShrinkT(50.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.cyan_accent
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.cyan_accent
         Text.fill_b(Style.font, "Time ingame: " + Stats.format_short_time play, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
         
         let row = content_bounds.ShrinkT(90.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.green_accent
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.green_accent
         Text.fill_b(Style.font, "Practice time: " + Stats.format_short_time practice, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
         
         let row = content_bounds.ShrinkT(130.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.grey_2
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.grey_2
         Text.fill_b(Style.font, "Other: " + Stats.format_short_time other, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
     
     override this.Update(elapsed_ms, moved) =

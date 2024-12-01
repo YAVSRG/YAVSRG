@@ -29,7 +29,7 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
     let PADDING = 20.0f
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
 
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
         let weeks_shown = 53
@@ -47,11 +47,11 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
                 | None -> Colors.black
 
             if day = selected.Value then
-                Draw.rect pos Colors.white.O2
+                Render.rect pos Colors.white.O2
             elif Some day = hovered_day then
-                Draw.rect pos Colors.yellow_accent.O2
+                Render.rect pos Colors.yellow_accent.O2
 
-            Draw.rect (pos.ShrinkPercent(0.2f)) color
+            Render.rect (pos.ShrinkPercent(0.2f)) color
 
             i <- i + 1
             day <- day.AddDays 1
@@ -141,7 +141,7 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
 
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
         let weeks_shown = (this.Bounds.Width - PADDING * 2.0f) / box_size |> floor |> int
@@ -159,11 +159,11 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
                 | None -> Colors.black
 
             if day = selected.Value then
-                Draw.rect pos Colors.white.O2
+                Render.rect pos Colors.white.O2
             elif Some day = hovered_day then
-                Draw.rect pos Colors.yellow_accent.O2
+                Render.rect pos Colors.yellow_accent.O2
 
-            Draw.rect (pos.ShrinkPercent(0.2f)) color
+            Render.rect (pos.ShrinkPercent(0.2f)) color
 
             i <- i + 1
             day <- day.AddDays 1

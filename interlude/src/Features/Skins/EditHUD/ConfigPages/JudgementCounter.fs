@@ -57,9 +57,9 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
     override this.Draw() =
 
         if this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O2
+            Render.rect this.Bounds Colors.yellow_accent.O2
             if this.Selected then
-                Draw.rect (this.Bounds.SlicePercentR(0.5f).SliceB(5.0f).Shrink(100.0f, 0.0f)) Colors.yellow_accent
+                Render.rect (this.Bounds.SlicePercentR(0.5f).SliceB(5.0f).Shrink(100.0f, 0.0f)) Colors.yellow_accent
 
         Text.fill(Style.font, ruleset.JudgementName i, this.Bounds.SlicePercentL(0.5f).Shrink(10.0f, 5.0f), ruleset.JudgementColor i, Alignment.CENTER)
         Text.fill_b(Style.font, Icons.ARROW_RIGHT, this.Bounds.Shrink(10.0f, 5.0f), Colors.text_greyout, Alignment.CENTER)
@@ -68,7 +68,7 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
         | None ->
             Text.fill_b(Style.font, ruleset.JudgementName i, this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.CENTER)
         | Some j ->
-            Draw.tex_quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
+            Render.tex_quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -160,12 +160,12 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
                     match display.[i] with
                     | Some texture_index ->
-                        Draw.tex_quad 
+                        Render.tex_quad 
                                 ((Sprite.fill_left (r.Shrink(5.0f)) texture).AsQuad)
                                 Color.White.AsQuad
                                 (Sprite.pick_texture (0, texture_index) texture)
                     | None ->
-                        Draw.rect (r.SliceL(5.0f)) j.Color
+                        Render.rect (r.SliceL(5.0f)) j.Color
                         Text.fill_b (Style.font, j.Name, r.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.LEFT)
 
                     if use_font.Value then

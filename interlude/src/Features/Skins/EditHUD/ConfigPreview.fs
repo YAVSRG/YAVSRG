@@ -59,59 +59,59 @@ type ConfigPreview(scale: float32, config: Setting<HudPosition>) =
             )
 
         // Draw container
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(container.Left, container.Top, container.Left, container.Bottom)
                 .Expand(2.0f, 0.0f))
             Color.Red
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(container.Right, container.Top, container.Right, container.Bottom)
                 .Expand(2.0f, 0.0f))
             Color.Red
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(container.Left, container.Top, container.Right, container.Top)
                 .Expand(0.0f, 2.0f))
             Color.Red
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(container.Left, container.Bottom, container.Right, container.Bottom)
                 .Expand(0.0f, 2.0f))
             Color.Red
         // Draw alignments
-        Draw.rect (Rect.Create(leftA, container.Top, leftA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
-        Draw.rect (Rect.Create(rightA, container.Top, rightA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
-        Draw.rect (Rect.Create(container.Left, topA, container.Right, topA).Expand(0.0f, 2.0f)) Color.Orange
+        Render.rect (Rect.Create(leftA, container.Top, leftA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
+        Render.rect (Rect.Create(rightA, container.Top, rightA, container.Bottom).Expand(2.0f, 0.0f)) Color.Orange
+        Render.rect (Rect.Create(container.Left, topA, container.Right, topA).Expand(0.0f, 2.0f)) Color.Orange
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(container.Left, bottomA, container.Right, bottomA)
                 .Expand(0.0f, 2.0f))
             Color.Orange
         // Draw bounds
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(bounds.Left, bounds.Top, bounds.Left, bounds.Bottom)
                 .Expand(2.0f, 0.0f))
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(bounds.Right, bounds.Top, bounds.Right, bounds.Bottom)
                 .Expand(2.0f, 0.0f))
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(bounds.Left, bounds.Top, bounds.Right, bounds.Top)
                 .Expand(0.0f, 2.0f))
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (Rect
                 .Create(bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom)
                 .Expand(0.0f, 2.0f))
@@ -150,19 +150,19 @@ type ConfigPreviewNew(position: HudPosition) =
         
         let bounds = Rect.Box(this.Bounds.ShrinkL(PRETTYWIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
         // Draw bounds
-        Draw.rect
+        Render.rect
             (bounds.BorderL Style.PADDING)
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (bounds.BorderCornersT Style.PADDING)
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (bounds.BorderR Style.PADDING)
             Color.Lime
 
-        Draw.rect
+        Render.rect
             (bounds.BorderCornersB Style.PADDING)
             Color.Lime
 

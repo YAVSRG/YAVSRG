@@ -19,7 +19,7 @@ module Beam =
         let startpoint = r1 + (r2 - r1) * (time * time)
         let endpoint = r1 + (r2 - r1) * (time * (2.0f - time))
 
-        Draw.quad
+        Render.quad
             (Quad.create
                 (o + d * startpoint + perp)
                 (o + d * endpoint + perp)
@@ -40,7 +40,7 @@ module Glint =
         
         let start = bounds.Left - stripe_width * 4.5f + travel_distance * percent
 
-        Draw.quad
+        Render.quad
         <| Quad.createv
             (start + stripe_width, bounds.Top)
             (start + stripe_width * 3.0f, bounds.Top)
@@ -48,7 +48,7 @@ module Glint =
             (start, bounds.Bottom)
         <| color.AsQuad
         
-        Draw.quad
+        Render.quad
         <| Quad.createv
             (start + 3.5f * stripe_width, bounds.Top)
             (start + 4.5f * stripe_width, bounds.Top)
@@ -60,7 +60,7 @@ module Glint =
         if percent <= 0.0f || percent >= 1.0f then () else
 
         Render.stencil_create false
-        Draw.rect bounds Color.Transparent
+        Render.rect bounds Color.Transparent
 
         Render.stencil_begin_draw ()
 
@@ -90,10 +90,10 @@ module Glint =
 
         let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
-        Draw.quad q c.AsQuad
-        Draw.quad q2 c.AsQuad
-        Draw.quad (Quad.rotate_about o 180.0 q) c.AsQuad
-        Draw.quad (Quad.rotate_about o 180.0 q2) c.AsQuad
+        Render.quad q c.AsQuad
+        Render.quad q2 c.AsQuad
+        Render.quad (Quad.rotate_about o 180.0 q) c.AsQuad
+        Render.quad (Quad.rotate_about o 180.0 q2) c.AsQuad
 
 module Wedge =
 
@@ -109,7 +109,7 @@ module Wedge =
             let ang1 = Vector2(Math.Sin a1 |> float32, -Math.Cos a1 |> float32)
             let ang2 = Vector2(Math.Sin a2 |> float32, -Math.Cos a2 |> float32)
 
-            Draw.quad
+            Render.quad
                 (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
                 col.AsQuad
 
@@ -158,7 +158,7 @@ module DiamondsWipe =
         let draw_diamond x y =
             let r = radius x
 
-            Draw.quad
+            Render.quad
                 (Quad.createv
                     (x - r, y)
                     (x, y - r)
@@ -183,7 +183,7 @@ module TriangleWipe =
 
         if inbound then
 
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Left, y + height * 2.0f)
                     (bounds.Left, y + height)
@@ -192,7 +192,7 @@ module TriangleWipe =
                 )
                 Color.Transparent.AsQuad
             
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Right, y + height * 2.0f)
                     (bounds.Right, y + height)
@@ -203,7 +203,7 @@ module TriangleWipe =
 
         else
 
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Left, y - height)
                     (bounds.Left, y + height)
@@ -212,7 +212,7 @@ module TriangleWipe =
                 )
                 Color.Transparent.AsQuad
             
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Right, y - height)
                     (bounds.Right, y + height)
@@ -229,7 +229,7 @@ module TriangleWipe =
 
         if inbound then
 
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Left, y - height * 2.0f)
                     (bounds.Left, y - height)
@@ -238,7 +238,7 @@ module TriangleWipe =
                 )
                 Color.Transparent.AsQuad
             
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Right, y - height * 2.0f)
                     (bounds.Right, y - height)
@@ -249,7 +249,7 @@ module TriangleWipe =
 
         else
 
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Left, y + height)
                     (bounds.Left, y - height)
@@ -258,7 +258,7 @@ module TriangleWipe =
                 )
                 Color.Transparent.AsQuad
             
-            Draw.quad 
+            Render.quad 
                 (Quad.createv
                     (bounds.Right, y + height)
                     (bounds.Right, y - height)
@@ -278,7 +278,7 @@ module StripeWipe =
         let left = bounds.Left - stripe_width + travel_distance * left
         let right = bounds.Left - stripe_width + travel_distance * right
 
-        Draw.quad
+        Render.quad
             (Quad.createv
                 (left + stripe_width, bounds.Top)
                 (right, bounds.Top)
@@ -299,7 +299,7 @@ module LoadingAnimation =
         let corner_3 = corner_1 + corner_2
 
         if b > 1.0f || a < corner_1 then
-            Draw.rect
+            Render.rect
                 (Rect.Create(
                     (if b > 1.0f then
                             bounds.Left
@@ -312,7 +312,7 @@ module LoadingAnimation =
                 color
 
         if b > corner_1 && a < corner_2 then
-            Draw.rect
+            Render.rect
                 (Rect.Create(
                     bounds.Right - Style.PADDING,
                     bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
@@ -322,7 +322,7 @@ module LoadingAnimation =
                 color
 
         if b > corner_2 && a < corner_3 then
-            Draw.rect
+            Render.rect
                 (Rect.Create(
                     bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
                     bounds.Bottom - Style.PADDING,
@@ -332,7 +332,7 @@ module LoadingAnimation =
                 color
 
         if b > corner_3 && a < 1.0f then
-            Draw.rect
+            Render.rect
                 (Rect.Create(
                     bounds.Left,
                     bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,

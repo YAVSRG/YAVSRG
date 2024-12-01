@@ -108,7 +108,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         base.Draw()
 
         match status with
-        | Downloading -> Draw.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) Colors.white.O1
+        | Downloading -> Render.rect (this.Bounds.SliceL(this.Bounds.Width * progress)) Colors.white.O1
         | _ -> ()
 
         Text.fill_b (
@@ -130,7 +130,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         let status_bounds =
             this.Bounds.SliceB(40.0f).SliceR(150.0f).Shrink(5.0f, 0.0f)
 
-        Draw.rect status_bounds Colors.shadow_2.O2
+        Render.rect status_bounds Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font,
@@ -143,7 +143,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         let download_bounds =
             this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(5.0f, 0.0f)
 
-        Draw.rect download_bounds Colors.shadow_2.O2
+        Render.rect download_bounds Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font,
@@ -163,7 +163,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
         let stat x text =
             let stat_bounds = this.Bounds.SliceB(40.0f).ShrinkR(x).SliceR(145.0f)
-            Draw.rect stat_bounds Colors.shadow_2.O2
+            Render.rect stat_bounds Colors.shadow_2.O2
 
             Text.fill_b (
                 Style.font,
@@ -186,7 +186,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                     45.0f * float32 beatmaps.Length
                 )
 
-            Draw.rect popover_bounds Colors.shadow_2.O3
+            Render.rect popover_bounds Colors.shadow_2.O3
             let mutable y = 0.0f
 
             for beatmap in beatmaps do

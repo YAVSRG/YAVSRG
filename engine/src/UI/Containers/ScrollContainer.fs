@@ -82,7 +82,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
     override this.Draw() =
         if content_height > 0.0f then
             Render.stencil_create (false)
-            Draw.rect this.Bounds Color.Transparent
+            Render.rect this.Bounds Color.Transparent
             Render.stencil_begin_draw ()
             child.Draw()
             Render.stencil_finish ()

@@ -65,9 +65,9 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
 
     override this.Draw() =
         if this.IsCurrent then
-            Draw.rect this.Bounds Colors.pink_accent.O1
+            Render.rect this.Bounds Colors.pink_accent.O1
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 
@@ -121,9 +121,9 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) 
 
     override this.Draw() =
         if this.IsCurrent then
-            Draw.rect this.Bounds Colors.green_accent.O1
+            Render.rect this.Bounds Colors.green_accent.O1
         elif this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 

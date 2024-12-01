@@ -61,7 +61,7 @@ type private HitOverlay
             )
             .Shrink((playfield.ColumnWidth - 5.0f) * 0.75f, -2.5f)
         |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Draw.rect a Colors.grey_2.O2
+        |> fun a -> Render.rect a Colors.grey_2.O2
 
         Rect
             .Create(
@@ -74,7 +74,7 @@ type private HitOverlay
             )
             .Shrink((playfield.ColumnWidth - 5.0f) * 0.5f, 0.0f)
         |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Draw.rect a color
+        |> fun a -> Render.rect a color
 
         Rect
             .Create(
@@ -87,7 +87,7 @@ type private HitOverlay
             )
             .Shrink(20.0f, -2.5f)
         |> scroll_direction_pos playfield.Bounds.Bottom
-        |> fun a -> Draw.rect a color
+        |> fun a -> Render.rect a color
 
     let label_before (column: int) (y: float32) (text: string) (color: Color) =
         if show_hit_overlay_labels.Value then

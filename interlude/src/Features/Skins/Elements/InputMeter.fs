@@ -39,7 +39,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 .ShrinkPercent(config.InputMeterColumnPadding * 0.5f)
         for k = 0 to state.Chart.Keys - 1 do
             let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * (float32 fades.[k].Time / float32 fades.[k].Interval)) |> int
-            Draw.rect box (config.InputMeterKeyColor.O4a key_alpha)
+            Render.rect box (config.InputMeterKeyColor.O4a key_alpha)
             box <- box.Translate(column_width, 0.0f)
 
         if config.InputMeterShowInputs then
@@ -65,7 +65,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
                 let y2, c2 = point previous
-                Draw.quad 
+                Render.quad 
                     (Rect.Create(
                         this.Bounds.Left + column_width * float32 k,
                         y1,

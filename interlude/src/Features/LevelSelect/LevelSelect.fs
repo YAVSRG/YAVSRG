@@ -180,7 +180,7 @@ type LevelSelectScreen() =
             } =
             this.Bounds
 
-        Draw.quad
+        Render.quad
             (Quad.create
              <| Vector2(left, top)
              <| Vector2(left + w + 85.0f, top)
@@ -188,7 +188,7 @@ type LevelSelectScreen() =
              <| Vector2(left, top + 170.0f))
             (!*Palette.DARK_100).AsQuad
 
-        Draw.quad
+        Render.quad
             (Quad.create
              <| Vector2(left + w + 85.0f, top)
              <| Vector2(right, top)
@@ -196,7 +196,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w, top + 170.0f))
             Colors.shadow_2.O2.AsQuad
 
-        Draw.rect (this.Bounds.SliceT(170.0f).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
+        Render.rect (this.Bounds.SliceT(170.0f).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 
         base.Draw()
 

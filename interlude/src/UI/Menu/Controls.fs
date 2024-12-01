@@ -44,9 +44,9 @@ type PageSetting(localised_text, widget: Widget) as this =
 
     override this.Draw() =
         if widget.Selected then
-            Draw.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.pink_accent.O2
+            Render.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.pink_accent.O2
         elif widget.Focused then
-            Draw.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.yellow_accent.O1
+            Render.rect (widget.Bounds.Expand(15.0f, Style.PADDING)) Colors.yellow_accent.O1
 
         base.Draw()
         widget.Draw()
@@ -111,7 +111,7 @@ type PageButton(localised_text, on_click) as this =
 
     override this.Draw() =
         if this.Focused then
-            Draw.rect this.Bounds Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 
@@ -203,8 +203,8 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
             elif is_highlighted then Colors.text
             else Colors.text_subheading
 
-        Draw.rect this.Bounds color
-        Draw.rect (this.Bounds.BorderB Style.PADDING) trim_color
+        Render.rect this.Bounds color
+        Render.rect (this.Bounds.BorderB Style.PADDING) trim_color
 
         Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
 

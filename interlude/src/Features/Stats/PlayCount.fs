@@ -18,7 +18,7 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
     let CONTENT_GAP = 100.0f
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.shadow_2.O2
+        Render.rect this.Bounds Colors.shadow_2.O2
 
         let graph_radius = this.Bounds.Height * 0.4f
         let midpoint = this.Bounds.CenterX - (CONTENT_WIDTH - graph_radius * 2.0f) * 0.5f
@@ -47,15 +47,15 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
         Text.fill_b(Style.font, sprintf "Songs played: %i" plays, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
 
         let row = content_bounds.ShrinkT(50.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.green_accent
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.green_accent
         Text.fill_b(Style.font, sprintf "Songs completed: %i" completed, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
         
         let row = content_bounds.ShrinkT(90.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.yellow_accent
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.yellow_accent
         Text.fill_b(Style.font, sprintf "Songs retried: %i" retries, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
         
         let row = content_bounds.ShrinkT(130.0f).SliceT(35.0f)
-        Draw.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.red_accent
+        Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.red_accent
         Text.fill_b(Style.font, sprintf "Songs quit/failed: %i" quits, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
     
     override this.Update(elapsed_ms, moved) =

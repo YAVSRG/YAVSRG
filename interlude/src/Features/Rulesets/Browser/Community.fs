@@ -75,7 +75,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     override this.Draw() =
         base.Draw()
-        Draw.rect (this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
+        Render.rect (this.Bounds.SliceT(40.0f).SliceR(300.0f).Shrink(20.0f, 0.0f)) Colors.shadow_2.O2
 
         Text.fill_b (
             Style.font

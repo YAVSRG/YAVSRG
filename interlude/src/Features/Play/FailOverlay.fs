@@ -25,9 +25,9 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
     override this.Draw() =
         let bounds = this.Bounds.TranslateY((1.0f - fade.Value) * 30.0f)
         let alpha = fade.Alpha
-        Draw.rect bounds (if this.Focused then Colors.yellow_accent.O1a alpha else Colors.shadow_2.O2a alpha)
-        Draw.rect (bounds.BorderR(10.0f).TranslateY(10.0f)) (Colors.black.O3a alpha)
-        Draw.rect (bounds.BorderB(10.0f).TranslateX(10.0f)) (Colors.black.O3a alpha)
+        Render.rect bounds (if this.Focused then Colors.yellow_accent.O1a alpha else Colors.shadow_2.O2a alpha)
+        Render.rect (bounds.BorderR(10.0f).TranslateY(10.0f)) (Colors.black.O3a alpha)
+        Render.rect (bounds.BorderB(10.0f).TranslateX(10.0f)) (Colors.black.O3a alpha)
         Text.fill_b(Style.font, hotkey.ToString(), bounds.Shrink(20.0f, 25.0f).TranslateY(22.0f), Colors.text_cyan, Alignment.CENTER)
         Text.fill_b(Style.font, label, bounds.Shrink(20.0f, 10.0f).TranslateY(-5.0f), (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
@@ -98,8 +98,8 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
 
         let text_color = (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha)
 
-        Draw.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (Colors.red.O4a 0) (Colors.red.O2a alpha))
-        Draw.rect (this.Bounds.SliceY(main_fade.Value * 200.0f).TranslateY(-200.0f)) Colors.shadow_2.O2
+        Render.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (Colors.red.O4a 0) (Colors.red.O2a alpha))
+        Render.rect (this.Bounds.SliceY(main_fade.Value * 200.0f).TranslateY(-200.0f)) Colors.shadow_2.O2
 
         Text.fill_b(Style.font, "MISSION FAILED", this.Bounds.SliceY(160.0f).TranslateY(-200.0f), text_color, Alignment.CENTER)
         Text.fill_b(Style.font, pacemaker_desc, this.Bounds.SliceY(70.0f).TranslateY(-50.0f - 50f * main_fade.Value), (Colors.yellow_accent.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)

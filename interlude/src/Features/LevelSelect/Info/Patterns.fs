@@ -77,8 +77,8 @@ type Patterns(display: Setting<Display>) =
                 Alignment.LEFT
             )
 
-            Draw.rect (b.SliceL(5.0f).SliceT(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
-            Draw.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
+            Render.rect (b.SliceL(5.0f).SliceT(20.0f).Translate(TEXT_WIDTH, 10.0f)) Colors.white
+            Render.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32</rate>) =
                 nps * 2.0f * SelectedChart.rate.Value |> float |> DifficultyRating.physical_color
@@ -86,7 +86,7 @@ type Patterns(display: Setting<Display>) =
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
-                Draw.quad
+                Render.quad
                     (Rect
                         .Create(
                             BAR_L + lo_pc * BAR_WIDTH * bar_scale,

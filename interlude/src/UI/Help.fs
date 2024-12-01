@@ -76,17 +76,17 @@ module HelpOverlay =
                     LoadingAnimation.draw_border_piece outline 0.0f (min 0.99999f t.Fade.Value) (Colors.yellow_accent.O3a alpha)
 
                     // blackout effect
-                    Draw.rect (screen_bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
-                    Draw.rect (screen_bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
+                    Render.rect (screen_bounds.SliceL outline.Left) (Colors.shadow_2.O3a alpha)
+                    Render.rect (screen_bounds.ShrinkL outline.Right) (Colors.shadow_2.O3a alpha)
 
-                    Draw.rect
+                    Render.rect
                         (screen_bounds
                             .ShrinkL(outline.Left)
                             .SliceL(outline.Width)
                             .SliceT(outline.Top))
                         (Colors.shadow_2.O3a alpha)
 
-                    Draw.rect
+                    Render.rect
                         (screen_bounds
                             .ShrinkL(outline.Left)
                             .SliceL(outline.Width)
@@ -108,12 +108,12 @@ module HelpOverlay =
                         outline.Bottom + SPACING
 
                 let callout_bounds = Rect.Box(x, y, width, height)
-                Draw.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
+                Render.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
                 let border = Colors.cyan_accent.O4a alpha
-                Draw.rect (callout_bounds.BorderCornersT Style.PADDING) border
-                Draw.rect (callout_bounds.BorderCornersB Style.PADDING) border
-                Draw.rect (callout_bounds.BorderL Style.PADDING) border
-                Draw.rect (callout_bounds.BorderR Style.PADDING) border
+                Render.rect (callout_bounds.BorderCornersT Style.PADDING) border
+                Render.rect (callout_bounds.BorderCornersB Style.PADDING) border
+                Render.rect (callout_bounds.BorderL Style.PADDING) border
+                Render.rect (callout_bounds.BorderR Style.PADDING) border
 
                 Callout.draw (
                     callout_bounds.Left,

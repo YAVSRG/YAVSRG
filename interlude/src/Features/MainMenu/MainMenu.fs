@@ -52,9 +52,9 @@ type private MenuButton(on_click, label: string, pos: Position) =
         Style.hover.Play()
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100).AsQuad
+        Render.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100).AsQuad
 
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100).AsQuad
+        Render.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100).AsQuad
         base.Draw()
 
     member this.Hide() =
@@ -219,7 +219,7 @@ type MainMenuScreen() as this =
 
         let heading_width = Text.measure (Style.font, splash) * 40.0f
 
-        Draw.rect
+        Render.rect
             (Rect.Box(
                 c - heading_width * 0.5f - 20.0f,
                 this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value,

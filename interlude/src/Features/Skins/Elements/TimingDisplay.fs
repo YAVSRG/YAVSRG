@@ -141,11 +141,11 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         for j in state.Scoring.Ruleset.Judgements do
             match j.TimingWindows with
             | Some (early, late) ->
-                Draw.rect 
+                Render.rect 
                     (Rect.Create(ms_to_x early, this.Bounds.Top, ms_to_x previous_early, this.Bounds.Bottom))
                     (j.Color.O4a opacity)
                 previous_early <- early
-                Draw.rect 
+                Render.rect 
                     (Rect.Create(ms_to_x previous_late, this.Bounds.Top, ms_to_x late, this.Bounds.Bottom))
                     (j.Color.O4a opacity)
                 previous_late <- late
@@ -158,7 +158,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         let centre = this.Bounds.CenterX
 
         if config.TimingDisplayShowGuide then
-            Draw.rect
+            Render.rect
                 (Rect.Create(
                     centre - config.TimingDisplayThickness * config.TimingDisplayGuideThickness,
                     this.Bounds.Top,
@@ -178,10 +178,10 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                     centre + moving_average.Value + config.TimingDisplayThickness,
                     this.Bounds.Bottom
                 )
-            Draw.rect r config.TimingDisplayMovingAverageColor
+            Render.rect r config.TimingDisplayMovingAverageColor
         | TimingDisplayMovingAverageType.Arrow ->
             let arrow_height = this.Bounds.Height * 0.5f
-            Draw.quad 
+            Render.quad 
                 (
                     Quad.createv 
                         (centre + moving_average.Value, this.Bounds.Top - 10.0f)
@@ -215,7 +215,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                     )
 
             if config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
-                Draw.rect
+                Render.rect
                     (if hit.IsRelease then
                          r.Expand(0.0f, config.TimingDisplayReleasesExtraHeight)
                      else

@@ -72,15 +72,15 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
                 .ShrinkL(230.0f)
                 .Shrink(5.0f)
 
-        Draw.rect preview s.Value
+        Render.rect preview s.Value
 
-        Draw.quad
+        Render.quad
             (saturation_value_picker.AsQuad)
             { TopLeft = Color.White; TopRight = Color.FromHsv(H, 1.0f, 1.0f); BottomRight = Color.Black; BottomLeft = Color.Black }
 
         let x = saturation_value_picker.Left + S * saturation_value_picker.Width
         let y = saturation_value_picker.Bottom - V * saturation_value_picker.Height
-        Draw.rect (Rect.Create(x - 2.5f, y - 2.5f, x + 2.5f, y + 2.5f)) Color.White
+        Render.rect (Rect.Create(x - 2.5f, y - 2.5f, x + 2.5f, y + 2.5f)) Color.White
 
         let h = hue_picker.Height / 6.0f
 
@@ -88,21 +88,21 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             let a = Color.FromHsv(float32 i / 6.0f, 1.0f, 1.0f)
             let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
 
-            Draw.quad
+            Render.quad
                 (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h))
                     .AsQuad
                 (Quad.gradient_top_to_bottom a b)
 
-        Draw.rect
+        Render.rect
             (Rect.Box(hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f))
             Color.White
 
         if allow_alpha then
-            Draw.quad
+            Render.quad
                 alpha_picker.AsQuad
                 (Quad.gradient_top_to_bottom (s.Value.O4a 0) s.Value)
 
-            Draw.rect
+            Render.rect
                 (Rect.Box(
                     alpha_picker.Left,
                     alpha_picker.Top + A * (alpha_picker.Height - 5.0f),

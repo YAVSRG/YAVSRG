@@ -82,8 +82,8 @@ type InfoPanel() as this =
 
     override this.Draw() =
         let info_area = this.Bounds.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f)
-        Draw.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
-        Draw.rect info_area (!*Palette.DARK_100)
+        Render.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
+        Render.rect info_area (!*Palette.DARK_100)
         base.Draw()
 
     member this.OnChartUpdated(info: LoadedChartInfo) =

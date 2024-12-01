@@ -30,7 +30,7 @@ module LoadingIndicator =
                     -tick_width
                     + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
 
-                Draw.rect
+                Render.rect
                     (Rect.Create(
                         this.Bounds.Left + max 0.0f pos,
                         this.Bounds.Top,
@@ -68,15 +68,15 @@ type WIP() as this =
     do this.Position <- Position.SliceB(100.0f)
 
     override this.Draw() =
-        Draw.rect this.Bounds (Color.FromArgb(127, Color.Yellow))
+        Render.rect this.Bounds (Color.FromArgb(127, Color.Yellow))
         let w = this.Bounds.Width / 20.0f
 
         for i = 0 to 19 do
-            Draw.rect
+            Render.rect
                 (Rect.Box(this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f))
                 (if i % 2 = 0 then Color.Yellow else Color.Black)
 
-            Draw.rect
+            Render.rect
                 (Rect.Box(this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f))
                 (if i % 2 = 1 then Color.Yellow else Color.Black)
 
@@ -157,6 +157,6 @@ type NewAndShiny() =
             (x + r * a, y - r * b)
 
         for i = 0 to 29 do
-            Draw.quad (Quad.createv (x, y) (x, y) (vec i) (vec (i + 1))) Colors.red_accent.AsQuad
+            Render.quad (Quad.createv (x, y) (x, y) (vec i) (vec (i + 1))) Colors.red_accent.AsQuad
 
         Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

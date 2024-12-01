@@ -74,7 +74,7 @@ module Logo =
                     let UPPER_TRIANGLE_2 = Vector2(r - 0.1f * w, t + 0.1f * w)
                     let UPPER_TRIANGLE_3 = Vector2(l + 0.5f * w, t + (0.1f + TRIANGLE_HEIGHT) * w)
 
-                    Draw.quad
+                    Render.quad
                         (Quad.create
                             (UPPER_TRIANGLE_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
                             (UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
@@ -90,7 +90,7 @@ module Logo =
                     let LOWER_LEFT_3 = Vector2(l + 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_LEFT_4 = Vector2(l + 0.5f * w, t + 0.95f * w)
 
-                    Draw.quad
+                    Render.quad
                         (Quad.create
                             (LOWER_LEFT_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
                             (LOWER_LEFT_2 + Vector2(X_PADDING_FOR_GRADIENT_INNER, -PADDING))
@@ -107,7 +107,7 @@ module Logo =
                     let LOWER_RIGHT_3 = Vector2(r - 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_RIGHT_4 = Vector2(r - 0.5f * w, t + 0.95f * w)
 
-                    Draw.quad
+                    Render.quad
                         (Quad.create
                             (LOWER_RIGHT_1 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
                             (LOWER_RIGHT_2 + Vector2(-X_PADDING_FOR_GRADIENT_INNER, -PADDING))
@@ -121,26 +121,26 @@ module Logo =
                     Render.stencil_create (true)
 
                     // center triangle
-                    Draw.quad
+                    Render.quad
                         (Quad.create UPPER_TRIANGLE_1 UPPER_TRIANGLE_2 UPPER_TRIANGLE_3 UPPER_TRIANGLE_3)
                         Colors.cyan_accent.AsQuad
 
-                    Draw.quad
+                    Render.quad
                         (Quad.create LOWER_LEFT_1 LOWER_LEFT_2 LOWER_LEFT_3 LOWER_LEFT_4
                          |> Quad.translate (0.0f, breathe_2))
                         Colors.cyan_accent.AsQuad
 
-                    Draw.quad
+                    Render.quad
                         (Quad.create LOWER_RIGHT_1 LOWER_RIGHT_2 LOWER_RIGHT_3 LOWER_RIGHT_4
                          |> Quad.translate (0.0f, breathe_2))
                         Colors.cyan_accent.AsQuad
 
-                    Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
+                    Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
                     /// RENDER VISUALISER AND RAIN INSIDE STENCIL
 
                     Render.stencil_begin_draw ()
-                    Draw.rect breathe_bounds Colors.cyan_accent
+                    Render.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.Texture "rain"
                     let v = float32 counter.Time
 
@@ -152,7 +152,7 @@ module Logo =
                             let mutable x = breathe_bounds.Left - stride + x % stride
 
                             while x < breathe_bounds.Right do
-                                Draw.sprite (Rect.Box(x, y, stride, stride)) color rain
+                                Render.sprite (Rect.Box(x, y, stride, stride)) color rain
                                 x <- x + stride
 
                             y <- y + stride
@@ -175,7 +175,7 @@ module Logo =
 
                         let i = float32 i
 
-                        Draw.quad
+                        Render.quad
                             (Quad.create
                                 (new Vector2(l + i * w / 32.0f, m - prev))
                                 (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))
@@ -186,7 +186,7 @@ module Logo =
                         prev <- level
 
                     Render.stencil_finish ()
-                    Draw.sprite breathe_bounds Colors.white (Content.Texture "logo")
+                    Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
         override this.Update(elapsed_ms, moved) =
             base.Update(elapsed_ms, moved)

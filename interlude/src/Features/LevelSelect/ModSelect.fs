@@ -32,9 +32,9 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
 
     override this.Draw() =
         let state = current_state ()
-        Draw.rect (this.Bounds.SliceT(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
+        Render.rect (this.Bounds.SliceT(TOP_HEIGHT)) (if state.IsSome then Colors.pink.O3 else Colors.shadow_2.O2)
 
-        Draw.rect
+        Render.rect
             (this.Bounds.ShrinkT(TOP_HEIGHT))
             (if state.IsSome then
                  Colors.pink_shadow.O3

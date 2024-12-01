@@ -31,7 +31,7 @@ type NetworkStatus() as this =
             | Network.Connected -> Icons.GLOBE + "  " + %"network.connection.not_logged_in", Colors.green_accent
             | Network.LoggedIn -> Icons.GLOBE + "  " + Network.credentials.Username, Colors.green_accent
 
-        Draw.rect area (Colors.shadow_1.O2)
+        Render.rect area (Colors.shadow_1.O2)
         Text.fill_b (Style.font, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
 
         if Network.credentials.Host = "localhost" then
@@ -39,7 +39,7 @@ type NetworkStatus() as this =
 
         if Screen.current_type <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
-            Draw.rect area (Colors.shadow_1.O2)
+            Render.rect area (Colors.shadow_1.O2)
 
             Text.fill_b (
                 Style.font,

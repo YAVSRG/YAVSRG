@@ -25,7 +25,7 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds Colors.black.O2
+        Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
 type private ControlOverlay(info: LoadedChartInfo, on_seek, who, cycle) =

@@ -68,8 +68,8 @@ module private Span =
     let link_fragment (text: string, link: string) =
         { new Button(text, (fun () -> LinkHandler.handle link)) with
             override this.Draw() =
-                Draw.rect (this.Bounds.SliceB(2.0f).Translate(2.0f, 2.0f)) Colors.shadow_2
-                Draw.rect (this.Bounds.SliceB(2.0f)) (if this.Focused then Colors.yellow_accent else Colors.white)
+                Render.rect (this.Bounds.SliceB(2.0f).Translate(2.0f, 2.0f)) Colors.shadow_2
+                Render.rect (this.Bounds.SliceB(2.0f)) (if this.Focused then Colors.yellow_accent else Colors.white)
                 base.Draw()
         }
 
@@ -211,7 +211,7 @@ type private Image(width, title, url) as this =
             base.Draw()
 
             match sprite with
-            | Some s -> Draw.sprite this.Bounds (Color.White.O4a fade.Alpha) s
+            | Some s -> Render.sprite this.Bounds (Color.White.O4a fade.Alpha) s
             | None -> ()
 
 type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as this =
@@ -322,11 +322,11 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
     override this.Draw() =
         if this.VisibleBounds.Visible then
             if not nested then
-                Draw.rect (this.Bounds.BorderCornersB(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderCornersT(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderL(Style.PADDING)) Colors.cyan_accent
-                Draw.rect (this.Bounds.BorderR(Style.PADDING)) Colors.cyan_accent
-                Draw.rect this.Bounds Colors.cyan.O2
+                Render.rect (this.Bounds.BorderCornersB(Style.PADDING)) Colors.cyan_accent
+                Render.rect (this.Bounds.BorderCornersT(Style.PADDING)) Colors.cyan_accent
+                Render.rect (this.Bounds.BorderL(Style.PADDING)) Colors.cyan_accent
+                Render.rect (this.Bounds.BorderR(Style.PADDING)) Colors.cyan_accent
+                Render.rect this.Bounds Colors.cyan.O2
 
             base.Draw()
 
@@ -381,7 +381,7 @@ type private Heading(max_width, size, body: MarkdownSpan list) as this =
 
     override this.Draw() =
         if this.VisibleBounds.Visible then
-            Draw.rect (this.Bounds.Shrink(Style.PADDING * 2.0f)) Colors.black.O2
+            Render.rect (this.Bounds.Shrink(Style.PADDING * 2.0f)) Colors.black.O2
             base.Draw()
 
 type HorizontalRule(max_width) =
@@ -392,7 +392,7 @@ type HorizontalRule(max_width) =
 
     override this.Draw() =
         if this.VisibleBounds.Visible then
-            Draw.rect (this.Bounds.SliceT(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) Colors.white.O2
+            Render.rect (this.Bounds.SliceT(5.0f).Translate(0.0f, this.Bounds.Height / 2.0f - 2.5f)) Colors.white.O2
 
 type CodeBlock(max_width, code, language) as this =
     inherit IParagraph()

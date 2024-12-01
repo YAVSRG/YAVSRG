@@ -37,7 +37,7 @@ type Jukebox() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect this.Bounds (Colors.shadow_1.O2)
+        Render.rect this.Bounds (Colors.shadow_1.O2)
 
         let carousel_bounds = this.Bounds.ShrinkL(145.0f).Shrink(Style.PADDING)
 
@@ -51,7 +51,7 @@ type Jukebox() =
         let song_title_width = Text.measure(Style.font, song_title) * 25.0f
 
         Render.stencil_create false
-        Draw.rect carousel_bounds Color.Transparent
+        Render.rect carousel_bounds Color.Transparent
         Render.stencil_begin_draw ()
         
         if song_title_width + CAROUSEL_GAP < carousel_bounds.Width then

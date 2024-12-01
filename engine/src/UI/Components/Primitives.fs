@@ -109,9 +109,9 @@ type Image(sprite: Sprite) =
 
     override this.Draw() =
         if this.StretchToFill then
-            Draw.sprite this.Bounds Color.White this.Sprite
+            Render.sprite this.Bounds Color.White this.Sprite
         else
-            Draw.sprite (Sprite.fill this.Bounds this.Sprite) Color.White this.Sprite
+            Render.sprite (Sprite.fill this.Bounds this.Sprite) Color.White this.Sprite
 
 [<Sealed>]
 type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
@@ -154,18 +154,18 @@ type Frame() =
         if border.A > 0uy then
 
             let r = this.Bounds.Expand Style.PADDING
-            Draw.rect (r.SliceL Style.PADDING) border
-            Draw.rect (r.SliceR Style.PADDING) border
+            Render.rect (r.SliceL Style.PADDING) border
+            Render.rect (r.SliceR Style.PADDING) border
 
             let r = this.Bounds.Expand(0.0f, Style.PADDING)
-            Draw.rect (r.SliceT Style.PADDING) border
-            Draw.rect (r.SliceB Style.PADDING) border
+            Render.rect (r.SliceT Style.PADDING) border
+            Render.rect (r.SliceB Style.PADDING) border
 
         let fill = this.Fill()
 
         if fill.A > 0uy then
 
-            Draw.rect base.Bounds fill
+            Render.rect base.Bounds fill
 
 type FrameContainer(nt: NodeType) =
     inherit Container(nt)
@@ -179,17 +179,17 @@ type FrameContainer(nt: NodeType) =
         if border.A > 0uy then
 
             let r = this.Bounds.Expand Style.PADDING
-            Draw.rect (r.SliceL Style.PADDING) border
-            Draw.rect (r.SliceR Style.PADDING) border
+            Render.rect (r.SliceL Style.PADDING) border
+            Render.rect (r.SliceR Style.PADDING) border
 
             let r = this.Bounds.Expand(0.0f, Style.PADDING)
-            Draw.rect (r.SliceT Style.PADDING) border
-            Draw.rect (r.SliceB Style.PADDING) border
+            Render.rect (r.SliceT Style.PADDING) border
+            Render.rect (r.SliceB Style.PADDING) border
 
         let fill = this.Fill()
 
         if fill.A > 0uy then
 
-            Draw.rect base.Bounds fill
+            Render.rect base.Bounds fill
 
         base.Draw()

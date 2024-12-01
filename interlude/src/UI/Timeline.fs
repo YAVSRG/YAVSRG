@@ -50,11 +50,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.quad
+            Render.quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
                 Colors.white.O2.AsQuad
 
-            Draw.quad
+            Render.quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
                 Colors.cyan_accent.O1.AsQuad
 
@@ -62,19 +62,19 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             note_prev <- note_next
             chord_prev <- chord_next
 
-        Draw.quad
+        Render.quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
             Colors.white.O2.AsQuad
 
-        Draw.quad
+        Render.quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             Colors.cyan_accent.O1.AsQuad
 
         let now = Song.time()
         let percent = (now - start) / (LAST_NOTE - start) |> min 1.0f
         let x = b.Width * percent
-        Draw.rect (b.BorderB(10.0f)) Colors.grey_1.O3
-        Draw.rect (b.BorderB(10.0f).SliceL x) Colors.cyan_accent
+        Render.rect (b.BorderB(10.0f)) Colors.grey_1.O3
+        Render.rect (b.BorderB(10.0f).SliceL x) Colors.cyan_accent
 
         let duration = (LAST_NOTE - FIRST_NOTE) / rate.Value |> format_duration_ms
         let now_on_1x = max 0.0f<ms> (now - FIRST_NOTE) |> format_duration_ms
