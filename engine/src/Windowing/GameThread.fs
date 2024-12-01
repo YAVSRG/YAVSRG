@@ -24,6 +24,7 @@ module GameThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
     let mutable private ui_initialiser: unit -> UIEntryPoint = fun () -> Unchecked.defaultof<_>
+    let mutable private loading_icon: Bitmap option = None
 
     let private LOCK_OBJ = obj()
     
@@ -40,8 +41,7 @@ module GameThread =
     *)
 
     let mutable internal GAME_THREAD_ID = -1
-    let is_game_thread() =
-        GAME_THREAD_ID = -1 || Thread.CurrentThread.ManagedThreadId = GAME_THREAD_ID
+    let is_game_thread() = Thread.CurrentThread.ManagedThreadId = GAME_THREAD_ID
 
     let mutable private action_queue : (unit -> unit) list = []
     let private run_action_queue() =
@@ -61,7 +61,7 @@ module GameThread =
     let after_init = after_init_ev.Publish
 
     (*
-        State
+        Timer variables
     *)
 
     let mutable private resized = false
@@ -203,27 +203,33 @@ module GameThread =
 
     let private main_loop () =
         GLFW.MakeContextCurrent(window)
-        let width, height = GLFW.GetFramebufferSize(window)
-        if width = 0 || height = 0 then Render.DEFAULT_SCREEN else (width, height)
-        |> Render.init
+        Render.init Render.DEFAULT_SCREEN
 
-        // todo: place some loading image on the screen and swap buffers once
+        match loading_icon with
+        | Some icon -> () // todo: get it to work
+        | _ -> ()
 
         match
-            try Ok(ui_initialiser())
+            try 
+                Thread.Sleep(1000)
+                let root = ui_initialiser()
+                root.Init()
+                Ok(root)
             with fatal_err -> Error fatal_err
         with
         | Error fatal_err ->
             fatal_error <- true
-            Logging.Critical("Fatal crash in UI initialisation", fatal_err)
+            Logging.Critical("Fatal crash in game initialisation", fatal_err)
             GLFW.SetWindowShouldClose(window, true)
         | Ok ui_root ->
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
 
-        ui_root.Init()
         after_init_ev.Trigger()
         fps_timer.Start()
+        
+        Input.begin_frame_events ()
+        Input.finish_frame_events ()
 
         try
             Console.hide()
@@ -231,7 +237,7 @@ module GameThread =
                 dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
-            Logging.Critical("Fatal crash in UI thread", fatal_err)
+            Logging.Critical("Fatal crash in game thread", fatal_err)
             Console.restore()
             GLFW.SetWindowShouldClose(window, true)
 
@@ -243,10 +249,11 @@ module GameThread =
         Initialisation
     *)
 
-    let internal init(_window: nativeptr<Window>, init_thunk: unit -> UIEntryPoint) =
+    let internal init(_window: nativeptr<Window>, icon: Bitmap option, init_thunk: unit -> UIEntryPoint) =
         GAME_THREAD_ID <- thread.ManagedThreadId
         window <- _window
         ui_initialiser <- init_thunk
+        loading_icon <- icon
 
     let internal start() =
         thread.Start()

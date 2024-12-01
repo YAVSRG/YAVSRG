@@ -29,8 +29,7 @@ module WindowThread =
     *)
     
     let mutable internal WINDOW_THREAD_ID = -1
-    let is_window_thread() =
-        Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
+    let is_window_thread() = Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
 
     let mutable private action_queue : (unit -> unit) list = []
     let private run_action_queue() =
@@ -88,7 +87,7 @@ module WindowThread =
     (*
         Window options
         
-        `apply_config` applies all the settings in the "video settings" object
+        `apply_config` applies new WindowOptions settings to the game window + render thread
     *)
 
     let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
@@ -350,12 +349,6 @@ module WindowThread =
         GL.LoadBindings(bindings)
         context.MakeNoneCurrent()
 
-        GameThread.init(window, init_thunk)
-        Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
-        resize_callback window width height
-
-        Input.init window
-
         match icon with
         | Some icon ->
             let mutable pixel_data = System.Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
@@ -366,6 +359,12 @@ module WindowThread =
             GLFW.SetWindowIcon(window, System.Span<Image>(image_array))
         | None -> ()
 
+        GameThread.init(window, icon, init_thunk)
+        Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
+        resize_callback window width height
+
+        Input.init window
+
         GLFW.SetDropCallback(window, file_drop_callback_d) |> ignore
         GLFW.SetWindowSizeCallback(window, resize_callback_d) |> ignore
         GLFW.SetWindowFocusCallback(window, focus_callback_d) |> ignore
@@ -373,12 +372,12 @@ module WindowThread =
         let monitor_area = Monitors.GetMonitorFromWindow(window).ClientArea
         GLFW.SetWindowPos(window, (monitor_area.Min.X + monitor_area.Max.X - width) / 2, (monitor_area.Min.Y + monitor_area.Max.Y - height) / 2)
         GLFW.ShowWindow(window)
-        GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
+        GLFW.RestoreWindow(window)
         GLFW.FocusWindow(window)
 
     let internal run() =
-        apply_config last_applied_config
         Fonts.init()
+        GameThread.defer (fun () -> defer (fun () -> apply_config last_applied_config))
         GameThread.start()
 
         if last_applied_config.InputCPUSaver && OperatingSystem.IsWindows() then

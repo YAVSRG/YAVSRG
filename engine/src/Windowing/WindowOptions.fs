@@ -1,7 +1,5 @@
 ﻿namespace Percyqaz.Flux.Windowing
 
-open Percyqaz.Common
-
 type WindowType =
     | Windowed = 0
     | Borderless = 1

@@ -282,7 +282,6 @@ module Render =
         if m <> alpha_mult then
             _batch.Draw ()
             Shader.set_uniform_f32 (Shader.alpha_mult_loc, m)
-            let previous_mult = alpha_mult
             alpha_mult <- m
 
     let internal start () =
@@ -364,7 +363,7 @@ Process: %s"""
             Image<Rgba32>
                 .LoadPixelData(new Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
 
-        image.Mutate(fun i -> i.RotateFlip(RotateMode.Rotate180, FlipMode.Horizontal) |> ignore)
+        image.Mutate(fun i -> i.Flip(FlipMode.Vertical) |> ignore)
         image
 
 (*
