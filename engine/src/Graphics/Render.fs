@@ -22,7 +22,7 @@ module Render =
     let mutable internal _height = snd DEFAULT_SCREEN |> float32
 
     let mutable internal _bounds = Rect.ZERO
-    let mutable internal _batch : Batch = Unchecked.defaultof<_> // todo: make private
+    let mutable internal _batch : Batch = Unchecked.defaultof<_>
 
     let width() = _width
     let height() = _height
@@ -295,7 +295,6 @@ module Render =
         assert(alpha_mult = 1.0f)
         GL.Flush()
 
-    // todo: collect all this stuff as a method on the Window + what settings user has for the window
     let debug_info() : string =
 
         let glfw_version =
@@ -320,14 +319,13 @@ module Render =
                 Environment.WorkingSet
 
         sprintf 
-            """-- DEBUG INFO (%s) --
+            """-- RENDERER DEBUG INFO --
 GLFW Version: %s
 GL Version: %s
 GL Renderer: %s
 Texture units: %s
 OS: %s
 Process: %s"""
-            (DateTime.UtcNow.ToLongTimeString())
             glfw_version
             (GL.GetString StringName.Version)
             (GL.GetString StringName.Renderer)

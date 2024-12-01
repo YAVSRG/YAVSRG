@@ -92,6 +92,22 @@ module Devices =
         with err ->
             Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
+    let debug_info() : string =
+        
+        match Bass.GetInfo() with
+        | false, _ -> sprintf "-- AUDIO DEBUG INFO --\nBass Version: %O\nOther details could not be retrieved"  Bass.Version
+        | true, info ->
+            sprintf 
+                """-- AUDIO DEBUG INFO --
+BASS Version: %O
+Estimated latency: %i
+Min buffer length: %i
+DirectSound Version: %i"""
+                Bass.Version
+                info.Latency
+                info.MinBufferLength
+                info.DSVersion
+
     let init (device: int, device_period: int, device_buffer_length: int) =
         get ()
 
@@ -104,9 +120,6 @@ module Devices =
 
         for (i, name) in devices do
             Bass.Init(i, Flags = DeviceInitFlags.Latency) |> display_bass_error
-        match Bass.GetInfo() with
-        | true, info -> Logging.Debug (sprintf "BASS %O | L: %ims | B: %ims | DS: %i" Bass.Version info.Latency info.MinBufferLength info.DSVersion)
-        | false, _ -> Logging.Debug (sprintf "BASS %O | Fetching info failed" Bass.Version)
 
         change device
         Bass.GlobalStreamVolume <- 0

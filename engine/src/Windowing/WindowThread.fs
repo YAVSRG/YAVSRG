@@ -390,3 +390,53 @@ module WindowThread =
         GLFW.Terminate()
 
         if GameThread.has_fatal_error() then Error() else Ok()
+    
+    let debug_info() : string =
+        assert(not (NativePtr.isNullPtr window))
+        assert(is_window_thread())
+
+        let monitor = Monitors.GetMonitorFromWindow(window)
+        let default_monitor = Monitors.GetPrimaryMonitor()
+
+        let monitor_dump (info: MonitorInfo) =
+            let max_hz_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.RefreshRate, vm.Width, vm.Height))
+            let max_res_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.Width, vm.Height, vm.RefreshRate))
+
+            sprintf "%s (%i, %i) %ix%i | S: %imm x %imm | DPI: %.4f x %.4f\n\tVideo mode: %ix%i@%ihz [%i:%i:%i]\n\tMax Refresh Rate: %ix%i@%ihz\n\tMax Resolution: %ix%i@%ihz" 
+                info.Name
+                info.ClientArea.Min.X
+                info.ClientArea.Min.Y
+                info.ClientArea.Size.X
+                info.ClientArea.Size.Y
+                info.PhysicalHeight
+                info.PhysicalWidth
+                info.HorizontalDpi
+                info.VerticalDpi
+                info.CurrentVideoMode.Width
+                info.CurrentVideoMode.Height
+                info.CurrentVideoMode.RefreshRate
+                info.CurrentVideoMode.RedBits
+                info.CurrentVideoMode.GreenBits
+                info.CurrentVideoMode.BlueBits
+                max_hz_vm.Width
+                max_hz_vm.Height
+                max_hz_vm.RefreshRate
+                max_res_vm.Width
+                max_res_vm.Height
+                max_res_vm.RefreshRate
+
+        sprintf 
+            """-- WINDOW DEBUG INFO --
+Display: %i
+Current Monitor: %s
+Primary Monitor: %s
+Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx"""
+            last_applied_config.Display
+            (monitor_dump monitor)
+            (monitor_dump default_monitor)
+            last_applied_config.RenderMode
+            last_applied_config.WindowMode
+            last_applied_config.WindowResolution
+            last_applied_config.SmartCapTearlinePosition
+            last_applied_config.SmartCapAntiJitter
+            last_applied_config.SmartCapFramerateMultiplier

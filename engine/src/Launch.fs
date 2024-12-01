@@ -19,21 +19,6 @@ module Launch =
             try
                 WindowThread.init(config, name, ui_root, icon)
                 true
-
-                //match icon with
-                //| Some image ->
-                //    let mutable data = System.Span<_>.Empty
-                //    let _ = image.TryGetSinglePixelSpan(&data)
-
-                //    w.Icon <-
-                //        new WindowIcon(
-                //            new OpenTK.Windowing.Common.Input.Image(
-                //                image.Width,
-                //                image.Height,
-                //                MemoryMarshal.AsBytes(data).ToArray()
-                //            )
-                //        )
-                //| None -> ()
             with err ->
                 match err with
                 | :? DllNotFoundException ->

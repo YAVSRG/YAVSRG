@@ -3,6 +3,7 @@
 open System.Drawing
 open System.Diagnostics
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
@@ -10,6 +11,7 @@ open Percyqaz.Flux.Windowing
 type PerformanceMonitor() =
     inherit StaticWidget(NodeType.None)
 
+    let dump_debug = Bind.Key(Keys.F1, (true, true, true))
     let dump_profiling = Bind.Key(Keys.F2, (true, true, true))
     let fps_bind = Bind.Key(Keys.F3, (false, false, false))
     let graph_bind = Bind.Key(Keys.F4, (false, false, false))
@@ -25,6 +27,11 @@ type PerformanceMonitor() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
+        
+        if dump_debug.Tapped() then
+            Logging.Debug(Devices.debug_info())
+            Logging.Debug(Render.debug_info())
+            WindowThread.defer (fun () -> Logging.Debug(WindowThread.debug_info()))
 
         if dump_profiling.Tapped() then
             dump_profiling_info ()
