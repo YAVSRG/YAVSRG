@@ -23,7 +23,7 @@ type private Strategy =
 module GameThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
-    let mutable private ui_root: UIEntryPoint = Unchecked.defaultof<_>
+    let mutable private ui_initialiser: unit -> UIEntryPoint = fun () -> Unchecked.defaultof<_>
 
     let private LOCK_OBJ = obj()
     
@@ -132,7 +132,7 @@ module GameThread =
                     GLFW.SwapInterval(0)
                     Unlimited
 
-    let private dispatch_frame() =
+    let private dispatch_frame (ui_root: UIEntryPoint) =
 
         visual_latency_lo <- frame_is_ready - real_next_frame
         visual_latency_hi <- start_of_frame - real_next_frame
@@ -202,6 +202,18 @@ module GameThread =
         if width = 0 || height = 0 then Render.DEFAULT_SCREEN else (width, height)
         |> Render.init
 
+        // todo: place some loading image on the screen and swap buffers once
+
+        match
+            try Ok(ui_initialiser())
+            with fatal_err -> Error fatal_err
+        with
+        | Error fatal_err ->
+            fatal_error <- true
+            Logging.Critical("Fatal crash in UI initialisation", fatal_err)
+            GLFW.SetWindowShouldClose(window, true)
+        | Ok ui_root ->
+
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
 
         ui_root.Init()
@@ -211,7 +223,7 @@ module GameThread =
         try
             Console.hide()
             while not (GLFW.WindowShouldClose window) do
-                dispatch_frame()
+                dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
             Logging.Critical("Fatal crash in UI thread", fatal_err)
@@ -226,10 +238,10 @@ module GameThread =
         Initialisation
     *)
 
-    let internal init(_window: nativeptr<Window>, _ui_root: UIEntryPoint) =
+    let internal init(_window: nativeptr<Window>, init_thunk: unit -> UIEntryPoint) =
         GAME_THREAD_ID <- thread.ManagedThreadId
         window <- _window
-        ui_root <- _ui_root
+        ui_initialiser <- init_thunk
 
     let internal start() =
         thread.Start()

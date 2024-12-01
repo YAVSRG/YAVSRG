@@ -328,7 +328,7 @@ module Options =
                 MenusMuffleSong = Setting.simple true
             }
 
-    let mutable internal config: Percyqaz.Flux.Windowing.WindowSettings = Unchecked.defaultof<_>
+    let mutable internal config: WindowSettings = Unchecked.defaultof<_>
 
     let mutable options: GameOptions = Unchecked.defaultof<_>
 
@@ -494,10 +494,9 @@ module Options =
             | Some preference -> load preference |> ignore
             | None -> ()
 
-    let init_startup (instance: int) =
+    let load_window_config (instance: int) =
         // Register decoding rules for Percyqaz.Flux config
         JSON
-            .WithAutoCodec<Percyqaz.Flux.Windowing.WindowSettings>(false)
             .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
             .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
         |> ignore
@@ -513,6 +512,9 @@ module Options =
             Directory.SetCurrentDirectory new_path
             Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
 
+        config.ToOptions
+
+    let init_startup() =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         Localisation.load_language options.Language.Value
 

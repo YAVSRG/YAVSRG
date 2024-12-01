@@ -7,7 +7,7 @@ open Percyqaz.Flux.Windowing
 
 module Launch =
 
-    let entry_point (config: WindowOptions, name: string, ui_root: UIEntryPoint, icon: Bitmap option) =
+    let entry_point (config: WindowOptions, name: string, init_thunk: unit -> UIEntryPoint, icon: Bitmap option) =
         
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 
@@ -15,7 +15,7 @@ module Launch =
 
         let init_success =
             try
-                WindowThread.init(config, name, ui_root, icon)
+                WindowThread.init(config, name, init_thunk, icon)
                 true
             with err ->
                 match err with

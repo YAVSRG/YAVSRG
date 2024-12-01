@@ -39,7 +39,8 @@
     <Compile Include="Content\Tables.fs" />
     <Compile Include="Content\Data.fs" />
     <Compile Include="Content\Init.fs" />
-    <Compile Include="Options.fs" />
+    <Compile Include="Options\Window.fs" />
+    <Compile Include="Options\Options.fs" />
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Animations.fs" />
     <Compile Include="UI\Callouts.fs" />

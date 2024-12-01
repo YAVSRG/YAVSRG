@@ -20,7 +20,7 @@ open Interlude.Features.Score
 module Startup =
 
     let init_startup (instance) =
-        Options.init_startup instance
+        Options.init_startup ()
         Options.Hotkeys.init_startup Options.options.Hotkeys
         Content.init_startup ()
         Stats.init_startup Content.Library Content.UserData

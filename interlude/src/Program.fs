@@ -26,32 +26,21 @@ let launch (instance: int) =
     let crash_splash =
         Utils.splash_message_picker "CrashSplashes.txt" >> (fun s -> Logging.Critical s)
 
-    let successful_startup =
-        try
-            Startup.init_startup instance
-            true
-        with err ->
-            Logging.Critical(
-                "Something went wrong when loading some of the game config/data, preventing the game from opening",
-                err
-            )
+    let init () =
+        Startup.init_startup instance
+        let ui_root = Startup.init_window instance
+        AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
+        ui_root :> UIEntryPoint
 
-            crash_splash ()
-            Console.ReadLine() |> ignore
-            false
+    WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])
 
-    if successful_startup then
-
-        GameThread.after_init.Add(fun () ->
-            AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
-        )
-        WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])
-
+    let icon = 
         use icon_stream = Utils.get_resource_stream ("icon.png")
-        let icon = Bitmap.from_stream true icon_stream
-        let result = Launch.entry_point (Options.config.ToOptions, "Interlude", Startup.init_window instance, icon)
+        Bitmap.from_stream true icon_stream
 
-        Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) crash_splash
+    let result = Launch.entry_point (Options.load_window_config instance, "Interlude", init, icon)
+
+    Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) crash_splash
 
 [<EntryPoint>]
 let main argv =
