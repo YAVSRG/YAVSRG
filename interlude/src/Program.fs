@@ -11,6 +11,11 @@ open Interlude
 open Interlude.UI
 open Interlude.Features
 
+let crash_text_file(message: string) =
+    let path = Path.GetTempFileName()
+    File.WriteAllText(path, message)
+    open_directory(path)
+
 let launch (instance: int) =
     Logging.Verbosity <-
         if DEV_MODE then
@@ -54,8 +59,7 @@ let main argv =
     if
         executable_location.Replace("\\", "/").ToLower().Contains "appdata/local/temp"
     then
-        printfn "Hello ZIP FILE USER,\n\nplease EXTRACT all contents of the Interlude zip file before running the exe\notherwise it won't work or save any of your data.\n\nThanks,\nPercyqaz"
-        Console.ReadLine() |> ignore
+        crash_text_file "Hello ZIP FILE USER,\n\nplease EXTRACT all contents of the Interlude zip file before running the exe\notherwise it won't work or save any of your data.\n\nThanks,\nPercyqaz"
         -1
     elif
         (
@@ -70,9 +74,7 @@ let main argv =
             && not (File.Exists "libbass_fx.dylib")
         )
     then
-        printfn
-            "Interlude is missing the appropriate audio library dll/so/dylib files for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
-        Console.ReadLine() |> ignore
+        crash_text_file "Interlude is missing the appropriate audio library dll/so/dylib files for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
         -1
     else
 

@@ -232,13 +232,11 @@ module GameThread =
         Input.finish_frame_events ()
 
         try
-            Console.hide()
             while not (GLFW.WindowShouldClose window) do
                 dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
             Logging.Critical("Fatal crash in game thread", fatal_err)
-            Console.restore()
             GLFW.SetWindowShouldClose(window, true)
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()

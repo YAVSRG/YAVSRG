@@ -285,10 +285,10 @@ module Common =
                 Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
 
                 if prompt then
-                    Logging.Critical "If you would like to launch anyway (WILL WIPE THIS DATA!!), press ENTER."
-                    Logging.Critical "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
-                    Console.ReadLine() |> ignore
-                    Logging.Critical "User has chosen to load with default data."
+                    Logging.Critical "This is likely a typo from manually editing the JSON yourself."
+                    Logging.Critical "Please correct the typo, or if you can't, delete the file and a fresh new one will be created."
+                    
+                    failwithf "Unable to parse JSON in %s" path
 
                 JSON.Default<'T>()
         else

@@ -11,8 +11,6 @@ module Launch =
         
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 
-        Console.detect()
-
         let init_success =
             try
                 WindowThread.init(config, name, init_thunk, icon)
@@ -28,19 +26,12 @@ module Launch =
                         err
                     )
                 | _ -> Logging.Critical(name + " failed to launch", err)
-                Console.ReadLine() |> ignore
                 false
 
         if init_success then
-            let mutable crashed = false
-            GameThread.after_init.Add (fun () -> Console.hide())
-
             try
-                crashed <- WindowThread.run() <> Ok()
+                WindowThread.run()
             with err ->
                 Logging.Critical("Fatal error in window/input thread", err)
-                crashed <- true
-
-            if crashed then Error() else Ok()
-
+                Error()
         else Error()

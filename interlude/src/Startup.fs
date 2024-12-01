@@ -19,6 +19,9 @@ open Interlude.Features.Score
 
 module Startup =
 
+    let mutable private deinit_required = false
+    let mutable private deinit_once = false
+
     let init_startup (instance) =
         Options.init_startup ()
         Options.Hotkeys.init_startup Options.options.Hotkeys
@@ -70,12 +73,9 @@ module Startup =
         Network.init_window ()
         Mounts.init_window ()
 
-        { new Screen.ScreenRoot(Toolbar()) with
-            override this.Init() =
-                base.Init()
-        }
+        deinit_required <- true
 
-    let mutable private has_shutdown = false
+        Screen.ScreenRoot(Toolbar())
 
     type ShutdownType =
         | Normal
@@ -83,22 +83,25 @@ module Startup =
         | ExternalCrash
 
     let deinit shutdown_type crash_splash =
-        if has_shutdown then
+        if deinit_once then
             ()
         else
-            has_shutdown <- true
-            Stats.save_current_session (Timestamp.now()) Content.UserData
-            Content.deinit ()
-            Options.deinit ()
-            Network.deinit ()
-            Printerlude.deinit ()
-            DiscordRPC.deinit ()
+            deinit_once <- true
+
+            if deinit_required then
+                Stats.save_current_session (Timestamp.now()) Content.UserData
+                Content.deinit ()
+                Options.deinit ()
+                Network.deinit ()
+                Printerlude.deinit ()
+                DiscordRPC.deinit ()
 
             match shutdown_type with
             | Normal -> Logging.Info("Thank you for playing")
             | InternalCrash -> 
                 crash_splash ()
-                System.Console.ReadLine() |> ignore
+                Logging.Shutdown()
+                Option.iter open_directory Logging.LogFile
             | ExternalCrash ->
                 crash_splash ()
                 Logging.Critical("The game was abnormally force-quit, but was able to shut down correctly")
