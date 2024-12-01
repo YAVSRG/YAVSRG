@@ -74,7 +74,6 @@ type private MenuButton(on_click, label: string, pos: Position) =
         this.SnapPosition()
         this.Position <- pos
 
-// Menu screen
 // todo: cool redesign with news feed and stuff
 
 type MainMenuScreen() as this =

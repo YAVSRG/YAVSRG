@@ -7,18 +7,19 @@ open Interlude
 open Interlude.UI
 open Interlude.Features.Online
 
-// Loading screen
-
 type LoadingScreen() =
     inherit Screen()
 
     let mutable closing = false
     let audio_fade = Animation.Fade 0.0f
     let animation = Animation.Sequence()
+    let background_fade = Animation.Delay(2200.0)
 
     override this.OnEnter(prev: Screen.Type) =
         Logo.move_center ()
         Toolbar.hide ()
+
+        background_fade.Reset()
 
         match prev with
         | Screen.Type.SplashScreen ->
@@ -47,6 +48,7 @@ type LoadingScreen() =
         base.Update(elapsed_ms, moved)
         audio_fade.Update elapsed_ms
         animation.Update elapsed_ms
+        background_fade.Update elapsed_ms
 
         Devices.change_volume (
             Options.options.AudioVolume.Value,
@@ -54,6 +56,13 @@ type LoadingScreen() =
         )
 
     override this.Draw() =
+        if closing then
+            let alpha = 255.0 * (1.0 - background_fade.Time / background_fade.Interval) |> int
+            Draw.rect this.Bounds (Colors.black.O4a alpha)
+        else
+            let alpha = 255.0 * (background_fade.Time / background_fade.Interval) |> int
+            Draw.rect this.Bounds (Colors.black.O4a alpha)
+
         let (x, y) = this.Bounds.Center
 
         Text.draw_aligned_b (
