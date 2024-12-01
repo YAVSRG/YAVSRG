@@ -41,15 +41,25 @@ module Render =
     let private in_use = Array.zeroCreate<bool> FBO_POOL_SIZE
 
     let mutable private fbo_stack: int list = []
-
+    
+    /// <summary>
+    /// Represents a GL 'Frame Buffer Object' from the pool.<br/>
+    /// While an FBO is bound, all draw calls render to a virtual image buffer instead of the screen.<br/>
+    /// The FBO can then later be used as a sprite to be drawn to the screen.<br/><br/>
+    /// FBOs must be disposed of when done with, to return them to the pool.
+    /// </summary>
+    /// <remarks>The current pool size is 6. Exceeding this will crash the game.</remarks>
     type FBO =
         internal {
             sprite: Sprite
             fbo_id: int
             fbo_index: int
         }
+        /// The sprite representation of this FBO, to be used in drawing
         member this.Sprite = this.sprite
 
+        /// Binds this FBO, so drawing goes to its buffer instead of the screen.
+        /// Must not be called if already bound.
         member this.Bind(clear) =
             _batch.Draw ()
 
@@ -62,7 +72,9 @@ module Render =
                 GL.Clear(ClearBufferMask.ColorBufferBit)
 
             fbo_stack <- this.fbo_id :: fbo_stack
-
+            
+        /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
+        /// Must not be called if not already bound.
         member this.Unbind() =
             _batch.Draw ()
             fbo_stack <- List.tail fbo_stack

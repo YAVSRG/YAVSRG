@@ -232,6 +232,7 @@ module Fonts =
 
 open Fonts
 
+// todo: combine this text api with the Render api
 module Text =
 
     let measure (font: SpriteFont, text: string) : float32 =
