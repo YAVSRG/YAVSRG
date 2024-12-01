@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Play.HUD
 
 open System
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
@@ -45,21 +46,21 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                 | Hit e ->
                     if not e.Missed then
                         moving_average.Target <- 
-                            Percyqaz.Flux.Utils.lerp 
+                            lerp 
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Hold e ->
                     if not e.Missed then
                         moving_average.Target <- 
-                            Percyqaz.Flux.Utils.lerp 
+                            lerp 
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Release e ->
                     if not e.Missed then
                         moving_average.Target <- 
-                            Percyqaz.Flux.Utils.lerp 
+                            lerp 
                                 config.TimingDisplayMovingAverageSensitivity
                                 moving_average.Target 
                                 (e.Delta / MAX_WINDOW * w * ln_mult)

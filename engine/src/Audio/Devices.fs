@@ -32,7 +32,7 @@ module Devices =
                     b0 <- b0 + 1
 
                 let y = Math.Clamp(Math.Sqrt(float peak) * 3.0 * 255.0 - 4.0, 0.0, 255.0) |> float32
-                waveform.[i] <- Percyqaz.Flux.Utils.lerp lerp_amount y waveform.[i]
+                waveform.[i] <- lerp lerp_amount y waveform.[i]
         else
             for i in 0..255 do
                 waveform.[i] <- waveform.[i] * lerp_amount

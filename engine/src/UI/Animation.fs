@@ -3,7 +3,7 @@
 open System
 open System.Drawing
 open System.Collections.Generic
-open Percyqaz.Flux.Utils
+open Percyqaz.Common
 
 [<AbstractClass>]
 type Animation() =
