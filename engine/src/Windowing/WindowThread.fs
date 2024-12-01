@@ -373,6 +373,7 @@ module WindowThread =
         let monitor_area = Monitors.GetMonitorFromWindow(window).ClientArea
         GLFW.SetWindowPos(window, (monitor_area.Min.X + monitor_area.Max.X - width) / 2, (monitor_area.Min.Y + monitor_area.Max.Y - height) / 2)
         GLFW.ShowWindow(window)
+        GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
         GLFW.FocusWindow(window)
 
     let internal run() =
