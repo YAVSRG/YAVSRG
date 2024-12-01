@@ -268,6 +268,7 @@ module WindowThread =
 
     let focus_window() =
         assert(is_window_thread())
+        GLFW.RestoreWindow(window)
         GLFW.FocusWindow(window)
 
     let private focus_callback (_: nativeptr<Window>) (focused: bool) =
