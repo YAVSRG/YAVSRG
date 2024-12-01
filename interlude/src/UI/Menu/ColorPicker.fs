@@ -74,7 +74,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
 
         Draw.rect preview s.Value
 
-        Draw.untextured_quad
+        Draw.quad
             (saturation_value_picker.AsQuad)
             { TopLeft = Color.White; TopRight = Color.FromHsv(H, 1.0f, 1.0f); BottomRight = Color.Black; BottomLeft = Color.Black }
 
@@ -88,7 +88,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             let a = Color.FromHsv(float32 i / 6.0f, 1.0f, 1.0f)
             let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
 
-            Draw.untextured_quad
+            Draw.quad
                 (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h))
                     .AsQuad
                 (Quad.gradient_top_to_bottom a b)
@@ -98,7 +98,7 @@ type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
             Color.White
 
         if allow_alpha then
-            Draw.untextured_quad
+            Draw.quad
                 alpha_picker.AsQuad
                 (Quad.gradient_top_to_bottom (s.Value.O4a 0) s.Value)
 

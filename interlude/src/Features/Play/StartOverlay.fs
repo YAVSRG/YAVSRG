@@ -32,7 +32,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
             let scale = max (bg_panel.Height / float32 bg.Height) (bg_panel.Width / float32 bg.Width)
             let x_adjust = (float32 bg.Width * scale - bg_panel.Width) * 0.5f
             let y_adjust = (float32 bg.Height * scale - bg_panel.Height) * 0.5f
-            Draw.quad bg_panel.AsQuad (Colors.white.O4a(alpha).AsQuad) (Sprite.tiling (scale, bg_panel.Left - x_adjust, bg_panel.Top - y_adjust) bg bg_panel.AsQuad)
+            Draw.tex_quad bg_panel.AsQuad (Colors.white.O4a(alpha).AsQuad) (Sprite.tiling (scale, bg_panel.Left - x_adjust, bg_panel.Top - y_adjust) bg bg_panel.AsQuad)
             Draw.rect bg_panel (Colors.shadow_2.O1a alpha)
         | None -> ()
 

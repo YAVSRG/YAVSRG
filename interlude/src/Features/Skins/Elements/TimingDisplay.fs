@@ -181,7 +181,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
             Draw.rect r config.TimingDisplayMovingAverageColor
         | TimingDisplayMovingAverageType.Arrow ->
             let arrow_height = this.Bounds.Height * 0.5f
-            Draw.untextured_quad 
+            Draw.quad 
                 (
                     Quad.createv 
                         (centre + moving_average.Value, this.Bounds.Top - 10.0f)

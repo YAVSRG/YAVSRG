@@ -106,7 +106,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         Draw.rect bounds color
 
         let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
-        Draw.untextured_quad
+        Draw.quad
             (Quad.create
                 <| new Vector2(left, top)
                 <| new Vector2(left + stripe_length, top)

@@ -281,12 +281,12 @@ module Text =
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then
-                    Draw.quad
+                    Draw.tex_quad
                         ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
                         bg.AsQuad
                         { Texture = s.Texture; Layer = s.Z; UV = s.PrecomputedQuad.Value }
 
-                Draw.quad r.AsQuad fg.AsQuad { Texture = s.Texture; Layer = s.Z; UV = s.PrecomputedQuad.Value }
+                Draw.tex_quad r.AsQuad fg.AsQuad { Texture = s.Texture; Layer = s.Z; UV = s.PrecomputedQuad.Value }
                 x <- x + w + font.CharSpacing * scale
 
     let draw (font, text, scale, x, y, color) =

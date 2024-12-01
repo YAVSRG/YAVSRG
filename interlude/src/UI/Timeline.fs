@@ -50,11 +50,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
                 Colors.white.O2.AsQuad
 
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
                 Colors.cyan_accent.O1.AsQuad
 
@@ -62,11 +62,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             note_prev <- note_next
             chord_prev <- chord_next
 
-        Draw.untextured_quad
+        Draw.quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
             Colors.white.O2.AsQuad
 
-        Draw.untextured_quad
+        Draw.quad
             (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
             Colors.cyan_accent.O1.AsQuad
 

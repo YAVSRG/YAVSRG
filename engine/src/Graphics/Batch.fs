@@ -29,6 +29,7 @@ type internal Batch =
         vertices: Vertex array
         mutable active: bool
         mutable vcount: int
+        mutable last_texture_handle: int
     }
     member this.Capacity = this.capacity
 
@@ -56,6 +57,16 @@ type internal Batch =
             }
 
         this.vcount <- this.vcount + 1
+
+    member inline this.Texture(t: Texture) =
+        if this.last_texture_handle <> t.Handle then
+            this.Draw()
+
+            if t.TextureUnit = 0 then
+                GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
+
+            Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
+            this.last_texture_handle <- t.Handle
     
     member this.Start () =
         this.active <- true
@@ -106,4 +117,5 @@ type internal Batch =
             vertices = vertices
             active = false
             vcount = 0
+            last_texture_handle = -1
         }

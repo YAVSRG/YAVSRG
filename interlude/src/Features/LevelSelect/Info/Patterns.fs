@@ -86,7 +86,7 @@ type Patterns(display: Setting<Display>) =
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
-                Draw.untextured_quad
+                Draw.quad
                     (Rect
                         .Create(
                             BAR_L + lo_pc * BAR_WIDTH * bar_scale,

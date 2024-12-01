@@ -65,7 +65,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
                 let y2, c2 = point previous
-                Draw.untextured_quad 
+                Draw.quad 
                     (Rect.Create(
                         this.Bounds.Left + column_width * float32 k,
                         y1,

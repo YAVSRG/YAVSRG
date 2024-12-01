@@ -180,7 +180,7 @@ type LevelSelectScreen() =
             } =
             this.Bounds
 
-        Draw.untextured_quad
+        Draw.quad
             (Quad.create
              <| Vector2(left, top)
              <| Vector2(left + w + 85.0f, top)
@@ -188,7 +188,7 @@ type LevelSelectScreen() =
              <| Vector2(left, top + 170.0f))
             (!*Palette.DARK_100).AsQuad
 
-        Draw.untextured_quad
+        Draw.quad
             (Quad.create
              <| Vector2(left + w + 85.0f, top)
              <| Vector2(right, top)

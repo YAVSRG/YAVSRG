@@ -41,7 +41,7 @@ type EarlyLateMeter(config: HudConfig, state: PlayState) =
             if time_ago < duration then
 
                 if config.EarlyLateMeterUseTexture then
-                    Draw.quad 
+                    Draw.tex_quad 
                         ((Sprite.fill this.Bounds texture).AsQuad)
                         Color.White.AsQuad
                         (Sprite.pick_texture (time_ago / config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int, if early then 0 else 1) texture)

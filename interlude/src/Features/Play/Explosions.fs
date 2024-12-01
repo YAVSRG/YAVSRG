@@ -196,7 +196,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
                              .Translate(0.0f, -column_width * ns.HoldExplosionSettings.Offset))
                         .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
 
-                Draw.quad
+                Draw.tex_quad
                     (bounds.AsQuad |> rotation k)
                     Color.White.AsQuad
                     (Sprite.pick_texture (frame, hold_colors.[k]) hold_explosion)
@@ -255,7 +255,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
                             .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
                             .Expand(ns.HoldExplosionSettings.ExpandAmount * expand * column_width)
 
-                    Draw.quad
+                    Draw.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)
                         (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) release_explosion)
@@ -310,7 +310,7 @@ type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
                             .Expand((ns.NoteExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
                             .Expand(ns.NoteExplosionSettings.ExpandAmount * expand * column_width)
 
-                    Draw.quad
+                    Draw.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)
                         (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (frame, ex.Color) note_explosion)

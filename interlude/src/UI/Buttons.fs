@@ -25,7 +25,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
     override this.Draw() =
         let h = this.Bounds.Height
 
-        Draw.untextured_quad
+        Draw.quad
             (Quad.createv
                 (this.Bounds.Left, this.Bounds.Top)
                 (this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)

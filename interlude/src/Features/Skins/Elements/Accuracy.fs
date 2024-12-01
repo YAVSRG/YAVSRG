@@ -28,13 +28,13 @@ module Accuracy =
         for c in accuracy_text do
             if c = '.' then
                 char_bounds <- char_bounds.Translate(scale * dot_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 10) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + dot_spacing + spacing) * char_width, 0.0f)
             elif c = '%' then
                 char_bounds <- char_bounds.Translate(scale * percent_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
             else
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
 type Accuracy(config: HudConfig, state: PlayState) =

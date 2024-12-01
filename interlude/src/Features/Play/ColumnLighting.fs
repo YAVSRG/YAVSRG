@@ -53,7 +53,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
 
                 let a = 255.0f * percent_remaining |> int
 
-                Draw.quad
+                Draw.tex_quad
                     (let x = column_width * 0.5f + column_positions.[k]
 
                      if options.Upscroll.Value then

@@ -68,7 +68,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
         | JudgementDisplayType.Name ->
             Text.fill(Style.font, ruleset.JudgementName i, this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f), ruleset.JudgementColor i, Alignment.CENTER)
         | JudgementDisplayType.Texture j ->
-            Draw.quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
+            Draw.tex_quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse

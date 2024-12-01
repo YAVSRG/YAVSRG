@@ -175,7 +175,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     |> scroll_direction_transform bottom
                     |> _.AsQuad
                     |> judgement_line_transform
-                Draw.quad
+                Draw.tex_quad
                     area
                     Color.White.AsQuad
                     (Sprite.pick_texture (animation.Loops, 0) judgement_line)
@@ -183,7 +183,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let inline draw_receptors() =
             if noteskin_config.UseReceptors then
                 for k in 0 .. (keys - 1) do
-                    Draw.quad
+                    Draw.tex_quad
                         (Rect.Box(
                             left + column_positions.[k],
                             hitposition + note_height - note_height / receptor_aspect_ratio,
@@ -204,7 +204,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             receptor)
         
         let inline draw_note (k, pos, color) =
-            Draw.quad
+            Draw.tex_quad
                 ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
                     .AsQuad
@@ -213,7 +213,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (Sprite.pick_texture (animation.Loops, color) note)
 
         let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
-            Draw.quad
+            Draw.tex_quad
                 ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
                     .AsQuad
@@ -222,7 +222,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
-            Draw.quad
+            Draw.tex_quad
                 ((Rect.Create(
                     left + column_positions.[k],
                     pos_a + note_height * 0.5f,
@@ -244,7 +244,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     Quad.create (q.TopLeft + correction) (q.TopRight + correction) q.BottomRight q.BottomLeft
                 else q
 
-            Draw.quad
+            Draw.tex_quad
                 (
                     (
                         Rect.Create(

@@ -63,7 +63,7 @@ type ReceptorColorPicker(color: Setting<int>) =
         elif this.Focused then
             Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
 
-        Draw.quad (this.Bounds.SliceY(this.Bounds.Width).SlicePercentT(1.0f / sprite.AspectRatio).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, 1 + color.Value * 2) sprite)
+        Draw.tex_quad (this.Bounds.SliceY(this.Bounds.Width).SlicePercentT(1.0f / sprite.AspectRatio).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, 1 + color.Value * 2) sprite)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -130,7 +130,7 @@ type ColumnLightColorPicker(color: Setting<int>) =
         elif this.Focused then
             Draw.rect (this.Bounds.Expand(Style.PADDING)) Colors.yellow_accent.O2
 
-        Draw.quad (this.Bounds.SliceY(this.Bounds.Width).ExpandPercentY((1.0f / sprite.AspectRatio |> min 2.0f) - 1.0f).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, color.Value) sprite)
+        Draw.tex_quad (this.Bounds.SliceY(this.Bounds.Width).ExpandPercentY((1.0f / sprite.AspectRatio |> min 2.0f) - 1.0f).AsQuad) Color.White.AsQuad (Sprite.pick_texture (0, color.Value) sprite)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -566,7 +566,7 @@ type AnimationSettingsPage() =
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f
 
         if enable_judgement_line.Value then
-            Draw.quad
+            Draw.tex_quad
                 (Rect
                     .Box(left, position - COLUMN_WIDTH, preview_width * COLUMN_WIDTH, COLUMN_WIDTH)
                     .ExpandPercentY(judgement_line_scale.Value * 0.5f - 0.5f)
@@ -577,7 +577,7 @@ type AnimationSettingsPage() =
 
         let receptor() =
             if enable_receptors.Value then
-                Draw.quad
+                Draw.tex_quad
                     (Rect
                         .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
                         .TranslateY(-COLUMN_WIDTH * receptor_offset.Value)
@@ -588,7 +588,7 @@ type AnimationSettingsPage() =
         if not notes_under_receptors.Value then
             receptor()
 
-        Draw.quad
+        Draw.tex_quad
             (Rect
                 .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                 .AsQuad)
@@ -642,7 +642,7 @@ type AnimationSettingsPage() =
 
             let a = 255.0f * percent_remaining |> int
 
-            Draw.quad
+            Draw.tex_quad
                 (Rect
                     .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale_note.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
@@ -668,7 +668,7 @@ type AnimationSettingsPage() =
 
                 let a = 255.0f * percent_remaining |> int
 
-                Draw.quad
+                Draw.tex_quad
                     (Rect
                         .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
@@ -693,7 +693,7 @@ type AnimationSettingsPage() =
 
                 let a = 255.0f * percent_remaining |> int
 
-                Draw.quad
+                Draw.tex_quad
                     (Rect
                         .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)

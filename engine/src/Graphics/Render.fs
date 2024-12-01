@@ -372,9 +372,7 @@ Process: %s"""
 
 module Draw =
 
-    let mutable private last_texture_handle = -1
-
-    let untextured_quad (q: Quad) (c: QuadColors) =
+    let quad (q: Quad) (c: QuadColors) =
         Render._batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
         Render._batch.Vertex(q.TopRight, Vector2.Zero, c.TopRight, 0)
         Render._batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
@@ -382,21 +380,8 @@ module Draw =
         Render._batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
         Render._batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
 
-    let quad
-        (q: Quad)
-        (c: QuadColors)
-        ({ Texture = t; Layer = layer; UV = uv } : QuadTexture)
-        =
-
-        if last_texture_handle <> t.Handle then
-            Render._batch.Draw ()
-
-            if t.TextureUnit = 0 then
-                GL.BindTexture(TextureTarget.Texture2DArray, t.Handle)
-
-            Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
-            last_texture_handle <- t.Handle
-            
+    let tex_quad (q: Quad) (c: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) =
+        Render._batch.Texture t
         Render._batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
         Render._batch.Vertex(q.TopRight, uv.TopRight, c.TopRight, layer)
         Render._batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
@@ -405,7 +390,7 @@ module Draw =
         Render._batch.Vertex(q.BottomLeft, uv.BottomLeft, c.BottomLeft, layer)
 
     let sprite (r: Rect) (c: Color) (s: Sprite) =
-        quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
+        tex_quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
 
     let rect (r: Rect) (c: Color) =
-        untextured_quad r.AsQuad c.AsQuad
+        quad r.AsQuad c.AsQuad

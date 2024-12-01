@@ -52,9 +52,9 @@ type private MenuButton(on_click, label: string, pos: Position) =
         Style.hover.Play()
 
     override this.Draw() =
-        Draw.untextured_quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100).AsQuad
+        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100).AsQuad
 
-        Draw.untextured_quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100).AsQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100).AsQuad
         base.Draw()
 
     member this.Hide() =

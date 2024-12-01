@@ -32,21 +32,21 @@ module ProgressMeter =
         let inner (i: int32) = inner_exact (float32 i)
 
         for i = 1 to PIE_SEGMENTS do
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
                 color_bg.AsQuad
 
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (inner (i - 1)) (outer (i - 1)) (outer i) (inner i))
                 Colors.white.O2.AsQuad
 
         let progress_rounded_down = progress * (PIE_SEGMENTS_F - 0.1f) |> floor |> int
         for i = 1 to progress_rounded_down do
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
                 color_fg.AsQuad
         
-        Draw.untextured_quad
+        Draw.quad
             (Quad.createv (x, y) (x, y) (inner progress_rounded_down) (inner_exact (progress * PIE_SEGMENTS_F)))
             color_fg.AsQuad
 
@@ -68,9 +68,9 @@ module ProgressMeter =
         for c in progress_text do
             if c = '%' then
                 char_bounds <- char_bounds.Translate(scale * percent_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 12) texture)
             else
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
     let fmt_time_left (time_left: float32<ms / rate>) =
@@ -98,10 +98,10 @@ module ProgressMeter =
         for c in time_left_text do
             if c = ':' then
                 char_bounds <- char_bounds.Translate(scale * colon_spacing * char_width, 0.0f)
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, 11) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing + colon_spacing) * char_width, 0.0f)
             else
-                Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+                Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
 type ProgressMeter(config: HudConfig, state: PlayState) =

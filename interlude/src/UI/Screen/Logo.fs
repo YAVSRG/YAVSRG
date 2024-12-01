@@ -74,7 +74,7 @@ module Logo =
                     let UPPER_TRIANGLE_2 = Vector2(r - 0.1f * w, t + 0.1f * w)
                     let UPPER_TRIANGLE_3 = Vector2(l + 0.5f * w, t + (0.1f + TRIANGLE_HEIGHT) * w)
 
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create
                             (UPPER_TRIANGLE_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
                             (UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
@@ -90,7 +90,7 @@ module Logo =
                     let LOWER_LEFT_3 = Vector2(l + 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_LEFT_4 = Vector2(l + 0.5f * w, t + 0.95f * w)
 
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create
                             (LOWER_LEFT_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
                             (LOWER_LEFT_2 + Vector2(X_PADDING_FOR_GRADIENT_INNER, -PADDING))
@@ -107,7 +107,7 @@ module Logo =
                     let LOWER_RIGHT_3 = Vector2(r - 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_RIGHT_4 = Vector2(r - 0.5f * w, t + 0.95f * w)
 
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create
                             (LOWER_RIGHT_1 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
                             (LOWER_RIGHT_2 + Vector2(-X_PADDING_FOR_GRADIENT_INNER, -PADDING))
@@ -121,16 +121,16 @@ module Logo =
                     Render.stencil_create (true)
 
                     // center triangle
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create UPPER_TRIANGLE_1 UPPER_TRIANGLE_2 UPPER_TRIANGLE_3 UPPER_TRIANGLE_3)
                         Colors.cyan_accent.AsQuad
 
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create LOWER_LEFT_1 LOWER_LEFT_2 LOWER_LEFT_3 LOWER_LEFT_4
                          |> Quad.translate (0.0f, breathe_2))
                         Colors.cyan_accent.AsQuad
 
-                    Draw.untextured_quad
+                    Draw.quad
                         (Quad.create LOWER_RIGHT_1 LOWER_RIGHT_2 LOWER_RIGHT_3 LOWER_RIGHT_4
                          |> Quad.translate (0.0f, breathe_2))
                         Colors.cyan_accent.AsQuad
@@ -175,7 +175,7 @@ module Logo =
 
                         let i = float32 i
 
-                        Draw.untextured_quad
+                        Draw.quad
                             (Quad.create
                                 (new Vector2(l + i * w / 32.0f, m - prev))
                                 (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))

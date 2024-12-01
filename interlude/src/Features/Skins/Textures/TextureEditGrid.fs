@@ -55,7 +55,7 @@ type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool 
 
     override this.Draw() =
         base.Draw()
-        Draw.quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (x, y) sprite)
+        Draw.tex_quad this.Bounds.AsQuad Color.White.AsQuad (Sprite.pick_texture (x, y) sprite)
 
 type private DeleteButton(on_click) =
     inherit Button(K Icons.TRASH, on_click, Floating = true)

@@ -68,7 +68,7 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
         | None ->
             Text.fill_b(Style.font, ruleset.JudgementName i, this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.CENTER)
         | Some j ->
-            Draw.quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
+            Draw.tex_quad (Sprite.fill (this.Bounds.SlicePercentR(0.5f).Shrink(10.0f, 5.0f)) texture).AsQuad Color.White.AsQuad (Sprite.pick_texture (0, j) texture)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -160,7 +160,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
                     match display.[i] with
                     | Some texture_index ->
-                        Draw.quad 
+                        Draw.tex_quad 
                                 ((Sprite.fill_left (r.Shrink(5.0f)) texture).AsQuad)
                                 Color.White.AsQuad
                                 (Sprite.pick_texture (0, texture_index) texture)

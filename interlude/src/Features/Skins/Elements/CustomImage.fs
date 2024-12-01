@@ -15,7 +15,7 @@ type CustomImage(config: HudConfig, state: PlayState) =
     let texture = Content.Texture "custom-image"
 
     override this.Draw() =
-        Draw.quad 
+        Draw.tex_quad 
             ((Sprite.fill this.Bounds texture).AsQuad) 
             Color.White.AsQuad 
             (Sprite.pick_texture (animation.Loops % texture.Columns, 0) texture)

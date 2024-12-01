@@ -14,14 +14,14 @@ module Lanecover =
         let upper (amount: float32) =
             Draw.rect (bounds.SliceT(amount - fade_length)) options.LaneCover.Color.Value
 
-            Draw.untextured_quad
+            Draw.quad
                 (bounds.SliceT(amount).SliceB(fade_length).AsQuad)
                 (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a 0))
 
         let lower (amount: float32) =
             Draw.rect (bounds.SliceB(amount - fade_length)) options.LaneCover.Color.Value
 
-            Draw.untextured_quad
+            Draw.quad
                 (bounds.SliceB(amount).SliceT(fade_length).AsQuad)
                 (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a 0) options.LaneCover.Color.Value)
 

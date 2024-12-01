@@ -27,7 +27,7 @@ module Combo =
             )
 
         for c in combo_text do
-            Draw.quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
+            Draw.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
 type Combo(config: HudConfig, state: PlayState) =

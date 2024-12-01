@@ -178,7 +178,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let dy = -HTHICKNESS * System.MathF.Cos theta
             let dx = HTHICKNESS * System.MathF.Sin theta
 
-            Draw.untextured_quad
+            Draw.quad
                 (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
                 color.AsQuad
 
