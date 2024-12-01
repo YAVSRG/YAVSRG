@@ -64,27 +64,25 @@ module FileDrop =
     let replay_dropped = replay_dropped_ev.Publish
 
     let handle (path: string) =
+        assert(GameThread.is_game_thread())
+
         match on_file_drop with
         | Some f -> f path
         | None ->
 
         match path with
         | OsuSkinFolder -> 
-            GameThread.defer 
-            <| fun () -> 
-                Menu.Exit()
-                osu.Skins.import_osu_skin path
+            Menu.Exit()
+            osu.Skins.import_osu_skin path
 
         | StepmaniaNoteskinFolder ->
-            GameThread.defer
-            <| fun () ->
-                Menu.Exit()
-                Etterna.Skins.import_stepmania_noteskin path
+            Menu.Exit()
+            Etterna.Skins.import_stepmania_noteskin path
 
         | InterludeSkinArchive ->
             try
                 File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName path))
-                GameThread.defer Skins.load
+                Skins.load()
             with err ->
                 Logging.Error("Something went wrong when moving this skin!", err)
 
@@ -93,10 +91,8 @@ module FileDrop =
             let target = Path.Combine(get_game_folder "Downloads", id)
             try Directory.Delete(target, true) with _ -> ()
             ZipFile.ExtractToDirectory(path, target)
-            GameThread.defer 
-            <| fun () -> 
-                Menu.Exit()
-                osu.Skins.import_osu_skin target
+            Menu.Exit()
+            osu.Skins.import_osu_skin target
             // todo: clean up extracted noteskin in downloads
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
@@ -107,10 +103,8 @@ module FileDrop =
         | Unknown -> // Treat it as a chart/pack/library import
 
             if Directory.Exists path && Path.GetFileName path = "Songs" then
-                GameThread.defer
-                <| fun () ->
-                    Menu.Exit()
-                    ConfirmUnlinkedSongsImport(path).Show()
+                Menu.Exit()
+                ConfirmUnlinkedSongsImport(path).Show()
             else
 
             Imports.auto_convert.Request(
