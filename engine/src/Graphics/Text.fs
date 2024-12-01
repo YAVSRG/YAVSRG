@@ -7,7 +7,6 @@ open SixLabors.ImageSharp.Processing
 open SixLabors.ImageSharp.Drawing.Processing
 open System.Collections.Generic
 open Percyqaz.Common
-open Percyqaz.Flux.Utils
 open Percyqaz.Flux.Icons
 
 module Fonts =
@@ -215,9 +214,17 @@ module Fonts =
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
         new SpriteFont(font, [ collection.Find "feather" ])
 
+    open System.Reflection
+
     let init () =
-        add (get_resource_stream "feather.ttf")
-        add (get_resource_stream "Inconsolata.ttf")
+        Assembly
+            .GetCallingAssembly()
+            .GetManifestResourceStream("Percyqaz.Flux.Resources.feather.ttf")
+        |> add
+        Assembly
+            .GetCallingAssembly()
+            .GetManifestResourceStream("Percyqaz.Flux.Resources.Inconsolata.ttf")
+        |> add
 
 (*
     Font rendering

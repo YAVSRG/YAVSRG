@@ -5,7 +5,6 @@ open System.Diagnostics
 open ManagedBass
 open ManagedBass.Fx
 open Percyqaz.Common
-open Percyqaz.Flux.Utils
 
 type Song =
     {

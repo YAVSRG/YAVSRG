@@ -1,15 +1,13 @@
 ﻿namespace Percyqaz.Flux
 
 open System
-open System.Runtime.InteropServices
-open OpenTK.Windowing.Common.Input
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
-open Percyqaz.Flux.UI
 
 module Launch =
 
-    let entry_point (config: WindowOptions, name: string, ui_root: UIEntryPoint, icon: Utils.Bitmap option) =
+    let entry_point (config: WindowOptions, name: string, ui_root: UIEntryPoint, icon: Bitmap option) =
         
         Logging.Info(sprintf "Launching %s: %O" name (DateTime.Now.ToString()))
 

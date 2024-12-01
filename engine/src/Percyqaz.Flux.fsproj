@@ -6,8 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <Compile Include="Utils.fs" />
-	  <Compile Include="Icons.fs" />
+	  <Compile Include="Resources\Icons.fs" />
 	  <EmbeddedResource Include="Resources\Inconsolata.ttf" />
 	  <EmbeddedResource Include="Resources\feather.ttf" />
 	  <EmbeddedResource Include="Resources\shader.frag" />

@@ -11,6 +11,8 @@ open Percyqaz.Common
     Sprites and content uploading
 *)
 
+type Bitmap = Image<Rgba32>
+
 // Represents a GL array texture and its properties
 type Texture =
     {
@@ -65,10 +67,10 @@ type SpriteUpload =
         Label: string
         Rows: int
         Columns: int
-        Image: Image<Rgba32>
+        Image: Bitmap
         DisposeImageAfter: bool
     }
-    static member OfImage(label: string, img: Image<Rgba32>) =
+    static member OfImage(label: string, img: Bitmap) =
         {
             Label = label
             Rows = 1

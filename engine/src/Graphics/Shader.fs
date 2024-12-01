@@ -2,7 +2,6 @@
 
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
-open Percyqaz.Flux.Utils
 
 module private Shader =
 
@@ -52,7 +51,15 @@ module private Shader =
     let mutable sampler_loc = 0
 
     let init() =
-        let program = compile_and_use (get_resource_text "shader.vert", get_resource_text "shader.frag")
+        let shader_src (name: string) =
+            use s = 
+                System.Reflection.Assembly
+                    .GetCallingAssembly()
+                    .GetManifestResourceStream("Percyqaz.Flux.Resources." + name)
+            use tr = new System.IO.StreamReader(s)
+            tr.ReadToEnd()
+
+        let program = compile_and_use (shader_src "shader.vert", shader_src "shader.frag")
         projection_loc <- get_uniform_location("uProjection", program)
         alpha_mult_loc <- get_uniform_location("alphaMult", program)
         alpha_masking_loc <- get_uniform_location("alphaMasking", program)
