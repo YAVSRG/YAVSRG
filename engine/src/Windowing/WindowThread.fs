@@ -330,10 +330,9 @@ module WindowThread =
         GLFW.WindowHint(WindowHintInt.DepthBits, 8)
 
         detect_monitors()
-
-        let INITIAL_SIZE = 400
         
-        window <- GLFW.CreateWindow(INITIAL_SIZE, INITIAL_SIZE, title, Unchecked.defaultof<_>, Unchecked.defaultof<_>)
+        let width, height = config.WindowResolution
+        window <- GLFW.CreateWindow(width, height, title, Unchecked.defaultof<_>, Unchecked.defaultof<_>)
 
         if NativePtr.isNullPtr window then
             let mutable desc = ""
@@ -348,7 +347,7 @@ module WindowThread =
 
         GameThread.init(window, ui_root)
         Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
-        resize_callback window INITIAL_SIZE INITIAL_SIZE
+        resize_callback window width height
 
         Input.init window
 
@@ -367,7 +366,7 @@ module WindowThread =
         GLFW.SetWindowFocusCallback(window, focus_callback_d) |> ignore
 
         let monitor_area = Monitors.GetMonitorFromWindow(window).ClientArea
-        GLFW.SetWindowPos(window, (monitor_area.Min.X + monitor_area.Max.X - INITIAL_SIZE) / 2, (monitor_area.Min.Y + monitor_area.Max.Y - INITIAL_SIZE) / 2)
+        GLFW.SetWindowPos(window, (monitor_area.Min.X + monitor_area.Max.X - width) / 2, (monitor_area.Min.Y + monitor_area.Max.Y - height) / 2)
         GLFW.ShowWindow(window)
         GLFW.FocusWindow(window)
 
