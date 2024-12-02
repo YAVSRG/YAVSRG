@@ -51,7 +51,7 @@ module HudElement =
         | HudElement.KeysPerSecondMeter -> false
         | HudElement.Pacemaker -> false
         | _ -> true
-    
+
     let can_toggle (e: HudElement) =
         match e with
         | HudElement.Pacemaker -> false
@@ -332,7 +332,10 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
-        | HudElement.TimingDisplay -> all_defaults.TimingDisplayPosition
+        | HudElement.TimingDisplay ->
+            if Content.HUD.TimingDisplayRotation <> TimingDisplayRotation.Normal then
+                all_defaults.TimingDisplayPosition.Rotate
+            else all_defaults.TimingDisplayPosition
         | HudElement.Combo -> all_defaults.ComboPosition
         | HudElement.SkipButton -> all_defaults.SkipButtonPosition
         | HudElement.JudgementMeter -> all_defaults.JudgementMeterPosition

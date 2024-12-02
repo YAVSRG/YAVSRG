@@ -15,6 +15,7 @@ type TimingDisplayPage(on_close: unit -> unit) =
     let show_guide = Setting.simple config.TimingDisplayShowGuide
     let guide_thickness = Setting.percentf config.TimingDisplayGuideThickness
     let show_non_judgements = Setting.simple config.TimingDisplayShowNonJudgements
+    let rotation = Setting.simple config.TimingDisplayRotation
 
     let thickness =
         config.TimingDisplayThickness |> Setting.bounded (1.0f, 25.0f)
@@ -35,10 +36,19 @@ type TimingDisplayPage(on_close: unit -> unit) =
     let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 0.5f)
     let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.timingdisplay.showguide", Checkbox show_guide)
-            .Help(Help.Info("hud.timingdisplay.showguide"))
+        |+ PageSetting(%"hud.timingdisplay.rotation",
+            SelectDropdown(
+                [|
+                    TimingDisplayRotation.Normal, %"hud.timingdisplay.rotation.normal"
+                    TimingDisplayRotation.Clockwise, %"hud.timingdisplay.rotation.clockwise"
+                    TimingDisplayRotation.Anticlockwise, %"hud.timingdisplay.rotation.anticlockwise"
+                |],
+                rotation
+            )
+        )
+            .Help(Help.Info("hud.timingdisplay.rotation"))
             .Pos(0)
         |+ PageSetting(%"hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
             .Help(Help.Info("hud.timingdisplay.shownonjudgements"))
@@ -49,20 +59,23 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
             .Help(Help.Info("hud.timingdisplay.thickness"))
             .Pos(6)
+        |+ PageSetting(%"hud.timingdisplay.showguide", Checkbox show_guide)
+            .Help(Help.Info("hud.timingdisplay.showguide"))
+            .Pos(8)
         |+ PageSetting(%"hud.timingdisplay.guide_thickness", Slider.Percent(guide_thickness))
             .Help(Help.Info("hud.timingdisplay.guide_thickness"))
-            .Pos(8)
+            .Pos(10)
             .Conditional(show_guide.Get)
         |+ PageSetting(%"hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
             .Help(Help.Info("hud.timingdisplay.releasesextraheight"))
-            .Pos(10)
+            .Pos(12)
         |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(Setting.uom animation_time, Step = 5f))
             .Help(Help.Info("hud.timingdisplay.animationtime"))
-            .Pos(12)
+            .Pos(14)
         |+ PageSetting(%"hud.timingdisplay.timingwindowsopacity", Slider.Percent(windows_opacity))
             .Help(Help.Info("hud.timingdisplay.timingwindowsopacity"))
-            .Pos(14)
-        |+ PageSetting(%"hud.timingdisplay.moving_average_type", 
+            .Pos(16)
+        |+ PageSetting(%"hud.timingdisplay.moving_average_type",
             SelectDropdown(
                 [|
                     TimingDisplayMovingAverageType.None, %"hud.timingdisplay.moving_average_type.none"
@@ -73,14 +86,14 @@ type TimingDisplayPage(on_close: unit -> unit) =
             )
         )
             .Help(Help.Info("hud.timingdisplay.moving_average_type"))
-            .Pos(16)
+            .Pos(18)
         |+ PageSetting(%"hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
             .Help(Help.Info("hud.timingdisplay.moving_average_sensitivity"))
-            .Pos(18)
+            .Pos(20)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         |+ PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
             .Help(Help.Info("hud.timingdisplay.moving_average_color"))
-            .Pos(20, 3)
+            .Pos(22, 3)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         :> Widget
 
@@ -100,6 +113,14 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayMovingAverageType = moving_average_type.Value
                 TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value
                 TimingDisplayMovingAverageColor = moving_average_color.Value
+                TimingDisplayRotation = rotation.Value
+                TimingDisplayPosition =
+                    if
+                        (Content.HUD.TimingDisplayRotation <> TimingDisplayRotation.Normal) <>
+                        (rotation.Value <> TimingDisplayRotation.Normal)
+                    then
+                        Content.HUD.TimingDisplayPosition.Rotate
+                    else Content.HUD.TimingDisplayPosition
             }
 
         on_close ()

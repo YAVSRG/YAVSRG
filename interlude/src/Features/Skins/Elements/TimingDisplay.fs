@@ -45,24 +45,24 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                 match ev.Action with
                 | Hit e ->
                     if not e.Missed then
-                        moving_average.Target <- 
-                            lerp 
+                        moving_average.Target <-
+                            lerp
                                 config.TimingDisplayMovingAverageSensitivity
-                                moving_average.Target 
+                                moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Hold e ->
                     if not e.Missed then
-                        moving_average.Target <- 
-                            lerp 
+                        moving_average.Target <-
+                            lerp
                                 config.TimingDisplayMovingAverageSensitivity
-                                moving_average.Target 
+                                moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Release e ->
                     if not e.Missed then
-                        moving_average.Target <- 
-                            lerp 
+                        moving_average.Target <-
+                            lerp
                                 config.TimingDisplayMovingAverageSensitivity
-                                moving_average.Target 
+                                moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * ln_mult)
                 | GhostTap _
                 | DropHold
@@ -141,11 +141,11 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         for j in state.Scoring.Ruleset.Judgements do
             match j.TimingWindows with
             | Some (early, late) ->
-                Render.rect 
+                Render.rect
                     (Rect.Create(ms_to_x early, this.Bounds.Top, ms_to_x previous_early, this.Bounds.Bottom))
                     (j.Color.O4a opacity)
                 previous_early <- early
-                Render.rect 
+                Render.rect
                     (Rect.Create(ms_to_x previous_late, this.Bounds.Top, ms_to_x late, this.Bounds.Bottom))
                     (j.Color.O4a opacity)
                 previous_late <- late
@@ -171,7 +171,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
         match config.TimingDisplayMovingAverageType with
         | TimingDisplayMovingAverageType.ReplaceBars ->
-            let r = 
+            let r =
                 Rect.Create(
                     centre + moving_average.Value - config.TimingDisplayThickness,
                     this.Bounds.Top,
@@ -181,9 +181,9 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
             Render.rect r config.TimingDisplayMovingAverageColor
         | TimingDisplayMovingAverageType.Arrow ->
             let arrow_height = this.Bounds.Height * 0.5f
-            Render.quad 
+            Render.quad
                 (
-                    Quad.createv 
+                    Quad.createv
                         (centre + moving_average.Value, this.Bounds.Top - 10.0f)
                         (centre + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height)
                         (centre + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)

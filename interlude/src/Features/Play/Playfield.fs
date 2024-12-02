@@ -165,7 +165,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let inline draw_judgement_line() =
             if noteskin_config.UseJudgementLine then
-                let area = 
+                let area =
                     Rect.Create(
                         left,
                         hitposition + (note_height - note_height * noteskin_config.JudgementLineScale) * 0.5f,
@@ -202,7 +202,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                              else
                                  0)
                             receptor)
-        
+
         let inline draw_note (k, pos, color) =
             Render.tex_quad
                 ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
@@ -259,8 +259,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 )
                 tint.AsQuad
                 (
-                    Sprite.pick_texture 
-                        (animation.Loops, color) 
+                    Sprite.pick_texture
+                        (animation.Loops, color)
                         (if noteskin_config.UseHoldTailTexture then holdtail else holdhead)
                     |> fun x -> x.Transform(quad_clip_correction)
                 )

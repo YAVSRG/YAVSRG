@@ -228,7 +228,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
                 let current = position.Value
-                
+
                 if preserve_center then
                     this.Position <-
                         {
@@ -549,14 +549,14 @@ type PositionerInfo(ctx: PositionerContext) =
     let LEFT_POSITION : Position = Position.SliceY(400.0f).SliceL(375.0f)
     let RIGHT_POSITION : Position = Position.SliceY(400.0f).SliceR(375.0f)
 
-    let dropdown_wrapper = 
+    let dropdown_wrapper =
         DropdownWrapper(
             (fun d ->
-                if currently_on_right then 
+                if currently_on_right then
                     Position.SliceY(d.Height).BorderL(370.0f).Translate(-10.0f, 0.0f)
                 else
                     Position.SliceY(d.Height).BorderR(370.0f).Translate(10.0f, 0.0f)
-            ), 
+            ),
             FocusTrap = true
         )
 
@@ -699,8 +699,8 @@ module EditHudScreen =
                 HudElement.FULL_LIST
                 |> Seq.iter ctx.Create
 
-                this 
-                |+ ctx.Screen 
+                this
+                |+ ctx.Screen
                 |* PositionerInfo ctx
             // todo: way to turn on multiplayer player list
 

@@ -22,7 +22,7 @@ type HudElement =
     | InputMeter
     | KeysPerSecondMeter
     | CustomImage
-    static member FULL_LIST = 
+    static member FULL_LIST =
         [
             Accuracy
             TimingDisplay
@@ -56,6 +56,11 @@ type TimingDisplayMovingAverageType =
     | Arrow = 1
     | ReplaceBars = 2
 
+type TimingDisplayRotation =
+    | Normal = 0
+    | Clockwise = 1
+    | Anticlockwise = 2
+
 [<Json.AutoCodec(false)>]
 type HudPosition =
     {
@@ -65,6 +70,21 @@ type HudPosition =
         Right: float32 * float32
         Bottom: float32 * float32
     }
+    member this.Rotate =
+        let inline pointwise_add (a, b) (c, d) = (a + c, b + d)
+        let inline pointwise_subtract (a, b) (c, d) = (a - c, b - d)
+        let inline mult m (a, b) = (a * m, b * m)
+        let center_x = pointwise_add this.Left this.Right |> mult 0.5f
+        let center_y = pointwise_add this.Top this.Bottom |> mult 0.5f
+        let hwidth = pointwise_subtract this.Right this.Left |> mult 0.5f
+        let hheight = pointwise_subtract this.Bottom this.Top |> mult 0.5f
+        {
+            RelativeToPlayfield = this.RelativeToPlayfield
+            Left = pointwise_subtract center_x hheight
+            Top = pointwise_subtract center_y hwidth
+            Right = pointwise_add center_x hheight
+            Bottom = pointwise_add center_y hwidth
+        }
 
 [<Json.AutoCodec(false)>]
 type BackgroundTextureOptions =
@@ -100,6 +120,7 @@ type HudConfig =
         TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
+        TimingDisplayRotation: TimingDisplayRotation
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -180,7 +201,7 @@ type HudConfig =
         KeysPerSecondMeterPosition: HudPosition
 
         MultiplayerScoreTrackerPosition: HudPosition
-        
+
         CustomImageEnabled: bool
         CustomImagePosition: HudPosition
         CustomImageFrameTime: float32<ms/rate>
@@ -202,7 +223,7 @@ type HudConfig =
             AccuracyFontSpacing = 0.0f
             AccuracyDotExtraSpacing = 0.0f
             AccuracyPercentExtraSpacing = 0.0f
-            
+
             TimingDisplayEnabled = true
             TimingDisplayPosition =
                 {
@@ -223,6 +244,7 @@ type HudConfig =
             TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
             TimingDisplayMovingAverageSensitivity = 0.75f
             TimingDisplayMovingAverageColor = Color.Aqua
+            TimingDisplayRotation = TimingDisplayRotation.Normal
 
             ComboEnabled = true
             ComboPosition =
@@ -248,17 +270,16 @@ type HudConfig =
                     Right = 200.0f, 0.5f
                     Bottom = 230.0f, 0.5f
                 }
-            SkipButtonBackground = 
+            SkipButtonBackground =
                 {
                     Enable = false
                     Scale = 1.1f
                     AlignmentX = 0.5f
                     AlignmentY = 0.5f
                 }
-                
 
             JudgementMeterEnabled = true
-            JudgementMeterPosition = 
+            JudgementMeterPosition =
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
@@ -275,7 +296,7 @@ type HudConfig =
             JudgementMeterCustomDisplay = Map.empty
 
             EarlyLateMeterEnabled = false
-            EarlyLateMeterPosition = 
+            EarlyLateMeterPosition =
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
@@ -290,7 +311,7 @@ type HudConfig =
             EarlyLateMeterLateText = "Slow"
             EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)
             EarlyLateMeterLateColor = Color.FromArgb(235, 52, 52)
-            
+
             ProgressMeterEnabled = true
             ProgressMeterPosition =
                 {
@@ -309,7 +330,7 @@ type HudConfig =
             ProgressMeterPercentExtraSpacing = 0.0f
             ProgressMeterLabelSize = 0.4f
 
-            PacemakerPosition = 
+            PacemakerPosition =
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
@@ -319,7 +340,7 @@ type HudConfig =
                 }
 
             JudgementCounterEnabled = false
-            JudgementCounterPosition = 
+            JudgementCounterPosition =
                 {
                     RelativeToPlayfield = false
                     Left = 20.0f, 0.0f
@@ -344,7 +365,7 @@ type HudConfig =
             JudgementCounterCustomDisplay = Map.empty
 
             RateModMeterEnabled = false
-            RateModMeterPosition = 
+            RateModMeterPosition =
                 {
                     RelativeToPlayfield = true
                     Left = -100.0f, 0.5f
@@ -353,9 +374,9 @@ type HudConfig =
                     Bottom = -40.0f, 1.0f
                 }
             RateModMeterShowMods = true
-                
+
             BPMMeterEnabled = false
-            BPMMeterPosition = 
+            BPMMeterPosition =
                 {
                     RelativeToPlayfield = true
                     Left = -100.0f, 0.5f
@@ -381,7 +402,7 @@ type HudConfig =
             InputMeterInputColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterInputFadeDistance = 100.0f
             InputMeterScrollDownwards = false
-            
+
             KeysPerSecondMeterEnabled = false
             KeysPerSecondMeterPosition =
                 {
@@ -402,7 +423,7 @@ type HudConfig =
                 }
 
             CustomImageEnabled = false
-            CustomImagePosition = 
+            CustomImagePosition =
                 {
                     RelativeToPlayfield = true
                     Left = -100.0f, 0.5f
