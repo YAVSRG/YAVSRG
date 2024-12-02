@@ -54,6 +54,10 @@ module Printerlude =
             UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
             io.WriteLine(sprintf "Entering warp speed (%.0f%%)" (UI.Screen.timescale * 100.0))
 
+        let toggle_background (io: IOContext) (b: bool) =
+            UI.Screen.enable_background <- b
+            io.WriteLine(sprintf "Background rendering: %A" b)
+
         open SixLabors.ImageSharp
 
         let private banner (hex: string) (emoji: string) =
@@ -112,7 +116,7 @@ module Printerlude =
                     |> io.WriteLine
             | None -> ()
 
-        let vacuum () = 
+        let vacuum () =
             ChartDatabase.vacuum.Request((Content.Charts, true), ignore)
 
         let register_commands (ctx: ShellContext) =
@@ -133,6 +137,7 @@ module Printerlude =
                         UI.Screen.exit <- true
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
+                .WithIOCommand("toggle_background", "Enables/disables background rendering", "enabled", toggle_background)
                 .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
@@ -188,4 +193,3 @@ module Printerlude =
     let deinit () =
         logging_disposable |> Option.iter (fun d -> d.Dispose())
         ipc_shutdown_token |> Option.iter (fun token -> token.Cancel())
- 

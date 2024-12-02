@@ -85,6 +85,7 @@ type LaneCoverOptions =
         FadeLength: Setting.Bounded<float32>
         Color: Setting<Color>
     }
+
     member this.LoadPreset(p: LaneCoverPresetOptions) =
         this.Enabled.Set p.Enabled
         this.DrawUnderReceptors.Set p.DrawUnderReceptors
@@ -92,6 +93,7 @@ type LaneCoverOptions =
         this.Hidden.Set p.Hidden
         this.FadeLength.Set p.FadeLength
         this.Color.Set p.Color
+
     member this.ToPreset : LaneCoverPresetOptions =
         {
             Enabled = this.Enabled.Value
@@ -101,6 +103,7 @@ type LaneCoverOptions =
             FadeLength = this.FadeLength.Value
             Color = this.Color.Value
         }
+
     static member Default =
         {
             Enabled = Setting.simple false

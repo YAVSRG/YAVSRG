@@ -67,6 +67,7 @@ module Screen =
 
     let logo = Logo.display
 
+    let mutable enable_background = true
     let mutable timescale = 1.0
     let mutable exit = false
     let mutable current_type = Type.SplashScreen
@@ -189,6 +190,7 @@ module Screen =
 
         override this.Draw() =
             if
+                enable_background &&
                 current_type <> Type.SplashScreen &&
                 (current_type <> Type.Play || Background.dim_percent.Value < 1.0f)
             then
