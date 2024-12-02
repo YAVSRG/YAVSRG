@@ -116,7 +116,7 @@ module Logo =
                          |> Quad.translate (0.0f, breathe_2))
                         Colors.blue.AsQuad
 
-                    /// STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
+                    // STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
 
                     Render.stencil_create (true)
 
@@ -137,7 +137,7 @@ module Logo =
 
                     Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
-                    /// RENDER VISUALISER AND RAIN INSIDE STENCIL
+                    // RENDER VISUALISER AND RAIN INSIDE STENCIL
 
                     Render.stencil_begin_draw ()
                     Render.rect breathe_bounds Colors.cyan_accent

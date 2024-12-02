@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Gameplay.Mods
 open Prelude.Data.Library
@@ -338,8 +339,8 @@ module Options =
     let load_window_config (instance: int) =
         // Register decoding rules for Percyqaz.Flux config
         JSON
-            .WithAutoCodec<Percyqaz.Flux.Windowing.FullscreenVideoMode>()
-            .WithAutoCodec<Percyqaz.Flux.Input.Bind>()
+            .WithAutoCodec<FullscreenVideoMode>()
+            .WithAutoCodec<Bind>()
         |> ignore
 
         config <- load_important_json_file "Config" CONFIG_PATH true
