@@ -21,13 +21,13 @@ module WindowThread =
 
     (*
         Action queuing
-        
+
         Most of the game runs from the 'game thread' where draws and updates take place
         `defer` can be used to queue up an action that needs to execute on the window thread
 
         Deferred actions are fire-and-forget, they will execute in the order they are queued
     *)
-    
+
     let mutable internal WINDOW_THREAD_ID = -1
     let is_window_thread() = Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
 
@@ -86,7 +86,7 @@ module WindowThread =
 
     (*
         Window options
-        
+
         `apply_config` applies new WindowOptions settings to the game window + render thread
     *)
 
@@ -139,7 +139,7 @@ module WindowThread =
                     monitor.ClientArea.Size.Y + 1,
                     0
                 )
-                
+
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.HideWindow(window)
                 GLFW.MaximizeWindow(window)
@@ -156,7 +156,7 @@ module WindowThread =
                     monitor.ClientArea.Size.Y,
                     0
                 )
-                
+
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
@@ -219,8 +219,8 @@ module WindowThread =
                 refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
-        
-        if config.EnableCursor then 
+
+        if config.EnableCursor then
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
         else
             // todo: grabbed on macos?
@@ -229,9 +229,9 @@ module WindowThread =
         let x, y = GLFW.GetWindowPos(window)
         let width, height = GLFW.GetWindowSize(window)
         let is_entire_monitor =
-            config.WindowMode = WindowType.Fullscreen || 
+            config.WindowMode = WindowType.Fullscreen ||
             (
-                monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width 
+                monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width
                 && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
             )
 
@@ -244,7 +244,7 @@ module WindowThread =
 
     (*
         Disabling windows key & Focus
-        
+
         Hitting the windows key and having it unfocus the game/bring up the start menu can ruin gameplay
         On windows only, calling `disable_windows_key` will disable the windows key while the window is focused
         Calling `enable_windows_key` after gameplay is over will enable the key again
@@ -253,9 +253,9 @@ module WindowThread =
     let mutable private is_focused = false
     let mutable private disabled_windows_key = false
 
-    let private should_disable_windows_key() = 
-        disabled_windows_key 
-        && is_focused 
+    let private should_disable_windows_key() =
+        disabled_windows_key
+        && is_focused
         && not last_applied_config.InputCPUSaver
         && OperatingSystem.IsWindows()
 
@@ -277,10 +277,10 @@ module WindowThread =
 
     let private focus_callback (_: nativeptr<Window>) (focused: bool) =
         is_focused <- focused
-        if should_disable_windows_key() then 
+        if should_disable_windows_key() then
             WindowsKey.disable()
         else WindowsKey.enable()
-        
+
     let private focus_callback_d = GLFWCallbacks.WindowFocusCallback focus_callback
 
     (*
@@ -291,7 +291,7 @@ module WindowThread =
         let width, height = GLFW.GetFramebufferSize(window)
         if width <> 0 && height <> 0 then
             GameThread.defer (fun () -> GameThread.viewport_resized(width, height))
-        
+
     let private resize_callback_d = GLFWCallbacks.WindowSizeCallback resize_callback
 
     let private file_drop_ev = Event<string array>()
@@ -334,7 +334,7 @@ module WindowThread =
         GLFW.WindowHint(WindowHintInt.DepthBits, 8)
 
         detect_monitors()
-        
+
         let width, height = config.WindowResolution
         window <- GLFW.CreateWindow(width, height, title, Unchecked.defaultof<_>, Unchecked.defaultof<_>)
 
@@ -389,13 +389,15 @@ module WindowThread =
                 GLFW.WaitEventsTimeout(0.5)
             else
                 GLFW.PollEvents()
-                
+
+        GameThread.wait_for_finish()
+
         WindowsKey.enable()
         GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GLFW.Terminate()
 
         if GameThread.has_fatal_error() then Error() else Ok()
-    
+
     let debug_info() : string =
         assert(not (NativePtr.isNullPtr window))
         assert(is_window_thread())
@@ -407,7 +409,7 @@ module WindowThread =
             let max_hz_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.RefreshRate, vm.Width, vm.Height))
             let max_res_vm = info.SupportedVideoModes |> Seq.maxBy (fun vm -> (vm.Width, vm.Height, vm.RefreshRate))
 
-            sprintf "%s (%i, %i) %ix%i | S: %imm x %imm | DPI: %.4f x %.4f\n\tVideo mode: %ix%i@%ihz [%i:%i:%i]\n\tMax Refresh Rate: %ix%i@%ihz\n\tMax Resolution: %ix%i@%ihz" 
+            sprintf "%s (%i, %i) %ix%i | S: %imm x %imm | DPI: %.4f x %.4f\n\tVideo mode: %ix%i@%ihz [%i:%i:%i]\n\tMax Refresh Rate: %ix%i@%ihz\n\tMax Resolution: %ix%i@%ihz"
                 info.Name
                 info.ClientArea.Min.X
                 info.ClientArea.Min.Y
@@ -430,7 +432,7 @@ module WindowThread =
                 max_res_vm.Height
                 max_res_vm.RefreshRate
 
-        sprintf 
+        sprintf
             """-- WINDOW DEBUG INFO --
 Display: %i
 Current Monitor: %s

@@ -14,7 +14,7 @@ type UIEntryPoint =
     abstract member Init: unit -> unit
     abstract member Update: float * bool -> unit
     abstract member Draw: unit -> unit
-            
+
 type private Strategy =
     | Unlimited
     | WindowsDwmFlush
@@ -27,13 +27,13 @@ module GameThread =
     let mutable private loading_icon: Bitmap option = None
 
     let private LOCK_OBJ = obj()
-    
+
     (*
         Action queuing
-        
+
         Most of the game runs from the 'render thread' where draws and updates take place
         `defer` can be used to queue up an action to be executed before the next frame update
-        Used for: 
+        Used for:
         - Queuing actions to take place on this thread from other threads
         - Deferring an action to be done at the start of the next frame for other logic/UI reasons
 
@@ -56,7 +56,7 @@ module GameThread =
 
     let inline on_game_thread (action: unit -> unit) =
         if is_game_thread () then action () else defer action
-        
+
     let private after_init_ev = Event<unit>()
     let after_init = after_init_ev.Publish
 
@@ -81,7 +81,7 @@ module GameThread =
         Global variables (to be refactored)
         These can be read from the game thread
     *)
-    
+
     let mutable uses_compositor = false
     let mutable anti_jitter = false
     let mutable tearline_position = 0.75
@@ -152,7 +152,7 @@ module GameThread =
 
             let time_taken_to_render = frame_is_ready - start_of_frame
             FrameTimeStrategies.sleep_accurate (total_frame_timer, now() - time_taken_to_render + est_refresh_period / framerate_multiplier)
-        
+
         | WindowsDwmFlush ->
             FrameTimeStrategies.DwmFlush() |> ignore
 
@@ -226,7 +226,7 @@ module GameThread =
 
         after_init_ev.Trigger()
         fps_timer.Start()
-        
+
         Input.begin_frame_events ()
         Input.finish_frame_events ()
 
@@ -254,3 +254,7 @@ module GameThread =
 
     let internal start() =
         thread.Start()
+
+    let internal wait_for_finish() =
+        while thread.IsAlive do
+            Thread.Sleep(200)
