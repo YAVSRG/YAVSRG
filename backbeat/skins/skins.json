@@ -1,5 +1,21 @@
 {
     "Skins": [{
+        "Name": "Kori's Pick",
+        "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Kori's Pick__thumbnail.png",
+        "Versions": [{
+            "Author": "Kori",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Kori's Pick_SV.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Kori's Pick_SV.png",
+            "Version": "SV"
+        }, {
+            "Author": "Kori",
+            "Download": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Kori's Pick_Orbs.isk",
+            "Editor": null,
+            "Preview": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Kori's Pick_Orbs.png",
+            "Version": "Orbs"
+        }]
+    }, {
         "Name": "Klee",
         "Thumbnail": "https://github.com/YAVSRG/YAVSRG/raw/main/backbeat/skins/files/Klee__thumbnail.png",
         "Versions": [{
