@@ -38,6 +38,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
     let MAX_WINDOW = state.Ruleset.LargestWindow
+    let IS_ROTATED = config.TimingDisplayRotation <> TimingDisplayRotation.Normal
 
     do
         if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
@@ -116,7 +117,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         moving_average.Update elapsed_ms
 
         if w = 0.0f || moved then
-            w <- this.Bounds.Width
+            w <- if IS_ROTATED then this.Bounds.Height else this.Bounds.Width
 
         let now = state.CurrentChartTime()
 
@@ -129,79 +130,111 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
             hits.RemoveAt(0)
 
     member this.DrawWindows(opacity: int) =
-        let centre = this.Bounds.CenterX
 
-        let ms_to_x =
-            let w = this.Bounds.Width * 0.5f
-            fun time -> centre + time / MAX_WINDOW * w
+        let draw (r: float32<ms/rate> -> float32<ms/rate> -> Rect) =
+            let mutable previous_early = 0.0f<ms / rate>
+            let mutable previous_late = 0.0f<ms / rate>
 
-        let mutable previous_early = 0.0f<ms / rate>
-        let mutable previous_late = 0.0f<ms / rate>
+            for j in state.Scoring.Ruleset.Judgements do
+                match j.TimingWindows with
+                | Some (early, late) ->
+                    Render.rect
+                        (r early previous_early)
+                        (j.Color.O4a opacity)
+                    previous_early <- early
+                    Render.rect
+                        (r previous_late late)
+                        (j.Color.O4a opacity)
+                    previous_late <- late
+                | None -> ()
 
-        for j in state.Scoring.Ruleset.Judgements do
-            match j.TimingWindows with
-            | Some (early, late) ->
-                Render.rect
-                    (Rect.Create(ms_to_x early, this.Bounds.Top, ms_to_x previous_early, this.Bounds.Bottom))
-                    (j.Color.O4a opacity)
-                previous_early <- early
-                Render.rect
-                    (Rect.Create(ms_to_x previous_late, this.Bounds.Top, ms_to_x late, this.Bounds.Bottom))
-                    (j.Color.O4a opacity)
-                previous_late <- late
-            | None -> ()
+        match config.TimingDisplayRotation with
+        | TimingDisplayRotation.Clockwise ->
+            let center = this.Bounds.CenterY
+            let ms_to_y =
+                let h = this.Bounds.Height * 0.5f
+                fun time -> center + time / MAX_WINDOW * h
+            let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
+            draw r
+        | TimingDisplayRotation.Anticlockwise ->
+            let center = this.Bounds.CenterY
+            let ms_to_y =
+                let h = this.Bounds.Height * 0.5f
+                fun time -> center - time / MAX_WINDOW * h
+            let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
+            draw r
+        | _ ->
+            let center = this.Bounds.CenterX
+            let ms_to_x =
+                let w = this.Bounds.Width * 0.5f
+                fun time -> center + time / MAX_WINDOW * w
+            let r time1 time2 = Rect.Create(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
+            draw r
 
     override this.Draw() =
         if window_opacity > 0 then
             this.DrawWindows window_opacity
 
-        let centre = this.Bounds.CenterX
+        let r =
+            match config.TimingDisplayRotation with
+            | TimingDisplayRotation.Clockwise ->
+                fun p1 p2 ->
+                let center = this.Bounds.CenterY
+                Rect.Create(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
+            | TimingDisplayRotation.Anticlockwise ->
+                fun p1 p2 ->
+                let center = this.Bounds.CenterY
+                Rect.Create(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
+            | _ ->
+                fun p1 p2 ->
+                let center = this.Bounds.CenterX
+                Rect.Create(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
 
         if config.TimingDisplayShowGuide then
             Render.rect
-                (Rect.Create(
-                    centre - config.TimingDisplayThickness * config.TimingDisplayGuideThickness,
-                    this.Bounds.Top,
-                    centre + config.TimingDisplayThickness * config.TimingDisplayGuideThickness,
-                    this.Bounds.Bottom
-                ))
+                (r (-config.TimingDisplayThickness * config.TimingDisplayGuideThickness) (config.TimingDisplayThickness * config.TimingDisplayGuideThickness))
                 Color.White
 
         let now = state.CurrentChartTime()
 
         match config.TimingDisplayMovingAverageType with
         | TimingDisplayMovingAverageType.ReplaceBars ->
-            let r =
-                Rect.Create(
-                    centre + moving_average.Value - config.TimingDisplayThickness,
-                    this.Bounds.Top,
-                    centre + moving_average.Value + config.TimingDisplayThickness,
-                    this.Bounds.Bottom
-                )
-            Render.rect r config.TimingDisplayMovingAverageColor
+            Render.rect
+                (r (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
+                config.TimingDisplayMovingAverageColor
         | TimingDisplayMovingAverageType.Arrow ->
-            let arrow_height = this.Bounds.Height * 0.5f
-            Render.quad
-                (
+            let quad =
+                match config.TimingDisplayRotation with
+                | TimingDisplayRotation.Clockwise ->
+                    let center = this.Bounds.CenterY
+                    let arrow_height = this.Bounds.Width * 0.5f
                     Quad.createv
-                        (centre + moving_average.Value, this.Bounds.Top - 10.0f)
-                        (centre + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height)
-                        (centre + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)
-                        (centre + moving_average.Value, this.Bounds.Top - 10.0f)
-                )
-                config.TimingDisplayMovingAverageColor.AsQuad
+                        (this.Bounds.Right + 10.0f, center + moving_average.Value)
+                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height)
+                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height)
+                        (this.Bounds.Right + 10.0f, center + moving_average.Value)
+                | TimingDisplayRotation.Anticlockwise ->
+                    let center = this.Bounds.CenterY
+                    let arrow_height = this.Bounds.Width * 0.5f
+                    Quad.createv
+                        (this.Bounds.Left - 10.0f, center - moving_average.Value)
+                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value + arrow_height)
+                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value - arrow_height)
+                        (this.Bounds.Left - 10.0f, center - moving_average.Value)
+                | _ ->
+                    let center = this.Bounds.CenterX
+                    let arrow_height = this.Bounds.Height * 0.5f
+                    Quad.createv
+                        (center + moving_average.Value, this.Bounds.Top - 10.0f)
+                        (center + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height)
+                        (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)
+                        (center + moving_average.Value, this.Bounds.Top - 10.0f)
+            Render.quad quad config.TimingDisplayMovingAverageColor.AsQuad
         | _ -> ()
 
         for hit in hits do
-            let r =
-                Rect.Create(
-                    centre + hit.Position - config.TimingDisplayThickness,
-                    this.Bounds.Top,
-                    centre + hit.Position + config.TimingDisplayThickness,
-                    this.Bounds.Bottom
-                )
-
-            let c =
+            let rect = r (hit.Position - config.TimingDisplayThickness) (hit.Position + config.TimingDisplayThickness)
+            let color =
                 match hit.Judgement with
                 | None ->
                     Color.FromArgb(
@@ -216,8 +249,13 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
             if config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
                 Render.rect
-                    (if hit.IsRelease then
-                         r.Expand(0.0f, config.TimingDisplayReleasesExtraHeight)
-                     else
-                         r)
-                    c
+                    (
+                        if hit.IsRelease then
+                            if IS_ROTATED then
+                                rect.ExpandX(config.TimingDisplayReleasesExtraHeight)
+                            else
+                                rect.ExpandY(config.TimingDisplayReleasesExtraHeight)
+                        else
+                            rect
+                    )
+                    color
