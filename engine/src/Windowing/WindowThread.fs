@@ -237,8 +237,8 @@ module WindowThread =
 
         if OperatingSystem.IsWindows() then
             Thread.CurrentThread.Priority <-
-                if last_applied_config.InputCPUSaver then ThreadPriority.Normal
-                else ThreadPriority.Highest
+                if last_applied_config.InputCPUSaver then ThreadPriority.Highest
+                else ThreadPriority.Normal
 
         GameThread.defer
         <| fun () ->
