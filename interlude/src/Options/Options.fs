@@ -184,6 +184,7 @@ type GameOptions =
         SuggestionsMaxRate: Setting.Bounded<Rate>
         SuggestionsOnlyNew: Setting<bool>
 
+        EnableExperiments: Setting<bool>
         EnableConsole: Setting<bool>
         Hotkeys: Dictionary<Hotkey, Bind>
         GameplayBinds: (Bind array) array
@@ -250,6 +251,7 @@ type GameOptions =
             SuggestionsMaxRate = Setting.rate 1.5f<rate>
             SuggestionsOnlyNew = Setting.simple true
 
+            EnableExperiments = Setting.simple false
             EnableConsole = Setting.simple false
             Hotkeys = Dictionary<Hotkey, Bind>()
             GameplayBinds =

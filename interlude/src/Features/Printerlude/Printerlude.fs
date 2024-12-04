@@ -16,6 +16,7 @@ open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Interlude
 open Interlude.Content
+open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
@@ -57,6 +58,9 @@ module Printerlude =
         let toggle_background (io: IOContext) (b: bool) =
             UI.Screen.enable_background <- b
             io.WriteLine(sprintf "Background rendering: %A" b)
+
+        let toggle_experiments (b: bool) =
+            options.EnableExperiments.Value <- b
 
         open SixLabors.ImageSharp
 
@@ -138,6 +142,7 @@ module Printerlude =
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
                 .WithIOCommand("toggle_background", "Enables/disables background rendering", "enabled", toggle_background)
+                .WithCommand("enable_experiments", "Enables/disables developer experiments", "enabled", toggle_experiments)
                 .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
                 .WithCommand("cmp_1", "Select chart to compare against", cmp_1)

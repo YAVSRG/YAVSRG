@@ -63,7 +63,7 @@ type Toolbar() =
             (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
             Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
-        )            
+        )
         |+ InlaidButton(
             Icons.MENU,
             (fun () -> QuickMenuPage().Show()),
@@ -92,7 +92,13 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.stats",
-                (fun () -> Screen.change_new (fun () -> StatsScreen()) Screen.Type.Stats Transitions.Transition.Default |> ignore),
+                (fun () ->
+                    if options.EnableExperiments.Value then
+                        StatsPage().Show()
+                    else
+                        Screen.change_new (fun () -> StatsScreen()) Screen.Type.Stats Transitions.Transition.Default
+                        |> ignore
+                ),
                 Icons.TRENDING_UP
             )
         )
@@ -181,7 +187,7 @@ type Toolbar() =
 
         if Screen.current_type <> Screen.Type.Score && (%%"screenshot").Tapped() then
             Toolbar.take_screenshot()
-        
+
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
             OptionsMenuPage().Show()
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
@@ -201,7 +207,7 @@ type Toolbar() =
                     this.Parent.Bounds
                 else
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
-                    
+
         if Toolbar.hidden then
             volume_when_collapsed.Update(elapsed_ms, moved)
         else
