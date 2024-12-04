@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Interlude.UI
 
 type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int, quits: unit -> int) =
@@ -33,7 +34,7 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
         Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - GRAPH_THICKNESS) graph_radius
             (float completed_slider.Value + float retries_slider.Value) (float completed_slider.Value + float retries_slider.Value + float quits_slider.Value)
             Colors.red_accent
-        
+
         let plays = plays()
         let completed = completed()
         let retries = retries()
@@ -44,20 +45,20 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
 
         let content_bounds = this.Bounds.SliceY(CONTENT_HEIGHT).ShrinkL(midpoint - this.Bounds.Left).SliceL(CONTENT_WIDTH).TranslateY(-10.0f)
 
-        Text.fill_b(Style.font, sprintf "Songs played: %i" plays, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
+        Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_played") plays, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
 
         let row = content_bounds.ShrinkT(50.0f).SliceT(35.0f)
         Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.green_accent
-        Text.fill_b(Style.font, sprintf "Songs completed: %i" completed, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
-        
+        Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_completed") completed, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
+
         let row = content_bounds.ShrinkT(90.0f).SliceT(35.0f)
         Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.yellow_accent
-        Text.fill_b(Style.font, sprintf "Songs retried: %i" retries, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
-        
+        Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_retried") retries, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
+
         let row = content_bounds.ShrinkT(130.0f).SliceT(35.0f)
         Render.rect (row.SliceL(35.0f).Shrink(10.0f)) Colors.red_accent
-        Text.fill_b(Style.font, sprintf "Songs quit/failed: %i" quits, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
-    
+        Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_quit") quits, row.ShrinkL(35.0f), Colors.text_subheading, Alignment.LEFT)
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 

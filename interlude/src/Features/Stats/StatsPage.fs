@@ -17,8 +17,8 @@ type StatsPage() =
             RadioButtons.create_tabs {
                 Setting = Setting.make swap.set_Current swap.get_Current
                 Options = [|
-                    session_stats, "Session stats", K false
-                    all_time_stats, "All time stats", K false
+                    session_stats, %"stats.sessions", K false
+                    all_time_stats, %"stats.overall", K false
                 |]
                 Height = 50.0f
             }

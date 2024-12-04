@@ -33,7 +33,7 @@ type MissingScore() =
         Render.rect this.Bounds fill_color
         Render.rect (this.Bounds.BorderL Style.PADDING) border_color
 
-        Text.fill_b(Style.font, "<Missing the chart for this score>", this.Bounds.SliceY(50.0f), (Colors.grey_2.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
+        Text.fill_b(Style.font, %"stats.missing_score", this.Bounds.SliceY(50.0f), (Colors.grey_2.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -41,7 +41,7 @@ type MissingScore() =
 
 // todo: clicking loads the song + opens score screen
 type Score(score_info: ScoreInfo) =
-    inherit Container(NodeType.None)
+    inherit Container(NodeType.Button (ignore))
 
     let mod_string = score_info.ModString()
 
@@ -89,7 +89,6 @@ type Score(score_info: ScoreInfo) =
             Alignment.LEFT
         )
 
-
         let box_color = Colors.shadow_2.O1a alpha
         let box = this.Bounds.SliceR(360.0f).ShrinkT(50.0f).TranslateX(-10.0f)
         Render.rect box box_color
@@ -97,14 +96,14 @@ type Score(score_info: ScoreInfo) =
             Style.font,
             if this.Focused then
                 if this.FocusedByMouse then %"scoreboard.view_hint_mouse" else [(%%"select").ToString()] %> "scoreboard.view_hint_keyboard"
-            else 
+            else
                 mod_string
             ,
             this.Bounds.ShrinkT(50.0f).SliceR(370.0f).ShrinkX(10.0f),
             (Colors.grey_1.O4a alpha, Colors.shadow_2.O4a alpha),
             Alignment.CENTER
         )
-        
+
         let box = this.Bounds.SliceR(140.0f).SliceT(45.0f).TranslateX(-230.0f)
         Render.rect box box_color
         Text.fill_b (
@@ -114,7 +113,7 @@ type Score(score_info: ScoreInfo) =
             ((score_info.Ruleset.GradeColor score_info.Grade).O4a alpha, Colors.shadow_2.O4a alpha),
             Alignment.CENTER
         )
-        
+
         let box = this.Bounds.SliceR(100.0f).SliceT(45.0f).TranslateX(-120.0f)
         Render.rect box box_color
         Text.fill_b (
@@ -176,7 +175,7 @@ type ScoreList(start_time: int64, end_time: int64) =
         ScoreList.loader.Request((start_time, end_time, Rulesets.current, scores.Add))
 
         base.Init parent
-        
+
         // todo: export as playlist
 
     override this.Draw() =
