@@ -21,13 +21,19 @@ type PerformanceSettingsPage() =
 
     let is_windows = OperatingSystem.IsWindows()
     let show_tearline_settings () =
-        is_windows 
+        is_windows
         && not GameThread.uses_compositor
         && config.RenderMode.Value = FrameLimit.Smart
         && config.SmartCapAntiJitter.Value
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
+        |+ PageSetting(
+            %"system.cpu_saver",
+            Checkbox(config.InputCPUSaver |> Setting.trigger (ignore >> config.Apply))
+        )
+            .Help(Help.Info("system.cpu_saver"))
+            .Pos(0)
         |+ PageSetting(
             %"system.framelimit",
             SelectDropdown(
@@ -35,41 +41,41 @@ type PerformanceSettingsPage() =
                     FrameLimit.Unlimited, %"system.framelimit.unlimited"
                     FrameLimit.Smart, %"system.framelimit.smart"
                 |],
-                config.RenderMode |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
+                config.RenderMode |> Setting.trigger (ignore >> config.Apply)
             )
         )
             .Help(Help.Info("system.framelimit"))
-            .Pos(0)
-        |+ Text(%"system.framelimit.unlimited_warning", 
+            .Pos(2)
+        |+ Text(%"system.framelimit.unlimited_warning",
             Color = K Colors.text_red,
             Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
-        |+ PageSetting(%"system.performance.antijitter", 
+        |+ PageSetting(%"system.performance.antijitter",
             Checkbox(
                 config.SmartCapAntiJitter
                 |> Setting.trigger (fun v -> GameThread.anti_jitter <- v)
             )
         )
             .Help(Help.Info("system.performance.antijitter"))
-            .Pos(2)
+            .Pos(4)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
-        |+ PageSetting(%"system.performance.screen_tear_alignment", 
+        |+ PageSetting(%"system.performance.screen_tear_alignment",
             Slider.Percent(screen_tear_alignment)
         )
-            .Pos(4)
+            .Pos(6)
             .Conditional(show_tearline_settings)
-        |+ Text(%"system.performance.screen_tear_alignment.hint", 
+        |+ Text(%"system.performance.screen_tear_alignment.hint",
             Color = K Colors.text,
-            Position = pretty_pos(6, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
+            Position = pretty_pos(8, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(show_tearline_settings)
-        |+ PageSetting(%"system.performance.frame_multiplier", 
+        |+ PageSetting(%"system.performance.frame_multiplier",
             SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
         )
-            .Pos(7)
+            .Pos(9)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen)
         :> Widget
 
@@ -80,14 +86,14 @@ type PerformanceSettingsPage() =
     override this.Draw() =
         base.Draw()
         if closed then () else
-        Render.rect 
+        Render.rect
             (this.Bounds.SliceR(200.0f).Shrink(20.0f))
             (Color.FromHsv(float32 (cycle.Time / cycle.Interval), 0.5f, 1.0f))
 
         for i = 0 to 10 do
             let anti_jitter = GameThread.frame_compensation () / 1.0f<ms / rate>
             let y = (float32 (cycle.Time / cycle.Interval) + (float32 i / 10.0f)) % 1.0f
-            Render.sprite 
+            Render.sprite
                 (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
                 Color.White
                 texture

@@ -1091,6 +1091,7 @@ system.automatic_offset=Automatic offset
 system.automatic_offset.tooltip=When enabled, local offset is automatically adjusted for charts whenever you play.\nYou can play the intro and retry a couple times to get most charts perfectly synchronised.
 system.confirm_exit=Confirm exit
 system.confirm_exit.tooltip=When enabled, you are prompted if you are sure before closing the game.
+system.cpu_saver=CPU Saver
 system.enable_console=Enable console
 system.framelimit=Frame limit
 system.framelimit.smart=Smart

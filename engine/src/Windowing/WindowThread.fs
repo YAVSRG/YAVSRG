@@ -235,6 +235,11 @@ module WindowThread =
                 && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
             )
 
+        if OperatingSystem.IsWindows() then
+            Thread.CurrentThread.Priority <-
+                if last_applied_config.InputCPUSaver then ThreadPriority.Normal
+                else ThreadPriority.Highest
+
         GameThread.defer
         <| fun () ->
             GameThread.change_mode(config.RenderMode, refresh_rate, is_entire_monitor, monitor_ptr)
@@ -380,13 +385,10 @@ module WindowThread =
         GameThread.defer (fun () -> defer (fun () -> apply_config last_applied_config))
         GameThread.start()
 
-        if last_applied_config.InputCPUSaver && OperatingSystem.IsWindows() then
-            Thread.CurrentThread.Priority <- ThreadPriority.Highest
-
         while not (GLFW.WindowShouldClose window) do
             run_action_queue()
             if last_applied_config.InputCPUSaver then
-                GLFW.WaitEventsTimeout(0.5)
+                GLFW.WaitEventsTimeout(5)
             else
                 GLFW.PollEvents()
 
@@ -437,7 +439,8 @@ module WindowThread =
 Display: %i
 Current Monitor: %s
 Primary Monitor: %s
-Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx"""
+Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx
+CPU Saver: %A"""
             last_applied_config.Display
             (monitor_dump monitor)
             (monitor_dump default_monitor)
@@ -447,3 +450,4 @@ Mode: %O %O | W: %A TL: %f AJ: %A FM: %.0fx"""
             last_applied_config.SmartCapTearlinePosition
             last_applied_config.SmartCapAntiJitter
             last_applied_config.SmartCapFramerateMultiplier
+            last_applied_config.InputCPUSaver

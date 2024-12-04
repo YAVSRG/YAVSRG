@@ -25,7 +25,7 @@ module Settings =
 
     let search_system_settings (tokens: string array) : SearchResult seq =
         results {
-            if token_match tokens [|%"system.performance"; %"search_keywords.performance"|] then
+            if token_match tokens [|%"system.performance"; %"system.cpu_saver"; %"search_keywords.performance"|] then
                 yield PageButton(
                     %"system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
@@ -42,12 +42,12 @@ module Settings =
                         |],
                         config.WindowMode
                         |> Setting.trigger window_mode_changed
-                        |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
+                        |> Setting.trigger (ignore >> config.Apply)
                     )
                 )
                 yield PageSetting(
                     %"system.windowresolution",
-                    WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions)))
+                    WindowedResolution(config.WindowResolution |> Setting.trigger (ignore >> config.Apply))
                 )
                     .Help(Help.Info("system.windowresolution"))
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
@@ -56,15 +56,15 @@ module Settings =
                     %"system.monitor",
                     SelectDropdown(
                         monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                        config.Display 
-                        |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions))
+                        config.Display
+                        |> Setting.trigger (fun _ -> select_fullscreen_size (); config.Apply())
                     )
                 )
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
                     %"system.videomode",
                     VideoMode(
-                        config.FullscreenVideoMode |> Setting.trigger (fun _ -> WindowThread.defer (fun () -> WindowThread.apply_config config.ToOptions)),
+                        config.FullscreenVideoMode |> Setting.trigger (ignore >> config.Apply),
                         get_current_supported_video_modes
                     )
                 )
@@ -84,7 +84,7 @@ module Settings =
                     %"system.audiodevice",
                     SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
                 )
-                
+
             if token_match tokens [|%"system.audiooffset"|] then
                 yield PageSetting(
                     %"system.audiooffset",
@@ -105,20 +105,20 @@ module Settings =
                     )
                 )
                     .Help(Help.Info("system.audio_pitch_rates"))
-                    
+
             if token_match tokens [|%"system.menus_muffle_song"|] then
-                yield PageSetting(%"system.menus_muffle_song", 
+                yield PageSetting(%"system.menus_muffle_song",
                     Checkbox(
-                        options.MenusMuffleSong 
+                        options.MenusMuffleSong
                         |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
                     )
                 )
                     .Help(Help.Info("system.menus_muffle_song"))
-            
+
             if token_match tokens [|%"system.visualoffset"|] then
                 yield PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
                     .Help(Help.Info("system.visualoffset"))
-                
+
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
                 yield PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
 
@@ -174,7 +174,7 @@ module Settings =
                 yield PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
                     .Help(Help.Info("gameplay.keybinds"))
                 , 2, 2, PageWidth.Full
-            
+
             if token_match tokens [|%"gameplay.hold_to_give_up"|] then
                 yield PageSetting(%"gameplay.hold_to_give_up", Checkbox options.HoldToGiveUp)
                     .Help(Help.Info("gameplay.hold_to_give_up"))
