@@ -5,7 +5,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Interlude.Features.Stats
 
 type TopBanner(score_info: ScoreInfo) as this =
     inherit Container(NodeType.None)

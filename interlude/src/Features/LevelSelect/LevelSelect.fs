@@ -87,7 +87,7 @@ type LevelSelectScreen() =
             .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
             (fun () ->
-                SelectedChart.when_loaded
+                SelectedChart.when_loaded true
                 <| fun info ->
                     Screen.change_new
                         (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))

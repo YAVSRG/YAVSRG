@@ -201,7 +201,7 @@ module Leaderboard =
                         |> Async.RunSynchronously
 
                         yield fun () -> state.Set target_state
-                        
+
                         for score in scores do
                             let with_mods = Mods.apply score.Mods req.Chart
                             let replay_data = Replay.decompress_string score.Replay
@@ -370,4 +370,4 @@ type Leaderboard(display: Setting<Display>) =
             scoring <- Content.Rulesets.current_hash
             Loader.load info.CacheInfo info.Chart
 
-    member this.Refresh() = SelectedChart.when_loaded this.OnChartUpdated
+    member this.Refresh() = SelectedChart.when_loaded false this.OnChartUpdated

@@ -114,7 +114,7 @@ type SkinPreview(position: Position) as this =
 
     member this.Refresh() =
         SelectedChart.recolor ()
-        SelectedChart.when_loaded <| fun info -> renderer <- create_renderer info
+        SelectedChart.when_loaded false <| fun info -> renderer <- create_renderer info
 
     static member RefreshAll() =
         for instance in instances do instance.Refresh()

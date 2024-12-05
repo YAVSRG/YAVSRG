@@ -49,9 +49,9 @@ module LevelSelect =
         let mutable private history: (ChartMeta * Rate) list = []
         let mutable private forward_history: (ChartMeta * Rate) list = []
 
-        let append_current () = 
+        let append_current () =
             match SelectedChart.CACHE_DATA with
-            | Some cc -> 
+            | Some cc ->
                 forward_history <- []
                 history <- (cc, SelectedChart.rate.Value) :: history
             | None -> ()
@@ -88,7 +88,6 @@ module LevelSelect =
 
         let can_go_forward() = (List.isEmpty >> not) forward_history
 
-
     let private state: EndlessModeState = EndlessModeState.create()
     let mutable private suggestion_ctx : SuggestionContext option = None
 
@@ -100,25 +99,21 @@ module LevelSelect =
             | None -> ()
         | _ -> ()
 
-    let try_play (info: LoadedChartInfo) : bool =
-        Screen.change_new
-            (fun () ->
-                PlayScreen.play_screen (
-                    info,
-                    if options.EnablePacemaker.Value then
-                        PacemakerCreationContext.FromUserSetting
-                    else
-                        PacemakerCreationContext.None
+    let play (info: LoadedChartInfo) =
+        if
+            Screen.change_new
+                (fun () ->
+                    PlayScreen.play_screen (
+                        info,
+                        if options.EnablePacemaker.Value then
+                            PacemakerCreationContext.FromUserSetting
+                        else
+                            PacemakerCreationContext.None
+                    )
                 )
-            )
-            Screen.Type.Play
-            Transitions.EnterGameplayFadeAudio
-        |> function true -> enter_gameplay info.LibraryContext; true | false -> false
-
-    // todo: remove the holes from this system by making a proper way to wait for song to load
-    let rec private retry_until_song_loaded (info: LoadedChartInfo) (action: LoadedChartInfo -> bool) =
-        if not (action info) then
-            GameThread.defer (fun () -> retry_until_song_loaded info action)
+                Screen.Type.Play
+                Transitions.EnterGameplayFadeAudio
+        then enter_gameplay info.LibraryContext
 
     let continue_endless_mode () : bool =
         if Transitions.in_progress() then false else
@@ -146,7 +141,7 @@ module LevelSelect =
             SelectedChart._rate.Set next.Rate
             SelectedChart._selected_mods.Set next.Mods
             SelectedChart.change (next.Chart, LibraryContext.None, false)
-            SelectedChart.when_loaded <| (fun info -> retry_until_song_loaded info try_play)
+            SelectedChart.when_loaded true (fun info -> play info)
             suggestion_ctx <- Some next.NextContext
             true
         | None ->
@@ -160,7 +155,7 @@ module LevelSelect =
     let start_playlist_shuffled (playlist: Playlist) =
         EndlessModeState.queue_shuffled_playlist playlist Content.Library state
         continue_endless_mode() |> ignore
-    
+
     let exit_gameplay () =
         suggestion_ctx <- None
         EndlessModeState.clear_queue state
@@ -203,13 +198,13 @@ module LevelSelect =
                     History.append_current()
                     SelectedChart._rate.Value <- rate
                     SelectedChart.change(cc, LibraryContext.None, true)
-                | None -> 
+                | None ->
                     true_random_chart()
             else
                 true_random_chart()
 
     let choose_this_chart () =
-        SelectedChart.when_loaded
+        SelectedChart.when_loaded true
         <| fun info ->
 
             match Network.lobby with
@@ -222,9 +217,9 @@ module LevelSelect =
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
                         Screen.Type.Replay
                         Transitions.Default
+                    |> ignore
                 else
-                    try_play info
-                |> ignore
+                    play info
 
     let challenge_score (score_info: ScoreInfo) =
         SelectedChart.if_loaded

@@ -66,7 +66,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             Icon = Icons.HEART,
             Hotkey = %%"like"
         )
-    and unlike_button = 
+    and unlike_button =
         PageButton(
             %"chart.remove_from_likes",
             (fun () -> CollectionActions.unlike_chart cc; like_button_swap.Current <- like_button),
@@ -152,15 +152,17 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             content
             |+ PageButton.Once(
                 %"chart.practice",
-                (fun () -> 
+                (fun () ->
                     Menu.Exit()
-                    SelectedChart.when_loaded(fun info ->
-                        Screen.change_new
-                            (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
-                            Screen.Type.Practice
-                            Transitions.Default
-                        |> ignore
-                    )
+                    SelectedChart.when_loaded
+                        true
+                        (fun info ->
+                            Screen.change_new
+                                (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                                Screen.Type.Practice
+                                Transitions.Default
+                            |> ignore
+                        )
                 ),
                 Icon = Icons.TARGET,
                 Hotkey = %%"practice_mode"

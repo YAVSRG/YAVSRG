@@ -125,7 +125,8 @@ module SelectedChart =
     let private chart_change_failed = Event<unit>()
     let on_chart_change_failed = chart_change_failed.Publish
 
-    let mutable private on_load_succeeded = []
+    let mutable private on_load_succeeded: (bool * (unit -> unit)) list = []
+    let mutable private on_song_load_succeeded: (unit -> unit) list = []
 
     type private LoadRequest =
         | Load of ChartMeta * play_audio: bool * rate: Rate * mods: ModState
@@ -140,7 +141,7 @@ module SelectedChart =
                     seq {
                         match ChartDatabase.get_chart cc.Hash Content.Charts with
                         | Error reason ->
-                                
+
                             Logging.Error(sprintf "Couldn't load chart: %s" reason)
                             Background.load None
 
@@ -150,8 +151,9 @@ module SelectedChart =
                             )
 
                             yield
-                                fun () -> 
+                                fun () ->
                                     on_load_succeeded <- []
+                                    on_song_load_succeeded <- []
                                     chart_change_failed.Trigger ()
                         | Ok chart ->
 
@@ -169,9 +171,9 @@ module SelectedChart =
                                     (cc.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
-                                            if Screen.current_type = Screen.Type.MainMenu then 
-                                                SongLoadAction.PlayFromBeginning 
-                                            else 
+                                            if Screen.current_type = Screen.Type.MainMenu then
+                                                SongLoadAction.PlayFromBeginning
+                                            else
                                                 SongLoadAction.PlayFromPreview
                                         else SongLoadAction.Wait
                                     )
@@ -195,10 +197,13 @@ module SelectedChart =
                                 FMT_NOTECOUNTS <- Some note_counts
                                 chart_change_finished.Trigger(create_loaded_chart_info ())
 
-                        yield
-                            fun () ->
-                                for action in on_load_succeeded do
-                                    action ()
+                                if not Song.loading then
+                                    for _, action in on_load_succeeded do
+                                        action ()
+                                else
+                                    on_song_load_succeeded <-
+                                        on_load_succeeded |>
+                                        List.choose (function | true, action -> Some action | false, action -> action(); None)
 
                                 on_load_succeeded <- []
                     }
@@ -227,10 +232,13 @@ module SelectedChart =
                                 else
                                     chart_update_finished.Trigger(create_loaded_chart_info ())
 
-                        yield
-                            fun () ->
-                                for action in on_load_succeeded do
-                                    action ()
+                                if not Song.loading then
+                                    for _, action in on_load_succeeded do
+                                        action ()
+                                else
+                                    on_song_load_succeeded <-
+                                        on_load_succeeded |>
+                                        List.choose (function | true, action -> Some action | false, action -> action(); None)
 
                                 on_load_succeeded <- []
                     }
@@ -241,14 +249,18 @@ module SelectedChart =
                         | Some with_mods ->
 
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
-                        yield fun () -> WITH_COLORS <- Some with_colors
+                        yield fun () ->
+                            WITH_COLORS <- Some with_colors
 
-                        yield
-                            fun () ->
-                                for action in on_load_succeeded do
+                            if not Song.loading then
+                                for _, action in on_load_succeeded do
                                     action ()
+                            else
+                                on_song_load_succeeded <-
+                                    on_load_succeeded |>
+                                    List.choose (function | true, action -> Some action | false, action -> action(); None)
 
-                                on_load_succeeded <- []
+                            on_load_succeeded <- []
                     }
 
             override this.Handle(action) = action ()
@@ -282,6 +294,7 @@ module SelectedChart =
 
         FMT_DURATION <- format_duration CACHE_DATA
         FMT_BPM <- format_bpm CACHE_DATA
+        on_song_load_succeeded <- []
 
         chart_loader.Request(Load(cc, auto_play_audio, _rate.Value, _selected_mods.Value))
 
@@ -322,11 +335,11 @@ module SelectedChart =
         if WITH_COLORS.IsSome then
             action (create_loaded_chart_info ())
 
-    let when_loaded (action: LoadedChartInfo -> unit) =
+    let when_loaded (also_require_song: bool) (action: LoadedChartInfo -> unit) =
         if WITH_COLORS.IsSome then
             action (create_loaded_chart_info ())
         else
-            on_load_succeeded <- (fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
+            on_load_succeeded <- (also_require_song, fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
 
     let private collections_on_rate_changed (library_ctx: LibraryContext) (v: Rate) =
         match library_ctx with
@@ -396,7 +409,7 @@ module SelectedChart =
         elif (%%"downrate").Tapped() then
             change_rate_by (-0.1f<rate>)
 
-    let init_window () = 
+    let init_window () =
 
         match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
         | Some cc -> change (cc, LibraryContext.None, true)
@@ -418,8 +431,13 @@ module SelectedChart =
             | None ->
                 Logging.Debug "No charts installed (or loading failed twice)"
                 Background.load None
-        
+
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
         on_chart_change_started.Add(fun info -> presets_on_chart_changed info.CacheInfo)
+
+        Song.on_loaded.Add(fun () ->
+            for action in on_song_load_succeeded do action()
+            on_song_load_succeeded <- []
+        )
 
         Screen.animations.Add(Animation.ActionLoop(chart_loader.Join)) // todo: tidy up

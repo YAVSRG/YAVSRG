@@ -62,7 +62,7 @@ module Startup =
 
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
-        Gameplay.retry <- fun () -> SelectedChart.if_loaded (LevelSelect.try_play >> ignore)
+        Gameplay.retry <- fun () -> SelectedChart.if_loaded LevelSelect.play
 
         Interlude.Updates.check_for_updates ()
         Printerlude.init_window (instance)

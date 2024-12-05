@@ -34,7 +34,7 @@ type InfoPanel() as this =
         |+ ChartDetails(Position = Position.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f))
 
         |+ StylishButton(
-            (fun () -> SelectedChart.when_loaded <| fun info -> Preview(info, change_rate).Show()),
+            (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
             K(sprintf "%s %s" Icons.EYE %"levelselect.preview"),
             !%Palette.MAIN_100,
             Hotkey = "preview",
@@ -92,4 +92,4 @@ type InfoPanel() as this =
         | Display.Online -> online.OnChartUpdated(info)
         | Display.Patterns -> patterns.OnChartUpdated(info)
 
-    member this.Refresh() = SelectedChart.when_loaded this.OnChartUpdated
+    member this.Refresh() = SelectedChart.when_loaded false this.OnChartUpdated

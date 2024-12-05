@@ -58,7 +58,6 @@ type Song =
         | existing ->
             let center = lerp amount 22049f 800f
             Bass.FXSetParameters(existing, BQFParameters(lFilter = BQFType.LowPass, fCenter = center, fBandwidth = 0f, fQ = 0.7f)) |> display_bass_error
-        
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -76,6 +75,9 @@ type SongLoadAction =
 module Song =
 
     let LEADIN_TIME = 3000.0f<ms / rate>
+
+    let private on_loaded_ev = Event<unit>()
+    let on_loaded = on_loaded_ev.Publish
 
     let mutable load_path: string option = None
     let mutable loading = false
@@ -126,7 +128,7 @@ module Song =
         timer.Restart()
         paused <- false
 
-    let play_leadin (first_note: Time) = 
+    let play_leadin (first_note: Time) =
         play_from (min 0.0f<ms> (first_note - LEADIN_TIME * rate))
 
     let seek (time) =
@@ -216,6 +218,8 @@ module Song =
                 | SongLoadAction.PlayFromBeginning ->
                     (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait -> ()
+
+                on_loaded_ev.Trigger()
         }
 
     let change (path: string option, offset: Time, new_rate: float32<rate>, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =

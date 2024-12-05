@@ -9,6 +9,9 @@ open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Gameplay.Rulesets
 open Interlude.Content
+open Interlude.UI
+open Interlude.Features.Gameplay
+open Interlude.Features.Score
 
 type MissingScore() =
     inherit StaticWidget(NodeType.None)
@@ -39,9 +42,22 @@ type MissingScore() =
         base.Update(elapsed_ms, moved)
         fade.Update elapsed_ms
 
-// todo: clicking loads the song + opens score screen
 type Score(score_info: ScoreInfo) =
-    inherit Container(NodeType.Button (ignore))
+    inherit Container(
+        NodeType.Button (fun () ->
+            Style.click.Play()
+            SelectedChart.change (score_info.ChartMeta, LibraryContext.None, true)
+            SelectedChart.when_loaded
+                true
+                (fun _ ->
+                    if Screen.change_new
+                        (fun () -> ScoreScreen(score_info, (Gameplay.ImprovementFlags.None, None), false))
+                        Screen.Type.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                    then Menu.Exit()
+                )
+        )
+    )
 
     let mod_string = score_info.ModString()
 
@@ -133,6 +149,10 @@ type Score(score_info: ScoreInfo) =
             (Colors.white.O4a alpha, (Charts.Processing.Difficulty.DifficultyRating.physical_color score_info.Physical).O4a alpha),
             Alignment.CENTER
         )
+
+    override this.OnFocus (by_mouse: bool) =
+        Style.hover.Play()
+        base.OnFocus(by_mouse)
 
     override this.Init(parent: Widget) =
         this |* Clickable.Focus this
