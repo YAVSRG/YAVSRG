@@ -98,7 +98,7 @@ module Glint =
 module Wedge =
 
     let draw (x: float32, y: float32) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
-        let segments = int ((a2 - a1) / 0.10)
+        let segments = int ((a2 - a1) / 0.10) |> max 1
         let segsize = (a2 - a1) / float segments
 
         let centre = new Vector2(x, y)
