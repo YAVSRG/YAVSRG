@@ -1,23 +1,22 @@
-0.7.26.9
+0.7.26.10
 ====
 
-Bug fix and quality of life update. Enjoy :)
+Engine patch ahead of the when you see it update
 
-# New features
-- You can now edit (most) hold mechanics in the ingame ruleset editor
-- Noteskins support keymode-specific column widths
-- With pacemaker on, you can now fail a song if you miss your target
-- Failed/quit scores can be saved and viewed like any other score
+# Engine changes
+- Fixed Borderless Fullscreen not working correctly when the task bar is hidden
+- Changed hotkeys to show FPS/performance overlay to F3 and F4
+- The game no longer opens a console window on start, crashes open the log file directly
+- Opening Interlude.exe while it's already running focuses the window
+- Simplified lots of game engine internals
 
-# Improvements
-- Some UI improvements for: changing gameplay binds, local scores list, online player list
-- You can choose what OD/HP to use when exporting charts as .osz
-- Grouping by date played/installed works on actual "day boundaries" rather than rounding how many minutes ago to an integer
-- Pattern calculation has changed slightly again
+# Skinning
+- Timing display now supports being rotated sideways
+- Fixed bug where black background was not removed from osu!-converted explosions
 
-# Bug fixes
-- Fixed alignment of background image during the song start overlay
-- Fixed pacemaker not working if set to use your lamp PB, and your PB is NONE
-- Rulesets with the same name no longer overwrite each other
-- Fixed several bugs where switching rulesets in certain scenarios doesn't work
+# Other
+- Stat tracking has been overhauled internally for a new feature coming out in the next few days..
+- Press tab while editing ruleset timing windows to auto-select next input box
+- Various localisation fixes
+- Improved look of local scores
 
