@@ -14,15 +14,15 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
         |+ Text(sprintf "Session on %O" ((session.Start |> timestamp_to_local_day).ToShortDateString()), Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
         |+ Text(
             if session.NotesHit > 0 then
-                sprintf "Notes hit: %i" session.NotesHit
+                sprintf "%s: %i" (%"stats.sessions.notes_hit") session.NotesHit
             else
-                sprintf "%s Session data estimated from scores" Icons.ALERT_CIRCLE
+                sprintf "%s %s" Icons.ALERT_CIRCLE (%"stats.sessions.estimated_data")
             ,
             Color = K Colors.text_subheading, Align = Alignment.LEFT,
             Position = Position.ShrinkT(70.0f).SliceT(40.0f)
         )
         |+ Text(
-            (fun () -> 
+            (fun () ->
                 sprintf "%s of playtime over %s, session started at %s"
                     (Stats.format_short_time session.PlayTime)
                     (Stats.format_short_time session.GameTime)
@@ -38,18 +38,20 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
         if sessions_today.Length > 1 then
             this
             |+ Text(
-                sprintf "Session %i of %i this day" (1 + List.findIndex ((=) session) sessions_today) sessions_today.Length,
+                [(1 + List.findIndex ((=) session) sessions_today).ToString(); sessions_today.Length.ToString()] %> "stats.sessions.count_this_day",
                 Align = Alignment.CENTER,
                 Position = Position.ShrinkT(70.0f).SliceT(40.0f).SliceR(300.0f)
             )
             |+ Button(
-                sprintf "%s Back" Icons.ARROW_LEFT,
+                sprintf "%s %s" Icons.ARROW_LEFT (%"stats.sessions.back"),
                 bk,
+                Align = Alignment.LEFT,
                 Position = Position.ShrinkT(105.0f).SliceT(40.0f).ShrinkR(150.0f).SliceR(150.0f)
             )
             |* Button(
-                sprintf "Next %s" Icons.ARROW_RIGHT,
+                sprintf "%s %s" (%"stats.sessions.next") Icons.ARROW_RIGHT,
                 fd,
+                Align = Alignment.RIGHT,
                 Position = Position.ShrinkT(105.0f).SliceT(40.0f).SliceR(150.0f)
             )
         base.Init parent

@@ -17,6 +17,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
     member val Disabled: unit -> bool = K false with get, set
     member val Floating = false with get, set
     member val TextColor = K Colors.text with get, set
+    member val Align = Alignment.CENTER with get, set
 
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
@@ -28,7 +29,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
         this
         |+ Text(
             text,
-            Align = Alignment.CENTER,
+            Align = this.Align,
             Color =
                 fun () ->
                     if this.Disabled() then Colors.text_greyout

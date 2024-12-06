@@ -12,12 +12,12 @@ open Interlude.UI
 type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
     inherit StaticWidget(NodeType.Leaf)
 
-    let session_dates = 
+    let session_dates =
         Stats.PREVIOUS_SESSIONS
         |> Map.filter (fun day _ -> day.Year = year)
-        |> Map.map (fun _ sessions -> 
+        |> Map.map (fun _ sessions ->
             let day_playtime_hours = (sessions |> List.sumBy (_.PlayTime)) / 3600_000.0
-            let color = 
+            let color =
                 if day_playtime_hours < 0.25 then Colors.cyan.O2
                 elif day_playtime_hours < 0.5 then Colors.cyan.O3
                 elif day_playtime_hours < 0.75 then Colors.cyan
@@ -38,10 +38,10 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
         let mutable day = DateOnly(year, 1, 1)
         let mutable i = int day.DayOfWeek
         while day.Year = year do
-            
+
             let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
-            let color = 
+            let color =
                 match session_dates.TryFind day with
                 | Some (_, color) -> color
                 | None -> Colors.black
@@ -69,19 +69,19 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
         let weeks_shown = 53
         let x_padding = (this.Bounds.Width - (box_size * float32 weeks_shown)) * 0.5f
-        
+
         let mutable day = DateOnly(year, 1, 1)
         let mutable i = int day.DayOfWeek
         while day.Year = year do
-            
+
             let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
-            if Mouse.hover pos then 
+            if Mouse.hover pos then
                 hovered_day <- Some day
 
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
-                    | Some (sessions, _) -> 
+                    | Some (sessions, _) ->
                         selected.Set day
                         on_day_selected sessions
                     | _ -> ()
@@ -110,11 +110,11 @@ type AllYearsActivityPage(selected: Setting<DateOnly>, on_day_selected: Session 
 type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
     inherit Container(NodeType.None)
 
-    let session_dates = 
+    let session_dates =
         Stats.PREVIOUS_SESSIONS
-        |> Map.map (fun _ sessions -> 
+        |> Map.map (fun _ sessions ->
             let day_playtime_hours = (sessions |> List.sumBy (_.PlayTime)) / 3600_000.0
-            let color = 
+            let color =
                 if day_playtime_hours < 0.25 then Colors.cyan.O2
                 elif day_playtime_hours < 0.5 then Colors.cyan.O3
                 elif day_playtime_hours < 0.75 then Colors.cyan
@@ -122,7 +122,7 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
             sessions, color
         )
 
-    let today, day_of_week = 
+    let today, day_of_week =
         let today_datetime = Timestamp.now() |> timestamp_to_local_day
         DateOnly.FromDateTime(today_datetime), today_datetime.DayOfWeek
 
@@ -130,9 +130,9 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
     let PADDING = 20.0f
 
     override this.Init(parent: Widget) =
-        this 
+        this
         |* Button(
-            Icons.ARROW_LEFT + " View older",
+            sprintf "%s %s" Icons.ARROW_LEFT (%"stats.activity.view_older"),
             fun () -> AllYearsActivityPage(selected, on_day_selected).Show()
             ,
             Floating = true,
@@ -150,10 +150,10 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
         let mutable day = today.AddDays(- int day_of_week - (weeks_shown - 1) * 7)
         let mutable i = 0
         while day <= today do
-            
+
             let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
-            let color = 
+            let color =
                 match session_dates.TryFind day with
                 | Some (_, color) -> color
                 | None -> Colors.black
@@ -172,9 +172,9 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
         | Some d ->
             Text.draw_aligned_b(Style.font, d.ToString("dddd, dd MMMM yyyy"), 20.0f, this.Bounds.Right - 10.0f, this.Bounds.Top - 35.0f, Colors.text_subheading, Alignment.RIGHT)
         | None -> ()
-        Text.draw_b(Style.font, "Activity", 30.0f, this.Bounds.Left + 15.0f, this.Bounds.Top - 50.0f, Colors.text)
+        Text.draw_b(Style.font, %"stats.activity", 30.0f, this.Bounds.Left + 15.0f, this.Bounds.Top - 50.0f, Colors.text)
         base.Draw()
-    
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         hovered_day <- None
@@ -186,15 +186,15 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
         let mutable day = today.AddDays(- int day_of_week - (weeks_shown - 1) * 7)
         let mutable i = 0
         while day <= today do
-            
+
             let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
-            if Mouse.hover pos then 
+            if Mouse.hover pos then
                 hovered_day <- Some day
 
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
-                    | Some (sessions, _) -> 
+                    | Some (sessions, _) ->
                         selected.Set day
                         on_day_selected sessions
                     | _ -> ()
