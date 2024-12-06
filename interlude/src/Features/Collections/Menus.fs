@@ -15,7 +15,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
     let new_name = Setting.simple "" |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
         |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
         |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
@@ -27,6 +27,7 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
                 | Some folder ->
                     Menu.Back()
                     on_create (new_name.Value, Folder folder)
+                    CollectionActions.collection_modified_ev.Trigger()
                 | None ->
                     Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
             ),
@@ -46,10 +47,10 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
             Icons.FOLDER, Icons.FOLDER
         |]
 
-type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
+type CreatePlaylistPage(starting_name: string, on_create: (string * Collection) -> unit) =
     inherit Page()
 
-    let new_name = Setting.simple "" |> Setting.alphanumeric
+    let new_name = Setting.simple starting_name |> Setting.alphanumeric
     let icon = Setting.simple Icons.HEART
 
     override this.Content() =
@@ -64,6 +65,7 @@ type private CreatePlaylistPage(on_create: (string * Collection) -> unit) =
                 | Some playlist ->
                     Menu.Back()
                     on_create (new_name.Value, Playlist playlist)
+                    CollectionActions.collection_modified_ev.Trigger()
                 | None ->
                     Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
             ),
@@ -88,7 +90,7 @@ type EditFolderPage(name: string, folder: Folder) =
 
     let new_name = Setting.simple name |> Setting.alphanumeric
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
         |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
         |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
@@ -249,7 +251,7 @@ type SelectCollectionPage
             .Pos(0)
         |+ PageButton(
             %"collections.create_playlist",
-            (fun () -> CreatePlaylistPage(if select_on_create then on_select else ignore).Show())
+            (fun () -> CreatePlaylistPage("", if select_on_create then on_select else ignore).Show())
         )
             .Help(Help.Info("collections.create_playlist"))
             .Pos(2)

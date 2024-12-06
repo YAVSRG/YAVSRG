@@ -1070,6 +1070,7 @@ stats.plays_quit=Songs quit
 stats.plays_retried=Songs retried
 stats.plays_started=Songs played
 stats.playtime=Time played
+stats.session.make_playlist=Create playlist from session
 stats.session.title=This session
 stats.session_time=Session time
 stats.sessions=Session stats

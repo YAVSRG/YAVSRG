@@ -63,6 +63,8 @@ type Score(score_info: ScoreInfo) =
 
     let fade = Animation.Fade(0.0f, Target = 1.0f)
 
+    member this.ScoreInfo = score_info
+
     override this.Draw() =
         let alpha = fade.Alpha
 
@@ -166,8 +168,8 @@ type Score(score_info: ScoreInfo) =
 module private ScoreList =
 
     let loader =
-        { new Async.SwitchServiceSeq<int64 * int64 * Ruleset * (Widget -> unit), unit -> unit>() with
-            member this.Process((start_time, end_time, ruleset, callback)) =
+        { new Async.SwitchServiceSeq<int64 * int64 * Ruleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
+            member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
                 seq {
                     for chart_hash, score in UserDatabase.get_scores_between start_time end_time Content.UserData do
                         match ChartDatabase.get_meta_cached chart_hash Content.Charts with
@@ -178,25 +180,52 @@ module private ScoreList =
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())
+                    yield callback_when_done
                 }
 
             member this.Handle(action) = action ()
         }
+
+open Prelude.Data.Library.Collections
+open Interlude.Features.Collections
 
 type ScoreList(start_time: int64, end_time: int64) =
     inherit Container(NodeType.None)
 
     let scores = FlowContainer.Vertical<Widget>(80.0f, Spacing = 5.0f)
 
-    override this.Init(parent: Widget) =
-        this
-        |* ScrollContainer(scores, Position = Position.Shrink(20.0f), Margin = 5.0f)
+    let make_playlist() =
+        let date = timestamp_to_local_day start_time
+        CreatePlaylistPage(sprintf "Session on %s" (date.ToShortDateString()), fun (_, collection) ->
+            match collection with
+            | Playlist p ->
+                scores.Iter(
+                    function
+                    | :? Score as s -> p.Add(s.ScoreInfo.ChartMeta, s.ScoreInfo.Rate, s.ScoreInfo.Mods) |> ignore
+                    | _ -> ()
+                )
+            | _ -> ()
+        ).Show()
 
-        ScoreList.loader.Request((start_time, end_time, Rulesets.current, scores.Add))
+    override this.Init(parent: Widget) =
+        let mutable finished_loading = false
+        let mutable has_scores = false
+
+        this
+        |+ ScrollContainer(scores, Position = Position.ShrinkX(20.0f).ShrinkT(20.0f).ShrinkB(60.0f), Margin = 5.0f)
+        |+ Button(
+            Icons.LIST + " " + %"stats.session.make_playlist",
+            make_playlist,
+            Align = Alignment.RIGHT,
+            Position = Position.Shrink(10.0f).SliceB(40.0f).SliceR(400.0f).ShrinkX(10.0f)
+        )
+            .Conditional(fun () -> has_scores)
+        |* EmptyState(Icons.WIND, "No scores this session", Position = Position.ShrinkT(160.0f))
+            .Conditional(fun () -> finished_loading && not has_scores)
+
+        ScoreList.loader.Request((start_time, end_time, Rulesets.current, (fun s -> has_scores <- true; scores.Add s), fun () -> finished_loading <- true))
 
         base.Init parent
-
-        // todo: export as playlist
 
     override this.Draw() =
         Render.rect this.Bounds Colors.shadow_2.O2
