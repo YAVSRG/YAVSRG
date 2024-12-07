@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Data.User
 open Interlude.UI
 
-type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
+type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>) =
     inherit StaticWidget(NodeType.Leaf)
 
     let session_dates =
@@ -46,7 +46,7 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
                 | Some (_, color) -> color
                 | None -> Colors.black
 
-            if day = selected.Value then
+            if Some day = Option.map fst selected.Value then
                 Render.rect pos Colors.white.O2
             elif Some day = hovered_day then
                 Render.rect pos Colors.yellow_accent.O2
@@ -82,8 +82,7 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
                     | Some (sessions, _) ->
-                        selected.Set day
-                        on_day_selected sessions
+                        selected.Value <- Some (day, sessions.[0])
                     | _ -> ()
 
                 day <- day.AddYears 1
@@ -91,24 +90,22 @@ type YearActivityGrid(year: int, selected: Setting<DateOnly>, on_day_selected: S
             i <- i + 1
             day <- day.AddDays 1
 
-type AllYearsActivityPage(selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
+type AllYearsActivityPage(selected: Setting<(DateOnly * Session) option>) =
     inherit Page()
-
-    let on_day_selected = fun ss -> on_day_selected ss; Menu.Back()
 
     override this.Content() =
         let flow = FlowContainer.Vertical<YearActivityGrid>(200.0f, Spacing = 65.0f)
 
         for year in Stats.PREVIOUS_SESSIONS |> Seq.map (fun kvp -> kvp.Key.Year) |> Seq.distinct |> Seq.sortDescending do
-            flow.Add(YearActivityGrid(year, selected, on_day_selected))
+            flow.Add(YearActivityGrid(year, selected |> Setting.trigger(fun _ -> Menu.Back())))
 
         ScrollContainer(flow, Position = Position.ShrinkT(120.0f).ShrinkB(80.0f).SliceX(1380.0f), Margin = 50.0f)
 
     override this.Title = %"stats.activity"
     override this.OnClose() = ()
 
-type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session list -> unit) =
-    inherit Container(NodeType.None)
+type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
+    inherit Container(NodeType.Leaf)
 
     let session_dates =
         Stats.PREVIOUS_SESSIONS
@@ -133,7 +130,7 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
         this
         |* Button(
             sprintf "%s %s" Icons.ARROW_LEFT (%"stats.activity.view_older"),
-            fun () -> AllYearsActivityPage(selected, on_day_selected).Show()
+            fun () -> AllYearsActivityPage(selected).Show()
             ,
             Floating = true,
             Position = Position.BorderB(30.0f).SliceL(120.0f).Translate(10.0f, 5.0f)
@@ -158,7 +155,7 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
                 | Some (_, color) -> color
                 | None -> Colors.black
 
-            if day = selected.Value then
+            if Some day = Option.map fst selected.Value then
                 Render.rect pos Colors.white.O2
             elif Some day = hovered_day then
                 Render.rect pos Colors.yellow_accent.O2
@@ -195,11 +192,15 @@ type RecentActivityGrid(selected: Setting<DateOnly>, on_day_selected: Session li
                 if Mouse.left_click() then
                     match session_dates.TryFind day with
                     | Some (sessions, _) ->
-                        selected.Set day
-                        on_day_selected sessions
+                        selected.Value <- Some (day, sessions.[0])
                     | _ -> ()
 
                 day <- today.AddDays 1
 
             i <- i + 1
             day <- day.AddDays 1
+
+    member this.EarliestVisibleDay =
+        let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
+        let weeks_shown = (this.Bounds.Width - PADDING * 2.0f) / box_size |> floor |> int
+        today.AddDays(- int day_of_week - (weeks_shown - 1) * 7)

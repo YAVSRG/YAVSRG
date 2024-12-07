@@ -3,98 +3,144 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.User
 
-type private SelectedSession =
-    | Current
-    | Archived of Session
+#nowarn "40"
 
 type SessionsTab() =
     inherit Container(NodeType.Leaf)
 
     let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkX(40.0f))
-    let selected_day = Setting.simple (Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime)
-    let mutable selected_session = Current
-    let mutable selected_sessions = Map.tryFind selected_day.Value Stats.PREVIOUS_SESSIONS |> Option.defaultValue []
 
-    let rec cycle_session_fd() =
-        match selected_session with
-        | Archived s ->
-            let i = (List.findIndex (fun s2 -> s2 = s) selected_sessions |> (+) 1) % selected_sessions.Length
-            selected_session <- Archived selected_sessions.[i]
-            session_panel.Current <- PreviousSession(selected_sessions.[i], selected_sessions, show_current, cycle_session_fd, cycle_session_bk)
-        | _ -> ()
+    let TODAY = Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime
+
+    let rec selected_session : Setting<(DateOnly * Session) option> =
+        Setting.simple None
+        |> Setting.trigger (fun v ->
+            session_panel.Current <-
+                match v with
+                | Some (date, session) ->
+                    let sessions_today =
+                        Stats.PREVIOUS_SESSIONS.[date]
+                    PreviousSession(session, sessions_today, (fun () -> selected_session.Set None), cycle_session_fd, cycle_session_bk) :> Widget
+                | None ->
+                    CurrentSession()
+        )
+
+    and cycle_session_fd() =
+        match selected_session.Value with
+        | Some (date, session) ->
+            let sessions_today = Stats.PREVIOUS_SESSIONS.[date]
+            let i = (List.findIndex (fun s -> s = session) sessions_today)
+            if i + 1 < sessions_today.Length then
+                selected_session.Value <- Some (date, sessions_today.[i + 1])
+            else
+                let mutable date = date.AddDays(1)
+                let mutable found = false
+                while date <= TODAY && not found do
+                    if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                        found <- true
+                        selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])
+                    date <- date.AddDays(1)
+                if not found then
+                    selected_session.Value <- None
+        | None ->
+            let mutable date = activity.EarliestVisibleDay
+            let mutable found = false
+            while date <= TODAY && not found do
+                if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                    found <- true
+                    selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])
+                date <- date.AddDays(1)
 
     and cycle_session_bk() =
-        match selected_session with
-        | Archived s ->
-            let i = (List.findIndex (fun s2 -> s2 = s) selected_sessions |> (+) (selected_sessions.Length - 1)) % selected_sessions.Length
-            selected_session <- Archived selected_sessions.[i]
-            session_panel.Current <- PreviousSession(selected_sessions.[i], selected_sessions, show_current, cycle_session_fd, cycle_session_bk)
-        | _ -> ()
+        match selected_session.Value with
+        | Some (date, session) ->
+            let sessions_today = Stats.PREVIOUS_SESSIONS.[date]
+            let i = (List.findIndex (fun s -> s = session) sessions_today)
+            if i > 0 then
+                selected_session.Value <- Some (date, sessions_today.[i - 1])
+            else
+                let mutable date = date.AddDays(-1)
+                let mutable found = false
+                let earliest_day = activity.EarliestVisibleDay
+                while date >= earliest_day && not found do
+                    if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                        found <- true
+                        selected_session.Value <- Some (date, List.last Stats.PREVIOUS_SESSIONS.[date])
+                    date <- date.AddDays(-1)
+                if not found then
+                    selected_session.Value <- None
+        | None ->
+            let mutable date = TODAY
+            let mutable found = false
+            let earliest_day = activity.EarliestVisibleDay
+            while date >= earliest_day && not found do
+                if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                    found <- true
+                    selected_session.Value <- Some (date,  List.last Stats.PREVIOUS_SESSIONS.[date])
+                date <- date.AddDays(-1)
 
-    and show_current() =
-        selected_session <- Current
-        session_panel.Current <- CurrentSession()
-
-    let select_sessions (sessions: Session list) =
-        selected_sessions <- sessions
-        match selected_session with
-        | Archived s ->
-            let i = (List.tryFindIndex (fun s2 -> s2 = s) selected_sessions |> Option.defaultValue -1 |> (+) 1) % selected_sessions.Length
-            selected_session <- Archived selected_sessions.[i]
-            session_panel.Current <- PreviousSession(selected_sessions.[i], selected_sessions, show_current, cycle_session_fd, cycle_session_bk)
-        | _ -> 
-        selected_session <- Archived selected_sessions.[0]
-        session_panel.Current <- PreviousSession(selected_sessions.[0], selected_sessions, show_current, cycle_session_fd, cycle_session_bk)
+    and activity : RecentActivityGrid =
+        RecentActivityGrid(selected_session,
+            Position = Position.SliceLPercent(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
 
     override this.Init(parent) =
         this
-        |+ RecentActivityGrid(selected_day, select_sessions,
-            Position = Position.SliceLPercent(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
+        |+ activity
 
         |+ SessionTime(
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.GameTime
-                | Archived a -> a.GameTime
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.GameTime
+                | Some (_, a) -> a.GameTime
             ),
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PlayTime
-                | Archived a -> a.PlayTime
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PlayTime
+                | Some (_, a) -> a.PlayTime
             ),
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PracticeTime
-                | Archived a -> a.PracticeTime
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PracticeTime
+                | Some (_, a) -> a.PracticeTime
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |+ PlayCount(
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PlaysStarted
-                | Archived a -> a.PlaysStarted
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PlaysStarted
+                | Some (_, a) -> a.PlaysStarted
             ),
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PlaysCompleted
-                | Archived a -> a.PlaysCompleted
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PlaysCompleted
+                | Some (_, a) -> a.PlaysCompleted
             ),
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PlaysRetried
-                | Archived a -> a.PlaysRetried
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PlaysRetried
+                | Some (_, a) -> a.PlaysRetried
             ),
             (fun () ->
-                match selected_session with
-                | Current -> Stats.CURRENT_SESSION.PlaysQuit
-                | Archived a -> a.PlaysQuit
+                match selected_session.Value with
+                | None -> Stats.CURRENT_SESSION.PlaysQuit
+                | Some (_, a) -> a.PlaysQuit
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |* session_panel
 
         base.Init parent
+
+    override this.Update (elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        if this.Focused then
+            if (%%"left").Tapped() then
+                cycle_session_bk()
+            elif (%%"right").Tapped() then
+                cycle_session_fd()
