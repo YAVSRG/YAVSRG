@@ -1,8 +1,9 @@
 ﻿namespace Interlude.Features.Stats
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User
@@ -18,7 +19,7 @@ type RatingTile(color: Color, value: float32) =
         Render.rect this.Bounds color.O1
         Text.fill_b (Style.font, sprintf "%.0f" value, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.CENTER)
 
-type SkillsetGraph(target: PatternSkillBreakdown) =
+type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
 
     let push = target.Push |> Array.ofList |> Array.rev
@@ -31,6 +32,37 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
 
     let AXIS_HEIGHT = 40.0f
 
+    let mutable hover = false
+    let mutable tooltip_bpm = 0
+    let mutable tooltip: (Callout * (float32 * float32)) option = None
+
+    let format_duration (ms: GameplayTime) =
+        if ms < 1000.0f<ms / rate> then
+            "short bursts"
+        else sprintf "%is" (floor (ms / 1000.0f<ms / rate>) |> int)
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+
+        let next_hover = Mouse.hover this.Bounds
+        let bpm = (Mouse.x() - this.Bounds.Left) / this.Bounds.Width * float32 (max_bpm - min_bpm) + float32 min_bpm |> int
+
+        if (not hover || bpm <> tooltip_bpm) && next_hover && Mouse.moved_recently () then
+
+            tooltip_bpm <- bpm
+            let content =
+                Callout.Normal
+                    .Title(sprintf "%i BPM %O" bpm pattern_type)
+                    .Body(sprintf "Push: %s with passable acc." (PatternStatLine.get_duration_at bpm target.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
+                    .Body(sprintf "Control: %s with good acc." (PatternStatLine.get_duration_at bpm target.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
+                    .Body(sprintf "Accuracy: %s with high acc." (PatternStatLine.get_duration_at bpm target.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
+            tooltip <- Some (content, Callout.measure content)
+
+        elif tooltip.IsSome && not next_hover then
+            tooltip <- None
+
+        hover <- next_hover
+
     override this.Draw() =
         let bottom = this.Bounds.Bottom - AXIS_HEIGHT
         let height = this.Bounds.Height - AXIS_HEIGHT
@@ -41,12 +73,12 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
         for point in push do
             Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.blue
             last <- float32 point.BPM
-        
+
         let mutable last = min_bpm
         for point in control do
             Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.green
             last <- float32 point.BPM
-        
+
         let mutable last = min_bpm
         for point in accuracy do
             Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.yellow_accent
@@ -62,14 +94,27 @@ type SkillsetGraph(target: PatternSkillBreakdown) =
             Render.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
 
-    static member Create(pattern: CorePattern, data: PatternSkillBreakdown) =
+        match tooltip with
+        | None -> ()
+        | Some (c, (width, height)) ->
+            let x, y = Mouse.pos()
+            let x, y = x - width * 0.5f |> max (this.Bounds.Left + 20.0f) |> min (this.Bounds.Right - width - 20.0f), y - height - 20.0f
+            let b = Rect.Box(x, y, width, height)
+            Render.rect b Colors.cyan_shadow.O3
+            Render.rect (b.BorderL(Style.PADDING)) Colors.cyan_accent
+            Render.rect (b.BorderCornersT(Style.PADDING)) Colors.cyan_accent
+            Render.rect (b.BorderR(Style.PADDING)) Colors.cyan_accent
+            Render.rect (b.BorderCornersB(Style.PADDING)) Colors.cyan_accent
+            Callout.draw(x, y, width, height, Colors.text, c)
+
+    static member Create(pattern_type: CorePattern, data: PatternSkillBreakdown) =
         if data = PatternSkillBreakdown.Default then
-            EmptyState(Icons.X, "No data") :> Widget
+            EmptyState(Icons.X, %"stats.skillsets.empty") :> Widget
         else
             let total = PatternStatLine.value data.Push + PatternStatLine.value data.Accuracy + PatternStatLine.value data.Control
-            let mult = pattern.RatingMultiplier
+            let mult = pattern_type.RatingMultiplier
             Container(NodeType.None)
-            |+ SkillsetGraph(data, Position = Position.ShrinkB(100.0f))
+            |+ SkillsetGraph(pattern_type, data, Position = Position.ShrinkB(100.0f))
             |+ (
                 GridFlowContainer(60.0f, 4, Spacing = (90.0f, 0.0f), Position = Position.SliceB(60.0f))
                 |+ RatingTile(Colors.yellow_accent, mult * PatternStatLine.value data.Accuracy)
@@ -100,14 +145,14 @@ type Skills() =
 
         let refresh_graph() =
             let skills = Stats.TOTAL_STATS.KeymodeSkills.[keymode.Value - 3]
-            let skill_data = 
+            let skill_data =
                 match skill.Value with
                 | Jacks -> skills.Jacks
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
             graph_container.Current <- SkillsetGraph.Create(skill.Value, skill_data)
 
-        let keymode_switcher = 
+        let keymode_switcher =
             InlaidButton(
                 (fun () -> sprintf "%iK" keymode.Value),
                 (fun () ->
@@ -117,7 +162,7 @@ type Skills() =
                 ""
             )
 
-        let skill_switcher = 
+        let skill_switcher =
             InlaidButton(
                 (fun () -> sprintf "%O" skill.Value),
                 (fun () ->

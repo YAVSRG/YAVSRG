@@ -1083,6 +1083,7 @@ stats.sessions.count_this_day=Session %0 of %1 this day
 stats.sessions.estimated_data=Session data estimated from scores
 stats.sessions.next=Next
 stats.sessions.notes_hit=Notes hit
+stats.skillsets.empty=No data
 stats.songs_completed=Songs completed
 stats.songs_played=Songs played
 stats.songs_quit=Songs quit/failed

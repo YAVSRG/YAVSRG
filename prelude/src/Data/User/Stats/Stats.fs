@@ -47,7 +47,7 @@ type CurrentSession =
 
             SessionScore = 0L
             Streak = 0
-            KeymodeSkills = 
+            KeymodeSkills =
                 let d = KeymodeSkillBreakdown.decay_over_time end_of_last_session now
                 previous_skills |> Array.map (fun k -> k.Scale d)
         }
@@ -212,7 +212,7 @@ module Stats =
         let base_xp = score_info.Scoring.JudgementCounts |> Array.truncate 5 |> Array.sum
         let streak_bonus = float32 (CURRENT_SESSION.Streak - 1) * 0.1f |> max 0.0f |> min 1.0f
 
-        let lamp_bonus_flat, lamp_bonus_mult = 
+        let lamp_bonus_flat, lamp_bonus_mult =
             match improvement.Lamp with
             | Improvement.None -> 0L, 0.0f
             | Improvement.New
@@ -237,14 +237,14 @@ module Stats =
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + acc_xp
 
-        let all_time_skill_up = 
+        let all_time_skill_up =
             KeymodeSkillBreakdown.score
                 score_info.ChartMeta.Patterns
                 score_info.Accuracy
                 score_info.Rate
                 TOTAL_STATS.KeymodeSkills.[score_info.WithMods.Keys - 3]
 
-        let session_skill_up = 
+        let session_skill_up =
             KeymodeSkillBreakdown.score
                 score_info.ChartMeta.Patterns
                 score_info.Accuracy
@@ -252,10 +252,10 @@ module Stats =
                 CURRENT_SESSION.KeymodeSkills.[score_info.WithMods.Keys - 3]
 
         save_current_session (Timestamp.now()) database
-        
+
         let skill_xp_mult = (float32 TOTAL_STATS.XP / 100_000f - 1.0f) |> max 0.0f |> min 1.0f
         let skill_xp =
-            int64 (session_skill_up.Total * skill_xp_mult) 
+            int64 (session_skill_up.Total * skill_xp_mult)
             + int64 (all_time_skill_up.Total * 10.0f * skill_xp_mult)
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + skill_xp
 
@@ -268,7 +268,7 @@ module Stats =
         }
 
     let private calculate (library: Library) (database: UserDatabase) : Session array * KeymodeSkillBreakdown array =
-        
+
         // calculate skillsets
         let sc_j4 = SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
@@ -293,7 +293,7 @@ module Stats =
             |> Seq.sortBy (snd >> _.Timestamp)
             |> Array.ofSeq
 
-        let first_score_length = 
+        let first_score_length =
             if scores.Length = 0 then 0L else
             match ChartDatabase.get_meta (fst scores.[0]) library.Charts with
             | Some cc -> cc.Length / (snd scores.[0]).Rate |> int64
@@ -308,10 +308,10 @@ module Stats =
         seq {
             for chart_id, score in scores do
 
-                let score_length = 
+                let score_length =
                     match ChartDatabase.get_meta chart_id library.Charts with
-                    | Some cc -> 
-                        
+                    | Some cc ->
+
                         let data = UserDatabase.get_chart_data cc.Hash database
                         match data.PersonalBests.TryFind(sc_j4_id) with
                         | Some pbs ->
@@ -327,7 +327,7 @@ module Stats =
 
                 if score.Timestamp - last_time > SESSION_TIMEOUT then
                     // start of new session
-                    yield { 
+                    yield {
                         Start = session_start_time
                         End = last_time
 
@@ -353,7 +353,7 @@ module Stats =
                     score_count <- score_count + 1
                 last_time <- score.Timestamp
 
-            yield { 
+            yield {
                 Start = session_start_time
                 End = last_time
 
@@ -379,7 +379,7 @@ module Stats =
     let init_startup (library: Library) (database: UserDatabase) =
 
         let sessions = DbSessions.get_all database.Database
-        PREVIOUS_SESSIONS <- 
+        PREVIOUS_SESSIONS <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
@@ -397,7 +397,7 @@ module Stats =
 
             let sessions, current_skills = calculate library database
             DbSessions.save_batch sessions database.Database
-            PREVIOUS_SESSIONS <- 
+            PREVIOUS_SESSIONS <-
                 sessions
                 |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
                 |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
@@ -406,7 +406,7 @@ module Stats =
 
             let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
             TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit; KeymodeSkills = TOTAL_STATS.KeymodeSkills }
-        
+
         let now = Timestamp.now()
         if CURRENT_SESSION.NotesHit = 0 then
             end_current_session now database
@@ -434,7 +434,7 @@ module Stats =
         let minutes = seconds / 60.0
         let hours = minutes / 60.0
 
-        if hours > 1 then
+        if hours >= 1 then
             sprintf "%i:%02i:%02i" (floor hours |> int) (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
         else
             sprintf "%02i:%02i" (floor (minutes % 60.0) |> int) (floor (seconds % 60.0) |> int)
