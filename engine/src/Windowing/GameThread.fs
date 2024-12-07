@@ -74,6 +74,7 @@ module GameThread =
     let mutable private start_of_frame = 0.0
     let mutable private frame_is_ready = 0.0
     let mutable private strategy = Unlimited
+    let mutable private looping = true
 
     let private now () = total_frame_timer.Elapsed.TotalMilliseconds
 
@@ -231,7 +232,7 @@ module GameThread =
         Input.finish_frame_events ()
 
         try
-            while not (GLFW.WindowShouldClose window) do
+            while looping && not (GLFW.WindowShouldClose window) do
                 dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
@@ -255,6 +256,6 @@ module GameThread =
     let internal start() =
         thread.Start()
 
-    let internal wait_for_finish() =
-        while thread.IsAlive do
-            Thread.Sleep(200)
+    let internal stop() =
+        looping <- false
+        thread.Join()

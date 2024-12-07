@@ -392,10 +392,10 @@ module WindowThread =
             else
                 GLFW.PollEvents()
 
-        GameThread.wait_for_finish()
-
         WindowsKey.enable()
         GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
+        GameThread.stop()
+        GLFW.DestroyWindow(window)
         GLFW.Terminate()
 
         if GameThread.has_fatal_error() then Error() else Ok()
