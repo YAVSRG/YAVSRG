@@ -307,8 +307,8 @@ type HudConfig =
             EarlyLateMeterDuration = 200.0f<ms / rate>
             EarlyLateMeterUseTexture = false
             EarlyLateMeterFrameTime = 20.0f<ms / rate>
-            EarlyLateMeterEarlyText = "Fast"
-            EarlyLateMeterLateText = "Slow"
+            EarlyLateMeterEarlyText = "Early"
+            EarlyLateMeterLateText = "Late"
             EarlyLateMeterEarlyColor = Color.FromArgb(52, 79, 235)
             EarlyLateMeterLateColor = Color.FromArgb(235, 52, 52)
 
