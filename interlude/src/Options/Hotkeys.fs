@@ -26,6 +26,7 @@ module Hotkeys =
         Hotkeys.register "import" (ctrl Keys.I)
         Hotkeys.register "options" (ctrl Keys.O)
         Hotkeys.register "wiki" (ctrl Keys.H)
+        Hotkeys.register "stats" (ctrl Keys.J)
         Hotkeys.register "console" (mk Keys.GraveAccent)
         Hotkeys.register "player_list" (mk Keys.F9)
         Hotkeys.register "quick_menu" (ctrl Keys.Tab)
@@ -73,6 +74,7 @@ module Hotkeys =
         Hotkeys.register "reload_content" (Bind.Key(Keys.S, (true, true, true)))
 
         Hotkeys.register "skip" (mk Keys.Space)
+        Hotkeys.register "pause" (mk Keys.Space)
         Hotkeys.register "retry" (ctrl Keys.R)
         Hotkeys.register "next_song" (ctrl_shift Keys.R)
         Hotkeys.register "offset" (ctrl Keys.O)

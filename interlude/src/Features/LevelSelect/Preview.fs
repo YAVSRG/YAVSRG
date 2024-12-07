@@ -24,10 +24,12 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
                 Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
-            if this.Initialised then 
+            if this.Initialised then
                 playfield.Init this
                 timeline.Init this
         )
+
+    let unpause_song_on_exit = Song.playing()
 
     let volume = Volume()
 
@@ -59,11 +61,25 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             LevelSelect.random_chart()
         elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous_random_chart").Tapped() then
             LevelSelect.History.back()
+        elif (%%"pause").Tapped() || (%%"pause_music").Tapped() then
+            if Song.playing () then
+                (if Song.time () > 0.0f<ms> then Song.pause ())
+            elif not (Mouse.held Mouse.LEFT) then Song.resume ()
         else
             SelectedChart.change_rate_hotkeys change_rate
 
+        if not (Mouse.held Mouse.LEFT) then
+            let scroll = Mouse.scroll()
+            if scroll <> 0.0f then
+                if Song.playing() then
+                    Song.pause()
+                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+                    Song.resume()
+                else
+                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+
     override this.Close() =
         change_chart_listener.Dispose()
-        if Mouse.held Mouse.LEFT then
+        if unpause_song_on_exit then
             Song.resume ()
         base.Close()

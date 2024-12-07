@@ -15,6 +15,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
     inherit StaticWidget(NodeType.None)
 
     let mutable seek = 0
+    let mutable last_time = 0.0f<ms>
     let keys_down = Array.zeroCreate keys
     let keys_times = Array.zeroCreate keys
 
@@ -99,3 +100,12 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
             for k = 0 to keys - 1 do
                 if keys_down.[k] then
                     draw_press (k, now, keys_times.[k], until_time)
+
+    override this.Update (elapsed_ms, moved): unit =
+        base.Update(elapsed_ms, moved)
+
+        let time = state.CurrentChartTime()
+        if time < last_time then
+            while seek > 0 && let struct (t, _) = replay_data.[seek] in t > time do
+                seek <- seek - 1
+        last_time <- state.CurrentChartTime()

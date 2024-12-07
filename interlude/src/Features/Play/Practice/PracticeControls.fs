@@ -68,45 +68,45 @@ type SyncSuggestionControls(state: PracticeState) =
 
         this
         |+ Text(
-            title, 
+            title,
             Position = Position.SliceT(60.0f).ShrinkX(25.0f),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT
         )
         |+ Text(
-            current_value, 
+            current_value,
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(60.0f),
             Align = Alignment.LEFT
         )
         |+ Text(
-            suggested_value, 
+            suggested_value,
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f),
             Align = Alignment.LEFT,
             Color = fun () -> if (match state.SyncSuggestions with Some v -> v.LooksAboutRight | None -> false) then Colors.text_green_2 else Colors.text
         )
         |+ Text(
-            %"practice.unmute_hint", 
+            %"practice.unmute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Align = Alignment.LEFT,
             Color = K Colors.text_red_2
         )
             .Conditional(fun () -> state.SyncMode.Value.Audio = 2 && options.AudioVolume.Value = 0.0)
         |+ Text(
-            %"practice.mute_mandatory_hint", 
+            %"practice.mute_mandatory_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Align = Alignment.LEFT,
             Color = K Colors.text_red_2
         )
             .Conditional(fun () -> state.SyncMode.Value.Audio = 0 && options.AudioVolume.Value > 0.0)
         |+ Text(
-            %"practice.mute_hint", 
+            %"practice.mute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Align = Alignment.LEFT,
             Color = K Colors.text_yellow_2
         )
             .Conditional(fun () -> state.SyncMode.Value.Audio = 1 && options.AudioVolume.Value > 0.0)
         |+ Text(
-            %"practice.mute_hint", 
+            %"practice.mute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Align = Alignment.LEFT,
             Color = K Colors.text_yellow_2
@@ -142,13 +142,13 @@ type PracticeControls(state: PracticeState, with_mods, on_seek) =
             Align = Alignment.LEFT
         )
         |+ PageButton(
-            sprintf "%s %s" Icons.SETTINGS (%"practice.tools"), 
+            sprintf "%s %s" Icons.SETTINGS (%"practice.tools"),
             (fun () -> PracticeToolsPage(state).Show()),
             Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
         |+ HotkeyAction("options", fun () -> PracticeToolsPage(state).Show())
         |+ SyncSuggestionControls(state, Position = Position.ShrinkT(160.0f))
-        
+
         |+ Text(
             (fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD SelectedChart.rate.Value),
             Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
@@ -161,7 +161,7 @@ type PracticeControls(state: PracticeState, with_mods, on_seek) =
             Align = Alignment.RIGHT
         )
         |+ Text(
-            sprintf "%s: %O" (%"practice.play") (%%"skip"),
+            sprintf "%s: %O" (%"practice.play") (%%"pause"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT

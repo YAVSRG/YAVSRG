@@ -16,8 +16,8 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
     let fade = Animation.Fade(1.0f)
     let mutable auto_hide_timer = 3000.0
     let mutable show_cooldown = 0.0
-    
-    let playback_speed = 
+
+    let playback_speed =
         let setting = rate |> Setting.bounded (0.25f<rate>, 3.0f<rate>)
         { setting with
             Set = fun v ->
@@ -46,7 +46,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
             Align = Alignment.LEFT
         )
         |+ PageButton(
-            sprintf "%s %s" Icons.SETTINGS (%"replay.settings"), 
+            sprintf "%s %s" Icons.SETTINGS (%"replay.settings"),
             (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show()),
             Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
@@ -57,7 +57,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
             Color = K Colors.text_cyan,
             Align = Alignment.LEFT
         )
-        
+
         |+ Text(
             (fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD playback_speed.Value),
             Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
@@ -76,7 +76,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
             Align = Alignment.RIGHT
         )
         |+ Text(
-            sprintf "%s: %O" (%"replay.pause") (%%"skip"),
+            sprintf "%s: %O" (%"replay.pause") (%%"pause"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
@@ -116,9 +116,19 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
 
         else show_cooldown <- show_cooldown - elapsed_ms
 
-        if (%%"skip").Tapped() then
-            if Song.playing () then 
+        if not (Mouse.held Mouse.LEFT) then
+            let scroll = Mouse.scroll()
+            if scroll <> 0.0f then
+                if Song.playing() then
+                    Song.pause()
+                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+                    Song.resume()
+                else
+                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+
+        if (%%"pause").Tapped() || (%%"pause_music").Tapped() then
+            if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())
             elif not (Mouse.held Mouse.LEFT) then Song.resume ()
-        else 
+        else
             SelectedChart.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)

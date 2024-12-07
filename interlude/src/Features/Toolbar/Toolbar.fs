@@ -86,8 +86,7 @@ type Toolbar() =
             |+ InlaidButton(
                 %"menu.wiki",
                 WikiBrowserPage.Show,
-                Icons.BOOK,
-                HoverIcon = Icons.BOOK_OPEN,
+                Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
             |+ InlaidButton(
@@ -99,7 +98,8 @@ type Toolbar() =
                         Screen.change_new (fun () -> StatsScreen()) Screen.Type.Stats Transitions.Transition.Default
                         |> ignore
                 ),
-                Icons.TRENDING_UP
+                Icons.TRENDING_UP,
+                Hotkey = "stats"
             )
         )
         |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))

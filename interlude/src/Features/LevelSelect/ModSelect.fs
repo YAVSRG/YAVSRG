@@ -54,7 +54,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
             Style.font,
             Mods.name id state,
             this.Bounds.SliceT(TOP_HEIGHT).Shrink(20.0f, 0.0f),
-            (if this.Focused then Colors.text_yellow_2 else Colors.text), 
+            (if this.Focused then Colors.text_yellow_2 else Colors.text),
             Alignment.LEFT
         )
 
@@ -62,7 +62,7 @@ type private ModSelector(id, current_state: unit -> int option, action: unit -> 
             Style.font,
             Mods.desc id state,
             this.Bounds.ShrinkT(TOP_HEIGHT - 2.0f).Shrink(20.0f, 0.0f),
-            (if this.Focused then Colors.text_yellow_2 else Colors.text_subheading), 
+            (if this.Focused then Colors.text_yellow_2 else Colors.text_subheading),
             Alignment.LEFT
         )
 
@@ -72,8 +72,8 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
     inherit Page()
 
     let mutable last_seen_mod_status = ModStatus.Ranked
-    let mod_status () = 
-        match SelectedChart.WITH_MODS with 
+    let mod_status () =
+        match SelectedChart.WITH_MODS with
         | Some m -> last_seen_mod_status <- m.Status
         | None -> ()
         last_seen_mod_status
@@ -114,9 +114,9 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
         page_container()
         |+ PageSetting(%"gameplay.rate",
             Slider(
-                SelectedChart.rate 
-                |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>) 
-                |> Setting.uom, 
+                SelectedChart.rate
+                |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>)
+                |> Setting.uom,
                 Format = sprintf "%.02fx"
             )
         )
@@ -126,11 +126,11 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
                     .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
             )
             .Pos(0)
-        |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i", 
+        |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i",
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
             Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH))
-        |+ Text(%"gameplay.rate.hotkey_hint_ii", 
+        |+ Text(%"gameplay.rate.hotkey_hint_ii",
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
             Position = pretty_pos(3, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH))
@@ -141,16 +141,16 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
             .Help(Help.Info("gameplay.pacemaker"))
             .Pos(17)
 
-        |+ PageSetting(%"mods.mod_status", 
+        |+ PageSetting(%"mods.mod_status",
             Text(
-                (fun () -> 
+                (fun () ->
                     match mod_status() with
                     | ModStatus.Ranked -> %"mods.mod_status.ranked"
                     | ModStatus.Unranked -> %"mods.mod_status.unranked"
                     | _ -> %"mods.mod_status.unstored"
                 ),
-                Color = 
-                    (fun () -> 
+                Color =
+                    (fun () ->
                         match mod_status() with
                         | ModStatus.Ranked -> Colors.text_green_2
                         | ModStatus.Unranked -> Colors.text_yellow_2
@@ -167,6 +167,8 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
 
         if (%%"autoplay").Tapped() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
+        elif (%%"mods").Tapped() then
+            Menu.Back()
         else
             SelectedChart.change_rate_hotkeys change_rate
 

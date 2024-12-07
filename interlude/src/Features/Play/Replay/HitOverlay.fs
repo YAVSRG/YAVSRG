@@ -30,6 +30,7 @@ type private HitOverlay
         full_score.Events |> Array.ofSeq
 
     let mutable seek = 0
+    let mutable last_time = 0.0f<ms>
 
     let scroll_direction_pos: float32 -> Rect -> Rect =
         if options.Upscroll.Value then
@@ -132,7 +133,7 @@ type private HitOverlay
             .Shrink(0.0f, -playfield.ColumnWidth * 0.5f).ShrinkPercent(0.15f)
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
-    
+
     let draw_event (now: ChartTime) (ev: GameplayEvent) =
         let ms_to_y (time: Time) =
             options.HitPosition.Value
@@ -156,9 +157,9 @@ type private HitOverlay
                 let action_y = ms_to_y ev.Time
                 draw_delta ev.Column action_y note_y color
 
-                if x.Delta < 0.0f<ms / rate> then 
+                if x.Delta < 0.0f<ms / rate> then
                     label_before ev.Column action_y (sprintf "%.1fms" x.Delta) color
-                else 
+                else
                     label_after ev.Column action_y (sprintf "+%.1fms" x.Delta) color
 
         | Release x ->
@@ -175,9 +176,9 @@ type private HitOverlay
                 let action_y = ms_to_y ev.Time
                 draw_delta ev.Column action_y note_y color
 
-                if x.Delta < 0.0f<ms / rate> then 
+                if x.Delta < 0.0f<ms / rate> then
                     label_before ev.Column action_y (sprintf "%s  %.1fms" Icons.CHEVRON_UP x.Delta) color
-                else 
+                else
                     label_after ev.Column action_y (sprintf "%s  +%.1fms" Icons.CHEVRON_UP x.Delta) color
 
         | GhostTap x ->
@@ -228,3 +229,12 @@ type private HitOverlay
             while hit_events.Length - 1 > peek && hit_events.[peek].Time < until_time do
                 draw_event now hit_events.[peek]
                 peek <- peek + 1
+
+    override this.Update (elapsed_ms, moved): unit =
+        base.Update(elapsed_ms, moved)
+
+        let time = state.CurrentChartTime()
+        if time < last_time then
+            while seek > 0 && hit_events.[seek].Time > time do
+                seek <- seek - 1
+        last_time <- state.CurrentChartTime()

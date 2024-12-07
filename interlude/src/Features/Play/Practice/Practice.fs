@@ -149,7 +149,7 @@ module PracticeScreen =
                         restart this
 
                 elif state.Paused.Value then
-                    if (%%"skip").Tapped() then
+                    if (%%"pause").Tapped() then
                         resume this
                     else
                         SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
@@ -158,7 +158,7 @@ module PracticeScreen =
                     if not state.Paused.Value then
                         pause this
                         input_key_state <- 0us
-                    else 
+                    else
                         Screen.back Transitions.Default |> ignore
 
                 elif not (liveplay :> IReplayProvider).Finished then
