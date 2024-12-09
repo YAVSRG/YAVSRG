@@ -19,12 +19,18 @@ type RatingTile(color: Color, value: float32) =
         Render.rect this.Bounds color.O1
         Text.fill_b (Style.font, sprintf "%.0f" value, this.Bounds.Shrink(10.0f, 0.0f), Colors.text, Alignment.CENTER)
 
-type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
+type SkillsetGraph(pattern_type: CorePattern, data: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
 
-    let push = target.Push |> Array.ofList |> Array.rev
-    let control = target.Control |> Array.ofList |> Array.rev
-    let accuracy = target.Accuracy |> Array.ofList |> Array.rev
+    let mult = pattern_type.RatingMultiplier
+    let total_rating = (PatternStatLine.value data.Push + PatternStatLine.value data.Control + PatternStatLine.value data.Accuracy) * mult
+    let push_rating = mult * PatternStatLine.value data.Push
+    let control_rating = mult * PatternStatLine.value data.Control
+    let accuracy_rating = mult * PatternStatLine.value data.Accuracy
+
+    let push = data.Push |> Array.ofList |> Array.rev
+    let control = data.Control |> Array.ofList |> Array.rev
+    let accuracy = data.Accuracy |> Array.ofList |> Array.rev
 
     let min_bpm = (Seq.concat [push; control; accuracy] |> Seq.map _.BPM |> Seq.min |> float32) - 5.0f
     let max_bpm = push |> Seq.map _.BPM |> Seq.max |> float32
@@ -49,13 +55,14 @@ type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
 
         if (not hover || bpm <> tooltip_bpm) && next_hover && Mouse.moved_recently () then
 
+            let threshold_a, threshold_c, threshold_p = pattern_type.AccuracyBreakpoints
             tooltip_bpm <- bpm
             let content =
-                Callout.Normal
+                Callout.Small
                     .Title(sprintf "%i BPM %O" bpm pattern_type)
-                    .Body(sprintf "Push: %s with passable acc." (PatternStatLine.get_duration_at bpm target.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
-                    .Body(sprintf "Control: %s with good acc." (PatternStatLine.get_duration_at bpm target.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
-                    .Body(sprintf "Accuracy: %s with high acc." (PatternStatLine.get_duration_at bpm target.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration))
+                    .Body(sprintf "Push: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
+                    .Body(sprintf "Control: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
+                    .Body(sprintf "Accuracy: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
             tooltip <- Some (content, Callout.measure content)
 
         elif tooltip.IsSome && not next_hover then
@@ -84,7 +91,8 @@ type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
             Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.yellow_accent
             last <- float32 point.BPM
 
-        Render.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
+        if max_duration > 60000.0f<ms / rate> then
+            Render.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
 
         Render.rect (this.Bounds.SliceB(AXIS_HEIGHT)) Colors.shadow_2.O1
         let SPACING = floor(max_bpm / 200.0f) * 10.0f |> max 10.0f
@@ -93,6 +101,17 @@ type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
             bpm <- bpm + SPACING
             Render.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 20.0f, x bpm, bottom + 7.5f, Colors.white, Alignment.CENTER)
+
+        Text.fill_b(Style.font, sprintf "%O rating: %.0f" pattern_type total_rating, this.Bounds.Shrink(10.0f).SliceT(50.0f).ShrinkR(10.0f), Colors.text, Alignment.RIGHT)
+
+        Text.fill_b(Style.font, sprintf "Push rating: %.0f" push_rating, this.Bounds.Shrink(10.0f).ShrinkT(50.0f).SliceT(35.0f).ShrinkR(35.0f), Colors.text_subheading, Alignment.RIGHT)
+        Render.rect (this.Bounds.Shrink(10.0f).ShrinkT(50.0f).SliceT(35.0f).SliceR(35.0f).Shrink(10.0f)) Colors.blue_accent
+
+        Text.fill_b(Style.font, sprintf "Control rating: %.0f" control_rating, this.Bounds.Shrink(10.0f).ShrinkT(85.0f).SliceT(35.0f).ShrinkR(35.0f), Colors.text_subheading, Alignment.RIGHT)
+        Render.rect (this.Bounds.Shrink(10.0f).ShrinkT(85.0f).SliceT(35.0f).SliceR(35.0f).Shrink(10.0f)) Colors.green_accent
+
+        Text.fill_b(Style.font, sprintf "Accuracy rating: %.0f" accuracy_rating, this.Bounds.Shrink(10.0f).ShrinkT(120.0f).SliceT(35.0f).ShrinkR(35.0f), Colors.text_subheading, Alignment.RIGHT)
+        Render.rect (this.Bounds.Shrink(10.0f).ShrinkT(120.0f).SliceT(35.0f).SliceR(35.0f).Shrink(10.0f)) Colors.yellow_accent
 
         match tooltip with
         | None -> ()
@@ -111,18 +130,7 @@ type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
         if data = PatternSkillBreakdown.Default then
             EmptyState(Icons.X, %"stats.skillsets.empty") :> Widget
         else
-            let total = PatternStatLine.value data.Push + PatternStatLine.value data.Accuracy + PatternStatLine.value data.Control
-            let mult = pattern_type.RatingMultiplier
-            Container(NodeType.None)
-            |+ SkillsetGraph(pattern_type, data, Position = Position.ShrinkB(100.0f))
-            |+ (
-                GridFlowContainer(60.0f, 4, Spacing = (90.0f, 0.0f), Position = Position.SliceB(60.0f))
-                |+ RatingTile(Colors.yellow_accent, mult * PatternStatLine.value data.Accuracy)
-                |+ RatingTile(Colors.green_accent, mult * PatternStatLine.value data.Control)
-                |+ RatingTile(Colors.blue_accent, mult * PatternStatLine.value data.Push)
-                |+ RatingTile(Colors.shadow_2, mult * total)
-            )
-            :> Widget
+            SkillsetGraph(pattern_type, data)
 
 type Skills() =
     inherit Container(NodeType.None)
