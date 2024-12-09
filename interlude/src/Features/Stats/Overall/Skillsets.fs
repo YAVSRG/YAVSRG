@@ -100,7 +100,7 @@ type SkillsetGraph(pattern_type: CorePattern, target: PatternSkillBreakdown) =
             let x, y = Mouse.pos()
             let x, y = x - width * 0.5f |> max (this.Bounds.Left + 20.0f) |> min (this.Bounds.Right - width - 20.0f), y - height - 20.0f
             let b = Rect.Box(x, y, width, height)
-            Render.rect b Colors.cyan_shadow.O3
+            Render.rect b Colors.cyan_shadow
             Render.rect (b.BorderL(Style.PADDING)) Colors.cyan_accent
             Render.rect (b.BorderCornersT(Style.PADDING)) Colors.cyan_accent
             Render.rect (b.BorderR(Style.PADDING)) Colors.cyan_accent

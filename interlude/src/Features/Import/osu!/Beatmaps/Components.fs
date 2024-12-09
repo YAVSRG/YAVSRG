@@ -44,7 +44,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                             function
                             | Some result ->
                                 Notifications.task_feedback (
-                                    Icons.DOWNLOAD, 
+                                    Icons.DOWNLOAD,
                                     %"notification.install_song",
                                     [data.title; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_song.body"
                                 )
