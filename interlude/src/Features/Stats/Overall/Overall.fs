@@ -10,6 +10,7 @@ type OverallTab() =
 
     override this.Init(parent) =
         this
+        |+ OverallHeader(Position = Position.SliceLPercent(0.4f).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f))
         |+ OverallTime(
             (fun () -> Stats.TOTAL_STATS.GameTime + Stats.CURRENT_SESSION.GameTime),
             (fun () -> Stats.TOTAL_STATS.PlayTime + Stats.CURRENT_SESSION.PlayTime),

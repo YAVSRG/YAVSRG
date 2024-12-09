@@ -12,7 +12,7 @@ open Interlude.UI
 type GraphSource =
     | AllTime
     | Recent
-    | Session
+    | Session // not used; // todo: store fast-decaying and slow-decaying skills separately in sessions
     override this.ToString() =
         match this with
         | AllTime -> "All time"
@@ -60,9 +60,9 @@ type SkillsetGraph(pattern_type: CorePattern, source: GraphSource, data: Pattern
             let content =
                 Callout.Small
                     .Title(sprintf "%i BPM %O" bpm pattern_type)
-                    .Body(sprintf "Push: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
-                    .Body(sprintf "Control: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
-                    .Body(sprintf "Accuracy: %s with %g%% on SC" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
+                    .Body(sprintf "Push: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
+                    .Body(sprintf "Control: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
+                    .Body(sprintf "Accuracy: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
             tooltip <- Some (content, Callout.measure content)
 
         elif tooltip.IsSome && not next_hover then
@@ -136,7 +136,7 @@ type SkillsetGraph(pattern_type: CorePattern, source: GraphSource, data: Pattern
         let keymode_info =
             match source with
             | AllTime -> Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3]
-            | Recent -> Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3] // todo: sessions store fast-decaying and slow-decaying skills separately
+            | Recent -> Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3]
             | Session -> Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3]
         let data =
             match pattern_type with

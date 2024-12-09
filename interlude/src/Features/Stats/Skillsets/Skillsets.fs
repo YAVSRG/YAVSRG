@@ -36,7 +36,7 @@ type Skills() =
                     refresh_graph()
                 ),
                 (fun () -> sprintf "%O" source.Value),
-                !%Palette.DARK_100,
+                K Colors.black.O2,
                 TiltLeft = false,
                 Position = Position.SliceT(50.0f).ShrinkR(400.0f)
             )
@@ -48,7 +48,7 @@ type Skills() =
                     refresh_graph()
                 ),
                 (fun () -> sprintf "%iK" keymode.Value),
-                !%Palette.MAIN_100,
+                K Colors.shadow_2.O2,
                 Position = Position.SliceT(50.0f).ShrinkR(275.0f).SliceR(100.0f)
             )
 
@@ -59,7 +59,7 @@ type Skills() =
                     refresh_graph()
                 ),
                 (fun () -> sprintf "%O" skill.Value),
-                !%Palette.DARK_100,
+                K Colors.black.O2,
                 TiltRight = false,
                 Position = Position.SliceT(50.0f).SliceR(250.0f)
             )

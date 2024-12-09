@@ -119,7 +119,6 @@ type private BasicStats() =
             Align = Alignment.RIGHT
         )
 
-
         |+ Text(
             %"stats.session.title",
             Position = Position.Row(500.0f, 70.0f).Shrink(40.0f, 0.0f),
@@ -254,7 +253,6 @@ type private Tabs() =
     override this.Draw() =
         Render.rect (this.Bounds.ShrinkT(50.0f)) !*Palette.DARK_100
         base.Draw()
-
 
 type StatsScreen() =
     inherit Screen()

@@ -212,12 +212,13 @@ type ScoreList(start_time: int64, end_time: int64) =
         let mutable has_scores = false
 
         this
-        |+ ScrollContainer(scores, Position = Position.ShrinkX(20.0f).ShrinkT(20.0f).ShrinkB(60.0f), Margin = 5.0f)
+        |+ ScrollContainer(scores, Position = Position.Shrink(20.0f), Margin = 5.0f)
         |+ Button(
             Icons.LIST + " " + %"stats.session.make_playlist",
             make_playlist,
             Align = Alignment.RIGHT,
-            Position = Position.Shrink(10.0f).SliceB(40.0f).SliceR(400.0f).ShrinkX(10.0f)
+            Floating = true,
+            Position = Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f)
         )
             .Conditional(fun () -> has_scores)
         |* EmptyState(Icons.WIND, "No scores this session", Position = Position.ShrinkT(160.0f))

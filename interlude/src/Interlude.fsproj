@@ -142,6 +142,7 @@
     <Compile Include="Features\Stats\Sessions\PreviousSession.fs" />
     <Compile Include="Features\Stats\Sessions\CurrentSession.fs" />
     <Compile Include="Features\Stats\Sessions\Sessions.fs" />
+    <Compile Include="Features\Stats\Overall\OverallHeader.fs" />
     <Compile Include="Features\Stats\Overall\OverallTime.fs" />
     <Compile Include="Features\Stats\Overall\Overall.fs" />
     <Compile Include="Features\Stats\StatsPage.fs" />
