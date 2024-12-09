@@ -393,12 +393,14 @@ module WindowThread =
                 GLFW.PollEvents()
 
         WindowsKey.enable()
-        GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GameThread.stop()
+        GLFW.MakeContextCurrent(NativePtr.nullPtr<Window>)
         GLFW.DestroyWindow(window)
         GLFW.Terminate()
 
         if GameThread.has_fatal_error() then Error() else Ok()
+
+    let exit () = GLFW.SetWindowShouldClose(window, true)
 
     let debug_info() : string =
         assert(not (NativePtr.isNullPtr window))

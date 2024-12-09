@@ -69,7 +69,6 @@ module Screen =
 
     let mutable enable_background = true
     let mutable timescale = 1.0
-    let mutable exit = false
     let mutable current_type = Type.SplashScreen
     let mutable private current = Unchecked.defaultof<T>
     let private screens: T array = Array.zeroCreate 5
@@ -184,9 +183,6 @@ module Screen =
 
             if (%%"exit").Tapped() then
                 back Transitions.UnderLogo |> ignore
-
-            if exit then
-                this.ShouldExit <- true
 
         override this.Draw() =
             if enable_background && current_type <> Type.SplashScreen then

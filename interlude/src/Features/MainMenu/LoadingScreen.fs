@@ -1,7 +1,8 @@
 ﻿namespace Interlude.Features.MainMenu
 
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.Options
@@ -77,5 +78,5 @@ type LoadingScreen() =
         )
 
     override this.OnBack() =
-        Screen.exit <- true
+        WindowThread.exit()
         None

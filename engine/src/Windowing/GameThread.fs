@@ -10,7 +10,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Common
 
 type UIEntryPoint =
-    abstract member ShouldExit: bool
     abstract member Init: unit -> unit
     abstract member Update: float * bool -> unit
     abstract member Draw: unit -> unit
@@ -173,9 +172,6 @@ module GameThread =
         Devices.update elapsed_ms
         update_time <- now () - start_of_frame
 
-        if ui_root.ShouldExit then
-            GLFW.SetWindowShouldClose(window, true)
-
         // Draw
         let before_draw = now ()
         Render.start ()
@@ -187,9 +183,8 @@ module GameThread =
         frame_is_ready <- now ()
         draw_time <- frame_is_ready - before_draw
 
-        if not ui_root.ShouldExit then
-            GLFW.SwapBuffers(window)
-            real_next_frame <- now ()
+        GLFW.SwapBuffers(window)
+        real_next_frame <- now ()
 
         // Performance profiling
         fps_count <- fps_count + 1

@@ -125,7 +125,7 @@ module Printerlude =
 
         let register_commands (ctx: ShellContext) =
             ctx
-                .WithCommand("exit", "Exits the game", (fun () -> UI.Screen.exit <- true))
+                .WithCommand("exit", "Exits the game", (fun () -> WindowThread.exit()))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
                 .WithCommand("crash", "Crashes the game", fun () -> GameThread.defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
@@ -138,7 +138,7 @@ module Printerlude =
                         Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
                         Updates.restart_on_exit <- true
-                        UI.Screen.exit <- true
+                        WindowThread.exit()
                 )
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
                 .WithIOCommand("toggle_background", "Enables/disables background rendering", "enabled", toggle_background)

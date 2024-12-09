@@ -10,8 +10,6 @@ type Root() =
     override this.Position
         with set (value) = failwith "root position is tied to the bounds of the screen"
 
-    member val ShouldExit = false with get, set
-
     override this.Init(parent: Widget) = failwith "call .Init() instead"
     abstract member Init: unit -> unit
 
@@ -28,7 +26,6 @@ type Root() =
             this.VisibleBounds <- Render._bounds
 
     interface UIEntryPoint with
-        member this.ShouldExit = this.ShouldExit
         member this.Init() = this.Init()
         member this.Update(elapsed_ms, moved) = this.Update(elapsed_ms, moved)
         member this.Draw() = this.Draw()
