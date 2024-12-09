@@ -6,8 +6,8 @@ open Prelude.Data.User
 type OverallTab() =
     inherit Container(NodeType.Leaf)
 
-    let content_panel = SwapContainer(Skills(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkT(160.0f).ShrinkX(40.0f))
-    
+    let content_panel = SwapContainer(Skills(), Position = Position.SliceRPercent(0.6f).ShrinkB(80.0f).ShrinkT(200.0f).ShrinkX(40.0f))
+
     override this.Init(parent) =
         this
         |+ OverallTime(

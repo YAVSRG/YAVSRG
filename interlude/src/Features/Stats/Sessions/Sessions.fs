@@ -12,7 +12,7 @@ open Prelude.Data.User
 type SessionsTab() =
     inherit Container(NodeType.Leaf)
 
-    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkY(40.0f).ShrinkX(40.0f))
+    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
 
     let TODAY = Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime
 

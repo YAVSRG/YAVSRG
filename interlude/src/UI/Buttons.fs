@@ -103,7 +103,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
     override this.Draw() =
 
         let text =
-            if icon = "" then 
+            if icon = "" then
                 label_func()
             elif this.Focused then
                 sprintf "%s %s" this.HoverIcon this.HoverText
