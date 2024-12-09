@@ -1,22 +1,21 @@
-0.7.26.10
+0.7.26.11
 ====
 
-Engine patch ahead of the when you see it update
+Separating the engine update from the stats update was a good idea
+Thanks to those in the Discord (especially @Kori) for reporting various visual issues which are now fixed
 
-# Engine changes
-- Fixed Borderless Fullscreen not working correctly when the task bar is hidden
-- Changed hotkeys to show FPS/performance overlay to F3 and F4
-- The game no longer opens a console window on start, crashes open the log file directly
-- Opening Interlude.exe while it's already running focuses the window
-- Simplified lots of game engine internals
+# Bug fixes
+- Fixed background being transparent with 100% background dim
+- Fixed background being transparent during the loading transition to another image
+- Fixed a visual issue with LN bodies on most skins
+- (Hopefully) fixed issue where the game sometimes hangs when exiting
+
+# UI Improvements
+- Added a hotkey for the stats screen (Ctrl+J default)
+- You can scrub through the chart preview and replays with scroll wheel
+- You can pause the chart preview with Space or Middle Click (both rebindable)
+- Pressing the mod menu hotkey (S default) while mods menu is open closes it again
 
 # Skinning
-- Timing display now supports being rotated sideways
-- Fixed bug where black background was not removed from osu!-converted explosions
-
-# Other
-- Stat tracking has been overhauled internally for a new feature coming out in the next few days..
-- Press tab while editing ruleset timing windows to auto-select next input box
-- Various localisation fixes
-- Improved look of local scores
+- Default text for Early/Late meter has been changed from "Fast"/"Slow" to "Early"/"Late"
 
