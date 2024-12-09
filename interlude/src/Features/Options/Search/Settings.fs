@@ -75,14 +75,14 @@ module Settings =
                     %"system.audiovolume",
                     Slider.Percent(
                         options.AudioVolume
-                        |> Setting.trigger (fun v -> Devices.change_volume (v, v))
+                        |> Setting.trigger (fun v -> Audio.change_volume (v, v))
                         |> Setting.f32
                     )
                 )
             if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
                     %"system.audiodevice",
-                    SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
+                    SelectDropdown(Array.ofSeq (Audio.list_devices ()), Setting.trigger Audio.change_device config.AudioDevice)
                 )
 
             if token_match tokens [|%"system.audiooffset"|] then

@@ -20,7 +20,7 @@
 	  <Compile Include="Audio\Shared.fs" />
 	  <Compile Include="Audio\Song.fs" />
 	  <Compile Include="Audio\SoundEffect.fs" />
-	  <Compile Include="Audio\Devices.fs" />
+	  <Compile Include="Audio\Audio.fs" />
 	  <Compile Include="Audio\Waveform.fs" />
 	  <Compile Include="Input\Input.fs" />
 	  <Compile Include="Input\Hotkeys.fs" />

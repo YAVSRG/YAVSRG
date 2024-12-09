@@ -79,7 +79,7 @@ module Transitions =
             )
 
         if transition_type = EnterGameplayFadeAudio then 
-            Devices.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
+            Audio.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
 
         draw_internal transition_type inbound (float32 amount) (bounds.Expand 1.0f)
 
@@ -106,6 +106,6 @@ module Transitions =
                     in_timer.Reset()
                     out_timer.Reset()
                     current <- None
-                    if transition_type = EnterGameplayFadeAudio then Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+                    if transition_type = EnterGameplayFadeAudio then Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
                 )
             ]

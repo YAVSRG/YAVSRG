@@ -21,20 +21,20 @@ type Volume() =
         if (%%"volume_up").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (0.0003 * elapsed_ms)) options.AudioVolume
-            Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
             slider.Target <- float32 options.AudioVolume.Value
 
         elif (%%"volume_down").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (-0.0003 * elapsed_ms)) options.AudioVolume
-            Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
             slider.Target <- float32 options.AudioVolume.Value
 
         elif (%%"volume").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (float (Mouse.scroll ()) * 0.02)) options.AudioVolume
 
-            Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
             slider.Target <- float32 options.AudioVolume.Value
 
         else

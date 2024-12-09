@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
-open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
@@ -17,14 +16,14 @@ type AudioPage() =
             %"system.audiovolume",
             Slider.Percent(
                 options.AudioVolume
-                |> Setting.trigger (fun v -> Devices.change_volume (v, v))
+                |> Setting.trigger (fun v -> Audio.change_volume (v, v))
                 |> Setting.f32
             )
         )
             .Pos(0)
         |+ PageSetting(
             %"system.audiodevice",
-            SelectDropdown(Array.ofSeq (Devices.list ()), Setting.trigger Devices.change config.AudioDevice)
+            SelectDropdown(Array.ofSeq (Audio.list_devices ()), Setting.trigger Audio.change_device config.AudioDevice)
         )
             .Pos(2)
         |+ PageSetting(
@@ -36,7 +35,7 @@ type AudioPage() =
         )
             .Help(Help.Info("system.audio_pitch_rates"))
             .Pos(5)
-        |+ PageSetting(%"system.menus_muffle_song", 
+        |+ PageSetting(%"system.menus_muffle_song",
             Checkbox (
                 options.MenusMuffleSong
                 |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)

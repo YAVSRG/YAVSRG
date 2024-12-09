@@ -167,7 +167,7 @@ module Logo =
                     for i in 0..31 do
                         let level =
                             (seq { (i * 8) .. (i * 8 + 7) }
-                             |> Seq.map (fun x -> Devices.waveform.[x])
+                             |> Seq.map (fun x -> Audio.waveform.[x])
                              |> Seq.sum)
                             * 0.125f
                             + MathF.Sin(v * WAVE_SPEED + float32 i * WAVE_SCALE) * WAVE_HEIGHT

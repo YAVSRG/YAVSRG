@@ -169,7 +169,7 @@ module GameThread =
         ui_root.Update(elapsed_ms, resized)
         resized <- false
         Input.finish_frame_events ()
-        Devices.update elapsed_ms
+        Audio.update elapsed_ms
         update_time <- now () - start_of_frame
 
         // Draw

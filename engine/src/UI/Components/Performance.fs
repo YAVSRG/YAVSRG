@@ -29,7 +29,7 @@ type PerformanceMonitor() =
         base.Update(elapsed_ms, moved)
         
         if dump_debug.Tapped() then
-            Logging.Debug(Devices.debug_info())
+            Logging.Debug(Audio.debug_info())
             Logging.Debug(Render.debug_info())
             WindowThread.defer (fun () -> Logging.Debug(WindowThread.debug_info()))
 

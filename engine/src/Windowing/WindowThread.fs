@@ -365,7 +365,7 @@ module WindowThread =
         | None -> ()
 
         GameThread.init(window, icon, init_thunk)
-        Devices.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
+        Audio.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
         resize_callback window width height
 
         Input.init window

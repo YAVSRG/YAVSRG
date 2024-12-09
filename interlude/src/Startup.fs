@@ -36,7 +36,7 @@ module Startup =
                 LevelSelectScreen()
             |]
 
-        Devices.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
+        Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
         Song.set_pitch_rates_enabled options.AudioPitchRates.Value
 
         FileDrop.replay_dropped.Add(fun replay ->

@@ -4,7 +4,7 @@ open System
 open ManagedBass
 open Percyqaz.Common
 
-module Devices =
+module Audio =
 
     let private fft: float32 array = Array.zeroCreate 1024
     let waveform: float32 array = Array.zeroCreate 256
@@ -51,7 +51,7 @@ module Devices =
     let private current_device_changed_ev = Event<unit>()
     let current_device_changed = current_device_changed_ev.Publish
 
-    let private get () =
+    let private detect_devices () =
         devices <-
             seq {
                 for i = 1 to Bass.DeviceCount do
@@ -65,14 +65,14 @@ module Devices =
             }
             |> Array.ofSeq
 
-    let list () =
+    let list_devices () =
         seq {
             yield -1, "Default"
             yield! devices
         }
         |> Array.ofSeq
 
-    let change (index: int) =
+    let change_device (index: int) =
         try
             let id =
                 if index = -1 then
@@ -93,11 +93,11 @@ module Devices =
             Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
     let debug_info() : string =
-        
+
         match Bass.GetInfo() with
         | false, _ -> sprintf "-- AUDIO DEBUG INFO --\nBass Version: %O\nOther details could not be retrieved"  Bass.Version
         | true, info ->
-            sprintf 
+            sprintf
                 """-- AUDIO DEBUG INFO --
 BASS Version: %O
 Estimated latency: %i
@@ -109,7 +109,7 @@ DirectSound Version: %i"""
                 info.DSVersion
 
     let init (device: int, device_period: int, device_buffer_length: int) =
-        get ()
+        detect_devices ()
 
         // https://github.com/ppy/osu/issues/3800
         Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
@@ -121,5 +121,5 @@ DirectSound Version: %i"""
         for (i, name) in devices do
             Bass.Init(i, Flags = DeviceInitFlags.Latency) |> display_bass_error
 
-        change device
+        change_device device
         Bass.GlobalStreamVolume <- 0
