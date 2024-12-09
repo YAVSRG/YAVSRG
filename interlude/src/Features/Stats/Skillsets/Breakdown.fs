@@ -7,7 +7,7 @@ open Prelude.Data.User
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 
-type Skills() =
+type SkillBreakdown() =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
@@ -25,9 +25,9 @@ type Skills() =
         let skill = Setting.simple Jacks
         let source = Setting.simple AllTime
 
-        let graph_container = SwapContainer(SkillsetGraph.Create(keymode.Value, skill.Value, source.Value), Position = Position.ShrinkT(50.0f))
+        let graph_container = SwapContainer(SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value), Position = Position.ShrinkT(50.0f))
         let refresh_graph() =
-            graph_container.Current <- SkillsetGraph.Create(keymode.Value, skill.Value, source.Value)
+            graph_container.Current <- SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value)
 
         let source_switcher =
             StylishButton(

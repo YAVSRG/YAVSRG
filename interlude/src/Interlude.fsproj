@@ -134,8 +134,10 @@
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\Score.fs" />
     <Compile Include="Features\Stats\PlayCount.fs" />
-    <Compile Include="Features\Stats\Skillsets\Graph.fs" />
-    <Compile Include="Features\Stats\Skillsets\Skillsets.fs" />
+    <Compile Include="Features\Stats\Skillsets\BreakdownGraph.fs" />
+    <Compile Include="Features\Stats\Skillsets\Breakdown.fs" />
+    <Compile Include="Features\Stats\Skillsets\TimelineGraph.fs" />
+    <Compile Include="Features\Stats\Skillsets\Timeline.fs" />
     <Compile Include="Features\Stats\Sessions\SessionTime.fs" />
     <Compile Include="Features\Stats\Sessions\ScoreList.fs" />
     <Compile Include="Features\Stats\Sessions\Activity.fs" />

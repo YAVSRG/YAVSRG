@@ -12,7 +12,7 @@ type KeymodeSkillIncrease =
         Combined: CombinedSkillIncrease
     }
     member this.Total = this.Jacks.Total + this.Chordstream.Total + this.Stream.Total + this.Combined.Total
-    override this.ToString() = 
+    override this.ToString() =
         if this.Total = 0.0f then "No change" else
         [
             if this.Jacks.Total > 0.0f then sprintf "Jacks: %O" this.Jacks else "Jacks: --"
@@ -48,8 +48,9 @@ type KeymodeSkillBreakdown =
             Stream = PatternSkillBreakdown.Default
             Combined = CombinedSkillBreakdown.Default
         }
-    
+
     member this.Copy = { Jacks = this.Jacks.Copy; Chordstream = this.Chordstream.Copy; Stream = this.Stream.Copy; Combined = this.Combined.Copy }
+
     member this.Minus (other: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
         {
             Jacks = this.Jacks.CompareImprovement CorePattern.Jacks.RatingMultiplier other.Jacks
@@ -57,7 +58,7 @@ type KeymodeSkillBreakdown =
             Stream = this.Stream.CompareImprovement CorePattern.Stream.RatingMultiplier other.Stream
             Combined = this.Combined.CompareImprovement other.Combined
         }
-    
+
     member this.Scale (multiplier: float32) =
         {
             Jacks = this.Jacks.Scale multiplier
@@ -89,7 +90,7 @@ module KeymodeSkillBreakdown =
         let total_chordstream = patterns.Clusters |> Seq.where(fun c -> c.Pattern = Chordstream) |> Seq.sumBy _.Amount
         let total_jacks = patterns.Clusters |> Seq.where(fun c -> c.Pattern = Jacks) |> Seq.sumBy _.Amount
 
-        let combined_multiplier = 
+        let combined_multiplier =
             (
                 sqrt (total_stream / patterns.Duration)
                 + sqrt (total_chordstream / patterns.Duration)
@@ -104,7 +105,7 @@ module KeymodeSkillBreakdown =
 
         for p in patterns.Clusters do
 
-            let time = 
+            let time =
                 patterns.Clusters
                 |> Seq.filter (fun p2 -> p2.Pattern = p.Pattern && p2.BPM >= p.BPM && p2.Density50 >= p.Density50)
                 |> Seq.sumBy _.Amount
@@ -114,7 +115,7 @@ module KeymodeSkillBreakdown =
                 | Jacks -> skills.Jacks
                 | Chordstream -> skills.Chordstream
                 | Stream -> skills.Stream
-                
+
             PatternSkillBreakdown.observe p.Pattern (p.Density10 * rate, accuracy, time / rate * 1.8f) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density25 * rate, accuracy, time / rate * 1.5f) skill
             PatternSkillBreakdown.observe p.Pattern (p.Density50 * rate, accuracy, time / rate) skill
@@ -122,7 +123,7 @@ module KeymodeSkillBreakdown =
             PatternSkillBreakdown.observe p.Pattern (p.Density90 * rate, accuracy, time / rate * 0.2f) skill
 
     let score (patterns: PatternReport) (accuracy: float) (rate: Rate) (skills: KeymodeSkillBreakdown) : KeymodeSkillIncrease =
-        
+
         let before = skills.Copy
 
         skill_increase patterns accuracy rate skills

@@ -19,7 +19,7 @@ type GraphSource =
         | Recent -> "Last 2 weeks"
         | Session -> "This session"
 
-type SkillsetGraph(pattern_type: CorePattern, source: GraphSource, data: PatternSkillBreakdown) =
+type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: PatternSkillBreakdown) =
     inherit StaticWidget(NodeType.None)
 
     let mult = pattern_type.RatingMultiplier
@@ -60,9 +60,9 @@ type SkillsetGraph(pattern_type: CorePattern, source: GraphSource, data: Pattern
             let content =
                 Callout.Small
                     .Title(sprintf "%i BPM %O" bpm pattern_type)
-                    .Body(sprintf "Push: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
-                    .Body(sprintf "Control: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
-                    .Body(sprintf "Accuracy: %s @ %g%% on SC" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
+                    .Body(sprintf "Push: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
+                    .Body(sprintf "Control: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
+                    .Body(sprintf "Accuracy: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
             tooltip <- Some (content, Callout.measure content)
 
         elif tooltip.IsSome && not next_hover then
@@ -147,4 +147,4 @@ type SkillsetGraph(pattern_type: CorePattern, source: GraphSource, data: Pattern
         if data = PatternSkillBreakdown.Default then
             EmptyState(Icons.X, %"stats.skillsets.empty") :> Widget
         else
-            SkillsetGraph(pattern_type, source, data)
+            SkillBreakdownGraph(pattern_type, source, data)
