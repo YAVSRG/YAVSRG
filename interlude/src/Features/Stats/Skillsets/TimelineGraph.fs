@@ -91,8 +91,8 @@ type SkillTimelineGraph(keymode: int) =
                         <| color.AsQuad
 
                 Render.quad
-                    <| Quad.createv (x, y - 7.5f) (x + 7.5f, y) (x, y + 7.5f) (x - 7.5f, y)
-                    <| (if i = hover_index && show_tooltip then Colors.white else color).AsQuad
+                    <| Quad.createv (previous_x, previous_y - 7.5f) (previous_x + 7.5f, previous_y) (previous_x, previous_y + 7.5f) (previous_x - 7.5f, previous_y)
+                    <| (if i - 1 = hover_index && show_tooltip then Colors.white else color).AsQuad
 
                 previous_x <- x
                 previous_y <- y
