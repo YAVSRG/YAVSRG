@@ -144,3 +144,6 @@ type SessionsTab() =
                 cycle_session_bk()
             elif (%%"right").Tapped() then
                 cycle_session_fd()
+
+    member this.ShowSessionForDate(date: DateOnly) =
+        selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])

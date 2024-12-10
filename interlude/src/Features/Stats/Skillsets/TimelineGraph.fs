@@ -16,6 +16,11 @@ type private GraphDataPoint =
         Value: float32
     }
 
+module SkillTimelineGraph =
+
+    let view_date_ev = Event<DateOnly>()
+    let on_view_date = view_date_ev.Publish
+
 type SkillTimelineGraph(keymode: int) =
     inherit StaticWidget(NodeType.None)
 
@@ -55,6 +60,9 @@ type SkillTimelineGraph(keymode: int) =
             while hover_index > 0 && abs (snd date_data.[hover_index - 1] - hover_day) < abs (snd date_data.[hover_index] - hover_day) do
                 hover_index <- hover_index - 1
             show_tooltip <- date_data.Length > 0
+
+            if show_tooltip && Mouse.left_click() then
+                SkillTimelineGraph.view_date_ev.Trigger(fst date_data.[hover_index])
         else
             show_tooltip <- false
 
@@ -76,7 +84,7 @@ type SkillTimelineGraph(keymode: int) =
             let mutable previous_y = 0.0f
             let mutable previous_day = -31
             while i < data.Length do
-                let x, y = x data.[i].DaysAgo, y data[i].Value
+                let x, y = x data.[i].DaysAgo, y data.[i].Value
 
                 if data.[i].DaysAgo - previous_day <= 30 then
                     let theta = MathF.Atan((previous_y - y) / (previous_x - x))
@@ -96,16 +104,45 @@ type SkillTimelineGraph(keymode: int) =
 
                 previous_x <- x
                 previous_y <- y
-                previous_day <- data[i].DaysAgo
+                previous_day <- data.[i].DaysAgo
                 if float32 data.[i].DaysAgo > day_range.Value then i <- data.Length
                 i <- i + 1
 
         Render.stencil_create false
-        Render.rect this.Bounds Color.Transparent
+        Render.rect (this.Bounds.ShrinkB AXIS_HEIGHT) Color.Transparent
         Render.stencil_begin_draw()
         draw_graph Colors.red_accent jack_data
         draw_graph Colors.green_accent chordstream_data
         draw_graph Colors.cyan_accent stream_data
+        Render.stencil_finish()
+
+        // X AXIS
+        Render.stencil_create false
+        Render.rect (this.Bounds.SliceB AXIS_HEIGHT) Color.Transparent
+        Render.stencil_begin_draw()
+        Render.rect (this.Bounds.SliceB(AXIS_HEIGHT).SliceT(2.5f)) Colors.white
+        if day_range.Value > 180.0f then
+            let mutable d = TODAY.AddDays(1 - TODAY.Day).AddMonths(1) // start of month
+            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+                d <- d.AddMonths(-1)
+                let x = x (TODAY.DayNumber - d.DayNumber)
+                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Text.draw_aligned(Style.font, d.ToString("MMM yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
+        elif day_range.Value > 90.0f then
+            let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
+            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+                d <- d.AddDays(-14)
+                let x = x (TODAY.DayNumber - d.DayNumber)
+                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
+        else
+            let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
+            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+                d <- d.AddDays(-7)
+                let x = x (TODAY.DayNumber - d.DayNumber)
+                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
+
         Render.stencil_finish()
 
         let inline draw_tooltip () =
@@ -123,7 +160,6 @@ type SkillTimelineGraph(keymode: int) =
             Text.fill_b(Style.font, sprintf "%O %.0f" Chordstream chordstream_rating, box.ShrinkT(85.0f).SliceT(40.0f), Colors.text_green, Alignment.CENTER)
             Text.fill_b(Style.font, sprintf "%O %.0f" Stream stream_rating, box.ShrinkT(125.0f).SliceT(40.0f), Colors.text_cyan, Alignment.CENTER)
             Text.fill_b(Style.font, "Click to view", box.SliceB(35.0f), Colors.text_subheading, Alignment.CENTER)
-            // todo: click to view
 
         if show_tooltip then
             draw_tooltip()

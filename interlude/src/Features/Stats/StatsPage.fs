@@ -12,6 +12,8 @@ type StatsPage() =
     let all_time_stats = OverallTab()
     let swap = SwapContainer(session_stats)
 
+    let view_date_listener = SkillTimelineGraph.on_view_date.Subscribe(fun date -> session_stats.ShowSessionForDate date; swap.Current <- session_stats)
+
     override this.Header() =
         let tabs =
             RadioButtons.create_tabs {
@@ -28,4 +30,4 @@ type StatsPage() =
     override this.Content() = swap
 
     override this.Title = %"menu.stats"
-    override this.OnClose() = ()
+    override this.OnClose() = view_date_listener.Dispose()
