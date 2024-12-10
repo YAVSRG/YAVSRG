@@ -48,7 +48,7 @@ type PerformanceSettingsPage() =
             .Pos(2)
         |+ Text(%"system.framelimit.unlimited_warning",
             Color = K Colors.text_red,
-            Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
+            Position = pretty_pos(4, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
