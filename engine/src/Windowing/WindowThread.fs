@@ -401,7 +401,9 @@ module WindowThread =
 
         if GameThread.has_fatal_error() then Error() else Ok()
 
-    let exit () = GLFW.SetWindowShouldClose(window, true)
+    let exit () =
+        GLFW.SetWindowShouldClose(window, true)
+        GLFW.PostEmptyEvent()
 
     let debug_info() : string =
         assert(not (NativePtr.isNullPtr window))
