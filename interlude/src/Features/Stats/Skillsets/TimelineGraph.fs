@@ -150,7 +150,7 @@ type SkillTimelineGraph(keymode: int) =
             let jack_rating = jack_data.[hover_index].Value
             let chordstream_rating = chordstream_data.[hover_index].Value
             let stream_rating = stream_data.[hover_index].Value
-            let x = this.Bounds.Right - (float32 days_ago / day_range.Value) * this.Bounds.Width
+            let x = this.Bounds.Right - (float32 days_ago / day_range.Value) * this.Bounds.Width |> max (this.Bounds.Left + 180.0f + 20.0f) |> min (this.Bounds.Right - 180.0f - 20.0f)
             let y = bottom - Array.max [|jack_rating; chordstream_rating; stream_rating|] / all_time_max * height
             let box = Rect.Create(x - 180.0f, y - 220.0f, x + 180.0f, y - 20.0f)
             Render.rect (box.Expand(Style.PADDING)) Colors.cyan
