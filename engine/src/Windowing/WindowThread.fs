@@ -41,6 +41,7 @@ module WindowThread =
         )
     let defer (action: unit -> unit) =
         lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
+        GLFW.PostEmptyEvent()
 
     (*
         Monitor detection
