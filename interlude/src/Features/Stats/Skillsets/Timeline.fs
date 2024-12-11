@@ -9,6 +9,13 @@ open Interlude.UI
 type SkillTimeline() =
     inherit Container(NodeType.None)
 
+    let graph_container = SwapContainer(Position = Position.ShrinkT(50.0f))
+
+    let keymode = Setting.simple 4
+
+    let refresh_graph() =
+        graph_container.Current <- SkillTimelineGraph(keymode.Value)
+
     override this.Init(parent) =
         let available_keymodes =
             seq {
@@ -20,11 +27,8 @@ type SkillTimeline() =
 
         let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
 
-        let keymode = Setting.simple available_keymodes.[0]
-
-        let graph_container = SwapContainer(SkillTimelineGraph(keymode.Value), Position = Position.ShrinkT(50.0f))
-        let refresh_graph() =
-            graph_container.Current <- SkillTimelineGraph(keymode.Value)
+        keymode.Value <- available_keymodes.[0]
+        refresh_graph()
 
         let keymode_switcher =
             StylishButton(
@@ -42,3 +46,7 @@ type SkillTimeline() =
         |+ keymode_switcher
         |* graph_container
         base.Init parent
+
+    member this.Switch(k: int) =
+        keymode.Value <- k
+        refresh_graph()

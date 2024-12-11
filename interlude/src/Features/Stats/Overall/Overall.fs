@@ -10,14 +10,27 @@ type OverallTab() =
     inherit Container(NodeType.Leaf)
 
     let skill_breakdown = SkillBreakdown()
-    let timeline = SkillTimeline(Position = Position.ShrinkT(150.0f))
-    let content_panel = SwapContainer(skill_breakdown, Position = Position.SliceRPercent(0.6f).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
+    let timeline = SkillTimeline()
+    let content_panel = SwapContainer(Position = Position.SliceRPercent(0.6f).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
+    let overview =
+        Overview(
+            fun keymode source pattern ->
+                match pattern with
+                | None ->
+                    timeline.Switch keymode
+                    content_panel.Current <- timeline
+                | Some p ->
+                    skill_breakdown.Switch (keymode, source, p)
+                    content_panel.Current <- skill_breakdown
+        )
+
+    do content_panel.Current <- overview
 
     let tabs =
         RadioButtons.create_tabs {
             Setting = Setting.make content_panel.set_Current content_panel.get_Current
             Options = [|
-                Dummy(), %"stats.overall.overview", K false
+                overview, %"stats.overall.overview", K false
                 timeline, %"stats.overall.timeline", K false
                 skill_breakdown, %"stats.overall.breakdown", K false
             |]

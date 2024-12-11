@@ -138,6 +138,7 @@
     <Compile Include="Features\Stats\Skillsets\Breakdown.fs" />
     <Compile Include="Features\Stats\Skillsets\TimelineGraph.fs" />
     <Compile Include="Features\Stats\Skillsets\Timeline.fs" />
+    <Compile Include="Features\Stats\Skillsets\Overview.fs" />
     <Compile Include="Features\Stats\Sessions\SessionTime.fs" />
     <Compile Include="Features\Stats\Sessions\ScoreList.fs" />
     <Compile Include="Features\Stats\Sessions\Activity.fs" />

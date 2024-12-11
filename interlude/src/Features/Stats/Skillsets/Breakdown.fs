@@ -10,6 +10,14 @@ open Interlude.UI
 type SkillBreakdown() =
     inherit Container(NodeType.None)
 
+    let keymode = Setting.simple 4
+    let skill = Setting.simple Jacks
+    let source = Setting.simple AllTime
+
+    let graph_container = SwapContainer(Position = Position.ShrinkT(50.0f))
+    let refresh_graph() =
+        graph_container.Current <- SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value)
+
     override this.Init(parent) =
         let available_keymodes =
             seq {
@@ -21,13 +29,9 @@ type SkillBreakdown() =
 
         let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
 
-        let keymode = Setting.simple available_keymodes.[0]
-        let skill = Setting.simple Jacks
-        let source = Setting.simple AllTime
+        keymode.Value <- available_keymodes.[0]
 
-        let graph_container = SwapContainer(SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value), Position = Position.ShrinkT(50.0f))
-        let refresh_graph() =
-            graph_container.Current <- SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value)
+        refresh_graph()
 
         let source_switcher =
             StylishButton(
@@ -70,3 +74,9 @@ type SkillBreakdown() =
         |+ skill_switcher
         |* graph_container
         base.Init parent
+
+    member this.Switch(_keymode: int, _source: GraphSource, _skill: CorePattern) =
+        keymode.Value <- _keymode
+        source.Value <- _source
+        skill.Value <- _skill
+        refresh_graph()

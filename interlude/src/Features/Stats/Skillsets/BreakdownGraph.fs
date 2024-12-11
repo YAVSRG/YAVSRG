@@ -98,6 +98,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
             Render.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
 
         // X AXIS
+        Render.rect (this.Bounds.SliceB(AXIS_HEIGHT).SliceT(2.5f)) Colors.white
         let SPACING = floor(max_bpm / 200.0f) * 10.0f |> max 10.0f
         let mutable bpm = floor(min_bpm / SPACING) * SPACING
         while bpm < max_bpm - SPACING * 1.5f do
