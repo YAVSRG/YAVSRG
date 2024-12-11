@@ -54,7 +54,6 @@ module Screen =
         | Practice = 5
         | Replay = 6
         | Score = 7
-        | Stats = 8
 
     [<AbstractClass>]
     type T() =

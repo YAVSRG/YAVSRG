@@ -91,13 +91,7 @@ type Toolbar() =
             )
             |+ InlaidButton(
                 %"menu.stats",
-                (fun () ->
-                    if options.EnableExperiments.Value then
-                        StatsPage().Show()
-                    else
-                        Screen.change_new (fun () -> StatsScreen()) Screen.Type.Stats Transitions.Transition.Default
-                        |> ignore
-                ),
+                (fun () -> StatsPage().Show()),
                 Icons.TRENDING_UP,
                 Hotkey = "stats"
             )

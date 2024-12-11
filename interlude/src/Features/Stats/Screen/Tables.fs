@@ -15,6 +15,8 @@ open Interlude.UI
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
+// this file is currently unused
+
 // todo: use new the web request container component
 type private WebRequestState =
     | Offline = 0
@@ -196,7 +198,6 @@ type private CompareFriend
         |* ScrollContainer(contents, Position = Position.Shrink(10.0f, 0.0f).ShrinkT(55.0f))
 
         base.Init parent
-
 
 type private FriendComparer(ruleset: Ruleset, score_data: (int * string * int option * float option) array) =
     inherit Container(NodeType.None)

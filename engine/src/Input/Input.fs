@@ -129,40 +129,40 @@ module internal InputThread =
     let private char_callback (_: nativeptr<Window>) (char: uint32) =
         if typing then
             last_typed <- GLFW.GetTime()
-            lock LOCK_OBJ (fun () -> 
+            lock LOCK_OBJ (fun () ->
                 typed_text <- typed_text + Convert.ToChar(char).ToString()
                 events_buffer <- []
             )
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
 
     let private cursor_pos_callback (_: nativeptr<Window>) (x: float) (y: float) =
-        lock LOCK_OBJ (fun () -> 
+        lock LOCK_OBJ (fun () ->
             mouse_x <- Math.Clamp(Render._width / float32 Render._viewport_width * float32 x, 0.0f, Render._width)
             mouse_y <- Math.Clamp(Render._height / float32 Render._viewport_height * float32 y, 0.0f, Render._height)
         )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
     let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) =
-        lock LOCK_OBJ (fun () -> 
+        lock LOCK_OBJ (fun () ->
             mouse_z <- mouse_z + float32 offset_y
         )
     let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
 
     let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) =
-        let event = 
+        let event =
             struct (
                 (
-                    key, 
+                    key,
                     (
                         modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
                         modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
                         modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
                     )
-                ) |> Bind.Key, 
-                action, 
+                ) |> Bind.Key,
+                action,
                 Song.time_with_offset ()
             )
-        lock LOCK_OBJ (fun () -> 
+        lock LOCK_OBJ (fun () ->
             if GLFW.GetTime() - last_typed > 0.050 then
                 events_buffer <- List.append events_buffer [ event ]
 
@@ -183,19 +183,19 @@ module internal InputThread =
     let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
 
     let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) =
-        let event = 
+        let event =
             struct (
                 Bind.Mouse button,
-                action, 
+                action,
                 Song.time_with_offset ()
             )
-        lock LOCK_OBJ (fun () -> 
+        lock LOCK_OBJ (fun () ->
             events_buffer <- List.append events_buffer [ event ]
             if action = InputAction.Release then
                 held_mouse_buttons <- Set.remove button held_mouse_buttons
             elif action = InputAction.Press then
                 held_mouse_buttons <- Set.add button held_mouse_buttons
-                
+
         )
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
@@ -501,7 +501,7 @@ type Bind with
     member this.TappedOrRepeated() =
         match this with
         | Key _
-        | Mouse _ -> 
+        | Mouse _ ->
             Input.pop_matching(this, InputEvType.Press).IsSome
             || Input.pop_matching(this, InputEvType.Repeat).IsSome
         | _ -> false

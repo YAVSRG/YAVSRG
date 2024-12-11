@@ -150,7 +150,6 @@
     <Compile Include="Features\Stats\Overall\Overall.fs" />
     <Compile Include="Features\Stats\StatsPage.fs" />
     <Compile Include="Features\Stats\Screen\Tables.fs" />
-    <Compile Include="Features\Stats\Screen\Screen.fs" />
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\StartOverlay.fs" />
     <Compile Include="Features\Play\FailOverlay.fs" />
