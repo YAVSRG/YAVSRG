@@ -21,7 +21,7 @@ module SkillTimelineGraph =
     let view_date_ev = Event<DateOnly>()
     let on_view_date = view_date_ev.Publish
 
-type SkillTimelineGraph(keymode: int) =
+type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
     inherit StaticWidget(NodeType.None)
 
     let all_time_records = Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
@@ -43,7 +43,6 @@ type SkillTimelineGraph(keymode: int) =
     let AXIS_HEIGHT = 60.0f
     let HTHICKNESS = 2.5f
     let DROP_GRADIENT_SIZE = 80.0f
-    let day_range = Animation.Fade(90.0f)
 
     let mutable hover_index = 0
     let mutable show_tooltip = false
@@ -52,7 +51,7 @@ type SkillTimelineGraph(keymode: int) =
         base.Update(elapsed_ms, moved)
 
         if Mouse.hover this.Bounds then
-            day_range.Target <- day_range.Target - 2.0f * Mouse.scroll() |> min 365.0f |> max 30.0f
+            day_range.Target <- day_range.Target - 2.0f * Mouse.scroll() |> min 390.0f |> max 30.0f
 
             let hover_day = (this.Bounds.Right - Mouse.x()) / this.Bounds.Width * day_range.Value |> round |> int
             while hover_index + 1 < date_data.Length && abs (snd date_data.[hover_index + 1] - hover_day) < abs (snd date_data.[hover_index] - hover_day) do
@@ -65,8 +64,6 @@ type SkillTimelineGraph(keymode: int) =
                 SkillTimelineGraph.view_date_ev.Trigger(fst date_data.[hover_index])
         else
             show_tooltip <- false
-
-        day_range.Update elapsed_ms
 
     override this.Draw() =
         Render.rect this.Bounds Colors.shadow_2.O2
