@@ -5,7 +5,6 @@ open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Audio
 
 type Keys = Windowing.GraphicsLibraryFramework.Keys
 type MouseButton = Windowing.GraphicsLibraryFramework.MouseButton
@@ -87,7 +86,7 @@ module Bind =
 
 type InputEvType = InputAction
 
-type InputEv = (struct (Bind * InputEvType * float32<ms>))
+type InputEv = (struct (Bind * InputEvType * float))
 
 [<RequireQualifiedAccess>]
 type InputListener =
@@ -159,7 +158,7 @@ module internal InputThread =
                     )
                 ) |> Bind.Key,
                 action,
-                Song.time_with_offset ()
+                GLFW.GetTime()
             )
         lock LOCK_OBJ (fun () ->
             if typing then
@@ -188,7 +187,7 @@ module internal InputThread =
             struct (
                 Bind.Mouse button,
                 action,
-                Song.time_with_offset ()
+                GLFW.GetTime()
             )
         lock LOCK_OBJ (fun () ->
             events_buffer <- List.append events_buffer [ event ]
@@ -230,7 +229,7 @@ module internal InputThread =
                         if typing then
                             match typing_buffered_input with
                             | ValueSome (struct (b, t, ts)) ->
-                                if Song.time_with_offset() - ts > 2.0f<ms> then
+                                if GLFW.GetTime() - ts > 0.002 then
                                     typing_buffered_input <- ValueNone
                                     (struct (b, t, ts)) :: events_buffer
                                 else
@@ -306,6 +305,8 @@ module Input =
         out
 
     let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
+        let glfw_now = GLFW.GetTime()
+
         let bind_match bind target =
             match bind, target with
             | Bind.Key(k, _), Bind.Key(K, _) when k = K -> true
@@ -321,7 +322,7 @@ module Input =
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] b then
-                        if time <= now then callback i time (t <> InputEvType.Press)
+                        callback i (now - float32 ((glfw_now - time) * 0.001) * 1.0f<ms>) (t <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
