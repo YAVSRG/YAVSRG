@@ -12,10 +12,11 @@ type SkillTimeline() =
     let graph_container = SwapContainer(Position = Position.ShrinkT(50.0f))
 
     let day_range = Animation.Fade(90.0f)
+    let day_offset = Animation.Fade(30.0f)
     let keymode = Setting.simple 4
 
     let refresh_graph() =
-        graph_container.Current <- SkillTimelineGraph(keymode.Value, day_range)
+        graph_container.Current <- SkillTimelineGraph(keymode.Value, day_range, day_offset)
 
     override this.Init(parent) =
         let available_keymodes =
@@ -61,16 +62,35 @@ type SkillTimeline() =
                 Position = Position.SliceT(50.0f).ShrinkR(300.0f).SliceR(100.0f)
             )
 
+        let show_newer =
+            StylishButton(
+                (fun () -> day_offset.Target <- max 0.0f (day_offset.Target - day_range.Target * 0.25f)),
+                K Icons.ARROW_RIGHT,
+                K Colors.black.O2,
+                Position = Position.SliceT(50.0f).ShrinkR(425.0f).SliceR(100.0f)
+            )
+
+        let show_older =
+            StylishButton(
+                (fun () -> day_offset.Target <- day_offset.Target + day_range.Target * 0.25f),
+                K Icons.ARROW_LEFT,
+                K Colors.shadow_2.O2,
+                Position = Position.SliceT(50.0f).ShrinkR(550.0f).SliceR(100.0f)
+            )
+
         this
         |+ keymode_switcher
         |+ zoom_in
         |+ zoom_out
+        |+ show_newer
+        |+ show_older
         |* graph_container
         base.Init parent
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         day_range.Update elapsed_ms
+        day_offset.Update elapsed_ms
 
     member this.Switch(k: int) =
         keymode.Value <- k

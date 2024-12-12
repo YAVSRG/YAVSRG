@@ -10,6 +10,7 @@ open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
 open Prelude.Data.User
 
+[<Struct>]
 type private GraphDataPoint =
     {
         DaysAgo: int
@@ -21,7 +22,7 @@ module SkillTimelineGraph =
     let view_date_ev = Event<DateOnly>()
     let on_view_date = view_date_ev.Publish
 
-type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
+type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Animation.Fade) =
     inherit StaticWidget(NodeType.None)
 
     let all_time_records = Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
@@ -53,7 +54,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
         if Mouse.hover this.Bounds then
             day_range.Target <- day_range.Target - 2.0f * Mouse.scroll() |> min 390.0f |> max 30.0f
 
-            let hover_day = (this.Bounds.Right - Mouse.x()) / this.Bounds.Width * day_range.Value |> round |> int
+            let hover_day = (this.Bounds.Right - Mouse.x()) / this.Bounds.Width * day_range.Value + day_offset.Value |> round |> int
             while hover_index + 1 < date_data.Length && abs (snd date_data.[hover_index + 1] - hover_day) < abs (snd date_data.[hover_index] - hover_day) do
                 hover_index <- hover_index + 1
             while hover_index > 0 && abs (snd date_data.[hover_index - 1] - hover_day) < abs (snd date_data.[hover_index] - hover_day) do
@@ -62,6 +63,12 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
 
             if show_tooltip && Mouse.left_click() then
                 SkillTimelineGraph.view_date_ev.Trigger(fst date_data.[hover_index])
+
+            if (%%"left").Pressed() then
+                day_offset.Target <- day_offset.Target + float32 elapsed_ms * 0.001f * day_range.Target
+            elif (%%"right").Pressed() then
+                day_offset.Target <- day_offset.Target - float32 elapsed_ms * 0.001f * day_range.Target |> max 0.0f
+
         else
             show_tooltip <- false
 
@@ -72,7 +79,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
         let height = this.Bounds.Height - AXIS_HEIGHT - 5.0f
 
         // GRAPH
-        let x day = this.Bounds.Right - (float32 day / day_range.Value) * this.Bounds.Width
+        let x day = this.Bounds.Right - ((float32 day - day_offset.Value) / day_range.Value) * this.Bounds.Width
         let y d = bottom - d / all_time_max * height
 
         let draw_graph (color: Color) (data: GraphDataPoint array) =
@@ -102,7 +109,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
                 previous_x <- x
                 previous_y <- y
                 previous_day <- data.[i].DaysAgo
-                if float32 data.[i].DaysAgo > day_range.Value then i <- data.Length
+                if float32 data.[i].DaysAgo - day_offset.Value > day_range.Value then i <- data.Length
                 i <- i + 1
 
         Render.stencil_create false
@@ -120,21 +127,21 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
         Render.rect (this.Bounds.SliceB(AXIS_HEIGHT).SliceT(2.5f)) Colors.white
         if day_range.Value > 180.0f then
             let mutable d = TODAY.AddDays(1 - TODAY.Day).AddMonths(1) // start of month
-            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+            while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddMonths(-1)
                 let x = x (TODAY.DayNumber - d.DayNumber)
                 Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
                 Text.draw_aligned(Style.font, d.ToString("MMM yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         elif day_range.Value > 90.0f then
             let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
-            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+            while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddDays(-14)
                 let x = x (TODAY.DayNumber - d.DayNumber)
                 Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
                 Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         else
             let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
-            while float32 (TODAY.DayNumber - d.DayNumber) < day_range.Value do
+            while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddDays(-7)
                 let x = x (TODAY.DayNumber - d.DayNumber)
                 Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
@@ -147,7 +154,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade) =
             let jack_rating = jack_data.[hover_index].Value
             let chordstream_rating = chordstream_data.[hover_index].Value
             let stream_rating = stream_data.[hover_index].Value
-            let x = this.Bounds.Right - (float32 days_ago / day_range.Value) * this.Bounds.Width |> max (this.Bounds.Left + 180.0f + 20.0f) |> min (this.Bounds.Right - 180.0f - 20.0f)
+            let x = x days_ago |> max (this.Bounds.Left + 180.0f + 20.0f) |> min (this.Bounds.Right - 180.0f - 20.0f)
             let y = bottom - Array.max [|jack_rating; chordstream_rating; stream_rating|] / all_time_max * height
             let box = Rect.Create(x - 180.0f, y - 220.0f, x + 180.0f, y - 20.0f)
             Render.rect (box.Expand(Style.PADDING)) Colors.cyan
