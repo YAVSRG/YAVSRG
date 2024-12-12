@@ -16,7 +16,7 @@ type Slider(setting: Setting.Bounded<float32>) =
     let mutable decimal_places = 2
     let mutable step = 0.01f
 
-    let typed_number = 
+    let typed_number =
         Setting.simple ""
         |> Setting.trigger (fun v ->
             Style.key.Play()
@@ -47,17 +47,14 @@ type Slider(setting: Setting.Bounded<float32>) =
         |+ Text(
             (fun () -> if typed_number.Value = "" then this.Format setting.Value else typed_number.Value),
             Align = Alignment.LEFT,
-            Position =
-                { Position.DEFAULT with
-                    Right = 0.0f %+ TEXTWIDTH
-                },
+            Position = Position.SliceL TEXTWIDTH,
             Color = fun () -> if typed_number.Value <> "" then Colors.text_yellow_2 else Colors.text
         )
         |* Clickable(
             (fun () ->
                 this.Select true
                 Style.click.Play()
-                dragging <- true
+                if Mouse.x() > this.Bounds.Left + TEXTWIDTH then dragging <- true
             ),
             OnHover =
                 (fun b ->
@@ -79,8 +76,8 @@ type Slider(setting: Setting.Bounded<float32>) =
 
     static member Percent(setting) =
         Slider(
-            setting, 
-            Format = (fun x -> 
+            setting,
+            Format = (fun x ->
                 let percent = x * 100.0f |> round
                 // handles what the F# foundation couldn't: -0 floating point value
                 if percent = 0.0f then sprintf "%.0f%%" 0.0f

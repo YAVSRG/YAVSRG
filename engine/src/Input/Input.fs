@@ -196,7 +196,6 @@ module internal InputThread =
                 held_mouse_buttons <- Set.remove button held_mouse_buttons
             elif action = InputAction.Press then
                 held_mouse_buttons <- Set.add button held_mouse_buttons
-
         )
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
@@ -228,7 +227,16 @@ module internal InputThread =
                             Shift = shift
                             Alt = alt
                         },
-                        events_buffer
+                        if typing then
+                            match typing_buffered_input with
+                            | ValueSome (struct (b, t, ts)) ->
+                                if Song.time_with_offset() - ts > 2.0f<ms> then
+                                    typing_buffered_input <- ValueNone
+                                    (struct (b, t, ts)) :: events_buffer
+                                else
+                                    events_buffer
+                            | _ -> events_buffer
+                        else events_buffer
 
                     events_buffer <- []
                     typed_text <- ""
@@ -237,13 +245,6 @@ module internal InputThread =
 
         this_frame <- a
         events_this_frame <- b
-        if typing then
-            match typing_buffered_input with
-            | ValueSome (struct (b, t, ts)) ->
-                if Song.time_with_offset() - ts > 2.0f<ms> then
-                    events_this_frame <- (struct (b, t, ts)) :: events_this_frame
-                    typing_buffered_input <- ValueNone
-            | _ -> ()
 
 module Input =
 

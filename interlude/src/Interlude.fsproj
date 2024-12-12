@@ -133,6 +133,7 @@
     <Compile Include="Features\Score\BottomBanner.fs" />
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\Score.fs" />
+    <Compile Include="Features\Stats\Tables.fs" />
     <Compile Include="Features\Stats\PlayCount.fs" />
     <Compile Include="Features\Stats\Skillsets\BreakdownGraph.fs" />
     <Compile Include="Features\Stats\Skillsets\Breakdown.fs" />
@@ -149,7 +150,6 @@
     <Compile Include="Features\Stats\Overall\OverallTime.fs" />
     <Compile Include="Features\Stats\Overall\Overall.fs" />
     <Compile Include="Features\Stats\StatsPage.fs" />
-    <Compile Include="Features\Stats\Screen\Tables.fs" />
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\StartOverlay.fs" />
     <Compile Include="Features\Play\FailOverlay.fs" />
