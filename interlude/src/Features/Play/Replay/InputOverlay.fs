@@ -61,7 +61,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 + (
                     (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
                     + options.VisualOffset.Value
-                ) * SelectedChart.rate.Value
+                ) * Song.playback_rate()
 
             while replay_data.Length - 1 > seek
                   && let struct (t, _) = replay_data.[seek + 1] in

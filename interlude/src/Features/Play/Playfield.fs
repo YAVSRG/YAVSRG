@@ -272,7 +272,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             + (
                 (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
                 + options.VisualOffset.Value
-            ) * SelectedChart.rate.Value
+            ) * Song.playback_rate()
 
         if now < time then
             handle_seek_back_in_time ()

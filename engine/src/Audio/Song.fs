@@ -181,6 +181,8 @@ module Song =
         if rate_changed then
             seek time
 
+    let playback_rate () = rate
+
     let set_pitch_rates_enabled (enabled: bool) =
         enable_pitch_rates <- enabled
 
