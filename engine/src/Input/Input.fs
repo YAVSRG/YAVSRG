@@ -121,17 +121,16 @@ module internal InputThread =
     let mutable private held_keys = Set.empty<Keys>
     let mutable private held_mouse_buttons = Set.empty<MouseButton>
 
-    let mutable private last_typed = 0.0
     let mutable private typing = false
+    let mutable private typing_buffered_input : InputEv voption = ValueNone
 
     let private LOCK_OBJ = Object()
 
     let private char_callback (_: nativeptr<Window>) (char: uint32) =
         if typing then
-            last_typed <- GLFW.GetTime()
             lock LOCK_OBJ (fun () ->
                 typed_text <- typed_text + Convert.ToChar(char).ToString()
-                events_buffer <- []
+                typing_buffered_input <- ValueNone
             )
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
 
@@ -163,7 +162,9 @@ module internal InputThread =
                 Song.time_with_offset ()
             )
         lock LOCK_OBJ (fun () ->
-            if GLFW.GetTime() - last_typed > 0.050 then
+            if typing then
+                typing_buffered_input <- ValueSome event
+            else
                 events_buffer <- List.append events_buffer [ event ]
 
             if action = InputAction.Release then
@@ -200,7 +201,7 @@ module internal InputThread =
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
     let enable_typing (v: bool) =
-        lock LOCK_OBJ (fun () -> typing <- v)
+        lock LOCK_OBJ (fun () -> typing <- v; typing_buffered_input <- ValueNone)
 
     let init (window: nativeptr<Window>) =
         GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true);
@@ -236,6 +237,13 @@ module internal InputThread =
 
         this_frame <- a
         events_this_frame <- b
+        if typing then
+            match typing_buffered_input with
+            | ValueSome (struct (b, t, ts)) ->
+                if Song.time_with_offset() - ts > 2.0f<ms> then
+                    events_this_frame <- (struct (b, t, ts)) :: events_this_frame
+                    typing_buffered_input <- ValueNone
+            | _ -> ()
 
 module Input =
 
