@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Sorting
 open Prelude.Data
 open Interlude.Content
 open Interlude.UI
@@ -56,7 +55,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                             function
                             | Some result ->
                                 Notifications.task_feedback (
-                                    Icons.DOWNLOAD, 
+                                    Icons.DOWNLOAD,
                                     %"notification.install_pack",
                                     [data.name; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_pack.body"
                                 )
@@ -103,13 +102,13 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
             Align = Alignment.LEFT,
             Position = Position.SliceB(45.0f).Shrink(10.0f, 5.0f)
         )
-        |+ Button(
+        |+ Button(Icons.DOWNLOAD, download, Position = Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
+        |+ Clickable.Focus this
+        |* Button(
             Icons.EXTERNAL_LINK
-            , fun () -> open_url (sprintf "https://beta.etternaonline.com/packs/%i" data.id)
+            , fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id)
             , Position = Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f)
         )
-        |+ Button(Icons.DOWNLOAD, download, Position = Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
-        |* Clickable.Focus this
 
         if data.contains_nsfw then
             this
