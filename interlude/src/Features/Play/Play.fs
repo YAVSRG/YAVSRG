@@ -68,11 +68,11 @@ module PlayScreen =
 
         let skip_song () =
             if Gameplay.continue_endless_mode() then Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
-        
+
         let give_up () =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
-            if 
+            if
                 if is_giving_up_play then
                     liveplay.Finish()
                     scoring.Update Time.infinity
@@ -115,7 +115,7 @@ module PlayScreen =
                         Transitions.EnterGameplayNoFadeAudio
                 then
                     Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
-                    
+
             fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
@@ -147,7 +147,6 @@ module PlayScreen =
             else
                 fade_in.Target <- 0.5f
                 this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
-
 
         let change_offset(state) =
             Song.pause()
@@ -229,7 +228,7 @@ module PlayScreen =
                 let now = Song.time_with_offset ()
                 let chart_time = now - first_note
 
-                if not (liveplay :> IReplayProvider).Finished then
+                if not (liveplay :> IReplayProvider).Finished && fade_in.Target = 1.0f then
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then
@@ -250,7 +249,7 @@ module PlayScreen =
                     fade_in.Update elapsed_ms
 
             override this.Draw() =
-                
+
                 if fade_in.Value < 1.0f then
                     let old_m = Render.alpha_multiplier_begin fade_in.Value
                     base.Draw()
