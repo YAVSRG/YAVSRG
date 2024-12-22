@@ -9,11 +9,21 @@ module Launch =
 
     let entry_point (config: unit -> WindowOptions, name: string, init_thunk: unit -> UIEntryPoint, icon: Bitmap option) =
 
+        try
+            let config = config()
+            Ok config
+        with err ->
+            Logging.Critical "Failed to load window config: %O" err
+            Error()
+        |> function
+        | Error() -> Error()
+        | Ok config ->
+
         Logging.Info "Launching %s: %O" name (DateTime.Now.ToString())
 
         let init_success =
             try
-                WindowThread.init(config(), name, init_thunk, icon)
+                WindowThread.init(config, name, init_thunk, icon)
                 true
             with err ->
                 match err with
