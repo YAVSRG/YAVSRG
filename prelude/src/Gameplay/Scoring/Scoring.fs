@@ -45,7 +45,7 @@ type GameplayEvent =
         Combo: ComboAction
     }
 
-/// This processor extends GameplayEventProcessor, taking its series of raw `GameplayEvent<GameplayActionInternal>` event markers 
+/// This processor extends GameplayEventProcessor, taking its series of raw `GameplayEvent<GameplayActionInternal>` event markers
 /// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
 /// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
 
@@ -86,11 +86,11 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
     let ms_to_judgement (delta: GameplayTime) : int =
         let mutable j = 0
-        while 
-            j + 1 < ruleset.Judgements.Length 
+        while
+            j + 1 < ruleset.Judgements.Length
             && (
-                match ruleset.Judgements.[j].TimingWindows with 
-                | None -> true 
+                match ruleset.Judgements.[j].TimingWindows with
+                | None -> true
                 | Some (early, late) -> delta < early || delta > late
             )
             do
@@ -99,7 +99,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
     let judgement_or_ms_to_points : GameplayTime -> int -> float =
         match ruleset.Accuracy with
-        | AccuracyPoints.WifeCurve j -> 
+        | AccuracyPoints.WifeCurve j ->
             fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
         | AccuracyPoints.PointsPerJudgement weights ->
             fun _ (judgement: int) -> weights.[judgement]
@@ -128,8 +128,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member this.OnEvent = on_event
 
     member private this.ProcessHit(delta, is_missed) : ComboAction * GameplayAction =
-            
-        match ruleset.HoldMechanics with 
+
+        match ruleset.HoldMechanics with
         | HoldMechanics.OnlyJudgeReleases _ ->
             (if is_missed then Break true else Increase),
             Hit
@@ -161,7 +161,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let points = judgement_or_ms_to_points delta judgement
 
             score_points(points, judgement)
-            
+
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Hold
                 {|
@@ -186,13 +186,13 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let judgement =
                 if missed && missed_head && not overheld then
                     ruleset.DefaultJudgement
-                else 
+                else
                     OsuHolds.ln_judgement windows head_delta release_delta overheld dropped
 
             let points = judgement_to_points judgement
 
             score_points(points, judgement)
-            
+
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
@@ -214,7 +214,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
             let points = judgement_to_points judgement
 
             score_points(points, judgement)
-            
+
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
@@ -226,7 +226,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
 
         | HoldMechanics.OnlyRequireHold _ ->
-        
+
             (if (not overheld) && (missed || dropped) then Break true else Increase),
             Release
                 {|
@@ -240,24 +240,24 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_overheld) ->
             let judgement =
                 if overheld then judgement_if_overheld
-                elif missed then ruleset.DefaultJudgement 
+                elif missed then ruleset.DefaultJudgement
                 else
                     assert(windows.Length = ruleset.Judgements.Length)
                     let mutable j = 0
-                    while 
-                        j + 1 < ruleset.Judgements.Length 
+                    while
+                        j + 1 < ruleset.Judgements.Length
                         && (
-                            match windows.[j] with 
-                            | None -> true 
+                            match windows.[j] with
+                            | None -> true
                             | Some (early, late) -> release_delta < early || release_delta > late
                         )
                         do
                         j <- j + 1
                     j
-                    
+
             let points = judgement_or_ms_to_points release_delta judgement
             score_points(points, judgement)
-            
+
             (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
             Release
                 {|
@@ -269,7 +269,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                 |}
 
         | HoldMechanics.OnlyJudgeReleases judgement_if_dropped ->
-            let judgement = 
+            let judgement =
                 if missed then
                     ruleset.DefaultJudgement
                 else
@@ -305,14 +305,14 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
             score_points(points, judgement)
 
-            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else Increase),
+            (if ruleset.Judgements.[judgement].BreaksCombo then Break true else NoChange),
             GhostTap {| Judgement = Some (judgement, points) |}
         | None ->
         NoChange,
         GhostTap {| Judgement = None |}
 
     override this.HandleEvent (internal_event: GameplayEventInternal) =
-        let combo_action, gameplay_action = 
+        let combo_action, gameplay_action =
             match internal_event.Action with
             | HIT(delta, is_missed) ->
                 this.ProcessHit(delta, is_missed)

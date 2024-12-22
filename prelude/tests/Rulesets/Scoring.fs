@@ -16,13 +16,13 @@ module Scoring =
 
     [<Test>]
     let BasicEndToEnd () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)
@@ -41,17 +41,17 @@ module Scoring =
         Assert.AreEqual(result.CurrentCombo, result.MaxPossibleCombo)
         Assert.AreEqual(result.BestCombo, result.MaxPossibleCombo)
         Assert.AreEqual(0, result.ComboBreaks)
-    
+
     [<Test>]
     let TimeStepped_Example () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Hold(1000.0f<ms>, 2000.0f<ms>)
                 .Hold(3000.0f<ms>, 4000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-45.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(1000.0f<ms>, 1000.0f<ms>)
@@ -101,14 +101,14 @@ module Scoring =
         Assert.AreEqual(3, stepper.CurrentCombo)
 
         step 3000.0f<ms>
-        
+
         Assert.AreEqual(1, stepper.JudgementCounts.[0])
         Assert.AreEqual(1, stepper.JudgementCounts.[1])
         Assert.AreEqual(0.95, stepper.Accuracy)
         Assert.AreEqual(4, stepper.CurrentCombo)
 
         step 3050.0f<ms>
-        
+
         Assert.AreEqual(1, stepper.JudgementCounts.[0])
         Assert.AreEqual(1, stepper.JudgementCounts.[1])
         Assert.AreEqual(0.95, stepper.Accuracy)
@@ -117,7 +117,7 @@ module Scoring =
         Assert.AreEqual(4, stepper.MaxPossibleCombo)
 
         step 3100.0f<ms>
-        
+
         Assert.AreEqual(1, stepper.JudgementCounts.[0])
         Assert.AreEqual(1, stepper.JudgementCounts.[1])
         Assert.AreEqual(0.95, stepper.Accuracy)
@@ -126,7 +126,7 @@ module Scoring =
         Assert.AreEqual(4, stepper.MaxPossibleCombo)
 
         step 4000.0f<ms>
-        
+
         Assert.AreEqual(1, stepper.JudgementCounts.[0])
         Assert.AreEqual(1, stepper.JudgementCounts.[1])
         Assert.AreEqual(1, stepper.JudgementCounts.[3])
@@ -149,21 +149,21 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Note(0.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownFor(offset, 1.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(1, event_processing.JudgementCounts.[expected_judgement])
-    
+
     [<Test>]
     let SCJ4_HoldNote_ExpectedJudgements_ExactRelease () =
         let TEST_CASES =
@@ -173,25 +173,25 @@ module Scoring =
                 45.1f<ms>, 2; -45.1f<ms>, 2; 90.0f<ms>, 2; -90.0f<ms>, 2
                 90.1f<ms>, 3; -90.1f<ms>, 3; 135.0f<ms>, 3; -135.0f<ms>, 3
                 135.1f<ms>, 4; -135.1f<ms>, 4; 180.0f<ms>, 4; -180.0f<ms>, 4
-                180.1f<ms>, 4; 
+                180.1f<ms>, 4;
                 -180.1f<ms>, 5
             ]
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 1000.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
-            
+
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
     [<Test>]
@@ -209,19 +209,19 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 1180.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
-            
+
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
     [<Test>]
@@ -239,16 +239,16 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 820.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
@@ -269,16 +269,16 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 500.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
@@ -299,17 +299,17 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 500.0f<ms>)
                     .KeyDownUntil(501.0f<ms>, 1000.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
@@ -330,16 +330,16 @@ module Scoring =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let replay = 
+            let replay =
                 ReplayBuilder()
                     .KeyDownUntil(offset, 1500.0f<ms>)
                     .Build()
-                
+
             let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
@@ -347,15 +347,15 @@ module Scoring =
 
     [<Test>]
     let SCJ4_HoldNote_CompletelyMissed () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .Build()
-                
+
         let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -392,7 +392,7 @@ module Scoring =
                 |> Array.ofSeq
 
             Assert.AreEqual(wife_points, Array.sortDescending wife_points)
-    
+
     [<Test>]
     let WifeCurve_Symmetrical () =
         for judge = 4 to 9 do
@@ -405,7 +405,7 @@ module Scoring =
 
     [<Test>]
     let Autoplay_PerfectScores() =
-        
+
         let perfect_replay = Replay.perfect_replay DONUT_HOLE_CHART.Keys DONUT_HOLE_CHART.Notes
 
         let result_scj4 = ScoreProcessor.run (SC.create 4) DONUT_HOLE_CHART.Keys (StoredReplayProvider(perfect_replay)) DONUT_HOLE_CHART.Notes 1.0f<rate>
@@ -420,3 +420,54 @@ module Scoring =
 
         Assert.AreEqual(1.0, result_etterna.Accuracy)
         Assert.AreEqual(0, result_etterna.ComboBreaks)
+
+    [<Test>]
+    let GhostTapJudgement_BreaksCombo_When_JudgementBreaksCombo() =
+        let notes =
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(500.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
+                .Build()
+
+        let ruleset = { RULESET with HitMechanics = { RULESET.HitMechanics with GhostTapJudgement = Some 5 } }
+
+        let event_processing = ScoringEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.True(ruleset.Judgements.[5].BreaksCombo)
+        Assert.AreEqual([|2; 0; 0; 0; 0; 1|], event_processing.JudgementCounts)
+        Assert.AreEqual(1, event_processing.ComboBreaks)
+        Assert.AreEqual(1, event_processing.CurrentCombo)
+
+    [<Test>]
+    let GhostTapJudgement_DoesNotIncreaseCombo_When_JudgementNormallyIncreasesCombo() =
+        let notes =
+            ChartBuilder(4)
+                .Note(0.0f<ms>)
+                .Note(1000.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(500.0f<ms>, 10.0f<ms>)
+                .KeyDownFor(1000.0f<ms>, 10.0f<ms>)
+                .Build()
+
+        let ruleset = { RULESET with HitMechanics = { RULESET.HitMechanics with GhostTapJudgement = Some 2 } }
+
+        let event_processing = ScoringEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.False(ruleset.Judgements.[2].BreaksCombo)
+        Assert.AreEqual([|2; 0; 1; 0; 0; 0|], event_processing.JudgementCounts)
+        Assert.AreEqual(0, event_processing.ComboBreaks)
+        Assert.AreNotEqual(3, event_processing.CurrentCombo)
+        Assert.AreEqual(2, event_processing.CurrentCombo)
