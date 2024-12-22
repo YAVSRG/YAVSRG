@@ -191,7 +191,7 @@ type private Image(width, title, url) as this =
                     sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )
-            | None -> Logging.Warn("Failed to load wiki image", url)
+            | None -> Logging.Warn "Failed to load wiki image '%s'" url
         )
 
         this |+ LoadingIndicator.Border(fun () -> sprite.IsNone)
@@ -218,7 +218,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
     inherit IParagraph()
 
     let MARGIN = 15.0f
-    let ctx = 
+    let ctx =
         {
             LineLength = max_width - MARGIN * 2.0f
             X = 0.0f

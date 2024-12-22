@@ -242,7 +242,7 @@ type OsuDatabase_Beatmap =
                 ManiaScrollSpeed = read_byte br
             }
         with err ->
-            Logging.Error(sprintf "Exception occured at position %i" br.BaseStream.Position)
+            Logging.Error "Exception occured at position %i" br.BaseStream.Position
             reraise ()
 
 type OsuDatabase =
@@ -266,7 +266,7 @@ type OsuDatabase =
             PlayerName = read_string br
             Beatmaps =
                 let count = read_int br
-                Logging.Info(sprintf "osu! Database header says there are %i beatmaps to read" count)
+                Logging.Info "osu! Database header says there are %i beatmaps to read" count
                 Array.init count (fun i -> OsuDatabase_Beatmap.Read version br)
             UserPermissions = read_int br
         }

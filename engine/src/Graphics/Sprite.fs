@@ -55,8 +55,8 @@ type QuadTexture =
         Layer: int
         UV: Quad
     }
-    member this.Transform(func: Quad -> Quad) = 
-        { 
+    member this.Transform(func: Quad -> Quad) =
+        {
             Texture = this.Texture
             Layer = this.Layer
             UV = func this.UV
@@ -102,7 +102,7 @@ module Texture =
                 |> Seq.tryFind (fun i -> not texture_unit_in_use.[i])
                 |> function
                     | None ->
-                        Logging.Debug(sprintf "Texture unit claim failed, all texture units are full")
+                        Logging.Debug "Texture unit claim failed, all texture units are full"
                         0
                     | Some i ->
                         texture_unit_handles.[i] <- texture.Handle
@@ -112,7 +112,7 @@ module Texture =
                         GL.BindTexture(TextureTarget.Texture2DArray, texture.Handle)
                         GL.ActiveTexture(TextureUnit.Texture0)
 
-                        if TRACE then Logging.Debug(sprintf "Texture slot [%i] <- %i" i texture.Handle)
+                        if TRACE then Logging.Debug "Texture slot [%i] <- %i" i texture.Handle
                         i
 
             texture.TextureUnit <- texture_unit
@@ -120,7 +120,7 @@ module Texture =
 
     let unclaim_texture_unit (texture: Texture) =
         if texture.TextureUnit <> 0 then
-            if TRACE then Logging.Debug(sprintf "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle)
+            if TRACE then Logging.Debug "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle
             texture_unit_in_use.[texture.TextureUnit] <- false
             texture.TextureUnit <- 0
 
@@ -128,7 +128,7 @@ module Texture =
         assert (texture.References = 0)
         unclaim_texture_unit texture
         GL.DeleteTexture texture.Handle
-        if TRACE then Logging.Debug(sprintf "Destroyed texture %i" texture.Handle)
+        if TRACE then Logging.Debug "Destroyed texture %i" texture.Handle
 
     let create (width: int, height: int, layers: int) : Texture =
         let id = GL.GenTexture()
@@ -181,7 +181,6 @@ module Texture =
             PrecomputedQuad = ValueSome Rect.ZERO.AsQuad
         }
 
-
 module Sprite =
 
     let precompute_1x1 (sprite: Sprite) =
@@ -209,7 +208,7 @@ module Sprite =
 
         let texture = Texture.create (width, height, layers)
 
-        if Texture.TRACE then Logging.Debug(sprintf "Texture %i created by %s" texture.Handle label)
+        if Texture.TRACE then Logging.Debug "Texture %i created by %s" texture.Handle label
 
         if use_texture_unit then
             Texture.claim_texture_unit texture |> ignore
@@ -398,12 +397,12 @@ module Sprite =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.Box(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)
-    
+
     let fill_left (bounds: Rect) (sprite: Sprite) : Rect =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
         Rect.Box(bounds.Left, bounds.CenterY - 0.5f * h, w, h)
-    
+
     let fill_right (bounds: Rect) (sprite: Sprite) : Rect =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale

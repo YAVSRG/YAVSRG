@@ -22,7 +22,7 @@ module Bot =
     let client = new DiscordSocketClient(config)
 
     let on_log (msg: LogMessage) =
-        task { Logging.Debug("[BOT] " + msg.Message) }
+        task { Logging.Debug "[BOT] %s" msg.Message }
 
     let on_message (message: SocketMessage) =
         task {
@@ -53,7 +53,7 @@ module Bot =
                                  else
                                      [])
                     with err ->
-                        Logging.Error(sprintf "Error handling user command '%s': %O" message.Content err)
+                        Logging.Error "Error handling user command '%s': %O" message.Content err
                         do! message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | None -> do! message.AddReactionAsync(Emoji.Parse(":no_entry_sign:"))
 
@@ -97,12 +97,12 @@ module Bot =
                                  else
                                      [])
                     with err ->
-                        Logging.Error(sprintf "Error handling admin command '%s': %O" message.Content err)
+                        Logging.Error "Error handling admin command '%s': %O" message.Content err
                         do! message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | _ ->
-                    Logging.Warn(
-                        sprintf "Discord user with id %i attempted to trigger an admin command" message.Author.Id
-                    )
+                    Logging.Warn
+                        "Discord user with id %i attempted to trigger an admin command"
+                        message.Author.Id
 
                     do! message.AddReactionAsync(Emoji.Parse(":skull:"))
         }
@@ -135,7 +135,7 @@ module Bot =
                                  else
                                      [])
                     with err ->
-                        Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
+                        Logging.Error "Error handling button click '%s': %O" comp.Data.CustomId err
                         do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | _ -> ()
             elif comp.Channel.Id = MAIN_CHANNEL_ID then
@@ -158,7 +158,7 @@ module Bot =
                                  else
                                      [])
                     with err ->
-                        Logging.Error(sprintf "Error handling button click '%s': %O" comp.Data.CustomId err)
+                        Logging.Error "Error handling button click '%s': %O" comp.Data.CustomId err
                         do! comp.Message.AddReactionAsync(Emoji.Parse(":alien:"))
                 | None -> ()
         }
@@ -184,8 +184,8 @@ module Bot =
                                 |> Async.Ignore
                                 |> Async.RunSynchronously
                             with err ->
-                                Logging.Critical(sprintf "Exception while trying to debug log message: %s" s, err)
-                    
+                                Logging.Critical "Exception while trying to debug-log message '%s': %O" s err
+
                     Discord.feed_log <-
                         fun s ->
                             let s =
@@ -200,7 +200,7 @@ module Bot =
                                 |> Async.Ignore
                                 |> Async.RunSynchronously
                             with err ->
-                                Logging.Critical(sprintf "Exception while trying to post feed message: %s" s, err)
+                                Logging.Critical "Exception while trying to post feed message '%s': %O" s err
 
                     if not startup_message_shown then
 
@@ -230,7 +230,7 @@ module Bot =
             Thread.Sleep Timeout.Infinite
 
         with err ->
-            Logging.Critical(err.ToString(), err)
+            Logging.Critical "%O" err
 
     let create_admin_prompt (embed, components) : unit =
         (client.GetChannel(ADMIN_CHANNEL_ID) :?> SocketTextChannel).SendMessageAsync(embed = embed, components = components)

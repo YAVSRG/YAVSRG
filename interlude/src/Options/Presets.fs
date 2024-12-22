@@ -56,20 +56,16 @@ module Presets =
             if Skins.noteskin_exists loaded_preset.Noteskin then
                 options.Noteskin.Set loaded_preset.Noteskin
             else
-                Logging.Debug(
-                    sprintf
-                        "Noteskin '%s' used in this preset has been renamed or isn't available"
-                        loaded_preset.Noteskin
-                )
+                Logging.Debug
+                    "Noteskin '%s' used in this preset has been renamed or isn't available"
+                    loaded_preset.Noteskin
 
             if Skins.hud_exists loaded_preset.HUD then
                 options.SelectedHUD.Set loaded_preset.HUD
             else
-                Logging.Debug(
-                    sprintf
-                        "HUD '%O' used in this preset has been renamed or isn't available"
-                        loaded_preset.HUD
-                )
+                Logging.Debug
+                    "HUD '%O' used in this preset has been renamed or isn't available"
+                    loaded_preset.HUD
 
             Some loaded_preset.Name
         | None -> None

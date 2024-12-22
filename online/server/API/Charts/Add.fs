@@ -36,7 +36,7 @@ module Add =
             | Some (song_id, existing_chart, existing_song) ->
                 Songs.update_song song_id (existing_song.MergeWithIncoming request.Song) |> ignore
                 Songs.update_chart chart_id (existing_chart.MergeWithIncoming request.Chart) |> ignore
-                Logging.Info(sprintf "Accepted changes to existing chart + song '%s'" existing_song.Title)
+                Logging.Info "Accepted changes to existing chart + song '%s'" existing_song.Title
             | None ->
 
                 match Songs.search_songs 2L 0 request.Song.FormattedTitle |> Array.tryExactlyOne with
@@ -44,14 +44,14 @@ module Add =
                     if existing_song.Title = request.Song.Title && existing_song.Artists = request.Song.Artists then
                         Songs.update_song song_id (existing_song.MergeWithIncoming request.Song) |> ignore
                         Songs.add_chart chart_id request.Chart song_id
-                        Logging.Info(sprintf "Accepted new chart for existing song '%s'" existing_song.Title)
+                        Logging.Info "Accepted new chart for existing song '%s'" existing_song.Title
                     else
                         let new_id = Songs.add_chart_song chart_id request.Chart request.Song
                         Bot.create_admin_prompt (AdminInteractables.do_songs_match (song_id, existing_song, new_id, request.Song))
-                        Logging.Info(sprintf "Accepted new chart for possibly new song '%s'" request.Song.Title)
+                        Logging.Info "Accepted new chart for possibly new song '%s'" request.Song.Title
                 | None ->
                     Songs.add_chart_song chart_id request.Chart request.Song |> ignore
-                    Logging.Info(sprintf "Accepted new chart for new song '%s'" request.Song.Title)
-            
+                    Logging.Info "Accepted new chart for new song '%s'" request.Song.Title
+
             response.ReplyJson(true)
         }

@@ -156,7 +156,7 @@ module Monitors =
             if not (Array.contains config.FullscreenVideoMode.Value supported_video_modes) then
                 config.FullscreenVideoMode.Set supported_video_modes.[supported_video_modes.Length - 1]
         with err ->
-            Logging.Debug("Error setting fullscreen video mode - Possibly invalid display selected", err)
+            Logging.Debug "Error setting fullscreen video mode - Possibly invalid display selected\n%O" err
 
     let window_mode_changed (wm: WindowType) =
         // todo: better ui for windowed mode since you can no longer do custom res

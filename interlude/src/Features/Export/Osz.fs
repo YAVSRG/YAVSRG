@@ -18,8 +18,8 @@ module OsuExport =
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
         | Error err ->
             Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-            Logging.Error(sprintf "Error exporting '%s' as osz" chart_meta.Title, err)
-    
+            Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
+
     let export_chart_with_mods (chart: ModdedChart) (chart_meta: ChartMeta) (options: OsuExportOptions) =
         let mod_string =
             chart.ModsApplied
@@ -27,7 +27,7 @@ module OsuExport =
             |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
             |> String.concat ", "
 
-        let chart_with_mods : Chart = 
+        let chart_with_mods : Chart =
             { Keys = chart.Keys; Notes = chart.Notes; SV = chart.SV; BPM = chart.BPM }
         let meta_with_mods =
             { chart_meta with DifficultyName = chart_meta.DifficultyName.Trim() + sprintf " (+%s)" mod_string }
@@ -38,7 +38,7 @@ module OsuExport =
             Notifications.action_feedback(Icons.CHECK, %"notification.song_exported.title", "")
         | Error err ->
             Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
-            Logging.Error(sprintf "Error exporting '%s' as osz" chart_meta.Title, err)
+            Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
 
     let bulk_export (charts: (Result<Chart, string> * ChartMeta) seq) (options: OsuExportOptions) =
         try
@@ -58,14 +58,14 @@ module OsuExport =
                         ok <- ok + 1
                     | Error err ->
                         failed <- failed + 1
-                        Logging.Error(sprintf "Error exporting '%s' as osz" chart_meta.Title, err)
+                        Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
                 | Error reason ->
                     failed <- failed + 1
-                    Logging.Error(sprintf "Error fetching chart for '%s' to export: %s" chart_meta.Hash reason)
+                    Logging.Error "Error fetching chart for '%s' to export: %s" chart_meta.Hash reason
 
             Notifications.action_feedback(Icons.CHECK, %"notification.bulk_exported.title", [ok.ToString(); failed.ToString()] %> "notification.bulk_exported.body")
         with err ->
-            Logging.Error(sprintf "Unexpected error bulk exporting charts", err)
+            Logging.Error "Unexpected error bulk exporting charts: %O" err
 
 type OsuExportOptionsPage(title: string, selected_mods: ModState, on_submit: bool -> OsuExportOptions -> unit) =
     inherit Page()
@@ -86,7 +86,7 @@ type OsuExportOptionsPage(title: string, selected_mods: ModState, on_submit: boo
         |+ PageButton
             .Once(
                 %"osz_export.confirm",
-                fun () -> 
+                fun () ->
                     on_submit apply_mods.Value { OD = float od.Value; HP = float hp.Value }
                     Menu.Exit()
             )

@@ -39,7 +39,7 @@ module Spectate =
                 replay_data <- replay_info.Replay :?> OnlineReplayProvider
                 Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
                 screen.State.ChangeScoring scoring
-            | None -> Logging.Warn(sprintf "Failed to switch to replay data for %s" next_user)
+            | None -> Logging.Warn "Failed to switch to replay data for %s" next_user
 
         let first_note = info.WithMods.FirstNote
 
@@ -66,7 +66,7 @@ module Spectate =
                 if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
                 if hud_config.KeysPerSecondMeterEnabled then add_widget hud_config.KeysPerSecondMeterPosition KeysPerSecondMeter
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
-                add_widget hud_config.PacemakerPosition 
+                add_widget hud_config.PacemakerPosition
                     (fun (hud_config, state) -> MultiplayerScoreTracker(hud_config, state, lobby.Replays))
 
                 this

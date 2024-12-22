@@ -76,7 +76,7 @@ module API =
                     response.MakeErrorResponse(400, Option.defaultValue "Bad request" err.Message)
                     |> ignore
                 | err ->
-                    Logging.Error(sprintf "Unhandled exception in %O %s: %O" method route err)
+                    Logging.Error "Unhandled exception in %O %s: %O" method route err
                     Discord.debug_log (sprintf "Unhandled exception in %O %s\n%s" method route (err.ToString()))
                     response.MakeErrorResponse(500, "Internal error") |> ignore
             else

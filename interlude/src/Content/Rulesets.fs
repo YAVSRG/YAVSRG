@@ -35,17 +35,17 @@ module Rulesets =
                 let id = Path.GetFileNameWithoutExtension(f)
 
                 match JSON.FromFile<Ruleset>(f) with
-                | Ok rs -> 
+                | Ok rs ->
                     match Ruleset.check rs with
                     | Ok rs -> loaded.Add(id, rs)
-                    | Error reason -> Logging.Error(sprintf "Error validating ruleset '%s': %s" id reason)
-                | Error e -> Logging.Error(sprintf "Error loading ruleset '%s'" id, e)
+                    | Error reason -> Logging.Error "Error validating ruleset '%s': %s" id reason
+                | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not (loaded.ContainsKey DEFAULT_ID) then
             loaded.Add(DEFAULT_ID, DEFAULT)
 
         if not (loaded.ContainsKey _selected_id.Value) then
-            Logging.Warn("Ruleset '" + _selected_id.Value + "' not found, switching to default")
+            Logging.Warn "Ruleset '%s' not found, switching to default" _selected_id.Value
             _selected_id.Value <- DEFAULT_ID
 
         current <- loaded.[_selected_id.Value]
@@ -60,7 +60,7 @@ module Rulesets =
             (fun new_id ->
                 if initialised then
                     if not (loaded.ContainsKey new_id) then
-                        Logging.Warn("Ruleset '" + new_id + "' not found, switching to default")
+                        Logging.Warn "Ruleset '%s' not found, switching to default" new_id
                         _selected_id.Value <- DEFAULT_ID
                     else
                         _selected_id.Value <- new_id
@@ -88,8 +88,8 @@ module Rulesets =
     let exists = loaded.ContainsKey
 
     let install (ruleset: Ruleset) =
-        
-        let new_id : string = 
+
+        let new_id : string =
             ruleset.Name
             |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
             |> Array.ofSeq
@@ -107,14 +107,14 @@ module Rulesets =
 
     let update (existing_id: string) (ruleset: Ruleset) =
 
-        let new_id : string = 
+        let new_id : string =
             ruleset.Name
             |> Seq.filter (function '\'' | '_' | '.' | ' ' -> true | c -> Char.IsAsciiLetterOrDigit c)
             |> Array.ofSeq
             |> String
             |> fun s -> s.ToLowerInvariant()
             |> fun s -> s.Split(' ', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries) |> String.concat "-"
-        
+
         let new_id = if new_id <> existing_id && exists new_id then sprintf "%s_%i" new_id (Timestamp.now()) else new_id
 
         let new_id =
@@ -123,12 +123,12 @@ module Rulesets =
                     File.Move(Path.Combine(get_game_folder "Rulesets", existing_id + ".ruleset"), Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"))
                 new_id
             with err ->
-                Logging.Error(sprintf "Failed to move ruleset file from '%s' to '%s'" existing_id new_id, err)
+                Logging.Error "Failed to move ruleset file from '%s' to '%s': %O" existing_id new_id err
                 existing_id
 
         if loaded.Remove(existing_id) then
             loaded.Add(new_id, ruleset)
-            
+
             if _selected_id.Value = existing_id then
                 _selected_id.Value <- new_id
                 current <- ruleset
@@ -144,6 +144,6 @@ module Rulesets =
                 loaded.Remove id
             with
             | :? IOException as err ->
-                Logging.Error("IO error deleting ruleset", err)
+                Logging.Error "IO error deleting ruleset: %O" err
                 false
         else false

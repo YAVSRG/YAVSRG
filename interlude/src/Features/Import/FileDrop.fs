@@ -38,7 +38,7 @@ type ConfirmUnlinkedSongsImport(path) =
                         function
                         | Some result ->
                             Notifications.task_feedback (
-                                Icons.CHECK, 
+                                Icons.CHECK,
                                 %"notification.import_success",
                                 [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                             )
@@ -71,7 +71,7 @@ module FileDrop =
         | None ->
 
         match path with
-        | OsuSkinFolder -> 
+        | OsuSkinFolder ->
             Menu.Exit()
             osu.Skins.import_osu_skin path
 
@@ -84,7 +84,7 @@ module FileDrop =
                 File.Copy(path, Path.Combine(get_game_folder "Skins", Path.GetFileName path))
                 Skins.load()
             with err ->
-                Logging.Error("Something went wrong when moving this skin!", err)
+                Logging.Error "Error moving/importing dropped skin: %O" err
 
         | OsuSkinArchive ->
             let id = Path.GetFileNameWithoutExtension(path)
@@ -112,7 +112,7 @@ module FileDrop =
                 function
                 | Some result ->
                     Notifications.task_feedback (
-                        Icons.CHECK, 
+                        Icons.CHECK,
                         %"notification.import_success",
                         [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                     )

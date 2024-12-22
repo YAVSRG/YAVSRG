@@ -16,7 +16,7 @@ let HTTPS_PORT = 443
 
 try
     Logging.Verbosity <- LoggingLevel.DEBUG
-    Logging.Info(sprintf "~~ Interlude.Web [%s] ~~" TAGLINE)
+    Logging.Info "~~ Interlude.Web [%s] ~~" TAGLINE
 
     let api_cert =
         new X509Certificate2(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
@@ -43,11 +43,11 @@ try
             Handle_Request = API.handle_request
         }
 
-    Logging.Info(sprintf "Launching game server on port %i ..." SOCKET_PORT)
+    Logging.Info "Launching game server on port %i ..." SOCKET_PORT
     Server.start ()
-    Logging.Info(sprintf "Launching api on port %i ..." HTTPS_PORT)
+    Logging.Info "Launching api on port %i ..." HTTPS_PORT
     API.Server.start ()
-    Logging.Info(sprintf "Launching discord bot ...")
+    Logging.Info "Launching discord bot ..."
     Bot.start ()
 
 #if DEBUG
@@ -57,7 +57,7 @@ try
 #endif
 
 with err ->
-    Logging.Critical(err.ToString(), err)
+    Logging.Critical "%O" err
     Thread.Sleep 60000
 
 Logging.Shutdown()

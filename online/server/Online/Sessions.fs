@@ -29,7 +29,7 @@ module Session =
                 match session_id_to_state_map.[session_id] with
                 | SessionState.LoggedIn(_, username) ->
                     username_to_session_id_map.Remove username |> ignore
-                    Logging.Info(sprintf "[<- %s" username)
+                    Logging.Info "[<- %s" username
                 | _ -> ()
 
                 session_id_to_state_map.Remove session_id |> ignore
@@ -58,9 +58,9 @@ module Session =
                         username_to_session_id_map.[username] <- session_id
                         session_id_to_state_map.[session_id] <- SessionState.LoggedIn(user_id, username)
                         Server.send (session_id, Downstream.LOGIN_SUCCESS username)
-                        Logging.Info(sprintf "[-> %s" username)
+                        Logging.Info "[-> %s" username
                 | Error() ->
-                    Logging.Info(sprintf "%O failed to authenticate" session_id)
+                    Logging.Info "%O failed to authenticate" session_id
                     Server.send (session_id, Downstream.LOGIN_FAILED "Login token invalid or expired")
             | SessionState.Nothing -> Server.kick (session_id, "Login sent before handshake")
             | _ -> ()
@@ -72,7 +72,7 @@ module Session =
             | SessionState.LoggedIn(_, username) ->
                 username_to_session_id_map.Remove username |> ignore
                 session_id_to_state_map.[session_id] <- SessionState.Handshake
-                Logging.Info(sprintf "[<- %s" username)
+                Logging.Info "[<- %s" username
             | _ -> Server.kick (session_id, "Not logged in")
 
     let list_online_users () =

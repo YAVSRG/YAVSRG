@@ -15,7 +15,7 @@ module StepmaniaSkinConverter =
     let load_bmp f =
         use s = File.Open(f, FileMode.Open)
         Bitmap.from_stream false s |> Option.get
-    
+
     type private Transform =
         | NoTransform
         | Stretch
@@ -28,7 +28,7 @@ module StepmaniaSkinConverter =
 
         Directory.CreateDirectory target |> ignore
 
-        let image_file_names = 
+        let image_file_names =
             Directory.EnumerateFiles source
             |> Seq.where (fun p -> Path.GetExtension(p).ToLower() = ".png")
             |> Seq.map Path.GetFileNameWithoutExtension
@@ -45,15 +45,15 @@ module StepmaniaSkinConverter =
         let dim_regex = Regex("""[0-9]+x[0-9]+""")
         let detect_image_dimensions name =
             let res = dim_regex.Matches name
-            if res.Count > 0 then 
+            if res.Count > 0 then
                 let split = res.[0].Value.Split("x")
                 int split.[0], int split.[1]
             else 1, 1
 
         let map_words_to_texture (words: string array) (antiwords: string array) (texture: string) (transform: Transform) : bool =
             match find_image_keywords words antiwords with
-            | None -> 
-                Logging.Debug(sprintf "no suitable match found for '%s'" texture)
+            | None ->
+                Logging.Debug "no suitable match found for '%s'" texture
                 false
             | Some image ->
                 let columns, rows = detect_image_dimensions image
@@ -83,7 +83,7 @@ module StepmaniaSkinConverter =
 
         let config: NoteskinConfig =
             { NoteskinConfig.Default with
-                NoteColors = 
+                NoteColors =
                     { ColorConfig.Default with
                         Style = ColorScheme.DDR
                         UseGlobalColors = true

@@ -83,7 +83,7 @@ module Common =
         let mutable private loaded_path = ""
 
         let load_language language_id =
-            
+
             let path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", language_id + ".txt")
 
             try
@@ -98,7 +98,7 @@ module Common =
 
                 loaded_path <- Path.GetFullPath path
             with err ->
-                Logging.Critical("Failed to load localisation file: " + path, err)
+                Logging.Critical "Failed to load localisation file '%s': %O" path err
 
         let localise str : string =
             if mapping.ContainsKey str then
@@ -270,7 +270,7 @@ module Common =
         try
             Process.Start(ProcessStartInfo(url, UseShellExecute = true)) |> ignore
         with err ->
-            Logging.Debug("Failed to open url in browser: " + url, err)
+            Logging.Debug "Failed to open url '%s' in browser: %O" url err
 
     let get_game_folder name =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
@@ -282,17 +282,17 @@ module Common =
             match JSON.FromFile path with
             | Ok data -> data
             | Error err ->
-                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
+                Logging.Critical "Could not load '%s'! Maybe it is corrupt?\n%O" (Path.GetFileName path) err
 
                 if prompt then
                     Logging.Critical "This is likely a typo from manually editing the JSON yourself."
                     Logging.Critical "Please correct the typo, or if you can't, delete the file and a fresh new one will be created."
-                    
+
                     failwithf "Unable to parse JSON in %s" path
 
                 JSON.Default<'T>()
         else
-            Logging.Info(sprintf "No %s file found, creating it." name)
+            Logging.Info "No %s file found, creating it." name
             JSON.Default<'T>()
 
     let save_important_json_file<'T> path (data: 'T) =

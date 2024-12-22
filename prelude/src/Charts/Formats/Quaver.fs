@@ -57,7 +57,7 @@ module Yaml =
 
     let rec private parse_nested_list (lines: string list) : ResizeArray<ParsedYamlNestedObject> * string list =
         let mutable lines_remaining = lines
-        
+
         let mutable object : ParsedYamlNestedObject = Map.empty
         let parsed_objects = ResizeArray<ParsedYamlNestedObject>()
 
@@ -72,7 +72,7 @@ module Yaml =
             let is_indented = line.StartsWith(" ") || line.StartsWith ("-")
             let is_new_item = line.Trim().StartsWith("-")
 
-            if not is_indented then 
+            if not is_indented then
                 end_of_list <- true
                 lines_remaining <- line :: lines_remaining
             elif is_new_item && line.IndexOf("-") <> indent then
@@ -84,7 +84,7 @@ module Yaml =
                     object <- Map.empty
 
                 let key_value = line.Trim().TrimStart('-').Trim().Split(":", 2)
-                
+
                 if key_value.[0] = "{}" then
                     ()
                 elif key_value.Length > 1 && key_value.[1] <> "" then
@@ -127,7 +127,7 @@ module Yaml =
 
     let get_int (key: string) (parsed: ParsedYamlObject) : int =
         match parsed.TryFind key with
-        | Some (String s) -> 
+        | Some (String s) ->
             match Int32.TryParse(s, Globalization.CultureInfo.InvariantCulture) with
             | true, res -> res
             | _ -> failwithf "Failed to parse expected int '%s' for key '%s'" s key
@@ -135,7 +135,7 @@ module Yaml =
 
     let get_int_or (key: string) (otherwise: int) (parsed: ParsedYamlObject) : int =
         match parsed.TryFind key with
-        | Some (String s) -> 
+        | Some (String s) ->
             match Int32.TryParse(s, Globalization.CultureInfo.InvariantCulture) with
             | true, res -> res
             | _ -> failwithf "Failed to parse expected int '%s' for key '%s'" s key
@@ -222,7 +222,7 @@ module QuaverChart =
             SliderVelocities = Yaml.get_array<QuaverSliderVelocity> "SliderVelocities" sv_from_yaml parsed
             HitObjects = Yaml.get_array<QuaverHitObject> "HitObjects" object_from_yaml parsed
         }
-    
+
     let from_file (path: string) : Result<QuaverChart, string> =
         try
             let lines = File.ReadAllLines path
@@ -230,5 +230,5 @@ module QuaverChart =
             let chart = from_yaml parsed_yaml
             Ok chart
         with err ->
-            Logging.Warn(sprintf "Error loading quaver chart: %O" err)
+            Logging.Warn "Error loading Quaver chart: %O" err
             Error err.Message

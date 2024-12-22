@@ -27,7 +27,7 @@ module Skins =
             |+ PageSetting(%"osu_skin_import.isarrows", Checkbox is_arrows)
                 .Pos(2)
                 .Conditional(fun () -> keymode.Value = Keymode.``4K``)
-            |+ 
+            |+
                 match existing_folder with
                 | Some folder ->
                     [
@@ -47,7 +47,7 @@ module Skins =
                                 (int keymode.Value)
                                 (keymode.Value = Keymode.``4K`` && is_arrows.Value)
 
-                            if delete_existing.Value then 
+                            if delete_existing.Value then
                                 try
                                     match existing_folder with
                                     | Some old_name ->
@@ -56,12 +56,12 @@ module Skins =
                                             Directory.Delete(skin_path, true)
                                     | None -> failwith "impossible"
                                 with err ->
-                                    Logging.Error("Error deleting old skin")
+                                    Logging.Error "Error deleting old skin"
                             Skins.load ()
                             Skins.selected_noteskin_id.Set folder_name
                             Skins.selected_hud_id.Set folder_name
                         with err ->
-                            Logging.Error("Error while converting to skin", err)
+                            Logging.Error "Error while converting to skin: %O" err
 
                         Menu.Back()
                         Menu.Back()
@@ -93,8 +93,8 @@ module Skins =
                 existing_id
             )
                 .Show()
-        | Error err -> 
-            Logging.Error("Error while parsing osu! skin.ini\n" + err)
+        | Error err ->
+            Logging.Error "Error while parsing osu! skin.ini: %O" err
             Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     type OsuSkinsListPage() =
@@ -124,7 +124,7 @@ module Skins =
                     |+ seq {
                         for path in osu_skin_paths do
                             yield PageButton(
-                                Path.GetFileName(path), 
+                                Path.GetFileName(path),
                                 fun () -> import_osu_skin(path)
                             )
                     },

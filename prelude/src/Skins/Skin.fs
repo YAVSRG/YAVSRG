@@ -52,8 +52,8 @@ type Skin(storage) as this =
 
     member this.NoteskinFolder() : string option =
         match storage with
-        | Folder path -> 
-            let noteskin_path = Path.Combine(path, "Noteskin") 
+        | Folder path ->
+            let noteskin_path = Path.Combine(path, "Noteskin")
             if Noteskin.Exists noteskin_path then
                 Some noteskin_path
             else None
@@ -61,8 +61,8 @@ type Skin(storage) as this =
 
     member this.HudFolder() : string option =
         match storage with
-        | Folder path -> 
-            let hud_path = Path.Combine(path, "HUD") 
+        | Folder path ->
+            let hud_path = Path.Combine(path, "HUD")
             if HudLayout.Exists hud_path then
                 Some hud_path
             else None
@@ -81,21 +81,21 @@ type Skin(storage) as this =
         if File.Exists hud_settings then
             match JSON.FromFile<HudConfig>(hud_settings) with
             | Ok _ -> ()
-            | Error _ -> 
+            | Error _ ->
 
             Logging.Critical("Your default User HUD's hud.json doesn't parse! Did you make a typo?\nIn future, use the ingame editor to avoid formatting mistakes.")
             Logging.Critical("If you want to FULLY reset your HUD file to defaults, type 'reset' now, otherwise go and fix it and then relaunch the game.")
 
             if System.Console.ReadLine().Trim().ToLower() <> "reset" then
                 failwith "User chose to crash the game so they can fix their HUD config"
-            
+
         JSON.ToFile(hud_settings, true) HudConfig.Default
 
         let skin_settings = Path.Combine(path, "skin.json")
         if File.Exists skin_settings then
             match JSON.FromFile<SkinMetadata>(skin_settings) with
             | Ok _ -> ()
-            | Error _ -> 
+            | Error _ ->
                 Logging.Warn("Resetting User skin.json because it didn't parse - Maybe you foolishly made a typo when editing it manually")
                 JSON.ToFile(skin_settings, true) default_skin_meta
         else
@@ -104,15 +104,15 @@ type Skin(storage) as this =
         let hud =
             match HudLayout.FromPath hud_path with
             | Ok hud -> hud
-            | Error err -> 
-                Logging.Critical("Something terrible has happened while creating a default hud", err)
+            | Error err ->
+                Logging.Critical "Something terrible has happened while creating a default hud: %O" err
                 raise err
 
         let skin =
             match Skin.FromPath path with
             | Ok skin -> skin
-            | Error err -> 
-                Logging.Critical("Something terrible has happened while creating a default skin", err)
+            | Error err ->
+                Logging.Critical "Something terrible has happened while creating a default skin: %O" err
                 raise err
 
         hud, skin

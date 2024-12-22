@@ -66,7 +66,7 @@ type ValidationMessage =
 
 module TextureFileName =
     open System.Text.RegularExpressions
-    
+
     let private GRID_REGEX = Regex(@"^([a-z\-]+)\[([0-9]+)x([0-9]+)\]\.png$", RegexOptions.IgnoreCase)
     let try_parse_grid (texture_name: string) (file_name: string) : (int * int) option =
         let matches = GRID_REGEX.Matches(file_name)
@@ -80,7 +80,7 @@ module TextureFileName =
 
     let to_grid (texture_id: string) (columns: int, rows: int) =
         sprintf "%s[%ix%i].png" texture_id columns rows
-        
+
     let private LOOSE_REGEX = Regex(@"^([a-z\-]+)-([0-9]+)-([0-9]+)\.png$", RegexOptions.IgnoreCase)
     let try_parse_loose (texture_name: string) (file_name: string) : (int * int) option =
         let matches = LOOSE_REGEX.Matches(file_name)
@@ -123,13 +123,11 @@ type Storage(storage: StorageType) =
         | :? DirectoryNotFoundException // File doesnt exist in folder storage
         | :? NullReferenceException -> None // File doesnt exist in zip storage
         | :? IOException as err ->
-            Logging.Error(
-                sprintf
-                    "IO error reading '%s' in: %O\n  This is unusual, maybe you still have the file open in another program?"
-                    (String.concat "/" path)
-                    storage,
+            Logging.Error
+                "IO error reading '%s' in: %O\n  This is unusual, maybe you still have the file open in another program?\n%O"
+                (String.concat "/" path)
+                storage
                 err
-            )
 
             reraise ()
         | _ -> reraise ()
@@ -144,7 +142,7 @@ type Storage(storage: StorageType) =
 
             if File.Exists p then
                 File.Delete p
-                
+
     member this.RenameFile(old_name: string, new_name: string, [<ParamArray>] path: string array) =
         let p = Path.Combine(path)
 
@@ -168,7 +166,7 @@ type Storage(storage: StorageType) =
                 for e in z.Entries do
                     if e.FullName = p + e.Name && Path.HasExtension e.Name then
                         yield e.Name
-            } 
+            }
             |> Array.ofSeq
         | Folder f ->
             let target = Path.Combine(f, p)
@@ -211,7 +209,7 @@ type Storage(storage: StorageType) =
                     |> function
                         | Ok v -> Some v
                         | Error err ->
-                            Logging.Error(sprintf "Failed to load %s in: %O" (String.concat "/" path) storage, err)
+                            Logging.Error "Failed to load '%s' in %O: %O" (String.concat "/" path) storage err
                             None
 
                 stream.Dispose()
@@ -237,13 +235,11 @@ type Storage(storage: StorageType) =
                     |> function
                         | Ok v -> v, false
                         | Error err ->
-                            Logging.Error(
-                                sprintf
-                                    "JSON error reading '%s' in: %O\n  Data was wrong or not formatted properly (Check you aren't missing a comma)\n  Using default values instead"
-                                    (String.concat "/" path)
-                                    storage,
+                            Logging.Error
+                                "JSON error reading '%s' in: %O\n  Data was wrong or not formatted properly (Check you aren't missing a comma)\n  Using default values instead\n%O"
+                                (String.concat "/" path)
+                                storage
                                 err
-                            )
 
                             JSON.Default<'T>(), true
 
@@ -291,15 +287,11 @@ type Storage(storage: StorageType) =
                 ZipFile.CreateFromDirectory(f, target)
                 true
             with
-            | :? DirectoryNotFoundException as e ->
-                Logging.Error(
-                    "Couldn't export archive because the folder moved. Did you move it while the game was open?",
-                    e
-                )
-
+            | :? DirectoryNotFoundException as err ->
+                Logging.Error "Couldn't export archive because the folder moved. Did you move it while the game was open?\n%O" err
                 false
-            | :? IOException as e ->
-                Logging.Error("IO exception while exporting archive", e)
+            | :? IOException as err ->
+                Logging.Error "IO exception while exporting archive: %O" err
                 false
             | _ -> reraise ()
 
@@ -308,7 +300,7 @@ type Storage(storage: StorageType) =
     member private this.LoadGridTexture
         (
             name: string,
-            columns: int, 
+            columns: int,
             rows: int,
             path: string array,
             must_be_square: bool
@@ -343,7 +335,7 @@ type Storage(storage: StorageType) =
     member private this.LoadLooseTextures
         (
             name: string,
-            columns: int, 
+            columns: int,
             rows: int,
             path: string array,
             must_be_square: bool
@@ -472,7 +464,7 @@ type Storage(storage: StorageType) =
             rules: TextureRules,
             [<ParamArray>] path: string array
         ) : ValidationMessage seq =
-            
+
         seq {
             let filename = TextureFileName.to_grid name (columns, rows)
             match this.TryReadFile(Array.append path [| filename |]) with
@@ -537,7 +529,7 @@ type Storage(storage: StorageType) =
                         let h = img.Height / rows
 
                         if rules.MustBeSquare && w <> h then
-                                
+
                             let could_rows_columns_swap = img.Width / rows = img.Height / columns
                             if could_rows_columns_swap then
                                 yield
@@ -645,7 +637,7 @@ type Storage(storage: StorageType) =
                                     Element = name
                                     Message =
                                         sprintf
-                                            "'%s' is missing" 
+                                            "'%s' is missing"
                                             filename
                                     SuggestedFix = None
                                 }
@@ -754,7 +746,7 @@ type Storage(storage: StorageType) =
                 yield! this.ValidateLooseTextures(name, columns, rows, rules, path)
         }
 
-    member this.TextureIsGrid(name: string) : bool = 
+    member this.TextureIsGrid(name: string) : bool =
         match this.DetectTextureFormat(name) with
         | Ok (_, _, is_grid) -> is_grid
         | _ -> false
@@ -763,14 +755,14 @@ type Storage(storage: StorageType) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-            
+
             match this.DetectTextureFormat(name, path) with
-            | Error reason -> Logging.Error(sprintf "Couldn't split texture '%s': %s" name reason)
+            | Error reason -> Logging.Error "Couldn't split texture '%s': %s" name reason
             | Ok (columns, rows, is_grid) ->
 
             if is_grid then
                 match this.LoadGridTexture(name, columns, rows, path, false) with
-                | Error _ -> Logging.Error(sprintf "Couldn't split texture '%s' because it couldn't be loaded" name)
+                | Error _ -> Logging.Error "Couldn't split texture '%s' because it couldn't be loaded" name
                 | Ok img ->
 
                 let w = img.Width / columns
@@ -794,12 +786,12 @@ type Storage(storage: StorageType) =
         | Folder f ->
 
             match this.DetectTextureFormat(name, path) with
-            | Error reason -> Logging.Error(sprintf "Couldn't stitch texture '%s': %s" name reason)
+            | Error reason -> Logging.Error "Couldn't stitch texture '%s': %s" name reason
             | Ok (columns, rows, is_grid) ->
 
             if not is_grid then
                 match this.LoadLooseTextures(name, columns, rows, path, false) with
-                | Error _ -> Logging.Error(sprintf "Couldn't stitch texture '%s' because it couldn't be loaded" name)
+                | Error _ -> Logging.Error "Couldn't stitch texture '%s' because it couldn't be loaded" name
                 | Ok img ->
 
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, TextureFileName.to_grid name (columns, rows)))
@@ -812,15 +804,15 @@ type Storage(storage: StorageType) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> 
-            Logging.Error(sprintf "Cannot mutate '%s': %s" name reason)
+        | Error reason ->
+            Logging.Error "Cannot mutate '%s': %s" name reason
             false
         | Ok (columns, rows, is_grid) ->
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot mutate %s (%i, %i) as it is a grid texture" name col row)
+            Logging.Warn "Cannot mutate %s (%i, %i) as it is a grid texture" name col row
             false
         elif col < 0 || col >= columns  || row < 0 || row >= rows then
             false
@@ -831,29 +823,29 @@ type Storage(storage: StorageType) =
         | Some stream ->
             match Bitmap.from_stream true stream with
             | None ->
-                Logging.Warn(sprintf "'%s' is not a valid image" filename)
+                Logging.Warn "'%s' is not a valid image" filename
                 false
             | Some img ->
                 img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
                 img.SaveAsPng(Path.Combine(f, Path.Combine path, filename))
                 true
         | None ->
-            Logging.Warn(sprintf "Couldn't find file '%s'" filename)
+            Logging.Warn "Couldn't find file '%s'" filename
             false
 
     member this.MutateLooseTextures(action: (IImageProcessingContext -> IImageProcessingContext), name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> 
-            Logging.Error(sprintf "Cannot mutate '%s': %s" name reason)
+        | Error reason ->
+            Logging.Error "Cannot mutate '%s': %s" name reason
             false
         | Ok (columns, rows, is_grid) ->
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot mutate %s as it is a grid texture" name)
+            Logging.Warn "Cannot mutate %s as it is a grid texture" name
             false
         else
 
@@ -864,12 +856,12 @@ type Storage(storage: StorageType) =
                 | Some stream ->
                     match Bitmap.from_stream true stream with
                     | None ->
-                        Logging.Warn(sprintf "'%s' is not a valid image" filename)
+                        Logging.Warn "'%s' is not a valid image" filename
                     | Some img ->
                         img.Mutate<PixelFormats.Rgba32>(fun context -> action context |> ignore)
                         img.SaveAsPng(Path.Combine(f, Path.Combine path, filename))
                 | None ->
-                    Logging.Warn(sprintf "Couldn't find file '%s'" filename)
+                    Logging.Warn "Couldn't find file '%s'" filename
         true
 
     member this.VerticalFlipTexture((col, row), name: string, [<ParamArray>] path: string array) =
@@ -888,13 +880,13 @@ type Storage(storage: StorageType) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> Logging.Error(sprintf "Couldn't edit texture '%s': %s" name reason); false
+        | Error reason -> Logging.Error "Couldn't edit texture '%s': %s" name reason; false
         | Ok (columns, rows, is_grid) ->
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot clone %s (*, %i) as it is a grid texture" name src_row)
+            Logging.Warn "Cannot clone %s (*, %i) as it is a grid texture" name src_row
             false
         else
 
@@ -906,20 +898,20 @@ type Storage(storage: StorageType) =
                 )
             true
         with err ->
-            Logging.Error("Error adding texture row", err)
+            Logging.Error "Error adding texture row: %O" err
             false
 
     member this.AddLooseTextureColumn(src_col: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> Logging.Error(sprintf "Couldn't edit texture '%s': %s" name reason); false
+        | Error reason -> Logging.Error "Couldn't edit texture '%s': %s" name reason; false
         | Ok (columns, rows, is_grid) ->
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot clone %s (%i, *) as it is a grid texture" name src_col)
+            Logging.Warn "Cannot clone %s (%i, *) as it is a grid texture" name src_col
             false
         else
 
@@ -931,22 +923,22 @@ type Storage(storage: StorageType) =
                 )
             true
         with err ->
-            Logging.Error("Error adding texture column", err)
+            Logging.Error "Error adding texture column: %O" err
             false
 
     member this.DeleteLooseTextureRow(row: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> Logging.Error(sprintf "Couldn't edit texture '%s': %s" name reason); false
+        | Error reason -> Logging.Error "Couldn't edit texture '%s': %s" name reason; false
         | Ok (columns, rows, is_grid) ->
 
         if rows <= 1 then false else
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot delete %s (*, %i) as it is a grid texture" name row)
+            Logging.Warn "Cannot delete %s (*, %i) as it is a grid texture" name row
             false
         else
 
@@ -961,22 +953,22 @@ type Storage(storage: StorageType) =
                     )
             true
         with err ->
-            Logging.Error("Error removing texture row", err)
+            Logging.Error "Error removing texture row: %O" err
             false
 
     member this.DeleteLooseTextureColumn(col: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
-        
+
         match this.DetectTextureFormat(name, path) with
-        | Error reason -> Logging.Error(sprintf "Couldn't edit texture '%s': %s" name reason); false
+        | Error reason -> Logging.Error "Couldn't edit texture '%s': %s" name reason; false
         | Ok (columns, rows, is_grid) ->
 
         if columns <= 1 then false else
 
         if is_grid then
-            Logging.Warn(sprintf "Cannot delete %s (%i, *) as it is a grid texture" name col)
+            Logging.Warn "Cannot delete %s (%i, *) as it is a grid texture" name col
             false
         else
 
@@ -991,7 +983,7 @@ type Storage(storage: StorageType) =
                     )
             true
         with err ->
-            Logging.Error("Error removing texture column", err)
+            Logging.Error "Error removing texture column: %O" err
             false
 
     interface IDisposable with

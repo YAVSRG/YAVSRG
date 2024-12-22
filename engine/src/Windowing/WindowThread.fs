@@ -309,13 +309,13 @@ module WindowThread =
             for i = 0 to count - 1 do
                 paths_array.[i] <- Marshal.PtrToStringUTF8(NativePtr.toNativeInt (NativePtr.get paths i))
         with err ->
-            Logging.Critical("Error getting dropped file paths", err)
+            Logging.Critical "Error getting dropped file paths: %O" err
         GameThread.defer (fun () -> file_drop_ev.Trigger paths_array)
 
     let private file_drop_callback_d = GLFWCallbacks.DropCallback file_drop_callback
 
     let private error_callback (code: ErrorCode) (desc: string) =
-        Logging.Debug(sprintf "GLFW Error (%O): %s" code desc)
+        Logging.Debug "GLFW Error (%O): %s" code desc
 
     let private error_callback_d = GLFWCallbacks.ErrorCallback error_callback
 

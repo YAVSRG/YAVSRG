@@ -73,7 +73,7 @@ module Imports =
         { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
             override this.Handle((path, config, { Charts = chart_db })) =
                 async {
-                    let results = 
+                    let results =
                         Directory.EnumerateFiles path
                         |> Seq.collect (
                             function
@@ -82,7 +82,7 @@ module Imports =
                                 try
                                     convert_chart_file action
                                 with err ->
-                                    Logging.Error(sprintf "Unhandled exception converting %s" file, err)
+                                    Logging.Error "Unhandled exception converting '%s': %O" file err
                                     []
                             | _ -> []
                         )
@@ -92,14 +92,14 @@ module Imports =
                                 match Chart.check import.Chart with
                                 | Ok chart -> Ok { import with Chart = chart }
                                 | Error reason ->
-                                    Logging.Error(sprintf "Conversion produced corrupt chart (%s): %s" path reason)
+                                    Logging.Error "Conversion produced corrupt chart (%s): %s" path reason
                                     Error (path, sprintf "Corrupt (%s)" reason)
                             | Error skipped_conversion -> Error skipped_conversion
                         )
                         |> List.ofSeq
 
                     let filter_rates =
-                        results 
+                        results
                         |> List.map (
                             function
                             | Ok import ->
@@ -108,13 +108,13 @@ module Imports =
                                     let original =
                                         results
                                         |> List.tryFind (
-                                            function 
-                                            | Ok { Chart = original } -> 
-                                                original.Notes.Length = import.Chart.Notes.Length 
+                                            function
+                                            | Ok { Chart = original } ->
+                                                original.Notes.Length = import.Chart.Notes.Length
                                                 && abs((import.Chart.LastNote - import.Chart.FirstNote) * float32 rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
                                             | _ -> false
                                         )
-                                    if original.IsSome then 
+                                    if original.IsSome then
                                         Error (path, sprintf "Skipping %.2fx rate of another map" rate)
                                     else Ok import
                                 | None -> Ok import
@@ -147,7 +147,7 @@ module Imports =
                 }
         }
 
-    let convert_folder_of_oszs = 
+    let convert_folder_of_oszs =
         { new Async.Service<string * Library, ConversionResult>() with
             override this.Handle((folder_of_oszs, library)) =
                 async {
@@ -165,7 +165,7 @@ module Imports =
                                 Directory.Exists(extracted_folder)
                                 && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
                             then
-                                Logging.Error(sprintf "Can't extract osz to %s because that folder exists already" extracted_folder)
+                                Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
                                 results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
                             else
                                 try
@@ -174,7 +174,7 @@ module Imports =
                                     Directory.Delete(extracted_folder, true)
                                     results <- ConversionResult.Combine result results
                                 with err ->
-                                    Logging.Error(sprintf "Unexpected error in %s" extracted_folder, err)
+                                    Logging.Error "Unexpected error in '%s': %O" extracted_folder err
                                     results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
                         | _ -> ()
                     return results
@@ -229,7 +229,7 @@ module Imports =
                         Directory.Exists(dir)
                         && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
                     then
-                        Logging.Error(sprintf "Can't extract zip to %s because that folder exists already" dir)
+                        Logging.Error "Can't extract zip to %s because that folder exists already" dir
                         return None
                     else
                         ZipFile.ExtractToDirectory(path, dir)
@@ -253,10 +253,7 @@ module Imports =
                             Directory.Delete(dir, true)
                             return Some results
                         | _ ->
-                            Logging.Warn(
-                                sprintf "%s: Extracted zip does not match the usual structure for a StepMania pack" dir
-                            )
-
+                            Logging.Warn "'%s': Extracted zip does not match the usual structure for a StepMania pack" dir
                             Directory.Delete(dir, true)
                             return None
                 }
@@ -269,7 +266,7 @@ module Imports =
                 result.SkippedCharts
                 |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
                 |> String.concat "\n "
-            Logging.Info(sprintf "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump)
+            Logging.Info "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
 
     let rec private auto_detect_import (path: string, move_assets: bool, library: Library) : Async<ConversionResult option> =
         async {
@@ -281,8 +278,8 @@ module Imports =
                         convert_song_folder.RequestAsync(
                             Path.GetDirectoryName path,
                             { ConversionOptions.Default with
-                                PackName = 
-                                    if ext = ".osu" then "osu!" 
+                                PackName =
+                                    if ext = ".osu" then "osu!"
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
@@ -297,7 +294,7 @@ module Imports =
                         Directory.Exists(dir)
                         && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
                     then
-                        Logging.Error(sprintf "Can't extract %s to %s because that folder exists already" ext dir)
+                        Logging.Error "Can't extract %s to %s because that folder exists already" ext dir
                         return None
                     else
                         ZipFile.ExtractToDirectory(path, dir)
@@ -305,7 +302,7 @@ module Imports =
                         Directory.Delete(dir, true)
                         return result
                 | _ ->
-                    Logging.Warn(sprintf "%s: Unrecognised file for import" path)
+                    Logging.Warn "%s: Unrecognised file for import" path
                     return None
             | _ ->
                 match path with
@@ -315,8 +312,8 @@ module Imports =
                             path,
                             { ConversionOptions.Default with
                                 MoveAssets = move_assets
-                                PackName = 
-                                    if ext = ".osu" then "osu!" 
+                                PackName =
+                                    if ext = ".osu" then "osu!"
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
@@ -343,7 +340,7 @@ module Imports =
                             else
                                 "Songs"
                         | s -> s
-                                
+
                     let! result =
                         convert_pack_folder.RequestAsync(
                             path,
@@ -368,16 +365,16 @@ module Imports =
                                 library
                             )
                         results <- ConversionResult.Combine result results
-                        
+
                     log_skipped results
                     return Some results
                 | _ ->
-                    Logging.Warn(sprintf "%s: No importable folder structure detected" path)
+                    Logging.Warn "%s: No importable folder structure detected" path
                     return None
         }
 
     let auto_convert =
         { new Async.Service<string * bool * Library, ConversionResult option>() with
-            override this.Handle((path, move_assets, library)) = 
+            override this.Handle((path, move_assets, library)) =
                 auto_detect_import (path, move_assets, library)
         }

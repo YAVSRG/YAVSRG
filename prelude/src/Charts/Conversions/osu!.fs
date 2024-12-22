@@ -117,7 +117,7 @@ module Osu_To_Interlude =
 
         let data = new Dictionary<float32<ms / beat>, Time>()
 
-        let uninherited = 
+        let uninherited =
             points
             |> Seq.choose (function Uninherited b -> Some b | _ -> None)
             |> List.ofSeq
@@ -127,7 +127,7 @@ module Osu_To_Interlude =
         | x :: xs ->
             let mutable current: float32<ms / beat> = float32 x.MsPerBeat * 1.0f<ms / beat>
             let mutable time = Time.of_number x.Time
-            
+
             for b in xs do
                 if (not (data.ContainsKey current)) then
                     data.Add(current, 0.0f<ms>)
@@ -135,12 +135,12 @@ module Osu_To_Interlude =
                 data.[current] <- data.[current] + Time.of_number b.Time - time
                 time <- Time.of_number b.Time
                 current <- float32 b.MsPerBeat * 1.0f<ms / beat>
-                
+
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
 
             data.[current] <- data.[current] + max (end_time - time) 0.0f<ms>
-        
+
         data
 
     let convert_timing_points (points: TimingPoint list) (end_time: Time) : TimeArray<BPM> * TimeArray<float32> =
@@ -271,8 +271,8 @@ module Osu_To_Interlude =
                 }
             }
         with
-        | :? ConversionSkipException as skip_reason -> 
+        | :? ConversionSkipException as skip_reason ->
             Error (action.Source, skip_reason.msg)
         | other_error ->
-            Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
             Error (action.Source, other_error.Message)

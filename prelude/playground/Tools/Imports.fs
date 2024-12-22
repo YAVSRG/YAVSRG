@@ -22,7 +22,7 @@ let main () =
                     match converted with
                     | Ok { Chart = chart }  ->
                         match Chart.check chart with
-                        | Error msg -> Logging.Error msg
+                        | Error msg -> Logging.Error "%s" msg
                         | Ok chart -> ()
                     | Error skipped_reason -> printfn "%A" skipped_reason
 

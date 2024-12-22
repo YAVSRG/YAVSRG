@@ -33,7 +33,7 @@ module Update =
             match Songs.song_by_id request.SongId with
             | Some (existing_song) ->
                 Songs.update_song request.SongId (existing_song.MergeWithIncoming request.Song) |> ignore
-                Logging.Info(sprintf "Accepted changes to existing song '%s'" existing_song.Title)
+                Logging.Info "Accepted changes to existing song '%s'" existing_song.Title
                 response.ReplyJson(true)
             | None ->
                 response.ReplyJson(false)

@@ -232,7 +232,7 @@ module Metadata =
                 remixers <- [ remixer ]
                 append_to_title <- "(" + remixer + " Remix)"
             | Some s ->
-                Logging.Info(sprintf "Unusual bracket text '%s'" s)
+                Logging.Info "Unusual bracket text '%s'" s
                 confident <- false
             | None -> ()
 
@@ -274,11 +274,11 @@ module Metadata =
                     remixers <- [ s.Split("'s").[0] ]
                     suggested_title <- title + " (" + s + ")"
                 else
-                    Logging.Info(sprintf "Unknown remix name '%s'" s)
+                    Logging.Info "Unknown remix name '%s'" s
                     confident <- false
                     suggested_title <- title + " (" + s + ")"
             | Some s ->
-                Logging.Info(sprintf "Unusual bracket text '%s'" s)
+                Logging.Info "Unusual bracket text '%s'" s
                 confident <- false
                 suggested_title <- title + " (" + s + ")"
             | None -> ()
@@ -331,7 +331,7 @@ module Metadata =
         if suggestion_2_confident && suggestion_2 <> song then suggestion_2 else
 
         song
-        
+
     let private character_voice_regex = Regex("[\\[\\(][cC][vV][.:\\-]?\\s?(.*)[\\]\\)]")
     let private fixed_artists = Extraction.artists.FixerMapping()
     let correct_artist_typos (song: Song) : Song =

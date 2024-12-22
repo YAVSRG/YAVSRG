@@ -35,7 +35,7 @@ module NoteskinExplosionMigration =
     let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) =
         match model.Explosions with
         | Some explosions ->
-            Logging.Info(sprintf "Migrating noteskin '%s' to new explosions system" model.Name)
+            Logging.Info "Migrating noteskin '%s' to new explosions system" model.Name
 
             if explosions.ExplodeOnMiss then
                 Logging.Warn(
@@ -120,10 +120,10 @@ type Noteskin(storage) as this =
             | TextureError _ -> ()
             | TextureOk (bmp, rows, columns) ->
                 let x, y = bmp.Width / columns / 2, bmp.Height / rows / 2
-                if 
+                if
                     this.Config.UseHoldTailTexture
                     && not this.Config.FlipHoldTail
-                    && bmp.Height / rows > 24 
+                    && bmp.Height / rows > 24
                     && bmp.[x, y - 8].A > 127uy
                     && bmp.[x, y + 8].A < 127uy
                 then
@@ -148,9 +148,9 @@ type Noteskin(storage) as this =
                                                     this.Config <- { this.Config with FlipHoldTail = true }
                                         }
                             }
-                    
+
         }
-        
+
     static member FromZipStream(stream: Stream) =
         new Noteskin(Embedded(new ZipArchive(stream)))
 

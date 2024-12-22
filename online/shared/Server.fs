@@ -24,13 +24,13 @@ module Server =
 
         override this.OnConnected() =
             config.Handle_Connect this.Id
-            Logging.Debug(sprintf "%O :: %O :: %O" DateTime.UtcNow this.Id this.Socket.RemoteEndPoint)
+            Logging.Debug "%O :: %O :: %O" DateTime.UtcNow this.Id this.Socket.RemoteEndPoint
 
         override this.OnDisconnected() = config.Handle_Disconnect this.Id
 
         override this.OnError(error: SocketError) =
             if error <> SocketError.NotConnected then
-                Logging.Error(sprintf "Socket error in session %O: %O" this.Id error)
+                Logging.Error "Socket error in session %O: %O" this.Id error
 
         override this.OnReceived(data: byte array, offset, size) =
             try
@@ -42,7 +42,7 @@ module Server =
                     Upstream.Read >> fun packet -> config.Handle_Packet(this.Id, packet)
                 )
             with err ->
-                Logging.Error(sprintf "Internal error processing socket data: %O" err)
+                Logging.Error "Internal error processing socket data: %O" err
                 this.ProtocolDisconnect "Internal error"
 
         member this.SendPacket(packet: Downstream) =
@@ -67,7 +67,7 @@ module Server =
         override this.CreateSession() = new Session(this, config)
 
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Error in TCP server: %O" error)
+            Logging.Error "Error in TCP server: %O" error
 
     let mutable private server = Unchecked.defaultof<Listener>
 
@@ -88,7 +88,7 @@ module Server =
                 Logging.Debug("Socket was disposed before packet could be sent")
 
     let kick (id: Guid, reason: string) =
-        Logging.Info(sprintf "Kicking session %O: %s" id reason)
+        Logging.Info "Kicking session %O: %s" id reason
         send (id, Downstream.DISCONNECT reason)
         let session = server.FindSession(id)
 

@@ -26,7 +26,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
             )
         )
 
-    let title = 
+    let title =
         if group.Versions.Length = 1 then
             group.Name
         else
@@ -74,7 +74,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     version.Preview,
                     function
                     | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
-                    | None -> Logging.Warn("Failed to load noteskin preview", version.Preview)
+                    | None -> Logging.Warn "Failed to load noteskin preview '%s'" version.Preview
                 )
         }
         |* Clickable.Focus this
@@ -153,7 +153,7 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     group.Thumbnail,
                     function
                     | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
-                    | None -> Logging.Warn("Failed to load noteskin thumbnail", group.Thumbnail)
+                    | None -> Logging.Warn "Failed to load noteskin thumbnail '%s'" group.Thumbnail
                 )
         }
         |* Clickable.Focus this

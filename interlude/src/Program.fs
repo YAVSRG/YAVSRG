@@ -26,7 +26,7 @@ let launch (instance: int) =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let crash_splash =
-        Utils.splash_message_picker "CrashSplashes.txt" >> (fun s -> Logging.Critical s)
+        Utils.splash_message_picker "CrashSplashes.txt" >> Logging.Critical "%s"
 
     let init () =
         Startup.init_startup instance
@@ -47,11 +47,7 @@ let launch (instance: int) =
 [<EntryPoint>]
 let main argv =
     let executable_location = AppDomain.CurrentDomain.BaseDirectory
-
-    try
-        Directory.SetCurrentDirectory(executable_location)
-    with err ->
-        Logging.Error(executable_location, err)
+    Directory.SetCurrentDirectory(executable_location)
 
     if
         executable_location.Replace("\\", "/").ToLower().Contains "appdata/local/temp"

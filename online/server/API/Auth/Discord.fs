@@ -59,13 +59,12 @@ module Discord =
                 |> Async.AwaitTask
 
             if not oauth_response.IsSuccessStatusCode then
-                Logging.Error(sprintf "Discord OAuth request failed: %s" oauth_response.ReasonPhrase)
+                Logging.Error "Discord OAuth request failed: %s" oauth_response.ReasonPhrase
 
-                Logging.Error(
-                    oauth_response.Content.ReadAsStringAsync()
-                    |> Async.AwaitTask
-                    |> Async.RunSynchronously
-                )
+                oauth_response.Content.ReadAsStringAsync()
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Logging.Error "%s"
 
                 response.ReplyRedirect("https://yavsrg.net/login_failed")
             else
@@ -83,13 +82,12 @@ module Discord =
             let identity_response = http_client.Send(identity_request)
 
             if not identity_response.IsSuccessStatusCode then
-                Logging.Error(sprintf "Discord Identity request failed: %s" identity_response.ReasonPhrase)
+                Logging.Error "Discord Identity request failed: %s" identity_response.ReasonPhrase
 
-                Logging.Error(
-                    identity_response.Content.ReadAsStringAsync()
-                    |> Async.AwaitTask
-                    |> Async.RunSynchronously
-                )
+                identity_response.Content.ReadAsStringAsync()
+                |> Async.AwaitTask
+                |> Async.RunSynchronously
+                |> Logging.Error "%s"
 
                 response.ReplyRedirect("https://yavsrg.net/login_failed")
             else

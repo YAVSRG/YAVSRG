@@ -10,7 +10,7 @@ open Interlude.Web.Server.Domain.Core
 module Users =
 
     let permanently_delete_user (user_id: int64) =
-        Logging.Info(sprintf "Permanently deleting user with id #%i\nSay goodbye to %A" user_id (User.by_id user_id))
+        Logging.Info "Permanently deleting user with id #%i\nSay goodbye to %A" user_id (User.by_id user_id)
 
         Friends.on_user_deleted (user_id)
 
@@ -69,7 +69,7 @@ module Users =
                 let user = User.create (username, discord_id)
                 let id = User.save_new user
 
-                Logging.Info(sprintf "New user '%s' registered with id %i to discord id %i" username id discord_id)
+                Logging.Info "New user '%s' registered with id %i to discord id %i" username id discord_id
 
                 Discord.debug_log (sprintf "🥳 New user '%s' registered!" username)
 
@@ -177,7 +177,7 @@ module Users =
                 | AuthFlowState.RegisterWaitingCallback id ->
 
                     if Auth.discord_id_is_taken (discord_id) then
-                        Logging.Info(sprintf "Discord account %s(%i) is already registered" discord_tag discord_id)
+                        Logging.Info "Discord account %s(%i) is already registered" discord_tag discord_id
                         auth_flows.Remove(flow_id) |> ignore
 
                         Server.send (
@@ -190,7 +190,7 @@ module Users =
                         false
                     else
 
-                    Logging.Info(sprintf "Ready to link account to %s(%i)" discord_tag discord_id)
+                    Logging.Info "Ready to link account to %s(%i)" discord_tag discord_id
                     auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
                     Server.send (id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
                     true

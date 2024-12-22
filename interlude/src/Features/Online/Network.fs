@@ -57,18 +57,18 @@ module Network =
         try
             Dns.GetHostAddresses(credentials.Host).[0]
         with err ->
-            Logging.Error("Failed to perform DNS lookup for " + credentials.Host, err)
+            Logging.Error "Failed to perform DNS lookup for %s: %O" credentials.Host err
             IPAddress.Parse("0.0.0.0")
 
     type NetworkClient() =
         inherit Client(target_ip, 32767)
 
-        override this.OnConnected() = 
+        override this.OnConnected() =
             GameThread.defer <| fun () -> status <- Connected
 
         override this.OnDisconnected() =
-            GameThread.defer 
-            <| fun () -> 
+            GameThread.defer
+            <| fun () ->
                 status <-
                     if status = Connecting then
                         ConnectionFailed
@@ -82,7 +82,7 @@ module Network =
         override this.OnPacketReceived(packet: Downstream) =
             match packet with
             | Downstream.DISCONNECT reason ->
-                Logging.Info(sprintf "Disconnected from server: %s" reason)
+                Logging.Info "Disconnected from server: %s" reason
                 kicked_no_reconnect <- true
                 GameThread.defer
                 <| fun () -> Notifications.error (%"notification.network.disconnected", reason)
@@ -91,21 +91,21 @@ module Network =
                     this.Send(Upstream.LOGIN credentials.Token)
             | Downstream.DISCORD_AUTH_URL url ->
                 if not (url.StartsWith("https://discord.com/api/oauth2")) then
-                    Logging.Error(sprintf "Got a strange auth link! %s" url)
+                    Logging.Error "Got a strange auth link! %s" url
                 else
                     open_url url
             | Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag ->
-                Logging.Debug("Linking an account with: " + discord_tag)
+                Logging.Debug "Linking an account with: %s" discord_tag
                 GameThread.defer <| fun () -> NetworkEvents.waiting_registration_ev.Trigger discord_tag
             | Downstream.REGISTRATION_FAILED reason ->
-                Logging.Info(sprintf "Registration failed: %s" reason)
+                Logging.Info "Registration failed: %s" reason
                 Notifications.error (%"notification.network.registrationfailed", reason)
                 GameThread.defer <| fun () -> NetworkEvents.registration_failed_ev.Trigger reason
             | Downstream.AUTH_TOKEN token ->
                 credentials.Token <- token
                 this.Send(Upstream.LOGIN credentials.Token)
             | Downstream.LOGIN_SUCCESS name ->
-                Logging.Info(sprintf "Logged in as %s" name)
+                Logging.Info "Logged in as %s" name
 
                 GameThread.defer
                 <| fun () ->
@@ -119,7 +119,7 @@ module Network =
 
                     NetworkEvents.successful_login_ev.Trigger name
             | Downstream.LOGIN_FAILED reason ->
-                Logging.Info(sprintf "Login failed: %s" reason)
+                Logging.Info "Login failed: %s" reason
                 credentials.Token <- ""
 
                 GameThread.defer
@@ -131,7 +131,7 @@ module Network =
 
             | Downstream.LOBBY_LIST lobbies ->
                 GameThread.defer
-                <| fun () -> 
+                <| fun () ->
                     NetworkEvents.receive_lobby_list_ev.Trigger lobbies
             | Downstream.YOU_JOINED_LOBBY (players: (string * int32) array) ->
                 GameThread.defer
@@ -139,7 +139,7 @@ module Network =
                     lobby <- Some <| Lobby(this, credentials.Username, players)
                     NetworkEvents.join_lobby_ev.Trigger(lobby.Value)
             | Downstream.INVITED_TO_LOBBY(by_user, lobby_id) ->
-                GameThread.defer 
+                GameThread.defer
                 <| fun () ->
                     lobby_invites <- { InvitedBy = by_user; LobbyId = lobby_id; } :: lobby_invites
                     NetworkEvents.receive_invite_ev.Trigger(by_user, lobby_id)
@@ -149,92 +149,92 @@ module Network =
                 <| fun () ->
                     lobby <- None
                     NetworkEvents.leave_lobby_ev.Trigger()
-            | Downstream.YOU_ARE_HOST b -> 
-                GameThread.defer 
+            | Downstream.YOU_ARE_HOST b ->
+                GameThread.defer
                 <| fun () ->
                     lobby.Value.YouAreHost <- b
             | Downstream.PLAYER_JOINED_LOBBY(username, color) ->
                 GameThread.defer
                 <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.PlayerJoined(username, color)
             | Downstream.PLAYER_LEFT_LOBBY username ->
                 GameThread.defer
                 <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.PlayerLeft(username)
             | Downstream.SELECT_CHART lc ->
                 GameThread.defer
                 <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.ChartSelected(lc)
             | Downstream.LOBBY_SETTINGS settings ->
                 GameThread.defer
                 <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.UpdateSettings(settings)
-            | Downstream.LOBBY_EVENT(kind, data) -> 
-                GameThread.defer 
-                <| fun () -> 
+            | Downstream.LOBBY_EVENT(kind, data) ->
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.LobbyEvent(kind, data)
             | Downstream.SYSTEM_MESSAGE msg ->
-                Logging.Info(sprintf "[NETWORK] %s" msg)
-                GameThread.defer 
-                <| fun () -> 
+                Logging.Info "[NETWORK] %s" msg
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.SystemMessage(msg)
             | Downstream.CHAT(sender, msg) ->
-                GameThread.defer 
-                <| fun () -> 
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.ChatMessage(sender, msg)
             | Downstream.PLAYER_STATUS(username, status) ->
                 GameThread.defer
                 <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.PlayerStatus(username, status)
             | Downstream.COUNTDOWN(reason, seconds) ->
-                GameThread.defer 
-                <| fun () -> 
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.StartCountdown(reason, seconds)
 
-            | Downstream.GAME_COUNTDOWN b -> 
-                GameThread.defer 
-                <| fun () -> 
+            | Downstream.GAME_COUNTDOWN b ->
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.Countdown <- b
             | Downstream.GAME_START ->
-                GameThread.defer 
-                <| fun () -> 
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.GameStart()
             | Downstream.GAME_END ->
-                GameThread.defer 
-                <| fun () -> 
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
                     | Some lobby -> lobby.GameEnd()
             | Downstream.PLAY_DATA(username, timestamp, data) ->
-                GameThread.defer 
-                <| fun () -> 
+                GameThread.defer
+                <| fun () ->
                     match lobby with
-                    | None -> Logging.Debug(sprintf "Unexpected lobby packet: %A" packet)
-                    | Some lobby -> 
+                    | None -> Logging.Debug "Unexpected lobby packet: %A" packet
+                    | Some lobby ->
                         match lobby.GetReplayInfo username with
-                        | None -> Logging.Debug(sprintf "Unexpected replay data for %s" username)
+                        | None -> Logging.Debug "Unexpected replay data for %s" username
                         | Some replay_info ->
                             use ms = new MemoryStream(data)
                             use br = new BinaryReader(ms)
@@ -253,7 +253,7 @@ module Network =
         else
             status <- Connecting
 
-            Logging.Info(sprintf "Connecting to %s ..." credentials.Host)
+            Logging.Info "Connecting to %s ..." credentials.Host
             client.Connect()
 
     let login_with_token () =

@@ -51,7 +51,7 @@ module Scores =
 
             match Mods.check mods with
             | Error message ->
-                Logging.Error(sprintf "Mod validation failed from user #%i: %s" user_id message)
+                Logging.Error "Mod validation failed from user #%i: %s" user_id message
                 return ScoreUploadOutcome.UploadFailed
             | Ok ModStatus.Unstored -> return ScoreUploadOutcome.UploadFailed
             | Ok mod_ranked_status ->
@@ -62,7 +62,7 @@ module Scores =
 
             match Replay.decompress_string_untrusted (chart.LastNote - chart.FirstNote) replay_untrusted_string with
             | Error message ->
-                Logging.Error(sprintf "Replay decompression failed from user #%i: %s" user_id message)
+                Logging.Error "Replay decompression failed from user #%i: %s" user_id message
                 return ScoreUploadOutcome.UploadFailed
             | Ok replay ->
 

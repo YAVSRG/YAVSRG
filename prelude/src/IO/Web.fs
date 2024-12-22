@@ -35,11 +35,10 @@ module WebServices =
                             return WebResult.Ok text
                         else
                             return WebResult.HttpError (int http_response.StatusCode)
-                    | Choice2Of2 err -> 
+                    | Choice2Of2 err ->
                         return WebResult.Exception err
                 }
         }
-
 
     let download_image =
 
@@ -63,11 +62,11 @@ module WebServices =
             override this.Handle((url: string, target: string, progress: float32 -> unit)) : Async<bool> =
                 async {
                     let intermediate_file = target + ".download"
-                    
+
                     try
                         use! response = download_file_client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead) |> Async.AwaitTask
                         if not response.IsSuccessStatusCode then
-                            Logging.Error(sprintf "Download from %s failed (%O)" url response.StatusCode)
+                            Logging.Error "Download from %s failed (%O)" url response.StatusCode
                             return false
                         else
 
@@ -108,7 +107,7 @@ module WebServices =
                         return true
 
                     with err ->
-                        Logging.Error("Failed to download file from " + url, err)
+                        Logging.Error "Failed to download file from '%s': %O" url err
                         return false
                 }
         }

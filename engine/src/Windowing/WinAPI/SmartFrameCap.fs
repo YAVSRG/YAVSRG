@@ -233,7 +233,7 @@ module private FrameTimeStrategies =
             let status = D3DKMTWaitForVerticalBlankEvent &info
 
             if status <> 0l then
-                Logging.Error(sprintf "Error waiting for vblank (%i)" status)
+                Logging.Error "Error waiting for vblank (%i)" status
                 false
             else
                 true
@@ -281,7 +281,7 @@ module private FrameTimeStrategies =
         let get (sync_adjustment: float, sw: Stopwatch) =
             lock LOCK_OBJ <| fun () ->
             if sync_broken then 0uL, sw.Elapsed.TotalMilliseconds, est_period
-            else 
+            else
                 let adjusted_last_time = last_time + sync_adjustment * est_period
                 if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
                     vblank_number - 0uL, adjusted_last_time - est_period, est_period

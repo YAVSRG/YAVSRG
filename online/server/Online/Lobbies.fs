@@ -157,11 +157,11 @@ module Lobby =
     let private game_end (lobby: Lobby) =
         lobby.GameRunning <- false
         multicast (lobby, Downstream.GAME_END)
-        Logging.Debug(sprintf "End of song (%s) in lobby %s" lobby.Chart.Value.Title lobby.Settings.Name)
+        Logging.Debug "End of song (%s) in lobby %s" lobby.Chart.Value.Title lobby.Settings.Name
 
         if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) then
             // Somebody was a straggler
-            Logging.Debug(sprintf "%s round (%s) did not end cleanly" lobby.Settings.Name lobby.Chart.Value.Title)
+            Logging.Debug "%s round (%s) did not end cleanly" lobby.Settings.Name lobby.Chart.Value.Title
 
             if lobby.Settings.HostRotation then
                 Server.send (lobby.Host, Downstream.SYSTEM_MESSAGE "Round didn't end properly so you are still host")
@@ -226,7 +226,6 @@ module Lobby =
                             let username = ensure_logged_in player
                             ensure_not_in_lobby player
 
-
                             let lobby_name =
                                 if valid_lobby_name lobby_name then
                                     lobby_name
@@ -242,9 +241,7 @@ module Lobby =
                             Server.send (player, Downstream.YOU_JOINED_LOBBY [||])
                             Server.send (player, Downstream.YOU_ARE_HOST true)
                             Server.send (player, Downstream.LOBBY_SETTINGS lobby.Settings)
-                            Logging.Info(sprintf "Opened lobby: %s (%O)" lobby.Settings.Name lobby_id)
-
-
+                            Logging.Info "Opened lobby: %s (%O)" lobby.Settings.Name lobby_id
 
                         | Join(player, lobby_id) ->
                             let username = ensure_logged_in player
@@ -282,12 +279,9 @@ module Lobby =
                                 if p.Status <> LobbyPlayerStatus.NotReady then
                                     Server.send (player, Downstream.PLAYER_STATUS(p.Username, p.Status))
 
-
-
                         | Leave player ->
                             let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
-
 
                             lobby.Players.Remove player |> ignore
                             in_lobby.Remove player |> ignore
@@ -298,7 +292,7 @@ module Lobby =
 
                             if lobby.Players.Count = 0 then
                                 lobbies.Remove lobby_id |> ignore
-                                Logging.Info(sprintf "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id)
+                                Logging.Info "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id
                             else
                                 if
                                     lobby.GameRunning
@@ -318,8 +312,6 @@ module Lobby =
                                         Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[lobby.Host].Username)
                                     )
 
-
-
                         | Invite(sender, recipient) ->
                             let username = ensure_logged_in sender
                             let lobby_id, lobby = ensure_in_lobby sender
@@ -331,20 +323,15 @@ module Lobby =
                             if in_lobby.ContainsKey recipient_id && in_lobby.[recipient_id] = lobby_id then
                                 user_error sender "User is already in this lobby"
 
-
                             Server.send (recipient_id, Downstream.INVITED_TO_LOBBY(username, lobby_id))
                             multicast (lobby, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
-
-
 
                         | Chat(player, message) ->
                             let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
-                            Logging.Info(sprintf "%s: %s" username message)
+                            Logging.Info "%s: %s" username message
                             multicast (lobby, Downstream.CHAT(username, message))
-
-
 
                         | ReadyUp(player, flag) ->
                             let username = ensure_logged_in player
@@ -358,7 +345,6 @@ module Lobby =
                             | LobbyPlayerStatus.Spectating ->
                                 malice player "Ready status changed while playing/spectating"
                             | _ -> ()
-
 
                             let new_status, lobby_event_flag =
                                 match flag with
@@ -400,8 +386,6 @@ module Lobby =
                                     }
                                     |> Async.Start
 
-
-
                         | SelectChart(player, chart) ->
                             let _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
@@ -412,7 +396,6 @@ module Lobby =
                             if lobby.GameRunning then
                                 user_error player "Game is currently running"
 
-
                             if lobby.Chart <> Some chart then
 
                                 lobby.Chart <- Some chart
@@ -421,8 +404,6 @@ module Lobby =
                                     p.Status <- LobbyPlayerStatus.NotReady
 
                                 multicast (lobby, Downstream.SELECT_CHART chart)
-
-
 
                         | StartGame player ->
                             let _ = ensure_logged_in player
@@ -440,7 +421,6 @@ module Lobby =
                             if lobby.CountingDown then
                                 user_error player "Game countdown already started"
 
-
                             lobby.CountdownId <- lobby.CountdownId + 1
                             let cid = lobby.CountdownId
                             lobby.CountingDown <- true
@@ -452,8 +432,6 @@ module Lobby =
                                 this.Request(CountdownTimeout(lobby_id, cid, false), ignore)
                             }
                             |> Async.Start
-
-
 
                         | CancelStartGame player ->
                             let _ = ensure_logged_in player
@@ -468,12 +446,9 @@ module Lobby =
                             if not lobby.CountingDown then
                                 user_error player "No countdown to cancel"
 
-
                             lobby.CountingDown <- false
                             multicast (lobby, Downstream.GAME_COUNTDOWN false)
                             multicast (lobby, Downstream.SYSTEM_MESSAGE "Countdown cancelled")
-
-
 
                         | BeginPlaying player ->
                             let username = ensure_logged_in player
@@ -481,7 +456,6 @@ module Lobby =
 
                             if not lobby.GameRunning then
                                 user_error player "Game is not running"
-
 
                             lobby.Players.[player].StartPlay()
 
@@ -493,8 +467,6 @@ module Lobby =
                         // todo? if anyone has sent play data you are probably starting too late and should be kicked
                         // ^^ unsure if wise because someone can maliciously send play data instantly to try and get people kicked
 
-
-
                         | FinishPlaying(player, abandoned) ->
                             let username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
@@ -504,7 +476,6 @@ module Lobby =
 
                             if lobby.Players.[player].PlayComplete then
                                 malice player "Play finish packet already sent"
-
 
                             let plr = lobby.Players.[player]
                             plr.FinishPlay()
@@ -530,7 +501,7 @@ module Lobby =
                                    |> not
                             then
                                 // you are first player in the lobby to finish
-                                Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
+                                Logging.Debug "First player to finish is %s, starting timeout" username
                                 lobby.CountdownId <- lobby.CountdownId + 1
                                 let cid = lobby.CountdownId
 
@@ -539,8 +510,6 @@ module Lobby =
                                     this.Request(GameplayTimeout(lobby_id, cid), ignore)
                                 }
                                 |> Async.Start
-
-
 
                         | BeginSpectating player ->
                             let username = ensure_logged_in player
@@ -585,8 +554,6 @@ module Lobby =
                                         else
                                             Server.send (player, Downstream.PLAY_DATA(p.Username, timestamp, data))
 
-
-
                         | PlayData(player, timestamp, data) ->
                             let username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
@@ -605,8 +572,6 @@ module Lobby =
                                 then
                                     Server.send (p, Downstream.PLAY_DATA(username, timestamp, data))
 
-
-
                         | Settings(player, settings) ->
                             let _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
@@ -619,8 +584,6 @@ module Lobby =
                                     Name = if valid_lobby_name settings.Name then settings.Name else lobby.Settings.Name
                                 }
                             multicast (lobby, Downstream.LOBBY_SETTINGS lobby.Settings)
-
-
 
                         | ChangeHost(player, newhost) ->
                             let _ = ensure_logged_in player
@@ -639,10 +602,7 @@ module Lobby =
                             if not (in_lobby.ContainsKey newhost_id) || in_lobby.[newhost_id] <> lobby_id then
                                 user_error player "User is not in this lobby"
 
-
                             transfer_host (lobby, newhost_id)
-
-
 
                         | MissingChart(player) ->
                             let username = ensure_logged_in player
@@ -655,7 +615,6 @@ module Lobby =
                                 if lobby.Players.[player].Status <> LobbyPlayerStatus.NotReady then
                                     malice player "Can't be missing the chart in this state"
 
-
                                 lobby.Players.[player].Status <- LobbyPlayerStatus.MissingChart
 
                                 multicast_except (
@@ -663,8 +622,6 @@ module Lobby =
                                     lobby,
                                     Downstream.PLAYER_STATUS(username, LobbyPlayerStatus.MissingChart)
                                 )
-
-
 
                         | GameplayTimeout(lobby_id, countdown_ref) ->
                             if not (lobbies.ContainsKey lobby_id) then
@@ -674,10 +631,8 @@ module Lobby =
                             let lobby = lobbies.[lobby_id]
 
                             if countdown_ref = lobby.CountdownId && lobby.GameRunning then
-                                Logging.Debug(sprintf "Round timed out on lobby with id %O" lobby_id)
+                                Logging.Debug "Round timed out on lobby with id %O" lobby_id
                                 game_end lobbies.[lobby_id]
-
-
 
                         | CountdownTimeout(lobby_id, countdown_ref, automatic) ->
                             if not (lobbies.ContainsKey lobby_id) then
@@ -719,8 +674,6 @@ module Lobby =
 
                     // todo: start a 5 second countdown - if nobody is playing then stop the round
 
-
-
                     with
                     | MaliciousError(player, error) -> Server.kick (player, error)
                     | UserError(player, message) -> Server.send (player, Downstream.SYSTEM_MESSAGE message)
@@ -735,4 +688,3 @@ module Lobby =
             state_change.Request(Leave(session_id), callback)
         else
             callback()
-

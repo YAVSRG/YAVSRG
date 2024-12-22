@@ -35,7 +35,7 @@ module ChartDatabase =
         | false, _ -> None
 
     let get_meta (chart_id: string) (db: ChartDatabase) : ChartMeta option =
-        lock db.LockObject 
+        lock db.LockObject
         <| fun () ->
             match get_meta_cached chart_id db with
             | Some existing -> Some existing
@@ -79,7 +79,7 @@ module ChartDatabase =
         let moved_assets = Dictionary<string, string>()
         let now = Timestamp.now()
 
-        lock db.LockObject <| fun () -> 
+        lock db.LockObject <| fun () ->
         seq {
             for chart in charts do
                 let header_with_assets_moved =
@@ -98,7 +98,7 @@ module ChartDatabase =
                                         moved_assets.[s] <- hash
                                         ImportAsset.Asset hash
                             | otherwise -> otherwise
-                        AudioFile = 
+                        AudioFile =
                             match chart.Header.AudioFile with
                             | ImportAsset.Relative s ->
                                 if moved_assets.ContainsKey s then
@@ -125,12 +125,12 @@ module ChartDatabase =
         db.Cache.Remove(chart_meta.Hash) |> ignore
         DbCharts.delete chart_meta.Hash db.Database |> ignore
 
-    let delete_many (cs: ChartMeta seq) (db: ChartDatabase) = 
-        let deleted = 
+    let delete_many (cs: ChartMeta seq) (db: ChartDatabase) =
+        let deleted =
             cs |> Seq.map (fun c -> db.Cache.Remove c.Hash |> ignore; c.Hash)
         DbCharts.delete_batch deleted db.Database |> ignore
 
-    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) = 
+    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) =
         if packs.IsEmpty then
             delete chart_meta db
         else
@@ -180,7 +180,7 @@ module ChartDatabase =
         db
 
     let private legacy_migrate (db: ChartDatabase) : ChartDatabase =
-        
+
         let cache_file = Path.Combine(get_game_folder "Songs", "cache.json")
         if not (File.Exists cache_file) then db else
 
@@ -195,7 +195,7 @@ module ChartDatabase =
                         if Path.GetExtension(file).ToLower() = ".yav" then
                             match Chart.from_file folder_name file with
                             | Ok chart -> yield ChartMeta.FromImport (File.GetLastWriteTime(file) |> Timestamp.from_datetime) chart, chart.Chart
-                            | Error reason -> Logging.Warn(sprintf "Failed to load %s: %s" file reason)
+                            | Error reason -> Logging.Warn "Failed to load %s: %s" file reason
         }
         |> Seq.chunkBySize 1000
         |> Seq.iter (fun chunk ->
@@ -245,7 +245,7 @@ module ChartDatabase =
 
                     match Chart.read_headless chart.Keys br with
                     | Error reason ->
-                        Logging.Error(sprintf "CDN download invalid for %s: %s" hash reason)
+                        Logging.Error "CDN download invalid for %s: %s" hash reason
                         return false
                     | Ok chart_data ->
 
@@ -291,11 +291,11 @@ module ChartDatabase =
 
                     import [{ PackName = folder; LoadedFromPath = ""; Header = header; Chart = chart_data }] db
 
-                    Logging.Debug(sprintf "Installed '%s' from CDN" song.FormattedTitle)
+                    Logging.Debug "Installed '%s' from CDN" song.FormattedTitle
 
                     return true
             with err ->
-                Logging.Error(err.Message, err)
+                Logging.Error "%O" err
                 return false
         }
 
@@ -309,7 +309,7 @@ module ChartDatabase =
                         for file in Directory.EnumerateFiles(directory) do
                             let hash_file_name = Path.GetFileName(file)
                             asset_hashes.Add hash_file_name |> ignore
-                    Logging.Debug(sprintf "Found %i assets on disk" asset_hashes.Count)
+                    Logging.Debug "Found %i assets on disk" asset_hashes.Count
 
                     let to_delete = ResizeArray<ChartMeta>()
 
@@ -328,11 +328,11 @@ module ChartDatabase =
                         | _ -> ()
 
                     if delete_missing_audio && to_delete.Count > 0 then
-                        Logging.Debug(sprintf "Found %i charts with misplaced audio files, deleting them..." to_delete.Count)
+                        Logging.Debug "Found %i charts with misplaced audio files, deleting them..." to_delete.Count
                         delete_many to_delete charts_db
 
                     if asset_hashes.Count > 0 then
-                        Logging.Debug(sprintf "Found %i assets not being used by chart database, deleting them..." asset_hashes.Count)
+                        Logging.Debug "Found %i assets not being used by chart database, deleting them..." asset_hashes.Count
                         let mutable bytes_freed = 0L
                         let mutable files_freed = 0
 
@@ -344,14 +344,14 @@ module ChartDatabase =
                                 info.Delete()
                                 bytes_freed <- bytes_freed + length
                                 files_freed <- files_freed + 1
-                            with err -> Logging.Warn(sprintf "Error deleting file %s" path, err)
+                            with err -> Logging.Warn "Error deleting file %s: %O" path err
 
-                        Logging.Debug(sprintf "Successfully deleted %i files, freeing at least %i MB" files_freed (bytes_freed / 1024L / 1024L))
+                        Logging.Debug "Successfully deleted %i files, freeing at least %i MB" files_freed (bytes_freed / 1024L / 1024L)
                     else
-                        Logging.Debug(sprintf "No assets found to delete, you're all good!")
+                        Logging.Debug "No assets found to delete, you're all good!"
                 }
         }
-    
+
     open Prelude.Charts.Processing.Difficulty
     open Prelude.Charts.Processing.Patterns
 
@@ -364,7 +364,7 @@ module ChartDatabase =
                             match get_chart entry.Hash charts_db with
                             | Ok chart ->
                                 yield entry.Hash, float32 (DifficultyRating.calculate 1.0f<rate> chart.Notes).Physical, PatternReport.from_chart chart
-                            | Error reason -> Logging.Warn(sprintf "Error recalculating patterns for %s: %s" entry.Hash reason)
+                            | Error reason -> Logging.Warn "Error recalculating patterns for %s: %s" entry.Hash reason
                     }
                     |> Seq.chunkBySize 1000
                     |> Seq.iter (fun chunk ->

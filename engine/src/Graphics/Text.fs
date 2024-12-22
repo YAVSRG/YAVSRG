@@ -56,7 +56,7 @@ module Fonts =
                     |> ignore
                 )
             with err ->
-                Logging.Warn(sprintf "Exception occurred rendering glyph with code point %i" (int c))
+                Logging.Warn "Exception occurred rendering glyph with code point %i" (int c)
 
             char_lookup.Add(
                 c,
@@ -121,9 +121,7 @@ module Fonts =
                 |> int
 
             if int w > Texture.MAX_TEXTURE_SIZE then
-                Logging.Critical(
-                    sprintf "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
-                )
+                Logging.Critical "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
 
             use img = new Bitmap(w, h)
 
@@ -196,7 +194,6 @@ module Fonts =
         member val SpaceWidth = 0.25f with get, set
         member val ShadowDepth = 0.09f with get, set
 
-
     let collection = new FontCollection()
 
     let add (stream: Stream) = collection.Install stream |> ignore
@@ -208,7 +205,7 @@ module Fonts =
             if found then
                 family
             else
-                Logging.Error(sprintf "Couldn't find font '%s', defaulting" name)
+                Logging.Error "Couldn't find font '%s', defaulting" name
                 collection.Find "Inconsolata"
 
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)

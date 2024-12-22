@@ -69,7 +69,7 @@ module StepMania_To_Interlude =
                     (fun k c ->
                         match c with
                         | '0' -> ()
-                        | '1' -> 
+                        | '1' ->
                             if not (Bitmask.has_key k ln) then
                                 nr.[k] <- NoteType.NORMAL
                         | '2'
@@ -267,7 +267,7 @@ module StepMania_To_Interlude =
                                 else
                                     ImportAsset.Absolute(Path.Combine(path, file))
                             | None ->
-                                //Logging.Warn(sprintf "Audio file for %s not found: %s" path sm.MUSIC)
+                                //Logging.Warn "Audio file for %s not found: %s" path sm.MUSIC
                                 ImportAsset.Missing
                         BackgroundFile =
                             match find_background () with
@@ -277,11 +277,11 @@ module StepMania_To_Interlude =
                                 else
                                     ImportAsset.Absolute(Path.Combine(path, file))
                             | None ->
-                                //Logging.Warn(sprintf "Background file for %s not found: %s" path sm.BACKGROUND)
+                                //Logging.Warn "Background file for %s not found: %s" path sm.BACKGROUND
                                 ImportAsset.Missing
 
-                        ChartSource = 
-                            match action.Config.EtternaPackName with 
+                        ChartSource =
+                            match action.Config.EtternaPackName with
                             | Some pack -> ImportOrigin.Etterna pack
                             | None -> ImportOrigin.Unknown
                     }
@@ -304,10 +304,10 @@ module StepMania_To_Interlude =
                     }
                 }
             with
-            | :? ConversionSkipException as skip_reason -> 
+            | :? ConversionSkipException as skip_reason ->
                 Error (action.Source, skip_reason.msg)
             | other_error ->
-                Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+                Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
                 Error (action.Source, other_error.Message)
 
         sm.Charts |> List.mapi convert_difficulty

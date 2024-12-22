@@ -157,7 +157,7 @@ module DynamicFlowContainer =
 
             if this.Initialised then
                 child.Init this
-                match child :> obj with 
+                match child :> obj with
                 | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
                 | _ -> ()
                 refresh <- true
@@ -168,11 +168,11 @@ module DynamicFlowContainer =
             match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
             | Some x ->
                 children.Remove x |> ignore
-                match child :> obj with 
+                match child :> obj with
                 | :? IResize as r -> r.OnSizeChanged <- ignore
                 | _ -> ()
                 refresh <- true
-            | None -> Logging.Error(sprintf "%O is not in flow container %O, can't remove" child this)
+            | None -> Logging.Error "%O is not in flow container %O, can't remove" child this
 
         override this.Init(parent: Widget) =
             base.Init parent
@@ -180,7 +180,7 @@ module DynamicFlowContainer =
 
             for { Widget = child } in children do
                 child.Init this
-                match child :> obj with 
+                match child :> obj with
                 | :? IResize as r -> r.OnSizeChanged <- fun () -> refresh <- true
                 | _ -> ()
 

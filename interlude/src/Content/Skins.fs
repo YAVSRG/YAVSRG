@@ -19,11 +19,11 @@ type private LoadedSkin =
     }
 
     static member Create(skin: Skin) : LoadedSkin =
-        let sprite = 
+        let sprite =
             match skin.GetIcon() with
             | TextureOk(img, columns, rows) ->
-                Sprite.upload_one false true 
-                    { 
+                Sprite.upload_one false true
+                    {
                         Label = skin.Metadata.Name + "_icon"
                         Rows = rows
                         Columns = columns
@@ -78,13 +78,11 @@ type private LoadedNoteskin =
                     }
             | TextureError reason ->
                 if required_textures.Contains texture_id then
-                    Logging.Error(
-                        sprintf
-                            "Problem with noteskin texture '%s' in '%s': %s\nIt will appear as a white square ingame."
-                            texture_id
-                            this.Metadata.Name
-                            reason
-                    )
+                    Logging.Error
+                        "Problem with noteskin texture '%s' in '%s': %s\nIt will appear as a white square ingame."
+                        texture_id
+                        this.Metadata.Name
+                        reason
 
                 missing_textures.Add texture_id
             | TextureNotRequired -> missing_textures.Add texture_id
@@ -116,7 +114,7 @@ type private LoadedNoteskin =
         Texture.claim_texture_unit atlas |> ignore
         for (texture_id, sprite) in sprites do
             Sprites.add false texture_id sprite
-        
+
     member this.Inactive() =
         match this.Textures with
         | None -> ()
@@ -124,10 +122,10 @@ type private LoadedNoteskin =
 
     interface IDisposable with
         member this.Dispose() =
-            if not this.Noteskin.IsEmbedded then 
+            if not this.Noteskin.IsEmbedded then
                 (this.Noteskin :> IDisposable).Dispose()
                 match this.Textures with
-                | Some (atlas, sprites) -> 
+                | Some (atlas, sprites) ->
                     Texture.unclaim_texture_unit atlas
                     sprites |> Array.iter (snd >> Sprite.destroy >> ignore)
                 | None -> ()
@@ -165,13 +163,11 @@ type private LoadedHUD =
                     }
             | TextureError reason ->
                 if required_textures.Contains texture_id then
-                    Logging.Error(
-                        sprintf
-                            "Problem with HUD texture '%s' in '%s': %s\nIt will appear as a white square ingame."
-                            texture_id
-                            this.Metadata.Name
-                            reason
-                    )
+                    Logging.Error
+                        "Problem with HUD texture '%s' in '%s': %s\nIt will appear as a white square ingame."
+                        texture_id
+                        this.Metadata.Name
+                        reason
 
                 missing_textures.Add texture_id
             | TextureNotRequired -> missing_textures.Add texture_id
@@ -203,7 +199,7 @@ type private LoadedHUD =
         Texture.claim_texture_unit atlas |> ignore
         for (texture_id, sprite) in sprites do
             Sprites.add false texture_id sprite
-        
+
     member this.Inactive() =
         match this.Textures with
         | None -> ()
@@ -213,13 +209,13 @@ type private LoadedHUD =
         member this.Dispose() =
             (this.HUD :> IDisposable).Dispose()
             match this.Textures with
-            | Some (atlas, sprites) -> 
+            | Some (atlas, sprites) ->
                 Texture.unclaim_texture_unit atlas
                 sprites |> Array.iter (snd >> Sprite.destroy >> ignore)
             | None -> ()
 
 module Skins =
-    
+
     let mutable private initialised = false
 
     let private DEFAULT_NOTESKIN_META =
@@ -239,7 +235,7 @@ module Skins =
     let private _selected_noteskin_id = Setting.simple DEFAULT_NOTESKIN_ID
     let mutable current_noteskin = DEFAULT_NOTESKIN
     let mutable current_noteskin_meta = DEFAULT_NOTESKIN_META
-    
+
     let private DEFAULT_HUD_META =
         {
             Name = "User"
@@ -256,7 +252,7 @@ module Skins =
     let private loaded_skins = new Dictionary<string, LoadedSkin>()
 
     let load () =
-        
+
         for noteskin in loaded_noteskins.Values do (noteskin :> IDisposable).Dispose()
         for hud in loaded_huds.Values do (hud :> IDisposable).Dispose()
         for skin in loaded_skins.Values do (skin :> IDisposable).Dispose()
@@ -277,8 +273,8 @@ module Skins =
             DEFAULT_SKIN_ICON <-
                 match DEFAULT_NOTESKIN.GetTexture("note") with
                 | TextureOk(img, columns, rows) ->
-                    Sprite.upload_one false true 
-                        { 
+                    Sprite.upload_one false true
+                        {
                             Label = "DEFAULT_SKIN_ICON"
                             Rows = rows
                             Columns = columns
@@ -304,10 +300,10 @@ module Skins =
                 Path.Combine(Path.GetDirectoryName zip, Path.GetFileNameWithoutExtension zip)
 
             if Directory.Exists(target) then
-                Logging.Info(sprintf "%s has already been extracted, deleting" (Path.GetFileName zip))
+                Logging.Info "%s has already been extracted, deleting" (Path.GetFileName zip)
                 File.Delete zip
             else
-                Logging.Info(sprintf "Extracting %s to a folder" (Path.GetFileName zip))
+                Logging.Info "Extracting %s to a folder" (Path.GetFileName zip)
                 ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
                 File.Delete zip
 
@@ -315,8 +311,8 @@ module Skins =
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") do
             if NoteskinToSkinMigration.folder_should_migrate source then
                 match NoteskinToSkinMigration.migrate_folder source with
-                | Ok () -> Logging.Info(sprintf "Migrating noteskin '%s' to new skin format" (Path.GetFileName source))
-                | Error err -> Logging.Error(sprintf "Error migrating noteskin '%s' to new skin format" (Path.GetFileName source), err)
+                | Ok () -> Logging.Info "Migrating noteskin '%s' to new skin format" (Path.GetFileName source)
+                | Error err -> Logging.Error "Error migrating noteskin '%s' to new skin format: %O" (Path.GetFileName source) err
 
         // load all skins and their parts
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") |> Seq.where Skin.Exists do
@@ -327,7 +323,7 @@ module Skins =
                 match skin.NoteskinFolder() with
                 | Some noteskin_path ->
                     match Noteskin.FromPath noteskin_path with
-                    | Error err -> Logging.Error("  Failed to load noteskin in '" + id + "'", err)
+                    | Error err -> Logging.Error "  Failed to load noteskin in '%s': %O" id err
                     | Ok noteskin ->
                         loaded_noteskins.Add(
                             id,
@@ -342,7 +338,7 @@ module Skins =
                 match skin.HudFolder() with
                 | Some hud_path ->
                     match HudLayout.FromPath hud_path with
-                    | Error err -> Logging.Error("  Failed to load HUD in '" + id + "'", err)
+                    | Error err -> Logging.Error "  Failed to load HUD in '%s': %O" id err
                     | Ok hud ->
                         loaded_huds.Add(
                             id,
@@ -357,7 +353,7 @@ module Skins =
                 loaded_skins.Add (id, LoadedSkin.Create skin)
 
             | Error err ->
-                Logging.Error("  Failed to load skin '" + id + "'", err)
+                Logging.Error "  Failed to load skin '%s': %O" id err
 
         // fallback HUD
         if not (loaded_skins.ContainsKey DEFAULT_HUD_FOLDER) then
@@ -372,17 +368,17 @@ module Skins =
             let hud, _ = Skin.CreateDefault DEFAULT_HUD_META (Path.Combine(get_game_folder "Skins", "User"))
             loaded_skins.Add(DEFAULT_HUD_FOLDER, skin)
             loaded_huds.Add(DEFAULT_HUD_FOLDER, { Metadata = skin.Skin.Metadata; HUD = hud; Textures = None })
-        
+
         // ensure selected IDs exist
         if not (loaded_noteskins.ContainsKey _selected_noteskin_id.Value) then
-            Logging.Warn("Noteskin '" + _selected_noteskin_id.Value + "' not found, switching to default")
+            Logging.Warn "Noteskin '%s' not found, switching to default" _selected_noteskin_id.Value
             _selected_noteskin_id.Value <- DEFAULT_NOTESKIN_ID
         current_noteskin <- loaded_noteskins.[_selected_noteskin_id.Value].Noteskin
         current_noteskin_meta <- loaded_noteskins.[_selected_noteskin_id.Value].Metadata
         loaded_noteskins.[_selected_noteskin_id.Value].Active(false)
 
         if not (loaded_huds.ContainsKey _selected_hud_id.Value) then
-            Logging.Warn("HUD '" + _selected_hud_id.Value + "' not found, switching to default")
+            Logging.Warn "HUD '%s' not found, switching to default" _selected_hud_id.Value
             _selected_hud_id.Value <- DEFAULT_HUD_FOLDER
         current_hud <- loaded_huds.[_selected_hud_id.Value].HUD
         current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
@@ -407,7 +403,7 @@ module Skins =
                     let old_id = _selected_hud_id.Value
 
                     if not (loaded_huds.ContainsKey new_id) then
-                        Logging.Warn("HUD '" + new_id.ToString() + "' not found, switching to default")
+                        Logging.Warn "HUD '%s' not found, switching to default" new_id
                         _selected_hud_id.Value <- DEFAULT_HUD_FOLDER
                     else
                         _selected_hud_id.Value <- new_id
@@ -433,7 +429,7 @@ module Skins =
                     let old_id = _selected_noteskin_id.Value
 
                     if not (loaded_noteskins.ContainsKey new_id) then
-                        Logging.Warn("Noteskin '" + new_id + "' not found, switching to default")
+                        Logging.Warn "Noteskin '%s' not found, switching to default" new_id
                         _selected_noteskin_id.Value <- DEFAULT_NOTESKIN_ID
                     else
                         _selected_noteskin_id.Value <- new_id
@@ -454,11 +450,11 @@ module Skins =
 
     let init_window () =
         load ()
-        Logging.Debug(sprintf "Loaded %i skins" loaded_skins.Count)
+        Logging.Debug "Loaded %i skins" loaded_skins.Count
         initialised <- true
 
     let get_icon (skin_id: string) : Sprite option =
-        if skin_id = DEFAULT_NOTESKIN_ID then 
+        if skin_id = DEFAULT_NOTESKIN_ID then
             DEFAULT_SKIN_ICON
         elif loaded_skins.ContainsKey skin_id then
             loaded_skins.[skin_id].Icon
@@ -493,7 +489,7 @@ module Skins =
             | None -> "Your skin"
 
         let can_go_in_user_folder = loaded_skins.[DEFAULT_HUD_FOLDER].Skin.NoteskinFolder().IsNone
-        let id = 
+        let id =
             if can_go_in_user_folder then DEFAULT_HUD_FOLDER
             else Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(noteskin_name, "")
         let target_skin_config = Path.Combine(get_game_folder "Skins", id, "skin.json")
@@ -543,7 +539,7 @@ module Skins =
                     true
                 with
                 | :? IOException as err ->
-                    Logging.Error("IO error while deleting noteskin", err)
+                    Logging.Error "IO error while deleting noteskin: %O" err
                     false
                 | _ -> reraise()
         else false
@@ -562,14 +558,14 @@ module Skins =
                     true
                 with
                 | :? IOException as err ->
-                    Logging.Error("IO error while deleting hud", err)
+                    Logging.Error "IO error while deleting hud: %O" err
                     false
                 | _ -> reraise()
         else false
 
     let export_skin (id: string) =
         if loaded_skins.ContainsKey id then
-            let file_name = 
+            let file_name =
                 let original_name = loaded_skins.[id].Skin.Metadata.Name
                 let file_safe_name = Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(original_name, "")
                 if file_safe_name = "" then id + ".isk" else file_safe_name + ".isk"

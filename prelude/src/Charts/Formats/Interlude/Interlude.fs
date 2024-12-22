@@ -20,7 +20,7 @@ type Chart =
     member this.FirstNote = (TimeArray.first this.Notes).Value.Time
     member this.LastNote = (TimeArray.last this.Notes).Value.Time
 
-(* 
+(*
     The .yav file format stores additional metadata about a chart
     Once a chart has been successfully imported into the game's database it has different data, for example pre-cached info about its patterns
     These headers are used solely during the process of importing a .yav file
@@ -212,12 +212,12 @@ module Chart =
                 match JSON.FromString(br.ReadString()) with
                 | Ok v -> v
                 | Error err ->
-                    Logging.Error(sprintf "%O" err)
+                    Logging.Error "%O" err
                     raise err
 
             match read_headless keys br with
-            | Ok chart -> 
-                Ok { 
+            | Ok chart ->
+                Ok {
                     PackName = pack_name
                     Header = header
                     LoadedFromPath = path
@@ -270,7 +270,7 @@ module Chart =
         | x :: xs ->
             let mutable current: float32<ms / beat> = x.Data.MsPerBeat
             let mutable time = Time.of_number x.Time
-            
+
             for b in xs do
                 if (not (data.ContainsKey current)) then
                     data.Add(current, 0.0f<ms>)
@@ -278,12 +278,12 @@ module Chart =
                 data.[current] <- data.[current] + Time.of_number b.Time - time
                 time <- Time.of_number b.Time
                 current <- b.Data.MsPerBeat
-                
+
             if (not (data.ContainsKey current)) then
                 data.Add(current, 0.0f<ms>)
 
             data.[current] <- data.[current] + max (end_time - time) 0.0f<ms>
-        
+
         data
 
     let find_most_common_bpm (chart: Chart) : float32<ms / beat> =

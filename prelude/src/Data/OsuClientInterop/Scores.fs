@@ -30,21 +30,18 @@ module Scores =
             | Some rate ->
                 let chart = Chart.scale rate converted_osu_chart
                 let chart_hash = Chart.hash chart
-                    
+
                 match ChartDatabase.get_meta chart_hash chart_db with
                 | None ->
-                    Logging.Warn(
-                        sprintf
-                            "Skipping %.2fx of %s [%s], can't find a matching imported 1.00x chart"
-                            rate
-                            beatmap_data.TitleUnicode
-                            beatmap_data.Difficulty
-                    )
-
+                    Logging.Warn
+                        "Skipping %.2fx of %s [%s], can't find a matching imported 1.00x chart"
+                        rate
+                        beatmap_data.TitleUnicode
+                        beatmap_data.Difficulty
                     None
                 | Some _ -> Some(chart, chart_hash, rate)
             | None ->
-                Logging.Warn(sprintf "%s [%s] skipped, can't find a matching imported chart" beatmap_data.TitleUnicode beatmap_data.Difficulty)
+                Logging.Warn "%s [%s] skipped, can't find a matching imported chart" beatmap_data.TitleUnicode beatmap_data.Difficulty
                 None
         | Some _ -> Some(converted_osu_chart, chart_hash, 1.0f<rate>)
 
@@ -63,7 +60,7 @@ module Scores =
                 use br = new BinaryReader(file)
                 Some(OsuScoreDatabase_Score.Read br)
             with err ->
-                Logging.Error(sprintf "Error loading replay file %s" replay_file, err)
+                Logging.Error "Error loading replay file '%s': %O" replay_file err
                 None
         with
         | None -> false
@@ -80,9 +77,7 @@ module Scores =
             || combined_rate > 3.0f
             || combined_rate < 0.5f
         then
-            Logging.Info(
-                sprintf "Skipping score with rate %.3f because this isn't supported in Interlude" combined_rate
-            )
+            Logging.Info "Skipping score with rate %.3f because this isn't supported in Interlude" combined_rate
             false
         else
 
@@ -114,7 +109,7 @@ module Scores =
             use reader = new BinaryReader(file, Encoding.UTF8)
             OsuScoreDatabase.Read(reader)
 
-        Logging.Info(sprintf "Read score data, containing info about %i maps" scores.Beatmaps.Length)
+        Logging.Info "Read score data, containing info about %i maps" scores.Beatmaps.Length
 
         let main_db =
             use file = Path.Combine(osu_root_folder, "osu!.db") |> File.OpenRead
@@ -122,12 +117,10 @@ module Scores =
             use reader = new BinaryReader(file, Encoding.UTF8)
             OsuDatabase.Read(reader)
 
-        Logging.Info(
-            sprintf
-                "Read %s's osu! database containing %i maps, starting import .."
-                main_db.PlayerName
-                main_db.Beatmaps.Length
-        )
+        Logging.Info
+            "Read %s's osu! database containing %i maps, starting import .."
+            main_db.PlayerName
+            main_db.Beatmaps.Length
 
         let chart_map =
             main_db.Beatmaps
@@ -160,7 +153,7 @@ module Scores =
                     |> function Ok i -> Ok i | Error s -> Error (snd s)
                 | Error reason -> Error reason
             with
-            | Error reason -> Logging.Warn(sprintf "%s [%s] skipped, conversion failed: %s" beatmap_data.TitleUnicode beatmap_data.Difficulty reason)
+            | Error reason -> Logging.Warn "%s [%s] skipped, conversion failed: %s" beatmap_data.TitleUnicode beatmap_data.Difficulty reason
             | Ok chart ->
 
             match find_matching_chart chart_db beatmap_data chart.Chart with
@@ -173,13 +166,13 @@ module Scores =
                 if import_osu_score osu_root_folder user_db score (chart, chart_hash, rate) then
                     score_count <- score_count + 1
 
-        Logging.Info(sprintf "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count)
+        Logging.Info "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count
         score_count, chart_count
 
     let import_osu_scores_service =
         { new Async.Service<ImportRequest, int * int>() with
-            override this.Handle(request) = 
-                async { 
+            override this.Handle(request) =
+                async {
                     return import_osu_scores request.OsuRootPath request.UserDatabase request.ChartDatabase
                 }
         }

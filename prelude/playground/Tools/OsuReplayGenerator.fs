@@ -18,7 +18,7 @@ let mutable recent_beatmap_hash = ""
 
 let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: float32) (mods: Mods) =
 
-    let chart : Chart = 
+    let chart : Chart =
         {
             Keys = 4
             Notes = notes
@@ -77,7 +77,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
     osu_replay.Write bw
     bw.Flush()
     bw.Close()
-    
+
     Diagnostics.Process
         .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
         .WaitForExit()
@@ -115,7 +115,7 @@ let collect_results () =
     async {
         match! WebServices.download_json_async<GosuMemoryData> "http://localhost:24050/json" with
         | WebResult.Ok d ->
-            Logging.Info(sprintf "Experiment results:\n%O" d)
+            Logging.Info "Experiment results:\n%O" d
         | WebResult.HttpError c -> printfn "Error getting GosuMemory data or it isn't running (HTTP ERROR %i)" c
         | WebResult.Exception err -> printfn "Error getting GosuMemory data or it isn't running\n%O" err
     }
@@ -125,7 +125,7 @@ let HANDS_FREE_AUTOMATION = true
 let run_experiment () =
 
     // have osu! and GosuMemory running
-        
+
     let od = 8.0f
 
     let perfect = floor_uom (OsuMania.perfect_window od) * 1.2f * 1.0f<rate> |> floor_uom
@@ -139,7 +139,7 @@ let run_experiment () =
 
         for tail in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
 
-            let notes = 
+            let notes =
                 ChartBuilder(4)
                     .Hold(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -150,10 +150,10 @@ let run_experiment () =
                     .Build()
                     .GetFullReplay()
 
-            Logging.Info(sprintf "Experiment: LN combination experiment: OD%.1f; Head %.1fms; Tail %.1fms" od head tail)
+            Logging.Info "Experiment: LN combination experiment: OD%.1f; Head %.1fms; Tail %.1fms" od head tail
 
             generate_scenario notes replay od Mods.None
-        
+
             Threading.Thread.Sleep(2000)
             if HANDS_FREE_AUTOMATION then
                 Diagnostics.Process

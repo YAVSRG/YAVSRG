@@ -214,7 +214,7 @@ module GameThread =
         with
         | Error fatal_err ->
             fatal_error <- true
-            Logging.Critical("Fatal crash in game initialisation", fatal_err)
+            Logging.Critical "Fatal crash in game initialisation: %O" fatal_err
             GLFW.SetWindowShouldClose(window, true)
         | Ok ui_root ->
 
@@ -231,7 +231,7 @@ module GameThread =
                 dispatch_frame ui_root
         with fatal_err ->
             fatal_error <- true
-            Logging.Critical("Fatal crash in game thread", fatal_err)
+            Logging.Critical "Fatal crash in game thread: %O" fatal_err
             GLFW.SetWindowShouldClose(window, true)
 
         if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()

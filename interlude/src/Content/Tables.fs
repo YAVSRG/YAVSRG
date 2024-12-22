@@ -22,7 +22,7 @@ module Tables =
 
                 match Table.load id with
                 | Some table -> loaded.Add(id, table)
-                | None -> Logging.Info(sprintf "Table '%s' is out of date" id)
+                | None -> Logging.Info "Table '%s' is out of date" id
 
     let install_or_update (table: Table) =
         Table.save table
@@ -37,7 +37,7 @@ module Tables =
         match _selected_id.Value with
         | Some id when loaded.ContainsKey id -> current <- Some loaded.[id]
         | Some id ->
-            Logging.Warn("Table '" + id + "' not found")
+            Logging.Warn "Table '%s' not found" id
             _selected_id.Value <- None
         | None -> ()
 
@@ -50,7 +50,7 @@ module Tables =
                     match new_id with
                     | Some id when loaded.ContainsKey id -> _selected_id.Value <- Some id
                     | Some id ->
-                        Logging.Warn("Table '" + id + "' not found")
+                        Logging.Warn "Table '%s' not found" id
                         _selected_id.Value <- None
                     | None -> _selected_id.Value <- None
 

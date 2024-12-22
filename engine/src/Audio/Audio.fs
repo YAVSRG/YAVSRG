@@ -90,7 +90,7 @@ module Audio =
             current_device_changed_ev.Trigger()
 
         with err ->
-            Logging.Error(sprintf "Error switching to audio output %i" index, err)
+            Logging.Error "Error switching to audio output %i: %O" index err
 
     let debug_info() : string =
 

@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Data.Library
 open Prelude.Data
 open Interlude.UI
-        
+
 type BeatmapBrowserPage() =
     inherit Page()
 
@@ -33,10 +33,10 @@ type BeatmapBrowserPage() =
                         Threading.Thread.Sleep(60000)
                         return None, action_at_bottom
                     | WebResult.HttpError code ->
-                        Logging.Error(sprintf "Mino API returned code %i" code)
+                        Logging.Error "Mino API returned code %i" code
                         return None, action_at_bottom
                     | WebResult.Exception err ->
-                        Logging.Error("Error getting Mino data from " + url, err)
+                        Logging.Error "Error getting Mino data from '%s': %O" url err
                         return None, action_at_bottom
                 }
 

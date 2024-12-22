@@ -42,12 +42,10 @@ module Accept =
 
                 if known_chart.Keys <> table.Keymode then
 
-                    Logging.Debug(
-                        sprintf
-                            "Cannot accept chart %A into table %s because keymode doesn't match"
-                            known_chart
-                            request.TableId
-                    )
+                    Logging.Debug
+                        "Cannot accept chart %A into table %s because keymode doesn't match"
+                        known_chart
+                        request.TableId
 
                     TableSuggestion.reject request.TableId chart_id user_id "Wrong keymode"
                     |> ignore

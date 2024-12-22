@@ -25,7 +25,7 @@ type Song =
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if ID = 0 then
-            Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
+            Logging.Error "Couldn't load audio track from '%s': %O" file Bass.LastError
             Song.Default
         else
             let d = Bass.ChannelGetInfo ID

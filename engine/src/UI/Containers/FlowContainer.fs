@@ -168,7 +168,7 @@ module FlowContainer =
             | Some x ->
                 children.Remove x |> ignore
                 refresh <- true
-            | None -> Logging.Error(sprintf "%O is not in flow container %O, can't remove" child this)
+            | None -> Logging.Error "%O is not in flow container %O, can't remove" child this
 
         override this.Init(parent: Widget) =
             base.Init parent
@@ -226,7 +226,7 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IHeight with
-            member this.Height = 
+            member this.Height =
                 if this.Initialised then content_height
                 else float32 this.Count * item_height + (float32 this.Count - 1.0f) * (this.Spacing)
 
@@ -266,7 +266,7 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width = 
+            member this.Width =
                 if this.Initialised then content_width
                 else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
 
@@ -313,7 +313,7 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width = 
+            member this.Width =
                 if this.Initialised then content_width
                 else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
 

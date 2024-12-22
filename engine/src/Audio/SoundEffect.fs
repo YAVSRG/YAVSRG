@@ -18,7 +18,7 @@ type SoundEffect =
             Bass.SampleLoad(data, 0L, data.Length, 1, BassFlags.SampleOverrideLongestPlaying ||| BassFlags.Prescan)
 
         if id = 0 then
-            Logging.Error(sprintf "Couldn't load sound effect '%s'" source, Bass.LastError)
+            Logging.Error "Couldn't load sound effect '%s': %O" source Bass.LastError
 
         let channel = Bass.SampleGetChannel(id)
         { ID = id; ChannelID = channel }

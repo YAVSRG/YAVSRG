@@ -27,11 +27,11 @@ type PerformanceMonitor() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        
+
         if dump_debug.Tapped() then
-            Logging.Debug(Audio.debug_info())
-            Logging.Debug(Render.debug_info())
-            WindowThread.defer (fun () -> Logging.Debug(WindowThread.debug_info()))
+            Logging.Debug "%s" (Audio.debug_info())
+            Logging.Debug "%s" (Render.debug_info())
+            WindowThread.defer (fun () -> Logging.Debug "%s" (WindowThread.debug_info()))
 
         if dump_profiling.Tapped() then
             dump_profiling_info ()

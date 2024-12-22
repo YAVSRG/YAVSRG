@@ -11,7 +11,7 @@ open YAVSRG.CLI
 
 [<AutoOpen>]
 module Config =
-    
+
     let BACKBEAT_SETTINGS_PATH = Path.Combine(Utils.YAVSRG_PATH, "backbeat", "settings.json")
 
     [<Json.AutoCodec>]
@@ -32,13 +32,13 @@ module Config =
         match JSON.FromFile BACKBEAT_SETTINGS_PATH with
         | Ok c -> c
         | Error e ->
-            Logging.Error("Error loading settings (using default): ", e)
+            Logging.Error "Error loading settings (using default): %O" e
             Config.Default
 
     [<Json.AutoCodec>]
     type LoginCredentials = { Api: string; Token: string } with static member Default = { Api = "api.yavsrg.net"; Token = "" }
 
-    do 
+    do
         try
             JSON.ToFile (BACKBEAT_SETTINGS_PATH, true) backbeat_config
             let credentials : LoginCredentials = JSON.FromFile(Path.Combine(backbeat_config.InterludePath, "Data", "login.json")) |> expect

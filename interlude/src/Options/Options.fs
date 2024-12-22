@@ -354,7 +354,7 @@ module Options =
             let new_path = (Directory.GetCurrentDirectory() + "-instance" + instance.ToString())
             Directory.CreateDirectory new_path |> ignore
             Directory.SetCurrentDirectory new_path
-            Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
+            Logging.Info "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory())
 
         config.ToOptions
 
@@ -368,4 +368,4 @@ module Options =
             save_important_json_file CONFIG_PATH config
             save_important_json_file (Path.Combine(get_game_folder "Data", "options.json")) options
         with err ->
-            Logging.Critical("Failed to write options/config to file.", err)
+            Logging.Critical "Failed to write options/config to file.\n%O" err

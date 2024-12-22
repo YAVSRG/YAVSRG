@@ -93,10 +93,10 @@ module Maintenance =
     //        let mutable artist = artist
 
     //        if closest_match <> "" then
-    //            Logging.Info(sprintf "Possible artist match")
-    //            Logging.Info(sprintf "Existing: %A" closest_match)
-    //            Logging.Info(sprintf "Incoming: %A" artist)
-    //            Logging.Info(sprintf " Context: %s" context.FormattedTitle)
+    //            Logging.Info "Possible artist match"
+    //            Logging.Info "Existing: %A" closest_match
+    //            Logging.Info "Incoming: %A" artist
+    //            Logging.Info " Context: %s" context.FormattedTitle
 
     //            Logging.Info(
     //                "\noptions ::\n 1 - Existing is correct\n 2 - Incoming is correct\n 3 - These are not the same artist"
@@ -142,5 +142,5 @@ module Maintenance =
     //            }
     //        )
 
-    //        Logging.Info(sprintf "Added %s, Is Japanese: %b" name is_japanese)
+    //        Logging.Info "Added %s, Is Japanese: %b" name is_japanese
     //        save ()

@@ -65,14 +65,14 @@ module API =
 
                 this.SendResponseAsync this.Response |> ignore
             with e ->
-                Logging.Critical(sprintf "Error handling HTTP request %O" request, e)
+                Logging.Critical "Error handling HTTP request %O: %O" request e
 
         override this.OnReceivedRequestError(request: HttpRequest, error: string) =
-            Logging.Error(sprintf "Error handling HTTP request: %s" error)
+            Logging.Error "Error handling HTTP request: %s" error
 
         override this.OnError(error: SocketError) =
             if error <> SocketError.NotConnected then
-                Logging.Error(sprintf "Socket error in HTTP session %O: %O" this.Id error)
+                Logging.Error "Socket error in HTTP session %O: %O" this.Id error
 
     type private Listener(config: Config) =
         inherit HttpsServer(config.SSLContext, IPAddress.Any, config.Port)
@@ -80,7 +80,7 @@ module API =
         override this.CreateSession() = new Session(this, config)
 
         override this.OnError(error: SocketError) =
-            Logging.Error(sprintf "Error in HTTP server: %O" error)
+            Logging.Error "Error in HTTP server: %O" error
 
     module Server =
 
@@ -123,7 +123,7 @@ module API =
                                 match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                                 | Ok res -> callback (Some res)
                                 | Error err ->
-                                    Logging.Error(sprintf "Error getting %s: %s" route err.Message)
+                                    Logging.Error "Error getting %s: %s" route err.Message
                                     callback None
                             else
                                 callback None
@@ -146,7 +146,7 @@ module API =
                                 match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                                 | Ok res -> callback (Some res)
                                 | Error err ->
-                                    Logging.Error(sprintf "Error getting %s: %s" route err.Message)
+                                    Logging.Error "Error getting %s: %s" route err.Message
                                     callback None
                             else
                                 callback None
@@ -177,7 +177,7 @@ module API =
                                 match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                                 | Ok res -> callback (Some res)
                                 | Error err ->
-                                    Logging.Error(sprintf "Error reading post %s: %s" route err.Message)
+                                    Logging.Error "Error reading post %s: %s" route err.Message
                                     callback None
                             else
                                 callback None
@@ -212,7 +212,7 @@ module API =
                                 match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                                 | Ok res -> callback (Some res)
                                 | Error err ->
-                                    Logging.Error(sprintf "Error reading post %s: %s" route err.Message)
+                                    Logging.Error "Error reading post %s: %s" route err.Message
                                     callback None
                             else
                                 callback None
@@ -234,7 +234,7 @@ module API =
                                 match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
                                 | Ok res -> callback (Some res)
                                 | Error err ->
-                                    Logging.Error(sprintf "Error reading delete %s: %s" route err.Message)
+                                    Logging.Error "Error reading delete %s: %s" route err.Message
                                     callback None
                             else
                                 callback None

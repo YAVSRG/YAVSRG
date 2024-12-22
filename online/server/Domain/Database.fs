@@ -39,10 +39,10 @@ module Migrations =
             "RulesetSCHasNewId"
             (fun db ->
                 let affected_rows = Database.exec_raw """UPDATE scores SET RulesetId = 'SAE1C74D1' WHERE RulesetId = 'SC(J4)548E5A';""" db |> expect
-                Logging.Info(sprintf "Migrated %i old SC J4 records to new ruleset ID (but didn't recalculate the ones on rates)" affected_rows)
+                Logging.Info "Migrated %i old SC J4 records to new ruleset ID (but didn't recalculate the ones on rates)" affected_rows
 
                 let affected_rows = Database.exec_raw """UPDATE leaderboards SET RulesetId = 'SAE1C74D1' WHERE RulesetId = 'SC(J4)548E5A';""" db |> expect
-                Logging.Info(sprintf "Migrated %i leaderboards to new ruleset ID" affected_rows)
+                Logging.Info "Migrated %i leaderboards to new ruleset ID" affected_rows
             )
             db
 

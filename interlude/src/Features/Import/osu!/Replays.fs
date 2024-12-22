@@ -19,7 +19,7 @@ module Replays =
             use br = new BinaryReader(file)
             Some(OsuScoreDatabase_Score.Read br)
         with err ->
-            Logging.Error(sprintf "Error loading replay file %s" replay_path, err)
+            Logging.Error "Error loading replay file %s: %O" replay_path err
             None
 
     // todo: should this be in prelude?
@@ -28,7 +28,7 @@ module Replays =
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
-        try 
+        try
             let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, 1.0f<rate>)
 
             Ok {
@@ -46,8 +46,8 @@ module Replays =
 
     let import_replay_file (replay: OsuScoreDatabase_Score) (chart_meta: ChartMeta) (chart: Chart) : bool =
         match convert_replay_to_score replay chart with
-        | Error reason -> 
-            Logging.Warn(sprintf "Error importing replay: %s" reason)
+        | Error reason ->
+            Logging.Warn "Error importing replay: %s" reason
             false
         | Ok score ->
             UserDatabase.delete_score chart_meta.Hash score.Timestamp Content.UserData |> ignore

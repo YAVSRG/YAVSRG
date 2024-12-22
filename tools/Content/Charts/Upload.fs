@@ -49,7 +49,7 @@ module Upload =
             let upload_notes =
                 task {
                         let file_name = chart_hash
-                        
+
                         let exists = check_cdn_file_exists file_name
 
                         if not exists then
@@ -69,7 +69,7 @@ module Upload =
             let upload_audio =
                 task {
                         let file_name = "assets/" + audio_hash
-                        
+
                         let exists = check_cdn_file_exists file_name
 
                         if not exists then
@@ -105,7 +105,7 @@ module Upload =
                     }
 
             async {
-                match! 
+                match!
                     Async.Parallel
                         [
                             upload_notes |> Async.AwaitTask
@@ -209,7 +209,7 @@ module Upload =
             | Ok (hash, files_changed) ->
 
             if files_changed > 0 then
-                Logging.Info(sprintf "Uploaded %i new files for '%s'" files_changed chart_meta.Title)
+                Logging.Info "Uploaded %i new files for '%s'" files_changed chart_meta.Title
 
             match! upload_chart_to_backbeat (hash, bb_chart, bb_song) with
             | Error reason -> return Error reason
@@ -221,11 +221,11 @@ module Upload =
             for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
                 async {
                     match ChartDatabase.get_chart cc.Hash interlude_chart_db with
-                    | Ok chart -> 
+                    | Ok chart ->
                         match! upload_chart cc chart with
-                        | Ok () -> Logging.Info(sprintf "Uploaded '%s'" cc.Title)
-                        | Error reason -> Logging.Warn(sprintf "Upload of '%s' failed: %s" cc.Title reason)
-                    | Error reason -> Logging.Error(sprintf "Loading '%s' from disk failed: %s" cc.Title reason)
+                        | Ok () -> Logging.Info "Uploaded '%s'" cc.Title
+                        | Error reason -> Logging.Warn "Upload of '%s' failed: %s" cc.Title reason
+                    | Error reason -> Logging.Error "Loading '%s' from disk failed: %s" cc.Title reason
                 }
         }
         |> fun upload_tasks -> Async.Parallel(upload_tasks, UPLOAD_POOL_CONCURRENCY)

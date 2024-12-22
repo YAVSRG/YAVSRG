@@ -142,7 +142,7 @@ module SelectedChart =
                         match ChartDatabase.get_chart cc.Hash Content.Charts with
                         | Error reason ->
 
-                            Logging.Error(sprintf "Couldn't load chart: %s" reason)
+                            Logging.Error "Couldn't load chart: %s" reason
                             Background.load None
 
                             Notifications.error (
@@ -414,8 +414,6 @@ module SelectedChart =
         match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
         | Some cc -> change (cc, LibraryContext.None, true)
         | None ->
-            Logging.Info("Couldn't find cached chart: " + options.CurrentChart.Value)
-
             match
                 Suggestion.get_random
                     Filter.Empty

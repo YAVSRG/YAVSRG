@@ -97,7 +97,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
         if player = your_username || this.Players.ContainsKey player then
             lobby_event_ev.Trigger(kind, player)
         else
-            Logging.Warn(sprintf "Received event from untracked player %s" player)
+            Logging.Warn "Received event from untracked player %s" player
 
     member this.SystemMessage(msg: string) =
         system_message_ev.Trigger msg
@@ -106,15 +106,15 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
         if sender = your_username || this.Players.ContainsKey sender then
             chat_message_ev.Trigger(sender, msg)
         else
-            Logging.Warn(sprintf "Received chat message from untracked player %s" sender)
+            Logging.Warn "Received chat message from untracked player %s" sender
 
     member this.PlayerStatus(username: string, status: LobbyPlayerStatus) =
         match this.Players.TryGetValue username with
-        | true, player -> 
+        | true, player ->
             player.Status <- status
             lobby_players_updated_ev.Trigger()
             player_status_ev.Trigger(username, status)
-        | false, _ -> Logging.Warn(sprintf "Received status for untracked player %s" username)
+        | false, _ -> Logging.Warn "Received status for untracked player %s" username
 
     member this.StartCountdown(reason: string, seconds: int) =
         countdown_ev.Trigger(reason, seconds)
@@ -184,7 +184,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
 
     member this.AddReplayInfo(username: string, info: LobbyPlayerReplayInfo) =
         if replays.ContainsKey username then
-            Logging.Warn(sprintf "%s already has replay info" username)
+            Logging.Warn "%s already has replay info" username
         replays.[username] <- info
 
     member this.Replays = replays

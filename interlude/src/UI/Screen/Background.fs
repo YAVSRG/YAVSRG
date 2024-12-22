@@ -80,7 +80,7 @@ module Background =
 
                             return Some(new_bmp, col)
                         with err ->
-                            Logging.Warn("Failed to load background image: " + file, err)
+                            Logging.Warn "Failed to load background image '%s': %O" file err
                             return None
                 }
 

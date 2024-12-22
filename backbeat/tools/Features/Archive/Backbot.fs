@@ -5,9 +5,9 @@ module Backbot = ()
     //let make_suggestion (flag: string) (id: int64) (before: Song) (after: Song) : bool =
     //    let inline diff label a b =
     //        if a <> b then
-    //            Logging.Info(sprintf "%s\n %A vvv\n %A" label a b)
+    //            Logging.Info "%s\n %A vvv\n %A" label a b
 
-    //    Logging.Info(sprintf "Backbot has a suggestion for '%i' that needs your approval" id)
+    //    Logging.Info "Backbot has a suggestion for '%i' that needs your approval" id
     //    diff "Artists" before.Artists after.Artists
     //    diff "Performers" before.OtherArtists after.OtherArtists
     //    diff "Remixers" before.Remixers after.Remixers
@@ -15,7 +15,7 @@ module Backbot = ()
     //    diff "Alt Titles" before.AlternativeTitles after.AlternativeTitles
     //    diff "Formatted title" before.FormattedTitle after.FormattedTitle
     //    diff "Tags" before.Tags after.Tags
-    //    Logging.Info(sprintf "Reason: %s" flag)
+    //    Logging.Info "Reason: %s" flag
     //    Logging.Info("\noptions ::\n 1 - Make this change\n 2 - Queue for manual review\n 3 - No correction needed")
     //    let mutable option_chosen = None
 
@@ -51,7 +51,7 @@ module Backbot = ()
 
     //        match Map.tryFind ded seen with
     //        | Some existing ->
-    //            Logging.Info(sprintf "%s is a duplicate of %s, merging" id existing)
+    //            Logging.Info "%s is a duplicate of %s, merging" id existing
     //            let existing_song = songs.[existing]
 
     //            songs.[existing] <-
@@ -88,10 +88,10 @@ module Backbot = ()
     //            }
 
     //        match Map.tryFind ded seen with
-    //        | Some existing -> Logging.Info(sprintf "%s could be a duplicate of %s" id existing)
+    //        | Some existing -> Logging.Info "%s could be a duplicate of %s" id existing
     //        | None -> seen <- Map.add ded id seen
 
     //        if titles.Contains ded.Title then
-    //            Logging.Info(sprintf "%s could be a duplicate title" ded.Title)
+    //            Logging.Info "%s could be a duplicate title" ded.Title
     //        else
     //            titles <- Set.add ded.Title titles

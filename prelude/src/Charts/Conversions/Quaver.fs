@@ -189,13 +189,13 @@ module Quaver_To_Interlude =
             if not b.BPMDoesNotAffectScrollVelocity then
                 skip_conversion "BPMDoesNotAffectScrollVelocity: false is not currently supported"
 
-            let bpm : TimeArray<BPM> = 
-                b.TimingPoints 
-                |> Seq.map (fun tp -> 
-                    { 
+            let bpm : TimeArray<BPM> =
+                b.TimingPoints
+                |> Seq.map (fun tp ->
+                    {
                         Time = Time.of_number tp.StartTime
                         Data =
-                            { 
+                            {
                                 Meter = 4<beat>
                                 MsPerBeat = 60000.0f<ms/minute> / (tp.Bpm * 1.0f<beat/minute>)
                             }
@@ -206,10 +206,10 @@ module Quaver_To_Interlude =
                 seq {
                     if b.InitialScrollVelocity <> 1.0f then
                         yield { Time = -10000.0f<ms>; Data = b.InitialScrollVelocity }
-                    yield! 
-                        b.SliderVelocities 
-                        |> Seq.map (fun sv -> 
-                            { 
+                    yield!
+                        b.SliderVelocities
+                        |> Seq.map (fun sv ->
+                            {
                                 Time = Time.of_number sv.StartTime
                                 Data = sv.Multiplier
                             }
@@ -229,8 +229,8 @@ module Quaver_To_Interlude =
                 }
             }
         with
-        | :? ConversionSkipException as skip_reason -> 
+        | :? ConversionSkipException as skip_reason ->
             Error (action.Source, skip_reason.msg)
         | other_error ->
-            Logging.Debug(sprintf "Unexpected error converting %s" action.Source, other_error)
+            Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
             Error (action.Source, other_error.Message)

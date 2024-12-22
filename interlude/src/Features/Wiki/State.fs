@@ -77,8 +77,8 @@ module private WikiState =
                                         |> Map.ofSeq
 
                                     Cache.index_content <- Some [| Markdown.Parse md |]
-                                | otherwise -> Logging.Debug(sprintf "Getting wiki index.json failed: %O" otherwise)
-                            | otherwise -> Logging.Debug(sprintf "Getting wiki index.md failed: %O" otherwise)
+                                | otherwise -> Logging.Debug "Getting wiki index.json failed: %O" otherwise
+                            | otherwise -> Logging.Debug "Getting wiki index.md failed: %O" otherwise
 
                         return Cache.index_content |> Option.defaultValue [||]
 
@@ -100,7 +100,7 @@ module private WikiState =
                                         p.Filename,
                                         Some(sections |> Array.map Markdown.Parse)
                                     )
-                            | otherwise -> Logging.Debug(sprintf "Getting wiki page '%s' failed: %O" p.Filename otherwise)
+                            | otherwise -> Logging.Debug "Getting wiki page '%s' failed: %O" p.Filename otherwise
 
                         return Cache.page_cache_by_filename.[p.Filename] |> Option.defaultValue [||]
 
@@ -114,7 +114,7 @@ module private WikiState =
                             | WebResult.Ok md ->
                                 let version_split_regex = System.Text.RegularExpressions.Regex(@"\s(?=[\.0-9]+\s+====)")
                                 Cache.changelog_content <- version_split_regex.Split(md) |> Array.map Markdown.Parse |> Some
-                            | otherwise -> Logging.Debug(sprintf "Getting changelog failed: %O" otherwise)
+                            | otherwise -> Logging.Debug "Getting changelog failed: %O" otherwise
 
                         return Cache.changelog_content |> Option.defaultValue [||]
                 }

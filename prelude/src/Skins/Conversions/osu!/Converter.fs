@@ -110,7 +110,7 @@ module private Image =
     type PixelFormats.Rgba32 with
         member this.BlackToTransparent =
             let new_alpha =
-                min 
+                min
                     this.A
                     (max this.R this.G |> max this.B)
             PixelFormats.Rgba32(this.R, this.G, this.B, new_alpha)
@@ -179,11 +179,11 @@ module OsuSkinConverter =
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
                     let percy_tail_texture = new Bitmap(width, width / 2)
-                    percy_tail_texture.Mutate(fun img -> 
+                    percy_tail_texture.Mutate(fun img ->
                         img
                             .DrawImage(image, Point((-image.Width + width) / 2, -i), 1.0f)
                             .Flip(FlipMode.Vertical)
-                            .Resize(width, width) 
+                            .Resize(width, width)
                         |> ignore)
 
                     percy_tail_texture.Save(Path.Combine(target, TextureFileName.to_loose "holdtail" (column, row)))
@@ -196,7 +196,7 @@ module OsuSkinConverter =
         let mutable top = 0
         while top < sample_receptor.Height && sample_receptor.[sample_receptor.Width / 2, top].A < 5uy do
             top <- top + 1
-        
+
         let mutable bottom = sample_receptor.Height - 1
         while bottom > top && sample_receptor.[sample_receptor.Width / 2, bottom].A < 5uy do
             bottom <- bottom - 1
@@ -234,13 +234,13 @@ module OsuSkinConverter =
         new_bmp.Mutate(fun img ->
             img
                 .Flip(FlipMode.Vertical)
-                .DrawImage(dot_texture, 1.0f) 
+                .DrawImage(dot_texture, 1.0f)
             |> ignore)
         new_bmp
 
     let convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) =
         try
-            let images = 
+            let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
                 |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
@@ -265,7 +265,7 @@ module OsuSkinConverter =
             Ok (-2.0f * float32 osu_overlap / float32 max_width)
         with err ->
             Error err
-    
+
     type ConvertedFont =
         {
             Spacing: float32
@@ -280,7 +280,7 @@ module OsuSkinConverter =
             let colon = dot_to_colon dot
             let percent = TextureFile.find(sprintf "%s-percent" osu_skin_prefix, source).Value.Load.Image
 
-            let images = 
+            let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
                 |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
@@ -306,13 +306,13 @@ module OsuSkinConverter =
             Error err
 
     let private convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
-    
+
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
 
         Directory.CreateDirectory target |> ignore
 
-        let version = 
+        let version =
             match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
             | true, v -> v
             | false, _ -> 3.0m
@@ -358,7 +358,7 @@ module OsuSkinConverter =
                     padded.Dispose()
             judgement_textures <- true
         with err ->
-            Logging.Warn("Error converting judgement textures", err)
+            Logging.Warn "Error converting judgement textures: %O" err
 
         // Convert judgement counter textures
         try
@@ -381,10 +381,10 @@ module OsuSkinConverter =
                 padded.Dispose()
             judgement_counter_textures <- true
         with err ->
-            Logging.Warn("Error converting judgement counter judgement textures", err)
+            Logging.Warn "Error converting judgement counter judgement textures: %O" err
 
         // Convert various fonts
-        match 
+        match
             convert_font (
                 source,
                 target,
@@ -396,9 +396,9 @@ module OsuSkinConverter =
         | Ok spacing ->
             combo_font_spacing <- Some spacing
         | Error err ->
-            Logging.Warn("Error converting combo font", err)
-        
-        match 
+            Logging.Warn "Error converting combo font: %O" err
+
+        match
             convert_font_with_extras (
                 source,
                 target,
@@ -410,8 +410,8 @@ module OsuSkinConverter =
         | Ok info ->
             accuracy_font_info <- Some info
         | Error err ->
-            Logging.Warn("Error converting accuracy font", err)
-        
+            Logging.Warn "Error converting accuracy font: %O" err
+
         match
             convert_font_with_extras (
                 source,
@@ -424,9 +424,9 @@ module OsuSkinConverter =
         | Ok info ->
             progress_meter_font_info <- Some info
         | Error err ->
-            Logging.Warn("Error converting progress meter font", err)
+            Logging.Warn "Error converting progress meter font: %O" err
 
-        match 
+        match
             convert_font_with_extras (
                 source,
                 target,
@@ -438,14 +438,14 @@ module OsuSkinConverter =
         | Ok info ->
             judgement_counter_font_info <- Some info
         | Error err ->
-            Logging.Warn("Error converting judgement counter font", err)
+            Logging.Warn "Error converting judgement counter font: %O" err
 
         let config: HudConfig =
             { HudConfig.Default with
                 JudgementMeterFrameTime = 16.7f<ms / rate>
                 JudgementMeterUseTexture = judgement_textures
                 JudgementMeterCustomDisplay =
-                    if judgement_textures then 
+                    if judgement_textures then
                         Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
                     else Map.empty
 
@@ -461,10 +461,10 @@ module OsuSkinConverter =
                 JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
                 JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
                 JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                        
+
                 JudgementCounterUseJudgementTextures = judgement_counter_textures
                 JudgementCounterCustomDisplay =
-                    if judgement_counter_textures then 
+                    if judgement_counter_textures then
                         Map.ofSeq [6, Array.init 6 Some]
                     else Map.empty
 
@@ -482,8 +482,8 @@ module OsuSkinConverter =
             failwith "a folder with this name already exists!"
 
         Directory.CreateDirectory target |> ignore
-        
-        let version = 
+
+        let version =
             match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
             | true, v -> v
             | false, _ -> 3.0m
@@ -494,16 +494,16 @@ module OsuSkinConverter =
             |> Option.defaultValue (Mania.Default keymode version)
 
         let colors = Array.zeroCreate 10
-        let receptor_colors = 
+        let receptor_colors =
             [|
-                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|]; 
-                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|]; 
+                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|];
+                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|];
                 [|0; 1; 0; 1; 2; 1; 0; 1; 0|]; [|0; 1; 2; 1; 0; 0; 1; 2; 1; 0|]
             |]
-        let column_light_colors = 
+        let column_light_colors =
             [|
-                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|]; 
-                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|]; 
+                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|];
+                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|];
                 [|0; 1; 0; 1; 2; 1; 0; 1; 0|]; [|0; 1; 2; 1; 0; 0; 1; 2; 1; 0|]
             |]
 
@@ -553,7 +553,7 @@ module OsuSkinConverter =
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "note"
         with err ->
-            Logging.Warn("Error converting note textures", err)
+            Logging.Warn "Error converting note textures: %O" err
 
         try
             let percy_ln_detected =
@@ -567,7 +567,7 @@ module OsuSkinConverter =
                 skip_tail_conversion <- true
                 flipholdtail <- true
         with err ->
-            Logging.Warn("Error converting hold body textures", err)
+            Logging.Warn "Error converting hold body textures: %O" err
 
         try
             core_textures
@@ -578,7 +578,7 @@ module OsuSkinConverter =
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "holdhead"
         with err ->
-            Logging.Warn("Error converting hold head textures", err)
+            Logging.Warn "Error converting hold head textures: %O" err
             skip_tail_conversion <- true
 
         if not skip_tail_conversion then
@@ -590,7 +590,7 @@ module OsuSkinConverter =
                 |> List.map (List.map _.Image)
                 |> convert_element_textures target "holdtail"
             with err ->
-                Logging.Debug("Error in holdtail textures - Using hold head textures instead", err)
+                Logging.Debug "Error in holdtail textures - Using hold head textures instead: %O" err
 
                 core_textures
                 |> List.map (fun x -> x.Head)
@@ -604,14 +604,14 @@ module OsuSkinConverter =
 
         // Convert keys to receptors
         try
-            let key_textures = 
+            let key_textures =
                 let distinct = ResizeArray<string * string>()
                 Array.zip keymode_settings.KeyImageΔ keymode_settings.KeyImageΔD
-                |> Array.iteri (fun i xs -> 
+                |> Array.iteri (fun i xs ->
                     if not (distinct.Contains xs) then distinct.Add xs
                     receptor_colors.[keymode - 3].[i] <- distinct.IndexOf xs
                 )
-                
+
                 distinct
                 |> Seq.map (fun (not_pressed, pressed) -> [not_pressed; pressed])
                 |> List.concat
@@ -625,7 +625,7 @@ module OsuSkinConverter =
 
             let width = float32 keymode_settings.ColumnWidth.[0] * 3.2f |> int
 
-            let scaled = 
+            let scaled =
                 key_textures
                 |> Seq.map (fun { Image = bmp; Is2x = is_2x } -> scale_receptor width height is_2x bmp)
                 |> Array.ofSeq
@@ -645,9 +645,9 @@ module OsuSkinConverter =
                 let top_of_key_osu_px = float32 height / float32 width * column_width_osu_px
                 let hitposition_osu_px = 480f - float32 keymode_settings.HitPosition
                 receptor_offset <- (top_of_key_osu_px - hitposition_osu_px) / column_width_osu_px - 0.5f
-                    
+
         with err ->
-            Logging.Warn("Error converting keys to receptors", err)
+            Logging.Warn "Error converting keys to receptors: %O" err
             try
                 use receptor_base =
                     TextureFile.find_animation_frames(core_textures.[if core_textures.Length > 1 then 1 else 0].Note, source)
@@ -661,7 +661,7 @@ module OsuSkinConverter =
                 not_pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 0)))
                 pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 1)))
             with err ->
-                Logging.Warn("Error generating placeholder receptors from note textures", err)
+                Logging.Warn "Error generating placeholder receptors from note textures: %O" err
 
         // Convert stage hint
         try
@@ -674,7 +674,7 @@ module OsuSkinConverter =
                 judgement_line <- true
             | None -> ()
         with err ->
-            Logging.Warn("Error converting stage hint to judgement line", err)
+            Logging.Warn "Error converting stage hint to judgement line: %O" err
 
         // Convert stage textures
         match TextureFile.find (keymode_settings.StageLeft, source) with
@@ -701,14 +701,14 @@ module OsuSkinConverter =
                     use colored = base_image.Clone()
 
                     let color = SixLabors.ImageSharp.Color.FromRgb(stage_light_color.R, stage_light_color.G, stage_light_color.B)
-                    colored.Mutate(fun img -> 
+                    colored.Mutate(fun img ->
                         img.Fill(
                             GraphicsOptions(
-                                ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply, 
+                                ColorBlendingMode = PixelFormats.PixelColorBlendingMode.Multiply,
                                 AlphaCompositionMode = PixelFormats.PixelAlphaCompositionMode.SrcAtop
                             ), color
                         )
-                            .Opacity(float32 stage_light_color.A / 255.0f) 
+                            .Opacity(float32 stage_light_color.A / 255.0f)
                         |> ignore
                     )
                     colored.Save(Path.Combine(target, TextureFileName.to_loose "receptorlighting" (0, distinct_colors.Count)))
@@ -725,10 +725,10 @@ module OsuSkinConverter =
 
         // Convert explosions
         try
-            let images = 
+            let images =
                 TextureFile.find_animation_frames (keymode_settings.LightingN, source)
                 |> List.map (_.Load >> _.Image)
-            
+
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
 
             for i, image in List.indexed images do
@@ -738,13 +738,13 @@ module OsuSkinConverter =
 
             note_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->
-            Logging.Warn("Error converting note explosions", err)
-        
+            Logging.Warn "Error converting note explosions: %O" err
+
         try
-            let images = 
+            let images =
                 TextureFile.find_animation_frames (keymode_settings.LightingL, source)
                 |> List.map (_.Load >> _.Image)
-            
+
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
 
             for i, image in List.indexed images do
@@ -754,7 +754,7 @@ module OsuSkinConverter =
 
             hold_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->
-            Logging.Warn("Error converting hold explosions", err)
+            Logging.Warn "Error converting hold explosions: %O" err
 
         // Generate noteskin.json
         let color_config: ColorConfig =
@@ -795,7 +795,7 @@ module OsuSkinConverter =
                     match note_explosions_scale with
                     | None -> NoteExplosionConfig.Default
                     | Some scale -> { NoteExplosionConfig.Default with UseBuiltInAnimation = false; Scale = scale }
-                HoldExplosionSettings = 
+                HoldExplosionSettings =
                     match hold_explosions_scale with
                     | None -> HoldExplosionConfig.Default
                     | Some scale -> { HoldExplosionConfig.Default with Scale = scale }

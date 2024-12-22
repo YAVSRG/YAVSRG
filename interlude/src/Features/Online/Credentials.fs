@@ -34,8 +34,8 @@ type Credentials =
             |> JSON.FromFile
             |> function
                 | Ok res -> res
-                | Error e ->
-                    Logging.Error("Error loading login credentials, you will need to log in again.", e)
+                | Error err ->
+                    Logging.Error "Error loading login credentials, you will need to log in again.\n%O" err
                     Credentials.Default
         else
             Credentials.Default

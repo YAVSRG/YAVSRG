@@ -76,7 +76,7 @@ type LiveReplayProvider(first_note: Time) =
 
         last_time <- time - first_note
         buffer.Add(struct (last_time, bitmap))
-    
+
     member this.AddMultiplayerMarker(time, bitmap) =
         if finished then invalidOp "Live play is declared as over; cannot append to replay"
         if time - first_note >= last_time then
@@ -103,7 +103,7 @@ type LiveReplayProvider(first_note: Time) =
         member this.GetFullReplay() =
             if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
             buffer.ToArray()
-        
+
         member this.EnumerateRecentEvents() =
             seq {
                 let mutable j = buffer.Count - 1
@@ -155,7 +155,7 @@ type OnlineReplayProvider() =
                 buffer.ToArray()
             else
                 invalidOp "Online play is not declared as over, we don't have the full replay yet!"
-        
+
         member this.EnumerateRecentEvents() =
             seq {
                 let mutable j = i - 1
@@ -175,7 +175,7 @@ type OnlineReplayProvider() =
                 while not (br.BaseStream.Position = br.BaseStream.Length) do
                     buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
             with err ->
-                Logging.Error("Error while receiving online replay data", err)
+                Logging.Error "Error while receiving online replay data: %O" err
 
     member this.Finish() =
         if not finished then

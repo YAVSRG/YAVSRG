@@ -16,7 +16,7 @@ type Library =
 module Library =
 
     let load () : Library =
-        
+
         let db = Percyqaz.Data.Sqlite.Database.from_file (Path.Combine(get_game_folder "Songs", "charts.db"))
         let charts_db = ChartDatabase.create true db
 
@@ -36,13 +36,11 @@ module Library =
                         false
             }
 
-        Logging.Info(
-            sprintf
-                "Loaded chart library of %i charts, %i folders, %i playlists"
-                library.Charts.Cache.Count
-                library.Collections.Folders.Count
-                library.Collections.Playlists.Count
-        )
+        Logging.Info
+            "Loaded chart library of %i charts, %i folders, %i playlists"
+            library.Charts.Cache.Count
+            library.Collections.Folders.Count
+            library.Collections.Playlists.Count
 
         library
 

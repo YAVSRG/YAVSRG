@@ -21,7 +21,7 @@ module Skins =
             page_container()
             |+ PageSetting(%"etterna_skin_import.isarrows", Checkbox is_arrows)
                 .Pos(2)
-            |+ 
+            |+
                 match existing_folder with
                 | Some folder ->
                     [
@@ -39,7 +39,7 @@ module Skins =
                                 (Path.Combine(get_game_folder "Skins", folder_name))
                                 is_arrows.Value
 
-                            if delete_existing.Value then 
+                            if delete_existing.Value then
                                 try
                                     match existing_folder with
                                     | Some old_name ->
@@ -48,12 +48,12 @@ module Skins =
                                             Directory.Delete(skin_path, true)
                                     | None -> failwith "impossible"
                                 with err ->
-                                    Logging.Error("Error deleting old skin")
+                                    Logging.Error "Error deleting old skin"
                             Skins.load ()
                             Skins.selected_noteskin_id.Set folder_name
                             Skins.selected_hud_id.Set folder_name
                         with err ->
-                            Logging.Error("Error while converting to skin", err)
+                            Logging.Error "Error while converting to skin: %O" err
 
                         Menu.Back()
                 )

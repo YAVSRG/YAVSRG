@@ -30,7 +30,7 @@ module Updates =
     /// Full version string e.g. "Interlude 0.5.16"
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
-        
+
         if DEV_MODE then
             sprintf "%s %s (%s)" v.Name short_version short_hash
         else
@@ -104,10 +104,10 @@ module Updates =
         let pincoming = parse_version incoming
 
         if pincoming > pcurrent then
-            Logging.Info(sprintf "Update available (%s)!" incoming)
+            Logging.Info "Update available (%s)!" incoming
             update_available <- true
         elif pincoming < pcurrent then
-            Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
+            Logging.Debug "Current build (%s) is ahead of update stream (%s)." current incoming
         else
             Logging.Info "Game is up to date."
 
@@ -132,7 +132,6 @@ module Updates =
         if not update_available then
             failwith "No update available to install"
 
-
         if update_started then
             ()
         else
@@ -145,7 +144,7 @@ module Updates =
 
             match latest_release.Value.assets |> List.tryFind (fun asset -> asset.name.ToLower().StartsWith(asset_name)) with
             | None -> Logging.Error("Update failed: The github release doesn't have a download for your platform. Report this to Percyqaz!")
-            | Some asset -> 
+            | Some asset ->
 
             let download_url = asset.browser_download_url
             let path = get_interlude_location ()

@@ -183,7 +183,7 @@ module Printerlude =
 
         logging_disposable <-
             Some
-            <| Logging.Subscribe(fun (level, main, details) -> sprintf "[%A] %s" level main |> Terminal.add_message)
+            <| Logging.Subscribe(fun (level, main) -> sprintf "[%A] %s" level main |> Terminal.add_message)
 
         Terminal.add_message @"================================================"
         Terminal.add_message @"=   ___      _      __          __        __   ="

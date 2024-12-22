@@ -19,9 +19,9 @@ module Helpers =
                 StepMania_To_Interlude.convert data action
 
             | Error msg ->
-                Logging.Debug(sprintf "Parse error in SM file %s" action.Source, msg)
+                Logging.Debug "Parse error in SM file %s: %O" action.Source msg
                 [ Error (action.Source, "Failed to parse this file") ]
-        
+
         | ".qua" ->
             match QuaverChart.from_file action.Source with
             | Ok quaver_chart ->
@@ -29,7 +29,7 @@ module Helpers =
                 [ Quaver_To_Interlude.convert quaver_chart action ]
 
             | Error msg ->
-                Logging.Debug(sprintf "Parse error in osu! file %s" action.Source, msg)
+                Logging.Debug "Parse error in osu! file %s: %O" action.Source msg
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | ".osu" ->
@@ -40,7 +40,7 @@ module Helpers =
                 [ Osu_To_Interlude.convert beatmap action ]
 
             | Error msg ->
-                Logging.Debug(sprintf "Parse error in osu! file %s" action.Source, msg)
+                Logging.Debug "Parse error in osu! file %s: %O" action.Source msg
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | _ -> []

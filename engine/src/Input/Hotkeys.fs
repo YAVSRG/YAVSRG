@@ -33,7 +33,7 @@ module Hotkeys =
         if defaults.ContainsKey id then
             hotkeys.[id] <- defaults.[id]
         else
-            Logging.Warn(sprintf "Cannot reset hotkey '%s', no default exists" id)
+            Logging.Warn "Cannot reset hotkey '%s', no default exists" id
 
     let reset_all () =
         for id in defaults.Keys do

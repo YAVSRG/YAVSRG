@@ -106,7 +106,7 @@ module Collections =
                 this.Charts.RemoveAt index
                 true
             with err ->
-                Logging.Error("Error removing chart from playlist", err)
+                Logging.Error "Error removing chart from playlist: %O" err
                 false
 
         member this.MoveChartUp(index: int) =

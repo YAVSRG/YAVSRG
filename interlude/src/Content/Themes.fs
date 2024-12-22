@@ -34,7 +34,7 @@ module Themes =
                 let theme = Theme.FromFolderName id
                 loaded.Add(id, theme)
             with err ->
-                Logging.Error("  Failed to load theme '" + id + "'", err)
+                Logging.Error "  Failed to load theme '%s': %O" id err
 
     let save_config (new_config: ThemeConfig) =
         current.Config <- new_config
@@ -58,9 +58,7 @@ module Themes =
                         DisposeImageAfter = true
                     }
             | TextureError reason ->
-                Logging.Error(
-                    sprintf "Problem with theme texture '%s': %s\nIt will appear as a white square ingame." id reason
-                )
+                Logging.Error "Problem with theme texture '%s': %s\nIt will appear as a white square ingame." id reason
                 // todo: fall back to default theme textures like it used to
                 missing_textures.Add id
             | TextureNotRequired -> failwith "currently impossible as all theme textures are required"
@@ -116,7 +114,7 @@ module Themes =
         load ()
 
         if not (loaded.ContainsKey _selected_id.Value) then
-            Logging.Warn("Theme '" + _selected_id.Value + "' not found, switching to default")
+            Logging.Warn "Theme '%s' not found, switching to default" _selected_id.Value
             _selected_id.Value <- DEFAULT_ID
 
         current <- loaded.[_selected_id.Value]
@@ -131,7 +129,7 @@ module Themes =
                     let old_id = _selected_id.Value
 
                     if not (loaded.ContainsKey new_id) then
-                        Logging.Warn("Theme '" + new_id + "' not found, switching to default")
+                        Logging.Warn "Theme '%s' not found, switching to default" new_id
                         _selected_id.Value <- DEFAULT_ID
                     else
                         _selected_id.Value <- new_id
