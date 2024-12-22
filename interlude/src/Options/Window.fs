@@ -5,7 +5,7 @@ open Percyqaz.Data
 open Percyqaz.Flux.Windowing
 open Prelude
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(false)>]
 type WindowSettings =
     {
         WorkingDirectory: string
