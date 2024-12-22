@@ -11,13 +11,17 @@ open Prelude.Charts
 module StepMania_To_Interlude =
 
     let private convert_measures
-        (keys: int)
+        (steps_type: StepManiaChartType)
         (measures: string list list)
         (bpms: (float32<beat> * float32<beat / minute>) list)
         (stops: (float32<beat> * float32) list)
         start
         =
 
+        let keys =
+            match steps_type.Keycount with
+            | -1 -> (measures |> List.head |> List.head).Length
+            | known -> known
         let mutable bpms = bpms
         let mutable stops = stops
         let meter = 4<beat>
@@ -138,7 +142,7 @@ module StepMania_To_Interlude =
             )
             measures
 
-        (states |> Array.ofSeq, points |> Array.ofSeq)
+        keys, states |> Array.ofSeq, points |> Array.ofSeq
 
     let convert (sm: StepManiaFile) (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
 
@@ -240,7 +244,6 @@ module StepMania_To_Interlude =
 
         let convert_difficulty (i: int) (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
-                let keys = diff.STEPSTYPE.Keycount
                 let title, title_native = choose_translit sm.TITLE sm.TITLETRANSLIT
                 let artist, artist_native = choose_translit sm.ARTIST sm.ARTISTTRANSLIT
 
@@ -286,8 +289,8 @@ module StepMania_To_Interlude =
                             | None -> ImportOrigin.Unknown
                     }
 
-                let (notes, bpm) =
-                    convert_measures keys diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
+                let (keys, notes, bpm) =
+                    convert_measures diff.STEPSTYPE diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
 
                 if notes.Length = 0 then
                     skip_conversion "StepMania chart has no notes"

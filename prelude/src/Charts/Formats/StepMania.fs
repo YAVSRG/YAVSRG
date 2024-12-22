@@ -37,8 +37,8 @@ type StepManiaChartType =
     member this.Keycount =
         match this with
         | Dance_Threepanel -> 3
-        | Dance_Single
-        | UNKNOWN -> 4
+        | Dance_Single -> 4
+        | UNKNOWN -> -1
         | Pump_Single -> 5
         | Dance_Solo
         | Pump_Halfdouble -> 6
@@ -75,7 +75,7 @@ type StepManiaChart =
         METER: string
         CREDIT: string
     }
-    
+
 (*
     Some common tags have been omitted due to having no relevance or poor documentation
 *)
@@ -142,19 +142,19 @@ module StepmaniaParser =
 
     let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
 
-    let private text = 
+    let private text =
         let normal_char = noneOf ":;"
         let escaped_char = skipChar '\\' >>. anyChar
         manyChars (notFollowedBy (newline .>> skipChar '#') >>. (escaped_char <|> normal_char)) |>> fun s -> s.Trim()
 
     let private parse_key_value =
-        comment >>. (skipChar '#') >>. text .>> skipChar ':'
+        comment >>. spaces >>. (skipChar '#') >>. text .>> skipChar ':'
         .>>. (sepBy text (skipChar ':'))
         .>> (optional (skipChar ';') >>. skipRestOfLine true)
         .>> spaces
 
     let private parse_header: Parser<Header, unit> = many parse_key_value .>> eof
-    
+
     let private parse_note_row = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
 
     let private parse_measures =
@@ -163,7 +163,7 @@ module StepmaniaParser =
         .>> eof
 
     let private parse_pairs =
-        (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ',') .>> eof)
+        (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ','))
 
     //https://github.com/etternagame/etterna/blob/master/src/Etterna/Singletons/GameManager.cpp
     let private parse_chart_type t =
@@ -199,21 +199,21 @@ module StepmaniaParser =
             | "MUSIC", [ t ] -> { s with MUSIC = t }
             | "OFFSET", [ v ] -> { s with OFFSET = float32 v }
             | "BPMS", [ bs ] ->
-                match run parse_pairs bs with
+                match run parse_pairs (bs.Trim ',') with
                 | Success(result, _, _) ->
                     { s with
                         BPMS =
                             result
                             |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat / minute>))
                     }
-                | Failure(errorMsg, _, _) -> failwith errorMsg
+                | Failure(error, _, _) -> failwith error
             | "STOPS", [ ss ] ->
-                match run parse_pairs ss with
+                match run parse_pairs (ss.Trim ',') with
                 | Success(result, _, _) ->
                     { s with
                         STOPS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b))
                     }
-                | Failure(errorMsg, _, _) -> failwith errorMsg
+                | Failure(error, _, _) -> s
             | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = float32 v }
             | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = float32 v }
             | "DISPLAYBPM", [ "*" ] ->
@@ -241,7 +241,10 @@ module StepmaniaParser =
                                 STEPSTYPE = parse_chart_type chartType
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
-                                DIFFICULTY = StepManiaDifficultyType.Parse(difficultyType, true)
+                                DIFFICULTY =
+                                    match StepManiaDifficultyType.TryParse(difficultyType, true) with
+                                    | true, d -> d
+                                    | false, _ -> StepManiaDifficultyType.Beginner
                                 METER = footMeter
                                 CREDIT = author
                             }
