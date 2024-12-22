@@ -338,7 +338,7 @@ module Options =
 
     let private CONFIG_PATH = Path.GetFullPath "config.json"
 
-    let load_window_config (instance: int) =
+    let load_window_config (instance: int) () =
         // Register decoding rules for Percyqaz.Flux config
         JSON
             .WithAutoCodec<FullscreenVideoMode>()
