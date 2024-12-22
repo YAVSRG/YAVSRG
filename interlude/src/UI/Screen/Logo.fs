@@ -142,10 +142,11 @@ module Logo =
                     Render.stencil_begin_draw ()
                     Render.rect breathe_bounds Colors.cyan_accent
                     let rain = Content.Texture "rain"
+                    let RAIN_SCALE = 512.0f
                     let v = float32 counter.Time
 
                     let draw_tiling_rain (scale, x, y) color =
-                        let stride = float32 rain.Width * scale
+                        let stride = RAIN_SCALE * scale
                         let mutable y = breathe_bounds.Top - stride + y % stride
 
                         while y < breathe_bounds.Bottom do
