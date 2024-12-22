@@ -38,6 +38,8 @@ Follow the install instructions for both of these for your platform
 	dotnet pack
 	dotnet tool install -g --add-source ./nupkg YAVSRG.CLI
 	```
+	**If you have never installed a dotnet tool**, after the final step you will likely see a message in your terminal about your dotnet tool location not being added to PATH, with a command to fix it.  
+	If so, also do that.
 
 	The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number in the terminal.  
 	**If this hasn't worked and you are stuck, get assistance in [the discord](https://yavsrg.net/discord)**

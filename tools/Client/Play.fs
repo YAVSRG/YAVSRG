@@ -29,7 +29,7 @@ module Play =
         let tag_digest = eval "git" "rev-list --tags --max-count=1"
         let tag_name = eval "git" (sprintf "describe --tags \"%s\"" tag_digest)
         exec "git" (sprintf "checkout %s" tag_name)
-        exec "git" "submodule update --init --recursive"
+        exec "git" "submodule update --recursive"
 
         try
             Directory.CreateDirectory GAME_FOLDER |> ignore
@@ -39,7 +39,7 @@ module Play =
         with err -> printfn "Error creating GAME folder: %O" err
 
         exec "git" "checkout main"
-        exec "git" "submodule update --init --recursive"
+        exec "git" "submodule update --recursive"
 
     let play () =
 
