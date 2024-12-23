@@ -62,7 +62,7 @@ type Overview(button_callback: int -> GraphSource -> CorePattern option -> unit)
                 container.Add(KeymodeOverview(i, button_callback i))
         if container.Count = 0 then
             this
-            |* EmptyState(Icons.WIND, "No data")
+            |* EmptyState(Icons.WIND, %"stats.no_data")
 
         this
         |* ScrollContainer(container, Margin = 50.0f)
