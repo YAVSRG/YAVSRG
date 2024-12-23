@@ -2,6 +2,7 @@
 
 open System.IO
 open FParsec
+open Percyqaz.Common
 open Prelude
 
 //https://github.com/stepmania/stepmania/wiki/sm
@@ -140,27 +141,36 @@ type StepManiaFile =
 
 module StepmaniaParser =
 
-    let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
+    // Main #KEY:VALUE; parser
+    let private separator = anyOf ":;"
 
-    let private text =
+    let private token =
         let normal_char = noneOf ":;"
         let escaped_char = skipChar '\\' >>. anyChar
         manyChars (notFollowedBy (newline .>> skipChar '#') >>. (escaped_char <|> normal_char)) |>> fun s -> s.Trim()
 
-    let private parse_key_value =
-        comment >>. spaces >>. (skipChar '#') >>. text .>> skipChar ':'
-        .>>. (sepBy text (skipChar ':'))
-        .>> (optional (skipChar ';') >>. skipRestOfLine true)
-        .>> spaces
+    let private header_value = (spaces >>. (skipChar '#' >>. token .>> separator) .>>. (sepBy1 token separator) .>> skipRestOfLine true)
 
-    let private parse_header: Parser<Header, unit> = many parse_key_value .>> eof
+    let private header_value_or_discard_line =
+        (header_value |>> Some) <|> (many1CharsTill anyChar (pchar '\n') >>% None)
+
+    let private parse_header: Parser<Header, unit> =
+        many header_value_or_discard_line
+        |>> List.choose id
+        .>> eof
+
+    // Parse valid note rows
 
     let private parse_note_row = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
+
+    let private comment = optional (skipString "//" >>. skipRestOfLine true >>. spaces)
 
     let private parse_measures =
         (optional (spaces >>. comment .>> spaces))
         >>. (sepBy parse_note_row (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
         .>> eof
+
+    // Parse BPMs and STOPs
 
     let private parse_pairs =
         (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ','))
@@ -185,21 +195,21 @@ module StepmaniaParser =
     let private read_stepmania_data header =
         let f s (key, values) =
             match key, values with
-            | "TITLE", [ t ] -> { s with TITLE = t }
-            | "SUBTITLE", [ t ] -> { s with SUBTITLE = t }
-            | "ARTIST", [ t ] -> { s with ARTIST = t }
-            | "TITLETRANSLIT", [ t ] -> { s with TITLETRANSLIT = t }
-            | "SUBTITLETRANSLIT", [ t ] -> { s with SUBTITLETRANSLIT = t }
-            | "ARTISTTRANSLIT", [ t ] -> { s with ARTISTTRANSLIT = t }
-            | "GENRE", [ t ] -> { s with GENRE = t }
-            | "CREDIT", [ t ] -> { s with CREDIT = t }
-            | "BANNER", [ t ] -> { s with BANNER = t }
-            | "BACKGROUND", [ t ] -> { s with BACKGROUND = t }
-            | "CDTITLE", [ t ] -> { s with CDTITLE = t }
-            | "MUSIC", [ t ] -> { s with MUSIC = t }
-            | "OFFSET", [ v ] -> { s with OFFSET = float32 v }
-            | "BPMS", [ bs ] ->
-                match run parse_pairs (bs.Trim ',') with
+            | "TITLE", t :: _  when t <> "" -> { s with TITLE = t }
+            | "SUBTITLE", t :: _ when t <> "" -> { s with SUBTITLE = t }
+            | "ARTIST", t :: _ when t <> "" -> { s with ARTIST = t }
+            | "TITLETRANSLIT", t :: _ when t <> "" -> { s with TITLETRANSLIT = t }
+            | "SUBTITLETRANSLIT", t :: _ when t <> "" -> { s with SUBTITLETRANSLIT = t }
+            | "ARTISTTRANSLIT", t :: _ when t <> "" -> { s with ARTISTTRANSLIT = t }
+            | "GENRE", t :: _ when t <> "" -> { s with GENRE = t }
+            | "CREDIT", t :: _ when t <> "" -> { s with CREDIT = t }
+            | "BANNER", t :: _ when t <> "" -> { s with BANNER = t }
+            | "BACKGROUND", t :: _ when t <> "" -> { s with BACKGROUND = t }
+            | "CDTITLE", t :: _ when t <> "" -> { s with CDTITLE = t }
+            | "MUSIC", t :: _ when t <> "" -> { s with MUSIC = t }
+            | "OFFSET", v :: _ when v <> "" -> { s with OFFSET = float32 v }
+            | "BPMS", bs :: _ ->
+                match run parse_pairs (bs.ReplaceLineEndings("").Trim ',') with
                 | Success(result, _, _) ->
                     { s with
                         BPMS =
@@ -207,45 +217,45 @@ module StepmaniaParser =
                             |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat / minute>))
                     }
                 | Failure(error, _, _) -> failwith error
-            | "STOPS", [ ss ] ->
-                match run parse_pairs (ss.Trim ',') with
+            | "STOPS", ss :: _ ->
+                match run parse_pairs (ss.ReplaceLineEndings("").Trim ',') with
                 | Success(result, _, _) ->
                     { s with
                         STOPS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b))
                     }
                 | Failure(error, _, _) -> s
-            | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = float32 v }
-            | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = float32 v }
-            | "DISPLAYBPM", [ "*" ] ->
+            | "SAMPLESTART", v :: _ when v <> "" -> { s with SAMPLESTART = float32 v }
+            | "SAMPLELENGTH", v :: _ when v <> "" -> { s with SAMPLELENGTH = float32 v }
+            | "DISPLAYBPM", "*" :: _ ->
                 { s with
                     DISPLAYBPM = (0.0f<beat / minute>, 999.0f<beat / minute>)
                 }
-            | "DISPLAYBPM", [ v ] ->
-                { s with
-                    DISPLAYBPM = float32 v |> fun x -> (x * 1.0f<beat / minute>, x * 1.0f<beat / minute>)
-                }
-            | "DISPLAYBPM", [ v1; v2 ] ->
+            | "DISPLAYBPM", v1 :: v2 :: _ when v2 <> "" ->
                 { s with
                     DISPLAYBPM = (float32 v1 * 1.0f<beat / minute>, float32 v2 * 1.0f<beat / minute>)
                 }
-            | "SELECTABLE", [ "YES" ] -> { s with SELECTABLE = true }
-            | "SELECTABLE", [ "NO" ] -> { s with SELECTABLE = false }
-            | "NOTES", [ chartType; author; difficultyType; footMeter; groove; noteData ] ->
-                match run parse_measures noteData with
+            | "DISPLAYBPM", v :: _ when v <> "" ->
+                { s with
+                    DISPLAYBPM = float32 v |> fun x -> (x * 1.0f<beat / minute>, x * 1.0f<beat / minute>)
+                }
+            | "SELECTABLE", "YES" :: _ -> { s with SELECTABLE = true }
+            | "SELECTABLE", "NO" :: _ -> { s with SELECTABLE = false }
+            | "NOTES", steps_type :: author :: difficulty_type :: foot_meter :: groove :: notes :: _ ->
+                match run parse_measures notes with
                 | Success(parsedNotes, _, _) ->
                     { s with
                         Charts =
                             {
                                 NOTES = parsedNotes
-                                CHARTNAME = difficultyType + " " + footMeter
-                                STEPSTYPE = parse_chart_type chartType
+                                CHARTNAME = difficulty_type + " " + foot_meter
+                                STEPSTYPE = parse_chart_type steps_type
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
                                 DIFFICULTY =
-                                    match StepManiaDifficultyType.TryParse(difficultyType, true) with
+                                    match StepManiaDifficultyType.TryParse(difficulty_type, true) with
                                     | true, d -> d
                                     | false, _ -> StepManiaDifficultyType.Beginner
-                                METER = footMeter
+                                METER = foot_meter
                                 CREDIT = author
                             }
                             :: s.Charts
