@@ -3,6 +3,7 @@ namespace Interlude.Features.Skins
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skins
 open Interlude.Content
@@ -15,16 +16,23 @@ open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.EditHUD
 open Interlude.Features.Skins.Browser
 
-type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
+type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, on_edit: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->
+                Style.click.Play()
                 if Skins.selected_noteskin_id.Value <> id then
                     options.Noteskin.Set id
-                    Style.click.Play()
                     on_switch ()
+                else
+                    on_edit()
             )
         )
+
+    let credit =
+        match meta.Editor with
+        | Some e -> [meta.Author; e] %> "skins.credit.edited"
+        | None -> [meta.Author] %> "skins.credit"
 
     member this.IsCurrent = Skins.selected_noteskin_id.Value = id
 
@@ -39,22 +47,25 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
+            Position = Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f)
         )
         |+ Text(
-            K(
-                match meta.Editor with
-                | Some e -> [meta.Author; e] %> "skins.credit.edited"
-                | None -> [meta.Author] %> "skins.credit"
+            (fun () ->
+                if this.Focused then
+                    if this.IsCurrent then
+                        if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
+                    else
+                        if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
+                else credit
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
+            Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
         )
         |* Clickable.Focus this
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(100.0f).Shrink(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -71,16 +82,23 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
 
         base.Draw()
 
-type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) =
+type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, on_edit: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->
+                Style.click.Play()
                 if Skins.selected_hud_id.Value <> id then
                     options.SelectedHUD.Set id
-                    Style.click.Play()
                     on_switch ()
+                else
+                    on_edit ()
             )
         )
+
+    let credit =
+        match meta.Editor with
+        | Some e -> [meta.Author; e] %> "skins.credit.edited"
+        | None -> [meta.Author] %> "skins.credit"
 
     member this.IsCurrent = Skins.selected_hud_id.Value = id
 
@@ -95,22 +113,25 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit) 
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
+            Position = Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f)
         )
         |+ Text(
-            K(
-                match meta.Editor with
-                | Some e -> [meta.Author; e] %> "skins.credit.edited"
-                | None -> [meta.Author] %> "skins.credit"
+            (fun () ->
+                if this.Focused then
+                    if this.IsCurrent then
+                        if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
+                    else
+                        if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
+                else credit
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
+            Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
         )
         |* Clickable.Focus this
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(100.0f).Shrink(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -133,21 +154,20 @@ type SelectSkinsPage() =
     let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
 
     let noteskin_grid =
-        GridFlowContainer<NoteskinButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+        GridFlowContainer<NoteskinButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let hud_grid =
-        GridFlowContainer<HUDButton>(100.0f, 2, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+        GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
-    let refresh () =
-        preview.Refresh()
-
-        noteskin_grid.Clear()
-        for id, _, meta in Skins.list_noteskins () do
-            noteskin_grid |* NoteskinButton(id, meta, preview.Refresh)
-
-        hud_grid.Clear()
-        for id, _, meta in Skins.list_huds () do
-            hud_grid |* HUDButton(id, meta, preview.Refresh)
+    let edit_hud () =
+        if
+            SelectedChart.WITH_COLORS.IsSome
+            && Screen.change_new
+                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
+                Screen.Type.Practice
+                Transitions.Default
+        then
+            Menu.Exit()
 
     let edit_or_extract_noteskin () =
         let noteskin = Content.Noteskin
@@ -171,6 +191,17 @@ type SelectSkinsPage() =
                 .Show()
         else EditNoteskinPage().Show()
 
+    let refresh () =
+        preview.Refresh()
+
+        noteskin_grid.Clear()
+        for id, _, meta in Skins.list_noteskins () do
+            noteskin_grid |* NoteskinButton(id, meta, preview.Refresh, edit_or_extract_noteskin)
+
+        hud_grid.Clear()
+        for id, _, meta in Skins.list_huds () do
+            hud_grid |* HUDButton(id, meta, preview.Refresh, edit_hud)
+
     override this.Content() =
         refresh ()
 
@@ -188,118 +219,45 @@ type SelectSkinsPage() =
                 (fun () -> osu.Skins.OsuSkinsListPage().Show()),
                 Position = pretty_pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             )
-            |+ Text(
-                %"skins.current",
-                Position = pretty_pos(0, 1, PageWidth.Full).SliceT(PRETTYHEIGHT * 0.65f),
-                Color = K Colors.text_subheading,
-                Align = Alignment.LEFT
-            )
-            |+ Text(
-                (fun () -> Content.NoteskinMeta.Name),
-                Position = pretty_pos (1, 3, PageWidth.Full),
-                Color = K Colors.text,
-                Align = Alignment.LEFT
-            )
-            |+ Text(
-                (fun () -> if Skins.selected_hud_id.Value <> Skins.selected_noteskin_id.Value then "HUD: " + Content.HUDMeta.Name else ""),
-                Position = pretty_pos(3, 2, PageWidth.Full).ShrinkT(15.0f),
-                Color = K Colors.text_subheading,
-                Align = Alignment.LEFT
-            )
 
-        let noteskin_tab = ScrollContainer(noteskin_grid)
-        let hud_tab = ScrollContainer(hud_grid)
-        let tabs = SwapContainer(noteskin_tab, Position = Position.ShrinkT(115.0f))
-
-        let tab_buttons =
-            let c =
-                RadioButtons.create_tabs
-                    {
-                        Setting = Setting.make tabs.set_Current tabs.get_Current
-                        Options =
-                            [|
-                                noteskin_tab, %"skins.noteskins", K false
-                                hud_tab, %"skins.huds", K false
-                            |]
-                        Height = 50.0f
-                    }
-            c.Position <- Position.ShrinkT(60.0f).SliceT(50.0f)
-            c
-
-        let action_buttons =
-            GridFlowContainer<Widget>(InlaidButton.HEIGHT, 4, Spacing = (0.0f, 0.0f), Position = Position.SliceT(60.0f), WrapNavigation = false)
-            |+ InlaidButton(
-                %"skins.edit",
-                (fun () ->
-                    if tabs.Current = noteskin_tab then
-                        edit_or_extract_noteskin()
-                    elif
-                        SelectedChart.WITH_COLORS.IsSome
-                        && Screen.change_new
-                            (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
-                            Screen.Type.Practice
-                            Transitions.Default
-                    then
-                        Menu.Exit()
-                ),
-                Icons.EDIT
-            )
-            |+ InlaidButton(
-                %"skins.export",
-                (fun () -> 
-                    if tabs.Current = noteskin_tab then
-                        if not (Skins.export_skin Skins.selected_noteskin_id.Value || Skins.current_noteskin.IsEmbedded) then
-                            Notifications.error (
-                                %"notification.export_skin_failure.title",
-                                %"notification.export_skin_failure.body"
-                            )
-                    else
-                        if not (Skins.export_skin Skins.selected_hud_id.Value) then
-                            Notifications.error (
-                                %"notification.export_skin_failure.title",
-                                %"notification.export_skin_failure.body"
-                            )
-                ),
-                Icons.UPLOAD
-            )
-                .Help(Help.Info("skins.export"))
-            |+ InlaidButton(
-                %"skins.open_folder",
-                (fun () -> 
-                    if tabs.Current = noteskin_tab then
-                        Skins.open_noteskin_folder Skins.selected_noteskin_id.Value |> ignore
-                    else
-                        Skins.open_hud_folder Skins.selected_hud_id.Value |> ignore
-                ),
-                Icons.FOLDER
-            )
-            |+ InlaidButton(
-                %"skins.delete",
-                (fun () -> 
-                    if tabs.Current = noteskin_tab then
-                        ConfirmPage([Content.NoteskinMeta.Name] %> "noteskin.delete.confirm",
-                            fun () -> Skins.delete_noteskin Skins.selected_noteskin_id.Value |> ignore
-                        ).Show()
-                    else
-                        ConfirmPage([Content.HUDMeta.Name] %> "hud.delete.confirm",
-                            fun () -> Skins.delete_hud Skins.selected_hud_id.Value |> ignore
-                        ).Show()
-                ),
-                Icons.TRASH
-            )
+        let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SliceLPercent(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
+        let hud_tab = ScrollContainer(hud_grid, Position = Position.SliceRPercent(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
 
         let right_side =
-            NavigationContainer.Column(
-                WrapNavigation = false, 
+            NavigationContainer.Row(
+                WrapNavigation = false,
                 Position =
                     { Position.DEFAULT with
                         Left = 0.35f %+ 10.0f
                     }
                         .Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
             )
-            |+ action_buttons
-            |+ tab_buttons
-            |+ tabs
+            |+ noteskin_tab
+            |+ hud_tab
+            |+ Text(
+                %"skins.current_noteskin",
+                Position = Position.SliceLPercent(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Color = K Colors.text_subheading,
+                Align = Alignment.LEFT
+            )
+            |+ Text(
+                (fun () -> Content.NoteskinMeta.Name),
+                Position = Position.SliceLPercent(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Color = K Colors.text,
+                Align = Alignment.LEFT
+            )
+            |+ Text(
+                %"skins.current_hud",
+                Position = Position.SliceRPercent(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Color = K Colors.text_subheading,
+                Align = Alignment.LEFT
+            )
+            |+ Text(
+                (fun () -> Content.HUDMeta.Name),
+                Position = Position.SliceRPercent(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Color = K Colors.text,
+                Align = Alignment.LEFT
+            )
 
         NavigationContainer.Row()
         |+ right_side
