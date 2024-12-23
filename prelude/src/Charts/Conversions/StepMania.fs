@@ -142,6 +142,17 @@ module StepMania_To_Interlude =
             )
             measures
 
+        let mutable i = states.Count - 1
+        while ln <> 0us do
+            let s = states.[i].Data
+            for k in Bitmask.toSeq ln do
+                if s.[k] = NoteType.HOLDHEAD then
+                    s.[k] <- NoteType.NORMAL
+                    ln <- Bitmask.unset_key k ln
+                elif s.[k] = NoteType.HOLDBODY then
+                    s.[k] <- NoteType.NOTHING
+            i <- i - 1
+
         keys, states |> Array.ofSeq, points |> Array.ofSeq
 
     let convert (sm: StepManiaFile) (action: ConversionAction) : Result<ImportChart, SkippedConversion> list =
@@ -254,7 +265,7 @@ module StepMania_To_Interlude =
                         Artist = artist
                         ArtistNative = artist_native
                         Creator = metadata_fallback [ if diff.CREDIT.Contains("Copied f") then "" else diff.CREDIT.Trim(); sm.CREDIT.Trim(); guess_author () ]
-                        DiffName = sprintf "%O %O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
+                        DiffName = sprintf "%O%O %O" diff.STEPSTYPE diff.DIFFICULTY diff.METER
                         Subtitle = metadata_fallback_opt [ sm.SUBTITLETRANSLIT; sm.SUBTITLE ]
                         Tags =
                             sm.GENRE.Trim().Split(" ", StringSplitOptions.RemoveEmptyEntries)

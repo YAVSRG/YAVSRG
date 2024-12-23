@@ -2,7 +2,6 @@
 
 open System.IO
 open FParsec
-open Percyqaz.Common
 open Prelude
 
 //https://github.com/stepmania/stepmania/wiki/sm
@@ -51,7 +50,10 @@ type StepManiaChartType =
         | Pump_Double
         | Pump_Routine -> 10
 
-    override this.ToString() = sprintf "%iK" this.Keycount
+    override this.ToString() =
+        match this with
+        | UNKNOWN -> ""
+        | _ -> sprintf "%iK " this.Keycount
 
 type StepManiaNote =
     | Nothing = '0'
