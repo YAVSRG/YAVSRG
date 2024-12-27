@@ -120,15 +120,11 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         if this.Expanded then
             let h = CHART_HEIGHT + 5.0f
 
-            let mutable index =
-                if scroll_to <> ScrollTo.Nothing then
-                    0
-                else
-                    (origin - b) / h |> floor |> int |> max 0
+            let mutable index = (origin - b) / h |> floor |> int |> max 0
 
             let mutable p = b + float32 index * h
 
-            while (scroll_to <> ScrollTo.Nothing || p < originB) && index < items.Count do
+            while p < originB && index < items.Count do
                 p <- items.[index].Draw(p, origin, originB)
                 index <- index + 1
 
