@@ -33,7 +33,7 @@ type SessionTime(total_time: unit -> float, play_time: unit -> float, practice_t
         let total = total_time()
         let play = play_time()
         let practice = practice_time()
-        let other = total - play - practice
+        let other = total - play - practice |> max 0.0
 
         let content_bounds = this.Bounds.SliceY(CONTENT_HEIGHT).ShrinkL(midpoint - this.Bounds.Left).SliceL(CONTENT_WIDTH).TranslateY(-10.0f)
 
