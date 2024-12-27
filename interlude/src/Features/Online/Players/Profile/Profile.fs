@@ -42,7 +42,7 @@ type private Profile() =
             DropdownWrapper(fun d -> Position.ShrinkR(40.0f).ShrinkT(70.0f).SliceR(300.0f).SliceT(500.0f))
 
         let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
-        
+
         let change_color_dropdown() =
             let badges =
                 seq {
@@ -120,7 +120,7 @@ type private Profile() =
                     .FromUnixTimeMilliseconds(data.DateSignedUp)
                     .ToLocalTime()
                     .DateTime.ToShortDateString()
-            ] 
+            ]
             %> "online.players.profile.playing_since",
             Color = K Colors.text_subheading,
             Align = Alignment.RIGHT,
@@ -183,7 +183,10 @@ type private Profile() =
             (fun () -> Network.lobby.IsSome && data.Username <> Network.credentials.Username),
             InlaidButton(
                 %"online.players.profile.invite_to_lobby",
-                (fun () -> Network.lobby.Value.InvitePlayer(data.Username)),
+                (fun () ->
+                    Network.lobby.Value.InvitePlayer(data.Username)
+                    Notifications.action_feedback (Icons.SEND, %"notification.lobby_invite_sent", data.Username)
+                ),
                 Icons.SEND,
                 Position = Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
             )

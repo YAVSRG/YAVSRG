@@ -789,6 +789,7 @@ notification.install_song=Installed song!
 notification.install_song.body=%0 (%1 charts, %2 skipped)
 notification.install_song_failed=Song install failed!
 notification.invited_to_lobby.title=%0 invited you to a lobby!
+notification.lobby_invite_sent=Invite sent!
 notification.mount_moved.body=The folder can no longer be found.\nThis may break any mounted songs, if so you will need to set up the link again.
 notification.mount_moved.etterna=Etterna Songs folder has moved?
 notification.mount_moved.osu=osu! Songs folder has moved?
