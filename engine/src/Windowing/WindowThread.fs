@@ -332,6 +332,7 @@ module WindowThread =
         GLFW.WindowHint(WindowHintBool.Focused, false)
         GLFW.WindowHint(WindowHintBool.AutoIconify, true)
         GLFW.WindowHint(WindowHintBool.Decorated, false)
+        GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core)
         GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
         GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
         GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
