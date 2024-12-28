@@ -199,19 +199,18 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
             let h = CHART_HEIGHT + 5.0f
 
-            let mutable index =
-                if scroll_to <> ScrollTo.Nothing then
-                    0
-                else
-                    (origin - b) / h |> floor |> int |> max 0
+            if scroll_to = ScrollTo.Chart && this.Selected then
+                let i = Seq.findIndex (fun (s: ChartItem) -> s.Selected) items
+                scroll (-(b + float32 i * h) + 500.0f)
+                scroll_to <- ScrollTo.Nothing
 
+            let mutable index = (origin - b) / h |> floor |> int |> max 0
             let mutable p = b + float32 index * h
 
-            while (scroll_to <> ScrollTo.Nothing || p < originB) && index < items.Count do
+            while p < originB && index < items.Count do
                 p <- items.[index].Update(p, origin, originB, elapsed_ms)
                 index <- index + 1
 
-            b + float32 items.Count * (CHART_HEIGHT + 5.0f)
-            
+            b + float32 items.Count * h
         else
             b

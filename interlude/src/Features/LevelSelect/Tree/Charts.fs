@@ -218,8 +218,4 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         hover.Update(elapsed_ms) |> ignore
 
     member this.Update(top, origin, originB, elapsed_ms) =
-        if scroll_to = ScrollTo.Chart && (group_name, group_ctx) = selected_group && this.Selected then
-            scroll (-top + 500.0f)
-            scroll_to <- ScrollTo.Nothing
-
         this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
