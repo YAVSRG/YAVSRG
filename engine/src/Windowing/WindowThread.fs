@@ -223,8 +223,10 @@ module WindowThread =
 
         if config.EnableCursor then
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
+        elif OperatingSystem.IsMacOS() && GLFW.RawMouseMotionSupported() then
+            GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorDisabled)
         else
-            // todo: grabbed on macos?
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
         let x, y = GLFW.GetWindowPos(window)
