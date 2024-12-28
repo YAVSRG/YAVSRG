@@ -34,6 +34,9 @@ type Song =
             let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
             Bass.ChannelSetAttribute(ID, ChannelAttribute.NoBuffer, 1f) |> display_bass_error
+            Bass.ChannelSetAttribute(ID, ChannelAttribute.TempoUseQuickAlgorithm, 1) |> display_bass_error
+            Bass.ChannelSetAttribute(ID, ChannelAttribute.TempoOverlapMilliseconds, 4) |> display_bass_error
+            Bass.ChannelSetAttribute(ID, ChannelAttribute.TempoSequenceMilliseconds, 30) |> display_bass_error
 
             {
                 ID = ID
@@ -171,12 +174,12 @@ module Song =
         let time = time ()
         rate <- new_rate
 
-        if not enable_pitch_rates then
-            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0)
-            |> display_bass_error
-
-        Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * float32 rate)
-        |> display_bass_error
+        if enable_pitch_rates then
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Tempo, 0.0f) |> display_bass_error
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * float32 rate) |> display_bass_error
+        else
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Tempo, (rate - 1.0f<rate>) * 100.0f</rate>) |> display_bass_error
+            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency) |> display_bass_error
 
         if rate_changed then
             seek time
@@ -185,10 +188,7 @@ module Song =
 
     let set_pitch_rates_enabled (enabled: bool) =
         enable_pitch_rates <- enabled
-
-        if now_playing.ID <> 0 then
-            Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Pitch, if enabled then 0.0 else -Math.Log(float rate, 2.0) * 12.0)
-            |> display_bass_error
+        change_rate rate
 
     let set_low_pass (amount: float32) =
         low_pass_target <- amount
