@@ -126,6 +126,9 @@ module Chart =
             if chart.BPM.Length = 0 then
                 failwith "Chart must have at least one BPM marker"
 
+            if chart.Keys < 3 || chart.Keys > 10 then
+                failwithf "Chart must have 3-10 keys (Has %i)" chart.Keys
+
             let mutable lastTime = -Time.infinity
             let mutable ln = 0us
 

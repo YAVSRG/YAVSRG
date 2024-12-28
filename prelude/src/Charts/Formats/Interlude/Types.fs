@@ -1,12 +1,6 @@
 ﻿namespace Prelude.Charts
 
-open System
-open System.Linq
 open System.IO
-open System.Collections.Generic
-open System.Security.Cryptography
-open Percyqaz.Data
-open Percyqaz.Common
 open Prelude
 
 type NoteType =
