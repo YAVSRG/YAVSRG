@@ -3,13 +3,13 @@
 open System
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Data.OsuClientInterop
-open Prelude.Data.Library
 open Prelude.Data.User
-open Interlude.Content
+open Interlude.UI
 
 module Replays =
 
@@ -23,20 +23,20 @@ module Replays =
             None
 
     // todo: should this be in prelude?
-    let convert_replay_to_score (replay: OsuScoreDatabase_Score) (chart: Chart) : Result<Score, string> =
+    let convert_replay_to_score (replay: OsuScoreDatabase_Score) (chart: Chart) (osu_chart_rate: float32<rate>) : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
         try
-            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, 1.0f<rate>)
+            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, osu_chart_rate)
 
             Ok {
                 Timestamp =
                     DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
                 Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(float32 rate, 2) * 1.0f<rate>
+                Rate = MathF.Round(float32 rate, 2) * osu_chart_rate
                 Mods = mods
                 IsImported = true
                 IsFailed = false
@@ -44,12 +44,20 @@ module Replays =
             }
         with err -> Error err.Message
 
-    let import_replay_file (replay: OsuScoreDatabase_Score) (chart_meta: ChartMeta) (chart: Chart) : bool =
-        match convert_replay_to_score replay chart with
-        | Error reason ->
-            Logging.Warn "Error importing replay: %s" reason
-            false
-        | Ok score ->
-            UserDatabase.delete_score chart_meta.Hash score.Timestamp Content.UserData |> ignore
-            UserDatabase.save_score chart_meta.Hash score Content.UserData
-            true
+type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay: Score -> unit) =
+    inherit Page()
+
+    let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) 1.0f<rate> |> Setting.roundf_uom 2
+
+    let import() =
+        match Replays.convert_replay_to_score replay chart rate.Value with
+        | Ok score -> show_replay score
+        | Error reason -> Notifications.error ("Replay import failed", reason)
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting("Rate", Slider(Setting.uom rate)).Pos(0)
+        |+ PageButton("Import!", import).Pos(3)
+        :> Widget
+    override this.Title = "Import replay"
+    override this.OnClose() = ()

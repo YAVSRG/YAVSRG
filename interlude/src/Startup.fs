@@ -7,6 +7,7 @@ open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Import
+open Interlude.Features.Import.osu
 open Interlude.Features.Gameplay
 open Interlude.Features.MainMenu
 open Interlude.Features.Mounts
@@ -41,22 +42,25 @@ module Startup =
 
         FileDrop.replay_dropped.Add(fun replay ->
             match SelectedChart.CACHE_DATA, SelectedChart.CHART with
-            | Some cc, Some chart when Screen.current_type = Screen.Type.LevelSelect ->
-                match osu.Replays.convert_replay_to_score replay chart with
-                | Ok score ->
-                    ConfirmPage("Is this replay for the chart currently selected?",
-                        [|
-                            "Yes, view it!", fun () ->
-                                Screen.change_new
+            | Some cc, Some chart ->
+                if Screen.current_type = Screen.Type.LevelSelect || Screen.current_type = Screen.Type.MainMenu then
+                    Menu.Exit()
+                    ImportReplayPage(
+                        replay,
+                        chart,
+                        fun score ->
+                            SelectedChart.change(cc, Data.Library.LibraryContext.None, true)
+                            SelectedChart.when_loaded true
+                            <| fun _ ->
+                                if Screen.change_new
                                     (fun () -> ScoreScreen(ScoreInfo.from_score cc chart Rulesets.current score, (Gameplay.ImprovementFlags.None, None), false))
                                     Screen.Type.Score
                                     Transitions.EnterGameplayNoFadeAudio
-                                |> ignore
-                            %"confirm.no", ignore
-                        |]
+                                then Menu.Exit()
                     )
                         .Show()
-                | Error reason -> ()
+                else
+                    Notifications.error("Replay import failed!", "Must be on level select or main menu screen")
             | _ -> ()
         )
 
