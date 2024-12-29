@@ -200,8 +200,9 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             let h = CHART_HEIGHT + 5.0f
 
             if scroll_to = ScrollTo.Chart && this.Selected then
-                let i = Seq.findIndex (fun (s: ChartItem) -> s.Selected) items
-                scroll (-(b + float32 i * h) + 500.0f)
+                match Seq.tryFindIndex (fun (s: ChartItem) -> s.Selected) items with
+                | Some i -> scroll (-(b + float32 i * h) + 500.0f)
+                | None -> ()
                 scroll_to <- ScrollTo.Nothing
 
             let mutable index = (origin - b) / h |> floor |> int |> max 0
