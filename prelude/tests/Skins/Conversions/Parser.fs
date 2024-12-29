@@ -24,7 +24,7 @@ module SkinIniParser =
 
         printfn "%A" result
 
-        Assert.True(result.IsOk)
+        Assert.True(Result.isOk result)
 
     [<Test>]
     let SampleIni () =
@@ -32,4 +32,4 @@ module SkinIniParser =
 
         printfn "%A" result
 
-        Assert.True(result.IsOk)
+        Assert.True(Result.isOk result)
