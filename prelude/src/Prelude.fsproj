@@ -77,6 +77,7 @@
     <Compile Include="Skins\Repo.fs" />
     <Compile Include="Skins\Conversions\Helpers.fs" />
     <Compile Include="Skins\Conversions\osu!\Parser.fs" />
+    <Compile Include="Skins\Conversions\osu!\Textures.fs" />
     <Compile Include="Skins\Conversions\osu!\Converter.fs" />
     <Compile Include="Skins\Conversions\StepMania\Converter.fs" />
     <Compile Include="Backbeat\Rulesets.fs" />

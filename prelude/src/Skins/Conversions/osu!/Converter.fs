@@ -11,64 +11,7 @@ open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 
-module private TextureFile =
-
-    let load_bmp f =
-        use s = File.Open(f, FileMode.Open)
-        Bitmap.from_stream false s |> Option.get
-
-    type Loaded =
-        {
-            Image: Bitmap
-            Is2x: bool
-        }
-
-    type Found =
-        {
-            Path: string
-            Is2x: bool
-        }
-        member this.Load = { Image = load_bmp this.Path; Is2x = this.Is2x }
-
-    let find (id: string, path: string) : Found option =
-        let file = Path.Combine(path, id)
-
-        if File.Exists(file + "@2x.png") then Some { Path = file + "@2x.png"; Is2x = true }
-        elif File.Exists(file + ".png") then Some { Path = file + ".png"; Is2x = false }
-        else None
-
-    let find_animation_frames (id: string, path: string) : Found list =
-
-        let file = Path.Combine(path, id)
-
-        let rec find_2x_animation i =
-            if File.Exists(file + "-" + i.ToString() + "@2x.png") then
-                { Path = file + "-" + i.ToString() + "@2x.png"; Is2x = true } :: find_2x_animation (i + 1)
-            else []
-
-        let rec find_animation i =
-            if File.Exists(file + "-" + i.ToString() + ".png") then
-                { Path = file + "-" + i.ToString() + ".png"; Is2x = false } :: find_animation (i + 1)
-            else []
-
-        let animation_2x = find_2x_animation 0
-        let animation = find_animation 0
-
-        if animation_2x <> [] then
-            animation_2x
-        elif File.Exists(file + "@2x.png") then
-            [ { Path = file + "@2x.png"; Is2x = true } ]
-        elif animation <> [] then
-            animation
-        elif File.Exists(file + ".png") then
-            [ { Path = file + ".png"; Is2x = false } ]
-        else
-            failwithf "could not find texture in skin folder for %A" id
-
-    let load_animation_frames (paths: Found list list) =
-        paths |> List.map (fun row -> row |> List.map _.Load)
-
-module private Image =
+module Image =
 
     let pad (width: int, height: int) (image: Bitmap) : Bitmap =
         assert (image.Width <= width)
@@ -174,11 +117,11 @@ module OsuSkinConverter =
                 square_image.Dispose()
 
                 if image.Height > 2000 then
-                    Logging.Debug("Detected 'percy ln' in skin, trying to guess what the tail texture should be")
+                    Logging.Debug("Detected 'Percy LN' in skin, guessing what the tail texture should be..")
                     let mutable i = 0
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
-                    let percy_tail_texture = new Bitmap(width, width / 2)
+                    let percy_tail_texture = new Bitmap(width, 128)
                     percy_tail_texture.Mutate(fun img ->
                         img
                             .DrawImage(image, Point((-image.Width + width) / 2, -i), 1.0f)
@@ -223,10 +166,10 @@ module OsuSkinConverter =
 
     type ColumnTextures =
         {
-            Note: string
-            Head: string
-            Body: string
-            Tail: string
+            Note: FoundTexture list option
+            Head: FoundTexture list option
+            Body: FoundTexture list option
+            Tail: FoundTexture list option
         }
 
     let dot_to_colon (dot_texture: Bitmap) =
@@ -242,8 +185,8 @@ module OsuSkinConverter =
         try
             let images =
                 seq { 0 .. 9 }
-                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
-                |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
+                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
+                |> Seq.map (fun (id, fallback) -> match Texture.find(id, fallback, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
                 |> Seq.map (_.Load >> _.Image) // todo: handle mismatched 2x and 1x images
                 |> Array.ofSeq
 
@@ -252,9 +195,9 @@ module OsuSkinConverter =
 
             let optional_extras =
                 try
-                    let dot = TextureFile.find(sprintf "%s-dot" osu_skin_prefix, source).Value.Load.Image
+                    let dot = Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source).Value.Load.Image
                     let colon = dot_to_colon dot
-                    let percent = TextureFile.find(sprintf "%s-percent" osu_skin_prefix, source).Value.Load.Image
+                    let percent = Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source).Value.Load.Image
                     percent.Mutate(fun img -> img.Crop(min percent.Width max_width, percent.Height) |> ignore)
                     [|dot; colon; percent|]
                 with _ -> [||]
@@ -276,14 +219,14 @@ module OsuSkinConverter =
 
     let convert_font_with_extras (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<ConvertedFont, exn> =
         try
-            let dot = TextureFile.find(sprintf "%s-dot" osu_skin_prefix, source).Value.Load.Image
+            let dot = Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source).Value.Load.Image
             let colon = dot_to_colon dot
-            let percent = TextureFile.find(sprintf "%s-percent" osu_skin_prefix, source).Value.Load.Image
+            let percent = Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source).Value.Load.Image
 
             let images =
                 seq { 0 .. 9 }
-                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i)
-                |> Seq.map (fun id -> match TextureFile.find(id, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
+                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
+                |> Seq.map (fun (id, fallback) -> match Texture.find(id, fallback, source) with Some f -> f | None -> failwithf "Couldn't find font image '%s'" id)
                 |> Seq.map (_.Load >> _.Image) // todo: handle mismatched 2x and 1x images
                 |> Array.ofSeq
 
@@ -317,10 +260,12 @@ module OsuSkinConverter =
             | true, v -> v
             | false, _ -> 3.0m
 
+        let default_settings = Mania.Default keymode version
+
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (Mania.Default keymode version)
+            |> Option.defaultValue default_settings
 
         let mutable combo_font_spacing : float32 option = None
         let mutable accuracy_font_info : ConvertedFont option = None
@@ -334,15 +279,15 @@ module OsuSkinConverter =
         try
             let images =
                 [
-                    keymode_settings.Hit300g
-                    keymode_settings.Hit300
-                    keymode_settings.Hit200
-                    keymode_settings.Hit100
-                    keymode_settings.Hit50
-                    keymode_settings.Hit0
+                    keymode_settings.Hit300g, default_settings.Hit300g
+                    keymode_settings.Hit300, default_settings.Hit300
+                    keymode_settings.Hit200, default_settings.Hit200
+                    keymode_settings.Hit100, default_settings.Hit100
+                    keymode_settings.Hit50, default_settings.Hit50
+                    keymode_settings.Hit0, default_settings.Hit0
                 ]
-                |> List.map (fun x -> TextureFile.find_animation_frames (x, source))
-                |> TextureFile.load_animation_frames
+                |> List.map (fun (x, fallback) -> Texture.find_animated(x, fallback, source).Value)
+                |> Texture.load_animation_frames
                 // todo: scale up images to 2x where not
                 |> List.map (List.map _.Image)
             let max_frames = images |> List.map (fun x -> x.Length) |> List.max
@@ -364,14 +309,14 @@ module OsuSkinConverter =
         try
             let images =
                 [
-                    "mania-hit300g"
-                    "mania-hit300"
-                    "mania-hit200"
-                    "mania-hit100"
-                    "mania-hit50"
-                    "mania-hit0"
+                    default_settings.Hit300g
+                    default_settings.Hit300
+                    default_settings.Hit200
+                    default_settings.Hit100
+                    default_settings.Hit50
+                    default_settings.Hit0
                 ]
-                |> List.map (fun x -> TextureFile.find_animation_frames(x, source).Head.Load.Image)
+                |> List.map (fun x -> Texture.find_animated_fallback(x, source).Value.Head.Load.Image)
             let max_width = images |> List.map _.Width |> List.max
             let max_height = images |> List.map _.Height |> List.max
 
@@ -488,10 +433,12 @@ module OsuSkinConverter =
             | true, v -> v
             | false, _ -> 3.0m
 
+        let default_settings = Mania.Default keymode version
+
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue (Mania.Default keymode version)
+            |> Option.defaultValue default_settings
 
         let colors = Array.zeroCreate 10
         let receptor_colors =
@@ -513,10 +460,10 @@ module OsuSkinConverter =
             for k = 0 to (keymode - 1) do
                 let tex =
                     {
-                        Note = keymode_settings.NoteImageΔ.[k]
-                        Head = keymode_settings.NoteImageΔH.[k]
-                        Body = keymode_settings.NoteImageΔL.[k]
-                        Tail = keymode_settings.NoteImageΔT.[k]
+                        Note = Texture.find_animated(keymode_settings.NoteImageΔ.[k], default_settings.NoteImageΔ.[k], source)
+                        Head = Texture.find_animated(keymode_settings.NoteImageΔH.[k], default_settings.NoteImageΔH.[k], source)
+                        Body = Texture.find_animated(keymode_settings.NoteImageΔL.[k], default_settings.NoteImageΔL.[k], source)
+                        Tail = Texture.find_animated(keymode_settings.NoteImageΔT.[k], default_settings.NoteImageΔT.[k], source)
                     }
 
                 if not (result.Contains tex) then
@@ -546,9 +493,8 @@ module OsuSkinConverter =
         // Generate main textures
         try
             core_textures
-            |> List.map (fun x -> x.Note)
-            |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-            |> TextureFile.load_animation_frames
+            |> List.map (fun x -> x.Note.Value)
+            |> Texture.load_animation_frames
             |> List.map (List.map _.Image)
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "note"
@@ -558,9 +504,8 @@ module OsuSkinConverter =
         try
             let percy_ln_detected =
                 core_textures
-                |> List.map (fun x -> x.Body)
-                |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-                |> TextureFile.load_animation_frames
+                |> List.map (fun x -> x.Body.Value)
+                |> Texture.load_animation_frames
                 |> List.map (List.map _.Image)
                 |> convert_hold_body_textures target
             if percy_ln_detected then
@@ -571,9 +516,8 @@ module OsuSkinConverter =
 
         try
             core_textures
-            |> List.map (fun x -> x.Head)
-            |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-            |> TextureFile.load_animation_frames
+            |> List.map (fun x -> x.Head.Value)
+            |> Texture.load_animation_frames
             |> List.map (List.map _.Image)
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "holdhead"
@@ -584,18 +528,16 @@ module OsuSkinConverter =
         if not skip_tail_conversion then
             try
                 core_textures
-                |> List.map (fun x -> x.Tail)
-                |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-                |> TextureFile.load_animation_frames
+                |> List.map (fun x -> x.Tail.Value)
+                |> Texture.load_animation_frames
                 |> List.map (List.map _.Image)
                 |> convert_element_textures target "holdtail"
             with err ->
                 Logging.Debug "Error in holdtail textures - Using hold head textures instead: %O" err
 
                 core_textures
-                |> List.map (fun x -> x.Head)
-                |> List.map (fun x -> TextureFile.find_animation_frames(x, source))
-                |> TextureFile.load_animation_frames
+                |> List.map (fun x -> x.Head.Value)
+                |> Texture.load_animation_frames
                 |> List.map (List.map _.Image)
                 |> if is_arrows then arrow_fix_4k else id
                 |> convert_element_textures target "holdtail"
@@ -605,17 +547,24 @@ module OsuSkinConverter =
         // Convert keys to receptors
         try
             let key_textures =
-                let distinct = ResizeArray<string * string>()
-                Array.zip keymode_settings.KeyImageΔ keymode_settings.KeyImageΔD
+                let distinct = ResizeArray<FoundTexture option * FoundTexture option>()
+                let not_pressed_images =
+                    Array.init keymode (fun i ->
+                        Texture.find(keymode_settings.KeyImageΔ.[i], default_settings.KeyImageΔ.[i], source)
+                    )
+                let pressed_images =
+                    Array.init keymode (fun i ->
+                        Texture.find(keymode_settings.KeyImageΔD.[i], default_settings.KeyImageΔD.[i], source)
+                    )
+                Array.zip not_pressed_images pressed_images
                 |> Array.iteri (fun i xs ->
                     if not (distinct.Contains xs) then distinct.Add xs
                     receptor_colors.[keymode - 3].[i] <- distinct.IndexOf xs
                 )
 
                 distinct
-                |> Seq.map (fun (not_pressed, pressed) -> [not_pressed; pressed])
+                |> Seq.map (fun (not_pressed, pressed) -> [not_pressed.Value; pressed.Value])
                 |> List.concat
-                |> List.map (fun id -> TextureFile.find(id, source).Value)
                 |> List.map _.Load
 
             let height =
@@ -650,7 +599,7 @@ module OsuSkinConverter =
             Logging.Warn "Error converting keys to receptors: %O" err
             try
                 use receptor_base =
-                    TextureFile.find_animation_frames(core_textures.[if core_textures.Length > 1 then 1 else 0].Note, source)
+                    core_textures.[if core_textures.Length > 1 then 1 else 0].Note.Value
                     |> List.head
                     |> _.Load
                     |> _.Image
@@ -665,7 +614,7 @@ module OsuSkinConverter =
 
         // Convert stage hint
         try
-            match TextureFile.find (keymode_settings.StageHint, source) with
+            match Texture.find (keymode_settings.StageHint, default_settings.StageHint, source) with
             | Some stage_hint ->
                 let image = stage_hint.Load.Image
                 let intended_height_interlude_px = if stage_hint.Is2x then float32 image.Height else float32 image.Height * 2.0f
@@ -677,9 +626,9 @@ module OsuSkinConverter =
             Logging.Warn "Error converting stage hint to judgement line: %O" err
 
         // Convert stage textures
-        match TextureFile.find (keymode_settings.StageLeft, source) with
+        match Texture.find (keymode_settings.StageLeft, default_settings.StageLeft, source) with
         | Some stage_left ->
-            match TextureFile.find (keymode_settings.StageRight, source) with
+            match Texture.find (keymode_settings.StageRight, default_settings.StageRight, source) with
             | Some stage_right ->
                 stage_left.Load.Image.Save(Path.Combine(target, TextureFileName.to_loose "stageleft" (0, 0)))
                 stage_right.Load.Image.Save(Path.Combine(target, TextureFileName.to_loose "stageright" (0, 0)))
@@ -688,7 +637,7 @@ module OsuSkinConverter =
         | None -> ()
 
         // Convert column lighting textures
-        match TextureFile.find (keymode_settings.StageLight, source) with
+        match Texture.find (keymode_settings.StageLight, default_settings.StageLight, source) with
         | Some stage_light ->
             use base_image = stage_light.Load.Image
 
@@ -726,7 +675,7 @@ module OsuSkinConverter =
         // Convert explosions
         try
             let images =
-                TextureFile.find_animation_frames (keymode_settings.LightingN, source)
+                Texture.find_animated(keymode_settings.LightingN, default_settings.LightingN, source).Value
                 |> List.map (_.Load >> _.Image)
 
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
@@ -742,7 +691,7 @@ module OsuSkinConverter =
 
         try
             let images =
-                TextureFile.find_animation_frames (keymode_settings.LightingL, source)
+                Texture.find_animated(keymode_settings.LightingL, default_settings.LightingL, source).Value
                 |> List.map (_.Load >> _.Image)
 
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
