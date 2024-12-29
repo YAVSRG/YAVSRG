@@ -26,9 +26,11 @@ type ImportsMenuPage() =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
         |+ PageButton(%"beatmap_browser", fun () -> BeatmapBrowserPage().Show()).Pos(0, 2, PageWidth.Full)
         |+ PageButton(%"etterna_pack_browser", fun () -> EtternaPacksBrowserPage().Show()).Pos(2, 2, PageWidth.Full)
-        |+ PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show()).Pos(4, 2, PageWidth.Full)
-        |+ PageButton(%"tables.browser", fun () -> TableBrowserPage().Show()).Pos(6, 2, PageWidth.Full)
-        |+ PageButton(%"skins.browser",fun () -> SkinsBrowserPage().Show()).Pos(8, 2, PageWidth.Full)
+
+        |+ PageButton(%"skins.browser", fun () -> SkinsBrowserPage().Show()).Pos(5, 2, PageWidth.Full)
+        |+ PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show()).Pos(7, 2, PageWidth.Full)
+        |+ PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show()).Pos(9, 2, PageWidth.Full)
+        |+ PageButton(%"tables.browser", fun () -> TableBrowserPage().Show()).Pos(11, 2, PageWidth.Full)
 
     override this.Content() =
         NavigationContainer.Row()
