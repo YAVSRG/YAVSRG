@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="data\skin.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\replay.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -44,8 +47,9 @@
     <Compile Include="Database\DbSingletons.fs" />
     <Compile Include="Database\DbSessions.fs" />
     <Compile Include="Database\DbCharts.fs" />
-    <Compile Include="Noteskins\Helpers.fs" />
-    <Compile Include="Noteskins\Validation.fs" />
+    <Compile Include="Skins\Conversions\Parser.fs" />
+    <Compile Include="Skins\Noteskins\Helpers.fs" />
+    <Compile Include="Skins\Noteskins\Validation.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

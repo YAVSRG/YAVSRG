@@ -33,7 +33,7 @@ module OsuSkinHelpers =
         )
         |> List.ofSeq
         |> function [] -> default_value | xs -> xs
-    
+
     let key_texture keys key =
         match keys with
         | 1 -> "S"
@@ -100,7 +100,7 @@ type General =
             CursorExpand = MapHelpers.int_or "CursorExpand" 1 properties <> 0
             CursorRotate = MapHelpers.int_or "CursorRotate" 1 properties <> 0
             CursorTrailRotate = MapHelpers.int_or "CursorTrailRotate" 1 properties <> 0
-            CustomComboBurstSounds = 
+            CustomComboBurstSounds =
                 MapHelpers.string_or "CustomComboBurstSounds" "" properties
                 |> fun s -> s.Split(',', StringSplitOptions.RemoveEmptyEntries ||| StringSplitOptions.TrimEntries)
                 |> Seq.choose (fun s ->
@@ -401,7 +401,7 @@ type SkinIni =
         Mania: Mania list
     }
 
-module Parser = 
+module SkinIni =
 
     [<Struct>]
     type private ParserState =
@@ -409,7 +409,7 @@ module Parser =
         | Header
         | ManiaHeader
 
-    let skin_ini_from_stream (stream: Stream) : SkinIni =
+    let from_stream (stream: Stream) : SkinIni =
         use reader = new StreamReader(stream)
 
         let mutable state = Nothing
@@ -467,9 +467,13 @@ module Parser =
         }
 
 type SkinIni with
+
+    static member FromStream(stream: Stream) =
+        try Ok (SkinIni.from_stream stream)
+        with err -> Error err.Message
+
     static member FromFile(path: string) =
         try
             use stream = File.OpenRead(path)
-            Ok (Parser.skin_ini_from_stream stream)
-        with err ->
-            Error err.Message
+            Ok (SkinIni.from_stream stream)
+        with err -> Error err.Message

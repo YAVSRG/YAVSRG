@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Noteskins
+﻿namespace Prelude.Tests.Skins.Noteskins
 
 open System.IO
 open System.IO.Compression
