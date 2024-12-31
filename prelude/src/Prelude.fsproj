@@ -54,11 +54,12 @@
     <Compile Include="Gameplay\Rulesets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />
     <Compile Include="Gameplay\Rulesets\Wife3.fs" />
+    <Compile Include="Gameplay\Scoring\WifeCurve.fs" />
+    <Compile Include="Gameplay\Rulesets\Compare.fs" />
     <Compile Include="Gameplay\Scoring\Grades.fs" />
     <Compile Include="Gameplay\Scoring\Lamps.fs" />
     <Compile Include="Gameplay\Scoring\HitMechanics.fs" />
     <Compile Include="Gameplay\Scoring\Events.fs" />
-    <Compile Include="Gameplay\Scoring\WifeCurve.fs" />
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
     <Compile Include="Gameplay\Scoring\Scoring.fs" />
     <Compile Include="Gameplay\Scoring\Graph.fs" />
