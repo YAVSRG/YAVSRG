@@ -8,6 +8,7 @@ open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
+open Interlude.Content
 
 type GraphSource =
     | AllTime
@@ -47,6 +48,31 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
             "short bursts"
         else sprintf "%is" (floor (ms / 1000.0f<ms / rate>) |> int)
 
+    let threshold_a, threshold_c, threshold_p = pattern_type.AccuracyBreakpoints
+    let a_accuracy_label =
+        let base_label = sprintf "%g%% %s" (threshold_a * 100.0) Rulesets.DEFAULT.Name
+        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_a * 100.0) Rulesets.DEFAULT Rulesets.current with
+            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
+            | None -> base_label
+        else base_label
+
+    let c_accuracy_label =
+        let base_label = sprintf "%g%% %s" (threshold_c * 100.0) Rulesets.DEFAULT.Name
+        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_c * 100.0) Rulesets.DEFAULT Rulesets.current with
+            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
+            | None -> base_label
+        else base_label
+
+    let p_accuracy_label =
+        let base_label = sprintf "%g%% %s" (threshold_p * 100.0) Rulesets.DEFAULT.Name
+        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_p * 100.0) Rulesets.DEFAULT Rulesets.current with
+            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
+            | None -> base_label
+        else base_label
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
@@ -55,14 +81,13 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
 
         if (not hover || bpm <> tooltip_bpm) && next_hover && Mouse.moved_recently () then
 
-            let threshold_a, threshold_c, threshold_p = pattern_type.AccuracyBreakpoints
             tooltip_bpm <- bpm
             let content =
                 Callout.Small
                     .Title(sprintf "%i BPM %O" bpm pattern_type)
-                    .Body(sprintf "Push: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_p * 100.0))
-                    .Body(sprintf "Control: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_c * 100.0))
-                    .Body(sprintf "Accuracy: %s @ %g%% on SC J4" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) (threshold_a * 100.0))
+                    .Body(sprintf "Push: %s @ %s" (PatternStatLine.get_duration_at bpm data.Push |> Option.defaultValue 0.0f<ms/rate> |> format_duration) p_accuracy_label)
+                    .Body(sprintf "Control: %s @ %s" (PatternStatLine.get_duration_at bpm data.Control |> Option.defaultValue 0.0f<ms/rate> |> format_duration) c_accuracy_label)
+                    .Body(sprintf "Accuracy: %s @ %s" (PatternStatLine.get_duration_at bpm data.Accuracy |> Option.defaultValue 0.0f<ms/rate> |> format_duration) a_accuracy_label)
             tooltip <- Some (content, Callout.measure content)
 
         elif tooltip.IsSome && not next_hover then
