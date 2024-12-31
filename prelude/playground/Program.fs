@@ -8,7 +8,8 @@ open Percyqaz.Common
 let your_script_here () =
     //OsuReplayGenerator.run_experiment()
     //OsuReplayReader.read_scores()
-    Endless.test()
+    //Endless.test()
+    CompareRulesets.main()
 
 [<EntryPoint>]
 let main argv =
