@@ -42,12 +42,6 @@ type SkinPreview(position: Position) as this =
         let playfield =
             Playfield(info.WithColors, state, noteskin_config, false)
 
-        if noteskin_config.EnableColumnLight then
-            playfield.Add(new ColumnLighting(info.WithColors.Keys, noteskin_config, state))
-
-        if noteskin_config.UseExplosions then
-            playfield.Add(new Explosions(info.WithColors.Keys, noteskin_config, state))
-
         playfield.Add(LanecoverOverReceptors())
         let overlay_items = Container(NodeType.None)
 

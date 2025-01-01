@@ -63,12 +63,6 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
     do
         this.Add playfield
 
-        if noteskin_config.EnableColumnLight then
-            playfield.Add(new ColumnLighting(with_colors.Keys, noteskin_config, state))
-
-        if noteskin_config.UseExplosions then
-            playfield.Add(new Explosions(with_colors.Keys, noteskin_config, state))
-
         playfield.Add(LanecoverOverReceptors())
 
         this.AddWidgets()

@@ -61,6 +61,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 v
             )
 
+    let column_lighting = ColumnLighting(chart.Keys, noteskin_config, state)
+    let explosions = Explosions(chart.Keys, noteskin_config, state)
+
     let note_height = column_width
     let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
     let playfield_color = noteskin_config.PlayfieldColor
@@ -142,9 +145,24 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     member this.ColumnWidth = column_width
     member this.ColumnPositions = column_positions
 
+    override this.Init(parent) =
+        base.Init parent
+
+        if noteskin_config.EnableColumnLight then
+            column_lighting.Init this
+
+        if noteskin_config.UseExplosions then
+            explosions.Init this
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
+
+        if noteskin_config.EnableColumnLight then
+            column_lighting.Update(elapsed_ms, moved)
+
+        if noteskin_config.UseExplosions then
+            explosions.Update(elapsed_ms, moved)
 
     override this.Draw() =
         let {
@@ -202,6 +220,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                              else
                                  0)
                             receptor)
+
+            if noteskin_config.EnableColumnLight then
+                column_lighting.Draw()
 
         let inline draw_note (k, pos, color) =
             Render.tex_quad
@@ -514,4 +535,6 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         elif noteskin_config.NotesUnderReceptors then
             draw_receptors()
 
+        if noteskin_config.UseExplosions then
+            explosions.Draw()
         base.Draw()
