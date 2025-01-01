@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -29,26 +29,26 @@ type SkipButtonPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.skipbutton.usebackground", Checkbox use_background)
-            .Help(Help.Info("hud.skipbutton.usebackground"))
+        |+ PageSetting(%"hud.skip_button.usebackground", Checkbox use_background)
+            .Help(Help.Info("hud.skip_button.usebackground"))
             .Pos(0)
-        |+ PageSetting(%"hud.skipbutton.backgroundscale", Slider.Percent(background_scale))
-            .Help(Help.Info("hud.skipbutton.backgroundscale"))
+        |+ PageSetting(%"hud.skip_button.backgroundscale", Slider.Percent(background_scale))
+            .Help(Help.Info("hud.skip_button.backgroundscale"))
             .Pos(2)
             .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.skipbutton.background_offset_x", Slider.Percent(background_offset_x))
-            .Help(Help.Info("hud.skipbutton.background_offset_x"))
+        |+ PageSetting(%"hud.skip_button.background_offset_x", Slider.Percent(background_offset_x))
+            .Help(Help.Info("hud.skip_button.background_offset_x"))
             .Pos(4)
             .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.skipbutton.background_offset_y", Slider.Percent(background_offset_y))
-            .Help(Help.Info("hud.skipbutton.background_offset_y"))
+        |+ PageSetting(%"hud.skip_button.background_offset_y", Slider.Percent(background_offset_y))
+            .Help(Help.Info("hud.skip_button.background_offset_y"))
             .Pos(6)
             .Conditional(use_background.Get)
         |>> Container
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.skipbutton"
+    override this.Title = %"hud.skip_button"
 
     override this.OnClose() =
         Skins.save_hud_config 

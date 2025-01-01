@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins
+namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -13,36 +13,36 @@ module HudElement =
     let name (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy"
-        | HudElement.TimingDisplay -> %"hud.timingdisplay"
+        | HudElement.TimingDisplay -> %"hud.hit_deviations"
         | HudElement.Combo -> %"hud.combo"
-        | HudElement.SkipButton -> %"hud.skipbutton"
-        | HudElement.JudgementMeter -> %"hud.judgementmeter"
-        | HudElement.EarlyLateMeter -> %"hud.earlylatemeter"
-        | HudElement.ProgressMeter -> %"hud.progressmeter"
-        | HudElement.JudgementCounter -> %"hud.judgementcounter"
+        | HudElement.SkipButton -> %"hud.skip_button"
+        | HudElement.JudgementMeter -> %"hud.judgement"
+        | HudElement.EarlyLateMeter -> %"hud.early_late"
+        | HudElement.ProgressMeter -> %"hud.progress_pie"
+        | HudElement.JudgementCounter -> %"hud.judgement_counter"
         | HudElement.RateModMeter -> %"hud.ratemodmeter"
-        | HudElement.BPMMeter -> %"hud.bpmmeter"
+        | HudElement.BPMMeter -> %"hud.bpm"
         | HudElement.Pacemaker -> %"hud.pacemaker"
-        | HudElement.InputMeter -> %"hud.inputmeter"
+        | HudElement.InputMeter -> %"hud.input_meter"
         | HudElement.KeysPerSecondMeter -> %"hud.kps_meter"
-        | HudElement.CustomImage -> %"hud.customimage"
+        | HudElement.CustomImage -> %"hud.custom_image"
 
     let tooltip (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HudElement.TimingDisplay -> %"hud.timingdisplay.tooltip"
+        | HudElement.TimingDisplay -> %"hud.hit_deviations.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
-        | HudElement.SkipButton -> %"hud.skipbutton.tooltip"
-        | HudElement.JudgementMeter -> %"hud.judgementmeter.tooltip"
-        | HudElement.EarlyLateMeter -> %"hud.earlylatemeter.tooltip"
-        | HudElement.ProgressMeter -> %"hud.progressmeter.tooltip"
-        | HudElement.JudgementCounter -> %"hud.judgementcounter.tooltip"
+        | HudElement.SkipButton -> %"hud.skip_button.tooltip"
+        | HudElement.JudgementMeter -> %"hud.judgement.tooltip"
+        | HudElement.EarlyLateMeter -> %"hud.early_late.tooltip"
+        | HudElement.ProgressMeter -> %"hud.progress_pie.tooltip"
+        | HudElement.JudgementCounter -> %"hud.judgement_counter.tooltip"
         | HudElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
-        | HudElement.BPMMeter -> %"hud.bpmmeter.tooltip"
+        | HudElement.BPMMeter -> %"hud.bpm.tooltip"
         | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
-        | HudElement.InputMeter -> %"hud.inputmeter.tooltip"
+        | HudElement.InputMeter -> %"hud.input_meter.tooltip"
         | HudElement.KeysPerSecondMeter -> %"hud.kps_meter.tooltip"
-        | HudElement.CustomImage -> %"hud.customimage.tooltip"
+        | HudElement.CustomImage -> %"hud.custom_image.tooltip"
 
     let can_configure (e: HudElement) =
         match e with

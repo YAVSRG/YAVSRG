@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -93,10 +93,10 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
     override this.Content() =
         page_container()
         |+ PageSetting(
-            %"hud.judgementcounter.usetextures",
+            %"hud.judgement_counter.usetextures",
             Checkbox use_texture
         )
-            .Help(Help.Info("hud.judgementcounter.usetextures"))
+            .Help(Help.Info("hud.judgement_counter.usetextures"))
             .Pos(0)
         |+ Conditional(use_texture.Get,
             FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
@@ -109,7 +109,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
         )
         :> Widget
 
-    override this.Title = %"hud.judgementcounter.textures"
+    override this.Title = %"hud.judgement_counter.textures"
     override this.OnClose() = ()
 
 type JudgementCounterPage(on_close: unit -> unit) =
@@ -204,11 +204,11 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.judgementcounter.animationtime", Slider(Setting.uom animation_time, Step = 5f))
-            .Help(Help.Info("hud.judgementcounter.animationtime"))
+        |+ PageSetting(%"hud.judgement_counter.animationtime", Slider(Setting.uom animation_time, Step = 5f))
+            .Help(Help.Info("hud.judgement_counter.animationtime"))
             .Pos(0)
-        |+ PageSetting(%"hud.judgementcounter.showratio", Checkbox show_ratio)
-            .Help(Help.Info("hud.judgementcounter.showratio"))
+        |+ PageSetting(%"hud.judgement_counter.showratio", Checkbox show_ratio)
+            .Help(Help.Info("hud.judgement_counter.showratio"))
             .Pos(2)
         |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
             .Help(Help.Info("hud.generic.use_font"))
@@ -225,29 +225,29 @@ type JudgementCounterPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.generic.colon_spacing"))
             .Pos(10)
             .Conditional(use_font.Get)
-        |+ PageButton(%"hud.judgementcounter.textures", 
+        |+ PageButton(%"hud.judgement_counter.textures", 
             fun () -> JudgementCounterDisplayPage(use_texture, display, ruleset).Show())
             .Pos(12)
-        |+ PageSetting(%"hud.judgementcounter.usebackground", Checkbox use_background)
-            .Help(Help.Info("hud.judgementcounter.usebackground"))
+        |+ PageSetting(%"hud.judgement_counter.usebackground", Checkbox use_background)
+            .Help(Help.Info("hud.judgement_counter.usebackground"))
             .Pos(14)
-        |+ PageSetting(%"hud.judgementcounter.backgroundscale", Slider.Percent(background_scale))
-            .Help(Help.Info("hud.judgementcounter.backgroundscale"))
+        |+ PageSetting(%"hud.judgement_counter.backgroundscale", Slider.Percent(background_scale))
+            .Help(Help.Info("hud.judgement_counter.backgroundscale"))
             .Pos(16)
             .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.judgementcounter.background_offset_x", Slider.Percent(background_offset_x))
-            .Help(Help.Info("hud.judgementcounter.background_offset_x"))
+        |+ PageSetting(%"hud.judgement_counter.background_offset_x", Slider.Percent(background_offset_x))
+            .Help(Help.Info("hud.judgement_counter.background_offset_x"))
             .Pos(18)
             .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.judgementcounter.background_offset_y", Slider.Percent(background_offset_y))
-            .Help(Help.Info("hud.judgementcounter.background_offset_y"))
+        |+ PageSetting(%"hud.judgement_counter.background_offset_y", Slider.Percent(background_offset_y))
+            .Help(Help.Info("hud.judgement_counter.background_offset_y"))
             .Pos(20)
             .Conditional(use_background.Get)
         |>> Container
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.judgementcounter"
+    override this.Title = %"hud.judgement_counter"
 
     override this.OnClose() =
         Skins.save_hud_config 

@@ -23,28 +23,28 @@ type InputMeterPage(on_close: unit -> unit) =
     
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.inputmeter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
+        |+ PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
             .Pos(0)
-        |+ PageSetting(%"hud.inputmeter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
+        |+ PageSetting(%"hud.input_meter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
                 .Pos(2)
-        |+ PageSetting(%"hud.inputmeter.key_color", ColorPicker(key_color, true))
+        |+ PageSetting(%"hud.input_meter.key_color", ColorPicker(key_color, true))
             .Pos(4, 3)
-        |+ PageSetting(%"hud.inputmeter.column_padding", Slider.Percent column_padding)
+        |+ PageSetting(%"hud.input_meter.column_padding", Slider.Percent column_padding)
             .Pos(7)
-        |+ PageSetting(%"hud.inputmeter.scroll_downwards", Checkbox scroll_downwards)
+        |+ PageSetting(%"hud.input_meter.scroll_downwards", Checkbox scroll_downwards)
             .Pos(9)
-        |+ PageSetting(%"hud.inputmeter.show_inputs", Checkbox show_inputs)
+        |+ PageSetting(%"hud.input_meter.show_inputs", Checkbox show_inputs)
             .Pos(11)
-        |+ PageSetting(%"hud.inputmeter.input_color", ColorPicker(input_color, true))
+        |+ PageSetting(%"hud.input_meter.input_color", ColorPicker(input_color, true))
             .Pos(13, 3)
             .Conditional(show_inputs.Get)
-        |+ PageSetting(%"hud.inputmeter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
+        |+ PageSetting(%"hud.input_meter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
             .Pos(16)
             .Conditional(show_inputs.Get)
         
         :> Widget
 
-    override this.Title = %"hud.inputmeter"
+    override this.Title = %"hud.input_meter"
 
     override this.OnClose() =
         Skins.save_hud_config 

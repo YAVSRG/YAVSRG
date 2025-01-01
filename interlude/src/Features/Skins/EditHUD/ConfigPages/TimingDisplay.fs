@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -38,66 +38,66 @@ type TimingDisplayPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.timingdisplay.rotation",
+        |+ PageSetting(%"hud.hit_deviations.rotation",
             SelectDropdown(
                 [|
-                    TimingDisplayRotation.Normal, %"hud.timingdisplay.rotation.normal"
-                    TimingDisplayRotation.Clockwise, %"hud.timingdisplay.rotation.clockwise"
-                    TimingDisplayRotation.Anticlockwise, %"hud.timingdisplay.rotation.anticlockwise"
+                    TimingDisplayRotation.Normal, %"hud.hit_deviations.rotation.normal"
+                    TimingDisplayRotation.Clockwise, %"hud.hit_deviations.rotation.clockwise"
+                    TimingDisplayRotation.Anticlockwise, %"hud.hit_deviations.rotation.anticlockwise"
                 |],
                 rotation
             )
         )
-            .Help(Help.Info("hud.timingdisplay.rotation"))
+            .Help(Help.Info("hud.hit_deviations.rotation"))
             .Pos(0)
-        |+ PageSetting(%"hud.timingdisplay.shownonjudgements", Checkbox show_non_judgements)
-            .Help(Help.Info("hud.timingdisplay.shownonjudgements"))
+        |+ PageSetting(%"hud.hit_deviations.shownonjudgements", Checkbox show_non_judgements)
+            .Help(Help.Info("hud.hit_deviations.shownonjudgements"))
             .Pos(2)
-        |+ PageSetting(%"hud.timingdisplay.halfscalereleases", Checkbox half_scale_releases)
-            .Help(Help.Info("hud.timingdisplay.halfscalereleases"))
+        |+ PageSetting(%"hud.hit_deviations.halfscalereleases", Checkbox half_scale_releases)
+            .Help(Help.Info("hud.hit_deviations.halfscalereleases"))
             .Pos(4)
-        |+ PageSetting(%"hud.timingdisplay.thickness", Slider(thickness, Step = 1f))
-            .Help(Help.Info("hud.timingdisplay.thickness"))
+        |+ PageSetting(%"hud.hit_deviations.thickness", Slider(thickness, Step = 1f))
+            .Help(Help.Info("hud.hit_deviations.thickness"))
             .Pos(6)
-        |+ PageSetting(%"hud.timingdisplay.showguide", Checkbox show_guide)
-            .Help(Help.Info("hud.timingdisplay.showguide"))
+        |+ PageSetting(%"hud.hit_deviations.showguide", Checkbox show_guide)
+            .Help(Help.Info("hud.hit_deviations.showguide"))
             .Pos(8)
-        |+ PageSetting(%"hud.timingdisplay.guide_thickness", Slider.Percent(guide_thickness))
-            .Help(Help.Info("hud.timingdisplay.guide_thickness"))
+        |+ PageSetting(%"hud.hit_deviations.guide_thickness", Slider.Percent(guide_thickness))
+            .Help(Help.Info("hud.hit_deviations.guide_thickness"))
             .Pos(10)
             .Conditional(show_guide.Get)
-        |+ PageSetting(%"hud.timingdisplay.releasesextraheight", Slider(release_thickness, Step = 1f))
-            .Help(Help.Info("hud.timingdisplay.releasesextraheight"))
+        |+ PageSetting(%"hud.hit_deviations.releasesextraheight", Slider(release_thickness, Step = 1f))
+            .Help(Help.Info("hud.hit_deviations.releasesextraheight"))
             .Pos(12)
-        |+ PageSetting(%"hud.timingdisplay.animationtime", Slider(Setting.uom animation_time, Step = 5f))
-            .Help(Help.Info("hud.timingdisplay.animationtime"))
+        |+ PageSetting(%"hud.hit_deviations.animationtime", Slider(Setting.uom animation_time, Step = 5f))
+            .Help(Help.Info("hud.hit_deviations.animationtime"))
             .Pos(14)
-        |+ PageSetting(%"hud.timingdisplay.timingwindowsopacity", Slider.Percent(windows_opacity))
-            .Help(Help.Info("hud.timingdisplay.timingwindowsopacity"))
+        |+ PageSetting(%"hud.hit_deviations.timingwindowsopacity", Slider.Percent(windows_opacity))
+            .Help(Help.Info("hud.hit_deviations.timingwindowsopacity"))
             .Pos(16)
-        |+ PageSetting(%"hud.timingdisplay.moving_average_type",
+        |+ PageSetting(%"hud.hit_deviations.moving_average_type",
             SelectDropdown(
                 [|
-                    TimingDisplayMovingAverageType.None, %"hud.timingdisplay.moving_average_type.none"
-                    TimingDisplayMovingAverageType.Arrow, %"hud.timingdisplay.moving_average_type.arrow"
-                    TimingDisplayMovingAverageType.ReplaceBars, %"hud.timingdisplay.moving_average_type.replace_bars"
+                    TimingDisplayMovingAverageType.None, %"hud.hit_deviations.moving_average_type.none"
+                    TimingDisplayMovingAverageType.Arrow, %"hud.hit_deviations.moving_average_type.arrow"
+                    TimingDisplayMovingAverageType.ReplaceBars, %"hud.hit_deviations.moving_average_type.replace_bars"
                 |],
                 moving_average_type
             )
         )
-            .Help(Help.Info("hud.timingdisplay.moving_average_type"))
+            .Help(Help.Info("hud.hit_deviations.moving_average_type"))
             .Pos(18)
-        |+ PageSetting(%"hud.timingdisplay.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
-            .Help(Help.Info("hud.timingdisplay.moving_average_sensitivity"))
+        |+ PageSetting(%"hud.hit_deviations.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+            .Help(Help.Info("hud.hit_deviations.moving_average_sensitivity"))
             .Pos(20)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
-        |+ PageSetting(%"hud.timingdisplay.moving_average_color", ColorPicker(moving_average_color, true))
-            .Help(Help.Info("hud.timingdisplay.moving_average_color"))
+        |+ PageSetting(%"hud.hit_deviations.moving_average_color", ColorPicker(moving_average_color, true))
+            .Help(Help.Info("hud.hit_deviations.moving_average_color"))
             .Pos(22, 3)
             .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
         :> Widget
 
-    override this.Title = %"hud.timingdisplay"
+    override this.Title = %"hud.hit_deviations"
 
     override this.OnClose() =
         Skins.save_hud_config

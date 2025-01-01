@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -127,33 +127,33 @@ type JudgementMeterPage(on_close: unit -> unit) =
     override this.Content() =
         page_container()
         |+ PageSetting(
-            %"hud.judgementmeter.ignoreperfectjudgements",
+            %"hud.judgement.ignoreperfectjudgements",
             Checkbox ignore_perfect_judgements
         )
-            .Help(Help.Info("hud.judgementmeter.ignoreperfectjudgements"))
+            .Help(Help.Info("hud.judgement.ignoreperfectjudgements"))
             .Pos(0)
         |+ PageSetting(
-            %"hud.judgementmeter.prioritiselowerjudgements",
+            %"hud.judgement.prioritiselowerjudgements",
             Checkbox prioritise_lower_judgements
         )
-            .Help(Help.Info("hud.judgementmeter.prioritiselowerjudgements"))
+            .Help(Help.Info("hud.judgement.prioritiselowerjudgements"))
             .Pos(2)
-        |+ PageSetting(%"hud.judgementmeter.duration", Slider(Setting.uom duration, Step = 5f))
-            .Help(Help.Info("hud.judgementmeter.duration"))
+        |+ PageSetting(%"hud.judgement.duration", Slider(Setting.uom duration, Step = 5f))
+            .Help(Help.Info("hud.judgement.duration"))
             .Pos(4)
             .Conditional(fun () -> not use_texture.Value || use_animation.Value)
-        |+ PageSetting(%"hud.judgementmeter.usetexture", Checkbox use_texture)
-            .Help(Help.Info("hud.judgementmeter.usetexture"))
+        |+ PageSetting(%"hud.judgement.usetexture", Checkbox use_texture)
+            .Help(Help.Info("hud.judgement.usetexture"))
             .Pos(6)
         |+ PageSetting(
-            %"hud.judgementmeter.useanimation",
+            %"hud.judgement.useanimation",
             Checkbox use_animation
         )
-            .Help(Help.Info("hud.judgementmeter.useanimation"))
+            .Help(Help.Info("hud.judgement.useanimation"))
             .Pos(8)
             .Conditional(use_texture.Get)
-        |+ PageSetting(%"hud.judgementmeter.frametime", Slider(Setting.uom frame_time, Step = 5f))
-            .Help(Help.Info("hud.judgementmeter.frametime"))
+        |+ PageSetting(%"hud.judgement.frametime", Slider(Setting.uom frame_time, Step = 5f))
+            .Help(Help.Info("hud.judgement.frametime"))
             .Pos(10)
             .Conditional(use_texture.Get)
         |+ Conditional(use_texture.Get,
@@ -167,7 +167,7 @@ type JudgementMeterPage(on_close: unit -> unit) =
         )
         :> Widget
 
-    override this.Title = %"hud.judgementmeter"
+    override this.Title = %"hud.judgement"
 
     override this.OnClose() =
         Skins.save_hud_config 

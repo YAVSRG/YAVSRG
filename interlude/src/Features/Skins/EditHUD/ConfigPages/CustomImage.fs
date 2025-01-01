@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -16,12 +16,12 @@ type CustomImagePage(on_close: unit -> unit) =
     
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.customimage.frame_time", Slider(frame_time |> Setting.uom, Step = 1f))
+        |+ PageSetting(%"hud.custom_image.frame_time", Slider(frame_time |> Setting.uom, Step = 1f))
             .Pos(0)
         
         :> Widget
 
-    override this.Title = %"hud.customimage"
+    override this.Title = %"hud.custom_image"
 
     override this.OnClose() =
         Skins.save_hud_config 

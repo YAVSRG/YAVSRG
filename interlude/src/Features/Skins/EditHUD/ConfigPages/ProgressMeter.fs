@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins.EditHUD
+namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -77,23 +77,23 @@ type ProgressMeterPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.progressmeter.label", 
+        |+ PageSetting(%"hud.progress_pie.label", 
             SelectDropdown(
                 [|
-                    ProgressMeterLabel.None, %"hud.progressmeter.label.none"
-                    ProgressMeterLabel.Countdown, %"hud.progressmeter.label.countdown"
-                    ProgressMeterLabel.Percentage, %"hud.progressmeter.label.percentage"
+                    ProgressMeterLabel.None, %"hud.progress_pie.label.none"
+                    ProgressMeterLabel.Countdown, %"hud.progress_pie.label.countdown"
+                    ProgressMeterLabel.Percentage, %"hud.progress_pie.label.percentage"
                 |],
                 label
             )
         )
             .Pos(0)
-        |+ PageSetting(%"hud.progressmeter.label_size", Slider.Percent(label_size))
-            .Help(Help.Info("hud.progressmeter.label_size"))
+        |+ PageSetting(%"hud.progress_pie.label_size", Slider.Percent(label_size))
+            .Help(Help.Info("hud.progress_pie.label_size"))
             .Pos(2)
-        |+ PageSetting(%"hud.progressmeter.color", ColorPicker(color, true))
+        |+ PageSetting(%"hud.progress_pie.color", ColorPicker(color, true))
             .Pos(4, 3)
-        |+ PageSetting(%"hud.progressmeter.backgroundcolor", ColorPicker(background_color, true))
+        |+ PageSetting(%"hud.progress_pie.backgroundcolor", ColorPicker(background_color, true))
             .Pos(7, 3)
         |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
             .Help(Help.Info("hud.generic.use_font"))
@@ -114,7 +114,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
         |+ preview
         :> Widget
 
-    override this.Title = %"hud.progressmeter"
+    override this.Title = %"hud.progress_pie"
 
     override this.OnClose() =
         Skins.save_hud_config 
