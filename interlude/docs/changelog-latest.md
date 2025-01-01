@@ -1,30 +1,19 @@
-0.7.27
+0.7.27.1
 ====
 
-Stats overhaul update!  
-(WHEN YOU SEE IT)
-
-# Stats screen has been overhauled
-- Browse through historical sessions (and see an activity graph of your playtime)
-- See what scores were set in a session (and convert the session to a playlist)
-- See overviews, timelines and breakdowns of your keymodes and skillsets
-- New XP level system
-
-Let me know your thoughts in the usual places, skillset info on LNs and more are planned
+Happy new year
 
 # Improvements
-- Simplified the Noteskins/HUDs selection menu
-- KPS meter updates less frequently which makes it easier to read
+- When hovering over skill breakdown graph, an estimate of equivalent percentages for the current ruleset is also shown
+- Sending a multiplayer invite has a success notification
+- Importing osu! replays by dropping them onto the game lets you enter what rate the .osu file was on (still experimental)
+- Minorly rearranged the import menu
+- Column lighting now renders behind notes for parity with osu!mania
 
 # Bug fixes
-- 10k column filters no longer go off the screen on 4:3 screen sizes
-- Fixed 'Open in browser' button in Etterna pack browser not being clickable
-- Fixed ruleset ghost-tap judgements awarding combo
-- Fixed keybinds sometimes triggering while typing in search boxes
-- Fixed config files with missing options not being loadable
-- Fixed several issues with .sm parsing
-- Fixed a rare crash in input engine when restarting a song
-- Fixed startup crash on macOS
-- Fixed game taking a couple of seconds to close on CPU Saver mode
-- Fixed game sometimes hanging on exit
+- Fixed some issues when importing osu! skins with bad paths in the skin.ini
+- Improved osu! skin conversion for 'Percy LN' tails
+- Optimisation to level select screen thanks to @9382
+- Some changes to the audio engine that should reduce offset drift on rates (particularly downrates)
+- Fixed an internal error when importing a .sm file with more than 10 keys
 
