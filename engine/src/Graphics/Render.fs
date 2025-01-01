@@ -23,7 +23,7 @@ module Render =
 
     let mutable internal _bounds = Rect.ZERO
     let mutable private _batch : Batch = Unchecked.defaultof<_>
-    
+
     let private create_flipped_projection (width: float32, height: float32) =
         Matrix4.Identity
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
@@ -41,7 +41,7 @@ module Render =
     let private in_use = Array.zeroCreate<bool> FBO_POOL_SIZE
 
     let mutable private fbo_stack: int list = []
-    
+
     /// <summary>
     /// Represents a GL 'Frame Buffer Object' from the pool.<br/>
     /// While an FBO is bound, all draw calls render to a virtual image buffer instead of the screen.<br/>
@@ -72,7 +72,7 @@ module Render =
                 GL.Clear(ClearBufferMask.ColorBufferBit)
 
             fbo_stack <- this.fbo_id :: fbo_stack
-            
+
         /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
         /// Must not be called if not already bound.
         member this.Unbind() =
@@ -84,7 +84,7 @@ module Render =
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
-                
+
         interface IDisposable with
             override this.Dispose() = in_use.[this.fbo_index] <- false
 
@@ -197,13 +197,13 @@ module Render =
     /// Equivalent to <c>Rect.Box(0.0f, 0.0f, width(), height())</c>.
     /// </summary>
     let bounds() = _bounds
-    
+
     /// <summary>
     /// Gets the real dimensions of the viewport, as screen pixels.<br/>
     /// This is not necessarily the dimensions of the window, as this does not include the window border/decorations.
     /// </summary>
     let viewport_size() = _viewport_width, _viewport_height
-    
+
     /// <summary>
     /// Gets and binds an <see cref="FBO"/> from the pool.<br/>
     /// While an FBO is bound, all draw calls render to a virtual image buffer instead of the screen.<br/>
@@ -257,7 +257,7 @@ module Render =
                 fbo
 
     let mutable private stencil_depth = 0
-    
+
     /// <summary>
     /// Begins drawing a stencil to the screen.<br/>
     /// In this mode, in addition to drawing to the screen, any modified pixels are added to the stencil layer.<br/>
@@ -280,7 +280,7 @@ module Render =
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         stencil_depth <- stencil_depth + 1
-        
+
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
     /// In this mode, pixels can only be updated if they were stencilled during the previous step.<br/>
@@ -292,7 +292,7 @@ module Render =
         GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
-        
+
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
     /// In this mode, pixels can only be updated if they were stencilled during the previous step.<br/>
@@ -327,7 +327,7 @@ module Render =
             alpha_mult <- multiplier
             previous_mult
         else multiplier
-        
+
     /// <summary>
     /// Applies an alpha multiplier to all subsequent draw calls.<br/>
     /// <paramref name="multiplier"/> is a multiplier from 0.0 to 1.0.<br/>
@@ -350,7 +350,7 @@ module Render =
         _batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
         _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
         _batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
-        
+
     /// <summary>
     /// Draws a textured quad to the screen.
     /// </summary>
@@ -362,13 +362,13 @@ module Render =
         _batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
         _batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
         _batch.Vertex(q.BottomLeft, uv.BottomLeft, c.BottomLeft, layer)
-        
+
     /// <summary>
     /// Draws a rectangular sprite to the screen.
     /// </summary>
     let sprite (r: Rect) (c: Color) (s: Sprite) =
         tex_quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
-        
+
     /// <summary>
     /// Draws an untextured rectangle to the screen.
     /// </summary>
@@ -381,7 +381,7 @@ module Render =
 
     let internal viewport_resized (width, height) =
         assert(width <> 0 && height <> 0)
-        
+
         _viewport_width <- width
         _viewport_height <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
@@ -438,20 +438,20 @@ module Render =
             sprintf "%i.%i.%i" major minor rev
 
         let texture_units =
-            sprintf 
+            sprintf
                 "%i units; %i max size; %i max layers"
                 Texture.MAX_TEXTURE_UNITS
                 Texture.MAX_TEXTURE_SIZE
                 Texture.MAX_ARRAY_TEXTURE_LAYERS
 
         let specs =
-            sprintf 
-                "x64: %A Cores: %i Memory: %i" 
+            sprintf
+                "x64: %A Cores: %i Memory: %i"
                 Environment.Is64BitProcess
                 Environment.ProcessorCount
                 Environment.WorkingSet
 
-        sprintf 
+        sprintf
             """-- RENDERER DEBUG INFO --
 GLFW Version: %s
 GL Version: %s
