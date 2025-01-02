@@ -12,12 +12,10 @@ type RateModPage(on_close: unit -> unit) =
 
     let config = Content.HUD
 
-    let pos = Setting.simple config.RateModMeterPosition
-
     let show_mods = Setting.simple config.RateModMeterShowMods
 
     let preview =
-        { new ConfigPreview(0.35f, pos) with
+        { new ConfigPreview(config.RateModMeterPosition) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (
                     Style.font,
@@ -33,15 +31,12 @@ type RateModPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.ratemodmeter.showmods", Checkbox show_mods)
             .Help(Help.Info("hud.ratemodmeter.showmods"))
             .Pos(0)
-        |>> Container
-        |+ preview
         :> Widget
 
     override this.Title = %"hud.ratemodmeter"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 RateModMeterShowMods = show_mods.Value
             }

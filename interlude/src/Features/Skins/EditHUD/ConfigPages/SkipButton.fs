@@ -22,7 +22,7 @@ type SkipButtonPage(on_close: unit -> unit) =
     let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
 
     let preview =
-        { new ConfigPreviewNew(config.SkipButtonPosition) with
+        { new ConfigPreview(config.SkipButtonPosition) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
@@ -51,9 +51,9 @@ type SkipButtonPage(on_close: unit -> unit) =
     override this.Title = %"hud.skip_button"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
-                SkipButtonBackground = 
+                SkipButtonBackground =
                     {
                         Enable = use_background.Value
                         Scale = background_scale.Value

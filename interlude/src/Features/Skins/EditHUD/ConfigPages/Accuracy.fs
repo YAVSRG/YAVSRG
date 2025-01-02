@@ -23,7 +23,7 @@ type AccuracyPage(on_close: unit -> unit) =
 
     let texture = Content.Texture "accuracy-font"
     let preview =
-        { new ConfigPreviewNew(config.AccuracyPosition) with
+        { new ConfigPreview(config.AccuracyPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Accuracy.draw_accuracy_centered(

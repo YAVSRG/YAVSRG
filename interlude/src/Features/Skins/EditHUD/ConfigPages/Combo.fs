@@ -24,13 +24,13 @@ type ComboPage(on_close: unit -> unit) =
         |> Setting.bounded (0.0f, 0.05f)
 
     let use_font = Setting.simple config.ComboUseFont
-    let font_spacing = 
+    let font_spacing =
         config.ComboFontSpacing
         |> Setting.bounded (-1.0f, 1.0f)
 
     let texture = Content.Texture "combo-font"
     let preview =
-        { new ConfigPreviewNew(config.ComboPosition) with
+        { new ConfigPreview(config.ComboPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Combo.draw_combo_centered(texture, bounds, Color.White, 727, font_spacing.Value)
@@ -63,7 +63,7 @@ type ComboPage(on_close: unit -> unit) =
     override this.Title = %"hud.combo"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 ComboLampColors = lamp_colors.Value
                 ComboPop = pop_amount.Value

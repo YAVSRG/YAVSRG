@@ -15,16 +15,9 @@ type BPMPage(on_close: unit -> unit) =
 
     let pos = Setting.simple noteskin_options.BPMMeterPosition
 
-    let preview =
-        { new ConfigPreview(0.35f, pos) with
-            override this.DrawComponent(bounds) =
-                Text.fill_b (Style.font, "727 BPM", bounds, Colors.text_subheading, Alignment.CENTER)
-        }
-
-    override this.Content() = preview
+    override this.Content() = Dummy()
 
     override this.Title = %"hud.bpm"
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnClose() =
         on_close ()
