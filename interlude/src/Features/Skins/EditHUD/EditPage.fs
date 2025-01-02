@@ -6,6 +6,7 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
+open Interlude.Features.Gameplay
 
 type EditHUDPage() =
     inherit Page()
@@ -22,22 +23,18 @@ type EditHUDPage() =
 
     let textures_tab, refresh_texture_grid = TextureGrid.create_hud hud
     let problems_tab, refresh_problems_list = Problems.create_hud hud
+    let general_tab =
+        NavigationContainer.Column(WrapNavigation = false)
+        |+ PageTextEntry(%"skin.name", name).Pos(4)
+        |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
+        |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
 
     let refresh () =
         refresh_texture_grid()
         refresh_problems_list()
 
-    override this.Content() =
-        refresh ()
-
-        let general_tab =
-            NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"skin.name", name).Pos(4)
-            |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
-            |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
-
+    let meta_editor =
         let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-
         let tab_buttons =
             RadioButtons.create_tabs
                 {
@@ -97,7 +94,23 @@ type EditHUDPage() =
         )
         |>> Container
         |+ preview
-        :> Widget
+
+    let layout_editor =
+        let mutable output : Widget = Dummy()
+        SelectedChart.if_loaded(fun info -> output <- LayoutEditor(info, { Left = 0.1f %+ 0.0f; Top = 0.1f %+ 0.0f; Right = 0.9f %- 0.0f; Bottom = 0.9f %- 0.0f }))
+        output
+
+    let supertabs = SwapContainer(layout_editor)
+
+    let editing_meta =
+        Setting.simple false
+        |> Setting.trigger (function true -> supertabs.Current <- meta_editor | false -> supertabs.Current <- layout_editor)
+
+    let header = EditHUDHeader(editing_meta)
+
+    override this.Content() =
+        refresh ()
+        supertabs
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -106,12 +119,27 @@ type EditHUDPage() =
     override this.Title = meta.Name
     override this.OnDestroy() = preview.Destroy()
 
+    override this.Init(parent) =
+        base.Init parent
+        header.Focus false
+
+    override this.Header() =
+        header
+        |> OverlayContainer
+        :> Widget
+
+    override this.OnEnterNestedPage() = header.Hide()
+
     override this.OnReturnFromNestedPage() =
         refresh ()
         preview.Refresh()
-        base.OnReturnFromNestedPage()
+        header.Show()
 
     override this.OnClose() =
+        match layout_editor with
+        | :? LayoutEditor as l -> l.Destroy()
+        | _ -> ()
+        header.Hide()
         Skins.save_skin_meta hud_id
             {
                 Name = name.Value.Trim()

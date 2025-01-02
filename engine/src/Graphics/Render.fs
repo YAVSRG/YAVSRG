@@ -409,6 +409,7 @@ module Render =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
+        GL.Enable(EnableCap.Multisample)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)

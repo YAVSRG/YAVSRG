@@ -160,14 +160,7 @@ type SelectSkinsPage() =
         GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let edit_hud () =
-        if
-            SelectedChart.WITH_COLORS.IsSome
-            && Screen.change_new
-                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
-                Screen.Type.Practice
-                Transitions.Default
-        then
-            Menu.Exit()
+        EditHUDPage().Show()
 
     let edit_or_extract_noteskin () =
         let noteskin = Content.Noteskin
