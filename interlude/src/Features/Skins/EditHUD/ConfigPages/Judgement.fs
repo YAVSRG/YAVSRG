@@ -87,7 +87,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
             elif (%%"down").Tapped() then
                 bk ()
 
-type JudgementMeterPage(on_close: unit -> unit) =
+type JudgementPage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD

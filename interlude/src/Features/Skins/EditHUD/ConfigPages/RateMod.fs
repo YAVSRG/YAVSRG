@@ -7,7 +7,7 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 
-type RateModMeterPage(on_close: unit -> unit) =
+type RateModPage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD

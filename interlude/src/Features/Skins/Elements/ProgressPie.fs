@@ -104,7 +104,7 @@ module ProgressMeter =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type ProgressMeter(config: HudConfig, state: PlayState) =
+type ProgressPie(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
@@ -122,7 +122,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
         if config.ProgressMeterUseFont then
 
             match config.ProgressMeterLabel with
-                | ProgressMeterLabel.Countdown ->
+                | ProgressPieLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
@@ -132,7 +132,7 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
                         config.ProgressMeterFontSpacing,
                         config.ProgressMeterColonExtraSpacing
                     )
-                | ProgressMeterLabel.Percentage ->
+                | ProgressPieLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
                         this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
@@ -147,10 +147,10 @@ type ProgressMeter(config: HudConfig, state: PlayState) =
 
             let text =
                 match config.ProgressMeterLabel with
-                | ProgressMeterLabel.Countdown ->
+                | ProgressPieLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.fmt_time_left time_left
-                | ProgressMeterLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
+                | ProgressPieLabel.Percentage -> sprintf "%.0f%%" (percent * 100.0f)
                 | _ -> ""
 
             Text.fill_b (

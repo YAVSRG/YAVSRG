@@ -9,34 +9,34 @@ open Prelude.Skins
 [<RequireQualifiedAccess>]
 type HudElement =
     | Accuracy
-    | TimingDisplay
+    | HitDeviations
     | Combo
     | SkipButton
-    | JudgementMeter
-    | EarlyLateMeter
-    | ProgressMeter
+    | Judgement
+    | EarlyLate
+    | ProgressPie
     | JudgementCounter
-    | RateModMeter
-    | BPMMeter
+    | RateMods
+    | BPM
     | Pacemaker
     | InputMeter
-    | KeysPerSecondMeter
+    | KeysPerSecond
     | CustomImage
     static member FULL_LIST =
         [
             Accuracy
-            TimingDisplay
+            HitDeviations
             Combo
             SkipButton
-            JudgementMeter
-            EarlyLateMeter
-            ProgressMeter
+            Judgement
+            EarlyLate
+            ProgressPie
             JudgementCounter
-            RateModMeter
-            BPMMeter
+            RateMods
+            BPM
             Pacemaker
             InputMeter
-            KeysPerSecondMeter
+            KeysPerSecond
             CustomImage
         ]
 
@@ -46,17 +46,17 @@ type JudgementDisplayType =
     | Name
     | Texture of int
 
-type ProgressMeterLabel =
+type ProgressPieLabel =
     | None = 0
     | Countdown = 1
     | Percentage = 2
 
-type TimingDisplayMovingAverageType =
+type HitDeviationsMovingAverageType =
     | None = 0
     | Arrow = 1
     | ReplaceBars = 2
 
-type TimingDisplayRotation =
+type HitDeviationsRotation =
     | Normal = 0
     | Clockwise = 1
     | Anticlockwise = 2
@@ -117,10 +117,10 @@ type HudConfig =
         TimingDisplayReleasesExtraHeight: float32
         TimingDisplayWindowsOpacity: float32
         TimingDisplayHalfScaleReleases: bool
-        TimingDisplayMovingAverageType: TimingDisplayMovingAverageType
+        TimingDisplayMovingAverageType: HitDeviationsMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
-        TimingDisplayRotation: TimingDisplayRotation
+        TimingDisplayRotation: HitDeviationsRotation
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -156,7 +156,7 @@ type HudConfig =
 
         ProgressMeterEnabled: bool
         ProgressMeterPosition: HudPosition
-        ProgressMeterLabel: ProgressMeterLabel
+        ProgressMeterLabel: ProgressPieLabel
         ProgressMeterColor: Color
         ProgressMeterBackgroundColor: Color
         ProgressMeterLabelSize: float32
@@ -241,10 +241,10 @@ type HudConfig =
             TimingDisplayReleasesExtraHeight = 5.0f
             TimingDisplayWindowsOpacity = 0.0f
             TimingDisplayHalfScaleReleases = true
-            TimingDisplayMovingAverageType = TimingDisplayMovingAverageType.None
+            TimingDisplayMovingAverageType = HitDeviationsMovingAverageType.None
             TimingDisplayMovingAverageSensitivity = 0.75f
             TimingDisplayMovingAverageColor = Color.Aqua
-            TimingDisplayRotation = TimingDisplayRotation.Normal
+            TimingDisplayRotation = HitDeviationsRotation.Normal
 
             ComboEnabled = true
             ComboPosition =
@@ -321,7 +321,7 @@ type HudConfig =
                     Right = 180.0f, 0.5f
                     Bottom = 140.0f, 0.0f
                 }
-            ProgressMeterLabel = ProgressMeterLabel.None
+            ProgressMeterLabel = ProgressPieLabel.None
             ProgressMeterColor = Color.FromArgb(100, 220, 220, 220)
             ProgressMeterBackgroundColor = Color.FromArgb(100, 20, 20, 20)
             ProgressMeterUseFont = false

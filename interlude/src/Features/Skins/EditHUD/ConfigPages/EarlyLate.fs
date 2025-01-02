@@ -6,7 +6,7 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 
-type EarlyLateMeterPage(on_close: unit -> unit) =
+type EarlyLatePage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD

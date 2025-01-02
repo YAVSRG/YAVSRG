@@ -7,7 +7,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 
-type TimingDisplayPage(on_close: unit -> unit) =
+type HitDeviationsPage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD
@@ -41,9 +41,9 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.hit_deviations.rotation",
             SelectDropdown(
                 [|
-                    TimingDisplayRotation.Normal, %"hud.hit_deviations.rotation.normal"
-                    TimingDisplayRotation.Clockwise, %"hud.hit_deviations.rotation.clockwise"
-                    TimingDisplayRotation.Anticlockwise, %"hud.hit_deviations.rotation.anticlockwise"
+                    HitDeviationsRotation.Normal, %"hud.hit_deviations.rotation.normal"
+                    HitDeviationsRotation.Clockwise, %"hud.hit_deviations.rotation.clockwise"
+                    HitDeviationsRotation.Anticlockwise, %"hud.hit_deviations.rotation.anticlockwise"
                 |],
                 rotation
             )
@@ -78,9 +78,9 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.hit_deviations.moving_average_type",
             SelectDropdown(
                 [|
-                    TimingDisplayMovingAverageType.None, %"hud.hit_deviations.moving_average_type.none"
-                    TimingDisplayMovingAverageType.Arrow, %"hud.hit_deviations.moving_average_type.arrow"
-                    TimingDisplayMovingAverageType.ReplaceBars, %"hud.hit_deviations.moving_average_type.replace_bars"
+                    HitDeviationsMovingAverageType.None, %"hud.hit_deviations.moving_average_type.none"
+                    HitDeviationsMovingAverageType.Arrow, %"hud.hit_deviations.moving_average_type.arrow"
+                    HitDeviationsMovingAverageType.ReplaceBars, %"hud.hit_deviations.moving_average_type.replace_bars"
                 |],
                 moving_average_type
             )
@@ -90,11 +90,11 @@ type TimingDisplayPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.hit_deviations.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
             .Help(Help.Info("hud.hit_deviations.moving_average_sensitivity"))
             .Pos(20)
-            .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
+            .Conditional(fun () -> moving_average_type.Value <> HitDeviationsMovingAverageType.None)
         |+ PageSetting(%"hud.hit_deviations.moving_average_color", ColorPicker(moving_average_color, true))
             .Help(Help.Info("hud.hit_deviations.moving_average_color"))
             .Pos(22, 3)
-            .Conditional(fun () -> moving_average_type.Value <> TimingDisplayMovingAverageType.None)
+            .Conditional(fun () -> moving_average_type.Value <> HitDeviationsMovingAverageType.None)
         :> Widget
 
     override this.Title = %"hud.hit_deviations"
@@ -116,8 +116,8 @@ type TimingDisplayPage(on_close: unit -> unit) =
                 TimingDisplayRotation = rotation.Value
                 TimingDisplayPosition =
                     if
-                        (Content.HUD.TimingDisplayRotation <> TimingDisplayRotation.Normal) <>
-                        (rotation.Value <> TimingDisplayRotation.Normal)
+                        (Content.HUD.TimingDisplayRotation <> HitDeviationsRotation.Normal) <>
+                        (rotation.Value <> HitDeviationsRotation.Normal)
                     then
                         Content.HUD.TimingDisplayPosition.Rotate
                     else Content.HUD.TimingDisplayPosition

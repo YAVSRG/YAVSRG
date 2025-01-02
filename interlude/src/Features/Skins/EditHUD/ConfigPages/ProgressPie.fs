@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play.HUD
 
-type ProgressMeterPage(on_close: unit -> unit) =
+type ProgressPiePage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD
@@ -37,7 +37,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
                 if use_font.Value then
 
                     match label.Value  with
-                        | ProgressMeterLabel.Countdown ->
+                        | ProgressPieLabel.Countdown ->
                             let time_left = 447000.0f<ms / rate>
                             ProgressMeter.draw_countdown_centered (
                                 font_texture,
@@ -47,7 +47,7 @@ type ProgressMeterPage(on_close: unit -> unit) =
                                 font_spacing.Value,
                                 font_colon_spacing.Value
                             )
-                        | ProgressMeterLabel.Percentage ->
+                        | ProgressPieLabel.Percentage ->
                             ProgressMeter.draw_percent_progress_centered (
                                 font_texture,
                                 bounds.SliceB(bounds.Width * label_size.Value), 
@@ -62,8 +62,8 @@ type ProgressMeterPage(on_close: unit -> unit) =
 
                     let text =
                         match label.Value with
-                        | ProgressMeterLabel.Countdown -> "7:27"
-                        | ProgressMeterLabel.Percentage -> "60%"
+                        | ProgressPieLabel.Countdown -> "7:27"
+                        | ProgressPieLabel.Percentage -> "60%"
                         | _ -> ""
 
                     Text.fill_b (
@@ -80,9 +80,9 @@ type ProgressMeterPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.progress_pie.label", 
             SelectDropdown(
                 [|
-                    ProgressMeterLabel.None, %"hud.progress_pie.label.none"
-                    ProgressMeterLabel.Countdown, %"hud.progress_pie.label.countdown"
-                    ProgressMeterLabel.Percentage, %"hud.progress_pie.label.percentage"
+                    ProgressPieLabel.None, %"hud.progress_pie.label.none"
+                    ProgressPieLabel.Countdown, %"hud.progress_pie.label.countdown"
+                    ProgressPieLabel.Percentage, %"hud.progress_pie.label.percentage"
                 |],
                 label
             )

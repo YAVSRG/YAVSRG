@@ -10,7 +10,7 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type JudgementMeter(config: HudConfig, state: PlayState) =
+type Judgement(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let mutable tier = 0
     let mutable time = -Time.infinity

@@ -7,7 +7,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type KeysPerSecondMeter(config: HudConfig, state: PlayState) =
+type KeysPerSecond(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let UPDATE_INTERVAL = 200.0

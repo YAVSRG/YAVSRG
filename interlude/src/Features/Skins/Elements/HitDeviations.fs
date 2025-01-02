@@ -19,7 +19,7 @@ type private TimingDisplayHit =
         Judgement: int option
     }
 
-type TimingDisplay(config: HudConfig, state: PlayState) =
+type HitDeviations(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let hits = ResizeArray<TimingDisplayHit>()
     let mutable w = 0.0f
@@ -38,10 +38,10 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
     let MAX_WINDOW = state.Ruleset.LargestWindow
-    let IS_ROTATED = config.TimingDisplayRotation <> TimingDisplayRotation.Normal
+    let IS_ROTATED = config.TimingDisplayRotation <> HitDeviationsRotation.Normal
 
     do
-        if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.None then
+        if config.TimingDisplayMovingAverageType <> HitDeviationsMovingAverageType.None then
             state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
@@ -69,7 +69,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                 | DropHold
                 | RegrabHold -> ()
             )
-        if config.TimingDisplayMovingAverageType <> TimingDisplayMovingAverageType.ReplaceBars then
+        if config.TimingDisplayMovingAverageType <> HitDeviationsMovingAverageType.ReplaceBars then
             state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
@@ -149,14 +149,14 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                 | None -> ()
 
         match config.TimingDisplayRotation with
-        | TimingDisplayRotation.Clockwise ->
+        | HitDeviationsRotation.Clockwise ->
             let center = this.Bounds.CenterY
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
                 fun time -> center + time / MAX_WINDOW * h
             let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
             draw r
-        | TimingDisplayRotation.Anticlockwise ->
+        | HitDeviationsRotation.Anticlockwise ->
             let center = this.Bounds.CenterY
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
@@ -177,11 +177,11 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
 
         let r =
             match config.TimingDisplayRotation with
-            | TimingDisplayRotation.Clockwise ->
+            | HitDeviationsRotation.Clockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
                 Rect.Create(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
-            | TimingDisplayRotation.Anticlockwise ->
+            | HitDeviationsRotation.Anticlockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
                 Rect.Create(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
@@ -198,14 +198,14 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
         let now = state.CurrentChartTime()
 
         match config.TimingDisplayMovingAverageType with
-        | TimingDisplayMovingAverageType.ReplaceBars ->
+        | HitDeviationsMovingAverageType.ReplaceBars ->
             Render.rect
                 (r (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
                 config.TimingDisplayMovingAverageColor
-        | TimingDisplayMovingAverageType.Arrow ->
+        | HitDeviationsMovingAverageType.Arrow ->
             let quad =
                 match config.TimingDisplayRotation with
-                | TimingDisplayRotation.Clockwise ->
+                | HitDeviationsRotation.Clockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
                     Quad.createv
@@ -213,7 +213,7 @@ type TimingDisplay(config: HudConfig, state: PlayState) =
                         (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height)
                         (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height)
                         (this.Bounds.Right + 10.0f, center + moving_average.Value)
-                | TimingDisplayRotation.Anticlockwise ->
+                | HitDeviationsRotation.Anticlockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
                     Quad.createv

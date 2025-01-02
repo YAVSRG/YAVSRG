@@ -13,42 +13,42 @@ module HudElement =
     let name (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy"
-        | HudElement.TimingDisplay -> %"hud.hit_deviations"
+        | HudElement.HitDeviations -> %"hud.hit_deviations"
         | HudElement.Combo -> %"hud.combo"
         | HudElement.SkipButton -> %"hud.skip_button"
-        | HudElement.JudgementMeter -> %"hud.judgement"
-        | HudElement.EarlyLateMeter -> %"hud.early_late"
-        | HudElement.ProgressMeter -> %"hud.progress_pie"
+        | HudElement.Judgement -> %"hud.judgement"
+        | HudElement.EarlyLate -> %"hud.early_late"
+        | HudElement.ProgressPie -> %"hud.progress_pie"
         | HudElement.JudgementCounter -> %"hud.judgement_counter"
-        | HudElement.RateModMeter -> %"hud.ratemodmeter"
-        | HudElement.BPMMeter -> %"hud.bpm"
+        | HudElement.RateMods -> %"hud.ratemodmeter"
+        | HudElement.BPM -> %"hud.bpm"
         | HudElement.Pacemaker -> %"hud.pacemaker"
         | HudElement.InputMeter -> %"hud.input_meter"
-        | HudElement.KeysPerSecondMeter -> %"hud.kps_meter"
+        | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
 
     let tooltip (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HudElement.TimingDisplay -> %"hud.hit_deviations.tooltip"
+        | HudElement.HitDeviations -> %"hud.hit_deviations.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
         | HudElement.SkipButton -> %"hud.skip_button.tooltip"
-        | HudElement.JudgementMeter -> %"hud.judgement.tooltip"
-        | HudElement.EarlyLateMeter -> %"hud.early_late.tooltip"
-        | HudElement.ProgressMeter -> %"hud.progress_pie.tooltip"
+        | HudElement.Judgement -> %"hud.judgement.tooltip"
+        | HudElement.EarlyLate -> %"hud.early_late.tooltip"
+        | HudElement.ProgressPie -> %"hud.progress_pie.tooltip"
         | HudElement.JudgementCounter -> %"hud.judgement_counter.tooltip"
-        | HudElement.RateModMeter -> %"hud.ratemodmeter.tooltip"
-        | HudElement.BPMMeter -> %"hud.bpm.tooltip"
+        | HudElement.RateMods -> %"hud.ratemodmeter.tooltip"
+        | HudElement.BPM -> %"hud.bpm.tooltip"
         | HudElement.Pacemaker -> %"hud.pacemaker.tooltip"
         | HudElement.InputMeter -> %"hud.input_meter.tooltip"
-        | HudElement.KeysPerSecondMeter -> %"hud.kps_meter.tooltip"
+        | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
 
     let can_configure (e: HudElement) =
         match e with
         | HudElement.SkipButton -> not Content.Noteskin.IsEmbedded
-        | HudElement.BPMMeter -> false
-        | HudElement.KeysPerSecondMeter -> false
+        | HudElement.BPM -> false
+        | HudElement.KeysPerSecond -> false
         | HudElement.Pacemaker -> false
         | _ -> true
 
@@ -62,18 +62,18 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> cast Accuracy
-        | HudElement.TimingDisplay -> cast TimingDisplay
+        | HudElement.HitDeviations -> cast HitDeviations
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
-        | HudElement.JudgementMeter -> cast JudgementMeter
-        | HudElement.EarlyLateMeter -> cast EarlyLateMeter
-        | HudElement.ProgressMeter -> cast ProgressMeter
+        | HudElement.Judgement -> cast Judgement
+        | HudElement.EarlyLate -> cast EarlyLate
+        | HudElement.ProgressPie -> cast ProgressPie
         | HudElement.JudgementCounter -> cast JudgementCounter
-        | HudElement.RateModMeter -> cast RateModMeter
-        | HudElement.BPMMeter -> cast BPMMeter
+        | HudElement.RateMods -> cast RateMods
+        | HudElement.BPM -> cast BPM
         | HudElement.Pacemaker -> cast Pacemaker
         | HudElement.InputMeter -> cast InputMeter
-        | HudElement.KeysPerSecondMeter -> cast KeysPerSecondMeter
+        | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
 
     let enabled_setting (e: HudElement) : Setting<bool> =
@@ -87,7 +87,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.AccuracyEnabled)
-        | HudElement.TimingDisplay ->
+        | HudElement.HitDeviations ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -114,7 +114,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.SkipButtonEnabled)
-        | HudElement.JudgementMeter ->
+        | HudElement.Judgement ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -123,7 +123,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.JudgementMeterEnabled)
-        | HudElement.EarlyLateMeter ->
+        | HudElement.EarlyLate ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -132,7 +132,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.EarlyLateMeterEnabled)
-        | HudElement.ProgressMeter ->
+        | HudElement.ProgressPie ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -150,7 +150,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.JudgementCounterEnabled)
-        | HudElement.RateModMeter ->
+        | HudElement.RateMods ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -159,7 +159,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.RateModMeterEnabled)
-        | HudElement.BPMMeter ->
+        | HudElement.BPM ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -179,7 +179,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.InputMeterEnabled)
-        | HudElement.KeysPerSecondMeter ->
+        | HudElement.KeysPerSecond ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -209,7 +209,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.AccuracyPosition)
-        | HudElement.TimingDisplay ->
+        | HudElement.HitDeviations ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -236,7 +236,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.SkipButtonPosition)
-        | HudElement.JudgementMeter ->
+        | HudElement.Judgement ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -245,7 +245,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.JudgementMeterPosition)
-        | HudElement.EarlyLateMeter ->
+        | HudElement.EarlyLate ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -254,7 +254,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.EarlyLateMeterPosition)
-        | HudElement.ProgressMeter ->
+        | HudElement.ProgressPie ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -272,7 +272,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.JudgementCounterPosition)
-        | HudElement.RateModMeter ->
+        | HudElement.RateMods ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -281,7 +281,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.RateModMeterPosition)
-        | HudElement.BPMMeter ->
+        | HudElement.BPM ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -308,7 +308,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.InputMeterPosition)
-        | HudElement.KeysPerSecondMeter ->
+        | HudElement.KeysPerSecond ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -332,19 +332,19 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
-        | HudElement.TimingDisplay ->
-            if Content.HUD.TimingDisplayRotation <> TimingDisplayRotation.Normal then
+        | HudElement.HitDeviations ->
+            if Content.HUD.TimingDisplayRotation <> HitDeviationsRotation.Normal then
                 all_defaults.TimingDisplayPosition.Rotate
             else all_defaults.TimingDisplayPosition
         | HudElement.Combo -> all_defaults.ComboPosition
         | HudElement.SkipButton -> all_defaults.SkipButtonPosition
-        | HudElement.JudgementMeter -> all_defaults.JudgementMeterPosition
-        | HudElement.EarlyLateMeter -> all_defaults.EarlyLateMeterPosition
-        | HudElement.ProgressMeter -> all_defaults.ProgressMeterPosition
+        | HudElement.Judgement -> all_defaults.JudgementMeterPosition
+        | HudElement.EarlyLate -> all_defaults.EarlyLateMeterPosition
+        | HudElement.ProgressPie -> all_defaults.ProgressMeterPosition
         | HudElement.JudgementCounter -> all_defaults.JudgementCounterPosition
-        | HudElement.RateModMeter -> all_defaults.RateModMeterPosition
-        | HudElement.BPMMeter -> all_defaults.BPMMeterPosition
+        | HudElement.RateMods -> all_defaults.RateModMeterPosition
+        | HudElement.BPM -> all_defaults.BPMMeterPosition
         | HudElement.Pacemaker -> all_defaults.PacemakerPosition
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
-        | HudElement.KeysPerSecondMeter -> all_defaults.KeysPerSecondMeterPosition
+        | HudElement.KeysPerSecond -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition

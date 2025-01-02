@@ -7,7 +7,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type RateModMeter(config: HudConfig, state: PlayState) =
+type RateMods(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
