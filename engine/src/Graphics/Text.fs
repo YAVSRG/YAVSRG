@@ -22,12 +22,14 @@ type private GlyphInfo =
 
 type SpriteFontOptions =
     {
+        BaseScale: float32
         CharSpacing: float32
         SpaceWidth: float32
         ShadowDepth: float32
     }
     static member Default =
         {
+            BaseScale = 30.0f
             CharSpacing = -0.04f
             SpaceWidth = 0.25f
             ShadowDepth = 0.09f
@@ -35,10 +37,9 @@ type SpriteFontOptions =
 
 type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: SpriteFontOptions) =
 
-    let SCALE = 25.0f
-    let FONT_SM = font_family.CreateFont(SCALE * 4.0f / 3.0f)
-    let FONT_MD = font_family.CreateFont(SCALE * 8.0f / 3.0f)
-    let FONT_LG = font_family.CreateFont(SCALE * 16.0f / 3.0f)
+    let FONT_SM = font_family.CreateFont(options.BaseScale * 4.0f / 3.0f)
+    let FONT_MD = font_family.CreateFont(options.BaseScale * 8.0f / 3.0f)
+    let FONT_LG = font_family.CreateFont(options.BaseScale * 16.0f / 3.0f)
 
     let char_lookup_sm = new Dictionary<int32, Sprite>()
     let char_lookup_md = new Dictionary<int32, Sprite>()
@@ -146,7 +147,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
         let rows =
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
             + Feather.CONCAT
-            |> Seq.chunkBySize 30
+            |> Seq.chunkBySize 25
             |> Seq.map (String)
 
         let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
@@ -307,17 +308,22 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     do render_atlas ()
 
-    member this.Char(c: int32) =
-        if not <| char_lookup_lg.ContainsKey c then
-            render_char c
+    member this.CharLookup (level: int) =
 
-        char_lookup_lg.[c]
+        let target = match level with 2 -> char_lookup_lg | 1 -> char_lookup_md | _ -> char_lookup_sm
+
+        fun (c: int32) ->
+            if not <| target.ContainsKey c then
+                render_char c
+
+            target.[c]
 
     member this.Dispose() =
         char_lookup_sm.Values |> Seq.iter (Sprite.destroy >> ignore)
         char_lookup_md.Values |> Seq.iter (Sprite.destroy >> ignore)
         char_lookup_lg.Values |> Seq.iter (Sprite.destroy >> ignore)
 
+    member this.BaseScale = options.BaseScale
     member this.CharSpacing = options.CharSpacing
     member this.SpaceWidth = options.SpaceWidth
     member this.ShadowDepth = options.ShadowDepth
@@ -359,11 +365,10 @@ module Fonts =
 // todo: combine this text api with the Render api
 module Text =
 
-    let SCALE = 100.0f
-
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing
         let mutable high_surrogate = ' '
+        let char_lookup = font.CharLookup 0
 
         for char in text.AsSpan() do
 
@@ -378,13 +383,18 @@ module Text =
                     else
                         int32 char
 
-                let s = font.Char code
-                width <- width + (float32 s.GridWidth) / SCALE + font.CharSpacing
+                let s = char_lookup code
+                width <- width + (float32 s.GridWidth) / font.BaseScale + font.CharSpacing
 
         width
 
     let draw_b (font: SpriteFont, text: string, scale, x, y, (fg: Drawing.Color, bg: Drawing.Color)) =
-        let scale2 = scale / SCALE
+        let level, scale_mult =
+            let l1 = scale / font.BaseScale
+            if l1 <= 1.0f then 0, l1
+            elif l1 <= 2.0f then 1, l1 / 2.0f
+            else 2, l1 / 4.0f
+        let char_lookup = font.CharLookup level
         let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
         let mutable high_surrogate = ' '
@@ -402,9 +412,9 @@ module Text =
                     else
                         int32 char
 
-                let s = font.Char code
-                let w = float32 s.Width * scale2
-                let h = float32 s.Height * scale2
+                let s = char_lookup code
+                let w = float32 s.Width * scale_mult
+                let h = float32 s.Height * scale_mult
                 let r = Rect.Box(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then

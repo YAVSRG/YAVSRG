@@ -338,7 +338,7 @@ module WindowThread =
         GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
         GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
         GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
-        GLFW.WindowHint(WindowHintInt.Samples, 4)
+        GLFW.WindowHint(WindowHintInt.Samples, config.MSAASamples)
         GLFW.WindowHint(WindowHintInt.StencilBits, 8)
         GLFW.WindowHint(WindowHintInt.DepthBits, 8)
 

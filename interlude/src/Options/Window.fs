@@ -21,6 +21,7 @@ type WindowSettings =
         AudioDevicePeriod: Setting<int>
         AudioDeviceBufferLengthMultiplier: Setting<int>
         InputCPUSaver: Setting<bool>
+        MSAASamples: Setting<int>
     }
 
     static member Default =
@@ -44,6 +45,7 @@ type WindowSettings =
             AudioDevicePeriod = Setting.simple 2
             AudioDeviceBufferLengthMultiplier = Setting.simple 2
             InputCPUSaver = Setting.simple false
+            MSAASamples = Setting.simple 4
         }
 
     member this.ToOptions : WindowOptions =
@@ -61,6 +63,7 @@ type WindowSettings =
             AudioDeviceBufferLengthMultiplier = this.AudioDeviceBufferLengthMultiplier.Value
             InputCPUSaver = this.InputCPUSaver.Value
             EnableCursor = false
+            MSAASamples = this.MSAASamples.Value
         }
 
     member this.Apply () =

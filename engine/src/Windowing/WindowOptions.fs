@@ -49,4 +49,5 @@ type WindowOptions =
         AudioDeviceBufferLengthMultiplier: int
         InputCPUSaver: bool
         EnableCursor: bool
+        MSAASamples: int
     }
