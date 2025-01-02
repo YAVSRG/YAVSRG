@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.Graphics
 
 open System
+open System.IO
 open SixLabors.Fonts
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
@@ -9,196 +10,325 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Icons
 
-module Fonts =
+type private GlyphInfo =
+    {
+        Code: int32
+        Size: FontRectangle
+        Offset: float32
+    }
 
-    open System.IO
+    member this.Width = this.Size.Width
+    member this.Height = this.Size.Height
 
-    let SCALE = 80f
-
-    type private GlyphInfo =
+type SpriteFontOptions =
+    {
+        CharSpacing: float32
+        SpaceWidth: float32
+        ShadowDepth: float32
+    }
+    static member Default =
         {
-            Code: int32
-            Size: FontRectangle
-            Offset: float32
+            CharSpacing = -0.04f
+            SpaceWidth = 0.25f
+            ShadowDepth = 0.09f
         }
 
-        member this.Width = this.Size.Width
-        member this.Height = this.Size.Height
+type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: SpriteFontOptions) =
 
-    [<AllowNullLiteral>]
-    type SpriteFont(font: Font, fallbacks: FontFamily list) =
-        let char_lookup = new Dictionary<int32, Sprite>()
+    let SCALE = 25.0f
+    let FONT_SM = font_family.CreateFont(SCALE * 4.0f / 3.0f)
+    let FONT_MD = font_family.CreateFont(SCALE * 8.0f / 3.0f)
+    let FONT_LG = font_family.CreateFont(SCALE * 16.0f / 3.0f)
 
-        let render_options =
-            new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+    let char_lookup_sm = new Dictionary<int32, Sprite>()
+    let char_lookup_md = new Dictionary<int32, Sprite>()
+    let char_lookup_lg = new Dictionary<int32, Sprite>()
 
-        let text_options =
-            let x = new TextOptions() in
-            x.FallbackFonts.AddRange(fallbacks)
-            x
+    let text_options =
+        let x = new TextOptions() in
+        x.FallbackFonts.AddRange(fallbacks)
+        x
 
-        let draw_options =
-            new DrawingOptions(
-                TextOptions = text_options,
-                GraphicsOptions = new GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
+    let draw_options =
+        new DrawingOptions(
+            TextOptions = text_options,
+            GraphicsOptions = new GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
+        )
+
+    let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
+
+    let render_char_level (font: Font) (c: int32) =
+        let s = code_to_string c
+        let render_options = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+        let size = TextMeasurer.Measure(s, render_options)
+        let img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
+
+        try
+            img.Mutate<PixelFormats.Rgba32>(fun img ->
+                img.DrawText(draw_options, s, font, Color.White, new PointF(0f, 0f))
+                |> ignore
             )
+        with err ->
+            Logging.Warn "Exception occurred rendering glyph with code point %i: %O" (int c) err
+        img
 
-        let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
+    let render_char (c: int32) =
+        let sm = render_char_level FONT_SM c
+        let md = render_char_level FONT_MD c
+        let lg = render_char_level FONT_LG c
 
-        let render_char (c: int32) =
-            let s = code_to_string c
-            let size = TextMeasurer.Measure(s, render_options)
-            use img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
+        let texture, sprites =
+            Sprite.upload_many
+                "LOOSE_CHAR"
+                false
+                true
+                [|
+                    {
+                        Label = "LOOSE_CHAR_SM"
+                        Rows = 1
+                        Columns = 1
+                        Image = sm
+                        DisposeImageAfter = true
+                    }
+                    {
+                        Label = "LOOSE_CHAR_MD"
+                        Rows = 1
+                        Columns = 1
+                        Image = md
+                        DisposeImageAfter = true
+                    }
+                    {
+                        Label = "LOOSE_CHAR_LG"
+                        Rows = 1
+                        Columns = 1
+                        Image = lg
+                        DisposeImageAfter = true
+                    }
+                |]
 
-            try
+        if sprites.Length = 3 then
+            char_lookup_sm.Add(c, snd sprites.[0])
+            char_lookup_md.Add(c, snd sprites.[1])
+            char_lookup_lg.Add(c, snd sprites.[2])
+        else failwithf "Sprites for glyph with code point %i didn't upload correctly" (int c)
+
+    let render_atlas_level (font: Font) : Bitmap * GlyphInfo list list * float32 =
+        let row_spacing = font.Size * 1.5f
+        let render_options = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+
+        let row_glyph_info chars =
+            let mutable w = 0.0f
+            let mutable high_surrogate: char = ' '
+
+            seq {
+                for c in chars do
+                    if Char.IsHighSurrogate c then
+                        high_surrogate <- c
+                    else
+                        let code =
+                            if Char.IsLowSurrogate c then
+                                Char.ConvertToUtf32(high_surrogate, c)
+                            else
+                                int32 c
+
+                        let size = TextMeasurer.Measure(code_to_string code, render_options)
+                        w <- w + size.Width + 2.0f
+
+                        yield
+                            {
+                                Code = code
+                                Size = size
+                                Offset = w - size.Width - 1.0f
+                            }
+            }
+            |> List.ofSeq
+
+        let rows =
+            "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
+            + Feather.CONCAT
+            |> Seq.chunkBySize 30
+            |> Seq.map (String)
+
+        let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
+
+        let h = float32 glyphs.Length * row_spacing |> int
+
+        let w =
+            glyphs
+            |> List.map (fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f)
+            |> List.max
+            |> int
+
+        assert(int w <= 4096)
+        if int w > Texture.MAX_TEXTURE_SIZE then
+            Logging.Critical "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
+        assert(int h <= 4096)
+        if int h > Texture.MAX_TEXTURE_SIZE then
+            Logging.Critical "Font atlas height of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
+
+        let img = new Bitmap(w, h)
+
+        for i, row in List.indexed glyphs do
+            for glyph in row do
                 img.Mutate<PixelFormats.Rgba32>(fun img ->
-                    img.DrawText(draw_options, s, font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
+                    img.DrawText(
+                        draw_options,
+                        code_to_string glyph.Code,
+                        font,
+                        Color.White,
+                        new PointF(glyph.Offset, row_spacing * float32 i)
+                    )
                     |> ignore
                 )
-            with err ->
-                Logging.Warn "Exception occurred rendering glyph with code point %i" (int c)
 
-            char_lookup.Add(
-                c,
-                Sprite.upload_one
-                    false
-                    true
+        img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
+
+        img, glyphs, row_spacing
+
+    // render a font texture atlas, containing common characters + icons
+    // characters outside this set are dynamically generated on use
+    let render_atlas() =
+
+        let sm, sm_glyphs, sm_spacing = render_atlas_level FONT_SM
+        let md, md_glyphs, md_spacing = render_atlas_level FONT_MD
+        let lg, lg_glyphs, lg_spacing = render_atlas_level FONT_LG
+
+        let atlas_texture, unused_layer_sprites =
+            Sprite.upload_many
+                "FONT_ATLASES"
+                true
+                true
+                [|
                     {
-                        Label = "LOOSE_CHAR"
+                        Label = "FONT_ATLAS_SM"
                         Rows = 1
                         Columns = 1
-                        Image = img
+                        Image = sm
                         DisposeImageAfter = true
                     }
-            )
-
-        // render a font texture atlas, containing common characters + icons
-        // characters outside this set are dynamically generated on use
-        let render_atlas () =
-            let row_spacing = SCALE * 1.6f
-
-            let row_glyph_info chars =
-                let mutable w = 0.0f
-                let mutable high_surrogate: char = ' '
-
-                seq {
-                    for c in chars do
-                        if Char.IsHighSurrogate c then
-                            high_surrogate <- c
-                        else
-                            let code =
-                                if Char.IsLowSurrogate c then
-                                    Char.ConvertToUtf32(high_surrogate, c)
-                                else
-                                    int32 c
-
-                            let size = TextMeasurer.Measure(code_to_string code, render_options)
-                            w <- w + size.Width + 2.0f
-
-                            yield
-                                {
-                                    Code = code
-                                    Size = size
-                                    Offset = w - size.Width - 1.0f
-                                }
-                }
-                |> List.ofSeq
-
-            let rows =
-                "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
-                + Feather.CONCAT
-                |> Seq.chunkBySize 30
-                |> Seq.map (String)
-
-            let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
-
-            let h = float32 glyphs.Length * row_spacing |> int
-
-            let w =
-                glyphs
-                |> List.map (fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f)
-                |> List.max
-                |> int
-
-            if int w > Texture.MAX_TEXTURE_SIZE then
-                Logging.Critical "Font atlas width of %i exceeds max texture size of %i!" w Texture.MAX_TEXTURE_SIZE
-
-            use img = new Bitmap(w, h)
-
-            for i, row in List.indexed glyphs do
-                for glyph in row do
-                    img.Mutate<PixelFormats.Rgba32>(fun img ->
-                        img.DrawText(
-                            draw_options,
-                            code_to_string glyph.Code,
-                            font,
-                            Color.White,
-                            new PointF(glyph.Offset, row_spacing * float32 i)
-                        )
-                        |> ignore
-                    )
-
-            img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
-
-            let atlas_sprite =
-                Sprite.upload_one
-                    true
-                    true
                     {
-                        Label = "FONT_ATLAS"
+                        Label = "FONT_ATLAS_MD"
                         Rows = 1
                         Columns = 1
-                        Image = img
+                        Image = md
                         DisposeImageAfter = true
                     }
+                    {
+                        Label = "FONT_ATLAS_LG"
+                        Rows = 1
+                        Columns = 1
+                        Image = lg
+                        DisposeImageAfter = true
+                    }
+                |]
 
-            for i, row in List.indexed glyphs do
-                for glyph in row do
-                    let sprite =
-                        Texture.create_sprite
-                            (glyph.Offset |> int, row_spacing * float32 i |> int)
-                            1
-                            (int glyph.Width, int glyph.Height)
-                            (1, 1)
-                            atlas_sprite.Texture
+        for i, row in List.indexed sm_glyphs do
+            for glyph in row do
+                let sprite =
+                    Texture.create_sprite
+                        (glyph.Offset |> int, sm_spacing * float32 i |> int)
+                        1
+                        (int glyph.Width, int glyph.Height)
+                        (1, 1)
+                        atlas_texture
 
-                    char_lookup.Add(
-                        glyph.Code,
-                        { sprite with
-                            PrecomputedQuad =
-                                ValueSome(
-                                    Rect
-                                        .Box(
-                                            glyph.Offset / float32 w,
-                                            (row_spacing * float32 i) / float32 h,
-                                            glyph.Width / float32 w,
-                                            glyph.Height / float32 h
-                                        )
-                                        .AsQuad
-                                )
-                        }
-                    )
+                char_lookup_sm.Add(
+                    glyph.Code,
+                    { sprite with
+                        PrecomputedQuad =
+                            ValueSome(
+                                Rect
+                                    .Box(
+                                        glyph.Offset / float32 atlas_texture.Width,
+                                        (sm_spacing * float32 i) / float32 atlas_texture.Height,
+                                        glyph.Width / float32 atlas_texture.Width,
+                                        glyph.Height / float32 atlas_texture.Height
+                                    )
+                                    .AsQuad
+                            )
+                    }
+                )
 
-        do render_atlas ()
+        for i, row in List.indexed md_glyphs do
+            for glyph in row do
+                let sprite =
+                    Texture.create_sprite
+                        (glyph.Offset |> int, md_spacing * float32 i |> int)
+                        2
+                        (int glyph.Width, int glyph.Height)
+                        (1, 1)
+                        atlas_texture
 
-        member this.Char(c: int32) =
-            if not <| char_lookup.ContainsKey c then
-                render_char c
+                char_lookup_md.Add(
+                    glyph.Code,
+                    { sprite with
+                        PrecomputedQuad =
+                            ValueSome(
+                                Rect
+                                    .Box(
+                                        glyph.Offset / float32 atlas_texture.Width,
+                                        (md_spacing * float32 i) / float32 atlas_texture.Height,
+                                        glyph.Width / float32 atlas_texture.Width,
+                                        glyph.Height / float32 atlas_texture.Height
+                                    )
+                                    .AsQuad
+                            )
+                    }
+                )
 
-            char_lookup.[c]
+        for i, row in List.indexed lg_glyphs do
+            for glyph in row do
+                let sprite =
+                    Texture.create_sprite
+                        (glyph.Offset |> int, lg_spacing * float32 i |> int)
+                        3
+                        (int glyph.Width, int glyph.Height)
+                        (1, 1)
+                        atlas_texture
 
-        member this.Dispose() =
-            char_lookup.Values |> Seq.iter (Sprite.destroy >> ignore)
+                char_lookup_lg.Add(
+                    glyph.Code,
+                    { sprite with
+                        PrecomputedQuad =
+                            ValueSome(
+                                Rect
+                                    .Box(
+                                        glyph.Offset / float32 atlas_texture.Width,
+                                        (lg_spacing * float32 i) / float32 atlas_texture.Height,
+                                        glyph.Width / float32 atlas_texture.Width,
+                                        glyph.Height / float32 atlas_texture.Height
+                                    )
+                                    .AsQuad
+                            )
+                    }
+                )
 
-        member val CharSpacing = -0.04f with get, set
-        member val SpaceWidth = 0.25f with get, set
-        member val ShadowDepth = 0.09f with get, set
+        unused_layer_sprites |> Seq.map snd |> Seq.iter (Sprite.destroy >> ignore)
+
+    do render_atlas ()
+
+    member this.Char(c: int32) =
+        if not <| char_lookup_lg.ContainsKey c then
+            render_char c
+
+        char_lookup_lg.[c]
+
+    member this.Dispose() =
+        char_lookup_sm.Values |> Seq.iter (Sprite.destroy >> ignore)
+        char_lookup_md.Values |> Seq.iter (Sprite.destroy >> ignore)
+        char_lookup_lg.Values |> Seq.iter (Sprite.destroy >> ignore)
+
+    member this.CharSpacing = options.CharSpacing
+    member this.SpaceWidth = options.SpaceWidth
+    member this.ShadowDepth = options.ShadowDepth
+
+module Fonts =
 
     let collection = new FontCollection()
 
     let add (stream: Stream) = collection.Install stream |> ignore
 
-    let create (name: string) =
+    let create (name: string) (options: SpriteFontOptions) =
         let found, family = collection.TryFind name
 
         let family =
@@ -208,8 +338,7 @@ module Fonts =
                 Logging.Error "Couldn't find font '%s', defaulting" name
                 collection.Find "Inconsolata"
 
-        let font = family.CreateFont(SCALE * 4.0f / 3.0f)
-        new SpriteFont(font, [ collection.Find "feather" ])
+        new SpriteFont(family, [ collection.Find "feather" ], options)
 
     open System.Reflection
 
@@ -227,10 +356,10 @@ module Fonts =
     Font rendering
 *)
 
-open Fonts
-
 // todo: combine this text api with the Render api
 module Text =
+
+    let SCALE = 100.0f
 
     let measure (font: SpriteFont, text: string) : float32 =
         let mutable width = -font.CharSpacing

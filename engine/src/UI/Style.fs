@@ -1,7 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Common
-open Percyqaz.Flux.Graphics.Fonts
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 
 open System.Drawing
