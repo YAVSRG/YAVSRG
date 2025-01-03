@@ -13,25 +13,28 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
     let retries_slider = Animation.Fade(0.0f)
     let quits_slider = Animation.Fade(0.0f)
 
-    let GRAPH_THICKNESS = 30.0f
     let CONTENT_HEIGHT = 165.0f
-    let CONTENT_WIDTH = 300.0f
-    let CONTENT_GAP = 100.0f
 
     override this.Draw() =
         Render.rect this.Bounds Colors.shadow_2.O2
 
-        let graph_radius = this.Bounds.Height * 0.4f
-        let midpoint = this.Bounds.CenterX - (CONTENT_WIDTH - graph_radius * 2.0f) * 0.5f
-        let graph_origin = midpoint - (graph_radius * 2.0f + CONTENT_GAP) * 0.5f
+        let graph_radius = min (this.Bounds.Height * 0.4f) (this.Bounds.Width * 0.15f)
+        let graph_thickness = graph_radius * 0.3f
+        let content_width = graph_radius * 3.0f
+        let padding = 15f + graph_radius * 0.05f
 
-        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - GRAPH_THICKNESS) graph_radius
+        let overall_width = content_width + graph_radius * 2.0f + padding
+
+        let graph_origin = this.Bounds.Left + 0.5f * (this.Bounds.Width - overall_width) + graph_radius
+        let content_bounds = this.Bounds.SliceX(overall_width).SliceY(CONTENT_HEIGHT).SliceR(content_width).TranslateY(-5.0f)
+
+        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - graph_thickness) graph_radius
             0.0 (float completed_slider.Value)
             Colors.green_accent
-        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - GRAPH_THICKNESS) graph_radius
+        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - graph_thickness) graph_radius
             (float completed_slider.Value) (float completed_slider.Value + float retries_slider.Value)
             Colors.yellow_accent
-        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - GRAPH_THICKNESS) graph_radius
+        Wedge.draw (graph_origin, this.Bounds.CenterY) (graph_radius - graph_thickness) graph_radius
             (float completed_slider.Value + float retries_slider.Value) (float completed_slider.Value + float retries_slider.Value + float quits_slider.Value)
             Colors.red_accent
 
@@ -42,8 +45,6 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
 
         if plays = 0 then
             Text.fill_b(Style.font, Icons.PIE_CHART, Rect.Box(graph_origin, this.Bounds.CenterY, 0.0f, 0.0f).Expand(graph_radius), Colors.text_greyout, Alignment.CENTER)
-
-        let content_bounds = this.Bounds.SliceY(CONTENT_HEIGHT).ShrinkL(midpoint - this.Bounds.Left).SliceL(CONTENT_WIDTH).TranslateY(-10.0f)
 
         Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_played") plays, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
 
