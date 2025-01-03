@@ -1,24 +1,13 @@
 ﻿namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
-open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
-open Prelude
-open Prelude.Charts
-open Prelude.Charts.Processing
-open Prelude.Gameplay.Replays
-open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
-open Interlude.Options
-open Interlude.UI
 open Interlude.Content
-open Interlude.Features.Gameplay
-open Interlude.Features.Online
 open Interlude.Features.Play
-open Interlude.Features.Pacemaker
 open Interlude.Features.Skins
 
 [<AutoOpen>]

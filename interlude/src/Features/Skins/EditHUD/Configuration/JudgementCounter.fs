@@ -150,7 +150,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
     let font_texture = Content.Texture "judgement-counter-font"
 
     let preview =
-        { new ConfigPreview(pos.Value) with
+        { new ElementPreview(pos.Value) with
             override this.DrawComponent(bounds) =
                 let h = bounds.Height / float32 (ruleset.Judgements.Length + if show_ratio.Value then 1 else 0)
                 let mutable r = bounds.SliceT(h)

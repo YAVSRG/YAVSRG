@@ -9,7 +9,7 @@ open Interlude.Features.Gameplay
 open Interlude.UI
 
 [<AbstractClass>]
-type ConfigPreview(position: HudPosition) =
+type ElementPreview(position: HudPosition) =
     inherit StaticWidget(NodeType.None)
 
     let keycount = int (SelectedChart.keymode ())

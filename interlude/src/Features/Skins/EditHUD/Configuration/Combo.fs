@@ -30,7 +30,7 @@ type ComboPage(on_close: unit -> unit) =
 
     let texture = Content.Texture "combo-font"
     let preview =
-        { new ConfigPreview(config.ComboPosition) with
+        { new ElementPreview(config.ComboPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Combo.draw_combo_centered(texture, bounds, Color.White, 727, font_spacing.Value)

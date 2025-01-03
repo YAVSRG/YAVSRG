@@ -30,7 +30,7 @@ type ProgressPiePage(on_close: unit -> unit) =
     let font_texture = Content.Texture "progress-meter-font"
 
     let preview =
-        { new ConfigPreview(pos.Value) with
+        { new ElementPreview(pos.Value) with
             override this.DrawComponent(bounds) =
                 ProgressMeter.draw_pie(bounds.SliceT(bounds.Width), color.Value, background_color.Value, 0.6f)
 
