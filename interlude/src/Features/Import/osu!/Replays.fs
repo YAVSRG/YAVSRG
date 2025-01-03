@@ -13,15 +13,6 @@ open Interlude.UI
 
 module Replays =
 
-    let parse_replay_file (replay_path: string) =
-        try
-            use file = File.OpenRead replay_path
-            use br = new BinaryReader(file)
-            Some(OsuScoreDatabase_Score.Read br)
-        with err ->
-            Logging.Error "Error loading replay file %s: %O" replay_path err
-            None
-
     // todo: should this be in prelude?
     let convert_replay_to_score (replay: OsuScoreDatabase_Score) (chart: Chart) (osu_chart_rate: float32<rate>) : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods replay.ModsUsed with

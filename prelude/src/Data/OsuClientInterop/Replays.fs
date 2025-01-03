@@ -7,11 +7,12 @@ open SevenZip.Compression
 open Prelude
 open Prelude.Gameplay.Replays
 
+type OsuReplay = OsuScoreDatabase_Score
+
 module OsuReplay =
 
-    let decode_replay (replay: OsuScoreDatabase_Score, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
-
-        if replay.CompressedReplayBytes.IsNone then 
+    let decode_replay (replay: OsuReplay, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
+        if replay.CompressedReplayBytes.IsNone then
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
 
         let input = new MemoryStream(replay.CompressedReplayBytes.Value)
@@ -79,6 +80,7 @@ module OsuReplay =
         output.Flush()
 
         {
+            FilePath = None
             Mode = 3uy
             Version = 20220216
             BeatmapHash = beatmap_hash
