@@ -206,10 +206,9 @@
     <Compile Include="Features\Skins\EditHUD\ConfigPages\InputMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\KeysPerSecond.fs" />
     <Compile Include="Features\Skins\EditHUD\ConfigPages\CustomImage.fs" />
-    <Compile Include="Features\Skins\EditHUD\Header.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
-    <Compile Include="Features\Skins\EditHUD\LayoutEditor.fs" />
     <Compile Include="Features\Skins\EditHUD\EditPage.fs" />
+    <Compile Include="Features\Skins\EditHUD\EditScreen.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Playfield.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNotes.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Notes.fs" />

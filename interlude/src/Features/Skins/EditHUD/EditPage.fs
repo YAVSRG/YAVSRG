@@ -6,7 +6,6 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
-open Interlude.Features.Gameplay
 
 type EditHUDPage() =
     inherit Page()
@@ -33,7 +32,8 @@ type EditHUDPage() =
         refresh_texture_grid()
         refresh_problems_list()
 
-    let meta_editor =
+    override this.Content() =
+        refresh ()
         let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
         let tab_buttons =
             RadioButtons.create_tabs
@@ -94,23 +94,7 @@ type EditHUDPage() =
         )
         |>> Container
         |+ preview
-
-    let layout_editor =
-        let mutable output : Widget = Dummy()
-        SelectedChart.if_loaded(fun info -> output <- LayoutEditor(info, { Left = 0.1f %+ 0.0f; Top = 0.1f %+ 0.0f; Right = 0.9f %- 0.0f; Bottom = 0.9f %- 0.0f }))
-        output
-
-    let supertabs = SwapContainer(layout_editor)
-
-    let editing_meta =
-        Setting.simple false
-        |> Setting.trigger (function true -> supertabs.Current <- meta_editor | false -> supertabs.Current <- layout_editor)
-
-    let header = EditHUDHeader(editing_meta)
-
-    override this.Content() =
-        refresh ()
-        supertabs
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -119,27 +103,11 @@ type EditHUDPage() =
     override this.Title = meta.Name
     override this.OnDestroy() = preview.Destroy()
 
-    override this.Init(parent) =
-        base.Init parent
-        header.Focus false
-
-    override this.Header() =
-        header
-        |> OverlayContainer
-        :> Widget
-
-    override this.OnEnterNestedPage() = header.Hide()
-
     override this.OnReturnFromNestedPage() =
         refresh ()
         preview.Refresh()
-        header.Show()
 
     override this.OnClose() =
-        match layout_editor with
-        | :? LayoutEditor as l -> l.Destroy()
-        | _ -> ()
-        header.Hide()
         Skins.save_skin_meta hud_id
             {
                 Name = name.Value.Trim()

@@ -82,7 +82,7 @@ type PositionerInfo(ctx: PositionerContext) =
         )
         |+ Button(
             Icons.EDIT + " " + %"hud.editor.advanced",
-            ignore,//(fun () -> EditHUDPage().Show()),
+            (fun () -> EditHUDPage().Show()),
             Position = Position.Row(340.0f, 60.0f).Shrink(10.0f, 5.0f)
         )
         |> this.Add
@@ -212,88 +212,3 @@ module EditHudScreen =
                 else
                     Song.seek 0.0f<ms>
         }
-
-type LayoutEditor(info: LoadedChartInfo, position: Position) =
-    inherit Container(NodeType.None)
-
-    let fbo = Render.borrow_fbo ()
-
-    let ctx : PositionerContext =
-        let state = PlayState.Dummy info
-        let noteskin_config = Content.NoteskinConfig
-        let playfield = Playfield(info.WithColors, state, noteskin_config, false)
-        playfield.Add(LanecoverOverReceptors())
-        let container = Container(NodeType.None)
-        container.Add playfield
-
-        let ctx : PositionerContext =
-            {
-                Screen = container
-                Playfield = playfield
-                State = state
-                Selected = HudElement.Accuracy
-                Positioners = Map.empty
-            }
-
-        let recreate_scoring() =
-            let replay_data: IReplayProvider = StoredReplayProvider.WavingAutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
-            let ruleset = Rulesets.current
-            let scoring = ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
-            state.ChangeScoring scoring
-
-        let mutable last_time = -Time.infinity
-
-        recreate_scoring()
-
-        playfield.Add({ new StaticWidget(NodeType.None) with
-            override this.Draw() = ()
-            override this.Update(elapsed_ms, moved) =
-                base.Update(elapsed_ms, moved)
-                let now = state.CurrentChartTime()
-                state.Scoring.Update (now)
-                if last_time > now then
-                    recreate_scoring()
-                last_time <- now
-        })
-
-        ctx
-
-    let bounds_placeholder =
-        Container(
-            NodeType.None,
-            Position = position
-        )
-
-    do
-        fbo.Unbind()
-
-    member this.PreviewBounds = bounds_placeholder.Bounds
-
-    override this.Update(elapsed_ms, moved) =
-        this.Bounds <- Render.bounds()
-        ctx.Screen.Update(elapsed_ms, moved)
-        base.Update(elapsed_ms, moved)
-        bounds_placeholder.Update(elapsed_ms, moved)
-
-    override this.Draw() =
-        fbo.Bind true
-        let screen_bounds = Render.bounds()
-        Background.draw (screen_bounds, Colors.white, 1.0f)
-        Render.rect screen_bounds (Color.Black.O4a(options.BackgroundDim.Value * 255.0f |> int))
-        ctx.Screen.Draw()
-        fbo.Unbind()
-        Render.rect (bounds_placeholder.Bounds.Translate(10.0f, 10.0f)) Colors.shadow_2.O2
-        Render.sprite bounds_placeholder.Bounds Color.White fbo.Sprite
-        base.Draw()
-
-    override this.Init(parent: Widget) =
-        this |* PositionerInfo ctx
-        HudElement.FULL_LIST
-        |> Seq.iter ctx.Create
-        base.Init parent
-        this.Bounds <- Render.bounds()
-        ctx.Screen.Init this
-        bounds_placeholder.Init this
-
-    member this.Destroy() =
-        (fbo :> System.IDisposable).Dispose()
