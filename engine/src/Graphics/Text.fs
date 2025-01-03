@@ -389,11 +389,15 @@ module Text =
         width
 
     let draw_b (font: SpriteFont, text: string, scale, x, y, (fg: Drawing.Color, bg: Drawing.Color)) =
+
         let level, scale_mult =
             let l1 = scale / font.BaseScale
-            if l1 < 0.95f then 0, l1
-            elif l1 < 1.9f then 1, l1 / 2.0f
-            else 2, l1 / 4.0f
+            if l1 < 1.05f then
+                0, l1
+            elif l1 < 2.1f then
+                1, l1 / 2.0f
+            else
+                2, l1 / 4.0f
         let char_lookup = font.CharLookup level
         let shadow_spacing = font.ShadowDepth * scale
         let mutable x = x
