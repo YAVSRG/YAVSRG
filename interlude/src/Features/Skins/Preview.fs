@@ -37,7 +37,7 @@ type SkinPreview(position: Position) as this =
                 outside_playfield.Add w
 
     let create_renderer (info: LoadedChartInfo) =
-        let state = PlayState.Dummy info
+        let state, recreate_scoring = PlayState.Dummy info
         let noteskin_config = Content.NoteskinConfig
         let playfield =
             Playfield(info.WithColors, state, noteskin_config, false)
@@ -53,12 +53,6 @@ type SkinPreview(position: Position) as this =
             })
         for elem in elements do
             construct_hud_element state elem playfield overlay_items
-
-        let recreate_scoring() =
-            let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
-            let ruleset = Rulesets.current
-            let scoring = ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
-            state.ChangeScoring scoring
 
         let mutable last_time = -Time.infinity
 

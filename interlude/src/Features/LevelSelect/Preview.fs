@@ -12,16 +12,24 @@ open Interlude.Features.Play
 type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     inherit Dialog()
 
+    let playstate, recreate_scoring = PlayState.Dummy info
+    let mutable playstate = playstate
+    let mutable recreate_scoring = recreate_scoring
+    let mutable last_time = -Time.infinity
+
     let mutable playfield =
-        Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
+        Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
         |+ LanecoverOverReceptors()
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
 
     let change_chart_listener =
         SelectedChart.on_chart_change_finished.Subscribe(fun info ->
+            let _playstate, _recreate_scoring = PlayState.Dummy info
+            playstate <- _playstate
+            recreate_scoring <- _recreate_scoring
             playfield <-
-                Playfield(info.WithColors, PlayState.Dummy info, Content.NoteskinConfig, false)
+                Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
             if this.Initialised then
@@ -49,6 +57,11 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         volume.Update(elapsed_ms, moved)
         timeline.Update(elapsed_ms, moved)
         playfield.Update(elapsed_ms, moved)
+        let now = playstate.CurrentChartTime()
+        playstate.Scoring.Update now
+        if last_time > now && Song.playing() then
+            recreate_scoring()
+        last_time <- now
 
         if (%%"preview").Tapped() || (%%"exit").Tapped() || Mouse.released Mouse.RIGHT then
             this.Close()
