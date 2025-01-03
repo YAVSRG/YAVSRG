@@ -27,7 +27,7 @@ module private ElementMenus =
     let show_menu (e: HudElement) (on_close: unit -> unit) =
         match e with
         | HudElement.Accuracy -> AccuracyPage(on_close).Show()
-        | HudElement.HitDeviations -> HitDeviationsPage(on_close).Show()
+        | HudElement.ErrorBar -> ErrorBarPage(on_close).Show()
         | HudElement.Combo -> ComboPage(on_close).Show()
         | HudElement.SkipButton -> SkipButtonPage(on_close).Show()
         | HudElement.Judgement -> JudgementPage(on_close).Show()

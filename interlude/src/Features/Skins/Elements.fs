@@ -13,7 +13,7 @@ module HudElement =
     let name (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy"
-        | HudElement.HitDeviations -> %"hud.hit_deviations"
+        | HudElement.ErrorBar -> %"hud.error_bar"
         | HudElement.Combo -> %"hud.combo"
         | HudElement.SkipButton -> %"hud.skip_button"
         | HudElement.Judgement -> %"hud.judgement"
@@ -30,7 +30,7 @@ module HudElement =
     let tooltip (e: HudElement) : string =
         match e with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
-        | HudElement.HitDeviations -> %"hud.hit_deviations.tooltip"
+        | HudElement.ErrorBar -> %"hud.error_bar.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
         | HudElement.SkipButton -> %"hud.skip_button.tooltip"
         | HudElement.Judgement -> %"hud.judgement.tooltip"
@@ -62,7 +62,7 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> cast Accuracy
-        | HudElement.HitDeviations -> cast HitDeviations
+        | HudElement.ErrorBar -> cast ErrorBar
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
         | HudElement.Judgement -> cast Judgement
@@ -87,7 +87,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.AccuracyEnabled)
-        | HudElement.HitDeviations ->
+        | HudElement.ErrorBar ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -209,7 +209,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.AccuracyPosition)
-        | HudElement.HitDeviations ->
+        | HudElement.ErrorBar ->
             Setting.make
                 (fun v ->
                     Skins.save_hud_config
@@ -332,8 +332,8 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
-        | HudElement.HitDeviations ->
-            if Content.HUD.TimingDisplayRotation <> HitDeviationsRotation.Normal then
+        | HudElement.ErrorBar ->
+            if Content.HUD.TimingDisplayRotation <> ErrorBarRotation.Normal then
                 all_defaults.TimingDisplayPosition.Rotate
             else all_defaults.TimingDisplayPosition
         | HudElement.Combo -> all_defaults.ComboPosition

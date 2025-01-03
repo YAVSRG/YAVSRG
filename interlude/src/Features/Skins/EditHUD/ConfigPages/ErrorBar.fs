@@ -7,7 +7,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 
-type HitDeviationsPage(on_close: unit -> unit) =
+type ErrorBarPage(on_close: unit -> unit) =
     inherit Page()
 
     let config = Content.HUD
@@ -38,66 +38,66 @@ type HitDeviationsPage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.hit_deviations.rotation",
+        |+ PageSetting(%"hud.error_bar.rotation",
             SelectDropdown(
                 [|
-                    HitDeviationsRotation.Normal, %"hud.hit_deviations.rotation.normal"
-                    HitDeviationsRotation.Clockwise, %"hud.hit_deviations.rotation.clockwise"
-                    HitDeviationsRotation.Anticlockwise, %"hud.hit_deviations.rotation.anticlockwise"
+                    ErrorBarRotation.Normal, %"hud.error_bar.rotation.normal"
+                    ErrorBarRotation.Clockwise, %"hud.error_bar.rotation.clockwise"
+                    ErrorBarRotation.Anticlockwise, %"hud.error_bar.rotation.anticlockwise"
                 |],
                 rotation
             )
         )
-            .Help(Help.Info("hud.hit_deviations.rotation"))
+            .Help(Help.Info("hud.error_bar.rotation"))
             .Pos(0)
-        |+ PageSetting(%"hud.hit_deviations.shownonjudgements", Checkbox show_non_judgements)
-            .Help(Help.Info("hud.hit_deviations.shownonjudgements"))
+        |+ PageSetting(%"hud.error_bar.shownonjudgements", Checkbox show_non_judgements)
+            .Help(Help.Info("hud.error_bar.shownonjudgements"))
             .Pos(2)
-        |+ PageSetting(%"hud.hit_deviations.halfscalereleases", Checkbox half_scale_releases)
-            .Help(Help.Info("hud.hit_deviations.halfscalereleases"))
+        |+ PageSetting(%"hud.error_bar.halfscalereleases", Checkbox half_scale_releases)
+            .Help(Help.Info("hud.error_bar.halfscalereleases"))
             .Pos(4)
-        |+ PageSetting(%"hud.hit_deviations.thickness", Slider(thickness, Step = 1f))
-            .Help(Help.Info("hud.hit_deviations.thickness"))
+        |+ PageSetting(%"hud.error_bar.thickness", Slider(thickness, Step = 1f))
+            .Help(Help.Info("hud.error_bar.thickness"))
             .Pos(6)
-        |+ PageSetting(%"hud.hit_deviations.showguide", Checkbox show_guide)
-            .Help(Help.Info("hud.hit_deviations.showguide"))
+        |+ PageSetting(%"hud.error_bar.showguide", Checkbox show_guide)
+            .Help(Help.Info("hud.error_bar.showguide"))
             .Pos(8)
-        |+ PageSetting(%"hud.hit_deviations.guide_thickness", Slider.Percent(guide_thickness))
-            .Help(Help.Info("hud.hit_deviations.guide_thickness"))
+        |+ PageSetting(%"hud.error_bar.guide_thickness", Slider.Percent(guide_thickness))
+            .Help(Help.Info("hud.error_bar.guide_thickness"))
             .Pos(10)
             .Conditional(show_guide.Get)
-        |+ PageSetting(%"hud.hit_deviations.releasesextraheight", Slider(release_thickness, Step = 1f))
-            .Help(Help.Info("hud.hit_deviations.releasesextraheight"))
+        |+ PageSetting(%"hud.error_bar.releasesextraheight", Slider(release_thickness, Step = 1f))
+            .Help(Help.Info("hud.error_bar.releasesextraheight"))
             .Pos(12)
-        |+ PageSetting(%"hud.hit_deviations.animationtime", Slider(Setting.uom animation_time, Step = 5f))
-            .Help(Help.Info("hud.hit_deviations.animationtime"))
+        |+ PageSetting(%"hud.error_bar.animationtime", Slider(Setting.uom animation_time, Step = 5f))
+            .Help(Help.Info("hud.error_bar.animationtime"))
             .Pos(14)
-        |+ PageSetting(%"hud.hit_deviations.timingwindowsopacity", Slider.Percent(windows_opacity))
-            .Help(Help.Info("hud.hit_deviations.timingwindowsopacity"))
+        |+ PageSetting(%"hud.error_bar.timingwindowsopacity", Slider.Percent(windows_opacity))
+            .Help(Help.Info("hud.error_bar.timingwindowsopacity"))
             .Pos(16)
-        |+ PageSetting(%"hud.hit_deviations.moving_average_type",
+        |+ PageSetting(%"hud.error_bar.moving_average_type",
             SelectDropdown(
                 [|
-                    HitDeviationsMovingAverageType.None, %"hud.hit_deviations.moving_average_type.none"
-                    HitDeviationsMovingAverageType.Arrow, %"hud.hit_deviations.moving_average_type.arrow"
-                    HitDeviationsMovingAverageType.ReplaceBars, %"hud.hit_deviations.moving_average_type.replace_bars"
+                    ErrorBarMovingAverageType.None, %"hud.error_bar.moving_average_type.none"
+                    ErrorBarMovingAverageType.Arrow, %"hud.error_bar.moving_average_type.arrow"
+                    ErrorBarMovingAverageType.ReplaceBars, %"hud.error_bar.moving_average_type.replace_bars"
                 |],
                 moving_average_type
             )
         )
-            .Help(Help.Info("hud.hit_deviations.moving_average_type"))
+            .Help(Help.Info("hud.error_bar.moving_average_type"))
             .Pos(18)
-        |+ PageSetting(%"hud.hit_deviations.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
-            .Help(Help.Info("hud.hit_deviations.moving_average_sensitivity"))
+        |+ PageSetting(%"hud.error_bar.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+            .Help(Help.Info("hud.error_bar.moving_average_sensitivity"))
             .Pos(20)
-            .Conditional(fun () -> moving_average_type.Value <> HitDeviationsMovingAverageType.None)
-        |+ PageSetting(%"hud.hit_deviations.moving_average_color", ColorPicker(moving_average_color, true))
-            .Help(Help.Info("hud.hit_deviations.moving_average_color"))
+            .Conditional(fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None)
+        |+ PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(moving_average_color, true))
+            .Help(Help.Info("hud.error_bar.moving_average_color"))
             .Pos(22, 3)
-            .Conditional(fun () -> moving_average_type.Value <> HitDeviationsMovingAverageType.None)
+            .Conditional(fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None)
         :> Widget
 
-    override this.Title = %"hud.hit_deviations"
+    override this.Title = %"hud.error_bar"
 
     override this.OnClose() =
         Skins.save_hud_config
@@ -116,8 +116,8 @@ type HitDeviationsPage(on_close: unit -> unit) =
                 TimingDisplayRotation = rotation.Value
                 TimingDisplayPosition =
                     if
-                        (Content.HUD.TimingDisplayRotation <> HitDeviationsRotation.Normal) <>
-                        (rotation.Value <> HitDeviationsRotation.Normal)
+                        (Content.HUD.TimingDisplayRotation <> ErrorBarRotation.Normal) <>
+                        (rotation.Value <> ErrorBarRotation.Normal)
                     then
                         Content.HUD.TimingDisplayPosition.Rotate
                     else Content.HUD.TimingDisplayPosition

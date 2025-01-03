@@ -57,7 +57,7 @@ module Spectate =
                 if hud_config.ComboEnabled then add_widget hud_config.ComboPosition Combo
                 if hud_config.ProgressMeterEnabled then add_widget hud_config.ProgressMeterPosition ProgressPie
                 if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
-                if hud_config.TimingDisplayEnabled then add_widget hud_config.TimingDisplayPosition HitDeviations
+                if hud_config.TimingDisplayEnabled then add_widget hud_config.TimingDisplayPosition ErrorBar
                 if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
                 if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition Judgement
                 if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLate
