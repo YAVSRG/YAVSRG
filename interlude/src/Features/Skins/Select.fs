@@ -163,7 +163,7 @@ type SelectSkinsPage() =
         if
             SelectedChart.WITH_COLORS.IsSome
             && Screen.change_new
-                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))
+                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
                 Screen.Type.Practice
                 Transitions.Default
         then
