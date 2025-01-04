@@ -10,14 +10,14 @@ open Prelude.Gameplay.Replays
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.User
 open Interlude.UI
+open System.Text.RegularExpressions
+
 
 module Replays =
 
     let parse_replay_file (replay_path: string) =
         try
-            use file = File.OpenRead replay_path
-            use br = new BinaryReader(file)
-            Some(OsuScoreDatabase_Score.Read br)
+            Some(OsuScoreDatabase_Score.ReadReplay replay_path)
         with err ->
             Logging.Error "Error loading replay file %s: %O" replay_path err
             None
@@ -43,11 +43,32 @@ module Replays =
                 Keys = chart.Keys
             }
         with err -> Error err.Message
+    let private RATE_REGEX =
+        Regex(
+            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
+        )
+
+    let detect_rate_mod (difficulty_name: string) : float32<rate> option =
+        let m = RATE_REGEX.Match difficulty_name
+
+        if m.Success then
+            let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
+
+            match Single.TryParse r with
+            | true, r -> Some (r * 1.0f<rate>)
+            | false, _ -> None
+        else
+            None
+open Replays
 
 type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay: Score -> unit) =
     inherit Page()
+    let extractRate (rateOpt: float32<rate> option) : float32<rate> =
+        rateOpt |> Option.defaultValue 1.0f<rate>
 
-    let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) 1.0f<rate> |> Setting.roundf_uom 2
+    let detectedRate = detect_rate_mod replay.Path.Value
+    let extractedRate = extractRate detectedRate    
+    let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) extractedRate |> Setting.roundf_uom 2
 
     let import() =
         match Replays.convert_replay_to_score replay chart rate.Value with
