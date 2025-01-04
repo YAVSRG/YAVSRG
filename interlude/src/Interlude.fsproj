@@ -209,8 +209,10 @@
     <Compile Include="Features\Skins\EditHUD\Configuration.fs" />
     <Compile Include="Features\Skins\EditHUD\Previews\SelectElement.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
-    <Compile Include="Features\Skins\EditHUD\EditHUDPage.fs" />
-    <Compile Include="Features\Skins\EditHUD\EditHUDScreen.fs" />
+    <Compile Include="Features\Skins\EditHUD\HUDOptions.fs" />
+    <Compile Include="Features\Skins\EditHUD\AnchorPage.fs" />
+    <Compile Include="Features\Skins\EditHUD\EditorControls.fs" />
+    <Compile Include="Features\Skins\EditHUD\EditHUD.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Playfield.fs" />
     <Compile Include="Features\Skins\EditNoteskin\HoldNotes.fs" />
     <Compile Include="Features\Skins\EditNoteskin\Notes.fs" />

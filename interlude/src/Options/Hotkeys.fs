@@ -55,6 +55,8 @@ module Hotkeys =
         Hotkeys.register "accept_offset" (mk Keys.Tab)
         Hotkeys.register "reset_offset" (mk Keys.Backspace)
         Hotkeys.register "hide_replay_overlay" (mk Keys.H)
+        Hotkeys.register "hud_anchor" (ctrl Keys.A)
+        Hotkeys.register "hud_reset_position" (ctrl Keys.R)
 
         Hotkeys.register "uprate_big" (ctrl_shift Keys.Equal)
         Hotkeys.register "downrate_big" (ctrl_shift Keys.Minus)

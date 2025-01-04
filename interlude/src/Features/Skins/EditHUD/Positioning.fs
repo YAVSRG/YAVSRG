@@ -380,7 +380,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
 
     override this.OnSelected by_mouse =
         base.OnSelected by_mouse
-        ctx.Selected <- elem
+        ctx.Selected <- Some elem
 
     override this.Draw() =
 
@@ -444,8 +444,9 @@ and PositionerContext =
         Screen: Container
         Playfield: Playfield
         State: PlayState
-        mutable Selected: HudElement
+        mutable Selected: HudElement option
         mutable Positioners: Map<HudElement, Positioner>
+        OnElementMoved: Event<unit>
     }
     member this.Create(e: HudElement) =
         match this.Positioners.TryFind e with
@@ -477,23 +478,29 @@ and PositionerContext =
 
             this.Positioners <- this.Positioners.Add(e, p)
 
-            if this.Selected = e then
+            if this.Selected = Some e then
                 if p.Initialised then p.Focus true else GameThread.defer (fun () -> p.Focus true)
 
     member this.Select(e: HudElement) =
-        if this.Selected <> e then
-            match this.Positioners.TryFind this.Selected with
+        if this.Selected <> Some e then
+            match this.Selected |> Option.bind this.Positioners.TryFind with
             | Some _ -> Selection.clear()
             | None -> ()
-            this.Selected <- e
+            this.Selected <- Some e
             match this.Positioners.TryFind e with
             | Some existing -> existing.Focus true
             | None -> ()
 
+    member this.ClearSelection() =
+        match this.Selected |> Option.bind this.Positioners.TryFind with
+        | Some _ -> Selection.clear()
+        | None -> ()
+        this.Selected <- None
+
     member this.ChangePositionRelative(to_playfield: bool, anchor: float32) =
-        match this.Positioners.TryFind this.Selected with
+        match this.Selected |> Option.bind this.Positioners.TryFind with
         | Some p ->
-            let setting = HudElement.position_setting this.Selected
+            let setting = HudElement.position_setting this.Selected.Value
             let current = setting.Value
 
             let bounds = p.Bounds
@@ -507,5 +514,5 @@ and PositionerContext =
                     Right = anchor %+ (bounds.Right - axis)
                     Bottom = current.Bottom
                 }
-            this.Create this.Selected
+            this.Create this.Selected.Value
         | None -> ()
