@@ -22,6 +22,11 @@ type EditHUDPage() =
 
     let textures_tab, refresh_texture_grid = TextureGrid.create_hud hud
     let problems_tab, refresh_problems_list = Problems.create_hud hud
+    let general_tab =
+        NavigationContainer.Column(WrapNavigation = false)
+        |+ PageTextEntry(%"skin.name", name).Pos(4)
+        |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
+        |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
 
     let refresh () =
         refresh_texture_grid()
@@ -29,15 +34,7 @@ type EditHUDPage() =
 
     override this.Content() =
         refresh ()
-
-        let general_tab =
-            NavigationContainer.Column(WrapNavigation = false)
-            |+ PageTextEntry(%"skin.name", name).Pos(4)
-            |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
-            |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
-
         let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
-
         let tab_buttons =
             RadioButtons.create_tabs
                 {
@@ -109,7 +106,6 @@ type EditHUDPage() =
     override this.OnReturnFromNestedPage() =
         refresh ()
         preview.Refresh()
-        base.OnReturnFromNestedPage()
 
     override this.OnClose() =
         Skins.save_skin_meta hud_id

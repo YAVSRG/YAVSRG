@@ -89,10 +89,10 @@ module Themes =
         for font in current.GetFonts() do
             Fonts.add font
 
-        if Style.font <> null then
+        if not (Object.ReferenceEquals(Style.font, null)) then
             Style.font.Dispose()
 
-        Style.font <- Fonts.create current_config.Font
+        Style.font <- Fonts.create current_config.Font SpriteFontOptions.Default
 
         Style.click <- Sounds.get "click"
         Style.hover <- Sounds.get "hover"

@@ -23,23 +23,23 @@ type AccuracyPage(on_close: unit -> unit) =
 
     let texture = Content.Texture "accuracy-font"
     let preview =
-        { new ConfigPreview(config.AccuracyPosition) with
+        { new ElementPreview(config.AccuracyPosition) with
             override this.DrawComponent(bounds) =
                 if use_font.Value then
                     Accuracy.draw_accuracy_centered(
                         texture,
                         bounds.ShrinkB(bounds.Height * 0.4f),
                         Color.White,
-                        Rulesets.current.FormatAccuracy 0.9672,
+                        Rulesets.current.FormatAccuracy 0.967234,
                         font_spacing.Value,
                         font_dot_spacing.Value,
                         font_percent_spacing.Value
                     )
                 else
-                    Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.9672, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, 0.5f)
+                    Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.967234, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, 0.5f)
 
                 if show_name.Value then
-                    Text.fill (Style.font, "SC J4", bounds.SliceB(bounds.Height * 0.4f), Color.White, 0.5f)
+                    Text.fill (Style.font, Rulesets.current.Name, bounds.SliceB(bounds.Height * 0.4f), Color.White, 0.5f)
         }
 
     override this.Content() =

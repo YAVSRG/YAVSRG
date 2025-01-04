@@ -38,9 +38,9 @@ module HelpOverlay =
                 if not _keep_alive then
                     t.Fade.Target <- 0.0f
 
-                if t.Delay > 0.0 then 
+                if t.Delay > 0.0 then
                     t.Delay <- t.Delay - elapsed_ms
-                else 
+                else
                     t.Fade.Update elapsed_ms
 
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
@@ -68,8 +68,10 @@ module HelpOverlay =
             | Some t ->
                 let screen_bounds = Render.bounds()
                 let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
-                
+
                 let alpha = t.Fade.Alpha
+
+                if alpha = 0 then () else
 
                 if not t.ByMouse then
 
@@ -179,7 +181,7 @@ type Help(content: Callout) =
 
             if next_hover && (match Selection.get_focused_element() with Some (:? Dropdown.Item) -> false | _ -> true) then
                 HelpOverlay.keep_alive id
-            else 
+            else
                 id <- -1
 
         hover <- next_hover

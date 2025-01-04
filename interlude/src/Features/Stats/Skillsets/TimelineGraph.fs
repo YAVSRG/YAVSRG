@@ -36,6 +36,13 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
         |> Seq.map (fun k -> k, TODAY.DayNumber - k.DayNumber, Map.find k Stats.PREVIOUS_SESSIONS)
         |> Array.ofSeq
 
+    let timeline_end =
+        if sessions.Length > 0 then
+            let date, _, _ = Array.last sessions
+            TODAY.DayNumber - date.DayNumber + 7 |> float32
+        else
+            187.0f
+
     let jack_data = sessions |> Array.map (fun (_, days_ago, sessions) -> { DaysAgo = days_ago; Value = sessions |> Seq.map _.KeymodeSkills.[keymode - 3].Jacks |> Seq.max })
     let chordstream_data = sessions |> Array.map (fun (_, days_ago, sessions) -> { DaysAgo = days_ago; Value = sessions |> Seq.map _.KeymodeSkills.[keymode - 3].Chordstream |> Seq.max })
     let stream_data = sessions |> Array.map (fun (_, days_ago, sessions) -> { DaysAgo = days_ago; Value = sessions |> Seq.map _.KeymodeSkills.[keymode - 3].Stream |> Seq.max })
@@ -71,6 +78,13 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
 
         else
             show_tooltip <- false
+
+        let distance_to_end = timeline_end - (day_offset.Target + day_range.Target)
+        if distance_to_end < 0.0f then
+            day_offset.Target <- day_offset.Target + distance_to_end
+
+        day_range.Update elapsed_ms
+        day_offset.Update elapsed_ms
 
     override this.Draw() =
         Render.rect this.Bounds Colors.shadow_2.O2

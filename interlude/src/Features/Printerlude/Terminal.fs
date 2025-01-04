@@ -127,11 +127,7 @@ module Terminal =
             current_line.Set(sprintf "%s \"%s\"" v path)
 
     let font =
-        lazy
-            (Fonts.create "Courier Prime Sans"
-             |> fun x ->
-                 x.SpaceWidth <- 0.75f
-                 x)
+        lazy (Fonts.create "Courier Prime Sans" { SpriteFontOptions.Default with SpaceWidth = 0.75f })
 
     let draw () =
         if not shown then

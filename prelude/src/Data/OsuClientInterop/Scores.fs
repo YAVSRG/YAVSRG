@@ -45,7 +45,7 @@ module Scores =
                 None
         | Some _ -> Some(converted_osu_chart, chart_hash, 1.0f<rate>)
 
-    let private import_osu_score (osu_root_folder: string) (user_db: UserDatabase) (score: OsuScoreDatabase_Score) (chart: Chart, chart_hash: string, chart_rate: Rate) : bool =
+    let private import_osu_score (osu_root_folder: string) (user_db: UserDatabase) (score: OsuReplay) (chart: Chart, chart_hash: string, chart_rate: Rate) : bool =
         let replay_file =
             Path.Combine(
                 osu_root_folder,
@@ -54,15 +54,7 @@ module Scores =
                 sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
             )
 
-        match
-            try
-                use file = File.OpenRead replay_file
-                use br = new BinaryReader(file)
-                Some(OsuScoreDatabase_Score.Read br)
-            with err ->
-                Logging.Error "Error loading replay file '%s': %O" replay_file err
-                None
-        with
+        match OsuReplay.TryReadFile replay_file with
         | None -> false
         | Some replay_info ->
 

@@ -61,10 +61,6 @@ type ScoreGraphLineColor =
     | Lamp = 1
     | Grade = 2
 
-type FailType =
-    | Instant = 0
-    | EndOfSong = 1
-
 [<Json.AutoCodec(false)>]
 type LaneCoverPresetOptions =
     {
@@ -159,10 +155,10 @@ type GameOptions =
         SelectedHUD: Setting<string>
         SelectedRuleset: Setting<string>
 
-        FailCondition: Setting<FailType>
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>
         EnablePacemakerFailMidway: Setting<bool>
+        SaveFailedScores: Setting<bool>
         OnlySaveNewRecords: Setting<bool>
         SelectedMods: Setting<ModState>
 
@@ -226,10 +222,10 @@ type GameOptions =
             SelectedHUD = Skins.selected_hud_id
             SelectedRuleset = Rulesets.selected_id
 
-            FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false
             EnablePacemakerFailMidway = Setting.simple true
+            SaveFailedScores = Setting.simple true
             OnlySaveNewRecords = Setting.simple false
             SelectedMods = Setting.simple Map.empty
 

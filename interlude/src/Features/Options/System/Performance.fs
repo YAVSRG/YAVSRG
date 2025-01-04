@@ -26,14 +26,10 @@ type PerformanceSettingsPage() =
         && config.RenderMode.Value = FrameLimit.Smart
         && config.SmartCapAntiJitter.Value
 
+    let mutable msaa_restart = false
+
     override this.Content() =
         page_container()
-        |+ PageSetting(
-            %"system.cpu_saver",
-            Checkbox(config.InputCPUSaver |> Setting.trigger (ignore >> config.Apply))
-        )
-            .Help(Help.Info("system.cpu_saver"))
-            .Pos(0)
         |+ PageSetting(
             %"system.framelimit",
             SelectDropdown(
@@ -45,13 +41,32 @@ type PerformanceSettingsPage() =
             )
         )
             .Help(Help.Info("system.framelimit"))
-            .Pos(2)
+            .Pos(0)
         |+ Text(%"system.framelimit.unlimited_warning",
             Color = K Colors.text_red,
-            Position = pretty_pos(4, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
+            Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
             Align = Alignment.LEFT
         )
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
+        |+ PageSetting(
+            %"system.cpu_saver",
+            Checkbox(config.InputCPUSaver |> Setting.trigger (ignore >> config.Apply))
+        )
+            .Help(Help.Info("system.cpu_saver"))
+            .Pos(3)
+        |+ PageSetting(
+            %"system.msaa",
+            Selector([| 0, sprintf "%s (0x)" %"system.msaa.off"; 4, sprintf "%s (4x)" %"system.msaa.normal"; 24, sprintf "%s (24x)" %"system.msaa.fancy" |], config.MSAASamples |> Setting.trigger (fun _ -> msaa_restart <- true))
+        )
+            .Help(Help.Info("system.msaa"))
+            .Pos(5)
+        |+ Text(%"system.msaa.restart_warning",
+            Color = K Colors.text_red,
+            Position = pretty_pos(7, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
+            Align = Alignment.LEFT
+        )
+            .Conditional(fun () -> msaa_restart)
+
         |+ PageSetting(%"system.performance.antijitter",
             Checkbox(
                 config.SmartCapAntiJitter
@@ -59,12 +74,12 @@ type PerformanceSettingsPage() =
             )
         )
             .Help(Help.Info("system.performance.antijitter"))
-            .Pos(4)
+            .Pos(8)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
         |+ PageSetting(%"system.performance.screen_tear_alignment",
             Slider.Percent(screen_tear_alignment)
         )
-            .Pos(6)
+            .Pos(10)
             .Conditional(show_tearline_settings)
         |+ Text(%"system.performance.screen_tear_alignment.hint",
             Color = K Colors.text,
@@ -75,7 +90,7 @@ type PerformanceSettingsPage() =
         |+ PageSetting(%"system.performance.frame_multiplier",
             SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
         )
-            .Pos(9)
+            .Pos(12)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen)
         :> Widget
 

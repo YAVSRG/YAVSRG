@@ -96,7 +96,7 @@ module FileDrop =
             // todo: clean up extracted noteskin in downloads
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
-            match osu.Replays.parse_replay_file path with
+            match OsuReplay.TryReadFile path with
             | Some replay -> replay_dropped_ev.Trigger replay
             | None -> Notifications.error (%"notification.import_failed", "")
 

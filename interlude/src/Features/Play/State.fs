@@ -23,21 +23,6 @@ type PlayState =
     // todo: remove references to SelectedChart.rate.Value in all HUD elements -> member this.Rate = this.Scoring.Rate
     member this.Ruleset = this.Scoring.Ruleset
 
-    static member Dummy(info: LoadedChartInfo) =
-        let replay_data: IReplayProvider = StoredReplayProvider.AutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
-        let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
-        let first_note = info.WithMods.FirstNote
-
-        {
-            Chart = info.Chart
-            WithColors = info.WithColors
-            Scoring = scoring
-            ScoringChanged = Event<unit>()
-            CurrentChartTime = fun () -> Song.time_with_offset () - first_note
-            Pacemaker = PacemakerState.None
-        }
-
     member this.SubscribeEvents(handler: GameplayEvent -> unit) =
         let mutable obj: IDisposable = this.Scoring.OnEvent.Subscribe handler
 
@@ -46,6 +31,25 @@ type PlayState =
             obj <- this.Scoring.OnEvent.Subscribe handler
         )
 
-    member this.ChangeScoring(scoring) =
+    member this.ChangeScoring(scoring: ScoreProcessor) =
         this.Scoring <- scoring
         this.ScoringChanged.Trigger()
+
+    static member Dummy(info: LoadedChartInfo) =
+        let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
+        let ruleset = Rulesets.current
+        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+        let first_note = info.WithMods.FirstNote
+
+        let state =
+            {
+                Chart = info.Chart
+                WithColors = info.WithColors
+                Scoring = scoring
+                ScoringChanged = Event<unit>()
+                CurrentChartTime = fun () -> Song.time_with_offset () - first_note
+                Pacemaker = PacemakerState.None
+            }
+        let reset () =
+            state.ChangeScoring <| ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+        state, reset

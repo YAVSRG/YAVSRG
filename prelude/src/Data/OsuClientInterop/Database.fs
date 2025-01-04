@@ -273,6 +273,7 @@ type OsuDatabase =
 
 type OsuScoreDatabase_Score =
     {
+        FilePath: string option
         Mode: byte
         Version: int
         BeatmapHash: string
@@ -296,8 +297,11 @@ type OsuScoreDatabase_Score =
         OnlineScoreID: int64
         // Incomplete / may crash if you have target practice scores in your database
     }
-    static member Read(br: BinaryReader) =
+    member this.IsReplayFile = this.FilePath.IsSome
+
+    static member Read(file_path: string option, br: BinaryReader) =
         {
+            FilePath = file_path
             Mode = read_byte br
             Version = read_int br
             BeatmapHash = read_string br
@@ -320,10 +324,15 @@ type OsuScoreDatabase_Score =
                 if length < 0 then None else Some <| br.ReadBytes length
             OnlineScoreID = read_long br
         }
-    static member ReadReplay(path: string) =
-        use file = File.OpenRead path
-        use br = new BinaryReader(file)
-        OsuScoreDatabase_Score.Read(br)
+
+    static member TryReadFile(file_path: string) =
+        try
+            use file = File.OpenRead file_path
+            use br = new BinaryReader(file)
+            Some(OsuScoreDatabase_Score.Read(Some file_path, br))
+        with err ->
+            Logging.Error "Error loading replay file '%s': %O" file_path err
+            None
 
     member this.Write(bw: BinaryWriter) =
         bw.Write this.Mode
@@ -360,7 +369,7 @@ type OsuScoreDatabase_Beatmap =
     static member Read(br: BinaryReader) =
         {
             Hash = read_string br
-            Scores = Array.init (read_int br) (fun i -> OsuScoreDatabase_Score.Read br)
+            Scores = Array.init (read_int br) (fun i -> OsuScoreDatabase_Score.Read(None, br))
         }
 
 type OsuScoreDatabase =

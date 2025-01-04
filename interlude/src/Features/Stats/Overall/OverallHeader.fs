@@ -10,9 +10,10 @@ open Interlude.Features.Online
 type OverallHeader() =
     inherit Container(NodeType.Leaf)
 
-    let level = Stats.TOTAL_STATS.XP |> Stats.current_level
+    let xp = Stats.TOTAL_STATS.XP + Stats.CURRENT_SESSION.SessionScore
+    let level = xp |> Stats.current_level
     let xp_to_next_level = Stats.xp_for_level (level + 1) - Stats.xp_for_level level
-    let current_xp = Stats.TOTAL_STATS.XP - Stats.xp_for_level level
+    let current_xp = xp - Stats.xp_for_level level
 
     override this.Draw() =
 
@@ -35,13 +36,13 @@ type OverallHeader() =
             Align = Alignment.LEFT
         )
         |+ Text(
-            sprintf "%s: %i" (%"stats.sessions.notes_hit") Stats.TOTAL_STATS.NotesHit,
+            sprintf "%s: %i" (%"stats.sessions.notes_hit") (Stats.TOTAL_STATS.NotesHit + Stats.CURRENT_SESSION.NotesHit),
             Color = K Colors.text_subheading,
             Position = Position.SliceT(50.0f).ShrinkT(15.0f).ShrinkX(10.0f),
             Align = Alignment.RIGHT
         )
         |+ Text(
-            sprintf "XP: %i" Stats.TOTAL_STATS.XP,
+            sprintf "XP: %i" xp,
             Color = K Colors.text_subheading,
             Position = Position.ShrinkT(50.0f).SliceT(50.0f).ShrinkB(15.0f).ShrinkX(10.0f),
             Align = Alignment.RIGHT

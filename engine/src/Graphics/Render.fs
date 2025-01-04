@@ -36,8 +36,10 @@ module Render =
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
 
     let private FBO_POOL_SIZE = 6
-    let private fbo_ids = Array.zeroCreate<int> FBO_POOL_SIZE
-    let private texture_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private draw_buffer_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private draw_texture_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private read_buffer_ids = Array.zeroCreate<int> FBO_POOL_SIZE
+    let private read_texture_ids = Array.zeroCreate<int> FBO_POOL_SIZE
     let private in_use = Array.zeroCreate<bool> FBO_POOL_SIZE
 
     let mutable private fbo_stack: int list = []
@@ -52,8 +54,9 @@ module Render =
     type FBO =
         internal {
             sprite: Sprite
-            fbo_id: int
-            fbo_index: int
+            drawing_buffer: int
+            reading_buffer: int
+            index: int
         }
         /// The sprite representation of this FBO, to be used in drawing
         member this.Sprite = this.sprite
@@ -66,18 +69,24 @@ module Render =
             if List.isEmpty fbo_stack then
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_projection(_width, _height))
 
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.drawing_buffer)
 
             if clear then
                 GL.Clear(ClearBufferMask.ColorBufferBit)
 
-            fbo_stack <- this.fbo_id :: fbo_stack
+            fbo_stack <- this.drawing_buffer :: fbo_stack
 
         /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
         /// Must not be called if not already bound.
         member this.Unbind() =
             _batch.Draw ()
             fbo_stack <- List.tail fbo_stack
+
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, this.drawing_buffer)
+            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, this.reading_buffer)
+            GL.BlitFramebuffer(0, 0, _viewport_width, _viewport_height, 0, 0, _viewport_width, _viewport_height, ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest)
+            GL.BindFramebuffer(FramebufferTarget.ReadFramebuffer, 0)
+            GL.BindFramebuffer(FramebufferTarget.DrawFramebuffer, 0)
 
             if List.isEmpty fbo_stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
@@ -86,20 +95,26 @@ module Render =
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
 
         interface IDisposable with
-            override this.Dispose() = in_use.[this.fbo_index] <- false
+            override this.Dispose() = in_use.[this.index] <- false
 
-    let private initialise_fbos () =
+    let private initialise_fbos (msaa_samples: int) =
         for i in 0 .. (FBO_POOL_SIZE - 1) do
-            if (texture_ids.[i] <> 0) then
-                GL.DeleteTexture(texture_ids.[i])
-                texture_ids.[i] <- 0
+            if (draw_texture_ids.[i] <> 0) then
 
-            if (fbo_ids.[i] <> 0) then
-                GL.DeleteFramebuffer(fbo_ids.[i])
-                fbo_ids.[i] <- 0
+                GL.DeleteTexture(draw_texture_ids.[i])
+                draw_texture_ids.[i] <- 0
 
-            texture_ids.[i] <- GL.GenTexture()
-            GL.BindTexture(TextureTarget.Texture2DArray, texture_ids.[i])
+                GL.DeleteFramebuffer(draw_buffer_ids.[i])
+                draw_buffer_ids.[i] <- 0
+
+                GL.DeleteTexture(read_texture_ids.[i])
+                read_texture_ids.[i] <- 0
+
+                GL.DeleteFramebuffer(read_buffer_ids.[i])
+                read_buffer_ids.[i] <- 0
+
+            read_texture_ids.[i] <- GL.GenTexture()
+            GL.BindTexture(TextureTarget.Texture2DArray, read_texture_ids.[i])
 
             GL.TexImage3D(
                 TextureTarget.Texture2DArray,
@@ -131,13 +146,13 @@ module Render =
             GL.TexParameter(
                 TextureTarget.Texture2DArray,
                 TextureParameterName.TextureMinFilter,
-                int TextureMinFilter.Linear
+                int TextureMinFilter.Nearest
             )
 
             GL.TexParameter(
                 TextureTarget.Texture2DArray,
                 TextureParameterName.TextureMagFilter,
-                int TextureMagFilter.Linear
+                int TextureMagFilter.Nearest
             )
 
             GL.TexParameter(
@@ -152,8 +167,8 @@ module Render =
                 int TextureWrapMode.ClampToEdge
             )
 
-            GL.GenFramebuffers(1, &fbo_ids.[i])
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
+            GL.GenFramebuffers(1, &read_buffer_ids.[i])
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, read_buffer_ids.[i])
 
             GL.RenderbufferStorage(
                 RenderbufferTarget.RenderbufferExt,
@@ -165,10 +180,27 @@ module Render =
             GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0,
-                texture_ids.[i],
+                read_buffer_ids.[i],
                 0,
                 1
             )
+
+            draw_texture_ids.[i] <- GL.GenTexture()
+            GL.BindTexture(TextureTarget.Texture2DMultisample, draw_texture_ids.[i])
+
+            GL.TexImage2DMultisample(
+                TextureTargetMultisample.Texture2DMultisample,
+                msaa_samples,
+                PixelInternalFormat.Rgba,
+                _viewport_width,
+                _viewport_height,
+                false
+            )
+
+            GL.GenFramebuffers(1, &draw_buffer_ids.[i])
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, draw_buffer_ids.[i])
+
+            GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, draw_texture_ids.[i], 0)
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
 
@@ -217,7 +249,7 @@ module Render =
             | Some i ->
                 let texture: Texture =
                     {
-                        Handle = texture_ids.[i]
+                        Handle = read_texture_ids.[i]
                         TextureUnit = 0
 
                         Width = _viewport_width
@@ -249,8 +281,9 @@ module Render =
                 let fbo =
                     {
                         sprite = sprite
-                        fbo_id = fbo_ids.[i]
-                        fbo_index = i
+                        drawing_buffer = draw_buffer_ids.[i]
+                        reading_buffer = read_buffer_ids.[i]
+                        index = i
                     }
 
                 fbo.Bind true
@@ -393,7 +426,7 @@ module Render =
 
         _bounds <- Rect.Box(0.0f, 0.0f, _width, _height)
 
-        initialise_fbos ()
+        initialise_fbos 24
 
     let internal start () =
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -409,6 +442,7 @@ module Render =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
+        GL.Enable(EnableCap.Multisample)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)

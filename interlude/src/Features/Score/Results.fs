@@ -110,7 +110,7 @@ type Accuracy
         base.Draw()
 
         if hover then
-            let acc_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
+            let acc_tooltip = this.Bounds.SliceX(150.0f).BorderB(60.0f).TranslateY(15.0f)
             Render.rect (acc_tooltip.Expand(Style.PADDING)) Colors.white
             Render.rect acc_tooltip Colors.shadow_2
 
@@ -196,7 +196,7 @@ type Lamp
         base.Draw()
         
         if hover then
-            let raw_greats_tooltip = this.Bounds.Expand(-130.0f, 75.0f).SliceB(60.0f)
+            let raw_greats_tooltip = this.Bounds.SliceX(150.0f).BorderB(60.0f).TranslateY(15.0f)
             Render.rect (raw_greats_tooltip.Expand(Style.PADDING)) Colors.white
             Render.rect raw_greats_tooltip Colors.shadow_2
 

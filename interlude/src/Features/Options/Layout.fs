@@ -46,14 +46,14 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
             IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
-            Keybind = Bind.mk Keys.D2
+            Keybind = Bind.mk Keys.D1
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.AIRPLAY (%"system"),
             200.0f,
             (fun () -> current_tab.Set OptionsMenuTab.System),
             IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
-            Keybind = Bind.mk Keys.D1
+            Keybind = Bind.mk Keys.D2
         )
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.IMAGE (%"skins"),
@@ -72,7 +72,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
     let search_box =
         { new SearchBox(
-                Setting.simple "", 
+                Setting.simple "",
                 (fun query ->
                     if query = "" then
                         current_tab.Set State.recent_tab
@@ -92,7 +92,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let mutable transition = Transition.In
 
     member private this.Buttons = tab_buttons
-        
+
     override this.Init(parent) =
         this.Position <- Position.SliceT(HEIGHT)
         this
@@ -163,7 +163,7 @@ type private OptionsMenuFooter() as this =
 
     let HEIGHT = 70.0f
 
-    let items = 
+    let items =
         NavigationContainer.Row()
         |+ InlaidButton(
             %"menu.back",

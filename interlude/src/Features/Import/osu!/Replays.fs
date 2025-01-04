@@ -12,7 +12,6 @@ open Prelude.Data.User
 open Interlude.UI
 open System.Text.RegularExpressions
 
-
 module Replays =
 
     let parse_replay_file (replay_path: string) =

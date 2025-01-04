@@ -136,7 +136,7 @@ type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
     member this.Child = child
 
 [<AutoOpen>]
-module ConditionalExtensions = 
+module ConditionalExtensions =
 
     type Widget with
         member this.Conditional(condition: unit -> bool) = Conditional(condition, this)

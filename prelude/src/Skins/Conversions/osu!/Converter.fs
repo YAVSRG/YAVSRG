@@ -193,10 +193,12 @@ module OsuSkinConverter =
 
     let convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) =
         try
+            let mutable scale_2x = 1.0f
             let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
                 |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> expect_texture)
+                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
                 |> Seq.map (Texture.load_single_texture >> _.As2x)
                 |> Array.ofSeq
 
@@ -223,7 +225,7 @@ module OsuSkinConverter =
             for i, img in Array.append images optional_extras |> Array.indexed do
                 let padded = Image.pad (max_width, max_height) img
                 padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
-            Ok (-2.0f * float32 osu_overlap / float32 max_width)
+            Ok (-scale_2x * float32 osu_overlap / float32 max_width)
         with err ->
             Error err
 
@@ -237,6 +239,7 @@ module OsuSkinConverter =
 
     let convert_font_with_extras (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<ConvertedFont, exn> =
         try
+            let mutable scale_2x = 1.0f
             let dot =
                 Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source)
                 |> expect_texture
@@ -253,6 +256,7 @@ module OsuSkinConverter =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
                 |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> expect_texture)
+                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
                 |> Seq.map (Texture.load_single_texture >> _.As2x)
                 |> Array.ofSeq
 
@@ -266,7 +270,7 @@ module OsuSkinConverter =
                 padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
 
             Ok {
-                Spacing = -2.0f * float32 osu_overlap / float32 max_width
+                Spacing = -scale_2x * float32 osu_overlap / float32 max_width
                 DotExtraSpacing = -0.5f * float32 (max_width - dot.Width) / float32 max_width
                 ColonExtraSpacing = -0.5f * float32 (max_width - colon.Width) / float32 max_width
                 PercentExtraSpacing = -0.5f * float32 (max_width - percent.Width) / float32 max_width

@@ -15,7 +15,7 @@ type RateModPage(on_close: unit -> unit) =
     let show_mods = Setting.simple config.RateModMeterShowMods
 
     let preview =
-        { new ConfigPreview(config.RateModMeterPosition) with
+        { new ElementPreview(config.RateModMeterPosition) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (
                     Style.font,

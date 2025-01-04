@@ -9,7 +9,7 @@ open Prelude.Skins
 [<RequireQualifiedAccess>]
 type HudElement =
     | Accuracy
-    | HitDeviations
+    | ErrorBar
     | Combo
     | SkipButton
     | Judgement
@@ -25,7 +25,7 @@ type HudElement =
     static member FULL_LIST =
         [
             Accuracy
-            HitDeviations
+            ErrorBar
             Combo
             SkipButton
             Judgement
@@ -51,12 +51,12 @@ type ProgressPieLabel =
     | Countdown = 1
     | Percentage = 2
 
-type HitDeviationsMovingAverageType =
+type ErrorBarMovingAverageType =
     | None = 0
     | Arrow = 1
     | ReplaceBars = 2
 
-type HitDeviationsRotation =
+type ErrorBarRotation =
     | Normal = 0
     | Clockwise = 1
     | Anticlockwise = 2
@@ -117,10 +117,10 @@ type HudConfig =
         TimingDisplayReleasesExtraHeight: float32
         TimingDisplayWindowsOpacity: float32
         TimingDisplayHalfScaleReleases: bool
-        TimingDisplayMovingAverageType: HitDeviationsMovingAverageType
+        TimingDisplayMovingAverageType: ErrorBarMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
-        TimingDisplayRotation: HitDeviationsRotation
+        TimingDisplayRotation: ErrorBarRotation
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -241,10 +241,10 @@ type HudConfig =
             TimingDisplayReleasesExtraHeight = 5.0f
             TimingDisplayWindowsOpacity = 0.0f
             TimingDisplayHalfScaleReleases = true
-            TimingDisplayMovingAverageType = HitDeviationsMovingAverageType.None
+            TimingDisplayMovingAverageType = ErrorBarMovingAverageType.None
             TimingDisplayMovingAverageSensitivity = 0.75f
             TimingDisplayMovingAverageColor = Color.Aqua
-            TimingDisplayRotation = HitDeviationsRotation.Normal
+            TimingDisplayRotation = ErrorBarRotation.Normal
 
             ComboEnabled = true
             ComboPosition =

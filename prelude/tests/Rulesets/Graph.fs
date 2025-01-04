@@ -12,18 +12,18 @@ open Prelude.Gameplay.Scoring
 
 module Graph =
 
-    let TEST_SCORE = 
+    let TEST_SCORE =
         let beatmap_path = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
         let beatmap = Beatmap.FromFile beatmap_path |> expect
         let chart = (Osu_To_Interlude.convert beatmap { Config = ConversionOptions.Default; Source = beatmap_path } |> expect).Chart
-        let osu_replay = OsuScoreDatabase_Score.ReadReplay "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
+        let osu_replay = OsuReplay.TryReadFile "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr" |> Option.get
         let replay_data = OsuReplay.decode_replay (osu_replay, chart.FirstNote, 1.0f<rate>)
         let ruleset = SC.create 4
         ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider(replay_data)) chart.Notes 1.0f<rate>
 
     [<Test>]
     let BasicEndToEnd() =
-        
+
         let result = ScoreScreenStats.calculate TEST_SCORE [|true; true; true; true|]
         printfn "%A" result
 
@@ -32,13 +32,13 @@ module Graph =
     [<Test>]
     let TwoNotes_CorrectOutput() =
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-30.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)
@@ -57,16 +57,16 @@ module Graph =
         Assert.AreEqual((0.0f<ms / rate>, 0.0f<ms / rate>), result.ReleaseRange)
         Assert.AreEqual(-20.0f, round (result.TapMean |> float32))
         Assert.AreEqual(0.0f, round (result.ReleaseMean |> float32))
-    
+
     [<Test>]
     let OneNote_CorrectOutput() =
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-30.0f<ms>, 30.0f<ms>)
                 .Build()
@@ -83,11 +83,11 @@ module Graph =
         Assert.AreEqual((0.0f<ms / rate>, 0.0f<ms / rate>), result.ReleaseRange)
         Assert.AreEqual(-30.0f, round (result.TapMean |> float32))
         Assert.AreEqual(0.0f, round (result.ReleaseMean |> float32))
-    
+
     [<Test>]
     let ColumnFilter_TwoNotes() =
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -95,7 +95,7 @@ module Graph =
                 .Note(3000.0f<ms>, 2)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-30.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)
@@ -115,11 +115,11 @@ module Graph =
         Assert.AreEqual((0.0f<ms / rate>, 0.0f<ms / rate>), result.ReleaseRange)
         Assert.AreEqual(-20.0f, round (result.TapMean |> float32))
         Assert.AreEqual(0.0f, round (result.ReleaseMean |> float32))
-    
+
     [<Test>]
     let ColumnFilter_ZeroNotes() =
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -127,7 +127,7 @@ module Graph =
                 .Note(3000.0f<ms>, 2)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-30.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)

@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -21,7 +20,7 @@ type PacemakerOptionsPage() =
 
     let mode = Setting.simple existing.Mode
 
-    let accuracy = 
+    let accuracy =
         existing.Accuracy
         |> Setting.bounded (0.0, 1.0)
         |> Setting.round 3
@@ -30,7 +29,7 @@ type PacemakerOptionsPage() =
 
     let use_personal_best = Setting.simple existing.UsePersonalBest
 
-    override this.Content() = 
+    override this.Content() =
         let lamps =
             seq {
                 let lamp_count = Rulesets.current.Lamps.Length
@@ -50,18 +49,21 @@ type PacemakerOptionsPage() =
         |+ PageSetting(%"gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
             .Help(Help.Info("gameplay.pacemaker.onlysavenewrecords"))
             .Pos(4)
+        |+ PageSetting(%"gameplay.pacemaker.save_failed_scores", Checkbox options.SaveFailedScores)
+            .Help(Help.Info("gameplay.pacemaker.save_failed_scores"))
+            .Pos(6)
         |+ PageSetting(%"gameplay.pacemaker.type",
             SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
         )
-            .Pos(7)
+            .Pos(9)
         |+ PageSetting(%"gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
             .Help(Help.Info("gameplay.pacemaker.use_personal_best"))
-            .Pos(9)
-        |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32)) 
             .Pos(11)
+        |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
+            .Pos(13)
             .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy)
         |+ PageSetting(%"gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-            .Pos(13)
+            .Pos(15)
             .Conditional(fun () -> mode.Value = PacemakerMode.Lamp)
         :> Widget
 

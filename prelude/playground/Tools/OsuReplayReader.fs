@@ -15,7 +15,7 @@ open Prelude.Gameplay.Scoring
 
 let private compare_interlude_implementation_to_osu (chart: Chart, header: ChartImportHeader, replay: ReplayData, rate: Rate, chart_od: float, score_data: OsuScoreDatabase_Score) =
 
-    let window_modifier = 
+    let window_modifier =
         if score_data.ModsUsed &&& Mods.Easy <> Mods.None then OsuMania.Easy
         elif score_data.ModsUsed &&& Mods.HardRock <> Mods.None then OsuMania.HardRock
         else OsuMania.NoMod
@@ -110,9 +110,7 @@ let read_scores () =
                             sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
                         )
 
-                    use file = File.OpenRead replay_file
-                    use br = new BinaryReader(file)
-                    let replay_data = OsuScoreDatabase_Score.Read br
+                    let replay_data = OsuReplay.TryReadFile(replay_file).Value
 
                     let interlude_replay = OsuReplay.decode_replay (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
 

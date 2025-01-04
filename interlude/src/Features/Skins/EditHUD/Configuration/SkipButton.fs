@@ -22,7 +22,7 @@ type SkipButtonPage(on_close: unit -> unit) =
     let preview_text = [ (%%"skip").ToString() ] %> "play.skiphint"
 
     let preview =
-        { new ConfigPreview(config.SkipButtonPosition) with
+        { new ElementPreview(config.SkipButtonPosition) with
             override this.DrawComponent(bounds) =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }

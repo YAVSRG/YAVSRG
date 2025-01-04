@@ -11,7 +11,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
 [<Struct>]
-type private TimingDisplayHit =
+type private ErrorBarEvent =
     {
         Time: Time
         Position: float32
@@ -19,9 +19,9 @@ type private TimingDisplayHit =
         Judgement: int option
     }
 
-type HitDeviations(config: HudConfig, state: PlayState) =
+type ErrorBar(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
-    let hits = ResizeArray<TimingDisplayHit>()
+    let hits = ResizeArray<ErrorBarEvent>()
     let mutable w = 0.0f
 
     let mutable last_seen_time = -Time.infinity
@@ -38,10 +38,10 @@ type HitDeviations(config: HudConfig, state: PlayState) =
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
     let MAX_WINDOW = state.Ruleset.LargestWindow
-    let IS_ROTATED = config.TimingDisplayRotation <> HitDeviationsRotation.Normal
+    let IS_ROTATED = config.TimingDisplayRotation <> ErrorBarRotation.Normal
 
     do
-        if config.TimingDisplayMovingAverageType <> HitDeviationsMovingAverageType.None then
+        if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
             state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
@@ -69,7 +69,7 @@ type HitDeviations(config: HudConfig, state: PlayState) =
                 | DropHold
                 | RegrabHold -> ()
             )
-        if config.TimingDisplayMovingAverageType <> HitDeviationsMovingAverageType.ReplaceBars then
+        if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
             state.SubscribeEvents(fun ev ->
                 match ev.Action with
                 | Hit e ->
@@ -149,14 +149,14 @@ type HitDeviations(config: HudConfig, state: PlayState) =
                 | None -> ()
 
         match config.TimingDisplayRotation with
-        | HitDeviationsRotation.Clockwise ->
+        | ErrorBarRotation.Clockwise ->
             let center = this.Bounds.CenterY
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
                 fun time -> center + time / MAX_WINDOW * h
             let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
             draw r
-        | HitDeviationsRotation.Anticlockwise ->
+        | ErrorBarRotation.Anticlockwise ->
             let center = this.Bounds.CenterY
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
@@ -177,11 +177,11 @@ type HitDeviations(config: HudConfig, state: PlayState) =
 
         let r =
             match config.TimingDisplayRotation with
-            | HitDeviationsRotation.Clockwise ->
+            | ErrorBarRotation.Clockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
                 Rect.Create(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
-            | HitDeviationsRotation.Anticlockwise ->
+            | ErrorBarRotation.Anticlockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
                 Rect.Create(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
@@ -198,14 +198,14 @@ type HitDeviations(config: HudConfig, state: PlayState) =
         let now = state.CurrentChartTime()
 
         match config.TimingDisplayMovingAverageType with
-        | HitDeviationsMovingAverageType.ReplaceBars ->
+        | ErrorBarMovingAverageType.ReplaceBars ->
             Render.rect
                 (r (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
                 config.TimingDisplayMovingAverageColor
-        | HitDeviationsMovingAverageType.Arrow ->
+        | ErrorBarMovingAverageType.Arrow ->
             let quad =
                 match config.TimingDisplayRotation with
-                | HitDeviationsRotation.Clockwise ->
+                | ErrorBarRotation.Clockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
                     Quad.createv
@@ -213,7 +213,7 @@ type HitDeviations(config: HudConfig, state: PlayState) =
                         (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height)
                         (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height)
                         (this.Bounds.Right + 10.0f, center + moving_average.Value)
-                | HitDeviationsRotation.Anticlockwise ->
+                | ErrorBarRotation.Anticlockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
                     Quad.createv

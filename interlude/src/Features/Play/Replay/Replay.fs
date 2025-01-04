@@ -67,7 +67,7 @@ module ReplayScreen =
                     if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
                     if hud_config.TimingDisplayEnabled then 
                         add_widget hud_config.TimingDisplayPosition 
-                            (fun x -> HitDeviations(x).Conditional(show_hit_overlay.Get >> not))
+                            (fun x -> ErrorBar(x).Conditional(show_hit_overlay.Get >> not))
                     if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
                     if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition Judgement
                     if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLate

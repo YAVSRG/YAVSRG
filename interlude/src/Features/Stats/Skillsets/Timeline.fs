@@ -87,11 +87,6 @@ type SkillTimeline() =
         |* graph_container
         base.Init parent
 
-    override this.Update (elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
-        day_range.Update elapsed_ms
-        day_offset.Update elapsed_ms
-
     member this.Switch(k: int) =
         keymode.Value <- k
         refresh_graph()
