@@ -21,7 +21,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
             .Pos(0)
         |+ PageSetting(%"rulesets.grade.color", ColorPicker(color, false))
             .Pos(2, 3)
-        |+ PageSetting(%"rulesets.grade.accuracy", 
+        |+ PageSetting(%"rulesets.grade.accuracy",
             Slider(acc_required, Format = (fun v -> sprintf "%.4f%%" (v * 100.0f)), Step = 0.001f)
         )
             .Pos(5)
@@ -31,7 +31,12 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     override this.OnClose() =
         let new_grades = ruleset.Value.Grades |> Array.copy
         new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
-        ruleset.Set { ruleset.Value with Grades = new_grades }
+        ruleset.Set
+            { ruleset.Value with
+                Grades =
+                    new_grades
+                    |> Array.sortBy (fun l -> l.Accuracy)
+            }
 
 type EditGradesPage(ruleset: Setting<Ruleset>) =
     inherit Page()
@@ -43,7 +48,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
         |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
         |+ Button(
             Icons.TRASH,
-            (fun () -> 
+            (fun () ->
                 ConfirmPage(
                     [g.Name] %> "rulesets.grade.confirm_delete",
                     fun () -> delete_grade i

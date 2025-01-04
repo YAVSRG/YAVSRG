@@ -4,7 +4,7 @@
 - If unsure what to name your branch, I would leave it as 'main' (but I'm open to suggestions)
 - At the moment I review all PRs, with an eye to help you understand what changes need to be made if any
 - Prefer `snake_case` variable names over `camelCase`
-- There will soon be a script to run automatic indentation/formatting on all code - hence don't think to deeply about this kind of thing and just submit the PR :)  
+- There will soon be a script to run automatic indentation/formatting on all code - hence don't think too deeply about this kind of thing and just submit the PR :)  
 
 ### Commit messages
 
