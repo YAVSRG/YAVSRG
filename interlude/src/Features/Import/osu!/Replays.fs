@@ -16,7 +16,7 @@ module Replays =
 
     let parse_replay_file (replay_path: string) =
         try
-            Some(OsuScoreDatabase_Score.ReadReplay replay_path)
+            Some(OsuScoreDatabase_Score.TryReadFile replay_path)
         with err ->
             Logging.Error "Error loading replay file %s: %O" replay_path err
             None
@@ -65,7 +65,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
     let extractRate (rateOpt: float32<rate> option) : float32<rate> =
         rateOpt |> Option.defaultValue 1.0f<rate>
 
-    let detectedRate = detect_rate_mod replay.Path.Value
+    let detectedRate = detect_rate_mod replay.FilePath.Value
     let extractedRate = extractRate detectedRate    
     let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) extractedRate |> Setting.roundf_uom 2
 
