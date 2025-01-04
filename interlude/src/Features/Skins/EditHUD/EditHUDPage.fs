@@ -24,9 +24,43 @@ type EditHUDPage() =
     let problems_tab, refresh_problems_list = Problems.create_hud hud
     let general_tab =
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageTextEntry(%"skin.name", name).Pos(4)
-        |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
-        |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
+        |+ PageTextEntry(%"skin.name", name).Pos(0)
+        |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(2)
+        |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(4)
+        |+ PageButton(
+            %"skins.export",
+            (fun () ->
+                if not (Skins.export_skin hud_id) then
+                    Notifications.error (
+                        %"notification.export_skin_failure.title",
+                        %"notification.export_skin_failure.body"
+                    )
+            ),
+            Icon = Icons.UPLOAD
+        )
+            .Help(Help.Info("skins.export"))
+            .Pos(8, 2, PageWidth.Full)
+        |+ PageButton(
+            %"skins.open_folder",
+            (fun () ->
+                Skins.open_hud_folder hud_id |> ignore
+            ),
+            Icon = Icons.FOLDER
+        )
+            .Pos(10, 2, PageWidth.Full)
+        |+ PageButton(
+            %"skins.delete",
+            (fun () ->
+                ConfirmPage([meta.Name] %> "hud.delete.confirm",
+                    fun () ->
+                        if Skins.delete_hud hud_id then
+                            Menu.Back()
+                ).Show()
+            ),
+            Icon = Icons.TRASH
+        )
+            .Pos(12, 2, PageWidth.Full)
+    let elements_tab = ScrollContainer(ElementGrid.create())
 
     let refresh () =
         refresh_texture_grid()
@@ -34,66 +68,28 @@ type EditHUDPage() =
 
     override this.Content() =
         refresh ()
-        let tabs = SwapContainer(general_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        let tabs = SwapContainer(elements_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
         let tab_buttons =
             RadioButtons.create_tabs
                 {
                     Setting = Setting.make tabs.set_Current tabs.get_Current
                     Options =
                         [|
+                            elements_tab, %"hud.elements", K false
                             general_tab, %"skins.general", K false
                             textures_tab, %"skins.textures", K false
                             problems_tab, %"skins.problems", K false
                         |]
-                    Height = 50.0f
+                    Height = 60.0f
                 }
 
-        tab_buttons.Position <- pretty_pos(0, 2, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+        tab_buttons.Position <- Position.Row(40.0f, 60.0f).ShrinkR(PRETTY_MARGIN_X).ShrinkL(PRETTY_MARGIN_X + 480.0f)
 
-        NavigationContainer.Row()
-        |+ (
-            NavigationContainer.Column()
-            |+ tab_buttons
-            |+ tabs
-        )
-        |+ (
-            NavigationContainer.Column(Position = Position.ShrinkL(PRETTYWIDTH + PRETTY_MARGIN_X).Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceB(PRETTYHEIGHT * 3.0f))
-            |+ PageButton(
-                %"skins.export",
-                (fun () ->
-                    if not (Skins.export_skin hud_id) then
-                        Notifications.error (
-                            %"notification.export_skin_failure.title",
-                            %"notification.export_skin_failure.body"
-                        )
-                ),
-                Icon = Icons.UPLOAD
-            )
-                .Help(Help.Info("skins.export"))
-                .Pos(0, 2, PageWidth.Full)
-            |+ PageButton(
-                %"skins.open_folder",
-                (fun () ->
-                    Skins.open_hud_folder hud_id |> ignore
-                ),
-                Icon = Icons.FOLDER
-            )
-                .Pos(2, 2, PageWidth.Full)
-            |+ PageButton(
-                %"skins.delete",
-                (fun () ->
-                    ConfirmPage([meta.Name] %> "hud.delete.confirm",
-                        fun () ->
-                            if Skins.delete_hud hud_id then
-                                Menu.Back()
-                    ).Show()
-                ),
-                Icon = Icons.TRASH
-            )
-                .Pos(4, 2, PageWidth.Full)
-        )
+        NavigationContainer.Column()
+        |+ tab_buttons
+        |+ tabs
         |>> Container
-        |+ preview
+        |+ preview.Conditional(fun () -> tabs.Current <> elements_tab)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =
