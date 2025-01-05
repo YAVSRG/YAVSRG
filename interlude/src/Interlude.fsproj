@@ -169,7 +169,7 @@
     <Compile Include="Features\Skins\Elements\Pacemaker.fs" />
     <Compile Include="Features\Skins\Elements\JudgementCounter.fs" />
     <Compile Include="Features\Skins\Elements\MultiplayerScoreTracker.fs" />
-    <Compile Include="Features\Skins\Elements\RateMod.fs" />
+    <Compile Include="Features\Skins\Elements\RateMods.fs" />
     <Compile Include="Features\Skins\Elements\BPM.fs" />
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />
     <Compile Include="Features\Skins\Elements\KeysPerSecond.fs" />
@@ -201,7 +201,7 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\SkipButton.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Pacemaker.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\JudgementCounter.fs" />
-    <Compile Include="Features\Skins\EditHUD\Configuration\RateMod.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\RateMods.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\BPM.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\InputMeter.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\KeysPerSecond.fs" />

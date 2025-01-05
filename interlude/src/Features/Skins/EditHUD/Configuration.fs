@@ -15,7 +15,7 @@ module private ConfigurationPageHelper =
         | HudElement.EarlyLate -> EarlyLatePage(on_close).Show()
         | HudElement.ProgressPie -> ProgressPiePage(on_close).Show()
         | HudElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
-        | HudElement.RateMods -> RateModPage(on_close).Show()
+        | HudElement.RateMods -> RateModsPage(on_close).Show()
         | HudElement.BPM -> BPMPage(on_close).Show()
         | HudElement.InputMeter -> InputMeterPage(on_close).Show()
         | HudElement.Pacemaker -> PacemakerPage(on_close).Show()
