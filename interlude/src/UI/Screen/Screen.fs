@@ -52,8 +52,9 @@ module Screen =
         | LevelSelect = 3
         | Play = 4
         | Practice = 5
-        | Replay = 6
-        | Score = 7
+        | EditHud = 6
+        | Replay = 7
+        | Score = 8
 
     [<AbstractClass>]
     type T() =

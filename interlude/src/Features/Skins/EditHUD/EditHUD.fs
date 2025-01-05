@@ -39,16 +39,19 @@ module EditHudScreen =
             scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
             screen.State.ChangeScoring scoring
 
+        let mutable ctx: PositionerContext = Unchecked.defaultof<_>
+
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
 
-                let ctx =
+                ctx <-
                     {
                         Screen = Container(NodeType.None)
                         Playfield = this.Playfield
                         State = this.State
                         Selected = None
                         Positioners = Map.empty
+                        UndoHistory = []
                         OnElementMoved = Event<unit>()
                     }
 
@@ -82,6 +85,9 @@ module EditHudScreen =
                 time <- chart_time
 
                 base.Update(elapsed_ms, moved)
+
+                if Mouse.left_click() then
+                    ctx.ClearSelection()
 
                 if not replay_data.Finished then
                     scoring.Update chart_time

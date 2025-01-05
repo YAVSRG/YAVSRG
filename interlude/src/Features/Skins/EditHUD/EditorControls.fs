@@ -25,6 +25,8 @@ type private HUDEditorButton(label: string, hotkey: Bind, action: unit -> unit) 
                 this.Focus true
             if Mouse.left_click() then
                 this.Select true
+        elif this.Focused then
+            Selection.up true
         if hotkey.Tapped() then
             this.Select false
         base.Update(elapsed_ms, moved)
@@ -43,7 +45,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
         ctx.OnElementMoved.Publish.Add(
             fun () ->
                 fade.Target <- 0.0f
-                auto_show_timer <- 2000.0
+                auto_show_timer <- 1000.0
         )
 
         this
@@ -98,29 +100,37 @@ type private HUDEditorControls(ctx: PositionerContext) =
             .Conditional(fun () -> ctx.Selected.IsSome)
 
         |+ Text(
-            "Move: Arrow keys/Drag",
+            "Move: Arrow keys/Drag with mouse",
             Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(385.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
         |+ Text(
-            "Resize: Ctrl + Arrow keys/Drag corners",
+            "Hold Ctrl or drag corners to resize",
             Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(425.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
         |+ Text(
-            "Hold Shift for smaller adjustments",
+            "Hold Shift for symmetrical resizes",
             Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(465.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
-        |* Text(
-            "Undo: Ctrl + Z",
+        |+ Text(
+            "Hold Alt for smaller adjustments",
             Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(505.0f),
+            Color = K Colors.text_cyan,
+            Align = Alignment.RIGHT
+        )
+            .Conditional(fun () -> ctx.Selected.IsSome)
+        |+ HotkeyAction("undo", ctx.Undo)
+        |* Text(
+            sprintf "Undo: %O" %%"undo",
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(545.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
@@ -135,7 +145,8 @@ type private HUDEditorControls(ctx: PositionerContext) =
             Render.alpha_multiplier_restore old_m
 
     override this.Update(elapsed_ms, moved) =
-        base.Update(elapsed_ms, moved)
+        if fade.Alpha > 10 then
+            base.Update(elapsed_ms, moved)
 
         if fade.Target = 0.0f then
             auto_show_timer <- auto_show_timer - elapsed_ms

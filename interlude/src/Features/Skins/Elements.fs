@@ -8,6 +8,7 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
+// todo: move most of this to prelude and/or make them extension methods
 module HudElement =
 
     let name (e: HudElement) : string =
@@ -46,7 +47,6 @@ module HudElement =
 
     let can_configure (e: HudElement) =
         match e with
-        | HudElement.SkipButton -> not Content.Noteskin.IsEmbedded
         | HudElement.BPM -> false
         | HudElement.KeysPerSecond -> false
         | HudElement.Pacemaker -> false
