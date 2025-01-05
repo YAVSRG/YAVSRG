@@ -7,7 +7,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Skins
 
-type EditHUDPage() =
+type EditHUDPage(ctx: PositionerContext) =
     inherit Page()
 
     let hud_id = Skins.selected_hud_id.Value
@@ -110,3 +110,4 @@ type EditHUDPage() =
                 Author = author.Value.Trim()
                 Editor = let e = editor.Value.Trim() in if e = "" then None else Some e
             }
+        ctx.CreateAll()

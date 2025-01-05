@@ -55,8 +55,7 @@ module EditHudScreen =
                         OnElementMoved = Event<unit>()
                     }
 
-                HudElement.FULL_LIST
-                |> Seq.iter ctx.Create
+                ctx.CreateAll()
 
                 this
                 |+ ctx.Screen

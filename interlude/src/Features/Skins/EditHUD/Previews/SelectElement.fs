@@ -42,7 +42,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
 module ElementGrid =
 
     let create () =
-        let grid = GridFlowContainer(400.0f, 3, Spacing = (20.0f, 20.0f))
+        let grid = GridFlowContainer(400.0f, (if Render.width() >= 1680.0f then 4 else 3), Spacing = (20.0f, 20.0f))
         for element in HudElement.FULL_LIST do
             grid.Add(ElementCard(element, ignore))
         grid

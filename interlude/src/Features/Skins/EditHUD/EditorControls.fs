@@ -3,7 +3,6 @@
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Windowing
 open Percyqaz.Common
 open Prelude
 open Interlude.UI
@@ -51,13 +50,13 @@ type private HUDEditorControls(ctx: PositionerContext) =
         this
         |+ Text(
             Icons.MOVE + " " + %"hud.editor",
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
-            Align = Alignment.LEFT
+            Position = Position.SliceT(90.0f).SliceL(500.0f).TranslateY(10.0f),
+            Align = Alignment.CENTER
         )
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.PLUS_CIRCLE (%"hud.add_more_elements"),
-            %%"quick_menu",
-            (fun () -> EditHUDPage().Show()),
+            %%"options",
+            (fun () -> EditHUDPage(ctx).Show()),
             Position = Position.SliceT(65.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
 
@@ -76,8 +75,8 @@ type private HUDEditorControls(ctx: PositionerContext) =
         )
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.SETTINGS (%"hud.configure"),
-            %%"options",
-            (fun () -> let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Create v)),
+            %%"context_menu",
+            (fun () -> let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)),
             Position = Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
@@ -91,10 +90,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.REFRESH_CW (%"hud.reset_position"),
             %%"hud_reset_position",
-            (fun () ->
-                HudElement.position_setting(ctx.Selected.Value).Set(HudElement.default_position ctx.Selected.Value)
-                GameThread.defer (fun () -> ctx.Create ctx.Selected.Value)
-            ),
+            ctx.ResetCurrentPosition,
             Position = Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(295.0f).Expand(Style.PADDING)
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
@@ -127,7 +123,6 @@ type private HUDEditorControls(ctx: PositionerContext) =
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ HotkeyAction("undo", ctx.Undo)
         |* Text(
             sprintf "Undo: %O" %%"undo",
             Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(545.0f),
@@ -147,6 +142,18 @@ type private HUDEditorControls(ctx: PositionerContext) =
     override this.Update(elapsed_ms, moved) =
         if fade.Alpha > 10 then
             base.Update(elapsed_ms, moved)
+        else
+            if (%%"options").Tapped() then
+                EditHUDPage(ctx).Show()
+            elif (%%"context_menu").Tapped() then
+                let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)
+            elif (%%"hud_anchor").Tapped() then
+                AnchorPage(ctx).Show()
+            elif (%%"hud_reset_position").Tapped() then
+                ctx.ResetCurrentPosition()
+
+        if (%%"undo").Tapped() then
+            ctx.Undo()
 
         if fade.Target = 0.0f then
             auto_show_timer <- auto_show_timer - elapsed_ms

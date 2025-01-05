@@ -12,32 +12,32 @@ type AnchorPage(ctx: PositionerContext) =
         page_container()
         |+ PageButton(
             %"hud.anchor.playfield_center",
-            (fun () -> ctx.ChangePositionRelative(true, Alignment.CENTER); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(true, Alignment.CENTER); Menu.Exit())
         )
             .Pos(0)
         |+ PageButton(
             %"hud.anchor.playfield_left",
-            (fun () -> ctx.ChangePositionRelative(true, Alignment.LEFT); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(true, Alignment.LEFT); Menu.Exit())
         )
             .Pos(2)
         |+ PageButton(
             %"hud.anchor.playfield_right",
-            (fun () -> ctx.ChangePositionRelative(true, Alignment.RIGHT); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(true, Alignment.RIGHT); Menu.Exit())
         )
             .Pos(4)
         |+ PageButton(
             %"hud.anchor.screen_center",
-            (fun () -> ctx.ChangePositionRelative(false, Alignment.CENTER); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(false, Alignment.CENTER); Menu.Exit())
         )
             .Pos(7)
         |+ PageButton(
             %"hud.anchor.screen_left",
-            (fun () -> ctx.ChangePositionRelative(false, Alignment.LEFT); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(false, Alignment.LEFT); Menu.Exit())
         )
             .Pos(9)
         |+ PageButton(
             %"hud.anchor.screen_right",
-            (fun () -> ctx.ChangePositionRelative(false, Alignment.RIGHT); Menu.Exit())
+            (fun () -> ctx.ChangeCurrentAnchor(false, Alignment.RIGHT); Menu.Exit())
         )
             .Pos(11)
         |+ Callout.frame

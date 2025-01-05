@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude.Skins.HudLayouts
 open Interlude.Content
@@ -47,8 +48,19 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
 and Positioner(element: HudElement, ctx: PositionerContext) =
     inherit Container(NodeType.None)
 
+    let mutable increment = 5.0f
+    let ALT = Bind.mk Keys.LeftAlt
+
     let round (offset: float32, anchor: float32) =
-        System.MathF.Round(offset / 5.0f) * 5.0f, anchor
+        System.MathF.Round(offset / increment) * increment, anchor
+
+    let x_axis_align (position: Position) =
+        let center = (fst position.Left + fst position.Right) * 0.5f
+        let adjustment = System.MathF.Round(center / increment) * increment - center
+        { position with
+            Left = position.Left ^+ adjustment
+            Right = position.Right ^+ adjustment
+        }
 
     let mutable moving_with_keyboard = false
     let mutable dragging_from: (float32 * float32) option = None
@@ -65,10 +77,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
         let bounds = Position.calculate pos parent_bounds
 
         if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
-            { pos with
-                Right = pos.Left ^+ max 5.0f bounds.Width
-                Bottom = pos.Top ^+ max 5.0f bounds.Height
-            }
+            new_unsaved_pos
         else
             pos
 
@@ -90,15 +99,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             let value =
                 if this.Initialised then
                     ctx.OnElementMoved.Trigger()
-                    let bounds = Position.calculate value this.Parent.Bounds
-
-                    if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
-                        { value with
-                            Right = value.Left ^+ max 5.0f bounds.Width
-                            Bottom = value.Top ^+ max 5.0f bounds.Height
-                        }
-                    else
-                        value
+                    validate_pos this.Parent.Bounds value
                 else
                     value
 
@@ -113,6 +114,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 Right = new_unsaved_pos.Right ^+ x
                 Bottom = new_unsaved_pos.Bottom ^+ y
             }
+            |> x_axis_align
 
     member this.Resize(x, y) =
         this.Position <-
@@ -372,6 +374,8 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
         hover <- Mouse.hover this.Bounds
 
+        increment <- if ALT.Pressed() then 1.0f else 5.0f
+
         match dragging_from with
         | Some(x, y) ->
             let current = position.Value
@@ -380,11 +384,12 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
             this.Position <-
                 {
-                    Left = current.Left ^+ (new_x - x) |> round
+                    Left = current.Left ^+ (new_x - x)
                     Top = current.Top ^+ (new_y - y) |> round
-                    Right = current.Right ^+ (new_x - x) |> round
+                    Right = current.Right ^+ (new_x - x)
                     Bottom = current.Bottom ^+ (new_y - y) |> round
                 }
+                |> x_axis_align
 
             if not (Mouse.held Mouse.LEFT) then
                 dragging_from <- None
@@ -396,7 +401,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 else
                     ctx.Select element
             elif hover && Mouse.right_click () && HudElement.can_configure element then
-                show_menu element (fun () -> ctx.Create element)
+                show_menu element (fun () -> ctx.Recreate element)
 
         base.Update(elapsed_ms, moved)
 
@@ -467,7 +472,7 @@ and PositionerContext =
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
     }
-    member this.Create(e: HudElement) =
+    member this.Recreate(e: HudElement) =
         match this.Positioners.TryFind e with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
         | None -> ()
@@ -496,10 +501,14 @@ and PositionerContext =
 
             this.Positioners <- this.Positioners.Add(e, p)
 
+    member this.CreateAll() =
+        for element in HudElement.FULL_LIST do
+            this.Recreate element
+
     member this.Select(e: HudElement) = this.Selected <- Some e
     member this.ClearSelection() = this.Selected <- None
 
-    member this.ChangePositionRelative(to_playfield: bool, anchor: float32) =
+    member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) =
         match this.Selected |> Option.bind this.Positioners.TryFind with
         | Some p ->
             let setting = HudElement.position_setting this.Selected.Value
@@ -518,19 +527,27 @@ and PositionerContext =
                     Right = anchor %+ (bounds.Right - axis)
                     Bottom = current.Bottom
                 }
-            this.Create this.Selected.Value
+            this.Recreate this.Selected.Value
+        | None -> ()
+
+    member this.ResetCurrentPosition() =
+        match this.Selected with
+        | Some element ->
+            let setting = HudElement.position_setting element
+            this.AddUndoHistory(element, setting.Value)
+            setting.Set(HudElement.default_position element)
+            GameThread.defer (fun () -> this.Recreate element)
         | None -> ()
 
     member this.AddUndoHistory(element: HudElement, position: HudPosition) =
         this.UndoHistory <- (element, position) :: this.UndoHistory
-        Style.text_open.Play()
 
     member this.Undo() =
         match this.UndoHistory with
         | (element, previous_position) :: xs ->
             this.Selected <- Some element
             HudElement.position_setting(element).Set previous_position
-            this.Create element
+            this.Recreate element
             Style.click.Play()
             this.UndoHistory <- xs
         | _ -> ()
