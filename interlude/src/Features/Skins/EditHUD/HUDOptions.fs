@@ -60,7 +60,7 @@ type EditHUDPage(ctx: PositionerContext) =
             Icon = Icons.TRASH
         )
             .Pos(12, 2, PageWidth.Full)
-    let elements_tab = ScrollContainer(ElementGrid.create())
+    let elements_tab = ScrollContainer(ElementGrid.create(fun element -> HudElement.enabled_setting(element).Set true; ctx.Select element; Menu.Exit()))
 
     let refresh () =
         refresh_texture_grid()
@@ -68,7 +68,7 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Content() =
         refresh ()
-        let tabs = SwapContainer(elements_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        let tabs = SwapContainer(elements_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).ExpandB(80.0f))
         let tab_buttons =
             RadioButtons.create_tabs
                 {

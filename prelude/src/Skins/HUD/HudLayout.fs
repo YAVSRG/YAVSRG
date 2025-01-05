@@ -37,7 +37,7 @@ type HudLayout(storage) as this =
             for texture_id in HudTextureRules.list () do
                 yield! this.ValidateTexture(texture_id, HudTextureRules.get this.Config texture_id)
         }
-        
+
     static member FromZipStream(stream: Stream) =
         new HudLayout(Embedded(new ZipArchive(stream)))
 
