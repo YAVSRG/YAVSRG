@@ -10,7 +10,7 @@ open Interlude.Features.Gameplay
 type KeysPerSecond(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
-    let UPDATE_INTERVAL = 200.0
+    let UPDATE_INTERVAL = 100.0
     let mutable update_timer = UPDATE_INTERVAL
 
     let mutable kps = 0.0f
