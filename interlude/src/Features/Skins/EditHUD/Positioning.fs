@@ -551,3 +551,13 @@ and PositionerContext =
             Style.click.Play()
             this.UndoHistory <- xs
         | _ -> ()
+
+    member this.RemoveElement() =
+        match this.Selected with
+        | Some element ->
+            let enabled = HudElement.enabled_setting element
+            enabled.Set false
+            this.Recreate element
+            this.Selected <- None
+            Style.click.Play()
+        | None -> ()

@@ -123,9 +123,16 @@ type private HUDEditorControls(ctx: PositionerContext) =
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
+        |+ Text(
+            sprintf "Remove this element: %O" %%"delete",
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(545.0f),
+            Color = K Colors.text_cyan,
+            Align = Alignment.RIGHT
+        )
+            .Conditional(fun () -> ctx.Selected.IsSome)
         |* Text(
             sprintf "Undo: %O" %%"undo",
-            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(545.0f),
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(585.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
@@ -154,6 +161,8 @@ type private HUDEditorControls(ctx: PositionerContext) =
 
         if (%%"undo").Tapped() then
             ctx.Undo()
+        elif (%%"delete").Tapped() then
+            ctx.RemoveElement()
 
         if fade.Target = 0.0f then
             auto_show_timer <- auto_show_timer - elapsed_ms
