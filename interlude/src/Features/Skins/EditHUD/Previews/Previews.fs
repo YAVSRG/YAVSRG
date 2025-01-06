@@ -174,6 +174,113 @@ module SelectPreviews =
         fun (bounds: Rect) ->
             Text.fill (Style.font, Icons.FLAG, bounds.SliceX(bounds.Height * 2.0f), Color.White, Alignment.CENTER)
 
+    let private create_judgement_counter (config: HudConfig) : SelectPreview =
+        let ruleset = Rulesets.current
+        let texture = Content.Texture "judgement-counter-judgements"
+        let display: int option array = config.GetJudgementCounterDisplay ruleset
+
+        let font_texture = Content.Texture "judgement-counter-font"
+        let opacity = 255f * config.JudgementCounterOpacity |> int |> max 0 |> min 255
+
+        let count_alignment =
+            if config.JudgementCounterShowLabels then
+                Alignment.RIGHT
+            else
+                Alignment.CENTER
+
+        None,
+        fun (bounds: Rect) ->
+
+        let h =
+            bounds.Height
+            / float32 (ruleset.Judgements.Length + if config.JudgementCounterShowRatio then 1 else 0)
+
+        let mutable r = bounds.SliceT(h).Shrink(10.0f)
+
+        for i = 0 to ruleset.Judgements.Length - 1 do
+            let j = ruleset.Judgements.[i]
+
+            Render.rect r (j.Color.O1a opacity)
+            Render.rect (r.BorderCornersT 5.0f) (j.Color.O3a opacity)
+            Render.rect (r.BorderCornersB 5.0f) (j.Color.O3a opacity)
+            Render.rect (r.BorderL 5.0f) (j.Color.O3a opacity)
+            Render.rect (r.BorderL(5.0f).SlicePercentY(0.45f)) j.Color.O2
+            Render.rect (r.BorderR 5.0f) (j.Color.O3a opacity)
+
+            if config.JudgementCounterShowLabels then
+
+                match display.[i] with
+                | Some texture_index ->
+                    Render.tex_quad
+                        ((Sprite.fill_left (r.SlicePercentY(config.JudgementCounterTextScale).ShrinkX(10.0f)) texture).AsQuad)
+                        Color.White.AsQuad
+                        (Sprite.pick_texture (0, texture_index) texture)
+                | None ->
+                    Text.fill_b (
+                        Style.font,
+                        j.Name,
+                        r.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f),
+                        (Color.White, Color.Black),
+                        Alignment.LEFT
+                    )
+
+            if config.JudgementCounterUseFont then
+                JudgementCounter.draw_count_aligned (
+                    font_texture,
+                    (
+                        if config.JudgementCounterShowLabels then
+                            r.SlicePercentY(config.JudgementCounterTextScale).ShrinkX(10.0f)
+                        else
+                            r.SlicePercentY(config.JudgementCounterTextScale).ExpandPercentX(2.0f)
+                    ),
+                    Color.White,
+                    730 - 7 * i,
+                    config.JudgementCounterFontSpacing,
+                    count_alignment
+                )
+            else
+                Text.fill_b (
+                    Style.font,
+                    sprintf "%i" (730 - 7 * i),
+                    (
+                        if config.JudgementCounterShowLabels then
+                            r.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f)
+                        else
+                            r.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f)
+                    ),
+                    (Color.White, Color.Black),
+                    count_alignment
+                )
+
+            r <- r.Translate(0.0f, h)
+
+        if config.JudgementCounterShowRatio then
+            let ratio = 727, 100
+
+            if config.JudgementCounterUseFont then
+                JudgementCounter.draw_ratio_centered (
+                    font_texture,
+                    r.SlicePercentT(config.JudgementCounterTextScale).ExpandPercentX(2.0f),
+                    Color.White,
+                    ratio,
+                    config.JudgementCounterFontSpacing,
+                    config.JudgementCounterDotExtraSpacing,
+                    config.JudgementCounterColonExtraSpacing
+                )
+            else
+                let (mv, pf) = ratio
+
+                Text.fill_b (
+                    Style.font,
+                    (if pf = 0 then
+                            sprintf "%.1f:0" (float mv)
+                        else
+                            sprintf "%.1f:1" (float mv / float pf)),
+                    r.SlicePercentT(config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f),
+                    (Color.White, Color.Black),
+                    Alignment.CENTER
+                )
+
     let private create_rate_mods (config: HudConfig) : SelectPreview =
         None,
         fun (bounds: Rect) ->
@@ -253,7 +360,7 @@ module SelectPreviews =
         | HudElement.ProgressPie -> create_progress_pie config
         | HudElement.SkipButton -> create_skip_button config
         | HudElement.Pacemaker -> create_pacemaker config
-        | HudElement.JudgementCounter -> None, ignore
+        | HudElement.JudgementCounter -> create_judgement_counter config
         | HudElement.RateMods -> create_rate_mods config
         | HudElement.BPM -> create_bpm config
         | HudElement.InputMeter -> create_input_meter config

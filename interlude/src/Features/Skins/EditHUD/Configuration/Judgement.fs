@@ -21,8 +21,8 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
             | JudgementDisplayType.Name ->
                 JudgementDisplayType.Texture 0
             | JudgementDisplayType.Texture i ->
-                if i + 1 >= texture.Rows then 
-                    JudgementDisplayType.Name 
+                if i + 1 >= texture.Rows then
+                    JudgementDisplayType.Name
                 else JudgementDisplayType.Texture (i + 1)
         Style.click.Play()
 
@@ -32,8 +32,8 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
             | JudgementDisplayType.Name ->
                 JudgementDisplayType.Texture (texture.Rows - 1)
             | JudgementDisplayType.Texture 0 ->
-                JudgementDisplayType.Name 
-            | JudgementDisplayType.Texture i -> 
+                JudgementDisplayType.Name
+            | JudgementDisplayType.Texture i ->
                 JudgementDisplayType.Texture (i - 1)
         Style.click.Play()
 
@@ -115,10 +115,10 @@ type JudgementPage(on_close: unit -> unit) =
     let texture = Content.Texture "judgements"
     let ruleset = Rulesets.current
     let JUDGEMENT_COUNT = ruleset.Judgements.Length
-    let judgement_display = 
+    let judgement_display =
         match config.JudgementMeterCustomDisplay.TryFind JUDGEMENT_COUNT with
         | Some existing -> Array.copy existing
-        | None -> 
+        | None ->
             if texture.Rows = JUDGEMENT_COUNT then
                 Array.init JUDGEMENT_COUNT JudgementDisplayType.Texture
             else
@@ -170,7 +170,7 @@ type JudgementPage(on_close: unit -> unit) =
     override this.Title = %"hud.judgement"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
                 JudgementMeterPrioritiseLower = prioritise_lower_judgements.Value

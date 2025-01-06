@@ -78,6 +78,7 @@ type HudPosition =
         let center_y = pointwise_add this.Top this.Bottom |> mult 0.5f
         let hwidth = pointwise_subtract this.Right this.Left |> mult 0.5f
         let hheight = pointwise_subtract this.Bottom this.Top |> mult 0.5f
+
         {
             RelativeToPlayfield = this.RelativeToPlayfield
             Left = pointwise_subtract center_x hheight
@@ -109,7 +110,7 @@ type HudConfig =
 
         TimingDisplayEnabled: bool
         TimingDisplayPosition: HudPosition
-        TimingDisplayFadeTime: float32<ms/rate>
+        TimingDisplayFadeTime: float32<ms / rate>
         TimingDisplayThickness: float32
         TimingDisplayShowGuide: bool
         TimingDisplayGuideThickness: float32
@@ -138,17 +139,17 @@ type HudConfig =
         JudgementMeterPosition: HudPosition
         JudgementMeterIgnorePerfect: bool
         JudgementMeterPrioritiseLower: bool
-        JudgementMeterDuration: float32<ms/rate>
-        JudgementMeterFrameTime: float32<ms/rate>
+        JudgementMeterDuration: float32<ms / rate>
+        JudgementMeterFrameTime: float32<ms / rate>
         JudgementMeterUseTexture: bool
         JudgementMeterUseBuiltInAnimation: bool
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
         EarlyLateMeterEnabled: bool
         EarlyLateMeterPosition: HudPosition
-        EarlyLateMeterDuration: float32<ms/rate>
+        EarlyLateMeterDuration: float32<ms / rate>
         EarlyLateMeterUseTexture: bool
-        EarlyLateMeterFrameTime: float32<ms/rate>
+        EarlyLateMeterFrameTime: float32<ms / rate>
         EarlyLateMeterEarlyText: string
         EarlyLateMeterLateText: string
         EarlyLateMeterEarlyColor: Color
@@ -169,14 +170,16 @@ type HudConfig =
 
         JudgementCounterEnabled: bool
         JudgementCounterPosition: HudPosition
-        JudgementCounterFadeTime: float32<ms/rate>
-        JudgementCounterShowRatio: bool
-        JudgementCounterBackground: BackgroundTextureOptions
+        JudgementCounterFadeTime: float32<ms / rate>
+        JudgementCounterPopAmount: float32
+        JudgementCounterOpacity: float32
+        JudgementCounterTextScale: float32
         JudgementCounterUseFont: bool
         JudgementCounterFontSpacing: float32
         JudgementCounterDotExtraSpacing: float32
         JudgementCounterColonExtraSpacing: float32
-        JudgementCounterUseJudgementTextures: bool
+        JudgementCounterShowRatio: bool
+        JudgementCounterShowLabels: bool
         JudgementCounterCustomDisplay: Map<int, int option array>
 
         RateModMeterEnabled: bool
@@ -188,9 +191,9 @@ type HudConfig =
 
         InputMeterEnabled: bool
         InputMeterPosition: HudPosition
-        InputMeterScrollSpeed: float32<rate/ms>
+        InputMeterScrollSpeed: float32<rate / ms>
         InputMeterKeyColor: Color
-        InputMeterKeyFadeTime: float32<ms/rate>
+        InputMeterKeyFadeTime: float32<ms / rate>
         InputMeterColumnPadding: float32
         InputMeterShowInputs: bool
         InputMeterInputColor: Color
@@ -204,7 +207,7 @@ type HudConfig =
 
         CustomImageEnabled: bool
         CustomImagePosition: HudPosition
-        CustomImageFrameTime: float32<ms/rate>
+        CustomImageFrameTime: float32<ms / rate>
     }
     static member Default =
         {
@@ -265,7 +268,7 @@ type HudConfig =
             SkipButtonPosition =
                 {
                     RelativeToPlayfield = true
-                    Left =  -200.0f, 0.5f
+                    Left = -200.0f, 0.5f
                     Top = 130.0f, 0.5f
                     Right = 200.0f, 0.5f
                     Bottom = 230.0f, 0.5f
@@ -283,7 +286,7 @@ type HudConfig =
                 {
                     RelativeToPlayfield = true
                     Left = -128.0f, 0.5f
-                    Top =  -160.0f, 0.5f
+                    Top = -160.0f, 0.5f
                     Right = 128.0f, 0.5f
                     Bottom = -105.0f, 0.5f
                 }
@@ -349,19 +352,15 @@ type HudConfig =
                     Bottom = -20.0f, 1.0f
                 }
             JudgementCounterFadeTime = 200.0f<ms / rate>
-            JudgementCounterBackground =
-                {
-                    Enable = false
-                    Scale = 1.1f
-                    AlignmentX = 0.0f
-                    AlignmentY = 0.0f
-                }
-            JudgementCounterShowRatio = false
+            JudgementCounterPopAmount = 0.5f
+            JudgementCounterOpacity = 0.5f
+            JudgementCounterTextScale = 0.5f
             JudgementCounterUseFont = false
             JudgementCounterFontSpacing = 0.0f
             JudgementCounterDotExtraSpacing = 0.0f
             JudgementCounterColonExtraSpacing = 0.0f
-            JudgementCounterUseJudgementTextures = false
+            JudgementCounterShowRatio = false
+            JudgementCounterShowLabels = false
             JudgementCounterCustomDisplay = Map.empty
 
             RateModMeterEnabled = false
@@ -394,7 +393,7 @@ type HudConfig =
                     Right = 200.0f, 1.0f
                     Bottom = -100.0f, 1.0f
                 }
-            InputMeterScrollSpeed = 0.75f<rate/ms>
+            InputMeterScrollSpeed = 0.75f<rate / ms>
             InputMeterKeyColor = Color.FromArgb(127, 255, 255, 255)
             InputMeterKeyFadeTime = 300.0f<ms / rate>
             InputMeterColumnPadding = 0.25f
@@ -435,18 +434,17 @@ type HudConfig =
         }
 
     member this.GetJudgementCounterDisplay(for_ruleset: Ruleset) : int option array =
-        if this.JudgementCounterUseJudgementTextures then
-            match this.JudgementCounterCustomDisplay.TryFind for_ruleset.Judgements.Length with
-            | Some xs -> xs
-            | None -> Array.create for_ruleset.Judgements.Length None
-        else Array.create for_ruleset.Judgements.Length None
+        match this.JudgementCounterCustomDisplay.TryFind for_ruleset.Judgements.Length with
+        | Some xs -> xs
+        | None -> Array.create for_ruleset.Judgements.Length None
 
     member this.GetJudgementMeterDisplay(for_ruleset: Ruleset) : JudgementDisplayType array =
         if this.JudgementMeterUseTexture then
             match this.JudgementMeterCustomDisplay.TryFind for_ruleset.Judgements.Length with
             | Some xs -> xs
             | None -> Array.create for_ruleset.Judgements.Length JudgementDisplayType.Name
-        else Array.create for_ruleset.Judgements.Length JudgementDisplayType.Name
+        else
+            Array.create for_ruleset.Judgements.Length JudgementDisplayType.Name
 
 // todo: song info
 // todo: real time clock
@@ -488,12 +486,6 @@ module HudTextureRules =
                     MustBeSquare = K false
                     MaxGridSize = K(2, 32)
                 }
-                "judgement-counter-bg",
-                {
-                    IsRequired = fun config -> config.JudgementCounterBackground.Enable
-                    MustBeSquare = K false
-                    MaxGridSize = K(1, 1)
-                }
                 "skip-button-bg",
                 {
                     IsRequired = fun config -> config.SkipButtonBackground.Enable
@@ -502,7 +494,9 @@ module HudTextureRules =
                 }
                 "judgement-counter-judgements",
                 {
-                    IsRequired = fun config -> config.JudgementCounterUseJudgementTextures
+                    IsRequired = fun config ->
+                        config.JudgementCounterShowLabels
+                        && config.JudgementCounterCustomDisplay.Values |> Seq.exists (Seq.exists (function Some _ -> true | _ -> false))
                     MustBeSquare = K false
                     MaxGridSize = K(16, 1)
                 }

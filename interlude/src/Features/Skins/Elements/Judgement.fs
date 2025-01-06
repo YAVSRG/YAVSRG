@@ -18,9 +18,9 @@ type Judgement(config: HudConfig, state: PlayState) =
     let texture = Content.Texture "judgements"
     let display = config.GetJudgementMeterDisplay state.Ruleset
     let animated = not config.JudgementMeterUseTexture || config.JudgementMeterUseBuiltInAnimation
-    let duration = 
+    let duration =
         (
-            if animated then 
+            if animated then
                 config.JudgementMeterDuration
             else
                 config.JudgementMeterFrameTime * float32 texture.Columns
@@ -55,10 +55,10 @@ type Judgement(config: HudConfig, state: PlayState) =
             let percent = Math.Clamp(time_ago / duration, 0.0f, 1.0f)
 
             if percent < 1.0f then
-            
-                let pop = if animated then max (1f + percent - 5.0f * percent * percent) (1f - 128f * MathF.Pow(percent - 0.5f, 8.0f)) else 1.0f
-                let alpha = Math.Clamp(255.0f * (((pop - 1.0f) * 2.0f) + 1.0f) |> int, 0, 255)
-                let bounds = this.Bounds.Expand((pop - 1.0f) * this.Bounds.Width, (pop - 1.0f) * this.Bounds.Height)
+
+                let pop = if animated then max (percent - 5.0f * percent * percent) (- 128f * MathF.Pow(percent - 0.5f, 8.0f)) else 0.0f
+                let alpha = Math.Clamp(255.0f * ((pop * 2.0f) + 1.0f) |> int, 0, 255)
+                let bounds = this.Bounds.Expand(pop * this.Bounds.Width, pop * this.Bounds.Height)
 
                 match display.[tier] with
                 | JudgementDisplayType.Name ->
@@ -70,7 +70,7 @@ type Judgement(config: HudConfig, state: PlayState) =
                         Alignment.CENTER
                     )
                 | JudgementDisplayType.Texture y ->
-                    Render.tex_quad 
+                    Render.tex_quad
                         ((Sprite.fill bounds texture).AsQuad)
                         (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (time_ago / config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)
