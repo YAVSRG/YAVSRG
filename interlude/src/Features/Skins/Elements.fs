@@ -8,7 +8,10 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
+// todo: move most of this to prelude and/or make them extension methods
 module HudElement =
+
+    let private show_pacemaker = Setting.simple true
 
     let name (e: HudElement) : string =
         match e with
@@ -46,7 +49,6 @@ module HudElement =
 
     let can_configure (e: HudElement) =
         match e with
-        | HudElement.SkipButton -> not Content.Noteskin.IsEmbedded
         | HudElement.BPM -> false
         | HudElement.KeysPerSecond -> false
         | HudElement.Pacemaker -> false
@@ -168,8 +170,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.BPMMeterEnabled)
-        | HudElement.Pacemaker -> // pacemaker cannot be toggled by the user like a setting, it is on depending on gameplay state
-            Setting.make (fun _ -> ()) (fun () -> true)
+        | HudElement.Pacemaker -> show_pacemaker
         | HudElement.InputMeter ->
             Setting.make
                 (fun v ->

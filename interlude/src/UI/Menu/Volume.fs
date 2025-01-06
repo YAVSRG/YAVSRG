@@ -18,7 +18,10 @@ type Volume() =
         fade.Update elapsed_ms
         slider.Update elapsed_ms
 
-        if (%%"volume_up").Pressed() then
+        if Screen.current_type = Screen.Type.EditHud && not (Dialog.exists()) then
+            fade.Target <- 0.0f
+
+        elif (%%"volume_up").Pressed() then
             fade.Target <- 1.0f
             Setting.app ((+) (0.0003 * elapsed_ms)) options.AudioVolume
             Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)

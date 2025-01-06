@@ -94,5 +94,5 @@ module TextureGrid =
         ScrollContainer(
             textures_grid,
             Margin = Style.PADDING,
-            Position = pretty_pos(3, PAGE_BOTTOM - 3, PageWidth.Normal)
+            Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal)
         ), refresh

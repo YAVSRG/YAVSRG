@@ -28,6 +28,11 @@ type Bind =
         | Key (k, m) -> Key (k, (ctrl, alt, shift))
         | Mouse b -> Mouse b
 
+    member this.IsKeyWithAnyModifiers (k: Keys) =
+        match this with
+        | Key (k1, _) when k1 = k -> true
+        | _ -> false
+
     static member private FormatKey(k: Keys) : string =
         match k with
         | Keys.D0 -> "0"
@@ -291,15 +296,32 @@ module Input =
         input_listener <- InputListener.Bind callback
 
     let pop_matching (b: Bind, t: InputEvType) =
+        let mutable found = false
+
+        let rec f evs =
+            match evs with
+            | [] -> []
+            | struct (B, T, _) :: xs when B = b && T = t ->
+                found <- true
+                xs
+            | x :: xs -> x :: (f xs)
+
+        events_this_frame <- f events_this_frame
+        found
+
+    let pop_key_with_any_modifiers (k: Keys, t: InputEvType) =
         let mutable out = ValueNone
 
         let rec f evs =
             match evs with
             | [] -> []
-            | struct (B, T, time) :: xs when B = b && T = t ->
-                out <- ValueSome time
-                xs
-            | x :: xs -> x :: (f xs)
+            | struct (b: Bind, T, time) :: xs when T = t ->
+                match b with
+                | Bind.Key (k1, modifiers) when k1 = k ->
+                    out <- ValueSome modifiers
+                    xs
+                | _ -> struct (b, T, time) :: f xs
+            | x :: xs -> x :: f xs
 
         events_this_frame <- f events_this_frame
         out
@@ -356,6 +378,9 @@ module Input =
         events_this_frame <- []
         this_frame_finished <- true
 
+    let key_held_any_modifiers (k: Keys) =
+        this_frame.HeldKeys.Contains k
+
     let held (b: Bind) =
         if this_frame_finished then
             false
@@ -391,18 +416,18 @@ module Input =
             if this_frame.TypedText <> "" then
                 s.Value <- s.Value + this_frame.TypedText
 
-            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputEvType.Press).IsSome || pop_matching(DELETE_CHARACTER, InputEvType.Repeat).IsSome) then
+            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputEvType.Press) || pop_matching(DELETE_CHARACTER, InputEvType.Repeat)) then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
 
-            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputEvType.Press).IsSome || pop_matching(DELETE_WORD, InputEvType.Repeat).IsSome) then
+            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputEvType.Press) || pop_matching(DELETE_WORD, InputEvType.Repeat)) then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
 
-            elif pop_matching(COPY, InputEvType.Press).IsSome then
+            elif pop_matching(COPY, InputEvType.Press) then
                 GLFW.SetClipboardString(window, s.Value)
 
-            elif pop_matching(PASTE, InputEvType.Press).IsSome then
+            elif pop_matching(PASTE, InputEvType.Press) then
                 s.Value <-
                     s.Value
                     + try
@@ -479,7 +504,7 @@ module Mouse =
         v
 
     let private click b : bool =
-        Input.pop_matching(Bind.Mouse b, InputEvType.Press).IsSome
+        Input.pop_matching(Bind.Mouse b, InputEvType.Press)
 
     let left_click () : bool = click LEFT
     let right_click () : bool = click RIGHT
@@ -488,7 +513,7 @@ module Mouse =
     let held b : bool = Input.held (Bind.Mouse b)
 
     let released b : bool =
-        Input.pop_matching(Bind.Mouse b, InputEvType.Release).IsSome
+        Input.pop_matching(Bind.Mouse b, InputEvType.Release)
 
     let moved_recently () : bool = GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
 
@@ -505,25 +530,25 @@ type Bind with
     member this.Repeated() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Repeat).IsSome
+        | Mouse _ -> Input.pop_matching(this, InputEvType.Repeat)
         | _ -> false
 
     member this.TappedOrRepeated() =
         match this with
         | Key _
         | Mouse _ ->
-            Input.pop_matching(this, InputEvType.Press).IsSome
-            || Input.pop_matching(this, InputEvType.Repeat).IsSome
+            Input.pop_matching(this, InputEvType.Press)
+            || Input.pop_matching(this, InputEvType.Repeat)
         | _ -> false
 
     member this.Tapped() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Press).IsSome
+        | Mouse _ -> Input.pop_matching(this, InputEvType.Press)
         | _ -> false
 
     member this.Released() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Release).IsSome
+        | Mouse _ -> Input.pop_matching(this, InputEvType.Release)
         | _ -> false

@@ -10,26 +10,6 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Skins
 
-[<AutoOpen>]
-module private ElementMenus =
-
-    let show_menu (e: HudElement) (on_close: unit -> unit) =
-        match e with
-        | HudElement.Accuracy -> AccuracyPage(on_close).Show()
-        | HudElement.ErrorBar -> ErrorBarPage(on_close).Show()
-        | HudElement.Combo -> ComboPage(on_close).Show()
-        | HudElement.SkipButton -> SkipButtonPage(on_close).Show()
-        | HudElement.Judgement -> JudgementPage(on_close).Show()
-        | HudElement.EarlyLate -> EarlyLatePage(on_close).Show()
-        | HudElement.ProgressPie -> ProgressPiePage(on_close).Show()
-        | HudElement.JudgementCounter -> JudgementCounterPage(on_close).Show()
-        | HudElement.RateMods -> RateModPage(on_close).Show()
-        | HudElement.BPM -> BPMPage(on_close).Show()
-        | HudElement.InputMeter -> InputMeterPage(on_close).Show()
-        | HudElement.Pacemaker -> PacemakerPage(on_close).Show()
-        | HudElement.KeysPerSecond -> KeysPerSecondPage(on_close).Show()
-        | HudElement.CustomImage -> CustomImagePage(on_close).Show()
-
 type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> unit, finish_drag: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
@@ -40,7 +20,7 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
 
     override this.Update(elapsed_ms, moved) =
 
-        hover <- this.Parent.Focused && Mouse.hover this.Bounds
+        hover <- (this.Parent :?> Positioner).IsSelectedElement && Mouse.hover this.Bounds
 
         match dragging_from with
         | Some(x, y) ->
@@ -59,30 +39,37 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
         base.Update(elapsed_ms, moved)
 
     override this.Draw() =
-        if this.Parent.Focused then
+        if (this.Parent :?> Positioner).IsSelectedElement then
             if hover then
-                Render.rect this.Bounds Colors.white.O3
+                Render.rect this.Bounds Colors.white.O4
             else
-                Render.rect this.Bounds Colors.white.O1
+                Render.rect this.Bounds Colors.white.O2
 
-type Positioner(elem: HudElement, ctx: PositionerContext) =
-    inherit Container(NodeType.FocusTrap)
+and Positioner(element: HudElement, ctx: PositionerContext) =
+    inherit Container(NodeType.None)
+
+    let mutable increment = 5.0f
+    let ALT = Bind.mk Keys.LeftAlt
 
     let round (offset: float32, anchor: float32) =
-        System.MathF.Round(offset / 5.0f) * 5.0f, anchor
+        System.MathF.Round(offset / increment) * increment, anchor
 
+    let x_axis_align (position: Position) =
+        let center = (fst position.Left + fst position.Right) * 0.5f
+        let adjustment = System.MathF.Round(center / increment) * increment - center
+        { position with
+            Left = position.Left ^+ adjustment
+            Right = position.Right ^+ adjustment
+        }
+
+    let mutable moving_with_keyboard = false
     let mutable dragging_from: (float32 * float32) option = None
     let mutable hover = false
 
-    let SMALL_UP = (%%"up").WithModifiers(false, false, true)
-    let SMALL_DOWN = (%%"down").WithModifiers(false, false, true)
-    let SMALL_LEFT = (%%"left").WithModifiers(false, false, true)
-    let SMALL_RIGHT = (%%"right").WithModifiers(false, false, true)
-
     let child =
-        HudElement.constructor elem (Content.HUD, ctx.State)
+        HudElement.constructor element (Content.HUD, ctx.State)
 
-    let position = HudElement.position_setting elem
+    let position = HudElement.position_setting element
 
     let mutable new_unsaved_pos: Position = Position.DEFAULT
 
@@ -90,14 +77,12 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
         let bounds = Position.calculate pos parent_bounds
 
         if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
-            { pos with
-                Right = pos.Left ^+ max 5.0f bounds.Width
-                Bottom = pos.Top ^+ max 5.0f bounds.Height
-            }
+            new_unsaved_pos
         else
             pos
 
     let save_pos () =
+        ctx.AddUndoHistory(element, position.Value)
         position.Set
             { position.Value with
                 Left = new_unsaved_pos.Left
@@ -106,38 +91,48 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                 Bottom = new_unsaved_pos.Bottom
             }
 
+    member this.IsSelectedElement = ctx.Selected = Some element
+
     override this.Position
         with set value =
 
             let value =
                 if this.Initialised then
-                    let bounds = Position.calculate value this.Parent.Bounds
-
-                    if bounds.Left + 5.0f > bounds.Right || bounds.Top + 5.0f > bounds.Bottom then
-                        { value with
-                            Right = value.Left ^+ max 5.0f bounds.Width
-                            Bottom = value.Top ^+ max 5.0f bounds.Height
-                        }
-                    else
-                        value
+                    ctx.OnElementMoved.Trigger()
+                    validate_pos this.Parent.Bounds value
                 else
                     value
 
             base.set_Position value
             new_unsaved_pos <- value
 
-    member this.Move(x, y) =
-        let current = position.Value
-
+    member this.Translate(x, y) =
         this.Position <-
             {
-                Left = current.Left ^+ x
-                Top = current.Top ^+ y
-                Right = current.Right ^+ x
-                Bottom = current.Bottom ^+ y
+                Left = new_unsaved_pos.Left ^+ x
+                Top = new_unsaved_pos.Top ^+ y
+                Right = new_unsaved_pos.Right ^+ x
+                Bottom = new_unsaved_pos.Bottom ^+ y
+            }
+            |> x_axis_align
+
+    member this.Resize(x, y) =
+        this.Position <-
+            {
+                Left = new_unsaved_pos.Left
+                Top = new_unsaved_pos.Top
+                Right = new_unsaved_pos.Right ^+ x
+                Bottom = new_unsaved_pos.Bottom ^+ y
             }
 
-        save_pos ()
+    member this.Expand(x, y) =
+        this.Position <-
+            {
+                Left = new_unsaved_pos.Left ^- x
+                Top = new_unsaved_pos.Top ^- y
+                Right = new_unsaved_pos.Right ^+ x
+                Bottom = new_unsaved_pos.Bottom ^+ y
+            }
 
     override this.Init(parent) =
         this
@@ -164,7 +159,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderCornersB(10.0f).SliceR(10.0f)
+            Position = Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -188,7 +183,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderCornersB(10.0f).SliceL(10.0f)
+            Position = Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -212,7 +207,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderCornersT(10.0f).SliceR(10.0f)
+            Position = Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
@@ -236,7 +231,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position = Position.BorderCornersT(10.0f).SliceL(10.0f)
+            Position = Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f)
         )
 
         |+ SubPositioner(
@@ -261,11 +256,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position =
-                { Position.BorderL(10.0f) with
-                    Top = 0.5f %- 5.0f
-                    Bottom = 0.5f %+ 5.0f
-                }
+            Position = Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (_, old_y), (_, new_y)) ->
@@ -289,11 +280,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position =
-                { Position.BorderT(10.0f) with
-                    Left = 0.5f %- 5.0f
-                    Right = 0.5f %+ 5.0f
-                }
+            Position = Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f)
         )
         |+ SubPositioner(
             (fun (preserve_center, (old_x, _), (new_x, _)) ->
@@ -317,11 +304,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position =
-                { Position.BorderR(10.0f) with
-                    Top = 0.5f %- 5.0f
-                    Bottom = 0.5f %+ 5.0f
-                }
+            Position = Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f)
         )
         |* SubPositioner(
             (fun (preserve_center, (_, old_y), (_, new_y)) ->
@@ -345,31 +328,75 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
                         }
             ),
             save_pos,
-            Position =
-                { Position.BorderB(10.0f) with
-                    Left = 0.5f %- 5.0f
-                    Right = 0.5f %+ 5.0f
-                }
+            Position = Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f)
         )
 
         base.Init parent
+
+    member this.KeyboardMovement(dx: float32, dy: float32, (ctrl: bool, alt: bool, shift: bool)) =
+        let increment = if alt then 1.0f else 5.0f
+        let direction = dx * increment, dy * increment
+        if ctrl && shift then
+            this.Expand direction
+        elif ctrl then
+            this.Resize direction
+        else
+            this.Translate direction
+        moving_with_keyboard <- true
 
     override this.Update(elapsed_ms, moved) =
 
         let mutable moved = moved
 
-        if this.Focused then
-            if SMALL_UP.TappedOrRepeated() then this.Move(0.0f, -1.0f)
-            elif SMALL_DOWN.TappedOrRepeated() then this.Move(0.0f, 1.0f)
-            elif SMALL_LEFT.TappedOrRepeated() then this.Move(-1.0f, 0.0f)
-            elif SMALL_RIGHT.TappedOrRepeated() then this.Move(1.0f, 0.0f)
+        if this.IsSelectedElement then
+            match Input.pop_key_with_any_modifiers(Keys.Up, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(0.0f, -1.0f, modifiers)
+            | _ -> ()
 
-            if (%%"up").TappedOrRepeated() then this.Move(0.0f, -5.0f)
-            if (%%"down").TappedOrRepeated() then this.Move(0.0f, 5.0f)
-            if (%%"left").TappedOrRepeated() then this.Move(-5.0f, 0.0f)
-            if (%%"right").TappedOrRepeated() then this.Move(5.0f, 0.0f)
+            match Input.pop_key_with_any_modifiers(Keys.Down, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(0.0f, 1.0f, modifiers)
+            | _ -> ()
+
+            match Input.pop_key_with_any_modifiers(Keys.Left, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(-1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            match Input.pop_key_with_any_modifiers(Keys.Right, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            let hold_up = Input.key_held_any_modifiers Keys.Up
+            let hold_down = Input.key_held_any_modifiers Keys.Down
+            let hold_left = Input.key_held_any_modifiers Keys.Left
+            let hold_right = Input.key_held_any_modifiers Keys.Right
+
+            let any_repeat =
+                Input.pop_key_with_any_modifiers(Keys.Up, InputEvType.Repeat)
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Down, InputEvType.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Left, InputEvType.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Right, InputEvType.Repeat))
+            match any_repeat with
+            | ValueSome modifiers ->
+                if hold_up then this.KeyboardMovement(0.0f, -1.0f, modifiers)
+                if hold_down then this.KeyboardMovement(0.0f, 1.0f, modifiers)
+                if hold_left then this.KeyboardMovement(-1.0f, 0.0f, modifiers)
+                if hold_right then this.KeyboardMovement(1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            if
+                moving_with_keyboard
+                && not (hold_up || hold_down || hold_left || hold_right)
+            then
+                moving_with_keyboard <- false
+                save_pos()
+
+        elif moving_with_keyboard then
+            moving_with_keyboard <- false
+            save_pos()
 
         hover <- Mouse.hover this.Bounds
+
+        increment <- if ALT.Pressed() then 1.0f else 5.0f
 
         match dragging_from with
         | Some(x, y) ->
@@ -379,28 +406,26 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
 
             this.Position <-
                 {
-                    Left = current.Left ^+ (new_x - x) |> round
+                    Left = current.Left ^+ (new_x - x)
                     Top = current.Top ^+ (new_y - y) |> round
-                    Right = current.Right ^+ (new_x - x) |> round
+                    Right = current.Right ^+ (new_x - x)
                     Bottom = current.Bottom ^+ (new_y - y) |> round
                 }
+                |> x_axis_align
 
             if not (Mouse.held Mouse.LEFT) then
                 dragging_from <- None
                 save_pos ()
-                this.Focus true
         | None ->
             if hover && Mouse.left_click () then
-                dragging_from <- Some(Mouse.pos ())
-                this.Select true
-            elif hover && Mouse.right_click () && HudElement.can_configure elem then
-                show_menu elem (fun () -> ctx.Create elem)
+                if this.IsSelectedElement then
+                    dragging_from <- Some(Mouse.pos ())
+                else
+                    ctx.Select element
+            elif hover && Mouse.right_click () && HudElement.can_configure element then
+                show_menu element (fun () -> ctx.Recreate element)
 
         base.Update(elapsed_ms, moved)
-
-    override this.OnSelected by_mouse =
-        base.OnSelected by_mouse
-        ctx.Selected <- elem
 
     override this.Draw() =
 
@@ -448,7 +473,7 @@ type Positioner(elem: HudElement, ctx: PositionerContext) =
 
         base.Draw()
 
-        if this.Focused then
+        if this.IsSelectedElement then
             Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.yellow_accent
             Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.yellow_accent
             Render.rect (this.Bounds.BorderL Style.PADDING) Colors.yellow_accent
@@ -464,15 +489,16 @@ and PositionerContext =
         Screen: Container
         Playfield: Playfield
         State: PlayState
-        mutable Selected: HudElement
+        mutable Selected: HudElement option
         mutable Positioners: Map<HudElement, Positioner>
+        mutable UndoHistory: List<HudElement * HudPosition>
+        OnElementMoved: Event<unit>
     }
-    member this.Create(e: HudElement) =
+    member this.Recreate(e: HudElement) =
         match this.Positioners.TryFind e with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
         | None -> ()
 
-        Selection.clear ()
         let enabled = HudElement.enabled_setting e
 
         if enabled.Value then
@@ -497,24 +523,20 @@ and PositionerContext =
 
             this.Positioners <- this.Positioners.Add(e, p)
 
-            if this.Selected = e then
-                if p.Initialised then p.Focus true else GameThread.defer (fun () -> p.Focus true)
+    member this.CreateAll() =
+        for element in HudElement.FULL_LIST do
+            this.Recreate element
 
-    member this.Select(e: HudElement) =
-        if this.Selected <> e then
-            match this.Positioners.TryFind this.Selected with
-            | Some _ -> Selection.clear()
-            | None -> ()
-            this.Selected <- e
-            match this.Positioners.TryFind e with
-            | Some existing -> existing.Focus true
-            | None -> ()
+    member this.Select(e: HudElement) = this.Selected <- Some e
+    member this.ClearSelection() = this.Selected <- None
 
-    member this.ChangePositionRelative(to_playfield: bool, anchor: float32) =
-        match this.Positioners.TryFind this.Selected with
+    member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) =
+        match this.Selected |> Option.bind this.Positioners.TryFind with
         | Some p ->
-            let setting = HudElement.position_setting this.Selected
+            let setting = HudElement.position_setting this.Selected.Value
             let current = setting.Value
+
+            this.AddUndoHistory(this.Selected.Value, current)
 
             let bounds = p.Bounds
             let parent_bounds = if to_playfield then this.Playfield.Bounds else this.Screen.Bounds
@@ -527,5 +549,37 @@ and PositionerContext =
                     Right = anchor %+ (bounds.Right - axis)
                     Bottom = current.Bottom
                 }
-            this.Create this.Selected
+            this.Recreate this.Selected.Value
+        | None -> ()
+
+    member this.ResetCurrentPosition() =
+        match this.Selected with
+        | Some element ->
+            let setting = HudElement.position_setting element
+            this.AddUndoHistory(element, setting.Value)
+            setting.Set(HudElement.default_position element)
+            GameThread.defer (fun () -> this.Recreate element)
+        | None -> ()
+
+    member this.AddUndoHistory(element: HudElement, position: HudPosition) =
+        this.UndoHistory <- (element, position) :: this.UndoHistory
+
+    member this.Undo() =
+        match this.UndoHistory with
+        | (element, previous_position) :: xs ->
+            this.Selected <- Some element
+            HudElement.position_setting(element).Set previous_position
+            this.Recreate element
+            Style.click.Play()
+            this.UndoHistory <- xs
+        | _ -> ()
+
+    member this.RemoveElement() =
+        match this.Selected with
+        | Some element ->
+            let enabled = HudElement.enabled_setting element
+            enabled.Set false
+            this.Recreate element
+            this.Selected <- None
+            Style.click.Play()
         | None -> ()

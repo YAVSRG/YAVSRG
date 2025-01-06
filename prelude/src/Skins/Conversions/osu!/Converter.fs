@@ -439,7 +439,6 @@ module OsuSkinConverter =
                 JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
                 JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
 
-                JudgementCounterUseJudgementTextures = judgement_counter_textures
                 JudgementCounterCustomDisplay =
                     if judgement_counter_textures then
                         Map.ofSeq [6, Array.init 6 Some]

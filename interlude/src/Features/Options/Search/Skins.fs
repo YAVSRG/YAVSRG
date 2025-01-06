@@ -47,7 +47,7 @@ module Skins =
                             SelectedChart.WITH_COLORS.IsSome
                             && Screen.change_new
                                 (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, ignore))
-                                Screen.Type.Practice
+                                Screen.Type.EditHud
                                 Transitions.Default
                         then
                             Menu.Exit()
