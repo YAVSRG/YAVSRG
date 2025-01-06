@@ -348,13 +348,13 @@ type HudConfig =
                     RelativeToPlayfield = false
                     Left = 20.0f, 0.0f
                     Top = -320.0f, 1.0f
-                    Right = 220.0f, 0.0f
+                    Right = 120.0f, 0.0f
                     Bottom = -20.0f, 1.0f
                 }
             JudgementCounterFadeTime = 200.0f<ms / rate>
             JudgementCounterPopAmount = 0.5f
             JudgementCounterOpacity = 0.5f
-            JudgementCounterTextScale = 0.5f
+            JudgementCounterTextScale = 0.7f
             JudgementCounterUseFont = false
             JudgementCounterFontSpacing = 0.0f
             JudgementCounterDotExtraSpacing = 0.0f
