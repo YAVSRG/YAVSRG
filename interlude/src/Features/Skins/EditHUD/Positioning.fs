@@ -333,42 +333,64 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
         base.Init parent
 
-    member this.KeyboardPositioning(key: Keys, dx: float32, dy: float32) =
-        match
-            Input.pop_key_with_any_modifiers(key, InputEvType.Press)
-            |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(key, InputEvType.Repeat))
-        with
-        | ValueSome (ctrl, alt, shift) ->
-            let increment = if alt then 1.0f else 5.0f
-            let direction = dx * increment, dy * increment
-            if ctrl && shift then
-                this.Expand direction
-            elif ctrl then
-                this.Resize direction
-            else
-                this.Translate direction
-            moving_with_keyboard <- true
-        | ValueNone -> ()
+    member this.KeyboardMovement(dx: float32, dy: float32, (ctrl: bool, alt: bool, shift: bool)) =
+        let increment = if alt then 1.0f else 5.0f
+        let direction = dx * increment, dy * increment
+        if ctrl && shift then
+            this.Expand direction
+        elif ctrl then
+            this.Resize direction
+        else
+            this.Translate direction
+        moving_with_keyboard <- true
 
     override this.Update(elapsed_ms, moved) =
 
         let mutable moved = moved
 
         if this.IsSelectedElement then
-            this.KeyboardPositioning(Keys.Up, 0.0f, -1.0f)
-            this.KeyboardPositioning(Keys.Down, 0.0f, 1.0f)
-            this.KeyboardPositioning(Keys.Left, -1.0f, 0.0f)
-            this.KeyboardPositioning(Keys.Right, 1.0f, 0.0f)
+            match Input.pop_key_with_any_modifiers(Keys.Up, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(0.0f, -1.0f, modifiers)
+            | _ -> ()
 
-        if
-            moving_with_keyboard
-            && not (
-                Input.key_held_any_modifiers Keys.Up ||
-                Input.key_held_any_modifiers Keys.Down ||
-                Input.key_held_any_modifiers Keys.Left ||
-                Input.key_held_any_modifiers Keys.Right
-            )
-        then
+            match Input.pop_key_with_any_modifiers(Keys.Down, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(0.0f, 1.0f, modifiers)
+            | _ -> ()
+
+            match Input.pop_key_with_any_modifiers(Keys.Left, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(-1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            match Input.pop_key_with_any_modifiers(Keys.Right, InputEvType.Press) with
+            | ValueSome modifiers -> this.KeyboardMovement(1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            let hold_up = Input.key_held_any_modifiers Keys.Up
+            let hold_down = Input.key_held_any_modifiers Keys.Down
+            let hold_left = Input.key_held_any_modifiers Keys.Left
+            let hold_right = Input.key_held_any_modifiers Keys.Right
+
+            let any_repeat =
+                Input.pop_key_with_any_modifiers(Keys.Up, InputEvType.Repeat)
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Down, InputEvType.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Left, InputEvType.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Right, InputEvType.Repeat))
+            match any_repeat with
+            | ValueSome modifiers ->
+                if hold_up then this.KeyboardMovement(0.0f, -1.0f, modifiers)
+                if hold_down then this.KeyboardMovement(0.0f, 1.0f, modifiers)
+                if hold_left then this.KeyboardMovement(-1.0f, 0.0f, modifiers)
+                if hold_right then this.KeyboardMovement(1.0f, 0.0f, modifiers)
+            | _ -> ()
+
+            if
+                moving_with_keyboard
+                && not (hold_up || hold_down || hold_left || hold_right)
+            then
+                moving_with_keyboard <- false
+                save_pos()
+
+        elif moving_with_keyboard then
             moving_with_keyboard <- false
             save_pos()
 
