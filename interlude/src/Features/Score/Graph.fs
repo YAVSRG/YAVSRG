@@ -270,7 +270,8 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         match options.ScoreGraphLineMode.Value with
         | ScoreGraphLineMode.Combo when stats.Value.GraphPoints.Length > 0 ->
 
-            let y_func (snapshot: GraphPoint) = float32 snapshot.Combo / float32 score_info.Scoring.BestCombo
+            let best_combo = stats.Value.GraphPoints |> Seq.map _.Combo |> Seq.max |> float32
+            let y_func (snapshot: GraphPoint) = float32 snapshot.Combo / best_combo
             this.PlotLine(y_func, line_color)
 
         | ScoreGraphLineMode.Mean when stats.Value.GraphPoints.Length > 0 ->
