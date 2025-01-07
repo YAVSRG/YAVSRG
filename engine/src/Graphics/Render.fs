@@ -35,6 +35,7 @@ module Render =
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
 
+    let private MAX_SAMPLES = GL.GetInteger(GetPName.MaxSamples)
     let private FBO_POOL_SIZE = 6
     let private draw_buffer_ids = Array.zeroCreate<int> FBO_POOL_SIZE
     let private draw_texture_ids = Array.zeroCreate<int> FBO_POOL_SIZE
@@ -113,7 +114,7 @@ module Render =
                 GL.DeleteFramebuffer(read_buffer_ids.[i])
                 read_buffer_ids.[i] <- 0
 
-            read_texture_ids.[i] <- GL.GenTexture()
+            GL.GenTextures(1, &read_texture_ids.[i])
             GL.BindTexture(TextureTarget.Texture2DArray, read_texture_ids.[i])
 
             GL.TexImage3D(
@@ -170,8 +171,9 @@ module Render =
             GL.GenFramebuffers(1, &read_buffer_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, read_buffer_ids.[i])
 
-            GL.RenderbufferStorage(
-                RenderbufferTarget.RenderbufferExt,
+            GL.RenderbufferStorageMultisample(
+                RenderbufferTarget.Renderbuffer,
+                msaa_samples,
                 RenderbufferStorage.Depth24Stencil8,
                 _viewport_width,
                 _viewport_height
@@ -180,12 +182,12 @@ module Render =
             GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
                 FramebufferAttachment.ColorAttachment0,
-                read_buffer_ids.[i],
+                read_texture_ids.[i],
                 0,
                 1
             )
 
-            draw_texture_ids.[i] <- GL.GenTexture()
+            GL.GenTextures(1, &draw_texture_ids.[i])
             GL.BindTexture(TextureTarget.Texture2DMultisample, draw_texture_ids.[i])
 
             GL.TexImage2DMultisample(
@@ -426,7 +428,7 @@ module Render =
 
         _bounds <- Rect.Box(0.0f, 0.0f, _width, _height)
 
-        initialise_fbos 24
+        initialise_fbos (min MAX_SAMPLES 8)
 
     let internal start () =
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -473,10 +475,12 @@ module Render =
 
         let texture_units =
             sprintf
-                "%i units; %i max size; %i max layers"
+                "%i units; %i max size; %i max layers; %i max samples; %i max framebuffer size"
                 Texture.MAX_TEXTURE_UNITS
                 Texture.MAX_TEXTURE_SIZE
                 Texture.MAX_ARRAY_TEXTURE_LAYERS
+                MAX_SAMPLES
+                (GL.GetInteger(GetPName.MaxRenderbufferSize))
 
         let specs =
             sprintf

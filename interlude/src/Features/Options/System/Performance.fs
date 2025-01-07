@@ -56,7 +56,7 @@ type PerformanceSettingsPage() =
             .Pos(3)
         |+ PageSetting(
             %"system.msaa",
-            Selector([| 0, sprintf "%s (0x)" %"system.msaa.off"; 4, sprintf "%s (4x)" %"system.msaa.normal"; 24, sprintf "%s (24x)" %"system.msaa.fancy" |], config.MSAASamples |> Setting.trigger (fun _ -> msaa_restart <- true))
+            Selector([| 0, sprintf "%s (0x)" %"system.msaa.off"; 4, sprintf "%s (4x)" %"system.msaa.normal"; 16, sprintf "%s (16x)" %"system.msaa.fancy" |], config.MSAASamples |> Setting.trigger (fun _ -> msaa_restart <- true))
         )
             .Help(Help.Info("system.msaa"))
             .Pos(5)
