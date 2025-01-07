@@ -44,6 +44,7 @@ module ReplayScreen =
 
         let replay_ended_fade = Animation.Fade 0.0f
 
+        let mutable last_time = -Time.infinity
         let mutable replay_data = replay_data
 
         let mutable scoring =
@@ -65,8 +66,8 @@ module ReplayScreen =
 
                 if not is_auto then
                     if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
-                    if hud_config.TimingDisplayEnabled then 
-                        add_widget hud_config.TimingDisplayPosition 
+                    if hud_config.TimingDisplayEnabled then
+                        add_widget hud_config.TimingDisplayPosition
                             (fun x -> ErrorBar(x).Conditional(show_hit_overlay.Get >> not))
                     if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
                     if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition Judgement
@@ -107,12 +108,7 @@ module ReplayScreen =
                     with_colors.Source,
                     is_auto,
                     rate,
-                    fun t ->
-                        let now = Song.time () in
-                        Song.seek t
-
-                        if t < now then
-                            seek_backwards this
+                    fun t -> Song.seek t
                 )
 
             override this.OnEnter p =
@@ -131,6 +127,10 @@ module ReplayScreen =
                 replay_ended_fade.Update elapsed_ms
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE
+
+                if last_time > now then
+                    seek_backwards(this)
+                last_time <- now
 
                 scoring.Update chart_time
 
