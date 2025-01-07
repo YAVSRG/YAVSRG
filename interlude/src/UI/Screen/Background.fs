@@ -134,6 +134,7 @@ module Background =
                 background
 
     let drawq (q: Quad, color: Color, depth: float32) =
+        Render.quad q Color.Black.AsQuad
         List.iter
             (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
                 let color = color.O4a fade.Alpha
