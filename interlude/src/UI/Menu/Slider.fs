@@ -10,6 +10,7 @@ open Prelude
 type Slider(setting: Setting.Bounded<float32>) =
     inherit Container(NodeType.Leaf)
 
+    let ORIGINAL_VALUE = setting.Value
     let TEXTWIDTH = 130.0f
     let mutable dragging = false
 
@@ -130,6 +131,10 @@ type Slider(setting: Setting.Bounded<float32>) =
                 add (-step * 5.0f)
             elif (%%"select").Tapped() then
                 typed_number.Set ""
+
+        if this.Focused && (%%"undo").Tapped() then
+            typed_number.Set ""
+            setting.Value <- ORIGINAL_VALUE
 
     override this.Draw() =
         let v = get_percent ()
