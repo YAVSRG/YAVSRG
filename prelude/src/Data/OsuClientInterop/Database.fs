@@ -96,14 +96,16 @@ module internal OsuDbHelpers =
 
     let read_int_double_pair (br: BinaryReader) =
         if br.ReadByte() <> 0x08uy then
-            failwith "Got unexpected byte"
+            failwith "Got unexpected byte at start of int-double pair"
 
         let int = read_int br
 
-        if br.ReadByte() <> 0x0Duy then
-            failwith "Got unexpected byte"
+        let double =
+            match br.ReadByte() with
+            | 0x0Duy -> read_double br
+            | 0x0Cuy -> read_single br |> float
+            | other -> failwithf "Got unexpected byte %X for float part of int-double pair" other
 
-        let double = read_double br
         int, double
 
     let read_star_ratings (br: BinaryReader) =
