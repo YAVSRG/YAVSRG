@@ -53,11 +53,15 @@ li {
 }
 
 .text-4xl {
-    text-shadow: var(--shadow-2-2a) 2px 2px 0;
+    text-shadow: var(--shadow-2-2a) 3px 3px 0;
 }
 
 .text-5xl {
     text-shadow: var(--shadow-2-2a) 4px 4px 0;
+}
+
+.text-6xl {
+    text-shadow: var(--shadow-2-2a) 5px 5px 0;
 }
 
 .text-green {
@@ -195,15 +199,17 @@ hr {
     fill: none;
 }
 
+a {
+    transition: 0.2s;
+}
+
 a:hover {
     color: var(--yellow-accent);
+    scale: 1.1;
+    transition: 0.2s;
 }
 
 .sticky-header {
-    background: var(--cyan-shadow-2a);
+    background: var(--cyan);
+    border-bottom: 5px solid var(--cyan-accent);
 }
-
-.header-gradient {
-    background: linear-gradient(var(--cyan-shadow-2a), var(--cyan-shadow-0a));
-}
-  
