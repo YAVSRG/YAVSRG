@@ -25,7 +25,7 @@ module Settings =
 
     let search_system_settings (tokens: string array) : SearchResult seq =
         results {
-            if token_match tokens [|%"system.performance"; %"system.cpu_saver"; %"search_keywords.performance"|] then
+            if token_match tokens [|%"system.performance"; %"system.cpu_saver"; %"system.msaa"; %"system.performance.antijitter"; %"search_keywords.performance"; |] then
                 yield PageButton(
                     %"system.performance",
                     (fun () -> PerformanceSettingsPage().Show())
@@ -163,7 +163,7 @@ module Settings =
             if token_match tokens [|%"gameplay.lanecover"|] then
                 yield PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show())
                     .Help(Help.Info("gameplay.lanecover"))
-            if token_match tokens [|%"gameplay.pacemaker"|] then
+            if token_match tokens [|%"gameplay.pacemaker"; %"gameplay.pacemaker.fail_mid_song"; %"gameplay.pacemaker.onlysavenewrecords"; %"gameplay.pacemaker.save_failed_scores"|] then
                 yield PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
             if token_match tokens [|%"rulesets"|] then
                 yield PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
