@@ -94,35 +94,18 @@ module Users =
 
         [<RequireQualifiedAccess>]
         type private AuthFlowState =
-            | RegisterWaitingCallback of online_session_id: Guid
             | RegisterWaitingUsername of online_session_id: Guid * discord_id: uint64
-            | LoginWaitingCallback of online_session_id: Guid
+            | WaitingCallback of online_session_id: Guid
 
         let private flow_id (session_id: Guid) = session_id.ToString("N")
         let private auth_flows = Dictionary<string, AuthFlowState>()
         let private AUTH_FLOW_LOCK_OBJ = obj ()
 
-        let begin_register_with_discord id =
+        let begin_register_or_login_with_discord id =
             lock AUTH_FLOW_LOCK_OBJ
             <| fun () ->
                 let new_flow = flow_id id
-                auth_flows.[new_flow] <- AuthFlowState.RegisterWaitingCallback id
-
-                let url =
-                    @"https://discord.com/api/oauth2/authorize?client_id="
-                    + SECRETS.DiscordClientId
-                    + "&redirect_uri=https%3A%2F%2F"
-                    + SECRETS.ApiBaseUrl
-                    + @"%2Fauth%2Fdiscord&response_type=code&scope=identify&state="
-                    + new_flow
-
-                Server.send (id, Downstream.DISCORD_AUTH_URL url)
-
-        let begin_login_with_discord id =
-            lock AUTH_FLOW_LOCK_OBJ
-            <| fun () ->
-                let new_flow = flow_id id
-                auth_flows.[new_flow] <- AuthFlowState.LoginWaitingCallback id
+                auth_flows.[new_flow] <- AuthFlowState.WaitingCallback id
 
                 let url =
                     @"https://discord.com/api/oauth2/authorize?client_id="
@@ -145,8 +128,7 @@ module Users =
                 else
 
                 match auth_flows.[flow_id] with
-                | AuthFlowState.RegisterWaitingCallback _
-                | AuthFlowState.LoginWaitingCallback _ ->
+                | AuthFlowState.WaitingCallback _ ->
                     Server.kick (id, "Unexpected registration packet")
                     false
                 | AuthFlowState.RegisterWaitingUsername(expected_id, discord_id) ->
@@ -174,33 +156,14 @@ module Users =
                 else
 
                 match auth_flows.[flow_id] with
-                | AuthFlowState.RegisterWaitingCallback id ->
-
-                    if Auth.discord_id_is_taken (discord_id) then
-                        Logging.Info "Discord account %s(%i) is already registered" discord_tag discord_id
-                        auth_flows.Remove(flow_id) |> ignore
-
-                        Server.send (
-                            id,
-                            Downstream.REGISTRATION_FAILED(
-                                sprintf "%s is already linked to an existing account" discord_tag
-                            )
-                        )
-
-                        false
-                    else
-
-                    Logging.Info "Ready to link account to %s(%i)" discord_tag discord_id
-                    auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
-                    Server.send (id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
-                    true
-
-                | AuthFlowState.LoginWaitingCallback id ->
+                | AuthFlowState.WaitingCallback id ->
 
                     match Auth.login_via_discord (discord_id) with
                     | Error() ->
-                        Server.send (id, Downstream.LOGIN_FAILED "No user is registered to this Discord account")
-                        false
+                        Logging.Info "Ready to link new account to %s(%i)" discord_tag discord_id
+                        auth_flows.[flow_id] <- AuthFlowState.RegisterWaitingUsername(id, discord_id)
+                        Server.send (id, Downstream.COMPLETE_REGISTRATION_WITH_DISCORD discord_tag)
+                        true
                     | Ok token ->
 
                     auth_flows.Remove(flow_id) |> ignore

@@ -7,7 +7,7 @@ open Prelude
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 14uy
+    let PROTOCOL_VERSION = 15uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 1
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -121,9 +121,8 @@ module Packets =
     [<RequireQualifiedAccess>]
     type Upstream =
         | VERSION of byte
-        | BEGIN_REGISTRATION_WITH_DISCORD
+        | LOGIN_WITH_DISCORD
         | COMPLETE_REGISTRATION_WITH_DISCORD of username: string
-        | BEGIN_LOGIN_WITH_DISCORD
         | LOGIN of token: string
         | LOGOUT
 
@@ -157,9 +156,8 @@ module Packets =
             let packet =
                 match kind with
                 | 0x00uy -> VERSION(br.ReadByte())
-                | 0x01uy -> BEGIN_REGISTRATION_WITH_DISCORD
+                | 0x01uy -> LOGIN_WITH_DISCORD
                 | 0x02uy -> COMPLETE_REGISTRATION_WITH_DISCORD(br.ReadString())
-                | 0x03uy -> BEGIN_LOGIN_WITH_DISCORD
                 | 0x04uy -> LOGIN(br.ReadString())
                 | 0x05uy -> LOGOUT
 
@@ -208,11 +206,10 @@ module Packets =
                 | VERSION v ->
                     bw.Write v
                     0x00uy
-                | BEGIN_REGISTRATION_WITH_DISCORD -> 0x01uy
+                | LOGIN_WITH_DISCORD -> 0x01uy
                 | COMPLETE_REGISTRATION_WITH_DISCORD username ->
                     bw.Write username
                     0x02uy
-                | BEGIN_LOGIN_WITH_DISCORD -> 0x03uy
                 | LOGIN name ->
                     bw.Write name
                     0x04uy

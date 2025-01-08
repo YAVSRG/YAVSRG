@@ -260,10 +260,7 @@ module Network =
         client.Send(Upstream.LOGIN credentials.Token)
 
     let begin_login () =
-        client.Send(Upstream.BEGIN_LOGIN_WITH_DISCORD)
-
-    let begin_registration () =
-        client.Send(Upstream.BEGIN_REGISTRATION_WITH_DISCORD)
+        client.Send(Upstream.LOGIN_WITH_DISCORD)
 
     let complete_registration (desired_username) =
         client.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD desired_username)

@@ -59,12 +59,7 @@ type LoginPage() =
             waiting_for_browser <- true
             Network.begin_login ()
 
-    let register () =
-        if not waiting_for_browser then
-            waiting_for_browser <- true
-            Network.begin_registration ()
-
-    let subscribed_events = 
+    let subscribed_events =
         NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back()),
         NetworkEvents.waiting_registration.Subscribe(fun discord_tag ->
             waiting_for_browser <- false
@@ -75,10 +70,9 @@ type LoginPage() =
 
     let info = Callout.Small.Icon(Icons.GLOBE).Title(%"login.waiting_for_discord")
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
         |+ PageButton(%"login.login_with_discord", login).Pos(0)
-        |+ PageButton(%"login.register_with_discord", register).Pos(3)
         |+ (Callout.frame info (fun (w, h) -> Position.Row(400.0f, h)))
             .Conditional(fun () -> waiting_for_browser)
         :> Widget
