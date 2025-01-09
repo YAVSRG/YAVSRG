@@ -9,7 +9,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Rulesets.Edit
 
-type private RulesetButton(name, action) =
+type private RulesetButton(id, name, action) =
     inherit
         Container(
             NodeType.Button(fun _ ->
@@ -24,8 +24,8 @@ type private RulesetButton(name, action) =
             K(sprintf "%s  >" name),
             Color =
                 (fun () ->
-                    if this.Focused then Colors.text_yellow_2 
-                    elif Rulesets.current.Name = name then Colors.text_pink_2 
+                    if this.Focused then Colors.text_yellow_2
+                    elif Rulesets.selected_id.Value = id then Colors.text_pink_2
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
@@ -70,23 +70,24 @@ type SelectRulesetPage() =
             container.Add(
                 NavigationContainer.Row()
                 |+ RulesetButton(
+                    id,
                     ruleset.Name,
                     (fun () -> options.SelectedRuleset.Set id),
                     Position = Position.ShrinkR(PRETTYHEIGHT * 3.0f)
                 )
                 |+ Button(
                     Icons.EDIT,
-                    (fun () -> 
+                    (fun () ->
                         RulesetEditorPage(id, ruleset).Show()
                     ),
                     Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT * 2.0f)
                 )
                 |+ Button(
                     Icons.COPY,
-                    (fun () -> 
+                    (fun () ->
                         ConfirmPage(
                             [ruleset.Name] %> "rulesets.confirm_copy",
-                            fun () -> 
+                            fun () ->
                                 Rulesets.install { ruleset with Name = ruleset.Name + " (Copy)" }
                         )
                             .Show()
@@ -95,7 +96,7 @@ type SelectRulesetPage() =
                 )
                 |+ Button(
                     Icons.TRASH,
-                    (fun () -> 
+                    (fun () ->
                         ConfirmPage(
                             [ruleset.Name] %> "rulesets.confirm_delete",
                             fun () -> Rulesets.delete id |> ignore

@@ -12,13 +12,13 @@ type RulesetEditorPage(id: string, original: Ruleset) =
 
     let validation_message = SwapContainer()
 
-    let ruleset = 
+    let ruleset =
         Setting.simple original
-        |> Setting.trigger (fun rs -> 
+        |> Setting.trigger (fun rs ->
             match Ruleset.check rs with
             | Ok _ -> validation_message.Current <- Dummy()
             | Error reason ->
-                let card = 
+                let card =
                     CalloutCard(
                         (Callout
                             .Normal
@@ -57,9 +57,6 @@ type RulesetEditorPage(id: string, original: Ruleset) =
 
     override this.Title = original.Name
     override this.OnClose() =
-        let has_changed = System.Object.ReferenceEquals(original, ruleset.Value) |> not || name.Value <> original.Name
         let has_error = match validation_message.Current with :? Dummy -> false | _ -> true
-        if has_changed && not has_error then
+        if not has_error then
             Rulesets.update id { ruleset.Value with Name = name.Value.Trim() }
-        else
-            ruleset.Set original

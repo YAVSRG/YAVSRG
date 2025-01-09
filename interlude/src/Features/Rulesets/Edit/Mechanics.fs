@@ -16,8 +16,8 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         | NotePriority.Etterna -> 2
         |> Setting.simple
 
-    let cbrush_window = 
-        let max_window = 
+    let cbrush_window =
+        let max_window =
             let early, late = ruleset.Value.NoteWindows
             max late (abs early)
 
@@ -30,7 +30,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         ruleset.Value.HitMechanics.GhostTapJudgement
         |> Setting.simple
 
-    let hold_mechanics_type = 
+    let hold_mechanics_type =
         match ruleset.Value.HoldMechanics with
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania _) -> 0
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr _) -> 1
@@ -79,20 +79,20 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
     override this.Content() =
         let ghost_tap_judgement_options : (int option * string) array =
             Array.append
-                [| None, %"rulesets.mechanics.ghost_tap_judgement.none" |] 
+                [| None, %"rulesets.mechanics.ghost_tap_judgement.none" |]
                 (ruleset.Value.Judgements |> Array.indexed |> Array.map (fun (i, j) -> Some i, j.Name))
 
         let judgement_dropdown(setting: Setting<int>) =
             SelectDropdown(ruleset.Value.Judgements |> Array.map _.Name |> Array.indexed, setting)
 
         page_container()
-        |+ PageSetting(%"rulesets.mechanics.ghost_tap_judgement", 
+        |+ PageSetting(%"rulesets.mechanics.ghost_tap_judgement",
             SelectDropdown(ghost_tap_judgement_options, ghost_tap_judgement))
             .Help(Help.Info("rulesets.mechanics.ghost_tap_judgement"))
             .Pos(0)
-        |+ PageSetting(%"rulesets.mechanics.note_priority", 
+        |+ PageSetting(%"rulesets.mechanics.note_priority",
             SelectDropdown(
-                [| 
+                [|
                     0, %"rulesets.mechanics.note_priority.interlude"
                     1, %"rulesets.mechanics.note_priority.osu_mania"
                     2, %"rulesets.mechanics.note_priority.etterna"
@@ -103,12 +103,12 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Help(Help.Info("rulesets.mechanics.cbrush_window"))
             .Conditional(fun () -> note_priority.Value = 0)
             .Pos(4)
-        |+ PageSetting(%"rulesets.mechanics.hold_mechanics", 
+        |+ PageSetting(%"rulesets.mechanics.hold_mechanics",
             SelectDropdown(
                 if hold_mechanics_type.Value = 0 then
                     [| 0, %"rulesets.mechanics.osu_mania" |]
                 else
-                    [| 
+                    [|
                         1, %"rulesets.mechanics.head_judgement_or"
                         2, %"rulesets.mechanics.just_require_hold"
                         3, %"rulesets.mechanics.judge_releases_separately"
@@ -140,7 +140,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Conditional(fun () -> hold_mechanics_type.Value = 1)
             .Pos(15)
         |+ (
-            Callout.frame 
+            Callout.frame
                 (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.head_judgement_or").Body(%"rulesets.mechanics.head_judgement_or.desc"))
                 (fun (w, h) -> pretty_pos(18, 5, PageWidth.Custom w))
         )
@@ -151,7 +151,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Conditional(fun () -> hold_mechanics_type.Value = 2)
             .Pos(9)
         |+ (
-            Callout.frame 
+            Callout.frame
                 (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.just_require_hold").Body(%"rulesets.mechanics.just_require_hold.desc"))
                 (fun (w, h) -> pretty_pos(12, 5, PageWidth.Custom w))
         )
@@ -165,12 +165,12 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Conditional(fun () -> hold_mechanics_type.Value = 3)
             .Pos(11)
         |+ (
-            Callout.frame 
+            Callout.frame
                 (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_separately").Body(%"rulesets.mechanics.judge_releases_separately.desc"))
                 (fun (w, h) -> pretty_pos(14, 6, PageWidth.Custom w))
         )
             .Conditional(fun () -> hold_mechanics_type.Value = 3)
-        
+
         |+ PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
             .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
             .Conditional(fun () -> hold_mechanics_type.Value = 4)
@@ -179,19 +179,18 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             .Conditional(fun () -> hold_mechanics_type.Value = 4)
             .Pos(11)
         |+ (
-            Callout.frame 
+            Callout.frame
                 (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_only").Body(%"rulesets.mechanics.judge_releases_only.desc"))
                 (fun (w, h) -> pretty_pos(14, 5, PageWidth.Custom w))
         )
             .Conditional(fun () -> hold_mechanics_type.Value = 4)
 
-            
         :> Widget
-        
+
     override this.Title = %"rulesets.edit.mechanics"
     override this.OnClose() =
-        ruleset.Set 
-            { ruleset.Value with 
+        ruleset.Set
+            { ruleset.Value with
                 HitMechanics =
                     {
                         NotePriority =
@@ -203,7 +202,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                     }
                 HoldMechanics =
                     match hold_mechanics_type.Value with
-                    | 1 -> 
+                    | 1 ->
                         HoldMechanics.CombineHeadAndTail (
                             HeadTailCombineRule.HeadJudgementOr (
                                 release_early_window.Value, release_late_window.Value,
