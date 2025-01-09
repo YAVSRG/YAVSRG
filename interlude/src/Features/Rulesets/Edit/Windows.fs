@@ -131,7 +131,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
 module EditWindows =
 
     let note_windows (ruleset: Setting<Ruleset>) : Page =
-        let new_judgements = ruleset.Value.Judgements
+        let new_judgements = ruleset.Value.Judgements |> Array.copy
         { new EditWindowsPage(
                 new_judgements, 
                 Array.init new_judgements.Length (fun i -> 
@@ -144,7 +144,7 @@ module EditWindows =
         }
     
     let notes_windows_as_release_windows (ruleset: Setting<Ruleset>) : Page =
-        let new_judgements = ruleset.Value.Judgements
+        let new_judgements = ruleset.Value.Judgements |> Array.copy
         { new EditWindowsPage(
                 new_judgements, 
                 Array.init new_judgements.Length (fun i -> 
