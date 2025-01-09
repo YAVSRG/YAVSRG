@@ -95,7 +95,7 @@ module LevelSelect =
         match ctx with
         | LibraryContext.Playlist(index, playlist_id, data) ->
             match Content.Library.Collections.GetPlaylist playlist_id with
-            | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist Content.Library state
+            | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist Content.Library filter state
             | None -> ()
         | _ -> ()
 
@@ -149,11 +149,11 @@ module LevelSelect =
             false
 
     let start_playlist (playlist: Playlist) =
-        EndlessModeState.queue_playlist 0 playlist Content.Library state
+        EndlessModeState.queue_playlist 0 playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
     let start_playlist_shuffled (playlist: Playlist) =
-        EndlessModeState.queue_shuffled_playlist playlist Content.Library state
+        EndlessModeState.queue_shuffled_playlist playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
     let exit_gameplay () =

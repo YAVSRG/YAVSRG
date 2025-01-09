@@ -104,9 +104,9 @@ module Suggestion =
                 else None
             )
             |> Seq.filter (fun (cc, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
-            |> if ctx.OnlyNewCharts then 
-                Seq.filter (fun (cc, (rate, p)) -> now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS) 
-               else 
+            |> if ctx.OnlyNewCharts then
+                Seq.filter (fun (cc, (rate, p)) -> now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
+               else
                 id
             |> ctx.Filter.Apply
 
@@ -116,7 +116,7 @@ module Suggestion =
         seq {
             for cc, (c_rate, c_patterns) in candidates do
 
-                let sv_compatibility = 
+                let sv_compatibility =
                     if (patterns.SVAmount < 30000.0f<ms>) <> (c_patterns.SVAmount < 30000.0f<ms>) then
                         0.5f
                     else 1.0f
@@ -133,7 +133,7 @@ module Suggestion =
                 let pattern_compatibility =
                     pattern_similarity total_pattern_amount (rate, patterns) (c_rate, c_patterns)
 
-                let compatibility = 
+                let compatibility =
                     sv_compatibility * length_compatibility * difficulty_compatibility * pattern_compatibility
 
                 yield (cc, c_rate), compatibility
@@ -161,7 +161,7 @@ module Suggestion =
 
             recommended_already <- Set.add cc.Hash recommended_already
             recommended_already <- Set.add (cc.Title.ToLower()) recommended_already
-            
+
             Some (cc, rate)
 
 type EndlessModeState =
@@ -177,7 +177,7 @@ module EndlessModeState =
         let random = new Random()
         items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
-    let queue_playlist (from: int) (playlist: Playlist) (library: Library) (state: EndlessModeState) =
+    let queue_playlist (from: int) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
         state.Queue <-
             playlist.Charts
             |> Seq.skip from
@@ -186,9 +186,10 @@ module EndlessModeState =
                 | Some cc -> Some(cc, info)
                 | None -> None
             )
+            |> filter.Apply
             |> List.ofSeq
 
-    let queue_shuffled_playlist (playlist: Playlist) (library: Library) (state: EndlessModeState) =
+    let queue_shuffled_playlist (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
         state.Queue <-
             playlist.Charts
             |> Seq.choose (fun (c, info) ->
@@ -196,6 +197,7 @@ module EndlessModeState =
                 | Some cc -> Some(cc, info)
                 | None -> None
             )
+            |> filter.Apply
             |> shuffle_playlist_charts
             |> List.ofSeq
 
