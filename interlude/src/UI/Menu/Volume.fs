@@ -12,6 +12,13 @@ type Volume() =
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f
 
+    // base setting should not be used directly, it rounds to nearest 0.01
+    let volume =
+        Setting.bounded (0.0, 1.0) options.AudioVolume.Value
+        |> Setting.trigger (fun v ->
+            options.AudioVolume.Value <- v
+            Audio.change_volume (v, v))
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
@@ -23,22 +30,19 @@ type Volume() =
 
         elif (%%"volume_up").Pressed() then
             fade.Target <- 1.0f
-            Setting.app ((+) (0.0003 * elapsed_ms)) options.AudioVolume
-            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
-            slider.Target <- float32 options.AudioVolume.Value
+            Setting.app ((+) (0.0003 * elapsed_ms)) volume
+            slider.Target <- float32 volume.Value
 
         elif (%%"volume_down").Pressed() then
             fade.Target <- 1.0f
-            Setting.app ((+) (-0.0003 * elapsed_ms)) options.AudioVolume
-            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
-            slider.Target <- float32 options.AudioVolume.Value
+            Setting.app ((+) (-0.0003 * elapsed_ms)) volume
+            slider.Target <- float32 volume.Value
 
         elif (%%"volume").Pressed() then
             fade.Target <- 1.0f
-            Setting.app ((+) (float (Mouse.scroll ()) * 0.02)) options.AudioVolume
+            Setting.app ((+) (float (Mouse.scroll ()) * 0.02)) volume
 
-            Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
-            slider.Target <- float32 options.AudioVolume.Value
+            slider.Target <- float32 volume.Value
 
         else
             fade.Target <- 0.0f
