@@ -21,7 +21,7 @@ module Validation =
             let ruleset = SC.create judge
 
             match Ruleset.check ruleset with
-            | Ok _ -> 
+            | Ok _ ->
                 printfn "%s: valid" ruleset.Name
                 printfn " Note windows: %A" ruleset.NoteWindows
                 printfn " Release windows: %A" ruleset.ReleaseWindows
@@ -29,7 +29,23 @@ module Validation =
             | Error reason -> Assert.Fail(reason)
 
         Assert.Pass()
-    
+
+    [<Test>]
+    let Quaver_AllJudges_Valid () =
+
+        for judge in Quaver.Judgement.LIST do
+            let ruleset = Quaver.create judge
+
+            match Ruleset.check ruleset with
+            | Ok _ ->
+                printfn "%s: valid" ruleset.Name
+                printfn " Note windows: %A" ruleset.NoteWindows
+                printfn " Release windows: %A" ruleset.ReleaseWindows
+                printfn " Hash: %s" (Ruleset.hash ruleset)
+            | Error reason -> Assert.Fail(reason)
+
+        Assert.Pass()
+
     [<Test>]
     let OsuOd8_Valid () =
         let ruleset = OsuMania.create 8.0f (OsuMania.Mode.NoMod)
@@ -45,11 +61,11 @@ module Validation =
             let od = 0.5f * float32 step
 
             for mode in [ OsuMania.Mode.NoMod; OsuMania.Mode.Easy; OsuMania.Mode.HardRock ] do
-                
+
                 let ruleset = OsuMania.create od mode
 
                 match Ruleset.check ruleset with
-                | Ok _ -> 
+                | Ok _ ->
                     printfn "%s: valid" ruleset.Name
                     printfn " Note windows: %A" ruleset.NoteWindows
                     printfn " Release windows: %A" ruleset.ReleaseWindows
@@ -70,11 +86,11 @@ module Validation =
     let Wife3_AllJudges_Valid () =
 
         for judge = 4 to 9 do
-                
+
             let ruleset = Wife3.create judge
 
             match Ruleset.check ruleset with
-            | Ok _ -> 
+            | Ok _ ->
                 printfn "%s: valid" ruleset.Name
                 printfn " Note windows: %A" ruleset.NoteWindows
                 printfn " Release windows: %A" ruleset.ReleaseWindows
@@ -87,19 +103,19 @@ module Validation =
 
     [<Test>]
     let Judgements_Required () =
-        
+
         let invalid_ruleset = { VALID_RULESET with Judgements = [||] }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
-    
+
     [<Test>]
     let Judgements_WindowsSigns_EarlyWindow () =
-        
-        let invalid_ruleset = 
-            { VALID_RULESET with 
-                Judgements = 
+
+        let invalid_ruleset =
+            { VALID_RULESET with
+                Judgements =
                     [|
                         {
                             Name = "A"
@@ -116,17 +132,17 @@ module Validation =
                     |]
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
             }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
-    
+
     [<Test>]
     let Judgements_WindowsSigns_LateWindow () =
-        
-        let invalid_ruleset = 
-            { VALID_RULESET with 
-                Judgements = 
+
+        let invalid_ruleset =
+            { VALID_RULESET with
+                Judgements =
                     [|
                         {
                             Name = "A"
@@ -143,17 +159,17 @@ module Validation =
                     |]
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
             }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
-    
+
     [<Test>]
     let Judgements_WindowsOrdering () =
-        
-        let invalid_ruleset = 
-            { VALID_RULESET with 
-                Judgements = 
+
+        let invalid_ruleset =
+            { VALID_RULESET with
+                Judgements =
                     [|
                         {
                             Name = "A"
@@ -170,17 +186,17 @@ module Validation =
                     |]
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
             }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
-    
+
     [<Test>]
     let Judgements_InvalidWindowValues_NaN () =
-        
-        let invalid_ruleset = 
-            { VALID_RULESET with 
-                Judgements = 
+
+        let invalid_ruleset =
+            { VALID_RULESET with
+                Judgements =
                     [|
                         {
                             Name = "A"
@@ -197,17 +213,17 @@ module Validation =
                     |]
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
             }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
     [<Test>]
     let Judgements_InvalidWindowValues_Infinity () =
-        
-        let invalid_ruleset = 
-            { VALID_RULESET with 
-                Judgements = 
+
+        let invalid_ruleset =
+            { VALID_RULESET with
+                Judgements =
                     [|
                         {
                             Name = "A"
@@ -224,7 +240,7 @@ module Validation =
                     |]
                 HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
             }
-        
+
         match Ruleset.check invalid_ruleset with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)

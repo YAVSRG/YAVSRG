@@ -11,7 +11,7 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 open Prelude.Tests.Rulesets
 
-module OsuClientParity =
+module OsuParity =
 
     let RULESET = OsuMania.create 8.0f OsuMania.NoMod
 

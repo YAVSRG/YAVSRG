@@ -39,7 +39,8 @@
     <Compile Include="Rulesets\Events.fs" />
     <Compile Include="Rulesets\Scoring.fs" />
     <Compile Include="Rulesets\Graph.fs" />
-    <Compile Include="Rulesets\OsuClientParity.fs" />
+    <Compile Include="Rulesets\OsuParity.fs" />
+    <Compile Include="Rulesets\QuaverParity.fs" />
     <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\UserDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />

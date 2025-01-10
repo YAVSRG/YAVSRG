@@ -22,13 +22,13 @@ type OsuRulesetPage() =
         page_container()
         |+ PageSetting(%"ruleset.osu_od", Slider(od, Step = 0.1f)).Pos(0)
         |+ PageSetting(
-            %"ruleset.osu_modifier", 
+            %"ruleset.osu_modifier",
             Selector(
-                [| 
+                [|
                     OsuMania.NoMod, %"ruleset.osu_modifier.nomod"
                     OsuMania.HardRock, %"ruleset.osu_modifier.hardrock"
                     OsuMania.Easy, %"ruleset.osu_modifier.easy"
-                |], 
+                |],
                 mode
             )
         ).Pos(2)
@@ -36,6 +36,31 @@ type OsuRulesetPage() =
         :> Widget
 
     override this.Title = %"rulesets.create.osu"
+    override this.OnClose() = ()
+
+type QuaverRulesetPage() =
+    inherit Page()
+
+    let judgement = Setting.simple Quaver.Standard
+
+    let create () =
+        Rulesets.install (Quaver.create judgement.Value)
+        Menu.Back()
+        Menu.Back()
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting(
+            %"ruleset.quaver_judgement",
+            SelectDropdown(
+                Quaver.Judgement.LIST |> Array.map (fun j -> j, j.ToString()),
+                judgement
+            )
+        ).Pos(0)
+        |+ PageButton.Once(%"rulesets.create", create).Pos(3)
+        :> Widget
+
+    override this.Title = %"rulesets.create.quaver"
     override this.OnClose() = ()
 
 type WifeRulesetPage() =
@@ -52,14 +77,14 @@ type WifeRulesetPage() =
         page_container()
         |+ PageSetting(%"ruleset.wife_judge",
             SelectDropdown(
-                [| 
+                [|
                     4, "4"
                     5, "5"
                     6, "6"
                     7, "7"
                     8, "8"
                     9, "JUSTICE"
-                |], 
+                |],
                 judge
             )
         ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))
@@ -83,7 +108,7 @@ type SCRulesetPage() =
         page_container()
         |+ PageSetting(%"ruleset.sc_judge",
             SelectDropdown(
-                [| 
+                [|
                     2, "2"
                     3, "3"
                     4, "4"
@@ -92,7 +117,7 @@ type SCRulesetPage() =
                     7, "7"
                     8, "8"
                     9, "9"
-                |], 
+                |],
                 judge
             )
         ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))

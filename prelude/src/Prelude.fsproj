@@ -53,6 +53,7 @@
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\Rulesets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />
+    <Compile Include="Gameplay\Rulesets\Quaver.fs" />
     <Compile Include="Gameplay\Rulesets\Wife3.fs" />
     <Compile Include="Gameplay\Scoring\WifeCurve.fs" />
     <Compile Include="Gameplay\Rulesets\Compare.fs" />
