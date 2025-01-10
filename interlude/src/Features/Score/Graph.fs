@@ -320,14 +320,21 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if expanded && options.ScoreGraphWindowBackground.Value then
             let h = 0.5f * this.Bounds.Height
             let c = this.Bounds.CenterY
+            let mutable y1 = c - h - 48.0f
+            let mutable y2 = c + h + 24.0f
             let ms_to_y (time: GameplayTime) = c - System.Math.Clamp(time * GraphSettings.scale.Value / MAX_WINDOW, -1.0f, 1.0f) * h
 
-            // todo: prevent labels from stacking at the top/bottom
             for j in score_info.Ruleset.Judgements do
                 match j.TimingWindows with
                 | Some (early, late) ->
-                    Text.draw_b(Style.font, sprintf "%gms" early, 15.0f, this.Bounds.Left + 5.0f, ms_to_y early - 24.0f, color)
-                    Text.draw_b(Style.font, sprintf "+%gms" late, 15.0f, this.Bounds.Left + 5.0f, ms_to_y late, color)
+                    let early_y = ms_to_y early - 24.0f
+                    if early_y - 24.0f > y1 then
+                        Text.draw_b(Style.font, sprintf "%gms" early, 15.0f, this.Bounds.Left + 5.0f, early_y, color)
+                        y1 <- early_y
+                    let late_y = ms_to_y late
+                    if late_y + 24.0f < y2 then
+                        Text.draw_b(Style.font, sprintf "+%gms" late, 15.0f, this.Bounds.Left + 5.0f, late_y, color)
+                        y2 <- late_y
                 | None -> ()
 
         else
