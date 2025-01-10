@@ -12,12 +12,7 @@ type Volume() =
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f
 
-    // base setting should not be used directly, it rounds to nearest 0.01
-    let volume =
-        Setting.bounded (0.0, 1.0) options.AudioVolume.Value
-        |> Setting.trigger (fun v ->
-            options.AudioVolume.Value <- v
-            Audio.change_volume (v, v))
+    let volume = options.AudioVolume |> Setting.trigger (fun v -> Audio.change_volume(v, v))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

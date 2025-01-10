@@ -207,7 +207,7 @@ type GameOptions =
 
             VisualOffset = 0.0f<ms / rate> |> Setting.bounded  (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
             AudioOffset =  0.0f<ms / rate> |> Setting.bounded (-500.0f<ms / rate>, 500.0f<ms / rate>) |> Setting.roundf_uom 0
-            AudioVolume = Setting.percent 0.05
+            AudioVolume = Setting.bounded (0.0, 1.0) 0.05
             AudioPitchRates = Setting.simple true
             CurrentChart = Setting.simple ""
             Theme = Themes.selected_id
