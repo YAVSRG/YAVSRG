@@ -15,6 +15,8 @@ module GraphSettings =
     let only_releases = Setting.simple false
     let column_filter = Array.create 10 true
     let scale = 1.0f |> Setting.bounded (1.0f, 6.0f)
+    let show_slice = Setting.simple false
+    let slice_size = 0.04f |> Setting.bounded (0.01f, 0.50f)
 
 type ScoreGraphSettingsPage(graph: ScoreGraph) =
     inherit Page()
@@ -63,6 +65,20 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
             .Pos(11)
         |+ PageSetting(%"score.graph.settings.windows_background", Checkbox(options.ScoreGraphWindowBackground))
             .Pos(13)
+        |+ PageSetting(%"score.graph.settings.hover_info",
+            SelectDropdown(
+                [|
+                    false, %"score.graph.settings.hover_info.cumulative"
+                    true, %"score.graph.settings.hover_info.slice"
+                |],
+                GraphSettings.show_slice
+            )
+        )
+            .Help(Help.Info("score.graph.settings.hover_info").Hotkey(%"score.graph.settings.hover_info_hint", "graph_alt_info"))
+            .Pos(16)
+        |+ PageSetting(%"score.graph.settings.slice_size", Slider.Percent GraphSettings.slice_size)
+            .Help(Help.Info("score.graph.settings.slice_size"))
+            .Pos(18)
         :> Widget
 
     override this.Title = %"score.graph.settings"
@@ -77,7 +93,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let mutable refresh = true
     let mutable expanded = false
     let mutable snapshot_index = 0
-    let window_width = Setting.bounded (5.0f, float32 ScoreScreenStats.GRAPH_POINT_COUNT / 4f) 20.0f
+    let mutable show_slice_info = false
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
@@ -118,7 +134,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     member this.Keys : int = score_info.WithMods.Keys
 
-    member private this.DrawSnapshotInfo(bounds: Rect, info: GraphPoint) =
+    member private this.DrawCumulativeInfo(bounds: Rect, info: GraphPoint) =
 
         let black_cutoff_area = this.Bounds.SlicePercentR(1.0f - info.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
         Render.rect black_cutoff_area Colors.black.O2
@@ -172,7 +188,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
-    member private this.DrawSnapshotWindowInfo(bounds: Rect, index: int, width: int) =
+    member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) =
 
         let pre = stats.Value.GraphPoints.[index - width |> max 0]
         let post = stats.Value.GraphPoints.[index + width |> min (stats.Value.GraphPoints.Length - 1)]
@@ -190,6 +206,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
 
+        let combo = stats.Value.GraphPoints.[index].Combo
         let max_points = post.MaxPointsScored - pre.MaxPointsScored
         let points = post.PointsScored - pre.PointsScored
         let accuracy = if max_points = 0.0 then 1.0 else points / max_points
@@ -205,7 +222,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "%.4f%%" (accuracy * 100.0),
+            sprintf "%.4f%% %ix" (accuracy * 100.0) combo,
             text_b,
             text_color,
             Alignment.LEFT
@@ -476,9 +493,11 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 refresh <- true
 
             let s = Mouse.scroll()
-            if Input.key_held_any_modifiers(Keys.LeftShift) then
-                window_width.Value <- window_width.Value + s * 5.0f
+            if GraphSettings.show_slice.Value <> (%%"graph_alt_info").Pressed() then
+                show_slice_info <- true
+                GraphSettings.slice_size.Value <- GraphSettings.slice_size.Value + s * 0.005f
             else
+                show_slice_info <- false
                 if s <> 0.0f then
                     GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
                     refresh <- true
@@ -523,10 +542,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     BOX_HEIGHT
                 )
 
-            if Input.key_held_any_modifiers(Keys.LeftShift) then
-                this.DrawSnapshotWindowInfo(box, snapshot_index, int window_width.Value)
+            if show_slice_info then
+                this.DrawSliceInfo(box, snapshot_index, int (GraphSettings.slice_size.Value * 0.5f * float32 ScoreScreenStats.GRAPH_POINT_COUNT))
             else
-                this.DrawSnapshotInfo(box, current_snapshot)
+                this.DrawCumulativeInfo(box, current_snapshot)
 
             this.DrawLabels true
         else
