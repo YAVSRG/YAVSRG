@@ -77,6 +77,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let mutable refresh = true
     let mutable expanded = false
     let mutable snapshot_index = 0
+    let window_width = Setting.bounded (5.0f, float32 ScoreScreenStats.GRAPH_POINT_COUNT / 4f) 20.0f
 
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
@@ -166,6 +167,69 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Text.fill_b (
             Style.font,
             info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ",
+            text_b.Translate(0.0f, row_height * 3.0f),
+            text_color,
+            Alignment.LEFT
+        )
+
+    member private this.DrawSnapshotWindowInfo(bounds: Rect, index: int, width: int) =
+
+        let pre = stats.Value.GraphPoints.[index - width |> max 0]
+        let post = stats.Value.GraphPoints.[index + width |> min (stats.Value.GraphPoints.Length - 1)]
+
+        let black_cutoff_left = this.Bounds.SlicePercentL(pre.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+        Render.rect black_cutoff_left Colors.black.O2
+        let black_cutoff_right = this.Bounds.SlicePercentR(1.0f - post.Time / stats.Value.GraphPoints.[stats.Value.GraphPoints.Length - 1].Time)
+        Render.rect black_cutoff_right Colors.black.O2
+
+        let outline_bounds = bounds.Expand(Style.PADDING)
+        Render.rect outline_bounds Colors.white.O4
+        Render.rect bounds Colors.shadow_2.O4
+
+        let row_height = bounds.Height / 4.0f
+        let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
+        let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
+
+        let max_points = post.MaxPointsScored - pre.MaxPointsScored
+        let points = post.PointsScored - pre.PointsScored
+        let accuracy = if max_points = 0.0 then 1.0 else points / max_points
+        let judgement_diff = post.Judgements |> Array.mapi (fun i v -> (v - pre.Judgements.[i]))
+        let judgement_count_post = Array.sum post.Judgements
+        let judgement_count_pre = Array.sum pre.Judgements
+        let mean = ((post.Mean * float32 judgement_count_post) - (pre.Mean * float32 judgement_count_pre)) / float32 (judgement_count_post - judgement_count_pre)
+        let standard_deviation =
+            ((post.StandardDeviation * post.StandardDeviation * float32 judgement_count_post)
+            - (pre.StandardDeviation * pre.StandardDeviation * float32 judgement_count_pre))
+            / float32 (judgement_count_post - judgement_count_pre)
+            |> sqrt
+
+        Text.fill_b (
+            Style.font,
+            sprintf "%.4f%%" (accuracy * 100.0),
+            text_b,
+            text_color,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            mean |> sprintf "M: %.2fms",
+            text_b.Translate(0.0f, row_height),
+            text_color,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            standard_deviation |> sprintf "SD: %.2fms",
+            text_b.Translate(0.0f, row_height * 2.0f),
+            text_color,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            judgement_diff |> Seq.map (sprintf "%i") |> String.concat "  |  ",
             text_b.Translate(0.0f, row_height * 3.0f),
             text_color,
             Alignment.LEFT
@@ -412,9 +476,12 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 refresh <- true
 
             let s = Mouse.scroll()
-            if s <> 0.0f then
-                GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
-                refresh <- true
+            if Input.key_held_any_modifiers(Keys.LeftShift) then
+                window_width.Value <- window_width.Value + s * 5.0f
+            else
+                if s <> 0.0f then
+                    GraphSettings.scale.Value <- GraphSettings.scale.Value + 0.25f * s
+                    refresh <- true
 
         if expanded && (%%"exit").Tapped() then
             expanded <- false
@@ -456,7 +523,10 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     BOX_HEIGHT
                 )
 
-            this.DrawSnapshotInfo(box, current_snapshot)
+            if Input.key_held_any_modifiers(Keys.LeftShift) then
+                this.DrawSnapshotWindowInfo(box, snapshot_index, int window_width.Value)
+            else
+                this.DrawSnapshotInfo(box, current_snapshot)
 
             this.DrawLabels true
         else
