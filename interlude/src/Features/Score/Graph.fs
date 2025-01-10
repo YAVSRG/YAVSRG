@@ -254,14 +254,29 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
     member private this.PlotLine(y_func: GraphPoint -> float32, color_func: GraphPoint -> Color) =
 
+        let mutable filler : ((float32 * float32) * (float32 * float32) * Color) voption = ValueNone
         let draw_line (x1, y1) (x2, y2) (color: Color) =
-            let theta = System.MathF.Atan((y2 - y1) / (x2 - x1))
+            let theta = System.MathF.Atan2(y2 - y1, x2 - x1)
             let dy = -HTHICKNESS * System.MathF.Cos theta
             let dx = HTHICKNESS * System.MathF.Sin theta
 
+            let p1 = x1 + dx, y1 + dy
+            let p2 = x2 + dx, y2 + dy
+            let p3 = x2 - dx, y2 - dy
+            let p4 = x1 - dx, y1 - dy
+
+            match filler with
+            | ValueSome (_p2, _p3, _color) ->
+                Render.quad
+                    (Quad.createv p1 _p2 _p3 p4)
+                    _color.AsQuad
+            | ValueNone -> ()
+
             Render.quad
-                (Quad.createv (x1 + dx, y1 + dy) (x2 + dx, y2 + dy) (x2 - dx, y2 - dy) (x1 - dx, y1 - dy))
+                (Quad.createv p1 p2 p3 p4)
                 color.AsQuad
+
+            filler <- ValueSome (p2, p3, color)
 
         let snapshots = stats.Value.GraphPoints
         let xscale = (this.Bounds.Width - 10.0f) / snapshots.[snapshots.Length - 1].Time
