@@ -27,29 +27,33 @@ You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in
 1. Install [Git](https://git-scm.com/downloads), and [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
 Follow the install instructions for both of these for your platform
 
-2. Clone the repository and set up the CLI tool
+2. Set up the repository
 
 	To do this via a terminal:
 	```bash
 	# Navigate to somewhere you want to store the interlude codebase - Don't forget --recurse-submodules!
 	git clone https://github.com/YAVSRG/YAVSRG.git --recurse-submodules
-	# Setup the `yavsrg` CLI tool
-	cd YAVSRG/tools
-	dotnet pack
-	dotnet tool install -g --add-source ./nupkg YAVSRG.CLI
 	```
-	**If you have never installed a dotnet tool**, after the final step you will likely see a message in your terminal about your dotnet tool location not being added to PATH, with a command to fix it.  
-	If so, also do that.
-
-	The steps above should set up the `yavsrg` CLI command. Try running `yavsrg version`, you should see a version number in the terminal.  
-	**If this hasn't worked and you are stuck, get assistance in [the discord](https://yavsrg.net/discord)**
-
-3. Run `yavsrg play` to build and play the latest version.  
-   From now on `yavsrg play` will launch the game when you want to play.  
-    To update your game when a new version comes out, run `yavsrg update`.
 	
-To later uninstall the `yavsrg` command line tool, run `dotnet tool uninstall --global yavsrg.cli`  
-After that you can delete the entire YAVSRG folder to entirely remove the game and all data from your system.
+3. Run the CLI tool
+	```bash
+	cd YAVSRG/tools
+	dotnet run
+	```
+	You will see in your terminal something like
+	```
+	== YAVSRG CLI Tools ==
+	type 'help' for a list of commands, or help <command> for details
+	>
+	```
+
+4. When *in the CLI tool*, run the `play` command to build and play the latest version.  
+    This will create a build of the game under `YAVSRG/GAME` which can be run directly if you prefer.  
+    To update your game when a new version comes out, run the CLI tool again, then run `update`.
+	
+**If a step isn't working/you are stuck, get assistance in [the discord](https://yavsrg.net/discord)**
+
+You can delete the entire YAVSRG folder to entirely remove the game and all data from your system.
 
 <h2 align="center">🧱 Building Interlude <code style="color: red; font-size: 20px">&lt;for developers only&gt;</code></h2>
 
@@ -57,10 +61,10 @@ After that you can delete the entire YAVSRG folder to entirely remove the game a
 >
 > If the setup guide for non-developers on Linux/macOS didn't work, please **do not try these steps** and instead get assistance in [the discord](https://yavsrg.net/discord) if all you want to do is play.
 
-Developers should first follow the non-developer setup and ensure the `yavsrg` CLI tool works.  
-Use `yavsrg debug_run` to build and test the current branch - You should run this at least once before building via an IDE.
+Developers should first follow the non-developer setup and ensure the CLI tool works.  
+Use the `debug_run` CLI command to build and test the current branch - You should run this at least once before building via an IDE.
 
-After the first use of `yavsrg debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
+After the first use of `debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
 If not, the game will let you know on launch - Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
 If your platform isn't there contact me in the discord or search online for it
 
