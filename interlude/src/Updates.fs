@@ -31,7 +31,6 @@ module Updates =
 
         let hash = informational_version.Substring(informational_version.IndexOf('+') + 1)
         hash.Substring(0, min hash.Length 6)
-        hash.Substring(0, min hash.Length 6)
 
     /// Full version string e.g. "Interlude 0.5.16"
     let version =
@@ -39,7 +38,6 @@ module Updates =
 
         if DEV_MODE then
             sprintf "%s %s (%s)" v.Name short_version short_hash
-            sprintf "%s %s (b%s)" v.Name short_version short_hash
         else
             sprintf "%s %s" v.Name short_version
 
