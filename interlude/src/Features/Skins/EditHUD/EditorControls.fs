@@ -12,7 +12,7 @@ type private HUDEditorButton(label: string, hotkey: Bind, action: unit -> unit) 
     inherit StaticWidget(NodeType.Button(fun () -> Style.click.Play(); action()))
 
     override this.Draw() =
-        Render.rect this.Bounds (if this.Focused then Colors.yellow_accent.O1 else Colors.shadow_2.O2)
+        Render.rect this.Bounds (if this.Focused then Colors.yellow_accent.O2 else Colors.shadow_2.O2)
         Render.rect (this.Bounds.BorderR(10.0f).TranslateY(10.0f)) Colors.black.O3
         Render.rect (this.Bounds.BorderB(10.0f).TranslateX(10.0f)) Colors.black.O3
         Text.fill_b(Style.font, hotkey.ToString(), this.Bounds.Shrink(20.0f, 25.0f).TranslateY(22.0f), Colors.text_cyan, Alignment.CENTER)
