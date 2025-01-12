@@ -99,7 +99,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let HTHICKNESS = THICKNESS * 0.5f
 
     let BOX_HEIGHT = 200.0f
-    let BOX_WIDTH = 350.0f
+    let BOX_WIDTH = 400.0f
 
     let NORMAL_POSITION =
         {
@@ -155,6 +155,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let row_height = bounds.Height / 4.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
+        let judgement_count = Array.sum info.Judgements
 
         Text.fill_b (
             Style.font,
@@ -182,7 +183,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ",
+            (info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + judgement_count.ToString() + "]",
             text_b.Translate(0.0f, row_height * 3.0f),
             text_color,
             Alignment.LEFT
@@ -246,7 +247,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            judgement_diff |> Seq.map (sprintf "%i") |> String.concat "  |  ",
+            (judgement_diff |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + (judgement_count_post - judgement_count_pre).ToString() + "]",
             text_b.Translate(0.0f, row_height * 3.0f),
             text_color,
             Alignment.LEFT
@@ -358,6 +359,15 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if score_info.IsFailed then
             let color = if translucent then Colors.red.O1, Color.Transparent else Colors.text_red
             Text.draw_aligned_b (Style.font, %"score.graph.failed", 24.0f, this.Bounds.Right - 10.0f, this.Bounds.Top + 3.0f, color, Alignment.RIGHT)
+
+        if stats.Value.ColumnFilterApplied then
+            let color = if translucent then Colors.green_accent.O1, Color.Transparent else Colors.text_green
+            let text =
+                GraphSettings.column_filter
+                |> Seq.indexed
+                |> Seq.choose (fun (i, b) -> if b && i < score_info.WithMods.Keys then Some ((i + 1).ToString()) else None)
+                |> String.concat " "
+            Text.draw_aligned_b (Style.font, sprintf "%s: %s" %"score.graph.settings.column_filter" text, 24.0f, this.Bounds.CenterX, this.Bounds.Bottom - 40.0f, color, Alignment.CENTER)
 
     member private this.DrawLineGraph() =
         let line_color =
