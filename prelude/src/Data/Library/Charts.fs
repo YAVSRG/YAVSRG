@@ -46,6 +46,11 @@ module DbCharts =
             """
         }
 
+    let internal RESET_ORIGINS: NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL = """ UPDATE charts SET Origin = '[]'; """
+        }
+
     let private SAVE: NonQuery<ChartMeta * Chart> =
         {
             SQL =
@@ -65,7 +70,7 @@ module DbCharts =
                     @Title, @TitleNative, @Artist, @ArtistNative,
                     @DifficultyName, @Subtitle, @Source, @Creator, @Tags,
                     json(@Background), json(@Audio), @PreviewTime,
-                    @Packs, json(@Origin),
+                    json(@Packs), json(@Origins),
                     @Keys, @Length, @BPM,
                     @DateAdded, @CalcVersion, @Rating, json(@Patterns),
                     @Chart)
@@ -83,7 +88,16 @@ module DbCharts =
                     Audio = excluded.Audio,
                     PreviewTime = excluded.PreviewTime,
                     DateAdded = excluded.DateAdded,
-                    Origin = excluded.Origin,
+                    Origin = (
+                        SELECT '[' || group_concat(value) || ']' FROM (
+                            SELECT json_each.value
+                            FROM charts, json_each(charts.Origin)
+                            WHERE charts.Id = excluded.Id
+                            UNION
+                            SELECT json_each.value
+                            FROM json_each(excluded.Origin)
+                        ) GROUP BY ''
+                    ),
                     Length = excluded.Length,
                     BPM = excluded.BPM,
                     DateAdded = excluded.DateAdded,
@@ -118,7 +132,7 @@ module DbCharts =
                     "@Audio", SqliteType.Text, -1
                     "@PreviewTime", SqliteType.Real, 4
                     "@Packs", SqliteType.Text, -1
-                    "@Origin", SqliteType.Text, -1
+                    "@Origins", SqliteType.Text, -1
                     "@Keys", SqliteType.Integer, 1
                     "@Length", SqliteType.Real, 4
                     "@BPM", SqliteType.Integer, 4
@@ -144,7 +158,7 @@ module DbCharts =
                     p.Json JSON db_chart.Audio
                     p.Float32 (float32 db_chart.PreviewTime |> no_nan)
                     p.Json JSON db_chart.Packs
-                    p.Json JSON db_chart.Origin
+                    p.Json JSON db_chart.Origins
                     p.Byte (byte db_chart.Keys)
                     p.Float32 (float32 db_chart.Length |> no_nan)
                     p.Int32 db_chart.BPM
@@ -184,7 +198,7 @@ module DbCharts =
             Audio = r.Json JSON
             PreviewTime = r.Float32 |> Time.of_number
             Packs = r.Json JSON
-            Origin = r.Json JSON
+            Origins = r.Json JSON
             Keys = r.Byte |> int32
             Length = r.Float32 |> Time.of_number
             BPM = r.Int32
@@ -198,12 +212,12 @@ module DbCharts =
                     PatternReport.Default
                 else r.Json JSON
         }
-        
+
     let private GET_META: Query<string, ChartMeta> =
         {
             SQL =
                 """
-            SELECT 
+            SELECT
                 Id,
                 Title, TitleNative, Artist, ArtistNative,
                 DifficultyName, Subtitle, Source, Creator, Tags,
@@ -226,7 +240,7 @@ module DbCharts =
         {
             SQL =
                 """
-            SELECT 
+            SELECT
                 Id,
                 Title, TitleNative, Artist, ArtistNative,
                 DifficultyName, Subtitle, Source, Creator, Tags,
@@ -254,13 +268,13 @@ module DbCharts =
                 next_batch <- FAST_LOAD.Execute batch db |> expect
                 yield! next_batch
         }
-        
+
     let private GET_CHART: Query<string, Result<Chart, string>> =
         {
             SQL = """SELECT Keys, Chart FROM charts WHERE Id = @Hash;"""
             Parameters = [ "@Hash", SqliteType.Text, -1 ]
             FillParameters = fun p hash -> p.String hash
-            Read = fun r -> 
+            Read = fun r ->
                 let keys = r.Byte |> int32
                 use stream = r.Stream
                 use br = new BinaryReader(stream)
@@ -289,21 +303,21 @@ module DbCharts =
     let private UPDATE_CALCULATED_DATA: NonQuery<string * float32 * PatternReport> =
         {
             SQL = """
-            UPDATE charts 
-            SET 
+            UPDATE charts
+            SET
                 CalcVersion = @CalcVersion,
                 Rating = @Rating,
                 Patterns = json(@Patterns)
             WHERE Id = @Hash;
             """
-            Parameters = [ 
+            Parameters = [
                 "@Hash", SqliteType.Text, -1
                 "@CalcVersion", SqliteType.Integer, 1
                 "@Rating", SqliteType.Real, 4
                 "@Patterns", SqliteType.Text, -1
             ]
-            FillParameters = 
-                (fun p (hash, rating, patterns) -> 
+            FillParameters =
+                (fun p (hash, rating, patterns) ->
                     p.String hash
                     p.Byte CALC_VERSION
                     p.Float32 rating
@@ -317,17 +331,17 @@ module DbCharts =
     let private UPDATE_PACKS: NonQuery<string * Set<string>> =
         {
             SQL = """
-            UPDATE charts 
-            SET 
+            UPDATE charts
+            SET
                 Packs = json(@Packs)
             WHERE Id = @Hash;
             """
-            Parameters = [ 
+            Parameters = [
                 "@Hash", SqliteType.Text, -1
                 "@Packs", SqliteType.Text, -1
             ]
-            FillParameters = 
-                (fun p (hash, packs) -> 
+            FillParameters =
+                (fun p (hash, packs) ->
                     p.String hash
                     p.Json JSON packs
                 )

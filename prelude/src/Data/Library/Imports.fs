@@ -69,6 +69,41 @@ module Imports =
         else
             None
 
+    let filter_rates (path: string) (results: Result<ImportChart, string * string> list) : Result<ImportChart, string * string> list =
+        results
+        |> List.map (
+            function
+            | Ok import ->
+                match detect_rate_mod import.Header.DiffName with
+                | Some rate ->
+                    let original =
+                        results
+                        |> List.tryPick (
+                            function
+                            | Ok { Chart = original; Header = header } ->
+                                let original_duration = original.LastNote - original.FirstNote
+                                let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
+                                if
+                                    original.Notes.Length = import.Chart.Notes.Length &&
+                                    abs (incoming_duration * float32 rate - original_duration) < 5.0f<ms>
+                                then
+                                    match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
+                                    | Some (ChartOrigin.Osu (md5, set_id, map_id, _)) ->
+                                        let offset = import.Chart.FirstNote * float32 rate - original.FirstNote
+                                        Some (header, ChartOrigin.Osu (md5, set_id, map_id, Some (rate, offset)))
+                                    | _ -> None
+                                else None
+                            | _ -> None
+                        )
+                    match original with
+                    | Some (h, alt_rate_origin) ->
+                        h.Origins <- h.Origins.Add alt_rate_origin
+                        Error (path, sprintf "Skipping %.2fx rate of another map" rate)
+                    | None -> Ok import
+                | None -> Ok import
+            | Error skipped_conversion -> Error skipped_conversion
+        )
+
     let convert_song_folder =
         { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
             override this.Handle((path, config, { Charts = chart_db })) =
@@ -98,35 +133,14 @@ module Imports =
                         )
                         |> List.ofSeq
 
-                    let filter_rates =
-                        results
-                        |> List.map (
-                            function
-                            | Ok import ->
-                                match detect_rate_mod import.Header.DiffName with
-                                | Some rate ->
-                                    let original =
-                                        results
-                                        |> List.tryFind (
-                                            function
-                                            | Ok { Chart = original } ->
-                                                original.Notes.Length = import.Chart.Notes.Length
-                                                && abs((import.Chart.LastNote - import.Chart.FirstNote) * float32 rate - (original.LastNote - original.FirstNote)) < 2.0f<ms>
-                                            | _ -> false
-                                        )
-                                    if original.IsSome then
-                                        Error (path, sprintf "Skipping %.2fx rate of another map" rate)
-                                    else Ok import
-                                | None -> Ok import
-                            | Error skipped_conversion -> Error skipped_conversion
-                        )
+                    let filtered = filter_rates path results
 
                     let mutable success_count = 0
-                    let charts = filter_rates |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                    let charts = filtered |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
                     ChartDatabase.import charts chart_db
                     return {
                         ConvertedCharts = success_count
-                        SkippedCharts = filter_rates |> List.choose (function Error skipped -> Some skipped | _ -> None)
+                        SkippedCharts = filtered |> List.choose (function Error skipped -> Some skipped | _ -> None)
                     }
                 }
         }

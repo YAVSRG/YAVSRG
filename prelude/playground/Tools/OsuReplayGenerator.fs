@@ -44,7 +44,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
             PreviewTime = 0.0f<ms>
 
             Packs = Set.empty
-            Origin = ChartOrigin.Unknown
+            Origins = Set.empty
 
             Keys = 4
             Length = 0.0f<ms>

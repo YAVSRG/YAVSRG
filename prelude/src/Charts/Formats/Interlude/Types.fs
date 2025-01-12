@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Charts
 
 open System.IO
+open Percyqaz.Data
 open Prelude
 
 type NoteType =
@@ -89,3 +90,22 @@ type BPM =
     }
 
 type SV = float32
+
+[<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
+type ChartOrigin =
+    | Osu of md5: string * beatmapsetid: int * beatmapid: int * from_rate: (float32<rate> * float32<ms>) option
+    | Quaver of md5: string * mapsetid: int * mapid: int
+    | Etterna of pack_name: string
+
+    override this.ToString() =
+        match this with
+        | Osu _ -> "osu!"
+        | Quaver _ -> "Quaver"
+        | Etterna pack -> pack
+
+    member this.SuitableForUpload =
+        match this with
+        | Osu (_, beatmapsetid, beatmapid, _) -> beatmapsetid <> -1 && beatmapid <> 0
+        | Quaver (_, mapsetid, mapid) -> mapsetid <> -1 && mapid <> 0
+        | Etterna _ -> true

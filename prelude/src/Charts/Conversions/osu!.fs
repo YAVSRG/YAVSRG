@@ -206,6 +206,11 @@ module Osu_To_Interlude =
                 | _ :: es -> find_background_file es
                 | [] -> ""
 
+            let md5 =
+                match Beatmap.HashFromFile action.Source with
+                | Ok s -> s
+                | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .osu file: %s" reason)
+
             let header =
                 {
                     Title = b.Metadata.Title.Trim()
@@ -252,7 +257,7 @@ module Osu_To_Interlude =
                         else
                             ImportAsset.Missing
 
-                    ChartSource = ImportOrigin.Osu(b.Metadata.BeatmapSetID, b.Metadata.BeatmapID)
+                    Origins = Set.singleton <| ChartOrigin.Osu(md5, b.Metadata.BeatmapSetID, b.Metadata.BeatmapID, None)
                 }
 
             let snaps = convert_hit_objects b.Objects keys

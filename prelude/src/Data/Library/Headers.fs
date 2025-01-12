@@ -19,20 +19,6 @@ type AssetPath =
         | Hash h -> Path.Combine(get_game_folder "Songs", ".assets", h.Substring(0, 2), h) |> Some
         | Missing -> None
 
-[<Json.AutoCodec>]
-[<RequireQualifiedAccess>]
-type ChartOrigin =
-    | Osu of beatmapsetid: int * beatmapid: int
-    | Quaver of mapsetid: int * mapid: int
-    | Etterna of pack_name: string
-    | Unknown
-    override this.ToString() =
-        match this with
-        | Osu _ -> "osu!"
-        | Quaver _ -> "Quaver"
-        | Etterna pack -> pack
-        | Unknown -> "Unknown"
-
 type ChartMeta =
     {
         Hash: string
@@ -52,7 +38,7 @@ type ChartMeta =
         PreviewTime: Time
 
         Packs: Set<string>
-        Origin: ChartOrigin
+        Origins: Set<ChartOrigin>
 
         Keys: int
         Length: Time
@@ -64,9 +50,12 @@ type ChartMeta =
     member this.OriginString =
         match Seq.tryExactlyOne this.Packs with
         | Some pack -> pack
-        | None -> this.Origin.ToString()
+        | None ->
+            match Seq.tryExactlyOne this.Origins with
+            | Some o -> o.ToString()
+            | None -> "Unknown"
 
-    static member FromImport (timestamp: int64) (import_chart: ImportChart) =
+    static member FromImport (timestamp: int64) (import_chart: ImportChart) : ChartMeta =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
         let chart = import_chart.Chart
         {
@@ -97,21 +86,15 @@ type ChartMeta =
             PreviewTime = import_chart.Header.PreviewTime
 
             Packs = Set.singleton import_chart.PackName
-            Origin = 
-                match import_chart.Header.ChartSource with
-                | ImportOrigin.Osu (set, map) -> ChartOrigin.Osu(set, map)
-                | ImportOrigin.Quaver (set, map) -> ChartOrigin.Quaver(set, map)
-                | ImportOrigin.Etterna pack -> ChartOrigin.Etterna pack
-                | ImportOrigin.Stepmania _ -> ChartOrigin.Etterna import_chart.PackName
-                | ImportOrigin.Unknown -> ChartOrigin.Unknown
+            Origins = import_chart.Header.Origins
 
             Keys = chart.Keys
             Length = chart.LastNote - chart.FirstNote
-            BPM = 
+            BPM =
                 let mspb = Chart.find_most_common_bpm chart
                 let bpm = 60000.0f<ms/minute> / mspb |> float32
-                if System.Single.IsFinite(bpm) then 
-                    bpm |> round |> int 
+                if System.Single.IsFinite(bpm) then
+                    bpm |> round |> int
                 else 0
             DateAdded = timestamp
             Rating = (DifficultyRating.calculate 1.0f<rate> chart.Notes).Physical |> float32

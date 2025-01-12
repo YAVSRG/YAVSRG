@@ -132,7 +132,7 @@ module Upload =
                 Error "Chart is too short"
             else
 
-            if chart_meta.Origin = ChartOrigin.Unknown then
+            if chart_meta.Origins |> Set.exists _.SuitableForUpload then
                 Error "Chart has no source"
             else
 
@@ -154,18 +154,7 @@ module Upload =
 
                         count
                     BPM = (60000.0f<ms/beat> / float32 chart_meta.BPM, 60000.0f<ms/beat> / float32 chart_meta.BPM)
-                    Sources =
-                        match chart_meta.Origin with
-                        | ChartOrigin.Osu(-1, _)
-                        | ChartOrigin.Osu(_, 0)
-                        | ChartOrigin.Quaver(-1, _)
-                        | ChartOrigin.Quaver(_, 0)
-                        | ChartOrigin.Etterna ""
-                        | ChartOrigin.Unknown -> []
-
-                        | ChartOrigin.Osu(set, id) -> [ Backbeat.Archive.ChartSource.Osu {| BeatmapSetId = set; BeatmapId = id |} ]
-                        | ChartOrigin.Quaver (set, id) -> [ Backbeat.Archive.ChartSource.Quaver {| MapsetId = set; MapId = id |} ]
-                        | ChartOrigin.Etterna pack_name -> [ Backbeat.Archive.ChartSource.Etterna pack_name ]
+                    Origins = chart_meta.Origins |> Set.filter _.SuitableForUpload
                     PreviewTime = chart_meta.PreviewTime
                     BackgroundHash = background_hash
                     AudioHash = audio_hash

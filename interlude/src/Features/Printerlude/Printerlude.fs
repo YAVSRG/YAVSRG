@@ -27,21 +27,10 @@ module Printerlude =
 
     module private Utils =
 
-        let mutable cmp = None
-
-        let cmp_1 () =
-            match SelectedChart.CHART with
+        let chart_info () =
+            match SelectedChart.CACHE_DATA with
             | None -> failwith "Select a chart"
-            | Some c -> cmp <- Some c
-
-        let cmp_2 () =
-            match cmp with
-            | None -> failwith "Use cmp_1 first"
-            | Some cmp ->
-
-            match SelectedChart.CHART with
-            | None -> failwith "Select a chart"
-            | Some c -> Chart.diff cmp c
+            | Some c -> Logging.Debug "%A" c
 
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Updates.version)
@@ -145,8 +134,7 @@ module Printerlude =
                 .WithCommand("enable_experiments", "Enables/disables developer experiments", "enabled", toggle_experiments)
                 .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
-                .WithCommand("cmp_1", "Select chart to compare against", cmp_1)
-                .WithCommand("cmp_2", "Compare current chart to selected chart", cmp_2)
+                .WithCommand("chart_info", "Dumps chart meta info", chart_info)
                 .WithCommand("vacuum", "Debug tool for cleaning up chart database", vacuum)
 
         let register_ipc_commands (ctx: ShellContext) =

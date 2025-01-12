@@ -3,6 +3,7 @@
 open NUnit.Framework
 
 open Prelude
+open Prelude.Charts
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain.Backbeat
 
@@ -37,7 +38,7 @@ module Songs =
             BPM = random.NextSingle() * 1000.0f<ms / beat>, random.NextSingle() * 1000.0f<ms / beat>
             BackgroundHash = random_text 15
             AudioHash = random_text 15
-            Sources = [ Etterna "Nanahira Minipack" ]
+            Origins = Set.ofList [ ChartOrigin.Etterna "Nanahira Minipack" ]
         }
 
     let TEST_SONG: Song =
@@ -67,7 +68,7 @@ module Songs =
             BPM = 413.7931f<ms / beat>, 413.7931f<ms / beat>
             BackgroundHash = "823436D6ED4350C2ED3ED6CC8502B69207F2670E60C6B5EAF6AB1A01744BD750"
             AudioHash = "D0AC559C92AE400A3A2C95EA0ED0E9034798634E1AF60ACAD99C6FA272631B89"
-            Sources = [ Etterna "Nanahira Minipack" ]
+            Origins = Set.ofList [ ChartOrigin.Etterna "Nanahira Minipack" ]
         }
 
     [<Test>]
@@ -301,7 +302,7 @@ module Songs =
         Assert.AreEqual(None, Songs.song_by_id song_id_1)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
-    
+
     [<Test>]
     let MergeSongs_MultipleChartsOnDuplicateSong () =
         let chart_id_1 = "mergesongs3"
@@ -326,7 +327,7 @@ module Songs =
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_1)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_2)
         Assert.AreEqual(Some(song_id_2, song_2), Songs.song_by_chart_id chart_id_3)
-    
+
     [<Test>]
     let MergeSongs_RemovedFromFTS () =
         let chart_id_1 = "mergesongs_fts"
@@ -341,7 +342,7 @@ module Songs =
         let song_id_2 = Songs.add_chart_song chart_id_2 chart_2 song_2
 
         Assert.True(Songs.merge_songs song_id_1 song_id_2)
-        
+
         let results = Songs.search_songs 20L 0 song_1.Title
         printfn "%A" results
         Assert.IsEmpty results
@@ -394,7 +395,7 @@ module Songs =
         let chart = generate_test_chart ()
         let song = generate_test_song()
         let song_id = Songs.add_chart_song chart_id chart song
-        
+
         let results_before = Songs.search_songs 20L 0 song.Title
         printfn "%A" results_before
 
@@ -404,7 +405,7 @@ module Songs =
         printfn "%A" results
 
         match results |> Array.tryFind (fun (id, _) -> id = song_id) with
-        | Some (_, found) -> 
+        | Some (_, found) ->
             printfn "Deleted song: %A\nbut found song: %A" song found
             Assert.Fail()
         | None -> Assert.Pass()

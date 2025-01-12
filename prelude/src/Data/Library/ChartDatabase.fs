@@ -24,7 +24,7 @@ type ChartDatabase =
 
 module ChartDatabase =
 
-    (* Retrival operations *)
+    (* Retrieval operations *)
 
     let get_chart (chart_id: string) (db: ChartDatabase) : Result<Chart, string> =
         DbCharts.get_chart chart_id db.Database
@@ -177,6 +177,7 @@ module ChartDatabase =
 
     let private migrate (db: Database) : Database =
         Database.migrate "AddChartsTable" (fun db -> DbCharts.CREATE_TABLE.Execute () db |> expect |> ignore) db
+        Database.migrate "ResetOriginsColumn" (fun db -> DbCharts.RESET_ORIGINS.Execute () db |> expect |> ignore) db
         db
 
     let private legacy_migrate (db: ChartDatabase) : ChartDatabase =

@@ -294,10 +294,10 @@ module StepMania_To_Interlude =
                                 //Logging.Warn "Background file for %s not found: %s" path sm.BACKGROUND
                                 ImportAsset.Missing
 
-                        ChartSource =
+                        Origins =
                             match action.Config.EtternaPackName with
-                            | Some pack -> ImportOrigin.Etterna pack
-                            | None -> ImportOrigin.Unknown
+                            | Some pack -> Set.singleton (ChartOrigin.Etterna pack)
+                            | None -> Set.empty
                     }
 
                 let (keys, notes, bpm) =

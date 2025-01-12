@@ -100,13 +100,6 @@ type StepmaniaPack =
         Size: int64
     }
 
-[<Json.AutoCodec>]
-type ChartSource =
-    | Osu of {| BeatmapId: int; BeatmapSetId: int |}
-    | Quaver of {| MapId: int; MapsetId: int |}
-    | Etterna of pack_name: string
-    | Stepmania of id: int // deprecated
-
 type ChartHash = string
 
 [<Json.AutoCodec>]
@@ -123,7 +116,7 @@ type Chart =
         BPM: (float32<ms / beat> * float32<ms / beat>)
         BackgroundHash: string
         AudioHash: string
-        Sources: ChartSource list
+        Origins: Set<ChartOrigin>
     }
     member this.FormattedCreators = String.concat ", " this.Creators
 
@@ -131,7 +124,7 @@ type Chart =
         { this with
             Subtitle = match this.Subtitle with Some existing -> Some existing | None -> chart.Subtitle
             Tags = List.distinct (this.Tags @ chart.Tags)
-            Sources = List.distinct (this.Sources @ chart.Sources)
+            Origins = Set.union this.Origins chart.Origins
             BackgroundHash = chart.BackgroundHash
             AudioHash = chart.AudioHash
         }
@@ -152,12 +145,7 @@ module Archive =
             PreviewTime = chart.PreviewTime
             BackgroundFile = ImportAsset.Asset chart.BackgroundHash
             AudioFile = ImportAsset.Asset chart.AudioHash
-            ChartSource =
-                match chart.Sources with
-                | Osu d :: _ -> ImportOrigin.Osu(d.BeatmapSetId, d.BeatmapId)
-                | Quaver d :: _ -> ImportOrigin.Quaver(d.MapsetId, d.MapId)
-                | Etterna pack_name :: _ -> ImportOrigin.Etterna pack_name
-                | _ -> ImportOrigin.Unknown
+            Origins = chart.Origins
         }
 
     module DownloadUrl =

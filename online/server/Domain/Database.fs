@@ -70,6 +70,11 @@ module Migrations =
             (fun _ -> Logging.Info("Old backbeat chart dump no longer exists to migrate data from"))
             db
 
+        Database.migrate
+            "ResetChartOrigins"
+            (fun db -> Database.exec_raw """UPDATE charts SET Sources = '[]';""" db |> expect |> ignore)
+            db
+
 module Database =
 
     let startup () =

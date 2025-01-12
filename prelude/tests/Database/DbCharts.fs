@@ -33,7 +33,7 @@ module DbCharts =
             Audio = AssetPath.Missing
             PreviewTime = 1000.0f<ms>
             Packs = Set.singleton "Singles"
-            Origin = ChartOrigin.Etterna "Bangers and Mash"
+            Origins = Set.singleton (ChartOrigin.Etterna "Bangers and Mash")
             Keys = 4
             Length = 0.0f<ms>
             BPM = 120
@@ -58,7 +58,7 @@ module DbCharts =
             Audio = AssetPath.Absolute "C:/path/to/audio.mp3"
             PreviewTime = 2000.0f<ms>
             Packs = Set.singleton "Nanahira Minipack"
-            Origin = ChartOrigin.Etterna "Nanahira Minipack"
+            Origins = Set.singleton (ChartOrigin.Etterna "Nanahira Minipack")
             Keys = 4
             Length = 1.0f<ms>
             BPM = 121
@@ -101,11 +101,11 @@ module DbCharts =
         Assert.AreEqual(Some TEST_CHART_META, result)
 
         Assert.AreEqual(None, DbCharts.get_meta "doesntexist" db)
-    
+
     [<Test>]
     let RoundTrip_Meta_With_NaN() =
         let db, conn = in_memory ()
-        
+
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
 
         DbCharts.save TEST_CHART_META_NAN TEST_CHART db
@@ -119,7 +119,7 @@ module DbCharts =
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_chart TEST_CHART_META.Hash db
         match result with
-        | Ok chart -> 
+        | Ok chart ->
             Assert.AreEqual(TEST_CHART_META.Hash, Chart.hash chart)
         | Error reason -> Assert.Fail(reason)
 
@@ -133,11 +133,11 @@ module DbCharts =
         | Error reason -> Assert.Pass(reason)
 
         conn.Dispose()
-    
+
     [<Test>]
     let Chart_Delete () =
         let db, conn = in_memory ()
-        
+
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
 
@@ -150,11 +150,11 @@ module DbCharts =
         Assert.False(DbCharts.delete TEST_CHART_META.Hash db)
 
         conn.Dispose()
-    
+
     [<Test>]
     let Chart_Batch_Delete () =
         let db, conn = in_memory ()
-        
+
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
 
@@ -178,7 +178,11 @@ module DbCharts =
         Assert.AreEqual(Some TEST_CHART_META, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         DbCharts.save TEST_CHART_META_ALT TEST_CHART db
-        let with_both_packs = { TEST_CHART_META_ALT with Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs }
-        Assert.AreEqual(Some with_both_packs, DbCharts.get_meta TEST_CHART_META.Hash db)
+        let with_merged_data =
+            { TEST_CHART_META_ALT with
+                Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs
+                Origins = Set.union TEST_CHART_META.Origins TEST_CHART_META_ALT.Origins
+            }
+        Assert.AreEqual(Some with_merged_data, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         conn.Dispose()

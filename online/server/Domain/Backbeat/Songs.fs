@@ -38,7 +38,7 @@ module Songs =
             );
 
             CREATE TRIGGER songs_fts_ai AFTER INSERT ON songs BEGIN
-              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source) 
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source)
               VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source);
             END;
 
@@ -46,7 +46,7 @@ module Songs =
               DELETE FROM songs_fts
               WHERE rowid = old.Id;
 
-              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source) 
+              INSERT INTO songs_fts(Id, Artists, OtherArtists, Remixers, Title, AlternativeTitles, Source)
               VALUES (new.Id, new.Artists, new.OtherArtists, new.Remixers, new.Title, new.AlternativeTitles, new.Source);
             END;
 
@@ -54,7 +54,7 @@ module Songs =
                 DELETE FROM songs_fts
                 WHERE rowid = old.Id;
             END;
-            
+
             CREATE TABLE charts (
                 Id TEXT PRIMARY KEY NOT NULL,
                 SongId INTEGER NOT NULL,
@@ -103,7 +103,7 @@ module Songs =
                         BPM = r.Json JSON
                         BackgroundHash = r.String
                         AudioHash = r.String
-                        Sources = r.Json JSON
+                        Origins = r.Json JSON
                     }
                 )
         }
@@ -115,7 +115,7 @@ module Songs =
         {
             SQL =
                 """
-            SELECT 
+            SELECT
                 charts.SongId, charts.Creators, charts.DifficultyName, charts.Subtitle,
                 charts.Tags, charts.Duration, charts.PreviewTime, charts.Notecount,
                 charts.Keys, charts.BPM, charts.BackgroundHash, charts.AudioHash, charts.Sources,
@@ -142,7 +142,7 @@ module Songs =
                         BPM = r.Json JSON
                         BackgroundHash = r.String
                         AudioHash = r.String
-                        Sources = r.Json JSON
+                        Origins = r.Json JSON
                     },
                     {
                         Artists = r.Json JSON
@@ -231,7 +231,7 @@ module Songs =
             INSERT INTO charts (Id, SongId, Creators, DifficultyName, Subtitle, Tags, Duration, PreviewTime, Notecount, Keys, BPM, BackgroundHash, AudioHash, Sources, LastUpdated)
             VALUES (@ChartId, last_insert_rowid(), @Creators, @DifficultyName, @Subtitle, @ChartTags, @Duration, @PreviewTime, @Notecount, @Keys, @BPM, @BackgroundHash, @AudioHash, @Sources, @LastUpdated)
             RETURNING SongId;
-            
+
             COMMIT;
             """
             Parameters =
@@ -279,7 +279,7 @@ module Songs =
                     p.Json JSON chart.BPM
                     p.String chart.BackgroundHash
                     p.String chart.AudioHash
-                    p.Json JSON chart.Sources
+                    p.Json JSON chart.Origins
                     p.Int64(Timestamp.now ())
                 )
             Read = fun r -> r.Int64
@@ -330,7 +330,7 @@ module Songs =
                     p.Json JSON chart.BPM
                     p.String chart.BackgroundHash
                     p.String chart.AudioHash
-                    p.Json JSON chart.Sources
+                    p.Json JSON chart.Origins
                     p.Int64(Timestamp.now ())
                 )
         }
@@ -358,9 +358,9 @@ module Songs =
         }
 
     let merge_songs (duplicate_song_id: int64) (original_song_id: int64) : bool =
-        if duplicate_song_id = original_song_id then 
-            false 
-        else 
+        if duplicate_song_id = original_song_id then
+            false
+        else
             MERGE_SONGS.Execute (duplicate_song_id, original_song_id) backbeat_db
             |> expect > 0
 
@@ -369,7 +369,7 @@ module Songs =
             SQL =
                 """
             UPDATE charts
-            SET 
+            SET
                 Creators = @Creators,
                 DifficultyName = @DifficultyName,
                 Subtitle = @Subtitle,
@@ -416,7 +416,7 @@ module Songs =
                     p.Json JSON chart.BPM
                     p.String chart.BackgroundHash
                     p.String chart.AudioHash
-                    p.Json JSON chart.Sources
+                    p.Json JSON chart.Origins
                     p.Int64(Timestamp.now ())
                 )
         }

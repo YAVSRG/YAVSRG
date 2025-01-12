@@ -34,15 +34,6 @@ type ImportAsset =
     | Asset of string // deprecated
     | Missing
 
-[<Json.AutoCodec>]
-[<RequireQualifiedAccess>]
-type ImportOrigin =
-    | Osu of beatmapsetid: int * beatmapid: int
-    | Quaver of mapsetid: int * mapid: int
-    | Etterna of pack_name: string
-    | Stepmania of packid: int // deprecated
-    | Unknown
-
 [<Json.AutoCodec(false)>]
 type ChartImportHeader =
     {
@@ -60,7 +51,7 @@ type ChartImportHeader =
         BackgroundFile: ImportAsset
         AudioFile: ImportAsset
 
-        ChartSource: ImportOrigin
+        mutable Origins: Set<ChartOrigin>
     }
     static member Default =
         {
@@ -78,7 +69,7 @@ type ChartImportHeader =
             BackgroundFile = ImportAsset.Missing
             AudioFile = ImportAsset.Missing
 
-            ChartSource = ImportOrigin.Unknown
+            Origins = Set.empty
         }
 
 type ImportChart =

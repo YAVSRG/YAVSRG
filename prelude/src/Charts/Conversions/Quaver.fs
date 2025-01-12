@@ -144,6 +144,11 @@ module Quaver_To_Interlude =
 
             let path = Path.GetDirectoryName action.Source
 
+            let md5 =
+                match QuaverChart.HashFromFile action.Source with
+                | Ok s -> s
+                | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
+
             let header =
                 {
                     Title = b.Title
@@ -178,7 +183,7 @@ module Quaver_To_Interlude =
                         else
                             ImportAsset.Missing
 
-                    ChartSource = ImportOrigin.Quaver(b.MapSetId, b.MapId)
+                    Origins = Set.singleton <| ChartOrigin.Quaver(md5, b.MapSetId, b.MapId)
                 }
 
             let snaps = convert_hit_objects b.HitObjects keys

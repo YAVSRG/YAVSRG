@@ -49,6 +49,17 @@ type QuaverChart =
         HitObjects: QuaverHitObject list
     }
 
+    static member Hash(stream: Stream) =
+        let md5 = System.Security.Cryptography.MD5.Create()
+        md5.ComputeHash(stream) |> Convert.ToHexString |> _.ToLower()
+
+    static member HashFromFile(path: string) : Result<string, string> =
+        try
+            use fs = File.OpenRead(path)
+            Ok(QuaverChart.Hash fs)
+        with err ->
+            Error err.Message
+
 // only parses a smaller subset of yaml that quaver uses
 module Yaml =
     type ParsedYamlNestedObject = Map<string, string>
