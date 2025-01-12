@@ -168,7 +168,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Text.fill_b (
             Style.font,
             info.Mean |> sprintf "M: %.2fms",
-            text_b.Translate(0.0f, row_height),
+            text_b.TranslateY(row_height),
             text_color,
             Alignment.LEFT
         )
@@ -176,7 +176,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Text.fill_b (
             Style.font,
             info.StandardDeviation |> sprintf "SD: %.2fms",
-            text_b.Translate(0.0f, row_height * 2.0f),
+            text_b.TranslateY(row_height * 2.0f),
             text_color,
             Alignment.LEFT
         )
@@ -184,7 +184,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Text.fill_b (
             Style.font,
             (info.Judgements |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + judgement_count.ToString() + "]",
-            text_b.Translate(0.0f, row_height * 3.0f),
+            text_b.TranslateY(row_height * 3.0f),
             text_color,
             Alignment.LEFT
         )

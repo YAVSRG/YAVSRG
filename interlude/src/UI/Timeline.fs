@@ -15,6 +15,10 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     let HEIGHT = 60.0f
     let LAST_NOTE = with_mods.LastNote
     let FIRST_NOTE = with_mods.FirstNote
+    let bpms = with_mods.BPM
+
+    let BOX_HEIGHT = 100.0f
+    let BOX_WIDTH = 200.0f
 
     let samples =
         int ((LAST_NOTE - FIRST_NOTE) / 1000.0f)
@@ -33,6 +37,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
     let mutable dragging = false
     let mutable unpause_after_drag = false
+    let mutable bpm_index = 0
 
     override this.Draw() =
         let b = this.Bounds.Shrink(10.0f, 20.0f)
@@ -89,10 +94,74 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             Text.draw_b(Style.font, now_on_1x, 14.0f, b.Left + 10.0f, b.Bottom - 60.0f, Colors.text_greyout)
             Text.draw_aligned_b(Style.font, duration_on_1x, 14.0f, b.Right - 10.0f, b.Bottom - 60.0f, Colors.text_greyout, Alignment.RIGHT)
 
+        if this.Bounds.Bottom - Mouse.y () < 100.0f then
+
+            let percent = (Mouse.x () - 10.0f) / (Render.width() - 20.0f) |> min 1.0f |> max 0.0f
+
+            let start = FIRST_NOTE - Song.LEADIN_TIME * rate.Value
+            let hovered_time = start + (LAST_NOTE - start) * percent |> max 0.0f<ms>
+
+            while bpm_index > 0 && bpms.[bpm_index].Time > hovered_time do
+                bpm_index <- bpm_index - 1
+            while bpm_index + 1 < bpms.Length && bpms.[bpm_index + 1].Time <= hovered_time do
+                bpm_index <- bpm_index + 1
+
+            let box =
+                Rect.Box(
+                    this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
+                    this.Bounds.Bottom - BOX_HEIGHT - 100.0f,
+                    BOX_WIDTH,
+                    BOX_HEIGHT
+                )
+
+            this.DrawHoverInfo(box, hovered_time)
+
+    member this.DrawHoverInfo(bounds, time) =
+        let bpm = if bpms.Length > 0 then 60000.0f<ms / minute> / bpms.[bpm_index].Data.MsPerBeat * rate.Value else 120f<beat / minute> * rate.Value
+        let s_index = (time - FIRST_NOTE) / (LAST_NOTE - FIRST_NOTE) * float32 samples |> floor |> int |> max 0 |> min (samples - 1)
+        let nps = note_density.[s_index] * rate.Value
+        let cps = chord_density.[s_index] * rate.Value
+
+        let outline_bounds = bounds.Expand(Style.PADDING)
+        Render.rect outline_bounds Colors.white.O4
+        Render.rect bounds Colors.shadow_2.O4
+
+        let row_height = bounds.Height / 3.0f
+        let text_b = bounds.SliceT(row_height).Shrink(20.0f, 0.0f)
+
+        Text.fill_b (
+            Style.font,
+            (
+                if rate.Value <> 1.0f<rate> then
+                    sprintf "%s (%s)" (format_duration_ms (time / float32 rate.Value)) (format_duration_ms time)
+                else
+                    format_duration_ms time
+            ),
+            text_b,
+            Colors.text,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            sprintf "NPS: %.0f  CPS: %.0f" nps cps,
+            text_b.TranslateY(row_height),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            sprintf "BPM: %.0f" bpm,
+            text_b.TranslateY(row_height * 2.0f),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
+
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if this.Bounds.Bottom - Mouse.y () < 200.0f && Mouse.left_click () then
+        if this.Bounds.Bottom - Mouse.y () < 100.0f && Mouse.left_click() then
             dragging <- true
             unpause_after_drag <- Song.playing()
             if unpause_after_drag then
