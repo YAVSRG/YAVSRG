@@ -88,23 +88,6 @@ module DbCharts =
                     Audio = excluded.Audio,
                     PreviewTime = excluded.PreviewTime,
                     DateAdded = excluded.DateAdded,
-                    Origin = (
-                        SELECT '[' || group_concat(value) || ']' FROM (
-                            SELECT json_each.value
-                            FROM charts, json_each(charts.Origin)
-                            WHERE charts.Id = excluded.Id
-                            UNION
-                            SELECT json_each.value
-                            FROM json_each(excluded.Origin)
-                        ) GROUP BY ''
-                    ),
-                    Length = excluded.Length,
-                    BPM = excluded.BPM,
-                    DateAdded = excluded.DateAdded,
-                    CalcVersion = excluded.CalcVersion,
-                    Rating = excluded.Rating,
-                    Patterns = excluded.Patterns,
-                    Chart = excluded.Chart,
                     Packs = (
                         SELECT json_group_array(value) FROM (
                             SELECT json_each.value
@@ -113,8 +96,25 @@ module DbCharts =
                             UNION
                             SELECT json_each.value
                             FROM json_each(excluded.Packs)
-                        ) GROUP BY ''
-                    );
+                        )
+                    ),
+                    Origin = (
+                        SELECT coalesce('[' || group_concat(value) || ']', '[]') FROM (
+                            SELECT json_each.value
+                            FROM charts, json_each(charts.Origin)
+                            WHERE charts.Id = excluded.Id
+                            UNION
+                            SELECT json_each.value
+                            FROM json_each(excluded.Origin)
+                        )
+                    ),
+                    Length = excluded.Length,
+                    BPM = excluded.BPM,
+                    DateAdded = excluded.DateAdded,
+                    CalcVersion = excluded.CalcVersion,
+                    Rating = excluded.Rating,
+                    Patterns = excluded.Patterns,
+                    Chart = excluded.Chart;
             """
             Parameters =
                 [

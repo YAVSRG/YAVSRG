@@ -186,3 +186,21 @@ module DbCharts =
         Assert.AreEqual(Some with_merged_data, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         conn.Dispose()
+
+    [<Test>]
+    let RoundTrip_Chart_Overwriting_EmptyOrigins() =
+        let db, conn = in_memory ()
+
+        DbCharts.delete TEST_CHART_META.Hash db |> ignore
+
+        DbCharts.save { TEST_CHART_META with Origins = Set.empty } TEST_CHART db
+
+        DbCharts.save { TEST_CHART_META_ALT with Origins = Set.empty } TEST_CHART db
+        let with_merged_data =
+            { TEST_CHART_META_ALT with
+                Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs
+                Origins = Set.empty
+            }
+        Assert.AreEqual(Some with_merged_data, DbCharts.get_meta TEST_CHART_META.Hash db)
+
+        conn.Dispose()
