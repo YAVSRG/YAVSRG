@@ -140,7 +140,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
 
     let animation_time =
         config.JudgementCounterFadeTime
-        |> Setting.bounded (100.0f<ms / rate>, 1000.0f<ms / rate>)
+        |> Setting.bounded (50.0f<ms / rate>, 1000.0f<ms / rate>)
 
     let pop_amount = config.JudgementCounterPopAmount |> Setting.bounded (-1.0f, 1.0f)
 
@@ -188,6 +188,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
                 let h =
                     bounds.Height
                     / float32 (ruleset.Judgements.Length + if show_ratio.Value then 1 else 0)
+                    |> min bounds.Width
 
                 let mutable r = bounds.SliceT(h).Shrink(10.0f)
 

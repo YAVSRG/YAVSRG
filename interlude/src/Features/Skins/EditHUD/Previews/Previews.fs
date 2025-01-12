@@ -194,6 +194,7 @@ module SelectPreviews =
         let h =
             bounds.Height
             / float32 (ruleset.Judgements.Length + if config.JudgementCounterShowRatio then 1 else 0)
+            |> min bounds.Width
 
         let mutable r = bounds.SliceT(h).Shrink(10.0f)
 

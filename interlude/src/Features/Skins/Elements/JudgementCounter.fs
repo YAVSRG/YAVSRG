@@ -77,7 +77,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
     let judgement_animations =
-        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(200.0))
+        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(float config.JudgementCounterFadeTime))
 
     let texture = Content.Texture "judgement-counter-judgements"
     let display: int option array = config.GetJudgementCounterDisplay state.Ruleset
