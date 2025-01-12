@@ -1,16 +1,22 @@
-0.7.27.4
+0.7.27.5
 ====
 
-Yet another hotfix update
+A few bug fixes and features requested by you
+Thanks again to the many new members of the Discord that have reported issues/suggested features :)
 
-# Bug fixes
-- Hotfix for a change to the osu!stable client's database format today, score importing should work again after this fix
-- Reverted the anti-aliasing changes to framebuffers, it caused hard-to-investigate issues (in addition to what was fixed in 0.7.27.3) on other people's hardware
-
-The reverted change for framebuffers only affects the score screen graph and gameplay previews, the MSAA setting and its performance gains remain the same
+# New features
+- Hold shift while hovering on the score graph to see stats for a "slice" of it
+- BPM, NPS and CPS info are shown while hovering over timelines in previews and replays
+- Rulesets emulating all Quaver judgements are now built-in defaults you can add via the ruleset menu
 
 # Improvements
-There is now only a "Log in with Discord" button instead of another one to register  
-If you don't have an account it will prompt you to register automatically, otherwise it will log you in  
-Multiple people (not naming names) were clicking "Log in" without an account and reporting it as a bug
+- Playing a playlist now respects the current search and filter entered in level select
+- Updated the layout of the website a little (with plans to do more in the future)
+
+# Bug fixes
+- Fixed tiny pixel holes in the score line graph
+- Fixed score graph window labels overlapping each other
+- Fixed volume up/down keys not working on high framerates
+- Fixed several visual bugs with the Judgement Counter
+- Fixed editing timing windows on a cloned ruleset also updating the original
 
