@@ -10,12 +10,80 @@ open Prelude.Charts
 
 module StepMania_To_Interlude =
 
+    // this does not work and was an experiment
+    open System.Security.Cryptography
+    let private get_chart_key_wip
+        (measures: string list list)
+        (bpms: (float32<beat> * float32<beat / minute>) list)
+        (start: Time)
+        =
+
+        let h = SHA1.Create()
+        use ms = new MemoryStream()
+        use bw = new StreamWriter(ms)
+
+        let mutable bpms = bpms
+
+        let meter = 4<beat>
+        let fmeter = float32 meter * 1.0f<beat>
+
+        let mutable bpm_now = snd (List.head bpms)
+        if bpm_now < 0.0f<beat / minute> then failwithf "SM file has negative BPMs"
+        bpms <- List.tail bpms
+
+        let mutable total_beats = 0.0f<beat>
+        let mutable lo = 0.0f<beat>
+        let mutable hi = 0.0f<beat>
+
+        let write_measure (m: string list) (lo: float32<beat>) (hi: float32<beat>) =
+            let l = List.length m |> float32
+            let start = Math.Ceiling(lo * l / fmeter |> float) |> int
+            let finish = Math.Ceiling(hi * l / fmeter |> float) |> int
+
+            for i in start .. (finish - 1) do
+                let beat = total_beats + float32 i * fmeter / l
+
+                Seq.iter
+                    (fun c ->
+                        match c with
+                        | '0' -> bw.Write('0')
+                        | '1' -> bw.Write('1')
+                        | '2' -> bw.Write('2')
+                        | '4' -> bw.Write('2')
+                        | '3' -> bw.Write('0')
+                        | 'M' -> bw.Write('4')
+                        | 'L' -> bw.Write('5')
+                        | 'F' -> bw.Write('7')
+                        | _ -> failwithf "Unknown note type '%c'" c
+                    )
+                    m.[i]
+                bw.Write(int (bpm_now + 0.374643F<beat / minute>))
+
+        List.iter
+            (fun m ->
+                lo <- 0.0f<beat>
+
+                while ((not (List.isEmpty bpms)) && fst (List.head bpms) < total_beats + fmeter) do
+                    hi <- fst (List.head bpms) - total_beats
+                    write_measure m lo hi
+                    lo <- hi
+                    bpm_now <- snd (List.head bpms)
+                    if bpm_now < 0.0f<beat / minute> then failwithf "SM file has negative BPMs"
+                    bpms <- List.tail bpms
+
+                write_measure m lo fmeter
+                total_beats <- total_beats + fmeter
+            )
+            measures
+
+        "X" + BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "").ToLower()
+
     let private convert_measures
         (steps_type: StepManiaChartType)
         (measures: string list list)
         (bpms: (float32<beat> * float32<beat / minute>) list)
         (stops: (float32<beat> * float32) list)
-        start
+        (start: Time)
         =
 
         let keys =
@@ -100,8 +168,8 @@ module StepMania_To_Interlude =
                         }
                     )
 
-        List.iteri
-            (fun i m ->
+        List.iter
+            (fun m ->
                 point_at_end_of_measure <- false
                 lo <- 0.0f<beat>
 
@@ -255,6 +323,12 @@ module StepMania_To_Interlude =
 
         let convert_difficulty (i: int) (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
+                let (keys, notes, bpm) =
+                    convert_measures diff.STEPSTYPE diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
+
+                if notes.Length = 0 then
+                    skip_conversion "StepMania chart has no notes"
+
                 let title, title_native = choose_translit sm.TITLE sm.TITLETRANSLIT
                 let artist, artist_native = choose_translit sm.ARTIST sm.ARTISTTRANSLIT
 
@@ -299,12 +373,6 @@ module StepMania_To_Interlude =
                             | Some pack -> Set.singleton (ChartOrigin.Etterna pack)
                             | None -> Set.empty
                     }
-
-                let (keys, notes, bpm) =
-                    convert_measures diff.STEPSTYPE diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
-
-                if notes.Length = 0 then
-                    skip_conversion "StepMania chart has no notes"
 
                 Ok {
                     Header = header
