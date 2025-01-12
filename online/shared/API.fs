@@ -4,6 +4,7 @@ open System
 open System.Web
 open System.Net
 open System.Net.Sockets
+open System.Diagnostics
 open NetCoreServer
 open Percyqaz.Common
 open Prelude
@@ -51,6 +52,7 @@ module API =
                 |> Map.ofSeq
 
             try
+                let before = Stopwatch.GetTimestamp()
                 match request.Method with
                 | "GET" ->
                     config.Handle_Request(GET, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
@@ -62,6 +64,8 @@ module API =
                     config.Handle_Request(POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
                     |> Async.RunSynchronously
                 | _ -> this.Response.MakeErrorResponse(404, "Not found") |> ignore
+
+                Logging.Info "%s responded %i in %.0fms" uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
 
                 this.SendResponseAsync this.Response |> ignore
             with e ->

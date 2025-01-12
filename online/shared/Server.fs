@@ -85,7 +85,7 @@ module Server =
             try
                 session.Send packet_with_header |> ignore
             with :? ObjectDisposedException ->
-                Logging.Debug("Socket was disposed before packet could be sent")
+                Logging.Debug "Socket was disposed before packet could be sent"
 
     let kick (id: Guid, reason: string) =
         Logging.Info "Kicking session %O: %s" id reason
