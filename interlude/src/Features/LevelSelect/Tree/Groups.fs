@@ -159,7 +159,9 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                     expanded_group <- name, context
                     scroll_to <- ScrollTo.Group (name, context)
             elif this.RightClick(origin) then
-                GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
+                match multi_selection with
+                | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
+                | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Tapped() then
                 match context with
                 | LibraryGroupContext.Folder _
