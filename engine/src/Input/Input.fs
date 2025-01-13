@@ -133,7 +133,7 @@ module internal InputThread =
     let private char_callback (_: nativeptr<Window>) (char: uint32) =
         if typing then
             lock LOCK_OBJ (fun () ->
-                typed_text <- typed_text + Convert.ToChar(char).ToString()
+                typed_text <- typed_text + Char.ConvertFromUtf32(int32 char)
                 typing_buffered_input <- ValueNone
             )
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
