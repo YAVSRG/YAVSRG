@@ -43,16 +43,16 @@ module OsuParity =
 
     [<Test>]
     let Replay_RoundTrip() =
-        let as_interlude_replay = OsuReplay.decode_replay (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
+        let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
 
-        let back_as_osu_replay = OsuReplay.encode_replay as_interlude_replay TEST_CHART.FirstNote Mods.None TEST_OSU_FILE_HASH
-        let return_as_interlude_replay = OsuReplay.decode_replay (back_as_osu_replay, TEST_CHART.FirstNote, 1.0f<rate>)
+        let back_as_osu_replay = OsuReplay.encode as_interlude_replay TEST_CHART.FirstNote Mods.None TEST_OSU_FILE_HASH
+        let return_as_interlude_replay = OsuReplay.decode (back_as_osu_replay, TEST_CHART.FirstNote, 1.0f<rate>)
 
         Assert.AreEqual(as_interlude_replay, return_as_interlude_replay)
 
     [<Test>]
     let OsuRuleset_MatchesReplayJudgements_HeHeHeSample () =
-        let as_interlude_replay = OsuReplay.decode_replay (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
+        let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
@@ -79,7 +79,7 @@ module OsuParity =
 
     [<Test>]
     let OsuRuleset_MatchesExpectedAccuracy_HeHeHeSample () =
-        let as_interlude_replay = OsuReplay.decode_replay (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
+        let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
         let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplayProvider(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
 
@@ -89,7 +89,7 @@ module OsuParity =
 
     [<Test>]
     let OsuRuleset_MatchesGosuMemoryDeltas_HeHeHeSample () =
-        let as_interlude_replay = OsuReplay.decode_replay (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
+        let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
@@ -245,7 +245,7 @@ module OsuParity =
     [<Test>]
     [<Ignore("osu!mania EZ, HR, DT and HT windows are too complicated so I'm not bothering with them for the time being")>]
     let OsuRuleset_MatchesReplayJudgements_DonutHoleSample () =
-        let replay_data = OsuReplay.decode_replay (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
+        let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
 
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
@@ -272,7 +272,7 @@ module OsuParity =
 
     [<Test>]
     let OsuRuleset_MatchesGosuMemoryDeltas_DonutHoleSample () =
-        let replay_data = OsuReplay.decode_replay (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
+        let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, (StoredReplayProvider(replay_data)), TEST_CHART_2.Notes, 1.5f<rate>)

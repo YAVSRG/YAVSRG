@@ -40,30 +40,6 @@ module Startup =
         Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
         Song.set_pitch_rates_enabled options.AudioPitchRates.Value
 
-        FileDrop.replay_dropped.Add(fun replay ->
-            match SelectedChart.CACHE_DATA, SelectedChart.CHART with
-            | Some cc, Some chart ->
-                if Screen.current_type = Screen.Type.LevelSelect || Screen.current_type = Screen.Type.MainMenu then
-                    Menu.Exit()
-                    ImportReplayPage(
-                        replay,
-                        chart,
-                        fun score ->
-                            SelectedChart.change(cc, Data.Library.LibraryContext.None, true)
-                            SelectedChart.when_loaded true
-                            <| fun _ ->
-                                if Screen.change_new
-                                    (fun () -> ScoreScreen(ScoreInfo.from_score cc chart Rulesets.current score, (Gameplay.ImprovementFlags.None, None), false))
-                                    Screen.Type.Score
-                                    Transitions.EnterGameplayNoFadeAudio
-                                then Menu.Exit()
-                    )
-                        .Show()
-                else
-                    Notifications.error("Replay import failed!", "Must be on level select or main menu screen")
-            | _ -> ()
-        )
-
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
         Gameplay.retry <- fun () -> SelectedChart.if_loaded LevelSelect.play

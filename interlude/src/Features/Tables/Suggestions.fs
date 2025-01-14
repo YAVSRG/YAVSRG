@@ -11,7 +11,6 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
-open Interlude.Features.Import
 open Interlude.Web.Shared.Requests
 
 type SuggestChartPage(table: Table, chart_id: string) =
@@ -117,7 +116,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             | _ -> Notifications.error (%"notification.suggestion.server_error.title", "")
         )
         Menu.Back()
-        
+
     let mutable still_open = true
     let playtest_suggestion () =
         match suggestion.LocalChart with
@@ -129,7 +128,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         Backbeat.download_missing_chart.Request(
             (suggestion.ChartId, table.Id),
             function
-            | true -> 
+            | true ->
                 Notifications.task_feedback(Icons.DOWNLOAD, %"notification.install_song", "")
                 GameThread.defer (fun () ->
                     if still_open then
@@ -148,7 +147,7 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, K (suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone), Icon = Icons.PLAY)
             .Pos(6)
         |+ PageButton(
-            %"table.suggestions.vote_another_level", 
+            %"table.suggestions.vote_another_level",
             (fun () -> SuggestChartPage(table, suggestion.ChartId).Show()),
             Icon = Icons.EDIT_2
         )
@@ -227,7 +226,7 @@ type SuggestionsPage(table: Table) =
     override this.Content() =
         NavigationContainer.Column()
         |+ Button("", ignore, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
-        |+ suggestions_list 
+        |+ suggestions_list
         |>> Container
         :> Widget
 

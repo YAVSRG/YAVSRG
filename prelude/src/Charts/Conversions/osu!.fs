@@ -211,6 +211,10 @@ module Osu_To_Interlude =
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .osu file: %s" reason)
 
+            let snaps = convert_hit_objects b.Objects keys
+
+            let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
+
             let header =
                 {
                     Title = b.Metadata.Title.Trim()
@@ -257,12 +261,8 @@ module Osu_To_Interlude =
                         else
                             ImportAsset.Missing
 
-                    Origins = Set.singleton <| ChartOrigin.Osu(md5, b.Metadata.BeatmapSetID, b.Metadata.BeatmapID, None)
+                    Origins = Set.singleton <| ChartOrigin.Osu(md5, b.Metadata.BeatmapSetID, b.Metadata.BeatmapID, 1.0f<rate>, snaps.[0].Time)
                 }
-
-            let snaps = convert_hit_objects b.Objects keys
-
-            let bpm, sv = convert_timing_points b.Timing (TimeArray.last snaps).Value.Time
 
             Ok {
                 Header = header

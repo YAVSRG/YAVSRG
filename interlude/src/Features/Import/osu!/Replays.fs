@@ -6,33 +6,13 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Gameplay.Replays
-open Prelude.Data.OsuClientInterop
 open Prelude.Data.User
+open Prelude.Data.Library
+open Prelude.Data.OsuClientInterop
+open Interlude.Content
 open Interlude.UI
-
-module Replays =
-
-    // todo: should this be in prelude?
-    let convert_replay_to_score (replay: OsuScoreDatabase_Score) (chart: Chart) (osu_chart_rate: float32<rate>) : Result<Score, string> =
-        match Mods.to_interlude_rate_and_mods replay.ModsUsed with
-        | None -> Error "Invalid mods used in replay"
-        | Some(rate, mods) ->
-
-        try
-            let replay_data = OsuReplay.decode_replay(replay, chart.FirstNote, osu_chart_rate)
-
-            Ok {
-                Timestamp =
-                    DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
-                    |> Timestamp.from_datetime
-                Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(float32 rate, 2) * osu_chart_rate
-                Mods = mods
-                IsImported = true
-                IsFailed = false
-                Keys = chart.Keys
-            }
-        with err -> Error err.Message
+open Interlude.Features.Gameplay
+open Interlude.Features.Score
 
 type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay: Score -> unit) =
     inherit Page()
@@ -49,7 +29,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
     let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) detected_rate |> Setting.roundf_uom 2
 
     let import() =
-        match Replays.convert_replay_to_score replay chart rate.Value with
+        match OsuReplay.to_score replay chart chart.FirstNote rate.Value with
         | Ok score -> show_replay score
         | Error reason -> Notifications.error ("Replay import failed", reason)
 
@@ -60,3 +40,58 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         :> Widget
     override this.Title = "Import replay"
     override this.OnClose() = ()
+
+module Replay =
+
+    let show_replay (chart_meta: ChartMeta) (chart: Chart) (score: Score) =
+        SelectedChart.change(chart_meta, LibraryContext.None, true)
+        SelectedChart.when_loaded true
+        <| fun _ ->
+            if Screen.change_new
+                (fun () -> ScoreScreen(ScoreInfo.from_score chart_meta chart Rulesets.current score, (Gameplay.ImprovementFlags.None, None), false))
+                Screen.Type.Score
+                Transitions.EnterGameplayNoFadeAudio
+            then Menu.Exit()
+
+    let figure_out_replay (replay: OsuReplay) =
+
+        // Strategy 1: Scan chart database for a chart that was imported from this .osu's md5
+        let database_hit =
+            Content.Charts.Entries
+            |> Seq.tryPick (fun chart_meta ->
+                match
+                    chart_meta.Origins
+                    |> Seq.tryPick (
+                        function
+                        | ChartOrigin.Osu (md5, _, _, rate, first_note) when md5 = replay.BeatmapHash -> Some (rate, first_note)
+                        | _ -> None
+                    )
+                with
+                | None -> None
+                | Some (rate, first_note) ->
+                    match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
+                    | Error reason -> Logging.Error "Failed to load chart matching replay: %s" reason; None
+                    | Ok chart -> Some (chart, chart_meta, rate, first_note * float32 rate)
+            )
+        match database_hit with
+        | Some (chart, chart_meta, rate, first_note) ->
+            match OsuReplay.to_score replay chart first_note rate with
+            | Ok score -> show_replay chart_meta chart score
+            | Error reason -> Notifications.error ("Replay import failed", reason)
+        | None ->
+
+        // Strategy 2: Scan osu!.db if available, import the chart
+        // Not implemented
+
+        // Strategy 3: Ask the user some details then assume it's the chart they have selected
+        Logging.Info "No chart in the database matched MD5 hash '%s' for dropped replay" replay.BeatmapHash
+        match SelectedChart.CACHE_DATA, SelectedChart.CHART with
+        | Some cc, Some chart ->
+            Menu.Exit()
+            ImportReplayPage(
+                replay,
+                chart,
+                show_replay cc chart
+            )
+                .Show()
+        | _ -> ()

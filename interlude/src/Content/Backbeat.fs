@@ -1,9 +1,8 @@
-﻿namespace Interlude.Features.Import
+﻿namespace Interlude.Content
 
 open Percyqaz.Common
 open Prelude
 open Prelude.Data.Library
-open Interlude.Content
 open Interlude.Web.Shared.Requests
 
 module Backbeat =

@@ -48,10 +48,10 @@ type ChartMeta =
         Patterns: PatternReport
     }
     member this.OriginString =
-        match Seq.tryExactlyOne this.Packs with
+        match Seq.tryHead this.Packs with
         | Some pack -> pack
         | None ->
-            match Seq.tryExactlyOne this.Origins with
+            match Seq.tryHead this.Origins with
             | Some o -> o.ToString()
             | None -> "Unknown"
 

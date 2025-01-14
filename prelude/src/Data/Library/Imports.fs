@@ -88,8 +88,8 @@ module Imports =
                                     abs (incoming_duration * float32 rate - original_duration) < 5.0f<ms>
                                 then
                                     match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
-                                    | Some (ChartOrigin.Osu (md5, set_id, map_id, _)) ->
-                                        Some (header, ChartOrigin.Osu (md5, set_id, map_id, Some (rate, import.Chart.FirstNote)))
+                                    | Some (ChartOrigin.Osu (md5, set_id, map_id, _, _)) ->
+                                        Some (header, ChartOrigin.Osu (md5, set_id, map_id, rate, import.Chart.FirstNote))
                                     | _ -> None
                                 else None
                             | _ -> None

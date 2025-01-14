@@ -4,14 +4,17 @@ open System
 open System.IO
 open System.Text
 open SevenZip.Compression
+open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Replays
+open Prelude.Charts
+open Prelude.Data.User
 
 type OsuReplay = OsuScoreDatabase_Score
 
 module OsuReplay =
 
-    let decode_replay (replay: OsuReplay, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
+    let decode (replay: OsuReplay, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
         if replay.CompressedReplayBytes.IsNone then
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
 
@@ -49,7 +52,7 @@ module OsuReplay =
         }
         |> Array.ofSeq
 
-    let encode_replay (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) =
+    let encode (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) =
 
         let first_note = first_note |> float32 |> round |> int
 
@@ -101,3 +104,24 @@ module OsuReplay =
             CompressedReplayBytes = Some <| output.ToArray()
             OnlineScoreID = 0
         }
+
+    let to_score (replay: OsuReplay) (chart: Chart) (osu_first_note: Time) (osu_chart_rate: float32<rate>) : Result<Score, string> =
+        match Mods.to_interlude_rate_and_mods replay.ModsUsed with
+        | None -> Error "Invalid mods used in replay"
+        | Some(rate, mods) ->
+
+        try
+            let replay_data = decode(replay, osu_first_note, osu_chart_rate)
+
+            Ok {
+                Timestamp =
+                    DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
+                    |> Timestamp.from_datetime
+                Replay = Replay.compress_bytes replay_data
+                Rate = MathF.Round(float32 rate, 2) * osu_chart_rate
+                Mods = mods
+                IsImported = true
+                IsFailed = false
+                Keys = chart.Keys
+            }
+        with err -> Error err.Message

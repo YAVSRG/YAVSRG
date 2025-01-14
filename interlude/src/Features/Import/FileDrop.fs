@@ -60,9 +60,6 @@ module FileDrop =
 
     let mutable on_file_drop : (string -> unit) option = None
 
-    let private replay_dropped_ev = Event<OsuScoreDatabase_Score>()
-    let replay_dropped = replay_dropped_ev.Publish
-
     let handle (path: string) =
         assert(GameThread.is_game_thread())
 
@@ -97,7 +94,11 @@ module FileDrop =
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile path with
-            | Some replay -> replay_dropped_ev.Trigger replay
+            | Some replay ->
+                if Screen.current_type = Screen.Type.LevelSelect || Screen.current_type = Screen.Type.MainMenu then
+                    osu.Replay.figure_out_replay replay
+                else
+                    Notifications.error("Replay import failed!", "Must be on level select or main menu screen")
             | None -> Notifications.error (%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import

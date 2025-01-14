@@ -112,7 +112,7 @@ let read_scores () =
 
                     let replay_data = OsuReplay.TryReadFile(replay_file).Value
 
-                    let interlude_replay = OsuReplay.decode_replay (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
+                    let interlude_replay = OsuReplay.decode (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
                     match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
                     | Some(rate, _) -> compare_interlude_implementation_to_osu (chart.Value.Chart, chart.Value.Header, interlude_replay, rate, od, replay_data)

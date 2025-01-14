@@ -73,7 +73,7 @@ module Scores =
             false
         else
 
-        let replay_data = OsuReplay.decode_replay (replay_info, chart.FirstNote, chart_rate)
+        let replay_data = OsuReplay.decode (replay_info, chart.FirstNote, chart_rate)
 
         let score: Score =
             {

@@ -17,7 +17,7 @@ module Graph =
         let beatmap = Beatmap.FromFile beatmap_path |> expect
         let chart = (Osu_To_Interlude.convert beatmap { Config = ConversionOptions.Default; Source = beatmap_path } |> expect).Chart
         let osu_replay = OsuReplay.TryReadFile "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr" |> Option.get
-        let replay_data = OsuReplay.decode_replay (osu_replay, chart.FirstNote, 1.0f<rate>)
+        let replay_data = OsuReplay.decode (osu_replay, chart.FirstNote, 1.0f<rate>)
         let ruleset = SC.create 4
         ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider(replay_data)) chart.Notes 1.0f<rate>
 
