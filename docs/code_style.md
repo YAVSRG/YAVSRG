@@ -12,15 +12,14 @@ I like to put emoji in commit messages
 You don't have to care about them - in PRs I can just squash with an emoji commit message
 
 👽️ = Bug fix
-🌸 = UI improvement
-✨ = New user-facing feature
-🔥 = New developer-facing feature/tooling
-🏗️ = Stuff that is WIP/hidden from users
+✨ = New client feature
+🔥 = New developer feature, experiment or tool
+⚙️ = New library feature, not available directly to users
+🌸 = User interface improvement (no new functionality)
 🧹 = Code refactoring/cleanup/formatting
-💡 = Automated tests
-⚡ = CI pipelines
-📘 = Documentation for users
-📕 = Documentation for developers
+💡 = Automated tests and CI pipelines
+📘 = User documentation / wiki / website
+📕 = Developer documentation / wiki
 🎓 = Localisation changes
 🏷️ = Releases
 💚 = Community content
