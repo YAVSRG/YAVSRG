@@ -11,37 +11,46 @@ module RulesetSwitcher =
 
     let make_dropdown (setting: Setting<string>) (w: DropdownWrapper) =
         w.Toggle(fun () ->
-                let rulesets = Rulesets.list ()
-                let remove_bracket = System.Text.RegularExpressions.Regex("\\(.+?\\)")
-                let groups =
-                    rulesets 
-                    |> Seq.groupBy(fun (id, _) -> id.Split("-").[0].Trim())
-                    |> Seq.map (fun (_, grouped) ->
-                        let arr = grouped |> Array.ofSeq
-                        let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
-                        group_name, arr
+            let rulesets = Rulesets.list ()
+            let remove_bracket = System.Text.RegularExpressions.Regex("\\(.+?\\)")
+            let groups =
+                rulesets
+                |> Seq.groupBy(fun (id, _) -> id.Split("-").[0].Trim())
+                |> Seq.map (fun (_, grouped) ->
+                    let arr = grouped |> Array.ofSeq
+                    let group_name = remove_bracket.Replace((snd arr.[0]).Name, "").Trim()
+                    group_name, arr
+                )
+                |> Array.ofSeq
+            let dropdown_items =
+                seq {
+                    yield (
+                        (fun () -> SelectRulesetPage().Show()),
+                        %"rulesets"
                     )
-                    |> Array.ofSeq
-                let dropdown_items =
-                    seq {
-                        yield (
-                            (fun () -> SelectRulesetPage().Show()),
-                            %"rulesets"
-                        )
-                        for name, items in groups do
-                            if items.Length < 3 then
-                                for (id, rs) in items do
-                                    yield ((fun () -> setting.Set id), rs.Name)
-                            else
-                                let inner_items = items |> Array.map (fun (id, rs) -> (fun () -> setting.Set id), rs.Name)
-                                let inner_dropdown = DropdownMenu { Items = inner_items }
-                                yield ((fun () -> GameThread.defer (fun () -> w.Show inner_dropdown)), name + " >")
-                    }
-                DropdownMenu
-                    {
-                        Items = dropdown_items
-                    }
-            )
+                    for name, items in groups do
+                        if items.Length < 3 then
+                            for (id, rs) in items do
+                                yield ((fun () -> setting.Set id), rs.Name)
+                        else
+                            let inner_items = items |> Array.map (fun (id, rs) -> (fun () -> setting.Set id), rs.Name)
+                            let inner_dropdown = DropdownMenu { Items = inner_items }
+                            yield (
+                                (fun () ->
+                                    GameThread.defer (fun () ->
+                                        w.Show inner_dropdown
+                                        w.OnClose <- Selection.unclamp
+                                        Selection.clamp_to inner_dropdown
+                                    )
+                                ),
+                                name + " >"
+                            )
+                }
+            DropdownMenu
+                {
+                    Items = dropdown_items
+                }
+        )
 
 type RulesetSwitcher(setting: Setting<string>) =
     inherit Container(NodeType.None)

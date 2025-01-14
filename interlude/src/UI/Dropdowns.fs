@@ -20,7 +20,7 @@ module private Dropdown =
             )
 
         override this.Init(parent) =
-            this 
+            this
             |+ Clickable.Focus(this, Floating = true)
             |* Text(label, Align = Alignment.LEFT, Position = Position.Shrink(10.0f, 5.0f), Color = K color)
             base.Init parent
@@ -90,7 +90,7 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
         if not dropdown.Focused then dropdown.Focus false
         if this.FocusTrap then Selection.clamp_to dropdown
 
-    member this.Dismiss() = 
+    member this.Dismiss() =
         current <- None
         if this.FocusTrap then Selection.unclamp()
         this.OnClose()
@@ -175,6 +175,6 @@ type DropdownMenu(options: DropdownMenuOptions) as this =
         base.Init parent
 
     member private this.Items = flow
-        
+
     interface IHeight with
         member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
