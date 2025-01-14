@@ -152,7 +152,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
 
         Text.fill_b (
             Style.font,
-            sprintf "BPM: %.0f" bpm,
+            sprintf "BPM: %.1f" bpm,
             text_b.TranslateY(row_height * 2.0f),
             Colors.text_subheading,
             Alignment.LEFT

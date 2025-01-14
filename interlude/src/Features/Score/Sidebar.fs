@@ -52,7 +52,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         )
 
         |+ Button(
-            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.1fms  •  SD: %.1fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
+            (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
             (fun () -> show_more_info.Set true),
             Position = Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f),
             TextColor = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
@@ -71,7 +71,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Align = Alignment.LEFT
         )
             .Conditional(show_more_info.Get >> not)
-        
+
         |+ Button(
             (fun () -> sprintf "MA: %s  •  PA: %s" (!stats).MA (!stats).PA),
             (fun () -> show_more_info.Set false),
@@ -80,7 +80,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         )
             .Conditional(show_more_info.Get)
         |+ Text(
-            (fun () -> sprintf "Taps ~ M: %.1fms  •  SD: %.1fms" (!stats).TapMean (!stats).TapStandardDeviation),
+            (fun () -> sprintf "Taps ~ M: %.2fms  •  SD: %.2fms" (!stats).TapMean (!stats).TapStandardDeviation),
             Position = Position.ShrinkT(640.0f).SliceT(40.0f).ShrinkX(25.0f),
             Align = Alignment.CENTER,
             Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
@@ -94,7 +94,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         )
             .Conditional(show_more_info.Get)
         |+ Text(
-            (fun () -> sprintf "Releases ~ M: %.1fms  •  SD: %.1fms" (!stats).ReleaseMean (!stats).ReleaseStandardDeviation),
+            (fun () -> sprintf "Releases ~ M: %.2fms  •  SD: %.2fms" (!stats).ReleaseMean (!stats).ReleaseStandardDeviation),
             Position = Position.ShrinkT(715.0f).SliceT(40.0f).ShrinkX(25.0f),
             Align = Alignment.CENTER,
             Color = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
