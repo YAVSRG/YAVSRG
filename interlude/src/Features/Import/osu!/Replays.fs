@@ -56,7 +56,7 @@ module Replay =
     let figure_out_replay (replay: OsuReplay) =
 
         // Strategy 1: Scan chart database for a chart that was imported from this .osu's md5
-        let database_hit =
+        let database_match =
             Content.Charts.Entries
             |> Seq.tryPick (fun chart_meta ->
                 match
@@ -71,19 +71,16 @@ module Replay =
                 | Some (rate, first_note) ->
                     match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
                     | Error reason -> Logging.Error "Failed to load chart matching replay: %s" reason; None
-                    | Ok chart -> Some (chart, chart_meta, rate, first_note * float32 rate)
+                    | Ok chart -> Some (chart, chart_meta, rate, first_note / float32 rate)
             )
-        match database_hit with
+        match database_match with
         | Some (chart, chart_meta, rate, first_note) ->
             match OsuReplay.to_score replay chart first_note rate with
             | Ok score -> show_replay chart_meta chart score
             | Error reason -> Notifications.error ("Replay import failed", reason)
         | None ->
 
-        // Strategy 2: Scan osu!.db if available, import the chart
-        // Not implemented
-
-        // Strategy 3: Ask the user some details then assume it's the chart they have selected
+        // Strategy 2: Ask the user some details then assume it's the chart they have selected
         Logging.Info "No chart in the database matched MD5 hash '%s' for dropped replay" replay.BeatmapHash
         match SelectedChart.CACHE_DATA, SelectedChart.CHART with
         | Some cc, Some chart ->

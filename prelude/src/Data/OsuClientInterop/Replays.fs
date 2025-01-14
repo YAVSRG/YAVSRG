@@ -105,13 +105,13 @@ module OsuReplay =
             OnlineScoreID = 0
         }
 
-    let to_score (replay: OsuReplay) (chart: Chart) (osu_first_note: Time) (osu_chart_rate: float32<rate>) : Result<Score, string> =
+    let to_score (replay: OsuReplay) (chart: Chart) (osu_first_note_on_1x: Time) (osu_chart_rate: float32<rate>) : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
         try
-            let replay_data = decode(replay, osu_first_note, osu_chart_rate)
+            let replay_data = decode(replay, osu_first_note_on_1x, osu_chart_rate)
 
             Ok {
                 Timestamp =
