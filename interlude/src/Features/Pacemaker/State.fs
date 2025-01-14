@@ -85,34 +85,33 @@ module PacemakerState =
                     PacemakerSettings.Default
 
             match setting.Mode with
-            | PacemakerMode.Accuracy -> 
+            | PacemakerMode.Accuracy ->
 
-                if setting.UsePersonalBest then
-                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) SelectedChart.rate.Value with
-                    | Some (best_accuracy, _, timestamp) ->
+                match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) SelectedChart.rate.Value with
+                | Some (best_accuracy, _, timestamp)
+                    when setting.PersonalBest = PacemakerPersonalBestMode.Always
+                    || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_accuracy > setting.Accuracy) ->
 
-                        match info.SaveData.ScoreByTimestamp timestamp with
-                        | Some score ->
-                            let with_mods = Mods.apply score.Mods info.Chart
-                            let replay_data = score.Replay |> Replay.decompress_bytes
-                            let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+                    match info.SaveData.ScoreByTimestamp timestamp with
+                    | Some score ->
+                        let with_mods = Mods.apply score.Mods info.Chart
+                        let replay_data = score.Replay |> Replay.decompress_bytes
+                        let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
-                            PacemakerState.Replay (best_accuracy, scoring)
+                        PacemakerState.Replay (best_accuracy, scoring)
 
-                        | None -> PacemakerState.Accuracy best_accuracy
-                    | None -> PacemakerState.Accuracy setting.Accuracy
-                else
-                    PacemakerState.Accuracy setting.Accuracy
+                    | None -> PacemakerState.Accuracy best_accuracy
+                | _ -> PacemakerState.Accuracy setting.Accuracy
 
             | PacemakerMode.Lamp ->
-                
+
                 let lamp =
-                    if setting.UsePersonalBest then
-                        match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
-                        | Some (best_lamp, _, _) -> max 0 best_lamp
-                        | None -> setting.Lamp
-                    else
-                        setting.Lamp
+                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
+                    | Some (best_lamp, _, _)
+                        when setting.PersonalBest = PacemakerPersonalBestMode.Always
+                        || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_lamp > setting.Lamp) ->
+                        max 0 best_lamp
+                    | _ -> setting.Lamp
 
                 if lamp >= Rulesets.current.Lamps.Length || lamp < 0 then
                     PacemakerState.None
@@ -124,17 +123,17 @@ module PacemakerState =
     let description (pacemaker: PacemakerState) =
         match pacemaker with
         | PacemakerState.None -> ""
-        | PacemakerState.Accuracy acc -> 
+        | PacemakerState.Accuracy acc ->
             sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (Rulesets.current.FormatAccuracy acc)
         | PacemakerState.Replay (acc, _) -> sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (Rulesets.current.FormatAccuracy acc)
         | PacemakerState.Judgement (j, count) ->
             let jname = Rulesets.current.JudgementName j
-            if count = 0 then 
+            if count = 0 then
                 sprintf "%s %s" Icons.FLAG ([jname] %> "pacemaker.zero_judgements")
-            else 
+            else
                 sprintf "%s %s" Icons.FLAG ([count.ToString(); jname] %> "pacemaker.n_judgements")
         | PacemakerState.ComboBreaks count ->
-            if count = 0 then 
+            if count = 0 then
                 sprintf "%s %s" Icons.FLAG (%"pacemaker.full_combo")
-            else 
+            else
                 sprintf "%s %s" Icons.FLAG ([count.ToString()] %> "pacemaker.n_combo_breaks")

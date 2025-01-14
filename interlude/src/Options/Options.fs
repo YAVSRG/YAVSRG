@@ -30,18 +30,25 @@ type PacemakerMode =
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
+type PacemakerPersonalBestMode =
+    | Never
+    | IfBetter
+    | Always
+
+[<Json.AutoCodec(false)>]
+[<RequireQualifiedAccess>]
 type PacemakerSettings =
     {
         Accuracy: float
         Lamp: int
-        UsePersonalBest: bool
+        PersonalBest: PacemakerPersonalBestMode
         Mode: PacemakerMode
     }
     static member Default =
         {
             Accuracy = 0.95
             Lamp = 0
-            UsePersonalBest = true
+            PersonalBest = PacemakerPersonalBestMode.IfBetter
             Mode = PacemakerMode.Accuracy
         }
 

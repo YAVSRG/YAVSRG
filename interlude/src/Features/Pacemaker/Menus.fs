@@ -27,7 +27,7 @@ type PacemakerOptionsPage() =
 
     let lamp = Setting.simple existing.Lamp
 
-    let use_personal_best = Setting.simple existing.UsePersonalBest
+    let use_personal_best = Setting.simple existing.PersonalBest
 
     override this.Content() =
         let lamps =
@@ -56,15 +56,23 @@ type PacemakerOptionsPage() =
             SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
         )
             .Pos(9)
-        |+ PageSetting(%"gameplay.pacemaker.use_personal_best", Checkbox use_personal_best)
-            .Help(Help.Info("gameplay.pacemaker.use_personal_best"))
-            .Pos(11)
         |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
-            .Pos(13)
+            .Pos(11)
             .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy)
         |+ PageSetting(%"gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-            .Pos(15)
+            .Pos(11)
             .Conditional(fun () -> mode.Value = PacemakerMode.Lamp)
+        |+ PageSetting(%"gameplay.pacemaker.use_personal_best",
+            SelectDropdown(
+                [|
+                    PacemakerPersonalBestMode.Never, %"gameplay.pacemaker.use_personal_best.never"
+                    PacemakerPersonalBestMode.IfBetter, %"gameplay.pacemaker.use_personal_best.if_better"
+                    PacemakerPersonalBestMode.Always, %"gameplay.pacemaker.use_personal_best.always"
+                |],
+                use_personal_best)
+        )
+            .Help(Help.Info("gameplay.pacemaker.use_personal_best"))
+            .Pos(13)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
@@ -75,5 +83,5 @@ type PacemakerOptionsPage() =
                 Accuracy = accuracy.Value
                 Lamp = lamp.Value
                 Mode = mode.Value
-                UsePersonalBest = use_personal_best.Value
+                PersonalBest = use_personal_best.Value
             }
