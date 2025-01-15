@@ -89,7 +89,7 @@ module private Parser =
     let parse_storyboard_event (csv: string array) =
         match csv.[0].ToLowerInvariant() with
         | "0"
-        | "background" ->   
+        | "background" ->
             Background(
                 (CsvHelpers.string_or 2 "" csv).Trim('"'),
                 CsvHelpers.int_or 3 0 csv,
@@ -173,7 +173,7 @@ module private Parser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                HitSample = 
+                HitSample =
                     CsvHelpers.string_or 5 "" csv
                     |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
                     |> parse_hit_sample
@@ -192,7 +192,7 @@ module private Parser =
                     | _ -> Bezier
                     ,
                     curve.[1].Split('|', StringSplitOptions.TrimEntries)
-                    |> Seq.map (fun s -> 
+                    |> Seq.map (fun s ->
                         let xy = s.Split(':', StringSplitOptions.TrimEntries)
                         CsvHelpers.int_or 0 0 xy, CsvHelpers.int_or 1 0 xy
                     )
@@ -208,7 +208,7 @@ module private Parser =
                 CurvePoints = curve_points
                 Slides = CsvHelpers.int_or 6 1 csv
                 Length = CsvHelpers.float_or 7 100.0 csv
-                EdgeSounds = 
+                EdgeSounds =
                     CsvHelpers.string_or 8 "" csv
                     |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
                     |> Seq.choose (fun n ->
@@ -217,15 +217,15 @@ module private Parser =
                         | false, _ -> None
                     )
                     |> List.ofSeq
-                EdgeSets = 
+                EdgeSets =
                     CsvHelpers.string_or 9 "" csv
                     |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
-                    |> Seq.map (fun s -> 
+                    |> Seq.map (fun s ->
                         let sets = s.Split(':', StringSplitOptions.TrimEntries)
                         CsvHelpers.enum_or 0 SampleSet.None sets, CsvHelpers.enum_or 1 SampleSet.None sets
                     )
                     |> List.ofSeq
-                HitSample = 
+                HitSample =
                     CsvHelpers.string_or 10 "" csv
                     |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
                     |> parse_hit_sample
@@ -239,7 +239,7 @@ module private Parser =
                 ColorHax = color_hax
                 HitSound = hitsound
                 EndTime = CsvHelpers.int_or 5 time csv
-                HitSample = 
+                HitSample =
                     CsvHelpers.string_or 6 "" csv
                     |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
                     |> parse_hit_sample
@@ -254,7 +254,7 @@ module private Parser =
                 ColorHax = color_hax
                 HitSound = hitsound
                 EndTime = CsvHelpers.int_or 0 time endtime_and_sample
-                HitSample = 
+                HitSample =
                     CsvHelpers.string_or 1 "" endtime_and_sample
                     |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
                     |> parse_hit_sample
@@ -327,9 +327,9 @@ module private Parser =
                     | None -> ()
             | TimingPoints ->
                 let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
-                if csv.Length > 1 && csv.Length < 8 then
+                if csv.Length > 1 && csv.Length < 6 then
                     parse_failure "Failed to parse timing point" line
-                elif csv.Length >= 8 then
+                elif csv.Length >= 6 then
                     parse_timing_point csv |> timing.Add
             | Objects ->
                 let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
@@ -346,7 +346,7 @@ module private Parser =
             Difficulty = Difficulty.FromMap difficulty.Value
             Events = List.ofSeq events
             Objects = objects |> Seq.sortBy (_.Time) |> List.ofSeq
-            Timing = timing |> Seq.sortBy (_.Time) |> List.ofSeq 
+            Timing = timing |> Seq.sortBy (_.Time) |> List.ofSeq
         }
 
 type Beatmap with
@@ -378,7 +378,7 @@ type Beatmap with
         try
             use fs = File.OpenRead(path)
             Ok(Beatmap.Hash fs)
-        with err -> 
+        with err ->
             Error err.Message
 
 type Storyboard with
