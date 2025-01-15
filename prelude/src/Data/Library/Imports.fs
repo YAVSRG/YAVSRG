@@ -32,14 +32,14 @@ module Imports =
     type MountedChartSource =
         {
             SourceFolder: string
-            mutable LastImported: DateTime
+            mutable LastImported: DateTime option
             Type: MountedChartSourceType
             ImportOnStartup: bool
         }
         static member Pack(name: string, path: string) =
             {
                 SourceFolder = path
-                LastImported = DateTime.UnixEpoch
+                LastImported = None
                 Type = Pack name
                 ImportOnStartup = false
             }
@@ -47,10 +47,19 @@ module Imports =
         static member Library(path: string) =
             {
                 SourceFolder = path
-                LastImported = DateTime.UnixEpoch
+                LastImported = None
                 Type = Library
                 ImportOnStartup = false
             }
+
+    let private log_skipped (result: ConversionResult) =
+        let skipped = result.SkippedCharts.Length
+        if skipped > 0 then
+            let dump =
+                result.SkippedCharts
+                |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
+                |> String.concat "\n "
+            Logging.Info "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
 
     let private RATE_REGEX =
         Regex(
@@ -200,34 +209,42 @@ module Imports =
                 async {
                     match source.Type with
                     | Pack packname ->
+                        Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
+                        match source.LastImported with
+                        | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
+                        | None -> ()
                         let config =
                             { ConversionOptions.Default with
                                 MoveAssets = false
-                                ChangedAfter = Some source.LastImported
+                                ChangedAfter = source.LastImported
                                 PackName = packname
                             }
 
                         let! result = convert_pack_folder.RequestAsync(source.SourceFolder, config, library)
-                        source.LastImported <- DateTime.UtcNow
+                        source.LastImported <- Some DateTime.UtcNow
+                        log_skipped result
                         return result
                     | Library ->
+                        Logging.Info "Importing songs library %s" source.SourceFolder
+                        match source.LastImported with
+                        | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
+                        | None -> ()
                         let mutable results = ConversionResult.Empty
-                        for pack_folder in
-                            Directory.EnumerateDirectories source.SourceFolder
-                            |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported) do
+                        for pack_folder in Directory.EnumerateDirectories source.SourceFolder do
                             let! result =
                                 convert_pack_folder.RequestAsync(
                                     pack_folder,
                                     { ConversionOptions.Default with
                                         MoveAssets = false
-                                        ChangedAfter = Some source.LastImported
+                                        ChangedAfter = source.LastImported
                                         PackName = Path.GetFileName pack_folder
                                     },
                                     library
                                 )
                             results <- ConversionResult.Combine result results
 
-                        source.LastImported <- DateTime.UtcNow
+                        log_skipped results
+                        source.LastImported <- Some DateTime.UtcNow
                         return results
                 }
         }
@@ -271,15 +288,6 @@ module Imports =
                             return None
                 }
         }
-
-    let private log_skipped (result: ConversionResult) =
-        let skipped = result.SkippedCharts.Length
-        if skipped > 0 then
-            let dump =
-                result.SkippedCharts
-                |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
-                |> String.concat "\n "
-            Logging.Info "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
 
     let rec private auto_detect_import (path: string, move_assets: bool, library: Library) : Async<ConversionResult option> =
         async {

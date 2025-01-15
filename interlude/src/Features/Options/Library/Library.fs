@@ -14,14 +14,14 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
-open Interlude.Features.Import.osu
 open Interlude.Features.Tables.Browser
 
 module Imports =
-    
+
     let import_in_progress () =
         WebServices.download_file.Status <> Async.ServiceStatus.Idle
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
+        || Imports.import_mounted_source.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
         || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle

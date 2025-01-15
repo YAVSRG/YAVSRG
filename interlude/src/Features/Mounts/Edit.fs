@@ -36,7 +36,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 %"mount.importall",
                 fun () ->
                     import <- true
-                    mount.LastImported <- System.DateTime.UnixEpoch
+                    mount.LastImported <- None
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
             )
             .Help(Help.Info("mount.importall"))
@@ -44,13 +44,13 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
         |+
             if
                 game = MountedGameType.Osu
-                && mount.LastImported <> System.DateTime.UnixEpoch
+                && mount.LastImported.IsSome
             then
                 PageButton.Once(
                     %"mount.import_osu_scores",
                     fun () ->
                         Scores.import_osu_scores_service.Request(
-                            { 
+                            {
                                 UserDatabase = Content.UserData
                                 ChartDatabase = Content.Charts
                                 OsuRootPath = Path.GetDirectoryName mount.SourceFolder
@@ -101,7 +101,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 (setting.Value.Value, Content.Library),
                 fun result ->
                     Notifications.task_feedback (
-                        Icons.CHECK, 
+                        Icons.CHECK,
                         %"notification.import_success",
                         [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                     )

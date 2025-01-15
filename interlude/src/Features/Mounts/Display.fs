@@ -51,10 +51,9 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
                 match setting.Value with
                 | Some s ->
                     [
-                        if s.LastImported = System.DateTime.UnixEpoch then
-                            "--"
-                        else
-                            s.LastImported.ToString()
+                        match s.LastImported with
+                        | Some date -> date.ToString()
+                        | None -> "--"
                     ]
                     %> "mount.lastimported"
                 | None -> %"mount.notlinked"
