@@ -143,7 +143,7 @@ module Settings =
                     (fun () ->
                         [
                             ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
-                            (float32 options.ScrollSpeed.Value * 31.0f / 2.38f).ToString("F1")
+                            (float32 options.ScrollSpeed.Value * 12.698412f).ToString("F1")
                             (float32 options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
                             "C" + (60000.0f * float32 options.ScrollSpeed.Value / Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                         ]
