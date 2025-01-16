@@ -76,22 +76,22 @@ type PerformanceSettingsPage() =
             .Help(Help.Info("system.performance.antijitter"))
             .Pos(8)
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
-        |+ PageSetting(%"system.performance.screen_tear_alignment",
-            Slider.Percent(screen_tear_alignment)
-        )
-            .Pos(10)
-            .Conditional(show_tearline_settings)
-        |+ Text(%"system.performance.screen_tear_alignment.hint",
-            Color = K Colors.text,
-            Position = pretty_pos(8, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
-            Align = Alignment.LEFT
-        )
-            .Conditional(show_tearline_settings)
         |+ PageSetting(%"system.performance.frame_multiplier",
             SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
         )
+            .Pos(10)
+            .Conditional(show_tearline_settings)
+        |+ PageSetting(%"system.performance.screen_tear_alignment",
+            Slider.Percent(screen_tear_alignment)
+        )
             .Pos(12)
-            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart && config.WindowMode.Value = WindowType.Fullscreen)
+            .Conditional(show_tearline_settings)
+        |+ Text(%"system.performance.screen_tear_alignment.hint",
+            Color = K Colors.text,
+            Position = pretty_pos(14, 1, PageWidth.Full).ShrinkL(PRETTYTEXTWIDTH),
+            Align = Alignment.LEFT
+        )
+            .Conditional(show_tearline_settings)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

@@ -170,19 +170,6 @@ type SystemPage() =
         window_mode_changed config.WindowMode.Value
 
         page_container()
-        |+ PageButton(
-            %"system.performance",
-            (fun () -> PerformanceSettingsPage().Show())
-        )
-            .Help(Help.Info("system.performance"))
-            .Pos(0)
-
-        |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-            .Pos(2)
-
-        |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
-            .Pos(4)
-
         |+ PageSetting(
             %"system.windowmode",
             SelectDropdown(
@@ -196,13 +183,13 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply))
             )
         )
-            .Pos(7)
+            .Pos(0)
         |+ PageSetting(
             %"system.windowresolution",
             WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
         )
             .Help(Help.Info("system.windowresolution"))
-            .Pos(9)
+            .Pos(2)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
         |+ PageSetting(
             %"system.monitor",
@@ -212,7 +199,7 @@ type SystemPage() =
                 |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.defer (ignore >> config.Apply))
             )
         )
-            .Pos(9)
+            .Pos(2)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
         |+ PageSetting(
             %"system.videomode",
@@ -222,11 +209,24 @@ type SystemPage() =
             )
         )
             .Help(Help.Info("system.videomode"))
-            .Pos(11)
+            .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
+
+        |+ PageButton(
+            %"system.performance",
+            (fun () -> PerformanceSettingsPage().Show())
+        )
+            .Help(Help.Info("system.performance"))
+            .Pos(7)
+
+        |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+            .Pos(9)
+
+        |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
+            .Pos(12)
         |+ PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
             .Help(Help.Info("system.visualoffset"))
-            .Pos(13)
+            .Pos(14)
         :> Widget
 
     override this.OnClose() = ()
