@@ -43,12 +43,16 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
 
 module Replay =
 
-    let show_replay (chart_meta: ChartMeta) (chart: Chart) (score: Score) =
+    let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) =
+        let score_info =
+            { ScoreInfo.from_score chart_meta chart Rulesets.current score with
+                PlayedBy = ScorePlayedBy.Username played_by
+            }
         SelectedChart.change(chart_meta, LibraryContext.None, true)
         SelectedChart.when_loaded true
         <| fun _ ->
             if Screen.change_new
-                (fun () -> ScoreScreen(ScoreInfo.from_score chart_meta chart Rulesets.current score, (Gameplay.ImprovementFlags.None, None), false))
+                (fun () -> ScoreScreen(score_info, (Gameplay.ImprovementFlags.None, None), false))
                 Screen.Type.Score
                 Transitions.EnterGameplayNoFadeAudio
             then Menu.Exit()
@@ -76,7 +80,7 @@ module Replay =
         match database_match with
         | Some (chart, chart_meta, rate, first_note) ->
             match OsuReplay.to_score replay chart first_note rate with
-            | Ok score -> show_replay chart_meta chart score
+            | Ok score -> show_replay replay.Player chart_meta chart score
             | Error reason -> Notifications.error ("Replay import failed", reason)
         | None ->
 
@@ -88,7 +92,7 @@ module Replay =
             ImportReplayPage(
                 replay,
                 chart,
-                show_replay cc chart
+                show_replay replay.Player cc chart
             )
                 .Show()
         | _ -> ()
