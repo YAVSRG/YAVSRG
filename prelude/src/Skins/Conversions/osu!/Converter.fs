@@ -40,6 +40,11 @@ module Image =
         image.Mutate(fun img -> img.Resize(target_width, target_width) |> ignore)
         image
 
+    let scale_y (scale: float32) (image: Bitmap) : Bitmap =
+        let image = image.Clone()
+        image.Mutate(fun img -> img.Resize(image.Width, float32 image.Height * scale |> round |> int) |> ignore)
+        image
+
     let rotate (rotate_mode: RotateMode) (image: Bitmap) : Bitmap =
         let image = pad_to_square image.Width image
         image.Mutate(fun img -> img.Rotate(rotate_mode) |> ignore)
@@ -464,12 +469,23 @@ module OsuSkinConverter =
             | true, v -> v
             | false, _ -> 3.0m
 
+        Logging.Debug "Converting skin '%s', version %A" ini.General.Name version
+
         let default_settings = Mania.Default keymode version
 
         let keymode_settings =
             ini.Mania
             |> List.tryFind (fun m -> m.Keys = keymode)
             |> Option.defaultValue default_settings
+
+        let note_height_scale =
+            match keymode_settings.WidthForNoteHeightScale with
+            | None -> 1.0f
+            | Some h -> 
+                let s = float32 h / float32 keymode_settings.ColumnWidth.[0]
+                Logging.Debug "WidthForNoteHeightScale is %.3fx column width, using that as scale" s
+                s
+                
 
         let colors = Array.zeroCreate 10
         let receptor_colors =
@@ -508,6 +524,8 @@ module OsuSkinConverter =
             }
             |> List.ofSeq
 
+        Logging.Debug "%i column variations to convert (Distinct by note/head/body/tail textures)" core_textures.Length
+
         let mutable flipholdtail = keymode_settings.NoteFlipWhenUpsideDownΔT.[0]
         let mutable useholdtail = true
         let mutable stage_textures = false
@@ -531,6 +549,7 @@ module OsuSkinConverter =
             |> List.map (fun x -> x.Note)
             |> List.map Texture.load_animated_texture
             |> List.map (List.map _.As2x)
+            |> List.map (List.map (Image.scale_y note_height_scale))
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "note"
         with err ->
@@ -551,9 +570,10 @@ module OsuSkinConverter =
 
         try
             core_textures
-                |> List.map (fun x -> x.Head)
-                |> List.map Texture.load_animated_texture
-                |> List.map (List.map _.As2x)
+            |> List.map (fun x -> x.Head)
+            |> List.map Texture.load_animated_texture
+            |> List.map (List.map _.As2x)
+            |> List.map (List.map (Image.scale_y note_height_scale))
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "holdhead"
         with err ->
@@ -567,6 +587,7 @@ module OsuSkinConverter =
                 |> List.map expect_texture
                 |> List.map Texture.load_animated_texture
                 |> List.map (List.map _.As2x)
+                |> List.map (List.map (Image.scale_y note_height_scale))
                 |> convert_element_textures target "holdtail"
             with err ->
                 Logging.Debug "Error in holdtail textures - Using hold head textures instead: %O" err
@@ -575,6 +596,7 @@ module OsuSkinConverter =
                 |> List.map (fun x -> x.Head)
                 |> List.map Texture.load_animated_texture
                 |> List.map (List.map _.As2x)
+                |> List.map (List.map (Image.scale_y note_height_scale))
                 |> if is_arrows then arrow_fix_4k else id
                 |> convert_element_textures target "holdtail"
 
@@ -621,7 +643,7 @@ module OsuSkinConverter =
 
             match detect_square_receptors scaled.[0] with
             | Some transform ->
-                Logging.Debug("Detected 'receptors' in osu mania key textures")
+                Logging.Debug "Detected 'receptors' in osu mania key textures"
                 scaled
                 |> Seq.indexed
                 |> Seq.iter (fun (i, img) -> (transform img).Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, i))))
