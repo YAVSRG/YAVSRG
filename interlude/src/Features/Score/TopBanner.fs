@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
+open Interlude.UI
 
 type TopBanner(score_info: ScoreInfo) as this =
     inherit Container(NodeType.None)
@@ -14,61 +15,36 @@ type TopBanner(score_info: ScoreInfo) as this =
         |+ Text(
             score_info.ChartMeta.Artist + " - " + score_info.ChartMeta.Title,
             Align = Alignment.LEFT,
-            Position =
-                {
-                    Left = 0.0f %+ 20.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 1.0f %- 20.0f
-                    Bottom = 0.0f %+ 85.0f
-                }
+            Position = Position.SliceT(85.0f).ShrinkX(20.0f).ShrinkR(300.0f)
         )
         |+ Text(
             score_info.ChartMeta.DifficultyName,
             Align = Alignment.LEFT,
-            Position =
-                {
-                    Left = 0.0f %+ 20.0f
-                    Top = 0.0f %+ 75.0f
-                    Right = 1.0f %- 20.0f
-                    Bottom = 0.0f %+ 130.0f
-                }
+            Position = Position.Row(75.0f, 55.0f).ShrinkX(20.0f)
         )
         |+ Text(
             sprintf "%s  •  %s" ([score_info.ChartMeta.OriginString] %> "score.source") ([score_info.ChartMeta.Creator] %> "score.creator"),
             Align = Alignment.LEFT,
-            Position =
-                {
-                    Left = 0.0f %+ 20.0f
-                    Top = 0.0f %+ 125.0f
-                    Right = 1.0f %+ 0.0f
-                    Bottom = 0.0f %+ 165.0f
-                }
+            Position = Position.Row(125.0f, 40.0f).ShrinkX(20.0f)
         )
 
         |+ Text(
             (score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString(),
             Align = Alignment.RIGHT,
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 75.0f
-                    Right = 1.0f %- 20.0f
-                    Bottom = 0.0f %+ 130.0f
-                }
+            Position = Position.Row(65.0f, 55.0f).ShrinkX(20.0f)
         )
         |* Text(
             match score_info.PlayedBy with
             | ScorePlayedBy.Username p -> K([p] %> "score.played_by")
             | ScorePlayedBy.You -> (fun () -> [Stats.format_short_time Stats.CURRENT_SESSION.GameTime; Stats.format_short_time Stats.CURRENT_SESSION.PlayTime] %> "score.session_time")
             , Align = Alignment.RIGHT
-            , Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 125.0f
-                    Right = 1.0f %- 20.0f
-                    Bottom = 0.0f %+ 165.0f
-                }
+            , Position = Position.Row(115.0f, 50.0f).ShrinkX(20.0f)
         )
+
+        match score_info.PlayedBy with
+        | ScorePlayedBy.You ->
+            this |* Username(Position = Position.SliceT(Toolbar.HEIGHT).SliceR(300.0f))
+        | _ -> ()
 
     override this.Draw() =
 
