@@ -150,9 +150,12 @@ type Storage(storage: StorageType) =
         | Embedded _ -> ()
         | Folder f ->
             let old_path = Path.Combine(f, p, old_name)
+            let new_path = Path.Combine(f, p, new_name)
 
-            if File.Exists old_path then
-                File.Move(old_path, Path.Combine(f, p, new_name))
+            if File.Exists old_path && not (File.Exists new_path) then
+                File.Move(old_path, new_path)
+            else
+                Logging.Error "Failed to move file from '%s' to '%s', skin may be messed up as a result" old_path new_path
 
     /// Returns string names of files in the requested folder
     member this.GetFiles([<ParamArray>] path: string array) =
@@ -875,6 +878,33 @@ type Storage(storage: StorageType) =
 
     member this.RotateAnticlockwise((col, row), name: string, [<ParamArray>] path: string array) =
         this.MutateLooseTexture((col, row), (fun (ctx: IImageProcessingContext) -> ctx.Rotate(RotateMode.Rotate270)), name, path)
+
+    member this.CycleTextures(positions: (int * int) array, name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Embedded _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+
+        match this.DetectTextureFormat(name, path) with
+        | Error reason ->
+            Logging.Error "Cannot mutate '%s': %s" name reason
+            false
+        | Ok (columns, rows, is_grid) ->
+
+        if is_grid then
+            Logging.Warn "Cannot mutate %s as it is a grid texture" name
+            false
+        elif positions.Length < 2 || positions |> Array.exists (fun (col, row) -> col < 0 || col >= columns  || row < 0 || row >= rows) then
+            false
+        else
+
+        let EXTRA_FILE = sprintf "%s.png.old" name
+        let mutable last_file = EXTRA_FILE
+        for (col, row) in positions do
+            let filename = TextureFileName.to_loose name (col, row)
+            this.RenameFile(filename, last_file, path)
+            last_file <- filename
+        this.RenameFile(EXTRA_FILE, last_file, path)
+        true
 
     member this.AddLooseTextureRow(src_row: int, name: string, [<ParamArray>] path: string array) : bool =
         match storage with

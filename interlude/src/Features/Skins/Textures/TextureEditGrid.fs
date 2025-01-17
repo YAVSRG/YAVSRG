@@ -276,7 +276,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
 type TextureEditPage(source: Storage, texture_id: string) =
     inherit Page()
 
-    let texture_rules = 
+    let texture_rules =
         match source with
         | :? Noteskin as ns -> NoteskinTextureRules.get ns.Config texture_id
         | :? HudLayout as hud -> HudTextureRules.get hud.Config texture_id
@@ -341,6 +341,14 @@ type TextureEditPage(source: Storage, texture_id: string) =
 
                     reload_source()
                     texture_editor.Refresh()
+                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
+            )
+            |+ Button(
+                Icons.REFRESH_CW + " Cycle selected"
+                , fun () ->
+                    if source.CycleTextures(texture_editor.SelectedTextures |> Array.ofSeq, texture_id) then
+                        reload_source()
+                        texture_editor.Refresh()
                 , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
             ))
         :> Widget
