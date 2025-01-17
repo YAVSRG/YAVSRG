@@ -63,6 +63,12 @@ type Slider(setting: Setting.Bounded<float32>) =
                         this.Focus true
                     elif not b && this.FocusedByMouse then
                         Selection.up true
+                ),
+            OnRightClick =
+                (fun () ->
+                    Style.text_close.Play()
+                    typed_number.Set ""
+                    setting.Value <- ORIGINAL_VALUE
                 )
         )
         base.Init parent
@@ -133,6 +139,7 @@ type Slider(setting: Setting.Bounded<float32>) =
                 typed_number.Set ""
 
         if this.Focused && (%%"undo").Tapped() then
+            Style.text_close.Play()
             typed_number.Set ""
             setting.Value <- ORIGINAL_VALUE
 
