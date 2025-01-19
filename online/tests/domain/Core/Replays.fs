@@ -15,19 +15,18 @@ module Replays =
     let CRESCENT_MOON =
         "1467CD6DEB4A3B87FA58FAB4F2398BE9AD7B0017031C511C549D3EF28FFB58D3"
 
-    let SCJ4 = "SC(J4)548E5A"
     let TIMEPLAYED = 1705685404000L
 
     [<Test>]
-    let Challenge_RoundTrip () =
-        let user_id = User.create ("ChallengeRoundTrip", 0uL) |> User.save_new
+    let Persistent_RoundTrip () =
+        let user_id = User.create ("PersistentRoundTrip", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_challenge replay
+        let replay_id = Replay2.save_persistent replay
 
-        match Replay.by_id replay_id with
+        match Replay2.by_id replay_id with
         | Some fetched_replay -> Assert.AreEqual(replay, fetched_replay)
         | None -> Assert.Fail()
 
@@ -36,24 +35,24 @@ module Replays =
         let user_id = User.create ("LeaderboardRoundTrip", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard SCJ4 replay
+        let replay_id = Replay2.save_leaderboard replay
 
-        match Replay.by_id replay_id with
+        match Replay2.by_id replay_id with
         | Some fetched_replay -> Assert.AreEqual(replay, fetched_replay)
         | None -> Assert.Fail()
 
     [<Test>]
-    let Challenge_Idempotent () =
-        let user_id = User.create ("ChallengeIdempotent", 0uL) |> User.save_new
+    let Persistent_Idempotent () =
+        let user_id = User.create ("PersistentIdempotent", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_challenge replay
-        let replay_id2 = Replay.save_challenge replay
-        let replay_id3 = Replay.save_challenge replay
+        let replay_id = Replay2.save_persistent replay
+        let replay_id2 = Replay2.save_persistent replay
+        let replay_id3 = Replay2.save_persistent replay
 
         Assert.AreEqual(replay_id, replay_id2)
         Assert.AreEqual(replay_id, replay_id3)
@@ -63,11 +62,11 @@ module Replays =
         let user_id = User.create ("LeaderboardIdempotent", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard SCJ4 replay
-        let replay_id2 = Replay.save_leaderboard SCJ4 replay
-        let replay_id3 = Replay.save_leaderboard SCJ4 replay
+        let replay_id = Replay2.save_leaderboard replay
+        let replay_id2 = Replay2.save_leaderboard replay
+        let replay_id3 = Replay2.save_leaderboard replay
 
         Assert.AreEqual(replay_id, replay_id2)
         Assert.AreEqual(replay_id, replay_id3)
@@ -77,17 +76,17 @@ module Replays =
         let user_id = User.create ("LeaderboardAutomaticDelete", 0uL) |> User.save_new
 
         let replay =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replay2 =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard SCJ4 replay
-        let replay_id2 = Replay.save_leaderboard SCJ4 replay2
+        let replay_id = Replay2.save_leaderboard replay
+        let replay_id2 = Replay2.save_leaderboard replay2
 
-        Assert.AreNotEqual(Some replay, Replay.by_id replay_id)
+        Assert.AreNotEqual(Some replay, Replay2.by_id replay_id)
 
-        match Replay.by_id replay_id2 with
+        match Replay2.by_id replay_id2 with
         | Some fetched_replay -> Assert.AreEqual(replay2, fetched_replay)
         | None -> Assert.Fail()
 
@@ -97,84 +96,43 @@ module Replays =
             User.create ("LeaderboardIdempotentAutomaticDelete", 0uL) |> User.save_new
 
         let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard SCJ4 replayA
-        let replay_id2 = Replay.save_leaderboard SCJ4 replayA
-        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
+        let replay_id = Replay2.save_leaderboard replayA
+        let replay_id2 = Replay2.save_leaderboard replayA
+        let replay_id3 = Replay2.save_leaderboard replayB
 
         Assert.AreEqual(replay_id, replay_id2)
-        Assert.AreNotEqual(Some replayA, Replay.by_id replay_id)
+        Assert.AreNotEqual(Some replayA, Replay2.by_id replay_id)
 
-        match Replay.by_id replay_id3 with
+        match Replay2.by_id replay_id3 with
         | Some fetched_replay -> Assert.AreEqual(replayB, fetched_replay)
         | None -> Assert.Fail()
 
     [<Test>]
-    let Leaderboard_ChallengeNoAutomaticDelete () =
+    let Leaderboard_PersistentNoAutomaticDelete () =
         let user_id =
-            User.create ("LeaderboardChallengeNoAutomaticDelete", 0uL) |> User.save_new
+            User.create ("LeaderboardPersistentNoAutomaticDelete", 0uL) |> User.save_new
 
         let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard SCJ4 replayA
-        let replay_id2 = Replay.save_leaderboard SCJ4 replayA
-        let replay_id3 = Replay.save_challenge replayA
-        let replay_id4 = Replay.save_leaderboard SCJ4 replayB
+        let replay_id = Replay2.save_leaderboard replayA
+        let replay_id2 = Replay2.save_leaderboard replayA
+        let replay_id3 = Replay2.save_persistent replayA
+        let replay_id4 = Replay2.save_leaderboard replayB
 
         Assert.AreEqual(replay_id, replay_id2)
         Assert.AreEqual(replay_id, replay_id3)
         Assert.AreNotEqual(replay_id, replay_id4)
-        Assert.AreEqual(Some replayA, Replay.by_id replay_id)
+        Assert.AreEqual(Some replayA, Replay2.by_id replay_id)
 
-        match Replay.by_id replay_id4 with
+        match Replay2.by_id replay_id4 with
         | Some fetched_replay -> Assert.AreEqual(replayB, fetched_replay)
         | None -> Assert.Fail()
-
-    [<Test>]
-    let Leaderboard_OtherRulesetNoAutomaticDelete () =
-        let user_id =
-            User.create ("LeaderboardOtherRulesetNoAutomaticDelete", 0uL) |> User.save_new
-
-        let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
-
-        let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
-
-        let replay_id = Replay.save_leaderboard SCJ4 replayA
-        let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA
-        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
-
-        Assert.AreEqual(replay_id, replay_id2)
-        Assert.AreNotEqual(replay_id, replay_id3)
-        Assert.AreEqual(Some replayA, Replay.by_id replay_id)
-        Assert.AreEqual(Some replayB, Replay.by_id replay_id3)
-
-    [<Test>]
-    let Leaderboard_OtherRulesetAutomaticDelete () =
-        let user_id =
-            User.create ("LeaderboardOtherRulesetAutomaticDelete", 0uL) |> User.save_new
-
-        let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
-
-        let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
-
-        let replay_id = Replay.save_leaderboard SCJ4 replayA
-        let replay_id2 = Replay.save_leaderboard "OtherRuleset" replayA
-        let replay_id3 = Replay.save_leaderboard SCJ4 replayB
-        let replay_id4 = Replay.save_leaderboard "OtherRuleset" replayB
-
-        Assert.AreEqual(replay_id, replay_id2)
-        Assert.AreEqual(replay_id3, replay_id4)
-        Assert.AreEqual(Some replayB, Replay.by_id replay_id3)
-        Assert.AreEqual(None, Replay.by_id replay_id)

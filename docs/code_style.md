@@ -15,6 +15,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 ✨ = New client feature
 🔥 = New developer feature, experiment or tool
 ⚙️ = New library feature, not available directly to users
+🌍 = New server-side/online feature
 🌸 = User interface improvement (no new functionality)
 🧹 = Code refactoring/cleanup/formatting
 💡 = Automated tests and CI pipelines

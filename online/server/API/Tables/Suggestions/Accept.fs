@@ -55,13 +55,11 @@ module Accept =
                 elif TableSuggestion.accept request.TableId chart_id user_id request.Level then
 
                     TableLevel.add_or_move user_id request.TableId chart_id request.Level
-                    let leaderboard_created = Leaderboard.create chart_id table.RulesetId
 
-                    sprintf "# :checkered_flag: %s\nNow in %s, %s%s"
+                    sprintf "# :checkered_flag: %s\nNow in %s, %s"
                         known_song.FormattedTitle
                         table.Name
                         (table.LevelName request.Level)
-                        (if leaderboard_created then "\nIt now has a leaderboard!" else "")
                     |> Discord.feed_log
 
                     response.ReplyJson(true)

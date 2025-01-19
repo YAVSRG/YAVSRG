@@ -19,16 +19,15 @@ module Users =
         Friends.add (user2_id, user_id)
 
         let replay =
-            Replay.create (user_id, Scores.CRESCENT_MOON, Scores.TIMEPLAYED, Scores.CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, Scores.CRESCENT_MOON, Scores.TIMEPLAYED, Scores.CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard "RulesetId" replay
+        let replay_id = Replay2.save_leaderboard replay
 
         let score =
-            Score
+            Score2
                 .create(
                     user_id,
                     Scores.CRESCENT_MOON,
-                    "RulesetId",
                     Scores.TIMEPLAYED,
                     1.0f<rate>,
                     Map.empty,
@@ -40,12 +39,12 @@ module Users =
                 .WithReplay
                 replay_id
 
-        let score_id = Score.save score
+        let score_id = Score2.save score
 
         Users.permanently_delete_user user_id
 
         Assert.IsEmpty(Friends.friends_list user2_id)
         Assert.IsEmpty(Friends.friends_list user_id)
-        Assert.AreEqual(None, Replay.by_id replay_id)
-        Assert.AreEqual(None, Score.by_id score_id)
+        Assert.AreEqual(None, Replay2.by_id replay_id)
+        Assert.AreEqual(None, Score2.by_id score_id)
         Assert.AreEqual(None, User.by_id user_id)

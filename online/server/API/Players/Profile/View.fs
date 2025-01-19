@@ -28,13 +28,11 @@ module View =
                 else
                     user_id, user
 
-            let recent_scores = Score.get_user_recent target_user_id
+            let recent_scores = Score2.get_user_recent target_user_id
 
             let scores: RecentScore array =
                 recent_scores
                 |> Array.map (fun s ->
-                    let rs = Backbeat.rulesets.[Score.PRIMARY_RULESET]
-
                     match Backbeat.Charts.by_hash s.ChartId with
                     | Some(chart, song) ->
                         {
@@ -42,12 +40,9 @@ module View =
                             Title = song.Title
                             Difficulty = chart.DifficultyName
                             Score = s.Accuracy
-                            Lamp = rs.LampName s.Lamp
-                            Mods =
-                                if s.Mods.IsEmpty then
-                                    sprintf "%.2fx" s.Rate
-                                else
-                                    sprintf "%.2fx*" s.Rate
+                            Lamp = s.Lamp
+                            Rate = s.Rate
+                            Mods = s.Mods
                             Timestamp = s.TimePlayed
                         }
                     | None ->
@@ -56,12 +51,9 @@ module View =
                             Title = "???"
                             Difficulty = "???"
                             Score = s.Accuracy
-                            Lamp = rs.LampName s.Lamp
-                            Mods =
-                                if s.Mods.IsEmpty then
-                                    sprintf "%.2fx" s.Rate
-                                else
-                                    sprintf "%.2fx*" s.Rate
+                            Lamp = s.Lamp
+                            Rate = s.Rate
+                            Mods = s.Mods
                             Timestamp = s.TimePlayed
                         }
                 )

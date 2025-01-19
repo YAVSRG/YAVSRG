@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Web.Shared.Requests
+open Interlude.Content
 open Interlude.Features.Online
 
 type private RecentScores(scores: Players.Profile.View.RecentScore array) =
@@ -48,7 +49,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b (
                 Style.font,
-                score.Lamp,
+                Rulesets.DEFAULT.LampName score.Lamp,
                 b.ShrinkR(h * 2.0f).SliceR(h).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.CENTER
@@ -56,7 +57,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b (
                 Style.font,
-                score.Mods,
+                (if score.Mods.IsEmpty then sprintf "%.2fx" score.Rate else sprintf"%.2fx*" score.Rate),
                 b.ShrinkR(h * 0.5f).SliceR(h).Shrink(0.0f, h * 0.2f),
                 Colors.text,
                 Alignment.CENTER

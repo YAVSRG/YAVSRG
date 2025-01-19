@@ -54,12 +54,12 @@ module UserCommands =
                     let embed, components = UserInteractables.song_search query 0 false
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                     return ()
-                
+
                 | query :: page :: [] ->
                     let embed, components = UserInteractables.song_search query (int page - 1) false
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                     return ()
-                
+
                 | query :: page :: _ ->
                     let embed, components = UserInteractables.song_search query (int page - 1) true
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
@@ -147,13 +147,13 @@ module UserCommands =
                             else
                                 "Just now"
 
-                        let format_mods (score: Score.RecentScore) =
+                        let format_mods (score: Score2.RecentScore) =
                             if score.Mods.IsEmpty then
                                 sprintf "%.2fx" score.Rate
                             else
                                 sprintf "%.2fx*" score.Rate
 
-                        let recent_scores = Score.get_user_recent user_id
+                        let recent_scores = Score2.get_user_recent user_id
 
                         let embed =
                             let color = user_info.Color |> Drawing.Color.FromArgb |> Color.op_Explicit
@@ -183,11 +183,11 @@ module UserCommands =
                                     EmbedFieldBuilder(Name = "..", IsInline = true)
                                         .WithValue(
                                             recent_scores
-                                            |> Array.map (fun (s: Score.RecentScore) ->
+                                            |> Array.map (fun (s: Score2.RecentScore) ->
                                                 sprintf
                                                     "`%6.2f%%` `%6s` `%6s` `%8s`"
                                                     (s.Accuracy * 100.0)
-                                                    (Backbeat.rulesets.[Score.PRIMARY_RULESET].LampName s.Lamp)
+                                                    (Backbeat.SC_J4.LampName s.Lamp)
                                                     (format_mods s)
                                                     (format_time_ago s.TimePlayed)
                                             )

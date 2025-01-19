@@ -15,9 +15,8 @@ module Migrations =
             (fun db ->
                 Database.create_table User.TABLE db |> expect |> ignore
                 Friends.CREATE_TABLE.Execute () db |> expect |> ignore
-                Replay.CREATE_TABLE.Execute () db |> expect |> ignore
-                Score.CREATE_TABLE.Execute () db |> expect |> ignore
-                Leaderboard.CREATE_TABLE.Execute () db |> expect |> ignore
+                ScoreV1.CREATE_TABLE.Execute () db |> expect |> ignore
+                ReplayV1.CREATE_TABLE.Execute () db |> expect |> ignore
                 Logging.Info("Migration created initial tables")
             )
             db
@@ -37,14 +36,19 @@ module Migrations =
 
         Database.migrate
             "RulesetSCHasNewId"
-            (fun db ->
-                let affected_rows = Database.exec_raw """UPDATE scores SET RulesetId = 'SAE1C74D1' WHERE RulesetId = 'SC(J4)548E5A';""" db |> expect
-                Logging.Info "Migrated %i old SC J4 records to new ruleset ID (but didn't recalculate the ones on rates)" affected_rows
+            (fun _ -> Logging.Info("Original tables to apply ruleset ID change to no longer exists"))
+            db
 
-                let affected_rows = Database.exec_raw """UPDATE leaderboards SET RulesetId = 'SAE1C74D1' WHERE RulesetId = 'SC(J4)548E5A';""" db |> expect
-                Logging.Info "Migrated %i leaderboards to new ruleset ID" affected_rows
+        Database.migrate
+            "LeaderboardAllBackbeatCharts"
+            (fun db ->
+                Database.exec_raw """DROP TABLE IF EXISTS leaderboards;""" db |> expect |> ignore
+                Replay2.CREATE_TABLE.Execute () db |> expect |> ignore
+                Score2.CREATE_TABLE.Execute () db |> expect |> ignore
             )
             db
+        // migrate data
+        // later, if successful drop old table rename new table
 
     open Interlude.Web.Server.Domain.Backbeat
 

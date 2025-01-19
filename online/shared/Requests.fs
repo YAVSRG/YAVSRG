@@ -83,33 +83,16 @@ module Charts =
                     Replay: string
                     Rate: Rate
                     Mods: ModState
-                    Timestamp: System.DateTime
+                    Timestamp: int64
                 }
 
             [<Json.AutoCodec>]
-            type LeaderboardChange =
+            type ScoreResult =
                 {
-                    RulesetId: string
-                    OldRank: int64 option
-                    NewRank: int64
+                    LeaderboardPosition: int option
                 }
 
-            [<Json.AutoCodec>]
-            type TableChange =
-                {
-                    Table: string
-                    OldPosition: (int64 * float) option
-                    NewPosition: (int64 * float)
-                }
-
-            [<Json.AutoCodec>]
-            type ScoreEffect =
-                {
-                    LeaderboardChanges: LeaderboardChange list
-                    TableChanges: TableChange list
-                }
-
-            type Response = ScoreEffect option
+            type Response = ScoreResult option
 
             let post (request: Request, callback: Response option -> unit) =
                 Client.post_return<Request, Response> (snd ROUTE, request, callback)
@@ -117,7 +100,6 @@ module Charts =
         /// requires login token as Authorization header
         /// url parameters:
         ///  chart - hash of chart to get details for
-        ///  ruleset - id of ruleset to get details for
         module Leaderboard =
 
             let ROUTE = (GET, "/charts/scores")
@@ -130,24 +112,23 @@ module Charts =
                     Replay: string
                     Rate: Rate
                     Mods: ModState
-                    Timestamp: System.DateTime
+                    Timestamp: int64
                 }
 
             [<Json.AutoCodec>]
             type Response =
                 {
-                    RulesetId: string
                     Scores: Score array
                 }
 
-            let get (chart: string, ruleset: string, callback: Response option -> unit) =
-                Client.get<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
+            let get (chart: string, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?chart=" + chart, callback)
 
-            let get_async (chart: string, ruleset: string, callback: Response option -> unit) =
-                Client.get_async<Response> (snd ROUTE + "?chart=" + chart + "&ruleset=" + escape ruleset, callback)
-                
+            let get_async (chart: string, callback: Response option -> unit) =
+                Client.get_async<Response> (snd ROUTE + "?chart=" + chart, callback)
+
 module Songs =
-    
+
     open Prelude.Backbeat.Archive
 
     /// url parameters:
@@ -157,11 +138,11 @@ module Songs =
         let ROUTE = (GET, "/songs/search")
 
         [<Json.AutoCodec>]
-        type Result = 
-            { 
+        type Result =
+            {
                 SongId: int64
                 Song: Song
-                //Charts: Map<string, Chart> 
+                //Charts: Map<string, Chart>
             }
 
         [<Json.AutoCodec>]
@@ -169,14 +150,14 @@ module Songs =
 
         let get (query: string, callback: Response option -> unit) =
             Client.get<Response> (snd ROUTE + "?query=" + query, callback)
-    
+
     /// requires login token as Authorization header
     /// url parameters:
     ///  page - page number to fetch
     module Scan =
 
         let ROUTE = (GET, "/songs/scan")
-        
+
         [<Json.AutoCodec>]
         type Result = { SongId: int64; Song: Song }
 
@@ -473,8 +454,9 @@ module Players =
                     Title: string
                     Difficulty: string
                     Score: float
-                    Lamp: string
-                    Mods: string
+                    Lamp: int
+                    Rate: float32<rate>
+                    Mods: ModState
                     Timestamp: int64
                 }
 

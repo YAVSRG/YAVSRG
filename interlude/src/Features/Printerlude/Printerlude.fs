@@ -91,7 +91,7 @@ module Printerlude =
                                         Replay = score.Replay |> Replay.compressed_bytes_to_string
                                         Rate = score.Rate
                                         Mods = score.Mods
-                                        Timestamp = Timestamp.to_datetime score.Timestamp
+                                        Timestamp = score.Timestamp
                                     }
                                     : Charts.Scores.Save.Request),
                                     ignore

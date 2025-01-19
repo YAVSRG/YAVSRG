@@ -11,12 +11,14 @@ open Interlude.Web.Server.Domain.Core
 
 module Backbeat =
 
+    let SC_J4 = SC.create 4
+
     let rulesets = Dictionary<string, Ruleset>()
     do
         let add_ruleset (ruleset: Ruleset) =
             rulesets.[Ruleset.hash ruleset] <- ruleset
 
-        add_ruleset (SC.create 4)
+        add_ruleset SC_J4
         add_ruleset (OsuMania.create 8.0f OsuMania.NoMod)
         add_ruleset (Wife3.create 4)
 
@@ -27,7 +29,7 @@ module Backbeat =
                 Name = "Crescent"
                 Description = "A variety of interesting 4K charts to improve your skills with!"
                 Keymode = 4
-                RulesetId = Score.PRIMARY_RULESET
+                RulesetId = Score2.PRIMARY_RULESET
                 RatingCalculation = TableRatingCalculation.AverageTop50
                 Sections =
                     [
@@ -223,7 +225,7 @@ module Backbeat =
                                 | Ok chart ->
                                     cache.[hash] <- chart
                                     return Some chart
-                                | Error reason -> 
+                                | Error reason ->
                                     Discord.debug_log (sprintf "CDN contains nonsense data for %s: %s" hash reason)
                                     return None
                             else return None

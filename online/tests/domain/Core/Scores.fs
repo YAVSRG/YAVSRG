@@ -23,11 +23,11 @@ module Scores =
         let user_id = User.create ("RecentScoreRoundTrip", 0uL) |> User.save_new
 
         let score =
-            Score.create (user_id, CRESCENT_MOON, SCJ4, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2.create (user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
-        let score_id = Score.save score
+        let score_id = Score2.save score
 
-        let results = Score.get_user_recent user_id
+        let results = Score2.get_user_recent user_id
         Assert.AreEqual(1, results.Length)
         Assert.AreEqual(score_id, results.[0].Id)
         Assert.AreEqual(score.ChartId, results.[0].ChartId)
@@ -40,38 +40,38 @@ module Scores =
 
     [<Test>]
     let Leaderboard_RoundTripWithReplays () =
+        Score2.wipe_leaderboard CRESCENT_MOON |> printfn "Clearing %i scores + replays to set up test"
+
         let user1_id = User.create ("LeaderboardRoundTripWithReplayA", 0uL) |> User.save_new
         let user2_id = User.create ("LeaderboardRoundTripWithReplayB", 0uL) |> User.save_new
 
-        let ruleset = "LeaderboardRoundTripWithReplays"
-
         let replayA =
-            Replay.create (user1_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user1_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let replayA_id = Replay2.save_leaderboard replayA
 
         let scoreA =
-            Score
-                .create(user1_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2
+                .create(user1_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
-        let _ = Score.save scoreA
+        let _ = Score2.save scoreA
 
         let replayB =
-            Replay.create (user2_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user2_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user2_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user2_id, CRESCENT_MOON, TIMEPLAYED, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let _ = Score.save scoreB
+        let _ = Score2.save scoreB
 
-        let results = Score.get_leaderboard CRESCENT_MOON ruleset
+        let results = Score2.get_leaderboard CRESCENT_MOON
 
         Assert.AreEqual(2, results.Length)
 
@@ -95,39 +95,39 @@ module Scores =
 
     [<Test>]
     let Leaderboard_RoundTripMultipleScoresWorstFirst () =
+        Score2.wipe_leaderboard CRESCENT_MOON |> printfn "Clearing %i scores + replays to set up test"
+
         let user_id =
             User.create ("LeaderboardRoundTripMultipleScoresWorstFirst", 0uL)
             |> User.save_new
 
-        let ruleset = "LeaderboardRoundTripMultipleScoresWorstFirst"
-
         let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let replayA_id = Replay2.save_leaderboard replayA
 
         let scoreA =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
-        let _ = Score.save scoreA |> Score.by_id |> printfn "%A"
+        let _ = Score2.save scoreA |> Score2.by_id |> printfn "%A"
 
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let _ = Score.save scoreB |> Score.by_id |> printfn "%A"
+        let _ = Score2.save scoreB |> Score2.by_id |> printfn "%A"
 
-        let results = Score.get_leaderboard CRESCENT_MOON ruleset
+        let results = Score2.get_leaderboard CRESCENT_MOON
 
         printfn "%A" results
 
@@ -144,31 +144,31 @@ module Scores =
 
     [<Test>]
     let Leaderboard_RoundTripMultipleScoresBestFirst () =
+        Score2.wipe_leaderboard CRESCENT_MOON |> printfn "Clearing %i scores + replays to set up test"
+
         let user_id =
             User.create ("LeaderboardRoundTripMultipleScoresBestFirst", 0uL)
             |> User.save_new
 
-        let ruleset = "LeaderboardRoundTripMultipleScoresBestFirst"
-
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let _ = Score.save scoreB
+        let _ = Score2.save scoreB
 
         let scoreA =
-            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2.create (user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
-        let _ = Score.save scoreA
+        let _ = Score2.save scoreA
 
-        let results = Score.get_leaderboard CRESCENT_MOON ruleset
+        let results = Score2.get_leaderboard CRESCENT_MOON
 
         printfn "%A" results
 
@@ -189,35 +189,33 @@ module Scores =
             User.create ("LeaderboardScoreRoundTripMultipleScoresWorstFirst", 0uL)
             |> User.save_new
 
-        let ruleset = "LeaderboardScoreRoundTripMultipleScoresWorstFirst"
-
         let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let replayA_id = Replay2.save_leaderboard replayA
 
         let scoreA =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
-        let _ = Score.save scoreA
+        let _ = Score2.save scoreA
 
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let _ = Score.save scoreB
+        let _ = Score2.save scoreB
 
-        match Score.get_user_leaderboard_score user_id CRESCENT_MOON ruleset with
+        match Score2.get_user_leaderboard_score user_id CRESCENT_MOON with
         | None -> Assert.Fail()
         | Some result ->
             Assert.AreEqual(scoreB.Accuracy, result.Accuracy)
@@ -234,27 +232,25 @@ module Scores =
             User.create ("LeaderboardScoreRoundTripMultipleScoresBestFirst", 0uL)
             |> User.save_new
 
-        let ruleset = "LeaderboardScoreRoundTripMultipleScoresBestFirst"
-
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let _ = Score.save scoreB
+        let _ = Score2.save scoreB
 
         let scoreA =
-            Score.create (user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2.create (user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
 
-        let _ = Score.save scoreA
+        let _ = Score2.save scoreA
 
-        match Score.get_user_leaderboard_score user_id CRESCENT_MOON ruleset with
+        match Score2.get_user_leaderboard_score user_id CRESCENT_MOON with
         | None -> Assert.Fail()
         | Some result ->
             Assert.AreEqual(scoreB.Accuracy, result.Accuracy)
@@ -269,39 +265,36 @@ module Scores =
     let RoundTrips_ById () =
         let user_id = User.create ("RoundTripsById", 0uL) |> User.save_new
 
-        let ruleset = "RoundTripsById"
-
         let replayA =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayA_id = Replay.save_leaderboard ruleset replayA
+        let replayA_id = Replay2.save_leaderboard replayA
 
         let scoreA =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
                 .WithReplay
                 replayA_id
 
-        let scoreA_id = Score.save scoreA
+        let scoreA_id = Score2.save scoreA
 
         let replayB =
-            Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
+            Replay2.create (user_id, CRESCENT_MOON, TIMEPLAYED + 1L, CRESCENT_MOON_REPLAY_DATA)
 
-        let replayB_id = Replay.save_leaderboard ruleset replayB
+        let replayB_id = Replay2.save_leaderboard replayB
 
         let scoreB =
-            Score
-                .create(user_id, CRESCENT_MOON, ruleset, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
+            Score2
+                .create(user_id, CRESCENT_MOON, TIMEPLAYED + 1L, 1.1f<rate>, Map.empty, true, 0.99, 0, 2)
                 .WithReplay
                 replayB_id
 
-        let scoreB_id = Score.save scoreB
+        let scoreB_id = Score2.save scoreB
 
-        match Score.by_id scoreA_id with
+        match Score2.by_id scoreA_id with
         | Some(retrieved_score, None) ->
             Assert.AreEqual(retrieved_score.UserId, scoreA.UserId)
             Assert.AreEqual(retrieved_score.ChartId, scoreA.ChartId)
-            Assert.AreEqual(retrieved_score.RulesetId, scoreA.RulesetId)
             Assert.AreEqual(retrieved_score.TimePlayed, scoreA.TimePlayed)
             Assert.AreEqual(retrieved_score.Rate, scoreA.Rate)
             Assert.AreEqual(retrieved_score.Mods, scoreA.Mods)
@@ -310,11 +303,10 @@ module Scores =
             Assert.AreEqual(retrieved_score.Lamp, scoreA.Lamp)
         | _ -> Assert.Fail()
 
-        match Score.by_id scoreB_id with
+        match Score2.by_id scoreB_id with
         | Some(retrieved_score, Some retrieved_replay) ->
             Assert.AreEqual(retrieved_score.UserId, scoreB.UserId)
             Assert.AreEqual(retrieved_score.ChartId, scoreB.ChartId)
-            Assert.AreEqual(retrieved_score.RulesetId, scoreB.RulesetId)
             Assert.AreEqual(retrieved_score.TimePlayed, scoreB.TimePlayed)
             Assert.AreEqual(retrieved_score.Rate, scoreB.Rate)
             Assert.AreEqual(retrieved_score.Mods, scoreB.Mods)
@@ -332,15 +324,14 @@ module Scores =
         let mutable time = TIMEPLAYED
 
         let save_score_and_replay (chart_id: string) (grade: int) =
-            let replay = Replay.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
-            let replay_id = Replay.save_leaderboard "AggregateGrades" replay
+            let replay = Replay2.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
+            let replay_id = Replay2.save_leaderboard replay
 
             let score =
-                Score
+                Score2
                     .create(
                         user_id,
                         chart_id,
-                        "AggregateGrades",
                         time,
                         1.05f<rate>,
                         Map.empty,
@@ -352,7 +343,7 @@ module Scores =
                     .WithReplay
                     replay_id
 
-            Score.save score |> ignore
+            Score2.save score |> ignore
             time <- time + 1000L
 
         save_score_and_replay "chart1" 1
@@ -366,7 +357,7 @@ module Scores =
         save_score_and_replay "chart3" 5
         save_score_and_replay "chart4" 0
 
-        let results = Score.aggregate_user_ranked_grades user_id "AggregateGrades"
+        let results = Score2.aggregate_user_ranked_grades user_id
         let result_map = Map.ofArray results
         printfn "%A" result_map
 
@@ -382,15 +373,14 @@ module Scores =
         let mutable time = TIMEPLAYED
 
         let save_score_and_replay (chart_id: string) (grade: int) =
-            let replay = Replay.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
-            let replay_id = Replay.save_leaderboard "AggregateScores" replay
+            let replay = Replay2.create (user_id, chart_id, time, CRESCENT_MOON_REPLAY_DATA)
+            let replay_id = Replay2.save_leaderboard replay
 
             let score =
-                Score
+                Score2
                     .create(
                         user_id,
                         chart_id,
-                        "AggregateScores",
                         time,
                         1.05f<rate>,
                         Map.empty,
@@ -402,7 +392,7 @@ module Scores =
                     .WithReplay
                     replay_id
 
-            Score.save score |> ignore
+            Score2.save score |> ignore
             time <- time + 1000L
 
         save_score_and_replay "chart1" 1
@@ -416,7 +406,7 @@ module Scores =
         save_score_and_replay "chart3" 5
         save_score_and_replay "chart4" 0
 
-        let results = Score.aggregate_user_ranked_scores user_id "AggregateScores"
+        let results = Score2.aggregate_user_ranked_scores user_id
         let result_map = Map.ofArray results
         printfn "%A" result_map
 

@@ -66,7 +66,7 @@ module Gameplay =
                             Replay = score_info.Replay |> Replay.compress_string
                             Rate = score_info.Rate
                             Mods = score_info.Mods
-                            Timestamp = score_info.TimePlayed |> Timestamp.to_datetime
+                            Timestamp = score_info.TimePlayed
                         }),
                         ignore
                     )

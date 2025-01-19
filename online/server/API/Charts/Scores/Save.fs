@@ -26,38 +26,9 @@ module Save =
 
             let chart_id = request.ChartId.ToUpper()
 
-            let timestamp =
-                (System.DateTimeOffset.op_Implicit request.Timestamp).ToUnixTimeMilliseconds()
-
-            match! Scores.submit (user_id, chart_id, request.Replay, request.Rate, request.Mods, timestamp) with
-            | Scores.ScoreUploadOutcome.UploadFailed -> raise (BadRequestException None)
-            | Scores.ScoreUploadOutcome.SongNotRecognised -> response.ReplyJson(None: Response)
-            | Scores.ScoreUploadOutcome.Unrated -> response.ReplyJson(None: Response)
-            | Scores.ScoreUploadOutcome.Rated(table_changes, leaderboard_changes) ->
-
-                response.ReplyJson(
-                    Some
-                        {
-                            // todo: these will be quite sick when set up but aren't set up for now
-                            LeaderboardChanges =
-                                leaderboard_changes
-                                |> List.map (fun x ->
-                                    {
-                                        RulesetId = x.RulesetId
-                                        OldRank = x.OldRank
-                                        NewRank = x.NewRank
-                                    }
-                                )
-                            TableChanges =
-                                table_changes
-                                |> List.map (fun x ->
-                                    {
-                                        Table = x.Table
-                                        OldPosition = None
-                                        NewPosition = (0, 0.0)
-                                    }
-                                )
-                        }
-                    : Response
-                )
+            match! Scores.submit (user_id, chart_id, request.Replay, request.Rate, request.Mods, request.Timestamp) with
+            | Scores.ScoreUploadOutcome.Failed -> raise (BadRequestException None)
+            | Scores.ScoreUploadOutcome.Unranked -> response.ReplyJson<Response>(None)
+            | Scores.ScoreUploadOutcome.Ranked(new_position) ->
+                response.ReplyJson<Response>(Some { LeaderboardPosition = new_position })
         }

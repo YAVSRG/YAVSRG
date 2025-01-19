@@ -20,24 +20,13 @@ module Leaderboard =
         ) =
         async {
             require_query_parameter query_params "chart"
-            require_query_parameter query_params "ruleset"
             let _, _ = authorize headers
 
             let chart_id = query_params.["chart"].[0].ToUpper()
-            let ruleset_id = query_params.["ruleset"].[0]
 
-            let ruleset_id =
-                if
-                    ruleset_id <> Score.PRIMARY_RULESET
-                    && not (Leaderboard.exists chart_id ruleset_id)
-                then
-                    Score.PRIMARY_RULESET
-                else
-                    ruleset_id
-
-            if Leaderboard.exists chart_id ruleset_id then
-
-                let info = Scores.get_leaderboard_details chart_id ruleset_id
+            match Backbeat.Charts.by_hash chart_id with
+            | Some _ ->
+                let info = Scores.get_leaderboard_details chart_id
 
                 let scores: Score array =
                     info
@@ -48,18 +37,12 @@ module Leaderboard =
                             Replay = replay.Data |> Convert.ToBase64String
                             Rate = score.Rate
                             Mods = score.Mods
-                            Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(score.TimePlayed).UtcDateTime
+                            Timestamp = score.TimePlayed
                         }
                     )
 
-                response.ReplyJson(
-                    {
-                        Scores = scores
-                        RulesetId = ruleset_id
-                    }
-                    : Response
-                )
+                response.ReplyJson<Response>({ Scores = scores })
 
-            else
+            | None ->
                 response.MakeErrorResponse(404) |> ignore
         }

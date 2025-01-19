@@ -18,7 +18,7 @@ type Setup() =
             RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors -> true)
 
         Client.init "https://localhost/"
-        let http_client = new System.Net.Http.HttpClient()
+        let http_client = new Http.HttpClient()
 
         task {
             let! response = http_client.GetStringAsync("https://localhost/auth/dummy?username=Integration")

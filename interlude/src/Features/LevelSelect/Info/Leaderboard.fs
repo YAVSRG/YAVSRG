@@ -171,7 +171,6 @@ module Leaderboard =
         type Request =
             {
                 Ruleset: Ruleset
-                RulesetId: string
                 ChartMeta: ChartMeta
                 Chart: Chart
             }
@@ -187,7 +186,6 @@ module Leaderboard =
                         let mutable target_state = State.Loading
                         Charts.Scores.Leaderboard.get_async (
                             req.ChartMeta.Hash,
-                            req.RulesetId,
                             function
                             | Some reply ->
                                 if reply.Scores.Length > 0 then
@@ -223,7 +221,7 @@ module Leaderboard =
                                     WithMods = with_mods
 
                                     PlayedBy = ScorePlayedBy.Username score.Username
-                                    TimePlayed = score.Timestamp |> Timestamp.from_datetime
+                                    TimePlayed = score.Timestamp
                                     Rate = score.Rate
 
                                     Replay = replay_data
@@ -253,7 +251,6 @@ module Leaderboard =
                 container.Clear()
                 score_loader.Request
                     {
-                        RulesetId = Content.Rulesets.current_hash
                         Ruleset = Content.Rulesets.current
                         ChartMeta = cc
                         Chart = chart

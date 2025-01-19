@@ -11,28 +11,33 @@ open Interlude.Web.Server.Domain.Services
 
 module Scores =
 
-    type LeaderboardRankChange =
-        {
-            RulesetId: string
-            OldRank: int64 option
-            NewRank: int64
-        }
-
-    type TableRatingChange =
-        {
-            Table: string
-            OldPosition: (int64 * float) option
-            NewPosition: (int64 * float)
-        }
-
     [<RequireQualifiedAccess>]
     type ScoreUploadOutcome =
-        | UploadFailed
-        | SongNotRecognised
-        | Unrated
-        | Rated of TableRatingChange list * LeaderboardRankChange list
+        | Failed
+        | Unranked
+        | Ranked of int option
 
-    let private ACCEPTED_RULESETS = [| Score.PRIMARY_RULESET |]
+    let private new_leaderboard_position (score: Score) : int option =
+        if not score.Ranked then None else
+
+        let existing_lb = Score2.get_leaderboard score.ChartId
+
+        let mutable already_has_score = false
+        let mutable position = -1
+        let mutable i = 0
+
+        while i < existing_lb.Length do
+            if score.Accuracy > existing_lb.[i].Accuracy then
+                position <- i
+                i <- existing_lb.Length
+            elif existing_lb.[i].UserId = score.UserId then
+                already_has_score <- true
+                i <- existing_lb.Length
+            i <- i + 1
+
+        if position < Score2.LEADERBOARD_SIZE && not already_has_score then
+            Some position
+        else None
 
     let submit
         (
@@ -46,91 +51,72 @@ module Scores =
         async {
 
             if rate < 0.5f<rate> || rate > 2.0f<rate> then
-                return ScoreUploadOutcome.UploadFailed
+                return ScoreUploadOutcome.Failed
             else
 
             match Mods.check mods with
             | Error message ->
                 Logging.Error "Mod validation failed from user #%i: %s" user_id message
-                return ScoreUploadOutcome.UploadFailed
-            | Ok ModStatus.Unstored -> return ScoreUploadOutcome.UploadFailed
+                return ScoreUploadOutcome.Failed
+            | Ok ModStatus.Unstored -> return ScoreUploadOutcome.Failed
             | Ok mod_ranked_status ->
 
             match! Backbeat.Charts.fetch.RequestAsync(chart_id) with
-            | None -> return ScoreUploadOutcome.SongNotRecognised
+            | None -> return ScoreUploadOutcome.Unranked
             | Some chart ->
 
             match Replay.decompress_string_untrusted (chart.LastNote - chart.FirstNote) replay_untrusted_string with
             | Error message ->
                 Logging.Error "Replay decompression failed from user #%i: %s" user_id message
-                return ScoreUploadOutcome.UploadFailed
+                return ScoreUploadOutcome.Failed
             | Ok replay ->
 
             let is_ranked = rate >= 1.0f<rate> && mod_ranked_status = ModStatus.Ranked
 
             let mod_chart = Mods.apply mods chart
 
-            if not is_ranked then
-                return ScoreUploadOutcome.Unrated
+            let ruleset = Backbeat.rulesets.[Score2.PRIMARY_RULESET]
+
+            let scoring =
+                ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
+
+            let accuracy = scoring.Accuracy
+
+            if accuracy >= 0.7 then
+                let score: Score =
+                    Score2.create (
+                        user_id,
+                        chart_id,
+                        timestamp,
+                        rate,
+                        mods,
+                        is_ranked,
+                        accuracy,
+                        Grade.calculate ruleset.Grades scoring.Accuracy,
+                        Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
+                    )
+
+                match new_leaderboard_position score with
+                | Some p ->
+                    let replay_id =
+                        (user_id, chart_id, timestamp, replay)
+                        |> Replay2.create
+                        |> Replay2.save_leaderboard
+
+                    let score_id = Score2.save (score.WithReplay replay_id)
+                    Logging.Debug "Saved score %i with replay %i" score_id replay_id
+                    return ScoreUploadOutcome.Ranked (Some (p + 1))
+                | None ->
+                    Score2.save score |> Logging.Debug "Saved score %i"
+                    return ScoreUploadOutcome.Ranked None
+
             else
 
-            let mutable leaderboard_changes: LeaderboardRankChange list = []
-            let mutable table_changes: TableRatingChange list = []
-
-            // todo: get relevant rulesets for this chart (i.e. tables ft this chart with different rulesets + SCJ4)
-            for ruleset_id in ACCEPTED_RULESETS do
-                let ruleset = Backbeat.rulesets.[ruleset_id]
-
-                let scoring =
-                    ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
-
-                let accuracy = scoring.Accuracy
-
-                if accuracy < 0.7 then
-                    ()
-                else
-
-                    let score: Score =
-                        Score.create (
-                            user_id,
-                            chart_id,
-                            ruleset_id,
-                            timestamp,
-                            rate,
-                            mods,
-                            is_ranked,
-                            accuracy,
-                            Grade.calculate ruleset.Grades scoring.Accuracy,
-                            Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
-                        )
-
-                    let is_new_leaderboard_score =
-                        if is_ranked && Leaderboard.exists chart_id ruleset_id then
-                            match Score.get_user_leaderboard_score user_id chart_id ruleset_id with
-                            | Some score_model -> score_model.Accuracy < accuracy
-                            | None -> true
-                        else
-                            false
-
-                    let score =
-                        if is_new_leaderboard_score then
-                            let replay_id =
-                                Replay.create (user_id, chart_id, timestamp, replay)
-                                |> Replay.save_leaderboard ruleset_id
-
-                            score.WithReplay replay_id
-                        else
-                            score
-
-                    Score.save score |> ignore
-
-            Tables.recalculate_affected_table_ratings (user_id, chart_id) // todo: return what ratings changed
-
-            return ScoreUploadOutcome.Rated(table_changes, leaderboard_changes)
+                return ScoreUploadOutcome.Unranked
         }
 
-    let get_leaderboard_details (chart_id: string) (ruleset_id: string) =
-        let leaderboard_scores = Score.get_leaderboard chart_id ruleset_id
+    let get_leaderboard_details (chart_id: string) =
+        let leaderboard_scores = Score2.get_leaderboard chart_id
 
         let users =
             leaderboard_scores
@@ -141,7 +127,7 @@ module Scores =
         let replays =
             leaderboard_scores
             |> Array.choose (fun x -> x.ReplayId)
-            |> Replay.by_ids
+            |> Replay2.by_ids
             |> Map.ofArray
 
         leaderboard_scores
