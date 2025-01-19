@@ -15,8 +15,8 @@ module Migrations =
             (fun db ->
                 Database.create_table User.TABLE db |> expect |> ignore
                 Friends.CREATE_TABLE.Execute () db |> expect |> ignore
-                ScoreV1.CREATE_TABLE.Execute () db |> expect |> ignore
-                ReplayV1.CREATE_TABLE.Execute () db |> expect |> ignore
+                Score.CREATE_TABLE_OLD.Execute () db |> expect |> ignore
+                Replay.CREATE_TABLE_OLD.Execute () db |> expect |> ignore
                 Logging.Info("Migration created initial tables")
             )
             db
@@ -43,12 +43,23 @@ module Migrations =
             "LeaderboardAllBackbeatCharts"
             (fun db ->
                 Database.exec_raw """DROP TABLE IF EXISTS leaderboards;""" db |> expect |> ignore
-                Replay2.CREATE_TABLE.Execute () db |> expect |> ignore
-                Score2.CREATE_TABLE.Execute () db |> expect |> ignore
+                Replay.CREATE_TABLE.Execute () db |> expect |> ignore
+                Score.CREATE_TABLE.Execute () db |> expect |> ignore
             )
             db
-        // migrate data
-        // later, if successful drop old table rename new table
+
+        Database.migrate
+            "MigrateLeaderboardData"
+            (fun db -> Score.MIGRATE_OLD_TO_NEW.Execute () db |> expect |> ignore)
+            db
+
+        Database.migrate
+            "ClearOldScoreTables"
+            (fun db ->
+                Database.exec_raw """DROP TABLE IF EXISTS scores;""" db |> expect |> ignore
+                Database.exec_raw """DROP TABLE IF EXISTS replays;""" db |> expect |> ignore
+            )
+            db
 
     open Interlude.Web.Server.Domain.Backbeat
 

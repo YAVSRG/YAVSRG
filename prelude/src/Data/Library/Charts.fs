@@ -14,6 +14,7 @@ module DbCharts =
     // Increment this to recalculate pattern & rating data
     let private CALC_VERSION = 4uy
 
+    // todo: create binary representation of Patterns data for much faster reading/writing and storage efficiency
     let internal CREATE_TABLE: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =

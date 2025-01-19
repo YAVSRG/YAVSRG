@@ -20,7 +20,7 @@ module Scores =
     let private new_leaderboard_position (score: Score) : int option =
         if not score.Ranked then None else
 
-        let existing_lb = Score2.get_leaderboard score.ChartId
+        let existing_lb = Score.get_leaderboard score.ChartId
 
         let mutable already_has_score = false
         let mutable position = -1
@@ -35,7 +35,7 @@ module Scores =
                 i <- existing_lb.Length
             i <- i + 1
 
-        if position < Score2.LEADERBOARD_SIZE && not already_has_score then
+        if position < Score.LEADERBOARD_SIZE && not already_has_score then
             Some position
         else None
 
@@ -75,7 +75,7 @@ module Scores =
 
             let mod_chart = Mods.apply mods chart
 
-            let ruleset = Backbeat.rulesets.[Score2.PRIMARY_RULESET]
+            let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
 
             let scoring =
                 ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
@@ -84,7 +84,7 @@ module Scores =
 
             if accuracy >= 0.7 then
                 let score: Score =
-                    Score2.create (
+                    Score.create (
                         user_id,
                         chart_id,
                         timestamp,
@@ -100,14 +100,14 @@ module Scores =
                 | Some p ->
                     let replay_id =
                         (user_id, chart_id, timestamp, replay)
-                        |> Replay2.create
-                        |> Replay2.save_leaderboard
+                        |> Replay.create
+                        |> Replay.save_leaderboard
 
-                    let score_id = Score2.save (score.WithReplay replay_id)
+                    let score_id = Score.save (score.WithReplay replay_id)
                     Logging.Debug "Saved score %i with replay %i" score_id replay_id
                     return ScoreUploadOutcome.Ranked (Some (p + 1))
                 | None ->
-                    Score2.save score |> Logging.Debug "Saved score %i"
+                    Score.save score |> Logging.Debug "Saved score %i"
                     return ScoreUploadOutcome.Ranked None
 
             else
@@ -116,7 +116,7 @@ module Scores =
         }
 
     let get_leaderboard_details (chart_id: string) =
-        let leaderboard_scores = Score2.get_leaderboard chart_id
+        let leaderboard_scores = Score.get_leaderboard chart_id
 
         let users =
             leaderboard_scores
@@ -127,7 +127,7 @@ module Scores =
         let replays =
             leaderboard_scores
             |> Array.choose (fun x -> x.ReplayId)
-            |> Replay2.by_ids
+            |> Replay.by_ids
             |> Map.ofArray
 
         leaderboard_scores

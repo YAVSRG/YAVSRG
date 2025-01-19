@@ -29,7 +29,7 @@ module Backbeat =
                 Name = "Crescent"
                 Description = "A variety of interesting 4K charts to improve your skills with!"
                 Keymode = 4
-                RulesetId = Score2.PRIMARY_RULESET
+                RulesetId = Score.PRIMARY_RULESET
                 RatingCalculation = TableRatingCalculation.AverageTop50
                 Sections =
                     [

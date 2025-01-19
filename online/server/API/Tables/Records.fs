@@ -37,7 +37,7 @@ module Records =
 
             // todo: aggregate grades and scores together
             let scores =
-                Score2.aggregate_user_ranked_scores target_user_id |> Map.ofArray
+                Score.aggregate_user_ranked_scores target_user_id |> Map.ofArray
 
             let charts = TableLevel.get_all table_id |> Array.map fst
             let ruleset = Backbeat.rulesets.[table.RulesetId]

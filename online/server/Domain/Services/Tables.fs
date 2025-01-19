@@ -14,7 +14,7 @@ module Tables =
         | _ ->
 
         let user_grades =
-            Score2.aggregate_user_ranked_grades user_id |> Map.ofSeq
+            Score.aggregate_user_ranked_grades user_id |> Map.ofSeq
 
         // todo: this implements AverageTop50 but should be a switch to future proof other calculation types
         let new_rating =

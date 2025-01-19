@@ -147,13 +147,13 @@ module UserCommands =
                             else
                                 "Just now"
 
-                        let format_mods (score: Score2.RecentScore) =
+                        let format_mods (score: Score.RecentScore) =
                             if score.Mods.IsEmpty then
                                 sprintf "%.2fx" score.Rate
                             else
                                 sprintf "%.2fx*" score.Rate
 
-                        let recent_scores = Score2.get_user_recent user_id
+                        let recent_scores = Score.get_user_recent user_id
 
                         let embed =
                             let color = user_info.Color |> Drawing.Color.FromArgb |> Color.op_Explicit
@@ -183,7 +183,7 @@ module UserCommands =
                                     EmbedFieldBuilder(Name = "..", IsInline = true)
                                         .WithValue(
                                             recent_scores
-                                            |> Array.map (fun (s: Score2.RecentScore) ->
+                                            |> Array.map (fun (s: Score.RecentScore) ->
                                                 sprintf
                                                     "`%6.2f%%` `%6s` `%6s` `%8s`"
                                                     (s.Accuracy * 100.0)

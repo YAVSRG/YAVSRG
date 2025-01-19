@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
-open Prelude
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server
 
@@ -15,9 +14,9 @@ type Replay =
         Data: byte array
     }
 
-module ReplayV1 =
+module Replay =
 
-    let internal CREATE_TABLE: NonQuery<unit> =
+    let internal CREATE_TABLE_OLD: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =
                 """
@@ -26,6 +25,24 @@ module ReplayV1 =
                 UserId INTEGER NOT NULL,
                 ChartId TEXT NOT NULL,
                 Purposes TEXT NOT NULL,
+                TimePlayed INTEGER NOT NULL,
+                TimeUploaded INTEGER NOT NULL,
+                Data BLOB NOT NULL,
+                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
+                UNIQUE (UserId, ChartId, TimePlayed)
+            );
+            """
+        }
+
+    let internal CREATE_TABLE: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL =
+                """
+            CREATE TABLE replays2 (
+                Id INTEGER PRIMARY KEY NOT NULL,
+                UserId INTEGER NOT NULL,
+                ChartId TEXT NOT NULL,
+                Persistent INTEGER NOT NULL,
                 TimePlayed INTEGER NOT NULL,
                 TimeUploaded INTEGER NOT NULL,
                 Data BLOB NOT NULL,
@@ -46,85 +63,43 @@ module ReplayV1 =
 
     let private REPLAY_LOCK_OBJ = obj ()
 
-    let private GET_LEADERBOARD
-        : Query<{|
-              UserId: int64
-              ChartId: string
-              RulesetId: string
-          |}, {|
-              Id: int64
-              Purposes: Set<string>
-              TimePlayed: int64
-          |}> =
+    let private GET_EXISTING_LEADERBOARD_REPLAY
+        : Query<int64 * string, int64 * int64> =
         {
             SQL =
                 """
-                SELECT Id, Purposes, TimePlayed FROM replays
+                SELECT Id, TimePlayed FROM replays2
                 WHERE UserId = @UserId
                 AND ChartId = @ChartId
-                AND Purposes LIKE @Pattern ESCAPE '\';
+                AND Persistent = 0;
             """
             Parameters =
                 [
                     "@UserId", SqliteType.Integer, 8
                     "@ChartId", SqliteType.Text, -1
-                    "@Pattern", SqliteType.Text, -1
                 ]
             FillParameters =
-                (fun p req ->
-                    p.Int64 req.UserId
-                    p.String req.ChartId
-                    p.String("%" + req.RulesetId.Replace("_", "\\_").Replace("%", "\\%") + "%")
+                (fun p (user_id, chart_id) ->
+                    p.Int64 user_id
+                    p.String chart_id
                 )
-            Read =
-                (fun r ->
-                    {|
-                        Id = r.Int64
-                        Purposes = r.Json JSON
-                        TimePlayed = r.Int64
-                    |}
-                )
-        }
-
-    let private UPDATE_PURPOSES: NonQuery<int64 * Set<string>> =
-        {
-            SQL =
-                """
-                UPDATE replays
-                SET Purposes = @Purposes
-                WHERE Id = @Id;
-            """
-            Parameters = [ "@Id", SqliteType.Integer, 8; "@Purposes", SqliteType.Text, -1 ]
-            FillParameters =
-                (fun p (id, purposes) ->
-                    p.Int64 id
-                    p.Json JSON purposes
-                )
+            Read = fun r -> r.Int64, r.Int64
         }
 
     let private DELETE_BY_ID: NonQuery<int64> =
         {
-            SQL = "DELETE FROM replays WHERE Id = @Id;"
+            SQL = "DELETE FROM replays2 WHERE Id = @Id;"
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
             FillParameters = fun p id -> p.Int64 id
         }
 
-    let private SAVE_LEADERBOARD: Query<string * Replay, int64> =
+    let private SAVE_LEADERBOARD: Query<Replay, int64> =
         {
             SQL =
                 """
-            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Data)
-            VALUES (@UserId, @ChartId, @PurposeSingleton, @TimePlayed, @TimeUploaded, @Data)
-            ON CONFLICT DO UPDATE SET
-                TimeUploaded = excluded.TimeUploaded,
-                Purposes = (
-                    SELECT json_group_array(value) FROM (
-                        SELECT json_each.value
-                        FROM replays, json_each(replays.Purposes)
-                        WHERE replays.Id = excluded.Id
-                        UNION ALL SELECT @Purpose
-                    ) GROUP BY ''
-                )
+            INSERT INTO replays2 (UserId, ChartId, Persistent, TimePlayed, TimeUploaded, Data)
+            VALUES (@UserId, @ChartId, 0, @TimePlayed, @TimeUploaded, @Data)
+            ON CONFLICT DO UPDATE SET TimeUploaded = excluded.TimeUploaded
             RETURNING Id;
             """
             Parameters =
@@ -134,57 +109,41 @@ module ReplayV1 =
                     "@TimePlayed", SqliteType.Integer, 8
                     "@TimeUploaded", SqliteType.Integer, 8
                     "@Data", SqliteType.Blob, -1
-                    "@PurposeSingleton", SqliteType.Text, -1
-                    "@Purpose", SqliteType.Text, -1
                 ]
             FillParameters =
-                (fun p (ruleset, replay) ->
+                (fun p (replay) ->
                     p.Int64 replay.UserId
                     p.String replay.ChartId
                     p.Int64 replay.TimePlayed
                     p.Int64 replay.TimeUploaded
                     p.Blob replay.Data
-                    p.Json JSON [ ruleset ]
-                    p.String ruleset
                 )
             Read = fun r -> r.Int64
         }
-    // Only the most best replay per-chart is stored, overwriting any previous replay for that chart
-    let save_leaderboard (ruleset_id: string) (replay: Replay) =
+
+    // An existing replay not marked persistent will be replaced with this one, so that only 1 replay is stored per player per leaderboard
+    // Replays marked as 'Persistent' will persist
+    let save_leaderboard (replay: Replay) =
         lock (REPLAY_LOCK_OBJ)
         <| fun () ->
             match
-                GET_LEADERBOARD.Execute
-                    {|
-                        ChartId = replay.ChartId
-                        RulesetId = ruleset_id
-                        UserId = replay.UserId
-                    |}
-                    core_db
+                GET_EXISTING_LEADERBOARD_REPLAY.Execute (replay.UserId, replay.ChartId) core_db
                 |> expect
                 |> Array.tryExactlyOne
             with
-            | Some existing ->
-                // If exact replay already exists in DB
-                if existing.TimePlayed = replay.TimePlayed then
-                    existing.Id
+            | Some (existing_id, existing_timestamp) ->
+
+                if existing_timestamp = replay.TimePlayed then
+                    // If exact replay already exists in DB just return that ID (should not happen)
+                    existing_id
                 else
-
-                    // If a score for this chart, this ruleset, already exists, with only this purpose, delete it
-                    if existing.Purposes.Count = 1 then
-                        DELETE_BY_ID.Execute existing.Id core_db |> expect |> ignore
-                    // Otherwise remove that purpose and keep it
-                    else
-                        UPDATE_PURPOSES.Execute (existing.Id, Set.remove ruleset_id existing.Purposes) core_db
-                        |> expect
-                        |> ignore
-
-                    SAVE_LEADERBOARD.Execute (ruleset_id, replay) core_db
+                    DELETE_BY_ID.Execute existing_id core_db |> expect |> ignore
+                    SAVE_LEADERBOARD.Execute replay core_db
                     |> expect
                     |> Array.exactlyOne
 
             | None ->
-                SAVE_LEADERBOARD.Execute (ruleset_id, replay) core_db
+                SAVE_LEADERBOARD.Execute replay core_db
                 |> expect
                 |> Array.exactlyOne
 
@@ -192,18 +151,11 @@ module ReplayV1 =
         {
             SQL =
                 """
-            INSERT INTO replays (UserId, ChartId, Purposes, TimePlayed, TimeUploaded, Data)
-            VALUES (@UserId, @ChartId, '["challenge"]', @TimePlayed, @TimeUploaded, @Data)
+            INSERT INTO replays2 (UserId, ChartId, Persistent, TimePlayed, TimeUploaded, Data)
+            VALUES (@UserId, @ChartId, 1, @TimePlayed, @TimeUploaded, @Data)
             ON CONFLICT DO UPDATE SET
                 TimeUploaded = excluded.TimeUploaded,
-                Purposes = (
-                    SELECT json_group_array(value) FROM (
-                        SELECT json_each.value
-                        FROM replays, json_each(replays.Purposes)
-                        WHERE replays.Id = excluded.Id
-                        UNION ALL SELECT 'challenge'
-                    ) GROUP BY ''
-                )
+                Persistent = 1
             RETURNING Id;
             """
             Parameters =
@@ -224,8 +176,9 @@ module ReplayV1 =
                 )
             Read = fun r -> r.Int64
         }
+
     // Replay is stored long term for sharing with friends
-    let save_challenge (replay: Replay) =
+    let save_persistent (replay: Replay) =
         lock (REPLAY_LOCK_OBJ)
         <| fun () -> SAVE_CHALLENGE.Execute replay core_db |> expect |> Array.exactlyOne
 
@@ -233,7 +186,7 @@ module ReplayV1 =
         {
             SQL =
                 """
-            SELECT UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays
+            SELECT UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays2
             WHERE Id = @Id;
             """
             Parameters = [ "@Id", SqliteType.Integer, 8 ]
@@ -264,7 +217,7 @@ module ReplayV1 =
             { Query.without_parameters () with
                 SQL =
                     sprintf
-                        "SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays WHERE Id IN (%s)"
+                        "SELECT Id, UserId, ChartId, TimePlayed, TimeUploaded, Data FROM replays2 WHERE Id IN (%s)"
                         ids_string
                 Read =
                     (fun r ->
