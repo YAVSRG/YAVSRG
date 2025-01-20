@@ -50,7 +50,7 @@ module Migrations =
 
         Database.migrate
             "MigrateLeaderboardData"
-            (fun db -> Score.MIGRATE_OLD_TO_NEW.Execute () db |> expect |> ignore)
+            (fun db -> Score.MIGRATE_OLD_TO_NEW.Execute () db |> expect |> Logging.Debug "Migrated %i scores + replays in prep of leaderboards")
             db
 
         Database.migrate
@@ -58,6 +58,13 @@ module Migrations =
             (fun db ->
                 Database.exec_raw """DROP TABLE IF EXISTS scores;""" db |> expect |> ignore
                 Database.exec_raw """DROP TABLE IF EXISTS replays;""" db |> expect |> ignore
+            )
+            db
+
+        Database.migrate
+            "UnrankPreLeaderboardScores"
+            (fun db ->
+                Database.exec_raw """UPDATE scores2 SET Ranked = 0 WHERE ReplayId IS NULL;""" db |> expect |> Logging.Debug "Unranked %i scores in prep of leaderboards"
             )
             db
 
