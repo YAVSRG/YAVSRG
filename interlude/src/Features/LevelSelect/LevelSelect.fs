@@ -111,7 +111,7 @@ type LevelSelectScreen() =
             .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart"))
             .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
-            (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.CacheInfo, info.LibraryContext).Show())),
+            (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
             K Icons.LIST,
             !%Palette.DARK.O2,
             Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-445.0f)

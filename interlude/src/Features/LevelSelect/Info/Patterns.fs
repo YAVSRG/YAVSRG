@@ -107,5 +107,5 @@ type Patterns(display: Setting<Display>) =
             b <- b.Translate(0.0f, 60.0f)
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
-        patterns <- info.CacheInfo.Patterns.Clusters |> Array.truncate 6
-        category <- info.CacheInfo.Patterns.Category
+        patterns <- info.ChartMeta.Patterns.Clusters |> Array.truncate 6
+        category <- info.ChartMeta.Patterns.Category

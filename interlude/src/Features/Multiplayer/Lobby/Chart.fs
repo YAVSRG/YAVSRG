@@ -43,7 +43,7 @@ module LobbyChart =
     let info_if_selected() : LoadedChartInfo option =
         match last_seen_loaded_chart, last_seen_lobby_chart with
         | Some real_chart, Some expected_chart ->
-            if real_chart.CacheInfo.Hash = expected_chart.Hash then
+            if real_chart.ChartMeta.Hash = expected_chart.Hash then
                 Some real_chart
             else None
         | _ -> None
@@ -153,7 +153,7 @@ type SelectedChart(lobby: Lobby) =
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
-                | Some info -> info.CacheInfo.DifficultyName
+                | Some info -> info.ChartMeta.DifficultyName
                 | None -> "???"
             ),
             Color = K Colors.text_subheading,

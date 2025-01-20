@@ -19,13 +19,13 @@ open Interlude.UI
 
 type LoadingChartInfo =
     {
-        CacheInfo: ChartMeta
+        ChartMeta: ChartMeta
         LibraryContext: LibraryContext
     }
 
 type LoadedChartInfo =
     {
-        CacheInfo: ChartMeta
+        ChartMeta: ChartMeta
         LibraryContext: LibraryContext
         DurationString: string
         BpmString: string
@@ -98,7 +98,7 @@ module SelectedChart =
 
     let private create_loaded_chart_info () =
         {
-            CacheInfo = CACHE_DATA.Value
+            ChartMeta = CACHE_DATA.Value
             LibraryContext = LIBRARY_CTX
             DurationString = FMT_DURATION
             BpmString = FMT_BPM
@@ -288,7 +288,7 @@ module SelectedChart =
 
         chart_change_started.Trigger
             {
-                CacheInfo = cc
+                ChartMeta = cc
                 LibraryContext = LIBRARY_CTX
             }
 
@@ -327,7 +327,7 @@ module SelectedChart =
         if CACHE_DATA.IsSome then
             action
                 {
-                    CacheInfo = CACHE_DATA.Value
+                    ChartMeta = CACHE_DATA.Value
                     LibraryContext = LIBRARY_CTX
                 }
 
@@ -431,7 +431,7 @@ module SelectedChart =
                 Background.load None
 
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
-        on_chart_change_started.Add(fun info -> presets_on_chart_changed info.CacheInfo)
+        on_chart_change_started.Add(fun info -> presets_on_chart_changed info.ChartMeta)
 
         Song.on_loaded.Add(fun () ->
             for action in on_song_load_succeeded do action()

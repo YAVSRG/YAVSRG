@@ -164,6 +164,7 @@ module Leaderboard =
             elif this.Focused && (%%"context_menu").Tapped() then
                 ScoreContextMenu(score_info).Show()
 
+    // todo: refactor to similar system as local scores
     module Loader =
 
         let state = Setting.simple State.NoLeaderboard
@@ -273,10 +274,15 @@ type Leaderboard(display: Setting<Display>) =
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add(fun info ->
-            if info.CacheInfo.Hash <> last_loading then
+            if info.ChartMeta.Hash <> last_loading then
                 Loader.container.Iter(fun s -> s.FadeOut())
-                last_loading <- info.CacheInfo.Hash
+                last_loading <- info.ChartMeta.Hash
                 last_loaded <- ""
+        )
+        Gameplay.leaderboard_rank_changed.Add(fun score_info ->
+            last_loaded <- score_info.ChartMeta.Hash
+            scoring <- Content.Rulesets.current_hash
+            Loader.load score_info.ChartMeta score_info.Chart
         )
 
         this
@@ -362,9 +368,9 @@ type Leaderboard(display: Setting<Display>) =
         Loader.score_loader.Join()
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
-        if info.CacheInfo.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
-            last_loaded <- info.CacheInfo.Hash
+        if info.ChartMeta.Hash <> last_loaded || scoring <> Content.Rulesets.current_hash then
+            last_loaded <- info.ChartMeta.Hash
             scoring <- Content.Rulesets.current_hash
-            Loader.load info.CacheInfo info.Chart
+            Loader.load info.ChartMeta info.Chart
 
     member this.Refresh() = SelectedChart.when_loaded false this.OnChartUpdated

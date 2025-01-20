@@ -104,7 +104,7 @@ module Tree =
     do
         LevelSelect.on_refresh_all.Add refresh
         LevelSelect.on_refresh_details.Add(fun () -> cache_flag <- cache_flag + 1)
-        SelectedChart.on_chart_change_started.Add(fun info -> if info.CacheInfo.Hash <> selected_chart then find_selected_chart_in_tree())
+        SelectedChart.on_chart_change_started.Add(fun info -> if info.ChartMeta.Hash <> selected_chart then find_selected_chart_in_tree())
 
     let previous () =
         match last_item with

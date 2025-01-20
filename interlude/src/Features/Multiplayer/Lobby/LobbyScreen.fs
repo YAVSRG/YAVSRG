@@ -170,7 +170,7 @@ type LobbyUI(lobby: Lobby) =
                             let replay_data = (replay :> IReplayProvider).GetFullReplay()
 
                             {
-                                ChartMeta = info.CacheInfo
+                                ChartMeta = info.ChartMeta
                                 Chart = info.Chart
                                 WithMods = info.WithMods
 

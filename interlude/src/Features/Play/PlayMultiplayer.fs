@@ -53,7 +53,7 @@ module PlayScreenMultiplayer =
                     let replay_data = (liveplay :> IReplayProvider).GetFullReplay()
 
                     {
-                        ChartMeta = info.CacheInfo
+                        ChartMeta = info.ChartMeta
                         Chart = info.Chart
                         WithMods = info.WithMods
 
@@ -177,8 +177,8 @@ module PlayScreenMultiplayer =
 
                 DiscordRPC.playing_timed (
                     "Multiplayer",
-                    info.CacheInfo.Title,
-                    info.CacheInfo.Length / SelectedChart.rate.Value
+                    info.ChartMeta.Title,
+                    info.ChartMeta.Length / SelectedChart.rate.Value
                 )
 
             override this.OnExit(next) =

@@ -39,8 +39,8 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
         let text_color = (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha)
         let text_subheading_color = (Colors.grey_1.O4a alpha, Colors.shadow_2.O4a alpha)
 
-        Text.fill_b(Style.font, info.CacheInfo.Title, song_title, text_color, Alignment.CENTER)
-        Text.fill_b(Style.font, info.CacheInfo.Artist + "  •  " + info.CacheInfo.Creator, song_title.TranslateY(70.0f).SliceT(40.0f), text_subheading_color, Alignment.CENTER)
+        Text.fill_b(Style.font, info.ChartMeta.Title, song_title, text_color, Alignment.CENTER)
+        Text.fill_b(Style.font, info.ChartMeta.Artist + "  •  " + info.ChartMeta.Creator, song_title.TranslateY(70.0f).SliceT(40.0f), text_subheading_color, Alignment.CENTER)
         Text.fill_b(Style.font, mod_string, song_title.TranslateY(70.0f).SliceB(40.0f), text_subheading_color, Alignment.CENTER)
         Text.fill_b(Style.font, pacemaker_desc, song_title.TranslateY(170.0f).SliceT(60.0f), (Colors.yellow_accent.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 

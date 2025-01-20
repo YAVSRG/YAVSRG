@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Gameplay
 
 open Percyqaz.Common
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Mods
@@ -25,6 +26,9 @@ module Gameplay =
     let private score_deleted_ev = Event<int64>()
     let score_deleted = score_deleted_ev.Publish
 
+    let private leaderboard_rank_changed_ev = Event<ScoreInfo>()
+    let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
+
     let score_info_from_gameplay
         (info: LoadedChartInfo)
         (scoring: ScoreProcessor)
@@ -32,7 +36,7 @@ module Gameplay =
         (failed: bool)
         : ScoreInfo =
         {
-            ChartMeta = info.CacheInfo
+            ChartMeta = info.ChartMeta
             Chart = info.Chart
             WithMods = info.WithMods
 
@@ -59,7 +63,13 @@ module Gameplay =
             mod_status < ModStatus.Unstored
         then
             if mod_status = ModStatus.Ranked then
-                if Network.status = Network.Status.LoggedIn then
+
+                let standardised_score =
+                    if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
+                        score_info.WithRuleset Rulesets.DEFAULT
+                    else score_info
+
+                if Network.status = Network.Status.LoggedIn && not score_info.IsFailed then
                     Charts.Scores.Save.post (
                         ({
                             ChartId = score_info.ChartMeta.Hash
@@ -68,13 +78,19 @@ module Gameplay =
                             Mods = score_info.Mods
                             Timestamp = score_info.TimePlayed
                         }),
-                        ignore
+                        (function
+                         | None -> Logging.Error "Error submitting score (%s on %s)" (score_info.Ruleset.FormatAccuracy standardised_score.Accuracy) score_info.ChartMeta.Title
+                         | Some None -> ()
+                         | Some (Some leaderboard_result) ->
+                            match leaderboard_result.LeaderboardPosition with
+                            | Some new_position ->
+                                Logging.Info "New leaderboard rank! (%s on %s) is #%i"
+                                    (score_info.Ruleset.FormatAccuracy standardised_score.Accuracy) score_info.ChartMeta.Title
+                                    new_position
+                                GameThread.defer (fun () -> leaderboard_rank_changed_ev.Trigger score_info)
+                            | None -> ()
+                        )
                     )
-
-                let standardised_score =
-                    if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
-                        score_info.WithRuleset Rulesets.DEFAULT
-                    else score_info
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with

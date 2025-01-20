@@ -18,8 +18,8 @@ type PersonalBests() =
 
     let refresh(info: LoadedChartInfo) =
         save_data <- Some info.SaveData
-        category <- info.CacheInfo.Patterns.Category
-        specific_patterns <- info.CacheInfo.Patterns.ImportantClusters |> Seq.truncate 2 |> Seq.map (fun c -> c.Format SelectedChart.rate.Value) |> String.concat ", "
+        category <- info.ChartMeta.Patterns.Category
+        specific_patterns <- info.ChartMeta.Patterns.ImportantClusters |> Seq.truncate 2 |> Seq.map (fun c -> c.Format SelectedChart.rate.Value) |> String.concat ", "
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_finished.Add refresh

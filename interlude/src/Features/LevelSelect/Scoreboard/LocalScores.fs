@@ -82,7 +82,7 @@ module LocalScores =
                 {
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
-                    ChartMeta = info.CacheInfo
+                    ChartMeta = info.ChartMeta
                     CurrentChart = info.Chart
                     ChartSaveData = info.SaveData
                 }

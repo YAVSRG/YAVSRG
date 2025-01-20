@@ -210,7 +210,7 @@ module LevelSelect =
             match Network.lobby with
             | Some lobby ->
                 if Screen.change Screen.Type.Lobby Transitions.Default then
-                    lobby.SelectChart (info.CacheInfo, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                    lobby.SelectChart (info.ChartMeta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None ->
                 if SelectedChart.autoplay then
                     Screen.change_new

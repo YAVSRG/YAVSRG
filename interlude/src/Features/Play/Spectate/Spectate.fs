@@ -79,7 +79,7 @@ module Spectate =
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                DiscordRPC.playing ("Spectating", info.CacheInfo.Title)
+                DiscordRPC.playing ("Spectating", info.ChartMeta.Title)
                 Song.pause ()
 
             override this.OnExit(next) =
