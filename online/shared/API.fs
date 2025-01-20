@@ -65,7 +65,7 @@ module API =
                     |> Async.RunSynchronously
                 | _ -> this.Response.MakeErrorResponse(404, "Not found") |> ignore
 
-                Logging.Info "%s responded %i in %.0fms" uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
+                Logging.Info "%s %s responded %i in %.0fms" request.Method uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
 
                 this.SendResponseAsync this.Response |> ignore
             with e ->
