@@ -290,8 +290,8 @@ module Chart =
         let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)
 
-    let pretty_print (chart: Chart) =
-        chart.Notes
+    let pretty_print (notes: TimeArray<NoteRow>) =
+        notes
         |> Array.iter (fun nr ->
             printfn "%06.1f | %s" nr.Time (NoteRow.pretty_print nr.Data)
         )

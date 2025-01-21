@@ -22,13 +22,13 @@ module Charts =
 
         let chart = ChartFuzzBuilder.generate (5, 0)
 
-        Chart.pretty_print chart
+        Chart.pretty_print chart.Notes
 
         Assert.Pass()
 
     [<Test>]
     let Fuzz_Deterministic_Hashing_Deterministic() =
-    
+
         let TEST_DATA =
             [
                 123, 4, "7F7ED43C7820701F541548FCA9A6692B0B6109A9F0D78FDFBE84D2BEA3E0A4F0"

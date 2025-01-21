@@ -3,12 +3,13 @@
 open System
 open NUnit.Framework
 open Prelude
+open Prelude.Charts.Formats.osu
 open Prelude.Charts
 open Prelude.Charts.Conversions
 open Prelude.Data.Library
 
 module Conversions =
-    
+
     [<Test>]
     let OsuMania_Notes_RoundTrip() =
 
@@ -61,7 +62,7 @@ module Conversions =
     [<Test>]
     let OsuMania_TimingPoints_VariableBPM() =
 
-        let many_bpms = 
+        let many_bpms =
             [|
                 { Time = 10f<ms>; Data = { MsPerBeat = 500.0f<ms / beat>; Meter = 4<beat> } }
                 { Time = 40f<ms>; Data = { MsPerBeat = 250.0f<ms / beat>; Meter = 4<beat> } }
@@ -77,3 +78,107 @@ module Conversions =
 
         Assert.AreEqual(many_bpms, interlude_bpm)
         Assert.AreEqual([||], interlude_sv)
+
+    [<Test>]
+    let OsuToInterlude_ForgiveStackedNotes_CaseA() =
+        let osu_notes = [
+            HitObject.CreateManiaNote(4, 0, 1000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 1000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 2000.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Chart.pretty_print interlude_notes
+            Assert.AreEqual(2, interlude_notes.Length)
+        with
+        | ConversionSkipException reason ->
+            Assert.Fail(reason)
+
+    [<Test>]
+    let OsuToInterlude_ForgiveStackedNotes_CaseB() =
+        let osu_notes = [
+            HitObject.CreateManiaNote(4, 0, 1000.0f<ms>)
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 3000.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Chart.pretty_print interlude_notes
+            Assert.AreEqual(3, interlude_notes.Length)
+        with
+        | ConversionSkipException reason ->
+            Assert.Fail(reason)
+
+    [<Test>]
+    let OsuToInterlude_ForgiveStackedNotes_CaseC() =
+        let osu_notes = [
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 1000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 3000.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Chart.pretty_print interlude_notes
+            Assert.AreEqual(3, interlude_notes.Length)
+        with
+        | ConversionSkipException reason ->
+            Assert.Fail(reason)
+
+    [<Test>]
+    let OsuToInterlude_UnacceptableStackedNote_CaseA() =
+        let osu_notes = [
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 2000.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Assert.Fail()
+        with
+        | ConversionSkipException reason ->
+            Assert.Pass(reason)
+
+    [<Test>]
+    let OsuToInterlude_UnacceptableStackedNote_CaseB() =
+        let osu_notes = [
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaNote(4, 0, 1500.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Assert.Fail()
+        with
+        | ConversionSkipException reason ->
+            Assert.Pass(reason)
+
+    [<Test>]
+    let OsuToInterlude_UnacceptableStackedNote_CaseC() =
+        let osu_notes = [
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaHold(4, 0, 1500.0f<ms>, 2500.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Assert.Fail()
+        with
+        | ConversionSkipException reason ->
+            Assert.Pass(reason)
+
+    [<Test>]
+    let OsuToInterlude_UnacceptableStackedNote_CaseD() =
+        let osu_notes = [
+            HitObject.CreateManiaHold(4, 0, 1000.0f<ms>, 2000.0f<ms>)
+            HitObject.CreateManiaHold(4, 0, 2000.0f<ms>, 3000.0f<ms>)
+        ]
+
+        try
+            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            Assert.Fail()
+        with
+        | ConversionSkipException reason ->
+            Assert.Pass(reason)

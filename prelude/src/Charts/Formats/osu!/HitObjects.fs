@@ -2,7 +2,7 @@
 
 open System.Globalization
 
-type HitSample = 
+type HitSample =
     {
         NormalSet: SampleSet
         AdditionSet: SampleSet
@@ -50,7 +50,7 @@ type HitCircle =
         {
             X = (float key + 0.5) * 512.0 / float keys |> int
             Y = 240
-            Time = int time
+            Time = time |> float32 |> round |> int
             StartsNewCombo = false
             ColorHax = 0
             HitSound = HitSound.Default
@@ -145,11 +145,11 @@ type Hold =
         {
             X = (float key + 0.5) * 512.0 / float keys |> int
             Y = 240
-            Time = int start_time
+            Time = start_time |> float32 |> round |> int
             StartsNewCombo = false
             ColorHax = 0
             HitSound = HitSound.Default
-            EndTime = int end_time
+            EndTime = end_time |> float32 |> round |> int
             HitSample = HitSample.Default
         }
 
