@@ -369,9 +369,10 @@ module StepMania_To_Interlude =
                                 ImportAsset.Missing
 
                         Origins =
-                            match action.Config.EtternaPackName with
-                            | Some pack -> Set.singleton (ChartOrigin.Etterna pack)
-                            | None -> Set.empty
+                            action.Config.EtternaPackName
+                            |> Option.defaultValue action.Config.PackName
+                            |> ChartOrigin.Etterna
+                            |> Set.singleton
                     }
 
                 Ok {
