@@ -57,7 +57,7 @@ module SelectedChart =
 
     let private format_bpm (cc: ChartMeta option) =
         match cc with
-        | Some cc -> sprintf "%s %i" Icons.MUSIC (int(float32 cc.BPM * _rate.Value))
+        | Some cc -> sprintf "%s %i" Icons.MUSIC (float32 cc.BPM * float32 _rate.Value |> round |> int)
         | None -> sprintf "%s 120" Icons.MUSIC
 
     let private format_notecounts (chart: ModdedChart) =
