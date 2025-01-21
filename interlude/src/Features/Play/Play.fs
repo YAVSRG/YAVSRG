@@ -210,8 +210,8 @@ module PlayScreen =
                 DiscordRPC.playing_timed ("Playing", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                if options.AutoCalibrateOffset.Value && not offset_manually_changed then
-                    LocalOffset.apply_automatic this.State info.SaveData
+                if not offset_manually_changed then
+                    LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
                 Toolbar.show_cursor ()
                 Background.set_parallax_amount 40.0f
                 Song.set_low_pass 0.0f

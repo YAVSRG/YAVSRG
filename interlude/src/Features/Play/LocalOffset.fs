@@ -13,6 +13,8 @@ open Interlude.Features.Gameplay
 
 module LocalOffset =
 
+    let mutable latest_suggestion: (Charts.Chart * Time) option = None
+
     let offset_setting (save_data: ChartSaveData) =
         Setting.make save_data.set_Offset save_data.get_Offset
         |> Setting.roundf_uom 0
@@ -32,13 +34,19 @@ module LocalOffset =
         let mean = sum / count * SelectedChart.rate.Value
 
         if count < 10.0f then
-            save_data.Offset
+            match latest_suggestion with
+            | Some (chart, offset) when state.Chart = chart -> offset
+            | _ -> save_data.Offset
         else
-            save_data.Offset - mean * 1.25f
+            let new_offset = save_data.Offset - mean * 1.25f
+            latest_suggestion <- Some (state.Chart, new_offset)
+            new_offset
 
-    let apply_automatic (state: PlayState) (save_data: ChartSaveData) =
-        let setting = offset_setting save_data
-        setting.Value <- get_automatic state save_data
+    let automatic (state: PlayState) (save_data: ChartSaveData) (apply_now: bool) =
+        let offset = get_automatic state save_data
+        if apply_now then
+            let setting = offset_setting save_data
+            setting.Value <- offset
 
 type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Setting<float32<ms>>, on_close: unit -> unit) =
     inherit Page()
@@ -85,7 +93,6 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
             Menu.Back()
 
         base.Update(elapsed_ms, moved)
-
 
     override this.Title = %"play.localoffset"
 

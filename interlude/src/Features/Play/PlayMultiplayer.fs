@@ -41,7 +41,7 @@ module PlayScreenMultiplayer =
         lobby.StartPlaying()
         lobby.AddReplayInfo(
             Network.credentials.Username,
-            { 
+            {
                 Replay = liveplay
                 ScoreProcessor = scoring
                 GetScoreInfo = fun () ->
@@ -93,7 +93,7 @@ module PlayScreenMultiplayer =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
             quit_out_early <- true
 
-            if 
+            if
                 if is_giving_up_play then
                     liveplay.Finish()
                     scoring.Update Time.infinity
@@ -182,8 +182,7 @@ module PlayScreenMultiplayer =
                 )
 
             override this.OnExit(next) =
-                if options.AutoCalibrateOffset.Value then
-                    LocalOffset.apply_automatic this.State info.SaveData
+                LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 
                 Toolbar.show_cursor ()
                 base.OnExit(next)
