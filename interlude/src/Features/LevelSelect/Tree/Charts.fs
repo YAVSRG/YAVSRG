@@ -51,7 +51,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 | _ -> SelectedChart.rate.Value
 
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
-            grade <- 
+            grade <-
                 match get_pb personal_bests.Value.Grade rate Rulesets.current.GradeColor Rulesets.current.GradeName with
                 | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
                     match get_pb personal_bests.Value.Accuracy rate (K Colors.white) Rulesets.current.FormatAccuracy with
@@ -60,7 +60,10 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                     | None -> Some (grade, grade_rate, color, text)
                 | otherwise -> otherwise
             lamp <- get_pb personal_bests.Value.Lamp rate Rulesets.current.LampColor Rulesets.current.LampName
-        | _ -> ()
+        | _ ->
+            personal_bests <- None
+            grade <- None
+            lamp <- None
 
         markers <-
             match ctx with
@@ -101,7 +104,6 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             if is_multi_selected then Colors.grey_2.O2, Colors.white.O2
             elif this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
             else Colors.shadow_1.O2, Colors.grey_2.O2
-
 
         Render.rect bounds color
 
@@ -169,7 +171,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             Colors.text_subheading
         )
 
-        let icon = 
+        let icon =
             match multi_selection with
             | Some s -> if s.IsSelected(cc, ctx) then Icons.CHECK_SQUARE else Icons.SQUARE
             | None -> markers
