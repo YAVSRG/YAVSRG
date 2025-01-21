@@ -50,6 +50,12 @@ type PlayState =
                 CurrentChartTime = fun () -> Song.time_with_offset () - first_note
                 Pacemaker = PacemakerState.None
             }
+
+        scoring.Update (state.CurrentChartTime())
+
         let reset () =
-            state.ChangeScoring <| ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+            let recreated = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+            recreated.Update (state.CurrentChartTime())
+            state.ChangeScoring recreated
+
         state, reset

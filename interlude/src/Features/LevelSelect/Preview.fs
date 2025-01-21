@@ -57,11 +57,13 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         volume.Update(elapsed_ms, moved)
         timeline.Update(elapsed_ms, moved)
         playfield.Update(elapsed_ms, moved)
-        let now = playstate.CurrentChartTime()
-        playstate.Scoring.Update now
-        if last_time > now && Song.playing() then
-            recreate_scoring()
-        last_time <- now
+
+        if Song.playing() then
+            let now = playstate.CurrentChartTime()
+            playstate.Scoring.Update now
+            if last_time > now then
+                recreate_scoring()
+            last_time <- now
 
         if (%%"preview").Tapped() || (%%"exit").Tapped() || Mouse.released Mouse.RIGHT then
             this.Close()

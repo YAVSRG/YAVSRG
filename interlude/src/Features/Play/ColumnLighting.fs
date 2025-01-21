@@ -10,7 +10,11 @@ open Interlude.Features.Play
 
 type ColumnLighting(keys, ns: NoteskinConfig, state) =
     inherit StaticWidget(NodeType.None)
-    let timers = Array.init keys (fun _ -> Animation.Delay ns.ColumnLightDuration)
+    let timers = Array.init keys (fun _ -> 
+        let anim = Animation.Delay ns.ColumnLightDuration
+        anim.Update ns.ColumnLightDuration
+        anim
+    )
     let sprite = Content.Texture "receptorlighting"
 
     let column_spacing = ns.KeymodeColumnSpacing keys
