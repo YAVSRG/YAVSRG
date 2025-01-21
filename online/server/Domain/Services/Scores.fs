@@ -17,13 +17,13 @@ module Scores =
         | Unranked
         | Ranked of int option
 
-    let private new_leaderboard_position (score: Score) : int option =
+    let new_leaderboard_position (score: Score) : int option =
         if not score.Ranked then None else
 
         let existing_lb = Score.get_leaderboard score.ChartId
 
         let mutable already_has_score = false
-        let mutable position = -1
+        let mutable position = Score.LEADERBOARD_SIZE
         let mutable i = 0
 
         while i < existing_lb.Length do
@@ -35,9 +35,14 @@ module Scores =
                 i <- existing_lb.Length
             i <- i + 1
 
-        if position < Score.LEADERBOARD_SIZE && not already_has_score then
-            Some position
-        else None
+        if already_has_score then
+            None
+        elif position < Score.LEADERBOARD_SIZE then
+            Some (position + 1)
+        elif existing_lb.Length < Score.LEADERBOARD_SIZE then
+            Some (existing_lb.Length + 1)
+        else
+            None
 
     let submit
         (
@@ -104,8 +109,8 @@ module Scores =
                         |> Replay.save_leaderboard
 
                     let score_id = Score.save (score.WithReplay replay_id)
-                    Logging.Debug "Saved score %i with replay %i" score_id replay_id
-                    return ScoreUploadOutcome.Ranked (Some (p + 1))
+                    Logging.Debug "Saved score %i with replay %i (#%i)" score_id replay_id p
+                    return ScoreUploadOutcome.Ranked (Some p)
                 | None ->
                     Score.save score |> Logging.Debug "Saved score %i"
                     return ScoreUploadOutcome.Ranked None
