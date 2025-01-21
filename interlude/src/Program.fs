@@ -113,4 +113,6 @@ let main argv =
         match Shell.IPC.send "Interlude" "focus" with
         | Some success -> printfn "%s" success
         | None -> printfn "Error: Connection timed out!"
+
+    Environment.Exit(0)
     0

@@ -85,4 +85,3 @@ module Startup =
                 crash_splash ()
                 Logging.Critical("The game was abnormally force-quit, but was able to shut down correctly")
                 Logging.Shutdown()
-            System.Environment.Exit(0)
