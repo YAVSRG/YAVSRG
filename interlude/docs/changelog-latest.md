@@ -1,22 +1,25 @@
-0.7.27.5
+0.7.27.6
 ====
 
-A few bug fixes and features requested by you
-Thanks again to the many new members of the Discord that have reported issues/suggested features :)
+Road to 1.0
 
 # New features
-- Hold shift while hovering on the score graph to see stats for a "slice" of it
-- BPM, NPS and CPS info are shown while hovering over timelines in previews and replays
-- Rulesets emulating all Quaver judgements are now built-in defaults you can add via the ruleset menu
+- Many more charts now have a leaderboard!
+- Option for pacemaker to use the higher of your PB and your default target
+- Your username is shown on the score screen
+- Score's username is shown on the score screen when dropping an osu! replay
+- Button to "cycle" texture frames when editing them in the Noteskin/HUD editor
 
 # Improvements
-- Playing a playlist now respects the current search and filter entered in level select
-- Updated the layout of the website a little (with plans to do more in the future)
+- Improved some UI and menus around importing
+- osu! skin conversion respects NoteWidthForHeight scale
+- More accurate osu! scroll speed estimate
+- Dropping an osu! replay will take you directly to the correct chart if you have it
+- Right-clicking on a selected group opens bulk actions (before it opened the context menu as if unselected)
 
 # Bug fixes
-- Fixed tiny pixel holes in the score line graph
-- Fixed score graph window labels overlapping each other
-- Fixed volume up/down keys not working on high framerates
-- Fixed several visual bugs with the Judgement Counter
-- Fixed editing timing windows on a cloned ruleset also updating the original
+- Fixed a crash when using Windows emoji keyboard
+- Fixed being unable to click on ruleset submenus due to hovering over local scores
+- Fixed some parsing errors in timing points in very old .osu files
+- Various fixes to mounted imports
 
