@@ -235,8 +235,6 @@ module Song =
         change_rate new_rate
 
         if path_changed then
-            timer_start <- -infinityf * 1.0f<ms>
-
             if now_playing.ID <> 0 then
                 now_playing.Free()
 
