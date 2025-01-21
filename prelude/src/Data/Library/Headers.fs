@@ -47,6 +47,7 @@ type ChartMeta =
         Rating: float32
         Patterns: PatternReport
     }
+
     member this.OriginString =
         match Seq.tryHead this.Packs with
         | Some pack -> pack
@@ -54,6 +55,12 @@ type ChartMeta =
             match Seq.tryHead this.Origins with
             | Some o -> o.ToString()
             | None -> "Unknown"
+
+    member this.MergeWithExisting (existing: ChartMeta) =
+        { this with
+            Packs = Set.union this.Packs existing.Packs
+            Origins = Set.union this.Origins existing.Origins
+        }
 
     static member FromImport (timestamp: int64) (import_chart: ImportChart) : ChartMeta =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)

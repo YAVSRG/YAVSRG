@@ -115,8 +115,12 @@ module ChartDatabase =
                     }
                 let chart = { chart with Header = header_with_assets_moved }
                 // todo: there should be an alternative to ChartMeta.FromImport that does the asset movement rather than the above hack
-                let chart_meta = (ChartMeta.FromImport now chart)
-                db.Cache.[chart_meta.Hash] <- chart_meta
+                let chart_meta = ChartMeta.FromImport now chart
+                let merged_chart_meta =
+                    match db.Cache.TryGetValue(chart_meta.Hash) with
+                    | true, data -> chart_meta.MergeWithExisting data
+                    | false, _ -> chart_meta
+                db.Cache.[chart_meta.Hash] <- merged_chart_meta
                 yield chart_meta, chart.Chart
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
