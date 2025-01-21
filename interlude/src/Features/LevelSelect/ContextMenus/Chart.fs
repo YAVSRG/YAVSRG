@@ -150,6 +150,15 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
 
         if Some cc = SelectedChart.CACHE_DATA then
             content
+            |+ PageButton(%"chart.change_offset",
+                fun () ->
+                    match SelectedChart.CHART, SelectedChart.SAVE_DATA with
+                    | Some chart, Some save_data ->
+                        LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
+                            .Show()
+                    | _ -> ()
+                , Icon = Icons.SPEAKER
+            )
             |+ PageButton.Once(
                 %"chart.practice",
                 (fun () ->
@@ -184,21 +193,6 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                 ),
                 Icon = Icons.UPLOAD
             )
-
-        match Content.Table, SelectedChart.CHART with
-        | Some table, Some chart ->
-            if
-                Network.status = Network.Status.LoggedIn
-                && cc.Keys = table.Info.Keymode
-                && Chart.hash chart = cc.Hash
-            then
-                content
-                |* PageButton(
-                    %"chart.suggest_for_table",
-                    (fun () -> SuggestChartPage(table, cc.Hash).Show()),
-                    Icon = Icons.SIDEBAR
-                )
-        | _ -> ()
 
         content
 

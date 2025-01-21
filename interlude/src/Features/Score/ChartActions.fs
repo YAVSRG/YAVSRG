@@ -1,18 +1,14 @@
 ﻿namespace Interlude.Features.Score
 
-open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Charts.Processing
-open Prelude.Gameplay.Mods
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Collections
-open Interlude.Features.Tables
-open Interlude.Features.Online
 open Interlude.Features.Export
 
 #nowarn "40"
@@ -27,7 +23,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
             Icon = Icons.HEART,
             Hotkey = %%"like"
         )
-    and unlike_button = 
+    and unlike_button =
         PageButton(
             %"chart.remove_from_likes",
             (fun () -> CollectionActions.unlike_chart score_info.ChartMeta; like_button_swap.Current <- like_button),
@@ -47,7 +43,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
             )
             |+ PageButton(
                 %"chart.delete",
-                fun () -> 
+                fun () ->
                     let chart_name = sprintf "%s [%s]" score_info.ChartMeta.Title score_info.ChartMeta.DifficultyName
                     ConfirmPage(
                         [ chart_name ] %> "misc.confirmdelete",
@@ -70,17 +66,6 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
                 ),
                 Icon = Icons.UPLOAD
             )
-
-        match Content.Table with
-        | Some table ->
-            if Network.status = Network.Status.LoggedIn && score_info.ChartMeta.Keys = table.Info.Keymode then
-                content
-                |* PageButton(
-                    %"chart.suggest_for_table",
-                    (fun () -> SuggestChartPage(table, score_info.ChartMeta.Hash).Show()),
-                    Icon = Icons.SIDEBAR
-                )
-        | _ -> ()
 
         content
 

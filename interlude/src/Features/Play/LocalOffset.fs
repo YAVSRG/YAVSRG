@@ -6,6 +6,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
+open Prelude.Charts
 open Prelude.Data.User
 open Prelude.Gameplay.Scoring
 open Interlude.UI
@@ -13,7 +14,7 @@ open Interlude.Features.Gameplay
 
 module LocalOffset =
 
-    let mutable latest_suggestion: (Charts.Chart * Time) option = None
+    let mutable latest_suggestion: (Chart * Time) option = None
 
     let offset_setting (save_data: ChartSaveData) =
         Setting.make save_data.set_Offset save_data.get_Offset
@@ -48,7 +49,12 @@ module LocalOffset =
             let setting = offset_setting save_data
             setting.Value <- offset
 
-type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Setting<float32<ms>>, on_close: unit -> unit) =
+    let get_recent_suggestion (chart: Chart) (save_data: ChartSaveData) =
+        match latest_suggestion with
+        | Some (c, offset) when chart = c -> offset
+        | _ -> save_data.Offset
+
+type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on_close: unit -> unit) =
     inherit Page()
 
     let offset_slider =
@@ -59,8 +65,6 @@ type LocalOffsetPage(state: PlayState, save_data: ChartSaveData, setting: Settin
             Step = 1f,
             Format = (fun v -> sprintf "%.0fms" v)
         )
-
-    let recommended_offset = LocalOffset.get_automatic state save_data
 
     let apply_recommended() =
         setting.Set recommended_offset
