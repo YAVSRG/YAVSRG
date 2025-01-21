@@ -23,12 +23,12 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
 
     let info =
         match game with
-            | MountedGameType.Osu -> 
+            | MountedGameType.Osu ->
                 Callout.Normal
                     .Icon(Icons.DOWNLOAD)
                     .Title(%"mount.create.osu.prompt")
                     .Body(%"mount.create.folder_hint")
-            | MountedGameType.Quaver -> 
+            | MountedGameType.Quaver ->
                 Callout.Normal
                     .Icon(Icons.DOWNLOAD)
                     .Title(%"mount.create.quaver.prompt")
@@ -58,14 +58,23 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
                 | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
 
                 if setting.Value.IsSome then
-                    Imports.import_mounted_source.Request((setting.Value.Value, Content.Library), ignore)
+                    Imports.import_mounted_source.Request(
+                        (setting.Value.Value, Content.Library),
+                        fun result ->
+                            Notifications.task_feedback (
+                                Icons.CHECK,
+                                %"notification.import_success",
+                                [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                            )
+                            Content.TriggerChartAdded()
+                    )
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     Menu.Back()
             |> Some
 
         page_container()
         |+ PageButton(
-            (if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"), 
+            (if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"),
             (fun () -> FileDrop.on_file_drop.Value auto_detect_location),
             Disabled = K (not folder_detected)
         ).Pos(6)

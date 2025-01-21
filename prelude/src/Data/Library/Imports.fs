@@ -52,14 +52,16 @@ module Imports =
                 ImportOnStartup = false
             }
 
-    let private log_skipped (result: ConversionResult) =
+    let private log_conversion (result: ConversionResult) =
         let skipped = result.SkippedCharts.Length
         if skipped > 0 then
             let dump =
                 result.SkippedCharts
                 |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
                 |> String.concat "\n "
-            Logging.Info "Successful import of %i file(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
+            Logging.Info "Successful import of %i charts(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
+        else
+            Logging.Info "Successfully imported %i charts(s)" result.ConvertedCharts
 
     let private RATE_REGEX =
         Regex(
@@ -222,7 +224,7 @@ module Imports =
 
                         let! result = convert_pack_folder.RequestAsync(source.SourceFolder, config, library)
                         source.LastImported <- Some DateTime.UtcNow
-                        log_skipped result
+                        log_conversion result
                         return result
                     | Library ->
                         Logging.Info "Importing songs library %s" source.SourceFolder
@@ -243,7 +245,7 @@ module Imports =
                                 )
                             results <- ConversionResult.Combine result results
 
-                        log_skipped results
+                        log_conversion results
                         source.LastImported <- Some DateTime.UtcNow
                         return results
                 }
@@ -306,7 +308,7 @@ module Imports =
                             },
                             library
                         )
-                    log_skipped result
+                    log_conversion result
                     return Some result
                 | ChartArchive ext ->
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
@@ -340,7 +342,7 @@ module Imports =
                             },
                             library
                         )
-                    log_skipped result
+                    log_conversion result
                     return Some result
                 | FolderOfOszs ->
                     let! result =
@@ -348,7 +350,7 @@ module Imports =
                             path,
                             library
                         )
-                    log_skipped result
+                    log_conversion result
                     return Some result
                 | PackFolder ->
                     let packname =
@@ -371,7 +373,7 @@ module Imports =
                             },
                             library
                         )
-                    log_skipped result
+                    log_conversion result
                     return Some result
                 | FolderOfPacks ->
                     let mutable results = ConversionResult.Empty
@@ -387,7 +389,7 @@ module Imports =
                             )
                         results <- ConversionResult.Combine result results
 
-                    log_skipped results
+                    log_conversion results
                     return Some results
                 | _ ->
                     Logging.Warn "%s: No importable folder structure detected" path
