@@ -170,7 +170,7 @@ module UserDatabase =
             "AddChartIdIndexToScores"
             (fun db -> DbScores.CREATE_INDEX.Execute () db |> expect |> ignore)
             db
-        
+
         Database.migrate
             "ResetPbDataTimestampsAdded"
             (fun db -> DbChartData.RESET_PERSONAL_BESTS.Execute () db |> expect |> ignore)
@@ -193,9 +193,18 @@ module UserDatabase =
 
         Database.migrate
             "AddSessions"
-            (fun db -> 
+            (fun db ->
                 Database.create_table DbSessions.TABLE db |> expect |> ignore
                 DbSessions.CREATE_INDEX.Execute () db |> expect |> ignore
+            )
+            db
+
+        Database.migrate
+            "RemoveBrokenSessionJan1970"
+            (fun db ->
+                Database.exec_raw """DELETE FROM SESSIONS WHERE Start = 0""" db
+                |> expect
+                |> function 0 -> () | n -> Logging.Debug "Removed %i sessions with Start set to 0L" n
             )
             db
 

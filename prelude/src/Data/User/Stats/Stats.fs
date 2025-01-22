@@ -353,22 +353,23 @@ module Stats =
                     score_count <- score_count + 1
                 last_time <- score.Timestamp
 
-            yield {
-                Start = session_start_time
-                End = last_time
+            if scores.Length > 0 then
+                yield {
+                    Start = session_start_time
+                    End = last_time
 
-                PlayTime = session_playing_time |> float
-                PracticeTime = 0.0
-                GameTime = float (last_time - session_start_time)
-                NotesHit = 0
-                PlaysStarted = score_count
-                PlaysCompleted = score_count
-                PlaysQuit = 0
-                PlaysRetried = 0
-                KeymodeSkills = skills |> Array.map _.Tiny
+                    PlayTime = session_playing_time |> float
+                    PracticeTime = 0.0
+                    GameTime = float (last_time - session_start_time)
+                    NotesHit = 0
+                    PlaysStarted = score_count
+                    PlaysCompleted = score_count
+                    PlaysQuit = 0
+                    PlaysRetried = 0
+                    KeymodeSkills = skills |> Array.map _.Tiny
 
-                XP = 0
-            }
+                    XP = 0
+                }
             let d = KeymodeSkillBreakdown.decay_over_time last_time (Timestamp.now())
             for i = 0 to skills.Length - 1 do
                 skills.[i] <- skills.[i].Scale d
