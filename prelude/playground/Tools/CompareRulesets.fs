@@ -42,11 +42,18 @@ let main() =
     let osu_5 = OsuMania.create 5.0f OsuMania.NoMod
     let wife_4 = Wife3.create 4
     let wife_5 = Wife3.create 5
+    let quaver_standard = Quaver.create Quaver.Standard
 
     multi_compare sc_4 sc_4
+
     multi_compare sc_4 osu_8
-    multi_compare sc_4 osu_5
+    multi_compare osu_8 sc_4
+    multi_compare sc_4 quaver_standard
+    multi_compare quaver_standard sc_4
     multi_compare sc_4 wife_4
+    multi_compare wife_4 sc_4
+
+    multi_compare sc_4 osu_5
     multi_compare sc_4 wife_5
     multi_compare wife_4 wife_5
     multi_compare osu_8 osu_5
