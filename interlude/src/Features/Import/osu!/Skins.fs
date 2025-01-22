@@ -22,7 +22,7 @@ module Skins =
 
         override this.Content() =
             page_container()
-            |+ PageSetting(%"osu_skin_import.keymode", Selector.FromEnum(keymode))
+            |+ PageSetting(%"osu_skin_import.keymode", SelectDropdown.FromEnum(keymode))
                 .Pos(0)
             |+ PageSetting(%"osu_skin_import.isarrows", Checkbox is_arrows)
                 .Pos(2)

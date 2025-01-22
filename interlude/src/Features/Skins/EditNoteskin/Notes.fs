@@ -223,7 +223,7 @@ type NotesSettingsPage() =
         page_container()
         |+ PageSetting(
             %"generic.keymode",
-            Selector.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors(); refresh_rotations()))
+            SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors(); refresh_rotations()))
         )
             .Pos(0)
         |+ PageSetting(

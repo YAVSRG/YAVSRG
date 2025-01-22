@@ -182,7 +182,7 @@ type AnimationSettingsPage() =
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let receptors_tab =
-    
+
         let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
 
         let receptor_colors = data.ReceptorColors
@@ -190,7 +190,7 @@ type AnimationSettingsPage() =
             let k = int keycount - 3
 
             Setting.make (fun v -> receptor_colors.[k].[i] <- v) (fun () -> receptor_colors.[k].[i])
-        
+
         let colors, refresh_colors =
             refreshable_row
                 (fun () -> int keymode.Value)
@@ -238,7 +238,7 @@ type AnimationSettingsPage() =
             .Conditional(enable_receptors.Get)
         |+ PageSetting(
             %"generic.keymode",
-            Selector.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+            SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
         )
             .Pos(9)
             .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
@@ -251,7 +251,7 @@ type AnimationSettingsPage() =
     let enable_judgement_line = Setting.simple data.UseJudgementLine
     let judgement_line_scale = data.JudgementLineScale |> Setting.bounded (0.1f, 3f)
     let judgement_line_offset = data.JudgementLineOffset |> Setting.bounded(-1.0f, 1.0f)
-    
+
     let judgement_line_tab =
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageSetting(
@@ -278,7 +278,7 @@ type AnimationSettingsPage() =
     let enable_column_light = Setting.simple data.EnableColumnLight
     let column_light_offset = data.ColumnLightOffset |> Setting.bounded (-1.0f, 1.0f)
     let column_light_duration =
-        data.ColumnLightDuration 
+        data.ColumnLightDuration
         |> Setting.bounded (0.0, 1000.0)
         |> Setting.round 0
         |> Setting.trigger t_columnlight.set_Interval
@@ -292,7 +292,7 @@ type AnimationSettingsPage() =
             let k = int keycount - 3
 
             Setting.make (fun v -> column_light_colors.[k].[i] <- v) (fun () -> column_light_colors.[k].[i])
-        
+
         let colors, refresh_colors =
             refreshable_row
                 (fun () -> int keymode.Value)
@@ -327,14 +327,14 @@ type AnimationSettingsPage() =
             .Conditional(enable_column_light.Get)
         |+ PageSetting(
             %"generic.keymode",
-            Selector.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+            SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
         )
             .Pos(7)
             .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
         |+ PageSetting(%"noteskin.column_light_colors", colors)
             .Pos(9, 3, PageWidth.Normal)
             .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
-    
+
     (* Explosions *)
 
     let enable_explosions = Setting.simple data.UseExplosions
@@ -348,26 +348,26 @@ type AnimationSettingsPage() =
     let explosion_colors_note = Setting.simple data.NoteExplosionSettings.Colors
 
     let explosion_offset_note =
-        data.NoteExplosionSettings.Offset 
+        data.NoteExplosionSettings.Offset
         |> Setting.bounded (-1.0f, 1.0f)
 
     let explosion_builtin_note =
         Setting.simple data.NoteExplosionSettings.UseBuiltInAnimation
 
     let explosion_duration_note =
-        data.NoteExplosionSettings.Duration 
+        data.NoteExplosionSettings.Duration
         |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> t_note_ex.set_Interval)
 
     let explosion_scale_note =
-        data.NoteExplosionSettings.Scale 
+        data.NoteExplosionSettings.Scale
         |> Setting.bounded (0.5f, 5.0f)
 
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
     let explosion_frame_time_hold =
-        data.HoldExplosionSettings.AnimationFrameTime 
+        data.HoldExplosionSettings.AnimationFrameTime
         |> Setting.bounded (10.0f<ms / rate>, 1000.0f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> f_hold_ex.set_Interval)
@@ -375,7 +375,7 @@ type AnimationSettingsPage() =
     let explosion_colors_hold = Setting.simple data.HoldExplosionSettings.Colors
 
     let explosion_offset_hold =
-        data.HoldExplosionSettings.Offset 
+        data.HoldExplosionSettings.Offset
         |> Setting.bounded (-1.0f, 1.0f)
 
     let explosion_hold_use_release =
@@ -385,13 +385,13 @@ type AnimationSettingsPage() =
         Setting.simple data.HoldExplosionSettings.ReleaseUseBuiltInAnimation
 
     let explosion_duration_hold =
-        data.HoldExplosionSettings.Duration 
+        data.HoldExplosionSettings.Duration
         |> Setting.bounded (50.0f<ms / rate>, 1000f<ms / rate>)
         |> Setting.roundf_uom 0
         |> Setting.trigger (float >> t_hold_ex.set_Interval)
 
     let explosion_scale_hold =
-        data.HoldExplosionSettings.Scale 
+        data.HoldExplosionSettings.Scale
         |> Setting.bounded (0.5f, 5.0f)
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount

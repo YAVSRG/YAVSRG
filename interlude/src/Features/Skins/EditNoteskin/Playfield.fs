@@ -72,7 +72,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
             elif (%%"right").Tapped() then
                 add 1.0f
                 Style.click.Play()
-        
+
         if Mouse.hover this.Bounds then
             add (Mouse.scroll())
 
@@ -88,7 +88,7 @@ type PlayfieldSettingsPage() =
     let playfield_color = Setting.simple data.PlayfieldColor
     let use_stage_textures = Setting.simple data.EnableStageTextures
 
-    let column_width = 
+    let column_width =
         data.ColumnWidth
         |> Setting.bounded (10.0f, 300.0f)
         |> Setting.roundf 0
@@ -113,7 +113,7 @@ type PlayfieldSettingsPage() =
         |> Setting.roundf 0
 
     let width_setting =
-        Setting.make 
+        Setting.make
             (fun v -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] <- v else column_width.Set v)
             (fun () -> if use_specific_column_widths.Value then column_widths.[int keymode.Value - 3] else column_width.Value)
         |> Setting.bound (10.0f, 300.0f)
@@ -154,7 +154,7 @@ type PlayfieldSettingsPage() =
 
         |+ PageSetting(
                 %"generic.keymode",
-                Selector.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
             )
             .Pos(10)
             .Conditional(fun () -> use_specific_column_widths.Value || use_advanced_column_spacing.Value)
