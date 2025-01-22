@@ -132,8 +132,8 @@ module Upload =
                 Error "Chart is too short"
             else
 
-            if chart_meta.Origins |> Set.exists _.SuitableForUpload then
-                Error "Chart has no source"
+            if chart_meta.Origins |> Set.exists _.SuitableForUpload |> not then
+                Error (sprintf "Chart has no valid sources (%A)" chart_meta.Origins)
             else
 
             Ok (
