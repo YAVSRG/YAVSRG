@@ -228,7 +228,6 @@ and Menu(top_level: Page) as this =
         if options.MenusMuffleSong.Value then Song.set_low_pass 1.0f
 
     override this.Draw() =
-        volume.Draw()
         let mutable i = 0
 
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
@@ -241,6 +240,7 @@ and Menu(top_level: Page) as this =
             else
                 stack.[i].Value.Draw()
             i <- i + 1
+        volume.Draw()
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

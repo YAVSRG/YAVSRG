@@ -44,5 +44,15 @@ type Volume() =
 
     override this.Draw() =
         let r = this.Bounds.SliceB 5.0f
-        Render.rect r (Palette.color (fade.Alpha, 0.4f, 0.0f))
-        Render.rect (r.SliceL(slider.Value * r.Width)) (Palette.color (fade.Alpha, 1.0f, 0.0f))
+        let a = fade.Alpha
+        if a > 0 then
+            Render.rect r (Palette.color (a, 0.2f, 0.0f))
+            Render.rect (r.SliceL(slider.Value * r.Width)) (Palette.color (a, 1.0f, 0.0f))
+            let volume_box = r.SliceX(220.0f).BorderT(50.0f).TranslateY(-5.0f)
+            Render.rect volume_box (Colors.shadow_1.O1a (a * 3))
+            let icon =
+                if slider.Value <= 0.005f then Icons.VOLUME_X
+                elif slider.Value < 0.05f then Icons.VOLUME
+                elif slider.Value < 0.4f then Icons.VOLUME_1
+                else Icons.VOLUME_2
+            Text.fill_b (Style.font, sprintf "%s Volume: %.0f%%" icon (slider.Value * 100.0f), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
