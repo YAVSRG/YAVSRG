@@ -12,18 +12,25 @@ open Interlude.Features.Gameplay
 type ChartDetails() =
     inherit Container(NodeType.None)
 
+    let never_played = %"levelselect.last_played.never"
+
     let mutable rating = 0.0
     let mutable notecounts = ""
-    let mutable last_played = "Never played"
+    let mutable last_played = K never_played
 
     let refresh(info: LoadedChartInfo) =
         rating <- info.Rating.Physical
         notecounts <- info.NotecountsString
-        last_played <- 
-            if info.SaveData.LastPlayed <= 0L then
-                "Never played"
-            else
-                sprintf "Last played %s ago" (Timestamp.since info.SaveData.LastPlayed |> format_timespan)
+        last_played <-
+            let mutable ts = info.SaveData.LastPlayed
+            let text (ts: int64) =
+                if ts <= 0L then never_played else [ Timestamp.since info.SaveData.LastPlayed |> format_timespan ] %> "levelselect.last_played"
+            let mutable t = text ts
+            fun () ->
+                if info.SaveData.LastPlayed <> ts then
+                    ts <- info.SaveData.LastPlayed
+                    t <- text ts
+                t
 
     static member HEIGHT = 230.0f
 
@@ -37,11 +44,11 @@ type ChartDetails() =
         base.Init parent
 
     override this.Draw() =
-        
+
         let play_info = this.Bounds.SliceT(40.0f).TranslateY(90.0f).ShrinkX(15.0f)
 
         Text.fill_b (Style.font, Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay), play_info, Colors.text, Alignment.LEFT)
-        Text.fill_b (Style.font, last_played, play_info, Colors.text, Alignment.RIGHT)
+        Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
 
         let chart_info = this.Bounds.SliceT(30.0f).TranslateY(130.0f).ShrinkX(15.0f)
         Text.fill_b (Style.font, (match SelectedChart.CACHE_DATA with Some cc -> cc.DifficultyName | None -> ""), chart_info.SlicePercentL 0.5f, Colors.text_subheading, Alignment.LEFT)
