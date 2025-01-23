@@ -14,7 +14,7 @@ type SuggestionContext =
     {
         BaseChart: ChartMeta * Rate
         Mods: ModState
-        Filter: Filter
+        Filter: FilteredSearch
         MinimumRate: Rate
         MaximumRate: Rate
         OnlyNewCharts: bool

@@ -11,7 +11,7 @@ open Prelude.Data.Library
 open Prelude.Data.Library.Endless
 
 let test() =
-        
+
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
     let library = Library.load()
     let user_db = UserDatabase.create true (Database.from_file "Data/scores.db")
@@ -35,7 +35,7 @@ let test() =
     printfn "Starting with %s - %s [%s] by %s" start.Artist start.Title start.DifficultyName start.Creator
 
     let state = EndlessModeState.create()
-    let mutable suggestion_ctx = 
+    let mutable suggestion_ctx =
         {
             Library = library
             UserDatabase = user_db
@@ -43,7 +43,7 @@ let test() =
             MinimumRate = 1.0f<rate>
             MaximumRate = 1.5f<rate>
             OnlyNewCharts = false
-            Filter = Filter.Empty
+            Filter = FilteredSearch.Empty
             Ruleset = sc_j4
             RulesetId = sc_j4_id
             Mods = Map.empty
@@ -62,4 +62,3 @@ let test() =
             | Ok chart ->
                 printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (DifficultyRating.calculate 1.0f<rate> chart.Notes |> _.Physical)
             | Error reason -> ()
-        

@@ -42,7 +42,7 @@ module FilterParts =
 
     let private filter =
         sepBy (
-            attempt equals 
+            attempt equals
             <|> attempt notequals
             <|> attempt clamp
             <|> attempt less
@@ -133,9 +133,9 @@ type Filter =
                         report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
                         || (
                             report.Clusters
-                            |> Array.exists (fun f -> 
+                            |> Array.exists (fun f ->
                                 f.SpecificTypes
-                                |> List.exists (fun (p, amount) -> 
+                                |> List.exists (fun (p, amount) ->
                                     amount * f.Amount / cc.Length > 0.1f && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
                                 )
                             )
@@ -165,7 +165,7 @@ type Filter =
 
             | Equals("k", n)
             | Equals("key", n)
-            | Equals("keys", n) -> 
+            | Equals("keys", n) ->
                 match Int32.TryParse(n) with
                 | true, k -> filter <- { filter with Keymode = Some k }
                 | false, _ -> ()
@@ -201,6 +201,20 @@ type FilteredSearch =
 
         Filter: Filter
     }
+
+    member this.WithoutSearchTerms =
+        {
+            SearchTerms = [||]
+            SearchAntiTerms = [||]
+            Filter = this.Filter
+        }
+
+    static member Empty =
+        {
+            SearchTerms = [||]
+            SearchAntiTerms = [||]
+            Filter = Filter.Empty
+        }
 
     member internal this.Compile : ChartMeta -> bool =
         let matches_filter = this.Filter.Compile
