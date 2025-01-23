@@ -34,15 +34,11 @@ module Leaderboard =
 
     [<RequireQualifiedAccess>]
     type Sort =
-        | Time = 0
-        | Performance = 1
         | Accuracy = 2
 
     [<RequireQualifiedAccess>]
     type Filter =
         | None = 0
-        | CurrentRate = 1
-        | CurrentMods = 2
 
     type LeaderboardScore = Charts.Scores.Leaderboard.Score
 
@@ -306,8 +302,6 @@ type Leaderboard(display: Setting<Display>) =
                 Icons.CHEVRONS_UP,
                 [|
                     Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
-                    Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
-                    Sort.Time, %"levelselect.info.scoreboard.sort.time"
                 |],
                 sort,
                 !%Palette.DARK_100,
@@ -326,8 +320,6 @@ type Leaderboard(display: Setting<Display>) =
                 Icons.FILTER,
                 [|
                     Filter.None, %"levelselect.info.scoreboard.filter.none"
-                    Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
-                    Filter.CurrentMods, %"levelselect.info.scoreboard.filter.currentmods"
                 |],
                 filter,
                 !%Palette.MAIN_100,
