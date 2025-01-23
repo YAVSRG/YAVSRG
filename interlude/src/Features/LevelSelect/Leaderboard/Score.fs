@@ -52,7 +52,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
 
         this
         |+ Text(
-            K(sprintf "#%i %s  •  %s" score.Rank score.Username score_info.Scoring.FormattedAccuracy),
+            (fun () -> sprintf "#%i %s  •  %s" score.Rank score.Username score_info.Scoring.FormattedAccuracy),
             Color = text_color,
             Align = Alignment.LEFT,
             Position =
@@ -65,7 +65,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
         )
 
         |+ Text(
-            K(
+            (fun () ->
                 sprintf
                     "%s  •  %ix  •  %.2f"
                     (score_info.Ruleset.LampName score_info.Lamp)
