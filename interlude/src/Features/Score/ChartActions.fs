@@ -19,16 +19,16 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
     let rec like_button =
         PageButton(
             %"chart.add_to_likes",
-            (fun () -> CollectionActions.like_chart score_info.ChartMeta; like_button_swap.Current <- unlike_button),
+            (fun () -> CollectionActions.toggle_liked score_info.ChartMeta; like_button_swap.Current <- unlike_button),
             Icon = Icons.HEART,
             Hotkey = %%"like"
         )
     and unlike_button =
         PageButton(
             %"chart.remove_from_likes",
-            (fun () -> CollectionActions.unlike_chart score_info.ChartMeta; like_button_swap.Current <- like_button),
+            (fun () -> CollectionActions.toggle_liked score_info.ChartMeta; like_button_swap.Current <- like_button),
             Icon = Icons.FOLDER_MINUS,
-            Hotkey = %%"unlike"
+            Hotkey = %%"like"
         )
     and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked score_info.ChartMeta then unlike_button else like_button)
 

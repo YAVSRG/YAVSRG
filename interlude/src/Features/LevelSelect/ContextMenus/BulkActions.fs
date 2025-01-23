@@ -86,15 +86,15 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
                     for cc, _ in charts do f.Add cc |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
-            ), 
-            K false, 
+            ),
+            K false,
             true
         )
             .Show()
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"bulk_actions.unlike", confirm_bulk_unlike, Icon = Icons.FOLDER_MINUS, Hotkey = %%"unlike").Pos(0)
+        |+ PageButton(%"bulk_actions.unlike", confirm_bulk_unlike, Icon = Icons.FOLDER_MINUS, Hotkey = %%"like").Pos(0)
         |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
         |+ PageButton(%"bulk_actions.delete", confirm_bulk_delete, Icon = Icons.TRASH, Hotkey = %%"delete").Pos(4)
         |+ PageButton(%"bulk_actions.export_oszs", (fun () -> BulkActions.confirm_bulk_export charts), Icon = Icons.UPLOAD).Pos(6)
@@ -144,8 +144,8 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
                     for cc, _ in charts do f.Add cc |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
-            ), 
-            (function (f, Folder _) when f = folder -> false | _ -> true), 
+            ),
+            (function (f, Folder _) when f = folder -> false | _ -> true),
             true
         )
             .Show()
@@ -169,8 +169,8 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
             [ (Seq.length charts).ToString(); playlist ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
                 match Content.Library.Collections.GetPlaylist playlist with
-                | Some p -> 
-                    charts 
+                | Some p ->
+                    charts
                     |> Seq.map (function _, LibraryContext.Playlist(index, _, _) -> index | _ -> -1)
                     |> Seq.sortDescending
                     |> Seq.iter (p.RemoveAt >> ignore)
@@ -208,8 +208,8 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
                     for cc, _ in charts do f.Add cc |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
-            ), 
-            (function (f, Folder _) when f = playlist -> false | _ -> true), 
+            ),
+            (function (f, Folder _) when f = playlist -> false | _ -> true),
             true
         )
             .Show()
@@ -254,8 +254,8 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
                     for cc, _ in charts do f.Add cc |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
-            ), 
-            K false, 
+            ),
+            K false,
             true
         )
             .Show()

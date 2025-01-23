@@ -33,7 +33,6 @@ module Hotkeys =
 
         Hotkeys.register "level_select_options" (mk Keys.D1)
         Hotkeys.register "like" (mk Keys.RightBracket)
-        Hotkeys.register "unlike" (mk Keys.LeftBracket)
         Hotkeys.register "move_down_in_playlist" (ctrl Keys.Down)
         Hotkeys.register "move_up_in_playlist" (ctrl Keys.Up)
         Hotkeys.register "sort_mode" (mk Keys.D2)

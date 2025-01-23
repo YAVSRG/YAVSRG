@@ -18,17 +18,15 @@ module CollectionActions =
     let is_liked (cc: ChartMeta) =
         Content.Library.Collections.IsLiked cc.Hash
 
-    let like_chart (cc: ChartMeta) =
-        if not (is_liked cc) then
-            Content.Library.Collections.Like cc.Hash
-            likes_modified_ev.Trigger()
-            Notifications.action_feedback (Icons.HEART, [ cc.Title ] %> "collections.liked", "")
-
-    let unlike_chart (cc: ChartMeta) =
+    let toggle_liked (cc: ChartMeta) =
         if is_liked cc then
             Content.Library.Collections.Unlike cc.Hash
             likes_modified_ev.Trigger()
             Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title ] %> "collections.unliked", "")
+        else
+            Content.Library.Collections.Like cc.Hash
+            likes_modified_ev.Trigger()
+            Notifications.action_feedback (Icons.HEART, [ cc.Title ] %> "collections.liked", "")
 
     let add_to (name: string, collection: Collection, cc: ChartMeta) =
         if

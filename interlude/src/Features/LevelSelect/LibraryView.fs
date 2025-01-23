@@ -128,7 +128,6 @@ type LibraryViewControls() =
 
         base.Init parent
 
-
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
@@ -138,9 +137,7 @@ type LibraryViewControls() =
             elif (%%"move_down_in_playlist").Tapped() then
                 CollectionActions.reorder_down SelectedChart.LIBRARY_CTX |> ignore
             elif (%%"like").Tapped() then
-                CollectionActions.like_chart SelectedChart.CACHE_DATA.Value
-            elif (%%"unlike").Tapped() then
-                CollectionActions.unlike_chart SelectedChart.CACHE_DATA.Value
+                CollectionActions.toggle_liked SelectedChart.CACHE_DATA.Value
 
             //elif (%%"skip").Tapped() then
             //    FiltersPage().Show()

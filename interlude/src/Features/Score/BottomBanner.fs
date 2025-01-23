@@ -38,7 +38,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
-        
+
         if Network.lobby.IsNone && played_just_now then
             this
             |+ StylishButton(
@@ -97,7 +97,6 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                 score_info
             )
         )
-        |+ HotkeyAction("like", fun () -> CollectionActions.like_chart score_info.ChartMeta)
-        |* HotkeyAction("unlike", fun () -> CollectionActions.unlike_chart score_info.ChartMeta)
+        |* HotkeyAction("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
 
         base.Init parent
