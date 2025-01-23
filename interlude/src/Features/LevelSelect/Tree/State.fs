@@ -37,7 +37,7 @@ module private TreeState =
     let mutable currently_drag_scrolling = false
     let mutable drag_scroll_distance = 0.0f
     let mutable drag_scroll_position = 0.0f
-    let mutable click_cooldown = 0.0
+    let mutable click_debounce = 0.0
     let mutable scroll_to_chart_once = false
 
     let DRAG_THRESHOLD = 40.0f
@@ -90,13 +90,13 @@ module private TreeState =
             top + bounds.Height + this.Spacing
 
         member this.LeftClick(origin) =
-            click_cooldown <= 0
+            click_debounce <= 0
             && Mouse.released Mouse.LEFT
             && drag_scroll_distance <= DRAG_THRESHOLD
             && Mouse.y () > origin
 
         member this.RightClick(origin) =
-            click_cooldown <= 0
+            click_debounce <= 0
             && Mouse.released Mouse.RIGHT
             && drag_scroll_distance <= DRAG_THRESHOLD
             && Mouse.y () > origin

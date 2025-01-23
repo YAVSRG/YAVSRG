@@ -39,29 +39,37 @@ type LevelSelectOptionsPage() =
             .Help(Help.Info("levelselect.only_suggest_new_songs"))
             .Pos(7)
         |+ PageSetting(
+            %"levelselect.enable_rate_suggestions",
+            Checkbox options.SuggestionsEnableRates
+        )
+            .Help(Help.Info("levelselect.enable_rate_suggestions"))
+            .Pos(9)
+        |+ PageSetting(
             %"levelselect.min_suggestion_rate",
             Slider (options.SuggestionsMinRate |> Setting.trigger (fun v -> options.SuggestionsMaxRate |> Setting.app (max v)) |> Setting.uom)
         )
             .Help(Help.Info("levelselect.min_suggestion_rate"))
-            .Pos(9)
+            .Conditional(options.SuggestionsEnableRates.Get)
+            .Pos(11)
         |+ PageSetting(
             %"levelselect.max_suggestion_rate",
             Slider (options.SuggestionsMaxRate |> Setting.trigger (fun v -> options.SuggestionsMinRate |> Setting.app (min v)) |> Setting.uom)
         )
             .Help(Help.Info("levelselect.max_suggestion_rate"))
-            .Pos(11)
+            .Conditional(options.SuggestionsEnableRates.Get)
+            .Pos(13)
         |+ PageButton(
             %"library.tables",
             (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
             Hotkey = %%"table"
         )
-            .Pos(14)
+            .Pos(15)
         |+ PageButton(
             %"library.collections",
             (fun () -> ManageCollectionsPage().Show()),
             Hotkey = %%"collections"
         )
-            .Pos(16)
+            .Pos(17)
         :> Widget
 
     override this.OnClose() = LevelSelect.refresh_all()

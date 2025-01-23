@@ -16,14 +16,14 @@ type Jukebox() =
     let CAROUSEL_GAP = 50.0f
 
     override this.Init(parent) =
-        this 
-        |+ Button(Icons.SKIP_BACK, 
+        this
+        |+ Button(Icons.SKIP_BACK,
             LevelSelect.History.back,
             Hotkey = "previous_random_chart",
             Disabled = (fun () -> Screen.current_type = Screen.Type.Lobby || not (LevelSelect.History.can_go_back())),
             Position = Position.Shrink(5.0f).SliceL(45.0f)
         )
-        |+ Button(Icons.PAUSE, 
+        |+ Button(Icons.PAUSE,
             (fun () -> if Song.playing() then Song.pause() else Song.resume()),
             Hotkey = "pause_music",
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)
@@ -43,8 +43,8 @@ type Jukebox() =
 
         base.Draw()
 
-        let song_title = 
-            match SelectedChart.CACHE_DATA with 
+        let song_title =
+            match SelectedChart.CACHE_DATA with
             | Some cc -> cc.Artist + " - " + cc.Title
             | None -> %"jukebox.no_chart_selected"
 
@@ -53,7 +53,7 @@ type Jukebox() =
         Render.stencil_create false
         Render.rect carousel_bounds Color.Transparent
         Render.stencil_begin_draw ()
-        
+
         if song_title_width + CAROUSEL_GAP < carousel_bounds.Width then
             Text.draw_b(Style.font, song_title, 25.0f, carousel_bounds.Left + (carousel_bounds.Width - song_title_width) * 0.5f, this.Bounds.Top + 7.0f, Colors.text_subheading)
         else
@@ -63,8 +63,6 @@ type Jukebox() =
 
         Render.stencil_finish()
 
-
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         song_title_carousel.Update elapsed_ms
-

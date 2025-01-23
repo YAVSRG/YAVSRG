@@ -192,6 +192,7 @@ type GameOptions =
         Table: Setting<string option>
         SuggestionsMinRate: Setting.Bounded<Rate>
         SuggestionsMaxRate: Setting.Bounded<Rate>
+        SuggestionsEnableRates: Setting<bool>
         SuggestionsOnlyNew: Setting<bool>
 
         EnableExperiments: Setting<bool>
@@ -259,6 +260,7 @@ type GameOptions =
             Table = Tables.selected_id
             SuggestionsMinRate = Setting.rate 1.0f<rate>
             SuggestionsMaxRate = Setting.rate 1.5f<rate>
+            SuggestionsEnableRates = Setting.simple true
             SuggestionsOnlyNew = Setting.simple true
 
             EnableExperiments = Setting.simple false

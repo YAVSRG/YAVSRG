@@ -123,8 +123,8 @@ module LevelSelect =
             | None ->
                 {
                     BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                    MinimumRate = options.SuggestionsMinRate.Value
-                    MaximumRate = options.SuggestionsMaxRate.Value
+                    MinimumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMinRate.Value else SelectedChart.rate.Value
+                    MaximumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMaxRate.Value else SelectedChart.rate.Value
                     OnlyNewCharts = options.SuggestionsOnlyNew.Value
                     Filter = filter.WithoutSearchTerms
                     Mods = SelectedChart.selected_mods.Value
@@ -182,8 +182,8 @@ module LevelSelect =
                 let ctx =
                     {
                         BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value
-                        MinimumRate = options.SuggestionsMinRate.Value
-                        MaximumRate = options.SuggestionsMaxRate.Value
+                        MinimumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMinRate.Value else SelectedChart.rate.Value
+                        MaximumRate = if options.SuggestionsEnableRates.Value then options.SuggestionsMaxRate.Value else SelectedChart.rate.Value
                         OnlyNewCharts = false
                         Filter = filter
                         Mods = SelectedChart.selected_mods.Value

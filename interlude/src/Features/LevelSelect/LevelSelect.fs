@@ -103,7 +103,7 @@ type LevelSelectScreen() =
             .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
             .Conditional(fun () -> TreeState.multi_selection.IsNone)
         |+ StylishButton(
-            (fun () -> LevelSelect.random_chart(); TreeState.click_cooldown <- 500.0),
+            (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
             K Icons.REFRESH_CCW,
             !%Palette.MAIN.O2,
             Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-360.0f)
@@ -120,7 +120,7 @@ type LevelSelectScreen() =
             .Conditional(fun () -> TreeState.multi_selection.IsNone)
 
         |+ StylishButton(
-            (fun () -> TreeState.multi_selection <- None; TreeState.click_cooldown <- 500.0),
+            (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
             K (sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection"),
             !%Palette.DARK.O2,
             TiltRight = false,

@@ -98,7 +98,7 @@ module Tree =
 
         is_empty <- List.isEmpty groups
         cache_flag <- 0
-        click_cooldown <- 500.0
+        click_debounce <- 500.0
         multi_selection <- None
 
     do
@@ -248,8 +248,8 @@ module Tree =
             else
                 scroll_to_chart_once <- false
 
-            if click_cooldown > 0.0 then
-                click_cooldown <- click_cooldown - elapsed_ms
+            if click_debounce > 0.0 then
+                click_debounce <- click_debounce - elapsed_ms
 
             let lo = total_height - tree_height - origin
             let hi = 20.0f + origin
