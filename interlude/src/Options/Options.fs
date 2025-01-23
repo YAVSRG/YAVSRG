@@ -35,6 +35,13 @@ type PacemakerPersonalBestMode =
     | IfBetter
     | Always
 
+[<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
+type QuitOutBehaviour =
+    | SaveAndShow
+    | Show
+    | Ignore
+
 [<Json.AutoCodec(false)>]
 [<RequireQualifiedAccess>]
 type PacemakerSettings =
@@ -165,7 +172,7 @@ type GameOptions =
         Pacemaker: Dictionary<string, PacemakerSettings>
         EnablePacemaker: Setting<bool>
         EnablePacemakerFailMidway: Setting<bool>
-        SaveFailedScores: Setting<bool>
+        QuitOutBehaviour: Setting<QuitOutBehaviour>
         OnlySaveNewRecords: Setting<bool>
         SelectedMods: Setting<ModState>
 
@@ -232,7 +239,7 @@ type GameOptions =
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false
             EnablePacemakerFailMidway = Setting.simple true
-            SaveFailedScores = Setting.simple false
+            QuitOutBehaviour = Setting.simple QuitOutBehaviour.SaveAndShow
             OnlySaveNewRecords = Setting.simple false
             SelectedMods = Setting.simple Map.empty
 

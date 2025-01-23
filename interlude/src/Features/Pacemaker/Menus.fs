@@ -49,8 +49,14 @@ type PacemakerOptionsPage() =
         |+ PageSetting(%"gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
             .Help(Help.Info("gameplay.pacemaker.onlysavenewrecords"))
             .Pos(4)
-        |+ PageSetting(%"gameplay.pacemaker.save_failed_scores", Checkbox options.SaveFailedScores)
-            .Help(Help.Info("gameplay.pacemaker.save_failed_scores"))
+        |+ PageSetting(%"gameplay.pacemaker.on_quit_out", SelectDropdown(
+                [|
+                    QuitOutBehaviour.SaveAndShow, %"gameplay.pacemaker.on_quit_out.save_and_show"
+                    QuitOutBehaviour.Show, %"gameplay.pacemaker.on_quit_out.show"
+                    QuitOutBehaviour.Ignore, %"gameplay.pacemaker.on_quit_out.ignore"
+                |],
+                options.QuitOutBehaviour)
+        )
             .Pos(6)
         |+ PageSetting(%"gameplay.pacemaker.type",
             SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)

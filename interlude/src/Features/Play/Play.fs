@@ -72,10 +72,12 @@ module PlayScreen =
         let give_up () =
             let is_giving_up_play = not (liveplay :> IReplayProvider).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
-            if
-                if is_giving_up_play then
-                    liveplay.Finish()
-                    scoring.Update Time.infinity
+            if is_giving_up_play then
+                liveplay.Finish()
+                scoring.Update Time.infinity
+                match options.QuitOutBehaviour.Value with
+                | QuitOutBehaviour.SaveAndShow
+                | QuitOutBehaviour.Show ->
                     Screen.change_new
                         (fun () ->
                             let score_info =
@@ -88,10 +90,19 @@ module PlayScreen =
                         )
                         Screen.Type.Score
                         Transitions.LeaveGameplay
-                else
+
+                | QuitOutBehaviour.Ignore ->
+                    let score_info =
+                        Gameplay.score_info_from_gameplay
+                            info
+                            scoring
+                            ((liveplay :> IReplayProvider).GetFullReplay())
+                            true
+                    Gameplay.set_score true score_info info.SaveData |> ignore
                     Screen.back Transitions.LeaveGameplay
-            then
-                Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
+            else
+                Screen.back Transitions.LeaveGameplay
+            |> function false -> () | true -> Stats.CURRENT_SESSION.PlaysQuit <- Stats.CURRENT_SESSION.PlaysQuit + 1
 
         let fail_midway(this: IPlayScreen) =
             liveplay.Finish()

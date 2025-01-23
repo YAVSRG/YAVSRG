@@ -106,7 +106,7 @@ module Gameplay =
                     else
                         Stats.handle_score standardised_score improvement_flags Content.UserData
 
-                if (options.SaveFailedScores.Value || not score_info.IsFailed) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
+                if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not score_info.IsFailed) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
                     UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
                     score_saved_ev.Trigger score_info
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
