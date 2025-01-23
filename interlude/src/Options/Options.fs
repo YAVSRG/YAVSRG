@@ -232,7 +232,7 @@ type GameOptions =
             Pacemaker = Dictionary<string, PacemakerSettings>()
             EnablePacemaker = Setting.simple false
             EnablePacemakerFailMidway = Setting.simple true
-            SaveFailedScores = Setting.simple true
+            SaveFailedScores = Setting.simple false
             OnlySaveNewRecords = Setting.simple false
             SelectedMods = Setting.simple Map.empty
 
