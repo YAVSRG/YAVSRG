@@ -100,7 +100,7 @@ module WindowThread =
         detect_monitors()
 
         last_applied_config <- config
-        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height) else None
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowResolution else None
 
         let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
 
@@ -180,6 +180,7 @@ module WindowThread =
                     max_height,
                     config.FullscreenVideoMode.RefreshRate
                 )
+                GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowResolution)
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
@@ -379,7 +380,7 @@ module WindowThread =
 
         GameThread.init(window, icon, init_thunk)
         Audio.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
-        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height) else None
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowResolution else None
         framebuffer_size_callback window width height
 
         GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)

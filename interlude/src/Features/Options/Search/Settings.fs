@@ -39,6 +39,7 @@ module Settings =
                             WindowType.Windowed, %"system.windowmode.windowed"
                             WindowType.Borderless, %"system.windowmode.borderless"
                             WindowType.Fullscreen, %"system.windowmode.fullscreen"
+                            WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
                         |],
                         config.WindowMode
                         |> Setting.trigger window_mode_changed
@@ -62,10 +63,16 @@ module Settings =
                 )
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
+                    %"system.letterbox_resolution",
+                    WindowedResolution(config.WindowResolution |> Setting.trigger (ignore >> config.Apply))
+                )
+                    .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
+                , 2, 0, PageWidth.Normal
+                yield PageSetting(
                     %"system.videomode",
                     VideoMode(
-                        config.FullscreenVideoMode |> Setting.trigger (ignore >> config.Apply),
-                        get_current_supported_video_modes
+                        config.FullscreenVideoMode
+                        |> Setting.trigger (ignore >> config.Apply)
                     )
                 )
                     .Help(Help.Info("system.videomode"))

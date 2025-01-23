@@ -2,10 +2,81 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
+
+[<AutoOpen>]
+module Monitors =
+
+    let monitors = WindowThread.get_monitors ()
+
+    let get_current_supported_video_modes () =
+        let reported_modes = monitors.[config.Display.Value].DisplayModes
+
+        if reported_modes.Length = 0 then
+            [|
+                {
+                    Width = 1920
+                    Height = 1080
+                    RefreshRate = 60
+                }
+            |]
+        else
+            reported_modes
+
+    let select_fullscreen_size () =
+        try
+            let supported_video_modes = get_current_supported_video_modes ()
+
+            if not (Array.contains config.FullscreenVideoMode.Value supported_video_modes) then
+                config.FullscreenVideoMode.Set supported_video_modes.[supported_video_modes.Length - 1]
+        with err ->
+            Logging.Debug "Error setting fullscreen video mode - Possibly invalid display selected\n%O" err
+
+    let window_mode_changed (wm: WindowType) =
+        if wm = WindowType.Fullscreen then
+            select_fullscreen_size ()
+
+type CustomWindowedResolutionPage(setting: Setting<int * int>) =
+    inherit Page()
+
+    let tab = Bind.mk Keys.Tab
+
+    let max_width, max_height =
+        let mode = get_current_supported_video_modes() |> Array.last
+        mode.Width, mode.Height
+
+    let width = Setting.bounded (min 320 (max_width - 1), max_width) (fst setting.Value)
+    let height = Setting.bounded (min 240 (max_height - 1), max_height) (snd setting.Value)
+
+    let width_box = NumberEntry.create_int width
+    let height_box = NumberEntry.create_int height
+
+    override this.Content () =
+        page_container()
+        |+ PageSetting(%"system.windowresolution.width", width_box).Pos(0)
+        |+ PageSetting(%"system.windowresolution.height", height_box).Pos(2)
+        |+ Text(%"system.windowresolution.aspect_ratio_warning", Color = K Colors.text_red, Align = Alignment.CENTER)
+            .Conditional(fun () -> height.Value * 4 / 3 >= width.Value)
+            .Pos(4, 1, PageWidth.Normal)
+        :> Widget
+
+    override this.Update (elapsed_ms, moved) =
+        if tab.Tapped() || (%%"select").Tapped() then
+            match Selection.get_selected_element() with
+            | Some w when (w :?> Widget).Parent = width_box -> height_box.Select false
+            | Some h when (h :?> Widget).Parent = height_box -> Menu.Back()
+            | _ -> width_box.Select false
+
+        base.Update(elapsed_ms, moved)
+
+    override this.Title = %"system.windowresolution"
+    override this.OnClose() =
+        if height.Value * 4 / 3 < width.Value then
+            setting.Set (width.Value, height.Value)
 
 type WindowedResolution(setting: Setting<int * int>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
@@ -24,13 +95,26 @@ type WindowedResolution(setting: Setting<int * int>) as this =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
-                    Items = WindowResolution.PRESETS |> Seq.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                    Items =
+                        let max_res = get_current_supported_video_modes() |> Array.last
+                        Seq.concat [
+                            [|(0, 0), %"system.windowresolution.custom"|]
+                            WindowResolution.PRESETS
+                            |> Array.filter (fun (w, h) -> w <= max_res.Width && h <= max_res.Height)
+                            |> Array.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
+                        ]
                     ColorFunc = K Colors.text
-                    Setting = setting
+                    Setting =
+                        { setting with
+                            Set = fun v ->
+                                if v = (0, 0) then
+                                    CustomWindowedResolutionPage(setting).Show()
+                                else setting.Set v
+                        }
                 }
         )
 
-type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> FullscreenVideoMode array) as this =
+type VideoMode(setting: Setting<FullscreenVideoMode>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
     let rec gcd a b =
@@ -46,7 +130,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
     let setting = setting |> Setting.trigger (fun mode -> let gcd = gcd mode.Width mode.Height in aspect_ratio <- mode.Width / gcd, mode.Height / gcd)
 
     let buttons =
-        GridFlowContainer(PRETTYHEIGHT - 10.0f, 3)
+        GridFlowContainer(PRETTYHEIGHT - 10.0f, 3, WrapNavigation = false)
         |+ Button(
             (fun () -> let mode = setting.Value in sprintf "%ix%i" mode.Width mode.Height),
             (fun () -> this.ToggleResolutionDropdown())
@@ -84,7 +168,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
             Dropdown
                 {
                     Items =
-                        modes_thunk ()
+                        get_current_supported_video_modes ()
                         |> Seq.filter (fun mode -> mode.RefreshRate = current_mode.RefreshRate && mode.Height * ax = mode.Width * ay)
                         |> Seq.map (fun mode ->
                             mode, sprintf "%ix%i" mode.Width mode.Height
@@ -97,11 +181,10 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
     member this.ToggleRefreshRateDropdown() =
         dropdown_wrapper.Toggle(fun () ->
             let current_mode = setting.Value
-            let (ax, ay) = aspect_ratio
             Dropdown
                 {
                     Items =
-                        modes_thunk ()
+                        get_current_supported_video_modes ()
                         |> Seq.filter (fun mode -> mode.Width = current_mode.Width && mode.Height = current_mode.Height)
                         |> Seq.map (fun mode ->
                             mode, sprintf "%ihz" mode.RefreshRate
@@ -117,7 +200,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
             Dropdown
                 {
                     Items =
-                        modes_thunk ()
+                        get_current_supported_video_modes ()
                         |> Seq.map (fun mode -> mode, let r = gcd mode.Width mode.Height in mode.Width / r, mode.Height / r)
                         |> Seq.sortBy (fun (mode, _) -> abs (mode.RefreshRate - current_mode.RefreshRate))
                         |> Seq.sortBy (fun (mode, _) -> abs (mode.Height - current_mode.Height))
@@ -129,39 +212,6 @@ type VideoMode(setting: Setting<FullscreenVideoMode>, modes_thunk: unit -> Fulls
                     Setting = setting
                 }
         )
-
-[<AutoOpen>]
-module Monitors =
-
-    let monitors = WindowThread.get_monitors ()
-
-    let get_current_supported_video_modes () =
-        let reported_modes = monitors.[config.Display.Value].DisplayModes
-
-        if reported_modes.Length = 0 then
-            [|
-                {
-                    Width = 1920
-                    Height = 1080
-                    RefreshRate = 60
-                }
-            |]
-        else
-            reported_modes
-
-    let select_fullscreen_size () =
-        try
-            let supported_video_modes = get_current_supported_video_modes ()
-
-            if not (Array.contains config.FullscreenVideoMode.Value supported_video_modes) then
-                config.FullscreenVideoMode.Set supported_video_modes.[supported_video_modes.Length - 1]
-        with err ->
-            Logging.Debug "Error setting fullscreen video mode - Possibly invalid display selected\n%O" err
-
-    let window_mode_changed (wm: WindowType) =
-        // todo: better ui for windowed mode since you can no longer do custom res
-        if wm = WindowType.Fullscreen then
-            select_fullscreen_size ()
 
 type SystemPage() =
     inherit Page()
@@ -177,6 +227,7 @@ type SystemPage() =
                     WindowType.Windowed, %"system.windowmode.windowed"
                     WindowType.Borderless, %"system.windowmode.borderless"
                     WindowType.Fullscreen, %"system.windowmode.fullscreen"
+                    WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
                 |],
                 config.WindowMode
                 |> Setting.trigger window_mode_changed
@@ -204,13 +255,19 @@ type SystemPage() =
         |+ PageSetting(
             %"system.videomode",
             VideoMode(
-                config.FullscreenVideoMode |> Setting.trigger (ignore >> config.Apply),
-                get_current_supported_video_modes
+                config.FullscreenVideoMode
+                |> Setting.trigger (ignore >> config.Apply)
             )
         )
             .Help(Help.Info("system.videomode"))
             .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
+        |+ PageSetting(
+            %"system.letterbox_resolution",
+            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+        )
+            .Pos(4)
+            .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
 
         |+ PageButton(
             %"system.performance",
