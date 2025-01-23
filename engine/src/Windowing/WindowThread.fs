@@ -93,12 +93,14 @@ module WindowThread =
 
     let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
     let mutable private refresh_rate = 60
+    let mutable private letterbox: (int * int) option = None
 
     let apply_config(config: WindowOptions) =
         assert(is_window_thread())
         detect_monitors()
 
         last_applied_config <- config
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height) else None
 
         let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
 
@@ -128,7 +130,6 @@ module WindowThread =
                     0
                 )
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.Borderless ->
                 GLFW.SetWindowMonitor(
@@ -140,12 +141,10 @@ module WindowThread =
                     monitor.ClientArea.Size.Y + 1,
                     0
                 )
-
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.HideWindow(window)
                 GLFW.MaximizeWindow(window)
                 GLFW.ShowWindow(window)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.BorderlessNoTaskbar ->
                 GLFW.SetWindowMonitor(
@@ -157,24 +156,30 @@ module WindowThread =
                     monitor.ClientArea.Size.Y,
                     0
                 )
-
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.Fullscreen ->
-                let requested_mode = config.FullscreenVideoMode
-
                 GLFW.SetWindowMonitor(
                     window,
                     monitor_ptr,
                     0,
                     0,
-                    requested_mode.Width,
-                    requested_mode.Height,
-                    requested_mode.RefreshRate
+                    config.FullscreenVideoMode.Width,
+                    config.FullscreenVideoMode.Height,
+                    config.FullscreenVideoMode.RefreshRate
                 )
 
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
+            | WindowType.FullscreenLetterbox ->
+                let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
+                GLFW.SetWindowMonitor(
+                    window,
+                    monitor_ptr,
+                    0,
+                    0,
+                    max_width,
+                    max_height,
+                    config.FullscreenVideoMode.RefreshRate
+                )
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
 
@@ -187,7 +192,6 @@ module WindowThread =
                 let width, height = config.WindowResolution
                 GLFW.SetWindowSize(window, width, height)
                 GLFW.SetWindowPos(window, (monitor.ClientArea.Min.X + monitor.ClientArea.Max.X - width) / 2, (monitor.ClientArea.Min.Y + monitor.ClientArea.Max.Y - height) / 2)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.Borderless ->
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
@@ -196,30 +200,38 @@ module WindowThread =
                 GLFW.SetWindowSize(window, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
                 GLFW.MaximizeWindow(window)
                 GLFW.ShowWindow(window)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.BorderlessNoTaskbar ->
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.SetWindowPos(window, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
                 GLFW.SetWindowSize(window, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
             | WindowType.Fullscreen ->
-                let requested_mode = config.FullscreenVideoMode
-
                 GLFW.SetWindowMonitor(
                     window,
                     monitor_ptr,
                     0,
                     0,
-                    requested_mode.Width,
-                    requested_mode.Height,
-                    requested_mode.RefreshRate
+                    config.FullscreenVideoMode.Width,
+                    config.FullscreenVideoMode.Height,
+                    config.FullscreenVideoMode.RefreshRate
                 )
 
-                refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
+            | WindowType.FullscreenLetterbox ->
+                let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
+                GLFW.SetWindowMonitor(
+                    window,
+                    monitor_ptr,
+                    0,
+                    0,
+                    max_width,
+                    max_height,
+                    config.FullscreenVideoMode.RefreshRate
+                )
 
             | _ -> Logging.Error "Tried to change to invalid window mode"
+
+        refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
         if config.EnableCursor then
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
@@ -295,12 +307,15 @@ module WindowThread =
         GLFW initialisation
     *)
 
-    let private resize_callback (window: nativeptr<Window>) (_: int) (_: int) =
-        let width, height = GLFW.GetFramebufferSize(window)
-        if width <> 0 && height <> 0 then
-            GameThread.defer (fun () -> GameThread.viewport_resized(width, height))
+    let private framebuffer_size_callback (_: nativeptr<Window>) (buffer_width: int) (buffer_height: int) =
+        if buffer_width <> 0 && buffer_height <> 0 then
+            match letterbox with
+            | Some (letterbox_width, letterbox_height) when letterbox_width <= buffer_width && letterbox_height <= buffer_height ->
+                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) (letterbox_width, letterbox_height))
+            | _ ->
+                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) (buffer_width, buffer_height))
 
-    let private resize_callback_d = GLFWCallbacks.WindowSizeCallback resize_callback
+    let private framebuffer_size_callback_d = GLFWCallbacks.FramebufferSizeCallback framebuffer_size_callback
 
     let private file_drop_ev = Event<string array>()
     let on_file_drop = file_drop_ev.Publish
@@ -370,12 +385,13 @@ module WindowThread =
 
         GameThread.init(window, icon, init_thunk)
         Audio.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
-        resize_callback window width height
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height) else None
+        framebuffer_size_callback window width height
 
         Input.init window
 
         GLFW.SetDropCallback(window, file_drop_callback_d) |> ignore
-        GLFW.SetWindowSizeCallback(window, resize_callback_d) |> ignore
+        GLFW.SetFramebufferSizeCallback(window, framebuffer_size_callback_d) |> ignore
         GLFW.SetWindowFocusCallback(window, focus_callback_d) |> ignore
 
         let monitor_area = Monitors.GetMonitorFromWindow(window).ClientArea

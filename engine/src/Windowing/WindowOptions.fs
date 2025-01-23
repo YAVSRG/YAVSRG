@@ -5,6 +5,7 @@ type WindowType =
     | Borderless = 1
     | Fullscreen = 2
     | BorderlessNoTaskbar = 3
+    | FullscreenLetterbox = 4
 
 module WindowResolution =
 

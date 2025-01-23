@@ -107,9 +107,9 @@ module GameThread =
     let has_fatal_error () =
         fatal_error
 
-    let internal viewport_resized(width, height) =
+    let internal framebuffer_resized framebuffer viewport =
         assert(is_game_thread())
-        Render.viewport_resized (width, height)
+        Render.framebuffer_resized framebuffer viewport
         resized <- true
 
     let internal change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
@@ -176,7 +176,7 @@ module GameThread =
         let before_draw = now ()
         Render.start ()
 
-        if Render._viewport_height > 0 then
+        if Render._framebuffer_height > 0 then
             ui_root.Draw()
 
         Render.finish ()
@@ -199,7 +199,7 @@ module GameThread =
 
     let private main_loop () =
         GLFW.MakeContextCurrent(window)
-        Render.init Render.DEFAULT_SCREEN
+        Render.init Render.DEFAULT_SCREEN Render.DEFAULT_SCREEN
 
         match loading_icon with
         | Some icon -> () // todo: get it to work
