@@ -43,7 +43,7 @@ type Scoreboard(display: Setting<Display>) =
         | Filter.CurrentRate -> (fun a -> a.Data.Rate = SelectedChart.rate.Value)
         | Filter.CurrentMods -> (fun a -> a.Data.Mods = SelectedChart.selected_mods.Value)
         | _ -> K true
-    
+
     let container = FlowContainer.Vertical<ScoreCard>(50.0f, Spacing = Style.PADDING)
 
     let scroll_container =
@@ -58,9 +58,9 @@ type Scoreboard(display: Setting<Display>) =
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()); loading <- true)
-        SelectedChart.on_chart_change_finished.Add(fun _ -> container.Clear(); count <- 0)
+        SelectedChart.on_chart_change_finished.Add (fun _ -> container.Clear(); count <- 0)
         Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> container.Sort <- sorter ()))
-        SelectedChart.on_chart_update_finished.Add(fun _ -> refresh_filter())
+        SelectedChart.on_chart_update_finished.Add (fun _ -> refresh_filter())
         Gameplay.score_deleted.Add (fun timestamp -> container.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> container.Remove sc)))
         container.Sort <- sorter ()
 

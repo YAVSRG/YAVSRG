@@ -243,10 +243,12 @@
     <Compile Include="Features\LevelSelect\Scoreboard\Score.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScores.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\Scoreboard.fs" />
+    <Compile Include="Features\LevelSelect\Leaderboard\Score.fs" />
+    <Compile Include="Features\LevelSelect\Leaderboard\OnlineScores.fs" />
+    <Compile Include="Features\LevelSelect\Leaderboard\Leaderboard.fs" />
     <Compile Include="Features\LevelSelect\Info\PersonalBests.fs" />
     <Compile Include="Features\LevelSelect\Info\ChartDetails.fs" />
     <Compile Include="Features\LevelSelect\Info\Patterns.fs" />
-    <Compile Include="Features\LevelSelect\Info\Leaderboard.fs" />
     <Compile Include="Features\LevelSelect\Info\InfoPanel.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Options\System\Hotkeys.fs" />

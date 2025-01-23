@@ -29,6 +29,29 @@ module Gameplay =
     let private leaderboard_rank_changed_ev = Event<ScoreInfo>()
     let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
 
+    let submit_online_score (score_info: ScoreInfo) =
+        Charts.Scores.Save.post (
+            ({
+                ChartId = score_info.ChartMeta.Hash
+                Replay = score_info.Replay |> Replay.compress_string
+                Rate = score_info.Rate
+                Mods = score_info.Mods
+                Timestamp = score_info.TimePlayed
+            }),
+            (function
+                | None -> Logging.Error "Error submitting score (%s on %s)" (score_info.Ruleset.FormatAccuracy score_info.Accuracy) score_info.ChartMeta.Title
+                | Some None -> ()
+                | Some (Some leaderboard_result) ->
+                match leaderboard_result.LeaderboardPosition with
+                | Some new_position ->
+                    Logging.Info "New leaderboard rank! (%s on %s) is #%i"
+                        (score_info.Ruleset.FormatAccuracy score_info.Accuracy) score_info.ChartMeta.Title
+                        new_position
+                    GameThread.defer (fun () -> leaderboard_rank_changed_ev.Trigger score_info)
+                | None -> ()
+            )
+        )
+
     let score_info_from_gameplay
         (info: LoadedChartInfo)
         (scoring: ScoreProcessor)
@@ -69,28 +92,8 @@ module Gameplay =
                         score_info.WithRuleset Rulesets.DEFAULT
                     else score_info
 
-                if Network.status = Network.Status.LoggedIn && not score_info.IsFailed then
-                    Charts.Scores.Save.post (
-                        ({
-                            ChartId = score_info.ChartMeta.Hash
-                            Replay = score_info.Replay |> Replay.compress_string
-                            Rate = score_info.Rate
-                            Mods = score_info.Mods
-                            Timestamp = score_info.TimePlayed
-                        }),
-                        (function
-                         | None -> Logging.Error "Error submitting score (%s on %s)" (score_info.Ruleset.FormatAccuracy standardised_score.Accuracy) score_info.ChartMeta.Title
-                         | Some None -> ()
-                         | Some (Some leaderboard_result) ->
-                            match leaderboard_result.LeaderboardPosition with
-                            | Some new_position ->
-                                Logging.Info "New leaderboard rank! (%s on %s) is #%i"
-                                    (score_info.Ruleset.FormatAccuracy standardised_score.Accuracy) score_info.ChartMeta.Title
-                                    new_position
-                                GameThread.defer (fun () -> leaderboard_rank_changed_ev.Trigger score_info)
-                            | None -> ()
-                        )
-                    )
+                if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
+                    submit_online_score standardised_score
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with

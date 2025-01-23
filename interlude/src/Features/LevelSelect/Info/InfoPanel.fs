@@ -88,8 +88,7 @@ type InfoPanel() as this =
 
     member this.OnChartUpdated(info: LoadedChartInfo) =
         match display.Value with
-        | Display.Local -> ()
-        | Display.Online -> online.OnChartUpdated(info)
         | Display.Patterns -> patterns.OnChartUpdated(info)
+        | _ -> ()
 
     member this.Refresh() = SelectedChart.when_loaded false this.OnChartUpdated
