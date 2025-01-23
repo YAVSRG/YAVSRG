@@ -18,8 +18,8 @@ module Render =
     let mutable internal _framebuffer_width = fst DEFAULT_SCREEN
     let mutable internal _framebuffer_height = snd DEFAULT_SCREEN
 
-    let mutable internal _letterbox_width = _framebuffer_width
-    let mutable internal _letterbox_height = _framebuffer_height
+    let mutable internal _viewport_width = _framebuffer_width
+    let mutable internal _viewport_height = _framebuffer_height
 
     let mutable internal _width = fst DEFAULT_SCREEN |> float32
     let mutable internal _height = snd DEFAULT_SCREEN |> float32
@@ -87,7 +87,7 @@ module Render =
             if List.isEmpty fbo_stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
-                GL.Viewport((_framebuffer_width - _letterbox_width) / 2, (_framebuffer_height - _letterbox_height) / 2, _letterbox_width, _letterbox_height)
+                GL.Viewport((_framebuffer_width - _viewport_width) / 2, (_framebuffer_height - _viewport_height) / 2, _viewport_width, _viewport_height)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
 
@@ -218,7 +218,7 @@ module Render =
     /// This is not necessarily the dimensions of the window, as this does account for the window border/decorations OR for letterboxing<br/>
     /// For the viewport area of the game use <c>viewport_size()</c>
     /// </summary>
-    let viewport_size() = _letterbox_width, _letterbox_height
+    let viewport_size() = _viewport_width, _viewport_height
 
     /// <summary>
     /// Gets and binds an <see cref="FBO"/> from the pool.<br/>
@@ -236,8 +236,8 @@ module Render =
                         Handle = texture_ids.[i]
                         TextureUnit = 0
 
-                        Width = _letterbox_width
-                        Height = _letterbox_height
+                        Width = _viewport_width
+                        Height = _viewport_height
                         Layers = 1
 
                         References = -1
@@ -251,8 +251,8 @@ module Render =
                         Y = 0
                         Z = 1
 
-                        GridWidth = _letterbox_width
-                        GridHeight = _letterbox_height
+                        GridWidth = _viewport_width
+                        GridHeight = _viewport_height
 
                         Rows = 1
                         Columns = 1
@@ -395,18 +395,18 @@ module Render =
         Internal functions used by the Game and Window threads
     *)
 
-    let internal framebuffer_resized (framebuffer_width, framebuffer_height) (letterbox_width, letterbox_height) =
-        assert(letterbox_width <> 0 && letterbox_height <> 0)
-        assert(framebuffer_width >= letterbox_width && framebuffer_height >= letterbox_height)
+    let internal framebuffer_resized (framebuffer_width, framebuffer_height) (viewport_width, viewport_height) =
+        assert(viewport_width <> 0 && viewport_height <> 0)
+        assert(framebuffer_width >= viewport_width && framebuffer_height >= viewport_height)
 
         _framebuffer_width <- framebuffer_width
         _framebuffer_height <- framebuffer_height
 
-        _letterbox_width <- letterbox_width
-        _letterbox_height <- letterbox_height
+        _viewport_width <- viewport_width
+        _viewport_height <- viewport_height
 
-        GL.Viewport((framebuffer_width - letterbox_width) / 2, (framebuffer_height - letterbox_height) / 2, letterbox_width, letterbox_height)
-        let width, height = float32 letterbox_width, float32 letterbox_height
+        GL.Viewport((framebuffer_width - viewport_width) / 2, (framebuffer_height - viewport_height) / 2, viewport_width, viewport_height)
+        let width, height = float32 viewport_width, float32 viewport_height
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
 
@@ -426,7 +426,7 @@ module Render =
         assert(alpha_mult = 1.0f)
         GL.Flush()
 
-    let internal init (viewport_width, viewport_height) (letterbox_width, letterbox_height) =
+    let internal init (framebuffer_width, framebuffer_height) (viewport_width, viewport_height) =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
@@ -435,10 +435,10 @@ module Render =
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
 
-        if letterbox_width <= 0 || letterbox_height <= 0 || viewport_width <= 0 || viewport_height <= 0 then
+        if viewport_width <= 0 || viewport_height <= 0 || framebuffer_width <= 0 || framebuffer_height <= 0 then
             framebuffer_resized DEFAULT_SCREEN DEFAULT_SCREEN
         else
-            framebuffer_resized (viewport_width, viewport_height) (letterbox_width, letterbox_height)
+            framebuffer_resized (framebuffer_width, framebuffer_height) (viewport_width, viewport_height)
 
         Shader.init()
         _batch <- Batch.Create(1024)
@@ -492,13 +492,13 @@ Process: %s"""
     open SixLabors.ImageSharp.Processing
 
     let take_screenshot () : Image<Rgba32> =
-        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_letterbox_width * _letterbox_height * 4)
+        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
 
-        GL.ReadPixels((_framebuffer_width - _letterbox_width) / 2, (_framebuffer_height - _letterbox_height) / 2, _letterbox_width, _letterbox_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        GL.ReadPixels((_framebuffer_width - _viewport_width) / 2, (_framebuffer_height - _viewport_height) / 2, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
 
         let image: Image<Rgba32> =
             Image<Rgba32>
-                .LoadPixelData(new Span<byte>(data.ToPointer(), (_letterbox_width * _letterbox_height * 4)), _letterbox_width, _letterbox_height)
+                .LoadPixelData(new Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
 
         image.Mutate(fun i -> i.Flip(FlipMode.Vertical) |> ignore)
         image
