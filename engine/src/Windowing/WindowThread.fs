@@ -113,13 +113,12 @@ module WindowThread =
                 Monitors.GetMonitorFromWindow(window)
         let monitor_ptr = monitor.Handle.ToUnsafePtr<Monitor>()
 
-        if was_fullscreen then
+        match config.WindowMode with
 
-            match config.WindowMode with
+        | WindowType.Windowed ->
+            let width, height = config.WindowResolution
 
-            | WindowType.Windowed ->
-                let width, height = config.WindowResolution
-
+            if was_fullscreen then
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
@@ -130,8 +129,13 @@ module WindowThread =
                     0
                 )
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
+            else
+                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
+                GLFW.SetWindowSize(window, width, height)
+                GLFW.SetWindowPos(window, (monitor.ClientArea.Min.X + monitor.ClientArea.Max.X - width) / 2, (monitor.ClientArea.Min.Y + monitor.ClientArea.Max.Y - height) / 2)
 
-            | WindowType.Borderless ->
+        | WindowType.Borderless ->
+            if was_fullscreen then
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
@@ -145,8 +149,16 @@ module WindowThread =
                 GLFW.HideWindow(window)
                 GLFW.MaximizeWindow(window)
                 GLFW.ShowWindow(window)
+            else
+                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
+                GLFW.HideWindow(window)
+                GLFW.SetWindowPos(window, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1)
+                GLFW.SetWindowSize(window, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
+                GLFW.MaximizeWindow(window)
+                GLFW.ShowWindow(window)
 
-            | WindowType.BorderlessNoTaskbar ->
+        | WindowType.BorderlessNoTaskbar ->
+            if was_fullscreen then
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
@@ -157,80 +169,36 @@ module WindowThread =
                     0
                 )
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
-
-            | WindowType.Fullscreen ->
-                GLFW.SetWindowMonitor(
-                    window,
-                    monitor_ptr,
-                    0,
-                    0,
-                    config.FullscreenVideoMode.Width,
-                    config.FullscreenVideoMode.Height,
-                    config.FullscreenVideoMode.RefreshRate
-                )
-
-            | WindowType.FullscreenLetterbox ->
-                let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
-                GLFW.SetWindowMonitor(
-                    window,
-                    monitor_ptr,
-                    0,
-                    0,
-                    max_width,
-                    max_height,
-                    config.FullscreenVideoMode.RefreshRate
-                )
-                GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowResolution)
-
-            | _ -> Logging.Error "Tried to change to invalid window mode"
-
-        else
-
-            match config.WindowMode with
-
-            | WindowType.Windowed ->
-                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
-                let width, height = config.WindowResolution
-                GLFW.SetWindowSize(window, width, height)
-                GLFW.SetWindowPos(window, (monitor.ClientArea.Min.X + monitor.ClientArea.Max.X - width) / 2, (monitor.ClientArea.Min.Y + monitor.ClientArea.Max.Y - height) / 2)
-
-            | WindowType.Borderless ->
-                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
-                GLFW.HideWindow(window)
-                GLFW.SetWindowPos(window, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1)
-                GLFW.SetWindowSize(window, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
-                GLFW.MaximizeWindow(window)
-                GLFW.ShowWindow(window)
-
-            | WindowType.BorderlessNoTaskbar ->
+            else
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.SetWindowPos(window, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
                 GLFW.SetWindowSize(window, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
 
-            | WindowType.Fullscreen ->
-                GLFW.SetWindowMonitor(
-                    window,
-                    monitor_ptr,
-                    0,
-                    0,
-                    config.FullscreenVideoMode.Width,
-                    config.FullscreenVideoMode.Height,
-                    config.FullscreenVideoMode.RefreshRate
-                )
+        | WindowType.Fullscreen ->
+            GLFW.SetWindowMonitor(
+                window,
+                monitor_ptr,
+                0,
+                0,
+                config.FullscreenVideoMode.Width,
+                config.FullscreenVideoMode.Height,
+                config.FullscreenVideoMode.RefreshRate
+            )
 
-            | WindowType.FullscreenLetterbox ->
-                let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
-                GLFW.SetWindowMonitor(
-                    window,
-                    monitor_ptr,
-                    0,
-                    0,
-                    max_width,
-                    max_height,
-                    config.FullscreenVideoMode.RefreshRate
-                )
+        | WindowType.FullscreenLetterbox ->
+            let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
+            GLFW.SetWindowMonitor(
+                window,
+                monitor_ptr,
+                0,
+                0,
+                max_width,
+                max_height,
+                config.FullscreenVideoMode.RefreshRate
+            )
+            GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowResolution)
 
-            | _ -> Logging.Error "Tried to change to invalid window mode"
+        | _ -> Logging.Error "Tried to change to invalid window mode"
 
         refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
