@@ -209,12 +209,13 @@ module Screen =
 
             if not Toolbar.cursor_hidden || Dialog.exists () then
                 Notifications.display.Draw()
-                let x, y = Mouse.pos ()
+                if Mouse.in_bounds() then
+                    let x, y = Mouse.pos ()
 
-                Render.sprite
-                    (Rect.Box(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
-                    (Palette.color (255, 1.0f, 0.5f))
-                    (Content.Texture "cursor")
+                    Render.sprite
+                        (Rect.Box(x, y, Content.ThemeConfig.CursorSize, Content.ThemeConfig.CursorSize))
+                        (Palette.color (255, 1.0f, 0.5f))
+                        (Content.Texture "cursor")
 
             perf.Draw()
 

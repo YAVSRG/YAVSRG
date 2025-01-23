@@ -62,7 +62,7 @@ type WindowSettings =
             AudioDevicePeriod = this.AudioDevicePeriod.Value
             AudioDeviceBufferLengthMultiplier = this.AudioDeviceBufferLengthMultiplier.Value
             InputCPUSaver = this.InputCPUSaver.Value
-            EnableCursor = false
+            HideCursor = true
             MSAASamples = this.MSAASamples.Value
         }
 

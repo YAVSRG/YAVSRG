@@ -205,10 +205,20 @@ module Render =
     let bounds() = _bounds
 
     /// <summary>
-    /// Gets the real dimensions of the viewport, as screen pixels.<br/>
-    /// This is not necessarily the dimensions of the window, as this does not include the window border/decorations.
+    /// Gets the real dimensions of the framebuffer, as screen pixels.<br/>
+    /// This is not necessarily the dimensions of the window, as this does not include the window border/decorations.<br/>
+    /// This is not necessarily the dimensions of the game UI, as user could be using letterboxing.<br/><br/>
+    /// For the viewport area of the game use <c>viewport_size()</c>
     /// </summary>
-    let viewport_size() = _framebuffer_width, _framebuffer_height
+    let framebuffer_size() = _framebuffer_width, _framebuffer_height
+
+    /// <summary>
+    /// Gets the real dimensions of the viewport, as screen pixels.<br/>
+    /// This is the dimensions of the part of the monitor the game is rendering on.<br/><br/>
+    /// This is not necessarily the dimensions of the window, as this does account for the window border/decorations OR for letterboxing<br/>
+    /// For the viewport area of the game use <c>viewport_size()</c>
+    /// </summary>
+    let viewport_size() = _letterbox_width, _letterbox_height
 
     /// <summary>
     /// Gets and binds an <see cref="FBO"/> from the pool.<br/>
@@ -396,7 +406,7 @@ module Render =
         _letterbox_height <- letterbox_height
 
         GL.Viewport((framebuffer_width - letterbox_width) / 2, (framebuffer_height - letterbox_height) / 2, letterbox_width, letterbox_height)
-        let width, height = float32 framebuffer_width, float32 framebuffer_height
+        let width, height = float32 letterbox_width, float32 letterbox_height
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
 

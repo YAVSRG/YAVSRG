@@ -233,13 +233,7 @@ module WindowThread =
 
         refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
-        if config.EnableCursor then
-            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
-        elif OperatingSystem.IsMacOS() && GLFW.RawMouseMotionSupported() then
-            GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)
-            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorDisabled)
-        else
-            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
+        InputThread.set_cursor_hidden config.HideCursor window
 
         let x, y = GLFW.GetWindowPos(window)
         let width, height = GLFW.GetWindowSize(window)
@@ -388,6 +382,7 @@ module WindowThread =
         letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height) else None
         framebuffer_size_callback window width height
 
+        GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)
         Input.init window
 
         GLFW.SetDropCallback(window, file_drop_callback_d) |> ignore

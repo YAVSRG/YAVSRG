@@ -104,6 +104,7 @@ type internal FrameEvents =
         MouseX: float32
         MouseY: float32
         MouseZ: float32
+        CursorInBounds: bool
         HeldKeys: Set<Keys>
         HeldMouseButtons: Set<MouseButton>
         Ctrl: bool
@@ -114,6 +115,8 @@ type internal FrameEvents =
 
 module internal InputThread =
 
+    let mutable private hide_cursor = false
+    let mutable private cursor_in_bounds = true
     let mutable private mouse_x = 0.0f
     let mutable private mouse_y = 0.0f
     let mutable private mouse_z = 0.0f
@@ -138,10 +141,20 @@ module internal InputThread =
             )
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
 
-    let private cursor_pos_callback (_: nativeptr<Window>) (x: float) (y: float) =
+    let private cursor_pos_callback (window: nativeptr<Window>) (x: float) (y: float) =
         lock LOCK_OBJ (fun () ->
-            mouse_x <- Math.Clamp(Render._width / float32 Render._framebuffer_width * float32 x, 0.0f, Render._width)
-            mouse_y <- Math.Clamp(Render._height / float32 Render._framebuffer_height * float32 y, 0.0f, Render._height)
+            let start_x = (Render._framebuffer_width - Render._letterbox_width) / 2 |> float32
+            let pc_x = (float32 x - start_x) / float32 Render._letterbox_width
+            mouse_x <- Math.Clamp(Render._width * pc_x, 0.0f, Render._width)
+
+            let start_y = (Render._framebuffer_height - Render._letterbox_height) / 2 |> float32
+            let pc_y = (float32 y - start_y) / float32 Render._letterbox_height
+            mouse_y <- Math.Clamp(Render._height * pc_y, 0.0f, Render._height)
+
+            let was_in_bounds = cursor_in_bounds
+            cursor_in_bounds <- pc_x >= 0.0f && pc_y >= 0.0f && pc_x <= 1.0f && pc_y <= 1.0f
+            if cursor_in_bounds <> was_in_bounds && hide_cursor then
+                GLFW.SetInputMode(window, CursorStateAttribute.Cursor, if cursor_in_bounds then CursorModeValue.CursorHidden else CursorModeValue.CursorNormal)
         )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
@@ -206,6 +219,16 @@ module internal InputThread =
     let enable_typing (v: bool) =
         lock LOCK_OBJ (fun () -> typing <- v; typing_buffered_input <- ValueNone)
 
+    let set_cursor_hidden (b: bool) (window: nativeptr<Window>) =
+        hide_cursor <- b
+        if not b then
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
+        elif OperatingSystem.IsMacOS() && GLFW.RawMouseMotionSupported() then
+            GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorDisabled)
+        else
+            GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
+
     let init (window: nativeptr<Window>) =
         GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true);
         GLFW.SetCharCallback(window, char_callback_d) |> ignore
@@ -224,6 +247,7 @@ module internal InputThread =
                             MouseX = mouse_x
                             MouseY = mouse_y
                             MouseZ = mouse_z
+                            CursorInBounds = cursor_in_bounds
                             TypedText = typed_text
                             HeldKeys = held_keys
                             HeldMouseButtons = held_mouse_buttons
@@ -494,6 +518,8 @@ module Mouse =
 
     let pos () =
         (Input.this_frame.MouseX, Input.this_frame.MouseY)
+
+    let in_bounds () = Input.this_frame.CursorInBounds
 
     let x () = fst (pos ())
     let y () = snd (pos ())

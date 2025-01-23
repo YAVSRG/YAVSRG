@@ -69,7 +69,7 @@ module Background =
                                         else
                                             Content.ThemeConfig.DefaultAccentColor
 
-                            let true_screen_width = fst (Render.viewport_size())
+                            let true_screen_width = fst (Render.framebuffer_size())
 
                             if bmp.Width * 3 / 4 > true_screen_width && true_screen_width > 0 then
                                 bmp.Mutate(fun img -> img.Resize(true_screen_width, 0) |> ignore)
