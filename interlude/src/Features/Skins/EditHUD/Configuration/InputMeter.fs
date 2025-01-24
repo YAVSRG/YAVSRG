@@ -18,9 +18,10 @@ type InputMeterPage(on_close: unit -> unit) =
 
     let show_inputs = Setting.simple config.InputMeterShowInputs
     let input_color = Setting.simple config.InputMeterInputColor
+    let judgement_colors = Setting.simple config.InputMeterJudgementColors
     let input_fade_distance = Setting.bounded (0.0f, 1000.0f) config.InputMeterInputFadeDistance
     let scroll_downwards = Setting.simple config.InputMeterScrollDownwards
-    
+
     override this.Content() =
         page_container()
         |+ PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
@@ -29,25 +30,28 @@ type InputMeterPage(on_close: unit -> unit) =
                 .Pos(2)
         |+ PageSetting(%"hud.input_meter.key_color", ColorPicker(key_color, true))
             .Pos(4, 3)
-        |+ PageSetting(%"hud.input_meter.column_padding", Slider.Percent column_padding)
+        |+ PageSetting(%"hud.input_meter.judgement_colors", Checkbox judgement_colors)
+            .Help(Help.Info("hud.input_meter.judgement_colors"))
             .Pos(7)
-        |+ PageSetting(%"hud.input_meter.scroll_downwards", Checkbox scroll_downwards)
+        |+ PageSetting(%"hud.input_meter.column_padding", Slider.Percent column_padding)
             .Pos(9)
-        |+ PageSetting(%"hud.input_meter.show_inputs", Checkbox show_inputs)
+        |+ PageSetting(%"hud.input_meter.scroll_downwards", Checkbox scroll_downwards)
             .Pos(11)
+        |+ PageSetting(%"hud.input_meter.show_inputs", Checkbox show_inputs)
+            .Pos(13)
         |+ PageSetting(%"hud.input_meter.input_color", ColorPicker(input_color, true))
-            .Pos(13, 3)
+            .Pos(15, 3)
             .Conditional(show_inputs.Get)
         |+ PageSetting(%"hud.input_meter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
-            .Pos(16)
+            .Pos(18)
             .Conditional(show_inputs.Get)
-        
+
         :> Widget
 
     override this.Title = %"hud.input_meter"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 InputMeterScrollSpeed = scroll_speed.Value
                 InputMeterKeyFadeTime = key_fade_time.Value
@@ -57,5 +61,6 @@ type InputMeterPage(on_close: unit -> unit) =
                 InputMeterInputColor = input_color.Value
                 InputMeterInputFadeDistance = input_fade_distance.Value
                 InputMeterScrollDownwards = scroll_downwards.Value
+                InputMeterJudgementColors = judgement_colors.Value
             }
         on_close ()
