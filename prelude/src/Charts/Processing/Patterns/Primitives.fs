@@ -26,7 +26,6 @@ type RowInfo =
         Density: Density
     }
 
-
 module Density =
 
     let private DENSITY_SENSITIVITY = 0.9f
@@ -57,44 +56,31 @@ module Density =
                 when ^T: (member FirstNote: Time)
                 and ^T: (member LastNote: Time)
                 and ^T: (member Notes: TimeArray<NoteRow>))
-        : int array * int array =
-        let mutable i = 0
-        let mutable notes = 0
-        let mutable rows = 0
-        let mutable last_sample = 0
-        let mutable last_sample_rows = 0
+        : Density array * Density array =
         let start = chart.FirstNote
-        let length = chart.LastNote - start
-        let interval = length / float32 samples
+        let duration = chart.LastNote - start
+
+        let interval = duration / float32 samples
 
         let notecounts = Array.zeroCreate samples
         let rowcounts = Array.zeroCreate samples
 
-        if length > 0.0f<ms> then
-
+        if duration > 0.0f<ms> then
             for { Time = t; Data = row } in chart.Notes do
-                let mutable is_empty = true
 
+                let s = float32 samples * (t - start) / duration |> int |> max 0 |> min (samples - 1)
+
+                let mutable is_empty = true
                 for nt in row do
                     if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then
                         is_empty <- false
-                        notes <- notes + 1
+                        notecounts.[s] <- notecounts.[s] + 1
 
                 if not is_empty then
-                    rows <- rows + 1
+                    rowcounts.[s] <- rowcounts.[s] + 1
 
-                while t - start >= interval * float32 (i + 1) do
-                    notecounts.[i] <- notes - last_sample
-                    rowcounts.[i] <- rows - last_sample_rows
-                    last_sample <- notes
-                    last_sample_rows <- rows
-                    i <- i + 1
-
-            if i <> samples then
-                notecounts.[samples - 1] <- notes - last_sample
-                rowcounts.[samples - 1] <- rows - last_sample_rows
-
-        notecounts, rowcounts
+        notecounts |> Array.map (fun i -> float32 i / interval * 1000f<ms / rate>),
+        rowcounts |> Array.map (fun i -> float32 i / interval * 1000f<ms / rate>)
 
 module Primitives =
 
