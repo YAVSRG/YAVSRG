@@ -1,25 +1,27 @@
-0.7.27.6
+0.7.27.7
 ====
 
-Road to 1.0
+Heads up when you install this update, the auto-restart won't work but it works again from now on
 
 # New features
-- Many more charts now have a leaderboard!
-- Option for pacemaker to use the higher of your PB and your default target
-- Your username is shown on the score screen
-- Score's username is shown on the score screen when dropping an osu! replay
-- Button to "cycle" texture frames when editing them in the Noteskin/HUD editor
+- Option to never show score screen when quitting out
+- Option to never use rates when suggesting songs
+- Added Letterboxing support as a new video mode under System settings
+- You can choose a custom windowed resolution (for both letterboxed and windowed mode)
+- Input meter has an option to flash indicating the judgements scored on each key
+- You can change offset manually from practice mode (as well as the automatic tools)
 
 # Improvements
-- Improved some UI and menus around importing
-- osu! skin conversion respects NoteWidthForHeight scale
-- More accurate osu! scroll speed estimate
-- Dropping an osu! replay will take you directly to the correct chart if you have it
-- Right-clicking on a selected group opens bulk actions (before it opened the context menu as if unselected)
+- Offset can be changed from the context menu in level select, and remembers its suggestion between screens
+- osu! Conversion now auto-corrects certain stacked notes instead of skipping the chart
+- Keymode selectors are now dropdowns in all places
+- 'Last played' indicator on level select updates immediately after playing
+- Volume slider looks better
+- Like/Unlike is now one hotkey instead of two
 
 # Bug fixes
-- Fixed a crash when using Windows emoji keyboard
-- Fixed being unable to click on ruleset submenus due to hovering over local scores
-- Fixed some parsing errors in timing points in very old .osu files
-- Various fixes to mounted imports
+- Fixed PBs for the wrong ruleset showing if changing to a ruleset without PB data
+- Fixed a crash when skipping a song
+- Fixed a visual issue with explosions/column lighting in previews
+- Fixed new users having an empty session on 1st January 1970
 
