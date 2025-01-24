@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play.HUD
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
@@ -13,14 +12,52 @@ open Interlude.Features.Gameplay
 type InputMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
+    let colors = Array.create state.Chart.Keys config.InputMeterKeyColor
+    let color_fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
     let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
 
     let SCROLL_SPEED = config.InputMeterScrollSpeed / SelectedChart.rate.Value
+
+    let lerp_color (percentage: float) (a: byte) (b: byte) =
+        (float (b - a) * percentage + float a) |> int |> max 0 |> min 255
+
+    do
+        if config.InputMeterJudgementColors then
+            state.SubscribeEvents (fun ev ->
+                match ev.Action with
+                | Hit h ->
+                    match h.Judgement with
+                    | Some (j, _) ->
+                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                        color_fades.[ev.Column].Reset()
+                    | _ -> ()
+                | Hold h ->
+                    match h.Judgement with
+                    | Some (j, _) ->
+                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                        color_fades.[ev.Column].Reset()
+                    | _ -> ()
+                | Release r ->
+                    match r.Judgement with
+                    | Some (j, _) ->
+                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                        color_fades.[ev.Column].Reset()
+                    | _ -> ()
+                | DropHold
+                | RegrabHold -> ()
+                | GhostTap g ->
+                    match g.Judgement with
+                    | Some (j, _) ->
+                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                        color_fades.[ev.Column].Reset()
+                    | _ -> ()
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         for k = 0 to state.Chart.Keys - 1 do
+            color_fades.[k].Update elapsed_ms
             fades.[k].Update elapsed_ms
             if Bitmask.has_key k state.Scoring.KeyState then
                 fades.[k].Reset()
@@ -28,7 +65,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
     override this.Draw() =
         let column_width = this.Bounds.Width / float32 state.Chart.Keys
 
-        let mutable box = 
+        let mutable box =
             (
                 if config.InputMeterScrollDownwards then
                     this.Bounds.SliceT(column_width)
@@ -37,26 +74,35 @@ type InputMeter(config: HudConfig, state: PlayState) =
             )
                 .SliceL(column_width)
                 .ShrinkPercent(config.InputMeterColumnPadding * 0.5f)
+
         for k = 0 to state.Chart.Keys - 1 do
-            let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * (float32 fades.[k].Time / float32 fades.[k].Interval)) |> int
-            Render.rect box (config.InputMeterKeyColor.O4a key_alpha)
+
+            let press_f = float32 fades.[k].Time / float32 fades.[k].Interval
+            let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * press_f) |> int
+            let color_f = 1.0 - (1.0 - float press_f) * (1.0 - color_fades.[k].Time / color_fades.[k].Interval)
+            let r = lerp_color color_f colors.[k].R config.InputMeterKeyColor.R
+            let g = lerp_color color_f colors.[k].G config.InputMeterKeyColor.G
+            let b = lerp_color color_f colors.[k].B config.InputMeterKeyColor.B
+            let color = Color.FromArgb(key_alpha, r, g, b)
+
+            Render.rect box color
             box <- box.Translate(column_width, 0.0f)
 
         if config.InputMeterShowInputs then
             let recent_events = state.Scoring.EnumerateRecentInputs()
 
             let now = state.CurrentChartTime()
-            let point (time: ChartTime) : float32 * Color = 
+            let point (time: ChartTime) : float32 * Color =
                 let time_ago = now - time
                 let height = this.Bounds.Height - column_width
                 let offset = time_ago * SCROLL_SPEED |> min height
-                
-                if config.InputMeterScrollDownwards then 
+
+                if config.InputMeterScrollDownwards then
                     this.Bounds.Top + column_width + offset
                 else
                     this.Bounds.Bottom - column_width - offset
                 ,
-                let mult = 
+                let mult =
                     if config.InputMeterInputFadeDistance > 0.0f then
                         (height - offset) / config.InputMeterInputFadeDistance |> min 1.0f
                     else 1.0f
@@ -65,7 +111,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
                 let y2, c2 = point previous
-                Render.quad 
+                Render.quad
                     (Rect.Create(
                         this.Bounds.Left + column_width * float32 k,
                         y1,
@@ -73,7 +119,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
                         y2
                     ).SliceX(box.Width).AsQuad)
                     (Quad.gradient_top_to_bottom c1 c2)
-        
+
             let mutable previous = now
             let cutoff = now - (this.Bounds.Height - column_width) / SCROLL_SPEED
             let fade_edge = now - (this.Bounds.Height - column_width - config.InputMeterInputFadeDistance) / SCROLL_SPEED

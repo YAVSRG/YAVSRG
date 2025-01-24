@@ -29,6 +29,7 @@ type GameplayAction =
     | DropHold
     | RegrabHold
     | GhostTap of {| Judgement: (int * float) option |}
+    // todo: would be nice to have a Judgement getter
 
 [<Struct>]
 type ComboAction =
