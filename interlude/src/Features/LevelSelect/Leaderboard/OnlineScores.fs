@@ -52,7 +52,6 @@ module OnlineScores =
         leaderboard_score_loaded_ev.Trigger (score, score_info)
 
     let private finish_loading (new_state: State) =
-        // if local scores loaded too, find and upload best online-submissible score
         state <- new_state
         leaderboard_loaded_ev.Trigger (state <> State.NoLeaderboard)
 
