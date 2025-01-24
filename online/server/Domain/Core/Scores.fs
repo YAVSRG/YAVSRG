@@ -118,7 +118,10 @@ module Score =
                 """
             INSERT INTO scores2 (UserId, ChartId, TimePlayed, TimeUploaded, Rate, Mods, Ranked, Accuracy, Grade, Lamp, ReplayId)
             VALUES (@UserId, @ChartId, @TimePlayed, @TimeUploaded, @Rate, @Mods, @Ranked, @Accuracy, @Grade, @Lamp, @ReplayId)
-            ON CONFLICT DO UPDATE SET TimeUploaded = excluded.TimeUploaded
+            ON CONFLICT DO UPDATE SET
+                TimeUploaded = excluded.TimeUploaded,
+                Ranked = excluded.Ranked,
+                ReplayId = excluded.ReplayId
             RETURNING Id;
             """
             Parameters =
