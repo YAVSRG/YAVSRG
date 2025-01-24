@@ -60,22 +60,21 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         |+ PageSetting(%"system.windowresolution.width", width_box).Pos(0)
         |+ PageSetting(%"system.windowresolution.height", height_box).Pos(2)
         |+ Text(%"system.windowresolution.aspect_ratio_warning", Color = K Colors.text_red, Align = Alignment.CENTER)
-            .Conditional(fun () -> height.Value * 4 / 3 >= width.Value)
+            .Conditional(fun () -> height.Value * 4 / 3 > width.Value)
             .Pos(4, 1, PageWidth.Normal)
+        |+ PageButton(%"confirm.yes", Menu.Back).Pos(6)
         :> Widget
 
     override this.Update (elapsed_ms, moved) =
-        if tab.Tapped() || (%%"select").Tapped() then
-            match Selection.get_selected_element() with
-            | Some w when (w :?> Widget).Parent = width_box -> height_box.Select false
-            | Some h when (h :?> Widget).Parent = height_box -> Menu.Back()
-            | _ -> width_box.Select false
+        let selected = Selection.get_selected_element() |> Option.map (fun w -> (w :?> Widget).Parent)
+        if selected = Some width_box && (tab.Tapped() || (%%"select").Tapped()) then height_box.Select false
+        elif selected = Some height_box && (tab.Tapped() || (%%"select").Tapped()) then Menu.Back()
 
         base.Update(elapsed_ms, moved)
 
     override this.Title = %"system.windowresolution"
     override this.OnClose() =
-        if height.Value * 4 / 3 < width.Value then
+        if height.Value * 4 / 3 <= width.Value then
             setting.Set (width.Value, height.Value)
 
 type WindowedResolution(setting: Setting<int * int>) as this =
