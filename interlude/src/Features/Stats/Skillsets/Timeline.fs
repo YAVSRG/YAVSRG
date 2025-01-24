@@ -12,7 +12,7 @@ type SkillTimeline() =
     let graph_container = SwapContainer(Position = Position.ShrinkT(50.0f))
 
     let day_range = Animation.Fade(90.0f)
-    let day_offset = Animation.Fade(30.0f)
+    let day_offset = Animation.Fade(0.0f)
     let keymode = Setting.simple 4
 
     let refresh_graph() =
