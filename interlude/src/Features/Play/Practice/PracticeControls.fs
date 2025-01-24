@@ -63,8 +63,8 @@ type SyncSuggestionControls(state: PracticeState) =
             match state.SyncMode.Value with
             | SyncMode.AUDIO_OFFSET -> sprintf "%s: %.0fms" suggested s.AudioOffset
             | SyncMode.HIT_POSITION -> sprintf "%s: %.0f" suggested s.HitPosition
-            | SyncMode.SCROLL_SPEED -> sprintf "%s: %.0f%%" current (100.0f * s.ScrollSpeed)
-            | SyncMode.VISUAL_OFFSET -> sprintf "%s: %.0fms" current s.VisualOffset
+            | SyncMode.SCROLL_SPEED -> sprintf "%s: %.0f%%" suggested (100.0f * s.ScrollSpeed)
+            | SyncMode.VISUAL_OFFSET -> sprintf "%s: %.0fms" suggested s.VisualOffset
 
         this
         |+ Text(
@@ -129,7 +129,7 @@ type SyncSuggestionControls(state: PracticeState) =
 
         base.Init parent
 
-type PracticeControls(state: PracticeState, with_mods, on_seek) =
+type PracticeControls(state: PracticeState, with_mods, on_seek, on_change_offset) =
     inherit Container(NodeType.None)
 
     let fade = Animation.Fade(1.0f)
@@ -146,7 +146,7 @@ type PracticeControls(state: PracticeState, with_mods, on_seek) =
             (fun () -> PracticeToolsPage(state).Show()),
             Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
         )
-        |+ HotkeyAction("options", fun () -> PracticeToolsPage(state).Show())
+        |+ HotkeyAction("context_menu", fun () -> PracticeToolsPage(state).Show())
         |+ SyncSuggestionControls(state, Position = Position.ShrinkT(160.0f))
 
         |+ Text(

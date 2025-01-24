@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
@@ -14,7 +13,6 @@ open Interlude.Content
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
-open Interlude.Features.Stats
 open Interlude.Features.Play.HUD
 open Interlude.Features.Play.Practice
 
@@ -83,7 +81,7 @@ module PracticeScreen =
             else
                 restart screen
 
-        let paused_overlay =
+        let paused_overlay (screen: IPlayScreen) =
             PracticeControls(
                 state,
                 info.WithMods,
@@ -91,6 +89,8 @@ module PracticeScreen =
                     state.PracticePoint.Set t
                     Song.seek t
                     resume_from_current_place <- false
+                ,
+                fun () -> Menu.Exit(); restart screen
             )
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
@@ -113,7 +113,7 @@ module PracticeScreen =
                 if hud_config.KeysPerSecondMeterEnabled then add_widget hud_config.KeysPerSecondMeterPosition KeysPerSecond
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
 
-                this.Add paused_overlay
+                this.Add (paused_overlay this)
 
             override this.OnEnter(p) =
                 base.OnEnter(p)
@@ -131,6 +131,14 @@ module PracticeScreen =
 
                 if (%%"retry").Tapped() then
                     restart this
+
+                elif (%%"offset").Tapped() then
+                    if not state.Paused.Value then pause this
+                    LocalOffsetPage(
+                        (match state.SyncSuggestions with Some s -> s.AudioOffset | None -> state.SaveData.Offset),
+                        LocalOffset.offset_setting state.SaveData,
+                        fun () -> restart this
+                    ).Show()
 
                 elif (%%"accept_offset").Tapped() then
                     if state.Paused.Value then

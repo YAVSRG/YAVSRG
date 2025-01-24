@@ -101,4 +101,5 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
     override this.Title = %"play.localoffset"
 
     override this.OnClose() =
+        Selection.up false
         on_close()
