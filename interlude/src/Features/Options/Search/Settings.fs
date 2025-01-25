@@ -48,7 +48,7 @@ module Settings =
                 )
                 yield PageSetting(
                     %"system.windowresolution",
-                    WindowedResolution(config.WindowResolution |> Setting.trigger (ignore >> config.Apply))
+                    WindowedResolution(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
                 )
                     .Help(Help.Info("system.windowresolution"))
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
@@ -64,7 +64,7 @@ module Settings =
                     .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
                 yield PageSetting(
                     %"system.letterbox_resolution",
-                    WindowedResolution(config.WindowResolution |> Setting.trigger (ignore >> config.Apply))
+                    WindowedResolution(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
                 )
                     .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
                 , 2, 0, PageWidth.Normal

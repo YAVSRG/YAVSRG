@@ -93,14 +93,14 @@ module WindowThread =
 
     let mutable private last_applied_config : WindowOptions = Unchecked.defaultof<_>
     let mutable private refresh_rate = 60
-    let mutable private letterbox: (int * int) option = None
+    let mutable private letterbox: WindowedResolution option = None
 
     let apply_config(config: WindowOptions) =
         assert(is_window_thread())
         detect_monitors()
 
         last_applied_config <- config
-        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowResolution else None
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
 
         let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
 
@@ -116,14 +116,27 @@ module WindowThread =
         match config.WindowMode with
 
         | WindowType.Windowed ->
-            let width, height = config.WindowResolution
+            let width, height = fst config.WindowedResolution
+            let offset_x, offset_y = snd config.WindowedResolution
+            let x =
+                float32 (monitor.ClientArea.Size.X - width) * offset_x
+                |> round
+                |> int
+                |> max monitor.ClientArea.Min.X
+                |> min (monitor.ClientArea.Max.X - width)
+
+            let y =
+                float32 (monitor.ClientArea.Size.Y - height) * offset_y
+                |> round
+                |> int
+                |> max monitor.ClientArea.Min.Y
+                |> min (monitor.ClientArea.Max.Y - height)
 
             if was_fullscreen then
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
-                    (monitor.ClientArea.Min.X + monitor.ClientArea.Max.X - width) / 2,
-                    (monitor.ClientArea.Min.Y + monitor.ClientArea.Max.Y - height) / 2,
+                    x, y,
                     width,
                     height,
                     0
@@ -132,7 +145,7 @@ module WindowThread =
             else
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, true)
                 GLFW.SetWindowSize(window, width, height)
-                GLFW.SetWindowPos(window, (monitor.ClientArea.Min.X + monitor.ClientArea.Max.X - width) / 2, (monitor.ClientArea.Min.Y + monitor.ClientArea.Max.Y - height) / 2)
+                GLFW.SetWindowPos(window, x, y)
 
         | WindowType.Borderless ->
             if was_fullscreen then
@@ -196,7 +209,7 @@ module WindowThread =
                 max_height,
                 config.FullscreenVideoMode.RefreshRate
             )
-            GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowResolution)
+            GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowedResolution)
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
 
@@ -273,10 +286,10 @@ module WindowThread =
     let private framebuffer_size_callback (_: nativeptr<Window>) (buffer_width: int) (buffer_height: int) =
         if buffer_width <> 0 && buffer_height <> 0 then
             match letterbox with
-            | Some (letterbox_width, letterbox_height) when letterbox_width <= buffer_width && letterbox_height <= buffer_height ->
-                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) (letterbox_width, letterbox_height))
+            | Some ((w, h), (x, y)) when w <= buffer_width && h <= buffer_height ->
+                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) ((w, h), (x, y)))
             | _ ->
-                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) (buffer_width, buffer_height))
+                GameThread.defer (fun () -> GameThread.framebuffer_resized (buffer_width, buffer_height) ((buffer_width, buffer_height), (0.5f, 0.5f)))
 
     let private framebuffer_size_callback_d = GLFWCallbacks.FramebufferSizeCallback framebuffer_size_callback
 
@@ -322,7 +335,7 @@ module WindowThread =
 
         detect_monitors()
 
-        let width, height = config.WindowResolution
+        let width, height = fst config.WindowedResolution
         window <- GLFW.CreateWindow(width, height, title, Unchecked.defaultof<_>, Unchecked.defaultof<_>)
 
         if NativePtr.isNullPtr window then
@@ -348,7 +361,7 @@ module WindowThread =
 
         GameThread.init(window, icon, init_thunk)
         Audio.init(config.AudioDevice, config.AudioDevicePeriod, config.AudioDevicePeriod * config.AudioDeviceBufferLengthMultiplier)
-        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowResolution else None
+        letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
         framebuffer_size_callback window width height
 
         GLFW.SetInputMode(window, RawMouseMotionAttribute.RawMouseMotion, true)
@@ -434,7 +447,7 @@ CPU Saver: %A"""
             (monitor_dump default_monitor)
             last_applied_config.RenderMode
             last_applied_config.WindowMode
-            last_applied_config.WindowResolution
+            last_applied_config.WindowedResolution
             last_applied_config.SmartCapTearlinePosition
             last_applied_config.SmartCapAntiJitter
             last_applied_config.SmartCapFramerateMultiplier

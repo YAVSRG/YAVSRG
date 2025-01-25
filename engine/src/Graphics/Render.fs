@@ -18,6 +18,9 @@ module Render =
     let mutable internal _framebuffer_width = fst DEFAULT_SCREEN
     let mutable internal _framebuffer_height = snd DEFAULT_SCREEN
 
+    let mutable internal _viewport_left = 0
+    let mutable internal _viewport_top = 0
+
     let mutable internal _viewport_width = _framebuffer_width
     let mutable internal _viewport_height = _framebuffer_height
 
@@ -87,7 +90,7 @@ module Render =
             if List.isEmpty fbo_stack then
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
                 Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
-                GL.Viewport((_framebuffer_width - _viewport_width) / 2, (_framebuffer_height - _viewport_height) / 2, _viewport_width, _viewport_height)
+                GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
             else
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head fbo_stack)
 
@@ -395,7 +398,7 @@ module Render =
         Internal functions used by the Game and Window threads
     *)
 
-    let internal framebuffer_resized (framebuffer_width, framebuffer_height) (viewport_width, viewport_height) =
+    let internal framebuffer_resized (framebuffer_width, framebuffer_height) ((viewport_width, viewport_height), (viewport_offset_x, viewport_offset_y)) =
         assert(viewport_width <> 0 && viewport_height <> 0)
         assert(framebuffer_width >= viewport_width && framebuffer_height >= viewport_height)
 
@@ -405,7 +408,16 @@ module Render =
         _viewport_width <- viewport_width
         _viewport_height <- viewport_height
 
-        GL.Viewport((framebuffer_width - viewport_width) / 2, (framebuffer_height - viewport_height) / 2, viewport_width, viewport_height)
+        _viewport_left <-
+            float32 (framebuffer_width - viewport_width) * viewport_offset_x
+            |> round |> int
+            |> max 0 |> min (framebuffer_width - viewport_width)
+        _viewport_top <-
+            float32 (framebuffer_height - viewport_height) * (1.0f - viewport_offset_y) // in OpenGL 0 = bottom of screen not top
+            |> round |> int
+            |> max 0 |> min (framebuffer_height - viewport_height)
+
+        GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
         let width, height = float32 viewport_width, float32 viewport_height
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
@@ -426,7 +438,7 @@ module Render =
         assert(alpha_mult = 1.0f)
         GL.Flush()
 
-    let internal init (framebuffer_width, framebuffer_height) (viewport_width, viewport_height) =
+    let internal init framebuffer viewport =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
@@ -435,10 +447,12 @@ module Render =
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
 
-        if viewport_width <= 0 || viewport_height <= 0 || framebuffer_width <= 0 || framebuffer_height <= 0 then
-            framebuffer_resized DEFAULT_SCREEN DEFAULT_SCREEN
+        let vw, vh = fst viewport
+        let fw, fh = framebuffer
+        if vw <= 0 || vh <= 0 || fw <= 0 || fh <= 0 then
+            framebuffer_resized DEFAULT_SCREEN (DEFAULT_SCREEN, (0.5f, 0.5f))
         else
-            framebuffer_resized (framebuffer_width, framebuffer_height) (viewport_width, viewport_height)
+            framebuffer_resized framebuffer viewport
 
         Shader.init()
         _batch <- Batch.Create(1024)
@@ -494,7 +508,7 @@ Process: %s"""
     let take_screenshot () : Image<Rgba32> =
         let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
 
-        GL.ReadPixels((_framebuffer_width - _viewport_width) / 2, (_framebuffer_height - _viewport_height) / 2, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        GL.ReadPixels(_viewport_left, _viewport_top, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
 
         let image: Image<Rgba32> =
             Image<Rgba32>

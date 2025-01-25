@@ -10,7 +10,7 @@ type WindowSettings =
     {
         WorkingDirectory: string
         WindowMode: Setting<WindowType>
-        WindowResolution: Setting<int * int>
+        WindowedResolution: Setting<WindowedResolution>
         FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
         SmartCapAntiJitter: Setting<bool>
@@ -28,7 +28,7 @@ type WindowSettings =
         {
             WorkingDirectory = ""
             WindowMode = Setting.simple WindowType.Fullscreen
-            WindowResolution = Setting.simple (1024, 768)
+            WindowedResolution = Setting.simple WindowedResolution.DEFAULT
             FullscreenVideoMode =
                 Setting.simple
                     {
@@ -51,7 +51,7 @@ type WindowSettings =
     member this.ToOptions : WindowOptions =
         {
             WindowMode = this.WindowMode.Value
-            WindowResolution = this.WindowResolution.Value
+            WindowedResolution = this.WindowedResolution.Value
             FullscreenVideoMode = this.FullscreenVideoMode.Value
             RenderMode = this.RenderMode.Value
             SmartCapAntiJitter = this.SmartCapAntiJitter.Value

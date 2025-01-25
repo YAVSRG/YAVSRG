@@ -143,12 +143,10 @@ module internal InputThread =
 
     let private cursor_pos_callback (window: nativeptr<Window>) (x: float) (y: float) =
         lock LOCK_OBJ (fun () ->
-            let start_x = (Render._framebuffer_width - Render._viewport_width) / 2 |> float32
-            let pc_x = (float32 x - start_x) / float32 Render._viewport_width
+            let pc_x = (float32 x - float32 Render._viewport_left) / float32 Render._viewport_width
             mouse_x <- Math.Clamp(Render._width * pc_x, 0.0f, Render._width)
 
-            let start_y = (Render._framebuffer_height - Render._viewport_height) / 2 |> float32
-            let pc_y = (float32 y - start_y) / float32 Render._viewport_height
+            let pc_y = (float32 y - float32 Render._viewport_top) / float32 Render._viewport_height
             mouse_y <- Math.Clamp(Render._height * pc_y, 0.0f, Render._height)
 
             let was_in_bounds = cursor_in_bounds

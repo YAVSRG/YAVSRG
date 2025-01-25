@@ -7,7 +7,10 @@ type WindowType =
     | BorderlessNoTaskbar = 3
     | FullscreenLetterbox = 4
 
-module WindowResolution =
+type WindowedResolution = (int * int) * (float32 * float32)
+module WindowedResolution =
+
+    let DEFAULT: WindowedResolution = (1024, 768), (0.5f, 0.5f)
 
     let PRESETS: (int * int) array =
         [|
@@ -50,7 +53,7 @@ type FrameLimit =
 type WindowOptions =
     {
         WindowMode: WindowType
-        WindowResolution: int * int
+        WindowedResolution: WindowedResolution
         FullscreenVideoMode: FullscreenVideoMode
         RenderMode: FrameLimit
         SmartCapAntiJitter: bool

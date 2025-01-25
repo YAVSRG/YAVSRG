@@ -77,14 +77,16 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         if height.Value * 4 / 3 <= width.Value then
             setting.Set (width.Value, height.Value)
 
-type WindowedResolution(setting: Setting<int * int>) as this =
+type WindowedResolution(setting: Setting<(int * int) * (float32 * float32)>) as this =
     inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f |> min 600.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
+    let res_setting = Setting.make (fun v -> setting.Set (v, snd setting.Value)) (setting.Get >> fst)
+    let offset_setting = Setting.make (fun v -> setting.Set (fst setting.Value, v)) (setting.Get >> snd)
 
     override this.Init(parent) =
         this
-        |+ Text((fun () -> let w, h = setting.Value in sprintf "%ix%i" w h), Align = Alignment.LEFT)
+        |+ Text((fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h), Align = Alignment.LEFT)
         |+ Clickable.Focus this
         |* dropdown_wrapper
 
@@ -98,17 +100,17 @@ type WindowedResolution(setting: Setting<int * int>) as this =
                         let max_res = get_current_supported_video_modes() |> Array.last
                         Seq.concat [
                             [|(0, 0), %"system.windowresolution.custom"|]
-                            WindowResolution.PRESETS
+                            WindowedResolution.PRESETS
                             |> Array.filter (fun (w, h) -> w <= max_res.Width && h <= max_res.Height)
                             |> Array.map (fun (w, h) -> (w, h), sprintf "%ix%i" w h)
                         ]
                     ColorFunc = K Colors.text
                     Setting =
-                        { setting with
+                        { res_setting with
                             Set = fun v ->
                                 if v = (0, 0) then
-                                    CustomWindowedResolutionPage(setting).Show()
-                                else setting.Set v
+                                    CustomWindowedResolutionPage(res_setting).Show()
+                                else res_setting.Set v
                         }
                 }
         )
@@ -236,7 +238,7 @@ type SystemPage() =
             .Pos(0)
         |+ PageSetting(
             %"system.windowresolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowedResolution(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
         )
             .Help(Help.Info("system.windowresolution"))
             .Pos(2)
@@ -263,7 +265,7 @@ type SystemPage() =
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(
             %"system.letterbox_resolution",
-            WindowedResolution(config.WindowResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowedResolution(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
         )
             .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)

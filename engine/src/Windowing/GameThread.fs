@@ -199,7 +199,7 @@ module GameThread =
 
     let private main_loop () =
         GLFW.MakeContextCurrent(window)
-        Render.init Render.DEFAULT_SCREEN Render.DEFAULT_SCREEN
+        Render.init Render.DEFAULT_SCREEN (Render.DEFAULT_SCREEN, (0.5f, 0.5f))
 
         match loading_icon with
         | Some icon -> () // todo: get it to work
