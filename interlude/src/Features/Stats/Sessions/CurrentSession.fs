@@ -3,12 +3,12 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 
 type CurrentSession() =
     inherit Container(NodeType.None)
 
-    let current_session = Stats.CURRENT_SESSION
+    let current_session = CURRENT_SESSION
 
     override this.Init(parent: Widget) =
         this
@@ -17,8 +17,8 @@ type CurrentSession() =
         |+ Text(
             (fun () ->
                 sprintf "%s of playtime over %s, session started at %s"
-                    (Stats.format_short_time current_session.PlayTime)
-                    (Stats.format_short_time current_session.GameTime)
+                    (format_short_time current_session.PlayTime)
+                    (format_short_time current_session.GameTime)
                     ((Timestamp.to_datetime current_session.Start).ToLocalTime().ToShortTimeString())
             ),
             Color = K Colors.text_subheading,

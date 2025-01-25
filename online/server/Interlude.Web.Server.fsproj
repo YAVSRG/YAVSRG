@@ -10,6 +10,7 @@
     <Compile Include="Domain\Core\Friends.fs" />
     <Compile Include="Domain\Core\Replays.fs" />
     <Compile Include="Domain\Core\Scores.fs" />
+    <Compile Include="Domain\Core\Stats.fs" />
     <Compile Include="Domain\Core\Tables.fs" />
     <Compile Include="Domain\Backbeat\Sources.fs" />
     <Compile Include="Domain\Backbeat\Songs.fs" />

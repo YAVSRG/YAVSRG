@@ -3,11 +3,9 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.Options
 open Interlude.Content
-open Interlude.Features.Import
-open Interlude.Features.Import.osu
 open Interlude.Features.Gameplay
 open Interlude.Features.MainMenu
 open Interlude.Features.Mounts
@@ -16,13 +14,13 @@ open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
-open Interlude.Features.Score
 
 module Startup =
 
     let mutable private deinit_required = false
     let mutable private deinit_once = false
 
+    // todo: combine these steps as they are now serialised
     let init_startup (instance) =
         Options.init_startup ()
         Content.init_startup ()

@@ -8,7 +8,7 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 
 [<Struct>]
 type private GraphDataPoint =
@@ -25,15 +25,15 @@ module SkillTimelineGraph =
 type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Animation.Fade) =
     inherit StaticWidget(NodeType.None)
 
-    let all_time_records = Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
+    let all_time_records = TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
     let all_time_max = Array.max [|all_time_records.Jacks; all_time_records.Chordstream; all_time_records.Stream|]
 
     let TODAY = Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime
 
     let sessions =
-        Stats.PREVIOUS_SESSIONS.Keys
+        PREVIOUS_SESSIONS.Keys
         |> Seq.sortDescending
-        |> Seq.map (fun k -> k, TODAY.DayNumber - k.DayNumber, Map.find k Stats.PREVIOUS_SESSIONS)
+        |> Seq.map (fun k -> k, TODAY.DayNumber - k.DayNumber, Map.find k PREVIOUS_SESSIONS)
         |> Array.ofSeq
 
     let timeline_end =

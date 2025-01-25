@@ -32,6 +32,14 @@ type KeymodeTinyBreakdown =
         Combined: float32
     }
 
+    static member Default =
+        {
+            Jacks = 0.0f
+            Chordstream = 0.0f
+            Stream = 0.0f
+            Combined = 0.0f
+        }
+
 [<Json.AutoCodec>]
 type KeymodeSkillBreakdown =
     {

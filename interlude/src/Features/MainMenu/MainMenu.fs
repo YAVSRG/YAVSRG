@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Prelude.Data.Library
 open Interlude.Options
 open Interlude
@@ -159,7 +159,7 @@ type MainMenuScreen() as this =
                     %"notification.pattern_cache_started.title",
                     %"notification.pattern_cache_started.body"
                 )
-            if Stats.TOTAL_STATS.NotesHit = 0 then
+            if TOTAL_STATS.NotesHit = 0 then
                 WikiBrowserPage.Show()
 
         splash_text <- choose_splash ()

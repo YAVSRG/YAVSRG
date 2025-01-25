@@ -3,13 +3,13 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.UI
 
 type SessionScoreBar(xp_gain: SessionXPGain) =
     inherit StaticWidget(NodeType.None)
 
-    let xp_now = Stats.CURRENT_SESSION.SessionScore
+    let xp_now = CURRENT_SESSION.SessionScore
     let xp_before = xp_now - xp_gain.Total
 
     let xp_display = Animation.Fade(float32 xp_before)
@@ -38,9 +38,9 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
         base.Init parent
 
     override this.Draw() =
-        let level = int64 xp_display.Value |> Stats.current_level
-        let xp_start = Stats.xp_for_level level |> float32
-        let xp_end = Stats.xp_for_level (level + 1) |> float32
+        let level = int64 xp_display.Value |> current_level
+        let xp_start = xp_for_level level |> float32
+        let xp_end = xp_for_level (level + 1) |> float32
         let xp_progress = (xp_display.Value - xp_start) / (xp_end - xp_start)
 
         // box
@@ -54,7 +54,7 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
         Render.rect (bar.SlicePercentL(xp_progress)) (!*Palette.HIGHLIGHT_100).O4
 
         let counter = this.Bounds.BorderB(60.0f).SliceR(220.0f)
-        let counterq = 
+        let counterq =
             let q = counter.AsQuad
             { q with TopLeft = q.TopLeft - OpenTK.Mathematics.Vector2(30.0f, 0.0f) }
         Render.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black.AsQuad

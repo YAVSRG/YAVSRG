@@ -34,6 +34,7 @@ module DbSessions =
 
                 XP = 567L
                 KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default.Tiny)
+                KeymodePlaytime = Map.ofSeq [4, 3600.0; 7, 1800.0]
             }
 
         DbSessions.save session db
@@ -41,7 +42,7 @@ module DbSessions =
         Assert.IsNotEmpty(result)
         Assert.AreEqual(session, result.[0])
         Assert.AreEqual(1, result.Length)
-    
+
     [<Test>]
     let Idempotence () =
         let db, conn = in_memory ()
@@ -63,6 +64,7 @@ module DbSessions =
 
                 XP = 567L
                 KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default.Tiny)
+                KeymodePlaytime = Map.ofSeq [4, 3600.0; 7, 1800.0]
             }
 
         DbSessions.save session db

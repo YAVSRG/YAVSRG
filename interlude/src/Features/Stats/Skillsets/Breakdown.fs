@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Gameplay
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 
@@ -22,7 +22,7 @@ type SkillBreakdown() =
         let available_keymodes =
             seq {
                 for i = 3 to 10 do
-                    if Stats.TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
+                    if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
                         yield i
             }
             |> Array.ofSeq

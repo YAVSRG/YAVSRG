@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Prelude.Gameplay
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -98,14 +99,14 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
 
         //match xp_gain with
-        //| Some x -> 
+        //| Some x ->
         //    SessionScoreBar(x, Position = Position.SliceRPercent(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
         //    |> this.Add
         //| None -> ()
 
         base.Init parent
 
-    override this.Update(elapsed_ms, moved) = 
+    override this.Update(elapsed_ms, moved) =
         ScoreScreenHelpers.animation_queue.Update elapsed_ms
         base.Update(elapsed_ms, moved)
 
@@ -129,7 +130,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
         Render.rect (this.Bounds.ShrinkT(175.0f).SliceT(160.0f).ShrinkT(5.0f)) Colors.shadow_2.O2
         Render.rect (this.Bounds.ShrinkT(175.0f).ShrinkT(160.0f).SliceT(5.0f)) Colors.white
-        
+
         Render.rect (bottom_info.Bounds.ShrinkT 5.0f) (Palette.color (127, 0.5f, 0.0f))
         Render.rect (bottom_info.Bounds.SliceT 5.0f) Colors.white.O2
 

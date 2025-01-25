@@ -4,16 +4,16 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.Features.Online
 
 type OverallHeader() =
     inherit Container(NodeType.Leaf)
 
-    let xp = Stats.TOTAL_STATS.XP + Stats.CURRENT_SESSION.SessionScore
-    let level = xp |> Stats.current_level
-    let xp_to_next_level = Stats.xp_for_level (level + 1) - Stats.xp_for_level level
-    let current_xp = xp - Stats.xp_for_level level
+    let xp = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
+    let level = xp |> current_level
+    let xp_to_next_level = xp_for_level (level + 1) - xp_for_level level
+    let current_xp = xp - xp_for_level level
 
     override this.Draw() =
 
@@ -36,7 +36,7 @@ type OverallHeader() =
             Align = Alignment.LEFT
         )
         |+ Text(
-            sprintf "%s: %i" (%"stats.sessions.notes_hit") (Stats.TOTAL_STATS.NotesHit + Stats.CURRENT_SESSION.NotesHit),
+            sprintf "%s: %i" (%"stats.sessions.notes_hit") (TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit),
             Color = K Colors.text_subheading,
             Position = Position.SliceT(50.0f).ShrinkT(15.0f).ShrinkX(10.0f),
             Align = Alignment.RIGHT

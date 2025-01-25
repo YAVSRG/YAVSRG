@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 
 #nowarn "40"
 
@@ -23,7 +23,7 @@ type SessionsTab() =
                 match v with
                 | Some (date, session) ->
                     let sessions_today =
-                        Stats.PREVIOUS_SESSIONS.[date]
+                        PREVIOUS_SESSIONS.[date]
                     PreviousSession(session, sessions_today, (fun () -> selected_session.Set None), cycle_session_fd, cycle_session_bk) :> Widget
                 | None ->
                     CurrentSession()
@@ -32,7 +32,7 @@ type SessionsTab() =
     and cycle_session_fd() =
         match selected_session.Value with
         | Some (date, session) ->
-            let sessions_today = Stats.PREVIOUS_SESSIONS.[date]
+            let sessions_today = PREVIOUS_SESSIONS.[date]
             let i = (List.findIndex (fun s -> s = session) sessions_today)
             if i + 1 < sessions_today.Length then
                 selected_session.Value <- Some (date, sessions_today.[i + 1])
@@ -40,9 +40,9 @@ type SessionsTab() =
                 let mutable date = date.AddDays(1)
                 let mutable found = false
                 while date <= TODAY && not found do
-                    if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                    if PREVIOUS_SESSIONS.ContainsKey date then
                         found <- true
-                        selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])
+                        selected_session.Value <- Some (date, PREVIOUS_SESSIONS.[date].[0])
                     date <- date.AddDays(1)
                 if not found then
                     selected_session.Value <- None
@@ -50,15 +50,15 @@ type SessionsTab() =
             let mutable date = activity.EarliestVisibleDay
             let mutable found = false
             while date <= TODAY && not found do
-                if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                if PREVIOUS_SESSIONS.ContainsKey date then
                     found <- true
-                    selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])
+                    selected_session.Value <- Some (date, PREVIOUS_SESSIONS.[date].[0])
                 date <- date.AddDays(1)
 
     and cycle_session_bk() =
         match selected_session.Value with
         | Some (date, session) ->
-            let sessions_today = Stats.PREVIOUS_SESSIONS.[date]
+            let sessions_today = PREVIOUS_SESSIONS.[date]
             let i = (List.findIndex (fun s -> s = session) sessions_today)
             if i > 0 then
                 selected_session.Value <- Some (date, sessions_today.[i - 1])
@@ -67,9 +67,9 @@ type SessionsTab() =
                 let mutable found = false
                 let earliest_day = activity.EarliestVisibleDay
                 while date >= earliest_day && not found do
-                    if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                    if PREVIOUS_SESSIONS.ContainsKey date then
                         found <- true
-                        selected_session.Value <- Some (date, List.last Stats.PREVIOUS_SESSIONS.[date])
+                        selected_session.Value <- Some (date, List.last PREVIOUS_SESSIONS.[date])
                     date <- date.AddDays(-1)
                 if not found then
                     selected_session.Value <- None
@@ -78,9 +78,9 @@ type SessionsTab() =
             let mutable found = false
             let earliest_day = activity.EarliestVisibleDay
             while date >= earliest_day && not found do
-                if Stats.PREVIOUS_SESSIONS.ContainsKey date then
+                if PREVIOUS_SESSIONS.ContainsKey date then
                     found <- true
-                    selected_session.Value <- Some (date,  List.last Stats.PREVIOUS_SESSIONS.[date])
+                    selected_session.Value <- Some (date,  List.last PREVIOUS_SESSIONS.[date])
                 date <- date.AddDays(-1)
 
     and activity : RecentActivityGrid =
@@ -94,17 +94,17 @@ type SessionsTab() =
         |+ SessionTime(
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.GameTime
+                | None -> CURRENT_SESSION.GameTime
                 | Some (_, a) -> a.GameTime
             ),
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PlayTime
+                | None -> CURRENT_SESSION.PlayTime
                 | Some (_, a) -> a.PlayTime
             ),
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PracticeTime
+                | None -> CURRENT_SESSION.PracticeTime
                 | Some (_, a) -> a.PracticeTime
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
@@ -112,22 +112,22 @@ type SessionsTab() =
         |+ PlayCount(
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PlaysStarted
+                | None -> CURRENT_SESSION.PlaysStarted
                 | Some (_, a) -> a.PlaysStarted
             ),
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PlaysCompleted
+                | None -> CURRENT_SESSION.PlaysCompleted
                 | Some (_, a) -> a.PlaysCompleted
             ),
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PlaysRetried
+                | None -> CURRENT_SESSION.PlaysRetried
                 | Some (_, a) -> a.PlaysRetried
             ),
             (fun () ->
                 match selected_session.Value with
-                | None -> Stats.CURRENT_SESSION.PlaysQuit
+                | None -> CURRENT_SESSION.PlaysQuit
                 | Some (_, a) -> a.PlaysQuit
             ),
             Position = Position.SliceLPercent(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
@@ -146,4 +146,4 @@ type SessionsTab() =
                 cycle_session_fd()
 
     member this.ShowSessionForDate(date: DateOnly) =
-        selected_session.Value <- Some (date, Stats.PREVIOUS_SESSIONS.[date].[0])
+        selected_session.Value <- Some (date, PREVIOUS_SESSIONS.[date].[0])

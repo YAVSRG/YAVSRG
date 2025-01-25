@@ -5,7 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.Content
 open Interlude.UI
 open Interlude
@@ -166,7 +166,7 @@ type Toolbar() =
             Terminal.draw ()
 
     override this.Update(elapsed_ms, moved) =
-        Stats.CURRENT_SESSION.GameTime <- Stats.CURRENT_SESSION.GameTime + elapsed_ms
+        CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
 
         let moved =
             if Toolbar.was_hidden <> Toolbar.hidden then

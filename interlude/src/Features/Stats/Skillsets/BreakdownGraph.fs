@@ -5,7 +5,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Prelude.Charts.Processing.Patterns
 open Interlude.UI
 open Interlude.Content
@@ -161,9 +161,9 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
     static member Create(keymode: int, pattern_type: CorePattern, source: GraphSource) =
         let keymode_info =
             match source with
-            | AllTime -> Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3]
-            | Recent -> Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3]
-            | Session -> Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3]
+            | AllTime -> TOTAL_STATS.KeymodeSkills.[keymode - 3]
+            | Recent -> CURRENT_SESSION.KeymodeSkills.[keymode - 3]
+            | Session -> CURRENT_SESSION.KeymodeSkills.[keymode - 3]
         let data =
             match pattern_type with
             | Jacks -> keymode_info.Jacks

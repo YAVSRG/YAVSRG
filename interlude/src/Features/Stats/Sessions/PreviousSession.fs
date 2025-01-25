@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.UI
 
 type PreviousSession(session: Session, sessions_today: Session list, close: unit -> unit, fd: unit -> unit, bk: unit -> unit) =
@@ -24,8 +25,8 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
         |+ Text(
             (fun () ->
                 sprintf "%s of playtime over %s, session started at %s"
-                    (Stats.format_short_time session.PlayTime)
-                    (Stats.format_short_time session.GameTime)
+                    (format_short_time session.PlayTime)
+                    (format_short_time session.GameTime)
                     ((Timestamp.to_datetime session.Start).ToLocalTime().ToShortTimeString())
             ),
             Color = K Colors.text_subheading,

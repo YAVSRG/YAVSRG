@@ -22,6 +22,7 @@ type Session =
 
         XP: int64
         KeymodeSkills: KeymodeTinyBreakdown array
+        KeymodePlaytime: Map<int, float>
     }
 
 module DbSessions =
@@ -49,6 +50,15 @@ module DbSessions =
                     Column.Text("KeymodeSkills")
                 ]
         }
+    let internal ADD_KEYMODE_PLAYTIME: NonQuery<unit> =
+        { NonQuery.without_parameters () with
+            SQL =
+                """
+            ALTER TABLE sessions
+            ADD COLUMN KeymodePlaytime TEXT NOT NULL DEFAULT '{}'
+            """
+        }
+
     let internal CREATE_INDEX: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =
@@ -61,11 +71,11 @@ module DbSessions =
     let private GET_ALL: Query<unit, Session> =
         {
             SQL =
-                """SELECT Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodeSkills FROM sessions ORDER BY Start ASC;"""
+                """SELECT Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodeSkills, KeymodePlaytime FROM sessions ORDER BY Start ASC;"""
             Parameters = []
             FillParameters = fun _ _ -> ()
-            Read = fun r -> 
-                { 
+            Read = fun r ->
+                {
                     Start = r.Int64
                     End = r.Int64
 
@@ -81,6 +91,7 @@ module DbSessions =
 
                     XP = r.Int64
                     KeymodeSkills = r.Json JSON
+                    KeymodePlaytime = r.Json JSON
                 }
         }
 
@@ -92,10 +103,10 @@ module DbSessions =
         {
             SQL =
                 """
-                INSERT OR REPLACE INTO sessions (Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodeSkills)
-                VALUES (@Start, @End, @PlayTime, @PracticeTime, @GameTime, @NotesHit, @PlaysStarted, @PlaysRetried, @PlaysCompleted, @PlaysQuit, @XP, json(@KeymodeSkills));
+                INSERT OR REPLACE INTO sessions (Start, End, PlayTime, PracticeTime, GameTime, NotesHit, PlaysStarted, PlaysRetried, PlaysCompleted, PlaysQuit, XP, KeymodeSkills, KeymodePlaytime)
+                VALUES (@Start, @End, @PlayTime, @PracticeTime, @GameTime, @NotesHit, @PlaysStarted, @PlaysRetried, @PlaysCompleted, @PlaysQuit, @XP, json(@KeymodeSkills), json(@KeymodePlaytime));
             """
-            Parameters = [ 
+            Parameters = [
                 "@Start", SqliteType.Integer, 8;
                 "@End", SqliteType.Integer, 8;
 
@@ -111,8 +122,9 @@ module DbSessions =
 
                 "@XP", SqliteType.Integer, 8;
                 "@KeymodeSkills", SqliteType.Text, -1
+                "@KeymodePlaytime", SqliteType.Text, -1
             ]
-            FillParameters = fun p session -> 
+            FillParameters = fun p session ->
                 p.Int64 session.Start
                 p.Int64 session.End
 
@@ -128,6 +140,7 @@ module DbSessions =
 
                 p.Int64 session.XP
                 p.Json JSON session.KeymodeSkills
+                p.Json JSON session.KeymodePlaytime
         }
 
     let save (session: Session) (db: Database) =

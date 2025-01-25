@@ -5,14 +5,14 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Processing.Patterns
 open Prelude.Gameplay
-open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.UI
 
 type KeymodeOverview(keymode: int, button_callback: GraphSource -> CorePattern option -> unit) =
     inherit Container(NodeType.None)
 
-    let all_time = Stats.TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
-    let recent = Stats.CURRENT_SESSION.KeymodeSkills.[keymode - 3].Tiny
+    let all_time = TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
+    let recent = CURRENT_SESSION.KeymodeSkills.[keymode - 3].Tiny
 
     let bar (value: float32) (max_value: float32) (color: Color * Color) (pos: Position) =
         { new StaticWidget(NodeType.None, Position = pos) with
@@ -58,7 +58,7 @@ type Overview(button_callback: int -> GraphSource -> CorePattern option -> unit)
     override this.Init(parent) =
         let container = FlowContainer.Vertical<KeymodeOverview>(150.0f, Spacing = 50.0f)
         for i = 3 to 10 do
-            if Stats.TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
+            if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
                 container.Add(KeymodeOverview(i, button_callback i))
         if container.Count = 0 then
             this

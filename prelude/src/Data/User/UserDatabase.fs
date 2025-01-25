@@ -208,6 +208,11 @@ module UserDatabase =
             )
             db
 
+        Database.migrate
+            "AddKeymodePlaytimeStats"
+            (fun db -> DbSessions.ADD_KEYMODE_PLAYTIME.Execute () db |> expect |> ignore)
+            db
+
         db
 
     let private legacy_migrate (db: UserDatabase) : UserDatabase =

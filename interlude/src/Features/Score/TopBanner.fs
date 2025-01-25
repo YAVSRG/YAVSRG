@@ -5,6 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Interlude.UI
 
 type TopBanner(score_info: ScoreInfo) as this =
@@ -36,7 +37,7 @@ type TopBanner(score_info: ScoreInfo) as this =
         |* Text(
             match score_info.PlayedBy with
             | ScorePlayedBy.Username p -> K([p] %> "score.played_by")
-            | ScorePlayedBy.You -> (fun () -> [Stats.format_short_time Stats.CURRENT_SESSION.GameTime; Stats.format_short_time Stats.CURRENT_SESSION.PlayTime] %> "score.session_time")
+            | ScorePlayedBy.You -> (fun () -> [format_short_time CURRENT_SESSION.GameTime; format_short_time CURRENT_SESSION.PlayTime] %> "score.session_time")
             , Align = Alignment.RIGHT
             , Position = Position.Row(115.0f, 50.0f).ShrinkX(20.0f)
         )
