@@ -77,22 +77,52 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         if height.Value * 4 / 3 <= width.Value then
             setting.Set (width.Value, height.Value)
 
-type WindowedResolution(setting: Setting<(int * int) * (float32 * float32)>) as this =
-    inherit Container(NodeType.Button(fun () -> this.ToggleDropdown()))
+type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
+    inherit Page()
+
+    let horizontal = Setting.percentf (fst setting.Value)
+    let vertical = Setting.percentf (snd setting.Value)
+
+    override this.Content () =
+        page_container()
+        |+ PageSetting(%"system.windowresolution.offset.horizontal", Slider.Percent(horizontal)).Pos(0)
+        |+ PageSetting(%"system.windowresolution.offset.vertical", Slider.Percent(vertical)).Pos(2)
+        |+ PageButton(%"system.windowresolution.offset.apply", fun () -> this.OnClose()).Pos(5)
+        |+ PageButton(%"confirm.yes", Menu.Back).Pos(7)
+        :> Widget
+
+    override this.Title = %"system.windowresolution.offset"
+    override this.OnClose() = setting.Set (horizontal.Value, vertical.Value)
+
+type WindowResolutionPicker(setting: Setting<WindowedResolution>) as this =
+    inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f |> min 600.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
     let res_setting = Setting.make (fun v -> setting.Set (v, snd setting.Value)) (setting.Get >> fst)
     let offset_setting = Setting.make (fun v -> setting.Set (fst setting.Value, v)) (setting.Get >> snd)
 
+    let buttons =
+        GridFlowContainer(PRETTYHEIGHT - 10.0f, 2, WrapNavigation = false)
+        |+ Button(
+            (fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h),
+            (fun () -> this.ToggleResolutionDropdown()),
+            Align = Alignment.LEFT
+        )
+        |+ Button(
+            (fun () -> if offset_setting.Value = (0.5f, 0.5f) then %"system.windowresolution.offset.center" else %"system.windowresolution.offset.custom"),
+            (fun () -> CustomWindowedOffsetPage(offset_setting).Show())
+        )
+
     override this.Init(parent) =
         this
-        |+ Text((fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h), Align = Alignment.LEFT)
-        |+ Clickable.Focus this
+        |+ buttons
         |* dropdown_wrapper
 
         base.Init parent
 
-    member this.ToggleDropdown() =
+    member this.Buttons = buttons
+
+    member this.ToggleResolutionDropdown() =
         dropdown_wrapper.Toggle(fun () ->
             Dropdown
                 {
@@ -134,7 +164,8 @@ type VideoMode(setting: Setting<FullscreenVideoMode>) as this =
         GridFlowContainer(PRETTYHEIGHT - 10.0f, 3, WrapNavigation = false)
         |+ Button(
             (fun () -> let mode = setting.Value in sprintf "%ix%i" mode.Width mode.Height),
-            (fun () -> this.ToggleResolutionDropdown())
+            (fun () -> this.ToggleResolutionDropdown()),
+            Align = Alignment.LEFT
         )
         |+ Button(
             (fun () -> sprintf "%ihz" setting.Value.RefreshRate),
@@ -238,7 +269,7 @@ type SystemPage() =
             .Pos(0)
         |+ PageSetting(
             %"system.windowresolution",
-            WindowedResolution(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
         )
             .Help(Help.Info("system.windowresolution"))
             .Pos(2)
@@ -265,7 +296,7 @@ type SystemPage() =
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
         |+ PageSetting(
             %"system.letterbox_resolution",
-            WindowedResolution(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
         )
             .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)

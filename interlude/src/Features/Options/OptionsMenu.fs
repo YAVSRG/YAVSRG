@@ -14,7 +14,7 @@ type OptionsMenuPage() =
     let mutable on_destroy_current_tab = ignore
     let mutable on_return_current_tab = ignore
 
-    let content_setting : Setting<OptionsMenuTab> = 
+    let content_setting : Setting<OptionsMenuTab> =
         Setting.make
             (fun new_tab ->
                 if current_tab = new_tab then () else
@@ -66,11 +66,11 @@ type OptionsMenuPage() =
         :> Widget
 
     override this.Footer() =
-        OptionsMenuFooter() 
-        |> OverlayContainer 
+        OptionsMenuFooter()
+        |> OverlayContainer
         :> Widget
 
-    override this.Content() = 
+    override this.Content() =
         content_setting.Set State.recent_tab
         page_body
 
