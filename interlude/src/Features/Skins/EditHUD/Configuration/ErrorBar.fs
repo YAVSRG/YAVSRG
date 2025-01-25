@@ -22,7 +22,7 @@ type ErrorBarPage(on_close: unit -> unit) =
 
     let release_thickness =
         config.TimingDisplayReleasesExtraHeight
-        |> Setting.bounded (0.0f, 20.0f)
+        |> Setting.bounded (-20.0f, 20.0f)
 
     let windows_opacity = config.TimingDisplayWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
 
