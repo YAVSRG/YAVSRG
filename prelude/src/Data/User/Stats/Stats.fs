@@ -2,20 +2,10 @@
 
 open System
 open Percyqaz.Common
-open Percyqaz.Data
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library
-
-[<Json.AutoCodec(false)>]
-type Stats =
-    {
-        TotalStats: TotalStats
-        CurrentSession: CurrentSession
-        LastOnlineSync: int64
-    }
-    static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; LastOnlineSync = 0L }
 
 type SessionXPGain =
     {
@@ -29,8 +19,7 @@ type SessionXPGain =
 
 module Stats =
 
-    let save (database: UserDatabase) =
-        DbSingletons.save<Stats> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; LastOnlineSync = LAST_ONLINE_SYNC } database.Database
+    let save (database: UserDatabase) = save_stats database
 
     let private end_current_session (now: int64) (database: UserDatabase) =
         TOTAL_STATS <- TOTAL_STATS.AddSession CURRENT_SESSION
@@ -142,9 +131,7 @@ module Stats =
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
-        let stats : Stats = DbSingletons.get_or_default "stats" Stats.Default database.Database
-        TOTAL_STATS <- stats.TotalStats
-        CURRENT_SESSION <- stats.CurrentSession
+        load_stats database
 
         Migration.migrate library database
 

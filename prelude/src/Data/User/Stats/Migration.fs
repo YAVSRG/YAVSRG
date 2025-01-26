@@ -10,7 +10,7 @@ open Prelude.Data.Library
 
 module private Migration =
 
-    let initial_backfill_calculation (library: Library) (database: UserDatabase) : Session array * KeymodeSkillBreakdown array =
+    let legacy_backfill (library: Library) (database: UserDatabase) : Session array * KeymodeSkillBreakdown array =
 
         // calculate skillsets
         let sc_j4 = SC.create 4
@@ -130,7 +130,7 @@ module private Migration =
         TOTAL_STATS <- TotalStats.Default
         CURRENT_SESSION <- CurrentSession.Default
 
-        let sessions, current_skills = initial_backfill_calculation library database
+        let sessions, current_skills = legacy_backfill library database
         DbSessions.save_batch sessions database.Database
         PREVIOUS_SESSIONS <-
             sessions
@@ -142,6 +142,80 @@ module private Migration =
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
         TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit; KeymodeSkills = TOTAL_STATS.KeymodeSkills }
 
+    let keymode_playtime_backfill (library: Library) (database: UserDatabase) =
+
+        Logging.Debug "Backfilling keymode playtimes from score history..."
+
+        let scores =
+            seq {
+                for chart_id in database.Cache.Keys do
+                    for score in database.Cache.[chart_id].Scores do
+                        yield struct {| ChartId = chart_id; Score = score |}
+            }
+            |> Seq.sortBy (_.Score >> _.Timestamp)
+            |> Array.ofSeq
+
+        let length_of_score (score: struct {| ChartId: string; Score: Score |}) =
+            match ChartDatabase.get_meta score.ChartId library.Charts with
+            | Some cc -> cc.Length / score.Score.Rate |> float
+            | None -> 123056.0
+
+        let sessions =
+            PREVIOUS_SESSIONS
+            |> Map.values
+            |> Seq.concat
+            |> Array.ofSeq
+
+        let mutable score_index = 0
+        let mutable i = 0
+        let mutable total_keymodes = Map.empty
+        while i < sessions.Length do
+            assert(i = 0 || sessions.[i - 1].Start < sessions.[i].Start)
+            let session = sessions.[i]
+            let mutable keymode_playtimes = Map.empty
+            while score_index < scores.Length && scores.[score_index].Score.Timestamp <= session.End do
+                let score = scores.[score_index]
+                let length = length_of_score score |> float
+                keymode_playtimes <- keymode_playtimes.Change(score.Score.Keys, function None -> Some length | Some v -> Some (v + length))
+                score_index <- score_index + 1
+
+            let playtime_sum = keymode_playtimes |> Map.values |> Seq.sum
+            if playtime_sum < session.PlayTime then
+                let length = session.PlayTime - playtime_sum
+                keymode_playtimes <- keymode_playtimes.Change(4, function None -> Some length | Some v -> Some (v + length))
+            sessions.[i] <-
+                { session with
+                    PlayTime = max session.PlayTime playtime_sum
+                    GameTime = max session.GameTime (max session.PlayTime playtime_sum + session.PracticeTime)
+                    KeymodePlaytime = keymode_playtimes
+                }
+            total_keymodes <- add_playtimes total_keymodes keymode_playtimes
+            i <- i + 1
+
+        let total_playtime = sessions |> Array.sumBy _.PlayTime
+        let total_gametime = sessions |> Array.sumBy _.GameTime
+        Logging.Debug "Total playtime: %s -> %s" (format_long_time TOTAL_STATS.PlayTime) (format_long_time total_playtime)
+        Logging.Debug "Total game time: %s -> %s" (format_long_time TOTAL_STATS.GameTime) (format_long_time total_gametime)
+
+        TOTAL_STATS <-
+            { TOTAL_STATS with
+                PlayTime = max TOTAL_STATS.PlayTime total_playtime
+                GameTime = max TOTAL_STATS.GameTime total_gametime
+                KeymodePlaytime = total_keymodes
+            }
+        MIGRATIONS <- MIGRATIONS.Add "BackfillKeymodePlaytime"
+        PREVIOUS_SESSIONS <-
+            sessions
+            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+            |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
+            |> Map.ofSeq
+        DbSessions.save_batch sessions database.Database
+        save_stats database
+
     let migrate (library: Library) (database: UserDatabase) =
+
         if PREVIOUS_SESSIONS = Map.empty && TOTAL_STATS.GameTime = 0.0 then
             migrate_legacy_stats library database
+
+        if not (MIGRATIONS.Contains "BackfillKeymodePlaytime") then
+            keymode_playtime_backfill library database

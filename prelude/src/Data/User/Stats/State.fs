@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Gameplay
+open Prelude.Data.User
 
 type Session = Prelude.Data.User.Session
 
@@ -154,13 +155,31 @@ type TotalStats =
             KeymodePlaytime = add_playtimes this.KeymodePlaytime session.KeymodePlaytime
         }
 
+[<Json.AutoCodec(false)>]
+type StatsSaveData =
+    {
+        TotalStats: TotalStats
+        CurrentSession: CurrentSession
+        Migrations: Set<string>
+    }
+    static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty }
+
 [<AutoOpen>]
 module StatsState =
 
     let SESSION_TIMEOUT = 2L * 60L * 60L * 1000L // 2 hours
     let STREAK_TIMEOUT = 60L * 1000L // 1 minute
 
+    let mutable internal MIGRATIONS : Set<string> = Set.empty
     let mutable TOTAL_STATS : TotalStats = Unchecked.defaultof<_>
     let mutable CURRENT_SESSION : CurrentSession = Unchecked.defaultof<_>
     let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
-    let mutable LAST_ONLINE_SYNC = 0L
+
+    let internal save_stats (database: UserDatabase) =
+        DbSingletons.save<StatsSaveData> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS } database.Database
+
+    let internal load_stats (database: UserDatabase) =
+        let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database.Database
+        TOTAL_STATS <- stats.TotalStats
+        CURRENT_SESSION <- stats.CurrentSession
+        MIGRATIONS <- stats.Migrations
