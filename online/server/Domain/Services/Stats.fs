@@ -1,11 +1,7 @@
 ﻿namespace Interlude.Web.Server.Domain.Services
 
-open System
-open System.Collections.Generic
 open Percyqaz.Common
 open Prelude.Data.User.Stats
-open Interlude.Web.Shared
-open Interlude.Web.Server
 open Interlude.Web.Server.Domain.Core
 
 module Stats =

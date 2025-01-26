@@ -84,12 +84,12 @@ type StatsSyncDownstream =
         BOUND_NETWORK_ID <- Some this.NetworkId
         TOTAL_STATS <-
             { TOTAL_STATS with
-                PlayTime = safe_stat_max TOTAL_STATS.PlayTime this.PlayTime
-                PracticeTime = safe_stat_max TOTAL_STATS.PracticeTime this.PracticeTime
-                GameTime = safe_stat_max TOTAL_STATS.GameTime this.GameTime
-                NotesHit = max TOTAL_STATS.NotesHit this.NotesHit
-                XP = max TOTAL_STATS.XP this.XP
-                KeymodePlaytime = combine_playtimes safe_stat_max TOTAL_STATS.KeymodePlaytime this.KeymodePlaytime
+                PlayTime = safe_stat_max TOTAL_STATS.PlayTime (this.PlayTime - CURRENT_SESSION.PlayTime)
+                PracticeTime = safe_stat_max TOTAL_STATS.PracticeTime (this.PracticeTime - CURRENT_SESSION.PracticeTime)
+                GameTime = safe_stat_max TOTAL_STATS.GameTime (this.GameTime - CURRENT_SESSION.GameTime)
+                NotesHit = max TOTAL_STATS.NotesHit (this.NotesHit - CURRENT_SESSION.NotesHit)
+                XP = max TOTAL_STATS.XP (this.XP - CURRENT_SESSION.SessionScore)
+                KeymodePlaytime = combine_playtimes safe_stat_max TOTAL_STATS.KeymodePlaytime (combine_playtimes (-) this.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime)
             }
 
         Some this.NetworkId

@@ -20,7 +20,7 @@ module StatsHelpers =
                     keymode,
                     function
                     | None -> Some time
-                    | Some t -> Some (op time t)
+                    | Some t -> Some (op t time)
                 )
             )
             total
