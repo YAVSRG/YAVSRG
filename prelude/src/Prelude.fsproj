@@ -107,6 +107,7 @@
     <Compile Include="Data\User\ScoreInfo.fs" />
     <Compile Include="Data\User\Stats\Helpers.fs" />
     <Compile Include="Data\User\Stats\State.fs" />
+    <Compile Include="Data\User\Stats\Sync.fs" />
     <Compile Include="Data\User\Stats\Migration.fs" />
     <Compile Include="Data\User\Stats\Stats.fs" />
     <Compile Include="Data\Maintenance\PersonalBests.fs" />

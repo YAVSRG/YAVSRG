@@ -6,18 +6,27 @@ open Percyqaz.Common
 [<AutoOpen>]
 module StatsHelpers =
 
-    let add_playtimes (total: Map<int, float>) (session: Map<int, float>) =
+    let safe_stat_max (original: float) (incoming: float) =
+        if Double.IsFinite incoming && incoming >= 0.0 then
+            max original incoming
+        else
+            Logging.Error "Incoming sync value was %f, ignoring" incoming
+            original
+
+    let combine_playtimes (op: float -> float -> float) (total: Map<int, float>) (session: Map<int, float>) =
         Map.fold
             (fun (pt: Map<int, float>) keymode time ->
                 pt.Change(
                     keymode,
                     function
                     | None -> Some time
-                    | Some t -> Some (time + t)
+                    | Some t -> Some (op time t)
                 )
             )
             total
             session
+
+    let add_playtimes = combine_playtimes (+)
 
     let format_long_time (time: float) =
         let seconds = time / 1000.0

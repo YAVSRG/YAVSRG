@@ -1,0 +1,94 @@
+﻿namespace Prelude.Data.User.Stats
+
+open Percyqaz.Common
+open Percyqaz.Data
+open Prelude.Gameplay
+
+[<Json.AutoCodec>]
+type StatsSyncUpstream =
+    {
+        PlayTime: float
+        PracticeTime: float
+        GameTime: float
+        NotesHit: int
+
+        XP: int64
+        KeymodePlayTime: Map<int, float>
+
+        KeymodeSkillsAllTime: KeymodeTinyBreakdown array
+        KeymodeSkillsRecent: KeymodeTinyBreakdown array
+
+        NetworkId: int64
+        Month: int
+        KeymodePlayTimeThisMonth: Map<int, float>
+        PlayTimeThisMonth: float
+        XPThisMonth: int64
+    }
+
+    static member Create (network_id: int64) : StatsSyncUpstream =
+        let month = Timestamp.now() |> timestamp_to_leaderboard_month
+        let month_start = start_of_leaderboard_month month
+        let month_end = start_of_leaderboard_month (month + 1)
+
+        let sessions =
+            PREVIOUS_SESSIONS.Values
+            |> Seq.concat
+            |> Seq.filter (fun s -> s.Start >= month_start && s.End <= month_end)
+            |> Array.ofSeq
+
+        {
+            PlayTime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
+            PracticeTime = TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime
+            GameTime = TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime
+            NotesHit = TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit
+
+            XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
+            KeymodePlayTime = add_playtimes TOTAL_STATS.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime
+
+            KeymodeSkillsAllTime = TOTAL_STATS.KeymodeSkills |> Array.map _.Tiny
+            KeymodeSkillsRecent = CURRENT_SESSION.KeymodeSkills |> Array.map _.Tiny
+
+            NetworkId = network_id
+            Month = month
+            KeymodePlayTimeThisMonth =
+                let month_playtimes = sessions |> Seq.map _.KeymodePlaytime |> Seq.fold add_playtimes Map.empty
+                add_playtimes month_playtimes CURRENT_SESSION.KeymodePlaytime
+            PlayTimeThisMonth =
+                let month_playtime = sessions |> Array.sumBy _.PlayTime
+                month_playtime + CURRENT_SESSION.PlayTime
+            XPThisMonth =
+                let month_xp = sessions |> Array.sumBy _.XP
+                month_xp + CURRENT_SESSION.SessionScore
+        }
+
+[<Json.AutoCodec>]
+type StatsSyncDownstream =
+    {
+        NetworkId: int64
+
+        PlayTime: float
+        PracticeTime: float
+        GameTime: float
+        NotesHit: int
+
+        XP: int64
+        KeymodePlaytime: Map<int, float>
+    }
+
+    member this.Accept : int64 option =
+        match BOUND_NETWORK_ID with
+        | Some id when id <> this.NetworkId -> None
+        | _ ->
+
+        BOUND_NETWORK_ID <- Some this.NetworkId
+        TOTAL_STATS <-
+            { TOTAL_STATS with
+                PlayTime = safe_stat_max TOTAL_STATS.PlayTime this.PlayTime
+                PracticeTime = safe_stat_max TOTAL_STATS.PracticeTime this.PracticeTime
+                GameTime = safe_stat_max TOTAL_STATS.GameTime this.GameTime
+                NotesHit = max TOTAL_STATS.NotesHit this.NotesHit
+                XP = max TOTAL_STATS.XP this.XP
+                KeymodePlaytime = combine_playtimes safe_stat_max TOTAL_STATS.KeymodePlaytime this.KeymodePlaytime
+            }
+
+        Some this.NetworkId
