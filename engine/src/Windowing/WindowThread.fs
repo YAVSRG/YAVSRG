@@ -197,6 +197,11 @@ module WindowThread =
                 config.FullscreenVideoMode.Height,
                 config.FullscreenVideoMode.RefreshRate
             )
+            GameThread.defer (fun () ->
+                GameThread.framebuffer_resized
+                    (config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height)
+                    ((config.FullscreenVideoMode.Width, config.FullscreenVideoMode.Height), (0.5f, 0.5f))
+            )
 
         | WindowType.FullscreenLetterbox ->
             let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
