@@ -221,7 +221,7 @@ module Score =
             WITH UserBestScores AS (
                 SELECT
                     UserId, TimePlayed, Rate, Mods, Accuracy, Grade, Lamp, ReplayId,
-                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC) AS UserScoreRank
+                    ROW_NUMBER() OVER (PARTITION BY UserId ORDER BY Accuracy DESC, TimePlayed ASC) AS UserScoreRank
                 FROM scores2
                 WHERE ChartId = @ChartId AND Ranked = 1
             )

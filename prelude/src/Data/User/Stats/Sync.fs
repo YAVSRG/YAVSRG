@@ -79,6 +79,7 @@ type StatsSyncDownstream =
         match BOUND_NETWORK_ID with
         | Some id when id <> this.NetworkId -> None
         | _ ->
+        // in theory if never synced, could ADD online stats to current
 
         BOUND_NETWORK_ID <- Some this.NetworkId
         TOTAL_STATS <-
