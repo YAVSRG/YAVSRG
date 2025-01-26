@@ -530,3 +530,139 @@ module Friends =
 
         let delete (user: string, callback: bool option -> unit) =
             Client.delete (snd ROUTE + "?user=" + escape user, callback)
+
+module Stats =
+
+    open Prelude.Data.User.Stats
+
+    /// requires login token as Authorization header
+    module Fetch =
+
+        let ROUTE = (GET, "/stats")
+
+        type Response = StatsSyncDownstream
+
+        let get (callback: Response option -> unit) =
+            Client.get<Response> (snd ROUTE, callback)
+
+    /// requires login token as Authorization header
+    module Sync =
+
+        let ROUTE = (POST, "/stats")
+
+        type Request = StatsSyncUpstream
+
+        let post (request: Request, callback: bool option -> unit) =
+            Client.post<Request> (snd ROUTE, request, callback)
+
+    module Leaderboard =
+
+        /// requires login token as Authorization header
+        module XP =
+
+            let ROUTE = (GET, "/leaderboard/xp")
+
+            [<Json.AutoCodec>]
+            type LeaderboardEntry =
+                {
+                    Username: string
+                    Color: int
+                    XP: int64
+                    Playtime: float
+                }
+
+            type Response = LeaderboardEntry array
+
+            let get (sort_by_playtime: bool, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
+
+        /// requires login token as Authorization header
+        module MonthlyXP =
+
+            let ROUTE = (GET, "/leaderboard/monthly/xp")
+
+            [<Json.AutoCodec>]
+            type LeaderboardEntry =
+                {
+                    Username: string
+                    Color: int
+                    XP: int64
+                    Playtime: float
+                }
+
+            type Response = LeaderboardEntry array
+
+            let get (sort_by_playtime: bool, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
+
+        /// requires login token as Authorization header
+        module Keymode =
+
+            let ROUTE = (GET, "/leaderboard/keymode")
+
+            [<Json.AutoCodec>]
+            type LeaderboardEntry =
+                {
+                    Username: string
+                    Color: int
+                    Playtime: float
+                    Combined: float32
+                    Jacks: float32
+                    Chordstream: float32
+                    Stream: float32
+                }
+
+            type Sort =
+                | Playtime
+                | Combined
+                | Jacks
+                | Chordstream
+                | Stream
+                override this.ToString() =
+                    match this with
+                    | Playtime -> "playtime"
+                    | Combined -> "combined"
+                    | Jacks -> "jacks"
+                    | Chordstream -> "chordstream"
+                    | Stream -> "stream"
+
+            type Response = LeaderboardEntry array
+
+            let get (keys: int, sort: Sort, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)
+
+        /// requires login token as Authorization header
+        module MonthlyKeymode =
+
+            let ROUTE = (GET, "/leaderboard/monthly/keymode")
+
+            [<Json.AutoCodec>]
+            type LeaderboardEntry =
+                {
+                    Username: string
+                    Color: int
+                    Playtime: float
+                    Combined: float32
+                    Jacks: float32
+                    Chordstream: float32
+                    Stream: float32
+                }
+
+            type Sort =
+                | Playtime
+                | Combined
+                | Jacks
+                | Chordstream
+                | Stream
+                override this.ToString() =
+                    match this with
+                    | Playtime -> "playtime"
+                    | Combined -> "combined"
+                    | Jacks -> "jacks"
+                    | Chordstream -> "chordstream"
+                    | Stream -> "stream"
+
+            type Response = LeaderboardEntry array
+
+            let get (keys: int, sort: Sort, callback: Response option -> unit) =
+                Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)
