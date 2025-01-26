@@ -19,6 +19,7 @@
     <Compile Include="Domain\Services\Tables.fs" />
     <Compile Include="Domain\Services\Scores.fs" />
     <Compile Include="Domain\Services\Users.fs" />
+    <Compile Include="Domain\Services\Stats.fs" />
     <Compile Include="Domain\Database.fs" />
     <Compile Include="Online\Sessions.fs" />
     <Compile Include="Online\Lobbies.fs" />
@@ -56,6 +57,8 @@
     <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />
+    <Compile Include="API\Stats\Fetch.fs" />
+    <Compile Include="API\Stats\Sync.fs" />
     <Compile Include="API\API.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

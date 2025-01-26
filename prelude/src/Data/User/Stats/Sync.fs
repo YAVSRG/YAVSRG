@@ -7,21 +7,21 @@ open Prelude.Gameplay
 [<Json.AutoCodec>]
 type StatsSyncUpstream =
     {
-        PlayTime: float
+        Playtime: float
         PracticeTime: float
         GameTime: float
         NotesHit: int
 
         XP: int64
-        KeymodePlayTime: Map<int, float>
+        KeymodePlaytime: Map<int, float>
 
         KeymodeSkillsAllTime: KeymodeTinyBreakdown array
         KeymodeSkillsRecent: KeymodeTinyBreakdown array
 
         NetworkId: int64
         Month: int
-        KeymodePlayTimeThisMonth: Map<int, float>
-        PlayTimeThisMonth: float
+        KeymodePlaytimeThisMonth: Map<int, float>
+        PlaytimeThisMonth: float
         XPThisMonth: int64
     }
 
@@ -37,23 +37,23 @@ type StatsSyncUpstream =
             |> Array.ofSeq
 
         {
-            PlayTime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
+            Playtime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
             PracticeTime = TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime
             GameTime = TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime
             NotesHit = TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit
 
             XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
-            KeymodePlayTime = add_playtimes TOTAL_STATS.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime
+            KeymodePlaytime = add_playtimes TOTAL_STATS.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime
 
             KeymodeSkillsAllTime = TOTAL_STATS.KeymodeSkills |> Array.map _.Tiny
             KeymodeSkillsRecent = CURRENT_SESSION.KeymodeSkills |> Array.map _.Tiny
 
             NetworkId = network_id
             Month = month
-            KeymodePlayTimeThisMonth =
+            KeymodePlaytimeThisMonth =
                 let month_playtimes = sessions |> Seq.map _.KeymodePlaytime |> Seq.fold add_playtimes Map.empty
                 add_playtimes month_playtimes CURRENT_SESSION.KeymodePlaytime
-            PlayTimeThisMonth =
+            PlaytimeThisMonth =
                 let month_playtime = sessions |> Array.sumBy _.PlayTime
                 month_playtime + CURRENT_SESSION.PlayTime
             XPThisMonth =

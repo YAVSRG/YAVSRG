@@ -53,6 +53,9 @@ module API =
         add_endpoint Friends.Add.ROUTE Friends.Add.handle
         add_endpoint Friends.Remove.ROUTE Friends.Remove.handle
 
+        add_endpoint Stats.Sync.ROUTE Stats.Sync.handle
+        add_endpoint Stats.Fetch.ROUTE Stats.Fetch.handle
+
     let handle_request
         (
             method: HttpMethod,
