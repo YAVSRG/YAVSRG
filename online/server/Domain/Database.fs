@@ -73,6 +73,11 @@ module Migrations =
             (fun db -> Stats.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
 
+        Database.migrate
+            "CreateMonthlyStatsTable"
+            (fun db -> MonthlyStats.CREATE_TABLE.Execute () db |> expect |> ignore)
+            db
+
     open Interlude.Web.Server.Domain.Backbeat
 
     let run_backbeat (db: Database) : unit =

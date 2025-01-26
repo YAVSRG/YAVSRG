@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Core\Stats.fs" />
-    <Compile Include="Core\Tables.fs" />
     <Compile Include="Core\Users.fs" />
     <Compile Include="Core\Friends.fs" />
     <Compile Include="Core\Replays.fs" />
     <Compile Include="Core\Scores.fs" />
+    <Compile Include="Core\Stats.fs" />
+    <Compile Include="Core\Tables.fs" />
     <Compile Include="Backbeat\Sources.fs" />
     <Compile Include="Backbeat\Songs.fs" />
     <Compile Include="Backbeat\Tables.fs" />
