@@ -26,7 +26,7 @@ module Stats =
         if CURRENT_SESSION.NotesHit > 0 then
             let database_session : Session = CURRENT_SESSION.ToSession
 
-            let date = timestamp_to_local_day database_session.Start |> DateOnly.FromDateTime
+            let date = timestamp_to_rg_calendar_day database_session.Start |> DateOnly.FromDateTime
             match PREVIOUS_SESSIONS.TryFind date with
             | Some sessions -> PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, database_session :: sessions)
             | None -> PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, [database_session])
@@ -128,7 +128,7 @@ module Stats =
         let sessions = DbSessions.get_all database.Database
         PREVIOUS_SESSIONS <-
             sessions
-            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         load_stats database

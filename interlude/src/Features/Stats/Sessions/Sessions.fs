@@ -14,7 +14,7 @@ type SessionsTab() =
 
     let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
 
-    let TODAY = Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime
+    let TODAY = Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
 
     let rec selected_session : Setting<(DateOnly * Session) option> =
         Setting.simple None

@@ -28,7 +28,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
     let all_time_records = TOTAL_STATS.KeymodeSkills.[keymode - 3].Tiny
     let all_time_max = Array.max [|all_time_records.Jacks; all_time_records.Chordstream; all_time_records.Stream|]
 
-    let TODAY = Timestamp.now() |> timestamp_to_local_day |> DateOnly.FromDateTime
+    let TODAY = Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
 
     let sessions =
         PREVIOUS_SESSIONS.Keys

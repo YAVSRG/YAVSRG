@@ -341,5 +341,3 @@ module Common =
             sprintf "%.0fm" ts.TotalMinutes
         else
             sprintf "%.0fs" ts.TotalSeconds
-
-    let timestamp_to_local_day (ts: int64) = Timestamp.to_datetime(ts).Subtract(TimeSpan.FromHours(4.0)).ToLocalTime().Date

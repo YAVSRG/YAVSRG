@@ -12,7 +12,7 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(sprintf "Session on %O" ((session.Start |> timestamp_to_local_day).ToShortDateString()), Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
+        |+ Text(sprintf "Session on %O" ((session.Start |> timestamp_to_rg_calendar_day).ToShortDateString()), Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
         |+ Text(
             if session.NotesHit > 0 then
                 sprintf "%s: %i" (%"stats.sessions.notes_hit") session.NotesHit

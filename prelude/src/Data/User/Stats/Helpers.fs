@@ -1,5 +1,8 @@
 ﻿namespace Prelude.Data.User.Stats
 
+open System
+open Percyqaz.Common
+
 [<AutoOpen>]
 module StatsHelpers =
 
@@ -44,3 +47,23 @@ module StatsHelpers =
 
     let xp_for_level (level: int) =
         int64 (level - 1) * int64 (level - 1) * 999L
+
+    /// The local "rhythm game calendar day" is a term I made up
+    /// It is the date this timestamp falls on relative to the user (i.e. respects the timezone of the machine)
+    /// BUT the next day starts at 4am instead of midnight
+    /// Example: A timestamp for 2am on the 2nd of January your time = "1st of January" as a rhythm game calendar day
+    /// Example: A timestamp for 11pm on the 1st of January your time = "1st of January" as well
+    /// Used to partition sessions into a calendar for stats viewing purposes
+    let timestamp_to_rg_calendar_day (ts: int64) = Timestamp.to_datetime(ts).Subtract(TimeSpan.FromHours(4.0)).ToLocalTime().Date
+
+    /// The global "rhythm game month" this timestamp falls into
+    /// Used for global monthly leaderboards which should be timezone-independent
+    /// The borders between months are exactly the standard borders in UTC
+    let timestamp_to_leaderboard_month (ts: int64) : int =
+        let utc_date = Timestamp.to_datetime(ts)
+        let start = 2025 * 12
+        utc_date.Month + utc_date.Year * 12 - start
+
+    let start_of_leaderboard_month (month: int) : int64 =
+        DateTime(2025 + month / 12, (month - 1) %% 12 + 1, 1, 0, 0, 0, DateTimeKind.Utc)
+        |> Timestamp.from_datetime

@@ -120,7 +120,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
         )
 
     let today, day_of_week =
-        let today_datetime = Timestamp.now() |> timestamp_to_local_day
+        let today_datetime = Timestamp.now() |> timestamp_to_rg_calendar_day
         DateOnly.FromDateTime(today_datetime), today_datetime.DayOfWeek
 
     let mutable hovered_day = None

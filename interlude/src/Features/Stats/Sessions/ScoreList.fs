@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.User
+open Prelude.Data.User.Stats
 open Prelude.Data.Library
 open Prelude.Gameplay.Rulesets
 open Interlude.Content
@@ -195,7 +196,7 @@ type ScoreList(start_time: int64, end_time: int64) =
     let scores = FlowContainer.Vertical<Widget>(80.0f, Spacing = 5.0f)
 
     let make_playlist() =
-        let date = timestamp_to_local_day start_time
+        let date = timestamp_to_rg_calendar_day start_time
         CreatePlaylistPage(sprintf "Session on %s" (date.ToShortDateString()), fun (_, collection) ->
             match collection with
             | Playlist p ->

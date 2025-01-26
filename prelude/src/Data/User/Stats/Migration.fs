@@ -134,7 +134,7 @@ module private Migration =
         DbSessions.save_batch sessions database.Database
         PREVIOUS_SESSIONS <-
             sessions
-            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         CURRENT_SESSION <- { CURRENT_SESSION with KeymodeSkills = current_skills }
@@ -206,7 +206,7 @@ module private Migration =
         MIGRATIONS <- MIGRATIONS.Add "BackfillKeymodePlaytime"
         PREVIOUS_SESSIONS <-
             sessions
-            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_local_day |> DateOnly.FromDateTime)
+            |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         DbSessions.save_batch sessions database.Database
