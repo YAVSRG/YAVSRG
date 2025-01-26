@@ -55,7 +55,7 @@ module DbSessions =
             SQL =
                 """
             ALTER TABLE sessions
-            ADD COLUMN KeymodePlaytime TEXT NOT NULL DEFAULT '{}'
+            ADD COLUMN KeymodePlaytime TEXT NOT NULL DEFAULT '[]'
             """
         }
 

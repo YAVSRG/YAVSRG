@@ -8,11 +8,11 @@ open Prelude.Gameplay.Rulesets
 type GameplayActionInternal =
     | HIT of delta: GameplayTime * missed: bool
     | HOLD of delta: GameplayTime * missed: bool
-    | RELEASE of 
-        release_delta: GameplayTime * 
-        missed: bool * 
-        overhold: bool * 
-        dropped: bool * 
+    | RELEASE of
+        release_delta: GameplayTime *
+        missed: bool *
+        overhold: bool *
+        dropped: bool *
         head_delta: GameplayTime *
         missed_head: bool
     | DROP_HOLD
@@ -47,7 +47,6 @@ type private HoldStateInternal =
         | H_MISSED_HEAD_DROPPED
         | H_MISSED_HEAD_REGRABBED -> true
         | _ -> false
-        
 
 [<Struct>]
 [<RequireQualifiedAccess>]
@@ -104,7 +103,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                 assert(status.[k] <> HitFlags.RELEASE_ACCEPTED)
 
                 if status.[k] = HitFlags.RELEASE_REQUIRED then
-                    
+
                     status.[k] <- HitFlags.RELEASE_ACCEPTED
                     hold_states.[k] <- H_NOTHING, head_index
 
@@ -160,7 +159,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
 
     member this.Finished = expired_notes_index = hit_data.Length
 
-    /// Result of calling this: 
+    /// Result of calling this:
     ///  notes.[expired_notes_index - 1].Time < now - LATE WINDOW
     ///  notes.[expired_notes_index].Time >= now - LATE WINDOW
     ///  All notes on rows before `expired_notes_index` now have an action assigned - if there wasn't one before, it is now marked as missed
@@ -319,7 +318,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                 let overhold =
                     if delta > late_release_window_scaled then
                         true
-                    else 
+                    else
                         deltas.[k] <- delta / rate
                         false
 
@@ -372,7 +371,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
     /// Result of calling this with a particular `chart_time`:
     /// - All replay inputs up to `chart_time` have been processed into hits by finding which notes/releases they correspond to with what timing
     /// - Notes where the time has passed to hit them, with no input mapping to them, have been processed as misses
-    
+
     /// Expected to be called with monotonically increasing values of `chart_time` during gameplay for live scoring
     /// For processing an entire score instantly pass in Time.infinity or any time higher than the duration of the chart + late window
 
