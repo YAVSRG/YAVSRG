@@ -144,7 +144,7 @@ type Slider(setting: Setting.Bounded<float32>) =
             setting.Value <- ORIGINAL_VALUE
 
     override this.Draw() =
-        let v = get_percent ()
+        let v = get_percent () |> min 1.0f |> max 0.0f
         let bounds = this.Bounds.ShrinkL TEXTWIDTH
 
         let cursor_x = bounds.Left + bounds.Width * v
