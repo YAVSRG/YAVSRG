@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
@@ -10,17 +11,11 @@ open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 
-type ScoreContextMenu(score_info: ScoreInfo) =
+type ScoreContextMenu(is_leaderboard: bool, score_info: ScoreInfo) =
     inherit Page()
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
-        |+ PageButton(
-            %"score.delete",
-            (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
-            Icon = Icons.TRASH
-        )
-            .Pos(0)
         |+ PageButton(
             %"score.watch_replay",
             (fun () ->
@@ -29,7 +24,7 @@ type ScoreContextMenu(score_info: ScoreInfo) =
             ),
             Icon = Icons.FILM
         )
-            .Pos(2)
+            .Pos(0)
         |+ PageButton(
             %"score.challenge",
             (fun () ->
@@ -40,7 +35,15 @@ type ScoreContextMenu(score_info: ScoreInfo) =
             Disabled = K Network.lobby.IsSome
         )
             .Help(Help.Info("score.challenge"))
+            .Pos(2)
+        |+ PageButton(
+            %"score.delete",
+            (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
+            Icon = Icons.TRASH,
+            Hotkey = %%"delete"
+        )
             .Pos(4)
+            .Conditional(K (not is_leaderboard))
         :> Widget
 
     override this.Title =

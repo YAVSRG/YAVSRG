@@ -109,7 +109,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
                 }
         )
 
-        |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
+        |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(true, score_info).Show()))
 
         base.Init parent
 
@@ -125,7 +125,18 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
 
-        if Mouse.hover this.Bounds && (%%"delete").Tapped() then
-            ScoreContextMenu.ConfirmDeleteScore(score_info, false)
-        elif this.Focused && (%%"context_menu").Tapped() then
-            ScoreContextMenu(score_info).Show()
+        if this.Focused && (not this.FocusedByMouse || Mouse.hover this.Bounds) then
+
+            if (%%"context_menu").Tapped() then
+                ScoreContextMenu(true, score_info).Show()
+
+        elif this.Focused && (%%"select").Tapped() then
+
+            if this.FocusedByMouse then
+                LevelSelect.choose_this_chart()
+            else
+                Screen.change_new
+                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                        Screen.Type.Score
+                        Transitions.EnterGameplayNoFadeAudio
+                    |> ignore

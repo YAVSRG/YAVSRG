@@ -32,7 +32,7 @@ type private ScoreCard(score_info: ScoreInfo) =
 
     override this.Init(parent) =
         this
-        |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(score_info).Show()))
+        |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(false, score_info).Show()))
 
         base.Init parent
 
@@ -66,7 +66,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         Render.rect bounds fill_color
         Render.rect (bounds.BorderB Style.PADDING) border_color
 
-        let mod_text = 
+        let mod_text =
             if score_info.Rate > SelectedChart.rate.Value then Icons.CHEVRONS_UP + "" + mod_string
             elif score_info.Rate < SelectedChart.rate.Value then Icons.CHEVRONS_DOWN + "" + mod_string
             else mod_string
@@ -74,7 +74,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         if this.Focused then
 
             Text.fill_b (
-                Style.font, 
+                Style.font,
                 mod_text,
                 bounds.SlicePercentT(0.6f).ShrinkL(450.0f).ShrinkR(10.0f),
                 (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
@@ -92,7 +92,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         else
 
             Text.fill_b (
-                Style.font, 
+                Style.font,
                 mod_text,
                 bounds.ShrinkL(440.0f).Shrink(10.0f, 5.0f),
                 (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha),
@@ -110,7 +110,7 @@ type private ScoreCard(score_info: ScoreInfo) =
         )
 
         let box_color = Colors.shadow_2.O1a alpha
-        
+
         let box = bounds.SliceL(140.0f).TranslateX(80.0f)
         Render.rect box box_color
         Text.fill_b (
@@ -120,7 +120,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             ((score_info.Ruleset.GradeColor score_info.Grade).O4a alpha, Colors.shadow_2.O4a alpha),
             Alignment.CENTER
         )
-        
+
         let box = bounds.SliceL(100.0f).TranslateX(230.0f)
         Render.rect box box_color
         Text.fill_b (
@@ -145,14 +145,18 @@ type private ScoreCard(score_info: ScoreInfo) =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
 
-        if Mouse.hover this.Bounds && (%%"delete").Tapped() then
-            ScoreContextMenu.ConfirmDeleteScore(score_info, false)
-        elif this.Focused && not this.FocusedByMouse && (%%"context_menu").Tapped() then
-            ScoreContextMenu(score_info).Show()
+        if this.Focused && (not this.FocusedByMouse || Mouse.hover this.Bounds) then
+
+            if (%%"delete").Tapped() then
+                ScoreContextMenu.ConfirmDeleteScore(score_info, false)
+            elif (%%"context_menu").Tapped() then
+                ScoreContextMenu(false, score_info).Show()
+
         elif this.Focused && (%%"select").Tapped() then
-            if this.FocusedByMouse then 
-                LevelSelect.choose_this_chart() 
-            else 
+
+            if this.FocusedByMouse then
+                LevelSelect.choose_this_chart()
+            else
                 Screen.change_new
                         (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                         Screen.Type.Score
