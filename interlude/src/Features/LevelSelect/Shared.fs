@@ -95,7 +95,7 @@ module LevelSelect =
         match ctx with
         | LibraryContext.Playlist(index, playlist_id, data) ->
             match Content.Library.Collections.GetPlaylist playlist_id with
-            | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist Content.Library filter state
+            | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist_id playlist Content.Library filter state
             | None -> ()
         | _ -> ()
 
@@ -140,7 +140,7 @@ module LevelSelect =
             History.append_current()
             SelectedChart._rate.Set next.Rate
             SelectedChart._selected_mods.Set next.Mods
-            SelectedChart.change (next.Chart, LibraryContext.None, false)
+            SelectedChart.change (next.Chart, next.LibraryContext, false)
             SelectedChart.when_loaded true (fun info -> play info)
             suggestion_ctx <- Some next.NextContext
             true
@@ -148,12 +148,12 @@ module LevelSelect =
             Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
-    let start_playlist (playlist: Playlist) =
-        EndlessModeState.queue_playlist 0 playlist Content.Library filter state
+    let start_playlist (playlist_id: string, playlist: Playlist) =
+        EndlessModeState.queue_playlist 0 playlist_id playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
-    let start_playlist_shuffled (playlist: Playlist) =
-        EndlessModeState.queue_shuffled_playlist playlist Content.Library filter state
+    let start_playlist_shuffled (playlist_id: string, playlist: Playlist) =
+        EndlessModeState.queue_shuffled_playlist playlist_id playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
     let exit_gameplay () =

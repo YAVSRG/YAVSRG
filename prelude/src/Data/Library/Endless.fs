@@ -166,35 +166,40 @@ module Suggestion =
 
 type EndlessModeState =
     internal {
-        mutable Queue: (ChartMeta * PlaylistEntryInfo) list
+        mutable Playlist: string
+        mutable Queue: (ChartMeta * (int * PlaylistEntryInfo)) list
     }
 
 module EndlessModeState =
 
-    let create () = { Queue = [] }
+    let create () = { Playlist = ""; Queue = [] }
 
     let private shuffle_playlist_charts (items: 'T seq) =
         let random = new Random()
         items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
-    let queue_playlist (from: int) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+    let queue_playlist (from: int) (name: string) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+        state.Playlist <- name
         state.Queue <-
             playlist.Charts
+            |> Seq.indexed
             |> Seq.skip from
-            |> Seq.choose (fun (c, info) ->
+            |> Seq.choose (fun (i, (c, info)) ->
                 match ChartDatabase.get_meta c.Hash library.Charts with
-                | Some cc -> Some(cc, info)
+                | Some cc -> Some(cc, (i, info))
                 | None -> None
             )
             |> filter.Apply
             |> List.ofSeq
 
-    let queue_shuffled_playlist (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+    let queue_shuffled_playlist (name: string) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =
+        state.Playlist <- name
         state.Queue <-
             playlist.Charts
-            |> Seq.choose (fun (c, info) ->
+            |> Seq.indexed
+            |> Seq.choose (fun (i, (c, info)) ->
                 match ChartDatabase.get_meta c.Hash library.Charts with
-                | Some cc -> Some(cc, info)
+                | Some cc -> Some(cc, (i, info))
                 | None -> None
             )
             |> filter.Apply
@@ -202,6 +207,7 @@ module EndlessModeState =
             |> List.ofSeq
 
     let clear_queue (state: EndlessModeState) =
+        state.Playlist <- ""
         state.Queue <- []
 
     type Next =
@@ -209,18 +215,20 @@ module EndlessModeState =
             Chart: ChartMeta
             Rate: Rate
             Mods: ModState
+            LibraryContext: LibraryContext
             NextContext: SuggestionContext
         }
 
     let next (ctx: SuggestionContext) (state: EndlessModeState) : Next option =
         match state.Queue with
-        | (chart, { Rate = rate; Mods = mods }) :: xs ->
+        | (chart, (index, playlist_data)) :: xs ->
             state.Queue <- xs
             Some
                 {
                     Chart = chart
-                    Rate = rate.Value
-                    Mods = mods.Value
+                    Rate = playlist_data.Rate.Value
+                    Mods = playlist_data.Mods.Value
+                    LibraryContext = LibraryContext.Playlist(index, state.Playlist, playlist_data)
                     NextContext = ctx
                 }
         | [] ->
@@ -231,6 +239,7 @@ module EndlessModeState =
                         Chart = next_cc
                         Rate = rate
                         Mods = ctx.Mods
+                        LibraryContext = LibraryContext.None
                         NextContext = ctx
                     }
             | None -> None

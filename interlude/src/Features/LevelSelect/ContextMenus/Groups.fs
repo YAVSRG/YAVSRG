@@ -18,14 +18,14 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
         |+ PageButton
             .Once(
                 %"playlist.play",
-                (fun () -> LevelSelect.start_playlist playlist),
+                (fun () -> LevelSelect.start_playlist (name, playlist)),
                 Icon = Icons.PLAY
             )
             .Pos(3)
         |+ PageButton
             .Once(
                 %"playlist.play_shuffled",
-                (fun () -> LevelSelect.start_playlist_shuffled playlist),
+                (fun () -> LevelSelect.start_playlist_shuffled (name, playlist)),
                 Icon = Icons.SHUFFLE
             )
             .Pos(5)

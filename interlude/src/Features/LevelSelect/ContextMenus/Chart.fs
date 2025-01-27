@@ -134,7 +134,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |+ PageButton.Once(
                 %"playlist.play",
                 (fun () ->
-                    LevelSelect.start_playlist (Content.Collections.GetPlaylist(name).Value)
+                    LevelSelect.start_playlist (name, Content.Collections.GetPlaylist(name).Value)
                 ),
                 Icon = Icons.PLAY,
                 Disabled = K Network.lobby.IsSome
@@ -142,7 +142,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |* PageButton.Once(
                 %"playlist.play_shuffled",
                 (fun () ->
-                    LevelSelect.start_playlist_shuffled (Content.Collections.GetPlaylist(name).Value)
+                    LevelSelect.start_playlist_shuffled (name, Content.Collections.GetPlaylist(name).Value)
                 ),
                 Icon = Icons.SHUFFLE,
                 Disabled = K Network.lobby.IsSome
