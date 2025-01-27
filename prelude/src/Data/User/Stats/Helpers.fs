@@ -7,7 +7,7 @@ open Percyqaz.Common
 module StatsHelpers =
 
     let safe_stat_max (original: float) (incoming: float) =
-        if Double.IsFinite incoming && incoming >= 0.0 then
+        if Double.IsFinite incoming then
             max original incoming
         else
             Logging.Error "Incoming sync value was %f, ignoring" incoming

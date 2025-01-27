@@ -14,6 +14,7 @@ open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
+open Interlude.Features.Stats
 
 module Startup =
 
@@ -25,6 +26,7 @@ module Startup =
         Options.init_startup ()
         Content.init_startup ()
         Stats.init_startup Content.Library Content.UserData
+        StatsSync.init_startup ()
 
     let init_window (instance) =
         Screen.init_window

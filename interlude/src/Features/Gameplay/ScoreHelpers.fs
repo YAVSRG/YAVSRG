@@ -30,7 +30,7 @@ module Gameplay =
     let private leaderboard_rank_changed_ev = Event<ScoreInfo>()
     let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
 
-    let submit_online_score (score_info: ScoreInfo) =
+    let upload_score (score_info: ScoreInfo) =
         Charts.Scores.Save.post (
             ({
                 ChartId = score_info.ChartMeta.Hash
@@ -94,7 +94,7 @@ module Gameplay =
                     else score_info
 
                 if Network.status = Network.Status.LoggedIn && not standardised_score.IsFailed then
-                    submit_online_score standardised_score
+                    upload_score standardised_score
 
                 let new_bests, improvement_flags =
                     match Map.tryFind Rulesets.current_hash save_data.PersonalBests with

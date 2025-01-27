@@ -25,7 +25,11 @@ type StatsSyncUpstream =
         XPThisMonth: int64
     }
 
-    static member Create (network_id: int64) : StatsSyncUpstream =
+    static member Create () : StatsSyncUpstream option =
+        match BOUND_NETWORK_ID with
+        | None -> None
+        | Some network_id ->
+
         let month = Timestamp.now() |> timestamp_to_leaderboard_month
         let month_start = start_of_leaderboard_month month
         let month_end = start_of_leaderboard_month (month + 1)
@@ -60,6 +64,7 @@ type StatsSyncUpstream =
                 let month_xp = sessions |> Array.sumBy _.XP
                 month_xp + CURRENT_SESSION.SessionScore
         }
+        |> Some
 
 [<Json.AutoCodec>]
 type StatsSyncDownstream =
@@ -75,9 +80,9 @@ type StatsSyncDownstream =
         KeymodePlaytime: Map<int, float>
     }
 
-    member this.Accept : int64 option =
+    member this.Accept : bool =
         match BOUND_NETWORK_ID with
-        | Some id when id <> this.NetworkId -> None
+        | Some id when id <> this.NetworkId -> false
         | _ ->
         // in theory if never synced, could ADD online stats to current
 
@@ -92,4 +97,4 @@ type StatsSyncDownstream =
                 KeymodePlaytime = combine_playtimes safe_stat_max TOTAL_STATS.KeymodePlaytime (combine_playtimes (-) this.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime)
             }
 
-        Some this.NetworkId
+        true

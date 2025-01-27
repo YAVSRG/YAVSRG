@@ -40,7 +40,7 @@ module ScoreSync =
                     && OnlineScores.leaderboard_scores.Count < 20
 
                 if leaderboard_has_room then
-                    Gameplay.submit_online_score local_score
+                    Gameplay.upload_score local_score
 
             synced <- true
 
