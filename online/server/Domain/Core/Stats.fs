@@ -207,6 +207,20 @@ module Stats =
     let xp_leaderboard () =
         XP_LEADERBOARD.Execute () core_db |> expect
 
+    let private PLAYTIME_LEADERBOARD: Query<unit, XPLeaderboardModel> =
+        { Query.without_parameters() with
+            SQL =
+                """
+            SELECT UserId, XP, Playtime FROM stats
+            ORDER BY Playtime DESC
+            LIMIT 50;
+            """
+            Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
+
+    let playtime_leaderboard () =
+        PLAYTIME_LEADERBOARD.Execute () core_db |> expect
+
     type KeymodeLeaderboardModel =
         {
             UserId: int64
@@ -453,6 +467,23 @@ module MonthlyStats =
 
     let xp_leaderboard (month: int) =
         XP_LEADERBOARD.Execute month core_db |> expect
+
+    let private PLAYTIME_LEADERBOARD: Query<int, XPLeaderboardModel> =
+        {
+            SQL =
+                """
+            SELECT UserId, XP, Playtime FROM monthly_stats
+            WHERE Month = @Month
+            ORDER BY Playtime DESC
+            LIMIT 50;
+            """
+            Parameters = [ "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p month -> p.Int32 month
+            Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
+
+    let playtime_leaderboard (month: int) =
+        PLAYTIME_LEADERBOARD.Execute month core_db |> expect
 
     type KeymodeLeaderboardModel =
         {
