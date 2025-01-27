@@ -366,10 +366,7 @@ module SelectedChart =
         let mutable previous_keymode = None
 
         fun (cc: ChartMeta) ->
-            match previous_keymode with
-            | Some k when k <> cc.Keys -> Presets.keymode_changed cc.Keys
-            | _ -> ()
-
+            if previous_keymode <> Some cc.Keys then Presets.keymode_changed cc.Keys
             previous_keymode <- Some cc.Keys
 
     let rate =
