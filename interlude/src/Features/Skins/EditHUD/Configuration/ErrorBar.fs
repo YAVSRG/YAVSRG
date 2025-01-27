@@ -33,7 +33,7 @@ type ErrorBarPage(on_close: unit -> unit) =
         |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
     let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
-    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 0.5f)
+    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
     let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
 
     override this.Content() =

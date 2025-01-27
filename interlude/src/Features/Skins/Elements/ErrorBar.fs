@@ -32,6 +32,7 @@ type ErrorBar(config: HudConfig, state: PlayState) =
         else
             1.0f
 
+    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity * 0.5f
     let animation_time = config.TimingDisplayFadeTime * SelectedChart.rate.Value
     let moving_average = Animation.Fade(0.0f)
 
@@ -48,21 +49,21 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                     if not e.Missed then
                         moving_average.Target <-
                             lerp
-                                config.TimingDisplayMovingAverageSensitivity
+                                moving_average_sensitivity
                                 moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Hold e ->
                     if not e.Missed then
                         moving_average.Target <-
                             lerp
-                                config.TimingDisplayMovingAverageSensitivity
+                                moving_average_sensitivity
                                 moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * 0.5f)
                 | Release e ->
                     if not e.Missed then
                         moving_average.Target <-
                             lerp
-                                config.TimingDisplayMovingAverageSensitivity
+                                moving_average_sensitivity
                                 moving_average.Target
                                 (e.Delta / MAX_WINDOW * w * ln_mult)
                 | GhostTap _
