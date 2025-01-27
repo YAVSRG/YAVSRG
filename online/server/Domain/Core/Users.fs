@@ -335,11 +335,23 @@ module User =
         DELETE.Execute id core_db |> expect |> ignore
 
     let private COUNT: Query<unit, int64> =
-        {
+        { Query.without_parameters() with
             SQL = """SELECT COUNT(1) FROM users"""
-            Parameters = []
-            FillParameters = fun p () -> ()
             Read = fun r -> r.Int64
         }
+
     let count () : int64 =
         COUNT.Execute () core_db |> expect |> Array.exactlyOne
+
+    let private RENAME: NonQuery<int64 * string> =
+        {
+            SQL = """UPDATE users SET Username = @Username WHERE Id = @Id;"""
+            Parameters = [ "@Id", SqliteType.Integer, 8; "@Username", SqliteType.Text, -1 ]
+            FillParameters =
+                fun p (id, username) ->
+                    p.Int64 id
+                    p.String username
+        }
+
+    let rename (id: int64, new_name: string) =
+        RENAME.Execute (id, new_name) core_db |> expect |> ignore

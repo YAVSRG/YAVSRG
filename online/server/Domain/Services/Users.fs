@@ -90,6 +90,26 @@ module Users =
                 Ok new_token
             | None -> Error()
 
+        let rename (old_name: string) (new_name: string) =
+            match User.by_username old_name with
+            | None -> Error (sprintf "User '%s' doesn't exist" old_name)
+            | Some (current_user_id, _) ->
+
+            if new_name = old_name then Ok() else
+
+            lock REGISTER_LOCK_OBJ
+            <| fun () ->
+                match Username.check new_name with
+                | Error reason -> Error(sprintf "Invalid new username (%s)" reason)
+                | Ok() ->
+
+                match User.by_username new_name with
+                | Some (user_id, _) when user_id <> current_user_id -> Error "Username is taken!"
+                | _ ->
+
+                User.rename (current_user_id, new_name)
+                Ok()
+
     module DiscordAuthFlow =
 
         [<RequireQualifiedAccess>]

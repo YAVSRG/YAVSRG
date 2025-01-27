@@ -142,6 +142,15 @@ module AdminCommands =
                         do! reply_emoji ":white_check_mark:"
                     | None -> do! reply "No user found."
 
+            | "renameuser" ->
+                match args with
+                | []
+                | [_] -> do! reply "Enter an existing username and new username, for example: $renameuser Percyqaz$Bananahira"
+                | old_name :: new_name :: _ ->
+                    match Users.Auth.rename old_name new_name with
+                    | Ok() -> do! reply_emoji ":white_check_mark:"
+                    | Error reason -> do! reply reason
+
             | "search" ->
                 match args with
 
@@ -152,12 +161,12 @@ module AdminCommands =
                     let embed, components = UserInteractables.song_search query 0 false
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                     return ()
-                
+
                 | query :: page :: [] ->
                     let embed, components = UserInteractables.song_search query (int page - 1) false
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)
                     return ()
-                
+
                 | query :: page :: _ ->
                     let embed, components = UserInteractables.song_search query (int page - 1) true
                     let! _ = context.Channel.SendMessageAsync(embed = embed, components = components)

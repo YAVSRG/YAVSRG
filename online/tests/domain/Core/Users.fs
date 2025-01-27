@@ -3,6 +3,7 @@ namespace Interlude.Web.Tests.Domain.Core
 open NUnit.Framework
 
 open Interlude.Web.Server.Domain.Core
+open Interlude.Web.Server.Domain.Services
 
 module Users =
 
@@ -261,7 +262,7 @@ module Users =
         User.create ("Count1", 0uL) |> User.save_new |> ignore
 
         let count_after_1 = User.count()
-        
+
         User.create ("Count2", 0uL) |> User.save_new |> ignore
         User.create ("Count3", 0uL) |> User.save_new |> ignore
 
@@ -271,3 +272,32 @@ module Users =
         Assert.GreaterOrEqual(original_count, 0)
         Assert.AreEqual(original_count + 1L, count_after_1)
         Assert.AreEqual(original_count + 3L, count_after_3)
+
+    [<Test>]
+    let Rename() =
+        let user_1 = User.create("RenameMe1", 0uL) |> User.save_new
+        let user_2 = User.create("RenameMe2", 0uL) |> User.save_new
+
+        match Users.Auth.rename "RenameMe1" "RenameMe2" with
+        | Error reason -> printfn "%s" reason
+        | Ok() -> Assert.Fail("This rename should fail (1 -> 2)")
+
+        match Users.Auth.rename "RenameMe1" "RenameMe3" with
+        | Error reason -> Assert.Fail(reason)
+        | Ok() -> ()
+
+        match Users.Auth.rename "RenameMe2" "RenameMe1" with
+        | Error reason -> Assert.Fail(reason)
+        | Ok() -> ()
+
+        match Users.Auth.rename "RenameMe2" "RenameMe1" with
+        | Error reason -> printfn "%s" reason
+        | Ok() -> Assert.Fail("This rename should fail (2 -> 1)")
+
+        match User.by_id user_1 with
+        | Some user -> Assert.AreEqual("RenameMe3", user.Username)
+        | None -> Assert.Fail()
+
+        match User.by_id user_2 with
+        | Some user -> Assert.AreEqual("RenameMe1", user.Username)
+        | None -> Assert.Fail()
