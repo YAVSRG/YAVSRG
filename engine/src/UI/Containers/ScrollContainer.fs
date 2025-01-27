@@ -41,16 +41,7 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
 
             match Selection.get_focused_element () with
             | None -> ()
-            | Some child ->
-
-
-            let selected_bounds =
-                (child :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
-
-            if selected_bounds.Bottom > this.Bounds.Bottom && selected_bounds.Top > this.Bounds.CenterY then
-                scroll_amt <- scroll_amt + selected_bounds.Bottom - this.Bounds.Bottom + Style.PADDING
-            elif selected_bounds.Top < this.Bounds.Top && selected_bounds.Bottom < this.Bounds.CenterY then
-                scroll_amt <- scroll_amt - this.Bounds.Top + selected_bounds.Top - Style.PADDING
+            | Some child -> this.ScrollTo(child :?> Widget)
 
         let moved =
             if scroll_amt <> 0.0f then
@@ -112,4 +103,13 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
     member this.RemainingScrollAnimation = scroll_pos.Target - scroll_pos.Value
 
     member this.Scroll(amount: float32) =
-        scroll_pos.Target <- scroll_pos.Target + amount
+        scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target + amount, content_height - this.Bounds.Height))
+
+    member this.ScrollTo(widget: Widget) =
+        let target =
+            widget.Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
+
+        if target.Bottom > this.Bounds.Bottom && target.Top > this.Bounds.CenterY then
+            this.Scroll(target.Bottom - this.Bounds.Bottom + Style.PADDING)
+        elif target.Top < this.Bounds.Top && target.Bottom < this.Bounds.CenterY then
+            this.Scroll(target.Top - this.Bounds.Top - Style.PADDING)

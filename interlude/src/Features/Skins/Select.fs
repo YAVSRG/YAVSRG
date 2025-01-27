@@ -3,6 +3,7 @@ namespace Interlude.Features.Skins
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skins
@@ -191,16 +192,23 @@ type SelectSkinsPage() =
                 .Show()
         else EditNoteskinPage().Show()
 
+    let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SliceLPercent(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
+    let hud_tab = ScrollContainer(hud_grid, Position = Position.SliceRPercent(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
+
     let refresh () =
         preview.Refresh()
 
         noteskin_grid.Clear()
         for id, _, meta in Skins.list_noteskins () do
-            noteskin_grid |* NoteskinButton(id, meta, preview.Refresh, edit_or_extract_noteskin)
+            let nb = NoteskinButton(id, meta, preview.Refresh, edit_or_extract_noteskin)
+            if nb.IsCurrent then GameThread.defer (fun () -> noteskin_tab.ScrollTo(nb))
+            noteskin_grid |* nb
 
         hud_grid.Clear()
         for id, _, meta in Skins.list_huds () do
-            hud_grid |* HUDButton(id, meta, preview.Refresh, edit_hud)
+            let hb = HUDButton(id, meta, preview.Refresh, edit_hud)
+            if hb.IsCurrent then GameThread.defer (fun () -> hud_tab.ScrollTo(hb))
+            hud_grid |* hb
 
     override this.Content() =
         refresh ()
@@ -219,9 +227,6 @@ type SelectSkinsPage() =
                 (fun () -> osu.Skins.OsuSkinsListPage().Show()),
                 Position = pretty_pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             )
-
-        let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SliceLPercent(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
-        let hud_tab = ScrollContainer(hud_grid, Position = Position.SliceRPercent(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
 
         let right_side =
             NavigationContainer.Row(
