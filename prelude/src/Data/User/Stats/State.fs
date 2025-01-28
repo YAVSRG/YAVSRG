@@ -177,6 +177,9 @@ module StatsState =
     let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
     let mutable BOUND_NETWORK_ID = None
 
+    let internal backup_stats (id: string) (database: UserDatabase) =
+        DbSingletons.save<StatsSaveData> ("stats_" + id) { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
+
     let internal save_stats (database: UserDatabase) =
         DbSingletons.save<StatsSaveData> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
 

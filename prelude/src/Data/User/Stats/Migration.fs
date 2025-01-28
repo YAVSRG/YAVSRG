@@ -218,4 +218,5 @@ module private Migration =
             migrate_legacy_stats library database
 
         if not (MIGRATIONS.Contains "BackfillKeymodePlaytime") then
+            backup_stats "backup_0.7.27.7" database
             keymode_playtime_backfill library database
