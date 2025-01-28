@@ -688,3 +688,5 @@ module Lobby =
             state_change.Request(Leave(session_id), callback)
         else
             callback()
+
+    let count() = lobbies.Count

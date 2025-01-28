@@ -87,6 +87,7 @@ module AdminCommands =
 
             | "online" ->
                 let user_list = Session.list_online_users ()
+                let lobby_count = Lobby.count()
 
                 do!
                     EmbedBuilder(Title = sprintf "All online users (%i)" user_list.Length)
@@ -96,6 +97,7 @@ module AdminCommands =
                             else
                                 user_list |> Seq.map snd |> String.concat "\n"
                         )
+                        .WithFooter(sprintf "%i multiplayer lobbies in progress" lobby_count)
                         .WithColor(Color.Blue)
                         .Build()
                     |> reply_embed
