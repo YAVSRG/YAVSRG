@@ -1,27 +1,24 @@
-0.7.27.7
+0.7.27.8
 ====
 
-Heads up when you install this update, the auto-restart won't work but it works again from now on
+A small bug fix update
 
 # New features
-- Option to never show score screen when quitting out
-- Option to never use rates when suggesting songs
-- Added Letterboxing support as a new video mode under System settings
-- You can choose a custom windowed resolution (for both letterboxed and windowed mode)
-- Input meter has an option to flash indicating the judgements scored on each key
-- You can change offset manually from practice mode (as well as the automatic tools)
+- Letterboxing now supports offsets within the monitor in question
+  This also applies to windowed mode, so you can have a default position other than the center of the monitor
+- Your stats are now synced between your game client and the server
+  This is not displayed anywhere yet, but enables various global leaderboards (probably next week)
 
 # Improvements
-- Offset can be changed from the context menu in level select, and remembers its suggestion between screens
-- osu! Conversion now auto-corrects certain stacked notes instead of skipping the chart
-- Keymode selectors are now dropdowns in all places
-- 'Last played' indicator on level select updates immediately after playing
-- Volume slider looks better
-- Like/Unlike is now one hotkey instead of two
+- Skinning screen will scroll as you enter it so that the selected HUD and Noteskin are always visible
+- Delete and context menu hotkeys behave more predictably when navigating scoreboard using keyboard
+- Release error bars can be made smaller as well as larger
 
 # Bug fixes
-- Fixed PBs for the wrong ruleset showing if changing to a ruleset without PB data
-- Fixed a crash when skipping a song
-- Fixed a visual issue with explosions/column lighting in previews
-- Fixed new users having an empty session on 1st January 1970
+- Fixed some visual issues with the stats screen
+- Fixed switching from fullscreen letterbox to fullscreen not working correctly
+- Fixed presets not auto-switching if the first song you change to is a different keymode
+- Fixed level select not returning to a playlist after continuing it in endless mode
+- Fixed moving average weight slider clipping out of bounds
+- Fixed option to delete a leaderboard score showing up (it didn't do anything)
 
