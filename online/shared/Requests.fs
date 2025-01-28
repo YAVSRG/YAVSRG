@@ -461,6 +461,15 @@ module Players =
                 }
 
             [<Json.AutoCodec>]
+            type ProfileStats =
+                {
+                    LastUpdated: int64
+                    XP: int64
+                    TotalPlaytime: float
+                    Keymodes: Map<int, float * float32>
+                }
+
+            [<Json.AutoCodec>]
             type Response =
                 {
                     Username: string
@@ -470,6 +479,7 @@ module Players =
                     DateSignedUp: int64
                     IsFriend: bool
                     IsMutualFriend: bool
+                    Stats: ProfileStats
                 }
 
             let get_me (callback: Response option -> unit) =

@@ -60,6 +60,8 @@ module View =
 
             let relation = Friends.relation (user_id, target_user_id)
 
+            let stats = Stats.get_or_default user_id
+
             response.ReplyJson(
                 {
                     Username = target_user.Username
@@ -77,6 +79,13 @@ module View =
                     DateSignedUp = target_user.DateSignedUp
                     IsFriend = relation = FriendRelation.Friend || relation = FriendRelation.MutualFriend
                     IsMutualFriend = relation = FriendRelation.MutualFriend
+                    Stats =
+                        {
+                            LastUpdated = stats.LastSync
+                            XP = stats.XP
+                            TotalPlaytime = stats.Playtime
+                            Keymodes = Map.ofSeq [ 4, (stats._4KPlaytime, stats._4K.Average); 7, (stats._7KPlaytime, stats._7K.Average); 10, (stats._10KPlaytime, stats._10K.Average) ]
+                        }
                 }
                 : Response
             )

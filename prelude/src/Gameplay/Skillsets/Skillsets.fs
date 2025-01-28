@@ -32,6 +32,8 @@ type KeymodeTinyBreakdown =
         Combined: float32
     }
 
+    member this.Average = (this.Chordstream + this.Jacks + this.Stream) / 3f
+
     static member Default =
         {
             Jacks = 0.0f
