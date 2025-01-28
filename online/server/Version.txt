@@ -1,1 +1,1 @@
-﻿EUNOIA II: Server database hotfix
+﻿EUNOIA III: Stats sync protocol
