@@ -46,6 +46,7 @@ module Version =
         File.WriteAllText(file, f)
 
         current_version <- v
+        Site.generate_index v
 
         printfn "Creating git commit"
 

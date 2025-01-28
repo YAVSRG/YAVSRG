@@ -7,12 +7,12 @@ open YAVSRG.CLI.Features
 module Commands =
 
     let release_all_in_one () =
-        Version.publish ()
         Wiki.generate_toc ()
         Site.generate_site ()
         exec "git" "add interlude/docs"
         exec "git" "add site"
         exec "git" "commit -m \"📘 Update site changelog & wiki\""
+        Version.publish ()
         exec "git" "push"
 
     let register (ctx: ShellContext) =
@@ -24,7 +24,6 @@ module Commands =
             .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Check.format_all_code ()))
 
             .WithCommand("version", "Displays the current version of Interlude", Version.version)
-            .WithCommand("publish_version", "Publishes a new version of Interlude", Version.publish)
             .WithCommand("release_aio", "All-in-one release script", release_all_in_one)
 
             .WithCommand("pack_win_x64", "Build an Interlude release and zip it user-ready", Releases.build_win_x64)

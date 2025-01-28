@@ -105,6 +105,16 @@ module Site =
             Filename = Path.GetFileNameWithoutExtension(path)
         }
 
+    let generate_index (version: string) =
+        let today = System.DateTime.UtcNow.ToString("dd-MM-yyyy")
+
+        let template = File.ReadAllText(Path.Combine(SITE_PATH, "templates", "index.html"))
+
+        template
+            .Replace("{{latest_release}}", version)
+            .Replace("{{latest_release_date}}", today)
+        |> fun t -> File.WriteAllText((Path.Combine(SITE_PATH, "files", "index.html")), t)
+
     let generate_site () =
 
         let template = File.ReadAllText(Path.Combine(SITE_PATH, "templates", "page.html"))
