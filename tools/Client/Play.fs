@@ -17,6 +17,8 @@ module Play =
             Releases.BuildPlatformInfo.WINDOWS_X64
         | Architecture.X64 when System.OperatingSystem.IsLinux() ->
             Releases.BuildPlatformInfo.LINUX_X64
+        | Architecture.X64 when System.OperatingSystem.IsMacOS() ->
+            Releases.BuildPlatformInfo.OSX_X64
         | Architecture.Arm64 when System.OperatingSystem.IsMacOS() ->
             Releases.BuildPlatformInfo.OSX_ARM64
         | _ -> failwithf "Your platform (%O) is not supported! Maybe complain in the discord?" arch

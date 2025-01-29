@@ -27,8 +27,9 @@ module Commands =
             .WithCommand("release_aio", "All-in-one release script", release_all_in_one)
 
             .WithCommand("pack_win_x64", "Build an Interlude release and zip it user-ready", Releases.build_win_x64)
-            .WithCommand("pack_osx_arm64", "Build an Interlude release and zip it user-ready", Releases.build_osx_arm64)
             .WithCommand("pack_linux_x64", "Build an Interlude release and zip it user-ready", Releases.build_linux_x64)
+            .WithCommand("pack_osx_x64", "Build an Interlude release and zip it user-ready", Releases.build_osx_x64)
+            .WithCommand("pack_osx_arm64", "Build an Interlude release and zip it user-ready", Releases.build_osx_arm64)
 
             .WithCommand("bundle_assets", "Bundle all assets for build pipeline", Assets.bundle_assets)
 
