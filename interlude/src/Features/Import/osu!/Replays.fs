@@ -17,14 +17,20 @@ open Interlude.Features.Score
 type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay: Score -> unit) =
     inherit Page()
 
-    let detected_rate =
-        Data.Library.Imports.detect_rate_mod replay.FilePath.Value
-        |> Option.defaultValue 1.0f<rate>
+    let info =
+        CalloutCard(
+            Callout.Normal
+                .Icon(Icons.ALERT_OCTAGON)
+                .Title("Attention")
+                .Body("The beatmap for this replay could not be found.")
+                .Body("This screen lets you manually try to import a replay IF\n - You are sure you currently have the right map selected\n - You are sure you have the right rate selected")
+                .Body("If you haven't reimported osu! charts since 0.7.27.6, you should and this warning will probably stop showing up."),
+            Colors.red_accent,
+            Colors.red.O3)
 
-    // todo: even better detection using the fact that replay file contains md5 of original .osu
-    // strategy 1: store original .osu md5s on all osu imports, search for it
-    // strategy 2: if strategy 1 fails, open up the osu!.db if available, search for chart, convert and load it temporarily
-    // if both strategies fail warn user that it's gonna try its best on the selected chart but that may be wrong
+    let detected_rate =
+        Imports.detect_rate_mod replay.FilePath.Value
+        |> Option.defaultValue 1.0f<rate>
 
     let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) detected_rate |> Setting.roundf_uom 2
 
@@ -37,6 +43,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         page_container()
         |+ PageSetting("Rate", Slider(Setting.uom rate)).Pos(0)
         |+ PageButton("Import!", import).Pos(3)
+        |+ info.Pos(6, 9, PageWidth.Custom (info :> IWidth).Width)
         :> Widget
     override this.Title = "Import replay"
     override this.OnClose() = ()
