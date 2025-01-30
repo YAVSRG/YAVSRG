@@ -70,7 +70,7 @@ module Audio =
                     let ok, info = Bass.GetDeviceInfo i
                     if ok then
                         if info.IsEnabled then
-                            yield { Index = i; Name = info.Name; Type = info.Type; IsDefault = info.IsDefault }
+                            yield { Index = i; Name = info.Name; Type = info.Type; IsDefault = info.IsDefault || info.Name.Contains("PulseAudio", StringComparison.OrdinalIgnoreCase) }
                     else Logging.Error "Failed to get info for BASS device %i" i
             }
             |> Array.ofSeq
@@ -82,10 +82,10 @@ module Audio =
             let device_index =
                 match detected_devices |> Array.tryFind (fun x -> x.Index = index) with
                 | None ->
-                    Logging.Debug "No audio device with index %i, using default" index
+                    if index >= 0 then Logging.Debug "No audio device with index %i, using default" index
                     match detected_devices |> Array.tryFind (fun x -> x.IsDefault) with
                     | None ->
-                        Logging.Error "No default audio device either! Initialising with no sound :("
+                        Logging.Error "No default audio device! Initialising with no sound :("
                         NO_AUDIO_DEVICE
                     | Some d -> d.Index
                 | Some d -> d.Index
