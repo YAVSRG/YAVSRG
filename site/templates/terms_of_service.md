@@ -1,5 +1,5 @@
 # Interlude terms of service
-Last updated 7th July 2023. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/master/site_data/terms_of_service.md).
+Last updated 29th January 2025. You can view the full history [here](https://github.com/YAVSRG/YAVSRG/blame/master/site_data/terms_of_service.md).
 
 "**Interlude**" refers to this site [https://yavsrg.net](https://yavsrg.net), the Interlude game client as available on [GitHub](https://github.com/YAVSRG/Interlude), and any affiliated services. These services are offered to You, conditioned on your acceptance of these terms and conditions.  
 "You" and "Your" refers to you, the person accessing this website and accepting Interlude's terms and conditions.
@@ -13,7 +13,7 @@ If you violate any of these terms of service, your permission to use the online 
 ## Prohibited activities
 As a user of Interlude's online services, you agree not to:
 
-- Use the services or register for an account if you are under 18 years old.
+- Use the services or register for an account if you are under 13 years old.
 - Trick, defraud, or mislead other users, especially in any attempt to learn sensitive account information such as user passwords.
 - Use any information obtained from the services in order to harass, abuse, or harm another person.
 - Interfere with, disrupt, or create an undue burden on the services or the networks or services connected to the services.

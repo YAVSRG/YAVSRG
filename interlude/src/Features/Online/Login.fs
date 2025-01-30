@@ -24,7 +24,7 @@ type RegisterPage(discord_tag) =
             .Body("Choose your username wisely! This is what gets displayed on your profile.")
             .Body("Usernames must be 3-20 characters long, and can have at most 2 special characters")
             .Body(
-                "By completing your registration you confirm that:\n - You have read, understood and agree to abide by Interlude's Terms of Service and Privacy Policy\n - You are 18 years old or older"
+                "By completing your registration you confirm that:\n - You have read, understood and agree to abide by Interlude's Terms of Service and Privacy Policy\n - You are at least 13 years old"
             )
 
     override this.Content() =
