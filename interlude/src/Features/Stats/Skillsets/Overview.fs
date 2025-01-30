@@ -43,8 +43,8 @@ type KeymodeOverview(keymode: int, button_callback: GraphSource -> CorePattern o
 
     override this.Init(parent) =
         this
-        |+ time_summary recent Recent (Position.SliceLPercent(0.5f).ShrinkL(50.0f).TranslateX(50.0f))
-        |+ time_summary all_time AllTime (Position.SliceRPercent(0.5f).ShrinkL(50.0f))
+        |+ time_summary recent Recent (Position.SlicePercentL(0.5f).ShrinkL(50.0f).TranslateX(50.0f))
+        |+ time_summary all_time AllTime (Position.SlicePercentR(0.5f).ShrinkL(50.0f))
         |* Text(sprintf "%iK" keymode, Position = Position.SliceL(100.0f).ShrinkX(20.0f).SliceY(50.0f))
         base.Init parent
 

@@ -192,8 +192,8 @@ type SelectSkinsPage() =
                 .Show()
         else EditNoteskinPage().Show()
 
-    let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SliceLPercent(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
-    let hud_tab = ScrollContainer(hud_grid, Position = Position.SliceRPercent(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
+    let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
+    let hud_tab = ScrollContainer(hud_grid, Position = Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
 
     let refresh () =
         preview.Refresh()
@@ -241,25 +241,25 @@ type SelectSkinsPage() =
             |+ hud_tab
             |+ Text(
                 %"skins.current_noteskin",
-                Position = Position.SliceLPercent(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Position = Position.SlicePercentL(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.NoteskinMeta.Name),
-                Position = Position.SliceLPercent(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Position = Position.SlicePercentL(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 %"skins.current_hud",
-                Position = Position.SliceRPercent(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Position = Position.SlicePercentR(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.HUDMeta.Name),
-                Position = Position.SliceRPercent(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Position = Position.SlicePercentR(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )

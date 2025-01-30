@@ -12,7 +12,7 @@ open Prelude.Data.User.Stats
 type SessionsTab() =
     inherit Container(NodeType.Leaf)
 
-    let session_panel = SwapContainer(CurrentSession(), Position = Position.SliceRPercent(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
+    let session_panel = SwapContainer(CurrentSession(), Position = Position.SlicePercentR(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
 
     let TODAY = Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
 
@@ -85,7 +85,7 @@ type SessionsTab() =
 
     and activity : RecentActivityGrid =
         RecentActivityGrid(selected_session,
-            Position = Position.SliceLPercent(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
+            Position = Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
 
     override this.Init(parent) =
         this
@@ -107,7 +107,7 @@ type SessionsTab() =
                 | None -> CURRENT_SESSION.PracticeTime
                 | Some (_, a) -> a.PracticeTime
             ),
-            Position = Position.SliceLPercent(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
+            Position = Position.SlicePercentL(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |+ PlayCount(
             (fun () ->
@@ -130,7 +130,7 @@ type SessionsTab() =
                 | None -> CURRENT_SESSION.PlaysQuit
                 | Some (_, a) -> a.PlaysQuit
             ),
-            Position = Position.SliceLPercent(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
+            Position = Position.SlicePercentL(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
 
         |* session_panel
 

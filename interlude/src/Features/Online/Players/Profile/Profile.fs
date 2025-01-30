@@ -93,33 +93,33 @@ type StatsHeader(data: ProfileData) =
         |+ Text(
             sprintf "%i / %i" current_xp xp_to_next_level,
             Color = K Colors.text_subheading,
-            Position = Position.SliceLPercent(BAR_PC).ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f),
+            Position = Position.SlicePercentL(BAR_PC).ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f),
             Align = Alignment.RIGHT
         )
         |+ Text(
             sprintf "Level %i" level,
-            Position = Position.SliceLPercent(BAR_PC).ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f),
+            Position = Position.SlicePercentL(BAR_PC).ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f),
             Align = Alignment.LEFT
         )
         |+ Text(
             [ (Timestamp.to_datetimeoffset data.DateSignedUp).ToLocalTime().DateTime.ToShortDateString() ]
             %> "online.players.profile.playing_since",
             Color = K Colors.text_subheading,
-            Position = Position.SliceRPercent(1.0f - BAR_PC).SliceT(40.0f).ShrinkX(20.0f),
+            Position = Position.SlicePercentR(1.0f - BAR_PC).SliceT(40.0f).ShrinkX(20.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
             [ (Timestamp.to_datetimeoffset data.Stats.LastUpdated).ToLocalTime().DateTime.ToShortDateString() ]
             %> "online.players.profile.last_seen",
             Color = K Colors.text_subheading,
-            Position = Position.SliceRPercent(1.0f - BAR_PC).ShrinkT(40.0f).SliceT(40.0f).ShrinkX(20.0f),
+            Position = Position.SlicePercentR(1.0f - BAR_PC).ShrinkT(40.0f).SliceT(40.0f).ShrinkX(20.0f),
             Align = Alignment.CENTER
         )
         |+ Text(
             [ format_long_time data.Stats.TotalPlaytime ]
             %> "online.players.profile.playtime",
             Color = K Colors.text_subheading,
-            Position = Position.SliceRPercent(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f),
+            Position = Position.SlicePercentR(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f),
             Align = Alignment.CENTER
         )
         |* Dummy()

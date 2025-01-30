@@ -24,7 +24,7 @@ type StatsPage() =
                 |]
                 Height = 50.0f
             }
-        tabs.Position <- Position.SliceLPercent(0.4f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
+        tabs.Position <- Position.SlicePercentL(0.4f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
         tabs
 
     override this.Content() = swap
