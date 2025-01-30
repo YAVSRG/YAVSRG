@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Diagnostics
 open System.Reflection
+open System.Runtime.InteropServices
 open Percyqaz.Common
 open System.IO.Compression
 open Percyqaz.Data
@@ -90,6 +91,12 @@ module Updates =
     let mutable update_started = false
     let mutable update_complete = false
 
+    let asset_name =
+        match RuntimeInformation.OSArchitecture with
+        | Architecture.X64 when OperatingSystem.IsWindows() -> Ok "interlude-win64.zip"
+        | Architecture.X64 when OperatingSystem.IsLinux() -> Ok "interlude-linux-x64.zip"
+        | other -> Error other
+
     let private handle_update (release: GithubRelease) =
         latest_release <- Some release
 
@@ -108,6 +115,10 @@ module Updates =
         let pcurrent = parse_version current
         let pincoming = parse_version incoming
 
+        match asset_name with
+        | Error arch -> Logging.Info "Auto-updater doesn't support this OS or architecture (%O)" arch
+        | Ok _ ->
+
         if pincoming > pcurrent then
             Logging.Info "Update available (%s)!" incoming
             update_available <- true
@@ -117,21 +128,18 @@ module Updates =
             Logging.Info "Game is up to date."
 
     let check_for_updates () =
-        if OperatingSystem.IsWindows() then
-            WebServices.download_json (
-                "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
-                function
-                | WebResult.Ok(d: GithubRelease) -> handle_update d
-                | _ -> ()
-            )
+        WebServices.download_json (
+            "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
+            function
+            | WebResult.Ok(d: GithubRelease) -> handle_update d
+            | _ -> ()
+        )
 
-            let path = get_interlude_location ()
-            let folder_path = Path.Combine(path, "update")
+        let path = get_interlude_location ()
+        let folder_path = Path.Combine(path, "update")
 
-            if Directory.Exists folder_path then
-                Directory.Delete(folder_path, true)
-        else
-            Logging.Info "Auto-updater not availble for macOS / Linux (yet)"
+        if Directory.Exists folder_path then
+            Directory.Delete(folder_path, true)
 
     let apply_update (callback) =
         if not update_available then
@@ -143,13 +151,9 @@ module Updates =
 
             update_started <- true
 
-            let asset_name =
-                // todo: other platforms eventually
-                "interlude-win64.zip"
-
             match
                 latest_release.Value.assets
-                |> List.tryFind (fun asset -> asset.name.ToLower().StartsWith(asset_name))
+                |> List.tryFind (fun asset -> Ok (asset.name.ToLower()) = asset_name)
             with
             | None ->
                 Logging.Error(
