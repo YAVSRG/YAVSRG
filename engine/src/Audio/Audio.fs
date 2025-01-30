@@ -66,7 +66,7 @@ module Audio =
     let private detect_devices () =
         detected_devices <-
             seq {
-                for i = FIRST_REAL_DEVICE to Bass.DeviceCount do
+                for i = FIRST_REAL_DEVICE to Bass.DeviceCount - 1 do
                     let ok, info = Bass.GetDeviceInfo i
                     if ok then
                         if info.IsEnabled then
