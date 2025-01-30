@@ -60,7 +60,7 @@ module View =
 
             let relation = Friends.relation (user_id, target_user_id)
 
-            let stats = Stats.get_or_default user_id
+            let stats = Stats.get_or_default target_user_id
 
             response.ReplyJson(
                 {
