@@ -34,7 +34,7 @@ type Song =
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
             let Frequency = d.Frequency
             let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
-            Bass.ChannelSetDevice(ID, current_device) |> display_bass_error
+            Bass.ChannelSetDevice(ID, Bass.CurrentDevice) |> display_bass_error
             Bass.ChannelSetAttribute(ID, ChannelAttribute.NoBuffer, 1f) |> display_bass_error
             Bass.ChannelSetAttribute(ID, ChannelAttribute.TempoUseQuickAlgorithm, 1) |> display_bass_error
             Bass.ChannelSetAttribute(ID, ChannelAttribute.TempoOverlapMilliseconds, 4) |> display_bass_error

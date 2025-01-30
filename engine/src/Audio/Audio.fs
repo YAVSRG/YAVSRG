@@ -4,6 +4,15 @@ open System
 open ManagedBass
 open Percyqaz.Common
 
+type Device =
+    {
+        Index: int
+        Name: string
+        Type: DeviceType
+        IsDefault: bool
+    }
+    override this.ToString() = this.Name
+
 module Audio =
 
     let private fft: float32 array = Array.zeroCreate 1024
@@ -41,9 +50,6 @@ module Audio =
         update_waveform elapsed_ms
         Song.update elapsed_ms
 
-    let mutable private default_device = -1
-    let mutable private devices = [||]
-
     let change_volume (fx_volume: float, song_volume: float) =
         Bass.GlobalSampleVolume <- int (fx_volume * 8000.0) |> max 0
         Bass.GlobalStreamVolume <- int (song_volume * 8000.0) |> max 0
@@ -51,62 +57,78 @@ module Audio =
     let private current_device_changed_ev = Event<unit>()
     let current_device_changed = current_device_changed_ev.Publish
 
+    let NO_AUDIO_DEVICE = 0
+    let FIRST_REAL_DEVICE = if OperatingSystem.IsLinux() then 2 else 1
+
+    let mutable private detected_devices = [||]
     let private detect_devices () =
-        devices <-
+        detected_devices <-
             seq {
-                for i = 1 to Bass.DeviceCount do
+                for i = FIRST_REAL_DEVICE to Bass.DeviceCount do
                     let ok, info = Bass.GetDeviceInfo i
-
                     if ok then
-                        if info.IsDefault then
-                            default_device <- i
-
-                        yield i, info.Name
+                        if info.IsEnabled then
+                            yield { Index = i; Name = info.Name; Type = info.Type; IsDefault = info.IsDefault }
+                    else Logging.Error "Failed to get info for BASS device %i" i
             }
             |> Array.ofSeq
 
-    let list_devices () =
-        seq {
-            yield -1, "Default"
-            yield! devices
-        }
-        |> Array.ofSeq
+    let list_devices () = detected_devices
 
     let change_device (index: int) =
         try
-            let id =
-                if index = -1 then
-                    default_device
-                else
-                    fst devices.[index - 1]
+            let device_index =
+                match detected_devices |> Array.tryFind (fun x -> x.Index = index) with
+                | None ->
+                    Logging.Debug "No audio device with index %i, using default" index
+                    match detected_devices |> Array.tryFind (fun x -> x.IsDefault) with
+                    | None ->
+                        Logging.Error "No default audio device either! Initialising with no sound :("
+                        NO_AUDIO_DEVICE
+                    | Some d -> d.Index
+                | Some d -> d.Index
 
-            Bass.CurrentDevice <- id
+            if Bass.Init(device_index, Flags = DeviceInitFlags.Latency) then
+                Bass.CurrentDevice <- device_index
+            else
+                Logging.Error "Failed to initialise audio device with index %i: %O" device_index Bass.LastError
+                if device_index <> NO_AUDIO_DEVICE && Bass.Init(0, Flags = DeviceInitFlags.Latency) then
+                    Bass.CurrentDevice <- NO_AUDIO_DEVICE
+                    Logging.Debug "Initialised with no sound :("
+                else
+                    Logging.Critical "Initialising with no sound also failed: %O" Bass.LastError
 
             if Song.now_playing.ID <> 0 then
-                Bass.ChannelSetDevice(Song.now_playing.ID, id) |> display_bass_error
-
-            current_device <- id
+                Bass.ChannelSetDevice(Song.now_playing.ID, device_index) |> display_bass_error
 
             current_device_changed_ev.Trigger()
 
         with err ->
-            Logging.Error "Error switching to audio output %i: %O" index err
+            Logging.Error "Unhandled exception switching to audio device %i: %O" index err
 
     let debug_info() : string =
 
+        let device_dump (dev: Device) =
+            sprintf "  %i. %s | %O | DEFAULT: %A" dev.Index dev.Name dev.Type dev.IsDefault
+
+        let devices = detected_devices |> Seq.map device_dump |> String.concat "\n"
+
         match Bass.GetInfo() with
-        | false, _ -> sprintf "-- AUDIO DEBUG INFO --\nBass Version: %O\nOther details could not be retrieved"  Bass.Version
+        | false, _ -> sprintf "-- AUDIO DEBUG INFO --\nBass Version: %O\nDetected and enabled devices:\n%s\nOther details could not be retrieved" Bass.Version devices
         | true, info ->
             sprintf
                 """-- AUDIO DEBUG INFO --
 BASS Version: %O
 Estimated latency: %i
 Min buffer length: %i
-DirectSound Version: %i"""
+DirectSound Version: %i
+Detected and enabled devices:
+%s"""
                 Bass.Version
                 info.Latency
                 info.MinBufferLength
                 info.DSVersion
+                devices
 
     let init (device: int, device_period: int, device_buffer_length: int) =
         detect_devices ()
@@ -117,9 +139,6 @@ DirectSound Version: %i"""
         Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length) |> display_bass_error
         Bass.Configure(Configuration.PlaybackBufferLength, 100) |> display_bass_error
         Bass.Configure(Configuration.UpdatePeriod, 5) |> display_bass_error
-
-        for (i, name) in devices do
-            Bass.Init(i, Flags = DeviceInitFlags.Latency) |> display_bass_error
 
         change_device device
         Bass.GlobalStreamVolume <- 0

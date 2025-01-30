@@ -89,7 +89,7 @@ module Settings =
             if token_match tokens [|%"system.audiodevice"|] then
                 yield PageSetting(
                     %"system.audiodevice",
-                    SelectDropdown(Array.ofSeq (Audio.list_devices ()), Setting.trigger Audio.change_device config.AudioDevice)
+                    SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
                 )
 
             if token_match tokens [|%"system.audiooffset"|] then

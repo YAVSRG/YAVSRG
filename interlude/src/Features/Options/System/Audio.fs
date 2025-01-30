@@ -23,7 +23,7 @@ type AudioPage() =
             .Pos(0)
         |+ PageSetting(
             %"system.audiodevice",
-            SelectDropdown(Array.ofSeq (Audio.list_devices ()), Setting.trigger Audio.change_device config.AudioDevice)
+            SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
         )
             .Pos(2)
         |+ PageSetting(

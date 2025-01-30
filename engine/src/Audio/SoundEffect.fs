@@ -28,7 +28,7 @@ type SoundEffect =
             Bass.SampleFree this.ID |> display_bass_error
 
     member this.ChangeDevice() =
-        Bass.ChannelSetDevice(this.ID, current_device) |> display_bass_error
+        Bass.ChannelSetDevice(this.ID, Bass.CurrentDevice) |> display_bass_error
         this.ChannelID <- Bass.SampleGetChannel(this.ID)
 
     static member Default = { ID = 0; ChannelID = 0 }
