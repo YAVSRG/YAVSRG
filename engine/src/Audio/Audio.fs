@@ -60,6 +60,8 @@ module Audio =
     let NO_AUDIO_DEVICE = 0
     let FIRST_REAL_DEVICE = if OperatingSystem.IsLinux() then 2 else 1
 
+    let mutable private initialised_devices = Set.empty
+
     let mutable private detected_devices = [||]
     let private detect_devices () =
         detected_devices <-
@@ -88,11 +90,12 @@ module Audio =
                     | Some d -> d.Index
                 | Some d -> d.Index
 
-            if Bass.Init(device_index, Flags = DeviceInitFlags.Latency) then
+            if initialised_devices.Contains device_index || Bass.Init(device_index, Flags = DeviceInitFlags.Latency) then
+                initialised_devices <- initialised_devices.Add device_index
                 Bass.CurrentDevice <- device_index
             else
                 Logging.Error "Failed to initialise audio device with index %i: %O" device_index Bass.LastError
-                if device_index <> NO_AUDIO_DEVICE && Bass.Init(0, Flags = DeviceInitFlags.Latency) then
+                if device_index <> NO_AUDIO_DEVICE && (initialised_devices.Contains NO_AUDIO_DEVICE || Bass.Init(NO_AUDIO_DEVICE, Flags = DeviceInitFlags.Latency)) then
                     Bass.CurrentDevice <- NO_AUDIO_DEVICE
                     Logging.Debug "Initialised with no sound :("
                 else
