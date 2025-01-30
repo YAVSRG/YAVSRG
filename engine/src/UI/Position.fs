@@ -128,6 +128,7 @@ type Position with
     static member inline SliceX width = Position.DEFAULT.SliceX width
     static member inline SliceY height = Position.DEFAULT.SliceY height
 
+    // todo: rename these to be consistent with Rect
     static member inline SliceLPercent percent = { Position.DEFAULT with Right = percent %+ 0.0f }
     static member inline SliceTPercent percent = { Position.DEFAULT with Bottom = percent %+ 0.0f }
     static member inline SliceRPercent percent = { Position.DEFAULT with Left = (1.0f - percent) %+ 0.0f }

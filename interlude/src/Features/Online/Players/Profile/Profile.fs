@@ -64,6 +64,67 @@ type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<in
     override this.Title = %"profile_settings"
     override this.OnClose() = ()
 
+open Prelude.Data.User.Stats
+
+type StatsHeader(data: ProfileData) =
+    inherit Container(NodeType.None)
+
+    let xp = data.Stats.XP
+    let level = xp |> current_level
+    let xp_to_next_level = xp_for_level (level + 1) - xp_for_level level
+    let current_xp = xp - xp_for_level level
+
+    let HEIGHT = 120.0f
+    let BAR_PC = 0.6f
+
+    override this.Draw() =
+
+        let bar_bg = this.Bounds.SlicePercentL(BAR_PC)
+        Render.rect bar_bg Colors.shadow_2.O2
+        let bar = bar_bg.SliceB(40.0f).ShrinkX(20.0f).TranslateY(-20.0f)
+        Render.rect (bar.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect bar !*Palette.DARKER
+        Render.rect (bar.SlicePercentL(float32 current_xp / float32 xp_to_next_level)) !*Palette.MAIN
+
+        base.Draw()
+
+    override this.Init (parent: Widget): unit =
+        this
+        |+ Text(
+            sprintf "%i / %i" current_xp xp_to_next_level,
+            Color = K Colors.text_subheading,
+            Position = Position.SliceLPercent(BAR_PC).ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f),
+            Align = Alignment.RIGHT
+        )
+        |+ Text(
+            sprintf "Level %i" level,
+            Position = Position.SliceLPercent(BAR_PC).ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f),
+            Align = Alignment.LEFT
+        )
+        |+ Text(
+            [ (Timestamp.to_datetimeoffset data.DateSignedUp).ToLocalTime().DateTime.ToShortDateString() ]
+            %> "online.players.profile.playing_since",
+            Color = K Colors.text_subheading,
+            Position = Position.SliceRPercent(1.0f - BAR_PC).SliceT(40.0f).ShrinkX(20.0f),
+            Align = Alignment.CENTER
+        )
+        |+ Text(
+            [ (Timestamp.to_datetimeoffset data.Stats.LastUpdated).ToLocalTime().DateTime.ToShortDateString() ]
+            %> "online.players.profile.last_seen",
+            Color = K Colors.text_subheading,
+            Position = Position.SliceRPercent(1.0f - BAR_PC).ShrinkT(40.0f).SliceT(40.0f).ShrinkX(20.0f),
+            Align = Alignment.CENTER
+        )
+        |+ Text(
+            [ format_long_time data.Stats.TotalPlaytime ]
+            %> "online.players.profile.playtime",
+            Color = K Colors.text_subheading,
+            Position = Position.SliceRPercent(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f),
+            Align = Alignment.CENTER
+        )
+        |* Dummy()
+        base.Init parent
+
 type private Profile() =
     inherit Container(NodeType.None)
 
@@ -133,33 +194,16 @@ type private Profile() =
             data.Username,
             Color = K(Color.FromArgb data.Color, Colors.shadow_2),
             Align = Alignment.LEFT,
-            Position = Position.SliceT(80.0f).Shrink(45.0f, 5.0f)
+            Position = Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f)
         )
-        |+ Text(
-            String.concat ", " (data.Badges |> Seq.map (fun b -> b.Name)),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(70.0f).SliceT(40.0f).Shrink(45.0f, 0.0f)
-        )
-        |+ Text(
-            [
-                DateTimeOffset
-                    .FromUnixTimeMilliseconds(data.DateSignedUp)
-                    .ToLocalTime()
-                    .DateTime.ToShortDateString()
-            ]
-            %> "online.players.profile.playing_since",
-            Color = K Colors.text_subheading,
-            Align = Alignment.RIGHT,
-            Position = Position.ShrinkT(125.0f).SliceT(45.0f).Shrink(45.0f, 0.0f)
-        )
+        |+ StatsHeader(data, Position = Position.Row(95.0f, 120.0f).ShrinkX(20.0f))
         |+ Text(
             %"online.players.profile.recent_scores",
             Color = K Colors.text,
             Align = Alignment.LEFT,
-            Position = Position.ShrinkT(125.0f).SliceT(45.0f).Shrink(45.0f, 0.0f)
+            Position = Position.ShrinkT(220.0f).SliceT(45.0f).ShrinkX(20.0f)
         )
-        |+ RecentScores(data.RecentScores, Position = Position.ShrinkT(130.0f).Shrink(40.0f))
+        |+ RecentScores(data.RecentScores, Position = Position.ShrinkT(250.0f).Shrink(20.0f))
 
         // Friend button when not your profile
         |+ InlaidButton(
