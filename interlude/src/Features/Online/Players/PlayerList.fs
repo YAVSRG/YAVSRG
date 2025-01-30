@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Online.Players
 
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.UI
 
 type PlayerListPage() =
@@ -27,5 +28,5 @@ type PlayerListPage() =
         :> Widget
 
     override this.OnClose() = ()
-    override this.Title = ""
+    override this.Title = %"network.players"
     override this.Header() = Dummy()

@@ -10,6 +10,60 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
+type ProfileData = Players.Profile.View.Response
+
+type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<int32>) =
+    inherit Page()
+
+    let color_picker =
+        DropdownWrapper(fun d -> Position.BorderB(min d.Height 500.0f + 2.0f * Style.PADDING).Shrink(Style.PADDING))
+
+    let badges =
+        seq {
+            for b in profile.Badges do
+                for c in b.Colors do
+                    yield (b.Name, c)
+        } |> Array.ofSeq
+
+    let change_color_dropdown() =
+
+        let save_color color =
+            Players.Profile.Options.post (
+                { Color = color },
+                function
+                | Some true -> GameThread.defer <| fun () -> profile_color.Set color
+                | _ -> Notifications.error (%"notification.network_action_failed", "")
+            )
+
+        let dropdown =
+            Dropdown
+                {
+                    Items = badges |> Seq.map (fun (label, color) -> color, label)
+                    ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
+                    Setting = Setting.make save_color profile_color.Get
+                }
+
+        color_picker.Show dropdown
+        dropdown.Focus false
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting(
+            %"profile_settings.color",
+            Button(
+                K profile.Username,
+                change_color_dropdown,
+                Align = Alignment.LEFT,
+                TextColor = fun () -> Color.FromArgb(profile_color.Value), Colors.shadow_2
+            )
+            |+ color_picker
+        )
+            .Pos(0)
+        :> Widget
+
+    override this.Title = %"profile_settings"
+    override this.OnClose() = ()
+
 type private Profile() =
     inherit Container(NodeType.None)
 
@@ -37,38 +91,11 @@ type private Profile() =
         else
             container.Offline()
 
-    let rerender (container: WebRequestContainer<_>) (data: Players.Profile.View.Response) =
-        let color_picker =
-            DropdownWrapper(fun d -> Position.ShrinkR(40.0f).ShrinkT(70.0f).SliceR(300.0f).SliceT(500.0f))
+    let rerender (container: WebRequestContainer<_>) (data: ProfileData) =
 
         let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
 
-        let change_color_dropdown() =
-            let badges =
-                seq {
-                    for b in data.Badges do
-                        for c in b.Colors do
-                            yield (b.Name, c)
-                }
-
-            let save_color color =
-                Players.Profile.Options.post (
-                    { Color = color },
-                    function
-                    | Some true -> GameThread.defer <| fun () -> container.SetData({ data with Color = color })
-                    | _ -> Notifications.error (%"notification.network_action_failed", "")
-                )
-
-            let dropdown =
-                Dropdown
-                    {
-                        Items = badges |> Seq.map (fun (label, color) -> color, label)
-                        ColorFunc = fun c -> Color.FromArgb c, Colors.shadow_2
-                        Setting = Setting.make save_color (fun () -> data.Color)
-                    }
-
-            color_picker.Show dropdown
-            dropdown.Focus false
+        let profile_color = Setting.simple data.Color
 
         let remove_friend() =
             Friends.Remove.delete (
@@ -135,65 +162,58 @@ type private Profile() =
         |+ RecentScores(data.RecentScores, Position = Position.ShrinkT(130.0f).Shrink(40.0f))
 
         // Friend button when not your profile
-        |+ Conditional(
-            (fun () -> data.IsFriend),
-            InlaidButton(
+        |+ InlaidButton(
+            (if data.IsMutualFriend then
+                    %"online.players.profile.mutual_friend"
+                else
+                    %"online.players.profile.remove_friend"),
+            remove_friend,
+            (if data.IsMutualFriend then
+                    Icons.HEART
+                else
+                    Icons.USER_MINUS),
+            HoverText = %"online.players.profile.remove_friend",
+            HoverIcon = Icons.USER_MINUS,
+            UnfocusedColor =
                 (if data.IsMutualFriend then
-                        %"online.players.profile.mutual_friend"
+                        Colors.text_pink_2
                     else
-                        %"online.players.profile.remove_friend"),
-                remove_friend,
-                (if data.IsMutualFriend then
-                        Icons.HEART
-                    else
-                        Icons.USER_MINUS),
-                HoverText = %"online.players.profile.remove_friend",
-                HoverIcon = Icons.USER_MINUS,
-                UnfocusedColor =
-                    (if data.IsMutualFriend then
-                            Colors.text_pink_2
-                        else
-                            Colors.text_red_2),
-                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
-            )
+                        Colors.text_red_2),
+            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
         )
-        |+ Conditional(
-            (fun () -> data.Username <> Network.credentials.Username && not data.IsFriend),
-            InlaidButton(
-                %"online.players.profile.add_friend",
-                add_friend,
-                Icons.USER_PLUS,
-                UnfocusedColor = Colors.text_green_2,
-                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
-            )
+            .Conditional(fun () -> data.IsFriend)
+        |+ InlaidButton(
+            %"online.players.profile.add_friend",
+            add_friend,
+            Icons.USER_PLUS,
+            UnfocusedColor = Colors.text_green_2,
+            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
         )
-        // Color button on your profile
-        |+ Conditional(
-            (fun () -> has_colors && data.Username = Network.credentials.Username),
-            InlaidButton(
-                %"online.players.profile.change_color",
-                change_color_dropdown,
-                Icons.REFRESH_CCW,
-                Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
-            )
+            .Conditional(fun () -> not data.IsFriend && data.Username <> Network.credentials.Username)
+
+        // Profile settings
+        |+ InlaidButton(
+            %"profile_settings",
+            (fun () -> ProfileSettingsPage(data, profile_color).Show()),
+            Icons.SETTINGS,
+            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
         )
-        |+ color_picker
+            .Conditional(fun () -> data.Username = Network.credentials.Username && has_colors)
+
         // Invite button
-        |+ Conditional(
-            (fun () -> Network.lobby.IsSome && data.Username <> Network.credentials.Username),
-            InlaidButton(
-                %"online.players.profile.invite_to_lobby",
-                (fun () ->
-                    Network.lobby.Value.InvitePlayer(data.Username)
-                    Notifications.action_feedback (Icons.SEND, %"notification.lobby_invite_sent", data.Username)
-                ),
-                Icons.SEND,
-                Position = Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
-            )
+        |+ InlaidButton(
+            %"online.players.profile.invite_to_lobby",
+            (fun () ->
+                Network.lobby.Value.InvitePlayer(data.Username)
+                Notifications.action_feedback (Icons.SEND, %"notification.lobby_invite_sent", data.Username)
+            ),
+            Icons.SEND,
+            Position = Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
         )
+            .Conditional(fun () -> Network.lobby.IsSome && data.Username <> Network.credentials.Username && (not (Network.lobby.Value.Players.ContainsKey data.Username)))
         :> Widget
 
-    let container = WebRequestContainer<Players.Profile.View.Response>(load_profile, rerender)
+    let container = WebRequestContainer<ProfileData>(load_profile, rerender)
 
     override this.Init(parent) =
         this
