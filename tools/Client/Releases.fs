@@ -8,7 +8,7 @@ module Releases =
 
     let README = """
 Interlude - Keyboard-based vertically scrolling rhythm game.
-Copyright (C) 2018-2024 Percyqaz
+Copyright (C) 2018-2025 Percyqaz
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
