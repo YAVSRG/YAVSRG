@@ -52,10 +52,11 @@ module Updates =
             let target = Path.Combine(dest, Path.GetFileName source)
 
             try
-                File.Copy(source, target, true)
-            with :? IOException as err ->
                 File.Move(target, source + ".old", true)
-                File.Copy(source, target, true)
+            with
+            | :? FileNotFoundException -> ()
+            | other -> Logging.Error "Error while moving file '%s' during auto-update: %O" source other
+            File.Copy(source, target, true)
         )
 
         Directory.EnumerateDirectories source
