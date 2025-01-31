@@ -57,8 +57,10 @@
     <Compile Include="API\Friends\List.fs" />
     <Compile Include="API\Friends\Add.fs" />
     <Compile Include="API\Friends\Remove.fs" />
-    <Compile Include="API\Stats\Leaderboard\MonthlyXP.fs" />
     <Compile Include="API\Stats\Leaderboard\XP.fs" />
+    <Compile Include="API\Stats\Leaderboard\MonthlyXP.fs" />
+    <Compile Include="API\Stats\Leaderboard\Keymode.fs" />
+    <Compile Include="API\Stats\Leaderboard\MonthlyKeymode.fs" />
     <Compile Include="API\Stats\Fetch.fs" />
     <Compile Include="API\Stats\Sync.fs" />
     <Compile Include="API\API.fs" />

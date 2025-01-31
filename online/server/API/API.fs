@@ -57,6 +57,8 @@ module API =
         add_endpoint Stats.Fetch.ROUTE Stats.Fetch.handle
         add_endpoint Stats.Leaderboard.XP.ROUTE Stats.Leaderboard.XP.handle
         add_endpoint Stats.Leaderboard.MonthlyXP.ROUTE Stats.Leaderboard.MonthlyXP.handle
+        add_endpoint Stats.Leaderboard.Keymode.ROUTE Stats.Leaderboard.Keymode.handle
+        add_endpoint Stats.Leaderboard.MonthlyKeymode.ROUTE Stats.Leaderboard.MonthlyKeymode.handle
 
     let handle_request
         (
