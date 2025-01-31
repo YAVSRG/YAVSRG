@@ -40,8 +40,8 @@ jobs:
     - name: Upload macOS (x64) artifact
       uses: actions/upload-artifact@v4
       with:
-          name: Interlude-osx-arm64
-          path: ./interlude/releases/Interlude-osx-arm64.zip
+          name: Interlude-osx-x64
+          path: ./interlude/releases/Interlude-osx-x64.zip
           
     - name: Upload macOS (Arm) artifact
       uses: actions/upload-artifact@v4
