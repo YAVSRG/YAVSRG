@@ -581,7 +581,12 @@ module Stats =
                     Playtime: float
                 }
 
-            type Response = LeaderboardEntry array
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Leaderboard: LeaderboardEntry array
+                    You: (int64 * LeaderboardEntry) option
+                }
 
             let get (sort_by_playtime: bool, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
@@ -600,7 +605,12 @@ module Stats =
                     Playtime: float
                 }
 
-            type Response = LeaderboardEntry array
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Leaderboard: LeaderboardEntry array
+                    You: (int64 * LeaderboardEntry) option
+                }
 
             let get (sort_by_playtime: bool, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
@@ -636,7 +646,12 @@ module Stats =
                     | Chordstream -> "chordstream"
                     | Stream -> "stream"
 
-            type Response = LeaderboardEntry array
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Leaderboard: LeaderboardEntry array
+                    You: (int64 * LeaderboardEntry) option
+                }
 
             let get (keys: int, sort: Sort, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)
@@ -672,7 +687,12 @@ module Stats =
                     | Chordstream -> "chordstream"
                     | Stream -> "stream"
 
-            type Response = LeaderboardEntry array
+            [<Json.AutoCodec>]
+            type Response =
+                {
+                    Leaderboard: LeaderboardEntry array
+                    You: (int64 * LeaderboardEntry) option
+                }
 
             let get (keys: int, sort: Sort, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)

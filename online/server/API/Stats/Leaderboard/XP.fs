@@ -17,7 +17,7 @@ module XP =
             response: HttpResponse
         ) =
         async {
-            let _, _ = authorize headers
+            let user_id, user = authorize headers
 
             let by_playtime = query_params.TryFind "sort" |> Option.bind Array.tryHead = Some "playtime"
 
@@ -30,17 +30,45 @@ module XP =
             let users =
                 data |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
+            let mutable you : (int64 * LeaderboardEntry) option = None
+
+            let mutable i = 0
             let result =
                 data
                 |> Array.map (fun l ->
+                    i <- i + 1
                     let user = users.[l.UserId]
-                    {
-                        Username = user.Username
-                        Color = user.Color
-                        XP = l.XP
-                        Playtime = l.Playtime
-                    }
+                    let entry =
+                        {
+                            Username = user.Username
+                            Color = user.Color
+                            XP = l.XP
+                            Playtime = l.Playtime
+                        }
+                    if user_id = l.UserId then you <- Some (i, entry)
+                    entry
                 )
 
-            response.ReplyJson(result: Response)
+            match you with
+            | Some _ -> ()
+            | None ->
+                match
+                    if by_playtime then
+                        Stats.playtime_rank user_id
+                    else
+                        Stats.xp_rank user_id
+                with
+                | Some rank ->
+                    you <- Some (
+                        rank.Rank,
+                        {
+                            Username = user.Username
+                            Color = user.Color
+                            XP = rank.XP
+                            Playtime = rank.Playtime
+                        }
+                    )
+                | None -> ()
+
+            response.ReplyJson({ Leaderboard = result; You = you }: Response)
         }

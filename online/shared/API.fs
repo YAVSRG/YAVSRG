@@ -3,7 +3,9 @@
 open System
 open System.Web
 open System.Net
+open System.Net.Http
 open System.Net.Sockets
+open System.Threading
 open System.Diagnostics
 open NetCoreServer
 open Percyqaz.Common
@@ -117,22 +119,31 @@ module API =
             }
 
         let internal get<'T> (route: string, callback: 'T option -> unit) =
+
+            let handle_response (response: HttpResponseMessage) =
+                if response.IsSuccessStatusCode then
+                    match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                    | Ok res -> callback (Some res)
+                    | Error err ->
+                        Logging.Error "Error getting %s: %s" route err.Message
+                        callback None
+                else
+                    callback None
+
             queue.Request(
                 fun client ->
                     async {
                         try
-                            let! response = client.GetAsync(route) |> Async.AwaitTask
-
-                            if response.IsSuccessStatusCode then
-                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                                | Ok res -> callback (Some res)
-                                | Error err ->
-                                    Logging.Error "Error getting %s: %s" route err.Message
-                                    callback None
-                            else
-                                callback None
+                            match! client.GetAsync(route) |> Async.AwaitTask |> Async.Catch with
+                            | Choice2Of2 (:? HttpRequestException)
+                            | Choice2Of2 (:? AggregateException) ->
+                                Thread.Sleep(100)
+                                let! retry = client.GetAsync(route) |> Async.AwaitTask
+                                handle_response retry
+                            | Choice2Of2 other -> raise other
+                            | Choice1Of2 response -> handle_response response
                         with
-                        | :? Http.HttpRequestException
+                        | :? HttpRequestException
                         | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
@@ -140,22 +151,31 @@ module API =
             )
 
         let internal get_async<'T> (route: string, callback: 'T option -> unit) : Async<unit> =
+
+            let handle_response (response: HttpResponseMessage) =
+                if response.IsSuccessStatusCode then
+                    match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                    | Ok res -> callback (Some res)
+                    | Error err ->
+                        Logging.Error "Error getting %s: %s" route err.Message
+                        callback None
+                else
+                    callback None
+
             queue.RequestAsync(
                 fun client ->
                     async {
                         try
-                            let! response = client.GetAsync(route) |> Async.AwaitTask
-
-                            if response.IsSuccessStatusCode then
-                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                                | Ok res -> callback (Some res)
-                                | Error err ->
-                                    Logging.Error "Error getting %s: %s" route err.Message
-                                    callback None
-                            else
-                                callback None
+                            match! client.GetAsync(route) |> Async.AwaitTask |> Async.Catch with
+                            | Choice2Of2 (:? HttpRequestException)
+                            | Choice2Of2 (:? AggregateException) ->
+                                Thread.Sleep(100)
+                                let! retry = client.GetAsync(route) |> Async.AwaitTask
+                                handle_response retry
+                            | Choice2Of2 other -> raise other
+                            | Choice1Of2 response -> handle_response response
                         with
-                        | :? Http.HttpRequestException
+                        | :? HttpRequestException
                         | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }

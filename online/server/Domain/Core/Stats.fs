@@ -5,6 +5,30 @@ open Percyqaz.Data.Sqlite
 open Prelude.Gameplay
 open Interlude.Web.Server
 
+type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }
+
+type XPRankModel = { Rank: int64; XP: int64; Playtime: float }
+
+type KeymodeLeaderboardModel =
+    {
+        UserId: int64
+        Playtime: float
+        Combined: float32
+        Jacks: float32
+        Chordstream: float32
+        Stream: float32
+    }
+
+type KeymodeRankModel =
+    {
+        Rank: int64
+        Playtime: float
+        Combined: float32
+        Jacks: float32
+        Chordstream: float32
+        Stream: float32
+    }
+
 type Stats =
     {
         LastSync: int64
@@ -191,8 +215,6 @@ module Stats =
     let save (user_id: int64) (stats: Stats) =
         SAVE.Execute (user_id, stats) core_db |> expect |> ignore
 
-    type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }
-
     let private XP_LEADERBOARD: Query<unit, XPLeaderboardModel> =
         { Query.without_parameters() with
             SQL =
@@ -204,8 +226,17 @@ module Stats =
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
-    let xp_leaderboard () =
-        XP_LEADERBOARD.Execute () core_db |> expect
+    let private XP_RANK: Query<int64, XPRankModel> =
+        {
+            SQL =
+                """
+            SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime FROM stats
+            WHERE UserId = @UserId;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8 ]
+            FillParameters = fun p user_id -> p.Int64 user_id
+            Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
 
     let private PLAYTIME_LEADERBOARD: Query<unit, XPLeaderboardModel> =
         { Query.without_parameters() with
@@ -218,25 +249,36 @@ module Stats =
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
+    let private PLAYTIME_RANK: Query<int64, XPRankModel> =
+        {
+            SQL =
+                """
+            SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime FROM stats
+            WHERE UserId = @UserId;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8 ]
+            FillParameters = fun p user_id -> p.Int64 user_id
+            Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
+
+    let xp_leaderboard () =
+        XP_LEADERBOARD.Execute () core_db |> expect
+
+    let xp_rank (user_id: int64) =
+        XP_RANK.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
     let playtime_leaderboard () =
         PLAYTIME_LEADERBOARD.Execute () core_db |> expect
 
-    type KeymodeLeaderboardModel =
-        {
-            UserId: int64
-            Playtime: float
-            Combined: float32
-            Jacks: float32
-            Chordstream: float32
-            Stream: float32
-        }
+    let playtime_rank (user_id: int64) =
+        PLAYTIME_RANK.Execute user_id core_db |> expect |> Array.tryExactlyOne
 
-    let private LEADERBOARD_4K: Query<unit, KeymodeLeaderboardModel> =
+    let private LEADERBOARD_4K (by_column: string) : Query<unit, KeymodeLeaderboardModel> =
         { Query.without_parameters() with
             SQL =
-                """
+                $"""
             SELECT UserId, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM stats
-            ORDER BY _4KCombined DESC
+            ORDER BY {by_column} DESC
             LIMIT 50;
             """
             Read = (fun r ->
@@ -251,15 +293,75 @@ module Stats =
             )
         }
 
-    let leaderboard_4k () =
-        LEADERBOARD_4K.Execute () core_db |> expect
+    let private RANK_4K (by_column: string) : Query<int64, KeymodeRankModel> =
+        {
+            SQL =
+                $"""
+            SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM stats
+            WHERE UserId = @UserId;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8 ]
+            FillParameters = fun p user_id -> p.Int64 user_id
+            Read = (fun r ->
+                {
+                    Rank = r.Int64
+                    Playtime = r.Float64
+                    Combined = r.Float32
+                    Jacks = r.Float32
+                    Chordstream = r.Float32
+                    Stream = r.Float32
+                }
+            )
+        }
 
-    let private LEADERBOARD_7K: Query<unit, KeymodeLeaderboardModel> =
+    let private LEADERBOARD_4K_PLAYTIME = LEADERBOARD_4K "_4KPlaytime"
+    let private LEADERBOARD_4K_COMBINED = LEADERBOARD_4K "_4KCombined"
+    let private LEADERBOARD_4K_JACKS = LEADERBOARD_4K "_4KJacks"
+    let private LEADERBOARD_4K_CHORDSTREAM = LEADERBOARD_4K "_4KChordstream"
+    let private LEADERBOARD_4K_STREAM = LEADERBOARD_4K "_4KStream"
+
+    let private RANK_4K_PLAYTIME = RANK_4K "_4KPlaytime"
+    let private RANK_4K_COMBINED = RANK_4K "_4KCombined"
+    let private RANK_4K_JACKS = RANK_4K "_4KJacks"
+    let private RANK_4K_CHORDSTREAM = RANK_4K "_4KChordstream"
+    let private RANK_4K_STREAM = RANK_4K "_4KStream"
+
+    let leaderboard_4k_playtime () =
+        LEADERBOARD_4K_PLAYTIME.Execute () core_db |> expect
+
+    let leaderboard_4k_combined () =
+        LEADERBOARD_4K_COMBINED.Execute () core_db |> expect
+
+    let leaderboard_4k_jacks () =
+        LEADERBOARD_4K_JACKS.Execute () core_db |> expect
+
+    let leaderboard_4k_chordstream () =
+        LEADERBOARD_4K_CHORDSTREAM.Execute () core_db |> expect
+
+    let leaderboard_4k_stream () =
+        LEADERBOARD_4K_STREAM.Execute () core_db |> expect
+
+    let rank_4k_playtime (user_id: int64) =
+        RANK_4K_PLAYTIME.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_combined (user_id: int64) =
+        RANK_4K_COMBINED.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_jacks (user_id: int64) =
+        RANK_4K_JACKS.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_chordstream (user_id: int64) =
+        RANK_4K_CHORDSTREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_stream (user_id: int64) =
+        RANK_4K_STREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let private LEADERBOARD_7K (by_column: string) : Query<unit, KeymodeLeaderboardModel> =
         { Query.without_parameters() with
             SQL =
-                """
+                $"""
             SELECT UserId, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM stats
-            ORDER BY _7KCombined DESC
+            ORDER BY {by_column} DESC
             LIMIT 50;
             """
             Read = (fun r ->
@@ -274,8 +376,68 @@ module Stats =
             )
         }
 
-    let leaderboard_7k () =
-        LEADERBOARD_7K.Execute () core_db |> expect
+    let private RANK_7K (by_column: string) : Query<int64, KeymodeRankModel> =
+        {
+            SQL =
+                $"""
+            SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM stats
+            WHERE UserId = @UserId;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8 ]
+            FillParameters = fun p user_id -> p.Int64 user_id
+            Read = (fun r ->
+                {
+                    Rank = r.Int64
+                    Playtime = r.Float64
+                    Combined = r.Float32
+                    Jacks = r.Float32
+                    Chordstream = r.Float32
+                    Stream = r.Float32
+                }
+            )
+        }
+
+    let private LEADERBOARD_7K_PLAYTIME = LEADERBOARD_7K "_7KPlaytime"
+    let private LEADERBOARD_7K_COMBINED = LEADERBOARD_7K "_7KCombined"
+    let private LEADERBOARD_7K_JACKS = LEADERBOARD_7K "_7KJacks"
+    let private LEADERBOARD_7K_CHORDSTREAM = LEADERBOARD_7K "_7KChordstream"
+    let private LEADERBOARD_7K_STREAM = LEADERBOARD_7K "_7KStream"
+
+    let private RANK_7K_PLAYTIME = RANK_7K "_7KPlaytime"
+    let private RANK_7K_COMBINED = RANK_7K "_7KCombined"
+    let private RANK_7K_JACKS = RANK_7K "_7KJacks"
+    let private RANK_7K_CHORDSTREAM = RANK_7K "_7KChordstream"
+    let private RANK_7K_STREAM = RANK_7K "_7KStream"
+
+    let leaderboard_7k_playtime () =
+        LEADERBOARD_7K_PLAYTIME.Execute () core_db |> expect
+
+    let leaderboard_7k_combined () =
+        LEADERBOARD_7K_COMBINED.Execute () core_db |> expect
+
+    let leaderboard_7k_jacks () =
+        LEADERBOARD_7K_JACKS.Execute () core_db |> expect
+
+    let leaderboard_7k_chordstream () =
+        LEADERBOARD_7K_CHORDSTREAM.Execute () core_db |> expect
+
+    let leaderboard_7k_stream () =
+        LEADERBOARD_7K_STREAM.Execute () core_db |> expect
+
+    let rank_7k_playtime (user_id: int64) =
+        RANK_7K_PLAYTIME.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_combined (user_id: int64) =
+        RANK_7K_COMBINED.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_jacks (user_id: int64) =
+        RANK_7K_JACKS.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_chordstream (user_id: int64) =
+        RANK_7K_CHORDSTREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_stream (user_id: int64) =
+        RANK_7K_STREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
 
 type MonthlyStats =
     {
@@ -449,8 +611,6 @@ module MonthlyStats =
     let save (month: int) (user_id: int64) (stats: MonthlyStats) =
         SAVE.Execute (user_id, month, stats) core_db |> expect |> ignore
 
-    type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }
-
     let private XP_LEADERBOARD: Query<int, XPLeaderboardModel> =
         {
             SQL =
@@ -465,8 +625,18 @@ module MonthlyStats =
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
-    let xp_leaderboard (month: int) =
-        XP_LEADERBOARD.Execute month core_db |> expect
+    let private XP_RANK: Query<int64 * int, XPRankModel> =
+        {
+            SQL =
+                """
+            SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime FROM monthly_stats
+            WHERE UserId = @UserId
+            AND Month = @Month;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
 
     let private PLAYTIME_LEADERBOARD: Query<int, XPLeaderboardModel> =
         {
@@ -482,26 +652,38 @@ module MonthlyStats =
             Read = (fun r -> { UserId = r.Int64; XP = r.Int64; Playtime = r.Float64 })
         }
 
+    let private PLAYTIME_RANK: Query<int64 * int, XPRankModel> =
+        {
+            SQL =
+                """
+            SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime FROM monthly_stats
+            WHERE UserId = @UserId
+            AND Month = @Month;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            Read = (fun r -> { Rank = r.Int64; XP = r.Int64; Playtime = r.Float64 })
+        }
+
+    let xp_leaderboard (month: int) =
+        XP_LEADERBOARD.Execute month core_db |> expect
+
+    let xp_rank (user_id: int64) (month: int) =
+        XP_RANK.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
     let playtime_leaderboard (month: int) =
         PLAYTIME_LEADERBOARD.Execute month core_db |> expect
 
-    type KeymodeLeaderboardModel =
-        {
-            UserId: int64
-            Playtime: float
-            Combined: float32
-            Jacks: float32
-            Chordstream: float32
-            Stream: float32
-        }
+    let playtime_rank (user_id: int64) (month: int) =
+        PLAYTIME_RANK.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
 
-    let private LEADERBOARD_4K: Query<int, KeymodeLeaderboardModel> =
+    let private LEADERBOARD_4K (by_column: string) : Query<int, KeymodeLeaderboardModel> =
         {
             SQL =
-                """
+                $"""
             SELECT UserId, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM monthly_stats
             WHERE Month = @Month AND _4KPlaytime > 0
-            ORDER BY _4KCombined DESC
+            ORDER BY {by_column} DESC
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
@@ -518,16 +700,78 @@ module MonthlyStats =
             )
         }
 
-    let leaderboard_4k (month: int) =
-        LEADERBOARD_4K.Execute month core_db |> expect
-
-    let private LEADERBOARD_7K: Query<int, KeymodeLeaderboardModel> =
+    let private RANK_4K (by_column: string) : Query<int64 * int, KeymodeRankModel> =
         {
             SQL =
-                """
+                $"""
+            SELECT RANK() OVER (ORDER BY {by_column} DESC), _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM monthly_stats
+            WHERE UserId = @UserId
+            AND Month = @Month
+            AND _4KPlaytime > 0;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            Read = (fun r ->
+                {
+                    Rank = r.Int64
+                    Playtime = r.Float64
+                    Combined = r.Float32
+                    Jacks = r.Float32
+                    Chordstream = r.Float32
+                    Stream = r.Float32
+                }
+            )
+        }
+
+    let private LEADERBOARD_4K_PLAYTIME = LEADERBOARD_4K "_4KPlaytime"
+    let private LEADERBOARD_4K_COMBINED = LEADERBOARD_4K "_4KCombined"
+    let private LEADERBOARD_4K_JACKS = LEADERBOARD_4K "_4KJacks"
+    let private LEADERBOARD_4K_CHORDSTREAM = LEADERBOARD_4K "_4KChordstream"
+    let private LEADERBOARD_4K_STREAM = LEADERBOARD_4K "_4KStream"
+
+    let private RANK_4K_PLAYTIME = RANK_4K "_4KPlaytime"
+    let private RANK_4K_COMBINED = RANK_4K "_4KCombined"
+    let private RANK_4K_JACKS = RANK_4K "_4KJacks"
+    let private RANK_4K_CHORDSTREAM = RANK_4K "_4KChordstream"
+    let private RANK_4K_STREAM = RANK_4K "_4KStream"
+
+    let leaderboard_4k_playtime (month: int) =
+        LEADERBOARD_4K_PLAYTIME.Execute month core_db |> expect
+
+    let leaderboard_4k_combined (month: int) =
+        LEADERBOARD_4K_COMBINED.Execute month core_db |> expect
+
+    let leaderboard_4k_jacks (month: int) =
+        LEADERBOARD_4K_JACKS.Execute month core_db |> expect
+
+    let leaderboard_4k_chordstream (month: int) =
+        LEADERBOARD_4K_CHORDSTREAM.Execute month core_db |> expect
+
+    let leaderboard_4k_stream (month: int) =
+        LEADERBOARD_4K_STREAM.Execute month core_db |> expect
+
+    let rank_4k_playtime (user_id: int64) (month: int) =
+        RANK_4K_PLAYTIME.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_combined (user_id: int64) (month: int) =
+        RANK_4K_COMBINED.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_jacks (user_id: int64) (month: int) =
+        RANK_4K_JACKS.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_chordstream (user_id: int64) (month: int) =
+        RANK_4K_CHORDSTREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_4k_stream (user_id: int64) (month: int) =
+        RANK_4K_STREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let private LEADERBOARD_7K (by_column: string) : Query<int, KeymodeLeaderboardModel> =
+        {
+            SQL =
+                $"""
             SELECT UserId, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM monthly_stats
             WHERE Month = @Month AND _7KPlaytime > 0
-            ORDER BY _7KCombined DESC
+            ORDER BY {by_column} DESC
             LIMIT 50;
             """
             Parameters = [ "@Month", SqliteType.Integer, 4 ]
@@ -544,5 +788,67 @@ module MonthlyStats =
             )
         }
 
-    let leaderboard_7k (month: int) =
-        LEADERBOARD_7K.Execute month core_db |> expect
+    let private RANK_7K (by_column: string) : Query<int64 * int, KeymodeRankModel> =
+        {
+            SQL =
+                $"""
+            SELECT RANK() OVER (ORDER BY {by_column} DESC), _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM monthly_stats
+            WHERE UserId = @UserId
+            AND Month = @Month
+            AND _7KPlaytime > 0;
+            """
+            Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
+            Read = (fun r ->
+                {
+                    Rank = r.Int64
+                    Playtime = r.Float64
+                    Combined = r.Float32
+                    Jacks = r.Float32
+                    Chordstream = r.Float32
+                    Stream = r.Float32
+                }
+            )
+        }
+
+    let private LEADERBOARD_7K_PLAYTIME = LEADERBOARD_7K "_7KPlaytime"
+    let private LEADERBOARD_7K_COMBINED = LEADERBOARD_7K "_7KCombined"
+    let private LEADERBOARD_7K_JACKS = LEADERBOARD_7K "_7KJacks"
+    let private LEADERBOARD_7K_CHORDSTREAM = LEADERBOARD_7K "_7KChordstream"
+    let private LEADERBOARD_7K_STREAM = LEADERBOARD_7K "_7KStream"
+
+    let private RANK_7K_PLAYTIME = RANK_7K "_7KPlaytime"
+    let private RANK_7K_COMBINED = RANK_7K "_7KCombined"
+    let private RANK_7K_JACKS = RANK_7K "_7KJacks"
+    let private RANK_7K_CHORDSTREAM = RANK_7K "_7KChordstream"
+    let private RANK_7K_STREAM = RANK_7K "_7KStream"
+
+    let leaderboard_7k_playtime (month: int) =
+        LEADERBOARD_7K_PLAYTIME.Execute month core_db |> expect
+
+    let leaderboard_7k_combined (month: int) =
+        LEADERBOARD_7K_COMBINED.Execute month core_db |> expect
+
+    let leaderboard_7k_jacks (month: int) =
+        LEADERBOARD_7K_JACKS.Execute month core_db |> expect
+
+    let leaderboard_7k_chordstream (month: int) =
+        LEADERBOARD_7K_CHORDSTREAM.Execute month core_db |> expect
+
+    let leaderboard_7k_stream (month: int) =
+        LEADERBOARD_7K_STREAM.Execute month core_db |> expect
+
+    let rank_7k_playtime (user_id: int64) (month: int) =
+        RANK_7K_PLAYTIME.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_combined (user_id: int64) (month: int) =
+        RANK_7K_COMBINED.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_jacks (user_id: int64) (month: int) =
+        RANK_7K_JACKS.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_chordstream (user_id: int64) (month: int) =
+        RANK_7K_CHORDSTREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let rank_7k_stream (user_id: int64) (month: int) =
+        RANK_7K_STREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne

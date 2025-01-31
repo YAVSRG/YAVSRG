@@ -87,8 +87,9 @@ module UserCommands =
                 | username :: _ ->
                     match user_by_name username with
                     | Some(id, _) ->
-                        Friends.add (user_id, id)
-                        do! reply_emoji ":white_check_mark:"
+                        match Friends.add (user_id, id) with
+                        | Ok() -> do! reply_emoji ":white_check_mark:"
+                        | Error reason -> do! reply reason
                     | None -> do! reply "No user found."
             | "uf"
             | "unfriend" ->

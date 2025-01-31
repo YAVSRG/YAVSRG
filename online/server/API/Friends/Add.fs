@@ -2,7 +2,6 @@
 
 open NetCoreServer
 open Prelude
-open Percyqaz.Common
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
@@ -27,7 +26,8 @@ module Add =
 
             match User.by_username request.User with
             | Some(id, user) ->
-                Friends.add (user_id, id)
-                response.ReplyJson(true)
+                match Friends.add (user_id, id) with
+                | Ok() -> response.ReplyJson(true)
+                | Error reason -> response.ReplyJson(false) // todo: get this reason back to the user
             | None -> response.ReplyJson(false)
         }

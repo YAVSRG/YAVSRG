@@ -72,7 +72,7 @@ module Friends =
             INSERT INTO friends (UserId, "Following", Followers)
             VALUES (@UserId, @UserNewFollowing, '[]')
             ON CONFLICT DO UPDATE SET "Following" = excluded.Following;
-            
+
             INSERT INTO friends (UserId, "Following", Followers)
             VALUES (@FriendId, '[]', @FriendNewFollowers)
             ON CONFLICT DO UPDATE SET Followers = excluded.Followers;
@@ -97,24 +97,32 @@ module Friends =
 
     let private UPDATE_LOCK_OBJ = obj ()
 
-    // todo: restrict max friends to 50 or so
-    let add (user_id: int64, friend_id: int64) =
+    let MAX_FRIENDS = 50
+
+    let add (user_id: int64, friend_id: int64) : Result<unit, string> =
         lock (UPDATE_LOCK_OBJ)
         <| fun () ->
-            if user_id = friend_id then
-                ()
-            else
+            if user_id <> friend_id then
 
-                UPDATE_FOLLOWING_FOLLOWERS.Execute
-                    {
-                        UserId = user_id
-                        UserNewFollowing = Set.add friend_id (get_following_ids user_id)
-                        FriendId = friend_id
-                        FriendNewFollowers = Set.add user_id (get_followers_ids friend_id)
-                    }
-                    core_db
-                |> expect
-                |> ignore
+                let new_following = Set.add friend_id (get_following_ids user_id)
+
+                if Set.count new_following > MAX_FRIENDS then
+                    Error(sprintf "Max friend limit is %i" MAX_FRIENDS)
+
+                else
+                    UPDATE_FOLLOWING_FOLLOWERS.Execute
+                        {
+                            UserId = user_id
+                            UserNewFollowing = Set.add friend_id (get_following_ids user_id)
+                            FriendId = friend_id
+                            FriendNewFollowers = Set.add user_id (get_followers_ids friend_id)
+                        }
+                        core_db
+                    |> expect
+                    |> ignore
+
+                    Ok()
+            else Error("Cannot add yourself as a friend")
 
     let remove (user_id: int64, friend_id: int64) =
         lock (UPDATE_LOCK_OBJ)
