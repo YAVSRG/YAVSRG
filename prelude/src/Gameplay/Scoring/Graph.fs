@@ -39,13 +39,15 @@ type ScoreScreenStats =
         MA: string
         PA: string
 
+        Accuracy: float
+
         GraphPoints: GraphPoint array
 
         ColumnFilterApplied: bool
     }
 
 module ScoreScreenStats =
-        
+
     let GRAPH_POINT_COUNT = 1000
 
     let calculate (score_processor: ScoreProcessor) (column_filter: bool array) =
@@ -122,7 +124,7 @@ module ScoreScreenStats =
                     latest_tap.Value <- max latest_tap.Value e.Delta
                     if e.Delta < 0.0f<ms / rate> then
                         inc early_taps
-                        
+
                 match e.Judgement with
                 | Some (j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
@@ -142,7 +144,7 @@ module ScoreScreenStats =
                     latest_release.Value <- max latest_release.Value e.Delta
                     if e.Delta < 0.0f<ms / rate> then
                         inc early_releases
-                        
+
                 match e.Judgement with
                 | Some (j, points) ->
                     filtered_judgements.[j] <- filtered_judgements.[j] + 1
@@ -150,7 +152,7 @@ module ScoreScreenStats =
                     max_points <- max_points + 1.0
                 | None -> ()
 
-            | GhostTap e -> 
+            | GhostTap e ->
                 inc ghost_taps
                 match e.Judgement with
                 | Some (j, points) ->
@@ -181,7 +183,7 @@ module ScoreScreenStats =
             let lamp = Lamp.calculate score_processor.Ruleset.Lamps filtered_judgements combo_breaks
 
             for i = 1 to new_graph_points_needed do
-                let this_point_timestamp = 
+                let this_point_timestamp =
                     last_point_timestamp + (chart_time - last_point_timestamp) * (float32 i / float32 new_graph_points_needed)
                 graph_points.Add
                     {
@@ -252,13 +254,15 @@ module ScoreScreenStats =
                 let mv = if filtered_judgements.Length > 0 then filtered_judgements.[0] else 0
                 let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
                 if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)
-            
+
             PA =
                 let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
                 let gr = if filtered_judgements.Length > 2 then filtered_judgements.[2] else 0
                 if gr = 0 then sprintf "%.1f:0" (float pf) else sprintf "%.1f:1" (float pf / float gr)
 
             GraphPoints = graph_points.ToArray()
-            
+
+            Accuracy = if max_points = 0.0 then 1.0 else scored_points / max_points
+
             ColumnFilterApplied = column_filter |> Array.forall id |> not
         }

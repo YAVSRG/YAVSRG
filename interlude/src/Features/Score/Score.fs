@@ -74,6 +74,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             lamp,
             personal_bests,
             previous_personal_bests,
+            stats,
             score_info,
             Position =
                 { Position.DEFAULT with

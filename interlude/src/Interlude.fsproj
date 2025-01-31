@@ -113,8 +113,8 @@
     <Compile Include="Features\Score\TopBanner.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
     <Compile Include="Features\Score\SessionScore.fs" />
-    <Compile Include="Features\Score\Results.fs" />
     <Compile Include="Features\Score\Graph.fs" />
+    <Compile Include="Features\Score\Results.fs" />
     <Compile Include="Features\Score\ChartActions.fs" />
     <Compile Include="Features\Score\BottomBanner.fs" />
     <Compile Include="Features\Score\Confetti.fs" />

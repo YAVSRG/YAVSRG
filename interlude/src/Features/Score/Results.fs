@@ -36,9 +36,10 @@ type Accuracy
         grade: GradeResult ref,
         improvements: ImprovementFlags ref,
         previous_personal_bests: Bests option ref,
+        stats: ScoreScreenStats ref,
         score_info: ScoreInfo
     ) =
-    inherit Container(NodeType.None)
+    inherit StaticWidget(NodeType.None)
 
     let LOWER_SIZE = 40.0f
     let new_record = sprintf "%s %s" Icons.AWARD (%"score.new_record")
@@ -47,13 +48,6 @@ type Accuracy
     let glint_animation = Animation.Delay(375.0)
 
     override this.Init(parent) =
-        this
-        |* Text(
-            (fun () -> score_info.Scoring.FormattedAccuracy),
-            Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)),
-            Position = Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE)
-        )
-
         if (!improvements).Accuracy <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
         base.Init parent
 
@@ -70,15 +64,33 @@ type Accuracy
 
         Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
 
-        Text.fill_b (
-            Style.font,
-            score_info.Scoring.FormattedAccuracy,
-            this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
-            (grade_color, Colors.black),
-            Alignment.CENTER
-        )
+        if (!stats).ColumnFilterApplied then
+            Text.fill_b (
+                Style.font,
+                score_info.Scoring.Ruleset.FormatAccuracy (!stats).Accuracy,
+                this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
+                Colors.text_green,
+                Alignment.CENTER
+            )
+        else
+            Text.fill_b (
+                Style.font,
+                score_info.Scoring.FormattedAccuracy,
+                this.Bounds.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE),
+                (grade_color, Colors.black),
+                Alignment.CENTER
+            )
 
         let text, color =
+            if (!stats).ColumnFilterApplied then
+                let columns =
+                    GraphSettings.column_filter
+                    |> Seq.indexed
+                    |> Seq.choose (fun (i, b) -> if b && i < score_info.WithMods.Keys then Some ((i + 1).ToString()) else None)
+                    |> String.concat " "
+                sprintf "%s: %s" %"score.graph.settings.column_filter" columns, Colors.text_green
+            else
+
             match (!improvements).Accuracy with
             | Improvement.New -> new_record, Colors.text_yellow_2
             | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), Colors.text_cyan_2
@@ -107,7 +119,6 @@ type Accuracy
                 | None -> "--", (Colors.grey_2.O2, Colors.black)
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceB(LOWER_SIZE), color, Alignment.CENTER)
-        base.Draw()
 
         if hover then
             let acc_tooltip = this.Bounds.SliceX(150.0f).BorderB(60.0f).TranslateY(15.0f)
@@ -116,9 +127,9 @@ type Accuracy
 
             Text.fill_b (
                 Style.font,
-                sprintf "%.4f%%" (score_info.Scoring.Accuracy * 100.0),
+                sprintf "%.4f%%" (stats.Value.Accuracy * 100.0),
                 acc_tooltip.Shrink(10.0f, 5.0f),
-                Colors.text,
+                (if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text),
                 Alignment.CENTER
             )
 
@@ -194,7 +205,7 @@ type Lamp
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(10.0f, 0.0f).SliceB(LOWER_SIZE), color, Alignment.CENTER)
         base.Draw()
-        
+
         if hover then
             let raw_greats_tooltip = this.Bounds.SliceX(150.0f).BorderB(60.0f).TranslateY(15.0f)
             Render.rect (raw_greats_tooltip.Expand(Style.PADDING)) Colors.white
@@ -208,7 +219,7 @@ type Lamp
                 Alignment.CENTER
             )
 
-type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
+type Results(grade, lamp, improvements, previous_personal_bests, stats, score_info) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
@@ -218,6 +229,7 @@ type Results(grade, lamp, improvements, previous_personal_bests, score_info) =
             grade,
             improvements,
             previous_personal_bests,
+            stats,
             score_info,
             Position =
                 {
