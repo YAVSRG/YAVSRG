@@ -22,14 +22,21 @@ module DiscordRPC =
         //client.RegisterUriScheme(null, null) |> ignore
         client.Initialize() |> ignore
 
-    let clear() = 
-        if not client.IsDisposed then 
+    let trim_long_string (string: string) : string =
+        if System.Text.Encoding.UTF8.GetByteCount string <= 64 then
+            string
+        else
+            let bytes = System.Text.Encoding.UTF8.GetBytes string
+            System.Text.Encoding.UTF8.GetString(bytes, 0, 64).TrimEnd('�') + "..."
+
+    let clear() =
+        if not client.IsDisposed then
             client.ClearPresence()
 
     let in_menus (details: string) =
         if not client.IsDisposed then
 
-            let rp = 
+            let rp =
                 new RichPresence(
                     State = "In menus",
                     Details = details,
@@ -44,11 +51,7 @@ module DiscordRPC =
             let rp =
                 new RichPresence(
                     State = mode,
-                    Details =
-                        (if song.Length > 48 then
-                             song.Substring(0, 44) + " ..."
-                         else
-                             song),
+                    Details = trim_long_string song,
                     Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
                 )
 
@@ -60,11 +63,7 @@ module DiscordRPC =
             let rp =
                 new RichPresence(
                     State = mode,
-                    Details =
-                        (if song.Length > 48 then
-                             song.Substring(0, 44) + " ..."
-                         else
-                             song),
+                    Details = trim_long_string song,
                     Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
                 )
 
