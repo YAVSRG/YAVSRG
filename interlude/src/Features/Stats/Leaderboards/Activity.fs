@@ -10,7 +10,7 @@ open Interlude.UI
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
-type Player(rank: int, username: string, color: Color, xp: int64, playtime: float) =
+type PlayerXP(rank: int, username: string, color: Color, xp: int64, playtime: float) =
     inherit StaticWidget(NodeType.None)
 
     let is_you = username = Network.credentials.Username
@@ -70,16 +70,16 @@ type private ActivityLeaderboard() =
 
     let rerender (container: WebRequestContainer<_>) (data: Stats.Leaderboard.XPResponse) =
 
-        let flow = FlowContainer.Vertical<Widget>(Player.HEIGHT, Spacing = Style.PADDING)
+        let flow = FlowContainer.Vertical<Widget>(PlayerXP.HEIGHT, Spacing = Style.PADDING)
         for i, d in Seq.indexed data.Leaderboard do
-            Player(i + 1, d.Username, Color.FromArgb(d.Color), d.XP, d.Playtime)
+            PlayerXP(i + 1, d.Username, Color.FromArgb(d.Color), d.XP, d.Playtime)
             |> flow.Add
 
         match data.You with
         | Some (rank, you) ->
             Container(NodeType.None)
-            |+ ScrollContainer(flow, Position = Position.ShrinkB(Player.HEIGHT + Style.PADDING))
-            |+ Player(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime, Position = Position.SliceB(Player.HEIGHT))
+            |+ ScrollContainer(flow, Position = Position.ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
+            |+ PlayerXP(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime, Position = Position.SliceB(PlayerXP.HEIGHT))
             :> Widget
         | None ->
             ScrollContainer(flow)

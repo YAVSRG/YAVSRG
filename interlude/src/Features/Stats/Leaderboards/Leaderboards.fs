@@ -4,39 +4,59 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
+open Interlude.Web.Shared.Requests.Stats.Leaderboard
 
 type LeaderboardsTab() =
     inherit Container(NodeType.None)
 
-    let sevenkey = Dummy()
-    let fourkey = Dummy()
+    let keymodes = KeymodesLeaderboard()
     let activity = ActivityLeaderboard()
-    let content_panel = SwapContainer(activity, Position = Position.SlicePercentR(0.6f).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
-
-    let tabs =
-        RadioButtons.create_tabs {
-            Setting = Setting.make content_panel.set_Current content_panel.get_Current
-            Options = [|
-                activity, %"stats.leaderboards.activity", K false
-                fourkey, "4K", K false
-                sevenkey, "7K", K false
-            |]
-            Height = 50.0f
-        }
+    let content_panel = SwapContainer(activity, Position = Position.SlicePercentR(0.6f).Shrink(40.0f, 80.0f))
 
     override this.Init(parent) =
 
-        tabs.Position <- Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
+        let options =
+            NavigationContainer.Column(Position = Position.SlicePercentL(0.4f).ShrinkT(150.0f).ShrinkX(40.0f))
+            |+ PageSetting("Leaderboard",
+                Selector(
+                    [| activity :> Widget, %"stats.leaderboards.activity"; keymodes, %"stats.leaderboards.rating" |],
+                    Setting.make content_panel.set_Current content_panel.get_Current
+                )
+            )
+                .Pos(0, 2, PageWidth.Full)
+            |+ PageSetting(
+                "Sort by",
+                Selector([| false, "XP"; true, "Playtime" |], activity.SortByPlaytime)
+            )
+                .Conditional(fun () -> content_panel.Current = activity)
+                .Pos(3, 2, PageWidth.Full)
+            |+ PageSetting(
+                "Time",
+                Selector([| false, "All-time"; true, "This month" |], activity.MonthlyLeaderboard)
+            )
+                .Conditional(fun () -> content_panel.Current = activity)
+                .Pos(5, 2, PageWidth.Full)
+            |+ PageSetting(
+                "Sort by",
+                Selector([| Combined, "Combined"; Playtime, "Playtime" |], keymodes.SortBy)
+            )
+                .Conditional(fun () -> content_panel.Current = keymodes)
+                .Pos(3, 2, PageWidth.Full)
+            |+ PageSetting(
+                "Time",
+                Selector([| false, "All-time"; true, "This month" |], keymodes.MonthlyLeaderboard)
+            )
+                .Conditional(fun () -> content_panel.Current = keymodes)
+                .Pos(5, 2, PageWidth.Full)
+            |+ PageSetting(
+                "Keymode",
+                Selector([| 4, "4K"; 7, "7K" |], keymodes.Keymode)
+            )
+                .Conditional(fun () -> content_panel.Current = keymodes)
+                .Pos(7, 2, PageWidth.Full)
+
         this
-        |+ tabs
-        |+ PageSetting(
-            "Sort by playtime",
-            Checkbox(activity.SortByPlaytime),
-            Position = Position.SlicePercentL(0.4f).ShrinkT(150.0f).SliceT(50.0f).ShrinkX(40.0f))
-        |+ PageSetting(
-            "Monthly",
-            Checkbox(activity.MonthlyLeaderboard),
-            Position = Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(50.0f).ShrinkX(40.0f))
+        |+ options
         |* content_panel
 
         base.Init parent

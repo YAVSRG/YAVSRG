@@ -203,6 +203,24 @@ type Rect =
     member inline this.SlicePercentX percent = this.SliceX (this.Width * percent)
     member inline this.SlicePercentY percent = this.SliceY (this.Height * percent)
 
+    member inline this.StripL(start: float32, width: float32) = this.ShrinkL(start).SliceL(width)
+    member inline this.StripT(start: float32, height: float32) = this.ShrinkT(start).SliceT(height)
+    member inline this.StripR(start: float32, width: float32) = this.ShrinkR(start).SliceR(width)
+    member inline this.StripB(start: float32, height: float32) = this.ShrinkB(start).SliceB(height)
+
+    member inline this.StripPercentL(start: float32, width: float32) =
+        let w = this.Width * width
+        this.ShrinkPercentL(start).SliceL(w)
+    member inline this.StripPercentT(start: float32, height: float32) =
+        let h = this.Height * height
+        this.ShrinkPercentT(start).SliceT(h)
+    member inline this.StripPercentR(start: float32, width: float32) =
+        let w = this.Width * width
+        this.ShrinkPercentR(start).SliceR(w)
+    member inline this.StripPercentB(start: float32, height: float32) =
+        let h = this.Height * height
+        this.ShrinkPercentB(start).SliceB(h)
+
     member inline this.BorderL amount =
         {
             Left = this.Left - amount
@@ -301,10 +319,10 @@ module AsQuadExtensions =
 
     type Color with
         member inline this.AsQuad : QuadColors = { TopLeft = this; TopRight = this; BottomRight = this; BottomLeft = this }
-    
+
     type Rect with
-        member inline this.AsQuad : Quad = 
-            { 
+        member inline this.AsQuad : Quad =
+            {
                 TopLeft = new Vector2(this.Left, this.Top)
                 TopRight = new Vector2(this.Right, this.Top)
                 BottomRight = new Vector2(this.Right, this.Bottom)

@@ -1099,6 +1099,7 @@ stats.activity=Activity
 stats.activity.view_older=View older
 stats.leaderboard=Leaderboard
 stats.leaderboards.activity=Activity
+stats.leaderboards.rating=Rating
 stats.missing_score=<Missing chart for this score>
 stats.name_placeholder=Your stats
 stats.no_data=No data
