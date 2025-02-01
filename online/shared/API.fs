@@ -3,11 +3,10 @@
 open System
 open System.Web
 open System.Net
+open NetCoreServer
 open System.Net.Http
 open System.Net.Sockets
-open System.Threading
 open System.Diagnostics
-open NetCoreServer
 open Percyqaz.Common
 open Prelude
 
@@ -104,19 +103,19 @@ module API =
 
     module Client =
 
-        let private client = new Http.HttpClient()
+        let private client = new HttpClient()
 
         let init (base_address: string) =
             client.BaseAddress <- new Uri(base_address)
             client.Timeout <- TimeSpan.FromSeconds(5.0)
 
-        let authenticate (token: string) =
-            client.DefaultRequestHeaders.Authorization <- new Http.Headers.AuthenticationHeaderValue("Bearer", token)
-
         let private queue =
-            { new Async.Service<Http.HttpClient -> Async<unit>, unit>() with
+            { new Async.Service<HttpClient -> Async<unit>, unit>() with
                 override this.Handle(action) = async { do! action client }
             }
+
+        let authenticate (token: string) =
+            client.DefaultRequestHeaders.Authorization <- new Headers.AuthenticationHeaderValue("Bearer", token)
 
         let internal get<'T> (route: string, callback: 'T option -> unit) =
 
@@ -134,14 +133,9 @@ module API =
                 fun client ->
                     async {
                         try
-                            match! client.GetAsync(route) |> Async.AwaitTask |> Async.Catch with
-                            | Choice2Of2 (:? HttpRequestException)
-                            | Choice2Of2 (:? AggregateException) ->
-                                Thread.Sleep(100)
-                                let! retry = client.GetAsync(route) |> Async.AwaitTask
-                                handle_response retry
-                            | Choice2Of2 other -> raise other
-                            | Choice1Of2 response -> handle_response response
+                            let request = new HttpRequestMessage(HttpMethod.Get, route)
+                            let! response = client.SendAsync request |> Async.AwaitTask
+                            handle_response response
                         with
                         | :? HttpRequestException
                         | :? OperationCanceledException
@@ -166,14 +160,9 @@ module API =
                 fun client ->
                     async {
                         try
-                            match! client.GetAsync(route) |> Async.AwaitTask |> Async.Catch with
-                            | Choice2Of2 (:? HttpRequestException)
-                            | Choice2Of2 (:? AggregateException) ->
-                                Thread.Sleep(100)
-                                let! retry = client.GetAsync(route) |> Async.AwaitTask
-                                handle_response retry
-                            | Choice2Of2 other -> raise other
-                            | Choice1Of2 response -> handle_response response
+                            let request = new HttpRequestMessage(HttpMethod.Get, route)
+                            let! response = client.SendAsync request |> Async.AwaitTask
+                            handle_response response
                         with
                         | :? HttpRequestException
                         | :? OperationCanceledException
@@ -181,89 +170,95 @@ module API =
                     }
             )
 
-        let internal post_return<'T, 'U> (route: string, request: 'T, callback: 'U option -> unit) =
+        let internal post_return<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) =
+
+            let handle_response (response: HttpResponseMessage) =
+                if response.IsSuccessStatusCode then
+                    match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                    | Ok res -> callback (Some res)
+                    | Error err ->
+                        Logging.Error "Error reading post %s: %s" route err.Message
+                        callback None
+                else
+                    callback None
+
             queue.Request(
                 fun client ->
                     async {
                         try
-                            let! response =
-                                client.PostAsync(
-                                    route,
-                                    new Http.StringContent(
-                                        JSON.ToString request,
-                                        Text.Encoding.UTF8,
-                                        "application/json"
-                                    )
+                            let request = new HttpRequestMessage(HttpMethod.Post, route)
+                            request.Content <-
+                                new StringContent(
+                                    JSON.ToString payload,
+                                    Text.Encoding.UTF8,
+                                    "application/json"
                                 )
-                                |> Async.AwaitTask
-
-                            if response.IsSuccessStatusCode then
-                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                                | Ok res -> callback (Some res)
-                                | Error err ->
-                                    Logging.Error "Error reading post %s: %s" route err.Message
-                                    callback None
-                            else
-                                callback None
+                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            handle_response response
                         with
-                        | :? Http.HttpRequestException
+                        | :? HttpRequestException
                         | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
                 , ignore
             )
 
-        let internal post<'T> (route: string, request: 'T, callback: bool option -> unit) =
-            post_return<'T, bool> (route, request, callback)
+        let internal post<'T> (route: string, payload: 'T, callback: bool option -> unit) =
+            post_return<'T, bool> (route, payload, callback)
 
-        let internal post_async<'T, 'U> (route: string, request: 'T, callback: 'U option -> unit) =
+        let internal post_async<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) =
+
+            let handle_response (response: HttpResponseMessage) =
+                if response.IsSuccessStatusCode then
+                    match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                    | Ok res -> callback (Some res)
+                    | Error err ->
+                        Logging.Error "Error reading post %s: %s" route err.Message
+                        callback None
+                else
+                    callback None
+
             queue.RequestAsync(
                 fun client ->
                     async {
                         try
-                            let! response =
-                                client.PostAsync(
-                                    route,
-                                    new Http.StringContent(
-                                        JSON.ToString request,
-                                        Text.Encoding.UTF8,
-                                        "application/json"
-                                    )
+                            let request = new HttpRequestMessage(HttpMethod.Post, route)
+                            request.Content <-
+                                new StringContent(
+                                    JSON.ToString payload,
+                                    Text.Encoding.UTF8,
+                                    "application/json"
                                 )
-                                |> Async.AwaitTask
-
-                            if response.IsSuccessStatusCode then
-                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                                | Ok res -> callback (Some res)
-                                | Error err ->
-                                    Logging.Error "Error reading post %s: %s" route err.Message
-                                    callback None
-                            else
-                                callback None
+                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            handle_response response
                         with
-                        | :? Http.HttpRequestException
+                        | :? HttpRequestException
                         | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
             )
 
         let internal delete (route: string, callback: bool option -> unit) =
+
+            let handle_response (response: HttpResponseMessage) =
+                if response.IsSuccessStatusCode then
+                    match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
+                    | Ok res -> callback (Some res)
+                    | Error err ->
+                        Logging.Error "Error reading delete %s: %s" route err.Message
+                        callback None
+                else
+                    callback None
+
             queue.Request(
                 fun client ->
                     async {
                         try
-                            let! response = client.DeleteAsync(route) |> Async.AwaitTask
-
-                            if response.IsSuccessStatusCode then
-                                match response.Content.ReadAsStream() |> fun s -> JSON.FromStream(route, s) with
-                                | Ok res -> callback (Some res)
-                                | Error err ->
-                                    Logging.Error "Error reading delete %s: %s" route err.Message
-                                    callback None
-                            else
-                                callback None
+                            let request = new HttpRequestMessage(HttpMethod.Delete, route)
+                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            handle_response response
                         with
-                        | :? Http.HttpRequestException
+                        | :? HttpRequestException
                         | :? OperationCanceledException
                         | :? AggregateException -> callback None
                     }
