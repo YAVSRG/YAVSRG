@@ -7,6 +7,7 @@ open Interlude.Web.Server.Domain.Core
 
 module Keymode =
 
+    open Stats.Leaderboard
     open Stats.Leaderboard.Keymode
 
     let handle
@@ -55,7 +56,7 @@ module Keymode =
             let users =
                 data |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
-            let mutable you : (int64 * LeaderboardEntry) option = None
+            let mutable you : (int64 * KeymodeLeaderboardEntry) option = None
 
             let mutable i = 0
             let result =

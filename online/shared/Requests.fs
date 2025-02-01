@@ -567,26 +567,28 @@ module Stats =
 
     module Leaderboard =
 
+        [<Json.AutoCodec>]
+        type XPLeaderboardEntry =
+            {
+                Username: string
+                Color: int
+                XP: int64
+                Playtime: float
+            }
+
+        [<Json.AutoCodec>]
+        type XPResponse =
+            {
+                Leaderboard: XPLeaderboardEntry array
+                You: (int64 * XPLeaderboardEntry) option
+            }
+
         /// requires login token as Authorization header
         module XP =
 
             let ROUTE = (GET, "/leaderboard/xp")
 
-            [<Json.AutoCodec>]
-            type LeaderboardEntry =
-                {
-                    Username: string
-                    Color: int
-                    XP: int64
-                    Playtime: float
-                }
-
-            [<Json.AutoCodec>]
-            type Response =
-                {
-                    Leaderboard: LeaderboardEntry array
-                    You: (int64 * LeaderboardEntry) option
-                }
+            type Response = XPResponse
 
             let get (sort_by_playtime: bool, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
@@ -596,62 +598,50 @@ module Stats =
 
             let ROUTE = (GET, "/leaderboard/monthly/xp")
 
-            [<Json.AutoCodec>]
-            type LeaderboardEntry =
-                {
-                    Username: string
-                    Color: int
-                    XP: int64
-                    Playtime: float
-                }
-
-            [<Json.AutoCodec>]
-            type Response =
-                {
-                    Leaderboard: LeaderboardEntry array
-                    You: (int64 * LeaderboardEntry) option
-                }
+            type Response = XPResponse
 
             let get (sort_by_playtime: bool, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + (if sort_by_playtime then "?sort=playtime" else ""), callback)
+
+        [<Json.AutoCodec>]
+        type KeymodeLeaderboardEntry =
+            {
+                Username: string
+                Color: int
+                Playtime: float
+                Combined: float32
+                Jacks: float32
+                Chordstream: float32
+                Stream: float32
+            }
+
+        type Sort =
+            | Playtime
+            | Combined
+            | Jacks
+            | Chordstream
+            | Stream
+            override this.ToString() =
+                match this with
+                | Playtime -> "playtime"
+                | Combined -> "combined"
+                | Jacks -> "jacks"
+                | Chordstream -> "chordstream"
+                | Stream -> "stream"
+
+        [<Json.AutoCodec>]
+        type KeymodeResponse =
+            {
+                Leaderboard: KeymodeLeaderboardEntry array
+                You: (int64 * KeymodeLeaderboardEntry) option
+            }
 
         /// requires login token as Authorization header
         module Keymode =
 
             let ROUTE = (GET, "/leaderboard/keymode")
 
-            [<Json.AutoCodec>]
-            type LeaderboardEntry =
-                {
-                    Username: string
-                    Color: int
-                    Playtime: float
-                    Combined: float32
-                    Jacks: float32
-                    Chordstream: float32
-                    Stream: float32
-                }
-
-            type Sort =
-                | Playtime
-                | Combined
-                | Jacks
-                | Chordstream
-                | Stream
-                override this.ToString() =
-                    match this with
-                    | Playtime -> "playtime"
-                    | Combined -> "combined"
-                    | Jacks -> "jacks"
-                    | Chordstream -> "chordstream"
-                    | Stream -> "stream"
-
-            [<Json.AutoCodec>]
-            type Response =
-                {
-                    Leaderboard: LeaderboardEntry array
-                    You: (int64 * LeaderboardEntry) option
-                }
+            type Response = KeymodeResponse
 
             let get (keys: int, sort: Sort, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)
@@ -661,38 +651,7 @@ module Stats =
 
             let ROUTE = (GET, "/leaderboard/monthly/keymode")
 
-            [<Json.AutoCodec>]
-            type LeaderboardEntry =
-                {
-                    Username: string
-                    Color: int
-                    Playtime: float
-                    Combined: float32
-                    Jacks: float32
-                    Chordstream: float32
-                    Stream: float32
-                }
-
-            type Sort =
-                | Playtime
-                | Combined
-                | Jacks
-                | Chordstream
-                | Stream
-                override this.ToString() =
-                    match this with
-                    | Playtime -> "playtime"
-                    | Combined -> "combined"
-                    | Jacks -> "jacks"
-                    | Chordstream -> "chordstream"
-                    | Stream -> "stream"
-
-            [<Json.AutoCodec>]
-            type Response =
-                {
-                    Leaderboard: LeaderboardEntry array
-                    You: (int64 * LeaderboardEntry) option
-                }
+            type Response = KeymodeResponse
 
             let get (keys: int, sort: Sort, callback: Response option -> unit) =
                 Client.get<Response> (snd ROUTE + "?sort=" + sort.ToString() + "&keys=" + keys.ToString(), callback)

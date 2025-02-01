@@ -7,6 +7,7 @@ open Interlude.Web.Server.Domain.Core
 
 module XP =
 
+    open Stats.Leaderboard
     open Stats.Leaderboard.XP
 
     let handle
@@ -30,7 +31,7 @@ module XP =
             let users =
                 data |> Array.map (fun x -> x.UserId) |> User.by_ids |> Map.ofArray
 
-            let mutable you : (int64 * LeaderboardEntry) option = None
+            let mutable you : (int64 * XPLeaderboardEntry) option = None
 
             let mutable i = 0
             let result =

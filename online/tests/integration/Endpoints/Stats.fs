@@ -6,6 +6,15 @@ open System.Threading
 
 module Stats =
 
+    let SORT_MODES =
+        [
+            Stats.Leaderboard.Playtime
+            Stats.Leaderboard.Combined
+            Stats.Leaderboard.Jacks
+            Stats.Leaderboard.Chordstream
+            Stats.Leaderboard.Stream
+        ]
+
     [<Test>]
     let Fetch () =
 
@@ -83,16 +92,7 @@ module Stats =
     [<Test>]
     let Leaderboard_Keymode_4K () =
 
-        let sort_modes =
-            [
-                Stats.Leaderboard.Keymode.Playtime
-                Stats.Leaderboard.Keymode.Combined
-                Stats.Leaderboard.Keymode.Jacks
-                Stats.Leaderboard.Keymode.Chordstream
-                Stats.Leaderboard.Keymode.Stream
-        ]
-
-        for sort in sort_modes do
+        for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
             Stats.Leaderboard.Keymode.get (
@@ -109,16 +109,7 @@ module Stats =
     [<Test>]
     let Leaderboard_Keymode_7K () =
 
-        let sort_modes =
-            [
-                Stats.Leaderboard.Keymode.Playtime
-                Stats.Leaderboard.Keymode.Combined
-                Stats.Leaderboard.Keymode.Jacks
-                Stats.Leaderboard.Keymode.Chordstream
-                Stats.Leaderboard.Keymode.Stream
-        ]
-
-        for sort in sort_modes do
+        for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
             Stats.Leaderboard.Keymode.get (
@@ -135,16 +126,7 @@ module Stats =
     [<Test>]
     let Leaderboard_Keymode_Monthly_4K () =
 
-        let sort_modes =
-            [
-                Stats.Leaderboard.MonthlyKeymode.Playtime
-                Stats.Leaderboard.MonthlyKeymode.Combined
-                Stats.Leaderboard.MonthlyKeymode.Jacks
-                Stats.Leaderboard.MonthlyKeymode.Chordstream
-                Stats.Leaderboard.MonthlyKeymode.Stream
-        ]
-
-        for sort in sort_modes do
+        for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
             Stats.Leaderboard.MonthlyKeymode.get (
@@ -161,16 +143,7 @@ module Stats =
     [<Test>]
     let Leaderboard_Keymode_Monthly_7K () =
 
-        let sort_modes =
-            [
-                Stats.Leaderboard.MonthlyKeymode.Playtime
-                Stats.Leaderboard.MonthlyKeymode.Combined
-                Stats.Leaderboard.MonthlyKeymode.Jacks
-                Stats.Leaderboard.MonthlyKeymode.Chordstream
-                Stats.Leaderboard.MonthlyKeymode.Stream
-        ]
-
-        for sort in sort_modes do
+        for sort in SORT_MODES do
             use done_signal = new AutoResetEvent(false)
 
             Stats.Leaderboard.MonthlyKeymode.get (
