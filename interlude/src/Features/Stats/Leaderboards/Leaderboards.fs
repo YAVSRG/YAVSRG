@@ -29,10 +29,14 @@ type LeaderboardsTab() =
         tabs.Position <- Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
         this
         |+ tabs
-        |+ Button(
-            "Toggle",
-            (fun () -> activity.SortByPlaytime.Value <- not activity.SortByPlaytime.Value),
+        |+ PageSetting(
+            "Sort by playtime",
+            Checkbox(activity.SortByPlaytime),
             Position = Position.SlicePercentL(0.4f).ShrinkT(150.0f).SliceT(50.0f).ShrinkX(40.0f))
+        |+ PageSetting(
+            "Monthly",
+            Checkbox(activity.MonthlyLeaderboard),
+            Position = Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(50.0f).ShrinkX(40.0f))
         |* content_panel
 
         base.Init parent
