@@ -21,18 +21,18 @@ module Stats =
             Error <| sprintf "Stats data is for user id #%i" incoming.NetworkId
         else
 
-        let time_since_sync = float (now - all_time_stats.LastSync) + 1000.0
-        if incoming.GameTime - all_time_stats.GameTime > time_since_sync then
+        let time_since_sync = float (now - all_time_stats.LastSync)
+        if incoming.GameTime - all_time_stats.GameTime > time_since_sync + 120000.0 then
             Error
                 (
-                    sprintf "Increase in gametime is greater than real life time elapsed since last sync: +%s vs +%s"
+                    sprintf "Increase in gametime is notably greater than real life time elapsed since last sync: +%s vs +%s"
                         (format_long_time(incoming.GameTime - all_time_stats.GameTime))
                         (format_long_time(time_since_sync))
                 )
-        elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime then
+        elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime + 120000.0 then
             Error
                 (
-                    sprintf "Increase in playtime is greater than increase in gametime: +%s vs +%s"
+                    sprintf "Increase in playtime is notably greater than increase in gametime: +%s vs +%s"
                         (format_long_time(incoming.Playtime - all_time_stats.Playtime))
                         (format_long_time(incoming.GameTime - all_time_stats.GameTime))
                 )
