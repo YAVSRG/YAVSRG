@@ -14,6 +14,7 @@ module FlowContainer =
     type Base<'T when 'T :> Widget>(item_size: float32) as this =
         inherit StaticWidget(NodeType.Container(fun _ -> this.WhoShouldFocus |> Option.map (fun x -> x :> ISelection)))
 
+        let mutable size_change = ignore
         let mutable filter: 'T -> bool = K true
         let mutable sort: ('T -> 'T -> int) option = None
         let mutable spacing = 0.0f
@@ -90,6 +91,7 @@ module FlowContainer =
                     c.Visible <- filter c.Widget
 
                 refresh <- true
+                size_change()
 
         member this.Sort
             with set (comp: 'T -> 'T -> int) =
@@ -102,12 +104,18 @@ module FlowContainer =
             and set (value) =
                 spacing <- value
                 refresh <- true
+                size_change()
 
         member this.ItemSize
             with get () = item_size
             and set (value) =
                 item_size <- value
                 refresh <- true
+                size_change()
+
+        member this.ContentSize =
+            let count = children |> Seq.where (_.Visible) |> Seq.length
+            float32 count * item_size + (float32 count - 1.0f) * spacing
 
         member val Floating = false with get, set
         member val AllowNavigation = true with get, set
@@ -116,6 +124,7 @@ module FlowContainer =
             assert(GameThread.is_game_thread())
             children.Clear()
             refresh <- true
+            size_change()
 
         override this.Draw() =
             for i = children.Count - 1 downto 0 do
@@ -161,6 +170,8 @@ module FlowContainer =
                 child.Init this
                 refresh <- true
 
+            size_change()
+
         member this.Remove(child: 'T) =
             assert(GameThread.is_game_thread())
 
@@ -168,6 +179,7 @@ module FlowContainer =
             | Some x ->
                 children.Remove x |> ignore
                 refresh <- true
+                size_change()
             | None -> Logging.Error "%O is not in flow container %O, can't remove" child this
 
         override this.Init(parent: Widget) =
@@ -194,26 +206,21 @@ module FlowContainer =
         static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
         static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
 
+        interface IResize with
+            member this.OnSizeChanged
+                with set v = size_change <- v
+
     [<Sealed>]
     type Vertical<'T when 'T :> Widget>(item_height: float32) =
         inherit Base<'T>(item_height)
 
-        let mutable size_change = ignore
-        let mutable content_height = 0.0f
-
         override this.FlowContent children =
             let mutable t = 0.0f
-            let mutable b = 0.0f
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     c.Position <- Position.SliceT(t, this.ItemSize)
-                    b <- t + this.ItemSize
                     t <- t + this.ItemSize + this.Spacing
-
-            if b <> content_height then
-                content_height <- b
-                size_change ()
 
         override this.Navigate() =
             if (%%"up").Tapped() then
@@ -226,34 +233,19 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IHeight with
-            member this.Height =
-                if this.Initialised then content_height
-                else float32 this.Count * item_height + (float32 this.Count - 1.0f) * (this.Spacing)
-
-        interface IResize with
-            member this.OnSizeChanged
-                with set v = size_change <- v
+            member this.Height = this.ContentSize
 
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
 
-        let mutable size_change = ignore
-        let mutable content_width = 0.0f
-
         override this.FlowContent children =
             let mutable l = 0.0f
-            let mutable r = 0.0f
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     c.Position <- Position.SliceL(l, this.ItemSize)
-                    r <- l + this.ItemSize
                     l <- l + this.ItemSize + this.Spacing
-
-            if r <> content_width then
-                content_width <- r
-                size_change ()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -266,24 +258,14 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width =
-                if this.Initialised then content_width
-                else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
-
-        interface IResize with
-            member this.OnSizeChanged
-                with set v = size_change <- v
+            member this.Width = this.ContentSize
 
     [<Sealed>]
     type RightToLeft<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
 
-        let mutable size_change = ignore
-        let mutable content_width = 0.0f
-
         override this.FlowContent children =
             let mutable r = 0.0f
-            let mutable l = 0.0f
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
@@ -294,13 +276,7 @@ module FlowContainer =
                             Right = 1.0f %- r
                             Bottom = Position.MAX
                         }
-
-                    l <- r + this.ItemSize
                     r <- r + this.ItemSize + this.Spacing
-
-                if l <> content_width then
-                    content_width <- l
-                    size_change ()
 
         override this.Navigate() =
             if (%%"left").Tapped() then
@@ -313,10 +289,4 @@ module FlowContainer =
                 this.SelectFocusedChild()
 
         interface IWidth with
-            member this.Width =
-                if this.Initialised then content_width
-                else float32 this.Count * item_width + (float32 this.Count - 1.0f) * (this.Spacing)
-
-        interface IResize with
-            member this.OnSizeChanged
-                with set v = size_change <- v
+            member this.Width = this.ContentSize
