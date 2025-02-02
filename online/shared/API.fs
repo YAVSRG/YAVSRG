@@ -117,6 +117,16 @@ module API =
         let authenticate (token: string) =
             client.DefaultRequestHeaders.Authorization <- new Headers.AuthenticationHeaderValue("Bearer", token)
 
+        let send_retry (client: HttpClient) (message: HttpRequestMessage) =
+            async {
+                let! response = client.SendAsync message |> Async.AwaitTask
+                if response.StatusCode = HttpStatusCode.Unauthorized then
+                    // Retry once
+                    return! client.SendAsync message |> Async.AwaitTask
+                else
+                    return response
+            }
+
         let internal get<'T> (route: string, callback: 'T option -> unit) =
 
             let handle_response (response: HttpResponseMessage) =
@@ -134,7 +144,7 @@ module API =
                     async {
                         try
                             let request = new HttpRequestMessage(HttpMethod.Get, route)
-                            let! response = client.SendAsync request |> Async.AwaitTask
+                            let! response = send_retry client request
                             handle_response response
                         with
                         | :? HttpRequestException
@@ -161,7 +171,7 @@ module API =
                     async {
                         try
                             let request = new HttpRequestMessage(HttpMethod.Get, route)
-                            let! response = client.SendAsync request |> Async.AwaitTask
+                            let! response = send_retry client request
                             handle_response response
                         with
                         | :? HttpRequestException
@@ -193,7 +203,7 @@ module API =
                                     Text.Encoding.UTF8,
                                     "application/json"
                                 )
-                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            let! response = send_retry client request
                             handle_response response
                         with
                         | :? HttpRequestException
@@ -229,7 +239,7 @@ module API =
                                     Text.Encoding.UTF8,
                                     "application/json"
                                 )
-                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            let! response = send_retry client request
                             handle_response response
                         with
                         | :? HttpRequestException
@@ -255,7 +265,7 @@ module API =
                     async {
                         try
                             let request = new HttpRequestMessage(HttpMethod.Delete, route)
-                            let! response = client.SendAsync(request) |> Async.AwaitTask
+                            let! response = send_retry client request
                             handle_response response
                         with
                         | :? HttpRequestException
