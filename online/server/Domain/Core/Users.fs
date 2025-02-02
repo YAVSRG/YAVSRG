@@ -16,6 +16,7 @@ module Badge =
     let MODERATOR = "moderator"
     let EARLYTESTER = "early-tester"
     let TABLE_EDITOR = "table-editor"
+    let CONTRIBUTOR = "contributor"
 
     let badge_color (badge: Badge) : int32 list =
         match badge with
@@ -23,6 +24,7 @@ module Badge =
         | _ when badge = MODERATOR -> [ 0xFF_66c2ff ]
         | _ when badge = DEVELOPER -> [ 0xFF_ff7559 ]
         | _ when badge = DONATOR -> [ 0xFF_ff8cdd; 0xFF_ffd36e ]
+        | _ when badge = CONTRIBUTOR -> [ 0xFF_873dff ]
         | _ -> []
 
     let DEFAULT_COLOR = 0xFF_cecfd9
