@@ -192,7 +192,7 @@ type private Profile() =
         // Main details
         |+ Text(
             data.Username,
-            Color = K(Color.FromArgb data.Color, Colors.shadow_2),
+            Color = (fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2),
             Align = Alignment.LEFT,
             Position = Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f)
         )
