@@ -47,6 +47,64 @@ type PlayerXP(rank: int, username: string, color: Color, xp: int64, playtime: fl
 
         Text.fill_b(Style.font, playtime, bounds.SlicePercentR(0.33f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
+type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
+    inherit Container(NodeType.None)
+
+    let playtime =
+        let pos = Position.SlicePercentR(0.33f).Shrink(10.0f, 5.0f)
+        if by_playtime then
+            Text(
+                Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.playtime",
+                Color = K Colors.text_cyan_2,
+                Align = Alignment.RIGHT,
+                Position = pos
+            )
+            :> Widget
+        else
+            Button(
+                %"stats.leaderboards.activity.playtime",
+                (fun () -> change_sort true),
+                Align = Alignment.RIGHT,
+                Position = pos
+            )
+
+    let xp =
+        let pos = Position.SlicePercentX(0.33f).Shrink(10.0f, 5.0f)
+        if by_playtime then
+            Button(
+                %"stats.leaderboards.activity.xp",
+                (fun () -> change_sort false),
+                Align = Alignment.CENTER,
+                Position = pos
+            )
+            :> Widget
+        else
+            Text(
+                Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.xp",
+                Color = K Colors.text_cyan_2,
+                Align = Alignment.CENTER,
+                Position = pos
+            )
+
+    let player =
+        Text(
+            %"stats.leaderboards.activity.player",
+            Color = K Colors.text_subheading,
+            Align = Alignment.LEFT,
+            Position = Position.SlicePercentL(0.33f).ShrinkL(PlayerXP.HEIGHT * 1.5f).Shrink(10.0f, 5.0f)
+        )
+
+    override this.Init(parent) =
+        this
+        |+ player
+        |+ xp
+        |* playtime
+        base.Init parent
+
+    override this.Draw() =
+        Render.rect this.Bounds Colors.black.O2
+        base.Draw()
+
 type private ActivityLeaderboard() =
     inherit Container(NodeType.None)
 
@@ -70,6 +128,19 @@ type private ActivityLeaderboard() =
 
     let rerender (container: WebRequestContainer<_>) (data: Stats.Leaderboard.XPResponse) =
 
+        let title =
+            Text(
+                (
+                    if monthly.Value then
+                        %"stats.leaderboards.activity.monthly"
+                        + "  -  "
+                        + (Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy")
+                    else
+                        %"stats.leaderboards.activity.all_time"
+                ),
+                Position = Position.SliceT(70.0f).ShrinkX(5.0f)
+            )
+        let header = ActivityHeader(by_playtime.Value, (fun v -> by_playtime.Set v; container.Reload()), Position = Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
         let flow = FlowContainer.Vertical<Widget>(PlayerXP.HEIGHT, Spacing = Style.PADDING)
         for i, d in Seq.indexed data.Leaderboard do
             PlayerXP(i + 1, d.Username, Color.FromArgb(d.Color), d.XP, d.Playtime)
@@ -78,11 +149,16 @@ type private ActivityLeaderboard() =
         match data.You with
         | Some (rank, you) ->
             Container(NodeType.None)
-            |+ ScrollContainer(flow, Position = Position.ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
+            |+ title
+            |+ header
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f).ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
             |+ PlayerXP(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime, Position = Position.SliceB(PlayerXP.HEIGHT))
-            :> Widget
         | None ->
-            ScrollContainer(flow)
+            Container(NodeType.None)
+            |+ title
+            |+ header
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f))
+        :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.XPResponse>(load, rerender)
 

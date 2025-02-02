@@ -19,6 +19,10 @@ module Position =
     let MIN = 0.0f %+ 0.0f
     let MAX = 1.0f %+ 0.0f
 
+    let lerp (amount: float32) (x, percentage) (x2, percentage2) =
+        x + (x2 - x) * amount,
+        percentage + (percentage2 - percentage) * amount
+
     let calculate (pos: Position) (bounds: Percyqaz.Flux.Graphics.Rect) =
         let inline c (offset, percent) min max : float32 = min + percent * (max - min) + offset
 
@@ -82,6 +86,22 @@ type Position with
     static member inline ShrinkX amount = Position.DEFAULT.ShrinkX amount
     static member inline ShrinkY amount = Position.DEFAULT.ShrinkY amount
 
+    member inline this.ShrinkPercentL percent = { this with Left = Position.lerp percent this.Left this.Right }
+    member inline this.ShrinkPercentT percent = { this with Top = Position.lerp percent this.Top this.Bottom }
+    member inline this.ShrinkPercentR percent = { this with Right = Position.lerp percent this.Right this.Left }
+    member inline this.ShrinkPercentB percent = { this with Bottom = Position.lerp percent this.Bottom this.Top }
+    member inline this.ShrinkPercentX percent =
+        { this with
+            Left = Position.lerp percent this.Left this.Right
+            Right = Position.lerp percent this.Right this.Left
+        }
+    member inline this.ShrinkPercentY percent =
+        { this with
+            Top = Position.lerp percent this.Top this.Bottom
+            Bottom = Position.lerp percent this.Bottom this.Top
+        }
+    member inline this.ShrinkPercent percent = this.ShrinkPercentX(percent).ShrinkPercentY(percent)
+
     member inline this.Expand (x, y) = this.Shrink (-x, -y)
     member inline this.Expand amount = this.Shrink -amount
     member inline this.ExpandL amount = this.ShrinkL -amount
@@ -128,12 +148,37 @@ type Position with
     static member inline SliceX width = Position.DEFAULT.SliceX width
     static member inline SliceY height = Position.DEFAULT.SliceY height
 
+    member inline this.SlicePercentL percent = { this with Right = Position.lerp percent this.Left this.Right }
+    member inline this.SlicePercentT percent = { this with Bottom = Position.lerp percent this.Top this.Bottom }
+    member inline this.SlicePercentR percent = { this with Left = Position.lerp percent this.Right this.Left }
+    member inline this.SlicePercentB percent = { this with Top = Position.lerp percent this.Bottom this.Top }
+    member inline this.SlicePercentX percent =
+        { this with
+            Left = Position.lerp (0.5f - percent * 0.5f) this.Left this.Right
+            Right = Position.lerp (0.5f + percent * 0.5f) this.Left this.Right
+        }
+    member inline this.SlicePercentY percent =
+        { this with
+            Top = Position.lerp (0.5f - percent * 0.5f) this.Top this.Bottom
+            Bottom = Position.lerp (0.5f + percent * 0.5f) this.Top this.Bottom
+        }
+
     static member inline SlicePercentL percent = { Position.DEFAULT with Right = percent %+ 0.0f }
     static member inline SlicePercentT percent = { Position.DEFAULT with Bottom = percent %+ 0.0f }
     static member inline SlicePercentR percent = { Position.DEFAULT with Left = (1.0f - percent) %+ 0.0f }
     static member inline SlicePercentB percent = { Position.DEFAULT with Top = (1.0f - percent) %+ 0.0f }
     static member inline SlicePercentX percent = { Position.DEFAULT with Left = ((1.0f - percent) * 0.5f) %+ 0.0f; Right = ((1.0f + percent) * 0.5f) %+ 0.0f }
     static member inline SlicePercentY percent = { Position.DEFAULT with Top = ((1.0f - percent) * 0.5f) %+ 0.0f; Bottom = ((1.0f + percent) * 0.5f) %+ 0.0f }
+
+    member inline this.StripPercentL (start: float32, width: float32) = this.ShrinkPercentL(start).SlicePercentL(width / (1.0f - start))
+    member inline this.StripPercentT (start: float32, height: float32) = this.ShrinkPercentT(start).SlicePercentT(height / (1.0f - start))
+    member inline this.StripPercentR (start: float32, width: float32) = this.ShrinkPercentR(start).SlicePercentR(width / (1.0f - start))
+    member inline this.StripPercentB (start: float32, height: float32) = this.ShrinkPercentB(start).SlicePercentB(height / (1.0f - start))
+
+    static member inline StripPercentL (start, width) = { Position.DEFAULT with Left = start %+ 0.0f; Right = (start + width) %+ 0.0f }
+    static member inline StripPercentT (start, height) = { Position.DEFAULT with Top = start %+ 0.0f; Bottom = (start + height) %+ 0.0f }
+    static member inline StripPercentR (start, width) = { Position.DEFAULT with Left = (1.0f - start - width) %+ 0.0f; Right = (1.0f - start) %+ 0.0f }
+    static member inline StripPercentB (start, height) = { Position.DEFAULT with Top = (1.0f - start - height) %+ 0.0f; Bottom = (1.0f - start) %+ 0.0f }
 
     member inline this.BorderL amount =
         { this with

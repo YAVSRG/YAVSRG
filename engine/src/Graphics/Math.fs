@@ -143,6 +143,7 @@ type Rect =
     member inline this.ShrinkB amount = this.ExpandB -amount
     member inline this.ShrinkX x = this.ExpandX -x
     member inline this.ShrinkY x = this.ExpandY -x
+
     member inline this.ShrinkPercentL percent = this.ShrinkL (this.Width * percent)
     member inline this.ShrinkPercentT percent = this.ShrinkT (this.Height * percent)
     member inline this.ShrinkPercentR percent = this.ShrinkR (this.Width * percent)

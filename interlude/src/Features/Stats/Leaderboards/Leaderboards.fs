@@ -11,7 +11,7 @@ type LeaderboardsTab() =
 
     let keymodes = KeymodesLeaderboard()
     let activity = ActivityLeaderboard()
-    let content_panel = SwapContainer(activity, Position = Position.SlicePercentR(0.6f).Shrink(40.0f, 80.0f))
+    let content_panel = SwapContainer(activity, Position = Position.SlicePercentR(0.6f).Shrink(40.0f, 40.0f))
 
     override this.Init(parent) =
 
@@ -25,35 +25,23 @@ type LeaderboardsTab() =
             )
                 .Pos(0, 2, PageWidth.Full)
             |+ PageSetting(
-                "Sort by",
-                Selector([| false, "XP"; true, "Playtime" |], activity.SortByPlaytime)
-            )
-                .Conditional(fun () -> content_panel.Current = activity)
-                .Pos(3, 2, PageWidth.Full)
-            |+ PageSetting(
                 "Time",
                 Selector([| false, "All-time"; true, "This month" |], activity.MonthlyLeaderboard)
             )
                 .Conditional(fun () -> content_panel.Current = activity)
-                .Pos(5, 2, PageWidth.Full)
-            |+ PageSetting(
-                "Sort by",
-                Selector([| Combined, "Combined"; Playtime, "Playtime" |], keymodes.SortBy)
-            )
-                .Conditional(fun () -> content_panel.Current = keymodes)
                 .Pos(3, 2, PageWidth.Full)
             |+ PageSetting(
                 "Time",
                 Selector([| false, "All-time"; true, "This month" |], keymodes.MonthlyLeaderboard)
             )
                 .Conditional(fun () -> content_panel.Current = keymodes)
-                .Pos(5, 2, PageWidth.Full)
+                .Pos(3, 2, PageWidth.Full)
             |+ PageSetting(
                 "Keymode",
                 Selector([| 4, "4K"; 7, "7K" |], keymodes.Keymode)
             )
                 .Conditional(fun () -> content_panel.Current = keymodes)
-                .Pos(7, 2, PageWidth.Full)
+                .Pos(5, 2, PageWidth.Full)
 
         this
         |+ options
