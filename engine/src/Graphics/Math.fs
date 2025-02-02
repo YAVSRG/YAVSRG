@@ -56,7 +56,7 @@ type Rect =
 
     // -- Various transform utilities --
 
-    // Translate
+    // Translate: Standard translate operation
     member inline this.TranslateX x =
         {
             Left = this.Left + x
@@ -245,47 +245,47 @@ type Rect =
     member inline this.SlicePercentY percent = this.SliceY (this.Height * percent)
 
     // Border: Gets a strip of a certain thickness, outside an edge of the box
-    member inline this.BorderL amount =
+    member inline this.BorderL thickness =
         {
-            Left = this.Left - amount
+            Left = this.Left - thickness
             Top = this.Top
             Right = this.Left
             Bottom = this.Bottom
         }
-    member inline this.BorderT amount =
+    member inline this.BorderT thickness =
         {
             Left = this.Left
-            Top = this.Top - amount
+            Top = this.Top - thickness
             Right = this.Right
             Bottom = this.Top
         }
-    member inline this.BorderR amount =
+    member inline this.BorderR thickness =
         {
             Left = this.Right
             Top = this.Top
-            Right = this.Right + amount
+            Right = this.Right + thickness
             Bottom = this.Bottom
         }
-    member inline this.BorderB amount =
+    member inline this.BorderB thickness =
         {
             Left = this.Left
             Top = this.Bottom
             Right = this.Right
-            Bottom = this.Bottom + amount
+            Bottom = this.Bottom + thickness
         }
-    member inline this.BorderCornersT amount =
+    member inline this.BorderCornersT thickness =
         {
-            Left = this.Left - amount
-            Top = this.Top - amount
-            Right = this.Right + amount
+            Left = this.Left - thickness
+            Top = this.Top - thickness
+            Right = this.Right + thickness
             Bottom = this.Top
         }
-    member inline this.BorderCornersB amount =
+    member inline this.BorderCornersB thickness =
         {
-            Left = this.Left - amount
+            Left = this.Left - thickness
             Top = this.Bottom
-            Right = this.Right + amount
-            Bottom = this.Bottom + amount
+            Right = this.Right + thickness
+            Bottom = this.Bottom + thickness
         }
 
 module Rect =

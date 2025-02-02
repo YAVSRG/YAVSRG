@@ -90,10 +90,10 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
     override this.Init(parent) =
         this
         |+ player
-        |+ button Stats.Leaderboard.Sort.Combined %"stats.leaderboards.rating.combined" (Position.StripPercentL(0.20f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Jacks %"stats.leaderboards.rating.jacks" (Position.StripPercentL(0.35f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Chordstream %"stats.leaderboards.rating.chordstream" (Position.StripPercentL(0.5f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Stream %"stats.leaderboards.rating.stream" (Position.StripPercentL(0.65f, 0.25f).ShrinkY(5.0f))
+        |+ button Stats.Leaderboard.Sort.Combined %"stats.leaderboards.rating.combined" (Position.SlicePercentL(0.20f, 0.25f).ShrinkY(5.0f))
+        |+ button Stats.Leaderboard.Sort.Jacks %"stats.leaderboards.rating.jacks" (Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f))
+        |+ button Stats.Leaderboard.Sort.Chordstream %"stats.leaderboards.rating.chordstream" (Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f))
+        |+ button Stats.Leaderboard.Sort.Stream %"stats.leaderboards.rating.stream" (Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f))
         |* playtime
         base.Init parent
 
