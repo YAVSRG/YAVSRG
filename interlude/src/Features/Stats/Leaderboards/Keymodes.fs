@@ -34,10 +34,10 @@ type PlayerInfo(rank: int, data: Stats.Leaderboard.KeymodeLeaderboardEntry) =
 
         Text.fill_b(Style.font, data.Username, bounds.SlicePercentL(0.25f).Shrink(10.0f, 5.0f), (color, Colors.shadow_2), Alignment.LEFT)
 
-        Text.fill_b(Style.font, sprintf "%.0f" data.Combined, bounds.StripPercentL(0.25f, 0.15f).Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Jacks, bounds.StripPercentL(0.4f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_red, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Chordstream, bounds.StripPercentL(0.55f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_green, Alignment.LEFT)
-        Text.fill_b(Style.font, sprintf "%.0f" data.Stream, bounds.StripPercentL(0.7f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_cyan, Alignment.LEFT)
+        Text.fill_b(Style.font, sprintf "%.0f" data.Combined, bounds.SlicePercentL(0.25f, 0.15f).Shrink(10.0f, 5.0f), Colors.text, Alignment.LEFT)
+        Text.fill_b(Style.font, sprintf "%.0f" data.Jacks, bounds.SlicePercentL(0.4f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_red, Alignment.LEFT)
+        Text.fill_b(Style.font, sprintf "%.0f" data.Chordstream, bounds.SlicePercentL(0.55f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_green, Alignment.LEFT)
+        Text.fill_b(Style.font, sprintf "%.0f" data.Stream, bounds.SlicePercentL(0.7f, 0.15f).Shrink(10.0f, 5.0f), Colors.text_cyan, Alignment.LEFT)
 
         Text.fill_b(Style.font, playtime, bounds.SlicePercentR(0.20f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 

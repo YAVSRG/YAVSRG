@@ -54,50 +54,32 @@ type Rect =
             Bottom = min this.Bottom other.Bottom
         }
 
-    member inline this.Translate(x, y) =
+    // -- Various transform utilities --
+
+    // Translate
+    member inline this.TranslateX x =
+        {
+            Left = this.Left + x
+            Top = this.Top
+            Right = this.Right + x
+            Bottom = this.Bottom
+        }
+    member inline this.TranslateY y =
+        {
+            Left = this.Left
+            Top = this.Top + y
+            Right = this.Right
+            Bottom = this.Bottom + y
+        }
+    member inline this.Translate (x, y) =
         {
             Left = this.Left + x
             Top = this.Top + y
             Right = this.Right + x
             Bottom = this.Bottom + y
         }
-    member inline this.TranslateX amount =
-        {
-            Left = this.Left + amount
-            Top = this.Top
-            Right = this.Right + amount
-            Bottom = this.Bottom
-        }
-    member inline this.TranslateY amount =
-        {
-            Left = this.Left
-            Top = this.Top + amount
-            Right = this.Right
-            Bottom = this.Bottom + amount
-        }
 
-    member inline this.Expand(x, y) =
-        {
-            Left = this.Left - x
-            Top = this.Top - y
-            Right = this.Right + x
-            Bottom = this.Bottom + y
-        }
-    member inline this.Expand amount = this.Expand(amount, amount)
-    member inline this.ExpandX amount =
-        {
-            Left = this.Left - amount
-            Top = this.Top
-            Right = this.Right + amount
-            Bottom = this.Bottom
-        }
-    member inline this.ExpandY amount =
-        {
-            Left = this.Left
-            Top = this.Top - amount
-            Right = this.Right
-            Bottom = this.Bottom + amount
-        }
+    // Expand: Enlarge by the given amount in all directions
     member inline this.ExpandL amount =
         {
             Left = this.Left - amount
@@ -126,6 +108,28 @@ type Rect =
             Right = this.Right
             Bottom = this.Bottom + amount
         }
+    member inline this.ExpandX amount =
+        {
+            Left = this.Left - amount
+            Top = this.Top
+            Right = this.Right + amount
+            Bottom = this.Bottom
+        }
+    member inline this.ExpandY amount =
+        {
+            Left = this.Left
+            Top = this.Top - amount
+            Right = this.Right
+            Bottom = this.Bottom + amount
+        }
+    member inline this.Expand(x, y) =
+        {
+            Left = this.Left - x
+            Top = this.Top - y
+            Right = this.Right + x
+            Bottom = this.Bottom + y
+        }
+    member inline this.Expand amount = this.Expand(amount, amount)
 
     member inline this.ExpandPercentL percent = this.ExpandL (this.Width * percent)
     member inline this.ExpandPercentT percent = this.ExpandT (this.Height * percent)
@@ -133,16 +137,18 @@ type Rect =
     member inline this.ExpandPercentB percent = this.ExpandB (this.Height * percent)
     member inline this.ExpandPercentX percent = this.ExpandX (this.Width * percent)
     member inline this.ExpandPercentY percent = this.ExpandY (this.Height * percent)
+    member inline this.ExpandPercent (percent_x, percent_y) = this.Expand (this.Width * percent_x, this.Height * percent_y)
     member inline this.ExpandPercent percent = this.Expand (this.Width * percent, this.Height * percent)
 
-    member inline this.Shrink(x, y) = this.Expand(-x, -y)
-    member inline this.Shrink amount = this.Shrink(amount, amount)
+    // Shrink: Opposite of expand
     member inline this.ShrinkL amount = this.ExpandL -amount
     member inline this.ShrinkT amount = this.ExpandT -amount
     member inline this.ShrinkR amount = this.ExpandR -amount
     member inline this.ShrinkB amount = this.ExpandB -amount
     member inline this.ShrinkX x = this.ExpandX -x
     member inline this.ShrinkY x = this.ExpandY -x
+    member inline this.Shrink(x, y) = this.Expand(-x, -y)
+    member inline this.Shrink amount = this.Shrink(amount, amount)
 
     member inline this.ShrinkPercentL percent = this.ShrinkL (this.Width * percent)
     member inline this.ShrinkPercentT percent = this.ShrinkT (this.Height * percent)
@@ -150,42 +156,72 @@ type Rect =
     member inline this.ShrinkPercentB percent = this.ShrinkB (this.Height * percent)
     member inline this.ShrinkPercentX percent = this.ShrinkX (this.Width * percent)
     member inline this.ShrinkPercentY percent = this.ShrinkY (this.Height * percent)
+    member inline this.ShrinkPercent (percent_x, percent_y) = this.Shrink (this.Width * percent_x, this.Height * percent_y)
     member inline this.ShrinkPercent percent = this.Shrink (this.Width * percent, this.Height * percent)
 
-    member inline this.SliceL amount =
+    // Slice: Gets a strip of a certain thickness, inside an edge of the box
+    member inline this.SliceL thickness =
         {
             Left = this.Left
             Top = this.Top
-            Right = this.Left + amount
+            Right = this.Left + thickness
             Bottom = this.Bottom
         }
-    member inline this.SliceT amount =
+    member inline this.SliceL (start, thickness) =
+        {
+            Left = this.Left + start
+            Top = this.Top
+            Right = this.Left + start + thickness
+            Bottom = this.Bottom
+        }
+    member inline this.SliceT thickness =
         {
             Left = this.Left
             Top = this.Top
             Right = this.Right
-            Bottom = this.Top + amount
+            Bottom = this.Top + thickness
         }
-    member inline this.SliceR amount =
+    member inline this.SliceT (start, thickness) =
         {
-            Left = this.Right - amount
+            Left = this.Left
+            Top = this.Top + start
+            Right = this.Right
+            Bottom = this.Top + start + thickness
+        }
+    member inline this.SliceR thickness =
+        {
+            Left = this.Right - thickness
             Top = this.Top
             Right = this.Right
             Bottom = this.Bottom
         }
-    member inline this.SliceB amount =
+    member inline this.SliceR (start, thickness) =
+        {
+            Left = this.Right - start - thickness
+            Top = this.Top
+            Right = this.Right - start
+            Bottom = this.Bottom
+        }
+    member inline this.SliceB thickness =
         {
             Left = this.Left
-            Top = this.Bottom - amount
+            Top = this.Bottom - thickness
             Right = this.Right
             Bottom = this.Bottom
         }
-    member inline this.SliceX amount =
+    member inline this.SliceB (start, thickness) =
+        {
+            Left = this.Left
+            Top = this.Bottom - start - thickness
+            Right = this.Right
+            Bottom = this.Bottom - start
+        }
+    member inline this.SliceX thickness =
         let center_x = this.CenterX
         {
-            Left = center_x - 0.5f * amount
+            Left = center_x - 0.5f * thickness
             Top = this.Top
-            Right = center_x + 0.5f * amount
+            Right = center_x + 0.5f * thickness
             Bottom = this.Bottom
         }
     member inline this.SliceY amount =
@@ -198,30 +234,17 @@ type Rect =
         }
 
     member inline this.SlicePercentL percent = this.SliceL (this.Width * percent)
+    member inline this.SlicePercentL (start, thickness) = this.ShrinkPercentL(start).SliceL(this.Width * thickness)
     member inline this.SlicePercentT percent = this.SliceT (this.Height * percent)
+    member inline this.SlicePercentT (start, thickness) = this.ShrinkPercentT(start).SliceT(this.Height * thickness)
     member inline this.SlicePercentR percent = this.SliceR (this.Width * percent)
+    member inline this.StripPercentR (start, thickness) = this.ShrinkPercentR(start).SliceR(this.Width * thickness)
     member inline this.SlicePercentB percent = this.SliceB (this.Height * percent)
+    member inline this.SlicePercentB (start, thickness) = this.ShrinkPercentB(start).SliceB(this.Height * thickness)
     member inline this.SlicePercentX percent = this.SliceX (this.Width * percent)
     member inline this.SlicePercentY percent = this.SliceY (this.Height * percent)
 
-    member inline this.StripL(start: float32, width: float32) = this.ShrinkL(start).SliceL(width)
-    member inline this.StripT(start: float32, height: float32) = this.ShrinkT(start).SliceT(height)
-    member inline this.StripR(start: float32, width: float32) = this.ShrinkR(start).SliceR(width)
-    member inline this.StripB(start: float32, height: float32) = this.ShrinkB(start).SliceB(height)
-
-    member inline this.StripPercentL(start: float32, width: float32) =
-        let w = this.Width * width
-        this.ShrinkPercentL(start).SliceL(w)
-    member inline this.StripPercentT(start: float32, height: float32) =
-        let h = this.Height * height
-        this.ShrinkPercentT(start).SliceT(h)
-    member inline this.StripPercentR(start: float32, width: float32) =
-        let w = this.Width * width
-        this.ShrinkPercentR(start).SliceR(w)
-    member inline this.StripPercentB(start: float32, height: float32) =
-        let h = this.Height * height
-        this.ShrinkPercentB(start).SliceB(h)
-
+    // Border: Gets a strip of a certain thickness, outside an edge of the box
     member inline this.BorderL amount =
         {
             Left = this.Left - amount
