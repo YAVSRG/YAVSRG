@@ -55,4 +55,4 @@ type Volume() =
                 elif slider.Value < 0.05f then Icons.VOLUME
                 elif slider.Value < 0.4f then Icons.VOLUME_1
                 else Icons.VOLUME_2
-            Text.fill_b (Style.font, sprintf "%s Volume: %.0f%%" icon (slider.Value * 100.0f), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
+            Text.fill_b (Style.font, sprintf "%s Volume: %.0f%%" icon (volume.Value * 100.0), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
