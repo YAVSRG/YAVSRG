@@ -14,7 +14,10 @@ module Monitors =
     let monitors = WindowThread.get_monitors ()
 
     let get_current_supported_video_modes () =
-        let reported_modes = monitors.[config.Display.Value].DisplayModes
+        let reported_modes =
+            if config.Display.Value >= 0 && config.Display.Value < monitors.Length then
+                monitors.[config.Display.Value].DisplayModes
+            else [||]
 
         if reported_modes.Length = 0 then
             [|
