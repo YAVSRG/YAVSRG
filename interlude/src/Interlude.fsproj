@@ -80,6 +80,7 @@
     <Compile Include="Features\Online\Players\Sidebar\Friends.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Search.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Sidebar.fs" />
+    <Compile Include="Features\Online\Players\Profile\Settings.fs" />
     <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />

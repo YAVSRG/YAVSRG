@@ -17,7 +17,9 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             score,
             (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp)
              |> format_timespan)
-            + " ago"
+            + " ago",
+            Gameplay.Scoring.Grade.calculate Rulesets.DEFAULT.Grades score.Score |> Rulesets.DEFAULT.GradeColor,
+            Rulesets.DEFAULT.LampColor score.Lamp
         )
 
     override this.Draw() =
@@ -25,16 +27,16 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
         let h = this.Bounds.Height / 10.0f
         let mutable y = 0.0f
 
-        for score, ago in scores do
+        for score, ago, grade_color, lamp_color in scores do
 
             let b = this.Bounds.ShrinkT(y).SliceT(h)
 
-            Text.fill_b (Style.font, score.Title, b.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text, Alignment.LEFT)
+            Text.fill_b (Style.font, score.Title, b.SliceT(45.0f).ShrinkX(10.0f), Colors.text, Alignment.LEFT)
 
             Text.fill_b (
                 Style.font,
                 score.Artist + "  •  " + score.Difficulty + "  •  " + ago,
-                b.ShrinkT(50.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -5.0f),
+                b.ShrinkT(45.0f).ShrinkX(10.0f).TranslateY(-5.0f),
                 Colors.text_subheading,
                 Alignment.LEFT
             )
@@ -42,23 +44,23 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             Text.fill_b (
                 Style.font,
                 sprintf "%.2f%%" (score.Score * 100.0),
-                b.ShrinkR(h * 3.5f).SliceR(h * 2.0f).Shrink(0.0f, h * 0.2f),
-                Colors.text,
+                b.ShrinkR(h * 3.5f).SliceR(h * 2.0f).ShrinkY(h * 0.2f),
+                (grade_color, Colors.shadow_2),
                 Alignment.RIGHT
             )
 
             Text.fill_b (
                 Style.font,
                 Rulesets.DEFAULT.LampName score.Lamp,
-                b.ShrinkR(h * 2.0f).SliceR(h).Shrink(0.0f, h * 0.2f),
-                Colors.text,
+                b.ShrinkR(h * 2.0f).SliceR(h).ShrinkY(h * 0.2f),
+                (lamp_color, Colors.shadow_2),
                 Alignment.CENTER
             )
 
             Text.fill_b (
                 Style.font,
                 (if score.Mods.IsEmpty then sprintf "%.2fx" score.Rate else sprintf"%.2fx*" score.Rate),
-                b.ShrinkR(h * 0.5f).SliceR(h).Shrink(0.0f, h * 0.2f),
+                b.ShrinkR(h * 0.5f).SliceR(h).ShrinkY(h * 0.2f),
                 Colors.text,
                 Alignment.CENTER
             )
