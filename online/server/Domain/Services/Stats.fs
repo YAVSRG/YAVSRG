@@ -23,9 +23,19 @@ module Stats =
 
         let time_since_sync = float (now - all_time_stats.LastSync) + 1000.0
         if incoming.GameTime - all_time_stats.GameTime > time_since_sync then
-            Error "Increase in gametime is greater than real life time elapsed since last sync"
+            Error
+                (
+                    sprintf "Increase in gametime is greater than real life time elapsed since last sync: +%s vs +%s"
+                        (format_long_time(incoming.GameTime - all_time_stats.GameTime))
+                        (format_long_time(time_since_sync))
+                )
         elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime then
-            Error "Increase in playtime is greater than increase in gametime"
+            Error
+                (
+                    sprintf "Increase in playtime is greater than increase in gametime: +%s vs +%s"
+                        (format_long_time(incoming.Playtime - all_time_stats.Playtime))
+                        (format_long_time(incoming.GameTime - all_time_stats.GameTime))
+                )
         else
 
         let new_all_time_stats: Stats =

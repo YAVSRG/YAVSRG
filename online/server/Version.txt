@@ -1,1 +1,1 @@
-﻿EUNOIA IV: Leaderboard API
+﻿EUNOIA V: Stats debug logging
