@@ -152,13 +152,13 @@ type private KeymodesLeaderboard() =
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
             |+ PlayerInfo(int32 rank, you, Position = Position.SliceB(PlayerInfo.HEIGHT))
         | None ->
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f))
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f))
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)

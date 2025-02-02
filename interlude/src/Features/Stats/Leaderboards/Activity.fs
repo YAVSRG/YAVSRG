@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Data.User.Stats
 open Interlude.UI
@@ -16,10 +17,9 @@ type PlayerXP(rank: int, username: string, color: Color, xp: int64, playtime: fl
     let is_you = username = Network.credentials.Username
     let playtime = format_long_time playtime
     let level = xp |> current_level
-    let bar_percent =
-        let xp_to_next_level = xp_for_level (level + 1) - xp_for_level level
-        let current_xp = xp - xp_for_level level
-        float32 current_xp / float32 xp_to_next_level
+    let xp_to_next_level = (xp_for_level (level + 1) - xp_for_level level |> float32) / 1000.0f
+    let current_xp = (xp - xp_for_level level |> float32) / 1000.0f
+    let bar_percent = current_xp / xp_to_next_level
 
     let NUMBER_WIDTH = 50.0f * 1.5f
 
@@ -43,7 +43,12 @@ type PlayerXP(rank: int, username: string, color: Color, xp: int64, playtime: fl
         let bar = bounds.SlicePercentX(0.33f).ShrinkX(10.0f).ShrinkL(NUMBER_WIDTH + 10.0f).SliceY(10.0f)
         Render.rect (bar.Translate(5.0f, 5.0f)) Colors.black
         Render.rect bar Colors.cyan_shadow
-        Render.rect (bar.SlicePercentL bar_percent) Colors.cyan_accent
+        let x, y = Mouse.pos()
+        if x > bar.Left && x < bar.Right && y > bounds.Top && y < bounds.Bottom then
+            Render.rect (bar.SlicePercentL bar_percent) Colors.cyan_accent.O1
+            Text.fill_b (Style.font, sprintf "%.1fk / %.1fk" current_xp xp_to_next_level, bar.SliceY(30.0f), Colors.text, Alignment.CENTER)
+        else
+            Render.rect (bar.SlicePercentL bar_percent) Colors.cyan_accent
 
         Text.fill_b(Style.font, playtime, bounds.SlicePercentR(0.33f).Shrink(10.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
@@ -151,13 +156,13 @@ type private ActivityLeaderboard() =
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f).ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f).ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
             |+ PlayerXP(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime, Position = Position.SliceB(PlayerXP.HEIGHT))
         | None ->
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(130.0f))
+            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f))
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.XPResponse>(load, rerender)
