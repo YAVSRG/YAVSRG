@@ -122,7 +122,9 @@ module API =
                 let! response = client.SendAsync message |> Async.AwaitTask
                 if response.StatusCode = HttpStatusCode.Unauthorized then
                     // Retry once
-                    return! client.SendAsync message |> Async.AwaitTask
+                    let message_copy = new HttpRequestMessage(message.Method, message.RequestUri)
+                    message_copy.Content <- message.Content
+                    return! client.SendAsync message_copy |> Async.AwaitTask
                 else
                     return response
             }
