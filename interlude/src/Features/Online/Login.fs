@@ -73,7 +73,7 @@ type LoginPage() =
     override this.Content() =
         page_container()
         |+ PageButton(%"login.login_with_discord", login).Pos(0)
-        |+ (Callout.frame info (fun (w, h) -> Position.Row(400.0f, h)))
+        |+ (Callout.frame info (fun (w, h) -> Position.SliceT(400.0f, h)))
             .Conditional(fun () -> waiting_for_browser)
         :> Widget
 

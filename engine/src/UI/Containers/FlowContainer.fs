@@ -207,7 +207,7 @@ module FlowContainer =
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
-                    c.Position <- Position.Row(t, this.ItemSize)
+                    c.Position <- Position.SliceT(t, this.ItemSize)
                     b <- t + this.ItemSize
                     t <- t + this.ItemSize + this.Spacing
 
@@ -247,7 +247,7 @@ module FlowContainer =
 
             for { Widget = c; Visible = visible } in children do
                 if visible then
-                    c.Position <- Position.Column(l, this.ItemSize)
+                    c.Position <- Position.SliceL(l, this.ItemSize)
                     r <- l + this.ItemSize
                     l <- l + this.ItemSize + this.Spacing
 

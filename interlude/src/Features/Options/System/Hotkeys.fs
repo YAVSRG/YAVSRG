@@ -79,7 +79,7 @@ type HotkeysPage() =
                             | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
                             | _ -> false
                     ),
-                    Position = Position.Row(40.0f, 60.0f).Shrink(PRETTY_MARGIN_X, 0.0f).SliceR(500.0f),
+                    Position = Position.SliceT(40.0f, 60.0f).Shrink(PRETTY_MARGIN_X, 0.0f).SliceR(500.0f),
                     Fill = K Colors.cyan.O3,
                     Border = K Colors.cyan_accent,
                     TextColor = K Colors.text_cyan) with

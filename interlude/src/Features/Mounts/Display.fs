@@ -43,7 +43,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
             | MountedGameType.Quaver -> "Quaver"
             | MountedGameType.Stepmania -> "Stepmania"
             | MountedGameType.Etterna -> "Etterna"
-            , Position = Position.Row(0.0f, 60.0f)
+            , Position = Position.SliceT(0.0f, 60.0f)
             , Align = Alignment.CENTER
         )
         |* Text(
@@ -58,7 +58,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
                     %> "mount.lastimported"
                 | None -> %"mount.notlinked"
             , Color = K Colors.text_subheading
-            , Position = Position.Row(60.0f, 40.0f)
+            , Position = Position.SliceT(60.0f, 40.0f)
             , Align = Alignment.CENTER
         )
 

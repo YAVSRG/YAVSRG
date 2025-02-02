@@ -26,7 +26,7 @@ module PageLayout =
         | PageWidth.Normal ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, PRETTYWIDTH, float32 height * 0.5f * PRETTYHEIGHT)
         | PageWidth.Full ->
-            Position.Row(float32 start * 0.5f * PRETTYHEIGHT, float32 height * 0.5f * PRETTYHEIGHT)
+            Position.SliceT(float32 start * 0.5f * PRETTYHEIGHT, float32 height * 0.5f * PRETTYHEIGHT)
         | PageWidth.Custom w ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PRETTYHEIGHT, w, float32 height * 0.5f * PRETTYHEIGHT)
 

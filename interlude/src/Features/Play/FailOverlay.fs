@@ -70,9 +70,9 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
         Toolbar.show_cursor()
 
     override this.Init(parent) =
-        let b_retry = FailButton(FailButtonType.RETRY, %"failed.retry", %%"retry", retry, b1_fade, Position = Position.Row(0.0f, 70.0f))
-        let b_score_screen = FailButton(FailButtonType.SCORE_SCREEN, %"failed.score_screen", %%"save_score", score_screen, b2_fade, Position = Position.Row(100.0f, 70.0f))
-        let b_next_song = FailButton(FailButtonType.CONTINUE, %"failed.next_song", %%"next_song", next_song, b3_fade, Position = Position.Row(200.0f, 70.0f))
+        let b_retry = FailButton(FailButtonType.RETRY, %"failed.retry", %%"retry", retry, b1_fade, Position = Position.SliceT(0.0f, 70.0f))
+        let b_score_screen = FailButton(FailButtonType.SCORE_SCREEN, %"failed.score_screen", %%"save_score", score_screen, b2_fade, Position = Position.SliceT(100.0f, 70.0f))
+        let b_next_song = FailButton(FailButtonType.CONTINUE, %"failed.next_song", %%"next_song", next_song, b3_fade, Position = Position.SliceT(200.0f, 70.0f))
         let b_none = Dummy(NodeType.Leaf)
 
         NavigationContainer.Column(Position = Position.SliceX(300.0f).ShrinkT(560.0f))

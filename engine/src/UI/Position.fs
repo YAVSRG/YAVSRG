@@ -235,22 +235,6 @@ type Position with
     static member inline BorderCornersT thickness = Position.DEFAULT.BorderCornersT thickness
     static member inline BorderCornersB thickness = Position.DEFAULT.BorderCornersB thickness
 
-    static member Row(y, height) =
-        {
-            Left = Position.MIN
-            Top = 0.0f %+ y
-            Right = Position.MAX
-            Bottom = 0.0f %+ (y + height)
-        }
-
-    static member Column(x, width) =
-        {
-            Left = 0.0f %+ x
-            Top = Position.MIN
-            Right = 0.0f %+ (x + width)
-            Bottom = Position.MAX
-        }
-
     static member Grid(l, t, r, b) =
         {
             Left = l %+ 0.0f

@@ -135,7 +135,7 @@ and PageHeaderBase() =
     let GAP_BETWEEN_BOXES = 70.0f
 
     override this.Init parent =
-        this.Position <- Position.Row(40.0f, 60.0f)
+        this.Position <- Position.SliceT(40.0f, 60.0f)
         base.Init parent
 
     override this.Draw() =

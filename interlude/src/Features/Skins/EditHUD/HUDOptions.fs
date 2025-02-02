@@ -83,7 +83,7 @@ type EditHUDPage(ctx: PositionerContext) =
                     Height = 60.0f
                 }
 
-        tab_buttons.Position <- Position.Row(40.0f, 60.0f).ShrinkR(PRETTY_MARGIN_X).ShrinkL(PRETTY_MARGIN_X + 480.0f)
+        tab_buttons.Position <- Position.SliceT(40.0f, 60.0f).ShrinkR(PRETTY_MARGIN_X).ShrinkL(PRETTY_MARGIN_X + 480.0f)
 
         NavigationContainer.Column()
         |+ tab_buttons

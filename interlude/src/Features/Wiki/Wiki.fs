@@ -45,7 +45,7 @@ type WikiBrowserPage() =
                 | WikiIndex -> sprintf "%s %s" Icons.HOME (%"wiki.home")
             ),
             Align = Alignment.LEFT,
-            Position = Position.Column(200.0f, 900.0f)
+            Position = Position.SliceL(200.0f, 900.0f)
         )
         |+ IconButton(
             %"wiki.openinbrowser"

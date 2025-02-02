@@ -196,7 +196,7 @@ type private Profile() =
             Align = Alignment.LEFT,
             Position = Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f)
         )
-        |+ StatsHeader(data, Position = Position.Row(95.0f, 120.0f).ShrinkX(20.0f))
+        |+ StatsHeader(data, Position = Position.SliceT(95.0f, 120.0f).ShrinkX(20.0f))
         |+ Text(
             %"online.players.profile.recent_scores",
             Color = K Colors.text,

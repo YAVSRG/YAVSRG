@@ -56,7 +56,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                         Colors.text
                 ),
             Align = Alignment.LEFT,
-            Position = Position.Row(0.0f, 70.0f).Shrink(Style.PADDING)
+            Position = Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING)
         )
         |+ Text(
             (
@@ -66,7 +66,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
             ),
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = Position.Row(60.0f, 50.0f).Shrink(Style.PADDING)
+            Position = Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING)
         )
         |+ { new Thumbnail(Position = Position.ShrinkT(130.0f).Shrink(10.0f)) with
             override this.Load() =

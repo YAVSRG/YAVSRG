@@ -170,7 +170,7 @@ type BeatmapBrowserPage() =
                     Left = 0.72f %+ 0.0f
                 }
         )
-        |>> (fun nt -> Container(nt, Position = Position.Row(20.0f, 115.0f).SliceX(1400.0f)))
+        |>> (fun nt -> Container(nt, Position = Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: FilterPart list) ->

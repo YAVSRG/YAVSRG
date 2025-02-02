@@ -215,7 +215,7 @@ module DynamicFlowContainer =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     let height = c.Height
-                    c.Position <- Position.Row(t, height)
+                    c.Position <- Position.SliceT(t, height)
                     b <- t + height
                     t <- t + height + this.Spacing
 
@@ -256,7 +256,7 @@ module DynamicFlowContainer =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     let width = c.Width
-                    c.Position <- Position.Column(l, width)
+                    c.Position <- Position.SliceL(l, width)
                     r <- l + width
                     l <- l + width + this.Spacing
 
