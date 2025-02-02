@@ -296,16 +296,19 @@ module Skins =
         for zip in
             Directory.EnumerateFiles(get_game_folder "Skins")
             |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
-            let target =
-                Path.Combine(Path.GetDirectoryName zip, Path.GetFileNameWithoutExtension zip)
+            let target = Path.ChangeExtension(zip, null)
 
-            if Directory.Exists(target) then
+            if Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target) |> Seq.isEmpty |> not then
                 Logging.Info "%s has already been extracted, deleting" (Path.GetFileName zip)
                 File.Delete zip
             else
-                Logging.Info "Extracting %s to a folder" (Path.GetFileName zip)
-                ZipFile.ExtractToDirectory(zip, Path.ChangeExtension(zip, null))
-                File.Delete zip
+                try
+                    try Directory.Delete target with _ -> ()
+                    Logging.Info "Extracting %s to a folder" (Path.GetFileName zip)
+                    ZipFile.ExtractToDirectory(zip, target)
+                    File.Delete zip
+                with err ->
+                    Logging.Error "Error extracting noteskin '%s': %s" zip err.Message
 
         // migrate old noteskins
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") do
@@ -490,8 +493,12 @@ module Skins =
 
         let can_go_in_user_folder = loaded_skins.[DEFAULT_HUD_FOLDER].Skin.NoteskinFolder().IsNone
         let id =
-            if can_go_in_user_folder then DEFAULT_HUD_FOLDER
-            else Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(noteskin_name, "")
+            if can_go_in_user_folder then
+                DEFAULT_HUD_FOLDER
+            else
+                Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(noteskin_name, "")
+                + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
+
         let target_skin_config = Path.Combine(get_game_folder "Skins", id, "skin.json")
         let target_noteskin_folder = Path.Combine(get_game_folder "Skins", id, "Noteskin")
 

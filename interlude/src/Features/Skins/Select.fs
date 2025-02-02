@@ -186,7 +186,8 @@ type SelectSkinsPage() =
                         )
                         |> not
                     then
-                        Logging.Error "An editable skin has already been extracted"
+                        Notifications.error(%"skins.extract_default_failed.title", %"skins.extract_default_failed.body")
+                        Logging.Error "Error extracting noteskin to be editable"
                 )
             )
                 .Show()
