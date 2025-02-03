@@ -1,24 +1,26 @@
-0.7.27.8
+0.7.27.9
 ====
 
-A small bug fix update
+This update adds leaderboards! Go check them out, let me know what you think in the usual places  
+As well as all-time leaderboards there is a monthly leaderboard that resets at midnight UTC at the start of each month
 
 # New features
-- Letterboxing now supports offsets within the monitor in question
-  This also applies to windowed mode, so you can have a default position other than the center of the monitor
-- Your stats are now synced between your game client and the server
-  This is not displayed anywhere yet, but enables various global leaderboards (probably next week)
+- Leaderboards! They can now be viewed via the Stats menu ingame
+- Some stats are now shown on user profiles ingame, where available
 
 # Improvements
-- Skinning screen will scroll as you enter it so that the selected HUD and Noteskin are always visible
-- Delete and context menu hotkeys behave more predictably when navigating scoreboard using keyboard
-- Release error bars can be made smaller as well as larger
+- Accuracy on score screen now reflects column filters if set
+- Improved some tooltips and messages to make various features clearer (osu! replay loading, audio offset, etc)
 
 # Bug fixes
-- Fixed some visual issues with the stats screen
-- Fixed switching from fullscreen letterbox to fullscreen not working correctly
-- Fixed presets not auto-switching if the first song you change to is a different keymode
-- Fixed level select not returning to a playlist after continuing it in endless mode
-- Fixed moving average weight slider clipping out of bounds
-- Fixed option to delete a leaderboard score showing up (it didn't do anything)
+- Fixed some audio engine issues where song audio wouldn't play or system-wide sound would mute
+- Fixed multiple 'Default' audio devices appearing in the list
+- Fixed a crash caused by unicode characters and Discord RPC
+- Fixed API requests sporadically displaying 'Server error' ingame
+- Fixed a crash when changing monitor settings if the monitor that was last selected is no longer available
+- Fixed some issues with extracting noteskins
+
+# Platform support
+- Linux x64 is now officially supported by the auto-updater and as a download via the site
+- Experimental builds for macOS, x64 architecture are now available for users who want to test them
 
