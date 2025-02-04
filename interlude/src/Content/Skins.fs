@@ -502,14 +502,11 @@ module Skins =
         let target_skin_config = Path.Combine(get_game_folder "Skins", id, "skin.json")
         let target_noteskin_folder = Path.Combine(get_game_folder "Skins", id, "Noteskin")
 
-        if not (Directory.Exists target_noteskin_folder) then
-            DEFAULT_NOTESKIN.ExtractToFolder(target_noteskin_folder) |> ignore
-            JSON.ToFile(target_skin_config, true) { DEFAULT_NOTESKIN_META with Editor = Option.defaultValue "Unknown" username |> Some }
-            load ()
-            selected_noteskin_id.Value <- id
-            true
-        else
-            false
+        DEFAULT_NOTESKIN.ExtractToFolder(target_noteskin_folder) |> ignore
+        JSON.ToFile(target_skin_config, true) { DEFAULT_NOTESKIN_META with Editor = Option.defaultValue "Unknown" username |> Some }
+        load ()
+        selected_noteskin_id.Value <- id
+        true
 
     let open_noteskin_folder (id: string) =
         if loaded_noteskins.ContainsKey id then
