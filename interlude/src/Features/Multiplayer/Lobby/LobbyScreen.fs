@@ -55,7 +55,7 @@ type LobbyUI(lobby: Lobby) =
     override this.Init(parent) =
         this
         |+ Button(
-            Icons.SETTINGS, 
+            Icons.SETTINGS,
             (fun () -> LobbySettingsPage(lobby).Show()),
             Position = Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f)
         )
@@ -184,7 +184,7 @@ type LobbyUI(lobby: Lobby) =
                                 Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                                 Rating = info.Rating
-                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring
 
                                 ImportedFromOsu = false
                                 IsFailed =
@@ -216,7 +216,7 @@ type LobbyScreen() =
     let current_lobby = None
 
     do
-        NetworkEvents.join_lobby.Add(fun lobby -> 
+        NetworkEvents.join_lobby.Add(fun lobby ->
             let lobby_ui = LobbyUI(lobby)
             current_lobby_ui.Current <- lobby_ui
         )

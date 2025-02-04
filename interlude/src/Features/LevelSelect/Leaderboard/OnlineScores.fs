@@ -102,7 +102,7 @@ module OnlineScores =
                                 Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
 
                                 Rating = rating
-                                Physical = Performance.calculate rating with_mods.Keys scoring |> fst
+                                Physical = Performance.calculate rating with_mods.Keys scoring
 
                                 ImportedFromOsu = false
                                 IsFailed = false

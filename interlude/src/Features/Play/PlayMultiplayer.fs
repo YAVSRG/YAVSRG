@@ -69,7 +69,7 @@ module PlayScreenMultiplayer =
                         Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                         Rating = info.Rating
-                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring |> fst
+                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring
 
                         ImportedFromOsu = false
                         IsFailed = quit_out_early

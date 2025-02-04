@@ -139,39 +139,34 @@ module Layout =
 type DifficultyRating =
     {
         Physical: float
-        Technical: float
-
         PhysicalData: float array
-        TechnicalData: float array
-
         PhysicalComposite: float array2d
-        TechnicalComposite: float array2d
     }
 
 module DifficultyRating =
 
-    let private jackCurve delta =
-        let widthScale = 0.02
-        let heightScale = 26.3
-        let curveExp = 1.0
-        Math.Min(heightScale / Math.Pow(widthScale * float delta, curveExp), 20.0)
+    let private jack_curve delta =
+        let width_scale = 0.02
+        let height_scale = 26.3
+        let curve_exp = 1.0
+        Math.Min(height_scale / Math.Pow(width_scale * float delta, curve_exp), 20.0)
 
-    let private streamCurve delta =
-        let widthScale = 0.02
-        let heightScale = 13.7
-        let curveExp = 1.0
+    let private stream_curve delta =
+        let width_scale = 0.02
+        let height_scale = 13.7
+        let curve_exp = 1.0
         let cutoff = 10.0
 
         Math.Max(
-            (heightScale / Math.Pow(widthScale * float delta, curveExp)
-             - 0.1 * heightScale / Math.Pow(widthScale * float delta, curveExp * cutoff)),
+            (height_scale / Math.Pow(width_scale * float delta, curve_exp)
+             - 0.1 * height_scale / Math.Pow(width_scale * float delta, curve_exp * cutoff)),
             0.0
         )
 
-    let private jackCompensation jackDelta streamDelta =
-        Math.Min(Math.Pow(Math.Max(Math.Log(float (jackDelta / streamDelta), 2.0), 0.0), 2.0), 1.0)
+    let private jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
+        Math.Min(Math.Pow(Math.Max(Math.Log(float (jack_delta / stream_delta), 2.0), 0.0), 2.0), 1.0)
 
-    let private rootMeanPower values power =
+    let private root_mean_power values power =
         match values with
         | x :: [] -> x
         | [] -> 0.0
@@ -182,12 +177,12 @@ module DifficultyRating =
             Math.Pow(sumpow / count, 1.0 / power)
 
     let stamina_func value input (delta: GameplayTime) =
-        let staminaBaseFunc ratio = 1.0 + 0.105 * ratio
-        let staminaDecayFunc delta = Math.Exp(-0.00044 * delta)
-        let v = Math.Max(value * staminaDecayFunc (float delta), 0.01)
-        v * staminaBaseFunc (input / v)
+        let stamina_base_func ratio = 1.0 + 0.105 * ratio
+        let stamina_decay_func delta = Math.Exp(-0.00044 * delta)
+        let v = Math.Max(value * stamina_decay_func (float delta), 0.01)
+        v * stamina_base_func (input / v)
 
-    let private overallDifficulty arr =
+    let private overall_difficulty arr =
         Math.Pow(Array.fold (fun v x -> v * Math.Exp(0.01 * Math.Max(0.0, Math.Log(x / v)))) 0.01 arr, 0.6)
         * 2.5
 
@@ -198,118 +193,93 @@ module DifficultyRating =
 
         let keys = notes.[0].Data.Length
 
-        let layoutData =
+        let layout =
             Layout.list keys
             |> List.head
             |> fun l -> Layout.info (l, keys) |> fun x -> x.Value
 
         let fingers = Array.zeroCreate<Time> keys
 
-        let physicalData = Array.zeroCreate notes.Length
-        let technicalData = Array.zeroCreate notes.Length
+        let physical_composite = Array2D.zeroCreate notes.Length keys
 
-        let delta = Array2D.zeroCreate notes.Length keys
-        let jack = Array2D.zeroCreate notes.Length keys
-        let trill = Array2D.zeroCreate notes.Length keys
-        let anchor = Array2D.zeroCreate notes.Length keys
-        let physicalComposite = Array2D.zeroCreate notes.Length keys
-        let technicalComposite = Array2D.zeroCreate notes.Length keys
+        let update_note_difficulty (column: int, index: int, time: Time, other_columns: Bitmask) =
+            let s = other_columns |> Bitmask.unset_key column
 
-        let updateNoteDifficulty (column, index, offset: Time, otherColumns: Bitmask) =
-            let s = otherColumns |> Bitmask.unset_key column
-
-            let delta1 =
+            let jack_delta, jack_v =
                 if fingers.[column] > 0.0f<ms> then
-                    delta.[index, column] <- (offset - fingers.[column]) / rate
-                    jack.[index, column] <- Math.Pow(jackCurve (delta.[index, column]), OHTNERF)
-                    delta.[index, column]
+                    let delta = (time - fingers.[column]) / rate
+                    delta, Math.Pow(jack_curve delta, OHTNERF)
                 else
-                    10000.0f<ms / rate>
+                    10000.0f<ms / rate>, 0.0
+
+            let mutable trill = 0.0
 
             for k in Bitmask.toSeq s do
                 if fingers.[k] > 0.0f<ms> then
-                    let delta2 = (offset - fingers.[k]) / rate
+                    let trill_delta = (time - fingers.[k]) / rate
+                    trill <- trill + Math.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
 
-                    trill.[index, column] <-
-                        trill.[index, column]
-                        + Math.Pow((streamCurve delta2) * (jackCompensation delta1 delta2), OHTNERF)
+            physical_composite.[index, column] <- Math.Pow(trill + jack_v, 1.0 / OHTNERF)
 
-            physicalComposite.[index, column] <- Math.Pow(trill.[index, column] + jack.[index, column], 1.0 / OHTNERF)
-            technicalComposite.[index, column] <- Math.Pow(jack.[index, column], 1.0 / OHTNERF)
-
-        let snapDifficulty (strain: float array) mask =
+        let snap_difficulty (strain: float array) mask =
             let mutable vals = []
 
             for k in Bitmask.toSeq mask do
                 vals <- strain.[k] :: vals
 
-            rootMeanPower vals 1.0
+            root_mean_power vals 1.0
 
-        let (physical, technical) =
-            let lastHandUse = Array.zeroCreate (List.length layoutData)
-            let currentStrain = Array.zeroCreate<float> keys
-            let mutable i = 0
+        let physical_data = Array.zeroCreate notes.Length
+        let last_hand_use = Array.zeroCreate (List.length layout)
+        let current_strain = Array.zeroCreate<float> keys
+        let mutable i = 0
 
-            for { Time = offset; Data = nr } in notes do
-                let hits =
-                    seq {
-                        for k = 0 to keys - 1 do
-                            if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                                yield k
-                    }
-                    |> Bitmask.ofSeq
+        for { Time = offset; Data = nr } in notes do
+            let hits =
+                seq {
+                    for k = 0 to keys - 1 do
+                        if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                            yield k
+                }
+                |> Bitmask.ofSeq
 
-                if hits > 0us then
-                    List.fold
-                        (fun h hand ->
-                            let handHits = hits &&& Layout.get_hand_bit_mask hand
+            if hits > 0us then
+                List.fold
+                    (fun h hand ->
+                        let hand_hits = hits &&& Layout.get_hand_bit_mask hand
 
-                            for k in Bitmask.toSeq handHits do
-                                updateNoteDifficulty (k, i, offset, Layout.get_hand_bit_mask hand)
+                        for k in Bitmask.toSeq hand_hits do
+                            update_note_difficulty (k, i, offset, Layout.get_hand_bit_mask hand)
 
-                                currentStrain.[k] <-
-                                    stamina_func
-                                        (currentStrain.[k])
-                                        (physicalComposite.[i, k] * SCALING_VALUE)
-                                        ((offset - fingers.[k]) / rate)
+                            current_strain.[k] <-
+                                stamina_func
+                                    (current_strain.[k])
+                                    (physical_composite.[i, k] * SCALING_VALUE)
+                                    ((offset - fingers.[k]) / rate)
 
-                            for k in Bitmask.toSeq handHits do
-                                fingers.[k] <- offset
+                        for k in Bitmask.toSeq hand_hits do
+                            fingers.[k] <- offset
 
-                            lastHandUse.[h] <- offset
-                            h + 1
-                        )
-                        0
-                        layoutData
-                    |> ignore
+                        last_hand_use.[h] <- offset
+                        h + 1
+                    )
+                    0
+                    layout
+                |> ignore
 
-                    physicalData.[i] <- snapDifficulty currentStrain hits
-                    technicalData.[i] <- Bitmask.count hits |> float
+                physical_data.[i] <- snap_difficulty current_strain hits
 
-                i <- i + 1
+            i <- i + 1
 
-            (overallDifficulty physicalData, overallDifficulty technicalData)
+        let physical = overall_difficulty physical_data
 
         {
             Physical = if Double.IsFinite physical then physical else 0.0
-            Technical = if Double.IsFinite technical then technical else 0.0
-
-            PhysicalData = physicalData
-            TechnicalData = technicalData
-
-            PhysicalComposite = physicalComposite
-            TechnicalComposite = technicalComposite
+            PhysicalData = physical_data
+            PhysicalComposite = physical_composite
         }
 
     let calculate = calculate_uncached |> cached
-
-    let technical_color v =
-        try
-            let a = Math.Min(1.0, v * 0.1)
-            let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
-            Color.FromArgb(255.0 * (1.0 - a) |> int, 255.0 * b |> int, 255.0 * a |> int)
-        with _ ->
-            Color.Blue
 
     let physical_color v =
         try

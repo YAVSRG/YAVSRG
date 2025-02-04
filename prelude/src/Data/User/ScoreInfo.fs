@@ -47,7 +47,7 @@ type ScoreInfo =
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
-    
+
     member this.WithRuleset (ruleset: Ruleset) =
         let scoring =
             ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
@@ -92,7 +92,7 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
-            Physical = Performance.calculate difficulty with_mods.Keys scoring |> fst
+            Physical = Performance.calculate difficulty with_mods.Keys scoring
 
             ImportedFromOsu = score.IsImported
             IsFailed = score.IsFailed

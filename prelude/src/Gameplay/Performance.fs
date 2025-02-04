@@ -32,9 +32,7 @@ module Performance =
     let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessor) =
         let last_times = Array.create keys 0.0f<ms>
         let mutable pv = 0.01
-        let mutable tv = 0.01
         let pvs = Array.zeroCreate keys
-        let tvs = Array.zeroCreate keys
 
         for ev in scoring.Events do
             match ev.Action with
@@ -44,22 +42,17 @@ module Performance =
                 let mutable p = 0.0
                 let mutable t = 0.0
                 let mutable c = 0.0
-                
+
                 pvs.[ev.Column] <-
                     performance_func (pvs.[ev.Column]) (rr.PhysicalComposite.[ev.Index, ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
-
-                tvs.[ev.Column] <-
-                    performance_func (tvs.[ev.Column]) (rr.TechnicalComposite.[ev.Index, ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
                 last_times.[ev.Column] <- ev.Time
                 c <- c + 1.0
                 p <- p + pvs.[ev.Column]
-                t <- t + tvs.[ev.Column]
 
                 let p, t = if c = 0.0 then 0.0, 0.0 else p / c, t / c
                 pv <- pv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(p / pv)))
-                tv <- tv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(t / tv)))
 
             | _ -> ()
 
-        (Math.Pow(pv, 0.6) * 2.5), (tv)
+        Math.Pow(pv, 0.6) * 2.5
