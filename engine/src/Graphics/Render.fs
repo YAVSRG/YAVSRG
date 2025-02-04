@@ -506,6 +506,9 @@ Process: %s"""
     open SixLabors.ImageSharp.Processing
 
     let take_screenshot () : Image<Rgba32> =
+        if _batch.active then
+            _batch.Draw()
+
         let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(_viewport_width * _viewport_height * 4)
 
         GL.ReadPixels(_viewport_left, _viewport_top, _viewport_width, _viewport_height, PixelFormat.Rgba, PixelType.UnsignedByte, data)
