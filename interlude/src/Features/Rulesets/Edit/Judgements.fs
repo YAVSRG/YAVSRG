@@ -19,10 +19,10 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
         page_container()
         |+ PageTextEntry(%"rulesets.judgement.name", name)
             .Pos(0)
-        |+ PageSetting(%"rulesets.judgement.color", ColorPicker(color, false))
-            .Pos(2, 3)
+        |+ PageSetting(%"rulesets.judgement.color", ColorPicker(%"rulesets.judgement.color", color, false))
+            .Pos(2)
         |+ PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
-            .Pos(5)
+            .Pos(4)
         :> Widget
 
     override this.Title = judgement.Name
@@ -41,7 +41,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
         |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR(PRETTYHEIGHT * 2.0f))
         |+ Button(
             Icons.COPY,
-            (fun () -> 
+            (fun () ->
                 ConfirmPage(
                     [j.Name] %> "rulesets.judgement.confirm_duplicate",
                     fun () -> duplicate_judgement i
@@ -51,7 +51,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
         )
         |+ Button(
             Icons.TRASH,
-            (fun () -> 
+            (fun () ->
                 ConfirmPage(
                     [j.Name] %> "rulesets.judgement.confirm_delete",
                     fun () -> delete_judgement i

@@ -26,8 +26,8 @@ type LanecoverPage() =
         |+ PageSetting(%"gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, Step = 5.0f))
             .Help(Help.Info("gameplay.lanecover.fadelength"))
             .Pos(9)
-        |+ PageSetting(%"gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true))
-            .Pos(11, 3)
+        |+ PageSetting(%"gameplay.lanecover.color", ColorPicker(%"gameplay.lanecover.color", options.LaneCover.Color, true))
+            .Pos(11)
         |>> Container
         |+ preview
         :> Widget

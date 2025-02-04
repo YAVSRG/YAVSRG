@@ -64,9 +64,9 @@
     <Compile Include="UI\Menu\Slider.fs" />
     <Compile Include="UI\Menu\Selector.fs" />
     <Compile Include="UI\Menu\Checkbox.fs" />
-    <Compile Include="UI\Menu\ColorPicker.fs" />
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
+    <Compile Include="UI\Menu\ColorPicker.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\State.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />

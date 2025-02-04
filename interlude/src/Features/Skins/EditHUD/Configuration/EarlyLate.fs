@@ -42,24 +42,24 @@ type EarlyLatePage(on_close: unit -> unit) =
             .Help(Help.Info("hud.early_late.earlytext"))
             .Pos(4)
             .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.earlycolor", ColorPicker(early_color, false))
+        |+ PageSetting(%"hud.early_late.earlycolor", ColorPicker(%"hud.early_late.earlycolor", early_color, false))
             .Help(Help.Info("hud.early_late.earlycolor"))
-            .Pos(6, 3)
+            .Pos(6)
             .Conditional(use_texture.Get >> not)
         |+ PageTextEntry(%"hud.early_late.latetext", late_text)
             .Help(Help.Info("hud.early_late.latetext"))
             .Pos(9)
             .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.latecolor", ColorPicker(late_color, false))
+        |+ PageSetting(%"hud.early_late.latecolor", ColorPicker(%"hud.early_late.latecolor", late_color, false))
             .Help(Help.Info("hud.early_late.latecolor"))
-            .Pos(11, 3)
+            .Pos(11)
             .Conditional(use_texture.Get >> not)
         :> Widget
 
     override this.Title = %"hud.early_late"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 EarlyLateMeterDuration = duration.Value
                 EarlyLateMeterUseTexture = use_texture.Value

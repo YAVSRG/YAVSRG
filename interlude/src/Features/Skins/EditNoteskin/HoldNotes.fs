@@ -36,9 +36,9 @@ type HoldNoteSettingsPage() =
             .Help(Help.Info("noteskin.flipholdtail"))
             .Conditional(use_tail_texture.Get)
             .Pos(5)
-        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(dropped_color, true))
+        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, true))
             .Help(Help.Info("noteskin.droppedholdcolor"))
-            .Pos(8, 3)
+            .Pos(8)
         :> Widget
 
     override this.Draw() =

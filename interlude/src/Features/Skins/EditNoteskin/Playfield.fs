@@ -149,8 +149,8 @@ type PlayfieldSettingsPage() =
         |+ PageSetting(%"noteskin.usestagetextures", Checkbox use_stage_textures)
             .Help(Help.Info("noteskin.usestagetextures"))
             .Pos(4)
-        |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(playfield_color, true))
-            .Pos(6, 3)
+        |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(%"noteskin.playfieldcolor", playfield_color, true))
+            .Pos(6)
 
         |+ PageSetting(
                 %"generic.keymode",

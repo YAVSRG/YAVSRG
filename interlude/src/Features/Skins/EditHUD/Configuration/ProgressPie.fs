@@ -41,7 +41,7 @@ type ProgressPiePage(on_close: unit -> unit) =
                             let time_left = 447000.0f<ms / rate>
                             ProgressMeter.draw_countdown_centered (
                                 font_texture,
-                                bounds.SliceB(bounds.Width * label_size.Value), 
+                                bounds.SliceB(bounds.Width * label_size.Value),
                                 Color.White,
                                 time_left,
                                 font_spacing.Value,
@@ -50,7 +50,7 @@ type ProgressPiePage(on_close: unit -> unit) =
                         | ProgressPieLabel.Percentage ->
                             ProgressMeter.draw_percent_progress_centered (
                                 font_texture,
-                                bounds.SliceB(bounds.Width * label_size.Value), 
+                                bounds.SliceB(bounds.Width * label_size.Value),
                                 Color.White,
                                 0.6f,
                                 font_spacing.Value,
@@ -77,7 +77,7 @@ type ProgressPiePage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"hud.progress_pie.label", 
+        |+ PageSetting(%"hud.progress_pie.label",
             SelectDropdown(
                 [|
                     ProgressPieLabel.None, %"hud.progress_pie.label.none"
@@ -91,24 +91,24 @@ type ProgressPiePage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.progress_pie.label_size", Slider.Percent(label_size))
             .Help(Help.Info("hud.progress_pie.label_size"))
             .Pos(2)
-        |+ PageSetting(%"hud.progress_pie.color", ColorPicker(color, true))
-            .Pos(4, 3)
-        |+ PageSetting(%"hud.progress_pie.backgroundcolor", ColorPicker(background_color, true))
-            .Pos(7, 3)
+        |+ PageSetting(%"hud.progress_pie.color", ColorPicker(%"hud.progress_pie.color", color, true))
+            .Pos(4)
+        |+ PageSetting(%"hud.progress_pie.backgroundcolor", ColorPicker(%"hud.progress_pie.backgroundcolor", background_color, true))
+            .Pos(6)
         |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
             .Help(Help.Info("hud.generic.use_font"))
-            .Pos(10)
+            .Pos(9)
         |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
             .Help(Help.Info("hud.generic.font_spacing"))
-            .Pos(12)
+            .Pos(11)
             .Conditional(use_font.Get)
         |+ PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
             .Help(Help.Info("hud.generic.colon_spacing"))
-            .Pos(14)
+            .Pos(13)
             .Conditional(use_font.Get)
         |+ PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
             .Help(Help.Info("hud.generic.percent_spacing"))
-            .Pos(16)
+            .Pos(15)
             .Conditional(use_font.Get)
         |>> Container
         |+ preview
@@ -117,7 +117,7 @@ type ProgressPiePage(on_close: unit -> unit) =
     override this.Title = %"hud.progress_pie"
 
     override this.OnClose() =
-        Skins.save_hud_config 
+        Skins.save_hud_config
             { Content.HUD with
                 ProgressMeterLabel = label.Value
                 ProgressMeterColor = color.Value

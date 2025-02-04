@@ -6,156 +6,173 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 
-type ColorPicker(s: Setting<Color>, allow_alpha: bool) as this =
-    inherit Container(NodeType.Container(fun _ -> Some this.HexEditor))
+type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on_close: unit -> unit) =
+    inherit Page()
 
-    let HEX_EDITOR_HEIGHT = PRETTYHEIGHT * 0.6f
+    let mutable hex = color.Value.ToHex()
 
-    let (H, S, V) = s.Value.ToHsv()
-    let mutable H = H
-    let mutable S = S
-    let mutable V = V
-    let mutable A = if allow_alpha then float32 s.Value.A / 255.0f else 1.0f
+    let mutable r = float32 color.Value.R
+    let mutable g = float32 color.Value.G
+    let mutable b = float32 color.Value.B
 
-    let mutable dragging_sv = false
-    let mutable dragging_h = false
-    let mutable dragging_a = false
+    let mutable a = float32 color.Value.A
 
-    let hex =
-        Setting.simple (s.Value.ToHex())
+    let h, s, v = color.Value.ToHsv()
+    let mutable h = h
+    let mutable s = s
+    let mutable v = v
+
+    let update_rgb() =
+        color.Value <- Color.FromArgb(int a, int r, int g, int b)
+        let _h, _s, _v = color.Value.ToHsv()
+        h <- _h
+        s <- _s
+        v <- _v
+        hex <- color.Value.ToHex()
+
+    let update_hsv() =
+        color.Value <- Color.FromHsv(h, s, v).O4a(int a)
+        r <- float32 color.Value.R
+        g <- float32 color.Value.G
+        b <- float32 color.Value.B
+        hex <- color.Value.ToHex()
+
+    let hex_setting =
+        Setting.make (fun s -> hex <- s) (fun () -> hex)
         |> Setting.trigger (fun color ->
-            try
-                s.Value <- Color.FromHex color
-                let (h, s, v) = s.Value.ToHsv()
-                H <- h
-                S <- s
-                V <- v
-            with _ -> ()
+            match Color.FromHex color with
+            | Some color ->
+                if allow_alpha then a <- float32 color.A
+                r <- float32 color.R
+                g <- float32 color.G
+                b <- float32 color.B
+                update_rgb()
+            | _ -> ()
         )
 
     let hex_editor =
-        { new TextEntry(hex, "none", false, Position = Position.ShrinkL(50.0f).SliceT HEX_EDITOR_HEIGHT) with
+        { new TextEntry(hex_setting, "none", false) with
             override this.OnDeselected(by_mouse: bool) =
                 base.OnDeselected by_mouse
-                hex.Value <- s.Value.ToHex()
+                hex <- color.Value.ToHex()
         }
 
-    let s = Setting.trigger (fun (c: Color) -> hex.Value <- c.ToHex()) s
+    let SEGMENTS = 6
+    let SEGMENT_SIZE = 1.0f / float32 SEGMENTS
 
-    do this.Add hex_editor
+    let draw_bar (color_func: float32 -> Color) (bounds: Rect, percentage: float32) =
+        for i = 0 to SEGMENTS - 1 do
+            Render.quad
+                <| bounds.SlicePercentL(float32 i * SEGMENT_SIZE, SEGMENT_SIZE).AsQuad
+                <| Quad.gradient_left_to_right (color_func(float32 i * SEGMENT_SIZE)) (color_func(float32 (i + 1) * SEGMENT_SIZE))
 
-    member private this.HexEditor = hex_editor
+        let cursor = bounds.ShrinkPercentL(percentage).SliceL(0.0f)
+        Render.rect (cursor.Expand(5f, 5f)) (if v > 0.5f then Colors.black else Colors.white)
+        Render.rect (cursor.Expand(2.5f, 2.5f)) (color_func percentage)
+
+    let red = Setting.make (fun x -> r <- x; update_rgb()) (fun () -> r) |> Setting.bound (0.0f, 255.0f)
+    let green = Setting.make (fun x -> g <- x; update_rgb()) (fun () -> g) |> Setting.bound (0.0f, 255.0f)
+    let blue = Setting.make (fun x -> b <- x; update_rgb()) (fun () -> b) |> Setting.bound (0.0f, 255.0f)
+
+    let alpha = Setting.make (fun x -> a <- x; update_rgb()) (fun () -> a) |> Setting.bound (0.0f, 255.0f)
+
+    let hue = Setting.make (fun x -> h <- x / 360.0f; update_hsv()) (fun () -> h * 360.0f) |> Setting.bound (0.0f, 360.0f)
+    let saturation = Setting.make (fun x -> s <- x; update_hsv()) (fun () -> s) |> Setting.bound (0.0f, 1.0f)
+    let value = Setting.make (fun x -> v <- x; update_hsv()) (fun () -> v) |> Setting.bound (0.0f, 1.0f)
+
+    let red_slider =
+        PageSetting("Red",
+            { new Slider(red, Format = sprintf "%.0f", Step = 5.0f) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromArgb(int (x * 255.0f), int g, int b)) (bounds, percentage)
+            }
+        )
+    let green_slider =
+        PageSetting("Green",
+            { new Slider(green, Format = sprintf "%.0f", Step = 5.0f) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromArgb(int r, int (x * 255.0f), int b)) (bounds, percentage)
+            }
+        )
+    let blue_slider =
+        PageSetting("Blue",
+            { new Slider(blue, Format = sprintf "%.0f", Step = 5.0f) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromArgb(int r, int g, int (x * 255.0f))) (bounds, percentage)
+            }
+        )
+
+    let alpha_slider =
+        PageSetting("Alpha",
+            { new Slider(alpha, Format = sprintf "%.0f", Step = 5.0f) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromArgb(int (x * 255.0f), int r, int g, int b)) (bounds, percentage)
+            }
+        )
+
+    let hue_slider =
+        PageSetting("Hue",
+            { new Slider(hue, Format = sprintf "%.0f'", Step = 5.0f) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromHsv(x, s, v)) (bounds, percentage)
+            }
+        )
+    let saturation_slider =
+        PageSetting("Saturation",
+            { new Slider(saturation, Format = fun v -> sprintf "%.0f%%" (v * 100.0f)) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromHsv(h, x, v)) (bounds, percentage)
+            }
+        )
+    let value_slider =
+        PageSetting("Value",
+            { new Slider(value, Format = fun v -> sprintf "%.0f%%" (v * 100.0f)) with
+                override this.DrawBar(bounds, percentage) =
+                    draw_bar (fun x -> Color.FromHsv(h, s, x)) (bounds, percentage)
+            }
+        )
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting("Hex", hex_editor).Pos(0)
+        |+ red_slider.Pos(3)
+        |+ green_slider.Pos(5)
+        |+ blue_slider.Pos(7)
+        |> fun c ->
+            if allow_alpha then
+                c
+                |+ alpha_slider.Pos(10)
+                |+ hue_slider.Pos(13)
+                |+ saturation_slider.Pos(15)
+                |+ value_slider.Pos(17)
+            else
+                c
+                |+ hue_slider.Pos(10)
+                |+ saturation_slider.Pos(12)
+                |+ value_slider.Pos(14)
+        :> Widget
+
+    override this.Title = title
+    override this.OnClose() = on_close()
+
+type ColorPicker(label: string, s: Setting<Color>, allow_alpha: bool) as this =
+    inherit Container(NodeType.Button(fun _ -> this.Edit()))
+
+    let mutable hex = s.Value.ToHex()
+
+    override this.Init (parent: Widget) =
+        this |* Clickable.Focus this
+        base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
 
     override this.Draw() =
-        base.Draw()
-
-        let preview = this.Bounds.SliceT(HEX_EDITOR_HEIGHT).SliceL(50.0f).Shrink(5.0f)
-
-        let saturation_value_picker =
-            this.Bounds.ShrinkT(HEX_EDITOR_HEIGHT).SliceL(200.0f).Shrink(5.0f)
-
-        let hue_picker =
-            this.Bounds
-                .ShrinkT(HEX_EDITOR_HEIGHT)
-                .SliceL(230.0f)
-                .ShrinkL(200.0f)
-                .Shrink(5.0f)
-
-        let alpha_picker =
-            this.Bounds
-                .ShrinkT(HEX_EDITOR_HEIGHT)
-                .SliceL(260.0f)
-                .ShrinkL(230.0f)
-                .Shrink(5.0f)
-
+        let preview = this.Bounds.SliceY(PRETTYHEIGHT * 0.6f).SliceL(50.0f).Shrink(5.0f)
         Render.rect preview s.Value
+        Text.fill_b(Style.font, hex, this.Bounds.ShrinkL(60.0f), (s.Value.O4, Colors.black), Alignment.LEFT)
 
-        Render.quad
-            (saturation_value_picker.AsQuad)
-            { TopLeft = Color.White; TopRight = Color.FromHsv(H, 1.0f, 1.0f); BottomRight = Color.Black; BottomLeft = Color.Black }
-
-        let x = saturation_value_picker.Left + S * saturation_value_picker.Width
-        let y = saturation_value_picker.Bottom - V * saturation_value_picker.Height
-        Render.rect (Rect.Create(x - 2.5f, y - 2.5f, x + 2.5f, y + 2.5f)) Color.White
-
-        let h = hue_picker.Height / 6.0f
-
-        for i = 0 to 5 do
-            let a = Color.FromHsv(float32 i / 6.0f, 1.0f, 1.0f)
-            let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
-
-            Render.quad
-                (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h))
-                    .AsQuad
-                (Quad.gradient_top_to_bottom a b)
-
-        Render.rect
-            (Rect.Box(hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f))
-            Color.White
-
-        if allow_alpha then
-            Render.quad
-                alpha_picker.AsQuad
-                (Quad.gradient_top_to_bottom (s.Value.O4a 0) s.Value)
-
-            Render.rect
-                (Rect.Box(
-                    alpha_picker.Left,
-                    alpha_picker.Top + A * (alpha_picker.Height - 5.0f),
-                    alpha_picker.Width,
-                    5.0f
-                ))
-                Color.White
-
-    override this.Update(elapsed_ms, moved) =
-
-        base.Update(elapsed_ms, moved)
-
-        let saturation_value_picker =
-            this.Bounds.ShrinkT(HEX_EDITOR_HEIGHT).SliceL(200.0f).Shrink(5.0f)
-
-        let hue_picker =
-            this.Bounds
-                .ShrinkT(HEX_EDITOR_HEIGHT)
-                .SliceL(230.0f)
-                .ShrinkL(200.0f)
-                .Shrink(5.0f)
-
-        let alpha_picker =
-            this.Bounds
-                .ShrinkT(HEX_EDITOR_HEIGHT)
-                .SliceL(260.0f)
-                .ShrinkL(230.0f)
-                .Shrink(5.0f)
-
-        if Mouse.hover saturation_value_picker && Mouse.left_click() then
-            dragging_sv <- true
-
-        if dragging_sv then
-            let x, y = Mouse.pos ()
-            S <- (x - saturation_value_picker.Left) / saturation_value_picker.Width |> min 1.0f |> max 0.0f
-            V <- 1.0f - (y - saturation_value_picker.Top) / saturation_value_picker.Height |> min 1.0f |> max 0.0f
-            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
-            if not (Mouse.held Mouse.LEFT) then dragging_sv <- false
-
-        elif Mouse.hover hue_picker && Mouse.left_click() then
-            dragging_h <- true
-
-        if dragging_h then
-            let y = Mouse.y ()
-            H <- (y - hue_picker.Top) / hue_picker.Height |> min 1.0f |> max 0.0f
-            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
-            if not (Mouse.held Mouse.LEFT) then dragging_h <- false
-
-        elif allow_alpha && Mouse.hover alpha_picker && Mouse.left_click() then
-            dragging_a <- true
-
-        if dragging_a then
-            let y = Mouse.y ()
-            A <- (y - alpha_picker.Top) / alpha_picker.Height |> min 1.0f |> max 0.0f
-            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
-            if not (Mouse.held Mouse.LEFT) then dragging_a <- false
+    member this.Edit() =
+        Style.click.Play()
+        ColorPickerPage(label, s, allow_alpha, fun () -> hex <- s.Value.ToHex()).Show()

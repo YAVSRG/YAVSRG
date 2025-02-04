@@ -91,9 +91,9 @@ type ErrorBarPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.error_bar.moving_average_sensitivity"))
             .Pos(20)
             .Conditional(fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None)
-        |+ PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(moving_average_color, true))
+        |+ PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true))
             .Help(Help.Info("hud.error_bar.moving_average_color"))
-            .Pos(22, 3)
+            .Pos(22)
             .Conditional(fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None)
         :> Widget
 

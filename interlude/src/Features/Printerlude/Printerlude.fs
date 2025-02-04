@@ -58,7 +58,7 @@ module Printerlude =
             use banner =
                 ImageServices.generate_banner
                     {
-                        BaseColor = Color.FromHex hex
+                        BaseColor = (Color.FromHex hex).Value
                         Emoji = emoji.ToLower()
                     }
 

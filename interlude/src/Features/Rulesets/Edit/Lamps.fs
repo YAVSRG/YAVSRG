@@ -20,8 +20,8 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
         page_container()
         |+ PageTextEntry(%"rulesets.lamp.name", name)
             .Pos(0)
-        |+ PageSetting(%"rulesets.lamp.color", ColorPicker(color, false))
-            .Pos(2, 3)
+        |+ PageSetting(%"rulesets.lamp.color", ColorPicker(%"rulesets.lamp.color", color, false))
+            .Pos(2)
         |+ PageSetting(%"rulesets.lamp.requirement",
             NavigationContainer.Row()
             |+ SelectDropdown(
@@ -40,26 +40,26 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
                 Position = { Position.DEFAULT with Left = 0.5f %+ 100.0f }
             )
         )
-            .Pos(5)
+            .Pos(4)
         :> Widget
 
     override this.Title = lamp.Name
     override this.OnClose() =
         let new_lamps = ruleset.Value.Lamps |> Array.copy
-        new_lamps.[id] <- 
-            { 
+        new_lamps.[id] <-
+            {
                 Name = name.Value.Trim()
                 Color = color.Value
                 Requirement =
-                    if judgement_type.Value < 0 then 
+                    if judgement_type.Value < 0 then
                         LampRequirement.ComboBreaksAtMost judgement_threshold.Value
                     else
                         LampRequirement.JudgementAtMost (judgement_type.Value, judgement_threshold.Value)
             }
-        ruleset.Set 
-            { ruleset.Value with 
-                Lamps = 
-                    new_lamps 
+        ruleset.Set
+            { ruleset.Value with
+                Lamps =
+                    new_lamps
                     |> Array.sortByDescending (fun l -> l.Requirement.SortKey)
             }
 
@@ -73,7 +73,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
         |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
         |+ Button(
             Icons.TRASH,
-            (fun () -> 
+            (fun () ->
                 ConfirmPage(
                     [l.Name] %> "rulesets.lamp.confirm_delete",
                     fun () -> delete_lamp i

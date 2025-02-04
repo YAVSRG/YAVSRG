@@ -180,7 +180,6 @@ module Settings =
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
                 yield PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
                     .Help(Help.Info("gameplay.keybinds"))
-                , 2, 2, PageWidth.Full
 
             if token_match tokens [|%"gameplay.hold_to_give_up"|] then
                 yield PageSetting(%"gameplay.hold_to_give_up", Checkbox options.HoldToGiveUp)

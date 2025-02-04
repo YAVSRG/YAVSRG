@@ -143,21 +143,21 @@ type Slider(setting: Setting.Bounded<float32>) =
             typed_number.Set ""
             setting.Value <- ORIGINAL_VALUE
 
-    override this.Draw() =
-        let v = get_percent () |> min 1.0f |> max 0.0f
-        let bounds = this.Bounds.ShrinkL TEXTWIDTH
-
-        let cursor_x = bounds.Left + bounds.Width * v
+    abstract member DrawBar : Rect * float32 -> unit
+    default this.DrawBar (bounds: Rect, percent: float32) =
+        let cursor_x = bounds.Left + bounds.Width * percent
 
         Render.rect
-            (Rect.Create(cursor_x, (bounds.Top + 10.0f), bounds.Right, (bounds.Bottom - 10.0f)))
+            (Rect.Create(cursor_x, bounds.Top, bounds.Right, bounds.Bottom))
             (if this.Selected then
                  Colors.pink_shadow.O3
              else
                  Colors.grey_2.O2)
 
         Render.rect
-            (Rect.Create(bounds.Left, (bounds.Top + 10.0f), cursor_x, (bounds.Bottom - 10.0f)))
+            (Rect.Create(bounds.Left, bounds.Top, cursor_x, bounds.Bottom))
             (if this.Selected then Colors.pink_accent else Colors.grey_2)
 
+    override this.Draw() =
+        this.DrawBar(this.Bounds.ShrinkL(TEXTWIDTH).ShrinkY(10.0f), get_percent () |> min 1.0f |> max 0.0f)
         base.Draw()
