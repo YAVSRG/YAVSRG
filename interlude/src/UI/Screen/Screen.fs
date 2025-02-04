@@ -29,7 +29,8 @@ module Toolbar =
 
     open Prelude.Data
 
-    let take_screenshot () =
+    let mutable screenshot_queued = false
+    let take_screenshot_internal () =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
         let img = Render.take_screenshot ()
@@ -42,6 +43,11 @@ module Toolbar =
             %"notification.screenshot.open_folder",
             fun () -> open_directory (get_game_folder "Screenshots")
         )
+
+        screenshot_queued <- false
+
+    let take_screenshot() =
+        screenshot_queued <- true
 
 module Screen =
 
@@ -206,6 +212,8 @@ module Screen =
 
             Dialog.display.Draw()
             HelpOverlay.display.Draw()
+
+            if Toolbar.screenshot_queued then Toolbar.take_screenshot_internal()
 
             if not Toolbar.cursor_hidden || Dialog.exists () then
                 Notifications.display.Draw()
