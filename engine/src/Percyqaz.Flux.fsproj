@@ -24,6 +24,7 @@
 	  <Compile Include="Audio\Waveform.fs" />
 	  <Compile Include="Input\Input.fs" />
 	  <Compile Include="Input\Hotkeys.fs" />
+	  <Compile Include="Windowing\WinAPI\Clipboard.fs" />
 	  <Compile Include="Windowing\WinAPI\WindowsKey.fs" />
 	  <Compile Include="Windowing\WinAPI\SmartFrameCap.fs" />
 	  <Compile Include="Windowing\WindowOptions.fs" />

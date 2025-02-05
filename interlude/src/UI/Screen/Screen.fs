@@ -7,7 +7,9 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
+open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 
@@ -27,13 +29,12 @@ module Toolbar =
     let moving () =
         was_hidden <> hidden || slideout_amount.Moving
 
-    open Prelude.Data
-
     let mutable screenshot_queued = false
     let take_screenshot_internal () =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
         let img = Render.take_screenshot ()
+        ClipboardWin32.set_image img |> ignore
         ImageServices.save_image_jpg.Request((img, path), img.Dispose)
 
         Notifications.action_feedback_button (
