@@ -99,7 +99,6 @@ module WindowThread =
         assert(is_window_thread())
         detect_monitors()
 
-        last_applied_config <- config
         letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
 
         let was_fullscreen = not (NativePtr.isNullPtr (GLFW.GetWindowMonitor(window)))
@@ -204,7 +203,12 @@ module WindowThread =
             )
 
         | WindowType.FullscreenLetterbox ->
-            let max_width, max_height = GLFW.GetVideoModes(monitor_ptr) |> Array.tryLast |> Option.map (fun vm -> vm.Width, vm.Height) |> Option.defaultValue (1920, 1080)
+            if was_fullscreen && last_applied_config.WindowMode = WindowType.Fullscreen then
+                GLFW.IconifyWindow(window)
+
+            let mode = GLFW.GetVideoMode(monitor_ptr) |> NativePtr.read
+            let max_width, max_height = mode.Width, mode.Height
+
             GLFW.SetWindowMonitor(
                 window,
                 monitor_ptr,
@@ -214,6 +218,7 @@ module WindowThread =
                 max_height,
                 config.FullscreenVideoMode.RefreshRate
             )
+            if was_fullscreen then GLFW.RestoreWindow(window)
             GameThread.defer (fun () -> GameThread.framebuffer_resized (max_width, max_height) config.WindowedResolution)
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
@@ -230,6 +235,8 @@ module WindowThread =
                 monitor.ClientArea.Min.X = x && monitor.ClientArea.Max.X = x + width
                 && monitor.ClientArea.Min.Y = y && monitor.ClientArea.Max.Y = y + height
             )
+
+        last_applied_config <- config
 
         if OperatingSystem.IsWindows() then
             Thread.CurrentThread.Priority <-

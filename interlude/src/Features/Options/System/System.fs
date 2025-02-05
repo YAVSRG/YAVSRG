@@ -121,6 +121,8 @@ type WindowResolutionPicker(setting: Setting<WindowedResolution>) as this =
         |+ buttons
         |* dropdown_wrapper
 
+        dropdown_wrapper.OnClose <- fun () -> buttons.Focus false
+
         base.Init parent
 
     member this.Buttons = buttons

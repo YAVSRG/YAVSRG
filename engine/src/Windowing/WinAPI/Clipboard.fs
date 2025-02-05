@@ -113,10 +113,10 @@ module ClipboardWin32 =
         set_clipboard (ptr, bytes, CF_DIB, true)
 
     let set_image_and_text (image: Image<Rgba32>, text: string) =
-        let image_ok = set_image image
-
-        let bytes = (text.Length + 1) * 2
-        let source = Marshal.StringToHGlobalUni(text)
-        set_clipboard (source, bytes, CF_UNICODETEXT, false) |> ignore
-
-        image_ok
+        if set_image image then
+            let bytes = (text.Length + 1) * 2
+            let source = Marshal.StringToHGlobalUni(text)
+            set_clipboard (source, bytes, CF_UNICODETEXT, false) |> ignore
+            true
+        else 
+            false
