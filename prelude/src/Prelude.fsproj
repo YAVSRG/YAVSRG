@@ -89,7 +89,6 @@
     <Compile Include="Data\User\Charts.fs" />
     <Compile Include="Data\User\Singletons.fs" />
     <Compile Include="Data\User\Sessions.fs" />
-    <Compile Include="Data\User\LegacyScores.fs" />
     <Compile Include="Data\User\UserDatabase.fs" />
     <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\Library\Charts.fs" />

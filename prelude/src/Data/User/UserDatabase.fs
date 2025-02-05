@@ -215,60 +215,18 @@ module UserDatabase =
 
         db
 
-    let private legacy_migrate (db: UserDatabase) : UserDatabase =
-        match LegacyScoreDatabase.TryLoad() with
-        | None -> db
-        | Some legacy_db ->
-            Logging.Debug("Found and loaded all scores in scores.json ...")
-
-            seq {
-                for hash in legacy_db.Entries.Keys do
-                    let data = legacy_db.Entries.[hash]
-
-                    for score in data.Scores do
-                        yield hash, score.Migrate
-            }
-            |> fun scores -> DbScores.save_batch scores db.Database
-
-            Logging.Debug("Copied all scores to database in new format")
-
-            for hash in legacy_db.Entries.Keys do
-                let data = legacy_db.Entries.[hash]
-
-                if data.PersonalBests.Count > 0 then
-                    db.ChangedPersonalBests.Add hash
-                    <| Map.ofSeq (
-                        data.PersonalBests
-                        |> Seq.map (|KeyValue|)
-                        |> Seq.map (fun (k, v) -> (k, v.Migrate))
-                    )
-
-                if data.LastPlayed.Year > 2000 then
-                    db.ChangedLastPlayed.Add hash <| Timestamp.from_datetime data.LastPlayed
-
-                if data.Comment <> "" then
-                    db.ChangedComments.Add hash <| data.Comment
-
-            save_changes db
-
-            Logging.Debug("Copied all other things (comments, personal bests, time last played) to database")
-            LegacyScoreDatabase.MarkOld()
-            Logging.Debug("Marked scores.json as old. All done!")
-            db
-
     // Fast load true loads the contents of the db into memory (used by game client)
     // Fast load false may be used for tools that just want to fetch stuff for a couple of charts
     let create (use_fast_load: bool) (database: Database) : UserDatabase =
-        legacy_migrate
-            {
-                Database = migrate database
-                Cache = Dictionary()
-                LockObject = obj ()
-                ChangedOffsets = ChangeTracker.Empty
-                ChangedLastPlayed = ChangeTracker.Empty
-                ChangedComments = ChangeTracker.Empty
-                ChangedBreakpoints = ChangeTracker.Empty
-                ChangedPersonalBests = ChangeTracker.Empty
-                FastLoaded = use_fast_load
-            }
+        {
+            Database = migrate database
+            Cache = Dictionary()
+            LockObject = obj ()
+            ChangedOffsets = ChangeTracker.Empty
+            ChangedLastPlayed = ChangeTracker.Empty
+            ChangedComments = ChangeTracker.Empty
+            ChangedBreakpoints = ChangeTracker.Empty
+            ChangedPersonalBests = ChangeTracker.Empty
+            FastLoaded = use_fast_load
+        }
         |> if use_fast_load then fast_load else id

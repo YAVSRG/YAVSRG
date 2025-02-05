@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Calculator\Helpers.fs" />
+    <Compile Include="Calculator\Curves.fs" />
     <Compile Include="Scripts\Polyrhythm.fs" />
     <Compile Include="Scripts\Quaver.fs" />
     <Compile Include="Scripts\Images.fs" />
