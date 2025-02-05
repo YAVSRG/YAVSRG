@@ -1,1 +1,1 @@
-﻿EUNOIA V: Stats debug logging
+﻿EUNOIA VI: Fix for stats error detection
