@@ -4,20 +4,20 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Conversions
-open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
 
-type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =
+type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChartSource option>) =
     inherit Page()
 
     let auto_detect_location =
         match game with
-        | MountedGameType.Osu -> Imports.OSU_SONG_FOLDER
-        | MountedGameType.Quaver -> Imports.QUAVER_SONG_FOLDER
-        | MountedGameType.Stepmania -> Imports.STEPMANIA_PACK_FOLDER
-        | MountedGameType.Etterna -> Imports.ETTERNA_PACK_FOLDER
+        | MountedGameType.Osu -> OSU_SONG_FOLDER
+        | MountedGameType.Quaver -> QUAVER_SONG_FOLDER
+        | MountedGameType.Stepmania -> STEPMANIA_PACK_FOLDER
+        | MountedGameType.Etterna -> ETTERNA_PACK_FOLDER
 
     let folder_detected = System.IO.Directory.Exists auto_detect_location
 
@@ -48,17 +48,17 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<Imports.Mou
         FileDrop.on_file_drop <-
             fun path ->
                 match game, path with
-                | MountedGameType.Osu, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("osu!", path) |> Some
+                | MountedGameType.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack("osu!", path) |> Some
                 | MountedGameType.Osu, _ -> Notifications.error (%"mount.create.osu.error", "")
-                | MountedGameType.Quaver, PackFolder -> setting.Value <- Imports.MountedChartSource.Pack("Quaver", path) |> Some
+                | MountedGameType.Quaver, PackFolder -> setting.Value <- MountedChartSource.Pack("Quaver", path) |> Some
                 | MountedGameType.Quaver, _ -> Notifications.error (%"mount.create.quaver.error", "")
                 | MountedGameType.Stepmania, FolderOfPacks
-                | MountedGameType.Etterna, FolderOfPacks -> setting.Value <- Imports.MountedChartSource.Library path |> Some
+                | MountedGameType.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
                 | MountedGameType.Stepmania, _ -> Notifications.error (%"mount.create.stepmania.error", "")
                 | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
 
                 if setting.Value.IsSome then
-                    Imports.import_mounted_source.Request(
+                    Mount.import_service.Request(
                         (setting.Value.Value, Content.Library),
                         fun result ->
                             Notifications.task_feedback (

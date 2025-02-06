@@ -49,7 +49,7 @@ module Commands =
             .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
             .WithCommand("play", "Play Interlude! Build it if not already built", Play.play)
 
-            .WithCommand("backbeat_upload", "Upload a local folder of charts to YAVSRG's chart network", "folder_name", Backbeat.Upload.upload_folder)
+            .WithCommand("backbeat_upload", "Upload a local folder of charts to YAVSRG's chart network", "folder_name", Backbeat.Upload.etterna_pack_aio)
             .WithCommand("backbeat_check", "WIP", Backbeat.Check.test)
 
             .WithCommand("exit", "Closes the YAVSRG command line", (fun () -> System.Environment.Exit(0)))

@@ -117,17 +117,17 @@ module API =
         let authenticate (token: string) =
             client.DefaultRequestHeaders.Authorization <- new Headers.AuthenticationHeaderValue("Bearer", token)
 
-        let send_retry (client: HttpClient) (message: HttpRequestMessage) =
+        let rec private _send_retry (retries_left: int) (client: HttpClient) (message: HttpRequestMessage)  =
             async {
                 let! response = client.SendAsync message |> Async.AwaitTask
-                if response.StatusCode = HttpStatusCode.Unauthorized then
-                    // Retry once
-                    let message_copy = new HttpRequestMessage(message.Method, message.RequestUri)
-                    message_copy.Content <- message.Content
-                    return! client.SendAsync message_copy |> Async.AwaitTask
+                if response.StatusCode = HttpStatusCode.Unauthorized && retries_left > 0 then
+                    Threading.Thread.Sleep(50)
+                    return! _send_retry (retries_left - 1) client (new HttpRequestMessage(message.Method, message.RequestUri, Content = message.Content))
                 else
                     return response
             }
+
+        let send_retry = _send_retry 3
 
         let internal get<'T> (route: string, callback: 'T option -> unit) =
 

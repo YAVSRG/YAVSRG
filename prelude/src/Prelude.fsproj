@@ -98,7 +98,10 @@
     <Compile Include="Data\Library\Views\Shared.fs" />
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
-    <Compile Include="Data\Library\Imports.fs" />
+    <Compile Include="Data\Library\Imports\Shared.fs" />
+    <Compile Include="Data\Library\Imports\FileSystem.fs" />
+    <Compile Include="Data\Library\Imports\Mounts.fs" />
+    <Compile Include="Data\Library\Imports\Online.fs" />
     <Compile Include="Data\Library\Exports.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />

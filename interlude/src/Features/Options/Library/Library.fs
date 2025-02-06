@@ -2,11 +2,12 @@ namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Data.Library
 open Prelude
 open Prelude.Data
 open Prelude.Data.Maintenance
 open Prelude.Data.OsuClientInterop
+open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -21,7 +22,7 @@ module Imports =
     let import_in_progress () =
         WebServices.download_file.Status <> Async.ServiceStatus.Idle
         || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
-        || Imports.import_mounted_source.Status <> Async.ServiceStatus.Idle
+        || Mount.import_service.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
         || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle

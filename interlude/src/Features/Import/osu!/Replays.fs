@@ -1,13 +1,12 @@
 ﻿namespace Interlude.Features.Import.osu
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay.Replays
 open Prelude.Data.User
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Prelude.Data.OsuClientInterop
 open Interlude.Content
 open Interlude.UI
@@ -29,7 +28,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
             Colors.red.O3)
 
     let detected_rate =
-        Imports.detect_rate_mod replay.FilePath.Value
+        detect_rate_mod replay.FilePath.Value
         |> Option.defaultValue 1.0f<rate>
 
     let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) detected_rate |> Setting.roundf_uom 2

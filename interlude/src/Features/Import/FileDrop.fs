@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Prelude.Data.OsuClientInterop
 open Prelude.Skins.Conversions
 open Interlude.UI

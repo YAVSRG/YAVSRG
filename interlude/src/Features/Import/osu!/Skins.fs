@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Conversions.osu
-open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.UI
 open Interlude.Options
 open Interlude.Content
@@ -103,7 +103,7 @@ module Skins =
         let osu_song_folder =
             match options.OsuMount.Value with
             | Some mount -> mount.SourceFolder
-            | None -> Imports.OSU_SONG_FOLDER
+            | None -> OSU_SONG_FOLDER
         let osu_skin_folder =
             Path.Combine(Path.GetDirectoryName(osu_song_folder), "Skins")
 

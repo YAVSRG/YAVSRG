@@ -11,6 +11,7 @@ open Prelude.Charts.Formats.osu
 open Prelude.Gameplay.Replays
 open Prelude.Data.User
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 
 module Scores =
 
@@ -26,7 +27,7 @@ module Scores =
 
         match ChartDatabase.get_meta chart_hash chart_db with
         | None ->
-            match Imports.detect_rate_mod beatmap_data.Difficulty with
+            match detect_rate_mod beatmap_data.Difficulty with
             | Some rate ->
                 let chart = Chart.scale rate converted_osu_chart
                 let chart_hash = Chart.hash chart

@@ -1,118 +1,53 @@
-﻿namespace Prelude.Data.Library
+﻿namespace Prelude.Data.Library.Imports
 
 open System
 open System.IO
 open System.IO.Compression
-open System.Text.RegularExpressions
 open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Conversions
+open Prelude.Data.Library
 
 module Imports =
 
-    let OSU_SONG_FOLDER =
-        Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
-
-    let STEPMANIA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
-
-    let ETTERNA_PACK_FOLDER =
-        Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
-
-    let QUAVER_SONG_FOLDER =
-        Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.ProgramFilesX86, "Steam", "steamapps", "common", "Quaver", "Songs")
-
-    [<Json.AutoCodec>]
-    type MountedChartSourceType =
-        | Pack of name: string
-        | Library
-
-    [<Json.AutoCodec>]
-    type MountedChartSource =
-        {
-            SourceFolder: string
-            mutable LastImported: DateTime option
-            Type: MountedChartSourceType
-            ImportOnStartup: bool
+    let delete_folder =
+        { new Async.Service<string, bool>() with
+            override this.Handle(path) =
+                async {
+                    Logging.Debug "Deleting folder '%s' post-import" path
+                    let mutable remaining_retries = 3
+                    while remaining_retries > 0 do
+                        try
+                            Directory.Delete (path, true)
+                            remaining_retries <- -1
+                        with err ->
+                            remaining_retries <- remaining_retries - 1
+                            Logging.Debug "Deleting folder '%s' failed, retrying in 1s: %s" path err.Message
+                            System.Threading.Thread.Sleep(1000)
+                    if remaining_retries = 0 then Logging.Error "Deleting folder '%s' failed, out of retries" path
+                    return remaining_retries < 0
+                }
         }
-        static member Pack(name: string, path: string) =
-            {
-                SourceFolder = path
-                LastImported = None
-                Type = Pack name
-                ImportOnStartup = false
-            }
 
-        static member Library(path: string) =
-            {
-                SourceFolder = path
-                LastImported = None
-                Type = Library
-                ImportOnStartup = false
-            }
-
-    let private log_conversion (result: ConversionResult) =
-        let skipped = result.SkippedCharts.Length
-        if skipped > 0 then
-            let dump =
-                result.SkippedCharts
-                |> Seq.map (fun (path, reason) -> sprintf "%s -> %s" path reason)
-                |> String.concat "\n "
-            Logging.Info "Successful import of %i charts(s) also skipped %i file(s):\n %s" result.ConvertedCharts skipped dump
-        else
-            Logging.Info "Successfully imported %i charts(s)" result.ConvertedCharts
-
-    let private RATE_REGEX =
-        Regex(
-            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
-        )
-
-    let detect_rate_mod (difficulty_name: string) : float32<rate> option =
-        let m = RATE_REGEX.Match difficulty_name
-
-        if m.Success then
-            let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
-
-            match Single.TryParse r with
-            | true, r -> Some (r * 1.0f<rate>)
-            | false, _ -> None
-        else
-            None
-
-    let filter_rates (path: string) (results: Result<ImportChart, string * string> list) : Result<ImportChart, string * string> list =
-        results
-        |> List.map (
-            function
-            | Ok import ->
-                match detect_rate_mod import.Header.DiffName with
-                | Some rate ->
-                    let original =
-                        results
-                        |> List.tryPick (
-                            function
-                            | Ok { Chart = original; Header = header } ->
-                                let original_duration = original.LastNote - original.FirstNote
-                                let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
-                                if
-                                    original.Notes.Length = import.Chart.Notes.Length &&
-                                    abs (incoming_duration * float32 rate - original_duration) < 5.0f<ms>
-                                then
-                                    match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
-                                    | Some (ChartOrigin.Osu (md5, set_id, map_id, _, _)) ->
-                                        Some (header, ChartOrigin.Osu (md5, set_id, map_id, rate, import.Chart.FirstNote))
-                                    | _ -> None
-                                else None
-                            | _ -> None
-                        )
-                    match original with
-                    | Some (h, alt_rate_origin) ->
-                        h.Origins <- h.Origins.Add alt_rate_origin
-                        Error (path, sprintf "Skipping %.2fx rate of another map" rate)
-                    | None -> Ok import
-                | None -> Ok import
-            | Error skipped_conversion -> Error skipped_conversion
-        )
+    let delete_file =
+        { new Async.Service<string, bool>() with
+            override this.Handle(path) =
+                async {
+                    Logging.Debug "Deleting file '%s' post-import" path
+                    let mutable remaining_retries = 3
+                    while remaining_retries > 0 do
+                        try
+                            File.Delete path
+                            remaining_retries <- -1
+                        with err ->
+                            remaining_retries <- remaining_retries - 1
+                            Logging.Debug "Deleting file '%s' failed, retrying in 1s: %s" path err.Message
+                            System.Threading.Thread.Sleep(1000)
+                    if remaining_retries = 0 then Logging.Error "Deleting file '%s' failed, out of retries" path
+                    return remaining_retries < 0
+                }
+        }
 
     let convert_song_folder =
         { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
@@ -205,52 +140,6 @@ module Imports =
                 }
         }
 
-    let import_mounted_source =
-        { new Async.Service<MountedChartSource * Library, ConversionResult>() with
-            override this.Handle((source, library)) =
-                async {
-                    match source.Type with
-                    | Pack packname ->
-                        Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
-                        match source.LastImported with
-                        | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                        | None -> ()
-                        let config =
-                            { ConversionOptions.Default with
-                                MoveAssets = false
-                                ChangedAfter = source.LastImported
-                                PackName = packname
-                            }
-
-                        let! result = convert_pack_folder.RequestAsync(source.SourceFolder, config, library)
-                        source.LastImported <- Some DateTime.UtcNow
-                        log_conversion result
-                        return result
-                    | Library ->
-                        Logging.Info "Importing songs library %s" source.SourceFolder
-                        match source.LastImported with
-                        | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                        | None -> ()
-                        let mutable results = ConversionResult.Empty
-                        for pack_folder in Directory.EnumerateDirectories source.SourceFolder do
-                            let! result =
-                                convert_pack_folder.RequestAsync(
-                                    pack_folder,
-                                    { ConversionOptions.Default with
-                                        MoveAssets = false
-                                        ChangedAfter = source.LastImported
-                                        PackName = Path.GetFileName pack_folder
-                                    },
-                                    library
-                                )
-                            results <- ConversionResult.Combine result results
-
-                        log_conversion results
-                        source.LastImported <- Some DateTime.UtcNow
-                        return results
-                }
-        }
-
     let convert_stepmania_pack_zip =
         { new Async.Service<string * string * Library, ConversionResult option>() with
             override this.Handle((path, pack_name, library)) =
@@ -282,11 +171,11 @@ module Imports =
                                     )
                                 results <- ConversionResult.Combine result results
 
-                            Directory.Delete(dir, true)
+                            delete_folder.Request(dir, ignore)
                             return Some results
                         | _ ->
                             Logging.Warn "'%s': Extracted zip does not match the usual structure for a StepMania pack" dir
-                            Directory.Delete(dir, true)
+                            delete_folder.Request(dir, ignore)
                             return None
                 }
         }
@@ -322,7 +211,7 @@ module Imports =
                     else
                         ZipFile.ExtractToDirectory(path, dir)
                         let! result = auto_detect_import (dir, true, library)
-                        Directory.Delete(dir, true)
+                        delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
                     Logging.Warn "%s: Unrecognised file for import" path

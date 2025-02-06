@@ -53,4 +53,10 @@ module Config =
         let db = Database.from_file db_file
         ChartDatabase.create true db
 
+    let interlude_library : Library =
+        {
+            Charts = interlude_chart_db
+            Collections = Unchecked.defaultof<_>
+        }
+
     let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

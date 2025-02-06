@@ -5,6 +5,7 @@ open System.Net.Http
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Prelude
 open Interlude.Web.Shared
 open Bytewizer.Backblaze.Client
@@ -205,6 +206,13 @@ module Upload =
             | Ok () -> return Ok ()
         }
 
+    let has_folder (folder_name: string) =
+        interlude_chart_db.Entries
+        |> Seq.where (fun meta -> meta.Packs.Contains folder_name)
+        |> Seq.map _.Origins
+        |> Seq.map (Set.exists _.SuitableForUpload)
+        |> Seq.forall id
+
     let upload_folder (folder_name: string) =
         seq {
             for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
@@ -220,3 +228,29 @@ module Upload =
         |> fun upload_tasks -> Async.Parallel(upload_tasks, UPLOAD_POOL_CONCURRENCY)
         |> Async.Ignore
         |> Async.RunSynchronously
+        Logging.Info "Uploading '%s' complete!" folder_name
+
+    let progress_bar label =
+        let mutable s = -1
+        fun p ->
+            let t = p / 0.1f |> floor |> int
+            if t > s then
+                s <- t
+                Logging.Info "%s: [%s%s] %.0f%%" label (String.replicate s "#") (String.replicate (max 0 (10 - s)) "-") (p * 100.0f)
+
+    let get_etterna_pack (pack_name: string) =
+        OnlineImports.get_from_origin (ChartOrigin.Etterna pack_name, interlude_library, progress_bar pack_name)
+        |> Async.RunSynchronously
+
+    let etterna_pack_aio (pack_name: string) =
+        if has_folder pack_name then
+            Logging.Info "You already have '%s'" pack_name
+            upload_folder pack_name
+        else
+            Logging.Info "'%s' is not installed or needs a re-download" pack_name
+            match get_etterna_pack pack_name with
+            | Error reason ->
+                Logging.Error "Error installing '%s': %s" pack_name reason
+            | Ok result ->
+                Logging.Info "Installed '%s': %i succeeded and %i skipped" pack_name result.ConvertedCharts result.SkippedCharts.Length
+                upload_folder pack_name

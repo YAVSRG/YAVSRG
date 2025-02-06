@@ -3,14 +3,14 @@
 open System.IO
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Prelude.Data.OsuClientInterop
 open Percyqaz.Flux.UI
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
 
-type private EditMountPage(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) =
+type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartSource option>) =
     inherit Page()
 
     let mount = setting.Value.Value
@@ -97,7 +97,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<Imports.Mount
                 }
 
         if import then
-            Imports.import_mounted_source.Request(
+            Mount.import_service.Request(
                 (setting.Value.Value, Content.Library),
                 fun result ->
                     Notifications.task_feedback (
