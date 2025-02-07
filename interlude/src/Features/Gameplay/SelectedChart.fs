@@ -185,7 +185,7 @@ module SelectedChart =
                         let with_mods = Mods.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
-                        let rating = DifficultyRating.calculate rate with_mods.Notes
+                        let rating = DifficultyRating.calculate(rate, with_mods.Notes)
 
                         let note_counts = format_notecounts with_mods
 
@@ -216,7 +216,7 @@ module SelectedChart =
                         let with_mods = Mods.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
-                        let rating = DifficultyRating.calculate rate with_mods.Notes
+                        let rating = DifficultyRating.calculate(rate, with_mods.Notes)
 
                         let note_counts = format_notecounts with_mods
 

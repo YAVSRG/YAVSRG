@@ -19,7 +19,7 @@ type ChartDetails() =
     let mutable last_played = K never_played
 
     let refresh(info: LoadedChartInfo) =
-        rating <- info.Rating.Physical
+        rating <- info.Rating.Overall
         notecounts <- info.NotecountsString
         last_played <-
             let mutable ts = info.SaveData.LastPlayed

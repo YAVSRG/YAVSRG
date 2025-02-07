@@ -369,7 +369,7 @@ module ChartDatabase =
                         for entry in charts_db.Entries do
                             match get_chart entry.Hash charts_db with
                             | Ok chart ->
-                                yield entry.Hash, float32 (DifficultyRating.calculate 1.0f<rate> chart.Notes).Physical, PatternReport.from_chart chart
+                                yield entry.Hash, float32 (DifficultyRating.calculate(1.0f<rate>, chart.Notes)).Overall, PatternReport.from_chart chart
                             | Error reason -> Logging.Warn "Error recalculating patterns for %s: %s" entry.Hash reason
                     }
                     |> Seq.chunkBySize 1000

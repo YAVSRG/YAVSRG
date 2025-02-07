@@ -36,7 +36,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             Align = Alignment.CENTER
         )
         |+ Text(
-            sprintf "%s %.2f" Icons.STAR score_info.Rating.Physical,
+            sprintf "%s %.2f" Icons.STAR score_info.Rating.Overall,
             Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f),
             Align = Alignment.LEFT
         )

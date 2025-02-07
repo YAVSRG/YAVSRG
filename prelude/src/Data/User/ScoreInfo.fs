@@ -75,7 +75,7 @@ module ScoreInfo =
         let scoring =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
-        let difficulty = DifficultyRating.calculate score.Rate with_mods.Notes
+        let difficulty = DifficultyRating.calculate(score.Rate, with_mods.Notes)
 
         {
             ChartMeta = cc

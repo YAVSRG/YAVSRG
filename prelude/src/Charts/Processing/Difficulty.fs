@@ -26,10 +26,9 @@ module Layout =
 
 type DifficultyRating =
     {
-        Physical: float
-        PhysicalData: float array
-        PhysicalComposite: float array array
-        Strain: float array array
+        NoteDifficulty: float array array
+        Strain: (float array * float) array
+        Overall: float
     }
 
 module DifficultyRating =
@@ -55,32 +54,21 @@ module DifficultyRating =
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
         Math.Min(Math.Pow(Math.Max(Math.Log(float (jack_delta / stream_delta), 2.0), 0.0), 2.0), 1.0)
 
-    let stamina_func (value: float) (input: float) (delta: GameplayTime) =
-        let stamina_base_func ratio = 1.0 + 0.105 * ratio
-        let stamina_decay_func delta = Math.Exp(-0.00044 * delta)
-        let v = Math.Max(value * stamina_decay_func (float delta), 0.01)
-        v * stamina_base_func (input / v)
-
-    let private overall_difficulty (arr: float array) =
-        Math.Pow(Array.fold (fun v x -> v * Math.Exp(0.01 * Math.Max(0.0, Math.Log(x / v)))) 0.01 arr, 0.6)
-        * 2.5
-
     let private OHTNERF = 3.0
-    let private SCALING_VALUE = 0.55
 
-    let private calculate_uncached (rate: Rate) (notes: TimeArray<NoteRow>) : DifficultyRating =
-
+    // todo: break down into smaller info: left, right, jack, LN
+    let private notes_difficulty_pass (rate: Rate, notes: TimeArray<NoteRow>) : float array array =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
 
         let last_note_in_column = Array.zeroCreate<Time> keys
-        let physical_composite = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
 
-        let update_note_difficulty (column: int, index: int, time: Time) =
+        let output = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
 
+        let note_difficulty (k: int, time: Time) =
             let jack_delta, jack_v =
-                if last_note_in_column.[column] > 0.0f<ms> then
-                    let delta = (time - last_note_in_column.[column]) / rate
+                if last_note_in_column.[k] > 0.0f<ms> then
+                    let delta = (time - last_note_in_column.[k]) / rate
                     delta, Math.Pow(jack_curve delta, OHTNERF)
                 else
                     10000.0f<ms / rate>, 0.0
@@ -88,50 +76,86 @@ module DifficultyRating =
             let mutable trill = 0.0
 
             let hand_lo, hand_hi =
-                if column < hand_split then 0, hand_split - 1 else hand_split, keys - 1
+                if k < hand_split then
+                    0, hand_split - 1
+                else
+                    hand_split, keys - 1
 
-            for k = hand_lo to hand_hi do
-                if k <> column && last_note_in_column.[k] > 0.0f<ms> then
-                    let trill_delta = (time - last_note_in_column.[k]) / rate
+            for hand_k = hand_lo to hand_hi do
+                if hand_k <> k && last_note_in_column.[hand_k] > 0.0f<ms> then
+                    let trill_delta = (time - last_note_in_column.[hand_k]) / rate
                     trill <- trill + Math.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
 
-            physical_composite.[index].[column] <- Math.Pow(trill + jack_v, 1.0 / OHTNERF)
-
-        let physical_data = Array.zeroCreate notes.Length
-        let strain = Array.zeroCreate<float> keys
+            Math.Pow(trill + jack_v, 1.0 / OHTNERF)
 
         for i = 0 to notes.Length - 1 do
-            let { Time = offset; Data = nr } = notes.[i]
-
-            let mutable sum = 0.0
-            let mutable n = 0.0
+            let { Time = time; Data = nr } = notes.[i]
 
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                    update_note_difficulty (k, i, offset)
-
-                    strain.[k] <-
-                        stamina_func
-                            (strain.[k])
-                            (physical_composite.[i].[k] * SCALING_VALUE)
-                            ((offset - last_note_in_column.[k]) / rate)
-
-                    sum <- sum + strain.[k]
-                    n <- n + 1.0
+                    output.[i].[k] <- note_difficulty (k, time)
 
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                    last_note_in_column.[k] <- offset
+                    last_note_in_column.[k] <- time
 
-            physical_data.[i] <- if n = 0.0 then 0.0 else sum / n
+        output
 
-        let physical = overall_difficulty physical_data
+    let stamina_func (value: float) (input: float) (delta: GameplayTime) =
+        let stamina_base_func ratio = 1.0 + 0.105 * ratio
+        let stamina_decay_func delta = Math.Exp(-0.00044 * delta)
+        let v = Math.Max(value * stamina_decay_func (float delta), 0.01)
+        v * stamina_base_func (input / v)
+
+    let private SCALING_VALUE = 0.55
+
+    let private finger_strain_pass (note_difficulty: float array array) (rate: Rate, notes: TimeArray<NoteRow>) =
+        let keys = notes.[0].Data.Length
+
+        let strain = Array.zeroCreate<float> keys
+        let last_note_in_column = Array.zeroCreate<Time> keys
+
+        seq {
+            for i = 0 to notes.Length - 1 do
+                let { Time = offset; Data = nr } = notes.[i]
+
+                let mutable sum = 0.0
+                let mutable n = 0.0
+
+                for k = 0 to keys - 1 do
+                    if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                        strain.[k] <-
+                            stamina_func
+                                (strain.[k])
+                                (note_difficulty.[i].[k] * SCALING_VALUE)
+                                ((offset - last_note_in_column.[k]) / rate)
+
+                        last_note_in_column.[k] <- offset
+
+                        sum <- sum + strain.[k]
+                        n <- n + 1.0
+
+                yield Array.copy strain, if n = 0.0 then 0.0 else sum / n
+        }
+        |> Array.ofSeq
+
+    let private overall_difficulty_pass (finger_strain_data: (float array * float) seq) =
+        let mutable v = 0.01
+        for _, x in finger_strain_data do
+            v <- v * Math.Exp(0.01 * Math.Max(0.0, Math.Log(x / v)))
+
+        Math.Pow(v, 0.6) * 2.5
+
+    let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : DifficultyRating =
+
+        let physical_composite = notes_difficulty_pass(rate, notes)
+        let physical_data = finger_strain_pass physical_composite (rate, notes)
+        let physical = overall_difficulty_pass physical_data
 
         {
-            Physical = if Double.IsFinite physical then physical else 0.0
-            PhysicalData = physical_data
-            PhysicalComposite = physical_composite
-            Strain = [|strain|]
+            NoteDifficulty = physical_composite
+            Strain = physical_data
+            Overall = if Double.IsFinite physical then physical else 0.0
         }
 
     let calculate = calculate_uncached |> cached

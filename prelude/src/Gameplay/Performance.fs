@@ -44,7 +44,7 @@ module Performance =
                 let mutable c = 0.0
 
                 pvs.[ev.Column] <-
-                    performance_func (pvs.[ev.Column]) (rr.PhysicalComposite.[ev.Index].[ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
+                    performance_func (pvs.[ev.Column]) (rr.NoteDifficulty.[ev.Index].[ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
                 last_times.[ev.Column] <- ev.Time
                 c <- c + 1.0

@@ -1,9 +1,7 @@
 ﻿namespace Prelude.Data.Library.Imports
 
-open System
 open System.IO
 open System.IO.Compression
-open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Charts.Conversions
