@@ -59,6 +59,10 @@ type Lamp =
 type AccuracyPoints =
     | WifeCurve of judge: int
     | PointsPerJudgement of points: float array
+    member internal this.Clone =
+        match this with
+        | PointsPerJudgement points -> PointsPerJudgement (Array.copy points)
+        | other -> other
 
 // Behaviour for hit detection / assigning an input to the correct note to hit
 
@@ -68,7 +72,7 @@ type NotePriority =
     | OsuMania // earliest note
     | Interlude of cbrush_threshold: GameplayTime // earliest note; if hit is off by `cbrush_threshold` try to find a nearer note
     | Etterna // nearest note
-    
+
 [<Json.AutoCodec>]
 type HitMechanics =
     {
@@ -90,7 +94,7 @@ type OsuLnWindows =
         WindowOverhold200: GameplayTime
         WindowOverhold100: GameplayTime
     }
-    
+
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type HeadTailCombineRule =
@@ -104,6 +108,10 @@ type HoldMechanics =
     | OnlyRequireHold of release_window: GameplayTime
     | JudgeReleasesSeparately of windows: ((GameplayTime * GameplayTime) option) array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
+    member internal this.Clone =
+        match this with
+        | JudgeReleasesSeparately (windows, j) -> JudgeReleasesSeparately (Array.copy windows, j)
+        | other -> other
 
 type DecimalPlaces =
     | TWO = 2
@@ -130,6 +138,20 @@ type Ruleset =
         Accuracy: AccuracyPoints
         Formatting: RulesetFormatting
     }
+    member this.Clone : Ruleset =
+        {
+            Name = this.Name
+            Description = this.Description
+
+            Judgements = Array.copy this.Judgements
+            Lamps = Array.copy this.Lamps
+            Grades = Array.copy this.Grades
+            HitMechanics = this.HitMechanics
+            HoldMechanics = this.HoldMechanics.Clone
+            Accuracy = this.Accuracy.Clone
+            Formatting = this.Formatting
+        }
+
     member this.DefaultJudgement: int = this.Judgements.Length - 1
 
     member this.GradeName i =
@@ -152,10 +174,10 @@ type Ruleset =
         else
             this.Lamps.[i].Color
 
-    member this.JudgementName i = 
+    member this.JudgementName i =
         if i < 0 || i >= this.Judgements.Length then "??"
         else this.Judgements.[i].Name
-    member this.JudgementColor i = 
+    member this.JudgementColor i =
         if i < 0 || i >= this.Judgements.Length then Color.Gray
         else this.Judgements.[i].Color
 
@@ -163,16 +185,16 @@ type Ruleset =
         match this.Judgements |> Seq.rev |> Seq.tryPick _.TimingWindows with
         | Some (early, late) -> early, late
         | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
-    
+
     member this.ReleaseWindows : GameplayTime * GameplayTime =
         match this.HoldMechanics with
-        | HoldMechanics.OnlyRequireHold window -> 
+        | HoldMechanics.OnlyRequireHold window ->
             -window, window
         | HoldMechanics.JudgeReleasesSeparately (windows, _) ->
             match windows |> Seq.rev |> Seq.tryPick id with
             | Some (early, late) -> early, late
             | None -> 0.0f<ms / rate>, 0.0f<ms / rate>
-        | HoldMechanics.OnlyJudgeReleases _ -> 
+        | HoldMechanics.OnlyJudgeReleases _ ->
             this.NoteWindows
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania w) ->
             -w.Window0, w.Window100 - 1.0f<ms / rate>
@@ -224,7 +246,7 @@ module Ruleset =
         for j in ruleset.Judgements do
             bw.Write j.BreaksCombo
             match j.TimingWindows with
-            | Some (early, late) -> 
+            | Some (early, late) ->
                 bw.Write (float32 early)
                 bw.Write (float32 late)
             | None ->
@@ -240,7 +262,7 @@ module Ruleset =
                 bw.Write 0uy
                 bw.Write j
                 bw.Write c
-            | LampRequirement.ComboBreaksAtMost c -> 
+            | LampRequirement.ComboBreaksAtMost c ->
                 bw.Write 1uy
                 bw.Write c
 
@@ -280,7 +302,7 @@ module Ruleset =
         | HoldMechanics.JudgeReleasesSeparately (judgement_windows, judgement_if_dropped) ->
             for j in judgement_windows do
                 match j with
-                | Some (early, late) -> 
+                | Some (early, late) ->
                     bw.Write (float32 early)
                     bw.Write (float32 late)
                 | None ->
@@ -298,11 +320,11 @@ module Ruleset =
             for p in points do
                 bw.Write p
 
-        let first_character = 
+        let first_character =
             match ruleset.Name.Trim() with
             | "" -> "_"
             | otherwise ->
-                if Char.IsAsciiLetterOrDigit otherwise.[0] then 
+                if Char.IsAsciiLetterOrDigit otherwise.[0] then
                     otherwise.[0].ToString().ToUpperInvariant()
                 else "_"
         let hash_string = ms.ToArray() |> h.ComputeHash |> BitConverter.ToString
@@ -347,9 +369,9 @@ module Ruleset =
                 l_req <- l.Requirement
 
             match ruleset.HitMechanics.GhostTapJudgement with
-            | Some judgement -> 
-                
-                match ruleset.Accuracy with 
+            | Some judgement ->
+
+                match ruleset.Accuracy with
                 | AccuracyPoints.PointsPerJudgement _ -> ()
                 | _ -> failwith "GhostTapJudgement must be used with PointsPerJudgement accuracy (otherwise it isn't clear what points it's worth)"
 
@@ -368,7 +390,7 @@ module Ruleset =
             match ruleset.HoldMechanics with
             | HoldMechanics.CombineHeadAndTail rule ->
 
-                match ruleset.Accuracy with 
+                match ruleset.Accuracy with
                 | AccuracyPoints.PointsPerJudgement _ -> ()
                 | _ -> failwith "CombineHeadAndTail rules must be used with PointsPerJudgement accuracy (otherwise it isn't clear what points you give overholds)"
 
@@ -376,7 +398,7 @@ module Ruleset =
                 | HeadTailCombineRule.OsuMania windows ->
 
                     if ruleset.Judgements.Length <> 6 then failwith "osu!mania ln mechanics must be used with exactly 6 judgements"
-                    
+
                     if negative(windows.Window320) then failwith "osu!mania ln Window320 must be non-negative"
                     if negative(windows.Window300) then failwith "osu!mania ln Window300 must be non-negative"
                     if negative(windows.Window200) then failwith "osu!mania ln Window200 must be non-negative"
@@ -433,20 +455,20 @@ module Ruleset =
         let replace_judgement = function x when x > j -> x + 1 | x -> x
 
         let duplicate (xs: 'T array) = Array.concat [ Array.take (j + 1) xs; [| xs.[j] |]; Array.skip (j + 1) xs ]
-        
+
         assert(j >= 0)
         assert(j < ruleset.Judgements.Length)
 
         {
             Name = ruleset.Name
             Description = ruleset.Description
-            Judgements = 
-                Array.concat [ 
+            Judgements =
+                Array.concat [
                     Array.take (j + 1) ruleset.Judgements
                     [| { ruleset.Judgements.[j] with Name = ruleset.Judgements.[j].Name + "'" } |]
                     Array.skip (j + 1) ruleset.Judgements
                 ]
-            Lamps = 
+            Lamps =
                 ruleset.Lamps
                 |> Array.map (fun l ->
                     match l.Requirement with
@@ -465,10 +487,10 @@ module Ruleset =
                 | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, if_dropped, if_overheld)) ->
                     HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, replace_judgement if_dropped, replace_judgement if_overheld))
                 | HoldMechanics.OnlyRequireHold w -> HoldMechanics.OnlyRequireHold w
-                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) -> 
+                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) ->
                     HoldMechanics.JudgeReleasesSeparately (duplicate windows, replace_judgement if_overheld)
                 | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
-            Accuracy = 
+            Accuracy =
                 match ruleset.Accuracy with
                 | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (duplicate ps)
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
@@ -478,21 +500,21 @@ module Ruleset =
     let remove_judgement (j: int) (ruleset: Ruleset) : Ruleset =
         let replace_judgement = function x when x = j -> ruleset.Judgements.Length - 2 | x when x > j -> x - 1 | x -> x
 
-        let latest_window = 
-            seq { 
+        let latest_window =
+            seq {
                 yield 0.0f<ms / rate>
-                for j in ruleset.Judgements |> Array.removeAt j do 
-                    match j.TimingWindows with 
+                for j in ruleset.Judgements |> Array.removeAt j do
+                    match j.TimingWindows with
                     | Some(_, l) -> yield l
                     | None -> ()
             }
             |> Seq.max
 
-        let earliest_window = 
-            seq { 
+        let earliest_window =
+            seq {
                 yield 0.0f<ms / rate>
-                for j in ruleset.Judgements |> Array.removeAt j do 
-                    match j.TimingWindows with 
+                for j in ruleset.Judgements |> Array.removeAt j do
+                    match j.TimingWindows with
                     | Some(e, _) -> yield e
                     | None -> ()
             }
@@ -506,10 +528,10 @@ module Ruleset =
             Name = ruleset.Name
             Description = ruleset.Description
             Judgements = Array.removeAt j ruleset.Judgements
-            Lamps = 
+            Lamps =
                 ruleset.Lamps
-                |> Array.choose (fun l -> 
-                    match l.Requirement with 
+                |> Array.choose (fun l ->
+                    match l.Requirement with
                     | LampRequirement.JudgementAtMost(x, _) when x = j -> None
                     | LampRequirement.JudgementAtMost(x, c) when x > j -> Some { l with Requirement = LampRequirement.JudgementAtMost(x - 1, c) }
                     | _ -> Some l
@@ -523,11 +545,11 @@ module Ruleset =
                         | Some x when x > j -> Some (x - 1)
                         | Some x -> Some x
                         | None -> None
-                    NotePriority = 
+                    NotePriority =
                         match ruleset.HitMechanics.NotePriority with
                         | NotePriority.Interlude w ->
                             let max_window = min (abs earliest_window) latest_window
-                            if w > max_window then 
+                            if w > max_window then
                                 NotePriority.Interlude 0.0f<ms / rate>
                             else
                                 NotePriority.Interlude w
@@ -540,10 +562,10 @@ module Ruleset =
                 | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, if_dropped, if_overheld)) ->
                     HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (early, late, replace_judgement if_dropped, replace_judgement if_overheld))
                 | HoldMechanics.OnlyRequireHold w -> HoldMechanics.OnlyRequireHold w
-                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) -> 
+                | HoldMechanics.JudgeReleasesSeparately (windows, if_overheld) ->
                     HoldMechanics.JudgeReleasesSeparately (Array.removeAt j windows, replace_judgement if_overheld)
                 | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
-            Accuracy = 
+            Accuracy =
                 match ruleset.Accuracy with
                 | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (Array.removeAt j ps)
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
