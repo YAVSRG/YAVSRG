@@ -3,10 +3,11 @@
 open System.IO
 open System.Net.Http
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
+open Prelude.Data
 open Prelude.Data.Library
 open Prelude.Data.Library.Imports
-open Prelude
 open Interlude.Web.Shared
 open Bytewizer.Backblaze.Client
 
@@ -209,9 +210,8 @@ module Upload =
     let has_folder (folder_name: string) =
         interlude_chart_db.Entries
         |> Seq.where (fun meta -> meta.Packs.Contains folder_name)
-        |> Seq.map _.Origins
-        |> Seq.map (Set.exists _.SuitableForUpload)
-        |> Seq.forall id
+        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetPath.Hash _ -> true | _ -> false)
+        |> fun s -> not (Seq.isEmpty s) && Seq.forall id s
 
     let upload_folder (folder_name: string) =
         seq {
@@ -254,3 +254,20 @@ module Upload =
             | Ok result ->
                 Logging.Info "Installed '%s': %i succeeded and %i skipped" pack_name result.ConvertedCharts result.SkippedCharts.Length
                 upload_folder pack_name
+
+    let get_etterna_pack_list () =
+        let on_file =
+            File.ReadAllLines PACK_LIST_PATH
+            |> Set.ofSeq
+        let top_50 =
+            match WebServices.download_json_async<_> "https://api.etternaonline.com/api/packs?page=1&limit=50&sort=-popularity" |> Async.RunSynchronously with
+            | WebResult.Ok (response: {| data: {| name: string |} array |}) -> response.data |> Array.map _.name
+            | WebResult.HttpError i -> [||]
+            | WebResult.Exception err -> [||]
+            |> Set.ofArray
+        let new_list = Set.union on_file top_50
+        File.WriteAllLines(PACK_LIST_PATH, new_list)
+        new_list
+
+    let bulk_etterna_pack_aio () =
+        get_etterna_pack_list () |> Seq.iter etterna_pack_aio

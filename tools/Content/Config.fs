@@ -14,6 +14,8 @@ module Config =
 
     let BACKBEAT_SETTINGS_PATH = Path.Combine(Utils.YAVSRG_PATH, "backbeat", "settings.json")
 
+    let PACK_LIST_PATH = Path.Combine(Utils.YAVSRG_PATH, "backbeat", "archive", "masterlist-sm")
+
     [<Json.AutoCodec>]
     type Config =
         {

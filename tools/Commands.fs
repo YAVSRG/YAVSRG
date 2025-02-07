@@ -49,6 +49,7 @@ module Commands =
             .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)
             .WithCommand("play", "Play Interlude! Build it if not already built", Play.play)
 
+            .WithCommand("backbeat_bulk_upload", "Upload all packs on master-list YAVSRG's chart network", Backbeat.Upload.bulk_etterna_pack_aio)
             .WithCommand("backbeat_upload", "Upload a local folder of charts to YAVSRG's chart network", "folder_name", Backbeat.Upload.etterna_pack_aio)
             .WithCommand("backbeat_check", "WIP", Backbeat.Check.test)
 

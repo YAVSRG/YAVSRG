@@ -15,7 +15,7 @@ module OnlineImports =
         async {
             let url = "https://api.etternaonline.com/api/packs?page=1&limit=1&sort=name&filter[search]=" + Uri.EscapeDataString(pack_name)
             match! WebServices.download_json_async<_> url with
-            | WebResult.Ok (response: {|data: {|download: string|} array|}) ->
+            | WebResult.Ok (response: {| data: {| download: string |} array |}) ->
                 match response.data |> Array.tryExactlyOne with
                 | Some d -> return Ok d.download
                 | None -> return Error "No matching packs"
