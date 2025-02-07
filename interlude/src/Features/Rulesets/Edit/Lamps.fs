@@ -14,7 +14,7 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
     let name = Setting.simple lamp.Name
     let color = Setting.simple lamp.Color
     let judgement_type = Setting.simple (match lamp.Requirement with LampRequirement.ComboBreaksAtMost _ -> -1 | LampRequirement.JudgementAtMost (j, _) -> j)
-    let judgement_threshold = Setting.simple (match lamp.Requirement with LampRequirement.ComboBreaksAtMost n -> n | LampRequirement.JudgementAtMost (_, n) -> n)
+    let judgement_threshold = Setting.simple (match lamp.Requirement with LampRequirement.ComboBreaksAtMost n -> n | LampRequirement.JudgementAtMost (_, n) -> min 99 n)
 
     override this.Content() =
         page_container()
@@ -35,7 +35,7 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
             )
             |+ Text("<=")
             |+ Selector(
-                [|0, "0"; 1, "1"; 9, "9"; 99, "99"|],
+                [|99, "99"; 9, "9"; 1, "1"; 0, "0";|],
                 judgement_threshold,
                 Position = { Position.DEFAULT with Left = 0.5f %+ 100.0f }
             )
