@@ -6,6 +6,7 @@ open Prelude
 open Prelude.Charts.Processing
 open Prelude.Data.User
 open Interlude.UI
+open Interlude.Options
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
@@ -14,10 +15,11 @@ type ReplayMode =
 
 [<AutoOpen>]
 module private ReplayModeSettings =
-    
+
     let show_input_overlay = Setting.simple false
     let show_hit_overlay = Setting.simple false
     let show_hit_overlay_labels = Setting.simple true
+    let show_difficulty_overlay = Setting.simple false
     let playfield_dim: Setting.Bounded<float32> = Setting.percentf 0.5f
     let fixed_scroll_speed = Setting.simple false
 
@@ -38,6 +40,9 @@ type private ReplayModeSettingsPage(on_close) =
         |+ PageSetting(%"replay.playfield_dim", Slider.Percent playfield_dim)
             .Conditional(fun () -> show_input_overlay.Value || show_hit_overlay.Value)
             .Pos(9)
+        |+ PageSetting(%"replay.difficulty_overlay", Checkbox show_difficulty_overlay)
+            .Conditional(fun () -> options.EnableExperiments.Value)
+            .Pos(11)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"replay.settings")

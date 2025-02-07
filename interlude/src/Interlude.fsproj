@@ -186,6 +186,7 @@
     <Compile Include="Features\Play\Replay\ReplayState.fs" />
     <Compile Include="Features\Play\Replay\HitOverlay.fs" />
     <Compile Include="Features\Play\Replay\InputOverlay.fs" />
+    <Compile Include="Features\Play\Replay\DifficultyOverlay.fs" />
     <Compile Include="Features\Play\Replay\ReplayControls.fs" />
     <Compile Include="Features\Play\Replay\Replay.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />

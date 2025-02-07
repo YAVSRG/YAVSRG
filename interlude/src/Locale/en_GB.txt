@@ -921,6 +921,7 @@ register.register=Register my account
 register.terms_of_service=Terms of Service
 register.username=Username
 replay.change_playback_rate=Change speed
+replay.difficulty_overlay=Difficulty overlay
 replay.drop_hold=Dropped
 replay.end_of_data=No more replay data available
 replay.fixed_scroll_speed=Fixed scroll speed

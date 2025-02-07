@@ -99,6 +99,12 @@ module ReplayScreen =
                     this.State,
                     this.Playfield
                 )
+                |+ DifficultyOverlay(
+                    with_colors.Source,
+                    Difficulty.DifficultyRating.calculate(rate, with_colors.Notes), // todo: get from chart info
+                    this.State,
+                    this.Playfield
+                )
                 |+ Text(
                     %"replay.end_of_data",
                     Color = (fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha),
