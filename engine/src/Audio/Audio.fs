@@ -140,7 +140,7 @@ Detected and enabled devices:
         Bass.Configure(Configuration.DevNonStop, true) |> display_bass_error
         Bass.Configure(Configuration.DevicePeriod, device_period) |> display_bass_error
         Bass.Configure(Configuration.DeviceBufferLength, device_buffer_length) |> display_bass_error
-        Bass.Configure(Configuration.PlaybackBufferLength, 100) |> display_bass_error
+        Bass.Configure(Configuration.PlaybackBufferLength, 200) |> display_bass_error
         Bass.Configure(Configuration.UpdatePeriod, 5) |> display_bass_error
 
         change_device device

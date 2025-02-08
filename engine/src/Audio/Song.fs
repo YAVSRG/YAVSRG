@@ -87,6 +87,7 @@ module Song =
     let mutable load_path: string option = None
     let mutable loading = false
 
+    let mutable seek_inaccuracy_compensation = 35.0f<ms>
     let mutable now_playing: Song = Song.Default
     let private timer = new Stopwatch()
     let mutable private timer_start = 0.0f<ms>
@@ -108,16 +109,17 @@ module Song =
     let time () =
         rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
 
+    let time_compensated () =
+        time () - seek_inaccuracy_compensation
+
     let time_with_offset () =
-        time () + _local_offset + _global_offset * rate
+        time_compensated () + _local_offset + _global_offset * rate
 
     let playing () = timer.IsRunning
 
     let play_from (time) =
-        timer_start <- time
 
         if time >= 0.0f<ms> && time < duration () then
-            channel_playing <- true
 
             Bass.ChannelSetPosition(
                 now_playing.ID,
@@ -126,10 +128,13 @@ module Song =
             |> display_bass_error
 
             Bass.ChannelPlay now_playing.ID |> display_bass_error
+            channel_playing <- true
+
         else if channel_playing then
             Bass.ChannelStop now_playing.ID |> display_bass_error
             channel_playing <- false
 
+        timer_start <- time
         timer.Restart()
         paused <- false
 
@@ -150,8 +155,8 @@ module Song =
                 Bass.ChannelStop now_playing.ID |> display_bass_error
                 channel_playing <- false
 
-            timer.Reset()
             timer_start <- time
+            timer.Reset()
 
     let pause () =
         let time = time ()
@@ -254,13 +259,16 @@ module Song =
         let t = time ()
 
         if playing () && t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
+
             channel_playing <- true
 
             Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| t / 1000.0f<ms>))
             |> display_bass_error
 
             Bass.ChannelPlay now_playing.ID |> display_bass_error
+
         elif t > now_playing.Duration then
+
             match on_finish with
             | SongFinishAction.LoopFromPreview ->
                 if t >= last_note then
@@ -274,3 +282,15 @@ module Song =
                     action ()
 
             channel_playing <- false
+
+        elif channel_playing && playing () && timer.ElapsedMilliseconds > 50L then
+            let audio_position = Bass.ChannelBytes2Seconds(now_playing.ID, Bass.ChannelGetPosition(now_playing.ID, PositionFlags.Bytes)) |> float32
+
+            let off_by = time_compensated () - audio_position * 1000.0f<ms>
+            let adjustment = abs off_by |> min (float32 elapsed_ms * 0.5f<ms>)
+            if adjustment > 1.0f<ms> then
+
+                if off_by > 0.0f<ms> then
+                    seek_inaccuracy_compensation <- seek_inaccuracy_compensation + adjustment
+                else
+                    seek_inaccuracy_compensation <- seek_inaccuracy_compensation - adjustment
