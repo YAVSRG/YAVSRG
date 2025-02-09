@@ -166,10 +166,10 @@ module GameThread =
         start_of_frame <- now ()
         Input.begin_frame_events ()
         run_action_queue()
+        Audio.update elapsed_ms
         ui_root.Update(elapsed_ms, resized)
         resized <- false
         Input.finish_frame_events ()
-        Audio.update elapsed_ms
         update_time <- now () - start_of_frame
 
         // Draw
