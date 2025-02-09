@@ -462,6 +462,23 @@ module Render =
         Additional utilities
     *)
 
+    type internal GpuVendor =
+        | Unknown = 0
+        | Intel = 1
+        | AMD = 2
+        | NVIDIA = 3
+
+    let internal detect_gpu_vendor() : GpuVendor =
+        let renderer = GL.GetString(StringName.Renderer)
+        if renderer.Contains("Intel", StringComparison.InvariantCultureIgnoreCase) then
+            GpuVendor.Intel
+        elif renderer.Contains("AMD", StringComparison.InvariantCultureIgnoreCase) then
+            GpuVendor.AMD
+        elif renderer.Contains("NVIDIA", StringComparison.InvariantCultureIgnoreCase) then
+            GpuVendor.NVIDIA
+        else
+            GpuVendor.Unknown
+
     let debug_info() : string =
 
         let glfw_version =
@@ -491,13 +508,17 @@ module Render =
             """-- RENDERER DEBUG INFO --
 GLFW Version: %s
 GL Version: %s
+GL Vendor: %s
 GL Renderer: %s
+Assumed vendor: %A
 Texture units: %s
 OS: %s
 Process: %s"""
             glfw_version
             (GL.GetString StringName.Version)
+            (GL.GetString StringName.Vendor)
             (GL.GetString StringName.Renderer)
+            (detect_gpu_vendor())
             texture_units
             Environment.OSVersion.VersionString
             specs

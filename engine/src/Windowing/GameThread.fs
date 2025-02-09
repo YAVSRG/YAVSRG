@@ -147,7 +147,7 @@ module GameThread =
         | Unlimited -> ()
 
         | WindowsVblankSync ->
-            let _, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+            let last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
             estimated_next_frame <- last_vblank + est_refresh_period
 
             let time_taken_to_render = frame_is_ready - start_of_frame
@@ -156,7 +156,7 @@ module GameThread =
         | WindowsDwmFlush ->
             FrameTimeStrategies.DwmFlush() |> ignore
 
-            let _, last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
+            let last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)
             estimated_next_frame <- last_vblank + est_refresh_period
 
         let elapsed_ms = last_frame_timer.Elapsed.TotalMilliseconds
@@ -218,7 +218,7 @@ module GameThread =
             GLFW.SetWindowShouldClose(window, true)
         | Ok ui_root ->
 
-        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.start total_frame_timer
+        FrameTimeStrategies.VBlankThread.start total_frame_timer
 
         after_init_ev.Trigger()
         fps_timer.Start()
@@ -234,7 +234,7 @@ module GameThread =
             Logging.Critical "Fatal crash in game thread: %O" fatal_err
             GLFW.SetWindowShouldClose(window, true)
 
-        if OperatingSystem.IsWindows() then FrameTimeStrategies.VBlankThread.stop ()
+        FrameTimeStrategies.VBlankThread.stop ()
 
     let private thread = Thread(main_loop)
 

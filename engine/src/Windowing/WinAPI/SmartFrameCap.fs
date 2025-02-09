@@ -250,6 +250,10 @@ module private FrameTimeStrategies =
         let mutable private action_queue : (unit -> unit) list = []
         let mutable private looping = true
 
+        let ENABLED =
+            OperatingSystem.IsWindows() &&
+            Render.detect_gpu_vendor() <> Render.GpuVendor.Intel
+
         let private loop (sw: Stopwatch) =
             while looping do
                 if not sync_broken then
@@ -268,21 +272,32 @@ module private FrameTimeStrategies =
                     action_queue <- []
 
         let start (sw: Stopwatch) =
-            Thread(fun () ->
-                loop sw
-            ).Start()
+            if ENABLED then
+                Thread(fun () ->
+                    loop sw
+                ).Start()
 
         let stop () = looping <- false
 
         let switch (period: float) (gdi_adapter_name: string) (glfw_monitor_name: string) =
-            lock LOCK_OBJ <| fun () ->
-                action_queue <- (fun () -> _vblank_number <- 0uL; sync_broken <- false; est_period <- period; open_adapter gdi_adapter_name glfw_monitor_name) :: action_queue
+            if ENABLED then
+                lock LOCK_OBJ <| fun () ->
+                    action_queue <- (fun () ->
+                        _vblank_number <- 0uL
+                        sync_broken <- false
+                        est_period <- period
+                        open_adapter gdi_adapter_name glfw_monitor_name
+                    ) :: action_queue
+            else
+                _vblank_number <- 0uL
+                sync_broken <- true
+                est_period <- period
 
         let get (sync_adjustment: float, sw: Stopwatch) =
             lock LOCK_OBJ <| fun () ->
-            if sync_broken then 0uL, sw.Elapsed.TotalMilliseconds, est_period
+            if sync_broken then sw.Elapsed.TotalMilliseconds, est_period
             else
                 let adjusted_last_time = last_time + sync_adjustment * est_period
                 if sw.Elapsed.TotalMilliseconds < adjusted_last_time then
-                    vblank_number - 0uL, adjusted_last_time - est_period, est_period
-                else vblank_number, adjusted_last_time, est_period
+                    adjusted_last_time - est_period, est_period
+                else adjusted_last_time, est_period
