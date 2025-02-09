@@ -1153,6 +1153,7 @@ system.confirm_exit=Confirm exit
 system.confirm_exit.tooltip=When enabled, you are prompted if you are sure before closing the game.
 system.cpu_saver=CPU Saver (Experimental)
 system.cpu_saver.tooltip=Turn this on if you have integrated graphics/a very low spec machine for better performance.\nSomewhat experimental - may cause unexpected issues!
+system.debug_crash=Debug crash
 system.enable_console=Enable console
 system.framelimit=Frame limit
 system.framelimit.smart=Smart

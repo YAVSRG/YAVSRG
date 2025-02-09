@@ -117,7 +117,6 @@ module Printerlude =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> WindowThread.exit()))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithCommand("crash", "Crashes the game", fun () -> GameThread.defer (fun () -> failwith "Deliberate debug crash"))
                 .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
                 .WithIOCommand(

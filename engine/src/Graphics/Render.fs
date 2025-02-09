@@ -490,7 +490,7 @@ module Render =
 
         let texture_units =
             sprintf
-                "%i units; %i max size; %i max layers; %i max samples; %i max framebuffer size"
+                "%i units; %i max size; %i max layers; %i max samples; %i max buffer size"
                 Texture.MAX_TEXTURE_UNITS
                 Texture.MAX_TEXTURE_SIZE
                 Texture.MAX_ARRAY_TEXTURE_LAYERS
@@ -511,7 +511,7 @@ GL Version: %s
 GL Vendor: %s
 GL Renderer: %s
 Assumed vendor: %A
-Texture units: %s
+Texture limits: %s
 OS: %s
 Process: %s"""
             glfw_version

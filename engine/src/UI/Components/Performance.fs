@@ -31,7 +31,12 @@ type PerformanceMonitor() =
         if dump_debug.Tapped() then
             Logging.Debug "%s" (Audio.debug_info())
             Logging.Debug "%s" (Render.debug_info())
-            WindowThread.defer (fun () -> Logging.Debug "%s" (WindowThread.debug_info()))
+            WindowThread.defer (fun () ->
+                Logging.Debug "%s" (WindowThread.debug_info())
+                GameThread.defer (fun () ->
+                    failwith "Debug crash, on purpose by pressing the debug dump hotkey"
+                )
+            )
 
         if dump_profiling.Tapped() then
             dump_profiling_info ()

@@ -4,6 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Data.Library
 open Interlude.Content
@@ -139,6 +140,19 @@ module Settings =
 
             if token_match tokens [|%"system.enable_console"|] then
                 yield PageSetting(%"system.enable_console", Checkbox options.EnableConsole)
+
+            if token_match tokens [|%"system.debug_crash"|] then
+                yield PageButton(%"system.debug_crash",
+                    fun () ->
+                        Logging.Debug "%s" (Audio.debug_info())
+                        Logging.Debug "%s" (Render.debug_info())
+                        WindowThread.defer (fun () ->
+                            Logging.Debug "%s" (WindowThread.debug_info())
+                            GameThread.defer (fun () ->
+                                failwith "Debug crash, on purpose by pressing the debug crash button"
+                            )
+                        )
+                )
         }
 
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
