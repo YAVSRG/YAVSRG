@@ -278,8 +278,7 @@ module PlayScreen =
                     Text.draw_b (
                         Style.font,
                         (
-                            if options.AutoCalibrateOffset.Value then [sprintf "%.0fms" offset_setting.Value] %> "play.localoffset.automatic"
-                            else [(%%"offset").ToString()] %> "play.localoffset.hint"
+                            [(%%"offset").ToString(); sprintf "%.0fms" offset_setting.Value] %> "play.localoffset.hint"
                         ),
                         20.0f,
                         this.Bounds.Left + 20.0f,
