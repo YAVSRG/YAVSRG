@@ -337,10 +337,14 @@ module WindowThread =
         GLFW.WindowHint(WindowHintBool.Focused, false)
         GLFW.WindowHint(WindowHintBool.AutoIconify, true)
         GLFW.WindowHint(WindowHintBool.Decorated, false)
-        GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core)
-        GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
-        GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
-        GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
+        if OperatingSystem.IsMacOS() then
+            GLFW.WindowHint(WindowHintOpenGlProfile.OpenGlProfile, OpenGlProfile.Core)
+            GLFW.WindowHint(WindowHintBool.OpenGLForwardCompat, true)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 3)
+        else
+            GLFW.WindowHint(WindowHintInt.ContextVersionMajor, 3)
+            GLFW.WindowHint(WindowHintInt.ContextVersionMinor, 0)
         GLFW.WindowHint(WindowHintInt.Samples, config.MSAASamples)
         GLFW.WindowHint(WindowHintInt.StencilBits, 8)
         GLFW.WindowHint(WindowHintInt.DepthBits, 8)
