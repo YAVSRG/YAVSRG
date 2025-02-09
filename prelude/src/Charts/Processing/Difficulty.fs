@@ -146,6 +146,27 @@ module DifficultyRating =
 
         Math.Pow(v, 0.6) * 2.5
 
+    let private overall_difficulty_pass_v2 (finger_strain_data: (float array * float) array) =
+
+        let length = float finger_strain_data.Length
+        let weight_func = fun (i: int) -> (float i / length) ** 2.0
+
+        let mutable weight = 0.0
+        let mutable total = 0.0
+
+        for i, value in finger_strain_data |> Seq.map snd |> Seq.filter (fun x -> x > 0.0) |> Seq.sort |> Seq.indexed do
+            let w = weight_func i
+            weight <- weight + w
+            total <- total + value * w
+        Math.Pow(total / weight, 0.6) * 2.5
+
+    let private difficulty_distribution (finger_strain_data: (float array * float) array) =
+        finger_strain_data
+        |> Seq.map snd
+        |> Seq.filter (fun x -> x > 0.0)
+        |> Seq.countBy (fun x -> floor(x * 10.0) / 10.0)
+        |> Seq.sortBy fst
+
     let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : DifficultyRating =
 
         let physical_composite = notes_difficulty_pass(rate, notes)
