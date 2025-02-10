@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.MainMenu
 
+open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
@@ -17,6 +18,26 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
     let animation = Animation.Sequence()
     let background_fade = Animation.Delay(2200.0)
 
+    let post_init () =
+        async {
+            try
+                post_init_thunk ()
+                Ok()
+            with error ->
+                Error error
+            |>
+            function
+            | Ok () ->
+                GameThread.defer
+                <| fun () ->
+                animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
+                animation.Add(Animation.Delay 1200.0)
+                animation.Add(Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.UnderLogo |> ignore))
+            | Error error ->
+                GameThread.defer (fun () -> raise error)
+        }
+        |> Async.Start
+
     override this.OnEnter(prev: Screen.Type) =
         Logo.move_center ()
         Toolbar.hide ()
@@ -27,13 +48,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         | Screen.Type.SplashScreen ->
             animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 1000.0)
-            animation.Add(Animation.Action(post_init_thunk))
-            animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
-            animation.Add(Animation.Delay 1200.0)
-
-            animation.Add(
-                Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.UnderLogo |> ignore)
-            )
+            animation.Add(Animation.Action(post_init))
         | _ ->
             closing <- true
             DiscordRPC.clear()
