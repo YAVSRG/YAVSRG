@@ -439,6 +439,24 @@ module Stats =
     let rank_7k_stream (user_id: int64) =
         RANK_7K_STREAM.Execute user_id core_db |> expect |> Array.tryExactlyOne
 
+    let private SUM_PLAYTIME : Query<unit, float option> =
+        { Query.without_parameters() with
+            SQL = """SELECT sum(Playtime) FROM stats;"""
+            Read = fun r -> r.Float64Option
+        }
+
+    let sum_playtime () =
+        SUM_PLAYTIME.Execute () core_db |> expect |> Array.tryExactlyOne |> Option.flatten |> Option.defaultValue 0.0
+
+    let private SUM_GAMETIME : Query<unit, float option> =
+        { Query.without_parameters() with
+            SQL = """SELECT sum(GameTime) FROM stats;"""
+            Read = fun r -> r.Float64Option
+        }
+
+    let sum_gametime () =
+        SUM_GAMETIME.Execute () core_db |> expect |> Array.tryExactlyOne |> Option.flatten |> Option.defaultValue 0.0
+
 type MonthlyStats =
     {
         LastSync: int64
@@ -852,3 +870,14 @@ module MonthlyStats =
 
     let rank_7k_stream (user_id: int64) (month: int) =
         RANK_7K_STREAM.Execute (user_id, month) core_db |> expect |> Array.tryExactlyOne
+
+    let private SUM_PLAYTIME : Query<int, float option> =
+        {
+            SQL = """SELECT sum(Playtime) FROM monthly_stats WHERE Month = @Month;"""
+            Parameters = [ "@Month", SqliteType.Integer, 4 ]
+            FillParameters = fun p month -> p.Int32 month
+            Read = fun r -> r.Float64Option
+        }
+
+    let sum_playtime (month: int) =
+        SUM_PLAYTIME.Execute month core_db |> expect |> Array.tryExactlyOne |> Option.flatten |> Option.defaultValue 0.0

@@ -141,6 +141,11 @@ module Stats =
         | Some _ -> Assert.Fail()
         | None -> ()
 
+    [<Test>]
+    let SumPlaytime () =
+        Stats.sum_playtime() |> printfn "%A"
+        Stats.sum_gametime() |> printfn "%A"
+
 module MonthlyStats =
 
     [<Test>]
@@ -293,3 +298,10 @@ module MonthlyStats =
         match MonthlyStats.rank_4k_stream user_id 20 with
         | Some x -> Assert.AreEqual(1, x.Rank)
         | None -> Assert.Fail()
+
+    [<Test>]
+    let SumPlaytime () =
+        MonthlyStats.sum_playtime 0 |> printfn "%A"
+        MonthlyStats.sum_playtime 1 |> printfn "%A"
+        MonthlyStats.sum_playtime 2 |> printfn "%A"
+        MonthlyStats.sum_playtime 999 |> printfn "%A"

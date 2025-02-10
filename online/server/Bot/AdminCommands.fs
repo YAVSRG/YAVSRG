@@ -3,6 +3,8 @@
 open System
 open Discord
 open Discord.WebSocket
+open Percyqaz.Common
+open Prelude.Data.User.Stats
 open Interlude.Web.Server.Domain.Backbeat
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
@@ -182,5 +184,22 @@ module AdminCommands =
                     else do! reply_emoji ":x:"
                 | _ -> do! reply "Enter two song ids, for example: $merge <id of duplicate>$<id of original>"
 
+            | "stats" ->
+                let total_gametime = Stats.sum_gametime ()
+                let total_playtime = Stats.sum_playtime ()
+                let month = Timestamp.now() |> timestamp_to_leaderboard_month
+                let monthly_playtime = MonthlyStats.sum_playtime month
+
+                do!
+                    EmbedBuilder(Title = "Interlude server stats")
+                        .WithDescription(
+                            sprintf "Total time game open: %s\nTotal time playing: %s\nMonthly playtime: %s"
+                                (format_long_time total_gametime)
+                                (format_long_time total_playtime)
+                                (format_long_time monthly_playtime)
+                        )
+                        .WithColor(Color.Blue)
+                        .Build()
+                    |> reply_embed
             | _ -> ()
         }
