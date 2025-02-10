@@ -16,8 +16,8 @@ Here are some terms the performance articles use and what they mean:
 - *Frame pacing* refers to how regular the interval between each frame being produced is (with consistency being good)
 - *Visual latency* refers to how old the information in a frame is by the time it gets onto your screen
 
-You can see some information about performance and frame times by pressing `CTRL+SHIFT+ALT+F3` ingame.  
-`CTRL+SHIFT+ALT+F4` hides/shows the frame time graph, since the graph lowers your frame rate :)  
+You can see some information about performance and frame times by pressing `F3` ingame.  
+`F4` hides/shows the frame time graph, since the graph lowers your frame rate :)  
 
 ## Diagnose your problem
 
