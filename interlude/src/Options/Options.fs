@@ -370,9 +370,9 @@ module Options =
 
         config.ToOptions
 
-    let init_startup() =
+    let init() =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
-        options <- { options with Hotkeys = Hotkeys.init_startup options.Hotkeys }
+        options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
         Localisation.load_language options.Language.Value
 
     let deinit () =

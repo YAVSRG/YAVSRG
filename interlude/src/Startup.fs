@@ -21,17 +21,27 @@ module Startup =
     let mutable private deinit_required = false
     let mutable private deinit_once = false
 
-    // todo: combine these steps as they are now serialised
-    let init_startup (instance) =
-        Options.init_startup ()
-        Content.init_startup ()
-        Stats.init_startup Content.Library Content.UserData
-        StatsSync.init_startup ()
+    let init (instance) =
+        Options.init ()
+        Content.init ()
 
-    let init_window (instance) =
-        Screen.init_window
+        let post_init_thunk () =
+
+            Content.load_data ()
+            Printerlude.init instance
+            Stats.init Content.Library Content.UserData
+            StatsSync.init ()
+            SelectedChart.init ()
+            Mounts.init ()
+            Network.init ()
+            DiscordRPC.init ()
+            Interlude.Updates.check_for_updates ()
+
+            deinit_required <- true
+
+        Screen.init
             [|
-                LoadingScreen()
+                LoadingScreen(post_init_thunk)
                 MainMenuScreen()
                 LobbyScreen()
                 LevelSelectScreen()
@@ -43,16 +53,6 @@ module Startup =
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
         Gameplay.retry <- fun () -> SelectedChart.if_loaded LevelSelect.play
-
-        Interlude.Updates.check_for_updates ()
-        Printerlude.init_window (instance)
-        Content.init_window ()
-        DiscordRPC.init_window ()
-        SelectedChart.init_window ()
-        Network.init_window ()
-        Mounts.init_window ()
-
-        deinit_required <- true
 
         Screen.ScreenRoot(Toolbar())
 
@@ -76,12 +76,12 @@ module Startup =
                 DiscordRPC.deinit ()
 
             match shutdown_type with
-            | Normal -> Logging.Info("Thank you for playing")
+            | Normal -> Logging.Info "Thank you for playing"
             | InternalCrash ->
                 crash_splash ()
                 Logging.Shutdown()
                 Option.iter open_directory Logging.LogFile
             | ExternalCrash ->
                 crash_splash ()
-                Logging.Critical("The game was abnormally force-quit, but was able to shut down correctly")
+                Logging.Critical "The game was abnormally force-quit, but was able to shut down correctly"
                 Logging.Shutdown()

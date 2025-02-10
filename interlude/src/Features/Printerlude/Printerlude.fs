@@ -160,7 +160,7 @@ module Printerlude =
 
     let ipc_commands = ShellContext.Empty |> Utils.register_ipc_commands
 
-    let init_window (instance: int) =
+    let init (instance: int) =
 
         ctx <-
             ShellContext.Empty

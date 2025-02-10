@@ -14,7 +14,7 @@ module DiscordRPC =
             client.ClearPresence()
             client.Dispose()
 
-    let init_window () =
+    let init () =
         client.OnConnectionFailed.Add(fun msg ->
             Logging.Info("Discord not detected, disabling rich presence")
             deinit ()

@@ -252,8 +252,6 @@ module Network =
             ()
         else
             status <- Connecting
-
-            Logging.Info "Connecting to %s ..." credentials.Host
             client.Connect()
 
     let login_with_token () =
@@ -281,7 +279,7 @@ module Network =
         lobby <- None
         client.Disconnect()
 
-    let init_window () =
+    let init () =
         if target_ip.ToString() <> "0.0.0.0" then
             connect ()
 

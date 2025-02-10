@@ -451,7 +451,7 @@ module Skins =
             )
             (fun () -> _selected_noteskin_id.Value)
 
-    let init_window () =
+    let init () =
         load ()
         Logging.Debug "Loaded %i skins" loaded_skins.Count
         initialised <- true

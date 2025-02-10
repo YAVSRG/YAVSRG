@@ -11,7 +11,7 @@ open Interlude.UI
 
 module Mounts =
 
-    let init_window () =
+    let init () =
         match options.OsuMount.Value with
         | Some mount ->
             if Directory.Exists mount.SourceFolder then

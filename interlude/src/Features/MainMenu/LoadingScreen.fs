@@ -9,7 +9,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Online
 
-type LoadingScreen() =
+type LoadingScreen(post_init_thunk: unit -> unit) =
     inherit Screen()
 
     let mutable closing = false
@@ -27,6 +27,7 @@ type LoadingScreen() =
         | Screen.Type.SplashScreen ->
             animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 1000.0)
+            animation.Add(Animation.Action(post_init_thunk))
             animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
             animation.Add(Animation.Delay 1200.0)
 

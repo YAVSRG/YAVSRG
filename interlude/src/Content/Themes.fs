@@ -110,7 +110,7 @@ module Themes =
         current_config <- current.Config
         load_current()
 
-    let init_window () =
+    let init () =
         load ()
 
         if not (loaded.ContainsKey _selected_id.Value) then

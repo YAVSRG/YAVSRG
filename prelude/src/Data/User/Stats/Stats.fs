@@ -123,7 +123,7 @@ module Stats =
             SkillXP = skill_xp // todo: separate into session/all time
         }
 
-    let init_startup (library: Library) (database: UserDatabase) =
+    let init (library: Library) (database: UserDatabase) =
 
         let sessions = DbSessions.get_all database.Database
         PREVIOUS_SESSIONS <-

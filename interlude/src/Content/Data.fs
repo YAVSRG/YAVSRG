@@ -12,7 +12,7 @@ module private Data =
     let mutable user_db: UserDatabase = Unchecked.defaultof<_>
     let mutable library: Library = Unchecked.defaultof<_>
 
-    let init_startup () =
+    let init () =
         library <- Library.load ()
         database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db")) // todo: rename to interlude.db
         user_db <- UserDatabase.create true database

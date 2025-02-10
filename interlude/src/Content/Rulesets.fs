@@ -51,7 +51,7 @@ module Rulesets =
         current <- loaded.[_selected_id.Value]
         current_hash <- Ruleset.hash current
 
-    let init_window () =
+    let init () =
         load ()
         initialised <- true
 

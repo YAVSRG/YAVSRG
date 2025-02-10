@@ -406,7 +406,7 @@ module SelectedChart =
         elif (%%"downrate").Tapped() then
             change_rate_by (-0.1f<rate>)
 
-    let init_window () =
+    let init () =
 
         match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
         | Some cc -> change (cc, LibraryContext.None, true)

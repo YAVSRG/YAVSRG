@@ -12,7 +12,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features
 
-let crash_text_file(message: string) =
+let crash_text_file (message: string) =
     let path = Path.ChangeExtension(Path.GetTempFileName(), ".txt")
     File.WriteAllText(path, message)
     open_directory(path)
@@ -29,15 +29,14 @@ let launch (instance: int) =
         Utils.splash_message_picker "CrashSplashes.txt" >> Logging.Critical "%s"
 
     let init () =
-        Startup.init_startup instance
-        let ui_root = Startup.init_window instance
+        let ui_root = Startup.init instance
         AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
         ui_root :> UIEntryPoint
 
-    WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error("Multiple file drops not supported") else Import.FileDrop.handle paths.[0])
+    WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error "Multiple file drops not supported" else Import.FileDrop.handle paths.[0])
 
     let icon =
-        use icon_stream = Utils.get_resource_stream ("icon.png")
+        use icon_stream = Utils.get_resource_stream "icon.png"
         Bitmap.from_stream true icon_stream
 
     let result = Launch.entry_point (Options.load_window_config instance, Updates.version, init, icon)

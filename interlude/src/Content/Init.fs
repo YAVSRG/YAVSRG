@@ -1,21 +1,20 @@
 ﻿namespace Interlude.Content
 
-open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 
 type Content() =
 
-    static member init_startup() = Data.init_startup ()
+    static member init () =
+        Themes.init ()
+        Skins.init ()
+        Sounds.init ()
 
-    static member init_window() =
-        Logging.Info "===== Loading game content ====="
-        Tables.init_window ()
-        Rulesets.init_window ()
-        Themes.init_window ()
-        Skins.init_window ()
-        Sounds.init_window ()
+    static member load_data () =
+        Tables.init ()
+        Rulesets.init ()
+        Data.init ()
 
-    static member deinit() = Data.deinit ()
+    static member deinit () = Data.deinit ()
 
     static member UserData = Data.user_db
     static member Library = Data.library

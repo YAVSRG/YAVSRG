@@ -166,7 +166,8 @@ type Toolbar() =
             Terminal.draw ()
 
     override this.Update(elapsed_ms, moved) =
-        CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
+        if Screen.current_type <> Screen.Type.SplashScreen then
+            CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
 
         let moved =
             if Toolbar.was_hidden <> Toolbar.hidden then

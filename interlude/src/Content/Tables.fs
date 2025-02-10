@@ -31,7 +31,7 @@ module Tables =
         if _selected_id.Value = Some table.Id then
             current <- Some table
 
-    let init_window () =
+    let init () =
         load ()
 
         match _selected_id.Value with

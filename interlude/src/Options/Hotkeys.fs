@@ -6,7 +6,7 @@ open Percyqaz.Flux.Input.Bind
 
 module Hotkeys =
 
-    let init_startup (d: Dictionary<Hotkey, Bind>) =
+    let init (d: Dictionary<Hotkey, Bind>) =
         Hotkeys.register "search" (mk Keys.Tab)
         Hotkeys.register "toolbar" (ctrl Keys.T)
         Hotkeys.register "tooltip" (mk Keys.Slash)

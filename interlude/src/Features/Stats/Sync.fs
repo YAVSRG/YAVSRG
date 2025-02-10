@@ -35,6 +35,6 @@ module StatsSync =
                 | None -> Logging.Error "Error fetching online stats"
             )
 
-    let init_startup () =
+    let init () =
         Gameplay.score_saved.Add (fun _ -> upload_online_stats())
         NetworkEvents.successful_login.Add (fun _ -> sync_online_stats())
