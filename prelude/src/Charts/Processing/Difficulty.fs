@@ -57,6 +57,7 @@ module DifficultyRating =
     let private OHTNERF = 3.0
 
     // todo: break down into smaller info: left, right, jack, LN
+    // todo: backwards pass as well
     let private notes_difficulty_pass (rate: Rate, notes: TimeArray<NoteRow>) : float array array =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
