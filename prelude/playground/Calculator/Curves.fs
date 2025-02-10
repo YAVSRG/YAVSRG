@@ -5,7 +5,7 @@ open Prelude.Charts.Processing.Difficulty
 
 module CurveExperiments =
 
-    let graph (values: 'T seq) (fmt: 'T -> string) (func: 'T -> float) (scale: float) =
+    let graph (values: 'T seq) (fmt: 'T -> string) (func: 'T -> float32) (scale: float32) =
         printfn "\n Key: # = %.1f units \n" scale
 
         for v in values do
@@ -18,15 +18,15 @@ module CurveExperiments =
 
     let jack () =
         let ms = seq { 1 .. 360 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
-        graph ms (ms_to_bpm >> sprintf "%.0f BPM") DifficultyRating.jack_curve 0.5
+        graph ms (ms_to_bpm >> sprintf "%.0f BPM") DifficultyRating.jack_curve 0.5f
 
     let stream () =
         let ms = seq { 1 .. 360 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
-        graph ms (ms_to_bpm >> sprintf "%.0f BPM") DifficultyRating.stream_curve 0.5
+        graph ms (ms_to_bpm >> sprintf "%.0f BPM") DifficultyRating.stream_curve 0.5f
 
     let comp () =
         let ms = seq { 0 .. 1000 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
-        graph ms (sprintf "%.0f ms") (fun x -> DifficultyRating.jack_compensation x 500.0f<ms / rate>) 0.01
+        graph ms (sprintf "%.0f ms") (fun x -> DifficultyRating.jack_compensation x 500.0f<ms / rate>) 0.01f
 
     let main() =
         comp()

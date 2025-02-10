@@ -50,7 +50,7 @@ type private DifficultyOverlay
         for k = 0 to chart.Keys - 1 do
             if chart.Notes.[index].Data.[k] = NoteType.NORMAL || chart.Notes.[index].Data.[k] = NoteType.HOLDHEAD then
                 let note_box = note_area.SliceL(playfield.ColumnPositions.[k], playfield.ColumnWidth)
-                draw_label (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).Shrink(5.0f)) (sprintf "%.2f" difficulty.NoteDifficulty.[index].[k]) Colors.cyan_accent
+                draw_label (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).Shrink(5.0f)) (sprintf "%.2f %.2f" difficulty.NoteDifficulty.[index].[k].SL difficulty.NoteDifficulty.[index].[k].SR) Colors.cyan_accent
                 draw_label (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).Shrink(5.0f)) (sprintf "%.2f" (fst difficulty.Strain.[index]).[k]) Colors.red_accent
         draw_label (note_area.BorderR(playfield.ColumnWidth).SlicePercentY(0.35f).Shrink(5.0f)) (sprintf "%.2f" (snd difficulty.Strain.[index])) Colors.red_accent
 

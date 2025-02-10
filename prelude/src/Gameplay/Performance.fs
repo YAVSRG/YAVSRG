@@ -27,11 +27,11 @@ module Performance =
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
 
     let private performance_func b value hit_delta (time_delta: GameplayTime) =
-        DifficultyRating.stamina_func b (value * confidence_value hit_delta) time_delta
+        DifficultyRating.stamina_func b (value * float32 (confidence_value hit_delta)) time_delta
 
     let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessor) =
         let last_times = Array.create keys 0.0f<ms>
-        let mutable pv = 0.01
+        let mutable pv = 0.01f
         let pvs = Array.zeroCreate keys
 
         for ev in scoring.Events do
@@ -39,20 +39,20 @@ module Performance =
             | Hit e
             | Hold e ->
 
-                let mutable p = 0.0
-                let mutable t = 0.0
-                let mutable c = 0.0
+                let mutable p = 0.0f
+                let mutable c = 0.0f
 
                 pvs.[ev.Column] <-
-                    performance_func (pvs.[ev.Column]) (rr.NoteDifficulty.[ev.Index].[ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
+                    performance_func (pvs.[ev.Column]) (rr.NoteDifficulty.[ev.Index].[ev.Column].T) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
                 last_times.[ev.Column] <- ev.Time
-                c <- c + 1.0
+                c <- c + 1.0f
                 p <- p + pvs.[ev.Column]
 
-                let p, t = if c = 0.0 then 0.0, 0.0 else p / c, t / c
-                pv <- pv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(p / pv)))
+                let p = if c = 0.0f then 0.0f else p / c
+                pv <- pv * MathF.Exp(0.01f * Math.Max(0.0f, MathF.Log(p / pv)))
 
             | _ -> ()
 
-        Math.Pow(pv, 0.6) * 2.5
+        MathF.Pow(pv, 0.6f) * 2.5f
+        |> float
