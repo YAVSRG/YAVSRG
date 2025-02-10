@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.MainMenu
 
-open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
@@ -38,8 +37,15 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         }
         |> Async.Start
 
+    override this.Init (parent: Widget) =
+        this
+        |* LoadingIndicator.Strip(
+            (fun () -> not closing),
+            Position = Position.SliceT(165.0f, 10.0f).SliceX(400.0f)
+        )
+        base.Init parent
+
     override this.OnEnter(prev: Screen.Type) =
-        Logo.move_center ()
         Toolbar.hide ()
 
         background_fade.Reset()
@@ -47,9 +53,12 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         match prev with
         | Screen.Type.SplashScreen ->
             animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
-            animation.Add(Animation.Delay 1000.0)
+            animation.Add(Animation.Delay 100.0)
+            animation.Add(Animation.Action(fun () -> Logo.move_center ()))
+            animation.Add(Animation.Delay 900.0)
             animation.Add(Animation.Action(post_init))
         | _ ->
+            Logo.move_center ()
             closing <- true
             DiscordRPC.clear()
             audio_fade.Snap()
@@ -74,24 +83,34 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         )
 
     override this.Draw() =
+        let alpha =
+            if closing then
+                255.0 * (1.0 - background_fade.Time / background_fade.Interval) |> int
+            else
+                255.0 * (background_fade.Time / background_fade.Interval) |> int
+        Render.rect this.Bounds (Colors.black.O4a alpha)
+
         if closing then
-            let alpha = 255.0 * (1.0 - background_fade.Time / background_fade.Interval) |> int
-            Render.rect this.Bounds (Colors.black.O4a alpha)
+            Text.draw_aligned_b (
+                Style.font,
+                "Thank you for playing",
+                70.0f,
+                this.Bounds.CenterX,
+                40.0f,
+                Colors.text,
+                0.5f
+            )
         else
-            let alpha = 255.0 * (background_fade.Time / background_fade.Interval) |> int
-            Render.rect this.Bounds (Colors.black.O4a alpha)
-
-        let (x, y) = this.Bounds.Center
-
-        Text.draw_aligned_b (
-            Style.font,
-            (if closing then "Thank you for playing" else "Loading :)"),
-            80.f,
-            x,
-            y - 500.0f,
-            Colors.text,
-            0.5f
-        )
+            Text.draw_aligned_b (
+                Style.font,
+                "Loading :)",
+                70.0f,
+                this.Bounds.CenterX,
+                40.0f,
+                (Colors.white.O4a alpha, Colors.black.O4a alpha),
+                0.5f
+            )
+            base.Draw()
 
     override this.OnBack() =
         WindowThread.exit()
