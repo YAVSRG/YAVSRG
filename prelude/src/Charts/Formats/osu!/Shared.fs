@@ -11,16 +11,16 @@ module MapHelpers =
     let int_or (key: string) (default_value: int) (map: Map<string, string>) =
         match map.TryFind key with
         | Some s ->
-            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
-            | true, v -> v
+            match Single.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> (int v)
             | false, _ -> default_value
         | None -> default_value
 
     let int_opt (key: string) (map: Map<string, string>) =
         match map.TryFind key with
         | Some s ->
-            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
-            | true, v -> Some v
+            match Single.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> Some (int v)
             | false, _ -> None
         | None -> None
 
@@ -49,23 +49,23 @@ module MapHelpers =
         | None -> default_value
 
 module CsvHelpers =
-    
+
     let string_or (index: int) (default_value: string) (csv: string array) =
-        if index >= csv.Length then 
-            default_value 
+        if index >= csv.Length then
+            default_value
         else
             csv.[index]
 
     let int_or (index: int) (default_value: int) (csv: string array) =
-        if index >= csv.Length then 
+        if index >= csv.Length then
             default_value
         else
-            match Int32.TryParse(csv.[index], CultureInfo.InvariantCulture) with
-            | true, v -> v
+            match Single.TryParse(csv.[index], CultureInfo.InvariantCulture) with
+            | true, v -> int v
             | false, _ -> default_value
 
     let float_or (index: int) (default_value: float) (csv: string array) =
-        if index >= csv.Length then 
+        if index >= csv.Length then
             default_value
         else
             match Double.TryParse(csv.[index], CultureInfo.InvariantCulture) with
@@ -73,8 +73,8 @@ module CsvHelpers =
             | false, _ -> default_value
 
     let enum_or<'T when 'T : enum<int> and 'T : (new: unit -> 'T) and 'T : struct and 'T :> ValueType> (index: int) (default_value: 'T) (csv: string array) =
-        if index >= csv.Length then 
-            default_value 
+        if index >= csv.Length then
+            default_value
         else
             match Enum.TryParse(csv.[index], true) with
             | true, v -> v

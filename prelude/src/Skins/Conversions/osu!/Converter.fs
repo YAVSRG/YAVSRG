@@ -150,7 +150,7 @@ module OsuSkinConverter =
             bottom <- bottom - 1
 
         let height = bottom - top
-        if height > sample_receptor.Width / 2 && height < sample_receptor.Width * 3 / 2 then
+        if height > sample_receptor.Width / 2 && height < sample_receptor.Width then
             Some (fun bmp ->
                 let new_bmp = new Bitmap(sample_receptor.Width, sample_receptor.Width)
                 new_bmp.Mutate(fun img -> img.DrawImage(bmp, Point((-bmp.Width + sample_receptor.Width) / 2, -top + (sample_receptor.Width - height) / 2), 1.0f) |> ignore)
@@ -481,11 +481,10 @@ module OsuSkinConverter =
         let note_height_scale =
             match keymode_settings.WidthForNoteHeightScale with
             | None -> 1.0f
-            | Some h -> 
+            | Some h ->
                 let s = float32 h / float32 keymode_settings.ColumnWidth.[0]
                 Logging.Debug "WidthForNoteHeightScale is %.3fx column width, using that as scale" s
                 s
-                
 
         let colors = Array.zeroCreate 10
         let receptor_colors =

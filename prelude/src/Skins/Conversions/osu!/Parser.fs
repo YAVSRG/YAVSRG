@@ -27,8 +27,8 @@ module OsuSkinHelpers =
     let parse_comma_ints_or (default_value: int list) (s: string) =
         s.Split(",", StringSplitOptions.TrimEntries)
         |> Seq.choose (fun s ->
-            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
-            | true, v -> Some v
+            match Single.TryParse(s, CultureInfo.InvariantCulture) with
+            | true, v -> Some (int v)
             | false, _ -> None
         )
         |> List.ofSeq
