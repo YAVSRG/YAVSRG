@@ -288,7 +288,7 @@ module Song =
 
             let off_by = time_compensated () - audio_position * 1000.0f<ms>
             let adjustment = abs off_by |> min (float32 elapsed_ms * 0.5f<ms>)
-            if adjustment > 1.0f<ms> then
+            if adjustment > 1.0f<ms> && abs off_by < 200.0f<ms> then
 
                 if off_by > 0.0f<ms> then
                     seek_inaccuracy_compensation <- seek_inaccuracy_compensation + adjustment
