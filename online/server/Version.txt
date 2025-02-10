@@ -1,1 +1,1 @@
-﻿EUNOIA VI: Fix for stats error detection
+﻿EUNOIA VII: See total playtime
