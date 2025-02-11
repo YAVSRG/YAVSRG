@@ -54,5 +54,5 @@ module Performance =
 
             | _ -> ()
 
-        MathF.Pow(pv, 0.6f) * 2.5f
+        MathF.Pow(pv, DifficultyRating.CURVE_POWER) * DifficultyRating.CURVE_SCALE
         |> float

@@ -57,24 +57,17 @@ module DifficultyRating =
 
     let private OHTNERF = 3.0f
 
-    // todo: break down into smaller info: left, right, jack, LN
-    // todo: backwards pass as well
-    let private notes_difficulty_pass (rate: Rate, notes: TimeArray<NoteRow>) : NoteDifficulty array array =
+    let private notes_difficulty_pass_forward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
 
-        let last_note_in_column = Array.zeroCreate<Time> keys
-
-        let output = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
+        let last_note_in_column = Array.create<Time> keys ((TimeArray.first notes).Value.Time - 1000000.0f<ms>)
 
         let note_difficulty (i: int, k: int, time: Time) =
             let jack_delta =
-                if last_note_in_column.[k] > 0.0f<ms> then
-                    let delta = (time - last_note_in_column.[k]) / rate
-                    output.[i].[k].J <- MathF.Pow(jack_curve delta, OHTNERF)
-                    delta
-                else
-                    10000.0f<ms / rate>
+                let delta = (time - last_note_in_column.[k]) / rate
+                data.[i].[k].J <- MathF.Pow(jack_curve delta, OHTNERF)
+                delta
 
             let hand_lo, hand_hi =
                 if k < hand_split then
@@ -82,16 +75,19 @@ module DifficultyRating =
                 else
                     hand_split, keys - 1
 
+            let mutable sl = 0.0f
+            let mutable sr = 0.0f
             for hand_k = hand_lo to hand_hi do
-                if hand_k <> k && last_note_in_column.[hand_k] > 0.0f<ms> then
+                if hand_k <> k then
                     let trill_delta = (time - last_note_in_column.[hand_k]) / rate
                     let trill_v = MathF.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
                     if hand_k < k then
-                        output.[i].[k].SL <- output.[i].[k].SL + trill_v
+                        sl <- sl + trill_v
                     else
-                        output.[i].[k].SR <- output.[i].[k].SR + trill_v
+                        sr <- sr + trill_v
 
-            output.[i].[k].T <- MathF.Pow(output.[i].[k].SL + output.[i].[k].SR + output.[i].[k].J, 1.0f / OHTNERF)
+            data.[i].[k].SL <- sl
+            data.[i].[k].SR <- sr
 
         for i = 0 to notes.Length - 1 do
             let { Time = time; Data = nr } = notes.[i]
@@ -104,7 +100,50 @@ module DifficultyRating =
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     last_note_in_column.[k] <- time
 
-        output
+    let private notes_difficulty_pass_backward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
+        let keys = notes.[0].Data.Length
+        let hand_split = Layout.keys_on_left_hand keys
+
+        let last_note_in_column = Array.create<Time> keys ((TimeArray.last notes).Value.Time + 1000000.0f<ms>)
+
+        let note_difficulty (i: int, k: int, time: Time) =
+            let jack_delta =
+                let delta = (last_note_in_column.[k] - time) / rate
+                assert(delta > 0.0f<ms / rate>)
+                data.[i].[k].J <- MathF.Pow(jack_curve delta, OHTNERF) |> max data.[i].[k].J
+                delta
+
+            let hand_lo, hand_hi =
+                if k < hand_split then
+                    0, hand_split - 1
+                else
+                    hand_split, keys - 1
+
+            let mutable sl = 0.0f
+            let mutable sr = 0.0f
+            for hand_k = hand_lo to hand_hi do
+                if hand_k <> k then
+                    let trill_delta = (last_note_in_column.[hand_k] - time) / rate
+                    assert(trill_delta > 0.0f<ms / rate>)
+                    let trill_v = MathF.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
+                    if hand_k < k then
+                        sl <- sl + trill_v
+                    else
+                        sr <- sr + trill_v
+
+            data.[i].[k].SL <- sr |> max data.[i].[k].SL
+            data.[i].[k].SR <- sl |> max data.[i].[k].SR
+
+        for i = notes.Length - 1 downto 0 do
+            let { Time = time; Data = nr } = notes.[i]
+
+            for k = 0 to keys - 1 do
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                    note_difficulty (i, k, time)
+
+            for k = 0 to keys - 1 do
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                    last_note_in_column.[k] <- time
 
     let stamina_func (value: float32) (input: float32) (delta: GameplayTime) =
         let stamina_base_func ratio = 1.0f + 0.105f * ratio
@@ -112,7 +151,7 @@ module DifficultyRating =
         let v = Math.Max(value * stamina_decay_func delta, 0.01f)
         v * stamina_base_func (input / v)
 
-    let private SCALING_VALUE = 0.55f
+    let private STRAIN_SCALE = 0.55f
 
     let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
         let keys = notes.[0].Data.Length
@@ -129,10 +168,13 @@ module DifficultyRating =
 
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+
+                        note_difficulty.[i].[k].T <- MathF.Pow(note_difficulty.[i].[k].SL + note_difficulty.[i].[k].SR + note_difficulty.[i].[k].J, 1.0f / OHTNERF)
+
                         strain.[k] <-
                             stamina_func
                                 (strain.[k])
-                                (note_difficulty.[i].[k].T * SCALING_VALUE)
+                                (note_difficulty.[i].[k].T * STRAIN_SCALE)
                                 ((offset - last_note_in_column.[k]) / rate)
 
                         last_note_in_column.[k] <- offset
@@ -144,12 +186,15 @@ module DifficultyRating =
         }
         |> Array.ofSeq
 
+    let CURVE_POWER = 0.6f
+    let CURVE_SCALE = 2.3f
+
     let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) =
         let mutable v = 0.01f
         for _, x in finger_strain_data do
             v <- v * MathF.Exp(0.01f * Math.Max(0.0f, MathF.Log(x / v)))
 
-        MathF.Pow(v, 0.6f) * 2.5f
+        MathF.Pow(v, CURVE_POWER) * CURVE_SCALE
 
     let private overall_difficulty_pass_v2 (finger_strain_data: (float32 array * float32) array) =
 
@@ -163,7 +208,7 @@ module DifficultyRating =
             let w = weight_func i
             weight <- weight + w
             total <- total + value * w
-        MathF.Pow(total / weight, 0.6f) * 2.5f
+        MathF.Pow(total / weight, CURVE_POWER) * CURVE_SCALE
 
     let private difficulty_distribution (finger_strain_data: (float32 array * float32) array) =
         finger_strain_data
@@ -173,13 +218,15 @@ module DifficultyRating =
         |> Seq.sortBy fst
 
     let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : DifficultyRating =
-
-        let physical_composite = notes_difficulty_pass(rate, notes)
-        let physical_data = finger_strain_pass physical_composite (rate, notes)
+        let keys = notes.[0].Data.Length
+        let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
+        notes_difficulty_pass_forward (rate, notes) note_data
+        notes_difficulty_pass_backward (rate, notes) note_data
+        let physical_data = finger_strain_pass note_data (rate, notes)
         let physical = overall_difficulty_pass physical_data
 
         {
-            NoteDifficulty = physical_composite
+            NoteDifficulty = note_data
             Strain = physical_data
             Overall = if Single.IsFinite physical then float physical else 0.0
         }
