@@ -361,9 +361,8 @@ module WindowThread =
             | ErrorCode.VersionUnavailable ->
                 Logging.Critical ""
                 Logging.Critical "=== Helpful message from Percyqaz ==="
-                Logging.Critical "This error means your PC doesn't support OpenGL 3.3 or higher, and so can't run '%s' :(" title
-                Logging.Critical "If you think your PC DOES support OpenGL 3.3+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
-                Logging.Critical "If your PC is from about 2011/12 and supports OpenGL 3.0-3.2, complain in the Discord anyway and I could spend more time seeing if the engine can be more backwards compatible"
+                Logging.Critical "This error means your PC doesn't support OpenGL 3.0 or higher, and so can't run '%s' :(" title
+                Logging.Critical "If you think your PC DOES support OpenGL 3.0+, make sure you have up-to-date drivers; Complain in the Discord if the problem persists"
                 Logging.Critical ""
             | ErrorCode.ApiUnavailable ->
                 Logging.Critical ""
