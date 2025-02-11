@@ -113,7 +113,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
     let THICKNESS = 5f
     let HTHICKNESS = THICKNESS * 0.5f
 
-    let BOX_HEIGHT = 200.0f
+    let BOX_HEIGHT = 250.0f
     let BOX_WIDTH = 400.0f
 
     let NORMAL_POSITION =
@@ -167,7 +167,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Render.rect outline_bounds Colors.white.O4
         Render.rect bounds Colors.shadow_2.O4
 
-        let row_height = bounds.Height / 4.0f
+        let row_height = bounds.Height / 5.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
         let judgement_count = Array.sum info.Judgements
@@ -204,6 +204,21 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             Alignment.LEFT
         )
 
+        Text.fill_b (
+            Style.font,
+            (
+                if score_info.Rate <> 1.0f<rate> then
+                    sprintf "%s (%s)"
+                        (format_duration_ms (info.Time / score_info.Rate))
+                        (format_duration_ms info.Time)
+                else
+                    sprintf "%s" (format_duration_ms info.Time)
+            ),
+            text_b.Translate(0.0f, row_height * 4.0f),
+            Colors.text_subheading,
+            Alignment.LEFT
+        )
+
     member private this.DrawSliceInfo(bounds: Rect, index: int, width: int) =
 
         let pre = stats.Value.GraphPoints.[index - width |> max 0]
@@ -218,7 +233,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Render.rect outline_bounds Colors.white.O4
         Render.rect bounds Colors.shadow_2.O4
 
-        let row_height = bounds.Height / 4.0f
+        let row_height = bounds.Height / 5.0f
         let text_b = bounds.SliceT(row_height).Shrink(20.0f, 5.0f)
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
 
@@ -265,6 +280,25 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             (judgement_diff |> Seq.map (sprintf "%i") |> String.concat "  |  ") + "   [" + (judgement_count_post - judgement_count_pre).ToString() + "]",
             text_b.Translate(0.0f, row_height * 3.0f),
             text_color,
+            Alignment.LEFT
+        )
+
+        Text.fill_b (
+            Style.font,
+            (
+                if score_info.Rate <> 1.0f<rate> then
+                    sprintf "%s (%s) - %s (%s)"
+                        (format_duration_ms (pre.Time / score_info.Rate))
+                        (format_duration_ms pre.Time)
+                        (format_duration_ms (post.Time / score_info.Rate))
+                        (format_duration_ms post.Time)
+                else
+                    sprintf "%s - %s"
+                        (format_duration_ms pre.Time)
+                        (format_duration_ms post.Time)
+            ),
+            text_b.Translate(0.0f, row_height * 4.0f),
+            Colors.text_subheading,
             Alignment.LEFT
         )
 
