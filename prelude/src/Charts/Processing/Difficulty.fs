@@ -41,28 +41,25 @@ type DifficultyRating =
 
 module DifficultyRating =
 
+    let JACK_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
+    let JACK_CURVE_HEIGHT_SCALE = 26.3f
+    let JACK_CURVE_CUTOFF = 20.0f
+
     let jack_curve (delta: GameplayTime) =
-        let width_scale = 0.02f</ms*rate>
-        let height_scale = 26.3f
-        Math.Min(height_scale / (width_scale * delta), 20.0f)
+        JACK_CURVE_HEIGHT_SCALE / (JACK_CURVE_WIDTH_SCALE * delta)
+        |> min JACK_CURVE_CUTOFF
+
+    let STREAM_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
+    let STREAM_CURVE_HEIGHT_SCALE = 13.7f
+    let STREAM_CURVE_CUTOFF = 10.0f
 
     let stream_curve (delta: GameplayTime) =
-        let width_scale = 0.02f</ms*rate>
-        let height_scale = 13.7f
-        let cutoff = 10.0f
-
-        Math.Max(
-            (
-                height_scale / (width_scale * delta) -
-                height_scale / MathF.Pow(width_scale * delta, cutoff) / cutoff
-            ),
-            0.0f
-        )
+        STREAM_CURVE_HEIGHT_SCALE / (STREAM_CURVE_WIDTH_SCALE * delta) -
+        STREAM_CURVE_HEIGHT_SCALE / MathF.Pow(STREAM_CURVE_WIDTH_SCALE * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF
+        |> max 0.0f
 
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
         Math.Min(MathF.Pow(Math.Max(MathF.Log((jack_delta / stream_delta), 2.0f), 0.0f), 2.0f), 1.0f)
-
-    let private OHTNERF = 3.0f
 
     let private notes_difficulty_pass_forward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
         let keys = notes.[0].Data.Length
@@ -158,7 +155,8 @@ module DifficultyRating =
         let v = Math.Max(value * stamina_decay_func delta, 0.01f)
         v * stamina_base_func (input / v)
 
-    let private STRAIN_SCALE = 0.55f
+    let private OHTNERF = 3.0f
+    let STRAIN_HAND_TRANSFER = 0.8f
 
     let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
         let keys = notes.[0].Data.Length
@@ -187,7 +185,7 @@ module DifficultyRating =
                         strain.[k] <-
                             stamina_func
                                 (strain.[k])
-                                (note_difficulty.[i].[k].T * STRAIN_SCALE)
+                                (note_difficulty.[i].[k].T)
                                 ((offset - last_note_in_column.[k]) / rate)
 
                         last_note_in_column.[k] <- offset
@@ -200,7 +198,7 @@ module DifficultyRating =
         |> Array.ofSeq
 
     let CURVE_POWER = 0.6f
-    let CURVE_SCALE = 2.3f
+    let CURVE_SCALE = 1.6067f
 
     let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) =
         let mutable v = 0.01f

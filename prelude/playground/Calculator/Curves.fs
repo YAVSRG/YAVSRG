@@ -28,5 +28,15 @@ module CurveExperiments =
         let ms = seq { 0 .. 1000 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
         graph ms (sprintf "%.0f ms") (fun x -> DifficultyRating.jack_compensation x 500.0f<ms / rate>) 0.01f
 
+    let stam () =
+        let mutable v = 0.1f
+        for i = 1 to 10 do
+            for _ = 1 to 10 do
+                v <- DifficultyRating.stamina_func v 10.0f 10.0f<ms / rate>
+            printfn "%i iterations: %.2f" (i * 10) v
+            let instant_extra = DifficultyRating.stamina_func v 10.0f 0.0f<ms / rate>
+            printfn "instant extra: %.2f" instant_extra
+            printfn "ratio %.2f / %.2f" (instant_extra / v) (v / instant_extra)
+
     let main() =
-        comp()
+        stam()

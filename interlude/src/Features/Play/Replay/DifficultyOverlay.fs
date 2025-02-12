@@ -38,6 +38,9 @@ type private DifficultyOverlay
         Render.rect bounds Colors.shadow_2.O3
         Text.fill_b(Style.font, sprintf "%.2f" value, bounds.Shrink(10.0f, 5.0f), (color, Colors.shadow_2), Alignment.CENTER)
 
+    let STREAM_SCALE = 15000.0f<ms / rate> * DifficultyRating.STREAM_CURVE_WIDTH_SCALE / DifficultyRating.STREAM_CURVE_HEIGHT_SCALE
+    let JACK_SCALE = 15000.0f<ms / rate> * DifficultyRating.JACK_CURVE_WIDTH_SCALE / DifficultyRating.JACK_CURVE_HEIGHT_SCALE
+
     let draw_row (now: ChartTime) (index: int) =
         let centre =
             options.HitPosition.Value
@@ -53,27 +56,37 @@ type private DifficultyOverlay
 
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SLF
+                    (difficulty.NoteDifficulty.[index].[k].SLF * STREAM_SCALE)
                     Colors.cyan_accent
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SRF
+                    (difficulty.NoteDifficulty.[index].[k].SRF * STREAM_SCALE)
                     Colors.cyan_accent
                 draw_label
                     (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).SlicePercentL(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SLB
+                    (difficulty.NoteDifficulty.[index].[k].SLB * STREAM_SCALE)
                     Colors.cyan_accent
                 draw_label
                     (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).SlicePercentR(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SRB
+                    (difficulty.NoteDifficulty.[index].[k].SRB * STREAM_SCALE)
                     Colors.cyan_accent
 
                 draw_label
-                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).TranslateY(-30.0f).Shrink(5.0f))
-                    (difficulty.NoteDifficulty.[index].[k].JB) Colors.green_accent
+                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).TranslateY(-playfield.ColumnWidth * 0.3f).Shrink(5.0f))
+                    (difficulty.NoteDifficulty.[index].[k].JB * JACK_SCALE)
+                    Colors.green_accent
                 draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).TranslateY(30.0f).Shrink(5.0f))
-                    (difficulty.NoteDifficulty.[index].[k].JF) Colors.green_accent
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
+                    (difficulty.NoteDifficulty.[index].[k].JF * JACK_SCALE)
+                    Colors.green_accent
+                draw_label
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    (difficulty.NoteDifficulty.[index].[k].T * JACK_SCALE)
+                    Colors.pink_accent
+                draw_label
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    ((fst difficulty.Strain.[index]).[k])
+                    Colors.red_accent
 
         draw_label (note_area.BorderR(playfield.ColumnWidth).SlicePercentY(0.35f).Shrink(5.0f)) (snd difficulty.Strain.[index]) Colors.red_accent
 

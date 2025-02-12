@@ -10,7 +10,7 @@ let your_script_here () =
     //OsuReplayGenerator.run_experiment()
     //OsuReplayReader.read_scores()
     //Endless.test()
-    Totals.main()
+    CurveExperiments.main()
 
 [<EntryPoint>]
 let main argv =
