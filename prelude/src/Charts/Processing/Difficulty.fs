@@ -21,9 +21,14 @@ module Layout =
 [<Struct>]
 type NoteDifficulty =
     {
-        mutable J: float32
-        mutable SL: float32
-        mutable SR: float32
+        mutable JF: float32
+        mutable SLF: float32
+        mutable SRF: float32
+
+        mutable JB: float32
+        mutable SLB: float32
+        mutable SRB: float32
+
         mutable T: float32
     }
 
@@ -47,8 +52,10 @@ module DifficultyRating =
         let cutoff = 10.0f
 
         Math.Max(
-            (height_scale / (width_scale * delta)
-             - 0.1f * height_scale / MathF.Pow(width_scale * delta, cutoff)),
+            (
+                height_scale / (width_scale * delta) -
+                height_scale / MathF.Pow(width_scale * delta, cutoff) / cutoff
+            ),
             0.0f
         )
 
@@ -66,7 +73,7 @@ module DifficultyRating =
         let note_difficulty (i: int, k: int, time: Time) =
             let jack_delta =
                 let delta = (time - last_note_in_column.[k]) / rate
-                data.[i].[k].J <- MathF.Pow(jack_curve delta, OHTNERF)
+                data.[i].[k].JF <- jack_curve delta
                 delta
 
             let hand_lo, hand_hi =
@@ -80,14 +87,14 @@ module DifficultyRating =
             for hand_k = hand_lo to hand_hi do
                 if hand_k <> k then
                     let trill_delta = (time - last_note_in_column.[hand_k]) / rate
-                    let trill_v = MathF.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
+                    let trill_v = stream_curve trill_delta * jack_compensation jack_delta trill_delta
                     if hand_k < k then
                         sl <- sl + trill_v
                     else
                         sr <- sr + trill_v
 
-            data.[i].[k].SL <- sl
-            data.[i].[k].SR <- sr
+            data.[i].[k].SLF <- sl
+            data.[i].[k].SRF <- sr
 
         for i = 0 to notes.Length - 1 do
             let { Time = time; Data = nr } = notes.[i]
@@ -110,7 +117,7 @@ module DifficultyRating =
             let jack_delta =
                 let delta = (last_note_in_column.[k] - time) / rate
                 assert(delta > 0.0f<ms / rate>)
-                data.[i].[k].J <- MathF.Pow(jack_curve delta, OHTNERF) |> max data.[i].[k].J
+                data.[i].[k].JB <- jack_curve delta
                 delta
 
             let hand_lo, hand_hi =
@@ -125,14 +132,14 @@ module DifficultyRating =
                 if hand_k <> k then
                     let trill_delta = (last_note_in_column.[hand_k] - time) / rate
                     assert(trill_delta > 0.0f<ms / rate>)
-                    let trill_v = MathF.Pow((stream_curve trill_delta) * (jack_compensation jack_delta trill_delta), OHTNERF)
+                    let trill_v = stream_curve trill_delta * jack_compensation jack_delta trill_delta
                     if hand_k < k then
                         sl <- sl + trill_v
                     else
                         sr <- sr + trill_v
 
-            data.[i].[k].SL <- sr |> max data.[i].[k].SL
-            data.[i].[k].SR <- sl |> max data.[i].[k].SR
+            data.[i].[k].SLB <- sl
+            data.[i].[k].SRB <- sr
 
         for i = notes.Length - 1 downto 0 do
             let { Time = time; Data = nr } = notes.[i]
@@ -169,7 +176,13 @@ module DifficultyRating =
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        note_difficulty.[i].[k].T <- MathF.Pow(note_difficulty.[i].[k].SL + note_difficulty.[i].[k].SR + note_difficulty.[i].[k].J, 1.0f / OHTNERF)
+                        note_difficulty.[i].[k].T <-
+                            MathF.Pow(
+                                MathF.Pow(max note_difficulty.[i].[k].SLF note_difficulty.[i].[k].SRB, OHTNERF) +
+                                MathF.Pow(max note_difficulty.[i].[k].SRF note_difficulty.[i].[k].SLB, OHTNERF) +
+                                MathF.Pow(max note_difficulty.[i].[k].JF note_difficulty.[i].[k].JB, OHTNERF),
+                                1.0f / OHTNERF
+                            )
 
                         strain.[k] <-
                             stamina_func
