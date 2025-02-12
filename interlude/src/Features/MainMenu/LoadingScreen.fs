@@ -29,8 +29,9 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
             | Ok () ->
                 GameThread.defer
                 <| fun () ->
+                animation.Add(Animation.Delay 50.0)
                 animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
-                animation.Add(Animation.Delay 1200.0)
+                animation.Add(Animation.Delay 500.0)
                 animation.Add(Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.UnderLogo |> ignore))
             | Error error ->
                 GameThread.defer (fun () -> raise error)
