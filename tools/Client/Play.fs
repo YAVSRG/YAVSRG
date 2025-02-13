@@ -56,9 +56,11 @@ module Play =
             printfn "Your GAME folder is missing an Interlude executable, run `yavsrg update` to fix it"
 
     let debug_run () =
-        exec_at INTERLUDE_SOURCE_PATH "dotnet" "build --configuration Debug -v q"
+        let build_output = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0")
         try
             let build_info = detect_build_info()
+            if not (Directory.Exists build_ouput) then Directory.CreateDirectory build_output
+
             File.Copy(
                 Path.Combine(YAVSRG_PATH, "engine", "lib", build_info.RuntimeId, build_info.BassLibraryFile),
                 Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0", build_info.BassLibraryFile),
@@ -71,4 +73,4 @@ module Play =
                 true
             )
         with err -> printfn "Error detecting platform: %O" err
-        exec_at (Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0")) "dotnet" "run --project ../../.."
+        exec_at INTERLUDE_SOURCE_PATH "dotnet" "run --configuration Debug -v q"
