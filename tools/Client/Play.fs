@@ -59,7 +59,7 @@ module Play =
         let build_output = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Debug", "net8.0")
         try
             let build_info = detect_build_info()
-            if not (Directory.Exists build_ouput) then Directory.CreateDirectory build_output
+            if not (Directory.Exists build_output) then Directory.CreateDirectory build_output |> ignore
 
             File.Copy(
                 Path.Combine(YAVSRG_PATH, "engine", "lib", build_info.RuntimeId, build_info.BassLibraryFile),
