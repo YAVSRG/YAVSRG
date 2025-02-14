@@ -52,10 +52,11 @@ module DifficultyRating =
     let STREAM_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
     let STREAM_CURVE_HEIGHT_SCALE = 13.7f
     let STREAM_CURVE_CUTOFF = 10.0f
+    let STREAM_CURVE_CUTOFF_2 = 10.0f
 
     let stream_curve (delta: GameplayTime) =
         STREAM_CURVE_HEIGHT_SCALE / (STREAM_CURVE_WIDTH_SCALE * delta) -
-        STREAM_CURVE_HEIGHT_SCALE / MathF.Pow(STREAM_CURVE_WIDTH_SCALE * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF
+        STREAM_CURVE_HEIGHT_SCALE / MathF.Pow(STREAM_CURVE_WIDTH_SCALE * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
 
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
@@ -156,7 +157,6 @@ module DifficultyRating =
         v * stamina_base_func (input / v)
 
     let private OHTNERF = 3.0f
-    let STRAIN_HAND_TRANSFER = 0.8f
 
     let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
         let keys = notes.[0].Data.Length
@@ -170,7 +170,6 @@ module DifficultyRating =
 
                 let mutable sum = 0.0f
                 let mutable n = 0.0f
-
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
@@ -184,10 +183,9 @@ module DifficultyRating =
 
                         strain.[k] <-
                             stamina_func
-                                (strain.[k])
-                                (note_difficulty.[i].[k].T)
+                                strain.[k]
+                                note_difficulty.[i].[k].T
                                 ((offset - last_note_in_column.[k]) / rate)
-
                         last_note_in_column.[k] <- offset
 
                         sum <- sum + strain.[k]
@@ -198,7 +196,7 @@ module DifficultyRating =
         |> Array.ofSeq
 
     let CURVE_POWER = 0.6f
-    let CURVE_SCALE = 1.6067f
+    let CURVE_SCALE = 1.746f
 
     let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) =
         let mutable v = 0.01f
@@ -232,7 +230,6 @@ module DifficultyRating =
         let keys = notes.[0].Data.Length
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         notes_difficulty_pass_forward (rate, notes) note_data
-        notes_difficulty_pass_backward (rate, notes) note_data
         let physical_data = finger_strain_pass note_data (rate, notes)
         let physical = overall_difficulty_pass physical_data
 
