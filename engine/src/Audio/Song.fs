@@ -80,6 +80,7 @@ type SongLoadAction =
 module Song =
 
     let LEADIN_TIME = 3000.0f<ms / rate>
+    let mutable EXPERIMENTAL_OFFSET_FIX = false
 
     let private on_loaded_ev = Event<unit>()
     let on_loaded = on_loaded_ev.Publish
@@ -283,7 +284,7 @@ module Song =
 
             channel_playing <- false
 
-        elif channel_playing && playing () && timer.ElapsedMilliseconds > 50L then
+        elif EXPERIMENTAL_OFFSET_FIX && channel_playing && playing () && timer.ElapsedMilliseconds > 50L then
             let audio_position = Bass.ChannelBytes2Seconds(now_playing.ID, Bass.ChannelGetPosition(now_playing.ID, PositionFlags.Bytes)) |> float32
 
             let off_by = time_compensated () - audio_position * 1000.0f<ms>
