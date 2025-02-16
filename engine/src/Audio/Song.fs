@@ -10,9 +10,9 @@ type Song =
     {
         ID: int
         Frequency: int // in hz
-        Duration: float32<ms>
-        PreviewPoint: float32<ms>
-        LastNote: float32<ms>
+        Duration: Time
+        PreviewPoint: Time
+        LastNote: Time
         mutable LowPassFilterEffect: int
     }
     static member Default =
@@ -25,7 +25,7 @@ type Song =
             LowPassFilterEffect = 0
         }
 
-    static member FromFile(preview_point: float32<ms>, last_note: float32<ms>, file: string) =
+    static member FromFile(preview_point: Time, last_note: Time, file: string) =
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if ID = 0 then

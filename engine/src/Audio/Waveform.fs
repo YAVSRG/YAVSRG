@@ -18,10 +18,9 @@ module Waveform =
 
     type Waveform =
         {
-            MsPerPoint: float32<ms>
+            MsPerPoint: Time
             Points: Point array
         }
-
 
     let private samples_per_second = 1000
     let private points_per_iteration = 1000
