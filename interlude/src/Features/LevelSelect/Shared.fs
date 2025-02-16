@@ -216,7 +216,7 @@ module LevelSelect =
                     Screen.change_new
                         (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
                         Screen.Type.Replay
-                        Transitions.Default
+                        Transitions.EnterGameplayFadeAudio
                     |> ignore
                 else
                     play info
@@ -243,7 +243,7 @@ module LevelSelect =
                     :> Screen.T
                 )
                 Screen.Type.Replay
-                Transitions.Default
+                Transitions.EnterGameplayFadeAudio
         then
             SelectedChart.rate.Value <- score_info.Rate
 
