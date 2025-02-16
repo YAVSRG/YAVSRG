@@ -48,6 +48,7 @@ type Song =
             }
 
     member this.Free() =
+        Logging.Debug "Freed %i" this.ID
         Bass.StreamFree this.ID |> display_bass_error
 
     member this.SetLowPass(amount: float32) =
@@ -80,6 +81,7 @@ type SongLoadAction =
 module Song =
 
     let LEADIN_TIME = 3000.0f<ms / rate>
+    let CROSSFADE_DURATION_MS = 200
     let mutable EXPERIMENTAL_OFFSET_FIX = false
 
     let private on_loaded_ev = Event<unit>()
@@ -225,6 +227,8 @@ module Song =
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
                     (if paused then seek else play_from) preview_point
+                    Bass.ChannelSetAttribute(song.ID, ChannelAttribute.Volume, 0.0f) |> display_bass_error
+                    Bass.ChannelSlideAttribute(song.ID, ChannelAttribute.Volume, 1.0f, CROSSFADE_DURATION_MS) |> display_bass_error
                 | SongLoadAction.PlayFromBeginning ->
                     (if paused then seek else play_from) 0.0f<ms>
                 | SongLoadAction.Wait -> ()
@@ -241,8 +245,14 @@ module Song =
         change_rate new_rate
 
         if path_changed then
-            if now_playing.ID <> 0 then
-                now_playing.Free()
+
+            let current = now_playing
+            let slide_completed _ _ _ _ = current.Free()
+
+            if current.ID <> 0 then
+                Bass.ChannelSetSync(current.ID, SyncFlags.Slided ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed)) |> display_bass_error
+                Bass.ChannelSetSync(current.ID, SyncFlags.End ||| SyncFlags.Onetime, 0, SyncProcedure(slide_completed)) |> display_bass_error
+                Bass.ChannelSlideAttribute(current.ID, ChannelAttribute.Volume, 0.0f, CROSSFADE_DURATION_MS) |> display_bass_error
 
             channel_playing <- false
             loading <- true
