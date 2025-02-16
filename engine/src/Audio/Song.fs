@@ -11,6 +11,8 @@ type Song =
         ID: int
         Frequency: int // in hz
         Duration: float32<ms>
+        PreviewPoint: float32<ms>
+        LastNote: float32<ms>
         mutable LowPassFilterEffect: int
     }
     static member Default =
@@ -18,20 +20,22 @@ type Song =
             ID = 0
             Frequency = 1
             Duration = 1000.0f<ms>
+            PreviewPoint = 0.0f<ms>
+            LastNote = 0.0f<ms>
             LowPassFilterEffect = 0
         }
 
-    static member FromFile(file: string) =
+    static member FromFile(preview_point: float32<ms>, last_note: float32<ms>, file: string) =
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if ID = 0 then
             Logging.Error "Couldn't load audio track from '%s': %s"
                 file
                 (match Bass.LastError with Errors.FileOpen -> "File couldn't be found/opened OR contains an audio format not supported" | other -> other.ToString())
-            Song.Default
+            { Song.Default with PreviewPoint = preview_point; LastNote = last_note }
         else
             let d = Bass.ChannelGetInfo ID
-            let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
+            let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) |> float32 |> (*) 1000.0f<ms>
             let Frequency = d.Frequency
             let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             Bass.ChannelSetDevice(ID, Bass.CurrentDevice) |> display_bass_error
@@ -43,12 +47,13 @@ type Song =
             {
                 ID = ID
                 Frequency = Frequency
-                Duration = float32 Duration * 1.0f<ms>
+                Duration = Duration
+                PreviewPoint = if preview_point >= Duration - 3000.0f<ms> || preview_point < 0.0f<ms> then Duration * 0.5f else preview_point
+                LastNote = last_note
                 LowPassFilterEffect = 0
             }
 
     member this.Free() =
-        Logging.Debug "Freed %i" this.ID
         Bass.StreamFree this.ID |> display_bass_error
 
     member this.SetLowPass(amount: float32) =
@@ -100,8 +105,6 @@ module Song =
     let mutable _local_offset = 0.0f<ms>
     let mutable private _global_offset = 0.0f<ms / rate>
     let mutable on_finish = SongFinishAction.Wait
-    let mutable private preview_point = 0.0f<ms>
-    let mutable private last_note = 0.0f<ms>
     let mutable private enable_pitch_rates = true
 
     let mutable private low_pass_amount = 0.0f
@@ -208,12 +211,12 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<string option * SongLoadAction, Song * SongLoadAction>() with
-            override this.Process((path, after_load)) =
+        { new Async.SwitchService<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
+            override this.Process((preview, last_note, path, after_load)) =
                 async {
                     return
                         match path with
-                        | Some p -> Song.FromFile p, after_load
+                        | Some p -> Song.FromFile (preview, last_note, p), after_load
                         | None -> Song.Default, after_load
                 }
 
@@ -226,7 +229,7 @@ module Song =
 
                 match after_load with
                 | SongLoadAction.PlayFromPreview ->
-                    (if paused then seek else play_from) preview_point
+                    (if paused then seek else play_from) song.PreviewPoint
                     Bass.ChannelSetAttribute(song.ID, ChannelAttribute.Volume, 0.0f) |> display_bass_error
                     Bass.ChannelSlideAttribute(song.ID, ChannelAttribute.Volume, 1.0f, CROSSFADE_DURATION_MS) |> display_bass_error
                 | SongLoadAction.PlayFromBeginning ->
@@ -239,8 +242,6 @@ module Song =
     let change (path: string option, offset: Time, new_rate: float32<rate>, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
         let path_changed = path <> load_path
         load_path <- path
-        preview_point <- preview
-        last_note <- chart_last_note
         set_local_offset offset
         change_rate new_rate
 
@@ -256,7 +257,7 @@ module Song =
 
             channel_playing <- false
             loading <- true
-            song_loader.Request(path, after_load)
+            song_loader.Request(preview, chart_last_note, path, after_load)
 
     let update (elapsed_ms: float) =
 
@@ -282,10 +283,10 @@ module Song =
 
             match on_finish with
             | SongFinishAction.LoopFromPreview ->
-                if t >= last_note then
-                    play_from preview_point
+                if t >= now_playing.LastNote then
+                    play_from now_playing.PreviewPoint
             | SongFinishAction.LoopFromBeginning ->
-                if t >= last_note then
+                if t >= now_playing.LastNote then
                     play_from 0.0f<ms>
             | SongFinishAction.Wait -> ()
             | SongFinishAction.Custom action ->
