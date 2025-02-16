@@ -21,7 +21,7 @@ type Song =
             Frequency = 1
             Duration = 1000.0f<ms>
             PreviewPoint = 0.0f<ms>
-            LastNote = 0.0f<ms>
+            LastNote = 1000.0f<ms>
             LowPassFilterEffect = 0
         }
 
@@ -87,33 +87,34 @@ module Song =
 
     let LEADIN_TIME = 3000.0f<ms / rate>
     let CROSSFADE_DURATION_MS = 200
-    let mutable EXPERIMENTAL_OFFSET_FIX = false
 
     let private on_loaded_ev = Event<unit>()
     let on_loaded = on_loaded_ev.Publish
 
-    let mutable load_path: string option = None
+    let mutable private load_path: string option = None
     let mutable loading = false
+    let mutable internal now_playing: Song = Song.Default
 
-    let mutable seek_inaccuracy_compensation = 35.0f<ms>
-    let mutable now_playing: Song = Song.Default
+    let mutable private _time = 0.0f<ms>
     let private timer = new Stopwatch()
     let mutable private timer_start = 0.0f<ms>
     let mutable private channel_playing = false
     let mutable private paused = false
-    let mutable private rate = 1.0f<rate>
-    let mutable _local_offset = 0.0f<ms>
-    let mutable private _global_offset = 0.0f<ms / rate>
     let mutable on_finish = SongFinishAction.Wait
+    let mutable internal seek_inaccuracy_compensation = 37.0f<ms>
+
+    let mutable private rate = 1.0f<rate>
     let mutable private enable_pitch_rates = true
+
+    let mutable private _local_offset = 0.0f<ms>
+    let mutable private _global_offset = 0.0f<ms / rate>
 
     let mutable private low_pass_amount = 0.0f
     let mutable private low_pass_target = 0.0f
 
     let duration () = now_playing.Duration
 
-    let time () =
-        rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
+    let time () = _time
 
     let time_compensated () =
         time () - seek_inaccuracy_compensation
@@ -260,6 +261,8 @@ module Song =
             song_loader.Request(preview, chart_last_note, path, after_load)
 
     let update (elapsed_ms: float) =
+        let time_last_update = _time
+        _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
 
         if low_pass_target <> low_pass_amount then
             low_pass_amount <- lerp (float32 <| Math.Pow(0.994, elapsed_ms)) low_pass_target low_pass_amount
@@ -268,25 +271,23 @@ module Song =
 
         song_loader.Join()
 
-        let t = time ()
-
-        if playing () && t >= 0.0f<ms> && t < now_playing.Duration && not channel_playing then
+        if playing () && _time >= 0.0f<ms> && _time < now_playing.Duration && not channel_playing then
 
             channel_playing <- true
 
-            Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| t / 1000.0f<ms>))
+            Bass.ChannelSetPosition(now_playing.ID, Bass.ChannelSeconds2Bytes(now_playing.ID, float <| _time / 1000.0f<ms>))
             |> display_bass_error
 
             Bass.ChannelPlay now_playing.ID |> display_bass_error
 
-        elif t > now_playing.Duration then
+        elif _time > now_playing.Duration then
 
             match on_finish with
             | SongFinishAction.LoopFromPreview ->
-                if t >= now_playing.LastNote then
+                if _time >= now_playing.LastNote then
                     play_from now_playing.PreviewPoint
             | SongFinishAction.LoopFromBeginning ->
-                if t >= now_playing.LastNote then
+                if _time >= now_playing.LastNote then
                     play_from 0.0f<ms>
             | SongFinishAction.Wait -> ()
             | SongFinishAction.Custom action ->
@@ -295,14 +296,13 @@ module Song =
 
             channel_playing <- false
 
-        elif EXPERIMENTAL_OFFSET_FIX && channel_playing && playing () && timer.ElapsedMilliseconds > 50L then
+        elif channel_playing && playing () && timer.ElapsedMilliseconds > 80L && timer.ElapsedMilliseconds < 2000L then
             let audio_position = Bass.ChannelBytes2Seconds(now_playing.ID, Bass.ChannelGetPosition(now_playing.ID, PositionFlags.Bytes)) |> float32
 
-            let off_by = time_compensated () - audio_position * 1000.0f<ms>
-            let adjustment = abs off_by |> min (float32 elapsed_ms * 0.5f<ms>)
-            if adjustment > 1.0f<ms> && abs off_by < 200.0f<ms> then
+            let clock_elapsed = _time - time_last_update
 
-                if off_by > 0.0f<ms> then
-                    seek_inaccuracy_compensation <- seek_inaccuracy_compensation + adjustment
-                else
-                    seek_inaccuracy_compensation <- seek_inaccuracy_compensation - adjustment
+            let off_by = time_compensated () - audio_position * 1000.0f<ms>
+            let adjustment = abs off_by |> min (clock_elapsed * 0.8f)
+
+            if adjustment > 0.5f<ms> && abs off_by < 200.0f<ms> then
+                seek_inaccuracy_compensation <- seek_inaccuracy_compensation + if off_by > 0.0f<ms> then adjustment else -adjustment

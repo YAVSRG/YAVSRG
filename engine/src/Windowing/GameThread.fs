@@ -139,8 +139,8 @@ module GameThread =
 
     let private dispatch_frame (ui_root: UIEntryPoint) =
 
-        visual_latency_lo <- frame_is_ready - real_next_frame
-        visual_latency_hi <- start_of_frame - real_next_frame
+        visual_latency_lo <- real_next_frame - frame_is_ready
+        visual_latency_hi <- real_next_frame - start_of_frame
 
         match strategy with
 

@@ -62,6 +62,8 @@ type PerformanceMonitor() =
 
     override this.Draw() =
         if enable then
+            Render.quad (this.Bounds.SliceL(600.0f).AsQuad) (Quad.gradient_left_to_right Colors.black.O3 Colors.black.O0)
+
             Text.draw_b (
                 Style.font,
                 sprintf "%.3f FPS" fps,
@@ -91,10 +93,19 @@ type PerformanceMonitor() =
 
             Text.draw_b (
                 Style.font,
+                sprintf "%.1fms audio compensation" Song.seek_inaccuracy_compensation,
+                30.0f,
+                this.Bounds.Left + 20.0f,
+                this.Bounds.Top + 140.0f,
+                (Color.White, Color.Black)
+            )
+
+            Text.draw_b (
+                Style.font,
                 sprintf "%O to show fps" fps_bind,
                 30.0f,
                 this.Bounds.Left + 20.0f,
-                this.Bounds.Top + 150.0f,
+                this.Bounds.Top + 190.0f,
                 Colors.text_subheading
             )
 
@@ -103,7 +114,7 @@ type PerformanceMonitor() =
                 sprintf "%O to show fps + graph" graph_bind,
                 30.0f,
                 this.Bounds.Left + 20.0f,
-                this.Bounds.Top + 190.0f,
+                this.Bounds.Top + 230.0f,
                 Colors.text_subheading
             )
 
