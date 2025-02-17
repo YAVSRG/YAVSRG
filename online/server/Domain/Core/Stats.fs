@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
-open Prelude.Gameplay
+open Prelude.Calculator
 open Interlude.Web.Server
 
 type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Calculator
 
 open Percyqaz.Data
 open Prelude
@@ -55,7 +55,7 @@ module CombinedStatLine =
             if duration > ONE_MINUTE then
                 1.0f + ((duration - ONE_MINUTE) / ONE_MINUTE * 0.01f)
             else duration / ONE_MINUTE
-        
+
         let rec v (xs: CombinedStatLine) =
             match xs with
             | x :: y :: xs ->
@@ -106,10 +106,10 @@ module CombinedSkillBreakdown =
     let multiplier (threshold: float) (accuracy: float) : float32 =
         if accuracy >= threshold then
             System.Math.Pow((1.0 - threshold) / (max (1.0 - accuracy) 0.001), 0.3) |> float32
-        else 
+        else
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-    let private OCTAVES = 
+    let private OCTAVES =
         [|
             0.8f, 1.4f
             0.9f, 1.2f
@@ -118,7 +118,7 @@ module CombinedSkillBreakdown =
             1.2f, 0.25f
             1.3f, 0.125f
         |]
-    
+
     let private observe_octave (density: float32, accuracy, duration: GameplayTime) (breakdown: CombinedSkillBreakdown) : unit =
         let density = int density
 

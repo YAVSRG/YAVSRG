@@ -8,13 +8,13 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Charts
 open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Prelude.Data.Library
 open Prelude.Gameplay
 open Prelude.Gameplay.Replays
+open Prelude.Calculator
 open Interlude
 open Interlude.Content
 open Interlude.Options

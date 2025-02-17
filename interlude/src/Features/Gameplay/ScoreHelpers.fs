@@ -7,6 +7,7 @@ open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
+open Prelude.Calculator
 open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.User.Stats

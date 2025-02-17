@@ -1,9 +1,8 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Calculator
 
 open System
 open Prelude
 open Prelude.Gameplay.Scoring
-open Prelude.Calculator
 
 module Performance =
 

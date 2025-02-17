@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Tests.Database
 
 open NUnit.Framework
-open Prelude.Gameplay
+open Prelude.Calculator
 open Prelude.Data.User
 
 module DbSessions =

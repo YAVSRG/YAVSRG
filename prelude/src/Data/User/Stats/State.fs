@@ -3,7 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Gameplay
+open Prelude.Calculator
 open Prelude.Data.User
 
 type Session = Prelude.Data.User.Session

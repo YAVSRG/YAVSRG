@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Calculator
 
 open Percyqaz.Data
 open Prelude

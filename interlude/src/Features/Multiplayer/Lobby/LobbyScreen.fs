@@ -4,9 +4,9 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
+open Prelude.Calculator
 open Prelude.Data.User
 open Interlude.Content
 open Interlude.Web.Shared

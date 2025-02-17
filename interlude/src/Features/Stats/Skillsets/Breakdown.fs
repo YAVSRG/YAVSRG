@@ -2,9 +2,9 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Gameplay
-open Prelude.Data.User.Stats
+open Prelude.Calculator
 open Prelude.Calculator.Patterns
+open Prelude.Data.User.Stats
 open Interlude.UI
 
 type SkillBreakdown() =

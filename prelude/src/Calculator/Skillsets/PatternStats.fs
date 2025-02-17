@@ -1,8 +1,7 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Calculator
 
 open Percyqaz.Data
 open Prelude
-open Prelude.Calculator
 
 [<Json.AutoCodec>]
 type PatternStatPoint = { BPM: int; Duration: GameplayTime }

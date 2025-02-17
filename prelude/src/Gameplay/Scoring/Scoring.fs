@@ -353,8 +353,6 @@ module ScoreProcessor =
         scoring.Update Time.infinity
         scoring
 
-    open Prelude.Calculator
-
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
         let ruleset = SC.create 4
         create ruleset chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f<rate>

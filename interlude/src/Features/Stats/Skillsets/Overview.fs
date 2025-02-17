@@ -3,8 +3,8 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Calculator
 open Prelude.Calculator.Patterns
-open Prelude.Gameplay
 open Prelude.Data.User.Stats
 open Interlude.UI
 

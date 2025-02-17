@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
 open Prelude.Data.User.Stats
+open Prelude.Calculator
 open Prelude.Calculator.Patterns
 open Interlude.UI
 open Interlude.Content
