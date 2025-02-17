@@ -1,8 +1,8 @@
-﻿namespace Prelude.Charts.Formats.osu
+﻿namespace Prelude.ChartFormats.osu
 
 open System
 open System.Globalization
-        
+
 type Gamemode =
     | OSU = 0
     | OSU_TAIKO = 1
@@ -93,7 +93,7 @@ type Editor =
         GridSize: int
         TimelineZoom: float
     }
-    static member Default = 
+    static member Default =
         {
             Bookmarks = []
             DistanceSpacing = 1.0
@@ -103,10 +103,10 @@ type Editor =
         }
     static member FromMap (properties: Map<string, string>) =
         {
-            Bookmarks = 
+            Bookmarks =
                 MapHelpers.string_or "Bookmarks" "" properties
                 |> fun s -> s.Trim().Trim(',').Split(',', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
-                |> Seq.choose (fun s -> 
+                |> Seq.choose (fun s ->
                     match Int32.TryParse(s, CultureInfo.InvariantCulture) with
                     | true, v -> Some v
                     | false, _ -> None
@@ -161,7 +161,7 @@ type Metadata =
             Creator = MapHelpers.string_or "Creator" "" properties
             Version = MapHelpers.string_or "Version" "" properties
             Source = MapHelpers.string_or "Source" "" properties
-            Tags = 
+            Tags =
                 MapHelpers.string_or "Tags" "" properties
                 |> fun s -> s.Split(' ', StringSplitOptions.TrimEntries ||| StringSplitOptions.RemoveEmptyEntries)
                 |> List.ofSeq

@@ -1,4 +1,4 @@
-namespace Prelude.Charts.Conversions
+namespace Prelude.ChartFormats
 
 open System
 open System.IO
@@ -98,7 +98,7 @@ module Utilities =
             |> fun b -> if b then None else Some()
         else
             None
-            
+
     let (|FolderOfOszs|_|) (path: string) =
         if Directory.Exists path then
             if

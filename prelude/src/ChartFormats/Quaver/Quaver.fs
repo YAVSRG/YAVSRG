@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Formats.Quaver
+﻿namespace Prelude.ChartFormats.Quaver
 
 open System
 open System.IO

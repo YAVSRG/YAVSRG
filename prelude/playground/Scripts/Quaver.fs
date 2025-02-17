@@ -1,10 +1,10 @@
 ﻿namespace Prelude.Scripts
 
 open System.IO
-open Prelude.Charts.Formats.Quaver
+open Prelude.ChartFormats.Quaver
 
 module Quaver =
-    
+
     let quaver_folder = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Quaver"
     let quaver_songs = Path.Combine(quaver_folder, "Songs")
 
@@ -17,10 +17,10 @@ module Quaver =
             for chart_file in Directory.EnumerateFiles song_folder |> Seq.where (fun p -> Path.GetExtension(p).ToLower() = ".qua") do
                 let outcome = (QuaverChart.from_file chart_file)
                 match outcome with
-                | Ok q -> 
+                | Ok q ->
                     if not q.BPMDoesNotAffectScrollVelocity then printfn "legacy quaver sv thing"
                     oks <- oks + 1
-                | Error msg -> 
+                | Error msg ->
                     printfn "%s" chart_file
                     errors <- errors + 1
 

@@ -1,12 +1,12 @@
-﻿namespace Prelude.Charts.Conversions
+﻿namespace Prelude.ChartFormats.Quaver
 
 open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.Quaver
 open Prelude.Charts
+open Prelude.ChartFormats
 
 module Quaver_To_Interlude =
 

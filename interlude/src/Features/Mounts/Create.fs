@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
 open Prelude.Data.Library.Imports
 open Interlude.Content
 open Interlude.UI
@@ -23,26 +23,26 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
 
     let info =
         match game with
-            | MountedGameType.Osu ->
-                Callout.Normal
-                    .Icon(Icons.DOWNLOAD)
-                    .Title(%"mount.create.osu.prompt")
-                    .Body(%"mount.create.folder_hint")
-            | MountedGameType.Quaver ->
-                Callout.Normal
-                    .Icon(Icons.DOWNLOAD)
-                    .Title(%"mount.create.quaver.prompt")
-                    .Body(%"mount.create.folder_hint")
-            | MountedGameType.Stepmania ->
-                Callout.Normal
-                    .Icon(Icons.DOWNLOAD)
-                    .Title(%"mount.create.stepmania.prompt")
-                    .Body(%"mount.create.folder_hint")
-            | MountedGameType.Etterna ->
-                Callout.Normal
-                    .Icon(Icons.DOWNLOAD)
-                    .Title(%"mount.create.etterna.prompt")
-                    .Body(%"mount.create.folder_hint")
+        | MountedGameType.Osu ->
+            Callout.Normal
+                .Icon(Icons.DOWNLOAD)
+                .Title(%"mount.create.osu.prompt")
+                .Body(%"mount.create.folder_hint")
+        | MountedGameType.Quaver ->
+            Callout.Normal
+                .Icon(Icons.DOWNLOAD)
+                .Title(%"mount.create.quaver.prompt")
+                .Body(%"mount.create.folder_hint")
+        | MountedGameType.Stepmania ->
+            Callout.Normal
+                .Icon(Icons.DOWNLOAD)
+                .Title(%"mount.create.stepmania.prompt")
+                .Body(%"mount.create.folder_hint")
+        | MountedGameType.Etterna ->
+            Callout.Normal
+                .Icon(Icons.DOWNLOAD)
+                .Title(%"mount.create.etterna.prompt")
+                .Body(%"mount.create.folder_hint")
 
     override this.Content() =
         FileDrop.on_file_drop <-
@@ -64,20 +64,27 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
                             Notifications.task_feedback (
                                 Icons.CHECK,
                                 %"notification.import_success",
-                                [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                                [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                                %> "notification.import_success.body"
                             )
+
                             Content.TriggerChartAdded()
                     )
+
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
                     Menu.Back()
             |> Some
 
-        page_container()
+        page_container ()
         |+ PageButton(
-            (if folder_detected then %"mount.create.use_detected_folder" else %"mount.create.game_not_detected"),
+            (if folder_detected then
+                 %"mount.create.use_detected_folder"
+             else
+                 %"mount.create.game_not_detected"),
             (fun () -> FileDrop.on_file_drop.Value auto_detect_location),
-            Disabled = K (not folder_detected)
-        ).Pos(6)
+            Disabled = K(not folder_detected)
+        )
+            .Pos(6)
         |+ Callout.frame info (fun (w, h) -> pretty_pos (0, 5, PageWidth.Custom w))
         :> Widget
 

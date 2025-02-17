@@ -6,8 +6,8 @@ open System.Text
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Conversions
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats
+open Prelude.ChartFormats.osu
 open Prelude.Gameplay.Replays
 open Prelude.Data.User
 open Prelude.Data.Library

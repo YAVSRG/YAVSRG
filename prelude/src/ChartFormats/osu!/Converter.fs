@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Conversions
+﻿namespace Prelude.ChartFormats.osu
 
 open System
 open System.IO
@@ -6,8 +6,8 @@ open System.Collections.Generic
 open System.Linq
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Formats.osu
 open Prelude.Charts
+open Prelude.ChartFormats
 
 module Osu_To_Interlude =
 

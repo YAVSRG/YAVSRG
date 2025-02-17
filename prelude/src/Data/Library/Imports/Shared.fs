@@ -5,10 +5,10 @@ open System.IO
 open System.Text.RegularExpressions
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Charts.Formats.osu
-open Prelude.Charts.Formats.Quaver
-open Prelude.Charts.Formats.StepMania
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
+open Prelude.ChartFormats.osu
+open Prelude.ChartFormats.Quaver
+open Prelude.ChartFormats.StepMania
 
 [<AutoOpen>]
 module Shared =

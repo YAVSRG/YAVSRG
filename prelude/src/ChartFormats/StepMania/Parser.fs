@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Formats.StepMania
+﻿namespace Prelude.ChartFormats.StepMania
 
 open System.IO
 open FParsec
@@ -142,3 +142,6 @@ module StepmaniaParser =
             | Failure(error_message, _, _) -> Result.Error error_message
         with
         | :? IOException as exn -> Result.Error exn.Message
+
+type StepMania() =
+    static member FromFile(path: string) = StepmaniaParser.parse_file path

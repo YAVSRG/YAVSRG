@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Formats.osu
+﻿namespace Prelude.ChartFormats.osu
 
 type Easing =
     | Linear = 0

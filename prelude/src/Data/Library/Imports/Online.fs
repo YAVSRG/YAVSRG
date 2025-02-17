@@ -2,10 +2,9 @@
 
 open System
 open System.IO
-open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
 open Prelude.Data.Library
 open Prelude.Data
 

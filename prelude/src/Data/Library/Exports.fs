@@ -4,7 +4,7 @@ open System.IO
 open System.IO.Compression
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats.osu
 
 type OsuExportOptions =
     {
@@ -56,7 +56,7 @@ module OsuExport =
         let mutable intended_scroll_multiplier = 1.0f
 
         while bpm_i < bpm.Length && sv_i < sv.Length do
-            
+
             let next_bpm = bpm.[bpm_i]
             let next_sv = sv.[sv_i]
 
@@ -74,7 +74,7 @@ module OsuExport =
         // now we have run out of either svs or bpms
 
         while bpm_i < bpm.Length do
-            
+
             let next_bpm = bpm.[bpm_i]
             bpm_multiplier <- most_common_mspb / next_bpm.Data.MsPerBeat
             bpm_i <- bpm_i + 1
@@ -82,7 +82,7 @@ module OsuExport =
             result.Add(TimingPoint.CreateSV(next_bpm.Time, intended_scroll_multiplier / bpm_multiplier))
 
         while sv_i < sv.Length do
-        
+
             let next_sv = sv.[sv_i]
             sv_i <- sv_i + 1
             intended_scroll_multiplier <- next_sv.Data

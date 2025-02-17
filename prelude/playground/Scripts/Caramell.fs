@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Prelude
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats.osu
 [<Measure>]
 type measure
 
@@ -463,7 +463,6 @@ let frame_times =
 //    Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, who + "-" + i.ToString() + ".png", (320, 820), events)
 //    |> sb.Add
 
-
 //let main () =
 //    // copy files
 //    for file in Directory.GetFiles sprites do
@@ -576,7 +575,6 @@ let frame_times =
 //    special_camera_1 (chorus3_2 + 5.0f<measure>) "josh"
 //    special_camera_2 (chorus3_2 + 6.0f<measure>) "blake"
 //    special_camera_2 (chorus3_2 + 7.0f<measure>) "josh"
-
 
 //    // save
 //    let result =

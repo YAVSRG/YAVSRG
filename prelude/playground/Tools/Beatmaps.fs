@@ -2,7 +2,7 @@
 
 open System.IO
 open Prelude.Data.Library.Imports
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats.osu
 
 let main() =
     for folder in Directory.EnumerateDirectories(OSU_SONG_FOLDER) do

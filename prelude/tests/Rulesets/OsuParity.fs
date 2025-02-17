@@ -3,8 +3,8 @@
 open NUnit.Framework
 open Prelude
 open Percyqaz.Common
-open Prelude.Charts.Formats.osu
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
+open Prelude.ChartFormats.osu
 open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets

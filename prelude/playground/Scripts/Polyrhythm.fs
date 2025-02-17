@@ -1,7 +1,7 @@
 ﻿module Polyrhythm
 
 open Prelude
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats.osu
 
 let source =
     @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-638573341266920297-audio\Virtual Riot - I heard you like polyrhythms (Percyqaz) [4K].osu"
@@ -19,7 +19,6 @@ let poly n =
             yield 340.0f<ms> + beat_spacing * float32 i, n
     }
 
-
 let line (t: Time) =
     { UninheritedTimingPoint.Create(t, 500.0, 4) with
         Effects = TimingEffect.OmitFirstBarline
@@ -32,7 +31,7 @@ let note (t: Time) =
 
 let seen = System.Collections.Generic.SortedSet<Time>()
 
-let notes = 
+let notes =
     seq { 0 .. 34 }
     |> Seq.collect poly
     |> Seq.filter (fun (value, n) ->

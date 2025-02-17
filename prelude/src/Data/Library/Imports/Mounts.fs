@@ -4,8 +4,7 @@ open System
 open System.IO
 open Percyqaz.Data
 open Percyqaz.Common
-open Prelude.Charts
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
 open Prelude.Data.Library
 
 [<Json.AutoCodec>]

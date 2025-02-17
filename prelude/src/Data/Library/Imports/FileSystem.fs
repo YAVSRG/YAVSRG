@@ -4,7 +4,7 @@ open System.IO
 open System.IO.Compression
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
 open Prelude.Data.Library
 
 module Imports =

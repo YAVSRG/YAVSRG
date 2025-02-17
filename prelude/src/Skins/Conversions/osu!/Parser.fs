@@ -4,7 +4,7 @@ open System
 open System.Globalization
 open System.IO
 open Prelude
-open Prelude.Charts.Formats.osu
+open Prelude.ChartFormats.osu
 
 //https://osu.ppy.sh/wiki/en/Skinning/skin.ini#[mania]
 

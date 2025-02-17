@@ -3,7 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Charts.Conversions
+open Prelude.ChartFormats
 open Prelude.Data.Library.Imports
 
 let main () =
@@ -20,7 +20,7 @@ let main () =
                             Config = ConversionOptions.Default
                         } do
                     match converted with
-                    | Ok { Chart = chart }  ->
+                    | Ok { Chart = chart } ->
                         match Chart.check chart with
                         | Error msg -> Logging.Error "%s" msg
                         | Ok chart -> ()
