@@ -31,7 +31,7 @@ type ScoreInfo =
         mutable Lamp: int
         mutable Grade: int
 
-        Rating: DifficultyRating
+        Rating: Difficulty
         Physical: float
 
         ImportedFromOsu: bool
@@ -74,7 +74,7 @@ module ScoreInfo =
         let scoring =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 
-        let difficulty = DifficultyRating.calculate(score.Rate, with_mods.Notes)
+        let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
 
         {
             ChartMeta = cc

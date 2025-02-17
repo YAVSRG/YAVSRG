@@ -101,7 +101,7 @@ module ReplayScreen =
                 )
                 |+ DifficultyOverlay(
                     with_colors.Source,
-                    DifficultyRating.calculate(rate, with_colors.Notes), // todo: get from chart info
+                    Difficulty.calculate(rate, with_colors.Notes), // todo: get from chart info
                     this.State,
                     this.Playfield
                 )

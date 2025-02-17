@@ -83,7 +83,7 @@ module OnlineScores =
                                 with_mods.Notes
                                 score.Rate
 
-                        let rating = DifficultyRating.calculate(score.Rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(score.Rate, with_mods.Notes)
 
                         let score_info: ScoreInfo =
                             {

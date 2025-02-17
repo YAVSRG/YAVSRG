@@ -55,7 +55,7 @@ type ChartDetails() =
         Text.fill_b (Style.font, notecounts, chart_info, Colors.text_subheading, Alignment.RIGHT)
 
         let three_icon_infos = this.Bounds.SliceT(70.0f).TranslateY(155.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, sprintf "%s %.2f" Icons.STAR rating, three_icon_infos, (Colors.white, DifficultyRating.physical_color rating), Alignment.LEFT)
+        Text.fill_b (Style.font, sprintf "%s %.2f" Icons.STAR rating, three_icon_infos, (Colors.white, Difficulty.color rating), Alignment.LEFT)
         Text.fill_b (Style.font, SelectedChart.FMT_BPM, three_icon_infos, Colors.text, Alignment.CENTER)
         Text.fill_b (Style.font, SelectedChart.FMT_DURATION, three_icon_infos, Colors.text, Alignment.RIGHT)
 

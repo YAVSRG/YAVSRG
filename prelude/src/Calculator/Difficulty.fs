@@ -32,14 +32,14 @@ type NoteDifficulty =
         mutable T: float32
     }
 
-type DifficultyRating =
+type Difficulty =
     {
         NoteDifficulty: NoteDifficulty array array
         Strain: (float32 array * float32) array
         Overall: float
     }
 
-module DifficultyRating =
+module Difficulty =
 
     let JACK_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
     let JACK_CURVE_HEIGHT_SCALE = 26.3f
@@ -226,7 +226,7 @@ module DifficultyRating =
         |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
         |> Seq.sortBy fst
 
-    let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : DifficultyRating =
+    let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : Difficulty =
         let keys = notes.[0].Data.Length
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         notes_difficulty_pass_forward (rate, notes) note_data
@@ -241,7 +241,7 @@ module DifficultyRating =
 
     let calculate = calculate_uncached |> cached
 
-    let physical_color v =
+    let color v =
         try
             let a = Math.Min(1.0, v * 0.1)
             let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)

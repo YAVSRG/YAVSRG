@@ -60,5 +60,5 @@ let test() =
             printfn ""
             match ChartDatabase.get_chart next.Chart.Hash library.Charts with
             | Ok chart ->
-                printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (DifficultyRating.calculate(1.0f<rate>, chart.Notes).Overall)
+                printfn "This is classed as: %A [%.2f]" (next.Chart.Patterns.Category) (Difficulty.calculate(1.0f<rate>, chart.Notes).Overall)
             | Error reason -> ()

@@ -35,7 +35,7 @@ type LoadedChartInfo =
 
         WithMods: ModdedChart
         NotecountsString: string
-        Rating: DifficultyRating
+        Rating: Difficulty
 
         WithColors: ColoredChart
     }
@@ -92,7 +92,7 @@ module SelectedChart =
 
     let mutable WITH_MODS: ModdedChart option = None
     let mutable FMT_NOTECOUNTS: string option = None
-    let mutable RATING: DifficultyRating option = None
+    let mutable RATING: Difficulty option = None
 
     let mutable WITH_COLORS: ColoredChart option = None
 
@@ -185,7 +185,7 @@ module SelectedChart =
                         let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
-                        let rating = DifficultyRating.calculate(rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(rate, with_mods.Notes)
 
                         let note_counts = format_notecounts with_mods
 
@@ -216,7 +216,7 @@ module SelectedChart =
                         let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
-                        let rating = DifficultyRating.calculate(rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(rate, with_mods.Notes)
 
                         let note_counts = format_notecounts with_mods
 

@@ -11,7 +11,7 @@ module Totals =
         for rate in RATES do
             [|1f; 2f; 3f|]
             |> Array.map (fun duration ->
-                let rating = DifficultyRating.calculate (rate, ChartBuilder.repeated_pattern 4 (duration * 60_000.0f<ms>) pattern)
+                let rating = Difficulty.calculate (rate, ChartBuilder.repeated_pattern 4 (duration * 60_000.0f<ms>) pattern)
                 rating.Overall
             )
             |> printfn "'%s' on %.1fx: %A" label rate

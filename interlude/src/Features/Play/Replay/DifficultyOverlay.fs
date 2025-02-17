@@ -16,7 +16,7 @@ open Interlude.Features.Play
 type private DifficultyOverlay
     (
         chart: ModdedChart,
-        difficulty: DifficultyRating,
+        difficulty: Difficulty,
         state: PlayState,
         playfield: Playfield
     ) =
@@ -38,8 +38,8 @@ type private DifficultyOverlay
         Render.rect bounds Colors.shadow_2.O3
         Text.fill_b(Style.font, sprintf "%.2f" value, bounds.Shrink(10.0f, 5.0f), (color, Colors.shadow_2), Alignment.CENTER)
 
-    let STREAM_SCALE = 15000.0f<ms / rate> * DifficultyRating.STREAM_CURVE_WIDTH_SCALE / DifficultyRating.STREAM_CURVE_HEIGHT_SCALE
-    let JACK_SCALE = 15000.0f<ms / rate> * DifficultyRating.JACK_CURVE_WIDTH_SCALE / DifficultyRating.JACK_CURVE_HEIGHT_SCALE
+    let STREAM_SCALE = 15000.0f<ms / rate> * Difficulty.STREAM_CURVE_WIDTH_SCALE / Difficulty.STREAM_CURVE_HEIGHT_SCALE
+    let JACK_SCALE = 15000.0f<ms / rate> * Difficulty.JACK_CURVE_WIDTH_SCALE / Difficulty.JACK_CURVE_HEIGHT_SCALE
 
     let draw_row (now: ChartTime) (index: int) =
         let centre =

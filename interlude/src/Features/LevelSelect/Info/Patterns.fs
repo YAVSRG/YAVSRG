@@ -81,7 +81,7 @@ type Patterns(display: Setting<Display>) =
             Render.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32</rate>) =
-                nps * 2.0f * SelectedChart.rate.Value |> float |> DifficultyRating.physical_color
+                nps * 2.0f * SelectedChart.rate.Value |> float |> Difficulty.color
 
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 

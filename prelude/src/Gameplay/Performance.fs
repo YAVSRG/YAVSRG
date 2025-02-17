@@ -27,9 +27,9 @@ module Performance =
         phi ((17.95 - Math.Max(2.0, Math.Abs delta)) / 15.0)
 
     let private performance_func b value hit_delta (time_delta: GameplayTime) =
-        DifficultyRating.stamina_func b (value * float32 (confidence_value hit_delta) / 0.55f) time_delta
+        Difficulty.stamina_func b (value * float32 (confidence_value hit_delta) / 0.55f) time_delta
 
-    let calculate (rr: DifficultyRating) (keys: int) (scoring: ScoreProcessor) =
+    let calculate (rr: Difficulty) (keys: int) (scoring: ScoreProcessor) =
         let last_times = Array.create keys 0.0f<ms>
         let mutable pv = 0.01f
         let pvs = Array.zeroCreate keys
@@ -54,5 +54,5 @@ module Performance =
 
             | _ -> ()
 
-        MathF.Pow(pv, DifficultyRating.CURVE_POWER) * DifficultyRating.CURVE_SCALE
+        MathF.Pow(pv, Difficulty.CURVE_POWER) * Difficulty.CURVE_SCALE
         |> float
