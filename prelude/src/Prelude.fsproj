@@ -46,7 +46,12 @@
     <Compile Include="ChartFormats\Quaver\Quaver.fs" />
     <Compile Include="ChartFormats\Quaver\Converter.fs" />
     <Compile Include="Mods\Types.fs" />
-    <Compile Include="Mods\Mods.fs" />
+    <Compile Include="Mods\Mirror.fs" />
+    <Compile Include="Mods\NoSV.fs" />
+    <Compile Include="Mods\NoLN.fs" />
+    <Compile Include="Mods\Inverse.fs" />
+    <Compile Include="Mods\MoreNotes.fs" />
+    <Compile Include="Mods\Randomise.fs" />
     <Compile Include="Mods\List.fs" />
     <Compile Include="Mods\State.fs" />
     <Compile Include="Gameplay\Replays\Replays.fs" />
