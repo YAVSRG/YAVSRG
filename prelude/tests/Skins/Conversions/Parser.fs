@@ -2,7 +2,7 @@
 
 open NUnit.Framework
 open System.IO
-open Prelude.Skins.Conversions.osu
+open Prelude.Skins.Conversions.Osu
 
 module SkinIniParser =
 

@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.osu
+﻿namespace Prelude.Skins.Conversions.Osu
 
 open System.IO
 open Percyqaz.Common
