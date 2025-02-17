@@ -108,33 +108,6 @@ module Quaver_To_Interlude =
         finish_holds Time.infinity
         output.ToArray()
 
-    let rec private find_bpm_durations
-        (points: QuaverTimingPoint list)
-        (end_time: Time)
-        : Dictionary<float32<ms / beat>, Time> =
-        if List.isEmpty points then
-            skip_conversion "Chart has no BPM points set"
-
-        let point = List.head points
-
-        let mutable current: float32<ms / beat> = 60000.0f<ms/minute> / (point.Bpm * 1.0f<beat/minute>)
-        let mutable t: Time = Time.of_number point.StartTime
-        let data = new Dictionary<float32<ms / beat>, Time>()
-
-        for p in points do
-            if (not (data.ContainsKey current)) then
-                data.Add(current, 0.0f<ms>)
-
-            data.[current] <- data.[current] + Time.of_number p.StartTime - t
-            t <- Time.of_number p.StartTime
-            current <- 60000.0f<ms/minute> / (p.Bpm * 1.0f<beat/minute>)
-
-        if (not (data.ContainsKey current)) then
-            data.Add(current, 0.0f<ms>)
-
-        data.[current] <- data.[current] + end_time - t
-        data
-
     let convert (b: QuaverChart) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Mode
