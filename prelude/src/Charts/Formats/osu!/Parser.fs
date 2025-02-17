@@ -355,7 +355,6 @@ type Beatmap with
             use stream = File.OpenRead(path)
             Ok (Parser.beatmap_from_stream stream)
         with err ->
-            printfn "%s" err.StackTrace
             Error err.Message
     member this.ToFile(path: string) =
         this.ToLines |> String.concat "\n" |> fun contents -> File.WriteAllText(path, contents, Encoding.UTF8)
@@ -365,7 +364,7 @@ type Beatmap with
 
     /// The internal hash osu! uses for a .osu file
     static member Hash(stream: Stream) =
-        let md5 = System.Security.Cryptography.MD5.Create()
+        let md5 = Security.Cryptography.MD5.Create()
         md5.ComputeHash(stream) |> Convert.ToHexString |> _.ToLower()
 
     static member Hash(beatmap: Beatmap) =
