@@ -3,9 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
-open Prelude.Charts.Processing
 open Prelude.Skins
-open Prelude.Skins.HudLayouts
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
@@ -159,7 +157,7 @@ type NoteskinConfig =
             PlayfieldAlignment = 0.5f, 0.5f
             ColumnWidth = 150.0f
             UseKeymodeSpecificColumnWidth = false
-            KeymodeSpecificColumnWidth = 
+            KeymodeSpecificColumnWidth =
                 [|
                     150.0f
                     150.0f
@@ -191,7 +189,7 @@ type NoteskinConfig =
 
             EnableColumnLight = false
             ColumnLightOffset = 0.0f
-            ColumnLightColors = 
+            ColumnLightColors =
                 [|
                     Array.init 3 id
                     Array.init 4 id
@@ -224,7 +222,7 @@ type NoteskinConfig =
             UseReceptors = true
             ReceptorStyle = ReceptorStyle.Receptors
             ReceptorOffset = 0.0f
-            ReceptorColors = 
+            ReceptorColors =
                 [|
                     Array.init 3 id
                     Array.init 4 id

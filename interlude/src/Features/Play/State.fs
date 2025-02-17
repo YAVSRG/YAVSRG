@@ -1,9 +1,8 @@
 ﻿namespace Interlude.Features.Play
 
 open System
-open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing
+open Prelude.Skins.Noteskins
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Percyqaz.Flux.Audio

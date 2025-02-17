@@ -5,7 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Interlude.UI
 open Interlude.Features.Gameplay
 
@@ -47,7 +47,7 @@ type ChartDetails() =
 
         let play_info = this.Bounds.SliceT(40.0f).TranslateY(90.0f).ShrinkX(15.0f)
 
-        Text.fill_b (Style.font, Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay), play_info, Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay), play_info, Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
 
         let chart_info = this.Bounds.SliceT(30.0f).TranslateY(130.0f).ShrinkX(15.0f)

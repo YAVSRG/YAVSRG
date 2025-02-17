@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude
 open Interlude.Options
 open Interlude.UI
@@ -102,7 +102,7 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
                             else
                                 None
                         ),
-                        (fun _ -> Setting.app (Mods.cycle id) SelectedChart.selected_mods)
+                        (fun _ -> Setting.app (ModState.cycle id) SelectedChart.selected_mods)
                     )
             }
             |+ ModSelector(

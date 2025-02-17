@@ -5,9 +5,9 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
+open Prelude.Skins.Noteskins
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content

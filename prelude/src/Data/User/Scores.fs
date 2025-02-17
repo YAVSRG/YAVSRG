@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 
 type Score =
     {

@@ -3,8 +3,8 @@
 open System
 open NUnit.Framework
 open Prelude
-open Prelude.ChartFormats.osu
 open Prelude.Charts
+open Prelude.ChartFormats.osu
 open Prelude.ChartFormats
 open Prelude.Data.Library
 

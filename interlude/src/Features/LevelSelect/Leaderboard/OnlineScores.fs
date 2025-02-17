@@ -2,10 +2,9 @@
 
 open Percyqaz.Common
 open Prelude.Charts
-open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
+open Prelude.Mods
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay.Rulesets
@@ -73,7 +72,7 @@ module OnlineScores =
                     |> Async.RunSynchronously
 
                     for score in scores do
-                        let with_mods = Mods.apply score.Mods req.CurrentChart
+                        let with_mods = ModState.apply score.Mods req.CurrentChart
                         let replay_data = Replay.decompress_string score.Replay
 
                         let scoring =

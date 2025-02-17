@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open YAVSRG.CLI.Utils
 
 module Check =

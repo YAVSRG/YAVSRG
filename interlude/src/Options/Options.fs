@@ -8,7 +8,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude.Data.Library
 open Interlude.Content
 

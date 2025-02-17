@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Skins.Noteskins
 open Prelude.Data.User
-open Prelude.Charts.Processing
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay

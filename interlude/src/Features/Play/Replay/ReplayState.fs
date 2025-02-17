@@ -3,8 +3,8 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Charts.Processing
 open Prelude.Data.User
+open Prelude.Skins.Noteskins
 open Interlude.UI
 open Interlude.Options
 

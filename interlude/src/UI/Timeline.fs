@@ -6,7 +6,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
-open Prelude.Charts.Processing
+open Prelude.Mods
 open Prelude.Charts.Processing.Patterns
 
 type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bounded<Rate>) =

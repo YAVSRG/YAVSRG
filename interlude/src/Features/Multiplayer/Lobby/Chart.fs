@@ -7,7 +7,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Interlude.Web.Shared
 open Interlude.Content
 open Interlude.UI
@@ -73,7 +73,7 @@ module LobbyChart =
                 Logging.Debug("Multiplayer chart not found, downloading")
                 Backbeat.download_missing_chart.Request((chart.Hash, "Multiplayer"),
                     function
-                    | false -> 
+                    | false ->
                         Logging.Debug("Multiplayer chart not found on the server either")
                         lobby.ReportMissingChart()
                         is_loading <- false
@@ -108,7 +108,7 @@ module LobbyChart =
         )
         attempt_match_lobby_chart lobby
 
-    do 
+    do
         SelectedChart.on_chart_change_finished.Add(fun info ->
             is_loading <- false
             last_seen_loaded_chart <- Some info
@@ -117,9 +117,9 @@ module LobbyChart =
         Content.OnChartAdded.Add(fun () ->
             match Network.lobby with
             | Some lobby ->
-                if 
+                if
                     Screen.current_type = Screen.Type.Lobby
-                    && not (is_loaded_or_loading()) 
+                    && not (is_loaded_or_loading())
                 then
                     attempt_match_lobby_chart (lobby)
             | None -> ()
@@ -171,7 +171,7 @@ type SelectedChart(lobby: Lobby) =
             Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
-            (fun () -> 
+            (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.DurationString
                 | None -> ""
@@ -180,7 +180,7 @@ type SelectedChart(lobby: Lobby) =
             Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
-            (fun () -> 
+            (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.BpmString
                 | None -> ""
@@ -189,16 +189,16 @@ type SelectedChart(lobby: Lobby) =
             Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
         |+ Text(
-            (fun () -> 
+            (fun () ->
                 match LobbyChart.info_if_selected() with
-                | Some _ -> Mods.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, false)
+                | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, false)
                 | None -> ""
             ),
             Align = Alignment.LEFT,
             Position = Position.ShrinkT(160.0f).SliceT(40.0f)
         )
         |+ Text(
-            (fun () -> 
+            (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.NotecountsString
                 | None -> ""
@@ -236,7 +236,7 @@ type SelectedChart(lobby: Lobby) =
                     Right = 0.5f %- 25.0f
                 }
         )
-            .Conditional(fun () -> 
+            .Conditional(fun () ->
                 LobbyChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
                 && lobby.ReadyStatus = ReadyFlag.NotReady
@@ -247,7 +247,7 @@ type SelectedChart(lobby: Lobby) =
                 match lobby.Replays |> Seq.tryHead with
                 | Some (KeyValue (username, replay_info)) ->
                     match LobbyChart.info_if_selected() with
-                    | Some info -> 
+                    | Some info ->
                         Screen.change_new
                             (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
                             Screen.Type.Replay

@@ -4,7 +4,7 @@ open System
 open System.IO
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 
 type Mods =
     | None = 0

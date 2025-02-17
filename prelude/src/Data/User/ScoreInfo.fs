@@ -2,10 +2,9 @@
 
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing
 open Prelude.Charts.Processing.Difficulty
+open Prelude.Mods
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -64,12 +63,12 @@ type ScoreInfo =
     member this.ModStatus = this.WithMods.Status
 
     member this.ModString() =
-        Mods.format (this.Rate, this.Mods, false)
+        ModState.format (this.Rate, this.Mods, false)
 
 module ScoreInfo =
 
     let from_score (cc: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
-        let with_mods = Mods.apply score.Mods chart
+        let with_mods = ModState.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 
         let scoring =

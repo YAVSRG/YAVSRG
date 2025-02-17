@@ -1,10 +1,10 @@
-﻿namespace Prelude.Charts.Processing
+﻿namespace Prelude.Skins.Noteskins
 
-open System
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
+open Prelude.Mods
 
 // This is the final stage of preprocessing chart data before it is played by the user.
 // Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures

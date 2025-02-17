@@ -3,7 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Charts.Processing
+open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections

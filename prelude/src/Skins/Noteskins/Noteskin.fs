@@ -2,7 +2,6 @@
 
 open System.IO
 open System.IO.Compression
-open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Percyqaz.Data

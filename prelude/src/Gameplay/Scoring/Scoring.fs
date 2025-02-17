@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Gameplay.Scoring
 
 open Prelude
+open Prelude.Mods
 open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets

@@ -31,8 +31,6 @@
     <Compile Include="Charts\Processing\Patterns\Categorise.fs" />
     <Compile Include="Charts\Processing\Patterns\Summary.fs" />
     <Compile Include="Charts\Processing\Difficulty.fs" />
-    <Compile Include="Charts\Processing\Mods.fs" />
-    <Compile Include="Charts\Processing\Colors.fs" />
     <Compile Include="ChartFormats\Conversions.fs" />
     <Compile Include="ChartFormats\osu!\Shared.fs" />
     <Compile Include="ChartFormats\osu!\Headers.fs" />
@@ -47,7 +45,10 @@
     <Compile Include="ChartFormats\Quaver\Yaml.fs" />
     <Compile Include="ChartFormats\Quaver\Quaver.fs" />
     <Compile Include="ChartFormats\Quaver\Converter.fs" />
-    <Compile Include="Gameplay\Mods.fs" />
+    <Compile Include="Mods\Types.fs" />
+    <Compile Include="Mods\Mods.fs" />
+    <Compile Include="Mods\List.fs" />
+    <Compile Include="Mods\State.fs" />
     <Compile Include="Gameplay\Replays\Replays.fs" />
     <Compile Include="Gameplay\Replays\Readers.fs" />
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
@@ -69,6 +70,20 @@
     <Compile Include="Gameplay\Skillsets\CombinedStats.fs" />
     <Compile Include="Gameplay\Skillsets\Skillsets.fs" />
     <Compile Include="Gameplay\PersonalBests.fs" />
+    <Compile Include="Skins\Storage.fs" />
+    <Compile Include="Skins\Themes.fs" />
+    <Compile Include="Skins\HUD\Config.fs" />
+    <Compile Include="Skins\HUD\HudLayout.fs" />
+    <Compile Include="Skins\Noteskins\Colors.fs" />
+    <Compile Include="Skins\Noteskins\Config.fs" />
+    <Compile Include="Skins\Noteskins\Noteskin.fs" />
+    <Compile Include="Skins\Skin.fs" />
+    <Compile Include="Skins\Repo.fs" />
+    <Compile Include="Skins\Conversions\Helpers.fs" />
+    <Compile Include="Skins\Conversions\osu!\Parser.fs" />
+    <Compile Include="Skins\Conversions\osu!\Textures.fs" />
+    <Compile Include="Skins\Conversions\osu!\Converter.fs" />
+    <Compile Include="Skins\Conversions\StepMania\Converter.fs" />
     <Compile Include="Backbeat\Rulesets.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
@@ -103,19 +118,6 @@
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />
     <Compile Include="Data\OsuClientInterop\Scores.fs" />
-    <Compile Include="Skins\Storage.fs" />
-    <Compile Include="Skins\Themes.fs" />
-    <Compile Include="Skins\HUD\Config.fs" />
-    <Compile Include="Skins\HUD\HudLayout.fs" />
-    <Compile Include="Skins\Noteskins\Config.fs" />
-    <Compile Include="Skins\Noteskins\Noteskin.fs" />
-    <Compile Include="Skins\Skin.fs" />
-    <Compile Include="Skins\Repo.fs" />
-    <Compile Include="Skins\Conversions\Helpers.fs" />
-    <Compile Include="Skins\Conversions\osu!\Parser.fs" />
-    <Compile Include="Skins\Conversions\osu!\Textures.fs" />
-    <Compile Include="Skins\Conversions\osu!\Converter.fs" />
-    <Compile Include="Skins\Conversions\StepMania\Converter.fs" />
   </ItemGroup>
 
   <ItemGroup>

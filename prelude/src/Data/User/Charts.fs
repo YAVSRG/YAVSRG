@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay
-open Prelude.Gameplay.Mods
 
 type DbChartData =
     {
@@ -40,7 +39,7 @@ module DbChartData =
             );
             """
         }
-    
+
     let internal RESET_PERSONAL_BESTS: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL = """ UPDATE chart_data SET PersonalBests = '[]'; """

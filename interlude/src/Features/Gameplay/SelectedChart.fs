@@ -6,9 +6,9 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing
+open Prelude.Mods
 open Prelude.Charts.Processing.Difficulty
-open Prelude.Gameplay.Mods
+open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections
@@ -182,7 +182,7 @@ module SelectedChart =
                                 SAVE_DATA <- Some save_data
                         // if chart is loaded we can safely restart from this point for different rates and mods
 
-                        let with_mods = Mods.apply mods chart
+                        let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
                         let rating = DifficultyRating.calculate(rate, with_mods.Notes)
@@ -213,7 +213,7 @@ module SelectedChart =
                         | None -> ()
                         | Some chart ->
 
-                        let with_mods = Mods.apply mods chart
+                        let with_mods = ModState.apply mods chart
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
                         let rating = DifficultyRating.calculate(rate, with_mods.Notes)

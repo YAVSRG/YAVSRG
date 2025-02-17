@@ -1,40 +1,8 @@
-﻿namespace Prelude.Charts.Processing
+﻿namespace Prelude.Mods
 
 open System
 open Prelude
 open Prelude.Charts
-
-(*
-    Marker for status of mods.
-        0 = This is a non-silly mod suitable for online upload, personal bests, leaderboards
-        1 = This is a for-fun mod that may transform a chart in large ways or are otherwise not suitable for leaderboards e.g. randomiser
-        2 = Scores with this mod enabled should not be saved at all e.g. something experimental or still in development
-*)
-type ModStatus =
-    | Ranked = 0
-    | Unranked = 1
-    | Unstored = 2
-
-type ModdedChart =
-    {
-        Keys: int
-        Notes: TimeArray<NoteRow>
-        BPM: TimeArray<BPM>
-        SV: TimeArray<float32>
-        ModsSelected: Map<string, int>
-        ModsApplied: Map<string, int>
-        Status: ModStatus
-    }
-    member this.FirstNote = this.Notes.[0].Time
-    member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
-
-type ModdedChartInternal =
-    {
-        Keys: int
-        Notes: TimeArray<NoteRow>
-        BPM: TimeArray<BPM>
-        SV: TimeArray<float32>
-    }
 
 module Mirror =
 
@@ -354,10 +322,10 @@ module MoreNotes =
             { chart with Notes = new_notes }, true
 
 module Randomise =
-    
+
     let shuffle (seed: int) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
         let random = PseudoRandom.FromSeed(seed)
-        let shuffled_columns = Array.init chart.Keys id 
+        let shuffled_columns = Array.init chart.Keys id
         random.Shuffle shuffled_columns
 
         let shuffle_notes (nr: NoteRow) : NoteRow =
@@ -377,7 +345,7 @@ module Randomise =
         let ln_column_map : int array = Array.zeroCreate chart.Keys
 
         let get_random_column (now: Time) (gap_size: Time) =
-            let suitable_columns = 
+            let suitable_columns =
                 column_last_used
                 |> Seq.indexed
                 |> Seq.filter (fun (i, t) -> let time_ago = (now - t) in gap_size < time_ago * 1.3f && gap_size > time_ago * 0.7f )
@@ -398,7 +366,7 @@ module Randomise =
             if fallback_columns.Length > 0 then
                 fallback_columns.[0]
 
-            else 
+            else
 
             failwith "impossible"
 
@@ -427,8 +395,8 @@ module Randomise =
                     new_row.[col] <- NoteType.NORMAL
             new_row
 
-        { chart with 
-            Notes = 
+        { chart with
+            Notes =
                 chart.Notes
                 |> Array.map (fun { Time = time; Data = nr } -> { Time = time; Data = randomise_row time nr })
         }, true

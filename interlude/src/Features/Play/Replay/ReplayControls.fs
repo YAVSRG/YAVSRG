@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts.Processing
+open Prelude.Mods
 open Interlude.UI
 open Interlude.Features.Gameplay
 

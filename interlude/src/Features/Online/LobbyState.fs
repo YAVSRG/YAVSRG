@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude.Data.Library
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring

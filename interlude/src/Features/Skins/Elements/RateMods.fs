@@ -2,7 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
@@ -13,7 +13,7 @@ type RateMods(config: HudConfig, state: PlayState) =
     override this.Init(parent) =
         let text =
             if config.RateModMeterShowMods then
-                Mods.format (SelectedChart.rate.Value, state.WithColors.ModsSelected, SelectedChart.autoplay)
+                ModState.format (SelectedChart.rate.Value, state.WithColors.ModsSelected, SelectedChart.autoplay)
             else
                 sprintf "%.2fx" SelectedChart.rate.Value
 

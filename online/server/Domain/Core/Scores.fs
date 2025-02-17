@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Gameplay
+open Prelude.Mods
 open Interlude.Web.Server
 
 type Score =
@@ -14,7 +14,7 @@ type Score =
         TimePlayed: int64
         TimeUploaded: int64
         Rate: Rate
-        Mods: Mods.ModState
+        Mods: ModState
         Ranked: bool // precomputed; true only if mod state is valid and rate >= 1
         Accuracy: float
         Grade: int
@@ -92,7 +92,7 @@ module Score =
             chart_id: string,
             time_played: int64,
             rate: Rate,
-            mods: Mods.ModState,
+            mods: ModState,
             is_ranked: bool,
             accuracy: float,
             grade: int,
@@ -166,7 +166,7 @@ module Score =
             ChartId: string
             TimePlayed: int64
             Rate: Rate
-            Mods: Mods.ModState
+            Mods: ModState
             Accuracy: float
             Grade: int
             Lamp: int
@@ -206,7 +206,7 @@ module Score =
             UserId: int64
             TimePlayed: int64
             Rate: Rate
-            Mods: Mods.ModState
+            Mods: ModState
             Accuracy: float
             Grade: int
             Lamp: int
@@ -257,7 +257,7 @@ module Score =
         {
             TimePlayed: int64
             Rate: Rate
-            Mods: Mods.ModState
+            Mods: ModState
             Accuracy: float
             Grade: int
             Lamp: int
@@ -357,7 +357,7 @@ module Score =
             ChartId: string
             TimePlayed: int64
             Rate: float32
-            Mods: Mods.ModState
+            Mods: ModState
             Accuracy: float
             Grade: int
             Lamp: int

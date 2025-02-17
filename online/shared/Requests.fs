@@ -2,7 +2,7 @@
 
 open Percyqaz.Data
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Interlude.Web.Shared.API
 
 module Health =

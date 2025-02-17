@@ -19,7 +19,7 @@ module Buffer =
         - Second byte: LEAST SIGNFICIANT bits of the length of the packet body
         - Third byte: packet 'kind' - See Packets.fs
         Followed by body bytes, the same number as represented in those first 2 bytes
-        
+
         After that the next byte is the first of the header for another packet
     *)
 

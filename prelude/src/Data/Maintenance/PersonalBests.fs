@@ -1,10 +1,10 @@
 ﻿namespace Prelude.Data.Maintenance
 
 open Percyqaz.Common
+open Prelude.Mods
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Charts.Processing
 
 module PersonalBests =
 

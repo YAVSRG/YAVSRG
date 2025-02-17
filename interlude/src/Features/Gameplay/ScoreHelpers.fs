@@ -3,11 +3,11 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Charts.Processing
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
+open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Prelude.Data.Library

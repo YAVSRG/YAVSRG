@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Features.Pacemaker
 
 open Prelude
-open Prelude.Gameplay.Mods
+open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -94,7 +94,7 @@ module PacemakerState =
 
                     match info.SaveData.ScoreByTimestamp timestamp with
                     | Some score ->
-                        let with_mods = Mods.apply score.Mods info.Chart
+                        let with_mods = ModState.apply score.Mods info.Chart
                         let replay_data = score.Replay |> Replay.decompress_bytes
                         let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
 

@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Prelude.Charts
+open Prelude.Mods
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -40,7 +41,7 @@ module LocalScores =
         let mutable new_bests = None
         for score_info in local_scores do
             assert(score_info.Ruleset = Rulesets.current)
-            if score_info.ModStatus = Processing.ModStatus.Ranked then
+            if score_info.ModStatus = ModStatus.Ranked then
                 new_bests <-
                     Some(
                         match new_bests with

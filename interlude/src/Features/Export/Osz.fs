@@ -4,8 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
-open Prelude.Gameplay.Mods
-open Prelude.Charts.Processing
+open Prelude.Mods
 open Prelude.Data.Library
 open Interlude.UI
 
@@ -23,7 +22,7 @@ module OsuExport =
     let export_chart_with_mods (chart: ModdedChart) (chart_meta: ChartMeta) (options: OsuExportOptions) =
         let mod_string =
             chart.ModsApplied
-            |> Mods.in_priority_order
+            |> ModState.in_priority_order
             |> Seq.map (fun (id, _, state) -> Mods.name id (Some state))
             |> String.concat ", "
 

@@ -3,9 +3,9 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
+open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Gameplay.Mods
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
@@ -59,7 +59,7 @@ module Scores =
                 return ScoreUploadOutcome.Failed
             else
 
-            match Mods.check mods with
+            match ModState.check mods with
             | Error message ->
                 Logging.Error "Mod validation failed from user #%i: %s" user_id message
                 return ScoreUploadOutcome.Failed
@@ -78,7 +78,7 @@ module Scores =
 
             let is_ranked = rate >= 1.0f<rate> && mod_ranked_status = ModStatus.Ranked
 
-            let mod_chart = Mods.apply mods chart
+            let mod_chart = ModState.apply mods chart
 
             let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
 
