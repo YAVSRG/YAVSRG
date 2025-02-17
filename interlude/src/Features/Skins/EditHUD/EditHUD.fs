@@ -8,7 +8,6 @@ open Prelude.Charts
 open Prelude.Charts.Processing
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.HudLayouts
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -68,6 +67,7 @@ module EditHudScreen =
                 Background.dim (float32 options.BackgroundDim.Value)
                 Toolbar.hide ()
                 Song.on_finish <- SongFinishAction.LoopFromBeginning
+                Song.resume()
                 Input.remove_listener ()
 
             override this.OnExit s =
