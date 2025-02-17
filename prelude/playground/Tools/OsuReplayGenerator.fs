@@ -6,7 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
-open Prelude.ChartFormats.osu
+open Prelude.Formats.Osu
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.OsuClientInterop

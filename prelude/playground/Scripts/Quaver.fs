@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Scripts
 
 open System.IO
-open Prelude.ChartFormats.Quaver
+open Prelude.Formats.Quaver
 
 module Quaver =
 

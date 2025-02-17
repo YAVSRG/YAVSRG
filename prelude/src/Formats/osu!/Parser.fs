@@ -1,4 +1,4 @@
-﻿namespace Prelude.ChartFormats.osu
+﻿namespace Prelude.Formats.Osu
 
 open System
 open System.Globalization

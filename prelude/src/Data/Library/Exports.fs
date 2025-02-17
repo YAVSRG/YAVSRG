@@ -4,7 +4,7 @@ open System.IO
 open System.IO.Compression
 open Prelude
 open Prelude.Charts
-open Prelude.ChartFormats.osu
+open Prelude.Formats.Osu
 
 type OsuExportOptions =
     {

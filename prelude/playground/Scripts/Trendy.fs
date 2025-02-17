@@ -1,7 +1,7 @@
 ﻿module Trendy
 
 open Prelude
-open Prelude.ChartFormats.osu
+open Prelude.Formats.Osu
 
 let trendy =
     Beatmap.FromFile

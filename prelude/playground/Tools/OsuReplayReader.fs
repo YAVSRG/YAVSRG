@@ -5,8 +5,8 @@ open System.IO
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.ChartFormats
-open Prelude.ChartFormats.osu
+open Prelude.Formats
+open Prelude.Formats.Osu
 open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library.Imports
 open Prelude.Gameplay.Replays

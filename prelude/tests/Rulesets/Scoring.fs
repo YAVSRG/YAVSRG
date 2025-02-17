@@ -4,8 +4,8 @@ open System
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude
-open Prelude.ChartFormats.osu
-open Prelude.ChartFormats
+open Prelude.Formats
+open Prelude.Formats.Osu
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring

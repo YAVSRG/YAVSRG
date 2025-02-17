@@ -4,7 +4,7 @@ open System
 open System.IO
 open Prelude
 open Prelude.Charts
-open Prelude.ChartFormats
+open Prelude.Formats
 open Prelude.Data.Library
 open Prelude.Data
 

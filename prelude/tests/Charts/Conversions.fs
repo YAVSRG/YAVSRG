@@ -4,8 +4,8 @@ open System
 open NUnit.Framework
 open Prelude
 open Prelude.Charts
-open Prelude.ChartFormats.osu
-open Prelude.ChartFormats
+open Prelude.Formats
+open Prelude.Formats.Osu
 open Prelude.Data.Library
 
 module Conversions =

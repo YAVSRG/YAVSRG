@@ -1,4 +1,4 @@
-namespace Prelude.ChartFormats
+namespace Prelude.Formats
 
 open System
 open System.IO

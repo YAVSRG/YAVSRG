@@ -1,4 +1,4 @@
-﻿namespace Prelude.ChartFormats.StepMania
+﻿namespace Prelude.Formats.StepMania
 
 open Prelude
 

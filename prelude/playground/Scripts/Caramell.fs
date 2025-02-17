@@ -3,7 +3,7 @@
 open System
 open System.IO
 open Prelude
-open Prelude.ChartFormats.osu
+open Prelude.Formats.Osu
 [<Measure>]
 type measure
 

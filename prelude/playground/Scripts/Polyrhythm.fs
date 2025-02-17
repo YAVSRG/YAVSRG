@@ -1,7 +1,7 @@
 ﻿module Polyrhythm
 
 open Prelude
-open Prelude.ChartFormats.osu
+open Prelude.Formats.Osu
 
 let source =
     @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-638573341266920297-audio\Virtual Riot - I heard you like polyrhythms (Percyqaz) [4K].osu"

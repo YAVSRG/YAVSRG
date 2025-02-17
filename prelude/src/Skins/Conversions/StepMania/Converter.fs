@@ -8,7 +8,6 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Skins
 open Prelude.Skins.Noteskins
-open Prelude.Calculator
 
 module StepmaniaSkinConverter =
 
