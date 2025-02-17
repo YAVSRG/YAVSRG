@@ -61,7 +61,6 @@
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
     <Compile Include="Gameplay\Scoring\Scoring.fs" />
     <Compile Include="Gameplay\Scoring\Graph.fs" />
-    <Compile Include="Gameplay\PersonalBests.fs" />
     <Compile Include="Calculator\Patterns\Primitives.fs" />
     <Compile Include="Calculator\Patterns\Patterns.fs" />
     <Compile Include="Calculator\Patterns\PatternFinder.fs" />
@@ -92,12 +91,14 @@
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Images.fs" />
+    <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\User\Scores.fs" />
+    <Compile Include="Data\User\ScoreInfo.fs" />
+    <Compile Include="Data\User\PersonalBests.fs" />
     <Compile Include="Data\User\Charts.fs" />
     <Compile Include="Data\User\Singletons.fs" />
     <Compile Include="Data\User\Sessions.fs" />
     <Compile Include="Data\User\UserDatabase.fs" />
-    <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\Library\Charts.fs" />
     <Compile Include="Data\Library\ChartDatabase.fs" />
     <Compile Include="Data\Library\Collections.fs" />
@@ -113,7 +114,6 @@
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
     <Compile Include="Data\Library\Endless.fs" />
-    <Compile Include="Data\User\ScoreInfo.fs" />
     <Compile Include="Data\User\Stats\Helpers.fs" />
     <Compile Include="Data\User\Stats\State.fs" />
     <Compile Include="Data\User\Stats\Sync.fs" />

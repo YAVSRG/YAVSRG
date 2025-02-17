@@ -1,7 +1,8 @@
-﻿namespace Prelude.Gameplay
+﻿namespace Prelude.Data.User
 
 open Percyqaz.Data
 open Prelude
+open Prelude.Mods
 
 [<RequireQualifiedAccess>]
 type Improvement<'T> =
@@ -99,13 +100,32 @@ type Bests =
     static member Default = { Lamp = []; Accuracy = []; Grade = [] }
 
 module Bests =
-    
+
     let ruleset_best_below<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (maximum_rate: Rate) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_below maximum_rate (property bests)
-    
+
     let ruleset_best_above<'T> (ruleset: string) (property: Bests -> PersonalBests<'T>) (minimum_rate: Rate) (map: Map<string, Bests>) : PersonalBestEntry<'T> option =
         match map.TryFind ruleset with
         | None -> None
         | Some bests -> PersonalBests.get_best_above minimum_rate (property bests)
+
+    let update (score_info: ScoreInfo) (existing: Bests) : Bests * ImprovementFlags =
+        assert(score_info.ModStatus = ModStatus.Ranked)
+        let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate, score_info.TimePlayed) existing.Lamp
+
+        let a, ap =
+            PersonalBests.update (score_info.Accuracy, score_info.Rate, score_info.TimePlayed) existing.Accuracy
+
+        let g, gp = PersonalBests.update (score_info.Grade, score_info.Rate, score_info.TimePlayed) existing.Grade
+
+        { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
+
+    let create (score_info: ScoreInfo) : Bests =
+        assert(score_info.ModStatus = ModStatus.Ranked)
+        {
+            Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate, score_info.TimePlayed)
+            Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate, score_info.TimePlayed)
+            Grade = PersonalBests.create (score_info.Grade, score_info.Rate, score_info.TimePlayed)
+        }

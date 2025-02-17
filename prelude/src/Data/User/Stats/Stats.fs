@@ -2,7 +2,6 @@
 
 open System
 open Percyqaz.Common
-open Prelude.Gameplay
 open Prelude.Calculator
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -41,7 +40,7 @@ module Stats =
         if now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session now database
         elif now < CURRENT_SESSION.LastTime then
-            Logging.Error("System clock changes could break your session stats")
+            Logging.Error "System clock changes could break your session stats"
             end_current_session now database
         else
             save database
@@ -141,5 +140,5 @@ module Stats =
         if Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session now database
         elif now < CURRENT_SESSION.LastTime then
-            Logging.Error("System clock changes could break your session stats")
+            Logging.Error "System clock changes could break your session stats"
             end_current_session now database

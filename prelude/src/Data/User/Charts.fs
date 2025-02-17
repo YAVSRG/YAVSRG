@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Gameplay
 
 type DbChartData =
     {

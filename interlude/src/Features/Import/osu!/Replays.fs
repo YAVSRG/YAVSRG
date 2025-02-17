@@ -58,7 +58,7 @@ module Replay =
         SelectedChart.when_loaded true
         <| fun _ ->
             if Screen.change_new
-                (fun () -> ScoreScreen(score_info, (Gameplay.ImprovementFlags.None, None), false))
+                (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false))
                 Screen.Type.Score
                 Transitions.EnterGameplayNoFadeAudio
             then Menu.Exit()

@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Scoring
+open Prelude.Data.User
 open Interlude.Content
 open Interlude.Features.Gameplay
 
@@ -33,9 +33,9 @@ type PersonalBests() =
 
             let pbs = save_data.PersonalBests.[Rulesets.current_hash]
 
-            let accuracy = 
+            let accuracy =
                 match pbs.Accuracy |> PersonalBests.get_best_above SelectedChart.rate.Value with
-                | Some (acc, rate, timestamp) -> 
+                | Some (acc, rate, timestamp) ->
                     let grade = Grade.calculate Rulesets.current.Grades acc
                     let color = Rulesets.current.GradeColor grade
                     Some (acc, rate, timestamp, color)
@@ -47,7 +47,7 @@ type PersonalBests() =
 
             let lamp =
                 match pbs.Lamp |> PersonalBests.get_best_above SelectedChart.rate.Value with
-                | Some (lamp, rate, timestamp) -> 
+                | Some (lamp, rate, timestamp) ->
                     let color = Rulesets.current.LampColor lamp
                     Some (lamp, rate, timestamp, color)
                 | None ->

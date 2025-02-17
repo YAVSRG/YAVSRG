@@ -4,7 +4,6 @@ open Prelude
 open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Mods
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -106,25 +105,4 @@ module ScoreInfo =
             IsImported = score_info.ImportedFromOsu
             IsFailed = score_info.IsFailed
             Keys = score_info.WithMods.Keys
-        }
-
-module Bests =
-
-    let update (score_info: ScoreInfo) (existing: Bests) : Bests * ImprovementFlags =
-        assert(score_info.ModStatus = ModStatus.Ranked)
-        let l, lp = PersonalBests.update (score_info.Lamp, score_info.Rate, score_info.TimePlayed) existing.Lamp
-
-        let a, ap =
-            PersonalBests.update (score_info.Accuracy, score_info.Rate, score_info.TimePlayed) existing.Accuracy
-
-        let g, gp = PersonalBests.update (score_info.Grade, score_info.Rate, score_info.TimePlayed) existing.Grade
-
-        { Lamp = l; Accuracy = a; Grade = g }, { Lamp = lp; Accuracy = ap; Grade = gp }
-
-    let create (score_info: ScoreInfo) : Bests =
-        assert(score_info.ModStatus = ModStatus.Ranked)
-        {
-            Lamp = PersonalBests.create (score_info.Lamp, score_info.Rate, score_info.TimePlayed)
-            Accuracy = PersonalBests.create (score_info.Accuracy, score_info.Rate, score_info.TimePlayed)
-            Grade = PersonalBests.create (score_info.Grade, score_info.Rate, score_info.TimePlayed)
         }
