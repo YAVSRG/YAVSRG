@@ -358,8 +358,8 @@ module ChartDatabase =
                 }
         }
 
-    open Prelude.Charts.Processing.Difficulty
-    open Prelude.Charts.Processing.Patterns
+    open Prelude.Calculator
+    open Prelude.Calculator.Patterns
 
     let recalculate_data =
         { new Async.Service<ChartDatabase, unit>() with

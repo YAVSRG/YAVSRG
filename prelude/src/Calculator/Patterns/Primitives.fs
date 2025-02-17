@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing.Patterns
+﻿namespace Prelude.Calculator.Patterns
 
 open Percyqaz.Common
 open Prelude

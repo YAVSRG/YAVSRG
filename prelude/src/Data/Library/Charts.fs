@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 
 module DbCharts =
 

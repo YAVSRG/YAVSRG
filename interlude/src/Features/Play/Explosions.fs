@@ -3,7 +3,7 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Processing
+open Prelude.Calculator
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Skins.Noteskins

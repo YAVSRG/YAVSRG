@@ -7,9 +7,8 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Charts
 open Prelude.Mods
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 open Prelude.Gameplay.Replays
-open Prelude.Skins.Noteskins
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play

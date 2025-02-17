@@ -9,7 +9,7 @@ open Prelude
 open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Charts.Processing
+open Prelude.Calculator
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.Options

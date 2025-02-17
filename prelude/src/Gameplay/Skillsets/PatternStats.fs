@@ -2,7 +2,7 @@
 
 open Percyqaz.Data
 open Prelude
-open Prelude.Charts.Processing
+open Prelude.Calculator
 
 [<Json.AutoCodec>]
 type PatternStatPoint = { BPM: int; Duration: GameplayTime }
@@ -56,7 +56,7 @@ module PatternStatLine =
             if duration > ONE_MINUTE then
                 1.0f + ((duration - ONE_MINUTE) / ONE_MINUTE * 0.01f)
             else duration / ONE_MINUTE
-        
+
         let rec v (xs: PatternStatLine) =
             match xs with
             | x :: y :: xs ->
@@ -107,10 +107,10 @@ module PatternSkillBreakdown =
     let multiplier (threshold: float) (accuracy: float) : float32 =
         if accuracy >= threshold then
             System.Math.Pow((1.0 - threshold) / (max (1.0 - accuracy) 0.001), 0.3) |> float32
-        else 
+        else
             System.Math.Pow((1.0 - threshold) / (1.0 - accuracy), 3.0) |> float32
 
-    let private OCTAVES = 
+    let private OCTAVES =
         [|
             0.8f, 1.4f
             0.9f, 1.2f

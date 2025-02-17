@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Playground.Calculator
 
 open Prelude
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 
 module CurveExperiments =
 

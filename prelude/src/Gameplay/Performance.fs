@@ -3,7 +3,7 @@
 open System
 open Prelude
 open Prelude.Gameplay.Scoring
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 
 module Performance =
 

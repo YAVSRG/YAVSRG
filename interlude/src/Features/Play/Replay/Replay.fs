@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing
+open Prelude.Calculator
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay
@@ -101,7 +101,7 @@ module ReplayScreen =
                 )
                 |+ DifficultyOverlay(
                     with_colors.Source,
-                    Difficulty.DifficultyRating.calculate(rate, with_colors.Notes), // todo: get from chart info
+                    DifficultyRating.calculate(rate, with_colors.Notes), // todo: get from chart info
                     this.State,
                     this.Playfield
                 )

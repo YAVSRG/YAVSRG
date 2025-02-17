@@ -353,7 +353,7 @@ module ScoreProcessor =
         scoring.Update Time.infinity
         scoring
 
-    open Prelude.Charts.Processing
+    open Prelude.Calculator
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
         let ruleset = SC.create 4

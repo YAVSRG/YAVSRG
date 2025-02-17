@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Gameplay
 open Prelude.Data.User.Stats
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 open Interlude.UI
 
 type SkillBreakdown() =

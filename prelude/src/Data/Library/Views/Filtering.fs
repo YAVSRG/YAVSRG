@@ -3,7 +3,7 @@
 open System
 open FParsec
 open Prelude
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 
 type FilterPart =
     | Equals of string * string

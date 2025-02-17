@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing.Patterns
+﻿namespace Prelude.Calculator.Patterns
 
 open System.Collections.Generic
 open Percyqaz.Data
@@ -80,7 +80,7 @@ type Cluster =
 module private Clustering =
 
     let BPM_CLUSTER_THRESHOLD = 5.0f<ms / beat>
-    
+
     let find_percentile (percentile: float32) (sorted_values: float32<'u> array) : float32<'u> =
         if sorted_values.Length = 0 then 0.0f |> LanguagePrimitives.Float32WithMeasure else
         let index = percentile * float32 sorted_values.Length |> floor |> int
@@ -149,10 +149,10 @@ module private Clustering =
                 bpms_mixed.Add(pattern, new_cluster)
                 new_cluster
 
-        let patterns_with_clusters = 
+        let patterns_with_clusters =
             matched_patterns
             |> Array.map (fun pattern ->
-                pattern, 
+                pattern,
                 if pattern.Mixed then
                     add_to_mixed_cluster pattern.Pattern pattern.MsPerBeat
                 else
@@ -173,7 +173,7 @@ module private Clustering =
 
             let data_count = float32 data.Length
             let specific_types =
-                data 
+                data
                 |> Array.choose (fst >> _.SpecificType)
                 |> Array.countBy id
                 |> Seq.map (fun (specific_type, count) -> (specific_type, float32 count / data_count))
@@ -185,7 +185,7 @@ module private Clustering =
                 SpecificTypes = specific_types
                 BPM = bpm
                 Mixed = mixed
-                
+
                 Density10 = find_percentile 0.1f densities
                 Density25 = find_percentile 0.25f densities
                 Density50 = find_percentile 0.5f densities

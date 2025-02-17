@@ -4,7 +4,7 @@ open System.IO
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library

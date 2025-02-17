@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing.Patterns
+﻿namespace Prelude.Calculator.Patterns
 
 open Percyqaz.Data
 open Prelude
@@ -20,8 +20,8 @@ type PatternReport =
 
         Duration: Time
     }
-    static member Default = 
-        { 
+    static member Default =
+        {
             Clusters = [||]
             LNPercent = 0.0f
             SVAmount = 0.0f<ms>
@@ -38,8 +38,8 @@ type PatternReport =
     member this.ImportantClusters =
         match Array.tryHead this.Clusters with
         | None -> Seq.empty
-        | Some c -> 
-        
+        | Some c ->
+
         let importance = c.Importance
         this.Clusters |> Seq.takeWhile (fun c -> c.Importance / importance > 0.5f)
 
@@ -47,7 +47,7 @@ module PatternReport =
 
     let from_chart_uncached (chart: Chart) : PatternReport =
         let density, patterns = PatternFinder.find_patterns chart
-        let clusters = 
+        let clusters =
             Clustering.calculate_clustered_patterns patterns
             |> Seq.filter (fun c -> c.BPM > 25<beat / minute / rate>)
             |> Seq.sortByDescending (fun x -> x.Amount)
@@ -61,7 +61,7 @@ module PatternReport =
                 && other.BPM > cluster.BPM
             )
 
-        let pruned_clusters = 
+        let pruned_clusters =
             seq {
                 let clusters = clusters |> Seq.filter (can_be_pruned >> not) |> Array.ofSeq
                 yield! clusters |> Seq.filter (fun x -> x.Pattern = Stream) |> Seq.truncate 3

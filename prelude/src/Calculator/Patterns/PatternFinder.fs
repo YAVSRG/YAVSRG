@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing.Patterns
+﻿namespace Prelude.Calculator.Patterns
 
 open Percyqaz.Data
 open Prelude
@@ -25,8 +25,8 @@ type CorePattern =
         | Chordstream -> ( 0.98, 0.95, 0.91 )
         | Jacks -> ( 0.99, 0.96, 0.93 )
 
-type MatchedPattern = 
-    { 
+type MatchedPattern =
+    {
         Pattern: CorePattern
         SpecificType: string option
         Start: Time
@@ -37,7 +37,7 @@ type MatchedPattern =
     }
 
 module PatternFinder =
-    
+
     let private PATTERN_STABILITY_THRESHOLD = 5.0f<ms/beat>
 
     let private matches (last_note: Time) (specific_patterns: SpecificPatterns) (full_data: RowInfo list) : MatchedPattern array =
@@ -67,7 +67,6 @@ module PatternFinder =
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
                 }
 
-            
             match Core.CHORDSTREAM remaining_data with
             | 0 -> ()
             | n ->
@@ -89,7 +88,6 @@ module PatternFinder =
                     Mixed = d |> List.forall (fun d -> abs(d.MsPerBeat - mean_mspb) < PATTERN_STABILITY_THRESHOLD) |> not
                 }
 
-            
             match Core.JACKS remaining_data with
             | 0 -> ()
             | n ->
@@ -105,7 +103,7 @@ module PatternFinder =
                     Pattern = Jacks
                     SpecificType = specific_type
                     Start = remaining_data.Head.Time
-                    End = 
+                    End =
                         max
                             (remaining_data.Head.Time + remaining_data.Head.MsPerBeat * 0.5f<beat>)
                             (remaining_data |> List.skip n |> List.tryHead |> function None -> last_note | Some r -> r.Time)
@@ -122,9 +120,9 @@ module PatternFinder =
         let density, primitives = Primitives.process_chart chart
 
         density,
-        if chart.Keys = 4 then 
+        if chart.Keys = 4 then
             matches chart.LastNote SpecificPatterns.SPECIFIC_4K primitives
-        elif chart.Keys = 7 then 
+        elif chart.Keys = 7 then
             matches chart.LastNote SpecificPatterns.SPECIFIC_7K primitives
         else
             matches chart.LastNote SpecificPatterns.SPECIFIC_OTHER primitives

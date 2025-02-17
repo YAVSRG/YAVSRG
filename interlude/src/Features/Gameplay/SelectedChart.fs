@@ -7,7 +7,7 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Charts
 open Prelude.Mods
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library

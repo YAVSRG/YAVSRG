@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay
+open Prelude.Calculator
 open Prelude.Data.User
 open Interlude.UI
 open Interlude.Features.Score
@@ -137,7 +138,7 @@ type private ScoreCard(score_info: ScoreInfo) =
             Style.font,
             (sprintf "%.2f" score_info.Physical),
             box.ShrinkY(5.0f),
-            (Colors.white.O4a alpha, (Charts.Processing.Difficulty.DifficultyRating.physical_color score_info.Physical).O4a alpha),
+            (Colors.white.O4a alpha, (DifficultyRating.physical_color score_info.Physical).O4a alpha),
             Alignment.CENTER
         )
 

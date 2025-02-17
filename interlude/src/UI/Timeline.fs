@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Mods
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 
 type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bounded<Rate>) =
     inherit StaticWidget(NodeType.None)

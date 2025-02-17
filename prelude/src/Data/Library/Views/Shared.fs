@@ -2,7 +2,7 @@
 
 open System
 open Percyqaz.Common
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library.Collections
@@ -20,11 +20,11 @@ module internal Shared =
 
     // A new day starts at 4am, your machine local time
     let days_ago (timestamp: int64) =
-        let local_date_now = 
+        let local_date_now =
             DateTime.Now
                 .Subtract(TimeSpan.FromHours(4.0))
                 .Date
-        let local_date = 
+        let local_date =
             Timestamp.to_datetime(timestamp)
                 .ToLocalTime()
                 .Subtract(TimeSpan.FromHours(4.0))
@@ -61,7 +61,7 @@ module internal Shared =
     let grade_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
-        match 
+        match
             data.PersonalBests
             |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
         with
@@ -71,13 +71,13 @@ module internal Shared =
     let lamp_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
-        match 
+        match
             data.PersonalBests
             |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
         with
         | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"
-    
+
     let below_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
         cc.Patterns.LNPercent < threshold
 
@@ -119,7 +119,6 @@ type LibraryContext =
         | Likes, None -> true
         | Likes, Pack _ -> true
         | _ -> this.Matches other
-
 
 [<RequireQualifiedAccess>]
 type LibraryGroupContext =

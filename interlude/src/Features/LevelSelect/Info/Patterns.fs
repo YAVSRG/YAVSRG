@@ -4,8 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Charts.Processing.Patterns
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator.Patterns
+open Prelude.Calculator
 open Interlude.UI
 open Interlude.Features.Gameplay
 

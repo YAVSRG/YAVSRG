@@ -4,7 +4,7 @@ open NUnit.Framework
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 open Prelude.Data.Library
 
 module DbCharts =

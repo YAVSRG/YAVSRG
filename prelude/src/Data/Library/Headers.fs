@@ -4,8 +4,8 @@ open System.IO
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing.Difficulty
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator
+open Prelude.Calculator.Patterns
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]

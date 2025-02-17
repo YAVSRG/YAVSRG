@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts.Processing.Difficulty
+﻿namespace Prelude.Calculator
 
 open System
 open Prelude

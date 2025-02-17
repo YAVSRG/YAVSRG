@@ -2,7 +2,7 @@
 
 open Percyqaz.Data
 open Prelude
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 
 type KeymodeSkillIncrease =
     {

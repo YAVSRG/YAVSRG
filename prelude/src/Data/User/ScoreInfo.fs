@@ -2,7 +2,7 @@
 
 open Prelude
 open Prelude.Charts
-open Prelude.Charts.Processing.Difficulty
+open Prelude.Calculator
 open Prelude.Mods
 open Prelude.Gameplay
 open Prelude.Gameplay.Replays

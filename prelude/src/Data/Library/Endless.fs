@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Mods
 open Prelude.Gameplay.Rulesets
-open Prelude.Charts.Processing.Patterns
+open Prelude.Calculator.Patterns
 open Prelude.Data.Library
 open Prelude.Data.Library.Collections
 open Prelude.Data.User

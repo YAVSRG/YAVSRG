@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Charts.Processing
+open Prelude.Calculator
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Collections
