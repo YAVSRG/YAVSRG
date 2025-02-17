@@ -114,6 +114,9 @@ module Song =
 
     let duration () = now_playing.Duration
 
+    let private update_time() =
+        _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
+
     let time () = _time
 
     let time_compensated () =
@@ -144,6 +147,7 @@ module Song =
         timer_start <- time
         timer.Restart()
         paused <- false
+        update_time()
 
     let play_leadin (first_note: Time) =
         play_from (min 0.0f<ms> (first_note - LEADIN_TIME * rate))
@@ -164,6 +168,7 @@ module Song =
 
             timer_start <- time
             timer.Reset()
+            update_time()
 
     let pause () =
         let time = time ()
@@ -262,7 +267,7 @@ module Song =
 
     let update (elapsed_ms: float) =
         let time_last_update = _time
-        _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
+        update_time()
 
         if low_pass_target <> low_pass_amount then
             low_pass_amount <- lerp (float32 <| Math.Pow(0.994, elapsed_ms)) low_pass_target low_pass_amount
