@@ -125,7 +125,7 @@ module private Migration =
 
     let migrate_legacy_stats (library: Library) (database: UserDatabase) =
 
-        Logging.Info("Backfilling session data from score history...")
+        Logging.Info "Backfilling session data from score history..."
 
         TOTAL_STATS <- TotalStats.Default
         CURRENT_SESSION <- CurrentSession.Default

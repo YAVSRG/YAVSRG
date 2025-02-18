@@ -13,7 +13,7 @@ module ModState =
     let private seed_generation = new Random()
 
     let cycle (id: string) (mods: ModState) : ModState =
-        if (mods.ContainsKey id) then
+        if mods.ContainsKey id then
             let state = mods.[id] + 1
 
             if state >= AVAILABLE_MODS.[id].States || AVAILABLE_MODS.[id].RandomSeed then
@@ -38,13 +38,7 @@ module ModState =
         )
 
     let apply (mods: ModState) (chart: Chart) : ModdedChart =
-        let mutable modchart_internal =
-            {
-                Keys = chart.Keys
-                Notes = chart.Notes
-                SV = chart.SV
-                BPM = chart.BPM
-            }
+        let mutable modchart_internal = ModdedChartInternal.OfChart chart
 
         let mutable mods_applied = []
         let mutable status = ModStatus.Ranked
@@ -68,7 +62,7 @@ module ModState =
             Status = status
         }
 
-    let format (rate: Rate, mods: ModState, autoplay: bool) =
+    let format (rate: Rate, mods: ModState, autoplay: bool) : string =
         String.Join(
             ", ",
             sprintf "%.2fx" rate
@@ -79,7 +73,7 @@ module ModState =
         )
         + if autoplay then ", " + name "auto" None else ""
 
-    let check (mods: ModState) =
+    let check (mods: ModState) : Result<ModStatus, string> =
         try
             let mutable status = ModStatus.Ranked
 

@@ -38,6 +38,7 @@
     <Compile Include="Formats\Quaver\Converter.fs" />
     <Compile Include="Mods\Types.fs" />
     <Compile Include="Mods\Mirror.fs" />
+    <Compile Include="Mods\ColumnSwap.fs" />
     <Compile Include="Mods\NoSV.fs" />
     <Compile Include="Mods\NoLN.fs" />
     <Compile Include="Mods\Inverse.fs" />

@@ -36,6 +36,13 @@ type ModdedChartInternal =
         BPM: TimeArray<BPM>
         SV: TimeArray<float32>
     }
+    static member OfChart (chart: Chart) =
+        {
+            Keys = chart.Keys
+            Notes = chart.Notes
+            SV = chart.SV
+            BPM = chart.BPM
+        }
 
 type Mod =
     {

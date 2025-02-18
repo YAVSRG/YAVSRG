@@ -153,6 +153,9 @@ module Inverse =
             i <- i + 1
 
         { chart with
-            Notes = output |> Array.ofSeq
+            Notes =
+                output
+                |> Array.ofSeq
+                |> TimeArray.filter (NoteRow.is_empty >> not)
         },
         true

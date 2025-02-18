@@ -235,7 +235,7 @@ module Conversions =
             ]
 
         try
-            let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes 4
+            let _ = Osu_To_Interlude.convert_hit_objects osu_notes 4
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)

@@ -30,6 +30,8 @@
     <Compile Include="Charts\Helpers.fs" />
     <Compile Include="Charts\Charts.fs" />
     <Compile Include="Charts\Conversions.fs" />
+    <Compile Include="Mods\Implementation.fs" />
+    <Compile Include="Mods\State.fs" />
     <Compile Include="Replays\Replays.fs" />
     <Compile Include="Rulesets\Editing.fs" />
     <Compile Include="Rulesets\Helpers.fs" />
@@ -41,7 +43,9 @@
     <Compile Include="Rulesets\Graph.fs" />
     <Compile Include="Rulesets\OsuParity.fs" />
     <Compile Include="Rulesets\QuaverParity.fs" />
-    <Compile Include="Stats\Stats.fs" />
+    <Compile Include="Skins\Conversions\Parser.fs" />
+    <Compile Include="Skins\Noteskins\Helpers.fs" />
+    <Compile Include="Skins\Noteskins\Validation.fs" />
     <Compile Include="Database\Helpers.fs" />
     <Compile Include="Database\UserDatabase.fs" />
     <Compile Include="Database\DbScores.fs" />
@@ -49,9 +53,7 @@
     <Compile Include="Database\DbSingletons.fs" />
     <Compile Include="Database\DbSessions.fs" />
     <Compile Include="Database\DbCharts.fs" />
-    <Compile Include="Skins\Conversions\Parser.fs" />
-    <Compile Include="Skins\Noteskins\Helpers.fs" />
-    <Compile Include="Skins\Noteskins\Validation.fs" />
+    <Compile Include="Stats\Stats.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
