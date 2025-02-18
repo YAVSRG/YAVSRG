@@ -1,26 +1,25 @@
-0.7.27.9
+0.7.27.10
 ====
 
-This update adds leaderboards! Go check them out, let me know what you think in the usual places  
-As well as all-time leaderboards there is a monthly leaderboard that resets at midnight UTC at the start of each month
+This update changes many engine things, enjoy
+Many more songs have now been given score leaderboards since last update (and more on the way)
 
 # New features
-- Leaderboards! They can now be viewed via the Stats menu ingame
-- Some stats are now shown on user profiles ingame, where available
-
-# Improvements
-- Accuracy on score screen now reflects column filters if set
-- Improved some tooltips and messages to make various features clearer (osu! replay loading, audio offset, etc)
+- Game window opens faster, then has a loading screen while the rest of the game loads
+- Audio engine should no longer have any offset drift at all across rates, in general offset will feel much more consistent now
+- Screenshots automatically get copied to the clipboard when taken
+- Screenshots do not include notifications/other screenshot popups in the image when taken
+- CTRL+ALT+SHIFT+F1 crashes your game and opens the log, for easier bug reporting
+- Song audio crossfades out/in when switching song instead of a hard cut
+- Change column filters on score screen with number keys
+- Timestamps are shown when hovering over the score graph
+- Color pickers in all options menus are now an entire page instead of a small box
 
 # Bug fixes
-- Fixed some audio engine issues where song audio wouldn't play or system-wide sound would mute
-- Fixed multiple 'Default' audio devices appearing in the list
-- Fixed a crash caused by unicode characters and Discord RPC
-- Fixed API requests sporadically displaying 'Server error' ingame
-- Fixed a crash when changing monitor settings if the monitor that was last selected is no longer available
-- Fixed some issues with extracting noteskins
-
-# Platform support
-- Linux x64 is now officially supported by the auto-updater and as a download via the site
-- Experimental builds for macOS, x64 architecture are now available for users who want to test them
+- Potential fix for various crashes and graphical glitches on Intel HD Graphics
+- Fixed cloning rulesets and then editing the clone sometimes editing the original too
+- Fixed bug with creating new lamps in rulesets that made the ordering unclear
+- HUD editor now unpauses song if it was paused on entering
+- Fixed issues with osu! Skin parsing when a decimal is used where an integer expected
+- Song now correctly fades out during the transition into replay mode
 

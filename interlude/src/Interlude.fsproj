@@ -4,8 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.7.27.9</AssemblyVersion>
-    <FileVersion>0.7.27.9</FileVersion>
+    <AssemblyVersion>0.7.27.10</AssemblyVersion>
+    <FileVersion>0.7.27.10</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
