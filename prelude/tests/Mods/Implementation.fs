@@ -53,6 +53,13 @@ module Implementation =
         Assert.AreEqual(Chart.hash SAMPLE_CHART, Chart.hash { SAMPLE_CHART with Notes = swapped_back_chart.Notes })
 
     [<Test>]
+    let ColumnSwap_NoNotes() =
+
+        let swap = ColumnSwap.parse "9999" |> expect
+        let _, mod_applied = ColumnSwap.apply swap (ModdedChartInternal.OfChart SAMPLE_CHART)
+        Assert.False(mod_applied)
+
+    [<Test>]
     let Inverse() =
 
         let inverted, _ = Inverse.apply (0.5f<beat>) (ModdedChartInternal.OfChart SAMPLE_CHART)

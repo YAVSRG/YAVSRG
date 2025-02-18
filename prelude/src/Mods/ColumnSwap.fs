@@ -22,8 +22,13 @@ module ColumnSwap =
         let map_row (notes: NoteType array) =
             swap |> Array.map (fun i -> if i >= 0 && i < notes.Length then notes.[i] else NoteType.NOTHING)
 
-        { chart with
-            Notes = TimeArray.map map_row chart.Notes |> TimeArray.filter (NoteRow.is_empty >> not)
-            Keys = swap.Length
-        },
-        true
+        let notes = TimeArray.map map_row chart.Notes |> TimeArray.filter (NoteRow.is_empty >> not)
+
+        if notes.Length > 0 then
+            { chart with
+                Notes = notes
+                Keys = swap.Length
+            },
+            true
+        else
+            chart, false
