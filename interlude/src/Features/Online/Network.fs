@@ -255,15 +255,19 @@ module Network =
             client.Connect()
 
     let login_with_token () =
+        assert(GameThread.is_game_thread())
         client.Send(Upstream.LOGIN credentials.Token)
 
     let begin_login () =
+        assert(GameThread.is_game_thread())
         client.Send(Upstream.LOGIN_WITH_DISCORD)
 
     let complete_registration (desired_username) =
+        assert(GameThread.is_game_thread())
         client.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD desired_username)
 
     let logout () =
+        assert(GameThread.is_game_thread())
         NetworkEvents.leave_lobby_ev.Trigger()
         lobby <- None
 
@@ -289,4 +293,6 @@ module Network =
 
         credentials.Save()
 
-    let join_lobby id = client.Send(Upstream.JOIN_LOBBY id)
+    let join_lobby id =
+        assert(GameThread.is_game_thread())
+        client.Send(Upstream.JOIN_LOBBY id)

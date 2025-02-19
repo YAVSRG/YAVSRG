@@ -11,7 +11,6 @@ open Prelude.Mods
 open Interlude.Web.Shared
 open Interlude.Content
 open Interlude.UI
-open Interlude.Features.Import
 open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Online
