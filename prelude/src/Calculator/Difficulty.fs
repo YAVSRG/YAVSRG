@@ -41,23 +41,21 @@ type Difficulty =
 
 module Difficulty =
 
-    let JACK_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
-    let JACK_CURVE_HEIGHT_SCALE = 26.3f
-    let JACK_CURVE_CUTOFF = 20.0f
+    let JACK_CURVE_CUTOFF = 230.0f
 
     let jack_curve (delta: GameplayTime) =
-        JACK_CURVE_HEIGHT_SCALE / (JACK_CURVE_WIDTH_SCALE * delta)
+        15000.0f<ms / rate> / delta
         |> min JACK_CURVE_CUTOFF
 
-    let STREAM_CURVE_WIDTH_SCALE = 0.02f<rate / ms>
-    let STREAM_CURVE_HEIGHT_SCALE = 13.7f
+    let STREAM_CURVE_HEIGHT_SCALE = 13.7f / 26.3f
     let STREAM_CURVE_CUTOFF = 10.0f
     let STREAM_CURVE_CUTOFF_2 = 10.0f
 
     let stream_curve (delta: GameplayTime) =
-        STREAM_CURVE_HEIGHT_SCALE / (STREAM_CURVE_WIDTH_SCALE * delta) -
-        STREAM_CURVE_HEIGHT_SCALE / MathF.Pow(STREAM_CURVE_WIDTH_SCALE * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
+        300.0f / (0.02f<rate / ms> * delta) -
+        300.0f / MathF.Pow(0.02f<rate / ms> * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
+        |> (*) STREAM_CURVE_HEIGHT_SCALE
 
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
         Math.Min(MathF.Pow(Math.Max(MathF.Log((jack_delta / stream_delta), 2.0f), 0.0f), 2.0f), 1.0f)
@@ -196,7 +194,7 @@ module Difficulty =
         |> Array.ofSeq
 
     let CURVE_POWER = 0.6f
-    let CURVE_SCALE = 1.746f
+    let CURVE_SCALE = 0.4056f
 
     let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) =
         let mutable v = 0.01f

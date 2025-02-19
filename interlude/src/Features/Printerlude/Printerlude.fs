@@ -110,6 +110,13 @@ module Printerlude =
                     |> io.WriteLine
             | None -> ()
 
+        let difficulty (io: IOContext) =
+            match SelectedChart.RATING with
+            | Some d ->
+                sprintf "Local: %f" d.Overall |> io.WriteLine
+                sprintf "Cached: %f" SelectedChart.CACHE_DATA.Value.Rating |> io.WriteLine
+            | None -> ()
+
         let vacuum () =
             ChartDatabase.vacuum.Request((Content.Charts, true), ignore)
 
@@ -135,6 +142,7 @@ module Printerlude =
                 .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
                 .WithCommand("chart_info", "Dumps chart meta info", chart_info)
+                .WithIOCommand("difficulty", "Dumps chart difficulty info", difficulty)
                 .WithCommand("vacuum", "Debug tool for cleaning up chart database", vacuum)
 
         let register_ipc_commands (ctx: ShellContext) =
