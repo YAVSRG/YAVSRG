@@ -230,7 +230,10 @@ module Stats =
         {
             SQL =
                 """
-            SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime FROM stats
+            SELECT Rank, XP, Playtime FROM
+            (
+                SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime, UserId FROM stats
+            )
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
@@ -253,7 +256,10 @@ module Stats =
         {
             SQL =
                 """
-            SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime FROM stats
+            SELECT Rank, XP, Playtime FROM
+            (
+                SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime, UserId FROM stats
+            )
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
@@ -297,7 +303,10 @@ module Stats =
         {
             SQL =
                 $"""
-            SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM stats
+            SELECT Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM
+            (
+                SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream, UserId FROM stats
+            )
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
@@ -380,7 +389,10 @@ module Stats =
         {
             SQL =
                 $"""
-            SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM stats
+            SELECT Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM
+            (
+                SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream, UserId FROM stats
+            )
             WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8 ]
@@ -647,9 +659,12 @@ module MonthlyStats =
         {
             SQL =
                 """
-            SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime FROM monthly_stats
-            WHERE UserId = @UserId
-            AND Month = @Month;
+            SELECT Rank, XP, Playtime FROM
+            (
+                SELECT RANK() OVER (ORDER BY XP DESC) AS Rank, XP, Playtime, UserId FROM monthly_stats
+                WHERE Month = @Month
+            )
+            WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
             FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
@@ -674,9 +689,12 @@ module MonthlyStats =
         {
             SQL =
                 """
-            SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime FROM monthly_stats
-            WHERE UserId = @UserId
-            AND Month = @Month;
+            SELECT Rank, XP, Playtime FROM
+            (
+                SELECT RANK() OVER (ORDER BY Playtime DESC) AS Rank, XP, Playtime, UserId FROM monthly_stats
+                WHERE Month = @Month
+            )
+            WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
             FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
@@ -722,10 +740,13 @@ module MonthlyStats =
         {
             SQL =
                 $"""
-            SELECT RANK() OVER (ORDER BY {by_column} DESC), _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM monthly_stats
-            WHERE UserId = @UserId
-            AND Month = @Month
-            AND _4KPlaytime > 0;
+            SELECT Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream FROM
+            (
+                SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _4KPlaytime, _4KCombined, _4KJacks, _4KChordstream, _4KStream, UserId FROM monthly_stats
+                WHERE Month = @Month
+                AND _4KPlaytime > 0
+            )
+            WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
             FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month
@@ -810,10 +831,13 @@ module MonthlyStats =
         {
             SQL =
                 $"""
-            SELECT RANK() OVER (ORDER BY {by_column} DESC), _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM monthly_stats
-            WHERE UserId = @UserId
-            AND Month = @Month
-            AND _7KPlaytime > 0;
+            SELECT Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream FROM
+            (
+                SELECT RANK() OVER (ORDER BY {by_column} DESC) AS Rank, _7KPlaytime, _7KCombined, _7KJacks, _7KChordstream, _7KStream, UserId FROM monthly_stats
+                WHERE Month = @Month
+                AND _7KPlaytime > 0
+            )
+            WHERE UserId = @UserId;
             """
             Parameters = [ "@UserId", SqliteType.Integer, 8; "@Month", SqliteType.Integer, 4 ]
             FillParameters = fun p (user_id, month) -> p.Int64 user_id; p.Int32 month

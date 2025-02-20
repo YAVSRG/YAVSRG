@@ -4,11 +4,7 @@ open System
 open System.Threading
 open System.Diagnostics
 open System.Runtime.InteropServices
-open OpenTK.Windowing.Desktop
-open OpenTK.Windowing.GraphicsLibraryFramework
-open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Input
 open Percyqaz.Common
 
 module private FrameTimeStrategies =
