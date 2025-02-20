@@ -47,7 +47,6 @@ module Difficulty =
         15000.0f<ms / rate> / delta
         |> min JACK_CURVE_CUTOFF
 
-    let STREAM_CURVE_HEIGHT_SCALE = 13.7f / 26.3f
     let STREAM_CURVE_CUTOFF = 10.0f
     let STREAM_CURVE_CUTOFF_2 = 10.0f
 
@@ -55,7 +54,6 @@ module Difficulty =
         300.0f / (0.02f<rate / ms> * delta) -
         300.0f / MathF.Pow(0.02f<rate / ms> * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
-        |> (*) STREAM_CURVE_HEIGHT_SCALE
 
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
         Math.Min(MathF.Pow(Math.Max(MathF.Log((jack_delta / stream_delta), 2.0f), 0.0f), 2.0f), 1.0f)
@@ -155,6 +153,7 @@ module Difficulty =
         v * stamina_base_func (input / v)
 
     let private OHTNERF = 3.0f
+    let STREAM_CURVE_HEIGHT_SCALE = 0.5209125f
 
     let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
         let keys = notes.[0].Data.Length
@@ -173,8 +172,8 @@ module Difficulty =
 
                         note_difficulty.[i].[k].T <-
                             MathF.Pow(
-                                MathF.Pow(max note_difficulty.[i].[k].SLF note_difficulty.[i].[k].SRB, OHTNERF) +
-                                MathF.Pow(max note_difficulty.[i].[k].SRF note_difficulty.[i].[k].SLB, OHTNERF) +
+                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * max note_difficulty.[i].[k].SLF note_difficulty.[i].[k].SRB, OHTNERF) +
+                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * max note_difficulty.[i].[k].SRF note_difficulty.[i].[k].SLB, OHTNERF) +
                                 MathF.Pow(max note_difficulty.[i].[k].JF note_difficulty.[i].[k].JB, OHTNERF),
                                 1.0f / OHTNERF
                             )
