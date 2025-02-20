@@ -41,16 +41,25 @@ type Difficulty =
 
 module Difficulty =
 
+    /// Cutoff of `JACK_CURVE_CUTOFF` prevents stacked minijacks from slingshotting the perceived BPM
+    /// Especially since you can typically hit such minijacks with good accuracy by playing them as a 230 jack no matter the BPM
     let JACK_CURVE_CUTOFF = 230.0f
-
-    let jack_curve (delta: GameplayTime) =
+    /// Converts ms difference between notes (in the same column) into its equivalent BPM
+    /// (on 1/4 snap, hence 1 minute * 1/4 is numerator)
+    let ms_to_jack_bpm (delta: GameplayTime) =
         15000.0f<ms / rate> / delta
         |> min JACK_CURVE_CUTOFF
 
+    /// These variables adjust what BPM the stream curve cuts off at
+    /// Best to put this whole expression into Desmos + variables as sliders if you want to understand it better
     let STREAM_CURVE_CUTOFF = 10.0f
     let STREAM_CURVE_CUTOFF_2 = 10.0f
-
-    let stream_curve (delta: GameplayTime) =
+    /// Converts ms difference between notes (in the same column) into its equivalent BPM (on 1/4 snap)
+    ///
+    /// Once the ms gets low enough, the curve starts going back down towards 0
+    /// since adjacent notes that would make a "500bpm stream" can be hit as grace notes and don't add difficulty
+    /// The real threshold is lower than 500 though, and controlled by the cutoff variables
+    let ms_to_stream_bpm (delta: GameplayTime) =
         300.0f / (0.02f<rate / ms> * delta) -
         300.0f / MathF.Pow(0.02f<rate / ms> * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
@@ -58,7 +67,12 @@ module Difficulty =
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
         Math.Min(MathF.Pow(Math.Max(MathF.Log((jack_delta / stream_delta), 2.0f), 0.0f), 2.0f), 1.0f)
 
-    let private notes_difficulty_pass_forward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
+    /// Walks forward through each row of notes in a chart:
+    /// - Sets JF on each note ("jack-forward") to the BPM between it and the previous note in its column
+    /// - Sets SLF on each note ("stream-left-forward") to the BPM betwen it and the previous note in the column to the left, if this column exists and is on the same hand
+    /// - Sets SRF on each note ("stream-right-forward") to the BPM betwen it and the previous note in the column to the right, if this column exists and is on the same hand
+    /// Don't worry about what it does for keymodes above 4K for SLF & SLR, I'm redesigning it
+    let private notes_difficulty_pass (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
 
@@ -67,7 +81,7 @@ module Difficulty =
         let note_difficulty (i: int, k: int, time: Time) =
             let jack_delta =
                 let delta = (time - last_note_in_column.[k]) / rate
-                data.[i].[k].JF <- jack_curve delta
+                data.[i].[k].JF <- ms_to_jack_bpm delta
                 delta
 
             let hand_lo, hand_hi =
@@ -81,7 +95,7 @@ module Difficulty =
             for hand_k = hand_lo to hand_hi do
                 if hand_k <> k then
                     let trill_delta = (time - last_note_in_column.[hand_k]) / rate
-                    let trill_v = stream_curve trill_delta * jack_compensation jack_delta trill_delta
+                    let trill_v = ms_to_stream_bpm trill_delta * jack_compensation jack_delta trill_delta
                     if hand_k < k then
                         sl <- sl + trill_v
                     else
@@ -101,50 +115,50 @@ module Difficulty =
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     last_note_in_column.[k] <- time
 
-    let private notes_difficulty_pass_backward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
-        let keys = notes.[0].Data.Length
-        let hand_split = Layout.keys_on_left_hand keys
+    //let private notes_difficulty_pass_backward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
+    //    let keys = notes.[0].Data.Length
+    //    let hand_split = Layout.keys_on_left_hand keys
 
-        let last_note_in_column = Array.create<Time> keys ((TimeArray.last notes).Value.Time + 1000000.0f<ms>)
+    //    let last_note_in_column = Array.create<Time> keys ((TimeArray.last notes).Value.Time + 1000000.0f<ms>)
 
-        let note_difficulty (i: int, k: int, time: Time) =
-            let jack_delta =
-                let delta = (last_note_in_column.[k] - time) / rate
-                assert(delta > 0.0f<ms / rate>)
-                data.[i].[k].JB <- jack_curve delta
-                delta
+    //    let note_difficulty (i: int, k: int, time: Time) =
+    //        let jack_delta =
+    //            let delta = (last_note_in_column.[k] - time) / rate
+    //            assert(delta > 0.0f<ms / rate>)
+    //            data.[i].[k].JB <- ms_to_jack_bpm delta
+    //            delta
 
-            let hand_lo, hand_hi =
-                if k < hand_split then
-                    0, hand_split - 1
-                else
-                    hand_split, keys - 1
+    //        let hand_lo, hand_hi =
+    //            if k < hand_split then
+    //                0, hand_split - 1
+    //            else
+    //                hand_split, keys - 1
 
-            let mutable sl = 0.0f
-            let mutable sr = 0.0f
-            for hand_k = hand_lo to hand_hi do
-                if hand_k <> k then
-                    let trill_delta = (last_note_in_column.[hand_k] - time) / rate
-                    assert(trill_delta > 0.0f<ms / rate>)
-                    let trill_v = stream_curve trill_delta * jack_compensation jack_delta trill_delta
-                    if hand_k < k then
-                        sl <- sl + trill_v
-                    else
-                        sr <- sr + trill_v
+    //        let mutable sl = 0.0f
+    //        let mutable sr = 0.0f
+    //        for hand_k = hand_lo to hand_hi do
+    //            if hand_k <> k then
+    //                let trill_delta = (last_note_in_column.[hand_k] - time) / rate
+    //                assert(trill_delta > 0.0f<ms / rate>)
+    //                let trill_v = ms_to_stream_bpm trill_delta * jack_compensation jack_delta trill_delta
+    //                if hand_k < k then
+    //                    sl <- sl + trill_v
+    //                else
+    //                    sr <- sr + trill_v
 
-            data.[i].[k].SLB <- sl
-            data.[i].[k].SRB <- sr
+    //        data.[i].[k].SLB <- sl
+    //        data.[i].[k].SRB <- sr
 
-        for i = notes.Length - 1 downto 0 do
-            let { Time = time; Data = nr } = notes.[i]
+    //    for i = notes.Length - 1 downto 0 do
+    //        let { Time = time; Data = nr } = notes.[i]
 
-            for k = 0 to keys - 1 do
-                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                    note_difficulty (i, k, time)
+    //        for k = 0 to keys - 1 do
+    //            if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+    //                note_difficulty (i, k, time)
 
-            for k = 0 to keys - 1 do
-                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                    last_note_in_column.[k] <- time
+    //        for k = 0 to keys - 1 do
+    //            if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+    //                last_note_in_column.[k] <- time
 
     let stamina_func (value: float32) (input: float32) (delta: GameplayTime) =
         let stamina_base_func ratio = 1.0f + 0.105f * ratio
@@ -219,7 +233,7 @@ module Difficulty =
     let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : Difficulty =
         let keys = notes.[0].Data.Length
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
-        notes_difficulty_pass_forward (rate, notes) note_data
+        notes_difficulty_pass (rate, notes) note_data
         let physical_data = finger_strain_pass note_data (rate, notes)
         let physical = overall_difficulty_pass physical_data
 

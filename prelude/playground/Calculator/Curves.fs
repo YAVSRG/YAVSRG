@@ -18,11 +18,11 @@ module CurveExperiments =
 
     let jack () =
         let ms = seq { 1 .. 360 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
-        graph ms (ms_to_bpm >> sprintf "%.0f BPM") Difficulty.jack_curve 0.5f
+        graph ms (ms_to_bpm >> sprintf "%.0f BPM") Difficulty.ms_to_jack_bpm 0.5f
 
     let stream () =
         let ms = seq { 1 .. 360 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
-        graph ms (ms_to_bpm >> sprintf "%.0f BPM") Difficulty.stream_curve 0.5f
+        graph ms (ms_to_bpm >> sprintf "%.0f BPM") Difficulty.ms_to_stream_bpm 0.5f
 
     let comp () =
         let ms = seq { 0 .. 1000 } |> Seq.map (fun i -> float32 i * 1.0f<ms / rate>)
