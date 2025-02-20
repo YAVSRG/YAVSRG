@@ -217,13 +217,6 @@ module Difficulty =
             total <- total + value * w
         MathF.Pow(total / weight, CURVE_POWER) * CURVE_SCALE
 
-    let private difficulty_distribution (finger_strain_data: (float32 array * float32) array) =
-        finger_strain_data
-        |> Seq.map snd
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-
     let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : Difficulty =
         let keys = notes.[0].Data.Length
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)

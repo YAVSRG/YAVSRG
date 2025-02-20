@@ -26,8 +26,6 @@ type private DifficultyOverlay
     let mutable seek = 0
     let mutable last_time = 0.0f<ms>
 
-    let indicator = Animation.Fade 0.0f
-
     let scroll_direction_pos: float32 -> float32 -> float32 =
         if options.Upscroll.Value then
             fun _ -> id
@@ -113,8 +111,6 @@ type private DifficultyOverlay
                 draw_row now peek
                 peek <- peek + 1
 
-            Render.rect (playfield.Bounds.BorderL(50.0f).SlicePercentB(indicator.Value / 14.0f)) Colors.red_accent
-
     override this.Update (elapsed_ms, moved): unit =
         base.Update(elapsed_ms, moved)
 
@@ -123,6 +119,4 @@ type private DifficultyOverlay
             while seek > 0 && chart.Notes.[seek].Time > time do
                 seek <- seek - 1
 
-        indicator.Target <- float32 (snd difficulty.Strain.[seek])
-        indicator.Update elapsed_ms
         last_time <- state.CurrentChartTime()

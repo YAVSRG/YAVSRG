@@ -2,8 +2,10 @@
 
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude
+open Prelude.Calculator
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
@@ -17,11 +19,39 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     let mutable recreate_scoring = recreate_scoring
     let mutable last_time = -Time.infinity
 
+    let difficulty_distribution_raw_notes (difficulty: Difficulty) =
+        difficulty.NoteDifficulty
+        |> Seq.concat
+        |> Seq.map _.T
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+
+    let difficulty_distribution_notes (difficulty: Difficulty) =
+        difficulty.Strain
+        |> Seq.map fst
+        |> Seq.concat
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+
+    let difficulty_distribution_chords (difficulty: Difficulty) =
+        difficulty.Strain
+        |> Seq.map snd
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+
     let mutable playfield =
         Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
         |+ LanecoverOverReceptors()
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
+
+    let mutable ddrn = difficulty_distribution_raw_notes info.Rating
+    let mutable ddn = difficulty_distribution_notes info.Rating
+    let mutable ddc = difficulty_distribution_chords info.Rating
+    let mutable ddmax = ddn |> Seq.map snd |> Seq.max |> float32
 
     let change_chart_listener =
         SelectedChart.on_chart_change_finished.Subscribe(fun info ->
@@ -32,6 +62,10 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
                 Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
+            ddrn <- difficulty_distribution_raw_notes info.Rating
+            ddn <- difficulty_distribution_notes info.Rating
+            ddc <- difficulty_distribution_chords info.Rating
+            ddmax <- ddn |> Seq.map snd |> Seq.max |> float32
             if this.Initialised then
                 playfield.Init this
                 timeline.Init this
@@ -51,6 +85,14 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         playfield.Draw()
         timeline.Draw()
         volume.Draw()
+
+        //let l = this.Bounds.Left + 20.0f
+        //for v, count in ddrn do
+        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 200.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.red
+        //for v, count in ddn do
+        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 400.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.green
+        //for v, count in ddc do
+        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 600.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.blue
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -76,6 +118,10 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             LevelSelect.random_chart()
         elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous_random_chart").Tapped() then
             LevelSelect.History.back()
+        elif Screen.current_type = Screen.Type.LevelSelect && (%%"next").Tapped() then
+            Tree.next()
+        elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous").Tapped() then
+            Tree.previous()
         elif (%%"pause").Tapped() || (%%"pause_music").Tapped() then
             if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())
