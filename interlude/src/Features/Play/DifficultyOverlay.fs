@@ -133,6 +133,24 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
             x <- x - 5.0f
 
+    let chord_strains =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield snd difficulty.Strain.[peek]
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+
+    let note_difficulties =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield! (difficulty.NoteDifficulty.[peek] |> Seq.map _.T)
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+
     override this.Draw() =
         let now =
             state.CurrentChartTime()
@@ -158,23 +176,16 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_graph 400.0f Colors.green difficulty_distribution_notes
         draw_graph 600.0f Colors.blue difficulty_distribution_chords
 
-        seq {
-            let mutable peek = seek
-            while peek >= 0 do
-                yield snd difficulty.Strain.[peek]
-                peek <- peek - 1
-        }
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> draw_live_data 200.0f Colors.red
+        draw_live_data 200.0f Colors.red note_difficulties
+        draw_live_data 400.0f Colors.blue chord_strains
 
-        seq {
-            let mutable peek = seek
-            while peek >= 0 do
-                yield! (difficulty.NoteDifficulty.[peek] |> Seq.map _.T)
-                peek <- peek - 1
-        }
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> draw_live_data 400.0f Colors.blue
+        let variety =
+            note_difficulties
+            |> Seq.map (fun d -> d / 5.0f |> round)
+            |> Seq.truncate 50
+            |> Seq.distinct
+            |> Seq.length
+        Text.draw(Style.font, sprintf "V: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
