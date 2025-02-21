@@ -126,7 +126,9 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
                 else
                     Song.seek(Song.time() - scroll * 40.0f<ms>)
 
-        if (%%"pause").Tapped() || (%%"pause_music").Tapped() then
+        if (%%"difficulty_overlay").Tapped() then
+            show_difficulty_overlay.Set (not show_difficulty_overlay.Value)
+        elif (%%"pause").Tapped() || (%%"pause_music").Tapped() then
             if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())
             elif not (Mouse.held Mouse.LEFT) then Song.resume ()

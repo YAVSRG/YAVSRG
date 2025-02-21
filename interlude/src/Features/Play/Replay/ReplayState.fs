@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Data.User
 open Prelude.Skins.Noteskins
 open Interlude.UI
-open Interlude.Options
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
@@ -40,9 +39,6 @@ type private ReplayModeSettingsPage(on_close) =
         |+ PageSetting(%"replay.playfield_dim", Slider.Percent playfield_dim)
             .Conditional(fun () -> show_input_overlay.Value || show_hit_overlay.Value)
             .Pos(9)
-        |+ PageSetting(%"replay.difficulty_overlay", Checkbox show_difficulty_overlay)
-            .Conditional(fun () -> options.EnableExperiments.Value)
-            .Pos(11)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"replay.settings")

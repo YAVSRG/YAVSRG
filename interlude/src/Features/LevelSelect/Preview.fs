@@ -2,81 +2,12 @@
 
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Calculator
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
-
-type DifficultyGraph =
-    {
-        Width: float32
-        Height: float32
-        Count: int
-        Values: (float32 * int) array
-    }
-
-type DifficultyDetails(difficulty) =
-    inherit StaticWidget(NodeType.None)
-
-    let difficulty_distribution_raw_notes (difficulty: Difficulty) =
-        difficulty.NoteDifficulty
-        |> Seq.concat
-        |> Seq.map _.T
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-
-    let difficulty_distribution_notes (difficulty: Difficulty) =
-        difficulty.Strain
-        |> Seq.map fst
-        |> Seq.concat
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-
-    let difficulty_distribution_chords (difficulty: Difficulty) =
-        difficulty.Strain
-        |> Seq.map snd
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-
-    let graph (data: (float32 * int) array) : DifficultyGraph =
-        let max_y = if data.Length > 0 then data |> Seq.map snd |> Seq.max |> float32 else 1.0f
-        let max_x = if data.Length > 0 then data |> Seq.map fst |> Seq.max else 1.0f
-        let count = data |> Seq.filter (fun (_, count) -> float32 count / max_y > 0.01f) |> Seq.length
-        { Height = max_y; Width = max_x; Count = count; Values = data }
-
-    let draw_graph (y: float32) (color: Color) (d: DifficultyGraph) =
-        for v, count in d.Values do
-            Render.rect (Rect.Box (20.0f + v * 10.0f, y, 5.0f, float32 count / d.Height * 100.0f)) color
-        Text.draw(Style.font, d.Count.ToString(), 20.0f, 20.0f, y - 30.0f, Colors.white)
-        Text.draw(Style.font, sprintf "%.2f" d.Width, 20.0f, 420.0f, y - 30.0f, Colors.white)
-
-    let mutable ddrn = graph [||]
-    let mutable ddn = graph [||]
-    let mutable ddc = graph [||]
-
-    member this.SetData(difficulty: Difficulty) =
-        ddrn <- difficulty_distribution_raw_notes difficulty |> graph
-        ddn <- difficulty_distribution_notes difficulty |> graph
-        ddc <- difficulty_distribution_chords difficulty |> graph
-
-    override this.Init (parent: Widget) =
-        this.SetData difficulty
-        base.Init parent
-
-    override this.Draw() =
-        draw_graph 200.0f Colors.red ddrn
-        draw_graph 400.0f Colors.green ddn
-        draw_graph 600.0f Colors.blue ddc
 
 type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     inherit Dialog()
@@ -92,7 +23,8 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
 
-    let diff_stuff = DifficultyDetails(info.Rating)
+    let mutable difficulty_overlay = DifficultyOverlay(info.WithMods, playfield, info.Rating, playstate)
+    let mutable show_difficulty_overlay = false
 
     let change_chart_listener =
         SelectedChart.on_chart_change_finished.Subscribe(fun info ->
@@ -102,9 +34,10 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             playfield <-
                 Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
+            difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Rating, playstate)
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
-            diff_stuff.SetData(info.Rating)
             if this.Initialised then
+                difficulty_overlay.Init this
                 playfield.Init this
                 timeline.Init this
         )
@@ -116,13 +49,13 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     override this.Init(parent: Widget) =
         base.Init parent
         playfield.Init this
-        diff_stuff.Init this
+        difficulty_overlay.Init this
         timeline.Init this
         volume.Init this
 
     override this.Draw() =
         playfield.Draw()
-        //diff_stuff.Draw()
+        if show_difficulty_overlay then difficulty_overlay.Draw()
         timeline.Draw()
         volume.Draw()
 
@@ -130,7 +63,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         base.Update(elapsed_ms, moved)
         volume.Update(elapsed_ms, moved)
         timeline.Update(elapsed_ms, moved)
-        diff_stuff.Update(elapsed_ms, moved)
+        if show_difficulty_overlay then difficulty_overlay.Update(elapsed_ms, moved)
         playfield.Update(elapsed_ms, moved)
 
         if Song.playing() then
@@ -155,6 +88,8 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             Tree.next()
         elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous").Tapped() then
             Tree.previous()
+        elif (%%"difficulty_overlay").Tapped() then
+            show_difficulty_overlay <- not show_difficulty_overlay
         elif (%%"pause").Tapped() || (%%"pause_music").Tapped() then
             if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())

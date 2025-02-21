@@ -219,7 +219,6 @@ module Render =
     /// Gets the real dimensions of the viewport, as screen pixels.<br/>
     /// This is the dimensions of the part of the monitor the game is rendering on.<br/><br/>
     /// This is not necessarily the dimensions of the window, as this does account for the window border/decorations OR for letterboxing<br/>
-    /// For the viewport area of the game use <c>viewport_size()</c>
     /// </summary>
     let viewport_size() = _viewport_width, _viewport_height
 

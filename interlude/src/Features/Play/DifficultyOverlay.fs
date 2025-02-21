@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Play.Replay
+﻿namespace Interlude.Features.Play
 
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -8,23 +8,24 @@ open Prelude
 open Prelude.Charts
 open Prelude.Mods
 open Prelude.Calculator
-open Prelude.Gameplay.Replays
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private DifficultyOverlay
-    (
-        chart: ModdedChart,
-        difficulty: Difficulty,
-        state: PlayState,
-        playfield: Playfield
-    ) =
+type DifficultyGraph =
+    {
+        Width: float32
+        Height: float32
+        Count: int
+        Values: (float32 * int) array
+    }
+
+type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Difficulty, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let first_note = chart.FirstNote
     let mutable seek = 0
-    let mutable last_time = 0.0f<ms>
+    let mutable last_time = state.CurrentChartTime()
 
     let scroll_direction_pos: float32 -> float32 -> float32 =
         if options.Upscroll.Value then
@@ -36,7 +37,7 @@ type private DifficultyOverlay
         Render.rect bounds Colors.shadow_2.O3
         Text.fill_b(Style.font, sprintf "%.2f" value, bounds.Shrink(10.0f, 5.0f), (color, Colors.shadow_2), Alignment.CENTER)
 
-    let draw_row (now: ChartTime) (index: int) =
+    let draw_row (now: Time) (index: int) =
         let centre =
             options.HitPosition.Value
             + (chart.Notes.[index].Time - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
@@ -85,33 +86,97 @@ type private DifficultyOverlay
 
         draw_label (note_area.BorderR(playfield.ColumnWidth).SlicePercentY(0.35f).Shrink(5.0f)) (snd difficulty.Strain.[index]) Colors.red_accent
 
-    override this.Init(parent) =
-        state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
-        base.Init parent
+    let graph (data: (float32 * int) array) : DifficultyGraph =
+        let max_y = if data.Length > 0 then data |> Seq.map snd |> Seq.max |> float32 else 1.0f
+        let max_x = if data.Length > 0 then data |> Seq.map fst |> Seq.max else 1.0f
+        let count = data |> Seq.filter (fun (_, count) -> float32 count / max_y > 0.01f) |> Seq.length
+        { Height = max_y; Width = max_x; Count = count; Values = data }
+
+    let difficulty_distribution_raw_notes =
+        difficulty.NoteDifficulty
+        |> Seq.concat
+        |> Seq.map _.T
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+        |> Array.ofSeq
+        |> graph
+
+    let difficulty_distribution_notes =
+        difficulty.Strain
+        |> Seq.map fst
+        |> Seq.concat
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+        |> Array.ofSeq
+        |> graph
+
+    let difficulty_distribution_chords =
+        difficulty.Strain
+        |> Seq.map snd
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
+        |> Seq.sortBy fst
+        |> Array.ofSeq
+        |> graph
+
+    let draw_graph (y: float32) (color: Color) (d: DifficultyGraph) =
+        for v, count in d.Values do
+            Render.rect (Rect.Box (20.0f + v * 2.0f, y, 1.0f, float32 count / d.Height * 100.0f)) color
+        Text.draw(Style.font, d.Count.ToString(), 20.0f, 20.0f, y - 30.0f, Colors.white)
+        Text.draw(Style.font, sprintf "%.2f" d.Width, 20.0f, 420.0f, y - 30.0f, Colors.white)
+
+    let draw_live_data (y: float32) (color: Color) (data: float32 seq) =
+        let mutable x = Render.width() - 20.0f
+        for d in Seq.truncate 100 data do
+            Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
+            x <- x - 5.0f
 
     override this.Draw() =
-        if show_difficulty_overlay.Value then
-            let now =
-                state.CurrentChartTime()
-                + (
-                    (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
-                    + options.VisualOffset.Value
-                ) * Song.playback_rate()
-                + first_note
+        let now =
+            state.CurrentChartTime()
+            + (
+                (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
+                + options.VisualOffset.Value
+            ) * Song.playback_rate()
+            + first_note
 
-            while chart.Notes.Length - 1 > seek && chart.Notes.[seek + 1].Time < now - 100.0f<ms> do
-                seek <- seek + 1
+        while chart.Notes.Length - 1 > seek && chart.Notes.[seek + 1].Time < now - 100.0f<ms> do
+            seek <- seek + 1
 
-            let until_time =
-                now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
+        let until_time =
+            now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
+        let mutable peek = seek
+
+        while chart.Notes.Length - 1 > peek && chart.Notes.[peek].Time < until_time do
+            draw_row now peek
+            peek <- peek + 1
+
+        draw_graph 200.0f Colors.red difficulty_distribution_raw_notes
+        draw_graph 400.0f Colors.green difficulty_distribution_notes
+        draw_graph 600.0f Colors.blue difficulty_distribution_chords
+
+        seq {
             let mutable peek = seek
+            while peek >= 0 do
+                yield snd difficulty.Strain.[peek]
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> draw_live_data 200.0f Colors.red
 
-            while chart.Notes.Length - 1 > peek && chart.Notes.[peek].Time < until_time do
-                draw_row now peek
-                peek <- peek + 1
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield! (difficulty.NoteDifficulty.[peek] |> Seq.map _.T)
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+        |> draw_live_data 400.0f Colors.blue
 
-    override this.Update (elapsed_ms, moved): unit =
+    override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()
@@ -119,4 +184,4 @@ type private DifficultyOverlay
             while seek > 0 && chart.Notes.[seek].Time > time do
                 seek <- seek - 1
 
-        last_time <- state.CurrentChartTime()
+        last_time <- time

@@ -162,6 +162,7 @@
     <Compile Include="Features\Play\Explosions.fs" />
     <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
+    <Compile Include="Features\Play\DifficultyOverlay.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\LocalOffset.fs" />
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
@@ -186,7 +187,6 @@
     <Compile Include="Features\Play\Replay\ReplayState.fs" />
     <Compile Include="Features\Play\Replay\HitOverlay.fs" />
     <Compile Include="Features\Play\Replay\InputOverlay.fs" />
-    <Compile Include="Features\Play\Replay\DifficultyOverlay.fs" />
     <Compile Include="Features\Play\Replay\ReplayControls.fs" />
     <Compile Include="Features\Play\Replay\Replay.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
