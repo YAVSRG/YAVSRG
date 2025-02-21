@@ -11,13 +11,16 @@ open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
-    inherit Dialog()
+type DifficultyGraph =
+    {
+        Width: float32
+        Height: float32
+        Count: int
+        Values: (float32 * int) array
+    }
 
-    let playstate, recreate_scoring = PlayState.Dummy info
-    let mutable playstate = playstate
-    let mutable recreate_scoring = recreate_scoring
-    let mutable last_time = -Time.infinity
+type DifficultyDetails(difficulty) =
+    inherit StaticWidget(NodeType.None)
 
     let difficulty_distribution_raw_notes (difficulty: Difficulty) =
         difficulty.NoteDifficulty
@@ -26,6 +29,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         |> Seq.filter (fun x -> x > 0.0f)
         |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
         |> Seq.sortBy fst
+        |> Array.ofSeq
 
     let difficulty_distribution_notes (difficulty: Difficulty) =
         difficulty.Strain
@@ -34,6 +38,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         |> Seq.filter (fun x -> x > 0.0f)
         |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
         |> Seq.sortBy fst
+        |> Array.ofSeq
 
     let difficulty_distribution_chords (difficulty: Difficulty) =
         difficulty.Strain
@@ -41,6 +46,45 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         |> Seq.filter (fun x -> x > 0.0f)
         |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
         |> Seq.sortBy fst
+        |> Array.ofSeq
+
+    let graph (data: (float32 * int) array) : DifficultyGraph =
+        let max_y = if data.Length > 0 then data |> Seq.map snd |> Seq.max |> float32 else 1.0f
+        let max_x = if data.Length > 0 then data |> Seq.map fst |> Seq.max else 1.0f
+        let count = data |> Seq.filter (fun (_, count) -> float32 count / max_y > 0.01f) |> Seq.length
+        { Height = max_y; Width = max_x; Count = count; Values = data }
+
+    let draw_graph (y: float32) (color: Color) (d: DifficultyGraph) =
+        for v, count in d.Values do
+            Render.rect (Rect.Box (20.0f + v * 10.0f, y, 5.0f, float32 count / d.Height * 100.0f)) color
+        Text.draw(Style.font, d.Count.ToString(), 20.0f, 20.0f, y - 30.0f, Colors.white)
+        Text.draw(Style.font, sprintf "%.2f" d.Width, 20.0f, 420.0f, y - 30.0f, Colors.white)
+
+    let mutable ddrn = graph [||]
+    let mutable ddn = graph [||]
+    let mutable ddc = graph [||]
+
+    member this.SetData(difficulty: Difficulty) =
+        ddrn <- difficulty_distribution_raw_notes difficulty |> graph
+        ddn <- difficulty_distribution_notes difficulty |> graph
+        ddc <- difficulty_distribution_chords difficulty |> graph
+
+    override this.Init (parent: Widget) =
+        this.SetData difficulty
+        base.Init parent
+
+    override this.Draw() =
+        draw_graph 200.0f Colors.red ddrn
+        draw_graph 400.0f Colors.green ddn
+        draw_graph 600.0f Colors.blue ddc
+
+type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
+    inherit Dialog()
+
+    let playstate, recreate_scoring = PlayState.Dummy info
+    let mutable playstate = playstate
+    let mutable recreate_scoring = recreate_scoring
+    let mutable last_time = -Time.infinity
 
     let mutable playfield =
         Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
@@ -48,10 +92,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
 
-    let mutable ddrn = difficulty_distribution_raw_notes info.Rating
-    let mutable ddn = difficulty_distribution_notes info.Rating
-    let mutable ddc = difficulty_distribution_chords info.Rating
-    let mutable ddmax = ddn |> Seq.map snd |> Seq.max |> float32
+    let diff_stuff = DifficultyDetails(info.Rating)
 
     let change_chart_listener =
         SelectedChart.on_chart_change_finished.Subscribe(fun info ->
@@ -62,10 +103,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
                 Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
-            ddrn <- difficulty_distribution_raw_notes info.Rating
-            ddn <- difficulty_distribution_notes info.Rating
-            ddc <- difficulty_distribution_chords info.Rating
-            ddmax <- ddn |> Seq.map snd |> Seq.max |> float32
+            diff_stuff.SetData(info.Rating)
             if this.Initialised then
                 playfield.Init this
                 timeline.Init this
@@ -78,26 +116,21 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     override this.Init(parent: Widget) =
         base.Init parent
         playfield.Init this
+        diff_stuff.Init this
         timeline.Init this
         volume.Init this
 
     override this.Draw() =
         playfield.Draw()
+        //diff_stuff.Draw()
         timeline.Draw()
         volume.Draw()
-
-        //let l = this.Bounds.Left + 20.0f
-        //for v, count in ddrn do
-        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 200.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.red
-        //for v, count in ddn do
-        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 400.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.green
-        //for v, count in ddc do
-        //    Render.rect (Rect.Box (l + v * 10.0f, this.Bounds.Top + 600.0f, 5.0f, float32 count / ddmax * 100.0f)) Colors.blue
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         volume.Update(elapsed_ms, moved)
         timeline.Update(elapsed_ms, moved)
+        diff_stuff.Update(elapsed_ms, moved)
         playfield.Update(elapsed_ms, moved)
 
         if Song.playing() then
