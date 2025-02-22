@@ -170,23 +170,22 @@ module Difficulty =
     let CURVE_POWER = 0.6f
     let CURVE_SCALE = 0.4056f
 
-    let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) =
+    let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) : float32 =
         let mutable v = 0.01f
         for _, x in finger_strain_data do
             v <- v * MathF.Exp(0.01f * Math.Max(0.0f, MathF.Log(x / v)))
 
         MathF.Pow(v, CURVE_POWER) * CURVE_SCALE
 
-    let private overall_difficulty_pass_v2 (finger_strain_data: (float32 array * float32) array) =
+    let  weighted_overall_difficulty (curve: float32 -> float32) (finger_strain_data: (float32 array * float32) array) : float32 =
 
         let length = float32 finger_strain_data.Length
-        let weight_func = fun (i: int) -> (float32 i / length) ** 2.0f
 
         let mutable weight = 0.0f
         let mutable total = 0.0f
 
         for i, value in finger_strain_data |> Seq.map snd |> Seq.filter (fun x -> x > 0.0f) |> Seq.sort |> Seq.indexed do
-            let w = weight_func i
+            let w = curve (float32 i / length)
             weight <- weight + w
             total <- total + value * w
         MathF.Pow(total / weight, CURVE_POWER) * CURVE_SCALE

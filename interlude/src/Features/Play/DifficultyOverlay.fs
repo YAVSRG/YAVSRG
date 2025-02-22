@@ -139,6 +139,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         }
         |> Seq.filter (fun x -> x > 0.0f)
 
+    let new_curve =
+        let f x = 0.05f + x ** 4.0f
+        Difficulty.weighted_overall_difficulty f difficulty.Strain
+
     override this.Draw() =
         let now =
             state.CurrentChartTime()
@@ -174,6 +178,8 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             |> Seq.distinct
             |> Seq.length
         Text.draw(Style.font, sprintf "V: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "New: %.2f" new_curve, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "Original: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
