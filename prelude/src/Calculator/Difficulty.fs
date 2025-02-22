@@ -51,7 +51,7 @@ module Difficulty =
         |> min JACK_CURVE_CUTOFF
 
     /// These variables adjust what BPM the stream curve cuts off at
-    /// Best to put this whole expression into Desmos + variables as sliders if you want to understand it better
+    /// Best to put this whole expression into https://www.desmos.com/calculator + variables as sliders if you want to understand it better
     let STREAM_CURVE_CUTOFF = 10.0f
     let STREAM_CURVE_CUTOFF_2 = 10.0f
     /// Converts ms difference between notes (in the same column) into its equivalent BPM (on 1/4 snap)
@@ -64,8 +64,19 @@ module Difficulty =
         300.0f / MathF.Pow(0.02f<rate / ms> * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
 
+    /// Consider note A in column 1, note B also in column 1, 100ms earlier and note C in column 2, also 100ms earlier
+    /// Note A should not get any "stream" value because you will be using your wrist to tap the key again, right after note B
+    ///
+    /// This function uses the ratio between the jack and stream spacing to determine a multiplier between 0.0 and 1.0
+    /// Example: for [12][1] as described above, 0.0 is returned to fully cancel out the stream value
+    /// Example: for [1][2][1] evenly spaced trill (note C is 50ms earlier instead), 1.0 is returned to do no cancelling at all
+    /// Best to put this whole expression into https://www.desmos.com/calculator if you want to understand it better
     let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
-        Math.Min(MathF.Pow(Math.Max(MathF.Log((jack_delta / stream_delta), 2.0f), 0.0f), 2.0f), 1.0f)
+        let ratio = jack_delta / stream_delta
+        MathF.Log(ratio, 2.0f)
+        |> max 0.0f
+        |> sqrt
+        |> min 1.0f
 
     /// Walks forward through each row of notes in a chart:
     /// - Sets JF on each note ("jack-forward") to the BPM between it and the previous note in its column
