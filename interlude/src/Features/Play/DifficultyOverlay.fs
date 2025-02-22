@@ -52,35 +52,23 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SLF
+                    difficulty.NoteDifficulty.[index].[k].SL
                     Colors.cyan_accent
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SRF
-                    Colors.cyan_accent
-                draw_label
-                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).SlicePercentL(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SLB
-                    Colors.cyan_accent
-                draw_label
-                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).SlicePercentR(0.5f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].SRB
+                    difficulty.NoteDifficulty.[index].[k].SR
                     Colors.cyan_accent
 
                 draw_label
-                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).TranslateY(-playfield.ColumnWidth * 0.3f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].JB
+                    (note_box.ShrinkPercentB(0.5f).SlicePercentB(0.6f).Shrink(5.0f))
+                    difficulty.NoteDifficulty.[index].[k].J
                     Colors.green_accent
                 draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
-                    difficulty.NoteDifficulty.[index].[k].JF
-                    Colors.green_accent
-                draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
                     difficulty.NoteDifficulty.[index].[k].T
                     Colors.pink_accent
                 draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
                     ((fst difficulty.Strain.[index]).[k])
                     Colors.red_accent
 

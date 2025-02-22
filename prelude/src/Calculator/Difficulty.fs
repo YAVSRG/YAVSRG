@@ -21,14 +21,9 @@ module Layout =
 [<Struct>]
 type NoteDifficulty =
     {
-        mutable JF: float32
-        mutable SLF: float32
-        mutable SRF: float32
-
-        mutable JB: float32
-        mutable SLB: float32
-        mutable SRB: float32
-
+        mutable J: float32
+        mutable SL: float32
+        mutable SR: float32
         mutable T: float32
     }
 
@@ -92,7 +87,7 @@ module Difficulty =
         let note_difficulty (i: int, k: int, time: Time) =
             let jack_delta =
                 let delta = (time - last_note_in_column.[k]) / rate
-                data.[i].[k].JF <- ms_to_jack_bpm delta
+                data.[i].[k].J <- ms_to_jack_bpm delta
                 delta
 
             let hand_lo, hand_hi =
@@ -112,8 +107,8 @@ module Difficulty =
                     else
                         sr <- sr + trill_v
 
-            data.[i].[k].SLF <- sl
-            data.[i].[k].SRF <- sr
+            data.[i].[k].SL <- sl
+            data.[i].[k].SR <- sr
 
         for i = 0 to notes.Length - 1 do
             let { Time = time; Data = nr } = notes.[i]
@@ -125,51 +120,6 @@ module Difficulty =
             for k = 0 to keys - 1 do
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     last_note_in_column.[k] <- time
-
-    //let private notes_difficulty_pass_backward (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
-    //    let keys = notes.[0].Data.Length
-    //    let hand_split = Layout.keys_on_left_hand keys
-
-    //    let last_note_in_column = Array.create<Time> keys ((TimeArray.last notes).Value.Time + 1000000.0f<ms>)
-
-    //    let note_difficulty (i: int, k: int, time: Time) =
-    //        let jack_delta =
-    //            let delta = (last_note_in_column.[k] - time) / rate
-    //            assert(delta > 0.0f<ms / rate>)
-    //            data.[i].[k].JB <- ms_to_jack_bpm delta
-    //            delta
-
-    //        let hand_lo, hand_hi =
-    //            if k < hand_split then
-    //                0, hand_split - 1
-    //            else
-    //                hand_split, keys - 1
-
-    //        let mutable sl = 0.0f
-    //        let mutable sr = 0.0f
-    //        for hand_k = hand_lo to hand_hi do
-    //            if hand_k <> k then
-    //                let trill_delta = (last_note_in_column.[hand_k] - time) / rate
-    //                assert(trill_delta > 0.0f<ms / rate>)
-    //                let trill_v = ms_to_stream_bpm trill_delta * jack_compensation jack_delta trill_delta
-    //                if hand_k < k then
-    //                    sl <- sl + trill_v
-    //                else
-    //                    sr <- sr + trill_v
-
-    //        data.[i].[k].SLB <- sl
-    //        data.[i].[k].SRB <- sr
-
-    //    for i = notes.Length - 1 downto 0 do
-    //        let { Time = time; Data = nr } = notes.[i]
-
-    //        for k = 0 to keys - 1 do
-    //            if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-    //                note_difficulty (i, k, time)
-
-    //        for k = 0 to keys - 1 do
-    //            if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-    //                last_note_in_column.[k] <- time
 
     let stamina_func (value: float32) (input: float32) (delta: GameplayTime) =
         let stamina_base_func ratio = 1.0f + 0.105f * ratio
@@ -197,9 +147,9 @@ module Difficulty =
 
                         note_difficulty.[i].[k].T <-
                             MathF.Pow(
-                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * max note_difficulty.[i].[k].SLF note_difficulty.[i].[k].SRB, OHTNERF) +
-                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * max note_difficulty.[i].[k].SRF note_difficulty.[i].[k].SLB, OHTNERF) +
-                                MathF.Pow(max note_difficulty.[i].[k].JF note_difficulty.[i].[k].JB, OHTNERF),
+                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note_difficulty.[i].[k].SL, OHTNERF) +
+                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note_difficulty.[i].[k].SR, OHTNERF) +
+                                MathF.Pow(note_difficulty.[i].[k].J, OHTNERF),
                                 1.0f / OHTNERF
                             )
 
