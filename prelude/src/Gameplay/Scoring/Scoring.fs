@@ -30,7 +30,14 @@ type GameplayAction =
     | DropHold
     | RegrabHold
     | GhostTap of {| Judgement: (int * float) option |}
-    // todo: would be nice to have a Judgement getter
+    member this.Judgement: (int * float) option =
+        match this with
+        | Hit h -> h.Judgement
+        | Hold h -> h.Judgement
+        | Release r -> r.Judgement
+        | DropHold
+        | RegrabHold -> None
+        | GhostTap g -> g.Judgement
 
 [<Struct>]
 type ComboAction =

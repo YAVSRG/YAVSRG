@@ -28,12 +28,7 @@ type Judgement(config: HudConfig, state: PlayState) =
 
     do
         state.SubscribeEvents(fun ev ->
-            let judge =
-                match ev.Action with
-                | Hit e -> e.Judgement |> Option.map fst
-                | Hold e -> e.Judgement |> Option.map fst
-                | Release e -> e.Judgement |> Option.map fst
-                | _ -> None
+            let judge = ev.Action.Judgement |> Option.map fst
 
             match judge with
             | Some j when not config.JudgementMeterIgnorePerfect || j > 0 ->

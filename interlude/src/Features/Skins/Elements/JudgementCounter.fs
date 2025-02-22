@@ -94,20 +94,9 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
     override this.Init(parent) =
         state.SubscribeEvents(fun h ->
-            match h.Action with
-            | Hit x ->
-                match x.Judgement with
-                | Some(j, _) -> judgement_animations[j].Reset()
-                | None -> ()
-            | Hold x ->
-                match x.Judgement with
-                | Some(j, _) -> judgement_animations[j].Reset()
-                | None -> ()
-            | Release x ->
-                match x.Judgement with
-                | Some(j, _) -> judgement_animations[j].Reset()
-                | None -> ()
-            | _ -> ()
+            match h.Action.Judgement with
+            | Some(j, _) -> judgement_animations[j].Reset()
+            | None -> ()
         )
 
         base.Init parent

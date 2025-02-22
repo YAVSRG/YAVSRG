@@ -24,33 +24,11 @@ type InputMeter(config: HudConfig, state: PlayState) =
     do
         if config.InputMeterJudgementColors then
             state.SubscribeEvents (fun ev ->
-                match ev.Action with
-                | Hit h ->
-                    match h.Judgement with
-                    | Some (j, _) ->
-                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
-                        color_fades.[ev.Column].Reset()
-                    | _ -> ()
-                | Hold h ->
-                    match h.Judgement with
-                    | Some (j, _) ->
-                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
-                        color_fades.[ev.Column].Reset()
-                    | _ -> ()
-                | Release r ->
-                    match r.Judgement with
-                    | Some (j, _) ->
-                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
-                        color_fades.[ev.Column].Reset()
-                    | _ -> ()
-                | DropHold
-                | RegrabHold -> ()
-                | GhostTap g ->
-                    match g.Judgement with
-                    | Some (j, _) ->
-                        colors.[ev.Column] <- state.Ruleset.JudgementColor j
-                        color_fades.[ev.Column].Reset()
-                    | _ -> ()
+                match ev.Action.Judgement with
+                | Some (j, _) ->
+                    colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                    color_fades.[ev.Column].Reset()
+                | _ -> ()
             )
 
     override this.Update(elapsed_ms, moved) =
