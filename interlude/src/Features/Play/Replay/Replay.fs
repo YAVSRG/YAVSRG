@@ -9,7 +9,6 @@ open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.Content
 open Interlude.UI
@@ -45,15 +44,11 @@ module ReplayScreen =
         let replay_ended_fade = Animation.Fade 0.0f
 
         let mutable last_time = -Time.infinity
-        let mutable replay_data = replay_data
 
-        let mutable scoring =
-            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+        let scoring = ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
-            replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
-            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
-            screen.State.ChangeScoring scoring
+            screen.State.ChangeScoring (screen.State.Scoring.Recreate())
 
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
@@ -139,7 +134,7 @@ module ReplayScreen =
                     seek_backwards(this)
                 last_time <- now
 
-                scoring.Update chart_time
+                this.State.Scoring.Update chart_time
 
                 if replay_data.Finished && now > chart.LastNote then
                     match mode with

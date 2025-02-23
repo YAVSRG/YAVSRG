@@ -26,17 +26,13 @@ module EditHudScreen =
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current
 
-        let mutable replay_data = replay_data
-
-        let mutable scoring =
+        let scoring =
             ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
 
         let mutable time = -Time.infinity
 
         let seek_backwards (screen: IPlayScreen) =
-            replay_data <- StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
-            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
-            screen.State.ChangeScoring scoring
+            screen.State.ChangeScoring (screen.State.Scoring.Recreate())
 
         let mutable ctx: PositionerContext = Unchecked.defaultof<_>
 
@@ -89,7 +85,7 @@ module EditHudScreen =
                     ctx.ClearSelection()
 
                 if not replay_data.Finished then
-                    scoring.Update chart_time
+                    this.State.Scoring.Update chart_time
                 else
                     Song.seek 0.0f<ms>
         }

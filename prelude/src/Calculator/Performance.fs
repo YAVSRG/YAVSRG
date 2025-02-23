@@ -2,6 +2,7 @@
 
 open System
 open Prelude
+open Prelude.Charts
 open Prelude.Gameplay.Scoring
 
 module Performance =
@@ -55,3 +56,27 @@ module Performance =
 
         MathF.Pow(pv, Difficulty.CURVE_POWER) * Difficulty.CURVE_SCALE
         |> float
+
+    let acc_timeline (rr: Difficulty) (scoring: ScoreProcessor) =
+        let mutable v = 1.0
+        let mutable i = 0
+        let output : float array = Array.zeroCreate rr.NoteDifficulty.Length
+        // todo: dropped holds have another calculation
+        for ev in scoring.Events do
+            while ev.Index > i do
+                output.[i] <- v
+                i <- i + 1
+            match ev.Action.Judgement with
+            | Some (_, value) ->
+                v <- 0.95 * v + 0.05 * value
+            | None -> ()
+        output.[output.Length - 1] <- v
+
+        //seq {
+        //    yield sprintf "Strain, Accuracy"
+        //    for i = 0 to output.Length - 1 do
+        //        yield sprintf "%.2f, %.2f" (snd rr.Strain.[i]) (output.[i] * 100.0)
+        //}
+        //|> fun lines -> System.IO.File.WriteAllLines("plot.csv", lines)
+
+        output

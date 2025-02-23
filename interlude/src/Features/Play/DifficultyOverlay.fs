@@ -139,9 +139,21 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         }
         |> Seq.filter (fun x -> x > 0.0f)
 
-    let new_curve =
-        let f x = 0.05f + x ** 4.0f
-        Difficulty.weighted_overall_difficulty f difficulty.Strain
+    let accuracies =
+        let full_score_events = state.Scoring.Recreate()
+        full_score_events.Update Time.infinity
+        let timeline = Performance.acc_timeline difficulty full_score_events
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield (float32 timeline.[peek] - 0.9f) * 2000.0f
+                peek <- peek - 1
+        }
+
+    let difficulty_curve x = 0.002f + x ** 4.0f
+
+    let new_curve_note_strain =
+        Difficulty.weighted_overall_difficulty difficulty_curve (difficulty.Strain |> Seq.map fst |> Seq.concat)
 
     override this.Draw() =
         let now =
@@ -170,6 +182,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
         draw_live_data 200.0f Colors.red note_difficulties
         draw_live_data 400.0f Colors.blue chord_strains
+        draw_live_data 600.0f Colors.yellow_accent accuracies
 
         let variety =
             note_difficulties
@@ -178,8 +191,8 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             |> Seq.distinct
             |> Seq.length
         Text.draw(Style.font, sprintf "V: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "New: %.2f" new_curve, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "Original: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "New: %.2f" new_curve_note_strain, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "Original: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 800.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
