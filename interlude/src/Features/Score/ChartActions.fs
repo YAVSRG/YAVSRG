@@ -5,9 +5,10 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Calculator
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Play
+open Interlude.Features.Gameplay
 open Interlude.Features.Collections
 open Interlude.Features.Export
 
@@ -40,6 +41,15 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
                 %"chart.add_to_collection",
                 (fun () -> AddToCollectionPage(score_info.ChartMeta).Show()),
                 Icon = Icons.FOLDER_PLUS
+            )
+            |+ PageButton(%"chart.change_offset",
+                fun () ->
+                    match SelectedChart.CHART, SelectedChart.SAVE_DATA with
+                    | Some chart, Some save_data ->
+                        LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
+                            .Show()
+                    | _ -> ()
+                , Icon = Icons.SPEAKER
             )
             |+ PageButton(
                 %"chart.delete",
