@@ -15,14 +15,14 @@ Visit [yavsrg.net](https://www.yavsrg.net) to read more about this project and i
 Various player guides, including a wiki, are built into the game to help you get started, especially if you're coming from another popular rhythm game client.  
 You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in your browser!
 
-**On Windows** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
-**On macOS and Linux** - You currently must build the game from source, I've made this quick and easy, see below
+**On Windows and Linux** - Download the latest release [from the website](https://www.yavsrg.net), extract it and play!  
+**On macOS** - Not officially supported, to try possibly unstable builds see instructions below
 
 <h2 align="center">🧱 Building Interlude</h2>
 
 > [!Note]
 >
-> If you just want to play the game on Windows, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
+> If you just want to play the game on Windows or Linux, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
 1. Install [Git](https://git-scm.com/downloads), and [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
 Follow the install instructions for both of these for your platform
@@ -68,7 +68,7 @@ After the first use of `debug_run`, you should have the correct BASS .dll/.dynli
 If not, the game will let you know on launch - Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
 If your platform isn't there contact me in the discord or search online for it
 
-If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run with F5 which is my current workflow.
+If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run by pressing F5.
 
 While Interlude stores all its data in the same folder as the exe by default, you can change that to a specific location - In YAVSRG/interlude/src/bin/Debug/net8.0/config.json you can edit `WorkingDirectory` to whatever is convenient
 
