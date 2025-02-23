@@ -71,6 +71,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
                     ((fst difficulty.Strain.[index]).[k])
                     Colors.red_accent
+                draw_label
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    difficulty.NoteDifficulty.[index].[k].S
+                    Colors.yellow_accent
 
         draw_label (note_area.BorderR(playfield.ColumnWidth).SlicePercentY(0.35f).Shrink(5.0f)) (snd difficulty.Strain.[index]) Colors.red_accent
 
@@ -155,6 +159,9 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
     let new_curve_note_strain =
         Difficulty.weighted_overall_difficulty difficulty_curve (difficulty.Strain |> Seq.map fst |> Seq.concat)
 
+    let new_rating =
+        Difficulty.weighted_overall_difficulty difficulty_curve (difficulty.NoteDifficulty |> Seq.concat |> Seq.map _.S |> Seq.filter (fun x -> x > 0.0f))
+
     override this.Draw() =
         let now =
             state.CurrentChartTime()
@@ -190,9 +197,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             |> Seq.truncate 50
             |> Seq.distinct
             |> Seq.length
-        Text.draw(Style.font, sprintf "V: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "New: %.2f" new_curve_note_strain, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "Original: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 800.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "X: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "V1+: %.2f" new_rating, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "V0+: %.2f" new_curve_note_strain, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "V0: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 800.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
