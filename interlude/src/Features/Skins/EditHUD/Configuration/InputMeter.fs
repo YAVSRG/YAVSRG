@@ -27,7 +27,7 @@ type InputMeterPage(on_close: unit -> unit) =
         |+ PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
             .Pos(0)
         |+ PageSetting(%"hud.input_meter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
-                .Pos(2)
+            .Pos(2)
         |+ PageSetting(%"hud.input_meter.key_color", ColorPicker(%"hud.input_meter.key_color", key_color, true))
             .Pos(4)
         |+ PageSetting(%"hud.input_meter.judgement_colors", Checkbox judgement_colors)

@@ -50,7 +50,6 @@ module HudElement =
     let can_configure (e: HudElement) =
         match e with
         | HudElement.BPM -> false
-        | HudElement.KeysPerSecond -> false
         | HudElement.Pacemaker -> false
         | _ -> true
 

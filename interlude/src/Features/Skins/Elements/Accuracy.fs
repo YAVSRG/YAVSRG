@@ -11,15 +11,15 @@ open Interlude.Features.Play
 
 module Accuracy =
 
-    let draw_accuracy_centered(texture: Sprite, bounds: Rect, color: Color, accuracy_text: string, spacing: float32, dot_spacing: float32, percent_spacing: float32) =
+    let draw_accuracy_aligned(texture: Sprite, bounds: Rect, color: Color, accuracy_text: string, spacing: float32, dot_spacing: float32, percent_spacing: float32, alignment: float32) =
         let char_width = float32 texture.Width
         let width = (dot_spacing * 2.0f + percent_spacing + float32 accuracy_text.Length + (float32 accuracy_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
-        let mutable char_bounds = 
+        let mutable char_bounds =
             Rect.Box(
-                bounds.CenterX - width * scale * 0.5f,
+                bounds.Left + (bounds.Width - width * scale) * alignment,
                 bounds.CenterY - height * scale * 0.5f,
                 char_width * scale,
                 height * scale
@@ -49,8 +49,10 @@ type Accuracy(config: HudConfig, state: PlayState) =
             else
                 Color.White
         )
-    
+
     let font_texture = Content.Texture "accuracy-font"
+
+    let alignment = config.AccuracyPosition.TextAlignment
 
     override this.Init(parent) =
         if config.AccuracyGradeColors then
@@ -58,13 +60,12 @@ type Accuracy(config: HudConfig, state: PlayState) =
                 color.Target <- Grade.calculate grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
             )
 
-        
         if not config.AccuracyUseFont then
             this
             |* Text(
                 (fun () -> state.Scoring.FormattedAccuracy),
                 Color = (fun () -> color.Value, Color.Transparent),
-                Align = Alignment.CENTER,
+                Align = alignment,
                 Position =
                     { Position.DEFAULT with
                         Bottom = 0.7f %+ 0.0f
@@ -76,7 +77,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
             |* Text(
                 K state.Ruleset.Name,
                 Color = K Colors.text_subheading,
-                Align = Alignment.CENTER,
+                Align = alignment,
                 Position =
                     { Position.DEFAULT with
                         Top = 0.6f %+ 0.0f
@@ -88,14 +89,15 @@ type Accuracy(config: HudConfig, state: PlayState) =
         base.Draw()
         if config.AccuracyUseFont then
             let text_bounds = this.Bounds.SliceT(this.Bounds.Height * 0.6f)
-            Accuracy.draw_accuracy_centered(
+            Accuracy.draw_accuracy_aligned(
                 font_texture,
                 text_bounds,
                 color.Value,
                 state.Scoring.FormattedAccuracy,
                 config.AccuracyFontSpacing,
                 config.AccuracyDotExtraSpacing,
-                config.AccuracyPercentExtraSpacing
+                config.AccuracyPercentExtraSpacing,
+                alignment
             )
 
     override this.Update(elapsed_ms, moved) =

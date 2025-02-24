@@ -70,6 +70,20 @@ type HudPosition =
         Right: float32 * float32
         Bottom: float32 * float32
     }
+    member this.TextAlignment =
+        let lo, la = this.Left
+        let ro, _ = this.Right
+        if la = 0.5f then
+            0.5f
+        elif la < 0.5f then
+            if lo >= 0.0f then 0.0f
+            elif ro <= 0.0f then 1.0f
+            else 0.5f
+        else
+            if lo >= 0.0f then 0.0f
+            elif ro <= 0.0f then 1.0f
+            else 0.5f
+
     member this.Rotate =
         let inline pointwise_add (a, b) (c, d) = (a + c, b + d)
         let inline pointwise_subtract (a, b) (c, d) = (a - c, b - d)
@@ -202,6 +216,9 @@ type HudConfig =
         InputMeterJudgementColors: bool
 
         KeysPerSecondMeterEnabled: bool
+        KeysPerSecondMeterShowAverage: bool
+        KeysPerSecondMeterShowMax: bool
+        KeysPerSecondMeterShowTotal: bool
         KeysPerSecondMeterPosition: HudPosition
 
         MultiplayerScoreTrackerPosition: HudPosition
@@ -405,6 +422,9 @@ type HudConfig =
             InputMeterJudgementColors = false
 
             KeysPerSecondMeterEnabled = false
+            KeysPerSecondMeterShowAverage = false
+            KeysPerSecondMeterShowMax = false
+            KeysPerSecondMeterShowTotal = false
             KeysPerSecondMeterPosition =
                 {
                     RelativeToPlayfield = true

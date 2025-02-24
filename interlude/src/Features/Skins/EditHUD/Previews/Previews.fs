@@ -18,25 +18,27 @@ module SelectPreviews =
 
     let private create_accuracy (config: HudConfig) : SelectPreview =
         let texture = Content.Texture "accuracy-font"
+        let alignment = config.AccuracyPosition.TextAlignment
 
         None,
         fun (bounds: Rect) ->
 
         if config.AccuracyUseFont then
-            Accuracy.draw_accuracy_centered(
+            Accuracy.draw_accuracy_aligned(
                 texture,
                 bounds.ShrinkB(bounds.Height * 0.4f),
                 Color.White,
                 Rulesets.current.FormatAccuracy 0.967234,
                 config.AccuracyFontSpacing,
                 config.AccuracyDotExtraSpacing,
-                config.AccuracyPercentExtraSpacing
+                config.AccuracyPercentExtraSpacing,
+                alignment
             )
         else
-            Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.967234, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, 0.5f)
+            Text.fill (Style.font, Rulesets.current.FormatAccuracy 0.967234, bounds.ShrinkB(bounds.Height * 0.3f), Color.White, alignment)
 
         if config.AccuracyShowName then
-            Text.fill (Style.font, Rulesets.current.Name, bounds.SliceB(bounds.Height * 0.4f), Color.White, 0.5f)
+            Text.fill (Style.font, Rulesets.current.Name, bounds.SliceB(bounds.Height * 0.4f), Color.White, alignment)
 
     let private create_error_bar (config: HudConfig) : SelectPreview =
 
@@ -337,9 +339,36 @@ module SelectPreviews =
                     config.InputMeterInputColor
 
     let private create_kps (config: HudConfig) : SelectPreview =
+        let shown_extras =
+            (if config.KeysPerSecondMeterShowAverage then 1 else 0) +
+            (if config.KeysPerSecondMeterShowMax then 1 else 0) +
+            (if config.KeysPerSecondMeterShowTotal then 1 else 0)
+
+        let extras =
+            let positions : (Rect -> Rect) seq =
+                match shown_extras with
+                | 3 -> [| (fun r -> r.SlicePercentT 0.4f); (fun r -> r.SlicePercentY 0.4f); (fun r -> r.SlicePercentB 0.4f) |]
+                | 2 -> [| (fun r -> r.SlicePercentT 0.55f); (fun r -> r.SlicePercentB 0.55f) |]
+                | 1 -> [| fun r -> r.SlicePercentY 0.7f |]
+                | _ -> [||]
+            let texts : string seq =
+                seq {
+                    if config.KeysPerSecondMeterShowAverage then yield "AVG: 70"
+                    if config.KeysPerSecondMeterShowMax then yield "MAX: 73"
+                    if config.KeysPerSecondMeterShowTotal then yield "TOTAL: 727"
+                }
+            Seq.zip positions texts
+            |> Array.ofSeq
+
+        let split_a, split_b = if shown_extras = 3 then 0.4f, 0.65f else 0.5f, 0.5f
+
         None,
         fun (bounds: Rect) ->
-            Text.fill (Style.font, "70 KPS", bounds.SlicePercentT 0.5f, Color.White, Alignment.CENTER)
+            let text_bounds = bounds.SlicePercentT split_a
+            let stat_bounds = bounds.SlicePercentB split_b
+            Text.fill_b(Style.font, "70 KPS", text_bounds, Colors.text, Alignment.CENTER)
+            for p, t in extras do
+                Text.fill_b(Style.font, t, p stat_bounds, Colors.text_subheading, Alignment.CENTER)
 
     let private create_custom_image (config: HudConfig) : SelectPreview =
         let texture = Content.Texture "custom-image"

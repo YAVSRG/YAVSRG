@@ -84,8 +84,5 @@ module EditHudScreen =
                 if Mouse.left_click() then
                     ctx.ClearSelection()
 
-                if not replay_data.Finished then
-                    this.State.Scoring.Update chart_time
-                else
-                    Song.seek 0.0f<ms>
+                this.State.Scoring.Update chart_time
         }
