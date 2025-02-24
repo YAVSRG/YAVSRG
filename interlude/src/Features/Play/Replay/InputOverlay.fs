@@ -56,12 +56,9 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 |> scroll_direction_pos playfield.Bounds.Bottom
                 |> fun a -> Render.rect a Colors.grey_2.O2
 
-            let now =
-                state.CurrentChartTime()
-                + (
-                    (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
-                    + options.VisualOffset.Value
-                ) * Song.playback_rate()
+            let now = 
+                state.CurrentChartTime() +
+                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
             while replay_data.Length - 1 > seek
                   && let struct (t, _) = replay_data.[seek + 1] in

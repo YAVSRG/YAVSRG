@@ -212,11 +212,8 @@ type private HitOverlay
     override this.Draw() =
         if show_hit_overlay.Value then
             let now =
-                state.CurrentChartTime()
-                + (
-                    (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
-                    + options.VisualOffset.Value
-                ) * Song.playback_rate()
+                state.CurrentChartTime() +
+                (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
             while hit_events.Length - 1 > seek && hit_events.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1

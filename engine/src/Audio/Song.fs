@@ -117,6 +117,9 @@ module Song =
     let private update_time() =
         _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
 
+    let frame_compensation () =
+        (rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start) - _time
+
     let time () = _time
 
     let time_compensated () =

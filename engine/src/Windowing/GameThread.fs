@@ -94,8 +94,10 @@ module GameThread =
     let mutable update_draw_elapsed_ms = 0.0
 
     let frame_compensation () =
-        if strategy <> Unlimited && anti_jitter then
-            float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
+        if strategy <> Unlimited && anti_jitter && Song.playing() then
+            let audio_cmp = Song.frame_compensation() / Song.playback_rate()
+            let visual_cmp = float32 (estimated_next_frame - now ()) * 1.0f<ms / rate>
+            audio_cmp + visual_cmp
         else
             0.0f<ms / rate>
 

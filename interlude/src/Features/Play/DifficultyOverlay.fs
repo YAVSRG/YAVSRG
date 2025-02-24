@@ -164,12 +164,9 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     override this.Draw() =
         let now =
-            state.CurrentChartTime()
-            + (
-                (if Song.playing() then GameThread.frame_compensation () else 0.0f<ms / rate>)
-                + options.VisualOffset.Value
-            ) * Song.playback_rate()
-            + first_note
+            state.CurrentChartTime() +
+            first_note +
+            (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
         while chart.Notes.Length - 1 > seek && chart.Notes.[seek + 1].Time < now - 100.0f<ms> do
             seek <- seek + 1
