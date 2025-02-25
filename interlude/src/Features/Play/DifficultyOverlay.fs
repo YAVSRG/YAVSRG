@@ -163,13 +163,11 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                 peek <- peek - 1
         }
 
-    let difficulty_curve x = 0.002f + x ** 4.0f
-
     let new_curve_note_strain =
-        Difficulty.weighted_overall_difficulty difficulty_curve (difficulty.Strain |> Seq.map fst |> Seq.concat)
+        Difficulty.weighted_overall_difficulty (difficulty.Strain |> Seq.map fst |> Seq.concat)
 
     let new_rating =
-        Difficulty.weighted_overall_difficulty difficulty_curve (difficulty.NoteDifficulty |> Seq.concat |> Seq.map _.S |> Seq.filter (fun x -> x > 0.0f))
+        Difficulty.weighted_overall_difficulty (difficulty.NoteDifficulty |> Seq.concat |> Seq.map _.S |> Seq.filter (fun x -> x > 0.0f))
 
     override this.Draw() =
         let now =
