@@ -29,14 +29,26 @@ module CurveExperiments =
         graph ms (sprintf "%.0f ms") (fun x -> Difficulty.jack_compensation x 500.0f<ms / rate>) 0.01f
 
     let stam () =
-        let mutable v = 0.1f
-        for i = 1 to 10 do
-            for _ = 1 to 10 do
-                v <- Difficulty.stamina_func v 10.0f 10.0f<ms / rate>
-            printfn "%i iterations: %.2f" (i * 10) v
-            let instant_extra = Difficulty.stamina_func v 10.0f 0.0f<ms / rate>
-            printfn "instant extra: %.2f" instant_extra
-            printfn "ratio %.2f / %.2f" (instant_extra / v) (v / instant_extra)
+
+        let mutable v = 0.0f
+        let mutable v2 = 0.0f
+        while true do
+            printf "diff: "
+            let diff = System.Console.ReadLine() |> float32
+
+            let spacing = 15000.0f<ms / rate> / diff
+
+            let freq = 1000.0f<ms / rate> / spacing |> ceil |> int
+
+            let target = (diff * (100.0f<ms / rate> / spacing) * 2.439f)
+            printfn "estimate target: %.2f" target
+            printfn "estimate result: %.2f" (v + (target - v) * (1.0f - exp -0.44f))
+
+            for i = 1 to freq do
+                v <- Difficulty.stamina_func v diff spacing
+                v2 <- Difficulty.stamina_func_2 v2 diff spacing
+                printfn "%.2f | %.2f" v v2
+            printfn "%i steps, %.1fms apart at %.2f: %.2f | %.2f" freq spacing diff v v2
 
     let main() =
         stam()

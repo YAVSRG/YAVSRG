@@ -125,11 +125,11 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
             x <- x - 5.0f
 
-    let chord_strains =
+    let note_strains =
         seq {
             let mutable peek = seek
             while peek >= 0 do
-                yield snd difficulty.Strain.[peek]
+                yield! fst difficulty.Strain.[peek]
                 peek <- peek - 1
         }
         |> Seq.filter (fun x -> x > 0.0f)
@@ -139,6 +139,15 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             let mutable peek = seek
             while peek >= 0 do
                 yield! (difficulty.NoteDifficulty.[peek] |> Seq.map _.T)
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+
+    let new_strains =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield! (difficulty.NoteDifficulty.[peek] |> Seq.map _.S)
                 peek <- peek - 1
         }
         |> Seq.filter (fun x -> x > 0.0f)
@@ -185,8 +194,9 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_graph 600.0f Colors.blue difficulty_distribution_chords
 
         draw_live_data 200.0f Colors.red note_difficulties
-        draw_live_data 400.0f Colors.blue chord_strains
-        draw_live_data 600.0f Colors.yellow_accent accuracies
+        draw_live_data 400.0f Colors.blue note_strains
+        draw_live_data 600.0f Colors.green_accent new_strains
+        draw_live_data 800.0f Colors.yellow_accent accuracies
 
         let variety =
             note_difficulties
