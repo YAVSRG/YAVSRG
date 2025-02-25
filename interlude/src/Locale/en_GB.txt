@@ -1191,6 +1191,7 @@ system.visualoffset.tooltip=Adjusts your visual offset.\nPositive numbers will m
 system.windowmode=Window mode
 system.windowmode.borderless=Borderless
 system.windowmode.fullscreen=Fullscreen
+system.windowmode.fullscreen_borderless=Fullscreen (Borderless)
 system.windowmode.fullscreen_letterbox=Fullscreen (Letterbox)
 system.windowmode.windowed=Windowed
 system.windowresolution=Window size

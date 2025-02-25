@@ -263,6 +263,7 @@ type SystemPage() =
                 [|
                     WindowType.Windowed, %"system.windowmode.windowed"
                     WindowType.Borderless, %"system.windowmode.borderless"
+                    WindowType.BorderlessNoTaskbar, %"system.windowmode.fullscreen_borderless"
                     WindowType.Fullscreen, %"system.windowmode.fullscreen"
                     WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
                 |],

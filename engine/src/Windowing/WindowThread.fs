@@ -151,10 +151,10 @@ module WindowThread =
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
-                    monitor.ClientArea.Min.X - 1,
-                    monitor.ClientArea.Min.Y - 1,
-                    monitor.ClientArea.Size.X + 1,
-                    monitor.ClientArea.Size.Y + 1,
+                    monitor.WorkArea.Min.X + 1,
+                    monitor.WorkArea.Min.Y + 1,
+                    monitor.WorkArea.Size.X - 2,
+                    monitor.WorkArea.Size.Y - 2,
                     0
                 )
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
@@ -164,8 +164,8 @@ module WindowThread =
             else
                 GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
                 GLFW.HideWindow(window)
-                GLFW.SetWindowPos(window, monitor.ClientArea.Min.X - 1, monitor.ClientArea.Min.Y - 1)
-                GLFW.SetWindowSize(window, monitor.ClientArea.Size.X + 1, monitor.ClientArea.Size.Y + 1)
+                GLFW.SetWindowPos(window, monitor.WorkArea.Min.X + 1, monitor.WorkArea.Min.Y + 1)
+                GLFW.SetWindowSize(window, monitor.WorkArea.Size.X - 2, monitor.WorkArea.Size.Y - 2)
                 GLFW.MaximizeWindow(window)
                 GLFW.ShowWindow(window)
 
@@ -174,17 +174,17 @@ module WindowThread =
                 GLFW.SetWindowMonitor(
                     window,
                     NativePtr.nullPtr<Monitor>,
-                    monitor.ClientArea.Min.X,
-                    monitor.ClientArea.Min.Y,
-                    monitor.ClientArea.Size.X,
-                    monitor.ClientArea.Size.Y,
+                    monitor.ClientArea.Min.X + 1,
+                    monitor.ClientArea.Min.Y + 1,
+                    monitor.ClientArea.Size.X - 2,
+                    monitor.ClientArea.Size.Y - 2,
                     0
                 )
-                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
-            else
-                GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
-                GLFW.SetWindowPos(window, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
-                GLFW.SetWindowSize(window, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
+            GLFW.HideWindow(window)
+            GLFW.SetWindowAttrib(window, WindowAttribute.Decorated, false)
+            GLFW.SetWindowPos(window, monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y)
+            GLFW.SetWindowSize(window, monitor.ClientArea.Size.X, monitor.ClientArea.Size.Y)
+            GLFW.ShowWindow(window)
 
         | WindowType.Fullscreen ->
             GLFW.SetWindowMonitor(
