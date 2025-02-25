@@ -76,10 +76,10 @@ module Difficulty =
         |> min 1.0f
 
     /// Walks forward through each row of notes in a chart:
-    /// - Sets JF on each note ("jack-forward") to the BPM between it and the previous note in its column
-    /// - Sets SLF on each note ("stream-left-forward") to the BPM betwen it and the previous note in the column to the left, if this column exists and is on the same hand
-    /// - Sets SRF on each note ("stream-right-forward") to the BPM betwen it and the previous note in the column to the right, if this column exists and is on the same hand
-    /// Don't worry about what it does for keymodes above 4K for SLF & SLR, I'm redesigning it
+    /// - Sets J ("jack") on each note to the BPM between it and the previous note in its column
+    /// - Sets SL ("stream-left") on each note to the BPM betwen it and the previous note in the column to the left, if this column exists and is on the same hand
+    /// - Sets SR ("stream-right") on each note to the BPM betwen it and the previous note in the column to the right, if this column exists and is on the same hand
+    /// For higher keymodes, SL and SR get the maximum value out of all left- and right-notes respectively
     let private notes_difficulty_pass (rate: Rate, notes: TimeArray<NoteRow>) (data: NoteDifficulty array array) =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
@@ -134,7 +134,7 @@ module Difficulty =
     let STAMINA_HALF_LIFE = 1575.3f<ms / rate>
     let STAMINA_DECAY_RATE = log 0.5f / STAMINA_HALF_LIFE
 
-    let stamina_func_2 (value: float32) (input: float32) (delta: GameplayTime) =
+    let stamina_func_improved (value: float32) (input: float32) (delta: GameplayTime) =
 
         let decay = exp (STAMINA_DECAY_RATE * delta)
         let a = value
@@ -175,7 +175,7 @@ module Difficulty =
                                 ((offset - last_note_in_column.[k]) / rate)
 
                         strain_v2.[k] <-
-                            stamina_func_2
+                            stamina_func_improved
                                 strain_v2.[k]
                                 note_difficulty.[i].[k].T
                                 ((offset - last_note_in_column.[k]) / rate)
@@ -232,6 +232,7 @@ module Difficulty =
     let CURVE_POWER = 0.6f
     let CURVE_SCALE = 0.4056f
 
+    /// Old and to be superseded by `weighted_overall_difficulty`
     let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) : float32 =
         let mutable v = 0.01f
         for _, x in finger_strain_data do
@@ -239,9 +240,18 @@ module Difficulty =
 
         MathF.Pow(v, CURVE_POWER) * CURVE_SCALE
 
-    let weighted_overall_difficulty (curve: float32 -> float32) (data: float32 seq) : float32 =
+    /// Calculates a single number to represent a set of difficulty data points
+    /// This number represents how a player would "perceive" the difficulty overall
+    /// Perception is not a concrete term so I've ruled: In my experience players perception is concentrated on the very hardest parts of a chart
+    let weighted_overall_difficulty (data: float32 seq) : float32 =
 
-        let note_count = 2500.0f
+        /// The top 2500 notes get special weightings
+        let DIFFICULTY_WEIGHTED_NOTES = 2500.0f
+        /// Weightings for the values are calculated by this formula
+        /// x = % position through the top 2500 from 0.0 - 1.0
+        /// Values below the top 2500 always have x = 0.0
+        let DIFFICULTY_CURVE x = 0.002f + x ** 4.0f
+
         let data_array = data |> Seq.filter (fun x -> x > 0.0f) |> Seq.sort |> Array.ofSeq
         let length = float32 data_array.Length
 
@@ -249,9 +259,11 @@ module Difficulty =
         let mutable total = 0.0f
 
         for i = 0 to data_array.Length - 1 do
-            let w = curve ((float32 i + note_count - length) / note_count |> max 0.0f)
+            let w = DIFFICULTY_CURVE ((float32 i + DIFFICULTY_WEIGHTED_NOTES - length) / DIFFICULTY_WEIGHTED_NOTES |> max 0.0f)
             weight <- weight + w
             total <- total + data_array.[i] * w
+
+        // Final transform on the weighted average: Power and rescale it to some arbitrary scale people like and are used to
         MathF.Pow(total / weight, CURVE_POWER) * CURVE_SCALE
 
     let private calculate_uncached (rate: Rate, notes: TimeArray<NoteRow>) : Difficulty =
