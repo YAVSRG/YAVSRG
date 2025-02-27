@@ -243,7 +243,9 @@ module Song =
                     Bass.ChannelSlideAttribute(song.ID, ChannelAttribute.Volume, 1.0f, CROSSFADE_DURATION_MS) |> display_bass_error
                 | SongLoadAction.PlayFromBeginning ->
                     (if paused then seek else play_from) 0.0f<ms>
-                | SongLoadAction.Wait -> ()
+                | SongLoadAction.Wait ->
+                    play_from (LEADIN_TIME * rate)
+                    pause()
 
                 on_loaded_ev.Trigger()
         }
