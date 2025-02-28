@@ -56,6 +56,10 @@ module Hotkeys =
         Hotkeys.register "hide_replay_overlay" (mk Keys.H)
         Hotkeys.register "hud_anchor" (ctrl Keys.A)
         Hotkeys.register "hud_reset_position" (ctrl Keys.R)
+        Hotkeys.register "hud_flip_horizontal" (ctrl Keys.H)
+        Hotkeys.register "hud_flip_vertical" (ctrl Keys.V)
+        Hotkeys.register "hud_flip_horizontal_all" (ctrl_shift Keys.H)
+        Hotkeys.register "hud_flip_vertical_all" (ctrl_shift Keys.V)
         Hotkeys.register "undo" (ctrl Keys.Z)
 
         Hotkeys.register "uprate_big" (ctrl_shift Keys.Equal)

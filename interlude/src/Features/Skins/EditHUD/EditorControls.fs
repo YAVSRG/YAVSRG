@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
+open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Features.Skins
 
@@ -125,14 +126,28 @@ type private HUDEditorControls(ctx: PositionerContext) =
             .Conditional(fun () -> ctx.Selected.IsSome)
         |+ Text(
             sprintf "Remove this element: %O" %%"delete",
-            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(545.0f),
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(565.0f),
+            Color = K Colors.text_cyan,
+            Align = Alignment.RIGHT
+        )
+            .Conditional(fun () -> ctx.Selected.IsSome)
+        |+ Text(
+            sprintf "Mirror horizontally: %O" %%"hud_flip_horizontal",
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(605.0f),
+            Color = K Colors.text_cyan,
+            Align = Alignment.RIGHT
+        )
+            .Conditional(fun () -> ctx.Selected.IsSome)
+        |+ Text(
+            sprintf "Mirror vertically: %O" %%"hud_flip_vertical",
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(645.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
             .Conditional(fun () -> ctx.Selected.IsSome)
         |* Text(
             sprintf "Undo: %O" %%"undo",
-            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(585.0f),
+            Position = Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(685.0f),
             Color = K Colors.text_cyan,
             Align = Alignment.RIGHT
         )
@@ -163,6 +178,14 @@ type private HUDEditorControls(ctx: PositionerContext) =
             ctx.Undo()
         elif (%%"delete").Tapped() then
             ctx.RemoveElement()
+        elif (%%"hud_flip_horizontal").Tapped() then
+            ctx.HorizontalFlip()
+        elif (%%"hud_flip_vertical").Tapped() then
+            ctx.VerticalFlip()
+        elif (%%"hud_flip_horizontal_all").Tapped() then
+            ctx.HorizontalFlipAll()
+        elif (%%"hud_flip_vertical_all").Tapped() then
+            ctx.VerticalFlipAll()
 
         if fade.Target = 0.0f then
             auto_show_timer <- auto_show_timer - elapsed_ms

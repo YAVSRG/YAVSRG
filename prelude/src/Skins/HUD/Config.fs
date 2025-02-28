@@ -101,6 +101,18 @@ type HudPosition =
             Bottom = pointwise_add center_y hwidth
         }
 
+    member this.FlipVertical =
+        { this with
+            Top = (-fst this.Bottom, 1.0f - snd this.Bottom)
+            Bottom = (-fst this.Top, 1.0f - snd this.Top)
+        }
+
+    member this.FlipHorizontal =
+        { this with
+            Left = (-fst this.Right, 1.0f - snd this.Right)
+            Right = (-fst this.Left, 1.0f - snd this.Left)
+        }
+
 [<Json.AutoCodec(false)>]
 type BackgroundTextureOptions =
     {

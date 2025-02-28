@@ -7,6 +7,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude.Skins.HudLayouts
 open Interlude.Content
+open Interlude.UI
 open Interlude.Features.Play
 open Interlude.Features.Skins
 
@@ -583,3 +584,29 @@ and PositionerContext =
             this.Selected <- None
             Style.click.Play()
         | None -> ()
+
+    member this.HorizontalFlip() =
+        match this.Selected with
+        | Some element ->
+            (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
+            this.Recreate element
+        | None -> ()
+
+    member this.VerticalFlip() =
+        match this.Selected with
+        | Some element ->
+            (HudElement.position_setting element) |> Setting.app _.FlipVertical
+            this.Recreate element
+        | None -> ()
+
+    member this.HorizontalFlipAll() =
+        for element in HudElement.FULL_LIST do
+            (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
+            this.Recreate element
+        Notifications.action_feedback(Icons.REPEAT, "All elements flipped horizontally", sprintf "Press %O to flip it back" %%"hud_flip_horizontal_all")
+
+    member this.VerticalFlipAll() =
+        for element in HudElement.FULL_LIST do
+            (HudElement.position_setting element) |> Setting.app _.FlipVertical
+            this.Recreate element
+        Notifications.action_feedback(Icons.REPEAT, "All elements flipped vertically", sprintf "Press %O to flip it back" %%"hud_flip_vertical_all")
