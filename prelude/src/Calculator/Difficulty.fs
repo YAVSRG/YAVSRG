@@ -24,15 +24,22 @@ type NoteDifficulty =
         mutable J: float32
         mutable SL: float32
         mutable SR: float32
-        // todo: dont store on the note
-        mutable T: float32
-        mutable S: float32
+    }
+
+[<Struct>]
+type RowStrain =
+    {
+        NotesV0: float32 array
+        NotesV1: float32 array
+        StrainV0: float32
+        StrainV0Notes: float32 array
+        StrainV1Notes: float32 array
     }
 
 type Difficulty =
     {
         NoteDifficulty: NoteDifficulty array array
-        Strain: (float32 array * float32) array
+        Strains: RowStrain array
         Overall: float
     }
 
@@ -123,6 +130,26 @@ module Difficulty =
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     last_note_in_column.[k] <- time
 
+    let private OHTNERF = 3.0f
+    let STREAM_CURVE_HEIGHT_SCALE = 0.5209125f
+    let note_strain_v0 (note: NoteDifficulty) : float32 =
+        MathF.Pow(
+            MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note.SL, OHTNERF) +
+            MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note.SR, OHTNERF) +
+            MathF.Pow(note.J, OHTNERF),
+            1.0f / OHTNERF
+        )
+
+    let STREAM_SCALE = 6f
+    let STREAM_POW = 0.5f
+    let note_strain_v1 (note: NoteDifficulty) : float32 =
+        MathF.Pow(
+            MathF.Pow(STREAM_SCALE * note.SL ** STREAM_POW, OHTNERF) +
+            MathF.Pow(STREAM_SCALE * note.SR ** STREAM_POW, OHTNERF) +
+            MathF.Pow(note.J, OHTNERF),
+            1.0f / OHTNERF
+        )
+
     let stamina_func (value: float32) (input: float32) (delta: GameplayTime) =
 
         let decay = exp (-0.00044f<rate / ms> * delta)
@@ -141,53 +168,57 @@ module Difficulty =
         let b = input * input * 0.01626f
         b - (b - a) * decay
 
-    let private OHTNERF = 3.0f
-    let STREAM_CURVE_HEIGHT_SCALE = 0.5209125f
-
-    let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
+    let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) : RowStrain array =
         let keys = notes.[0].Data.Length
-
-        let strain = Array.zeroCreate<float32> keys
-        let strain_v2 = Array.zeroCreate<float32> keys
         let last_note_in_column = Array.zeroCreate<Time> keys
+
+        let strain_v0 = Array.zeroCreate<float32> keys
+        let strain_v1 = Array.zeroCreate<float32> keys
 
         seq {
             for i = 0 to notes.Length - 1 do
                 let { Time = offset; Data = nr } = notes.[i]
+
+                let notes_v0 = Array.zeroCreate<float32> keys
+                let notes_v1 = Array.zeroCreate<float32> keys
+                let row_strain_v0 = Array.zeroCreate<float32> keys
+                let row_strain_v1 = Array.zeroCreate<float32> keys
 
                 let mutable sum = 0.0f
                 let mutable n = 0.0f
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        note_difficulty.[i].[k].T <-
-                            MathF.Pow(
-                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note_difficulty.[i].[k].SL, OHTNERF) +
-                                MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note_difficulty.[i].[k].SR, OHTNERF) +
-                                MathF.Pow(note_difficulty.[i].[k].J, OHTNERF),
-                                1.0f / OHTNERF
-                            )
+                        notes_v0.[k] <- note_strain_v0 note_difficulty.[i].[k]
+                        notes_v1.[k] <- note_strain_v1 note_difficulty.[i].[k]
 
-                        strain.[k] <-
+                        strain_v0.[k] <-
                             stamina_func
-                                strain.[k]
-                                note_difficulty.[i].[k].T
+                                strain_v0.[k]
+                                notes_v0.[k]
                                 ((offset - last_note_in_column.[k]) / rate)
+                        row_strain_v0.[k] <- strain_v0.[k]
 
-                        strain_v2.[k] <-
+                        strain_v1.[k] <-
                             stamina_func_improved
-                                strain_v2.[k]
-                                note_difficulty.[i].[k].T
+                                strain_v1.[k]
+                                notes_v1.[k]
                                 ((offset - last_note_in_column.[k]) / rate)
-
-                        note_difficulty.[i].[k].S <- strain_v2.[k]
+                        row_strain_v1.[k] <- strain_v1.[k]
 
                         last_note_in_column.[k] <- offset
 
-                        sum <- sum + strain.[k]
+                        sum <- sum + strain_v0.[k]
                         n <- n + 1.0f
 
-                yield Array.copy strain, if n = 0.0f then 0.0f else sum / n
+                yield
+                    {
+                        NotesV0 = notes_v0
+                        NotesV1 = notes_v1
+                        StrainV0 = if n = 0.0f then 0.0f else sum / n
+                        StrainV0Notes = row_strain_v0
+                        StrainV1Notes = row_strain_v1
+                    }
         }
         |> Array.ofSeq
 
@@ -233,9 +264,9 @@ module Difficulty =
     let CURVE_SCALE = 0.4056f
 
     /// Old and to be superseded by `weighted_overall_difficulty`
-    let private overall_difficulty_pass (finger_strain_data: (float32 array * float32) seq) : float32 =
+    let private overall_difficulty_pass (finger_strain_data: float32 seq) : float32 =
         let mutable v = 0.01f
-        for _, x in finger_strain_data do
+        for x in finger_strain_data do
             if x > v then v <- v * MathF.Pow(x / v, 0.01f)
 
         MathF.Pow(v, CURVE_POWER) * CURVE_SCALE
@@ -271,11 +302,11 @@ module Difficulty =
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         notes_difficulty_pass (rate, notes) note_data
         let physical_data = finger_strain_pass note_data (rate, notes)
-        let physical = overall_difficulty_pass physical_data
+        let physical = overall_difficulty_pass (physical_data |> Seq.map _.StrainV0)
 
         {
             NoteDifficulty = note_data
-            Strain = physical_data
+            Strains = physical_data
             Overall = if Single.IsFinite physical then float physical else 0.0
         }
 

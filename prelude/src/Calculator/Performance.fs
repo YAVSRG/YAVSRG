@@ -43,7 +43,7 @@ module Performance =
                 let mutable c = 0.0f
 
                 pvs.[ev.Column] <-
-                    performance_func (pvs.[ev.Column]) (rr.NoteDifficulty.[ev.Index].[ev.Column].T) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
+                    performance_func (pvs.[ev.Column]) (Difficulty.note_strain_v0 rr.NoteDifficulty.[ev.Index].[ev.Column]) e.Delta ((ev.Time - last_times.[ev.Column]) / scoring.Rate)
 
                 last_times.[ev.Column] <- ev.Time
                 c <- c + 1.0f
@@ -80,3 +80,30 @@ module Performance =
         //|> fun lines -> System.IO.File.WriteAllLines("plot.csv", lines)
 
         output
+
+    let acc_vs_difficulty (lo: float32) (rr: Difficulty) (scoring: ScoreProcessor) =
+
+        try
+            seq {
+                for ev in scoring.Events do
+
+                    if rr.Strains.[ev.Index].StrainV1Notes.[ev.Column] >= lo then
+                        match ev.Action.Judgement with
+                        | Some (_, value) -> yield value
+                        | None -> ()
+            }
+            |> Seq.average
+        with _ -> 0.0
+
+    let acc_vs_difficulty_graph (rr: Difficulty) (scoring: ScoreProcessor) =
+
+        let strain_data = rr.Strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.sort |> Array.ofSeq
+        seq {
+            for percentile = 1 to 100 do
+
+                let index_lo = (float32 percentile / 100.0f) * float32 strain_data.Length |> round |> int |> max 0 |> min (strain_data.Length - 1)
+                let threshold_lo = strain_data.[index_lo]
+
+                yield percentile, acc_vs_difficulty threshold_lo rr scoring
+        }
+        |> Array.ofSeq
