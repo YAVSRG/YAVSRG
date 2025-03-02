@@ -73,13 +73,7 @@ type LibraryViewControls() =
             K Icons.SETTINGS,
             !%Palette.DARK_100,
             Hotkey = "level_select_options",
-            Position =
-                {
-                    Left = 0.4f %+ 25.0f
-                    Top = 0.0f %+ 120.0f
-                    Right = 0.4f %+ 85.0f
-                    Bottom = 0.0f %+ 170.0f
-                }
+            Position = Position.SliceL(25.0f, 60.0f)
         )
 
         |+ ModeDropdown(
@@ -91,13 +85,7 @@ type LibraryViewControls() =
             |> Setting.map not not
             |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "sort_mode",
-            Position =
-                {
-                    Left = 0.4f %+ 110.0f
-                    Top = 0.0f %+ 120.0f
-                    Right = 0.7f %+ 30.0f
-                    Bottom = 0.0f %+ 170.0f
-                }
+            Position = Position.ShrinkL(110.0f).SlicePercentL(0.5f).ShrinkR(12.5f)
         )
             .Help(
                 Help
@@ -112,13 +100,7 @@ type LibraryViewControls() =
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "group_mode",
-            Position =
-                {
-                    Left = 0.7f %+ 55.0f
-                    Top = 0.0f %+ 120.0f
-                    Right = 1.0f %+ 0.0f
-                    Bottom = 0.0f %+ 170.0f
-                }
+            Position = Position.ShrinkL(110.0f).SlicePercentR(0.5f).ShrinkL(12.5f)
         )
             .Help(
                 Help

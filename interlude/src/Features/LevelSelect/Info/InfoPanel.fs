@@ -14,9 +14,9 @@ type InfoPanel() as this =
 
     let display = Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
 
-    let scoreboard = Scoreboard(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
-    let online = Leaderboard(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
-    let patterns = Patterns(display, Position = Position.ShrinkB(ChartDetails.HEIGHT + 55.0f))
+    let scoreboard = Scoreboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    let online = Leaderboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    let patterns = Patterns(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
 
     override this.Init(parent) =
         let change_rate change_rate_by =
@@ -31,7 +31,7 @@ type InfoPanel() as this =
         |+ online.Conditional(fun () -> display.Value = Display.Online)
         |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
 
-        |+ ChartDetails(Position = Position.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f))
+        |+ GameplayInfo(Position = Position.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f))
 
         |+ StylishButton(
             (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
@@ -81,7 +81,7 @@ type InfoPanel() as this =
         base.Init(parent)
 
     override this.Draw() =
-        let info_area = this.Bounds.SliceB(ChartDetails.HEIGHT).TranslateY(-50.0f)
+        let info_area = this.Bounds.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f)
         Render.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
         Render.rect info_area (!*Palette.DARK_100)
         base.Draw()

@@ -9,7 +9,7 @@ open Prelude.Mods
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type ChartDetails() =
+type GameplayInfo() =
     inherit Container(NodeType.None)
 
     let never_played = %"levelselect.last_played.never"

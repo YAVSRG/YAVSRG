@@ -36,14 +36,13 @@ module Tree =
         }
         |> Seq.tryHead
         |> function
-        | Some (ctx, group) -> 
+        | Some (ctx, group) ->
             SelectedChart.LIBRARY_CTX <- ctx
             selected_chart <- current_cc.Hash
             selected_group <- group.Name, group.Context
             expanded_group <- selected_group
             scroll_to <- ScrollTo.Chart
         | None -> ()
-
 
     let refresh () =
         // fetch groups
@@ -56,7 +55,7 @@ module Tree =
                     UserDatabase = Content.UserData
                     Library = Content.Library
                 }
-                
+
             LibraryView.get_groups
                 LevelSelect.filter
                 Grouping.modes.[options.ChartGroupMode.Value]
@@ -186,7 +185,7 @@ module Tree =
         drag_scroll_distance <- 0.0f
         scroll_fade.Target <- 1.0f
 
-    let finish_drag_scroll () = 
+    let finish_drag_scroll () =
         currently_drag_scrolling <- false
         scroll_fade.Target <- 0.0f
 
@@ -275,7 +274,7 @@ module Tree =
 
         Render.stencil_finish ()
 
-        Render.rect 
+        Render.rect
             (Rect.Create(
                 screen_bounds.Right - 10.0f,
                 origin + 5.0f,

@@ -18,18 +18,13 @@ open Interlude.Features.Play
 type LevelSelectScreen() =
     inherit Screen()
 
+    let TOP_BAR_HEIGHT = 150.0f
+    let INFO_SCREEN_SPLIT = 0.4f
+
     let search_text = Setting.simple ""
 
     let info_panel =
-        InfoPanel(
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 175.0f
-                    Right = 0.4f %- 0.0f
-                    Bottom = 1.0f %+ 0.0f
-                }
-        )
+        InfoPanel(Position = Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT))
 
     let refresh () =
         SelectedChart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
@@ -42,7 +37,7 @@ type LevelSelectScreen() =
         Setting.app (fun s -> if Grouping.modes.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
-        |+ CurrentChart(Position = { Position.SliceT(170.0f) with Right = 0.4f %- 0.0f })
+        |+ CurrentChart(Position = Position.SliceT(TOP_BAR_HEIGHT).SlicePercentL(INFO_SCREEN_SPLIT))
         |+ SearchBox(
             search_text,
             (fun f ->
@@ -50,17 +45,18 @@ type LevelSelectScreen() =
                 refresh ()
             ),
             Position =
-                {
-                    Left = 0.4f %+ 290.0f
-                    Top = 0.0f %+ 30.0f
-                    Right = 1.0f %- (20.0f + Style.PADDING)
-                    Bottom = 0.0f %+ 90.0f
-                }
+                Position
+                    .SliceT(TOP_BAR_HEIGHT)
+                    .ShrinkB(50.0f)
+                    .SliceY(60.0f)
+                    .ShrinkPercentL(0.4f)
+                    .ShrinkL(290.0f)
+                    .ShrinkR(25.0f)
         )
             .Help(Help.Info("levelselect.search", "search"))
 
         |+ (
-            Container(NodeType.None, Position = { Position.ShrinkT(170.0f) with Left = 0.5f %+ 0.0f })
+            Container(NodeType.None, Position = Position.ShrinkT(TOP_BAR_HEIGHT).ShrinkPercentL(INFO_SCREEN_SPLIT))
             |+ EmptyState(Icons.SEARCH, %"levelselect.empty.search")
                 .Conditional(fun () -> search_text.Value <> "")
             |+ EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
@@ -135,7 +131,7 @@ type LevelSelectScreen() =
         )
             .Conditional(fun () -> TreeState.multi_selection.IsSome)
 
-        |+ LibraryViewControls()
+        |+ LibraryViewControls(Position = Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT))
         |* info_panel
 
         LevelSelect.on_refresh_all.Add refresh
@@ -165,13 +161,13 @@ type LevelSelectScreen() =
         elif (%%"end").Tapped() then
             Tree.bottom_of_group ()
 
-        Tree.update (this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsed_ms)
+        Tree.update (this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom, elapsed_ms)
 
     override this.Draw() =
 
-        Tree.draw (this.Bounds.Top + 170.0f, this.Bounds.Bottom)
+        Tree.draw (this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom)
 
-        let w = this.Bounds.Width * 0.4f
+        let w = this.Bounds.Width * INFO_SCREEN_SPLIT
 
         let {
                 Rect.Left = left
@@ -183,20 +179,20 @@ type LevelSelectScreen() =
         Render.quad
             (Quad.create
              <| Vector2(left, top)
-             <| Vector2(left + w + 85.0f, top)
-             <| Vector2(left + w, top + 170.0f)
-             <| Vector2(left, top + 170.0f))
+             <| Vector2(left + w + TOP_BAR_HEIGHT * 0.5f, top)
+             <| Vector2(left + w, top + TOP_BAR_HEIGHT)
+             <| Vector2(left, top + TOP_BAR_HEIGHT))
             (!*Palette.DARK_100).AsQuad
 
         Render.quad
             (Quad.create
-             <| Vector2(left + w + 85.0f, top)
+             <| Vector2(left + w + TOP_BAR_HEIGHT * 0.5f, top)
              <| Vector2(right, top)
-             <| Vector2(right, top + 170.0f)
-             <| Vector2(left + w, top + 170.0f))
+             <| Vector2(right, top + TOP_BAR_HEIGHT)
+             <| Vector2(left + w, top + TOP_BAR_HEIGHT))
             Colors.shadow_2.O2.AsQuad
 
-        Render.rect (this.Bounds.SliceT(170.0f).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
+        Render.rect (this.Bounds.SliceT(TOP_BAR_HEIGHT).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
 
         base.Draw()
 
