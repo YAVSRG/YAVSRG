@@ -36,10 +36,19 @@ type RowStrain =
         StrainV1Notes: float32 array
     }
 
+[<Struct>]
+type RowStrainV2 =
+    {
+        Strains: float32 array
+        Left: float32 * float32 * float32
+        Right: float32 * float32 * float32
+    }
+
 type Difficulty =
     {
         NoteDifficulty: NoteDifficulty array array
         Strains: RowStrain array
+        Hands: RowStrainV2 array
         Overall: float
     }
 
@@ -158,14 +167,33 @@ module Difficulty =
         let mult = 1.0f + 0.105f * ratio
         v * mult
 
-    let STAMINA_HALF_LIFE = 1575.3f<ms / rate>
-    let STAMINA_DECAY_RATE = log 0.5f / STAMINA_HALF_LIFE
+    let STRAIN_SCALE = 0.01626f
 
-    let stamina_func_improved (value: float32) (input: float32) (delta: GameplayTime) =
+    let STRAIN_BURST_HALF_LIFE = 500.0f<ms / rate>
+    let STRAIN_BURST_DECAY_RATE = log 0.5f / STRAIN_BURST_HALF_LIFE
+    let strain_burst (value: float32) (input: float32) (delta: GameplayTime) =
 
-        let decay = exp (STAMINA_DECAY_RATE * delta)
+        let decay = exp (STRAIN_BURST_DECAY_RATE * delta) |> max 0.5f
         let a = value
-        let b = input * input * 0.01626f
+        let b = input * input * STRAIN_SCALE
+        b - (b - a) * decay
+
+    let STRAIN_LOAD_HALF_LIFE = 3000.0f<ms / rate>
+    let STRAIN_LOAD_DECAY_RATE = log 0.5f / STRAIN_LOAD_HALF_LIFE
+    let strain_load (value: float32) (input: float32) (delta: GameplayTime) =
+
+        let decay = exp (STRAIN_LOAD_DECAY_RATE * delta) |> max 0.5f
+        let a = value
+        let b = input * input * STRAIN_SCALE
+        b - (b - a) * decay
+
+    let STRAIN_STAMINA_HALF_LIFE = 60000.0f<ms / rate>
+    let STRAIN_STAMINA_DECAY_RATE = log 0.5f / STRAIN_STAMINA_HALF_LIFE
+    let strain_stamina (value: float32) (input: float32) (delta: GameplayTime) =
+
+        let decay = exp (STRAIN_STAMINA_DECAY_RATE * delta) |> max 0.5f
+        let a = value
+        let b = input * input * STRAIN_SCALE
         b - (b - a) * decay
 
     let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) : RowStrain array =
@@ -200,7 +228,7 @@ module Difficulty =
                         row_strain_v0.[k] <- strain_v0.[k]
 
                         strain_v1.[k] <-
-                            stamina_func_improved
+                            strain_load
                                 strain_v1.[k]
                                 notes_v1.[k]
                                 ((offset - last_note_in_column.[k]) / rate)
@@ -222,43 +250,56 @@ module Difficulty =
         }
         |> Array.ofSeq
 
-    //let private hand_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) =
-    //    let keys = notes.[0].Data.Length
-    //    let hand_split = Layout.keys_on_left_hand keys
+    let hand_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) : RowStrainV2 array =
+        let keys = notes.[0].Data.Length
+        let hand_split = Layout.keys_on_left_hand keys
 
-    //    let last_note_in_column = Array.init<float32 * Time> keys (fun _ -> 0.0f, 0.0f<ms>)
+        let last_note_in_column = Array.init<_> keys (fun _ -> 0.0f, 0.0f, 0.0f, 0.0f<ms>)
 
-    //    seq {
-    //        for i = 0 to notes.Length - 1 do
-    //            let { Time = offset; Data = nr } = notes.[i]
+        seq {
+            for i = 0 to notes.Length - 1 do
+                let { Time = offset; Data = nr } = notes.[i]
 
-    //            let mutable left_hand = 0.00f
-    //            let mutable right_hand = 0.00f
+                let mutable left_hand_burst = 0.00f
+                let mutable left_hand_load = 0.00f
+                let mutable left_hand_stamina = 0.00f
 
-    //            for k = 0 to keys - 1 do
-    //                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                let mutable right_hand_burst = 0.00f
+                let mutable right_hand_load = 0.00f
+                let mutable right_hand_stamina = 0.00f
 
-    //                    if k < hand_split then
-    //                        for hand_k = 0 to hand_split - 1 do
-    //                            let prev_strain, prev_time = last_note_in_column.[hand_k]
-    //                            left_hand <- max left_hand (stamina_func_2 prev_strain note_difficulty.[i].[k].T ((offset - prev_time) / rate))
-    //                    else
-    //                        for hand_k = hand_split to keys - 1 do
-    //                            let prev_strain, prev_time = last_note_in_column.[hand_k]
-    //                            right_hand <- max right_hand (stamina_func_2 prev_strain note_difficulty.[i].[k].T ((offset - prev_time) / rate))
+                let strain = Array.zeroCreate<float32> keys
 
-    //            for k = 0 to keys - 1 do
-    //                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-    //                    if k < hand_split then
-    //                        last_note_in_column.[k] <- left_hand, offset
-    //                        note_difficulty.[i].[k].S <- left_hand
-    //                    else
-    //                        last_note_in_column.[k] <- right_hand, offset
-    //                        note_difficulty.[i].[k].S <- right_hand
+                for k = 0 to keys - 1 do
+                    if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-    //            yield left_hand, right_hand
-    //    }
-    //    |> Array.ofSeq
+                        let d = note_strain_v1 note_difficulty.[i].[k]
+
+                        if k < hand_split then
+                            for hand_k = 0 to hand_split - 1 do
+                                let pburst, pload, pstamina, ptime = last_note_in_column.[hand_k]
+                                left_hand_burst <- max left_hand_burst (strain_burst pburst d ((offset - ptime) / rate))
+                                left_hand_load <- max left_hand_load (strain_load pload d ((offset - ptime) / rate))
+                                left_hand_stamina <- max left_hand_stamina (strain_stamina pstamina d ((offset - ptime) / rate))
+                        else
+                            for hand_k = hand_split to keys - 1 do
+                                let pburst, pload, pstamina, ptime = last_note_in_column.[hand_k]
+                                right_hand_burst <- max right_hand_burst (strain_burst pburst d ((offset - ptime) / rate))
+                                right_hand_load <- max right_hand_load (strain_load pload d ((offset - ptime) / rate))
+                                right_hand_stamina <- max right_hand_stamina (strain_stamina pstamina d ((offset - ptime) / rate))
+
+                for k = 0 to keys - 1 do
+                    if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
+                        if k < hand_split then
+                            last_note_in_column.[k] <- left_hand_burst, left_hand_load, left_hand_stamina, offset
+                            strain.[k] <- left_hand_burst * 0.125f + left_hand_load * 0.75f + left_hand_stamina * 0.125f
+                        else
+                            last_note_in_column.[k] <- right_hand_burst, right_hand_load, right_hand_stamina, offset
+                            strain.[k] <- right_hand_burst * 0.125f + right_hand_load * 0.75f + right_hand_stamina * 0.125f
+
+                yield { Strains = strain; Left = left_hand_burst, left_hand_load, left_hand_stamina; Right = right_hand_burst, right_hand_load, right_hand_stamina }
+        }
+        |> Array.ofSeq
 
     let CURVE_POWER = 0.6f
     let CURVE_SCALE = 0.4056f
@@ -302,11 +343,13 @@ module Difficulty =
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         notes_difficulty_pass (rate, notes) note_data
         let physical_data = finger_strain_pass note_data (rate, notes)
+        let hands = hand_strain_pass note_data (rate, notes)
         let physical = overall_difficulty_pass (physical_data |> Seq.map _.StrainV0)
 
         {
             NoteDifficulty = note_data
             Strains = physical_data
+            Hands = hands
             Overall = if Single.IsFinite physical then float physical else 0.0
         }
 

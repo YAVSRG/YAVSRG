@@ -129,6 +129,24 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
             x <- x - 5.0f
 
+    let draw_octaves (y: float32) =
+        let mutable x = Render.width() - 20.0f
+        for (burst, load, stamina) in
+            seq {
+                let mutable peek = seek
+                while peek >= 0 do
+                    yield difficulty.Hands.[peek]
+                    peek <- peek - 1
+            }
+            |> Seq.map _.Left
+            |> Seq.filter (fun (x, _, _ ) ->  x > 0.0f)
+            |> Seq.truncate 100
+            do
+                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + load * 0.75f + burst * 0.125f) * 0.5f)) Colors.red_accent
+                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + load * 0.75f) * 0.5f)) Colors.red
+                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, stamina * 0.125f * 0.5f)) Colors.red_shadow
+                x <- x - 5.0f
+
     let note_difficulties =
         seq {
             let mutable peek = seek
@@ -201,7 +219,12 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_live_data 200.0f Colors.red note_difficulties
         draw_live_data 400.0f Colors.blue note_strains
         draw_live_data 600.0f Colors.green_accent new_strains
-        draw_live_data 800.0f Colors.yellow_accent accuracies
+        let (burst, load, stamina) = difficulty.Hands.[seek].Right in
+            Text.draw(Style.font, sprintf "R: %.0f | %.0f | %.0f" burst load stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
+        let (burst, load, stamina) = difficulty.Hands.[seek].Left in
+            Text.draw(Style.font, sprintf "L: %.0f | %.0f | %.0f" burst load stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
+        draw_octaves 800.0f
+        //draw_live_data 800.0f Colors.yellow_accent accuracies
 
         let variety =
             note_difficulties
