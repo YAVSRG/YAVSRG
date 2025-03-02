@@ -68,10 +68,10 @@ module ModState =
             sprintf "%.2fx" rate
             :: (mods
                 |> in_priority_order
-                |> Seq.map (fun (id, _, state) -> name id (Some state))
+                |> Seq.map (fun (id, m, state) -> m.Shorthand state)
                 |> List.ofSeq)
         )
-        + if autoplay then ", " + name "auto" None else ""
+        + if autoplay then ", AP" else ""
 
     let check (mods: ModState) : Result<ModStatus, string> =
         try

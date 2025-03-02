@@ -56,6 +56,9 @@ type Mod =
         /// Returns resulting chart + flag
         /// flag is true if the mod made meaningful changes to the chart and the mod should be considered 'applied'
         Apply: int -> ModdedChartInternal -> ModdedChartInternal * bool
+        /// Short code representing the mod, to be abbreviated in places without room for the full names
+        /// Language independent
+        Shorthand: int -> string
     }
     static member internal Default =
         {
@@ -64,4 +67,5 @@ type Mod =
             Exclusions = []
             RandomSeed = false
             Apply = (fun _ mc -> mc, false)
+            Shorthand = fun _ -> "??"
         }

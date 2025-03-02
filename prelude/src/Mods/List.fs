@@ -14,6 +14,7 @@ module Mods =
                 Status = ModStatus.Ranked
                 Exclusions = [ "shuffle"; "random" ]
                 Apply = fun _ mc -> Mirror.apply mc
+                Shorthand = fun _ -> "MR"
             }
 
             "shuffle",
@@ -22,6 +23,7 @@ module Mods =
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.shuffle s mc
                 Exclusions = [ "random"; "mirror" ]
+                Shorthand = fun _ -> "RDC"
             }
 
             "random",
@@ -30,12 +32,14 @@ module Mods =
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.randomise s mc
                 Exclusions = [ "shuffle"; "mirror" ]
+                Shorthand = fun _ -> "RD"
             }
 
             "nosv",
             { Mod.Default with
                 Status = ModStatus.Unranked
                 Apply = fun _ mc -> NoSV.apply mc
+                Shorthand = fun _ -> "NSV"
             }
 
             "noln",
@@ -51,6 +55,7 @@ module Mods =
                         | 2 -> NoLN.apply_shorter_than 0.5f<beat>  mc
                         | 3 -> NoLN.apply_shorter_than 0.25f<beat> mc
                         | _ -> failwith "impossible"
+                Shorthand = function 3 -> "LN-1" | 2 -> "LN-2" | 1 -> "LN-3" | _ -> "NLN"
             }
 
             "inverse",
@@ -64,6 +69,7 @@ module Mods =
                     | 1 -> Inverse.apply 0.125f<beat> mc
                     | 2 -> Inverse.apply 0.5f<beat> mc
                     | _ -> failwith "impossible"
+                Shorthand = function 1 -> "INV+1" | 2 -> "INV-1" | _ -> "INV"
             }
 
             "more_notes",
@@ -71,6 +77,7 @@ module Mods =
                 Status = ModStatus.Unstored
                 States = 2
                 Apply = fun s mc -> if s = 1 then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
+                Shorthand = function 1 -> "MNC" | _ -> "MNM"
             }
         ]
 

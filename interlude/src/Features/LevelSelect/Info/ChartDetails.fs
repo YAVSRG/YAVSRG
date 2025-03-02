@@ -17,6 +17,8 @@ type ChartDetails() =
     let mutable rating = 0.0
     let mutable notecounts = ""
     let mutable last_played = K never_played
+    let mutable mod_string = "--"
+    let mutable mod_status = ModStatus.Ranked
 
     let refresh(info: LoadedChartInfo) =
         rating <- info.Rating.Overall
@@ -31,6 +33,8 @@ type ChartDetails() =
                     ts <- info.SaveData.LastPlayed
                     t <- text ts
                 t
+        mod_string <- ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay)
+        mod_status <- info.WithMods.Status
 
     static member HEIGHT = 230.0f
 
@@ -47,7 +51,15 @@ type ChartDetails() =
 
         let play_info = this.Bounds.SliceT(40.0f).TranslateY(90.0f).ShrinkX(15.0f)
 
-        Text.fill_b (Style.font, ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay), play_info, Colors.text, Alignment.LEFT)
+        match mod_status with
+        | ModStatus.Unstored ->
+            let x = Text.measure(Style.font, mod_string) * play_info.Height * 0.6f + 10.0f
+            Text.fill_b (Style.font, Icons.X_CIRCLE + " " + %"mods.mod_status.unstored", play_info.ShrinkL x, Colors.text_greyout, Alignment.LEFT)
+        | ModStatus.Unranked ->
+            let x = Text.measure(Style.font, mod_string) * play_info.Height * 0.6f + 10.0f
+            Text.fill_b (Style.font, Icons.ALERT_CIRCLE + " " + %"mods.mod_status.unranked", play_info.ShrinkL(x).ShrinkY(2.0f), Colors.text_yellow_2, Alignment.LEFT)
+        | _ -> ()
+        Text.fill_b (Style.font, mod_string, play_info, Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
 
         let chart_info = this.Bounds.SliceT(30.0f).TranslateY(130.0f).ShrinkX(15.0f)
