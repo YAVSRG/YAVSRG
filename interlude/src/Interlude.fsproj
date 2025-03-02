@@ -251,7 +251,7 @@
     <Compile Include="Features\LevelSelect\Leaderboard\OnlineScores.fs" />
     <Compile Include="Features\LevelSelect\Leaderboard\Leaderboard.fs" />
     <Compile Include="Features\LevelSelect\Info\CurrentChart.fs" />
-    <Compile Include="Features\LevelSelect\Info\PersonalBests.fs" />
+    <Compile Include="Features\LevelSelect\Info\GameplayInfoBoxes.fs" />
     <Compile Include="Features\LevelSelect\Info\GameplayInfo.fs" />
     <Compile Include="Features\LevelSelect\Info\Patterns.fs" />
     <Compile Include="Features\LevelSelect\Info\InfoPanel.fs" />

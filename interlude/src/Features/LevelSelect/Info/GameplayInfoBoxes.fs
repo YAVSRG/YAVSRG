@@ -9,8 +9,10 @@ open Prelude.Data.User
 open Interlude.Content
 open Interlude.Features.Gameplay
 
-type PersonalBests() =
+type GameplayInfoBoxes() =
     inherit Container(NodeType.None)
+
+    let PERSONAL_BESTS_WIDTH = 360.0f
 
     let mutable save_data = None
     let mutable category = "Uncategorised"
@@ -56,7 +58,7 @@ type PersonalBests() =
                 | Some (lamp, rate, timestamp) -> Some (lamp, rate, timestamp, Colors.white.O2)
                 | None -> None
 
-            let accuracy_bounds = this.Bounds.SliceR(180.0f).Shrink(10.0f)
+            let accuracy_bounds = this.Bounds.SliceR(PERSONAL_BESTS_WIDTH).SlicePercentR(0.5f).ShrinkL(10.0f)
             match accuracy with
             | Some (acc, rate, timestamp, color) ->
                 Render.rect accuracy_bounds Colors.shadow_2.O2
@@ -65,7 +67,7 @@ type PersonalBests() =
                 Text.fill_b (Style.font, sprintf "(%.2fx)  •  %s" rate (format_timespan time_ago), accuracy_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), (color, Colors.shadow_2), Alignment.CENTER)
             | None -> ()
 
-            let lamp_bounds = accuracy_bounds.Translate(-180.0f, 0.0f)
+            let lamp_bounds = this.Bounds.SliceR(PERSONAL_BESTS_WIDTH).SlicePercentL(0.5f).ShrinkL(10.0f)
             match lamp with
             | Some (lamp, rate, timestamp, color) ->
                 Render.rect lamp_bounds Colors.shadow_2.O2
@@ -75,12 +77,12 @@ type PersonalBests() =
             | None -> ()
 
         | _ ->
-            let no_pb_bounds = this.Bounds.SliceR(360.0f).Shrink(10.0f)
+            let no_pb_bounds = this.Bounds.SliceR(PERSONAL_BESTS_WIDTH)
             Render.rect no_pb_bounds Colors.shadow_2.O2
             Text.fill_b (Style.font, %"levelselect.no_personal_best", no_pb_bounds.SliceT(50.0f).Shrink(10.0f, 0.0f), Colors.text_greyout, Alignment.CENTER)
             Text.fill_b (Style.font, %"levelselect.no_personal_best.subtitle", no_pb_bounds.SliceB(30.0f).Shrink(10.0f, 0.0f).Translate(0.0f, -8.0f), Colors.text_greyout, Alignment.CENTER)
 
-        let pattern_bounds = this.Bounds.ShrinkR(360.0f).Shrink(10.0f)
+        let pattern_bounds = this.Bounds.ShrinkR(PERSONAL_BESTS_WIDTH)
         Render.rect pattern_bounds Colors.shadow_2.O2
 
         Text.fill_b (

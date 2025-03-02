@@ -43,14 +43,15 @@ type GameplayInfo() =
         SelectedChart.on_chart_update_finished.Add refresh
         SelectedChart.if_loaded refresh
 
-        this |* PersonalBests(Position = Position.SliceT(100.0f))
+        this |* GameplayInfoBoxes(Position = Position.SliceT(100.0f).Shrink(10.0f))
 
         base.Init parent
 
     override this.Draw() =
 
-        let play_info = this.Bounds.SliceT(40.0f).TranslateY(90.0f).ShrinkX(15.0f)
-
+        let play_info = this.Bounds.SliceT(90.0f, 40.0f).ShrinkX(15.0f)
+        Text.fill_b (Style.font, mod_string, play_info, Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
         match mod_status with
         | ModStatus.Unstored ->
             let x = Text.measure(Style.font, mod_string) * play_info.Height * 0.6f + 10.0f
@@ -59,14 +60,12 @@ type GameplayInfo() =
             let x = Text.measure(Style.font, mod_string) * play_info.Height * 0.6f + 10.0f
             Text.fill_b (Style.font, Icons.ALERT_CIRCLE + " " + %"mods.mod_status.unranked", play_info.ShrinkL(x).ShrinkY(2.0f), Colors.text_yellow_2, Alignment.LEFT)
         | _ -> ()
-        Text.fill_b (Style.font, mod_string, play_info, Colors.text, Alignment.LEFT)
-        Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
 
-        let chart_info = this.Bounds.SliceT(30.0f).TranslateY(130.0f).ShrinkX(15.0f)
+        let chart_info = this.Bounds.SliceT(130.0f, 30.0f).ShrinkX(15.0f)
         Text.fill_b (Style.font, (match SelectedChart.CACHE_DATA with Some cc -> cc.DifficultyName | None -> ""), chart_info.SlicePercentL 0.5f, Colors.text_subheading, Alignment.LEFT)
         Text.fill_b (Style.font, notecounts, chart_info, Colors.text_subheading, Alignment.RIGHT)
 
-        let three_icon_infos = this.Bounds.SliceT(70.0f).TranslateY(155.0f).ShrinkX(15.0f)
+        let three_icon_infos = this.Bounds.SliceT(155.0f, 70.0f).ShrinkX(15.0f)
         Text.fill_b (Style.font, sprintf "%s %.2f" Icons.STAR rating, three_icon_infos, (Colors.white, Difficulty.color rating), Alignment.LEFT)
         Text.fill_b (Style.font, SelectedChart.FMT_BPM, three_icon_infos, Colors.text, Alignment.CENTER)
         Text.fill_b (Style.font, SelectedChart.FMT_DURATION, three_icon_infos, Colors.text, Alignment.RIGHT)
