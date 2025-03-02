@@ -226,16 +226,36 @@ module Chart =
             if chart.Keys < 3 || chart.Keys > 10 then
                 failwithf "Chart must have 3-10 keys (Has %i)" chart.Keys
 
-            let mutable lastTime = -Time.infinity
+            let mutable last_time = -Time.infinity
+
+            for { Time = time; Data = { Meter = meter; MsPerBeat = mspb } } in chart.BPM do
+                if time < last_time then
+                    failwithf "BPM appears before the previous time (%f, %f)" time last_time
+                elif not (Single.IsFinite (float32 time)) then
+                    failwithf "BPM timestamp is invalid value: %f" time
+                elif meter <= 0<beat> then
+                    failwithf "BPM meter was non-positive: %i at %f" meter time
+                elif Single.IsNegative(float32 mspb) then
+                    failwithf "BPM is negative: %f mspb at %f" mspb time
+
+            let mutable last_time = -Time.infinity
+
+            for { Time = time; Data = sv } in chart.SV do
+                if time < last_time then
+                    failwithf "SV appears before the previous time (%f, %f)" time last_time
+                elif not (Single.IsFinite (float32 time)) then
+                    failwithf "SV timestamp is invalid value: %f" time
+
+            let mutable last_time = -Time.infinity
             let mutable ln = 0us
 
             for { Time = time; Data = nr } in chart.Notes do
-                if time <= lastTime then
-                    failwithf "Note row appears on or before the previous time (%f, %f)" time lastTime
+                if time <= last_time then
+                    failwithf "Note row appears on or before the previous time (%f, %f)" time last_time
                 elif not (Single.IsFinite (float32 time)) then
-                    failwithf "Timestamp is invalid value: %f" time
+                    failwithf "Note row timestamp is invalid value: %f" time
 
-                lastTime <- time
+                last_time <- time
 
                 for k = 0 to (chart.Keys - 1) do
                     if nr.[k] = NoteType.HOLDHEAD then
@@ -259,7 +279,7 @@ module Chart =
                     failwithf "Note row is useless/empty at %f" time
 
             if ln <> 0us then
-                failwithf "Unterminated hold notes at end of chart at %f [%i]" lastTime ln
+                failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time ln
 
             Ok chart
         with err ->
