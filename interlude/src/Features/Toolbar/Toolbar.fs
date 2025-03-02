@@ -34,6 +34,21 @@ type Toolbar() =
             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
         | None -> ()
 
+    let draw_waveform (bounds: Rect) =
+        let s = bounds.Width / 48.0f
+
+        for i in 0..47 do
+            let level =
+                System.Math.Min((Audio.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
+
+            Render.rect
+                (Rect.Box(bounds.Left + float32 i * s + 2.5f, bounds.Top, s - 5.0f, level))
+                (Palette.color (int level, 1.0f, 0.5f))
+
+            Render.rect
+                (Rect.Box(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
+                (Palette.color (int level, 1.0f, 0.5f))
+
     let import_button =
         InlaidButton(
             %"menu.import",
@@ -136,31 +151,10 @@ type Toolbar() =
         if Toolbar.hidden then
             volume_when_collapsed.Draw()
         else
-            let {
-                    Rect.Left = l
-                    Top = t
-                    Right = r
-                    Bottom = b
-                } =
-                this.Bounds
+            Render.rect (this.Bounds.SliceT HEIGHT) !*Palette.MAIN_100
+            Render.rect (this.Bounds.SliceB HEIGHT) !*Palette.MAIN_100
 
-            Render.rect (Rect.Create(l, t, r, t + HEIGHT)) !*Palette.MAIN_100
-            Render.rect (Rect.Create(l, b - HEIGHT, r, b)) !*Palette.MAIN_100
-
-            if Toolbar.slideout_amount.Value > 0.01f then
-                let s = this.Bounds.Width / 48.0f
-
-                for i in 0..47 do
-                    let level =
-                        System.Math.Min((Audio.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
-
-                    Render.rect
-                        (Rect.Create(l + float32 i * s + 2.0f, t, l + (float32 i + 1.0f) * s - 2.0f, t + level))
-                        (Palette.color (int level, 1.0f, 0.5f))
-
-                    Render.rect
-                        (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b - level, r - float32 i * s - 2.0f, b))
-                        (Palette.color (int level, 1.0f, 0.5f))
+            if Toolbar.slideout_amount.Value > 0.01f then draw_waveform this.Bounds
 
             container.Draw()
             Terminal.draw ()

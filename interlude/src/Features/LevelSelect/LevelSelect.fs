@@ -182,7 +182,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w + TOP_BAR_HEIGHT * 0.5f, top)
              <| Vector2(left + w, top + TOP_BAR_HEIGHT)
              <| Vector2(left, top + TOP_BAR_HEIGHT))
-            (!*Palette.DARK_100).AsQuad
+            (Quad.gradient_top_to_bottom (!*Palette.MAIN_100) (!*Palette.DARK_100))
 
         Render.quad
             (Quad.create
@@ -192,7 +192,7 @@ type LevelSelectScreen() =
              <| Vector2(left + w, top + TOP_BAR_HEIGHT))
             Colors.shadow_2.O2.AsQuad
 
-        Render.rect (this.Bounds.SliceT(TOP_BAR_HEIGHT).BorderB(5.0f)) (Palette.color (255, 0.8f, 0.0f))
+        Render.rect (this.Bounds.SliceT(TOP_BAR_HEIGHT).BorderB(5.0f)) (!*Palette.MAIN)
 
         base.Draw()
 
