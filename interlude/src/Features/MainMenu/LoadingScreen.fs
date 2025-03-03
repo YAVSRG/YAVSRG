@@ -86,9 +86,9 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
     override this.Draw() =
         let alpha =
             if closing then
-                255.0 * (1.0 - background_fade.Time / background_fade.Interval) |> int
+                255.0 * (1.0 - background_fade.Progress) |> int
             else
-                255.0 * (background_fade.Time / background_fade.Interval) |> int
+                255.0 * background_fade.Progress |> int
         Render.rect this.Bounds (Colors.black.O4a alpha)
 
         if closing then

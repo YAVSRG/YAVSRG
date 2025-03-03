@@ -116,7 +116,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         match transition with
         | Transition.In ->
             Render.stencil_create false
-            let pc = (transition_timer.Time / transition_timer.Interval |> float32)
+            let pc = float32 transition_timer.Progress
             let pc2 = pc * pc
             StripeWipe.draw_left_to_right 0.0f pc (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 
@@ -130,7 +130,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
         | Transition.Out ->
             Render.stencil_create false
-            let pc = (transition_timer.Time / transition_timer.Interval |> float32)
+            let pc = float32 transition_timer.Progress
             let pc2 = (2.0f - pc) * pc
             StripeWipe.draw_left_to_right pc 1.0f (this.Bounds.Expand(0.0f, Style.PADDING)) Color.Transparent
 

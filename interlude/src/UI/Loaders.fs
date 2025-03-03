@@ -28,7 +28,7 @@ module LoadingIndicator =
 
                 let pos =
                     -tick_width
-                    + (this.Bounds.Width + tick_width) * float32 animation.Time / 1500.0f
+                    + (this.Bounds.Width + tick_width) * float32 animation.Progress
 
                 Render.rect
                     (Rect.Create(
@@ -57,8 +57,7 @@ module LoadingIndicator =
             else
 
                 let b = this.Bounds.Expand(Style.PADDING)
-                let x = float32 (animation.Time / animation.Interval)
-                LoadingAnimation.draw_border b x (Colors.white.O4a fade.Alpha)
+                LoadingAnimation.draw_border b (float32 animation.Progress) (Colors.white.O4a fade.Alpha)
 
 type WIP() as this =
     inherit StaticWidget(NodeType.None)

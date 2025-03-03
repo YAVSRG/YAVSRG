@@ -62,7 +62,7 @@ type Accuracy
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
         Render.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
 
-        Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
+        Glint.draw_stencilled (float32 glint_animation.Progress) this.Bounds Glint.COLOR
 
         if (!stats).ColumnFilterApplied then
             Text.fill_b (
@@ -170,7 +170,7 @@ type Lamp
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
         Render.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
 
-        Glint.draw_stencilled (float32 (glint_animation.Time / glint_animation.Interval)) this.Bounds Glint.COLOR
+        Glint.draw_stencilled (float32 glint_animation.Progress) this.Bounds Glint.COLOR
 
         let text, color =
             match (!improvements).Lamp with

@@ -55,9 +55,9 @@ type InputMeter(config: HudConfig, state: PlayState) =
 
         for k = 0 to state.Chart.Keys - 1 do
 
-            let press_f = float32 fades.[k].Time / float32 fades.[k].Interval
+            let press_f = float32 fades.[k].Progress
             let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * press_f) |> int
-            let color_f = 1.0 - (1.0 - float press_f) * (1.0 - color_fades.[k].Time / color_fades.[k].Interval)
+            let color_f = 1.0 - (1.0 - float press_f) * (1.0 - color_fades.[k].Progress)
             let r = lerp_color color_f colors.[k].R config.InputMeterKeyColor.R
             let g = lerp_color color_f colors.[k].G config.InputMeterKeyColor.G
             let b = lerp_color color_f colors.[k].B config.InputMeterKeyColor.B

@@ -10,7 +10,7 @@ open Interlude.Features.Play
 
 type ColumnLighting(keys, ns: NoteskinConfig, state) =
     inherit StaticWidget(NodeType.None)
-    let timers = Array.init keys (fun _ -> 
+    let timers = Array.init keys (fun _ ->
         let anim = Animation.Delay ns.ColumnLightDuration
         anim.Update ns.ColumnLightDuration
         anim
@@ -53,7 +53,7 @@ type ColumnLighting(keys, ns: NoteskinConfig, state) =
         let draw_column k (s: Animation.Delay) =
             if not s.Complete then
                 let percent_remaining =
-                    1.0f - float32 (s.Time / s.Interval) |> min 1.0f |> max 0.0f
+                    1.0f - float32 s.Progress |> min 1.0f |> max 0.0f
 
                 let a = 255.0f * percent_remaining |> int
 

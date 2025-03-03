@@ -50,7 +50,7 @@ type GameplayInfo() =
     override this.Draw() =
 
         let play_info = this.Bounds.SliceT(90.0f, 40.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, mod_string, play_info, Colors.text, Alignment.LEFT)
+        Text.fill_b (Style.font, mod_string + (if SelectedChart.autoplay then ", AP" else ""), play_info, Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
         match mod_status with
         | ModStatus.Unstored ->

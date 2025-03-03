@@ -606,7 +606,7 @@ type AnimationSettingsPage() =
                 if holding then
                     1.0f
                 else
-                    1.0 - (t_columnlight.Time / t_columnlight.Interval)
+                    1.0 - t_columnlight.Progress
                     |> min 1.0
                     |> max 0.0
                     |> float32

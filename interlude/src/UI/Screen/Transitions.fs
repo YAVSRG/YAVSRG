@@ -70,15 +70,12 @@ module Transitions =
 
         let amount =
             Math.Clamp(
-                (if inbound then
-                        in_timer.Time / in_timer.Interval
-                    else
-                        1.0 - (out_timer.Time / out_timer.Interval)),
+                (if inbound then in_timer.Progress else 1.0 - out_timer.Progress),
                 0.0,
                 1.0
             )
 
-        if transition_type = EnterGameplayFadeAudio then 
+        if transition_type = EnterGameplayFadeAudio then
             Audio.change_volume (options.AudioVolume.Value * (1.0 - amount), options.AudioVolume.Value * (1.0 - amount))
 
         draw_internal transition_type inbound (float32 amount) (bounds.Expand 1.0f)
@@ -86,7 +83,7 @@ module Transitions =
     let animate (func: unit -> unit, transition_type: Transition) : Animation =
 
         match current with
-        | Some _ -> 
+        | Some _ ->
             failwith "Should not be called while a transition is already in progress"
         | None ->
 

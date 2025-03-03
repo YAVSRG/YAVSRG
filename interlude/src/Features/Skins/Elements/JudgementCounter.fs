@@ -120,8 +120,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
         for i = 0 to state.Ruleset.Judgements.Length - 1 do
             let j = state.Ruleset.Judgements.[i]
 
-            let percent =
-                judgement_animations.[i].Time / judgement_animations.[i].Interval |> float32
+            let percent = float32 judgement_animations.[i].Progress
 
             let pop =
                 r.Expand(r.Height * (1.0f - percent) * config.JudgementCounterPopAmount * 0.1f)
