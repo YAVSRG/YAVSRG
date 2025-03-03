@@ -90,7 +90,7 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
-            Physical = Performance.calculate difficulty with_mods.Keys scoring
+            Physical = Performance.calculate difficulty scoring
 
             ImportedFromOsu = score.IsImported
             IsFailed = score.IsFailed

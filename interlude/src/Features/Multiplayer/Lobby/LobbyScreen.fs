@@ -184,7 +184,7 @@ type LobbyUI(lobby: Lobby) =
                                 Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                                 Rating = info.Rating
-                                Physical = Performance.calculate info.Rating info.WithMods.Keys scoring
+                                Physical = Performance.calculate info.Rating scoring
 
                                 ImportedFromOsu = false
                                 IsFailed =

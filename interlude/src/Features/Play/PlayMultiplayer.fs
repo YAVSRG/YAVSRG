@@ -6,7 +6,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Calculator
@@ -69,7 +68,7 @@ module PlayScreenMultiplayer =
                         Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                         Rating = info.Rating
-                        Physical = Performance.calculate info.Rating info.WithMods.Keys scoring
+                        Physical = Performance.calculate info.Rating scoring
 
                         ImportedFromOsu = false
                         IsFailed = quit_out_early
@@ -79,7 +78,7 @@ module PlayScreenMultiplayer =
 
         scoring.OnEvent.Add(fun h ->
             match h.Action with
-            | Hit d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+            | Hit d
             | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
             | _ -> ()
         )

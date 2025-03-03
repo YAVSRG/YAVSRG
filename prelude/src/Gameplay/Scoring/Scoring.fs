@@ -121,6 +121,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member val Duration = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
     member val JudgementCounts = judgement_counts
     member val Rate = rate
+    member val Keys = keys
+    member val internal Notes = notes
 
     member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
     member this.FormattedAccuracy = ruleset.FormatAccuracy this.Accuracy

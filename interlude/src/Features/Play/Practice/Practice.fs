@@ -52,7 +52,7 @@ module PracticeScreen =
 
             scoring.OnEvent.Add(fun h ->
                 match h.Action with
-                | Hit d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+                | Hit d
                 | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
                 | _ -> ()
             )

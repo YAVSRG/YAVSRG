@@ -46,7 +46,7 @@ module CurveExperiments =
 
             for i = 1 to freq do
                 v <- Difficulty.stamina_func v diff spacing
-                v2 <- Difficulty.strain_load v2 diff spacing
+                v2 <- Difficulty.strain_burst v2 diff spacing
                 printfn "%.2f | %.2f" v v2
             printfn "%i steps, %.1fms apart at %.2f: %.2f | %.2f" freq spacing diff v v2
 

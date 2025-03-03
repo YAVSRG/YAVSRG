@@ -131,7 +131,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     let draw_octaves (y: float32) =
         let mutable x = Render.width() - 20.0f
-        for (burst, load, stamina) in
+        for (burst, stamina) in
             seq {
                 let mutable peek = seek
                 while peek >= 0 do
@@ -139,11 +139,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                     peek <- peek - 1
             }
             |> Seq.map _.Left
-            |> Seq.filter (fun (x, _, _ ) ->  x > 0.0f)
+            |> Seq.filter (fun (x, _ ) ->  x > 0.0f)
             |> Seq.truncate 100
             do
-                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + load * 0.75f + burst * 0.125f) * 0.5f)) Colors.red_accent
-                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + load * 0.75f) * 0.5f)) Colors.red
+                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + burst * 0.875f) * 0.5f)) Colors.red_accent
                 Render.rect (Rect.Box (x - 5.0f, y, 5.0f, stamina * 0.125f * 0.5f)) Colors.red_shadow
                 x <- x - 5.0f
 
@@ -184,7 +183,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         seq {
             let mutable peek = seek
             while peek >= 0 do
-                yield (float32 timeline.[peek] - 0.9f) * 2000.0f
+                yield (timeline.[peek] - 0.9f) * 2000.0f
                 peek <- peek - 1
         }
 
@@ -219,10 +218,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_live_data 200.0f Colors.red note_difficulties
         draw_live_data 400.0f Colors.blue note_strains
         draw_live_data 600.0f Colors.green_accent new_strains
-        let (burst, load, stamina) = difficulty.Hands.[seek].Right in
-            Text.draw(Style.font, sprintf "R: %.0f | %.0f | %.0f" burst load stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
-        let (burst, load, stamina) = difficulty.Hands.[seek].Left in
-            Text.draw(Style.font, sprintf "L: %.0f | %.0f | %.0f" burst load stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
+        let (burst, stamina) = difficulty.Hands.[seek].Right in
+            Text.draw(Style.font, sprintf "R: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
+        let (burst, stamina) = difficulty.Hands.[seek].Left in
+            Text.draw(Style.font, sprintf "L: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
         draw_octaves 800.0f
         //draw_live_data 800.0f Colors.yellow_accent accuracies
 

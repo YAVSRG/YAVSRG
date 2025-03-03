@@ -40,8 +40,8 @@ type RowStrain =
 type RowStrainV2 =
     {
         Strains: float32 array
-        Left: float32 * float32 * float32
-        Right: float32 * float32 * float32
+        Left: float32 * float32
+        Right: float32 * float32
     }
 
 type Difficulty =
@@ -169,20 +169,11 @@ module Difficulty =
 
     let STRAIN_SCALE = 0.01626f
 
-    let STRAIN_BURST_HALF_LIFE = 500.0f<ms / rate>
+    let STRAIN_BURST_HALF_LIFE = 1575.0f<ms / rate>
     let STRAIN_BURST_DECAY_RATE = log 0.5f / STRAIN_BURST_HALF_LIFE
     let strain_burst (value: float32) (input: float32) (delta: GameplayTime) =
 
         let decay = exp (STRAIN_BURST_DECAY_RATE * delta) |> max 0.5f
-        let a = value
-        let b = input * input * STRAIN_SCALE
-        b - (b - a) * decay
-
-    let STRAIN_LOAD_HALF_LIFE = 3000.0f<ms / rate>
-    let STRAIN_LOAD_DECAY_RATE = log 0.5f / STRAIN_LOAD_HALF_LIFE
-    let strain_load (value: float32) (input: float32) (delta: GameplayTime) =
-
-        let decay = exp (STRAIN_LOAD_DECAY_RATE * delta) |> max 0.5f
         let a = value
         let b = input * input * STRAIN_SCALE
         b - (b - a) * decay
@@ -196,7 +187,7 @@ module Difficulty =
         let b = input * input * STRAIN_SCALE
         b - (b - a) * decay
 
-    let private finger_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) : RowStrain array =
+    let finger_strain_pass (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulty: NoteDifficulty array array) : RowStrain array =
         let keys = notes.[0].Data.Length
         let last_note_in_column = Array.zeroCreate<Time> keys
 
@@ -228,7 +219,7 @@ module Difficulty =
                         row_strain_v0.[k] <- strain_v0.[k]
 
                         strain_v1.[k] <-
-                            strain_load
+                            strain_burst
                                 strain_v1.[k]
                                 notes_v1.[k]
                                 ((offset - last_note_in_column.[k]) / rate)
@@ -250,22 +241,20 @@ module Difficulty =
         }
         |> Array.ofSeq
 
-    let hand_strain_pass (note_difficulty: NoteDifficulty array array) (rate: Rate, notes: TimeArray<NoteRow>) : RowStrainV2 array =
+    let hand_strain_pass (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulty: NoteDifficulty array array) : RowStrainV2 array =
         let keys = notes.[0].Data.Length
         let hand_split = Layout.keys_on_left_hand keys
 
-        let last_note_in_column = Array.init<_> keys (fun _ -> 0.0f, 0.0f, 0.0f, 0.0f<ms>)
+        let last_note_in_column = Array.init<_> keys (fun _ -> 0.0f, 0.0f, 0.0f<ms>)
 
         seq {
             for i = 0 to notes.Length - 1 do
                 let { Time = offset; Data = nr } = notes.[i]
 
                 let mutable left_hand_burst = 0.00f
-                let mutable left_hand_load = 0.00f
                 let mutable left_hand_stamina = 0.00f
 
                 let mutable right_hand_burst = 0.00f
-                let mutable right_hand_load = 0.00f
                 let mutable right_hand_stamina = 0.00f
 
                 let strain = Array.zeroCreate<float32> keys
@@ -277,52 +266,41 @@ module Difficulty =
 
                         if k < hand_split then
                             for hand_k = 0 to hand_split - 1 do
-                                let pburst, pload, pstamina, ptime = last_note_in_column.[hand_k]
+                                let pburst, pstamina, ptime = last_note_in_column.[hand_k]
                                 left_hand_burst <- max left_hand_burst (strain_burst pburst d ((offset - ptime) / rate))
-                                left_hand_load <- max left_hand_load (strain_load pload d ((offset - ptime) / rate))
                                 left_hand_stamina <- max left_hand_stamina (strain_stamina pstamina d ((offset - ptime) / rate))
                         else
                             for hand_k = hand_split to keys - 1 do
-                                let pburst, pload, pstamina, ptime = last_note_in_column.[hand_k]
+                                let pburst, pstamina, ptime = last_note_in_column.[hand_k]
                                 right_hand_burst <- max right_hand_burst (strain_burst pburst d ((offset - ptime) / rate))
-                                right_hand_load <- max right_hand_load (strain_load pload d ((offset - ptime) / rate))
                                 right_hand_stamina <- max right_hand_stamina (strain_stamina pstamina d ((offset - ptime) / rate))
 
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                         if k < hand_split then
-                            last_note_in_column.[k] <- left_hand_burst, left_hand_load, left_hand_stamina, offset
-                            strain.[k] <- left_hand_burst * 0.125f + left_hand_load * 0.75f + left_hand_stamina * 0.125f
+                            last_note_in_column.[k] <- left_hand_burst, left_hand_stamina, offset
+                            strain.[k] <- left_hand_burst * 0.875f + left_hand_stamina * 0.125f
                         else
-                            last_note_in_column.[k] <- right_hand_burst, right_hand_load, right_hand_stamina, offset
-                            strain.[k] <- right_hand_burst * 0.125f + right_hand_load * 0.75f + right_hand_stamina * 0.125f
+                            last_note_in_column.[k] <- right_hand_burst, right_hand_stamina, offset
+                            strain.[k] <- right_hand_burst * 0.875f + right_hand_stamina * 0.125f
 
-                yield { Strains = strain; Left = left_hand_burst, left_hand_load, left_hand_stamina; Right = right_hand_burst, right_hand_load, right_hand_stamina }
+                yield { Strains = strain; Left = left_hand_burst, left_hand_stamina; Right = right_hand_burst, right_hand_stamina }
         }
         |> Array.ofSeq
 
     let CURVE_POWER = 0.6f
     let CURVE_SCALE = 0.4056f
-
-    /// Old and to be superseded by `weighted_overall_difficulty`
-    let private overall_difficulty_pass (finger_strain_data: float32 seq) : float32 =
-        let mutable v = 0.01f
-        for x in finger_strain_data do
-            if x > v then v <- v * MathF.Pow(x / v, 0.01f)
-
-        MathF.Pow(v, CURVE_POWER) * CURVE_SCALE
-
     /// Calculates a single number to represent a set of difficulty data points
     /// This number represents how a player would "perceive" the difficulty overall
     /// Perception is not a concrete term so I've ruled: In my experience players perception is concentrated on the very hardest parts of a chart
     let weighted_overall_difficulty (data: float32 seq) : float32 =
 
         /// The top 2500 notes get special weightings
-        let DIFFICULTY_WEIGHTED_NOTES = 2500.0f
+        let MOST_IMPORTANT_NOTES = 2500.0f
         /// Weightings for the values are calculated by this formula
         /// x = % position through the top 2500 from 0.0 - 1.0
         /// Values below the top 2500 always have x = 0.0
-        let DIFFICULTY_CURVE x = 0.002f + x ** 4.0f
+        let WEIGHTING_CURVE x = 0.002f + x ** 4.0f
 
         let data_array = data |> Seq.filter (fun x -> x > 0.0f) |> Seq.sort |> Array.ofSeq
         let length = float32 data_array.Length
@@ -331,7 +309,7 @@ module Difficulty =
         let mutable total = 0.0f
 
         for i = 0 to data_array.Length - 1 do
-            let w = DIFFICULTY_CURVE ((float32 i + DIFFICULTY_WEIGHTED_NOTES - length) / DIFFICULTY_WEIGHTED_NOTES |> max 0.0f)
+            let w = WEIGHTING_CURVE ((float32 i + MOST_IMPORTANT_NOTES - length) / MOST_IMPORTANT_NOTES |> max 0.0f)
             weight <- weight + w
             total <- total + data_array.[i] * w
 
@@ -342,9 +320,9 @@ module Difficulty =
         let keys = notes.[0].Data.Length
         let note_data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         notes_difficulty_pass (rate, notes) note_data
-        let physical_data = finger_strain_pass note_data (rate, notes)
-        let hands = hand_strain_pass note_data (rate, notes)
-        let physical = overall_difficulty_pass (physical_data |> Seq.map _.StrainV0)
+        let physical_data = finger_strain_pass (rate, notes) note_data
+        let hands = hand_strain_pass (rate, notes) note_data
+        let physical = weighted_overall_difficulty (physical_data |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f))
 
         {
             NoteDifficulty = note_data
@@ -357,8 +335,7 @@ module Difficulty =
 
     let color v =
         try
-            let a = Math.Min(1.0, v * 0.1)
-            let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
+            let a = v * 0.1 |> min 1.0
+            let b = (v * 0.1 |> max 1.0) - 1.0 |> min 1.0
             Color.FromArgb(255.0 * a |> int, 255.0 * (1.0 - a) |> int, 255.0 * b |> int)
-        with _ ->
-            Color.Red
+        with _ -> Color.Red

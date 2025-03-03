@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Calculator
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User.Stats
@@ -38,7 +37,7 @@ module PlayScreen =
 
         scoring.OnEvent.Add(fun h ->
             match h.Action with
-            | Hit d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+            | Hit d
             | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
             | _ -> ()
         )
