@@ -62,7 +62,7 @@ type ScoreInfo =
     member this.ModStatus = this.WithMods.Status
 
     member this.ModString() =
-        ModState.format (this.Rate, this.Mods, false)
+        ModState.format (this.Rate, this.Mods)
 
 module ScoreInfo =
 

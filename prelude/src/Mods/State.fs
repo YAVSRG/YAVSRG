@@ -62,7 +62,7 @@ module ModState =
             Status = status
         }
 
-    let format (rate: Rate, mods: ModState, autoplay: bool) : string =
+    let format (rate: Rate, mods: ModState) : string =
         String.Join(
             ", ",
             sprintf "%.2fx" rate
@@ -71,7 +71,6 @@ module ModState =
                 |> Seq.map (fun (id, m, state) -> m.Shorthand state)
                 |> List.ofSeq)
         )
-        + if autoplay then ", AP" else ""
 
     let check (mods: ModState) : Result<ModStatus, string> =
         try

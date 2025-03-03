@@ -82,7 +82,7 @@ type InfoPanel() as this =
 
     override this.Draw() =
         let info_area = this.Bounds.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f)
-        Render.rect (info_area.BorderT(Style.PADDING)) (Palette.color (255, 0.8f, 0.0f))
+        Render.rect (info_area.BorderT(Style.PADDING)) (!*Palette.MAIN)
         Render.rect info_area (!*Palette.DARK_100)
         base.Draw()
 

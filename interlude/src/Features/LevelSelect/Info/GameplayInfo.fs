@@ -33,7 +33,7 @@ type GameplayInfo() =
                     ts <- info.SaveData.LastPlayed
                     t <- text ts
                 t
-        mod_string <- ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, SelectedChart.autoplay)
+        mod_string <- ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
         mod_status <- info.WithMods.Status
 
     static member HEIGHT = 230.0f

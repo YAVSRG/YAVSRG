@@ -13,7 +13,7 @@ type RateMods(config: HudConfig, state: PlayState) =
     override this.Init(parent) =
         let text =
             if config.RateModMeterShowMods then
-                ModState.format (SelectedChart.rate.Value, state.WithColors.ModsSelected, SelectedChart.autoplay)
+                ModState.format (SelectedChart.rate.Value, state.WithColors.ModsSelected)
             else
                 sprintf "%.2fx" SelectedChart.rate.Value
 

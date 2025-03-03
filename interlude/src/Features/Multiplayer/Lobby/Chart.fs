@@ -190,7 +190,7 @@ type SelectedChart(lobby: Lobby) =
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
-                | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value, false)
+                | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                 | None -> ""
             ),
             Align = Alignment.LEFT,

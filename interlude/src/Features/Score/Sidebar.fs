@@ -15,7 +15,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
 
     let show_more_info = Setting.simple false
 
-    let mod_string = ModState.format (score_info.Rate, score_info.Mods, false)
+    let mod_string = ModState.format (score_info.Rate, score_info.Mods)
 
     let category, main_clusters =
         let c = score_info.ChartMeta.Patterns

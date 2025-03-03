@@ -12,7 +12,7 @@ open Interlude.Features.Pacemaker
 type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
-    let mod_string = ModState.format (SelectedChart.rate.Value, info.WithColors.ModsApplied, false)
+    let mod_string = ModState.format (SelectedChart.rate.Value, info.WithColors.ModsApplied)
 
     let BG_SCALE = 0.35f
 
