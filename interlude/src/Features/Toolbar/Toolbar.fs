@@ -66,18 +66,18 @@ type Toolbar() =
         |+ Text(
             Updates.version,
             Align = Alignment.RIGHT,
-            Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT, 300.0f, HEIGHT * 0.5f)
+            Position = Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentT(0.5f)
         )
         |+ Text(
             (fun () -> System.DateTime.Now.ToString()),
             Align = Alignment.RIGHT,
-            Position = Position.Box(1.0f, 1.0f, -305.0f, -HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f)
+            Position = Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f)
         )
         |+ InlaidButton(
             %"menu.back",
             (fun () -> Screen.back Transitions.UnderLogo |> ignore),
             Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
+            Position = Position.SliceL(10.0f, 180.0f).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT)
         )
         |+ InlaidButton(
             Icons.MENU,
@@ -127,8 +127,8 @@ type Toolbar() =
         |+ HotkeyAction("preset3", fun () -> load_preset 3)
         |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
-        |+ Jukebox(Position = { Position.SliceB(55.0f).Translate(200.0f, -7.5f) with Right = 0.4f %- 10.0f })
-        |* Volume(Position = Position.Shrink(0.0f, HEIGHT))
+        |+ Jukebox(Position = Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
+        |* Volume(Position = Position.ShrinkY(HEIGHT))
 
         base.Init parent
 
