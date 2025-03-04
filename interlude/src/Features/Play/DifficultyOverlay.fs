@@ -65,57 +65,18 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                     Colors.green_accent
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
-                    difficulty.Strains.[index].NotesV0.[k]
+                    difficulty.Strains.[index].NotesV1.[k]
                     Colors.pink_accent
                 draw_label
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
-                    difficulty.Strains.[index].StrainV0Notes.[k]
-                    Colors.red_accent
-                draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
-                    difficulty.Strains.[index].NotesV1.[k]
-                    Colors.white
-                draw_label
-                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
                     difficulty.Strains.[index].StrainV1Notes.[k]
-                    Colors.yellow_accent
-
-        draw_label (note_area.BorderR(playfield.ColumnWidth).SlicePercentY(0.35f).Shrink(5.0f)) difficulty.Strains.[index].StrainV0 Colors.red_accent
+                    Colors.red_accent
 
     let graph (data: (float32 * int) array) : DifficultyGraph =
         let max_y = if data.Length > 0 then data |> Seq.map snd |> Seq.max |> float32 else 1.0f
         let max_x = if data.Length > 0 then data |> Seq.map fst |> Seq.max else 1.0f
         let count = data |> Seq.filter (fun (_, count) -> float32 count / max_y > 0.01f) |> Seq.length
         { Height = max_y; Width = max_x; Count = count; Values = data }
-
-    let difficulty_distribution_raw_notes =
-        difficulty.Strains
-        |> Seq.map _.NotesV0
-        |> Seq.concat
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-        |> graph
-
-    let difficulty_distribution_notes =
-        difficulty.Strains
-        |> Seq.map _.StrainV0Notes
-        |> Seq.concat
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-        |> graph
-
-    let difficulty_distribution_chords =
-        difficulty.Strains
-        |> Seq.map _.StrainV0
-        |> Seq.filter (fun x -> x > 0.0f)
-        |> Seq.countBy (fun x -> floor(x * 10.0f) / 10.0f)
-        |> Seq.sortBy fst
-        |> Array.ofSeq
-        |> graph
 
     let draw_graph (y: float32) (color: Color) (d: DifficultyGraph) =
         for v, count in d.Values do
@@ -150,21 +111,12 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         seq {
             let mutable peek = seek
             while peek >= 0 do
-                yield! difficulty.Strains.[peek].NotesV0
+                yield! difficulty.Strains.[peek].NotesV1
                 peek <- peek - 1
         }
         |> Seq.filter (fun x -> x > 0.0f)
 
     let note_strains =
-        seq {
-            let mutable peek = seek
-            while peek >= 0 do
-                yield! difficulty.Strains.[peek].StrainV0Notes
-                peek <- peek - 1
-        }
-        |> Seq.filter (fun x -> x > 0.0f)
-
-    let new_strains =
         seq {
             let mutable peek = seek
             while peek >= 0 do
@@ -187,12 +139,6 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                 peek <- peek - 1
         }
 
-    let new_curve_note_strain =
-        Difficulty.weighted_overall_difficulty (difficulty.Strains |> Seq.map _.StrainV0Notes |> Seq.concat)
-
-    let new_rating =
-        Difficulty.weighted_overall_difficulty (difficulty.Strains |> Seq.map _.StrainV1Notes |> Seq.concat)
-
     override this.Draw() =
         let now =
             state.CurrentChartTime() +
@@ -211,30 +157,32 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             draw_row now peek
             peek <- peek + 1
 
-        draw_graph 200.0f Colors.red difficulty_distribution_raw_notes
-        draw_graph 400.0f Colors.green difficulty_distribution_notes
-        draw_graph 600.0f Colors.blue difficulty_distribution_chords
+        //draw_graph 200.0f Colors.red difficulty_distribution_raw_notes
+        //draw_graph 400.0f Colors.green difficulty_distribution_notes
+        //draw_graph 600.0f Colors.blue difficulty_distribution_chords
 
         draw_live_data 200.0f Colors.red note_difficulties
         draw_live_data 400.0f Colors.blue note_strains
-        draw_live_data 600.0f Colors.green_accent new_strains
         let (burst, stamina) = difficulty.Hands.[seek].Right in
             Text.draw(Style.font, sprintf "R: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
         let (burst, stamina) = difficulty.Hands.[seek].Left in
             Text.draw(Style.font, sprintf "L: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
-        draw_octaves 800.0f
-        //draw_live_data 800.0f Colors.yellow_accent accuracies
+        draw_octaves 600.0f
+        draw_live_data 800.0f Colors.yellow_accent accuracies
 
         let variety =
-            note_difficulties
+            seq {
+                let mutable peek = seek
+                while peek >= 0 && (chart.Notes.[seek].Time - chart.Notes.[peek].Time) / state.Scoring.Rate < 1500.0f<ms / rate> do
+                    yield! difficulty.Strains.[peek].NotesV1
+                    peek <- peek - 1
+            }
+            |> Seq.filter (fun x -> x > 0.0f)
             |> Seq.map (fun d -> d / 5.0f |> round)
-            |> Seq.truncate 50
             |> Seq.distinct
             |> Seq.length
         Text.draw(Style.font, sprintf "X: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "V1: %.2f" new_rating, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "V0+W: %.2f" new_curve_note_strain, 20.0f, this.Bounds.Right - 600.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "V0: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 800.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "V1: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

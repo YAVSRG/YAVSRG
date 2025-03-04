@@ -22,9 +22,9 @@ module Performance =
         output
 
     let scale_note (accuracy: float32) (note: NoteDifficulty) : NoteDifficulty =
-        let l = MathF.Log2((note.SL + note.SR) / note.J)
+        let l = MathF.Log2((note.SL + note.SR) * 0.5f / note.J)
         let x = (l + 1.0f) * 0.5f |> max 0.0f |> min 0.0f
-        let par = 0.98f - x * 0.05f
+        let par = 0.99f - x * 0.09f
         let scale = (1.0f - par) / (1.0f - accuracy) |> min 1.2f |> max 0.0f
         {
             J = note.J * scale

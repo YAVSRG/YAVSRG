@@ -30,7 +30,6 @@ module CurveExperiments =
 
     let stam () =
 
-        let mutable v = 0.0f
         let mutable v2 = 0.0f
         while true do
             printf "diff: "
@@ -42,13 +41,12 @@ module CurveExperiments =
 
             let target = (diff * (100.0f<ms / rate> / spacing) * 2.439f)
             printfn "estimate target: %.2f" target
-            printfn "estimate result: %.2f" (v + (target - v) * (1.0f - exp -0.44f))
+            printfn "estimate result: %.2f" (v2 + (target - v2) * (1.0f - exp -0.44f))
 
             for i = 1 to freq do
-                v <- Difficulty.stamina_func v diff spacing
                 v2 <- Difficulty.strain_burst v2 diff spacing
-                printfn "%.2f | %.2f" v v2
-            printfn "%i steps, %.1fms apart at %.2f: %.2f | %.2f" freq spacing diff v v2
+                printfn "%.2f" v2
+            printfn "%i steps, %.1fms apart at %.2f: %.2f" freq spacing diff v2
 
     let trill_vs_jack () =
         for bpm in [80.0f; 90.0f; 100.0f; 110.0f; 120.0f; 130.0f; 140.0f; 150.0f; 160.0f; 170.0f; 180.0f; 190.0f; 200.0f] do
@@ -57,11 +55,11 @@ module CurveExperiments =
             let stream_curve = Difficulty.ms_to_stream_bpm (ms / 2.0f)
             let roll_curve_a = Difficulty.ms_to_stream_bpm (ms / 4.0f)
             let roll_curve_b = Difficulty.ms_to_stream_bpm (ms * 3.0f / 4.0f)
-            let jack_value = Difficulty.note_strain_v1 { J = jack_curve; SL = 0.0f; SR = 0.0f }
-            let trill_value = Difficulty.note_strain_v1 { J = jack_curve; SL = stream_curve; SR = 0.0f }
-            let bracket_value = Difficulty.note_strain_v1 { J = jack_curve; SL = stream_curve; SR = stream_curve }
-            let roll_value_a = Difficulty.note_strain_v1 { J = jack_curve; SL = roll_curve_a; SR = 0.0f }
-            let roll_value_b = Difficulty.note_strain_v1 { J = jack_curve; SL = roll_curve_b; SR = 0.0f }
+            let jack_value = Difficulty.note_strain { J = jack_curve; SL = 0.0f; SR = 0.0f }
+            let trill_value = Difficulty.note_strain { J = jack_curve; SL = stream_curve; SR = 0.0f }
+            let bracket_value = Difficulty.note_strain { J = jack_curve; SL = stream_curve; SR = stream_curve }
+            let roll_value_a = Difficulty.note_strain { J = jack_curve; SL = roll_curve_a; SR = 0.0f }
+            let roll_value_b = Difficulty.note_strain { J = jack_curve; SL = roll_curve_b; SR = 0.0f }
 
             printfn "Notes in a %.0f longjack are valued like %.0f longjacks" bpm jack_value
             printfn "Notes in a %.0f trill (two antiphase %.0f longjacks) are valued like %.0f longjacks" (bpm * 2.0f) bpm trill_value

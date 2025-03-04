@@ -29,10 +29,7 @@ type NoteDifficulty =
 [<Struct>]
 type RowStrain =
     {
-        NotesV0: float32 array
         NotesV1: float32 array
-        StrainV0: float32
-        StrainV0Notes: float32 array
         StrainV1Notes: float32 array
     }
 
@@ -139,33 +136,16 @@ module Difficulty =
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     last_note_in_column.[k] <- time
 
-    let private OHTNERF = 3.0f
-    let STREAM_CURVE_HEIGHT_SCALE = 0.5209125f
-    let note_strain_v0 (note: NoteDifficulty) : float32 =
-        MathF.Pow(
-            MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note.SL, OHTNERF) +
-            MathF.Pow(STREAM_CURVE_HEIGHT_SCALE * note.SR, OHTNERF) +
-            MathF.Pow(note.J, OHTNERF),
-            1.0f / OHTNERF
-        )
-
+    let OHTNERF = 3.0f
     let STREAM_SCALE = 6f
     let STREAM_POW = 0.5f
-    let note_strain_v1 (note: NoteDifficulty) : float32 =
+    let note_strain (note: NoteDifficulty) : float32 =
         MathF.Pow(
             MathF.Pow(STREAM_SCALE * note.SL ** STREAM_POW, OHTNERF) +
             MathF.Pow(STREAM_SCALE * note.SR ** STREAM_POW, OHTNERF) +
             MathF.Pow(note.J, OHTNERF),
             1.0f / OHTNERF
         )
-
-    let stamina_func (value: float32) (input: float32) (delta: GameplayTime) =
-
-        let decay = exp (-0.00044f<rate / ms> * delta)
-        let v = Math.Max(value * decay, 0.01f)
-        let ratio = input / v
-        let mult = 1.0f + 0.105f * ratio
-        v * mult
 
     let STRAIN_SCALE = 0.01626f
 
@@ -191,32 +171,19 @@ module Difficulty =
         let keys = notes.[0].Data.Length
         let last_note_in_column = Array.zeroCreate<Time> keys
 
-        let strain_v0 = Array.zeroCreate<float32> keys
         let strain_v1 = Array.zeroCreate<float32> keys
 
         seq {
             for i = 0 to notes.Length - 1 do
                 let { Time = offset; Data = nr } = notes.[i]
 
-                let notes_v0 = Array.zeroCreate<float32> keys
                 let notes_v1 = Array.zeroCreate<float32> keys
-                let row_strain_v0 = Array.zeroCreate<float32> keys
                 let row_strain_v1 = Array.zeroCreate<float32> keys
 
-                let mutable sum = 0.0f
-                let mutable n = 0.0f
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        notes_v0.[k] <- note_strain_v0 note_difficulty.[i].[k]
-                        notes_v1.[k] <- note_strain_v1 note_difficulty.[i].[k]
-
-                        strain_v0.[k] <-
-                            stamina_func
-                                strain_v0.[k]
-                                notes_v0.[k]
-                                ((offset - last_note_in_column.[k]) / rate)
-                        row_strain_v0.[k] <- strain_v0.[k]
+                        notes_v1.[k] <- note_strain note_difficulty.[i].[k]
 
                         strain_v1.[k] <-
                             strain_burst
@@ -227,15 +194,9 @@ module Difficulty =
 
                         last_note_in_column.[k] <- offset
 
-                        sum <- sum + strain_v0.[k]
-                        n <- n + 1.0f
-
                 yield
                     {
-                        NotesV0 = notes_v0
                         NotesV1 = notes_v1
-                        StrainV0 = if n = 0.0f then 0.0f else sum / n
-                        StrainV0Notes = row_strain_v0
                         StrainV1Notes = row_strain_v1
                     }
         }
@@ -262,7 +223,7 @@ module Difficulty =
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        let d = note_strain_v1 note_difficulty.[i].[k]
+                        let d = note_strain note_difficulty.[i].[k]
 
                         if k < hand_split then
                             for hand_k = 0 to hand_split - 1 do
