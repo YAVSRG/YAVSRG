@@ -15,6 +15,9 @@ type Device =
 
 module Audio =
 
+    /// In BASS units; 10000 is the max supported but it is deafening on
+    let MAX_VOLUME = 4000.0
+
     let private fft: float32 array = Array.zeroCreate 1024
     let waveform: float32 array = Array.zeroCreate 256
 
@@ -51,8 +54,8 @@ module Audio =
         Song.update elapsed_ms
 
     let change_volume (fx_volume: float, song_volume: float) =
-        Bass.GlobalSampleVolume <- int (fx_volume * 8000.0) |> max 0
-        Bass.GlobalStreamVolume <- int (song_volume * 8000.0) |> max 0
+        Bass.GlobalSampleVolume <- int (fx_volume * MAX_VOLUME) |> max 0
+        Bass.GlobalStreamVolume <- int (song_volume * MAX_VOLUME) |> max 0
 
     let private current_device_changed_ev = Event<unit>()
     let current_device_changed = current_device_changed_ev.Publish
