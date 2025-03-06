@@ -486,6 +486,7 @@ levelselect.groupby.lamp=Lamp
 levelselect.groupby.level=Levels
 levelselect.groupby.none=None
 levelselect.groupby.pack=Pack
+levelselect.groupby.difficulty=Difficulty
 levelselect.groupby.patterns=Patterns
 levelselect.groupby.reverse_hint=Reverse group ordering
 levelselect.groupby.title=Title

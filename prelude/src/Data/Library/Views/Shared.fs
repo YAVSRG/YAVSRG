@@ -45,6 +45,13 @@ module internal Shared =
         elif days_ago < 3600 then 8, "A long time ago"
         else 9, "Never"
 
+    let format_difficulty (cc: ChartMeta, _) =
+        let stars = cc.Rating |> floor |> int
+        if stars >= 15 then
+            15, "15+ Stars"
+        else
+            stars, sprintf "%i Stars" stars
+
     let format_date_added (c: ChartMeta, _) =
         let days_ago = days_ago c.DateAdded
 

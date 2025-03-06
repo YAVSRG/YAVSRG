@@ -4,7 +4,7 @@ open System.Collections.Generic
 
 type GroupFunc = ChartMeta * LibraryViewContext -> int * string
 
-type GroupMethod = 
+type GroupMethod =
     | Normal of GroupFunc
     | Packs
     | Collections
@@ -19,10 +19,11 @@ module Grouping =
                 "pack", Packs
                 "collection", Collections
                 "level", Levels
+                "difficulty", Normal format_difficulty
                 "date_played", Normal format_date_last_played
                 "date_installed", Normal format_date_added
                 "grade", Normal grade_achieved
-                "lamp", Normal lamp_achieved 
+                "lamp", Normal lamp_achieved
                 "title", Normal <| fun (c, _) -> 0, first_character c.Title
                 "artist", Normal <| fun (c, _) -> 0, first_character c.Artist
                 "creator", Normal <| fun (c, _) -> 0, first_character c.Creator
@@ -43,7 +44,7 @@ type private GroupWithSorting =
     }
     member this.ToGroup (reverse_sorting: bool) : Group =
         {
-            Charts = 
+            Charts =
                 this.Charts
                 |> Seq.sortBy (fun (_, _, key) -> key)
                 |> if reverse_sorting then Seq.rev else id
