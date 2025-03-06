@@ -178,7 +178,7 @@ type AnimationSettingsPage() =
 
     let enable_receptors = Setting.simple data.UseReceptors
     let receptor_style = Setting.simple data.ReceptorStyle
-    let receptor_offset = data.ReceptorOffset |> Setting.bounded (-1.0f, 1.0f)
+    let receptor_offset = data.ReceptorOffset |> Setting.bounded (-10.0f, 10.0f)
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
     let receptors_tab =
