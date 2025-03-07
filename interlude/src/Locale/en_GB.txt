@@ -496,6 +496,7 @@ levelselect.info.leaderboard=Leaderboard
 levelselect.info.leaderboard.empty=No leaderboard scores yet!
 levelselect.info.leaderboard.empty.subtitle=You can be the first..
 levelselect.info.leaderboard.unavailable=No leaderboard
+levelselect.info.leaderboard.unavailable.subtitle=But your scores still count towards global rankings!
 levelselect.info.mode=Score source
 levelselect.info.mode.tooltip=Cycle through what gets displayed on this info panel.
 levelselect.info.scoreboard=Your scores

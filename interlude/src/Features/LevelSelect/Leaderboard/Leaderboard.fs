@@ -140,7 +140,7 @@ type Leaderboard(display: Setting<Display>) =
             Subtitle = %"levelselect.info.leaderboard.empty.subtitle"
         )
             .Conditional(fun () -> OnlineScores.state = OnlineScores.State.Loaded && count = 0)
-        |+ EmptyState(Icons.CLOUD_OFF, %"levelselect.info.leaderboard.unavailable")
+        |+ EmptyState(Icons.CLOUD_OFF, %"levelselect.info.leaderboard.unavailable", Subtitle = %"levelselect.info.leaderboard.unavailable.subtitle")
             .Conditional(fun () -> OnlineScores.state = OnlineScores.State.NoLeaderboard)
         |* EmptyState(Icons.GLOBE, %"misc.offline")
             .Conditional(fun () -> OnlineScores.state = OnlineScores.State.Offline)
