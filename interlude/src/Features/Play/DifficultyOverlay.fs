@@ -170,18 +170,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_octaves 600.0f
         draw_live_data 800.0f Colors.yellow_accent accuracies
 
-        let variety =
-            seq {
-                let mutable peek = seek
-                while peek >= 0 && (chart.Notes.[seek].Time - chart.Notes.[peek].Time) / state.Scoring.Rate < 1500.0f<ms / rate> do
-                    yield! difficulty.Strains.[peek].NotesV1
-                    peek <- peek - 1
-            }
-            |> Seq.filter (fun x -> x > 0.0f)
-            |> Seq.map (fun d -> d / 5.0f |> round)
-            |> Seq.distinct
-            |> Seq.length
-        Text.draw(Style.font, sprintf "X: %i" variety, 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "X: %.2f" difficulty.Variety.[peek], 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
         Text.draw(Style.font, sprintf "V1: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =

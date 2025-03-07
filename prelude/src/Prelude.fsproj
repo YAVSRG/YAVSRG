@@ -62,6 +62,10 @@
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
     <Compile Include="Gameplay\Scoring\Scoring.fs" />
     <Compile Include="Gameplay\Scoring\Graph.fs" />
+    <Compile Include="Calculator\Utils.fs" />
+    <Compile Include="Calculator\Notes.fs" />
+    <Compile Include="Calculator\Strain.fs" />
+    <Compile Include="Calculator\Variety.fs" />
     <Compile Include="Calculator\Patterns\Primitives.fs" />
     <Compile Include="Calculator\Patterns\Patterns.fs" />
     <Compile Include="Calculator\Patterns\PatternFinder.fs" />
