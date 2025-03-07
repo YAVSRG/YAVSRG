@@ -6,27 +6,31 @@ open Prelude.Charts
 
 module Variety =
 
-    let VARIETY_WINDOW = 1500.0f<ms / rate>
+    let VARIETY_WINDOW = 750.0f<ms / rate>
 
     /// So basically, round all the difficulties of notes to the nearest 5bpm
-    /// Then count how many unique bpms appear in the last `VARIETY_WINDOW` ms
-    /// Goofy but this is by FAR the best metric I have come up with for measuring variety/technicality so...
+    /// Then count how many unique bpms appear within +-`VARIETY_WINDOW` ms of each note
+    /// Goofy but this is by FAR the best metric I have come up with for measuring variety/technicality so enjoy
     let calculate_variety (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulties: NoteDifficulty array array) : float32 array =
         let keys = notes.[0].Data.Length
 
         let buckets = Dictionary<float32, int>()
+        let mutable front = 0
         let mutable back = 0
 
         seq {
             for i = 0 to notes.Length - 1 do
-                let { Time = time; Data = nr } = notes.[i]
+                let now = notes.[i].Time
 
-                for k = 0 to keys - 1 do
-                    if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
-                        let strain = Strain.note_strain note_difficulties.[i].[k] / 5.0f |> round
-                        buckets.[strain] <- buckets.GetValueOrDefault strain + 1
+                while front < notes.Length && notes.[front].Time < now + VARIETY_WINDOW * rate do
+                    let fnr = notes.[front].Data
+                    for k = 0 to keys - 1 do
+                        if fnr.[k] = NoteType.NORMAL || fnr.[k] = NoteType.HOLDHEAD then
+                            let strain = Strain.note_strain note_difficulties.[front].[k] / 5.0f |> round
+                            buckets.[strain] <- buckets.GetValueOrDefault strain + 1
+                    front <- front + 1
 
-                while back < i && notes.[back].Time + VARIETY_WINDOW * rate < time do
+                while back < i && notes.[back].Time < now - VARIETY_WINDOW * rate do
                     let bnr = notes.[back].Data
                     for k = 0 to keys - 1 do
                         if bnr.[k] = NoteType.NORMAL || bnr.[k] = NoteType.HOLDHEAD then
