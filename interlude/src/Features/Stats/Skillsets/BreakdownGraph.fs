@@ -5,6 +5,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.User.Stats
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
@@ -51,25 +52,25 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
 
     let threshold_a, threshold_c, threshold_p = pattern_type.AccuracyBreakpoints
     let a_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_a * 100.0) Rulesets.DEFAULT.Name
-        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_a * 100.0) Rulesets.DEFAULT Rulesets.current with
+        let base_label = sprintf "%g%% %s" (threshold_a * 100.0) SC_J4.Name
+        if Rulesets.current_hash <> SC_J4_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_a * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
 
     let c_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_c * 100.0) Rulesets.DEFAULT.Name
-        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_c * 100.0) Rulesets.DEFAULT Rulesets.current with
+        let base_label = sprintf "%g%% %s" (threshold_c * 100.0) SC_J4.Name
+        if Rulesets.current_hash <> SC_J4_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_c * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
 
     let p_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_p * 100.0) Rulesets.DEFAULT.Name
-        if Rulesets.current_hash <> Rulesets.DEFAULT_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_p * 100.0) Rulesets.DEFAULT Rulesets.current with
+        let base_label = sprintf "%g%% %s" (threshold_p * 100.0) SC_J4.Name
+        if Rulesets.current_hash <> SC_J4_HASH then
+            match Rulesets.RulesetComparison.compare (threshold_p * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label

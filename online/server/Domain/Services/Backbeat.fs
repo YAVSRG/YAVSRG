@@ -10,8 +10,6 @@ open Interlude.Web.Server.Domain.Core
 
 module Backbeat =
 
-    let SC_J4 = SC.create 4
-
     let rulesets = Dictionary<string, Ruleset>()
     do
         let add_ruleset (ruleset: Ruleset) =

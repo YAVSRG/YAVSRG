@@ -4,8 +4,8 @@ open System
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Gameplay.Rulesets
 open Interlude.Web.Shared.Requests
-open Interlude.Content
 open Interlude.Features.Online
 
 type private RecentScores(scores: Players.Profile.View.RecentScore array) =
@@ -18,8 +18,8 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
             (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp)
              |> format_timespan)
             + " ago",
-            Gameplay.Scoring.Grade.calculate Rulesets.DEFAULT.Grades score.Score |> Rulesets.DEFAULT.GradeColor,
-            Rulesets.DEFAULT.LampColor score.Lamp
+            Gameplay.Scoring.Grade.calculate SC_J4.Grades score.Score |> SC_J4.GradeColor,
+            SC_J4.LampColor score.Lamp
         )
 
     override this.Draw() =
@@ -51,7 +51,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
 
             Text.fill_b (
                 Style.font,
-                Rulesets.DEFAULT.LampName score.Lamp,
+                SC_J4.LampName score.Lamp,
                 b.ShrinkR(h * 2.0f).SliceR(h).ShrinkY(h * 0.2f),
                 (lamp_color, Colors.shadow_2),
                 Alignment.CENTER

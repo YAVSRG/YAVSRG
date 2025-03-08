@@ -10,13 +10,11 @@ open Prelude.Gameplay.Rulesets
 module Rulesets =
 
     let DEFAULT_ID = "sc-j4"
-    let DEFAULT = SC.create 4
-    let DEFAULT_HASH = Ruleset.hash DEFAULT
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Ruleset>()
-    let mutable current = DEFAULT
-    let mutable current_hash = DEFAULT_HASH
+    let mutable current = SC_J4
+    let mutable current_hash = SC_J4_HASH
     let private _selected_id = Setting.simple DEFAULT_ID
     let private on_changed_ev = Event<Ruleset>()
     let on_changed = on_changed_ev.Publish
@@ -28,7 +26,7 @@ module Rulesets =
         let default_path = Path.Combine(path, DEFAULT_ID + ".ruleset")
 
         if not (File.Exists default_path) then
-            JSON.ToFile (default_path, true) DEFAULT
+            JSON.ToFile (default_path, true) SC_J4
 
         for f in Directory.GetFiles(path) do
             if Path.GetExtension(f).ToLower() = ".ruleset" then
@@ -42,7 +40,7 @@ module Rulesets =
                 | Error e -> Logging.Error "Error loading ruleset '%s': %O" id e
 
         if not (loaded.ContainsKey DEFAULT_ID) then
-            loaded.Add(DEFAULT_ID, DEFAULT)
+            loaded.Add(DEFAULT_ID, SC_J4)
 
         if not (loaded.ContainsKey _selected_id.Value) then
             Logging.Warn "Ruleset '%s' not found, switching to default" _selected_id.Value

@@ -6,7 +6,7 @@ module SC =
 
     let create (judge: int) : Ruleset =
 
-        let PERFECT_WINDOW = 
+        let PERFECT_WINDOW =
             if judge = 9 then 9.0f<ms / rate>
             else
                 let scale = (10.0f - float32 judge) / 6.0f
@@ -173,11 +173,17 @@ module SC =
                     }
                 |]
             Accuracy = AccuracyPoints.PointsPerJudgement [| 1.0; 0.9; 0.5; -0.5; MISS_PENALTY_POINTS; MISS_PENALTY_POINTS |]
-            HitMechanics = 
-                { 
+            HitMechanics =
+                {
                     NotePriority = NotePriority.Interlude 90.0f<ms / rate>
                     GhostTapJudgement = None
                 }
             HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (-180.0f<ms / rate>, 180.0f<ms / rate>, 3, 3))
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }
+
+[<AutoOpen>]
+module DefaultRuleset =
+
+    let SC_J4 = SC.create 4
+    let SC_J4_HASH = Ruleset.hash SC_J4

@@ -3,8 +3,8 @@
 open System
 open Discord
 open Discord.WebSocket
+open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat.Archive
-open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
@@ -188,7 +188,7 @@ module UserCommands =
                                                 sprintf
                                                     "`%6.2f%%` `%6s` `%6s` `%8s`"
                                                     (s.Accuracy * 100.0)
-                                                    (Backbeat.SC_J4.LampName s.Lamp)
+                                                    (SC_J4.LampName s.Lamp)
                                                     (format_mods s)
                                                     (format_time_ago s.TimePlayed)
                                             )
