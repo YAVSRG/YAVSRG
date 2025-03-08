@@ -67,5 +67,11 @@ module CurveExperiments =
             printfn "Notes in a %.0f roll are valued like %.0f / %.0f longjacks" (bpm * 4.0f) roll_value_a roll_value_b
             printfn "--"
 
+    let scales () =
+        for i = 0 to 100 do
+            let acc = float32 i / 100.0f
+            printfn "T @ %i%%: %.2f" i (Performance.tech_curve acc)
+            printfn "P @ %i%%: %.2f" i (Performance.physical_curve acc)
+
     let main() =
-        trill_vs_jack()
+        scales()

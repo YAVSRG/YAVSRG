@@ -21,15 +21,27 @@ module Performance =
         output.[output.Length - 1] <- float32 v
         output
 
-    let scale_note (accuracy: float32) (note: NoteDifficulty) : NoteDifficulty =
-        let l = MathF.Log2((note.SL + note.SR) * 0.5f / note.J)
-        let x = (l + 1.0f) * 0.5f |> max 0.0f |> min 0.0f
-        let par = 0.99f - x * 0.09f
-        let scale = (1.0f - par) / (1.0f - accuracy) |> min 1.2f |> max 0.0f
+    let tech_curve (accuracy: float32) =
+        let x = 20.0f * (accuracy - 1.0f)
+        let y = x / sqrt (1.0f + x * x)
+        0.85f * (1.0f + y) - 0.05f |> max 0.0f
+
+    let physical_curve (accuracy: float32) =
+        let x = 9.25f - 10.0f * accuracy
+        let y = x / sqrt (1.0f + x * x)
+        0.5f - y
+
+    let variety_mult (variety: float32) =
+        (variety - 5.0f) / 15.0f |> min 1.0f |> max 0.0f
+
+    let scale_note (accuracy: float32) (variety: float32) (note: NoteDifficulty) : NoteDifficulty =
+        let note_mult =
+            physical_curve accuracy +
+            variety_mult variety * tech_curve accuracy
         {
-            J = note.J * scale
-            SL = note.SL * scale
-            SR = note.SR * scale
+            J = note.J * note_mult
+            SL = note.SL * note_mult
+            SR = note.SR * note_mult
         }
 
     let calculate (rr: Difficulty) (scoring: ScoreProcessor) =
@@ -37,7 +49,7 @@ module Performance =
         let timeline = acc_timeline rr scoring
         let scaled_notes =
             rr.NoteDifficulty
-            |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i]) nr)
+            |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
         let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
         Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
         |> float
