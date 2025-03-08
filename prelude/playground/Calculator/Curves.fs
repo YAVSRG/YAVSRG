@@ -55,11 +55,11 @@ module CurveExperiments =
             let stream_curve = NoteDifficulty.ms_to_stream_bpm (ms / 2.0f)
             let roll_curve_a = NoteDifficulty.ms_to_stream_bpm (ms / 4.0f)
             let roll_curve_b = NoteDifficulty.ms_to_stream_bpm (ms * 3.0f / 4.0f)
-            let jack_value = Strain.note_strain { J = jack_curve; SL = 0.0f; SR = 0.0f }
-            let trill_value = Strain.note_strain { J = jack_curve; SL = stream_curve; SR = 0.0f }
-            let bracket_value = Strain.note_strain { J = jack_curve; SL = stream_curve; SR = stream_curve }
-            let roll_value_a = Strain.note_strain { J = jack_curve; SL = roll_curve_a; SR = 0.0f }
-            let roll_value_b = Strain.note_strain { J = jack_curve; SL = roll_curve_b; SR = 0.0f }
+            let jack_value = { J = jack_curve; SL = 0.0f; SR = 0.0f }.Total
+            let trill_value = { J = jack_curve; SL = stream_curve; SR = 0.0f }.Total
+            let bracket_value = { J = jack_curve; SL = stream_curve; SR = stream_curve }.Total
+            let roll_value_a = { J = jack_curve; SL = roll_curve_a; SR = 0.0f }.Total
+            let roll_value_b = { J = jack_curve; SL = roll_curve_b; SR = 0.0f }.Total
 
             printfn "Notes in a %.0f longjack are valued like %.0f longjacks" bpm jack_value
             printfn "Notes in a %.0f trill (two antiphase %.0f longjacks) are valued like %.0f longjacks" (bpm * 2.0f) bpm trill_value

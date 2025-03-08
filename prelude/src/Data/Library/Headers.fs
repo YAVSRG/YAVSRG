@@ -65,6 +65,8 @@ type ChartMeta =
     static member FromImport (timestamp: int64) (import_chart: ImportChart) : ChartMeta =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
         let chart = import_chart.Chart
+        let difficulty = Difficulty.calculate(1.0f<rate>, chart.Notes)
+
         {
             Hash = Chart.hash chart
 
@@ -104,6 +106,6 @@ type ChartMeta =
                     bpm |> round |> int
                 else 0
             DateAdded = timestamp
-            Rating = (Difficulty.calculate(1.0f<rate>, chart.Notes)).Overall |> float32
-            Patterns = (PatternReport.from_chart chart)
+            Rating = difficulty.Overall
+            Patterns = (PatternReport.from_chart(difficulty, chart))
         }

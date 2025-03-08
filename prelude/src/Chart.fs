@@ -276,7 +276,7 @@ module Chart =
                         ln <- Bitmask.unset_key k ln
 
                 if NoteRow.is_empty nr then
-                    failwithf "Note row is useless/empty at %f" time
+                    failwithf "Note row is redundant at %f" time
 
             if ln <> 0us then
                 failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time ln

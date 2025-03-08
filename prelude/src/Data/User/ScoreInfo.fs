@@ -31,7 +31,7 @@ type ScoreInfo =
         mutable Grade: int
 
         Rating: Difficulty
-        Physical: float
+        Physical: float32
 
         ImportedFromOsu: bool
         IsFailed: bool

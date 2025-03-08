@@ -3,6 +3,7 @@
 open Percyqaz.Data
 open Prelude
 open Prelude.Charts
+open Prelude.Calculator
 
 [<Json.AutoCodec>]
 type PatternReport =
@@ -45,8 +46,9 @@ type PatternReport =
 
 module PatternReport =
 
-    let from_chart_uncached (chart: Chart) : PatternReport =
-        let density, patterns = PatternFinder.find_patterns chart
+    let from_chart_uncached (difficulty_info: Difficulty, chart: Chart) : PatternReport =
+        let density = Density.process_chart chart
+        let patterns = Patterns.find (density, difficulty_info, chart)
         let clusters =
             Clustering.calculate_clustered_patterns patterns
             |> Seq.filter (fun c -> c.BPM > 25<beat / minute / rate>)
@@ -70,15 +72,15 @@ module PatternReport =
             }
             |> Seq.sortByDescending (fun x -> x.Importance)
             |> Array.ofSeq
-        let sv_amount = Metrics.sv_time chart
 
+        let sv_amount = Metrics.sv_time chart
         let sorted_densities = density |> Array.sort
 
         {
             Clusters = pruned_clusters
             LNPercent = Metrics.ln_percent chart
             SVAmount = sv_amount
-            Category = Categorise.categorise_chart chart.Keys pruned_clusters sv_amount
+            Category = Categorise.categorise_chart (chart.Keys, pruned_clusters, sv_amount)
             Density10 = Clustering.find_percentile 0.1f sorted_densities
             Density25 = Clustering.find_percentile 0.25f sorted_densities
             Density50 = Clustering.find_percentile 0.5f sorted_densities

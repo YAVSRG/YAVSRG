@@ -101,3 +101,18 @@ module NoteDifficulty =
                     last_note_in_column.[k] <- time
 
         data
+
+    let OHTNERF = 3.0f
+    let STREAM_SCALE = 6f
+    let STREAM_POW = 0.5f
+    /// Combines all the parts of a note found by `calculate_note_ratings` and creates a single "this note is a bit like X bpm jacks" number
+    let total (note: NoteDifficulty) : float32 =
+        MathF.Pow(
+            MathF.Pow(STREAM_SCALE * note.SL ** STREAM_POW, OHTNERF) +
+            MathF.Pow(STREAM_SCALE * note.SR ** STREAM_POW, OHTNERF) +
+            MathF.Pow(note.J, OHTNERF),
+            1.0f / OHTNERF
+        )
+
+type NoteDifficulty with
+    member this.Total = NoteDifficulty.total this

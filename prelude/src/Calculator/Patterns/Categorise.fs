@@ -6,7 +6,7 @@ module Categorise =
 
     let SV_AMOUNT_THRESHOLD = 2000.0f<ms>
 
-    let categorise_chart (keys: int) (ordered_clusters: Cluster array) (sv_amount: Time) : string =
+    let categorise_chart (keys: int, ordered_clusters: Cluster array, sv_amount: Time) : string =
 
         if ordered_clusters.Length = 0 then
             if sv_amount >= SV_AMOUNT_THRESHOLD then "SV" else "Uncategorised"

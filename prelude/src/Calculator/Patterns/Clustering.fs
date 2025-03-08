@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Data
 open Prelude
+open Prelude.Calculator
 
 type private ClusterBuilder =
     internal {
@@ -29,6 +30,8 @@ type Cluster =
         BPM: int<beat / minute / rate>
         Mixed: bool
 
+        Rating: float32
+
         Density10: Density
         Density25: Density
         Density50: Density
@@ -36,10 +39,6 @@ type Cluster =
         Density90: Density
 
         Amount: Time
-
-        Time10: Time
-        Time50: Time
-        Time90: Time
     }
 
     static member Default =
@@ -49,6 +48,8 @@ type Cluster =
             BPM = 120<beat / minute / rate>
             Mixed = false
 
+            Rating = 0.0f
+
             Density10 = 0.0f</rate>
             Density25 = 0.0f</rate>
             Density50 = 0.0f</rate>
@@ -56,10 +57,6 @@ type Cluster =
             Density90 = 0.0f</rate>
 
             Amount = 1.0f<ms>
-
-            Time10 = 0.0f<ms>
-            Time50 = 1.0f<ms>
-            Time90 = 2.0f<ms>
         }
 
     member this.Importance =
@@ -108,7 +105,7 @@ module private Clustering =
 
         total_time
 
-    let calculate_clustered_patterns (matched_patterns: MatchedPattern array) : Cluster array =
+    let calculate_clustered_patterns (patterns: FoundPattern array) : Cluster array =
         let bpms_non_mixed = ResizeArray<ClusterBuilder>()
         let bpms_mixed = Dictionary<CorePattern, ClusterBuilder>()
 
@@ -150,7 +147,7 @@ module private Clustering =
                 new_cluster
 
         let patterns_with_clusters =
-            matched_patterns
+            patterns
             |> Array.map (fun pattern ->
                 pattern,
                 if pattern.Mixed then
@@ -168,7 +165,6 @@ module private Clustering =
         )
         |> Array.map (fun ((pattern, mixed, bpm), data) ->
             let starts_ends = data |> Array.map (fun (m, _) -> m.Start, m.End)
-            let times = starts_ends |> Array.map fst
             let densities = data |> Array.map (fst >> _.Density) |> Array.sort
 
             let data_count = float32 data.Length
@@ -186,6 +182,8 @@ module private Clustering =
                 BPM = bpm
                 Mixed = mixed
 
+                Rating = data |> Seq.map (fst >> _.Strains) |> Seq.concat |> Difficulty.weighted_overall_difficulty
+
                 Density10 = find_percentile 0.1f densities
                 Density25 = find_percentile 0.25f densities
                 Density50 = find_percentile 0.5f densities
@@ -193,9 +191,5 @@ module private Clustering =
                 Density90 = find_percentile 0.9f densities
 
                 Amount = pattern_amount starts_ends
-
-                Time10 = find_percentile 0.1f times
-                Time50 = find_percentile 0.5f times
-                Time90 = find_percentile 0.9f times
             }
         )

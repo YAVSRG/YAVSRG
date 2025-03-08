@@ -59,4 +59,3 @@ module Performance =
             |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
         let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
         Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
-        |> float

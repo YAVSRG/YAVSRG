@@ -10,7 +10,7 @@ type Difficulty =
         Strains: RowStrain array
         Variety: float32 array
         Hands: RowStrainV2 array
-        Overall: float
+        Overall: float32
     }
 
 module Difficulty =
@@ -55,14 +55,14 @@ module Difficulty =
             Strains = physical_data
             Variety = variety
             Hands = hands
-            Overall = if Single.IsFinite physical then float physical else 0.0
+            Overall = if Single.IsFinite physical then physical else 0.0f
         }
 
     let calculate = calculate_uncached |> cached
 
-    let color v =
+    let color (rating: float32) =
         try
-            let a = v * 0.1 |> min 1.0
-            let b = (v * 0.1 |> max 1.0) - 1.0 |> min 1.0
-            Color.FromArgb(255.0 * a |> int, 255.0 * (1.0 - a) |> int, 255.0 * b |> int)
+            let a = rating * 0.1f |> min 1.0f
+            let b = (rating * 0.1f |> max 1.0f) - 1.0f |> min 1.0f
+            Color.FromArgb(255.0f * a |> int, 255.0f * (1.0f - a) |> int, 255.0f * b |> int)
         with _ -> Color.Red

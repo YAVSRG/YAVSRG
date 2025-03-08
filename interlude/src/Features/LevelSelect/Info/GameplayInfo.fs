@@ -14,7 +14,7 @@ type GameplayInfo() =
 
     let never_played = %"levelselect.last_played.never"
 
-    let mutable rating = 0.0
+    let mutable rating = 0.0f
     let mutable notecounts = ""
     let mutable last_played = K never_played
     let mutable mod_string = "--"

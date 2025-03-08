@@ -56,14 +56,14 @@ type Patterns(display: Setting<Display>) =
                 Alignment.LEFT
             )
 
-            let feels_like_bpm = entry.Pattern.DensityToBPM * entry.Density50 * SelectedChart.rate.Value |> int
-
             Text.fill_b (
                 Style.font,
-                (if entry.Mixed then
-                     sprintf "~%.0f BPM / %i" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm
-                 else
-                     sprintf "%.0f BPM / %i" (float32 entry.BPM * SelectedChart.rate.Value) feels_like_bpm),
+                (
+                    if entry.Mixed then
+                        sprintf "~%.0f BPM / %.2f*" (float32 entry.BPM * SelectedChart.rate.Value) entry.Rating
+                    else
+                        sprintf "%.0f BPM / %.2f*" (float32 entry.BPM * SelectedChart.rate.Value) entry.Rating
+                ),
                 b.SliceB(30.0f).SliceL(TEXT_WIDTH),
                 Colors.text_subheading,
                 Alignment.LEFT
@@ -81,7 +81,7 @@ type Patterns(display: Setting<Display>) =
             Render.rect (b.SliceR(5.0f).SliceT(20.0f).Translate(0.0f, 10.0f)) Colors.white
 
             let density_color (nps: float32</rate>) =
-                nps * 2.0f * SelectedChart.rate.Value |> float |> Difficulty.color
+                nps * 2.0f * SelectedChart.rate.Value |> Difficulty.color
 
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 

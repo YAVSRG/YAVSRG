@@ -26,7 +26,7 @@ module Variety =
                     let fnr = notes.[front].Data
                     for k = 0 to keys - 1 do
                         if fnr.[k] = NoteType.NORMAL || fnr.[k] = NoteType.HOLDHEAD then
-                            let strain = Strain.note_strain note_difficulties.[front].[k] / 5.0f |> round
+                            let strain = note_difficulties.[front].[k].Total / 5.0f |> round
                             buckets.[strain] <- buckets.GetValueOrDefault strain + 1
                     front <- front + 1
 
@@ -34,7 +34,7 @@ module Variety =
                     let bnr = notes.[back].Data
                     for k = 0 to keys - 1 do
                         if bnr.[k] = NoteType.NORMAL || bnr.[k] = NoteType.HOLDHEAD then
-                            let strain = Strain.note_strain note_difficulties.[back].[k] / 5.0f |> round
+                            let strain = note_difficulties.[back].[k].Total / 5.0f |> round
                             buckets.[strain] <- buckets.GetValueOrDefault strain - 1
                             if buckets.[strain] = 0 then buckets.Remove strain |> ignore
                     back <- back + 1

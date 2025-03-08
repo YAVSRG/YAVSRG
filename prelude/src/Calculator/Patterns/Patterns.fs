@@ -1,5 +1,35 @@
 ﻿namespace Prelude.Calculator.Patterns
 
+open Percyqaz.Data
+open Prelude
+
+// This file stores the definition of what patterns can be recognised
+// The logic to actually "recognise" them and spit them out as data is in FindPatterns.fs
+
+[<Json.AutoCodec>]
+type CorePattern =
+    | Stream
+    | Chordstream
+    | Jacks
+
+    member this.DensityToBPM =
+        match this with
+        | Stream -> 52.5f<beat / minute>
+        | Chordstream -> 35f<beat / minute>
+        | Jacks -> 17.5f<beat / minute>
+
+    member this.RatingMultiplier =
+        match this with
+        | Stream -> 1f / 3f
+        | Chordstream -> 0.5f
+        | Jacks -> 1.0f
+
+    member this.AccuracyBreakpoints =
+        match this with
+        | Stream -> ( 0.97, 0.935, 0.90 )
+        | Chordstream -> ( 0.98, 0.95, 0.91 )
+        | Jacks -> ( 0.99, 0.96, 0.93 )
+
 type PatternRecogniser = RowInfo list -> int
 
 module Core =

@@ -1,6 +1,5 @@
 ﻿namespace Prelude.Calculator
 
-open System
 open Prelude
 open Prelude.Charts
 
@@ -20,17 +19,6 @@ type RowStrainV2 =
     }
 
 module Strain =
-
-    let OHTNERF = 3.0f
-    let STREAM_SCALE = 6f
-    let STREAM_POW = 0.5f
-    let note_strain (note: NoteDifficulty) : float32 =
-        MathF.Pow(
-            MathF.Pow(STREAM_SCALE * note.SL ** STREAM_POW, OHTNERF) +
-            MathF.Pow(STREAM_SCALE * note.SR ** STREAM_POW, OHTNERF) +
-            MathF.Pow(note.J, OHTNERF),
-            1.0f / OHTNERF
-        )
 
     let STRAIN_SCALE = 0.01626f
 
@@ -69,7 +57,7 @@ module Strain =
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        notes_v1.[k] <- note_strain note_difficulty.[i].[k]
+                        notes_v1.[k] <- note_difficulty.[i].[k].Total
 
                         strain_v1.[k] <-
                             strain_burst
@@ -111,7 +99,7 @@ module Strain =
                 for k = 0 to keys - 1 do
                     if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
 
-                        let d = note_strain note_difficulty.[i].[k]
+                        let d = note_difficulty.[i].[k].Total
 
                         if k < hand_split then
                             for hand_k = 0 to hand_split - 1 do
