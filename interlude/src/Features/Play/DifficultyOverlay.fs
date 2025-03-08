@@ -23,6 +23,19 @@ type DifficultyGraph =
 type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Difficulty, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
+    let full_score_events =
+        let x = state.Scoring.Recreate()
+        x.Update Time.infinity
+        x
+
+    let accuracy_timeline = Performance.acc_timeline difficulty full_score_events
+
+    let performance_notes =
+        difficulty.NoteDifficulty
+        |> Array.mapi (fun i nr -> Array.map (Performance.scale_note accuracy_timeline.[i] difficulty.Variety.[i]) nr)
+    let performance_strains = Strain.calculate_finger_strains (state.Scoring.Rate, chart.Notes) performance_notes
+    let performance_rating = Difficulty.weighted_overall_difficulty (performance_strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
+
     let first_note = chart.FirstNote
     let mutable seek = 0
     let mutable last_time = state.CurrentChartTime()
@@ -71,6 +84,10 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                     (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentR(0.5f).TranslateY(playfield.ColumnWidth * 0.3f).Shrink(5.0f))
                     difficulty.Strains.[index].StrainV1Notes.[k]
                     Colors.red_accent
+                draw_label
+                    (note_box.ShrinkPercentT(0.5f).SlicePercentT(0.6f).SlicePercentL(0.5f).TranslateY(playfield.ColumnWidth * 0.6f).Shrink(5.0f))
+                    (accuracy_timeline.[index] * 100.0f)
+                    Colors.white
 
     let graph (data: (float32 * int) array) : DifficultyGraph =
         let max_y = if data.Length > 0 then data |> Seq.map snd |> Seq.max |> float32 else 1.0f
@@ -78,13 +95,13 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         let count = data |> Seq.filter (fun (_, count) -> float32 count / max_y > 0.01f) |> Seq.length
         { Height = max_y; Width = max_x; Count = count; Values = data }
 
-    let draw_graph (y: float32) (color: Color) (d: DifficultyGraph) =
-        for v, count in d.Values do
-            Render.rect (Rect.Box (20.0f + v * 2.0f, y, 1.0f, float32 count / d.Height * 100.0f)) color
-        Text.draw(Style.font, d.Count.ToString(), 20.0f, 20.0f, y - 30.0f, Colors.white)
-        Text.draw(Style.font, sprintf "%.2f" d.Width, 20.0f, 420.0f, y - 30.0f, Colors.white)
+    let draw_performance_data (y: float32) (color: Color) (data: float32 seq) =
+        let mutable x = 20.0f
+        for d in Seq.truncate 100 data do
+            Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
+            x <- x + 5.0f
 
-    let draw_live_data (y: float32) (color: Color) (data: float32 seq) =
+    let draw_note_data (y: float32) (color: Color) (data: float32 seq) =
         let mutable x = Render.width() - 20.0f
         for d in Seq.truncate 100 data do
             Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
@@ -125,17 +142,29 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         }
         |> Seq.filter (fun x -> x > 0.0f)
 
-    let full_score_events =
-        let x = state.Scoring.Recreate()
-        x.Update Time.infinity
-        x
-
-    let accuracies =
-        let timeline = Performance.acc_timeline difficulty full_score_events
+    let performance_notes =
         seq {
             let mutable peek = seek
             while peek >= 0 do
-                yield (timeline.[peek] - 0.9f) * 2000.0f
+                yield! performance_strains.[peek].NotesV1
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+
+    let performance_strains =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield! performance_strains.[peek].StrainV1Notes
+                peek <- peek - 1
+        }
+        |> Seq.filter (fun x -> x > 0.0f)
+
+    let accuracies =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield (accuracy_timeline.[peek] - 0.9f) * 2000.0f
                 peek <- peek - 1
         }
 
@@ -157,21 +186,24 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             draw_row now peek
             peek <- peek + 1
 
-        //draw_graph 200.0f Colors.red difficulty_distribution_raw_notes
-        //draw_graph 400.0f Colors.green difficulty_distribution_notes
-        //draw_graph 600.0f Colors.blue difficulty_distribution_chords
+        Text.draw(Style.font, sprintf "Performance rating: %.2f" performance_rating, 20.0f, 200.0f, 170.0f, Colors.white)
+        draw_performance_data 200.0f Colors.red performance_notes
+        Text.draw(Style.font, "^^ Note ratings | Strain ratings vv", 20.0f, 200.0f, 370.0f, Colors.white)
+        draw_performance_data 400.0f Colors.blue performance_strains
+        Text.draw(Style.font, "Accuracy", 20.0f, 200.0f, 570.0f, Colors.white)
+        draw_performance_data 600.0f Colors.yellow_accent accuracies
 
-        draw_live_data 200.0f Colors.red note_difficulties
-        draw_live_data 400.0f Colors.blue note_strains
+        Text.draw(Style.font, sprintf "Variety/Tech: %.2f" difficulty.Variety.[peek], 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
+        Text.draw(Style.font, sprintf "Star rating: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
+        draw_note_data 200.0f Colors.red note_difficulties
+        Text.draw(Style.font, "^^ Note ratings | Strain ratings vv", 20.0f, this.Bounds.Right - 400.0f, 370.0f, Colors.white)
+        draw_note_data 400.0f Colors.blue note_strains
+        Text.draw(Style.font, "Experimental strain, not used yet", 20.0f, this.Bounds.Right - 400.0f, 570.0f, Colors.white)
+        draw_octaves 600.0f
         let (burst, stamina) = difficulty.Hands.[seek].Right in
             Text.draw(Style.font, sprintf "R: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
         let (burst, stamina) = difficulty.Hands.[seek].Left in
             Text.draw(Style.font, sprintf "L: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
-        draw_octaves 600.0f
-        draw_live_data 800.0f Colors.yellow_accent accuracies
-
-        Text.draw(Style.font, sprintf "X: %.2f" difficulty.Variety.[peek], 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
-        Text.draw(Style.font, sprintf "V1: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
