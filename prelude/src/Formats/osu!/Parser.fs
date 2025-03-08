@@ -129,7 +129,7 @@ module private Parser =
         if uninherited then
             Uninherited {
                 Time = CsvHelpers.float_or 0 0.0 csv
-                MsPerBeat = CsvHelpers.float_or 1 500.0 csv
+                MsPerBeat = CsvHelpers.float_or 1 500.0 csv |> max 0.0
                 Meter = CsvHelpers.int_or 2 4 csv
                 SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
                 SampleIndex = CsvHelpers.int_or 4 0 csv

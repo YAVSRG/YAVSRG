@@ -29,7 +29,7 @@ type UninheritedTimingPoint =
     static member inline Create(time: ^X, ms_per_beat: ^Y, meter: ^Z) =
         {
             Time = int time
-            MsPerBeat = float ms_per_beat
+            MsPerBeat = float ms_per_beat |> max 0.0
             Meter = int meter
             SampleSet = SampleSet.Soft
             SampleIndex = 0
