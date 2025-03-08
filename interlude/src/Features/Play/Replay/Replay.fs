@@ -44,11 +44,15 @@ module ReplayScreen =
         let replay_ended_fade = Animation.Fade 0.0f
 
         let mutable last_time = -Time.infinity
+        let mutable replay_data = replay_data
 
-        let scoring = ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+        let mutable scoring =
+            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
-            screen.State.ChangeScoring (screen.State.Scoring.Recreate())
+            replay_data <- StoredReplayProvider(replay_data.GetFullReplay())
+            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            screen.State.ChangeScoring scoring
 
         { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
             override this.AddWidgets() =
@@ -136,7 +140,7 @@ module ReplayScreen =
 
                 this.State.Scoring.Update chart_time
 
-                if replay_data.Finished && now > chart.LastNote then
+                if now > chart.LastNote && replay_data.Finished then
                     match mode with
                     | ReplayMode.Auto _ -> Screen.back Transitions.LeaveGameplay |> ignore
                     | ReplayMode.Replay(score_info, _) ->
