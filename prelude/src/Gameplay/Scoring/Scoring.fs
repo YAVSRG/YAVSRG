@@ -138,8 +138,9 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     member this.Events = hit_events.AsReadOnly()
     member this.OnEvent = on_event
 
-    /// Throw an exception if used on a live/online replay
-    member this.Recreate() = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplayProvider, notes, rate)
+    /// Throws an exception if used on a live/online replay
+    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplayProvider, notes, rate)
+    member this.Recreate() = this.Recreate(ruleset)
 
     member private this.ProcessHit(delta, is_missed) : ComboAction * GameplayAction =
 

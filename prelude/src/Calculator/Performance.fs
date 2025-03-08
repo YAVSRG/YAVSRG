@@ -1,5 +1,7 @@
 ﻿namespace Prelude.Calculator
 
+open Prelude
+open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
 module Performance =
@@ -52,6 +54,14 @@ module Performance =
     /// Take the accuracy and scale notes up/down in the areas you are doing good/bad in
     /// Now feed the new scaled notes through the same SR algorithm to get PR
     let calculate (rr: Difficulty) (scoring: ScoreProcessor) =
+
+        let scoring =
+            if SC_J4_HASH <> Ruleset.hash scoring.Ruleset then
+                let on_standard_ruleset = scoring.Recreate(SC_J4)
+                on_standard_ruleset.Update Time.infinity
+                on_standard_ruleset
+            else
+                scoring
 
         let timeline = acc_timeline rr scoring
         let scaled_notes =
