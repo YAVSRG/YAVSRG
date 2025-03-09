@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Formats
 open Prelude.Data.Library
+open Prelude.Data.User
 
 module Imports =
 
@@ -48,8 +49,8 @@ module Imports =
         }
 
     let convert_song_folder =
-        { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
-            override this.Handle((path, config, { Charts = chart_db })) =
+        { new Async.Service<string * ConversionOptions * Library * UserDatabase, ConversionResult>() with
+            override this.Handle((path, config, { Charts = chart_db }, user_db)) =
                 async {
                     let results =
                         Directory.EnumerateFiles path
@@ -79,7 +80,22 @@ module Imports =
                     let filtered = filter_rates path results
 
                     let mutable success_count = 0
-                    let charts = filtered |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                    let charts =
+                        filtered
+                        |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                        |> List.map (fun c ->
+                            let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
+                            if with_pruned_svs.SV.Length < c.Chart.SV.Length then
+                                let before_hash = Chart.hash c.Chart
+                                let after_hash = Chart.hash with_pruned_svs
+                                if before_hash <> after_hash then
+                                    match ChartDatabase.get_meta before_hash chart_db with
+                                    | Some cc -> ChartDatabase.delete cc chart_db
+                                    | None -> ()
+                                    if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
+                                        UserDatabase.transfer_scores before_hash after_hash user_db
+                            { c with Chart = with_pruned_svs }
+                        )
                     ChartDatabase.import charts chart_db
                     return {
                         ConvertedCharts = success_count
@@ -89,8 +105,8 @@ module Imports =
         }
 
     let convert_pack_folder =
-        { new Async.Service<string * ConversionOptions * Library, ConversionResult>() with
-            override this.Handle((path, config, library)) =
+        { new Async.Service<string * ConversionOptions * Library * UserDatabase, ConversionResult>() with
+            override this.Handle((path, config, library, user_db)) =
                 async {
                     let mutable results = ConversionResult.Empty
                     for song_folder in
@@ -98,15 +114,15 @@ module Imports =
                          |> match config.ChangedAfter with
                             | None -> id
                             | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)) do
-                        let! result = convert_song_folder.RequestAsync(song_folder, config, library)
+                        let! result = convert_song_folder.RequestAsync(song_folder, config, library, user_db)
                         results <- ConversionResult.Combine result results
                     return results
                 }
         }
 
     let convert_folder_of_oszs =
-        { new Async.Service<string * Library, ConversionResult>() with
-            override this.Handle((folder_of_oszs, library)) =
+        { new Async.Service<string * Library * UserDatabase, ConversionResult>() with
+            override this.Handle((folder_of_oszs, library, user_db)) =
                 async {
                     let config =
                         { ConversionOptions.Default with
@@ -127,7 +143,7 @@ module Imports =
                             else
                                 try
                                     ZipFile.ExtractToDirectory(osz, extracted_folder)
-                                    let! result = convert_song_folder.RequestAsync(extracted_folder, config, library)
+                                    let! result = convert_song_folder.RequestAsync(extracted_folder, config, library, user_db)
                                     Directory.Delete(extracted_folder, true)
                                     results <- ConversionResult.Combine result results
                                 with err ->
@@ -139,8 +155,8 @@ module Imports =
         }
 
     let convert_stepmania_pack_zip =
-        { new Async.Service<string * string * Library, ConversionResult option>() with
-            override this.Handle((path, pack_name, library)) =
+        { new Async.Service<string * string * Library * UserDatabase, ConversionResult option>() with
+            override this.Handle((path, pack_name, library, user_db)) =
                 async {
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -165,7 +181,8 @@ module Imports =
                                             PackName = Path.GetFileName pack_folder
                                             MoveAssets = true
                                         },
-                                        library
+                                        library,
+                                        user_db
                                     )
                                 results <- ConversionResult.Combine result results
 
@@ -178,7 +195,7 @@ module Imports =
                 }
         }
 
-    let rec private auto_detect_import (path: string, move_assets: bool, library: Library) : Async<ConversionResult option> =
+    let rec private auto_detect_import (path: string, move_assets: bool, library: Library, user_db: UserDatabase) : Async<ConversionResult option> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
@@ -193,7 +210,8 @@ module Imports =
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
-                            library
+                            library,
+                            user_db
                         )
                     log_conversion result
                     return Some result
@@ -208,7 +226,7 @@ module Imports =
                         return None
                     else
                         ZipFile.ExtractToDirectory(path, dir)
-                        let! result = auto_detect_import (dir, true, library)
+                        let! result = auto_detect_import (dir, true, library, user_db)
                         delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
@@ -227,7 +245,8 @@ module Imports =
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
-                            library
+                            library,
+                            user_db
                         )
                     log_conversion result
                     return Some result
@@ -235,7 +254,8 @@ module Imports =
                     let! result =
                         convert_folder_of_oszs.RequestAsync(
                             path,
-                            library
+                            library,
+                            user_db
                         )
                     log_conversion result
                     return Some result
@@ -258,7 +278,8 @@ module Imports =
                                 PackName = packname
                                 MoveAssets = move_assets
                             },
-                            library
+                            library,
+                            user_db
                         )
                     log_conversion result
                     return Some result
@@ -272,7 +293,8 @@ module Imports =
                                     PackName = Path.GetFileName pack_folder
                                     MoveAssets = move_assets
                                 },
-                                library
+                                library,
+                                user_db
                             )
                         results <- ConversionResult.Combine result results
 
@@ -284,7 +306,7 @@ module Imports =
         }
 
     let auto_convert =
-        { new Async.Service<string * bool * Library, ConversionResult option>() with
-            override this.Handle((path, move_assets, library)) =
-                auto_detect_import (path, move_assets, library)
+        { new Async.Service<string * bool * Library * UserDatabase, ConversionResult option>() with
+            override this.Handle((path, move_assets, library, user_db)) =
+                auto_detect_import (path, move_assets, library, user_db)
         }

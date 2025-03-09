@@ -211,3 +211,16 @@ module DbScores =
 
     let get_between (start_time: int64) (end_time: int64) (db: Database) : (string * Score) array =
         GET_BETWEEN.Execute (start_time, end_time) db |> expect
+
+    let private TRANSFER: NonQuery<string * string> =
+        {
+            SQL =
+                """
+            UPDATE scores SET ChartId = @AfterHash WHERE ChartId = @BeforeHash;
+            """
+            Parameters = [ "@BeforeHash", SqliteType.Text, -1; "@AfterHash", SqliteType.Text, -1 ]
+            FillParameters = fun p (before_hash, after_hash) -> p.String before_hash; p.String after_hash
+        }
+
+    let transfer (before_hash: string) (after_hash: string) (db: Database) : int =
+        TRANSFER.Execute (before_hash, after_hash) db |> expect

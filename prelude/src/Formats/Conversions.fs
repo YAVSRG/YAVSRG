@@ -2,6 +2,7 @@ namespace Prelude.Formats
 
 open System
 open System.IO
+open Prelude
 
 type ConversionOptions =
     {
@@ -47,6 +48,21 @@ exception ConversionSkipException of msg: string
 module Utilities =
 
     let inline skip_conversion (msg: string) = raise (ConversionSkipException msg)
+
+    let cleaned_sv (sv: TimeArray<float32>) : TimeArray<float32> =
+        seq {
+            let deduped =
+                sv
+                |> Array.rev
+                |> Array.distinctBy _.Time
+                |> Array.rev
+            let mutable previous_value = 1.0f
+            for s in deduped do
+                if abs (s.Data - previous_value) > 0.005f then
+                    yield s
+                    previous_value <- s.Data
+        }
+        |> Array.ofSeq
 
     let (|ChartFile|_|) (path: string) =
         let s = Path.GetExtension(path).ToLower()

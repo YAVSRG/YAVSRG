@@ -12,7 +12,6 @@ open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Prelude.Data.Library
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Calculator
 open Interlude
@@ -31,7 +30,10 @@ module Printerlude =
         let chart_info () =
             match SelectedChart.CACHE_DATA with
             | None -> failwith "Select a chart"
-            | Some c -> Logging.Debug "%A" c
+            | Some c ->
+                Logging.Debug "%A" c
+                Logging.Debug "Hash: %s" c.Hash
+                Logging.Debug "SVs: %i" SelectedChart.CHART.Value.SV.Length
 
         let show_version (io: IOContext) =
             io.WriteLine(sprintf "You are running %s" Updates.version)

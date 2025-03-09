@@ -143,6 +143,15 @@ module UserDatabase =
     let get_scores_between (start_time: int64) (end_time: int64) (db: UserDatabase) =
         DbScores.get_between start_time end_time db.Database
 
+    let transfer_scores (before_hash: string) (after_hash: string) (db: UserDatabase) =
+        lock db.LockObject <| fun () ->
+        let before_scores = get_chart_data before_hash db
+        let after_scores = get_chart_data after_hash db
+        after_scores.Scores <- before_scores.Scores @ after_scores.Scores
+        db.Cache.Remove before_hash |> ignore
+        let succeeded = DbScores.transfer before_hash after_hash db.Database
+        Logging.Debug "Moved %i scores from '%s' to '%s'" succeeded before_hash after_hash
+
     let private fast_load (db: UserDatabase) : UserDatabase =
         lock db.LockObject
         <| fun () ->

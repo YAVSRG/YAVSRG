@@ -173,24 +173,9 @@ module Osu_To_Interlude =
             | Inherited s ->
                 sv.Add { Time = Time.of_number s.Time; Data = current_bpm_mult * float32 s.Multiplier }
 
-        let cleaned_sv =
-            seq {
-                let deduped =
-                    sv.ToArray()
-                    |> Array.rev
-                    |> Array.distinctBy _.Time
-                    |> Array.rev
-                let mutable previous_value = 1.0f
-                for s in deduped do
-                    if abs (s.Data - previous_value) > 0.005f then
-                        yield s
-                        previous_value <- s.Data
-            }
-            |> Array.ofSeq
+        bpm.ToArray(), sv.ToArray()
 
-        bpm.ToArray(), cleaned_sv
-
-    let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+    let internal convert_internal (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try
             let keys = b.Difficulty.CircleSize |> int
 
@@ -286,3 +271,8 @@ module Osu_To_Interlude =
         | other_error ->
             Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
             Error (action.Source, other_error.Message)
+
+    let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
+        match convert_internal b action with
+        | Ok x -> Ok { x with Chart = { x.Chart with SV = cleaned_sv x.Chart.SV } }
+        | error -> error

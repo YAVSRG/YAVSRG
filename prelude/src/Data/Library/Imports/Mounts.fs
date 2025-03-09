@@ -6,6 +6,7 @@ open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Formats
 open Prelude.Data.Library
+open Prelude.Data.User
 
 [<Json.AutoCodec>]
 type MountedChartSourceType =
@@ -39,8 +40,8 @@ type MountedChartSource =
 module Mount =
 
     let import_service =
-        { new Async.Service<MountedChartSource * Library, ConversionResult>() with
-            override this.Handle((source, library)) =
+        { new Async.Service<MountedChartSource * Library * UserDatabase, ConversionResult>() with
+            override this.Handle((source, library, user_db)) =
                 async {
                     match source.Type with
                     | Pack packname ->
@@ -55,7 +56,7 @@ module Mount =
                                 PackName = packname
                             }
 
-                        let! result = Imports.convert_pack_folder.RequestAsync(source.SourceFolder, config, library)
+                        let! result = Imports.convert_pack_folder.RequestAsync(source.SourceFolder, config, library, user_db)
                         source.LastImported <- Some DateTime.UtcNow
                         log_conversion result
                         return result
@@ -74,7 +75,8 @@ module Mount =
                                         ChangedAfter = source.LastImported
                                         PackName = Path.GetFileName pack_folder
                                     },
-                                    library
+                                    library,
+                                    user_db
                                 )
                             results <- ConversionResult.Combine result results
 

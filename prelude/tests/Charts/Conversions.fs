@@ -29,7 +29,7 @@ module Conversions =
             seq {
                 let mutable previous_value = 1.0f
 
-                for s in sv do
+                for s in sv |> cleaned_sv do
                     if abs (s.Data - previous_value) > 0.005f then
                         yield
                             {
@@ -77,7 +77,7 @@ module Conversions =
         printfn "%A" osu_points
 
         Assert.AreEqual(one_bpm, interlude_bpm)
-        Assert.AreEqual([||], interlude_sv)
+        Assert.AreEqual([||], interlude_sv |> cleaned_sv)
 
     [<Test>]
     let OsuMania_TimingPoints_VariableBPM () =
@@ -134,7 +134,7 @@ module Conversions =
         printfn "%A" osu_points
 
         Assert.AreEqual(many_bpms, interlude_bpm)
-        Assert.AreEqual([||], interlude_sv)
+        Assert.AreEqual([||], interlude_sv |> cleaned_sv)
 
     [<Test>]
     let OsuToInterlude_ForgiveStackedNotes_CaseA () =

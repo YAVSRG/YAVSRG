@@ -114,7 +114,7 @@ module Shared =
             | Ok beatmap when beatmap.General.Mode <> Gamemode.OSU_MANIA -> []
             | Ok beatmap ->
 
-                [ Osu_To_Interlude.convert beatmap action ]
+                [ Osu_To_Interlude.convert_internal beatmap action ]
 
             | Error msg ->
                 Logging.Debug "Parse error in osu! file %s: %O" action.Source msg

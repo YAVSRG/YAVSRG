@@ -6,6 +6,7 @@ open Percyqaz.Data
 open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Data.Library
+open Prelude.Data.User
 open Interlude.Web.Shared
 open YAVSRG.CLI
 
@@ -60,5 +61,12 @@ module Config =
             Charts = interlude_chart_db
             Collections = Unchecked.defaultof<_>
         }
+
+    let interlude_scores_db =
+        Directory.SetCurrentDirectory(backbeat_config.InterludePath)
+        let db_file = Path.Combine(get_game_folder "Data", "scores.db")
+        if not (File.Exists db_file) then failwith "Couldn't find your interlude scores.db"
+        let db = Database.from_file db_file
+        UserDatabase.create false db
 
     let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

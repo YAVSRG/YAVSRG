@@ -17,7 +17,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new osu! songs to import.."
-                    Mount.import_service.Request((mount, Content.Library), ignore)
+                    Mount.import_service.Request((mount, Content.Library, Content.UserData), ignore)
             else
                 Logging.Warn(
                     "osu! Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -30,7 +30,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new Quaver songs to import.."
-                    Mount.import_service.Request((mount, Content.Library), ignore)
+                    Mount.import_service.Request((mount, Content.Library, Content.UserData), ignore)
             else
                 Logging.Warn(
                     "Quaver Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -43,7 +43,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new Stepmania songs to import.."
-                    Mount.import_service.Request((mount, Content.Library), ignore)
+                    Mount.import_service.Request((mount, Content.Library, Content.UserData), ignore)
             else
                 Logging.Warn(
                     "Stepmania Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."
@@ -56,7 +56,7 @@ module Mounts =
             if Directory.Exists mount.SourceFolder then
                 if mount.ImportOnStartup then
                     Logging.Info "Checking for new Etterna songs to import.."
-                    Mount.import_service.Request((mount, Content.Library), ignore)
+                    Mount.import_service.Request((mount, Content.Library, Content.UserData), ignore)
             else
                 Logging.Warn(
                     "Etterna Songs folder has moved or can no longer be found.\n This may break any mounted songs, if so you will need to set up the link again."

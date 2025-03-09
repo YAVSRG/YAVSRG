@@ -98,7 +98,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
 
         if import then
             Mount.import_service.Request(
-                (setting.Value.Value, Content.Library),
+                (setting.Value.Value, Content.Library, Content.UserData),
                 fun result ->
                     Notifications.task_feedback (
                         Icons.CHECK,

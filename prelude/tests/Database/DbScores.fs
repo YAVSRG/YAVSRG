@@ -159,7 +159,7 @@ module DbScores =
         Assert.AreEqual(0, result.Length)
 
         conn.Dispose()
-    
+
     [<Test>]
     let GetBetween_CorrectResult() =
         let db, conn = in_memory ()
@@ -192,5 +192,45 @@ module DbScores =
         let result = DbScores.get_between 20L 30L db
         Assert.AreEqual(1, result.Length)
         Assert.Contains(("between", score_1), result)
+
+        conn.Dispose()
+
+    [<Test>]
+    let Transfer() =
+        let db, conn = in_memory ()
+
+        let score_1 =
+            {
+                Timestamp = 20L
+                Rate = 1.0f<rate>
+                Mods = Map.empty
+                Replay = [| 0uy |]
+                IsImported = false
+                IsFailed = true
+                Keys = 4
+            }
+
+        let score_2 =
+            {
+                Timestamp = 40L
+                Rate = 1.2f<rate>
+                Mods = Map.empty
+                Replay = [| 1uy |]
+                IsImported = true
+                IsFailed = false
+                Keys = 4
+            }
+
+        DbScores.save "transfer_a" score_1 db
+        DbScores.save "transfer_b" score_2 db
+
+        let result = DbScores.transfer "transfer_a" "transfer_b" db
+        Assert.AreEqual(1, result)
+
+        let scores_a = DbScores.by_chart_id "transfer_a" db
+        Assert.IsEmpty(scores_a)
+
+        let scores_b = DbScores.by_chart_id "transfer_b" db
+        Assert.AreEqual(2, scores_b.Length)
 
         conn.Dispose()
