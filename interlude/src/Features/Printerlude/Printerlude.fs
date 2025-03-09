@@ -115,6 +115,12 @@ module Printerlude =
             | Some d ->
                 sprintf "Local: %f" d.Overall |> io.WriteLine
                 sprintf "Cached: %f" SelectedChart.CACHE_DATA.Value.Rating |> io.WriteLine
+
+                for acc = 90 to 100 do
+                    let a = float32 acc / 100.0f
+                    Performance.accuracy_to_rating (a, SelectedChart.rate.Value, SelectedChart.CHART.Value.Notes, d)
+                    |> sprintf "PR for %i%% %.2f" acc
+                    |> io.WriteLine
             | None -> ()
 
         let vacuum () =
