@@ -271,6 +271,8 @@ module ChartDatabase =
                                 ignore
                             )
 
+                        if not success then failwithf "Error downloading background '%s'" chart.BackgroundHash
+
                         let actual_bg_hash = hash_asset bg_path db
 
                         if chart.BackgroundHash <> actual_bg_hash then
@@ -289,6 +291,8 @@ module ChartDatabase =
                                 audio_path,
                                 ignore
                             )
+
+                        if not success then failwithf "Error downloading audio '%s'" chart.BackgroundHash
 
                         let actual_audio_hash = hash_asset audio_path db
 
