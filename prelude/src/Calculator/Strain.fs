@@ -21,24 +21,20 @@ type RowStrainV2 =
 module Strain =
 
     let STRAIN_SCALE = 0.01626f
+    let STRAIN_TIME_CAP = 200.0f<ms / rate>
 
-    let STRAIN_BURST_HALF_LIFE = 1575.0f<ms / rate>
-    let STRAIN_BURST_DECAY_RATE = log 0.5f / STRAIN_BURST_HALF_LIFE
-    let strain_burst (value: float32) (input: float32) (delta: GameplayTime) =
+    let strain_func (half_life: float32<ms / rate>) =
+        let DECAY_RATE = log 0.5f / half_life
 
-        let decay = exp (STRAIN_BURST_DECAY_RATE * delta) |> max 0.5f
-        let a = value
-        let b = input * input * STRAIN_SCALE
-        b - (b - a) * decay
+        fun (value: float32) (input: float32) (delta: GameplayTime) ->
+            let decay = exp (DECAY_RATE * min STRAIN_TIME_CAP delta)
+            let time_cap_decay = if delta > STRAIN_TIME_CAP then exp (DECAY_RATE * (delta - STRAIN_TIME_CAP)) else 1.0f
+            let a = value * time_cap_decay
+            let b = input * input * STRAIN_SCALE
+            b - (b - a) * decay
 
-    let STRAIN_STAMINA_HALF_LIFE = 60000.0f<ms / rate>
-    let STRAIN_STAMINA_DECAY_RATE = log 0.5f / STRAIN_STAMINA_HALF_LIFE
-    let strain_stamina (value: float32) (input: float32) (delta: GameplayTime) =
-
-        let decay = exp (STRAIN_STAMINA_DECAY_RATE * delta) |> max 0.5f
-        let a = value
-        let b = input * input * STRAIN_SCALE
-        b - (b - a) * decay
+    let strain_burst = strain_func 1575.0f<ms / rate>
+    let strain_stamina = strain_func 60000.0f<ms / rate>
 
     /// Current system - Looking to be made obselete by `calculate_hand_strains`
     let calculate_finger_strains (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulty: NoteDifficulty array array) : RowStrain array =
