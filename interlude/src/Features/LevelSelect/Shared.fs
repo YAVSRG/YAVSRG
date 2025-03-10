@@ -178,7 +178,7 @@ module LevelSelect =
             | None -> ()
 
         if not (Transitions.in_progress()) then
-            if SelectedChart.RATING.IsSome then
+            if SelectedChart.DIFFICULTY.IsSome then
                 let ctx =
                     {
                         BaseChart = SelectedChart.CACHE_DATA.Value, SelectedChart.rate.Value

@@ -8,6 +8,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Mods
 open Prelude.Calculator
+open Prelude.Calculator.Patterns
 open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -35,7 +36,8 @@ type LoadedChartInfo =
 
         WithMods: ModdedChart
         NotecountsString: string
-        Rating: Difficulty
+        Difficulty: Difficulty
+        Patterns: PatternReport
 
         WithColors: ColoredChart
     }
@@ -92,7 +94,8 @@ module SelectedChart =
 
     let mutable WITH_MODS: ModdedChart option = None
     let mutable FMT_NOTECOUNTS: string option = None
-    let mutable RATING: Difficulty option = None
+    let mutable DIFFICULTY: Difficulty option = None
+    let mutable PATTERNS: PatternReport option = None
 
     let mutable WITH_COLORS: ColoredChart option = None
 
@@ -108,7 +111,8 @@ module SelectedChart =
 
             WithMods = WITH_MODS.Value
             NotecountsString = FMT_NOTECOUNTS.Value
-            Rating = RATING.Value
+            Difficulty = DIFFICULTY.Value
+            Patterns = PATTERNS.Value
 
             WithColors = WITH_COLORS.Value
         }
@@ -186,6 +190,7 @@ module SelectedChart =
                         let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
 
                         let rating = Difficulty.calculate(rate, with_mods.Notes)
+                        let patterns = PatternReport.from_chart(rating, with_mods.AsChart)
 
                         let note_counts = format_notecounts with_mods
 
@@ -193,7 +198,8 @@ module SelectedChart =
                             fun () ->
                                 WITH_MODS <- Some with_mods
                                 WITH_COLORS <- Some with_colors
-                                RATING <- Some rating
+                                DIFFICULTY <- Some rating
+                                PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
                                 chart_change_finished.Trigger(create_loaded_chart_info ())
 
@@ -219,12 +225,14 @@ module SelectedChart =
                         let rating = Difficulty.calculate(rate, with_mods.Notes)
 
                         let note_counts = format_notecounts with_mods
+                        let patterns = PatternReport.from_chart(rating, with_mods.AsChart)
 
                         yield
                             fun () ->
                                 WITH_MODS <- Some with_mods
                                 WITH_COLORS <- Some with_colors
-                                RATING <- Some rating
+                                DIFFICULTY <- Some rating
+                                PATTERNS <- Some patterns
                                 FMT_NOTECOUNTS <- Some note_counts
 
                                 if is_interrupted_load then
@@ -282,7 +290,7 @@ module SelectedChart =
 
         WITH_MODS <- None
         FMT_NOTECOUNTS <- None
-        RATING <- None
+        DIFFICULTY <- None
 
         WITH_COLORS <- None
 
@@ -310,7 +318,7 @@ module SelectedChart =
 
             WITH_MODS <- None
             FMT_NOTECOUNTS <- None
-            RATING <- None
+            DIFFICULTY <- None
 
             WITH_COLORS <- None
 

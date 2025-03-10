@@ -113,7 +113,7 @@ module Printerlude =
             | None -> ()
 
         let difficulty (io: IOContext) =
-            match SelectedChart.RATING with
+            match SelectedChart.DIFFICULTY with
             | Some d ->
                 sprintf "Local: %f" d.Overall |> io.WriteLine
                 sprintf "Cached: %f" SelectedChart.CACHE_DATA.Value.Rating |> io.WriteLine

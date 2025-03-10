@@ -74,8 +74,8 @@ module Gameplay =
             Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
-            Rating = info.Rating
-            Physical = Performance.calculate info.Rating scoring
+            Rating = info.Difficulty
+            Physical = Performance.calculate info.Difficulty scoring
 
             ImportedFromOsu = false
             IsFailed = failed

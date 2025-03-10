@@ -21,7 +21,7 @@ type GameplayInfo() =
     let mutable mod_status = ModStatus.Ranked
 
     let refresh(info: LoadedChartInfo) =
-        rating <- info.Rating.Overall
+        rating <- info.Difficulty.Overall
         notecounts <- info.NotecountsString
         last_played <-
             let mutable ts = info.SaveData.LastPlayed

@@ -27,6 +27,13 @@ type ModdedChart =
     }
     member this.FirstNote = this.Notes.[0].Time
     member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
+    member this.AsChart : Chart =
+        {
+            Keys = this.Keys
+            Notes = this.Notes
+            BPM = this.BPM
+            SV = this.SV
+        }
 
 /// Intermediate chart getting mods applied to it, when completed it becomes a ModdedChart
 type ModdedChartInternal =

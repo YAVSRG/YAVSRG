@@ -23,7 +23,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
 
-    let mutable difficulty_overlay = DifficultyOverlay(info.WithMods, playfield, info.Rating, playstate)
+    let mutable difficulty_overlay = DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
     let mutable show_difficulty_overlay = false
 
     let change_chart_listener =
@@ -34,7 +34,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             playfield <-
                 Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
                 |+ LanecoverOverReceptors()
-            difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Rating, playstate)
+            difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
             if this.Initialised then
                 difficulty_overlay.Init this
