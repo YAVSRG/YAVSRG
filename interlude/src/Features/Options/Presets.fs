@@ -192,10 +192,7 @@ module private Presets =
                 ),
                 Disabled = (fun () -> setting.Value.IsNone),
                 Position =
-                    { Position.SliceB(40.0f) with
-                        Right = 0.5f %+ 0.0f
-                    }
-                        .Shrink(40.0f, 0.0f)
+                    Position.SliceB(40.0f).SlicePercentL(0.5f).ShrinkX(10.0f).ShrinkR(20.0f)
             )
 
         let save_preset_button =
@@ -228,10 +225,7 @@ module private Presets =
                         | None -> false
                     ),
                 Position =
-                    { Position.SliceB(40.0f) with
-                        Left = 0.5f %+ 0.0f
-                    }
-                        .Shrink(40.0f, 0.0f)
+                    Position.SliceB(40.0f).SlicePercentR(0.5f).ShrinkX(10.0f).ShrinkL(20.0f)
             )
 
         let lower_buttons =
@@ -257,7 +251,7 @@ module private Presets =
         |+ Text(
             sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
             Color = K Colors.text_green,
-            Position = Position.SliceB(40.0f).Shrink(10.0f, 0.0f)
+            Position = Position.SliceB(40.0f).ShrinkX(10.0f)
         )
             .Conditional(fun () ->
                 options.SelectedPreset.Value = Some preset_id

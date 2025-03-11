@@ -8,6 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Skins
 open Interlude.Features.OptionsMenu.Search
 
 [<RequireQualifiedAccess>]
@@ -169,13 +170,25 @@ type private OptionsMenuFooter() as this =
             %"menu.back",
             Menu.Back,
             Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.Box(0.0f, 1.0f, 10.0f, -HEIGHT + 7.5f, 180.0f, InlaidButton.HEIGHT)
+            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).SliceL(10.0f, 180.0f)
+        )
+        |+ InlaidButton(
+            %"noteskin.edit",
+            Skinning.edit_or_extract_noteskin,
+            Icons.IMAGE,
+            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).ShrinkPercentR(0.5f).ShrinkL(210.0f).SlicePercentL(0.5f).ShrinkR(10.0f)
+        )
+        |+ InlaidButton(
+            %"hud.edit",
+            (fun () -> Skinning.edit_hud ignore),
+            Icons.ZAP,
+            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).ShrinkPercentR(0.5f).ShrinkL(210.0f).SlicePercentR(0.5f).ShrinkL(10.0f)
         )
         |+ (
-            FlowContainer.RightToLeft(300.0f, Spacing = 20.0f, Position = Position.SliceB(HEIGHT + 10.0f).Translate(-30.0f, -20.0f))
-            |+ Presets.preset_buttons 3 options.Preset3
-            |+ Presets.preset_buttons 2 options.Preset2
+            GridFlowContainer(HEIGHT, 3, Spacing = (20.0f, 20.0f), Position = Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))
             |+ Presets.preset_buttons 1 options.Preset1
+            |+ Presets.preset_buttons 2 options.Preset2
+            |+ Presets.preset_buttons 3 options.Preset3
         )
 
     member this.Items = items

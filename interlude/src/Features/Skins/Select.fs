@@ -149,22 +149,13 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 
         base.Draw()
 
-type SelectSkinsPage() =
-    inherit Page()
+module Skinning =
 
-    let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
-
-    let noteskin_grid =
-        GridFlowContainer<NoteskinButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
-
-    let hud_grid =
-        GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
-
-    let edit_hud () =
+    let edit_hud on_exit =
         if
             SelectedChart.WITH_COLORS.IsSome
             && Screen.change_new
-                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, fun () -> SelectSkinsPage().Show()))
+                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, on_exit))
                 Screen.Type.EditHud
                 Transitions.Default
         then
@@ -184,14 +175,27 @@ type SelectSkinsPage() =
                             else
                                 None
                         )
-                        |> not
                     then
+                        EditNoteskinPage().Show()
+                    else
                         Notifications.error(%"skins.extract_default_failed.title", %"skins.extract_default_failed.body")
                         Logging.Error "Error extracting noteskin to be editable"
                 )
             )
                 .Show()
-        else EditNoteskinPage().Show()
+        else
+            EditNoteskinPage().Show()
+
+type SelectSkinsPage() =
+    inherit Page()
+
+    let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
+
+    let noteskin_grid =
+        GridFlowContainer<NoteskinButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+
+    let hud_grid =
+        GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
     let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
     let hud_tab = ScrollContainer(hud_grid, Position = Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
@@ -201,13 +205,13 @@ type SelectSkinsPage() =
 
         noteskin_grid.Clear()
         for id, _, meta in Skins.list_noteskins () do
-            let nb = NoteskinButton(id, meta, preview.Refresh, edit_or_extract_noteskin)
+            let nb = NoteskinButton(id, meta, preview.Refresh, Skinning.edit_or_extract_noteskin)
             if nb.IsCurrent then GameThread.defer (fun () -> noteskin_tab.ScrollTo(nb))
             noteskin_grid |* nb
 
         hud_grid.Clear()
         for id, _, meta in Skins.list_huds () do
-            let hb = HUDButton(id, meta, preview.Refresh, edit_hud)
+            let hb = HUDButton(id, meta, preview.Refresh, fun () -> Skinning.edit_hud (fun () -> SelectSkinsPage().Show()))
             if hb.IsCurrent then GameThread.defer (fun () -> hud_tab.ScrollTo(hb))
             hud_grid |* hb
 
