@@ -71,7 +71,7 @@ module Users =
 
                 Logging.Info "New user '%s' registered with id %i to discord id %i" username id discord_id
 
-                Discord.debug_log (sprintf "🥳 New user '%s' registered!" username)
+                Discord.debug_log (sprintf "🥳 New user '%s' registered! (<@%i>)" username discord_id)
 
                 Ok user.AuthToken
 
