@@ -66,6 +66,7 @@ type Filter =
 
         BPMClamp: (CorePattern * float) option
 
+        Creator: string option
         Keymode: int option
         LengthMin: float32 option
         LengthMax: float32 option
@@ -83,6 +84,7 @@ type Filter =
 
             BPMClamp = None
 
+            Creator = None
             Keymode = None
             LengthMin = None
             LengthMax = None
@@ -123,6 +125,10 @@ type Filter =
             match this.SV with
             | Some false -> yield fun cc -> not (cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
             | Some true -> yield fun cc -> cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
+            | None -> ()
+
+            match this.Creator with
+            | Some creator -> yield fun cc -> cc.Creator.Contains(creator, StringComparison.InvariantCultureIgnoreCase)
             | None -> ()
 
             if this.PatternTerms.Length <> 0 || this.PatternAntiTerms.Length <> 0 then
@@ -186,6 +192,10 @@ type Filter =
             | MoreThan("ln", pc)
             | MoreThan("holds", pc)
             | MoreThan("lns", pc) -> filter <- { filter with LNPercentMax = Some pc }
+
+            | Equals("mapper", creator)
+            | Equals("m", creator)
+            | Equals("creator", creator) -> filter <- { filter with Creator = Some creator }
 
             | Tag "nosv"
             | Tag "nsv" -> filter <- { filter with SV = Some false }
