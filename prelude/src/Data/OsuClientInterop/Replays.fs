@@ -14,7 +14,12 @@ type OsuReplay = OsuScoreDatabase_Score
 
 module OsuReplay =
 
-    let decode (replay: OsuReplay, first_note: Time, rate_relative_to_chart: Rate) : ReplayData =
+    /// Decodes a replay from osu! into a Replay usable on the 1.0x Interlude version of a chart
+    /// osu! Replay timestamps are lined up exactly with the original .osu file
+    /// e.g. if the first note is at ms 150 then the first input should have timestamp 150 to line up
+    /// Interlude replay timestamps are lined up so a replay timestamp of 0 = the first note, allowing better portability
+    /// `original_osu_file_first_note` and `original_osu_file_rate` are accordingly used to make a correctly synced Interlude replay
+    let decode (replay: OsuReplay, original_osu_file_first_note: Time, original_osu_file_rate: Rate) : ReplayData =
         if replay.CompressedReplayBytes.IsNone then
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
 
@@ -34,7 +39,7 @@ module OsuReplay =
         output.Flush()
         let string_data = output.ToArray() |> Encoding.UTF8.GetString
 
-        let mutable time = -first_note
+        let mutable time = 0.0f<ms>
         let mutable last_state = 256us
 
         seq {
@@ -43,11 +48,11 @@ module OsuReplay =
                 let parts = entry.Split("|")
 
                 if parts.[0] <> "-12345" then
-                    time <- time + float32 parts.[0] * rate_relative_to_chart * 1.0f<ms / rate>
+                    time <- time + float32 parts.[0] * 1.0f<ms>
                     let state = uint16 parts.[1]
 
                     if state <> last_state then
-                        yield struct (time, uint16 parts.[1])
+                        yield struct ((time - original_osu_file_first_note) * float32 original_osu_file_rate, uint16 parts.[1])
                         last_state <- state
         }
         |> Array.ofSeq
@@ -105,20 +110,29 @@ module OsuReplay =
             OnlineScoreID = 0
         }
 
-    let to_score (replay: OsuReplay) (chart: Chart) (osu_first_note_on_1x: Time) (osu_chart_rate: float32<rate>) : Result<Score, string> =
+    let to_score (replay: OsuReplay) (chart: Chart) (original_osu_file_first_note: Time) (original_osu_file_rate: float32<rate>) : Result<Score, string> =
         match Mods.to_interlude_rate_and_mods replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
+        let combined_rate = MathF.Round(float32 rate * float32 original_osu_file_rate, 3)
+        if
+            combined_rate <> MathF.Round(combined_rate, 2)
+            || combined_rate > 3.0f
+            || combined_rate < 0.5f
+        then
+            Error (sprintf "Rate %.3f isn't supported in Interlude" combined_rate)
+        else
+
         try
-            let replay_data = decode(replay, osu_first_note_on_1x, osu_chart_rate)
+            let replay_data = decode(replay, original_osu_file_first_note, original_osu_file_rate)
 
             Ok {
                 Timestamp =
                     DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
                 Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(float32 rate, 2) * osu_chart_rate
+                Rate = combined_rate * 1.0f<rate>
                 Mods = mods
                 IsImported = true
                 IsFailed = false

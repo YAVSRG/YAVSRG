@@ -55,11 +55,11 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                                 ChartDatabase = Content.Charts
                                 OsuRootPath = Path.GetDirectoryName mount.SourceFolder
                             },
-                            fun (score_count, chart_count) ->
+                            fun result ->
                                 Notifications.task_feedback (
                                     Icons.FOLDER_PLUS,
                                     %"notification.score_import_success",
-                                    [ score_count.ToString(); chart_count.ToString() ] %> "notification.score_import_success.body"
+                                    [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
                                 )
                         )
 

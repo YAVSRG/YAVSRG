@@ -1,100 +1,59 @@
 ﻿namespace Prelude.Data.OsuClientInterop
 
-open System
 open System.IO
 open System.Text
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Formats
-open Prelude.Formats.Osu
-open Prelude.Gameplay.Replays
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 
 module Scores =
 
-    type ImportRequest =
+    type ScoreImportResult =
         {
-            UserDatabase: UserDatabase
-            ChartDatabase: ChartDatabase
-            OsuRootPath: string
+            mutable Scores: int
+            mutable NewScores: int
+            mutable Maps: int
         }
 
-    let private find_matching_chart (chart_db: ChartDatabase) (beatmap_data: OsuDatabase_Beatmap) (converted_osu_chart: Chart) =
-        let chart_hash = Chart.hash converted_osu_chart
+    let private import_map_scores
+        (result: ScoreImportResult)
+        (osu_root_folder: string)
+        (beatmap_score_data: OsuScoreDatabase_Beatmap, original_osu_file_first_note: Time, original_osu_file_rate: Rate)
+        (chart: Chart, chart_hash: string)
+        (user_db: UserDatabase) : unit =
 
-        match ChartDatabase.get_meta chart_hash chart_db with
-        | None ->
-            match detect_rate_mod beatmap_data.Difficulty with
-            | Some rate ->
-                let chart = Chart.scale rate converted_osu_chart
-                let chart_hash = Chart.hash chart
+        for score in beatmap_score_data.Scores do
+            let replay_file =
+                Path.Combine(
+                    osu_root_folder,
+                    "Data",
+                    "r",
+                    sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
+                )
 
-                match ChartDatabase.get_meta chart_hash chart_db with
-                | None ->
-                    Logging.Warn
-                        "Skipping %.2fx of %s [%s], can't find a matching imported 1.00x chart"
-                        rate
-                        beatmap_data.TitleUnicode
-                        beatmap_data.Difficulty
-                    None
-                | Some _ -> Some(chart, chart_hash, rate)
-            | None ->
-                Logging.Warn "%s [%s] skipped, can't find a matching imported chart" beatmap_data.TitleUnicode beatmap_data.Difficulty
-                None
-        | Some _ -> Some(converted_osu_chart, chart_hash, 1.0f<rate>)
+            match OsuReplay.TryReadFile replay_file with
+            | None -> ()
+            | Some replay ->
+                match OsuReplay.to_score replay chart original_osu_file_first_note original_osu_file_rate with
+                | Error reason -> Logging.Error "Error with replay '%s': %s" replay_file reason
+                | Ok score ->
+                    let existing_score_replaced = UserDatabase.delete_score chart_hash score.Timestamp user_db
+                    UserDatabase.save_score chart_hash score user_db
 
-    let private import_osu_score (osu_root_folder: string) (user_db: UserDatabase) (score: OsuReplay) (chart: Chart, chart_hash: string, chart_rate: Rate) : bool =
-        let replay_file =
-            Path.Combine(
-                osu_root_folder,
-                "Data",
-                "r",
-                sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
-            )
+                    result.Scores <- result.Scores + 1
+                    if not existing_score_replaced then
+                        result.NewScores <- result.NewScores + 1
 
-        match OsuReplay.TryReadFile replay_file with
-        | None -> false
-        | Some replay_info ->
+    let private import_osu_scores (osu_root_folder: string) (user_db: UserDatabase, chart_db: ChartDatabase) : ScoreImportResult =
 
-        match Mods.to_interlude_rate_and_mods replay_info.ModsUsed with
-        | None -> false // score is invalid for import in some way, skip
-        | Some(rate_via_mods, mods) ->
-
-        let combined_rate = float32 (rate_via_mods * chart_rate)
-
-        if
-            MathF.Round(combined_rate, 3) <> MathF.Round(combined_rate, 2)
-            || combined_rate > 3.0f
-            || combined_rate < 0.5f
-        then
-            Logging.Info "Skipping score with rate %.3f because this isn't supported in Interlude" combined_rate
-            false
-        else
-
-        let replay_data = OsuReplay.decode (replay_info, chart.FirstNote, chart_rate)
-
-        let score: Score =
+        let result =
             {
-                Timestamp =
-                    DateTime.FromFileTimeUtc(replay_info.Timestamp).ToLocalTime()
-                    |> Timestamp.from_datetime
-                Replay = Replay.compress_bytes replay_data
-                Rate = MathF.Round(combined_rate, 2) * 1.0f<rate>
-                Mods = mods
-                IsImported = true
-                IsFailed = false
-                Keys = chart.Keys
+                Scores = 0
+                NewScores = 0
+                Maps = 0
             }
-
-        let existing_score_replaced = UserDatabase.delete_score chart_hash score.Timestamp user_db
-        UserDatabase.save_score chart_hash score user_db
-
-        not existing_score_replaced
-
-    let private import_osu_scores (osu_root_folder: string) (user_db: UserDatabase) (chart_db: ChartDatabase) : int * int =
 
         let scores =
             use file = Path.Combine(osu_root_folder, "scores.db") |> File.OpenRead
@@ -115,57 +74,70 @@ module Scores =
             main_db.PlayerName
             main_db.Beatmaps.Length
 
-        let chart_map =
+        // MD5 -> osu! beatmap data
+        let osu_db_map =
             main_db.Beatmaps
             |> Seq.filter (fun b -> b.Mode = 3uy)
             |> Seq.map (fun b -> b.Hash, b)
             |> Map.ofSeq
 
-        let mutable chart_count = 0
-        let mutable score_count = 0
+        // MD5 -> Imported interlude data
+        let interlude_db_map =
+            seq {
+                for entry in chart_db.Entries do
+                    for origin in entry.Origins do
+                        match origin with
+                        | ChartOrigin.Osu osu -> yield osu.Md5, (entry.Hash, osu.FirstNoteOffset, osu.SourceRate)
+                        | _ -> ()
+            }
+            |> Map.ofSeq
 
         for beatmap_score_data in
             scores.Beatmaps
-            |> Seq.where (fun b -> b.Scores.Length > 0 && b.Scores.[0].Mode = 3uy) do
-            match Map.tryFind beatmap_score_data.Hash chart_map with
-            | None -> ()
-            | Some beatmap_data ->
+            |> Seq.where (fun b -> b.Scores.Length > 0 && b.Scores.[0].Mode = 3uy)
+            do
 
-            let osu_file =
-                Path.Combine(osu_root_folder, "Songs", beatmap_data.FolderName, beatmap_data.Filename)
+            match Map.tryFind beatmap_score_data.Hash interlude_db_map with
+            | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
 
-            match
-                match Beatmap.FromFile osu_file with
-                | Ok beatmap ->
-                    Osu_To_Interlude.convert
-                        beatmap
-                        {
-                            Config = ConversionOptions.Default
-                            Source = osu_file
-                        }
-                    |> function Ok i -> Ok i | Error s -> Error (snd s)
-                | Error reason -> Error reason
-            with
-            | Error reason -> Logging.Warn "%s [%s] skipped, conversion failed: %s" beatmap_data.TitleUnicode beatmap_data.Difficulty reason
-            | Ok chart ->
+                match ChartDatabase.get_chart interlude_hash chart_db with
+                | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
+                | Ok chart ->
 
-            match find_matching_chart chart_db beatmap_data chart.Chart with
-            | None -> ()
-            | Some(chart, chart_hash, rate) ->
+                import_map_scores
+                    result
+                    osu_root_folder
+                    (beatmap_score_data, original_osu_file_first_note, original_osu_file_rate)
+                    (chart, interlude_hash)
+                    user_db
 
-            chart_count <- chart_count + 1
+            | None ->
+                match Map.tryFind beatmap_score_data.Hash osu_db_map with
+                | None -> Logging.Error "Beatmap %s not imported into Interlude (or known in osu! database?), skipping" beatmap_score_data.Hash
+                | Some beatmap_data ->
+                    Logging.Error "Beatmap %s (%s) not imported into Interlude, skipping" beatmap_score_data.Hash beatmap_data.Filename
 
-            for score in beatmap_score_data.Scores do
-                if import_osu_score osu_root_folder user_db score (chart, chart_hash, rate) then
-                    score_count <- score_count + 1
+                // todo: consider importing song folder here and now
 
-        Logging.Info "Finished importing osu! scores (%i scores from %i maps)" score_count chart_count
-        score_count, chart_count
+            result.Maps <- result.Maps + 1
+
+        Logging.Info "Finished importing osu! scores: %i scores found from %i maps, +%i new scores imported" result.Scores result.Maps result.NewScores
+        result
+
+    type ScoreImportRequest =
+        {
+            UserDatabase: UserDatabase
+            ChartDatabase: ChartDatabase
+            OsuRootPath: string
+        }
 
     let import_osu_scores_service =
-        { new Async.Service<ImportRequest, int * int>() with
+        { new Async.Service<ScoreImportRequest, ScoreImportResult>() with
             override this.Handle(request) =
                 async {
-                    return import_osu_scores request.OsuRootPath request.UserDatabase request.ChartDatabase
+                    return
+                        import_osu_scores
+                            request.OsuRootPath
+                            (request.UserDatabase, request.ChartDatabase)
                 }
         }

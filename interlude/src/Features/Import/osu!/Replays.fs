@@ -81,7 +81,7 @@ module Replay =
                 | Some (rate, first_note) ->
                     match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
                     | Error reason -> Logging.Error "Failed to load chart matching replay: %s" reason; None
-                    | Ok chart -> Some (chart, chart_meta, rate, first_note / float32 rate)
+                    | Ok chart -> Some (chart, chart_meta, rate, first_note)
             )
         match database_match with
         | Some (chart, chart_meta, rate, first_note) ->
