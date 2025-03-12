@@ -107,6 +107,22 @@ module Migrations =
             (fun db -> Database.exec_raw """UPDATE charts SET Sources = '[]';""" db |> expect |> ignore)
             db
 
+        Database.migrate
+            "ResetChartOrigins2"
+            (fun db ->
+                Database.exec_raw
+                    """
+                    UPDATE charts
+                    SET Sources =
+                    (
+	                    SELECT coalesce('[' || group_concat(json_each.value) || ']', '[]')
+	                    FROM json_each(charts.Sources)
+	                    WHERE json_each.value NOT LIKE '%Osu%'
+	                    AND json_each.value NOT LIKE '%Quaver%'
+                    );
+                """ db |> expect |> ignore)
+            db
+
 module Database =
 
     let startup () =
