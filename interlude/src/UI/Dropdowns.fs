@@ -44,6 +44,7 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
     let mutable swapped_last_frame = false
 
     member private this.Current = current |> Option.map (fun x -> x :> ISelection)
+    member this.Active = current.IsSome
 
     member val FocusTrap = false with get, set
     member val OnClose = ignore with get, set

@@ -4,6 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Charts
+open Prelude.Gameplay.Rulesets
 open Interlude.UI
 open Interlude.Content
 

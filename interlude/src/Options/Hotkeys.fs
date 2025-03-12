@@ -74,6 +74,7 @@ module Hotkeys =
         Hotkeys.register "preview" (mk Keys.A)
         Hotkeys.register "mods" (mk Keys.S)
         Hotkeys.register "ruleset_switch" (mk Keys.D)
+        Hotkeys.register "native_ruleset" (shift Keys.D)
         Hotkeys.register "random_chart" (mk Keys.R)
         Hotkeys.register "previous_random_chart" (shift Keys.R)
         Hotkeys.register "autoplay" (ctrl Keys.A)

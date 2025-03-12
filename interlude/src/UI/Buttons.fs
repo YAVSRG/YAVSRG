@@ -86,7 +86,8 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
     member val UnfocusedColor = Colors.text_greyout with get, set
 
     override this.Init(parent) =
-        this |+ Clickable.Focus this
+        this
+        |+ Clickable.Focus this
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
@@ -103,12 +104,11 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
     override this.Draw() =
 
         let text =
-            if icon = "" then
-                label_func()
-            elif this.Focused then
-                sprintf "%s %s" this.HoverIcon this.HoverText
-            else
-                sprintf "%s %s" icon (label_func())
+            if this.Focused then
+                if this.HoverIcon = "" then this.HoverText 
+                else sprintf "%s %s" this.HoverIcon this.HoverText
+            elif icon = "" then label_func()
+            else sprintf "%s %s" icon (label_func())
 
         Render.rect this.Bounds (Colors.shadow_1.O2)
 

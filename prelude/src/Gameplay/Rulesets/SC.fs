@@ -181,9 +181,3 @@ module SC =
             HoldMechanics = HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.HeadJudgementOr (-180.0f<ms / rate>, 180.0f<ms / rate>, 3, 3))
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }
-
-[<AutoOpen>]
-module DefaultRuleset =
-
-    let SC_J4 = SC.create 4
-    let SC_J4_HASH = Ruleset.hash SC_J4
