@@ -47,6 +47,21 @@ module DbCharts =
             """
         }
 
+    let internal RESET_OSU_QUAVER_ORIGINS: NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL =
+                """
+                UPDATE charts
+                SET Origin =
+                (
+	                SELECT coalesce('[' || group_concat(json_each.value) || ']', '[]')
+	                FROM json_each(charts.Origin)
+	                WHERE json_each.value NOT LIKE '%Osu%'
+	                AND json_each.value NOT LIKE '%Quaver%'
+                );
+            """
+        }
+
     let internal RESET_ORIGINS: NonQuery<unit> =
         { NonQuery.without_parameters() with
             SQL = """ UPDATE charts SET Origin = '[]'; """

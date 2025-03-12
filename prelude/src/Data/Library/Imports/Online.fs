@@ -59,11 +59,12 @@ module OnlineImports =
         async {
             match origin with
 
-            | ChartOrigin.Osu (md5, mapset_id, map_id, _, _) ->
-                let url = sprintf "https://catboy.best/d/%in" mapset_id
+            | ChartOrigin.Osu osu ->
+                // todo: download via md5 if available
+                let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
                 return! download_osu_set (url, library, user_db, progress)
 
-            | ChartOrigin.Quaver (md5, mapset_id, map_id) ->
+            | ChartOrigin.Quaver quaver ->
                 return Error "No mirror exists for Quaver"
 
             | ChartOrigin.Etterna (pack: string) ->

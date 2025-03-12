@@ -122,10 +122,30 @@ type ImportAsset =
     | Missing
 
 [<Json.AutoCodec>]
+type OsuOrigin =
+    {
+        Md5: string
+        BeatmapSetId: int
+        BeatmapId: int
+        SourceRate: Rate
+        SourceOD: float32
+        FirstNoteOffset: Time
+    }
+
+[<Json.AutoCodec>]
+type QuaverOrigin =
+    {
+        Md5: string
+        MapSetId: int
+        MapId: int
+        FirstNoteOffset: Time
+    }
+
+[<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
 type ChartOrigin =
-    | Osu of md5: string * beatmapsetid: int * beatmapid: int * from_rate: float32<rate> * first_note_offset: float32<ms>
-    | Quaver of md5: string * mapsetid: int * mapid: int
+    | Osu of OsuOrigin
+    | Quaver of QuaverOrigin
     | Etterna of pack_name: string
 
     override this.ToString() =
@@ -136,8 +156,8 @@ type ChartOrigin =
 
     member this.SuitableForUpload =
         match this with
-        | Osu (_, beatmapsetid, beatmapid, _, _) -> beatmapsetid <> -1 && beatmapid <> 0
-        | Quaver (_, mapsetid, mapid) -> mapsetid <> -1 && mapid <> 0
+        | Osu osu -> osu.BeatmapSetId <> -1 && osu.BeatmapId <> 0
+        | Quaver quaver -> quaver.MapSetId <> -1 && quaver.MapId <> 0
         | Etterna _ -> true
 
 [<Json.AutoCodec(false)>]

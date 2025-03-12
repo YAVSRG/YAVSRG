@@ -122,6 +122,8 @@ module Quaver_To_Interlude =
                 | Ok s -> s
                 | Error reason -> skip_conversion (sprintf "Failed to calculate MD5 of .qua file: %s" reason)
 
+            let snaps = convert_hit_objects b.HitObjects keys
+
             let header =
                 {
                     Title = b.Title
@@ -156,10 +158,16 @@ module Quaver_To_Interlude =
                         else
                             ImportAsset.Missing
 
-                    Origins = Set.singleton <| ChartOrigin.Quaver(md5, b.MapSetId, b.MapId)
+                    Origins =
+                        {
+                            Md5 = md5
+                            MapSetId = b.MapSetId
+                            MapId = b.MapId
+                            FirstNoteOffset = snaps.[0].Time
+                        }
+                        |> ChartOrigin.Quaver
+                        |> Set.singleton
                 }
-
-            let snaps = convert_hit_objects b.HitObjects keys
 
             if b.HasScratchKey then
                 skip_conversion "HasScratchKey: true is not currently supported"

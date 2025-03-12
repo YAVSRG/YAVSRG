@@ -73,7 +73,7 @@ module Replay =
                     chart_meta.Origins
                     |> Seq.tryPick (
                         function
-                        | ChartOrigin.Osu (md5, _, _, rate, first_note) when md5 = replay.BeatmapHash -> Some (rate, first_note)
+                        | ChartOrigin.Osu osu when osu.Md5 = replay.BeatmapHash -> Some (osu.SourceRate, osu.FirstNoteOffset)
                         | _ -> None
                     )
                 with

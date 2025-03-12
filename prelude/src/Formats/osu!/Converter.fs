@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Formats.Osu
 
+open System
 open System.IO
 open System.Collections.Generic
 open System.Linq
@@ -251,7 +252,17 @@ module Osu_To_Interlude =
                         else
                             ImportAsset.Missing
 
-                    Origins = Set.singleton <| ChartOrigin.Osu(md5, b.Metadata.BeatmapSetID, b.Metadata.BeatmapID, 1.0f<rate>, snaps.[0].Time)
+                    Origins =
+                        {
+                            Md5 = md5
+                            BeatmapSetId = b.Metadata.BeatmapSetID
+                            BeatmapId = b.Metadata.BeatmapID
+                            SourceRate = 1.0f<rate>
+                            FirstNoteOffset = snaps.[0].Time
+                            SourceOD = Math.Clamp(MathF.Round(float32 b.Difficulty.OverallDifficulty, 1), 0.0f, 10.0f)
+                        }
+                        |> ChartOrigin.Osu
+                        |> Set.singleton
                 }
 
             Ok {
