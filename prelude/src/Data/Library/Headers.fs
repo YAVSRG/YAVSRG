@@ -56,11 +56,33 @@ type ChartMeta =
             | Some o -> o.ToString()
             | None -> "Unknown"
 
-    member this.MergeWithExisting (existing: ChartMeta) =
-        { this with
-            Packs = Set.union this.Packs existing.Packs
-            Origins = Set.union this.Origins existing.Origins
-        }
+    member this.MergeWithExisting (existing: ChartMeta) : ChartMeta * bool =
+        // Tiebreaker rule when importing data over the top of an existing chart
+        // Etterna metadata takes priority over osu, etc
+        let existing_data_priority =
+            not (Set.isEmpty existing.Origins) && existing.Origins < this.Origins
+
+        if existing_data_priority then
+            { existing with
+                TitleNative = existing.TitleNative |> Option.orElse this.TitleNative
+                ArtistNative = existing.ArtistNative |> Option.orElse this.ArtistNative
+                Subtitle = existing.Subtitle |> Option.orElse this.Subtitle
+                Source = existing.Source |> Option.orElse this.Source
+                Packs = Set.union this.Packs existing.Packs
+                Origins = Set.union this.Origins existing.Origins
+                Background = this.Background
+            },
+            false
+        else
+            { this with
+                TitleNative = this.TitleNative |> Option.orElse existing.TitleNative
+                ArtistNative = this.ArtistNative |> Option.orElse existing.ArtistNative
+                Subtitle = this.Subtitle |> Option.orElse existing.Subtitle
+                Source = this.Source |> Option.orElse existing.Source
+                Packs = Set.union this.Packs existing.Packs
+                Origins = Set.union this.Origins existing.Origins
+            },
+            true
 
     static member FromImport (timestamp: int64) (import_chart: ImportChart) : ChartMeta =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)

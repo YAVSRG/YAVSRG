@@ -75,22 +75,22 @@ module ChartDatabase =
     let asset_path (hash: string) (db: ChartDatabase) : string =
         Path.Combine(db.AssetsPath, hash.Substring(0, 2), hash)
 
-    let import (charts: ImportChart seq) (db: ChartDatabase) =
+    let import (imported_charts: ImportChart seq) (db: ChartDatabase) =
         let moved_assets = Dictionary<string, string>()
         let now = Timestamp.now()
 
         lock db.LockObject <| fun () ->
         seq {
-            for chart in charts do
+            for import_chart in imported_charts do
                 let header_with_assets_moved =
-                    { chart.Header with
+                    { import_chart.Header with
                         BackgroundFile =
-                            match chart.Header.BackgroundFile with
+                            match import_chart.Header.BackgroundFile with
                             | ImportAsset.Relative s ->
                                 if moved_assets.ContainsKey s then
                                     ImportAsset.Asset moved_assets.[s]
                                 else
-                                    let path = Path.Combine(Path.GetDirectoryName chart.LoadedFromPath, s)
+                                    let path = Path.Combine(Path.GetDirectoryName import_chart.LoadedFromPath, s)
                                     if not (File.Exists path) then
                                         ImportAsset.Missing
                                     else
@@ -99,12 +99,12 @@ module ChartDatabase =
                                         ImportAsset.Asset hash
                             | otherwise -> otherwise
                         AudioFile =
-                            match chart.Header.AudioFile with
+                            match import_chart.Header.AudioFile with
                             | ImportAsset.Relative s ->
                                 if moved_assets.ContainsKey s then
                                     ImportAsset.Asset moved_assets.[s]
                                 else
-                                    let path = Path.Combine(Path.GetDirectoryName chart.LoadedFromPath, s)
+                                    let path = Path.Combine(Path.GetDirectoryName import_chart.LoadedFromPath, s)
                                     if not (File.Exists path) then
                                         ImportAsset.Missing
                                     else
@@ -113,15 +113,26 @@ module ChartDatabase =
                                         ImportAsset.Asset hash
                             | otherwise -> otherwise
                     }
-                let chart = { chart with Header = header_with_assets_moved }
+                let import_chart = { import_chart with Header = header_with_assets_moved }
                 // todo: there should be an alternative to ChartMeta.FromImport that does the asset movement rather than the above hack
-                let chart_meta = ChartMeta.FromImport now chart
-                let merged_chart_meta =
-                    match db.Cache.TryGetValue(chart_meta.Hash) with
-                    | true, data -> chart_meta.MergeWithExisting data
-                    | false, _ -> chart_meta
-                db.Cache.[chart_meta.Hash] <- merged_chart_meta
-                yield chart_meta, chart.Chart
+                let incoming_meta = ChartMeta.FromImport now import_chart
+                let incoming_chart = import_chart.Chart
+
+                let accepted_chart, accepted_chart_meta =
+                    match db.Cache.TryGetValue incoming_meta.Hash with
+                    | false, _ -> incoming_chart, incoming_meta
+                    | true, data ->
+                        let merged_chart_meta, accept_updated_chart = incoming_meta.MergeWithExisting data
+
+                        if accept_updated_chart then incoming_chart, merged_chart_meta
+                        else
+                            match get_chart incoming_meta.Hash db with
+                            | Error _ -> incoming_chart, merged_chart_meta
+                            | Ok existing_chart -> existing_chart, merged_chart_meta
+
+
+                db.Cache.[incoming_meta.Hash] <- accepted_chart_meta
+                yield accepted_chart_meta, accepted_chart
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
 
