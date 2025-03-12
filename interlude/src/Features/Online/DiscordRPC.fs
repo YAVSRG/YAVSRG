@@ -33,6 +33,9 @@ module DiscordRPC =
         if not client.IsDisposed then
             client.ClearPresence()
 
+    let large_image_text() =
+        if Network.status = Network.Status.LoggedIn then Network.credentials.Username else "www.yavsrg.net"
+
     let in_menus (details: string) =
         if not client.IsDisposed then
 
@@ -40,7 +43,7 @@ module DiscordRPC =
                 new RichPresence(
                     State = "In menus",
                     Details = details,
-                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())
                 )
 
             client.SetPresence(rp)
@@ -52,7 +55,7 @@ module DiscordRPC =
                 new RichPresence(
                     State = mode,
                     Details = trim_long_string song,
-                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())
                 )
 
             client.SetPresence(rp)
@@ -64,7 +67,7 @@ module DiscordRPC =
                 new RichPresence(
                     State = mode,
                     Details = trim_long_string song,
-                    Assets = Assets(LargeImageKey = "icon", LargeImageText = "www.yavsrg.net")
+                    Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())
                 )
 
             let now = System.DateTime.UtcNow

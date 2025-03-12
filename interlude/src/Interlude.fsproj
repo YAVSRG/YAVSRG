@@ -70,10 +70,10 @@
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\State.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
-    <Compile Include="Features\Online\DiscordRPC.fs" />
     <Compile Include="Features\Online\Credentials.fs" />
     <Compile Include="Features\Online\LobbyState.fs" />
     <Compile Include="Features\Online\Network.fs" />
+    <Compile Include="Features\Online\DiscordRPC.fs" />
     <Compile Include="Features\Online\Login.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Shared.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Online.fs" />
