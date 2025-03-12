@@ -6,7 +6,7 @@ open Prelude.Gameplay.Scoring
 
 module Performance =
 
-    let ACC_SENSITIVITY = 0.97
+    let ACC_SENSITIVITY = 0.96
 
     let acc_timeline (rr: Difficulty) (scoring: ScoreProcessor) =
         let mutable v = 1.0
@@ -19,7 +19,7 @@ module Performance =
                 i <- i + 1
             match ev.Action.Judgement with
             | Some (_, value) ->
-                v <- ACC_SENSITIVITY * v + (1.0 - ACC_SENSITIVITY) * value
+                v <- ACC_SENSITIVITY * v + (1.0 - ACC_SENSITIVITY) * value |> max 0.85
             | None -> ()
         output.[output.Length - 1] <- float32 v
         output
@@ -35,7 +35,7 @@ module Performance =
     let physical_curve (accuracy: float32) =
         let x = 9.15f - 10.0f * accuracy
         let y = x / sqrt (1.0f + x * x)
-        0.5f - y
+        0.5f - y |> max 0.0f
 
     let variety_mult (variety: float32) =
         (variety - 5.0f) / 15.0f |> min 1.0f |> max 0.0f

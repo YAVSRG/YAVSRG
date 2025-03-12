@@ -68,7 +68,7 @@ module CurveExperiments =
             printfn "--"
 
     let scales () =
-        for i = 0 to 100 do
+        for i = 80 to 100 do
             let acc = float32 i / 100.0f
             printfn "T @ %i%%: %.2f" i (Performance.tech_curve acc)
             printfn "P @ %i%%: %.2f" i (Performance.physical_curve acc)
