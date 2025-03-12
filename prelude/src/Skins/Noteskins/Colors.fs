@@ -19,14 +19,14 @@ type ColorScheme =
 module ColorScheme =
 
     let DDR_VALUES =
-        [| 1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f |]
-        |> Array.map (fun i -> i * 1.0f< / beat>)
+        [| 1; 2; 3; 4; 6; 8; 12; 16 |]
+        |> Array.map (fun i -> 48 / i)
 
     let count (keycount: int) (scheme: ColorScheme) =
         match scheme with
         | ColorScheme.Column -> keycount
         | ColorScheme.Chord -> keycount
-        | ColorScheme.DDR -> Array.length DDR_VALUES + 1
+        | ColorScheme.DDR -> DDR_VALUES.Length + 1
         | _ -> keycount
 
 type ColorData = byte array
@@ -77,12 +77,15 @@ type ColorConfig =
 
 module NoteColors =
 
-    let private roughly_divisible (a: Time) (b: Time) =
-        abs (a - b * float32 (round (float <| a / b))) < 3.0f<ms>
-
     let private ddr_func (delta: Time) (ms_per_beat: float32<ms / beat>) : int =
-        List.tryFind ((fun i -> ColorScheme.DDR_VALUES.[i]) >> fun n -> roughly_divisible delta (ms_per_beat / n)) [ 0..7 ]
-        |> Option.defaultValue ColorScheme.DDR_VALUES.Length
+        let tick = (float32 delta % float32 ms_per_beat) * 48.0f / float32 ms_per_beat |> round |> int
+
+        let rec f i =
+            if i >= ColorScheme.DDR_VALUES.Length then ColorScheme.DDR_VALUES.Length
+            elif tick % ColorScheme.DDR_VALUES.[i] = 0 then i
+            else f (i + 1)
+
+        f 0
 
     let private column_colors (color_data: ColorData) (mc: ModdedChart) : TimeArray<ColorData> =
 
