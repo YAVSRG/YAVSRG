@@ -64,13 +64,13 @@ You can delete the entire YAVSRG folder to entirely remove the game and all data
 Developers should first follow the non-developer setup and ensure the CLI tool works.  
 Use the `debug_run` CLI command to build and test the current branch - You should run this at least once before building via an IDE.
 
-After the first use of `debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net8.0  
+After the first use of `debug_run`, you should have the correct BASS .dll/.dynlib/.so files for your platform placed in YAVSRG/interlude/src/bin/Debug/net9.0  
 If not, the game will let you know on launch - Look for them here https://github.com/YAVSRG/YAVSRG/tree/main/engine/lib (you need both the main and the fx one)
 If your platform isn't there contact me in the discord or search online for it
 
 If you open YAVSRG.sln in [Visual Studio 2022](https://visualstudio.microsoft.com/vs/community/), setting Interlude as the active project will let you simply build and run by pressing F5.
 
-While Interlude stores all its data in the same folder as the exe by default, you can change that to a specific location - In YAVSRG/interlude/src/bin/Debug/net8.0/config.json you can edit `WorkingDirectory` to whatever is convenient
+While Interlude stores all its data in the same folder as the exe by default, you can change that to a specific location - In YAVSRG/interlude/src/bin/Debug/net9.0/config.json you can edit `WorkingDirectory` to whatever is convenient
 
 I use `"C:/Interlude/dev"` on Windows  
 If you previously built Interlude as a non-developer, setting it to `"../../../../../GAME"` means both builds share data  
