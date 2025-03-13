@@ -3,12 +3,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_push:
+  test_server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
+    
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
           
       - name: Unit tests
         run: dotnet test -v q online/tests/domain/Interlude.Web.Tests.Domain.fsproj
