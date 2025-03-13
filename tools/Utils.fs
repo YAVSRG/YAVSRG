@@ -4,9 +4,6 @@ open System.IO
 open System.Diagnostics
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
-open Percyqaz.Common
-open Percyqaz.Data
-open Prelude
 
 module Utils =
 
