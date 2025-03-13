@@ -24,7 +24,7 @@ You can also [check out the wiki here](https://www.yavsrg.net/interlude/wiki) in
 >
 > If you just want to play the game on Windows or Linux, **you do *not* need to do this**, instead get the game by downloading the latest release from the site
 
-1. Install [Git](https://git-scm.com/downloads), and [the .NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)  
+1. Install [Git](https://git-scm.com/downloads), and [the .NET 9 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)  
 Follow the install instructions for both of these for your platform
 
 2. Set up the repository
