@@ -1,8 +1,8 @@
-﻿#version 330 core
-layout (location = 0) in vec2 vPos;
-layout (location = 1) in vec2 vUv;
-layout (location = 2) in vec4 vColor;
-layout (location = 3) in float vTexLayer;
+﻿#version 130
+in vec2 vPos;
+in vec2 vUv;
+in vec4 vColor;
+in float vTexLayer;
 
 uniform mat4 uProjection;
 
