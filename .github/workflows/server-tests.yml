@@ -20,6 +20,7 @@ jobs:
           
       - name: Setup certificate and secrets for Server instance
         run: |
+            mkdir -p online/secrets
             dotnet dev-certs https --trust -ep online/secrets/localhost.pfx -p DEVELOPMENT
             echo "{}" >> online/secrets/secrets.json
         
