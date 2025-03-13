@@ -176,7 +176,7 @@ module Skinning =
                                 None
                         )
                     then
-                        EditNoteskinPage().Show()
+                        GameThread.defer (fun () -> EditNoteskinPage().Show())
                     else
                         Notifications.error(%"skins.extract_default_failed.title", %"skins.extract_default_failed.body")
                         Logging.Error "Error extracting noteskin to be editable"
