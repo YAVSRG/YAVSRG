@@ -19,10 +19,10 @@ try
     Logging.Info "~~ Interlude.Web [%s] ~~" TAGLINE
 
     let api_cert =
-        new X509Certificate2(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
+        X509CertificateLoader.LoadPkcs12FromFile(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
 
     let socket_cert =
-        new X509Certificate2(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
+        X509CertificateLoader.LoadPkcs12FromFile(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
 
     Domain.Database.startup ()
 

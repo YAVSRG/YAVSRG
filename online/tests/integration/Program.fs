@@ -1,8 +1,6 @@
 namespace Interlude.Web.Tests.Integration
 
-open System.Net
-open System.Net.Security
-open Percyqaz.Common
+open System.Net.Http
 open Interlude.Web.Shared.API
 open NUnit.Framework
 
@@ -12,13 +10,10 @@ type Setup() =
     [<OneTimeSetUp>]
     member _.InitAndAuth() =
 
-        Logging.Info("DISABLING SSL SECURITY AS A WORKAROUND FOR LOCAL CERTS ON LINUX")
-
-        ServicePointManager.ServerCertificateValidationCallback <-
-            RemoteCertificateValidationCallback(fun _ cert _ sslPolicyErrors -> true)
-
+        Client.http_client_handler.ServerCertificateCustomValidationCallback <- fun _ cert _ sslPolicyErrors -> true
         Client.init "https://localhost/"
-        let http_client = new Http.HttpClient()
+
+        let http_client = new HttpClient(Client.http_client_handler)
 
         task {
             let! response = http_client.GetStringAsync("https://localhost/auth/dummy?username=Integration")

@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
 	<NoWarn>NU1903,NU1902</NoWarn>
+	<CETCompat>false</CETCompat>
   </PropertyGroup>
 
   <ItemGroup>

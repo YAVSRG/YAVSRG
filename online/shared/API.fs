@@ -12,7 +12,7 @@ open Prelude
 
 module API =
 
-    let escape = Uri.EscapeDataString
+    let escape : string -> string = Uri.EscapeDataString
 
     type HttpMethod =
         | GET
@@ -103,7 +103,8 @@ module API =
 
     module Client =
 
-        let private client = new HttpClient()
+        let http_client_handler = new HttpClientHandler()
+        let private client = new HttpClient(http_client_handler)
 
         let init (base_address: string) =
             client.BaseAddress <- new Uri(base_address)

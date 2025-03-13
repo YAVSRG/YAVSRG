@@ -86,7 +86,7 @@ Information, future updates and support available at:
     let build_platform (info: BuildPlatformInfo) =
 
         let build_dir =
-            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net8.0", info.RuntimeId)
+            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net9.0", info.RuntimeId)
 
         let clean_dir =
             Path.Combine(YAVSRG_PATH, "interlude", "releases", $"Interlude-{info.Name}")

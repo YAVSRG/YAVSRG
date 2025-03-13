@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
     <AssemblyVersion>0.7.27.11</AssemblyVersion>
@@ -12,6 +12,7 @@
     <DebugType>embedded</DebugType>
 	<PublishTrimmed>True</PublishTrimmed>
 	<TrimMode>partial</TrimMode>
+	<CETCompat>false</CETCompat>
   </PropertyGroup>
   <PropertyGroup>
     <Optimize>True</Optimize>
