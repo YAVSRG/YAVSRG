@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
@@ -229,7 +230,9 @@ type LobbyScreen() =
         Song.on_finish <- SongFinishAction.LoopFromPreview
         DiscordRPC.in_menus ("Multiplayer lobby")
 
-    override this.OnExit(_) = ()
+    override this.OnExit(_) =
+        Selection.clear()
+        Input.remove_listener()
 
     override this.OnBack() =
         match Network.lobby with
