@@ -37,7 +37,7 @@ module WindowedResolution =
             2715, 1527
         |]
 
-[<Struct; StructuralEquality; StructuralComparison>]
+[<Struct>]
 type FullscreenVideoMode =
     {
         Width: int

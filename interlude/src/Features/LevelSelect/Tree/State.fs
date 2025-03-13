@@ -3,8 +3,6 @@
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
-open Prelude
-open Prelude.Gameplay
 open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -66,7 +64,7 @@ module private TreeState =
     let deselect_multiple (items: (ChartMeta * LibraryContext) seq) =
         match multi_selection with
         | None -> ()
-        | Some s -> 
+        | Some s ->
             s.Deselect items
             if s.IsEmpty then multi_selection <- None
 

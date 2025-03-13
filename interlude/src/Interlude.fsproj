@@ -298,7 +298,7 @@
     <PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="8.0.100" />
+    <PackageReference Update="FSharp.Core" Version="9.0.201" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\engine\src\Percyqaz.Flux.fsproj" />
