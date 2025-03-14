@@ -200,7 +200,7 @@ module Upload =
             | Ok (hash, files_changed) ->
 
             if files_changed > 0 then
-                Logging.Info "Uploaded %i new files for '%s'" files_changed chart_meta.Title
+                Logging.Debug "Uploaded %i new files for '%s'" files_changed chart_meta.Title
 
             match! upload_chart_to_backbeat (hash, bb_chart, bb_song) with
             | Error reason -> return Error reason
@@ -220,7 +220,7 @@ module Upload =
                     match ChartDatabase.get_chart cc.Hash interlude_chart_db with
                     | Ok chart ->
                         match! upload_chart cc chart with
-                        | Ok () -> Logging.Info "Uploaded '%s'" cc.Title
+                        | Ok () -> Logging.Debug "Uploaded '%s'" cc.Title
                         | Error reason -> Logging.Warn "Upload of '%s' failed: %s" cc.Title reason
                     | Error reason -> Logging.Error "Loading '%s' from disk failed: %s" cc.Title reason
                 }
