@@ -27,6 +27,7 @@ module LocalOffset =
 
         for ev in state.Scoring.Events do
             match ev.Action with
+            | Hold x
             | Hit x when not x.Missed ->
                 sum <- sum + x.Delta
                 count <- count + 1.0f
