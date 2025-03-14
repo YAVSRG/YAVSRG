@@ -366,7 +366,7 @@ module Input =
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] b then
-                        callback i (now - float32 ((glfw_now - time) * 0.001) * 1.0f<ms>) (t <> InputEvType.Press)
+                        callback i (now - float32 (1000.0 * (glfw_now - time)) * 1.0f<ms>) (t <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
