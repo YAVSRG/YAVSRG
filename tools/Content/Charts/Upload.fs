@@ -239,7 +239,7 @@ module Upload =
                 Logging.Info "%s: [%s%s] %.0f%%" label (String.replicate s "#") (String.replicate (max 0 (10 - s)) "-") (p * 100.0f)
 
     let get_etterna_pack (pack_name: string) =
-        OnlineImports.get_from_origin (ChartOrigin.Etterna pack_name, interlude_library, interlude_scores_db, progress_bar pack_name)
+        OnlineImports.get_from_origin (ChartOrigin.Etterna pack_name, interlude_library.Charts, interlude_scores_db, progress_bar pack_name)
         |> Async.RunSynchronously
 
     let etterna_pack_aio (pack_name: string) =

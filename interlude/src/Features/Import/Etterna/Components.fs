@@ -51,8 +51,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 (data.download, target, (fun p -> progress <- p)),
                 fun completed ->
                     if completed then
-                        Imports.convert_stepmania_pack_zip.Request(
-                            (target, data.name, Content.Library, Content.UserData),
+                        Imports.convert_stepmania_pack_zip_service.Request(
+                            (target, data.name, Content.Charts, Content.UserData),
                             function
                             | Some result ->
                                 Notifications.task_feedback (

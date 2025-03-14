@@ -48,161 +48,156 @@ module Imports =
                 }
         }
 
-    let convert_song_folder =
-        { new Async.Service<string * ConversionOptions * Library * UserDatabase, ConversionResult>() with
-            override this.Handle((path, config, { Charts = chart_db }, user_db)) =
-                async {
-                    let results =
-                        Directory.EnumerateFiles path
-                        |> Seq.collect (
-                            function
-                            | ChartFile _ as file ->
-                                let action = { Config = config; Source = file }
-                                try
-                                    convert_chart_file action
-                                with err ->
-                                    Logging.Error "Unhandled exception converting '%s': %O" file err
-                                    []
-                            | _ -> []
-                        )
-                        |> Seq.map (
-                            function
-                            | Ok import ->
-                                match Chart.check import.Chart with
-                                | Ok chart -> Ok { import with Chart = chart }
-                                | Error reason ->
-                                    Logging.Error "Conversion produced corrupt chart (%s): %s" path reason
-                                    Error (path, sprintf "Corrupt (%s)" reason)
-                            | Error skipped_conversion -> Error skipped_conversion
-                        )
-                        |> List.ofSeq
+    let convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) =
+        async {
+            let results =
+                Directory.EnumerateFiles path
+                |> Seq.collect (
+                    function
+                    | ChartFile _ as file ->
+                        let action = { Config = config; Source = file }
+                        try
+                            convert_chart_file action
+                        with err ->
+                            Logging.Error "Unhandled exception converting '%s': %O" file err
+                            []
+                    | _ -> []
+                )
+                |> Seq.map (
+                    function
+                    | Ok import ->
+                        match Chart.check import.Chart with
+                        | Ok chart -> Ok { import with Chart = chart }
+                        | Error reason ->
+                            Logging.Error "Conversion produced corrupt chart (%s): %s" path reason
+                            Error (path, sprintf "Corrupt (%s)" reason)
+                    | Error skipped_conversion -> Error skipped_conversion
+                )
+                |> List.ofSeq
 
-                    let filtered = filter_rates path results
+            let filtered = filter_rates path results
 
-                    let mutable success_count = 0
-                    let charts =
-                        filtered
-                        |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
-                        |> List.map (fun c ->
-                            let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
-                            if with_pruned_svs.SV.Length < c.Chart.SV.Length then
-                                let before_hash = Chart.hash c.Chart
-                                let after_hash = Chart.hash with_pruned_svs
-                                if before_hash <> after_hash then
-                                    match ChartDatabase.get_meta before_hash chart_db with
-                                    | Some cc -> ChartDatabase.delete cc chart_db
-                                    | None -> ()
-                                    if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
-                                        UserDatabase.transfer_scores before_hash after_hash user_db
-                            { c with Chart = with_pruned_svs }
-                        )
-                    ChartDatabase.import charts chart_db
-                    return {
-                        ConvertedCharts = success_count
-                        SkippedCharts = filtered |> List.choose (function Error skipped -> Some skipped | _ -> None)
-                    }
-                }
+            let mutable success_count = 0
+            let charts =
+                filtered
+                |> List.choose (function Ok c -> success_count <- success_count + 1; Some c | _ -> None)
+                |> List.map (fun c ->
+                    let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
+                    if with_pruned_svs.SV.Length < c.Chart.SV.Length then
+                        let before_hash = Chart.hash c.Chart
+                        let after_hash = Chart.hash with_pruned_svs
+                        if before_hash <> after_hash then
+                            match ChartDatabase.get_meta before_hash chart_db with
+                            | Some cc -> ChartDatabase.delete cc chart_db
+                            | None -> ()
+                            if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
+                                UserDatabase.transfer_scores before_hash after_hash user_db
+                    { c with Chart = with_pruned_svs }
+                )
+            ChartDatabase.import charts chart_db
+            return {
+                ConvertedCharts = success_count
+                SkippedCharts = filtered |> List.choose (function Error skipped -> Some skipped | _ -> None)
+            }
         }
 
-    let convert_pack_folder =
-        { new Async.Service<string * ConversionOptions * Library * UserDatabase, ConversionResult>() with
-            override this.Handle((path, config, library, user_db)) =
-                async {
-                    let mutable results = ConversionResult.Empty
-                    for song_folder in
-                        (Directory.EnumerateDirectories path
-                         |> match config.ChangedAfter with
-                            | None -> id
-                            | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)) do
-                        let! result = convert_song_folder.RequestAsync(song_folder, config, library, user_db)
-                        results <- ConversionResult.Combine result results
-                    return results
-                }
+    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) =
+        async {
+            let mutable results = ConversionResult.Empty
+            let song_folders =
+                match config.ChangedAfter with
+                | None -> Directory.EnumerateDirectories path
+                | Some timestamp -> Directory.EnumerateDirectories path |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)
+
+            for song_folder in song_folders do
+                let! result = convert_song_folder(song_folder, config, chart_db, user_db)
+                results <- ConversionResult.Combine result results
+            return results
         }
 
-    let convert_folder_of_oszs =
-        { new Async.Service<string * Library * UserDatabase, ConversionResult>() with
-            override this.Handle((folder_of_oszs, library, user_db)) =
-                async {
-                    let config =
-                        { ConversionOptions.Default with
-                            MoveAssets = true
-                            PackName = Path.GetFileName folder_of_oszs
-                        }
-                    let mutable results = ConversionResult.Empty
-                    for osz in Directory.EnumerateFiles folder_of_oszs do
-                        match osz with
-                        | ChartArchive ".osz" ->
-                            let extracted_folder = Path.ChangeExtension(osz, null).TrimEnd(' ', '.')
-                            if
-                                Directory.Exists(extracted_folder)
-                                && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
-                            then
-                                Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
-                                results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
-                            else
-                                try
-                                    ZipFile.ExtractToDirectory(osz, extracted_folder)
-                                    let! result = convert_song_folder.RequestAsync(extracted_folder, config, library, user_db)
-                                    Directory.Delete(extracted_folder, true)
-                                    results <- ConversionResult.Combine result results
-                                with err ->
-                                    Logging.Error "Unexpected error in '%s': %O" extracted_folder err
-                                    results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
-                        | _ -> ()
-                    return results
+    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase) =
+        async {
+            let config =
+                { ConversionOptions.Default with
+                    MoveAssets = true
+                    PackName = Path.GetFileName folder_of_oszs
                 }
-        }
-
-    let convert_stepmania_pack_zip =
-        { new Async.Service<string * string * Library * UserDatabase, ConversionResult option>() with
-            override this.Handle((path, pack_name, library, user_db)) =
-                async {
-                    let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
-
+            let mutable results = ConversionResult.Empty
+            for osz in Directory.EnumerateFiles folder_of_oszs do
+                match osz with
+                | ChartArchive ".osz" ->
+                    let extracted_folder = Path.ChangeExtension(osz, null).TrimEnd(' ', '.')
                     if
-                        Directory.Exists(dir)
-                        && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
+                        Directory.Exists(extracted_folder)
+                        && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
                     then
-                        Logging.Error "Can't extract zip to %s because that folder exists already" dir
-                        return None
+                        Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
+                        results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
                     else
-                        ZipFile.ExtractToDirectory(path, dir)
-
-                        match dir with
-                        | FolderOfPacks ->
-                            let mutable results = ConversionResult.Empty
-                            for pack_folder in Directory.EnumerateDirectories dir do
-                                let! result =
-                                    convert_pack_folder.RequestAsync(
-                                        pack_folder,
-                                        { ConversionOptions.Default with
-                                            EtternaPackName = Some pack_name
-                                            PackName = Path.GetFileName pack_folder
-                                            MoveAssets = true
-                                        },
-                                        library,
-                                        user_db
-                                    )
-                                results <- ConversionResult.Combine result results
-
-                            delete_folder.Request(dir, ignore)
-                            return Some results
-                        | _ ->
-                            Logging.Warn "'%s': Extracted zip does not match the usual structure for a StepMania pack" dir
-                            delete_folder.Request(dir, ignore)
-                            return None
-                }
+                        try
+                            ZipFile.ExtractToDirectory(osz, extracted_folder)
+                            let! result = convert_song_folder(extracted_folder, config, chart_db, user_db)
+                            delete_folder.Request(extracted_folder, ignore)
+                            results <- ConversionResult.Combine result results
+                        with err ->
+                            Logging.Error "Unexpected error in '%s': %O" extracted_folder err
+                            results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
+                | _ -> ()
+            return results
         }
 
-    let rec private auto_detect_import (path: string, move_assets: bool, library: Library, user_db: UserDatabase) : Async<ConversionResult option> =
+    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase) =
+        async {
+            let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
+
+            if
+                Directory.Exists(dir)
+                && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
+            then
+                Logging.Error "Can't extract zip to %s because that folder exists already" dir
+                return None
+            else
+                ZipFile.ExtractToDirectory(path, dir)
+
+                match dir with
+                | FolderOfPacks ->
+                    let mutable results = ConversionResult.Empty
+                    for pack_folder in Directory.EnumerateDirectories dir do
+                        let! result =
+                            convert_pack_folder(
+                                pack_folder,
+                                { ConversionOptions.Default with
+                                    EtternaPackName = Some pack_name
+                                    PackName = Path.GetFileName pack_folder
+                                    MoveAssets = true
+                                },
+                                chart_db,
+                                user_db
+                            )
+                        results <- ConversionResult.Combine result results
+
+                    delete_folder.Request(dir, ignore)
+                    return Some results
+                | _ ->
+                    Logging.Warn "'%s': Extracted zip does not match the usual structure for a StepMania pack" dir
+                    delete_folder.Request(dir, ignore)
+                    return None
+        }
+
+    let convert_stepmania_pack_zip_service =
+        { new Async.Service<string * string * ChartDatabase * UserDatabase, ConversionResult option>() with
+            override this.Handle((path, pack_name, chart_db, user_db)) =
+                convert_stepmania_pack_zip (path, pack_name, chart_db, user_db)
+        }
+
+    let rec private auto_detect_import (path: string, move_assets: bool, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult option> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
                 match path with
                 | ChartFile ext ->
                     let! result =
-                        convert_song_folder.RequestAsync(
+                        convert_song_folder(
                             Path.GetDirectoryName path,
                             { ConversionOptions.Default with
                                 PackName =
@@ -210,7 +205,7 @@ module Imports =
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
-                            library,
+                            chart_db,
                             user_db
                         )
                     log_conversion result
@@ -226,7 +221,7 @@ module Imports =
                         return None
                     else
                         ZipFile.ExtractToDirectory(path, dir)
-                        let! result = auto_detect_import (dir, true, library, user_db)
+                        let! result = auto_detect_import (dir, true, chart_db, user_db)
                         delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
@@ -236,7 +231,7 @@ module Imports =
                 match path with
                 | SongFolder ext ->
                     let! result =
-                        convert_song_folder.RequestAsync(
+                        convert_song_folder(
                             path,
                             { ConversionOptions.Default with
                                 MoveAssets = move_assets
@@ -245,16 +240,16 @@ module Imports =
                                     elif ext = ".qua" then "Quaver"
                                     else "Singles"
                             },
-                            library,
+                            chart_db,
                             user_db
                         )
                     log_conversion result
                     return Some result
                 | FolderOfOszs ->
                     let! result =
-                        convert_folder_of_oszs.RequestAsync(
+                        convert_folder_of_oszs(
                             path,
-                            library,
+                            chart_db,
                             user_db
                         )
                     log_conversion result
@@ -272,13 +267,13 @@ module Imports =
                         | s -> s
 
                     let! result =
-                        convert_pack_folder.RequestAsync(
+                        convert_pack_folder(
                             path,
                             { ConversionOptions.Default with
                                 PackName = packname
                                 MoveAssets = move_assets
                             },
-                            library,
+                            chart_db,
                             user_db
                         )
                     log_conversion result
@@ -287,13 +282,13 @@ module Imports =
                     let mutable results = ConversionResult.Empty
                     for pack_folder in Directory.EnumerateDirectories path do
                         let! result =
-                            convert_pack_folder.RequestAsync(
+                            convert_pack_folder(
                                 pack_folder,
                                 { ConversionOptions.Default with
                                     PackName = Path.GetFileName pack_folder
                                     MoveAssets = move_assets
                                 },
-                                library,
+                                chart_db,
                                 user_db
                             )
                         results <- ConversionResult.Combine result results
@@ -306,7 +301,7 @@ module Imports =
         }
 
     let auto_convert =
-        { new Async.Service<string * bool * Library * UserDatabase, ConversionResult option>() with
-            override this.Handle((path, move_assets, library, user_db)) =
-                auto_detect_import (path, move_assets, library, user_db)
+        { new Async.Service<string * bool * ChartDatabase * UserDatabase, ConversionResult option>() with
+            override this.Handle((path, move_assets, chart_db, user_db)) =
+                auto_detect_import (path, move_assets, chart_db, user_db)
         }

@@ -40,8 +40,8 @@ type MountedChartSource =
 module Mount =
 
     let import_service =
-        { new Async.Service<MountedChartSource * Library * UserDatabase, ConversionResult>() with
-            override this.Handle((source, library, user_db)) =
+        { new Async.Service<MountedChartSource * ChartDatabase * UserDatabase, ConversionResult>() with
+            override this.Handle((source, chart_db, user_db)) =
                 async {
                     match source.Type with
                     | Pack packname ->
@@ -56,7 +56,7 @@ module Mount =
                                 PackName = packname
                             }
 
-                        let! result = Imports.convert_pack_folder.RequestAsync(source.SourceFolder, config, library, user_db)
+                        let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db)
                         source.LastImported <- Some DateTime.UtcNow
                         log_conversion result
                         return result
@@ -68,14 +68,14 @@ module Mount =
                         let mutable results = ConversionResult.Empty
                         for pack_folder in Directory.EnumerateDirectories source.SourceFolder do
                             let! result =
-                                Imports.convert_pack_folder.RequestAsync(
+                                Imports.convert_pack_folder(
                                     pack_folder,
                                     { ConversionOptions.Default with
                                         MoveAssets = false
                                         ChangedAfter = source.LastImported
                                         PackName = Path.GetFileName pack_folder
                                     },
-                                    library,
+                                    chart_db,
                                     user_db
                                 )
                             results <- ConversionResult.Combine result results

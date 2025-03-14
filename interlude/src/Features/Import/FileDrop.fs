@@ -34,7 +34,7 @@ type ConfirmUnlinkedSongsImport(path) =
                 %"unlinkedsongsimport.confirm",
                 fun () ->
                     Imports.auto_convert.Request(
-                        (path, false, Content.Library, Content.UserData),
+                        (path, false, Content.Charts, Content.UserData),
                         function
                         | Some result ->
                             Notifications.task_feedback (
@@ -109,7 +109,7 @@ module FileDrop =
             else
 
             Imports.auto_convert.Request(
-                (path, false, Content.Library, Content.UserData),
+                (path, false, Content.Charts, Content.UserData),
                 function
                 | Some result ->
                     Notifications.task_feedback (

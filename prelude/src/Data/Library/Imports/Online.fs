@@ -23,13 +23,13 @@ module OnlineImports =
             | WebResult.Exception err -> return Error err.Message
         }
 
-    let private download_etterna_pack (name: string, url: string, library: Library, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
+    let private download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
             match! WebServices.download_file.RequestAsync((url, target, progress)) with
             | false -> return Error "Download failure"
             | true ->
-                match! Imports.convert_stepmania_pack_zip.RequestAsync(target, name, library, user_db) with
+                match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db) with
                 | Some result ->
                     progress 1.0f
                     Imports.delete_file.Request(target, ignore)
@@ -39,13 +39,13 @@ module OnlineImports =
                     return Error "Error extracting/converting zip"
         }
 
-    let private download_osu_set (url: string, library: Library, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
+    let private download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
             match! WebServices.download_file.RequestAsync((url, target, progress)) with
             | false -> return Error "Download failure"
             | true ->
-                match! Imports.auto_convert.RequestAsync(target, true, library, user_db) with
+                match! Imports.auto_convert.RequestAsync(target, true, chart_db, user_db) with
                 | Some result ->
                     progress 1.0f
                     Imports.delete_file.Request(target, ignore)
@@ -55,14 +55,14 @@ module OnlineImports =
                     return Error "Error extracting/converting osz"
         }
 
-    let get_from_origin (origin: ChartOrigin, library: Library, user_db: UserDatabase, progress: float32 -> unit) =
+    let get_from_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) =
         async {
             match origin with
 
             | ChartOrigin.Osu osu ->
                 // todo: download via md5 if available
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
-                return! download_osu_set (url, library, user_db, progress)
+                return! download_osu_set (url, chart_db, user_db, progress)
 
             | ChartOrigin.Quaver quaver ->
                 return Error "No mirror exists for Quaver"
@@ -72,5 +72,5 @@ module OnlineImports =
                 | Error reason ->
                     return Error (sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
                 | Ok url ->
-                    return! download_etterna_pack (pack, url, library, user_db, progress)
+                    return! download_etterna_pack (pack, url, chart_db, user_db, progress)
         }
