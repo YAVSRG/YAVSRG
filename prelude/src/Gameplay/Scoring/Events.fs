@@ -132,7 +132,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
     member this.EnumerateRecentInputs() = replay.EnumerateRecentEvents()
     member this.Ruleset = ruleset
 
-    member this.HoldState (index: int) (k: int) =
+    member this.HoldState (index: int) (k: int) : HoldState =
         let state, i = hold_states.[k]
 
         if i = index then
@@ -153,11 +153,11 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
         else
             HoldState.InTheFuture
 
-    member this.IsNoteHit (index: int) (k: int) =
+    member this.IsNoteHit (index: int) (k: int) : bool =
         let  { Data = struct (_, flags) } = hit_data.[index]
         flags.[k] = HitFlags.HIT_ACCEPTED
 
-    member this.Finished = expired_notes_index = hit_data.Length
+    member this.Finished : bool = expired_notes_index = hit_data.Length
 
     /// Result of calling this:
     ///  notes.[expired_notes_index - 1].Time < now - LATE WINDOW

@@ -164,20 +164,20 @@ type Ruleset =
         else
             this.Grades.[i].Color
 
-    member this.LampName i =
+    member this.LampName (i: int) : string =
         if i < 0 then "NONE"
         else if i >= this.Lamps.Length then "??"
         else this.Lamps.[i].Name
-    member this.LampColor i =
+    member this.LampColor (i: int) : Color =
         if i < 0 || i >= this.Grades.Length then
             Color.White
         else
             this.Lamps.[i].Color
 
-    member this.JudgementName i =
+    member this.JudgementName (i: int) : string =
         if i < 0 || i >= this.Judgements.Length then "??"
         else this.Judgements.[i].Name
-    member this.JudgementColor i =
+    member this.JudgementColor (i: int) : Color =
         if i < 0 || i >= this.Judgements.Length then Color.Gray
         else this.Judgements.[i].Color
 
@@ -208,7 +208,7 @@ type Ruleset =
             (max (abs n_early) n_late)
             (max (abs r_early) r_late)
 
-    member this.FormatAccuracy(accuracy: float) =
+    member this.FormatAccuracy(accuracy: float) : string =
         match this.Formatting.DecimalPlaces with
         | DecimalPlaces.FOUR -> sprintf "%.4f%%" (accuracy * 100.0)
         | DecimalPlaces.THREE ->
@@ -238,7 +238,7 @@ module Ruleset =
     /// Any change to a ruleset that changes how it functions changes the bytes, and the hash will change
     /// Any change is only cosmetic (e.g. color of a judemgent) does not appear in the bytes, and the hash will stay the same
 
-    let hash (ruleset: Ruleset) =
+    let hash (ruleset: Ruleset) : string =
         let h = SHA256.Create()
         use ms = new MemoryStream()
         use bw = new BinaryWriter(ms)

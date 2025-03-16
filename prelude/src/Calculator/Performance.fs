@@ -8,7 +8,7 @@ module Performance =
 
     let ACC_SENSITIVITY = 0.96
 
-    let acc_timeline (rr: Difficulty) (scoring: ScoreProcessor) =
+    let acc_timeline (rr: Difficulty) (scoring: ScoreProcessor) : float32 array =
         let mutable v = 1.0
         let mutable i = 0
         let output : float32 array = Array.zeroCreate rr.NoteDifficulty.Length
@@ -27,17 +27,17 @@ module Performance =
     /// Some curves put together quickly in a day to be a 'good enough' proof of concept
     /// Documentation coming soon, or if it didn't, bother me on discord for additional comment
 
-    let tech_curve (accuracy: float32) =
+    let tech_curve (accuracy: float32) : float32 =
         let x = 20.0f * (accuracy - 1.0f)
         let y = x / sqrt (1.0f + x * x)
         0.65f * (1.0f + y) - 0.05f |> max 0.0f
 
-    let physical_curve (accuracy: float32) =
+    let physical_curve (accuracy: float32) : float32 =
         let x = 9.15f - 10.0f * accuracy
         let y = x / sqrt (1.0f + x * x)
         0.5f - y |> max 0.0f
 
-    let variety_mult (variety: float32) =
+    let variety_mult (variety: float32) : float32 =
         (variety - 5.0f) / 15.0f |> min 1.0f |> max 0.0f
 
     let scale_note (accuracy: float32) (variety: float32) (note: NoteDifficulty) : NoteDifficulty =
@@ -53,7 +53,7 @@ module Performance =
     /// Performance rating concept: Look at your accuracy throughout a score
     /// Take the accuracy and scale notes up/down in the areas you are doing good/bad in
     /// Now feed the new scaled notes through the same SR algorithm to get PR
-    let calculate (rr: Difficulty) (scoring: ScoreProcessor) =
+    let calculate (rr: Difficulty) (scoring: ScoreProcessor) : float32 =
 
         let scoring =
             if SC_J4_HASH <> Ruleset.hash scoring.Ruleset then
@@ -70,7 +70,7 @@ module Performance =
         let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
         Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
 
-    let accuracy_to_rating (accuracy: float32, rate: Rate, notes: TimeArray<_>, rr: Difficulty) =
+    let accuracy_to_rating (accuracy: float32, rate: Rate, notes: TimeArray<_>, rr: Difficulty) : float32 =
         // naive approach
         let scaled_notes = rr.NoteDifficulty |> Array.mapi (fun i nr -> Array.map (scale_note accuracy rr.Variety.[i]) nr)
         let strains = Strain.calculate_finger_strains (rate, notes) scaled_notes

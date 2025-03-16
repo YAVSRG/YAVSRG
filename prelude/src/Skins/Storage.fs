@@ -78,7 +78,7 @@ module TextureFileName =
             | _ -> None
         else None
 
-    let to_grid (texture_id: string) (columns: int, rows: int) =
+    let to_grid (texture_id: string) (columns: int, rows: int) : string =
         sprintf "%s[%ix%i].png" texture_id columns rows
 
     let private LOOSE_REGEX = Regex(@"^([a-z\-]+)-([0-9]+)-([0-9]+)\.png$", RegexOptions.IgnoreCase)
@@ -92,14 +92,14 @@ module TextureFileName =
             | _ -> None
         else None
 
-    let to_loose (texture_id: string) (column: int, row: int) =
+    let to_loose (texture_id: string) (column: int, row: int) : string =
         sprintf "%s-%i-%i.png" texture_id row column
 
 type Storage(storage: StorageType) =
 
-    member this.Source = storage
+    member this.Source : StorageType = storage
 
-    member this.IsEmbedded =
+    member this.IsEmbedded : bool =
         match storage with
         | Embedded _ -> true
         | _ -> false
@@ -158,7 +158,7 @@ type Storage(storage: StorageType) =
                 Logging.Error "Failed to move file from '%s' to '%s', skin may be messed up as a result" old_path new_path
 
     /// Returns string names of files in the requested folder
-    member this.GetFiles([<ParamArray>] path: string array) =
+    member this.GetFiles([<ParamArray>] path: string array) : string array =
         let p = Path.Combine(path)
 
         match storage with
@@ -177,7 +177,7 @@ type Storage(storage: StorageType) =
             Directory.EnumerateFiles target |> Seq.map Path.GetFileName |> Array.ofSeq
 
     /// Returns string names of folders in the requested folder
-    member this.GetFolders([<ParamArray>] path: string array) =
+    member this.GetFolders([<ParamArray>] path: string array) : string array =
         let p = Path.Combine path
 
         match storage with
@@ -192,10 +192,11 @@ type Storage(storage: StorageType) =
                         if e.FullName = p + "/" + s.[0] + "/" then
                             yield s.[0]
             }
+            |> Array.ofSeq
         | Folder f ->
             let target = Path.Combine(f, p)
             Directory.CreateDirectory target |> ignore
-            Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
+            Directory.EnumerateDirectories target |> Seq.map Path.GetFileName |> Array.ofSeq
 
     /// Gets the specified JSON file, or returns None
     /// None is returned with silent fail if the file did not exist
@@ -263,7 +264,7 @@ type Storage(storage: StorageType) =
             target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
             JSON.ToFile (target, true) data
 
-    member this.ExtractToFolder target_directory : bool =
+    member this.ExtractToFolder (target_directory: string) : bool =
         Directory.CreateDirectory target_directory |> ignore
 
         match storage with
@@ -274,7 +275,7 @@ type Storage(storage: StorageType) =
             Logging.Error("Can only extract a compressed zip to a folder")
             false
 
-    member this.CompressToZip target : bool =
+    member this.CompressToZip (target: string) : bool =
         if File.Exists target then
             File.Delete target
 
@@ -344,7 +345,7 @@ type Storage(storage: StorageType) =
             must_be_square: bool
         ) : Result<Bitmap, string> =
 
-        let load_img row column =
+        let load_img (row: int) (column: int) =
             let filename = TextureFileName.to_loose name (column, row)
             match this.TryReadFile(Array.append path [| filename |]) with
             | Some stream ->

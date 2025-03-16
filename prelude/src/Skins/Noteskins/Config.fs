@@ -387,6 +387,6 @@ module NoteskinTextureRules =
                 }
             ]
 
-    let get (config: NoteskinConfig) (name: string) = TEXTURES.[name].Evaluate config
+    let get (config: NoteskinConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate config
 
     let list () : string seq = TEXTURES.Keys :> string seq

@@ -22,7 +22,7 @@ module ColorScheme =
         [| 1; 2; 3; 4; 6; 8; 12; 16 |]
         |> Array.map (fun i -> 48 / i)
 
-    let count (keycount: int) (scheme: ColorScheme) =
+    let count (keycount: int) (scheme: ColorScheme) : int =
         match scheme with
         | ColorScheme.Column -> keycount
         | ColorScheme.Chord -> keycount

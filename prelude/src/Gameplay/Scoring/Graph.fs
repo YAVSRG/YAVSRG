@@ -50,7 +50,7 @@ module ScoreScreenStats =
 
     let GRAPH_POINT_COUNT = 1000
 
-    let calculate (score_processor: ScoreProcessor) (column_filter: bool array) =
+    let calculate (score_processor: ScoreProcessor) (column_filter: bool array) : ScoreScreenStats =
 
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: GameplayTime ref) (t: GameplayTime) = x.Value <- x.Value + t

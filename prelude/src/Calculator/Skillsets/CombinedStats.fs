@@ -66,7 +66,7 @@ module CombinedStatLine =
             | [] -> 0.0f
         v stats * 150.0f
 
-    let scale (multiplier: float32) (stats: CombinedStatLine) =
+    let scale (multiplier: float32) (stats: CombinedStatLine) : CombinedStatLine =
         stats |> List.map (fun { Density = d; Duration = duration } -> { Density = d; Duration = duration * multiplier })
 
 type CombinedSkillIncrease =

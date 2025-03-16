@@ -46,10 +46,6 @@ type Skin(storage) as this =
     member this.GetIcon() : TextureLoadResult =
         this.LoadTexture("note", { IsRequired = false; MustBeSquare = true; MaxGridSize = (16, 32) }, "Noteskin")
 
-    static member FromPath(path: string) =
-        try new Skin(Folder path) |> Ok
-        with err -> Error err
-
     member this.NoteskinFolder() : string option =
         match storage with
         | Folder path ->
@@ -68,8 +64,12 @@ type Skin(storage) as this =
             else None
         | _ -> failwith "impossible"
 
-    static member Exists(path: string) =
+    static member Exists(path: string) : bool =
         Directory.Exists path && File.Exists (Path.Combine(path, "skin.json"))
+
+    static member FromPath(path: string) =
+        try new Skin(Folder path) |> Ok
+        with err -> Error err
 
     /// Call to create default User folder with HUD data
     static member CreateDefault (default_skin_meta: SkinMetadata) (path: string) : HudLayout * Skin =

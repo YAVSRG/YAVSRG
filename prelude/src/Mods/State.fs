@@ -29,7 +29,7 @@ module ModState =
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
-    let in_priority_order (mods: ModState) =
+    let in_priority_order (mods: ModState) : (string * Mod * int) seq =
         APPLICATION_PRIORITY_ORDER
         |> Seq.choose (fun id ->
             match Map.tryFind id mods with

@@ -49,7 +49,7 @@ module PatternStatLine =
                     | None -> Some x.Duration
                     | Some better_duration -> Some better_duration
 
-    let value (stats: PatternStatLine) =
+    let value (stats: PatternStatLine) : float32 =
         let ONE_MINUTE = 60000f<ms / rate>
         let duration_value (duration: GameplayTime) =
             if duration > ONE_MINUTE then
@@ -66,7 +66,7 @@ module PatternStatLine =
             | [] -> 0.0f
         v stats * 10.0f
 
-    let scale (multiplier: float32) (stats: PatternStatLine) =
+    let scale (multiplier: float32) (stats: PatternStatLine) : PatternStatLine =
         stats |> List.map (fun { BPM = bpm; Duration = duration } -> { BPM = bpm; Duration = duration * multiplier })
 
 type PatternSkillIncrease =

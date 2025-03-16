@@ -27,7 +27,7 @@ module Wife3Curve =
 
             sign * y
 
-    let calculate (judge: int) (delta: GameplayTime) =
+    let calculate (judge: int) (delta: GameplayTime) : float =
 
         let delta = float delta |> abs
 

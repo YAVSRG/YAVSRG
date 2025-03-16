@@ -72,7 +72,7 @@ module Image =
 
 module OsuSkinConverter =
 
-    let check_before_convert (source: string) =
+    let check_before_convert (source: string) : Result<SkinIni, string> =
         SkinIni.FromFile (Path.Combine(source, "skin.ini"))
 
     let scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
@@ -158,7 +158,7 @@ module OsuSkinConverter =
             )
         else None
 
-    let arrow_fix_4k (images: Bitmap list list) =
+    let arrow_fix_4k (images: Bitmap list list) : Bitmap list list =
         match images with
         | left :: down :: up :: right :: [] ->
             [
@@ -182,12 +182,12 @@ module OsuSkinConverter =
             Result.toOption this.Body,
             Result.toOption this.Tail
 
-    let expect_texture (t: Result<'T, string list>) =
+    let expect_texture (t: Result<'T, string list>) : Result<'T, string list> =
         match t with
         | Ok f -> Ok f
         | Error expected_files -> failwithf "Couldn't find any matching image %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat ", ")
 
-    let dot_to_colon (dot_texture: Bitmap) =
+    let dot_to_colon (dot_texture: Bitmap) : Bitmap =
         let new_bmp = dot_texture.Clone()
         new_bmp.Mutate(fun img ->
             img
@@ -196,7 +196,7 @@ module OsuSkinConverter =
             |> ignore)
         new_bmp
 
-    let convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) =
+    let convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<float32, exn> =
         try
             let mutable scale_2x = 1.0f
             let images =

@@ -90,7 +90,7 @@ module KeymodeSkillBreakdown =
     let private COMBINED_MULTIPLIER_SCALE_CONSTANT = sqrt 2.0f
     let private DAILY_DECAY_CONSTANT = -0.105360515
 
-    let decay_over_time (before: int64) (now: int64) =
+    let decay_over_time (before: int64) (now: int64) : float32 =
         let days = float (now - before) / 86_400_000.0
         exp (DAILY_DECAY_CONSTANT * days) |> float32
 

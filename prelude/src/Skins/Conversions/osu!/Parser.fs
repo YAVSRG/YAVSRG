@@ -24,7 +24,7 @@ module OsuSkinHelpers =
         | _ :: _ :: _ :: _ -> Color.FromArgb(CsvHelpers.int_or 0 255 split, CsvHelpers.int_or 1 255 split, CsvHelpers.int_or 2 255 split)
         | _ -> default_color
 
-    let parse_comma_ints_or (default_value: int list) (s: string) =
+    let parse_comma_ints_or (default_value: int list) (s: string) : int list =
         s.Split(",", StringSplitOptions.TrimEntries)
         |> Seq.choose (fun s ->
             match Single.TryParse(s, CultureInfo.InvariantCulture) with
@@ -34,8 +34,8 @@ module OsuSkinHelpers =
         |> List.ofSeq
         |> function [] -> default_value | xs -> xs
 
-    let key_texture keys key =
-        match keys with
+    let key_texture (keycount: int) (key: int) =
+        match keycount with
         | 1 -> "S"
         | 2 -> "1"
         | 3 -> [| "1"; "S"; "1" |].[key]

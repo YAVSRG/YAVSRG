@@ -3,7 +3,6 @@
 open System
 open Percyqaz.Common
 open Prelude.Calculator.Patterns
-open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library.Collections
 
@@ -19,7 +18,7 @@ module internal Shared =
             "?"
 
     // A new day starts at 4am, your machine local time
-    let days_ago (timestamp: int64) =
+    let days_ago (timestamp: int64) : int =
         let local_date_now =
             DateTime.Now
                 .Subtract(TimeSpan.FromHours(4.0))
@@ -31,7 +30,7 @@ module internal Shared =
                 .Date
         (local_date_now - local_date).TotalDays |> floor |> int
 
-    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) =
+    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) : int * string =
         let days_ago = days_ago (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed
 
         if days_ago < 1 then 0, "Today"
@@ -45,14 +44,14 @@ module internal Shared =
         elif days_ago < 3600 then 8, "A long time ago"
         else 9, "Never"
 
-    let format_difficulty (cc: ChartMeta, _) =
+    let format_difficulty (cc: ChartMeta, _) : int * string =
         let stars = cc.Rating |> floor |> int
         if stars >= 15 then
             15, "15+ Stars"
         else
             stars, sprintf "%i Stars" stars
 
-    let format_date_added (c: ChartMeta, _) =
+    let format_date_added (c: ChartMeta, _) : int * string =
         let days_ago = days_ago c.DateAdded
 
         if days_ago < 1 then 0, "Today"
@@ -65,7 +64,7 @@ module internal Shared =
         elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
-    let grade_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
+    let grade_achieved (cc: ChartMeta, ctx: LibraryViewContext) : int * string =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match
@@ -75,7 +74,7 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
         | None -> -2, "No grade achieved"
 
-    let lamp_achieved (cc: ChartMeta, ctx: LibraryViewContext) =
+    let lamp_achieved (cc: ChartMeta, ctx: LibraryViewContext) : int * string  =
         let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
 
         match
@@ -85,13 +84,13 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"
 
-    let below_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
+    let below_ln_percent (threshold: float32) (cc: ChartMeta, _: LibraryViewContext) : bool =
         cc.Patterns.LNPercent < threshold
 
-    let above_ln_percent (threshold: float32) (cc: ChartMeta, ctx: LibraryViewContext) =
+    let above_ln_percent (threshold: float32) (cc: ChartMeta, _: LibraryViewContext) : bool =
         cc.Patterns.LNPercent > threshold
 
-    let has_sv (cc: ChartMeta, ctx: LibraryViewContext) =
+    let has_sv (cc: ChartMeta, _: LibraryViewContext) =
         cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]
@@ -105,7 +104,7 @@ type LibraryContext =
     | Folder of id: string
     | Playlist of index: int * id: string * data: PlaylistEntryInfo
 
-    member this.Matches(other: LibraryContext) =
+    member this.Matches(other: LibraryContext) : bool =
         match this, other with
         | None, None -> true
         | None, Pack _ -> true
@@ -116,7 +115,7 @@ type LibraryContext =
         | Folder f, Folder f2 when f = f2 -> true
         | Playlist (i, id, _), Playlist (i2, id2, _) when i = i2 && id = id2 -> true
         | _ -> false
-    member this.SoftMatches(other: LibraryContext) =
+    member this.SoftMatches(other: LibraryContext) : bool =
         match this, other with
         | None, _ -> true
         | Pack _, None -> true

@@ -566,6 +566,6 @@ module HudTextureRules =
                 }
             ]
 
-    let get (config: HudConfig) (name: string) = TEXTURES.[name].Evaluate config
+    let get (config: HudConfig) (name: string) : TextureRules = TEXTURES.[name].Evaluate config
 
     let list () : string seq = TEXTURES.Keys :> string seq

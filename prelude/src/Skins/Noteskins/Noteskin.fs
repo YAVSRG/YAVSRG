@@ -31,7 +31,7 @@ module NoteskinExplosionMigration =
     [<Json.AutoCodec(false)>]
     type NoteskinMigrationModel = { Name: string; Explosions: Explosions option }
 
-    let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) =
+    let patch (model: NoteskinMigrationModel) (config: NoteskinConfig) : NoteskinConfig =
         match model.Explosions with
         | Some explosions ->
             Logging.Info "Migrating noteskin '%s' to new explosions system" model.Name

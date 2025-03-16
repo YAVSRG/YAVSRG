@@ -3,7 +3,6 @@
 open System.IO
 open System.Net
 open System.Net.Http
-open SixLabors.ImageSharp
 open Percyqaz.Common
 open Prelude
 

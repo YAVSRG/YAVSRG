@@ -19,7 +19,7 @@ module NoteDifficulty =
     let JACK_CURVE_CUTOFF = 230.0f
     /// Converts ms difference between notes (in the same column) into its equivalent BPM
     /// (on 1/4 snap, hence 1 minute * 1/4 is numerator)
-    let ms_to_jack_bpm (delta: GameplayTime) =
+    let ms_to_jack_bpm (delta: GameplayTime) : float32 =
         15000.0f<ms / rate> / delta
         |> min JACK_CURVE_CUTOFF
 
@@ -32,7 +32,7 @@ module NoteDifficulty =
     /// Once the ms gets low enough, the curve starts going back down towards 0
     /// since adjacent notes that would make a "500bpm stream" can be hit as grace notes and don't add difficulty
     /// The real threshold is lower than 500 though, and controlled by the cutoff variables
-    let ms_to_stream_bpm (delta: GameplayTime) =
+    let ms_to_stream_bpm (delta: GameplayTime) : float32 =
         300.0f / (0.02f<rate / ms> * delta) -
         300.0f / MathF.Pow(0.02f<rate / ms> * delta, STREAM_CURVE_CUTOFF) / STREAM_CURVE_CUTOFF_2
         |> max 0.0f
@@ -44,7 +44,7 @@ module NoteDifficulty =
     /// Example: for [12][1] as described above, 0.0 is returned to fully cancel out the stream value
     /// Example: for [1][2][1] evenly spaced trill (note C is 50ms earlier instead), 1.0 is returned to do no cancelling at all
     /// Best to put this whole expression into https://www.desmos.com/calculator if you want to understand it better
-    let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) =
+    let jack_compensation (jack_delta: GameplayTime) (stream_delta: GameplayTime) : float32 =
         let ratio = jack_delta / stream_delta
         MathF.Log(ratio, 2.0f)
         |> max 0.0f

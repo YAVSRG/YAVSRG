@@ -185,7 +185,7 @@ module Collections =
             else
                 None
 
-        member this.Exists(name) = this.Get(name).IsSome
+        member this.Exists(name) : bool = this.Get(name).IsSome
 
         member this.CreateFolder(name, icon) : Folder option =
             if this.Exists name || name = "" then

@@ -9,7 +9,7 @@ module Density =
 
     let private DENSITY_SENSITIVITY = 0.9f
 
-    let private note (time: Time) (d: Density) =
+    let private note (time: Time) (d: Density) : Density =
         let next_d = 1000.0f<ms / rate> / time
         d * DENSITY_SENSITIVITY + next_d * (1.0f - DENSITY_SENSITIVITY)
 

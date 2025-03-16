@@ -32,7 +32,7 @@ module RulesetComparison =
 
             sign * y
 
-    let simulate (ruleset: Ruleset) (standard_deviation: float) (misses_per_1000_notes: float) =
+    let simulate (ruleset: Ruleset) (standard_deviation: float) (misses_per_1000_notes: float) : float =
         let non_misses = 1000.0 - misses_per_1000_notes
 
         let ERF_CONSTANT = standard_deviation * 1.41421356
@@ -69,7 +69,7 @@ module RulesetComparison =
 
         total / 10.0 // percent accuracy out of 100
 
-    let standard_deviation_for_accuracy (ruleset: Ruleset) (acc: float) (misses_per_1000_notes: float) =
+    let standard_deviation_for_accuracy (ruleset: Ruleset) (acc: float) (misses_per_1000_notes: float) : float =
         let mutable sd = 15.0
         let mutable increment = 5.0
 

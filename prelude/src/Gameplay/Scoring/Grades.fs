@@ -32,5 +32,5 @@ module Grade =
 
         loop -1
 
-    let calculate (grades: Grade array) (accuracy: float) =
+    let calculate (grades: Grade array) (accuracy: float) : int =
         (calculate_with_target grades accuracy).Grade

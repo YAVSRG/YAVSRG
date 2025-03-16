@@ -252,10 +252,10 @@ type FilteredSearch =
 
         else matches_filter
 
-    member this.Apply (charts: ChartMeta seq) =
+    member this.Apply (charts: ChartMeta seq) : ChartMeta seq =
         Seq.filter this.Compile charts
 
-    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) =
+    member this.Apply<'T> (charts: (ChartMeta * 'T) seq) : (ChartMeta * 'T) seq =
         Seq.filter (fst >> this.Compile) charts
 
     static member Build (parts: FilterPart list) : FilteredSearch =

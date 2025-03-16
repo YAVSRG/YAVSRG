@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Gameplay.Scoring
 
+open System.Collections.ObjectModel
 open Prelude
 open Prelude.Mods
 open Prelude.Charts
@@ -75,7 +76,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
     let mutable combo_breaks = 0
     let mutable max_possible_combo = 0
 
-    let break_combo(would_have_increased_combo: bool) =
+    let break_combo (would_have_increased_combo: bool) =
         if would_have_increased_combo then max_possible_combo <- max_possible_combo + 1
         combo_breaks <- combo_breaks + 1
         current_combo <- 0
@@ -85,12 +86,12 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         current_combo <- current_combo + 1
         best_combo <- max best_combo current_combo
 
-    let score_points(judgement_points, judgement) =
+    let score_points (judgement_points: float, judgement: int) =
         max_possible_points <- max_possible_points + 1.0
         points_scored <- points_scored + judgement_points
         judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
 
-    let add_judgement(judgement) =
+    let add_judgement (judgement: int) =
         judgement_counts.[judgement] <- judgement_counts.[judgement] + 1
 
     let ms_to_judgement (delta: GameplayTime) : int =
@@ -113,36 +114,36 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
         | AccuracyPoints.PointsPerJudgement weights ->
             fun _ (judgement: int) -> weights.[judgement]
 
-    let judgement_to_points (judgement: int) =
+    let judgement_to_points (judgement: int) : float =
         match ruleset.Accuracy with
         | AccuracyPoints.PointsPerJudgement weights -> weights.[judgement]
         | _ -> failwith "Ruleset isn't using PointsPerJudgement + a feature that expects it to be used. This line should be unreachable if the ruleset was validated"
 
-    member val Duration = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
-    member val JudgementCounts = judgement_counts
-    member val Rate = rate
-    member val Keys = keys
-    member val internal Notes = notes
+    member val Duration : Time = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
+    member val JudgementCounts : int array = judgement_counts
+    member val Rate : Rate = rate
+    member val Keys : int = keys
+    member val internal Notes : TimeArray<NoteRow> = notes
 
-    member this.Accuracy = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
-    member this.FormattedAccuracy = ruleset.FormatAccuracy this.Accuracy
+    member this.Accuracy : float = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
+    member this.FormattedAccuracy : string = ruleset.FormatAccuracy this.Accuracy
 
-    member this.CurrentCombo = current_combo
-    member this.BestCombo = best_combo
-    member this.ComboBreaks = combo_breaks
-    member this.MaxPossibleCombo = max_possible_combo
+    member this.CurrentCombo : int = current_combo
+    member this.BestCombo : int = best_combo
+    member this.ComboBreaks : int = combo_breaks
+    member this.MaxPossibleCombo : int = max_possible_combo
 
-    member this.MaxPossiblePoints = max_possible_points
-    member this.PointsScored = points_scored
+    member this.MaxPossiblePoints : float = max_possible_points
+    member this.PointsScored : float = points_scored
 
-    member this.Events = hit_events.AsReadOnly()
-    member this.OnEvent = on_event
+    member this.Events : ReadOnlyCollection<GameplayEvent> = hit_events.AsReadOnly()
+    member this.OnEvent : IEvent<GameplayEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
     member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplayProvider, notes, rate)
     member this.Recreate() = this.Recreate(ruleset)
 
-    member private this.ProcessHit(delta, is_missed) : ComboAction * GameplayAction =
+    member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyJudgeReleases _ ->
@@ -167,7 +168,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     Missed = is_missed
                 |}
 
-    member private this.ProcessHold(delta, is_missed) : ComboAction * GameplayAction =
+    member private this.ProcessHold(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyRequireHold _
@@ -195,7 +196,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
                     Missed = is_missed
                 |}
 
-    member private this.ProcessRelease(release_delta, missed, overheld, dropped, head_delta, missed_head) : ComboAction * GameplayAction =
+    member private this.ProcessRelease(release_delta: GameplayTime, missed: bool, overheld: bool, dropped: bool, head_delta: GameplayTime, missed_head: bool) : ComboAction * GameplayAction =
         match ruleset.HoldMechanics with
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
             let judgement =

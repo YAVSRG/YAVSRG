@@ -3,6 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Prelude
+open Prelude.Charts
 
 /// Abstraction that allows walking through a replay one row at a time
 /// The underlying replay could be being created live as a player plays the chart, backed by some pre-existing score, or being streamed in from a network for multiplayer
@@ -55,10 +56,10 @@ type StoredReplayProvider(data: ReplayData) =
 
     new(data: string) = StoredReplayProvider(Replay.decompress_string data)
 
-    static member AutoPlay(keys, notes) =
+    static member AutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplayProvider =
         Replay.perfect_replay keys notes |> StoredReplayProvider
 
-    static member WavingAutoPlay(keys, notes) =
+    static member WavingAutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplayProvider =
         Replay.auto_replay_waving keys notes |> StoredReplayProvider
 
 /// Replay provider that supports writing information to the replay live during gameplay
@@ -68,7 +69,7 @@ type LiveReplayProvider(first_note: Time) =
     let mutable export = 0
     let buffer = ResizeArray<ReplayRow>()
 
-    let mutable last_time = -Time.infinity
+    let mutable last_time : ChartTime = -Time.infinity
 
     member this.Add(time, bitmap) =
         if finished then invalidOp "Live play is declared as over; cannot append to replay"
@@ -89,7 +90,7 @@ type LiveReplayProvider(first_note: Time) =
     interface IReplayProvider with
         member this.Finished = finished
 
-        member this.HasNext time =
+        member this.HasNext (time: ChartTime) =
             if i >= buffer.Count then
                 false
             else
@@ -139,7 +140,7 @@ type OnlineReplayProvider() =
     interface IReplayProvider with
         member this.Finished = finished
 
-        member this.HasNext time =
+        member this.HasNext (time: ChartTime) =
             if i >= buffer.Count then
                 false
             else

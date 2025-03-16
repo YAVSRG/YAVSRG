@@ -47,7 +47,7 @@ module ImageServices =
 
     type BannerInfo = { BaseColor: Color; Emoji: string }
 
-    let generate_banner (info: BannerInfo) =
+    let generate_banner (info: BannerInfo) : Bitmap =
         let banner =
             new Bitmap(1200, 480, PixelFormats.Rgba32(info.BaseColor.R, info.BaseColor.G, info.BaseColor.B))
 

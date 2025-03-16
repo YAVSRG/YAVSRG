@@ -130,7 +130,6 @@ module ChartDatabase =
                             | Error _ -> incoming_chart, merged_chart_meta
                             | Ok existing_chart -> existing_chart, merged_chart_meta
 
-
                 db.Cache.[incoming_meta.Hash] <- accepted_chart_meta
                 yield accepted_chart_meta, accepted_chart
         }
@@ -247,7 +246,7 @@ module ChartDatabase =
 
     let private httpclient = new HttpClient()
 
-    let cdn_download (folder: string) (hash: string) (chart: Chart, song: Song) (db: ChartDatabase) =
+    let cdn_download (folder: string) (hash: string) (chart: Chart, song: Song) (db: ChartDatabase) : Async<bool> =
         async {
             let header = Archive.make_chart_header (chart, song)
 

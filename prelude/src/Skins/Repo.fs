@@ -16,7 +16,7 @@ module NoteskinPreview =
     let private COLUMN_START = (WIDTH - NOTE_SIZE * 4) / 2
     let private HITPOSITION = HEIGHT - NOTE_SIZE
 
-    let private get_texture (id: string) (ns: Noteskin) =
+    let private get_texture (id: string) (ns: Noteskin) : Bitmap * int * int =
         match ns.GetTexture id with
         | TextureOk(a, columns, rows) -> a, columns, rows
         | _ -> failwithf "Failed to get texture '%s'" id
@@ -121,7 +121,7 @@ module NoteskinPreview =
 
         img
 
-    let render_thumbnail (ns: Noteskin) =
+    let render_thumbnail (ns: Noteskin) : Bitmap =
         let bmp, columns, rows = get_texture "note" ns
         let size = min (bmp.Width / columns) NOTE_SIZE
         let thumbnail = new Bitmap(bmp.Width / columns, bmp.Height / rows)
@@ -138,7 +138,7 @@ type SkinVersion =
         Preview: string
         Download: string
     }
-        
+
 [<Json.AutoCodec>]
 type SkinGroup =
     {

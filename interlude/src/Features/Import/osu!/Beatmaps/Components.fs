@@ -42,7 +42,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                         Imports.auto_convert.Request(
                             (target, true, Content.Charts, Content.UserData),
                             function
-                            | Some result ->
+                            | Ok result ->
                                 Notifications.task_feedback (
                                     Icons.DOWNLOAD,
                                     %"notification.install_song",
@@ -51,7 +51,8 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                                 Content.TriggerChartAdded()
                                 status <- Installed
                                 File.Delete target
-                            | None ->
+                            | Error reason ->
+                                Logging.Error "Error importing %s: %s" target reason
                                 Notifications.error (%"notification.install_song_failed", data.title)
                                 status <- DownloadFailed
                                 File.Delete target

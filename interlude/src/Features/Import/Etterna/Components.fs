@@ -54,7 +54,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                         Imports.convert_stepmania_pack_zip_service.Request(
                             (target, data.name, Content.Charts, Content.UserData),
                             function
-                            | Some result ->
+                            | Ok result ->
                                 Notifications.task_feedback (
                                     Icons.DOWNLOAD,
                                     %"notification.install_pack",
@@ -64,7 +64,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                                 progress <- 1.0f
                                 status <- Installed
                                 File.Delete target
-                            | None ->
+                            | Error reason ->
+                                Logging.Error "Error installing %s: %s" target reason
                                 Notifications.error (%"notification.install_pack_failed", data.name)
                                 status <- DownloadFailed
                                 File.Delete target

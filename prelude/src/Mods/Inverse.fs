@@ -131,7 +131,7 @@ module Inverse =
 
         let mutable bpm_index = -1
 
-        let update_spacing now =
+        let update_spacing (now: Time) =
             while bpm_index < 0
                   || (bpm_index + 1 < chart.BPM.Length && chart.BPM.[bpm_index + 1].Time < now) do
                 let msPerBeat = chart.BPM.[bpm_index + 1].Data.MsPerBeat

@@ -48,7 +48,7 @@ module Imports =
                 }
         }
 
-    let convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) =
+    let convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
         async {
             let results =
                 Directory.EnumerateFiles path
@@ -101,7 +101,7 @@ module Imports =
             }
         }
 
-    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) =
+    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
             let song_folders =
@@ -115,7 +115,7 @@ module Imports =
             return results
         }
 
-    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase) =
+    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
         async {
             let config =
                 { ConversionOptions.Default with
@@ -146,7 +146,7 @@ module Imports =
             return results
         }
 
-    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase) =
+    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -154,8 +154,7 @@ module Imports =
                 Directory.Exists(dir)
                 && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
             then
-                Logging.Error "Can't extract zip to %s because that folder exists already" dir
-                return None
+                return Error (sprintf "Target extraction folder (%s) already exists" dir)
             else
                 ZipFile.ExtractToDirectory(path, dir)
 
@@ -177,20 +176,19 @@ module Imports =
                         results <- ConversionResult.Combine result results
 
                     delete_folder.Request(dir, ignore)
-                    return Some results
+                    return Ok results
                 | _ ->
-                    Logging.Warn "'%s': Extracted zip does not match the usual structure for a StepMania pack" dir
                     delete_folder.Request(dir, ignore)
-                    return None
+                    return Error "Extracted zip does not match the usual structure for a StepMania pack"
         }
 
     let convert_stepmania_pack_zip_service =
-        { new Async.Service<string * string * ChartDatabase * UserDatabase, ConversionResult option>() with
+        { new Async.Service<string * string * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
             override this.Handle((path, pack_name, chart_db, user_db)) =
                 convert_stepmania_pack_zip (path, pack_name, chart_db, user_db)
         }
 
-    let rec private auto_detect_import (path: string, move_assets: bool, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult option> =
+    let rec private auto_detect_import (path: string, move_assets: bool, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
@@ -209,7 +207,7 @@ module Imports =
                             user_db
                         )
                     log_conversion result
-                    return Some result
+                    return Ok result
                 | ChartArchive ext ->
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -217,16 +215,14 @@ module Imports =
                         Directory.Exists(dir)
                         && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
                     then
-                        Logging.Error "Can't extract %s to %s because that folder exists already" ext dir
-                        return None
+                        return Error (sprintf "Target extraction folder (%s) already exists" dir)
                     else
                         ZipFile.ExtractToDirectory(path, dir)
                         let! result = auto_detect_import (dir, true, chart_db, user_db)
                         delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
-                    Logging.Warn "%s: Unrecognised file for import" path
-                    return None
+                    return Error "File type not recognised as importable"
             | _ ->
                 match path with
                 | SongFolder ext ->
@@ -244,7 +240,7 @@ module Imports =
                             user_db
                         )
                     log_conversion result
-                    return Some result
+                    return Ok result
                 | FolderOfOszs ->
                     let! result =
                         convert_folder_of_oszs(
@@ -253,7 +249,7 @@ module Imports =
                             user_db
                         )
                     log_conversion result
-                    return Some result
+                    return Ok result
                 | PackFolder ->
                     let packname =
                         match Path.GetFileName path with
@@ -277,7 +273,7 @@ module Imports =
                             user_db
                         )
                     log_conversion result
-                    return Some result
+                    return Ok result
                 | FolderOfPacks ->
                     let mutable results = ConversionResult.Empty
                     for pack_folder in Directory.EnumerateDirectories path do
@@ -294,14 +290,13 @@ module Imports =
                         results <- ConversionResult.Combine result results
 
                     log_conversion results
-                    return Some results
+                    return Ok results
                 | _ ->
-                    Logging.Warn "%s: No importable folder structure detected" path
-                    return None
+                    return Error "No importable folder structure detected"
         }
 
     let auto_convert =
-        { new Async.Service<string * bool * ChartDatabase * UserDatabase, ConversionResult option>() with
+        { new Async.Service<string * bool * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
             override this.Handle((path, move_assets, chart_db, user_db)) =
                 auto_detect_import (path, move_assets, chart_db, user_db)
         }

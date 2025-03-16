@@ -5,7 +5,7 @@ open Prelude.Charts
 
 module NoLN =
 
-    let compact_empty (data: TimeArray<NoteRow>) =
+    let compact_empty (data: TimeArray<NoteRow>) : TimeArray<NoteRow> =
         TimeArray.filter (NoteRow.is_empty >> not) data
 
     let apply (chart: ModdedChartInternal) : ModdedChartInternal * bool =

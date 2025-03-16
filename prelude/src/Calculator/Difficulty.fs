@@ -60,7 +60,7 @@ module Difficulty =
 
     let calculate = calculate_uncached |> cached
 
-    let color (rating: float32) =
+    let color (rating: float32) : Color =
         try
             let a = rating * 0.1f |> min 1.0f
             let b = (rating * 0.1f |> max 1.0f) - 1.0f |> min 1.0f

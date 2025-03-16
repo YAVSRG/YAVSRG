@@ -107,12 +107,12 @@ module Mods =
         assert(APPLICATION_PRIORITY_ORDER.Length = AVAILABLE_MODS.Count)
         assert(MENU_DISPLAY_ORDER.Length = AVAILABLE_MODS.Count)
 
-    let name (id: string) (state: int option) =
+    let name (id: string) (state: int option) : string =
         match state with
         | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i" id i)
         | _ -> Localisation.localise (sprintf "mod.%s" id)
 
-    let desc (id: string) (state: int option) =
+    let desc (id: string) (state: int option) : string =
         match state with
         | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.desc" id i)
         | _ -> Localisation.localise (sprintf "mod.%s.desc" id)

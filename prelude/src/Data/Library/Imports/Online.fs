@@ -30,13 +30,13 @@ module OnlineImports =
             | false -> return Error "Download failure"
             | true ->
                 match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db) with
-                | Some result ->
+                | Ok result ->
                     progress 1.0f
                     Imports.delete_file.Request(target, ignore)
                     return Ok result
-                | None ->
+                | Error reason ->
                     Imports.delete_file.Request(target, ignore)
-                    return Error "Error extracting/converting zip"
+                    return Error reason
         }
 
     let private download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
@@ -46,13 +46,13 @@ module OnlineImports =
             | false -> return Error "Download failure"
             | true ->
                 match! Imports.auto_convert.RequestAsync(target, true, chart_db, user_db) with
-                | Some result ->
+                | Ok result ->
                     progress 1.0f
                     Imports.delete_file.Request(target, ignore)
                     return Ok result
-                | None ->
+                | Error reason ->
                     Imports.delete_file.Request(target, ignore)
-                    return Error "Error extracting/converting osz"
+                    return Error reason
         }
 
     let get_from_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) =

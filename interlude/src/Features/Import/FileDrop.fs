@@ -36,14 +36,15 @@ type ConfirmUnlinkedSongsImport(path) =
                     Imports.auto_convert.Request(
                         (path, false, Content.Charts, Content.UserData),
                         function
-                        | Some result ->
+                        | Ok result ->
                             Notifications.task_feedback (
                                 Icons.CHECK,
                                 %"notification.import_success",
                                 [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                             )
                             Content.TriggerChartAdded()
-                        | None ->
+                        | Error reason ->
+                            Logging.Error "Error importing %s: %s" path reason
                             Notifications.error (%"notification.import_failed", "")
                     )
 
@@ -111,13 +112,14 @@ module FileDrop =
             Imports.auto_convert.Request(
                 (path, false, Content.Charts, Content.UserData),
                 function
-                | Some result ->
+                | Ok result ->
                     Notifications.task_feedback (
                         Icons.CHECK,
                         %"notification.import_success",
                         [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
                     )
                     Content.TriggerChartAdded()
-                | None ->
+                | Error reason ->
+                    Logging.Error "Error importing %s: %s" path reason
                     Notifications.error (%"notification.import_failed", "")
             )

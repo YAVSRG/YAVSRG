@@ -76,7 +76,7 @@ type Theme(storage) as this =
     member this.GetSound(name: string) : Stream option =
         this.TryReadFile("Sounds", name + ".wav")
 
-    member this.GetFonts() =
+    member this.GetFonts() : Stream seq =
         seq {
             for file in this.GetFiles "Fonts" do
                 match Path.GetExtension(file).ToLower() with

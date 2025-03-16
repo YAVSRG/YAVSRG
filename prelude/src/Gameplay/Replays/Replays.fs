@@ -43,8 +43,8 @@ module Replay =
     let compress_string (data: ReplayData) : string =
         Convert.ToBase64String(compress_bytes data)
 
-    let compressed_string_to_bytes (data: string) = Convert.FromBase64String data
-    let compressed_bytes_to_string (data: byte array) = Convert.ToBase64String data
+    let compressed_string_to_bytes (data: string) : byte array = Convert.FromBase64String data
+    let compressed_bytes_to_string (data: byte array) : string = Convert.ToBase64String data
 
     let decompress_from (input_stream: Stream) : ReplayData =
         use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
