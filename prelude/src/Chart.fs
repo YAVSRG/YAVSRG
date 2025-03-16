@@ -296,9 +296,13 @@ module Chart =
                 elif not (Single.IsFinite (float32 time)) then
                     failwithf "BPM timestamp is invalid value: %f" time
                 elif meter <= 0<beat> then
-                    failwithf "BPM meter was non-positive: %i at %f" meter time
-                elif Single.IsNegative(float32 mspb) then
+                    failwithf "BPM meter is non-positive: %i at %f" meter time
+                elif mspb < 0.0f<ms / beat> then
                     failwithf "BPM is negative: %f mspb at %f" mspb time
+                elif Single.IsNaN (float32 mspb) then
+                    failwithf "BPM is invalid value: %f mspb at %f" mspb time
+
+                last_time <- time
 
             let mutable last_time = -Time.infinity
 
@@ -307,6 +311,10 @@ module Chart =
                     failwithf "SV appears before the previous time (%f, %f)" time last_time
                 elif not (Single.IsFinite (float32 time)) then
                     failwithf "SV timestamp is invalid value: %f" time
+                elif Single.IsNaN sv then
+                    failwithf "SV is NaN (should use +Infinity instead): %f" time
+
+                last_time <- time
 
             let mutable last_time = -Time.infinity
             let mutable ln = 0us
