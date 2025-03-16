@@ -350,6 +350,7 @@ module Input =
 
     let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
         let glfw_now = GLFW.GetTime()
+        let rate = Percyqaz.Flux.Audio.Song.playback_rate()
 
         let bind_match bind target =
             match bind, target with
@@ -366,7 +367,7 @@ module Input =
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] b then
-                        callback i (now - float32 (1000.0 * (glfw_now - time)) * 1.0f<ms>) (t <> InputEvType.Press)
+                        callback i (now - float32 (1000.0 * (glfw_now - time)) * 1.0f<ms / rate> * rate) (t <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
