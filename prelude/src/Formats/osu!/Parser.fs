@@ -83,10 +83,11 @@ type Storyboard =
 
 module private Parser =
 
-    let parse_failure message line =
+    let parse_failure (message: string) (line: string) =
         failwithf "osu! parse error: %s\nat: %s" message line
 
-    let parse_storyboard_event (csv: string array) =
+    /// Incomplete parser: Returns Some _ if parsing this event is supported and None if not
+    let parse_storyboard_event (csv: string array) : StoryboardObject option =
         match csv.[0].ToLowerInvariant() with
         | "0"
         | "background" ->
@@ -124,7 +125,7 @@ module private Parser =
         | "animation"
         | _ -> None
 
-    let parse_timing_point (csv: string array) =
+    let parse_timing_point (csv: string array) : TimingPoint =
         let uninherited = CsvHelpers.int_or 6 1 csv <> 0
         if uninherited then
             Uninherited {
@@ -146,7 +147,7 @@ module private Parser =
                 Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
             }
 
-    let parse_hit_sample (colon_separated_values: string array) =
+    let parse_hit_sample (colon_separated_values: string array) : HitSample =
         {
             NormalSet = CsvHelpers.enum_or 0 SampleSet.Default colon_separated_values
             AdditionSet = CsvHelpers.enum_or 1 SampleSet.Default colon_separated_values
@@ -155,7 +156,7 @@ module private Parser =
             Filename = (CsvHelpers.string_or 4 "" colon_separated_values).Trim('"')
         }
 
-    let parse_hit_object (line: string) (csv: string array) =
+    let parse_hit_object (line: string) (csv: string array) : HitObject =
         let x = CsvHelpers.int_or 0 0 csv
         let y = CsvHelpers.int_or 1 0 csv
         let time = CsvHelpers.int_or 2 0 csv

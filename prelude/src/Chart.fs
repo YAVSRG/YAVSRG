@@ -22,9 +22,9 @@ module NoteRow =
 
     let clone = Array.copy
 
-    let create_empty keycount : NoteRow = Array.create keycount NoteType.NOTHING
+    let create_empty (keycount: int) : NoteRow = Array.create keycount NoteType.NOTHING
 
-    let create_notes keycount (notes: Bitmask) =
+    let create_notes (keycount: int) (notes: Bitmask) =
         let nr = create_empty keycount
 
         for k in Bitmask.toSeq notes do
@@ -32,7 +32,7 @@ module NoteRow =
 
         nr
 
-    let create_ln_bodies keycount (notes: Bitmask) =
+    let create_ln_bodies (keycount: int) (notes: Bitmask) =
         let nr = create_empty keycount
 
         for k in Bitmask.toSeq notes do
@@ -76,7 +76,7 @@ module NoteRow =
         for k in columns do
             bw.Write(byte row.[k])
 
-    let pretty_print (row: NoteRow) =
+    let pretty_print (row: NoteRow) : string =
         let p =
             function
             | NoteType.NORMAL -> '#'
@@ -101,11 +101,11 @@ type Chart =
         Keys: int
         Notes: TimeArray<NoteRow>
         BPM: TimeArray<BPM>
-        SV: TimeArray<float32>
+        SV: TimeArray<SV>
     }
 
-    member this.FirstNote = (TimeArray.first this.Notes).Value.Time
-    member this.LastNote = (TimeArray.last this.Notes).Value.Time
+    member this.FirstNote : Time = (TimeArray.first this.Notes).Value.Time
+    member this.LastNote : Time = (TimeArray.last this.Notes).Value.Time
 
 (*
     The .yav file format stores additional metadata about a chart
@@ -156,13 +156,13 @@ type ChartOrigin =
         | Quaver _ -> "Quaver"
         | Etterna pack -> pack
 
-    member this.InfoString =
+    member this.InfoString : string =
         match this with
         | Osu osu -> sprintf "osu!|%s|%i|%i" osu.Md5 osu.BeatmapSetId osu.BeatmapId
         | Quaver quaver -> sprintf "Quaver|%s|%i|%i" quaver.Md5 quaver.MapSetId quaver.MapId
         | Etterna pack -> sprintf "Etterna|%s" pack
 
-    member this.SuitableForUpload =
+    member this.SuitableForUpload : bool =
         match this with
         | Osu osu -> osu.BeatmapSetId <> -1 && osu.BeatmapId <> 0
         | Quaver quaver -> quaver.MapSetId <> -1 && quaver.MapId <> 0
@@ -442,7 +442,7 @@ module Chart =
 
         printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
 
-    let scale (scale: Rate) (chart: Chart) =
+    let scale (scale: Rate) (chart: Chart) : Chart =
         { chart with
             Notes = TimeArray.scale scale chart.Notes
             BPM = TimeArray.scale scale chart.BPM

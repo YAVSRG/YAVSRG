@@ -82,7 +82,7 @@ module Common =
         let private mapping = new Dictionary<string, string>()
         let mutable private loaded_path = ""
 
-        let load_language language_id =
+        let load_language (language_id: string) =
 
             let path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", language_id + ".txt")
 
@@ -100,15 +100,15 @@ module Common =
             with err ->
                 Logging.Critical "Failed to load localisation file '%s': %O" path err
 
-        let localise str : string =
-            if mapping.ContainsKey str then
-                mapping.[str]
+        let localise (key: string) : string =
+            if mapping.ContainsKey key then
+                mapping.[key]
             else
-                str
+                key
 
-        let localise_with xs str =
-            let mutable s = localise str
-            List.iteri (fun i x -> s <- s.Replace("%" + i.ToString(), x)) xs
+        let localise_with (data: string list) (key: string) =
+            let mutable s = localise key
+            List.iteri (fun i x -> s <- s.Replace("%" + i.ToString(), x)) data
             s
 
     [<AutoOpen>]
@@ -117,7 +117,7 @@ module Common =
         /// Shorthand operator to get the localised text from a locale string id
         let (~%) = Localisation.localise
 
-        let inline (%>) (args: string list) (localisation_key: string) =
+        let inline (%>) (args: string list) (localisation_key: string) : string =
             Localisation.localise_with args localisation_key
 
     (*
@@ -208,7 +208,8 @@ module Common =
     type Color = Drawing.Color
 
     type Drawing.Color with
-        static member FromHsv(H: float32, S: float32, V: float32) =
+
+        static member FromHsv(H: float32, S: float32, V: float32) : Color =
             let C = V * S
             let X = C * (1.0f - MathF.Abs((H * 6.0f) %% 2.0f - 1.0f))
             let m = V - C
@@ -272,12 +273,12 @@ module Common =
         with err ->
             Logging.Debug "Failed to open url '%s' in browser: %O" url err
 
-    let get_game_folder name =
+    let get_game_folder (name: string) : string =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
         Directory.CreateDirectory p |> ignore
         p
 
-    let load_important_json_file<'T> name path prompt =
+    let load_important_json_file<'T> (name: string) (path: string) (prompt: bool) : 'T =
         if File.Exists path then
             match JSON.FromFile path with
             | Ok data -> data
@@ -295,7 +296,7 @@ module Common =
             Logging.Info "No %s file found, creating it." name
             JSON.Default<'T>()
 
-    let save_important_json_file<'T> path (data: 'T) =
+    let save_important_json_file<'T> (path: string) (data: 'T) =
         let write = Path.ChangeExtension(path, ".new")
         let bak = Path.ChangeExtension(path, ".bak")
         let bak2 = Path.ChangeExtension(path, ".bak2")
@@ -312,7 +313,7 @@ module Common =
 
         File.Move(write, path)
 
-    let inline format_duration_ms (ms: 'T) =
+    let inline format_duration_ms (ms: 'T) : string =
         let ms = float32 ms
         if ms > 3600_000f then
             sprintf
@@ -323,7 +324,7 @@ module Common =
         else
             sprintf "%i:%02i" ((ms / 60_000f) % 60f |> floor |> int) ((ms / 1_000f) % 60f |> floor |> int)
 
-    let format_timespan (ts: TimeSpan) =
+    let format_timespan (ts: TimeSpan) : string =
 
         if ts < TimeSpan.Zero then
             "IN THE FUTURE?"

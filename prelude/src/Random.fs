@@ -14,14 +14,14 @@ type PseudoRandom =
     }
 
     member private this.Step() =
-        this.State <- 
-            if this.State &&& 1uL <> 0uL then 
-                (this.State >>> 1) ^^^ 0x800000000000000DuL 
-            else 
+        this.State <-
+            if this.State &&& 1uL <> 0uL then
+                (this.State >>> 1) ^^^ 0x800000000000000DuL
+            else
                 this.State >>> 1
 
     /// Returns number in the range [0 .. max)
-    member this.Next(max: int) =
+    member this.Next(max: int) : int =
         for i = 1 to 8 do
             this.Step()
 

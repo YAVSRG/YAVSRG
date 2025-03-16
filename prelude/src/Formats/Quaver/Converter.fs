@@ -1,6 +1,5 @@
 ﻿namespace Prelude.Formats.Quaver
 
-open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common

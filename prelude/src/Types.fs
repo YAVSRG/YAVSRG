@@ -11,7 +11,7 @@ module Types =
 
         let empty = 0us
 
-        let rec count (x: Bitmask) =
+        let rec count (x: Bitmask) : int =
             match x with
             | 0us -> 0
             | n -> (if (n &&& 1us) = 1us then 1 else 0) + (count (n >>> 1))
@@ -21,14 +21,14 @@ module Types =
         let unset_key (k: int) (x: Bitmask) = ~~~(1us <<< k) &&& x
         let toggle_key (k: int) (x: Bitmask) = (1us <<< k) ^^^ x
 
-        let rec toSeq (x: Bitmask) =
+        let rec toSeq (x: Bitmask) : int seq =
             seq {
                 for i = 0 to 15 do
                     if (has_key i x) then
                         yield i
             }
 
-        let ofSeq (l: seq<int>) =
+        let ofSeq (l: int seq) : Bitmask =
             let mutable bm: Bitmask = 0us
             Seq.iter (fun k -> bm <- set_key k bm) l
             bm
@@ -52,8 +52,8 @@ module Types =
 
     module Time =
 
-        let inline of_number (f: ^T) = float32 f * 1.0f<ms>
-        let infinity = infinityf * 1.0f<ms>
+        let inline of_number (f: ^T) : Time = float32 f * 1.0f<ms>
+        let infinity : Time = infinityf * 1.0f<ms>
 
     type GameplayTime = float32<ms / rate>
 
@@ -70,25 +70,27 @@ module Types =
 
     module TimeArray =
 
-        let filter (f: 'T -> bool) (arr: TimeItem<'T> array) =
+        let filter (f: 'T -> bool) (arr: TimeArray<'T>) : TimeArray<'T> =
             Array.filter (fun { Time = _; Data = d } -> f d) arr
 
-        let map (c: 'T -> 'U) (arr: TimeItem<'T> array) =
+        let map (c: 'T -> 'U) (arr: TimeArray<'T>) : TimeArray<'U> =
             Array.map (fun { Time = time; Data = d } -> { Time = time; Data = c d }) arr
 
-        let last (arr: TimeArray<'T>) =
+        let last (arr: TimeArray<'T>) : TimeItem<'T> option =
             if arr.Length > 0 then Some arr.[arr.Length - 1] else None
 
-        let first (arr: TimeArray<'T>) =
+        let first (arr: TimeArray<'T>) : TimeItem<'T> option =
             if arr.Length > 0 then Some arr.[0] else None
 
-        let scale (scale: float32<'u>) (arr: TimeArray<'T>) =
+        let scale (scale: float32<'u>) (arr: TimeArray<'T>) : TimeArray<'T> =
             arr
             |> Array.map (fun { Time = time; Data = d } -> { Time = time * float32 scale; Data = d })
 
+        // todo: find_left, find_right, between are never used. remove? or add tests for them for future use?
+
         // greatest index i where arr.[i] <= time
         // if no such index because you are before all events, -1
-        let find_left time (arr: TimeArray<'T>) =
+        let find_left (time: Time) (arr: TimeArray<'T>) =
             let mutable low = 0
             let mutable high = arr.Length
             let mutable mid = -1
@@ -104,7 +106,7 @@ module Types =
             high - 1
 
         // least index i where arr.[i] >= time
-        let find_right time (arr: TimeArray<'T>) =
+        let find_right (time: Time) (arr: TimeArray<'T>) =
             let mutable low = 0
             let mutable high = arr.Length
             let mutable mid = -1
@@ -119,7 +121,7 @@ module Types =
 
             low
 
-        let between time1 time2 (arr: TimeArray<'T>) =
+        let between (time1: Time) (time2: Time) (arr: TimeArray<'T>) : TimeItem<'T> seq =
             seq {
                 let mutable i = find_right time1 arr
 
@@ -130,7 +132,7 @@ module Types =
 
         open System.IO
 
-        let read<'T> (br: BinaryReader) (f: BinaryReader -> 'T) =
+        let read<'T> (br: BinaryReader) (f: BinaryReader -> 'T) : TimeArray<'T> =
             let count = br.ReadInt32()
             let array = Array.zeroCreate<TimeItem<'T>> count
 

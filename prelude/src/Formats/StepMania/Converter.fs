@@ -84,6 +84,7 @@ module StepMania_To_Interlude =
         (bpms: (float32<beat> * float32<beat / minute>) list)
         (stops: (float32<beat> * float32) list)
         (start: Time)
+        : int * TimeArray<NoteRow> * TimeArray<BPM>
         =
 
         let keys =
@@ -227,14 +228,14 @@ module StepMania_To_Interlude =
 
         let path = Path.GetDirectoryName action.Source
 
-        let rec metadata_fallback x =
-            match x with
+        let rec metadata_fallback (choices: string list) : string =
+            match choices with
             | "" :: xs -> metadata_fallback xs
             | s :: _ -> s.Trim()
             | [] -> ""
 
-        let rec metadata_fallback_opt x =
-            match x with
+        let rec metadata_fallback_opt (choices: string list) : string option =
+            match choices with
             | "" :: xs -> metadata_fallback_opt xs
             | s :: _ -> Some(s.Trim())
             | [] -> None
@@ -321,7 +322,7 @@ module StepMania_To_Interlude =
                 original, Some translit
             else translit, Some original
 
-        let convert_difficulty (i: int) (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
+        let convert_difficulty (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
                 let (keys, notes, bpm) =
                     convert_measures diff.STEPSTYPE diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
@@ -393,4 +394,4 @@ module StepMania_To_Interlude =
                 Logging.Debug "Unexpected error converting %s: %O" action.Source other_error
                 Error (action.Source, other_error.Message)
 
-        sm.Charts |> List.mapi convert_difficulty
+        sm.Charts |> List.map convert_difficulty

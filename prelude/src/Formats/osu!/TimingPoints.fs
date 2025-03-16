@@ -7,6 +7,8 @@ type TimingEffect =
     | Kiai = 1
     | OmitFirstBarline = 8
 
+/// Represents a red line in the osu! editor
+/// Note that `time` being a float is not a mistake, unlike hitobjects, osu! supports floats for the timestamp of timing points
 type UninheritedTimingPoint =
     {
         Time: float
@@ -28,7 +30,7 @@ type UninheritedTimingPoint =
             (int this.Effects)
     static member inline Create(time: ^X, ms_per_beat: ^Y, meter: ^Z) =
         {
-            Time = int time
+            Time = float time
             MsPerBeat = float ms_per_beat |> max 0.0
             Meter = int meter
             SampleSet = SampleSet.Soft
@@ -37,6 +39,8 @@ type UninheritedTimingPoint =
             Effects = TimingEffect.None
         }
 
+/// Represents a green line in the osu! editor
+/// Note that `time` being a float is not a mistake, unlike hitobjects, osu! supports floats for the timestamp of timing points
 type InheritedTimingPoint =
     {
         Time: float
@@ -56,7 +60,7 @@ type InheritedTimingPoint =
             (int this.Effects)
     static member inline Create(time: ^Z, multiplier: ^Y) =
         {
-            Time = int time
+            Time = float time
             Multiplier = float multiplier
             SampleSet = SampleSet.Soft
             SampleIndex = 0

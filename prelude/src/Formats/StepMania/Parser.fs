@@ -144,4 +144,4 @@ module StepmaniaParser =
         | :? IOException as exn -> Result.Error exn.Message
 
 type StepMania() =
-    static member FromFile(path: string) = StepmaniaParser.parse_file path
+    static member FromFile(path: string) : Result<StepManiaFile, string> = StepmaniaParser.parse_file path

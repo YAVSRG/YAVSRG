@@ -16,10 +16,10 @@ module Osu_To_Interlude =
         let holding_until: Time option array = Array.zeroCreate keys
         let mutable last_row: TimeItem<NoteRow> = { Time = -Time.infinity; Data = [||] }
 
-        let x_to_column (x: float) =
+        let x_to_column (x: float) : int =
             x / 512.0 * float keys |> int |> min (keys - 1) |> max 0
 
-        let finish_holds time =
+        let finish_holds (time: Time) =
             let mutable earliest_upcoming_release = Time.infinity
 
             let find_earliest_upcoming_release () =
@@ -59,7 +59,7 @@ module Osu_To_Interlude =
 
                 find_earliest_upcoming_release ()
 
-        let add_note column time =
+        let add_note (column: int) (time: Time) =
             finish_holds time
             assert (time >= last_row.Time)
 
@@ -82,9 +82,10 @@ module Osu_To_Interlude =
             | NoteType.HOLDHEAD -> Logging.Debug "Fixing stacked note at %f, column %i" time (column + 1)
             | other -> skip_conversion (sprintf "Stacked note at %f, column %i, coincides with %A" time (column + 1) other)
 
-        let start_hold column time end_time =
+        let start_hold (column: int) (time: Time) (end_time: Time) =
             finish_holds time
             assert (time >= last_row.Time)
+            assert (end_time > time)
 
             if time > last_row.Time then
                 last_row <-

@@ -105,7 +105,7 @@ module QuaverChart =
             Error err.Message
 
 type QuaverChart with
-    static member FromFile(path: string) = QuaverChart.from_file path
+    static member FromFile(path: string) : Result<QuaverChart, string> = QuaverChart.from_file path
 
     /// The internal hash osu! uses for a .osu file
     static member Hash(stream: Stream) =
