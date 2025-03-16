@@ -161,8 +161,8 @@ module Osu_To_Interlude =
         let sv = ResizeArray<TimeItem<float32>>()
         let bpm = ResizeArray<TimeItem<BPM>>()
 
-        // in osu!, an inherited point before an uninherited point stops the file from being playable or playtestable in the editor
-        // so 1.0f is a suitable placeholder
+        // in osu!, an inherited point before an uninherited point stops the file from being playable, or playtestable in the editor
+        // This algorithm creates defined behaviour for it, but keep that in mind
         let mutable current_bpm_mult = 1.0f
 
         for p in points do

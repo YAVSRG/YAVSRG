@@ -2,6 +2,7 @@
 
 open System
 open NUnit.Framework
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Formats
@@ -239,3 +240,57 @@ module Conversions =
             Assert.Fail()
         with ConversionSkipException reason ->
             Assert.Pass(reason)
+
+    [<Test>]
+    let OsuParsing_TimingPointsCanHaveNonIntegerTimes () =
+        let points =
+            [
+                "200,250,4,1,0,10,1,0"
+                "5000,250,4,1,0,10,1,0"
+                "5000.1,25,4,1,0,10,1,0"
+                "5000.2,250,4,1,0,10,1,0"
+            ]
+            |> List.map OsuParser.parse_timing_point
+        printfn "%A" points
+
+        let bpm, sv = Osu_To_Interlude.convert_timing_points points 200000.0f<ms>
+        Assert.AreEqual(
+            [|
+                { Time = 200.0f<ms>; Data = { MsPerBeat = 250.0f<ms / beat>; Meter = 4<beat> } }
+                { Time = 5000.0f<ms>; Data = { MsPerBeat = 250.0f<ms / beat>; Meter = 4<beat> } }
+                { Time = 5000.1f<ms>; Data = { MsPerBeat = 25.0f<ms / beat>; Meter = 4<beat> } }
+                { Time = 5000.2f<ms>; Data = { MsPerBeat = 250.0f<ms / beat>; Meter = 4<beat> } }
+            |],
+            bpm
+        )
+        Assert.AreEqual(
+            [|
+                { Time = 5000.1f<ms>; Data = 10.0f }
+                { Time = 5000.2f<ms>; Data = 1.0f }
+            |],
+            sv |> cleaned_sv
+        )
+
+    // todo: test to cover negative bpms clamped to 0pm
+    // todo: test to cover svs clamped to 0.1x - 10x (that will currently fail)
+    // todo: test to cover SV pruning logic
+
+    [<Test>]
+    let BackbeatManiac () =
+        let beatmap = Beatmap.FromFile "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu" |> expect
+        let converted =
+            Osu_To_Interlude.convert
+                beatmap
+                {
+                    Config = ConversionOptions.Default
+                    Source = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
+                }
+            |> expect
+        printfn "%A" converted.Header
+        let chart = converted.Chart
+
+        match Chart.check chart with
+        | Ok _ -> ()
+        | Error reason -> Assert.Fail(reason)
+
+        Assert.AreEqual(Chart.hash chart, "785CAC8E416B32EF134D16D504E1F71E43AC595219EC347B89E896758F5F2795")

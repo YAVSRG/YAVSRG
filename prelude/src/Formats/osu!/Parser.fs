@@ -81,13 +81,13 @@ type Storyboard =
                 yield object.ToString()
         }
 
-module private Parser =
+module OsuParser =
 
-    let parse_failure (message: string) (line: string) =
+    let private parse_failure (message: string) (line: string) =
         failwithf "osu! parse error: %s\nat: %s" message line
 
     /// Incomplete parser: Returns Some _ if parsing this event is supported and None if not
-    let parse_storyboard_event (csv: string array) : StoryboardObject option =
+    let private _parse_storyboard_event (csv: string array) : StoryboardObject option =
         match csv.[0].ToLowerInvariant() with
         | "0"
         | "background" ->
@@ -125,7 +125,14 @@ module private Parser =
         | "animation"
         | _ -> None
 
-    let parse_timing_point (csv: string array) : TimingPoint =
+    /// Incomplete parser: Returns Some _ if parsing this event is supported and None if not
+    let parse_storyboard_event (line: string): StoryboardObject option =
+        let csv = line.Split(',', StringSplitOptions.TrimEntries)
+        if csv.Length > 1 then
+            _parse_storyboard_event csv
+        else parse_failure "Empty line" line
+
+    let private _parse_timing_point (csv: string array) : TimingPoint =
         let uninherited = CsvHelpers.int_or 6 1 csv <> 0
         if uninherited then
             Uninherited {
@@ -147,7 +154,15 @@ module private Parser =
                 Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
             }
 
-    let parse_hit_sample (colon_separated_values: string array) : HitSample =
+    let parse_timing_point (line: string) : TimingPoint =
+        let csv = line.Split(',', StringSplitOptions.TrimEntries)
+        if csv.Length > 1 && csv.Length < 6 then
+            parse_failure "Failed to parse timing point" line
+        elif csv.Length >= 6 then
+            _parse_timing_point csv
+        else parse_failure "Empty line" line
+
+    let private parse_hit_sample (colon_separated_values: string array) : HitSample =
         {
             NormalSet = CsvHelpers.enum_or 0 SampleSet.Default colon_separated_values
             AdditionSet = CsvHelpers.enum_or 1 SampleSet.Default colon_separated_values
@@ -156,7 +171,7 @@ module private Parser =
             Filename = (CsvHelpers.string_or 4 "" colon_separated_values).Trim('"')
         }
 
-    let parse_hit_object (line: string) (csv: string array) : HitObject =
+    let private _parse_hit_object (line: string) (csv: string array) : HitObject =
         let x = CsvHelpers.int_or 0 0 csv
         let y = CsvHelpers.int_or 1 0 csv
         let time = CsvHelpers.int_or 2 0 csv
@@ -263,6 +278,14 @@ module private Parser =
         else
             parse_failure "Unrecognised object type" line
 
+    let parse_hit_object (line: string) =
+        let csv = line.Split(',', StringSplitOptions.TrimEntries)
+        if csv.Length > 1 && csv.Length < 5 then
+            parse_failure "Failed to parse hit object" line
+        elif csv.Length >= 5 then
+            _parse_hit_object line csv
+        else parse_failure "Empty line" line
+
     [<Struct>]
     type private ParserState =
         | Nothing
@@ -287,9 +310,8 @@ module private Parser =
         let events = ResizeArray<StoryboardObject>()
 
         while reader.Peek() >= 0 do
-            let line = reader.ReadLine()
-            let trimmed = line.Trim()
-            match trimmed with
+            let line = reader.ReadLine().Trim()
+            match line with
             | "" -> ()
             | _ when line.StartsWith("//") -> ()
             | "[General]" ->
@@ -310,35 +332,30 @@ module private Parser =
                 state <- TimingPoints
             | "[HitObjects]" ->
                 state <- Objects
-            | "[Colours]" -> // todo: support colors header
+            | "[Colours]" ->
                 state <- Colors
             | _ ->
 
             match state with
             | Nothing -> ()
             | Header ->
-                let parts = trimmed.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+                let parts = line.Split([|':'|], 2, StringSplitOptions.TrimEntries)
                 if parts.Length = 2 then
                     section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
             | Events ->
-                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
-                if csv.Length > 1 then
-                    match parse_storyboard_event csv with
-                    | Some event -> events.Add event
-                    | None -> ()
+                line
+                |> parse_storyboard_event
+                |> Option.iter events.Add
             | TimingPoints ->
-                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
-                if csv.Length > 1 && csv.Length < 6 then
-                    parse_failure "Failed to parse timing point" line
-                elif csv.Length >= 6 then
-                    parse_timing_point csv |> timing.Add
+                line
+                |> parse_timing_point
+                |> timing.Add
             | Objects ->
-                let csv = trimmed.Split(',', StringSplitOptions.TrimEntries)
-                if csv.Length > 1 && csv.Length < 5 then
-                    parse_failure "Failed to parse hit object" line
-                elif csv.Length >= 5 then
-                    parse_hit_object line csv |> objects.Add
-            | Colors -> ()
+                line
+                |> parse_hit_object
+                |> objects.Add
+            | Colors ->
+                () // todo: support colors header
 
         {
             General = General.FromMap general.Value
@@ -346,6 +363,12 @@ module private Parser =
             Metadata = Metadata.FromMap metadata.Value
             Difficulty = Difficulty.FromMap difficulty.Value
             Events = List.ofSeq events
+            // The osu! client sorts all hitobjects and timing points by timestamp for when users have put them in the wrong order via notepad
+            // IMPORTANT: If multiple timing points are stacked on the same timestamp,
+            //   osu! will act UNPREDICTABLY and put them in an arbitrary order since it does not use a stable sort
+            // I have ruled to use a stable sort (`Seq.sortBy`)
+            //   This means stacked timing points will stay in the order they are in the .osu file after being sorted
+            // This gives a defined behaviour to my parse and conversion but anyone writing their own should be aware that it's UB
             Objects = objects |> Seq.sortBy (_.Time) |> List.ofSeq
             Timing = timing |> Seq.sortBy (_.Time) |> List.ofSeq
         }
@@ -354,7 +377,7 @@ type Beatmap with
     static member FromFile(path: string) =
         try
             use stream = File.OpenRead(path)
-            Ok (Parser.beatmap_from_stream stream)
+            Ok (OsuParser.beatmap_from_stream stream)
         with err ->
             Error err.Message
     member this.ToFile(path: string) =
