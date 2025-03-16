@@ -62,7 +62,7 @@ module DbChartData =
                 )
         }
 
-    let get (chart_id: string) (db: Database) =
+    let get (chart_id: string) (db: Database) : DbChartData =
         GET.Execute chart_id db
         |> expect
         |> Array.tryExactlyOne

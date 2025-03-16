@@ -36,7 +36,7 @@ module Suggestion =
 
     let mutable recommended_already = Set.empty
 
-    let most_common_pattern (total: Time) (patterns: PatternReport) =
+    let most_common_pattern (total: Time) (patterns: PatternReport) : CorePattern =
         Array.tryHead patterns.Clusters
         |> Option.map _.Pattern
         |> Option.defaultValue Stream

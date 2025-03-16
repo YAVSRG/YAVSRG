@@ -79,22 +79,22 @@ module Mods =
 [<AutoOpen>]
 module internal OsuDbHelpers =
 
-    let read_byte (br: BinaryReader) = br.ReadByte()
-    let read_short (br: BinaryReader) = br.ReadInt16()
-    let read_int (br: BinaryReader) = br.ReadInt32()
-    let read_long (br: BinaryReader) = br.ReadInt64()
-    let read_single (br: BinaryReader) = br.ReadSingle()
-    let read_double (br: BinaryReader) = br.ReadDouble()
-    let read_bool (br: BinaryReader) = br.ReadByte() <> 0x00uy
+    let read_byte (br: BinaryReader) : byte = br.ReadByte()
+    let read_short (br: BinaryReader) : int16 = br.ReadInt16()
+    let read_int (br: BinaryReader) : int = br.ReadInt32()
+    let read_long (br: BinaryReader) : int64 = br.ReadInt64()
+    let read_single (br: BinaryReader) : float32 = br.ReadSingle()
+    let read_double (br: BinaryReader) : float = br.ReadDouble()
+    let read_bool (br: BinaryReader) : bool = br.ReadByte() <> 0x00uy
 
-    let read_string (br: BinaryReader) =
+    let read_string (br: BinaryReader) : string =
         let b = br.ReadByte()
 
         if b = 0x00uy then ""
         elif b = 0x0buy then br.ReadString()
         else failwith "Unknown byte while reading string"
 
-    let read_int_double_pair (br: BinaryReader) =
+    let read_int_double_pair (br: BinaryReader) : int * float =
         if br.ReadByte() <> 0x08uy then
             failwith "Got unexpected byte at start of int-double pair"
 
@@ -108,7 +108,7 @@ module internal OsuDbHelpers =
 
         int, double
 
-    let read_star_ratings (br: BinaryReader) =
+    let read_star_ratings (br: BinaryReader) : (int * float) array =
         let count = read_int br
 
         if count < 0 then

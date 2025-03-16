@@ -95,7 +95,7 @@ module DbSessions =
                 }
         }
 
-    let get_all (db: Database) =
+    let get_all (db: Database) : Session array =
         GET_ALL.Execute () db
         |> expect
 

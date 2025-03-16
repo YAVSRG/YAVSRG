@@ -50,7 +50,6 @@ module PersonalBests =
                             if new_bests <> existing_bests then
                                 data.PersonalBests <- new_bests
 
-                    Logging.Info("Finished processing personal bests for all rulesets")
                     UserDatabase.save_changes request.UserDatabase
                     Logging.Info("Finished processing personal bests for all rulesets")
                 }

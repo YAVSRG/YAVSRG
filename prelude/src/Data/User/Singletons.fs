@@ -26,7 +26,7 @@ module DbSingletons =
             Read = fun r -> r.Json JSON
         }
 
-    let get_or_default (id: string) (default_value: 'T) (db: Database) =
+    let get_or_default (id: string) (default_value: 'T) (db: Database) : 'T =
         GET.Execute id db
         |> expect
         |> Array.tryExactlyOne
@@ -40,11 +40,11 @@ module DbSingletons =
                 VALUES (@Id, json(@Data));
             """
             Parameters = [ "@Id", SqliteType.Text, -1; "@Data", SqliteType.Text, -1 ]
-            FillParameters = fun p (id, data: 'T) -> 
+            FillParameters = fun p (id, data: 'T) ->
                 p.String id
                 p.Json JSON data
         }
 
-    [<RequiresExplicitTypeArguments>] 
+    [<RequiresExplicitTypeArguments>]
     let save<'T> (id: string) (value: 'T) (db: Database) =
         SAVE.Execute (id, value) db |> expect |> ignore

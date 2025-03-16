@@ -15,7 +15,7 @@ type OsuExportOptions =
 
 module OsuExport =
 
-    let notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) =
+    let notes_to_hitobjects (notes: TimeArray<NoteRow>) (keys: int) : HitObject list =
         let rec ln_lookahead k (snaps: TimeItem<NoteRow> list) =
             match snaps with
             | { Time = offset; Data = nr } :: ss ->
@@ -158,6 +158,8 @@ module OsuExport =
 
 module Exports =
 
+    /// Creates an .osz representation of the chart in the given folder `export_folder`
+    /// If successful, the exported beatmap data + the filename of the .osz are returned
     let create_osz (options: OsuExportOptions) (chart: Chart) (chart_meta: ChartMeta) (export_folder: string) : Result<Beatmap * string, exn> =
         try
             let beatmap = OsuExport.convert options chart chart_meta

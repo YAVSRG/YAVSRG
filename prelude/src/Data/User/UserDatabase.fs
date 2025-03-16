@@ -4,7 +4,6 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Data.Sqlite
 open Prelude
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 
 type internal ChangeTracker<'T> =
@@ -140,7 +139,7 @@ module UserDatabase =
             else
                 false
 
-    let get_scores_between (start_time: int64) (end_time: int64) (db: UserDatabase) =
+    let get_scores_between (start_time: int64) (end_time: int64) (db: UserDatabase) : (string * Score) array =
         DbScores.get_between start_time end_time db.Database
 
     let transfer_scores (before_hash: string) (after_hash: string) (db: UserDatabase) =

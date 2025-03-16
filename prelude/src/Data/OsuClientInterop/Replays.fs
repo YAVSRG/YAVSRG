@@ -57,7 +57,7 @@ module OsuReplay =
         }
         |> Array.ofSeq
 
-    let encode (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) =
+    let encode (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
 
         let first_note = first_note |> float32 |> round |> int
 
