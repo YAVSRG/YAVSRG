@@ -3,6 +3,7 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Interlude.UI
 open Interlude.Features.Gameplay
 
 type CurrentChart() =
@@ -21,5 +22,7 @@ type CurrentChart() =
         let diff_text =
             match SelectedChart.CACHE_DATA with
             | None -> "--"
-            | Some c -> c.OriginString
+            | Some c ->
+                if c.Audio.IsAbsolute then Icons.LINK + " " + c.OriginString
+                else c.OriginString
         Text.fill_b (Style.font, diff_text, this.Bounds.Shrink(20.0f, 10.0f).SliceB(50.0f), Colors.text, Alignment.CENTER)
