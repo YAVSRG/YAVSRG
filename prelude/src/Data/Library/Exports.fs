@@ -178,23 +178,23 @@ module Exports =
 
             do
                 match chart_meta.Background.Path with
-                | Some bg_path ->
+                | Some bg_path when File.Exists(bg_path) ->
                     use fs = File.Open(bg_path, FileMode.Open)
                     let bg_file_entry = archive.CreateEntry(beatmap.Events |> Seq.pick (function Background(bg, _, _) -> Some bg | _ -> None))
                     use bg_file_stream = bg_file_entry.Open()
                     fs.CopyTo(bg_file_stream)
-                | None -> ()
+                | _ -> ()
 
             do
                 match chart_meta.Audio.Path with
-                | Some audio_path ->
+                | Some audio_path when File.Exists(audio_path) ->
                     use fs =
                         File.Open(audio_path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
 
                     let audio_file_entry = archive.CreateEntry(beatmap.General.AudioFilename)
                     use audio_file_stream = audio_file_entry.Open()
                     fs.CopyTo(audio_file_stream)
-                | None -> ()
+                | _ -> ()
             Ok (beatmap, archive_file_name)
         with err ->
             Error err
