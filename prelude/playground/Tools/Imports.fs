@@ -17,7 +17,7 @@ let main () =
                     convert_chart_file
                         {
                             Source = file
-                            Config = ConversionOptions.Default
+                            Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
                         } do
                     match converted with
                     | Ok { Chart = chart } ->
