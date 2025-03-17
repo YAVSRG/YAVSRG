@@ -22,7 +22,7 @@ module OsuParity =
     let TEST_OSU_FILE =
         Beatmap.FromFile "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" |> expect
     let TEST_CHART =
-        (Osu_To_Interlude.convert TEST_OSU_FILE { Config = ConversionOptions.Default; Source = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" } |> expect).Chart
+        (Osu_To_Interlude.convert TEST_OSU_FILE { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" } |> expect).Chart
 
     let TEST_REPLAY_FILE_2 =
         OsuReplay.TryReadFile "./Data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr" |> Option.get
@@ -31,7 +31,7 @@ module OsuParity =
     let TEST_OSU_FILE_2 =
         Beatmap.FromFile "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" |> expect
     let TEST_CHART_2 =
-        (Osu_To_Interlude.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Default; Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" } |> expect).Chart
+        (Osu_To_Interlude.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" } |> expect).Chart
 
     [<Test>]
     let Replay_MatchesTestFile_1 () =

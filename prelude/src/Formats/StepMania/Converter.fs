@@ -351,23 +351,21 @@ module StepMania_To_Interlude =
                         AudioFile =
                             match find_audio () with
                             | Some file ->
-                                if action.Config.MoveAssets then
-                                    ImportAsset.Relative file
-                                else
-                                    ImportAsset.Absolute(Path.Combine(path, file))
-                            | None ->
-                                //Logging.Warn "Audio file for %s not found: %s" path sm.MUSIC
-                                ImportAsset.Missing
+                                let absolute_audio_path = Path.Combine(path, file)
+
+                                match action.Config.AssetBehaviour with
+                                | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
+                                | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
+                            | None -> ImportAsset.Missing
                         BackgroundFile =
                             match find_background () with
                             | Some file ->
-                                if action.Config.MoveAssets then
-                                    ImportAsset.Relative file
-                                else
-                                    ImportAsset.Absolute(Path.Combine(path, file))
-                            | None ->
-                                //Logging.Warn "Background file for %s not found: %s" path sm.BACKGROUND
-                                ImportAsset.Missing
+                                let absolute_background_path = Path.Combine(path, file)
+
+                                match action.Config.AssetBehaviour with
+                                | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
+                                | LinkAssetFiles -> ImportAsset.Link absolute_background_path
+                            | None -> ImportAsset.Missing
 
                         Origins =
                             action.Config.EtternaPackName

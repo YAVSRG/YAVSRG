@@ -117,11 +117,7 @@ module Imports =
 
     let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
         async {
-            let config =
-                { ConversionOptions.Default with
-                    MoveAssets = true
-                    PackName = Path.GetFileName folder_of_oszs
-                }
+            let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
             let mutable results = ConversionResult.Empty
             for osz in Directory.EnumerateFiles folder_of_oszs do
                 match osz with
@@ -165,11 +161,7 @@ module Imports =
                         let! result =
                             convert_pack_folder(
                                 pack_folder,
-                                { ConversionOptions.Default with
-                                    EtternaPackName = Some pack_name
-                                    PackName = Path.GetFileName pack_folder
-                                    MoveAssets = true
-                                },
+                                ConversionOptions.EtternaPack(pack_name, None, CopyAssetFiles),
                                 chart_db,
                                 user_db
                             )
@@ -188,21 +180,21 @@ module Imports =
                 convert_stepmania_pack_zip (path, pack_name, chart_db, user_db)
         }
 
-    let rec private auto_detect_import (path: string, move_assets: bool, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
+    let rec private auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
                 match path with
                 | ChartFile ext ->
+                    let folder_name =
+                        match ext with
+                        | ".osu" -> "osu!"
+                        | ".qua" -> "Quaver"
+                        | _ -> "Singles"
                     let! result =
                         convert_song_folder(
                             Path.GetDirectoryName path,
-                            { ConversionOptions.Default with
-                                PackName =
-                                    if ext = ".osu" then "osu!"
-                                    elif ext = ".qua" then "Quaver"
-                                    else "Singles"
-                            },
+                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
                             chart_db,
                             user_db
                         )
@@ -218,7 +210,7 @@ module Imports =
                         return Error (sprintf "Target extraction folder (%s) already exists" dir)
                     else
                         ZipFile.ExtractToDirectory(path, dir)
-                        let! result = auto_detect_import (dir, true, chart_db, user_db)
+                        let! result = auto_detect_import (dir, chart_db, user_db)
                         delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
@@ -226,16 +218,16 @@ module Imports =
             | _ ->
                 match path with
                 | SongFolder ext ->
+                    let folder_name =
+                        match ext with
+                        | ".osu" -> "osu!"
+                        | ".qua" -> "Quaver"
+                        | _ -> "Singles"
+
                     let! result =
                         convert_song_folder(
                             path,
-                            { ConversionOptions.Default with
-                                MoveAssets = move_assets
-                                PackName =
-                                    if ext = ".osu" then "osu!"
-                                    elif ext = ".qua" then "Quaver"
-                                    else "Singles"
-                            },
+                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
                             chart_db,
                             user_db
                         )
@@ -251,7 +243,7 @@ module Imports =
                     log_conversion result
                     return Ok result
                 | PackFolder ->
-                    let packname =
+                    let folder_name =
                         match Path.GetFileName path with
                         | "Songs" ->
                             if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then
@@ -265,10 +257,7 @@ module Imports =
                     let! result =
                         convert_pack_folder(
                             path,
-                            { ConversionOptions.Default with
-                                PackName = packname
-                                MoveAssets = move_assets
-                            },
+                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
                             chart_db,
                             user_db
                         )
@@ -280,10 +269,7 @@ module Imports =
                         let! result =
                             convert_pack_folder(
                                 pack_folder,
-                                { ConversionOptions.Default with
-                                    PackName = Path.GetFileName pack_folder
-                                    MoveAssets = move_assets
-                                },
+                                ConversionOptions.Pack(Path.GetFileName pack_folder, None, CopyAssetFiles),
                                 chart_db,
                                 user_db
                             )
@@ -296,7 +282,7 @@ module Imports =
         }
 
     let auto_convert =
-        { new Async.Service<string * bool * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
-            override this.Handle((path, move_assets, chart_db, user_db)) =
-                auto_detect_import (path, move_assets, chart_db, user_db)
+        { new Async.Service<string * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
+            override this.Handle((path, chart_db, user_db)) =
+                auto_detect_import (path, chart_db, user_db)
         }

@@ -282,7 +282,7 @@ module Conversions =
             Osu_To_Interlude.convert
                 beatmap
                 {
-                    Config = ConversionOptions.Default
+                    Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
                     Source = "./Data/Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu"
                 }
             |> expect

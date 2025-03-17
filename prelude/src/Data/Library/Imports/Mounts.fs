@@ -49,13 +49,7 @@ module Mount =
                         match source.LastImported with
                         | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
                         | None -> ()
-                        let config =
-                            { ConversionOptions.Default with
-                                MoveAssets = false
-                                ChangedAfter = source.LastImported
-                                PackName = packname
-                            }
-
+                        let config = ConversionOptions.Pack(packname, source.LastImported, LinkAssetFiles)
                         let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db)
                         source.LastImported <- Some DateTime.UtcNow
                         log_conversion result
@@ -70,11 +64,7 @@ module Mount =
                             let! result =
                                 Imports.convert_pack_folder(
                                     pack_folder,
-                                    { ConversionOptions.Default with
-                                        MoveAssets = false
-                                        ChangedAfter = source.LastImported
-                                        PackName = Path.GetFileName pack_folder
-                                    },
+                                    ConversionOptions.Pack( Path.GetFileName pack_folder, source.LastImported, LinkAssetFiles),
                                     chart_db,
                                     user_db
                                 )

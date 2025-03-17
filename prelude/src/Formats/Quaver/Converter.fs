@@ -137,25 +137,21 @@ module Quaver_To_Interlude =
 
                     PreviewTime = Time.of_number b.SongPreviewTime
                     BackgroundFile =
-                        let requested_file = b.BackgroundFile
+                        if b.BackgroundFile = "" then ImportAsset.Missing else
 
-                        if File.Exists(Path.Combine(path, requested_file)) then
-                            if action.Config.MoveAssets then
-                                ImportAsset.Relative requested_file
-                            else
-                                ImportAsset.Absolute(Path.Combine(path, requested_file))
-                        else
-                            ImportAsset.Missing
+                        let absolute_background_path = Path.Combine(path, b.BackgroundFile)
+
+                        match action.Config.AssetBehaviour with
+                        | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
+                        | LinkAssetFiles -> ImportAsset.Link absolute_background_path
                     AudioFile =
-                        let requested_file = b.AudioFile
+                        if b.AudioFile = "" then ImportAsset.Missing else
 
-                        if File.Exists(Path.Combine(path, requested_file)) then
-                            if action.Config.MoveAssets then
-                                ImportAsset.Relative requested_file
-                            else
-                                ImportAsset.Absolute(Path.Combine(path, requested_file))
-                        else
-                            ImportAsset.Missing
+                        let absolute_audio_path = Path.Combine(path, b.AudioFile)
+
+                        match action.Config.AssetBehaviour with
+                        | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
+                        | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
 
                     Origins =
                         {

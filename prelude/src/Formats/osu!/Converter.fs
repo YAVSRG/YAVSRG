@@ -233,25 +233,23 @@ module Osu_To_Interlude =
 
                     PreviewTime = float32 b.General.PreviewTime * 1.0f<ms>
                     BackgroundFile =
-                        let r = find_background_file b.Events
+                        let background_file = find_background_file b.Events
+                        if background_file = "" then ImportAsset.Missing else
 
-                        if File.Exists(Path.Combine(path, r)) then
-                            if action.Config.MoveAssets then
-                                ImportAsset.Relative r
-                            else
-                                ImportAsset.Absolute(Path.Combine(path, r))
-                        else
-                            ImportAsset.Missing
+                        let absolute_background_path = Path.Combine(path, background_file)
+
+                        match action.Config.AssetBehaviour with
+                        | CopyAssetFiles -> ImportAsset.Copy absolute_background_path
+                        | LinkAssetFiles -> ImportAsset.Link absolute_background_path
                     AudioFile =
-                        let r = b.General.AudioFilename
+                        let audio_file = b.General.AudioFilename
+                        if audio_file = "" then ImportAsset.Missing else
 
-                        if File.Exists(Path.Combine(path, r)) then
-                            if action.Config.MoveAssets then
-                                ImportAsset.Relative r
-                            else
-                                ImportAsset.Absolute(Path.Combine(path, r))
-                        else
-                            ImportAsset.Missing
+                        let absolute_audio_path = Path.Combine(path, audio_file)
+
+                        match action.Config.AssetBehaviour with
+                        | CopyAssetFiles -> ImportAsset.Copy absolute_audio_path
+                        | LinkAssetFiles -> ImportAsset.Link absolute_audio_path
 
                     Origins =
                         {

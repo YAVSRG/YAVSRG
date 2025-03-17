@@ -20,7 +20,7 @@ module Graph =
             (Osu_To_Interlude.convert
                 beatmap
                 {
-                    Config = ConversionOptions.Default
+                    Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
                     Source = beatmap_path
                 }
              |> expect)

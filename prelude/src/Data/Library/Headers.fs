@@ -84,7 +84,7 @@ type ChartMeta =
             },
             true
 
-    static member FromImport (timestamp: int64) (import_chart: ImportChart) : ChartMeta =
+    static member FromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
         let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.Notes)
@@ -102,18 +102,8 @@ type ChartMeta =
             Creator = import_chart.Header.Creator
             Tags = import_chart.Header.Tags
 
-            Background =
-                match import_chart.Header.BackgroundFile with
-                | ImportAsset.Asset s -> AssetPath.Hash s
-                | ImportAsset.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f)) // todo: it depends. this responsibility should be somewhere else
-                | ImportAsset.Absolute p -> AssetPath.Absolute p
-                | ImportAsset.Missing -> AssetPath.Missing
-            Audio =
-                match import_chart.Header.AudioFile with
-                | ImportAsset.Asset s -> AssetPath.Hash s
-                | ImportAsset.Relative f -> AssetPath.Absolute (Path.Combine(source_folder_path, f))
-                | ImportAsset.Absolute p -> AssetPath.Absolute p
-                | ImportAsset.Missing -> AssetPath.Missing
+            Background = handle_asset import_chart.Header.BackgroundFile
+            Audio = handle_asset import_chart.Header.AudioFile
             PreviewTime = import_chart.Header.PreviewTime
 
             Packs = Set.singleton import_chart.PackName

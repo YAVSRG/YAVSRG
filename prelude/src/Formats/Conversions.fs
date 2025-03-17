@@ -4,19 +4,32 @@ open System
 open System.IO
 open Prelude
 
+type ConversionAssetBehaviour =
+    | CopyAssetFiles
+    | LinkAssetFiles
+
 type ConversionOptions =
     {
-        MoveAssets: bool
+        AssetBehaviour: ConversionAssetBehaviour
         EtternaPackName: string option
         ChangedAfter: DateTime option
         PackName: string
     }
-    static member Default =
+
+    static member EtternaPack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
         {
-            MoveAssets = false
+            AssetBehaviour = asset_behaviour
+            EtternaPackName = Some pack_name
+            ChangedAfter = changed_after
+            PackName = pack_name
+        }
+
+    static member Pack(pack_name: string, changed_after: DateTime option, asset_behaviour: ConversionAssetBehaviour) =
+        {
+            AssetBehaviour = asset_behaviour
             EtternaPackName = None
-            ChangedAfter = None
-            PackName = "Singles"
+            ChangedAfter = changed_after
+            PackName = pack_name
         }
 
 type ConversionAction =

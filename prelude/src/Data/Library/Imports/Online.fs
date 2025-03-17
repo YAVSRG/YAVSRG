@@ -45,7 +45,7 @@ module OnlineImports =
             match! WebServices.download_file.RequestAsync((url, target, progress)) with
             | false -> return Error "Download failure"
             | true ->
-                match! Imports.auto_convert.RequestAsync(target, true, chart_db, user_db) with
+                match! Imports.auto_convert.RequestAsync(target, chart_db, user_db) with
                 | Ok result ->
                     progress 1.0f
                     Imports.delete_file.Request(target, ignore)

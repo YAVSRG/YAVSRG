@@ -143,8 +143,8 @@ module Archive =
             Source = song.Source
             Tags = chart.Tags
             PreviewTime = chart.PreviewTime
-            BackgroundFile = ImportAsset.Asset chart.BackgroundHash
-            AudioFile = ImportAsset.Asset chart.AudioHash
+            BackgroundFile = ImportAsset.Download chart.BackgroundHash
+            AudioFile = ImportAsset.Download chart.AudioHash
             Origins = chart.Origins
         }
 

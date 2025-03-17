@@ -22,6 +22,7 @@
     <Compile Include="Random.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Chart.fs" />
+    <Compile Include="Imports.fs" />
     <Compile Include="Formats\Conversions.fs" />
     <Compile Include="Formats\osu!\Shared.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
