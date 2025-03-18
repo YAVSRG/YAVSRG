@@ -1628,26 +1628,28 @@ module Events =
 
     [<Test>]
     let IgnoreNotesBefore_NoPartialHolds2 () =
-        let replay =
-            ReplayBuilder()
-                .KeyDownFor(0.0f<ms>, 100.0f<ms>)
-                .KeyDownFor(110.0f<ms>, 200.0f<ms>)
-                .Build()
-
         let notes =
             ChartBuilder(4)
-                .Hold(50.0f<ms>, 90.0f<ms>)
+                .Hold(0.0f<ms>, 90.0f<ms>)
                 .Hold(100.0f<ms>, 190.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownUntil(-1.0f<ms>, 91.0f<ms>)
+                .KeyDownUntil(101.0f<ms>, 189.0f<ms>)
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 75.0f<ms>
         event_processing.Update Time.infinity
 
+        printfn "%A" (event_processing.Events |> Seq.map (fun e -> e.Action))
+
         Assert.AreEqual(
             [
-                HOLD(-10.0f<ms / rate>, false)
-                RELEASE(-10.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
+                HOLD(1.0f<ms / rate>, false)
+                RELEASE(-1.0f<ms / rate>, false, false, false, 1.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map (fun e -> e.Action)
         )
