@@ -73,7 +73,8 @@ type LiveReplayProvider(first_note: Time) =
 
     member this.Add(time, bitmap) =
         if finished then invalidOp "Live play is declared as over; cannot append to replay"
-        if time - first_note < last_time then failwith "Input timestamps go backwards"
+        if time - first_note < last_time then
+            failwithf "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
 
         last_time <- time - first_note
         buffer.Add(struct (last_time, bitmap))
@@ -169,7 +170,7 @@ type OnlineReplayProvider() =
         if finished then
             invalidOp "Online play is declared as over; cannot append to replay"
         elif timestamp < current_chart_time then
-            failwith "Timestamp for replay data went backwards"
+            failwithf "Timestamp for replay data went backwards: %f, %f" timestamp current_chart_time
         else
             current_chart_time <- timestamp
             try
