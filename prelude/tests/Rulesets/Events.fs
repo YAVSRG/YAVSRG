@@ -12,13 +12,13 @@ module Events =
 
     [<Test>]
     let BasicEndToEnd () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)
@@ -31,7 +31,7 @@ module Events =
 
     [<Test>]
     let TapNotes_LateOffsets () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -39,7 +39,7 @@ module Events =
                 .Note(3000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 250.0f<ms>)
                 .KeyDownFor(1010.0f<ms>, 250.0f<ms>)
@@ -59,10 +59,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_EarlyOffsets () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -70,7 +70,7 @@ module Events =
                 .Note(3000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 250.0f<ms>)
                 .KeyDownFor(990.0f<ms>, 250.0f<ms>)
@@ -90,16 +90,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-        
+
     [<Test(Description = "Interlude's behaviour: When a badly hit note is closer than the next note that would be hit, ignore the input")>]
     let TapNotes_EarlyBoundary_InterludeCbrushWindow () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-180.0f<ms>, 30.0f<ms>) // hits note 0
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>) // would be +0ms on note 0, which has a -180ms hit. eat the hit (don't have it hit note 1)
@@ -115,16 +115,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test(Description = "Interlude's behaviour: If a hit is at least +-90ms off, look for something better to hit")>]
     let TapNotes_LateBoundary_InterludeCbrushWindow () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(180.0f<ms>, 30.0f<ms>) // would be +180ms on note 0, but +0ms on note 1, so hit note 1
                 .KeyDownFor(360.0f<ms>, 30.0f<ms>) // this tap goes nowhere, ghost tap
@@ -144,13 +144,13 @@ module Events =
 
     [<Test>]
     let TapNotes_EarlyBoundary_OsuMania () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-180.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
@@ -168,21 +168,21 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_LateBoundary_OsuMania () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(180.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(360.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
@@ -195,10 +195,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_SplitChords () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>, 0)
                 .Note(0.0f<ms>, 1)
@@ -210,7 +210,7 @@ module Events =
                 .Note(1000.0f<ms>, 3)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDown(-20.0f<ms>, 0)
                 .KeyDown(-5.0f<ms>, 1)
@@ -263,10 +263,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Column
         )
-        
+
     [<Test>]
     let TapNotes_ColumnLock_OsuMania () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
@@ -276,7 +276,7 @@ module Events =
                 .Note(500.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-90.0f<ms>, 10.0f<ms>)
                 .KeyDownFor(10.0f<ms>, 30.0f<ms>)
@@ -286,7 +286,7 @@ module Events =
                 .KeyDownFor(410.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(510.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
@@ -304,10 +304,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_ColumnLock_Interlude () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
@@ -317,7 +317,7 @@ module Events =
                 .Note(500.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-90.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(10.0f<ms>, 30.0f<ms>) // this input gets eaten
@@ -342,10 +342,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_ColumnLock_Interlude_HalfRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(50.0f<ms>)
@@ -355,7 +355,7 @@ module Events =
                 .Note(250.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-45.0f<ms>, 15.0f<ms>)
                 .KeyDownFor(5.0f<ms>, 15.0f<ms>) // eaten like in `TapNotes_ColumnLock_Interlude`
@@ -380,10 +380,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_ColumnLock_Interlude_DoubleRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
@@ -393,7 +393,7 @@ module Events =
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-180.0f<ms>, 60.0f<ms>)
                 .KeyDownFor(20.0f<ms>, 60.0f<ms>) // eaten like in `TapNotes_ColumnLock_Interlude`
@@ -418,10 +418,10 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TapNotes_ColumnLock_Interlude_Threshold () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
@@ -431,7 +431,7 @@ module Events =
                 .Note(500.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-89.0f<ms>, 10.0f<ms>)
                 .KeyDownFor(11.0f<ms>, 30.0f<ms>) // this input does not get eaten
@@ -457,16 +457,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let GhostTap_BetweenNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 30.0f<ms>)
@@ -484,16 +484,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test(Description = "Extra inputs before the first note should not count as ghost taps")>]
     let GhostTap_ImpossibleBeforeNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-1000.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
@@ -504,7 +504,7 @@ module Events =
         event_processing.Update Time.infinity
 
         Assert.False(
-            event_processing.Events 
+            event_processing.Events
             |> Seq.exists (fun ev -> ev.Action = GHOST_TAP)
         )
 
@@ -515,16 +515,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test(Description = "Extra inputs after the last note still count as ghost taps")>]
     let GhostTap_AfterNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(1000.0f<ms>, 30.0f<ms>)
@@ -542,17 +542,17 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let MissedNotes_Basic () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .Build()
 
@@ -570,14 +570,14 @@ module Events =
 
     [<Test>]
     let MissedNotes_AfterHit () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDown(0.0f<ms>)
                 .Build()
@@ -596,14 +596,14 @@ module Events =
 
     [<Test>]
     let MissedNotes_BetweenHits () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(400.0f<ms>, 30.0f<ms>)
@@ -620,16 +620,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let MissedNotes_TapsOutOfRange () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-200.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(800.0f<ms>, 30.0f<ms>)
@@ -648,13 +648,13 @@ module Events =
 
     [<Test>]
     let MissedNotes_TapsInOtherColumns () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-200.0f<ms>, 30.0f<ms>, 1)
                 .KeyDownFor(800.0f<ms>, 30.0f<ms>, 2)
@@ -670,15 +670,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
         )
-    
+
     [<Test>]
     let HoldNote_Basic () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -693,15 +693,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Basic_Offset () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(10.0f<ms>, 990.0f<ms>)
                 .Build()
@@ -716,15 +716,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_InnerBoundaries () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(180.0f<ms>, 820.0f<ms>)
                 .Build()
@@ -742,12 +742,12 @@ module Events =
 
     [<Test>]
     let HoldNote_OuterBoundaries () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(-180.0f<ms>, 1180.0f<ms>)
                 .Build()
@@ -762,15 +762,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_InnerBoundaries_HalfRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(90.0f<ms>, 910.0f<ms>)
                 .Build()
@@ -788,12 +788,12 @@ module Events =
 
     [<Test>]
     let HoldNote_OuterBoundaries_HalfRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(-90.0f<ms>, 1090.0f<ms>)
                 .Build()
@@ -808,15 +808,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_InnerBoundaries_DoubleRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(360.0f<ms>, 640.0f<ms>)
                 .Build()
@@ -834,12 +834,12 @@ module Events =
 
     [<Test>]
     let HoldNote_OuterBoundaries_DoubleRate () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownUntil(-360.0f<ms>, 1360.0f<ms>)
                 .Build()
@@ -854,15 +854,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Missed () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .Build()
 
@@ -876,15 +876,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Overheld () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 2000.0f<ms>)
                 .Build()
@@ -899,15 +899,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Dropped () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 500.0f<ms>)
                 .Build()
@@ -923,15 +923,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Regrabbed () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 400.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 500.0f<ms>)
@@ -949,15 +949,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Multiple_Regrabs () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 300.0f<ms>)
                 .KeyDownFor(350.0f<ms>, 100.0f<ms>)
@@ -967,7 +967,7 @@ module Events =
 
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
-        
+
         Assert.AreEqual(
             event_processing.Events |> Seq.map _.Time |> Seq.sort,
             event_processing.Events |> Seq.map _.Time
@@ -986,15 +986,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Regrabbed_Overheld () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 400.0f<ms>)
                 .KeyDownFor(500.0f<ms>, 1000.0f<ms>)
@@ -1012,15 +1012,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_MissedHead_Regrabbed () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(500.0f<ms>, 500.0f<ms>)
                 .Build()
@@ -1036,15 +1036,15 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_MissedHead_HeldEarly () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(-500.0f<ms>, 1500.0f<ms>)
                 .Build()
@@ -1059,16 +1059,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Dropped_IntoNote () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 999.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 500.0f<ms>)
                 .KeyDownFor(990.0f<ms>, 10.0f<ms>)
@@ -1086,16 +1086,16 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let HoldNote_Dropped_IntoHoldNote () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 999.0f<ms>)
                 .Hold(1000.0f<ms>, 1010.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 500.0f<ms>)
                 .KeyDownFor(990.0f<ms>, 30.0f<ms>)
@@ -1117,12 +1117,12 @@ module Events =
 
     [<Test>]
     let HoldNote_VeryLateRegrab () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 500.0f<ms>)
                 .KeyDownFor(1179.0f<ms>, 1.0f<ms>)
@@ -1140,17 +1140,17 @@ module Events =
             ],
             event_processing.Events |> Seq.map _.Action
         )
-    
+
     [<Test>]
     let TimeStepping_Normal () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Hold(500.0f<ms>, 1000.0f<ms>)
                 .Note(1500.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(500.0f<ms>, 200.0f<ms>)
                 .KeyDownFor(800.0f<ms>, 200.0f<ms>)
@@ -1199,14 +1199,14 @@ module Events =
 
     [<Test(Description = "Passing in decreasing timestamps should perhaps crash in future, currently parts of the client rely on it not doing anything")>]
     let TimeStepping_BackwardsHasNoEffect () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Hold(500.0f<ms>, 1000.0f<ms>)
                 .Note(1500.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(500.0f<ms>, 200.0f<ms>)
                 .KeyDownFor(800.0f<ms>, 200.0f<ms>)
@@ -1260,21 +1260,21 @@ module Events =
             event_step_processing.Events,
             event_processing.Events
         )
-    
+
     [<Test(Description = "Interlude's cbrush window mechanic means you can hit notes in reverse order. Documented so it isn't reported as a bug")>]
     let SCJ4_BackwardsNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(100.0f<ms>, 1.0f<ms>)
                 .KeyDownFor(102.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1293,18 +1293,18 @@ module Events =
 
     [<Test(Description = "It is impossible to hit notes backwards in osu!mania (stable)")>]
     let OsuOd8_NoBackwardsNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(100.0f<ms>, 1.0f<ms>)
                 .KeyDownFor(102.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1320,21 +1320,21 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
-    
+
     [<Test(Description = "Etterna uses nearest note, it is known that you can hit notes backwards")>]
     let Wife3_BackwardsNotes () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(51.0f<ms>, 1.0f<ms>)
                 .KeyDownFor(53.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1350,20 +1350,20 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
-    
+
     [<Test>]
     let Wife3_TouchingWindows () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(180.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1382,17 +1382,17 @@ module Events =
 
     [<Test>]
     let SCJ4_TouchingWindows () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.0f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(180.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1408,20 +1408,20 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
-    
+
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.5f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(180.5f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(Wife3.create 4, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1464,20 +1464,20 @@ module Events =
             Accuracy = AccuracyPoints.PointsPerJudgement [|1.0; 0.0|]
             Formatting = { DecimalPlaces = DecimalPlaces.TWO }
         }
-    
+
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed_AsymmetricalWindows () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(90.5f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(90.5f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(SIMPLE_RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1493,16 +1493,16 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
-    
+
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed_WiderWindowsDueToReleases () =
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(90.5f<ms>)
                 .Build()
 
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(90.5f<ms>, 30.0f<ms>)
                 .Build()
@@ -1511,7 +1511,7 @@ module Events =
             { SIMPLE_RULESET with
                 HoldMechanics = HoldMechanics.OnlyRequireHold 180.0f<ms / rate>
             }
-                
+
         let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
@@ -1527,37 +1527,37 @@ module Events =
             event_processing.Events |> Seq.map (_.Time),
             event_processing.Events |> Seq.map (_.Time) |> Seq.sort
         )
-    
+
     [<Test>]
     let FirstNoteIndependence () =
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(22.5f<ms>, 30.0f<ms>)
                 .KeyDownFor(90.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(200.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         printfn "FIRST NOTE AT 0ms"
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         printfn "FIRST NOTE AT 1000ms"
 
-        let notes_2 = 
+        let notes_2 =
             ChartBuilder(4)
                 .Note(1000.0f<ms>)
                 .Note(1100.0f<ms>)
                 .Note(1200.0f<ms>)
                 .Build()
-                
+
         let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
         event_processing_2.Update Time.infinity
 
@@ -1565,56 +1565,55 @@ module Events =
 
     [<Test>]
     let FirstNoteIndependence_IgnoreNotesBefore () =
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(22.5f<ms>, 30.0f<ms>)
                 .KeyDownFor(90.0f<ms>, 30.0f<ms>)
                 .KeyDownFor(200.0f<ms>, 30.0f<ms>)
                 .Build()
-                
+
         printfn "FIRST NOTE AT 0ms"
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 100.0f<ms>
         event_processing.Update Time.infinity
 
         printfn "FIRST NOTE AT 1000ms"
 
-        let notes_2 = 
+        let notes_2 =
             ChartBuilder(4)
                 .Note(1000.0f<ms>)
                 .Note(1100.0f<ms>)
                 .Note(1200.0f<ms>)
                 .Build()
-                
+
         let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
         event_processing_2.IgnoreNotesBefore 1100.0f<ms>
         event_processing_2.Update Time.infinity
 
         Assert.AreEqual(event_processing.Events, event_processing_2.Events)
 
-    
     [<Test>]
     let IgnoreNotesBefore_NoPartialHolds () =
-        let replay = 
+        let replay =
             ReplayBuilder()
                 .KeyDownFor(0.0f<ms>, 1000.0f<ms>)
                 .KeyDownFor(2000.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let notes = 
+        let notes =
             ChartBuilder(4)
                 .Hold(0.0f<ms>, 1000.0f<ms>)
                 .Hold(2000.0f<ms>, 3000.0f<ms>)
                 .Build()
-                
+
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 500.0f<ms>
         event_processing.Update Time.infinity
@@ -1623,6 +1622,32 @@ module Events =
             [
                 HOLD(0.0f<ms / rate>, false)
                 RELEASE(0.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
+            ],
+            event_processing.Events |> Seq.map (fun e -> e.Action)
+        )
+
+    [<Test>]
+    let IgnoreNotesBefore_NoPartialHolds2 () =
+        let replay =
+            ReplayBuilder()
+                .KeyDownFor(0.0f<ms>, 100.0f<ms>)
+                .KeyDownFor(110.0f<ms>, 200.0f<ms>)
+                .Build()
+
+        let notes =
+            ChartBuilder(4)
+                .Hold(50.0f<ms>, 90.0f<ms>)
+                .Hold(100.0f<ms>, 190.0f<ms>)
+                .Build()
+
+        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.IgnoreNotesBefore 75.0f<ms>
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                HOLD(-10.0f<ms / rate>, false)
+                RELEASE(-10.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
             ],
             event_processing.Events |> Seq.map (fun e -> e.Action)
         )

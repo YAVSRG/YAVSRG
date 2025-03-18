@@ -100,9 +100,11 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
             while tail_search_index < hit_data.Length do
                 let { Data = struct (_, status) } = hit_data.[tail_search_index]
 
-                assert(status.[k] <> HitFlags.RELEASE_ACCEPTED)
+                // Only possible if an LN has been modified to be already hit via `IgnoreNotesBefore`, for practice mode
+                if status.[k] = HitFlags.RELEASE_ACCEPTED then
+                    tail_search_index <- hit_data.Length
 
-                if status.[k] = HitFlags.RELEASE_REQUIRED then
+                elif status.[k] = HitFlags.RELEASE_REQUIRED then
 
                     status.[k] <- HitFlags.RELEASE_ACCEPTED
                     hold_states.[k] <- H_NOTHING, head_index
@@ -302,9 +304,11 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider
                 let { Time = t; Data = struct (_, status) } = hit_data.[tail_search_index]
                 let d = now - t
 
-                assert(status.[k] <> HitFlags.RELEASE_ACCEPTED)
+                // Only possible if an LN has been modified to be already hit via `IgnoreNotesBefore`, for practice mode
+                if status.[k] = HitFlags.RELEASE_ACCEPTED then
+                    tail_search_index <- hit_data.Length
 
-                if status.[k] = HitFlags.RELEASE_REQUIRED then
+                elif status.[k] = HitFlags.RELEASE_REQUIRED then
                     found <- tail_search_index
                     delta <- d
                     tail_search_index <- hit_data.Length
