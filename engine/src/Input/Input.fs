@@ -111,6 +111,7 @@ type internal FrameEvents =
         Alt: bool
         Shift: bool
         TypedText: string
+        Time: float
     }
 
 module internal InputThread =
@@ -252,6 +253,7 @@ module internal InputThread =
                             Ctrl = ctrl
                             Shift = shift
                             Alt = alt
+                            Time = GLFW.GetTime()
                         },
                         if typing then
                             match typing_buffered_input with
@@ -349,7 +351,6 @@ module Input =
         out
 
     let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
-        let glfw_now = GLFW.GetTime()
         let rate = Percyqaz.Flux.Audio.Song.playback_rate()
 
         let bind_match bind target =
@@ -367,7 +368,7 @@ module Input =
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] b then
-                        callback i (now - float32 (1000.0 * (glfw_now - time)) * 1.0f<ms / rate> * rate) (t <> InputEvType.Press)
+                        callback i (now - float32 (999.0 * (this_frame.Time - time)) * 1.0f<ms / rate> * rate) (t <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
