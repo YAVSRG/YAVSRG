@@ -23,7 +23,7 @@ module OnlineImports =
             | WebResult.Exception err -> return Error err.Message
         }
 
-    let private download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
             match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
@@ -40,7 +40,7 @@ module OnlineImports =
                     return Error reason
         }
 
-    let private download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
             match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
@@ -48,7 +48,7 @@ module OnlineImports =
                 progress Faulted
                 return Error "Download failure"
             | true ->
-                match! Imports.auto_convert.RequestAsync(target, chart_db, user_db, progress) with
+                match! Imports.auto_detect_import(target, chart_db, user_db, progress) with
                 | Ok result ->
                     Imports.delete_file.Request(target, ignore)
                     return Ok result
@@ -57,7 +57,7 @@ module OnlineImports =
                     return Error reason
         }
 
-    let get_from_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
+    let download_by_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
         async {
             match origin with
 

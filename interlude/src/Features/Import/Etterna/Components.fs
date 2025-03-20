@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
 open Prelude.Data.Library.Imports
-open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 
@@ -42,36 +41,24 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     let download () =
         if status <> Downloading then
-            let target =
-                Path.Combine(get_game_folder "Downloads", System.Guid.NewGuid().ToString() + ".zip")
-
             progress <- 0.0f
 
-            WebServices.download_file.Request(
-                (data.download, target, (fun p -> progress <- p)),
-                fun completed ->
-                    if completed then
-                        Imports.convert_stepmania_pack_zip_service.Request(
-                            (target, data.name, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.name),
-                            function
-                            | Ok result ->
-                                Notifications.task_feedback (
-                                    Icons.DOWNLOAD,
-                                    %"notification.install_pack",
-                                    [data.name; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_pack.body"
-                                )
-                                Content.TriggerChartAdded()
-                                progress <- 1.0f
-                                status <- Installed
-                                File.Delete target
-                            | Error reason ->
-                                Logging.Error "Error installing %s: %s" target reason
-                                Notifications.error (%"notification.install_pack_failed", data.name)
-                                status <- DownloadFailed
-                                File.Delete target
-                        )
-                    else
-                        status <- DownloadFailed
+            let task = OnlineImports.download_etterna_pack(data.name, data.download, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.name)
+            import_queue.Request(task,
+                function
+                | Ok result ->
+                    Notifications.task_feedback (
+                        Icons.DOWNLOAD,
+                        %"notification.install_pack",
+                        [data.name; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_pack.body"
+                    )
+                    Content.TriggerChartAdded()
+                    progress <- 1.0f
+                    status <- Installed
+                | Error reason ->
+                    Logging.Error "Error installing %s: %s" data.name reason
+                    Notifications.error (%"notification.install_pack_failed", data.name)
+                    status <- DownloadFailed
             )
 
             status <- Downloading

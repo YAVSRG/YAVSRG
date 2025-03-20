@@ -58,7 +58,7 @@ module ChartDatabase =
         |> BitConverter.ToString
         |> fun s -> s.Replace("-", "")
 
-    let private hash_asset (file_path: string) (db: ChartDatabase) : string =
+    let internal hash_asset (file_path: string) (db: ChartDatabase) : string =
         if not (File.Exists file_path) then
             failwithf "Missing asset file: %s" file_path
 

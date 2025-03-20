@@ -97,13 +97,20 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 }
 
         if import then
-            Mount.import_service.Request(
-                (setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar "mount"),
-                fun result ->
+            let task = Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar "mount")
+            import_queue.Request(task,
+                function
+                | Ok result ->
                     Notifications.task_feedback (
                         Icons.CHECK,
                         %"notification.import_success",
-                        [result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.import_success.body"
+                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                        %> "notification.import_success.body"
                     )
                     Content.TriggerChartAdded()
+                | Error reason ->
+                    Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
+                    Notifications.error (%"notification.import_failed", reason)
             )
+
+            Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")

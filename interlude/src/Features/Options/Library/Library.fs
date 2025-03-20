@@ -20,12 +20,12 @@ open Interlude.Features.Tables.Browser
 module Imports =
 
     let import_in_progress () =
-        WebServices.download_file.Status <> Async.ServiceStatus.Idle
-        || Imports.auto_convert.Status <> Async.ServiceStatus.Idle
-        || Mount.import_service.Status <> Async.ServiceStatus.Idle
+        import_queue.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
         || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle
+        || ChartDatabase.vacuum.Status <> Async.ServiceStatus.Idle
+        || ChartDatabase.recalculate_data.Status <> Async.ServiceStatus.Idle
 
 type LibraryPage() =
     inherit Page()

@@ -231,7 +231,7 @@ module Upload =
         Logging.Info "Uploading '%s' complete!" folder_name
 
     let get_etterna_pack (pack_name: string) =
-        OnlineImports.get_from_origin (ChartOrigin.Etterna pack_name, interlude_library.Charts, interlude_scores_db, ImportProgress.log_progress_bar pack_name)
+        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library.Charts, interlude_scores_db, ImportProgress.log_progress_bar pack_name)
         |> Async.RunSynchronously
 
     let etterna_pack_aio (pack_name: string) =

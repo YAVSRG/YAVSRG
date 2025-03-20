@@ -149,3 +149,6 @@ module Shared =
                 [ Error (action.Source, "Failed to parse this file") ]
 
         | _ -> []
+
+    let import_queue =
+        { new Async.Service<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with override this.Handle(task) = task }

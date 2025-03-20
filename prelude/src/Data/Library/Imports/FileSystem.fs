@@ -181,13 +181,7 @@ module Imports =
                     return Error "Extracted zip does not match the usual structure for a StepMania pack"
         }
 
-    let convert_stepmania_pack_zip_service =
-        { new Async.Service<string * string * ChartDatabase * UserDatabase * ImportProgressCallback, Result<ConversionResult, string>>() with
-            override this.Handle((path, pack_name, chart_db, user_db, progress)) =
-                convert_stepmania_pack_zip (path, pack_name, chart_db, user_db, progress)
-        }
-
-    let rec private auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let rec auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
@@ -293,10 +287,4 @@ module Imports =
                     return Ok results
                 | _ ->
                     return Error "No importable folder structure detected"
-        }
-
-    let auto_convert =
-        { new Async.Service<string * ChartDatabase * UserDatabase * ImportProgressCallback, Result<ConversionResult, string>>() with
-            override this.Handle((path, chart_db, user_db, progress)) =
-                auto_detect_import (path, chart_db, user_db, progress)
         }

@@ -8,7 +8,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Imports
-open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 
@@ -32,33 +31,23 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
-            let target =
-                Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
 
-            WebServices.download_file.Request(
-                (sprintf "https://catboy.best/d/%in" data.id, target, (fun p -> progress <- p)),
-                fun completed ->
-                    if completed then
-                        Imports.auto_convert.Request(
-                            (target, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.title),
-                            function
-                            | Ok result ->
-                                Notifications.task_feedback (
-                                    Icons.DOWNLOAD,
-                                    %"notification.install_song",
-                                    [data.title; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_song.body"
-                                )
-                                Content.TriggerChartAdded()
-                                status <- Installed
-                                File.Delete target
-                            | Error reason ->
-                                Logging.Error "Error importing %s: %s" target reason
-                                Notifications.error (%"notification.install_song_failed", data.title)
-                                status <- DownloadFailed
-                                File.Delete target
-                        )
-                    else
-                        status <- DownloadFailed
+            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.title)
+            import_queue.Request(task,
+                function
+                | Ok result ->
+                    Notifications.task_feedback (
+                        Icons.DOWNLOAD,
+                        %"notification.install_song",
+                        [data.title; result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString()] %> "notification.install_song.body"
+                    )
+                    Content.TriggerChartAdded()
+                    progress <- 1.0f
+                    status <- Installed
+                | Error reason ->
+                    Logging.Error "Error importing %s: %s" data.title reason
+                    Notifications.error (%"notification.install_song_failed", data.title)
+                    status <- DownloadFailed
             )
 
             status <- Downloading

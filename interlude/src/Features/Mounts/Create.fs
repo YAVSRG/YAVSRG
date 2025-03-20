@@ -58,17 +58,20 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
                 | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
 
                 if setting.Value.IsSome then
-                    Mount.import_service.Request(
-                        (setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar path),
-                        fun result ->
+                    let task = Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar path)
+                    import_queue.Request(task,
+                        function
+                        | Ok result ->
                             Notifications.task_feedback (
                                 Icons.CHECK,
                                 %"notification.import_success",
                                 [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
                                 %> "notification.import_success.body"
                             )
-
                             Content.TriggerChartAdded()
+                        | Error reason ->
+                            Logging.Error "Error importing %s: %s" path reason
+                            Notifications.error (%"notification.import_failed", reason)
                     )
 
                     Notifications.action_feedback (Icons.FOLDER_PLUS, %"notification.import_queued", "")
