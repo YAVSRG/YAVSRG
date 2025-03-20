@@ -114,8 +114,8 @@ type LibraryPage() =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Left = 0.5f %+ 10.0f })
         |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.SliceT(100.0f, 150.0f))
         |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.SliceT(270.0f, 150.0f))
-        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.SliceT(440.0f, 150.0f))
-        |+ MountControl(MountedGameType.Etterna, options.EtternaMount, Position = Position.SliceT(610.0f, 150.0f))
+        |+ MountControl(MountedGameType.Etterna, options.EtternaMount, Position = Position.SliceT(440.0f, 150.0f))
+        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.SliceT(610.0f, 150.0f))
         |+ Text(%"imports.mount", Align = Alignment.CENTER, Position = Position.SliceT(0.0f, 80.0f))
 
     override this.Content() =

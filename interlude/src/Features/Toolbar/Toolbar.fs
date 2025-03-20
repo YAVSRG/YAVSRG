@@ -86,7 +86,7 @@ type Toolbar() =
             Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT)
         )
             .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
-        |+ (FlowContainer.LeftToRight(
+        |+ (FlowContainer.LeftToRight<Widget>(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
@@ -99,17 +99,18 @@ type Toolbar() =
             )
             |+ import_button
             |+ InlaidButton(
-                %"menu.wiki",
-                WikiBrowserPage.Show,
-                Icons.BOOK_OPEN,
-                Hotkey = "wiki"
-            )
-            |+ InlaidButton(
                 %"menu.stats",
                 (fun () -> StatsPage().Show()),
                 Icons.TRENDING_UP,
                 Hotkey = "stats"
             )
+            |+ InlaidButton(
+                %"menu.wiki",
+                WikiBrowserPage.Show,
+                Icons.BOOK_OPEN,
+                Hotkey = "wiki"
+            )
+                .Conditional(fun () -> Screen.current_type = Screen.Type.MainMenu)
         )
         |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
         |+ HotkeyAction(
