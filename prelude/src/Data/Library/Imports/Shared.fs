@@ -11,6 +11,7 @@ open Prelude.Formats.Quaver
 open Prelude.Formats.StepMania
 
 type ImportProgress =
+    | Generic of label: string
     | Downloading of percent: float32
     | Processing of count: int * total: int
     | Faulted
@@ -24,6 +25,7 @@ module ImportProgress =
     let log_progress_bar label =
         let mutable download_step = -1
         function
+        | Generic status -> Logging.Warn "%s: %s" label status
         | Downloading p ->
             let t = p / 0.1f |> floor |> int
             if t > download_step then

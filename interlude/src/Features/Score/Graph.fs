@@ -598,11 +598,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         if refresh then
             this.Redraw()
 
-        Render.rect (this.Bounds.BorderL Style.PADDING) Colors.white
-        Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white
-        Render.rect (this.Bounds.BorderR Style.PADDING) Colors.white
-        Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white
-
+        Render.border Style.PADDING this.Bounds Colors.white
         Render.rect this.Bounds Colors.black.O3
         Render.sprite (Render.bounds()) Color.White fbo.Sprite
 

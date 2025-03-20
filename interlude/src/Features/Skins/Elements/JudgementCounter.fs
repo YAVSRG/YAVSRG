@@ -125,12 +125,9 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
             let pop =
                 r.Expand(r.Height * (1.0f - percent) * config.JudgementCounterPopAmount * 0.1f)
 
-            Render.rect pop (j.Color.O1a opacity)
-            Render.rect (pop.BorderCornersT 5.0f) (j.Color.O3a opacity)
-            Render.rect (pop.BorderCornersB 5.0f) (j.Color.O3a opacity)
-            Render.rect (pop.BorderL 5.0f) (j.Color.O3a opacity)
+            Render.border Style.PADDING pop (j.Color.O3a opacity)
             Render.rect (pop.BorderL(5.0f).SlicePercentY(0.45f)) j.Color.O2
-            Render.rect (pop.BorderR 5.0f) (j.Color.O3a opacity)
+            Render.rect pop (j.Color.O1a opacity)
 
             if config.JudgementCounterShowLabels then
 

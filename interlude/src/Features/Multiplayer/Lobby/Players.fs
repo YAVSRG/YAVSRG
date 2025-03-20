@@ -77,11 +77,7 @@ type PlayerList(lobby: Lobby) =
 
         let user_bounds = this.Bounds.SliceT(55.0f)
 
-        Render.rect (user_bounds.BorderL Style.PADDING) border.O3
-        Render.rect (user_bounds.BorderCornersT Style.PADDING) border.O3
-        Render.rect (user_bounds.BorderR Style.PADDING) border.O3
-        Render.rect (user_bounds.BorderCornersB Style.PADDING) border.O3
-
+        Render.border Style.PADDING user_bounds border.O3
         Render.rect user_bounds fill.O3
 
         Text.fill_b (

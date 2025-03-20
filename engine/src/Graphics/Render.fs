@@ -393,6 +393,15 @@ module Render =
     let rect (r: Rect) (c: Color) =
         quad r.AsQuad c.AsQuad
 
+    /// <summary>
+    /// Draws a border around a rectangle to the screen.
+    /// </summary>
+    let border (thickness: float32) (r: Rect) (c: Color) =
+        quad (r.BorderL(thickness).AsQuad) c.AsQuad
+        quad (r.BorderCornersT(thickness).AsQuad) c.AsQuad
+        quad (r.BorderR(thickness).AsQuad) c.AsQuad
+        quad (r.BorderCornersB(thickness).AsQuad) c.AsQuad
+
     (*
         Internal functions used by the Game and Window threads
     *)

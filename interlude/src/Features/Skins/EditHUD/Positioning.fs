@@ -475,15 +475,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
         base.Draw()
 
         if this.IsSelectedElement then
-            Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.yellow_accent
-            Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.yellow_accent
-            Render.rect (this.Bounds.BorderL Style.PADDING) Colors.yellow_accent
-            Render.rect (this.Bounds.BorderR Style.PADDING) Colors.yellow_accent
+            Render.border Style.PADDING this.Bounds Colors.yellow_accent
         elif hover then
-            Render.rect (this.Bounds.BorderCornersT Style.PADDING) Colors.white.O2
-            Render.rect (this.Bounds.BorderCornersB Style.PADDING) Colors.white.O2
-            Render.rect (this.Bounds.BorderL Style.PADDING) Colors.white.O2
-            Render.rect (this.Bounds.BorderR Style.PADDING) Colors.white.O2
+            Render.border Style.PADDING this.Bounds Colors.white.O2
 
 and PositionerContext =
     {

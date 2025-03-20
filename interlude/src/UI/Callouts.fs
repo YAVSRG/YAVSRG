@@ -89,7 +89,7 @@ module Callout =
 
     let private PADDING_X = 30.0f
     let private PADDING_Y = 20.0f
-    let private spacing = 
+    let private spacing =
         function
         | Tiny -> 10.0f
         | Small -> 10.0f
@@ -104,7 +104,7 @@ module Callout =
         | Tiny -> 15.0f
         | Small -> 18.0f
         | Large -> 25.0f
-    let private text_spacing = 
+    let private text_spacing =
         function
         | Tiny -> 6.0f
         | Small -> 8.0f
@@ -248,7 +248,7 @@ module Callout =
                 y <- y + button_size
 
             y <- y + spacing
-            
+
     type Card(callout: Callout, border: Color, fill: Color) =
         inherit StaticWidget(NodeType.None)
 
@@ -258,11 +258,7 @@ module Callout =
 
         override this.Draw() =
 
-            Render.rect (this.Bounds.BorderCornersT Style.PADDING) border
-            Render.rect (this.Bounds.BorderCornersB Style.PADDING) border
-            Render.rect (this.Bounds.BorderL Style.PADDING) border
-            Render.rect (this.Bounds.BorderR Style.PADDING) border
-
+            Render.border Style.PADDING this.Bounds border
             Render.rect this.Bounds fill
 
             draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)

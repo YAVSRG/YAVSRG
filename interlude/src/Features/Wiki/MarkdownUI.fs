@@ -322,10 +322,7 @@ type private Paragraphs(nested: bool, max_width: float32, paragraphs: IParagraph
     override this.Draw() =
         if this.VisibleBounds.Visible then
             if not nested then
-                Render.rect (this.Bounds.BorderCornersB(Style.PADDING)) Colors.cyan_accent
-                Render.rect (this.Bounds.BorderCornersT(Style.PADDING)) Colors.cyan_accent
-                Render.rect (this.Bounds.BorderL(Style.PADDING)) Colors.cyan_accent
-                Render.rect (this.Bounds.BorderR(Style.PADDING)) Colors.cyan_accent
+                Render.border Style.PADDING this.Bounds Colors.cyan_accent
                 Render.rect this.Bounds Colors.cyan.O2
 
             base.Draw()

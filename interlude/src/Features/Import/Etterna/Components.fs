@@ -9,6 +9,7 @@ open Prelude.Data.Library
 open Prelude.Data.Library.Imports
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Import
 
 type private PackDownloadStatus =
     | NotDownloaded
@@ -43,7 +44,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         if status <> Downloading then
             progress <- 0.0f
 
-            let task = OnlineImports.download_etterna_pack(data.name, data.download, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.name)
+            let task_status = ImportsInProgress.add data.name
+            let task = OnlineImports.download_etterna_pack(data.name, data.download, Content.Charts, Content.UserData, task_status.set_Status)
             import_queue.Request(task,
                 function
                 | Ok result ->

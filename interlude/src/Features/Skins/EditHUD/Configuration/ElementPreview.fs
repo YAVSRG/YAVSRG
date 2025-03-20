@@ -36,22 +36,7 @@ type ElementPreview(position: HudPosition) =
     override this.Draw() =
 
         let bounds = Rect.Box(this.Bounds.ShrinkL(PRETTYWIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
-        // Draw bounds
-        Render.rect
-            (bounds.BorderL Style.PADDING)
-            Color.Lime
-
-        Render.rect
-            (bounds.BorderCornersT Style.PADDING)
-            Color.Lime
-
-        Render.rect
-            (bounds.BorderR Style.PADDING)
-            Color.Lime
-
-        Render.rect
-            (bounds.BorderCornersB Style.PADDING)
-            Color.Lime
+        Render.border Style.PADDING bounds Color.Lime
 
         this.DrawComponent(bounds)
 

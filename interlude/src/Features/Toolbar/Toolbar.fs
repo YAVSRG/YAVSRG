@@ -10,11 +10,11 @@ open Interlude.Content
 open Interlude.UI
 open Interlude
 open Interlude.Options
+open Interlude.Features.Import
 open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
-open Interlude.Features.OptionsMenu.Library
 open Interlude.Features.Printerlude
 
 type Toolbar() =
@@ -57,7 +57,7 @@ type Toolbar() =
             Hotkey = "import"
         )
         |+ LoadingIndicator.Strip(
-            Imports.import_in_progress,
+            ImportsInProgress.import_in_progress,
             Position = Position.BorderB(Style.PADDING)
         )
 
@@ -158,6 +158,10 @@ type Toolbar() =
             if Toolbar.slideout_amount.Value > 0.01f then draw_waveform this.Bounds
 
             container.Draw()
+
+            if ImportsInProgress.import_in_progress() then
+                ImportsInProgress.draw 1.0f
+
             Terminal.draw ()
 
     override this.Update(elapsed_ms, moved) =

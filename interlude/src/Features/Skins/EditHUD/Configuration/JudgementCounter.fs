@@ -195,12 +195,9 @@ type JudgementCounterPage(on_close: unit -> unit) =
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     let j = ruleset.Judgements.[i]
 
-                    Render.rect r (j.Color.O1a opacity)
-                    Render.rect (r.BorderCornersT 5.0f) (j.Color.O3a opacity)
-                    Render.rect (r.BorderCornersB 5.0f) (j.Color.O3a opacity)
-                    Render.rect (r.BorderL 5.0f) (j.Color.O3a opacity)
+                    Render.border 5.0f r (j.Color.O3a opacity)
                     Render.rect (r.BorderL(5.0f).SlicePercentY(0.45f)) j.Color.O2
-                    Render.rect (r.BorderR 5.0f) (j.Color.O3a opacity)
+                    Render.rect r (j.Color.O1a opacity)
 
                     if show_labels.Value then
 

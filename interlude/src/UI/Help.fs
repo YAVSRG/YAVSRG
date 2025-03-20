@@ -110,12 +110,8 @@ module HelpOverlay =
                         outline.Bottom + SPACING
 
                 let callout_bounds = Rect.Box(x, y, width, height)
+                Render.border Style.PADDING callout_bounds (Colors.cyan_accent.O4a alpha)
                 Render.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
-                let border = Colors.cyan_accent.O4a alpha
-                Render.rect (callout_bounds.BorderCornersT Style.PADDING) border
-                Render.rect (callout_bounds.BorderCornersB Style.PADDING) border
-                Render.rect (callout_bounds.BorderL Style.PADDING) border
-                Render.rect (callout_bounds.BorderR Style.PADDING) border
 
                 Callout.draw (
                     callout_bounds.Left,

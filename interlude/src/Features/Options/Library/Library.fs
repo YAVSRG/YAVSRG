@@ -3,29 +3,15 @@ namespace Interlude.Features.OptionsMenu.Library
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data
-open Prelude.Data.Maintenance
-open Prelude.Data.OsuClientInterop
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Import
 open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
-open Interlude.Features.Tables.Browser
-
-module Imports =
-
-    let import_in_progress () =
-        import_queue.Status <> Async.ServiceStatus.Idle
-        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
-        || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
-        || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle
-        || ChartDatabase.vacuum.Status <> Async.ServiceStatus.Idle
-        || ChartDatabase.recalculate_data.Status <> Async.ServiceStatus.Idle
 
 type LibraryPage() =
     inherit Page()
@@ -34,14 +20,14 @@ type LibraryPage() =
         Container(NodeType.None, Position = pretty_pos(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
         |+ Text(
             (fun () ->
-                if Imports.import_in_progress () then
+                if ImportsInProgress.import_in_progress () then
                     %"imports.in_progress"
                 else
                     %"imports.not_in_progress"
             ),
             Color =
                 (fun () ->
-                    if Imports.import_in_progress () then
+                    if ImportsInProgress.import_in_progress () then
                         Colors.text_green
                     else
                         Colors.text_subheading
@@ -49,7 +35,7 @@ type LibraryPage() =
             Position = Position.SliceT(40.0f).Shrink(20.0f, 0.0f)
         )
         |+ LoadingIndicator.Strip(
-            Imports.import_in_progress,
+            ImportsInProgress.import_in_progress,
             Position = Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f)
         )
         |+ Text(

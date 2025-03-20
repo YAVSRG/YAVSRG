@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
-open Interlude.Web.Shared.Requests.Stats.Leaderboard
 
 type LeaderboardsTab() =
     inherit Container(NodeType.None)
