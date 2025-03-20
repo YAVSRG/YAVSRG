@@ -59,7 +59,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
 
                 if setting.Value.IsSome then
                     Mount.import_service.Request(
-                        (setting.Value.Value, Content.Charts, Content.UserData),
+                        (setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar path),
                         fun result ->
                             Notifications.task_feedback (
                                 Icons.CHECK,

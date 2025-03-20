@@ -40,8 +40,8 @@ type MountedChartSource =
 module Mount =
 
     let import_service =
-        { new Async.Service<MountedChartSource * ChartDatabase * UserDatabase, ConversionResult>() with
-            override this.Handle((source, chart_db, user_db)) =
+        { new Async.Service<MountedChartSource * ChartDatabase * UserDatabase * ImportProgressCallback, ConversionResult>() with
+            override this.Handle((source, chart_db, user_db, progress)) =
                 async {
                     match source.Type with
                     | Pack packname ->
@@ -50,7 +50,7 @@ module Mount =
                         | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
                         | None -> ()
                         let config = ConversionOptions.Pack(packname, source.LastImported, LinkAssetFiles)
-                        let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db)
+                        let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db, progress)
                         source.LastImported <- Some DateTime.UtcNow
                         log_conversion result
                         return result
@@ -64,9 +64,10 @@ module Mount =
                             let! result =
                                 Imports.convert_pack_folder(
                                     pack_folder,
-                                    ConversionOptions.Pack( Path.GetFileName pack_folder, source.LastImported, LinkAssetFiles),
+                                    ConversionOptions.Pack(Path.GetFileName pack_folder, source.LastImported, LinkAssetFiles),
                                     chart_db,
-                                    user_db
+                                    user_db,
+                                    progress
                                 )
                             results <- ConversionResult.Combine result results
 

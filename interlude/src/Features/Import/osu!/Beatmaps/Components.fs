@@ -40,7 +40,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
                 fun completed ->
                     if completed then
                         Imports.auto_convert.Request(
-                            (target, Content.Charts, Content.UserData),
+                            (target, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.title),
                             function
                             | Ok result ->
                                 Notifications.task_feedback (

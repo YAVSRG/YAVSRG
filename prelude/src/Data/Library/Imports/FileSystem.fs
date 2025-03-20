@@ -101,48 +101,54 @@ module Imports =
             }
         }
 
-    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
+    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
             let song_folders =
                 match config.ChangedAfter with
                 | None -> Directory.EnumerateDirectories path
                 | Some timestamp -> Directory.EnumerateDirectories path |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)
+                |> Array.ofSeq
 
-            for song_folder in song_folders do
+            for i, song_folder in Array.indexed song_folders do
                 let! result = convert_song_folder(song_folder, config, chart_db, user_db)
                 results <- ConversionResult.Combine result results
+                progress <| Processing (i + 1, song_folders.Length)
             return results
         }
 
-    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
+    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
             let mutable results = ConversionResult.Empty
-            for osz in Directory.EnumerateFiles folder_of_oszs do
-                match osz with
-                | ChartArchive ".osz" ->
-                    let extracted_folder = Path.ChangeExtension(osz, null).TrimEnd(' ', '.')
-                    if
-                        Directory.Exists(extracted_folder)
-                        && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
-                    then
-                        Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
-                        results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
-                    else
-                        try
-                            ZipFile.ExtractToDirectory(osz, extracted_folder)
-                            let! result = convert_song_folder(extracted_folder, config, chart_db, user_db)
-                            delete_folder.Request(extracted_folder, ignore)
-                            results <- ConversionResult.Combine result results
-                        with err ->
-                            Logging.Error "Unexpected error in '%s': %O" extracted_folder err
-                            results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
-                | _ -> ()
+
+            let files =
+                Directory.EnumerateFiles folder_of_oszs
+                |> Seq.filter (function ChartArchive ".osz" -> true | _ -> false)
+                |> Array.ofSeq
+
+            for i, osz in Array.indexed files do
+                let extracted_folder = Path.ChangeExtension(osz, null).TrimEnd(' ', '.')
+                if
+                    Directory.Exists(extracted_folder)
+                    && Directory.EnumerateFileSystemEntries(extracted_folder) |> Seq.isEmpty |> not
+                then
+                    Logging.Error "Can't extract osz to %s because that folder exists already" extracted_folder
+                    results <- { results with SkippedCharts = (osz, "Extraction failed") :: results.SkippedCharts }
+                else
+                    try
+                        ZipFile.ExtractToDirectory(osz, extracted_folder)
+                        let! result = convert_song_folder(extracted_folder, config, chart_db, user_db)
+                        delete_folder.Request(extracted_folder, ignore)
+                        results <- ConversionResult.Combine result results
+                    with err ->
+                        Logging.Error "Unexpected error in '%s': %O" extracted_folder err
+                        results <- { results with SkippedCharts = (extracted_folder, sprintf "Unexpected error: %s" err.Message) :: results.SkippedCharts }
+                progress <| Processing (i + 1, files.Length)
             return results
         }
 
-    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
+    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -163,7 +169,8 @@ module Imports =
                                 pack_folder,
                                 ConversionOptions.EtternaPack(pack_name, None, CopyAssetFiles),
                                 chart_db,
-                                user_db
+                                user_db,
+                                progress
                             )
                         results <- ConversionResult.Combine result results
 
@@ -175,12 +182,12 @@ module Imports =
         }
 
     let convert_stepmania_pack_zip_service =
-        { new Async.Service<string * string * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
-            override this.Handle((path, pack_name, chart_db, user_db)) =
-                convert_stepmania_pack_zip (path, pack_name, chart_db, user_db)
+        { new Async.Service<string * string * ChartDatabase * UserDatabase * ImportProgressCallback, Result<ConversionResult, string>>() with
+            override this.Handle((path, pack_name, chart_db, user_db, progress)) =
+                convert_stepmania_pack_zip (path, pack_name, chart_db, user_db, progress)
         }
 
-    let rec private auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase) : Async<Result<ConversionResult, string>> =
+    let rec private auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             match File.GetAttributes path &&& FileAttributes.Directory |> int with
             | 0 ->
@@ -200,7 +207,7 @@ module Imports =
                         )
                     log_conversion result
                     return Ok result
-                | ChartArchive ext ->
+                | ChartArchive _ ->
                     let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
                     if
@@ -210,7 +217,7 @@ module Imports =
                         return Error (sprintf "Target extraction folder (%s) already exists" dir)
                     else
                         ZipFile.ExtractToDirectory(path, dir)
-                        let! result = auto_detect_import (dir, chart_db, user_db)
+                        let! result = auto_detect_import (dir, chart_db, user_db, progress)
                         delete_folder.Request(dir, ignore)
                         return result
                 | _ ->
@@ -238,7 +245,8 @@ module Imports =
                         convert_folder_of_oszs(
                             path,
                             chart_db,
-                            user_db
+                            user_db,
+                            progress
                         )
                     log_conversion result
                     return Ok result
@@ -259,19 +267,25 @@ module Imports =
                             path,
                             ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
                             chart_db,
-                            user_db
+                            user_db,
+                            progress
                         )
                     log_conversion result
                     return Ok result
                 | FolderOfPacks ->
                     let mutable results = ConversionResult.Empty
-                    for pack_folder in Directory.EnumerateDirectories path do
+                    let pack_folders = Directory.GetDirectories path
+
+                    for i, pack_folder in Array.indexed pack_folders do
+                        let pack_name = Path.GetFileName pack_folder
+
                         let! result =
                             convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.Pack(Path.GetFileName pack_folder, None, CopyAssetFiles),
+                                ConversionOptions.Pack(pack_name, None, CopyAssetFiles),
                                 chart_db,
-                                user_db
+                                user_db,
+                                (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )
                         results <- ConversionResult.Combine result results
 
@@ -282,7 +296,7 @@ module Imports =
         }
 
     let auto_convert =
-        { new Async.Service<string * ChartDatabase * UserDatabase, Result<ConversionResult, string>>() with
-            override this.Handle((path, chart_db, user_db)) =
-                auto_detect_import (path, chart_db, user_db)
+        { new Async.Service<string * ChartDatabase * UserDatabase * ImportProgressCallback, Result<ConversionResult, string>>() with
+            override this.Handle((path, chart_db, user_db, progress)) =
+                auto_detect_import (path, chart_db, user_db, progress)
         }

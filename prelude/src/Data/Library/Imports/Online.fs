@@ -23,15 +23,16 @@ module OnlineImports =
             | WebResult.Exception err -> return Error err.Message
         }
 
-    let private download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
+    let private download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
-            match! WebServices.download_file.RequestAsync((url, target, progress)) with
-            | false -> return Error "Download failure"
+            match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+            | false ->
+                progress Faulted
+                return Error "Download failure"
             | true ->
-                match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db) with
+                match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db, progress) with
                 | Ok result ->
-                    progress 1.0f
                     Imports.delete_file.Request(target, ignore)
                     return Ok result
                 | Error reason ->
@@ -39,15 +40,16 @@ module OnlineImports =
                     return Error reason
         }
 
-    let private download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) : Async<Result<ConversionResult, string>> =
+    let private download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
-            match! WebServices.download_file.RequestAsync((url, target, progress)) with
-            | false -> return Error "Download failure"
+            match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+            | false ->
+                progress Faulted
+                return Error "Download failure"
             | true ->
-                match! Imports.auto_convert.RequestAsync(target, chart_db, user_db) with
+                match! Imports.auto_convert.RequestAsync(target, chart_db, user_db, progress) with
                 | Ok result ->
-                    progress 1.0f
                     Imports.delete_file.Request(target, ignore)
                     return Ok result
                 | Error reason ->
@@ -55,7 +57,7 @@ module OnlineImports =
                     return Error reason
         }
 
-    let get_from_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: float32 -> unit) =
+    let get_from_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
         async {
             match origin with
 
