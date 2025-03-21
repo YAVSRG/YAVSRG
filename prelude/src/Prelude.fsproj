@@ -115,6 +115,7 @@
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
     <Compile Include="Data\Library\Imports\Shared.fs" />
+    <Compile Include="Data\Library\Imports\ImportProgress.fs" />
     <Compile Include="Data\Library\Imports\FileSystem.fs" />
     <Compile Include="Data\Library\Imports\Mounts.fs" />
     <Compile Include="Data\Library\Imports\Online.fs" />
@@ -127,6 +128,8 @@
     <Compile Include="Data\User\Stats\Sync.fs" />
     <Compile Include="Data\User\Stats\Migration.fs" />
     <Compile Include="Data\User\Stats\Stats.fs" />
+    <Compile Include="Data\Maintenance\Patterns.fs" />
+    <Compile Include="Data\Maintenance\Vacuum.fs" />
     <Compile Include="Data\Maintenance\PersonalBests.fs" />
     <Compile Include="Data\OsuClientInterop\Database.fs" />
     <Compile Include="Data\OsuClientInterop\Replays.fs" />

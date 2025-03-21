@@ -12,6 +12,8 @@ open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
+open Prelude.Data.Maintenance
 open Prelude.Gameplay.Replays
 open Prelude.Calculator
 open Interlude
@@ -126,7 +128,8 @@ module Printerlude =
             | None -> ()
 
         let vacuum () =
-            ChartDatabase.vacuum.Request((Content.Charts, true), ignore)
+            let task = Vacuum.vacuum_charts(true, Content.Charts, ImportProgress.log_progress_bar "Vacuum")
+            general_task_queue.Request(task, ignore)
 
         let register_commands (ctx: ShellContext) =
             ctx

@@ -143,23 +143,12 @@ type MainMenuScreen() as this =
             )
 
         if prev = Screen.Type.SplashScreen then
-            if
-                ChartDatabase.recalculate_if_needed
-                    Content.Charts
-                    (fun () ->
-                        Notifications.system_feedback (
-                            Icons.ALERT_OCTAGON,
-                            %"notification.pattern_cache_complete.title",
-                            ""
-                        )
-                    )
-            then
-                Notifications.system_feedback (
-                    Icons.ALERT_OCTAGON,
-                    %"notification.pattern_cache_started.title",
-                    %"notification.pattern_cache_started.body"
-                )
+
+            if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
+                Library.Library.recalculate_patterns()
+
             if TOTAL_STATS.NotesHit = 0 then
+                // todo: quick start wizard instead
                 WikiBrowserPage.Show()
 
         splash_text <- choose_splash ()

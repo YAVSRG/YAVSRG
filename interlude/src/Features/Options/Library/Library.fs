@@ -3,7 +3,10 @@ namespace Interlude.Features.OptionsMenu.Library
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
+open Prelude.Data.Maintenance
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -12,6 +15,45 @@ open Interlude.Features.Collections
 open Interlude.Features.Tables
 open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
+
+module Library =
+
+    let recalculate_pbs () =
+        let rulesets = Rulesets.list() |> Seq.map (fun (id, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
+        let task_status = ImportsInProgress.add %"library.recalculate_personal_bests"
+        let task = PersonalBests.recalculate(rulesets, false, Content.Charts, Content.UserData, task_status.set_Status)
+        general_task_queue.Request(task,
+            fun () ->
+                Notifications.system_feedback (
+                    Icons.ALERT_OCTAGON,
+                    %"notification.score_recalculation_complete.title",
+                    ""
+                )
+        )
+
+        Notifications.system_feedback (
+            Icons.ALERT_OCTAGON,
+            %"notification.score_recalculation_started.title",
+            %"notification.score_recalculation_started.body"
+        )
+
+    let recalculate_patterns () =
+        let task_status = ImportsInProgress.add %"library.recache_patterns"
+        let task = Patterns.recalculate(Content.Charts, task_status.set_Status)
+        general_task_queue.Request(task,
+            fun () ->
+                Notifications.system_feedback (
+                    Icons.ALERT_OCTAGON,
+                    %"notification.pattern_cache_complete.title",
+                    ""
+                )
+        )
+
+        Notifications.system_feedback (
+            Icons.ALERT_OCTAGON,
+            %"notification.pattern_cache_started.title",
+            %"notification.pattern_cache_started.body"
+        )
 
 type LibraryPage() =
     inherit Page()
@@ -63,29 +105,14 @@ type LibraryPage() =
         |+ PageButton
             .Once(
                 %"library.recache_patterns",
-                fun () ->
-                    ChartDatabase.recalculate_data.Request(
-                        Content.Charts,
-                        fun () ->
-                            Notifications.system_feedback (
-                                Icons.ALERT_OCTAGON,
-                                %"notification.pattern_cache_complete.title",
-                                ""
-                            )
-                    )
-
-                    Notifications.system_feedback (
-                        Icons.ALERT_OCTAGON,
-                        %"notification.pattern_cache_started.title",
-                        %"notification.pattern_cache_started.body"
-                    )
+                Library.recalculate_patterns
             )
             .Help(Help.Info("library.recache_patterns"))
             .Pos(5, 2, PageWidth.Full)
         |+ PageButton
             .Once(
                 %"library.recalculate_personal_bests",
-                PersonalBests.recalculate
+                Library.recalculate_pbs
             )
             .Help(Help.Info("library.recalculate_personal_bests"))
             .Pos(7, 2, PageWidth.Full)

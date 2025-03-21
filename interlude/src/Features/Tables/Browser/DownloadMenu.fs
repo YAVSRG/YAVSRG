@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Backbeat
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.Web.Shared.Requests
 open Interlude.Content
 open Interlude.UI
@@ -252,9 +253,11 @@ module TableDownloader =
                         ChartDatabase.change_packs cc (cc.Packs.Add table_name) Content.Charts
                         GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
-                        match! ChartDatabase.cdn_download table_name chart.Hash (chart.Chart, chart.Song) Content.Charts with
-                        | true -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
-                        | false -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
+                        match! OnlineImports.cdn_install (table_name, chart.Hash, chart.Chart, chart.Song, Content.Charts) with
+                        | Ok() -> GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
+                        | Error reason ->
+                            Logging.Error "Error downloading '%s' from CDN: %s" chart.Hash reason
+                            GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.DownloadFailed))
 
                     return ()
                 }

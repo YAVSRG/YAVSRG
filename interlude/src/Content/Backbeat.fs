@@ -3,10 +3,12 @@
 open Percyqaz.Common
 open Prelude
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.Web.Shared.Requests
 
 module Backbeat =
 
+    // todo: move as much into prelude as possible
     let download_missing_chart =
         { new Async.Service<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
@@ -26,8 +28,12 @@ module Backbeat =
                     | None -> return false
                     | Some found ->
 
-                    let! success = ChartDatabase.cdn_download folder_name chart_id (found.Chart, found.Song) Content.Charts
-                    if success then Content.TriggerChartAdded()
-                    return success
+                    match! OnlineImports.cdn_install (folder_name, chart_id, found.Chart, found.Song, Content.Charts) with
+                    | Ok () ->
+                        Content.TriggerChartAdded()
+                        return true
+                    | Error reason ->
+                        Logging.Error "Error downloading '%s' from CDN: %s" chart_id reason
+                        return false
                 }
         }

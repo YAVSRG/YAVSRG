@@ -6,9 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Imports
-open Prelude.Data.Maintenance
 open Prelude.Data.OsuClientInterop
-open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
@@ -112,8 +110,6 @@ module ImportsInProgress =
 
     let import_in_progress () =
         import_queue.Status <> Async.ServiceStatus.Idle
+        || general_task_queue.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
         || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle
-        || PersonalBests.recalculate_service.Status <> Async.ServiceStatus.Idle
-        || ChartDatabase.vacuum.Status <> Async.ServiceStatus.Idle
-        || ChartDatabase.recalculate_data.Status <> Async.ServiceStatus.Idle

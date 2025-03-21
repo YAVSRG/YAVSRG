@@ -238,28 +238,13 @@ module Settings =
             if token_match tokens [|%"library.recache_patterns"|] then
                 yield PageButton.Once(
                     %"library.recache_patterns",
-                    fun () ->
-                        ChartDatabase.recalculate_data.Request(
-                            Content.Charts,
-                            fun () ->
-                                Notifications.system_feedback (
-                                    Icons.ALERT_OCTAGON,
-                                    %"notification.pattern_cache_complete.title",
-                                    ""
-                                )
-                        )
-
-                        Notifications.system_feedback (
-                            Icons.ALERT_OCTAGON,
-                            %"notification.pattern_cache_started.title",
-                            %"notification.pattern_cache_started.body"
-                        )
+                    Library.recalculate_patterns
                 )
                     .Help(Help.Info("library.recache_patterns"))
             if token_match tokens [|%"library.recalculate_personal_bests"|] then
                 yield PageButton.Once(
                     %"library.recalculate_personal_bests",
-                    PersonalBests.recalculate
+                    Library.recalculate_pbs
                 )
                     .Help(Help.Info("library.recalculate_personal_bests"))
         }
