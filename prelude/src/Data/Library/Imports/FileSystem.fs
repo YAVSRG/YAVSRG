@@ -48,7 +48,7 @@ module Imports =
                 }
         }
 
-    let convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
+    let internal convert_song_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase) : Async<ConversionResult> =
         async {
             let results =
                 Directory.EnumerateFiles path
@@ -101,7 +101,7 @@ module Imports =
             }
         }
 
-    let convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
+    let internal convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
             let song_folders =
@@ -117,7 +117,7 @@ module Imports =
             return results
         }
 
-    let convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
+    let internal convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
             let mutable results = ConversionResult.Empty
@@ -148,7 +148,7 @@ module Imports =
             return results
         }
 
-    let convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let internal convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 

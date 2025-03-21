@@ -38,11 +38,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
     override this.Init(parent: Widget) =
         this
         |+ Text(
-            match game with
-            | MountedGameType.Osu -> "osu!mania"
-            | MountedGameType.Quaver -> "Quaver"
-            | MountedGameType.Stepmania -> "Stepmania"
-            | MountedGameType.Etterna -> "Etterna"
+            game.ToString()
             , Position = Position.SliceT(0.0f, 60.0f)
             , Align = Alignment.CENTER
         )

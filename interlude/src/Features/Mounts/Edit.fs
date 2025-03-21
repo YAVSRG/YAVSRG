@@ -97,7 +97,13 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 }
 
         if import then
-            let task = Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, ImportProgress.log_progress_bar "mount")
+            let task_status =
+                match setting.Value.Value.LastImported with
+                | Some _ -> %"mount.import"
+                | None -> %"mount.importall"
+                |> sprintf "%O: %s" game
+                |> ImportsInProgress.add
+            let task = Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_status.set_Status)
             import_queue.Request(task,
                 function
                 | Ok result ->

@@ -12,7 +12,7 @@ open Prelude.Skins.Conversions
 open Interlude.UI
 open Interlude.Content
 
-type ConfirmUnlinkedSongsImport(path) =
+type ConfirmUnlinkedSongsImport(path: string) =
     inherit Page()
 
     let info =
@@ -33,7 +33,8 @@ type ConfirmUnlinkedSongsImport(path) =
             .Once(
                 %"unlinkedsongsimport.confirm",
                 fun () ->
-                    let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, ignore)
+                    let task_status = ImportsInProgress.add (Path.GetFileName path)
+                    let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_status.set_Status)
                     import_queue.Request(task,
                         function
                         | Ok result ->
@@ -45,7 +46,7 @@ type ConfirmUnlinkedSongsImport(path) =
                             Content.TriggerChartAdded()
                         | Error reason ->
                             Logging.Error "Error importing %s: %s" path reason
-                            Notifications.error (%"notification.import_failed", "")
+                            Notifications.error (%"notification.import_failed", reason)
                     )
 
                     Menu.Back()
@@ -122,5 +123,5 @@ module FileDrop =
                     Content.TriggerChartAdded()
                 | Error reason ->
                     Logging.Error "Error importing %s: %s" path reason
-                    Notifications.error (%"notification.import_failed", "")
+                    Notifications.error (%"notification.import_failed", reason)
             )
