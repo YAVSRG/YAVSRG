@@ -109,7 +109,8 @@ module FileDrop =
                 ConfirmUnlinkedSongsImport(path).Show()
             else
 
-            let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, ImportProgress.log_progress_bar path)
+            let task_status = ImportsInProgress.add (Path.GetFileName path)
+            let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_status.set_Status)
             import_queue.Request(task,
                 function
                 | Ok result ->

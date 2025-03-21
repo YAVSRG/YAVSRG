@@ -1,7 +1,5 @@
 ﻿namespace Interlude.Features.Import.osu
 
-open System
-open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -10,6 +8,7 @@ open Prelude
 open Prelude.Data.Library.Imports
 open Interlude.Content
 open Interlude.UI
+open Interlude.Features.Import
 
 type private BeatmapDownloadStatus =
     | NotDownloaded
@@ -32,7 +31,8 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
 
-            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Charts, Content.UserData, ImportProgress.log_progress_bar data.title)
+            let task_status = ImportsInProgress.add data.title
+            let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Charts, Content.UserData, task_status.set_Status)
             import_queue.Request(task,
                 function
                 | Ok result ->

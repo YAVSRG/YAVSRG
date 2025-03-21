@@ -41,39 +41,50 @@ module Mount =
 
     let import_new (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
+            try
+                match source.Type with
+                | Pack packname ->
+                    Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
+                    match source.LastImported with
+                    | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
+                    | None -> ()
+                    let config = ConversionOptions.Pack(packname, source.LastImported, LinkAssetFiles)
+                    let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db, progress)
 
-            match source.Type with
-            | Pack packname ->
-                Logging.Info "Importing songs path %s as '%s'" source.SourceFolder packname
-                match source.LastImported with
-                | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                | None -> ()
-                let config = ConversionOptions.Pack(packname, source.LastImported, LinkAssetFiles)
-                let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db, progress)
-                source.LastImported <- Some DateTime.UtcNow
-                log_conversion result
-                return Ok result
+                    log_conversion result
+                    source.LastImported <- Some DateTime.UtcNow
+                    progress Complete
+                    return Ok result
 
-            | Library ->
-                Logging.Info "Importing songs library %s" source.SourceFolder
-                match source.LastImported with
-                | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
-                | None -> ()
-                let mutable results = ConversionResult.Empty
-                for pack_folder in Directory.EnumerateDirectories source.SourceFolder do
-                    let! result =
-                        Imports.convert_pack_folder(
-                            pack_folder,
-                            ConversionOptions.Pack(Path.GetFileName pack_folder, source.LastImported, LinkAssetFiles),
-                            chart_db,
-                            user_db,
-                            progress
-                        )
-                    results <- ConversionResult.Combine result results
+                | Library ->
+                    Logging.Info "Importing songs library %s" source.SourceFolder
+                    match source.LastImported with
+                    | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
+                    | None -> ()
+                    let mutable results = ConversionResult.Empty
+                    let pack_folders = Directory.GetDirectories source.SourceFolder
 
-                log_conversion results
-                source.LastImported <- Some DateTime.UtcNow
-                return Ok results
+                    for i, pack_folder in Array.indexed pack_folders do
+                        let pack_name = Path.GetFileName pack_folder
+
+                        let! result =
+                            Imports.convert_pack_folder(
+                                pack_folder,
+                                ConversionOptions.Pack(pack_name, source.LastImported, LinkAssetFiles),
+                                chart_db,
+                                user_db,
+                                (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
+                            )
+                        results <- ConversionResult.Combine result results
+
+                    log_conversion results
+                    source.LastImported <- Some DateTime.UtcNow
+                    progress Complete
+                    return Ok results
+            with err ->
+                Logging.Error "Unexpected exception while importing '%s': %O" source.SourceFolder err
+                progress Faulted
+                return Error err.Message
         }
 
     let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =

@@ -183,108 +183,120 @@ module Imports =
 
     let rec auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
-            match File.GetAttributes path &&& FileAttributes.Directory |> int with
-            | 0 ->
-                match path with
-                | ChartFile ext ->
-                    let folder_name =
-                        match ext with
-                        | ".osu" -> "osu!"
-                        | ".qua" -> "Quaver"
-                        | _ -> "Singles"
-                    let! result =
-                        convert_song_folder(
-                            Path.GetDirectoryName path,
-                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                            chart_db,
-                            user_db
-                        )
-                    log_conversion result
-                    return Ok result
-                | ChartArchive _ ->
-                    let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
+            try
+                match File.GetAttributes path &&& FileAttributes.Directory |> int with
+                | 0 ->
+                    match path with
+                    | ChartFile ext ->
+                        let folder_name =
+                            match ext with
+                            | ".osu" -> "osu!"
+                            | ".qua" -> "Quaver"
+                            | _ -> "Singles"
+                        let! result =
+                            convert_song_folder(
+                                Path.GetDirectoryName path,
+                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
+                                chart_db,
+                                user_db
+                            )
+                        log_conversion result
+                        progress Complete
+                        return Ok result
+                    | ChartArchive _ ->
+                        let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
-                    if
-                        Directory.Exists(dir)
-                        && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
-                    then
-                        return Error (sprintf "Target extraction folder (%s) already exists" dir)
-                    else
-                        ZipFile.ExtractToDirectory(path, dir)
-                        let! result = auto_detect_import (dir, chart_db, user_db, progress)
-                        delete_folder.Request(dir, ignore)
-                        return result
+                        if
+                            Directory.Exists(dir)
+                            && Directory.EnumerateFileSystemEntries(dir) |> Seq.isEmpty |> not
+                        then
+                            return Error (sprintf "Target extraction folder (%s) already exists" dir)
+                        else
+                            ZipFile.ExtractToDirectory(path, dir)
+                            let! result = auto_detect_import (dir, chart_db, user_db, progress)
+                            delete_folder.Request(dir, ignore)
+                            return result
+                    | _ ->
+                        progress Faulted
+                        return Error "File type not recognised as importable"
                 | _ ->
-                    return Error "File type not recognised as importable"
-            | _ ->
-                match path with
-                | SongFolder ext ->
-                    let folder_name =
-                        match ext with
-                        | ".osu" -> "osu!"
-                        | ".qua" -> "Quaver"
-                        | _ -> "Singles"
+                    match path with
+                    | SongFolder ext ->
+                        let folder_name =
+                            match ext with
+                            | ".osu" -> "osu!"
+                            | ".qua" -> "Quaver"
+                            | _ -> "Singles"
 
-                    let! result =
-                        convert_song_folder(
-                            path,
-                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                            chart_db,
-                            user_db
-                        )
-                    log_conversion result
-                    return Ok result
-                | FolderOfOszs ->
-                    let! result =
-                        convert_folder_of_oszs(
-                            path,
-                            chart_db,
-                            user_db,
-                            progress
-                        )
-                    log_conversion result
-                    return Ok result
-                | PackFolder ->
-                    let folder_name =
-                        match Path.GetFileName path with
-                        | "Songs" ->
-                            if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then
-                                "osu!"
-                            elif path |> Path.GetDirectoryName |> Path.GetFileName = "Quaver" then
-                                "Quaver"
-                            else
-                                "Songs"
-                        | s -> s
-
-                    let! result =
-                        convert_pack_folder(
-                            path,
-                            ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
-                            chart_db,
-                            user_db,
-                            progress
-                        )
-                    log_conversion result
-                    return Ok result
-                | FolderOfPacks ->
-                    let mutable results = ConversionResult.Empty
-                    let pack_folders = Directory.GetDirectories path
-
-                    for i, pack_folder in Array.indexed pack_folders do
-                        let pack_name = Path.GetFileName pack_folder
+                        let! result =
+                            convert_song_folder(
+                                path,
+                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
+                                chart_db,
+                                user_db
+                            )
+                        log_conversion result
+                        progress Complete
+                        return Ok result
+                    | FolderOfOszs ->
+                        let! result =
+                            convert_folder_of_oszs(
+                                path,
+                                chart_db,
+                                user_db,
+                                progress
+                            )
+                        log_conversion result
+                        progress Complete
+                        return Ok result
+                    | PackFolder ->
+                        let folder_name =
+                            match Path.GetFileName path with
+                            | "Songs" ->
+                                if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then
+                                    "osu!"
+                                elif path |> Path.GetDirectoryName |> Path.GetFileName = "Quaver" then
+                                    "Quaver"
+                                else
+                                    "Songs"
+                            | s -> s
 
                         let! result =
                             convert_pack_folder(
-                                pack_folder,
-                                ConversionOptions.Pack(pack_name, None, CopyAssetFiles),
+                                path,
+                                ConversionOptions.Pack(folder_name, None, CopyAssetFiles),
                                 chart_db,
                                 user_db,
-                                (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
+                                progress
                             )
-                        results <- ConversionResult.Combine result results
+                        log_conversion result
+                        progress Complete
+                        return Ok result
+                    | FolderOfPacks ->
+                        let mutable results = ConversionResult.Empty
+                        let pack_folders = Directory.GetDirectories path
 
-                    log_conversion results
-                    return Ok results
-                | _ ->
-                    return Error "No importable folder structure detected"
+                        for i, pack_folder in Array.indexed pack_folders do
+                            let pack_name = Path.GetFileName pack_folder
+
+                            let! result =
+                                convert_pack_folder(
+                                    pack_folder,
+                                    ConversionOptions.Pack(pack_name, None, CopyAssetFiles),
+                                    chart_db,
+                                    user_db,
+                                    (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
+                                )
+                            results <- ConversionResult.Combine result results
+
+                        log_conversion results
+                        progress Complete
+                        return Ok results
+                    | _ ->
+                        progress Faulted
+                        return Error "No importable folder structure detected"
+            with err ->
+                Logging.Error "Unexpected exception while importing '%s': %O" path err
+                progress Faulted
+                return Error err.Message
         }

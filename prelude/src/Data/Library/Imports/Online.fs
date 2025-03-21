@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Formats
@@ -25,36 +26,50 @@ module OnlineImports =
 
     let download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
-            let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
-            match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
-            | false ->
+            try
+                let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
+                match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+                | false ->
+                    progress Faulted
+                    return Error "Download failure"
+                | true ->
+                    match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db, progress) with
+                    | Ok result ->
+                        Imports.delete_file.Request(target, ignore)
+                        progress Complete
+                        return Ok result
+                    | Error reason ->
+                        Imports.delete_file.Request(target, ignore)
+                        progress Faulted
+                        return Error reason
+            with err ->
+                Logging.Error "Unexpected exception while downloading '%s': %O" name err
                 progress Faulted
-                return Error "Download failure"
-            | true ->
-                match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db, progress) with
-                | Ok result ->
-                    Imports.delete_file.Request(target, ignore)
-                    return Ok result
-                | Error reason ->
-                    Imports.delete_file.Request(target, ignore)
-                    return Error reason
+                return Error err.Message
         }
 
     let download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
-            let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
-            match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
-            | false ->
+            try
+                let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
+                match! WebServices.download_file.RequestAsync((url, target, Downloading >> progress)) with
+                | false ->
+                    progress Faulted
+                    return Error "Download failure"
+                | true ->
+                    match! Imports.auto_detect_import(target, chart_db, user_db, progress) with
+                    | Ok result ->
+                        Imports.delete_file.Request(target, ignore)
+                        progress Complete
+                        return Ok result
+                    | Error reason ->
+                        Imports.delete_file.Request(target, ignore)
+                        progress Faulted
+                        return Error reason
+            with err ->
+                Logging.Error "Unexpected exception while downloading '%s': %O" url err
                 progress Faulted
-                return Error "Download failure"
-            | true ->
-                match! Imports.auto_detect_import(target, chart_db, user_db, progress) with
-                | Ok result ->
-                    Imports.delete_file.Request(target, ignore)
-                    return Ok result
-                | Error reason ->
-                    Imports.delete_file.Request(target, ignore)
-                    return Error reason
+                return Error err.Message
         }
 
     let download_by_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
@@ -67,11 +82,13 @@ module OnlineImports =
                 return! download_osu_set (url, chart_db, user_db, progress)
 
             | ChartOrigin.Quaver quaver ->
+                progress Faulted
                 return Error "No mirror exists for Quaver"
 
             | ChartOrigin.Etterna (pack: string) ->
                 match! etterna_download_url pack with
                 | Error reason ->
+                    progress Faulted
                     return Error (sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
                 | Ok url ->
                     return! download_etterna_pack (pack, url, chart_db, user_db, progress)
