@@ -57,5 +57,4 @@ module PersonalBests =
 
             UserDatabase.save_changes user_db
             progress Complete
-            Logging.Info("Finished processing personal bests for all rulesets")
         }

@@ -17,13 +17,18 @@ type TrackedTask(label: string) =
 
     let mutable completed = ValueNone
 
+    do Logging.Debug "Queuing task '%s'" label
+
     member this.Progress
         with get() = lock this (fun () -> progress)
         and set v = lock this (fun () ->
             progress <- v
             match progress with
             | Faulted
-            | Complete -> completed <- ValueSome (Timestamp.now())
+            | Complete -> 
+                let now = Timestamp.now()
+                Logging.Debug "Task '%s' complete after %s (including time waiting for its turn)" label (format_duration_ms (now - start))
+                completed <- ValueSome now
             | _ -> ()
         )
     member val StartedAt : int64 = start
