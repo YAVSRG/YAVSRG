@@ -5,6 +5,7 @@ open System.IO
 open Percyqaz.Data
 open Percyqaz.Common
 open Prelude.Formats
+open Prelude.Data
 open Prelude.Data.Library
 open Prelude.Data.User
 
@@ -39,7 +40,7 @@ type MountedChartSource =
 
 module Mount =
 
-    let import_new (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let import_new (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 match source.Type with
@@ -87,7 +88,7 @@ module Mount =
                 return Error err.Message
         }
 
-    let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
+    let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
         async {
             source.LastImported <- None
             return! import_new(source, chart_db, user_db, progress)

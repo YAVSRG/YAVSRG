@@ -1,18 +1,18 @@
-﻿namespace Prelude.Data.Library.Imports
+﻿namespace Prelude.Data
 
 open Percyqaz.Common
 
-type ImportProgress =
+type TaskProgress =
     | Generic of label: string
     | Downloading of percent: float32
     | Processing of count: int * total: int
     | Faulted
     | Complete
-    | Nested of label: string * count: int * total: int * inner: ImportProgress
+    | Nested of label: string * count: int * total: int * inner: TaskProgress
 
-type ImportProgressCallback = ImportProgress -> unit
+type ProgressCallback = TaskProgress -> unit
 
-module ImportProgress =
+module TaskProgress =
 
     let log_progress_bar label =
         let mutable download_step = -1

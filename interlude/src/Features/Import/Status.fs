@@ -5,12 +5,13 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Data
 open Prelude.Data.Library.Imports
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
 type ImportStatus(label: string) =
-    let mutable status = Generic %"import.waiting"
+    let mutable status: TaskProgress = Generic %"import.waiting"
 
     let start = Timestamp.now()
 
@@ -47,7 +48,7 @@ module ImportsInProgress =
     let HEIGHT = 45.0f
     let SPACING = 15.0f
 
-    let rec private fmt_status (status: ImportProgress) : string * Color =
+    let rec private fmt_status (status: TaskProgress) : string * Color =
         match status with
         | Generic status -> status, Colors.grey_2
         | Downloading percent -> sprintf "%s %.0f%%" Icons.DOWNLOAD (percent * 100.0f), Colors.grey_1

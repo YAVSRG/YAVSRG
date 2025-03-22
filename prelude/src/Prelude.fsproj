@@ -97,6 +97,7 @@
     <Compile Include="Backbeat\Rulesets.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
+    <Compile Include="Data\TaskProgress.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Images.fs" />
     <Compile Include="Data\Library\Headers.fs" />
@@ -115,7 +116,6 @@
     <Compile Include="Data\Library\Views\Filtering.fs" />
     <Compile Include="Data\Library\Views\Sorting.fs" />
     <Compile Include="Data\Library\Imports\Shared.fs" />
-    <Compile Include="Data\Library\Imports\ImportProgress.fs" />
     <Compile Include="Data\Library\Imports\FileSystem.fs" />
     <Compile Include="Data\Library\Imports\Mounts.fs" />
     <Compile Include="Data\Library\Imports\Online.fs" />

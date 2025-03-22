@@ -5,6 +5,7 @@ open System.IO.Compression
 open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Formats
+open Prelude.Data
 open Prelude.Data.Library
 open Prelude.Data.User
 
@@ -101,7 +102,7 @@ module Imports =
             }
         }
 
-    let internal convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
+    let internal convert_pack_folder (path: string, config: ConversionOptions, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ConversionResult> =
         async {
             let mutable results = ConversionResult.Empty
             let song_folders =
@@ -117,7 +118,7 @@ module Imports =
             return results
         }
 
-    let internal convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ConversionResult> =
+    let internal convert_folder_of_oszs (folder_of_oszs: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ConversionResult> =
         async {
             let config = ConversionOptions.Pack(Path.GetFileName folder_of_oszs, None, CopyAssetFiles)
             let mutable results = ConversionResult.Empty
@@ -148,7 +149,7 @@ module Imports =
             return results
         }
 
-    let internal convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let internal convert_stepmania_pack_zip (path: string, pack_name: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             let dir = Path.ChangeExtension(path, null).TrimEnd(' ', '.')
 
@@ -181,7 +182,7 @@ module Imports =
                     return Error "Extracted zip does not match the usual structure for a StepMania pack"
         }
 
-    let rec auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let rec auto_detect_import (path: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 match File.GetAttributes path &&& FileAttributes.Directory |> int with

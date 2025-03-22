@@ -3,9 +3,9 @@
 open Percyqaz.Common
 open Prelude.Mods
 open Prelude.Gameplay.Rulesets
+open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 
 module PersonalBests =
 
@@ -17,7 +17,7 @@ module PersonalBests =
             MergeWithExisting: bool
         }
 
-    let recalculate (rulesets: (string * Ruleset) array, merge_with_existing: bool, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
+    let recalculate (rulesets: (string * Ruleset) array, merge_with_existing: bool, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
         if rulesets.Length = 0 then
             async { progress Complete }
         else

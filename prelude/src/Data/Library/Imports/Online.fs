@@ -24,7 +24,7 @@ module OnlineImports =
             | WebResult.Exception err -> return Error err.Message
         }
 
-    let download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
@@ -48,7 +48,7 @@ module OnlineImports =
                 return Error err.Message
         }
 
-    let download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
@@ -72,7 +72,7 @@ module OnlineImports =
                 return Error err.Message
         }
 
-    let download_by_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) =
+    let download_by_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
         async {
             match origin with
 

@@ -128,7 +128,7 @@ module Printerlude =
             | None -> ()
 
         let vacuum () =
-            let task = Vacuum.vacuum_charts(true, Content.Charts, ImportProgress.log_progress_bar "Vacuum")
+            let task = Vacuum.vacuum_charts(true, Content.Charts, TaskProgress.log_progress_bar "Vacuum")
             general_task_queue.Request(task, ignore)
 
         let register_commands (ctx: ShellContext) =

@@ -5,9 +5,9 @@ open System.Text
 open Percyqaz.Common
 open Prelude
 open Prelude.Charts
+open Prelude.Data
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 
 module Scores =
 
@@ -47,7 +47,7 @@ module Scores =
                     if not existing_score_replaced then
                         result.NewScores <- result.NewScores + 1
 
-    let private import_osu_scores (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : ScoreImportResult =
+    let private import_osu_scores (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : ScoreImportResult =
 
         let result =
             {
@@ -129,7 +129,7 @@ module Scores =
         progress Complete
         result
 
-    let import_osu_scores_async (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ScoreImportResult> =
+    let import_osu_scores_async (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<ScoreImportResult> =
         // todo: make the IO operations actually benefit from async
         async {
             try

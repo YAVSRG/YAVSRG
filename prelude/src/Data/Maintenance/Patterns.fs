@@ -5,12 +5,12 @@ open Prelude
 open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
+open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 
 module Patterns =
 
-    let recalculate (chart_db: ChartDatabase, progress: ImportProgressCallback) : Async<unit> =
+    let recalculate (chart_db: ChartDatabase, progress: ProgressCallback) : Async<unit> =
         chart_db.RecalculationNeeded <- false
         async {
             seq {

@@ -3,12 +3,12 @@
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
+open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
 
 module Vacuum =
 
-    let vacuum_charts (delete_missing_audio: bool, chart_db: ChartDatabase, progress: ImportProgressCallback) : Async<unit> =
+    let vacuum_charts (delete_missing_audio: bool, chart_db: ChartDatabase, progress: ProgressCallback) : Async<unit> =
         async {
             progress (Generic "Vacuuming")
             Logging.Debug "Running SQLite VACUUM command on charts.db"
