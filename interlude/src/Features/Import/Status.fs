@@ -124,3 +124,54 @@ module ImportsInProgress =
         import_queue.Status <> Async.ServiceStatus.Idle
         || general_task_queue.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+
+    let current_task_status () =
+        list
+        |> Seq.map (_.Status)
+        |> Seq.tryPick (function Complete -> None | otherwise -> Some otherwise)
+        |> Option.defaultValue Complete
+
+/// Displayed below the import button when a task is in progress
+type TaskProgressMiniBar() =
+    inherit StaticWidget(NodeType.None)
+
+    let animation = Animation.Counter(1500.0)
+    let fade = Animation.Fade 0.0f
+
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        animation.Update elapsed_ms
+        fade.Target <- if ImportsInProgress.import_in_progress() then 1.0f else 0.0f
+        fade.Update elapsed_ms
+
+    override this.Draw() =
+        let alpha = fade.Alpha
+        if alpha > 0 then
+
+            match ImportsInProgress.current_task_status() with
+            | Downloading p ->
+                Render.rect this.Bounds (Colors.shadow_2.O4a alpha)
+                Render.rect (this.Bounds.SlicePercentL p) (Colors.cyan.O4a alpha)
+            | Processing (i, total) ->
+                Render.rect this.Bounds (Colors.cyan.O4a alpha)
+                Render.rect (this.Bounds.SlicePercentL (float32 i / float32 total)) (Colors.green_accent.O4a alpha)
+            | Complete -> Render.rect this.Bounds (Colors.green_accent.O4a alpha)
+            | Faulted -> Render.rect this.Bounds (Colors.red_accent.O4a alpha)
+            | Nested (_, i, total, _) ->
+                Render.rect this.Bounds (Colors.cyan.O4a alpha)
+                Render.rect (this.Bounds.SlicePercentL (float32 i / float32 total)) (Colors.green_accent.O4a alpha)
+            | Generic _ ->
+                let tick_width = this.Bounds.Width * 0.2f
+
+                let pos =
+                    -tick_width
+                    + (this.Bounds.Width + tick_width) * float32 animation.Progress
+
+                Render.rect
+                    (Rect.Create(
+                        this.Bounds.Left + max 0.0f pos,
+                        this.Bounds.Top,
+                        this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
+                        this.Bounds.Bottom
+                    ))
+                    (Colors.white.O4a alpha)

@@ -57,10 +57,7 @@ type Toolbar() =
             Icons.DOWNLOAD,
             Hotkey = "import"
         )
-        |+ LoadingIndicator.Strip(
-            ImportsInProgress.import_in_progress,
-            Position = Position.BorderB(Style.PADDING)
-        )
+        |+ TaskProgressMiniBar(Position = Position.BorderB(Style.PADDING))
 
     override this.Init(parent) =
         container
