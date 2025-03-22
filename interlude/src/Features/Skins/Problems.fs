@@ -30,8 +30,8 @@ module Problems =
                 |> fun c -> match e.SuggestedFix with Some fix -> c.Button(fix.Description, fork fix.Action after_fix) | None -> c
                 , Colors.red_accent, Colors.red.O2)
 
-    let problems_loader = 
-        { new Async.SwitchServiceSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), (unit -> unit)>() with 
+    let problems_loader =
+        { new Async.CancelQueueSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), (unit -> unit)>() with
             override this.Process((storage, container, after_fix)) =
                 match storage with
                 | :? Noteskin as ns -> ns.Validate()

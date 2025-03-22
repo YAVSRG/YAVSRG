@@ -22,7 +22,7 @@ type EtternaPacksBrowserPage() =
     let mutable failed = false
 
     let json_downloader =
-        { new Async.SwitchService<string * (unit -> unit), EtternaOnlineApiResponse option * (unit -> unit)>() with
+        { new Async.CancelQueue<string * (unit -> unit), EtternaOnlineApiResponse option * (unit -> unit)>() with
             override this.Process((url, action_at_bottom)) =
                 async {
                     match! WebServices.download_json_async<EtternaOnlineApiResponse>(url) with
@@ -41,7 +41,7 @@ type EtternaPacksBrowserPage() =
                         when_at_bottom <- Some action_at_bottom
 
                     loading <- false
-                | None -> 
+                | None ->
                     failed <- true
                     loading <- false
         }

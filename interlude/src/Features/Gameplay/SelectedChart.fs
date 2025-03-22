@@ -138,7 +138,7 @@ module SelectedChart =
         | Recolor
 
     let private chart_loader =
-        { new Async.SwitchServiceSeq<LoadRequest, unit -> unit>() with
+        { new Async.CancelQueueSeq<LoadRequest, unit -> unit>() with
             override this.Process(req) =
                 match req with
                 | Load(cc, play_audio, rate, mods) ->

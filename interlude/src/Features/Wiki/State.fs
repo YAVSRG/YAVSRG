@@ -40,7 +40,7 @@ module private WikiState =
     let mutable page_changed: unit -> unit = ignore
 
     let private page_loader =
-        { new Async.Service<Resource, MarkdownDocument array>() with
+        { new Async.Queue<Resource, MarkdownDocument array>() with
             override this.Handle(req) =
                 async {
                     match req with

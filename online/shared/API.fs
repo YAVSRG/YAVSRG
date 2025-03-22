@@ -111,7 +111,7 @@ module API =
             client.Timeout <- TimeSpan.FromSeconds(5.0)
 
         let private queue =
-            { new Async.Service<HttpClient -> Async<unit>, unit>() with
+            { new Async.Queue<HttpClient -> Async<unit>, unit>() with
                 override this.Handle(action) = async { do! action client }
             }
 
@@ -130,7 +130,7 @@ module API =
 
         let send_retry = _send_retry 3
 
-        let internal get<'T> (route: string, callback: 'T option -> unit) =
+        let internal get<'T> (route: string, callback: 'T option -> unit) : unit =
 
             let handle_response (response: HttpResponseMessage) =
                 if response.IsSuccessStatusCode then
@@ -183,7 +183,7 @@ module API =
                     }
             )
 
-        let internal post_return<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) =
+        let internal post_return<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) : unit =
 
             let handle_response (response: HttpResponseMessage) =
                 if response.IsSuccessStatusCode then
@@ -216,10 +216,10 @@ module API =
                 , ignore
             )
 
-        let internal post<'T> (route: string, payload: 'T, callback: bool option -> unit) =
+        let internal post<'T> (route: string, payload: 'T, callback: bool option -> unit) : unit =
             post_return<'T, bool> (route, payload, callback)
 
-        let internal post_async<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) =
+        let internal post_async<'T, 'U> (route: string, payload: 'T, callback: 'U option -> unit) : Async<unit> =
 
             let handle_response (response: HttpResponseMessage) =
                 if response.IsSuccessStatusCode then
@@ -251,7 +251,7 @@ module API =
                     }
             )
 
-        let internal delete (route: string, callback: bool option -> unit) =
+        let internal delete (route: string, callback: bool option -> unit) : unit =
 
             let handle_response (response: HttpResponseMessage) =
                 if response.IsSuccessStatusCode then

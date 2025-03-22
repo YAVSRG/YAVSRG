@@ -220,7 +220,7 @@ module Song =
     let set_global_offset (offset) = _global_offset <- offset
 
     let private song_loader =
-        { new Async.SwitchService<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
+        { new Async.CancelQueue<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
             override this.Process((preview, last_note, path, after_load)) =
                 async {
                     return

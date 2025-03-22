@@ -193,7 +193,7 @@ module Lobby =
             user_error player "You are already in a lobby"
 
     let private state_change =
-        { new Async.Service<Action, unit>() with
+        { new Async.Queue<Action, unit>() with
             override this.Handle req =
                 async {
                     try

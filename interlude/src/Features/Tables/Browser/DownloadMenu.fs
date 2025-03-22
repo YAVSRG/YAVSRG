@@ -35,7 +35,7 @@ module TableDownloader =
         (
             table: Table,
             charts: Tables.Charts.ChartInfo array,
-            download_service: Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>
+            download_service: Async.Queue<DownloaderState * string * Tables.Charts.ChartInfo, unit>
         ) =
 
         let levels_by_chart = charts |> Seq.map (fun c -> c.Hash, c.Level) |> Map.ofSeq
@@ -243,7 +243,7 @@ module TableDownloader =
                 | _ -> ()
 
     let download_service =
-        { new Async.Service<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
+        { new Async.Queue<DownloaderState * string * Tables.Charts.ChartInfo, unit>() with
             override _.Handle((state: DownloaderState, table_name: string, chart: Tables.Charts.ChartInfo)) =
                 async {
                     GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))

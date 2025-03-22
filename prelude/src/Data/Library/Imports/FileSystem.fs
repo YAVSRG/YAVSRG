@@ -12,7 +12,7 @@ open Prelude.Data.User
 module Imports =
 
     let delete_folder =
-        { new Async.Service<string, bool>() with
+        { new Async.Queue<string, bool>() with
             override this.Handle(path) =
                 async {
                     Logging.Debug "Deleting folder '%s' post-import" path
@@ -31,7 +31,7 @@ module Imports =
         }
 
     let delete_file =
-        { new Async.Service<string, bool>() with
+        { new Async.Queue<string, bool>() with
             override this.Handle(path) =
                 async {
                     Logging.Debug "Deleting file '%s' post-import" path

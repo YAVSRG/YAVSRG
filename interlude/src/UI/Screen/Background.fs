@@ -26,7 +26,7 @@ module Background =
     let mutable private background: (Sprite * Animation.Fade * bool) list = []
 
     let private loader =
-        { new Async.SwitchService<string option, (Bitmap * Color) option>() with
+        { new Async.CancelQueue<string option, (Bitmap * Color) option>() with
             member this.Process(file: string option) =
                 async {
                     match file with

@@ -55,7 +55,7 @@ module OnlineScores =
         leaderboard_loaded_ev.Trigger (state <> State.NoLeaderboard)
 
     let score_loader =
-        { new Async.SwitchServiceSeq<Request, unit -> unit>() with
+        { new Async.CancelQueueSeq<Request, unit -> unit>() with
             member this.Process(req: Request) =
                 seq {
                     let mutable scores : LeaderboardScore array = [||]

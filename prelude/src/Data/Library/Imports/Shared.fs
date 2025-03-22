@@ -122,5 +122,5 @@ module Shared =
 
         | _ -> []
 
-    let import_queue = { new Async.Service<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with override this.Handle(task) = task }
-    let general_task_queue = { new Async.Service<Async<unit>, unit>() with override this.Handle(task) = task }
+    let import_queue = { new Async.Queue<Async<Result<ConversionResult, string>>, Result<ConversionResult, string>>() with override this.Handle(task) = task }
+    let general_task_queue = { new Async.Queue<Async<unit>, unit>() with override this.Handle(task) = task }

@@ -122,9 +122,9 @@ module TaskTracking =
             y <- draw_task(now, opacity, x, y, task)
 
     let in_progress () =
-        import_queue.Status <> Async.ServiceStatus.Idle
-        || general_task_queue.Status <> Async.ServiceStatus.Idle
-        || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
+        import_queue.Status <> Async.QueueStatus.Idle
+        || general_task_queue.Status <> Async.QueueStatus.Idle
+        || TableDownloader.download_service.Status <> Async.QueueStatus.Idle
 
     let current_progress () =
         list

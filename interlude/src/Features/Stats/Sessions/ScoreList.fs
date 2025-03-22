@@ -170,7 +170,7 @@ type Score(score_info: ScoreInfo) =
 module private ScoreList =
 
     let loader =
-        { new Async.SwitchServiceSeq<int64 * int64 * Ruleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
+        { new Async.CancelQueueSeq<int64 * int64 * Ruleset * (Widget -> unit) * (unit -> unit), unit -> unit>() with
             member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
                 seq {
                     for chart_hash, score in UserDatabase.get_scores_between start_time end_time Content.UserData do

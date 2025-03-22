@@ -23,7 +23,7 @@ type BeatmapBrowserPage() =
     let mutable loading = false
 
     let json_downloader =
-        { new Async.SwitchService<string * (unit -> unit), MinoBeatmapSearch option * (unit -> unit)>() with
+        { new Async.CancelQueue<string * (unit -> unit), MinoBeatmapSearch option * (unit -> unit)>() with
             override this.Process((url, action_at_bottom)) =
                 async {
                     match! WebServices.download_json_async(url) with

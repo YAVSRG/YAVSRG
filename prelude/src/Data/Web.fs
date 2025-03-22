@@ -24,7 +24,7 @@ module WebServices =
             client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate")
             client
 
-        { new Async.Service<string, WebResult<string>>() with
+        { new Async.Queue<string, WebResult<string>>() with
             override this.Handle(url: string) =
                 async {
                     match! download_string_client.GetAsync(url) |> Async.AwaitTask |> Async.Catch with
@@ -43,7 +43,7 @@ module WebServices =
 
         let download_image_client = new HttpClient()
 
-        { new Async.Service<string, Bitmap option>() with
+        { new Async.Queue<string, Bitmap option>() with
             override this.Handle(url: string) =
                 async {
                     match! Async.AwaitTask(download_image_client.GetStreamAsync url) |> Async.Catch with
@@ -57,7 +57,7 @@ module WebServices =
         let download_file_client = new HttpClient()
         download_file_client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
 
-        { new Async.Service<string * string * (float32 -> unit), bool>() with
+        { new Async.Queue<string * string * (float32 -> unit), bool>() with
             override this.Handle((url: string, target: string, progress: float32 -> unit)) : Async<bool> =
                 async {
                     let intermediate_file = target + ".download"

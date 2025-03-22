@@ -60,7 +60,7 @@ module LocalScores =
         scores_loaded_ev.Trigger ()
 
     let score_loader =
-        { new Async.SwitchServiceSeq<Request, unit -> unit>() with
+        { new Async.CancelQueueSeq<Request, unit -> unit>() with
             member this.Process(req: Request) =
                 seq {
                     for score in req.ChartSaveData.Scores do

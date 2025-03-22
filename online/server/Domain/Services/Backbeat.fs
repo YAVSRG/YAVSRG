@@ -200,7 +200,7 @@ module Backbeat =
             let cache = Dictionary<string, Chart>()
             let http_client = new System.Net.Http.HttpClient()
 
-            { new Async.Service<string, Chart option>() with
+            { new Async.Queue<string, Chart option>() with
                 override this.Handle(hash) =
                     async {
                         if cache.ContainsKey hash then

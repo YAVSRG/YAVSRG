@@ -10,7 +10,7 @@ module Backbeat =
 
     // todo: move as much into prelude as possible
     let download_missing_chart =
-        { new Async.Service<string * string, bool>() with
+        { new Async.Queue<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
                 async {
                     match ChartDatabase.get_meta chart_id Content.Charts with
