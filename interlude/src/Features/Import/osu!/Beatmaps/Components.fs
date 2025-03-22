@@ -31,7 +31,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
     let download () =
         if status = NotDownloaded || status = DownloadFailed then
 
-            let task_status = ImportsInProgress.add data.title
+            let task_status = TaskTracking.add data.title
             let task = OnlineImports.download_osu_set(sprintf "https://catboy.best/d/%in" data.id, Content.Charts, Content.UserData, task_status.set_Status)
             import_queue.Request(task,
                 function

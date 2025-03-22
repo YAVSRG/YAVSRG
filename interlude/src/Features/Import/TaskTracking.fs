@@ -10,7 +10,7 @@ open Prelude.Data.Library.Imports
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
-type ImportStatus(label: string) =
+type TrackedTask(label: string) =
     let mutable status: TaskProgress = Generic %"import.waiting"
 
     let start = Timestamp.now()
@@ -30,14 +30,14 @@ type ImportStatus(label: string) =
     member this.CompletedAt : int64 voption = lock this (fun () -> completed)
     member this.Label = label
 
-module ImportsInProgress =
+module TaskTracking =
 
-    let private list = ResizeArray<ImportStatus>()
+    let private list = ResizeArray<TrackedTask>()
 
-    let add (label: string) : ImportStatus =
+    let add (label: string) : TrackedTask =
         assert(GameThread.is_game_thread())
 
-        let status = ImportStatus(label)
+        let status = TrackedTask(label)
         list.Add(status)
         status
 
@@ -48,18 +48,18 @@ module ImportsInProgress =
     let HEIGHT = 45.0f
     let SPACING = 15.0f
 
-    let rec private fmt_status (status: TaskProgress) : string * Color =
-        match status with
+    let rec private fmt_progress (progress: TaskProgress) : string * Color =
+        match progress with
         | Generic status -> status, Colors.grey_2
         | Downloading percent -> sprintf "%s %.0f%%" Icons.DOWNLOAD (percent * 100.0f), Colors.grey_1
         | Processing (count, total) -> sprintf "%s %i / %i" Icons.DATABASE count total, Colors.grey_1
         | Complete -> Icons.CHECK, Colors.green_accent
         | Faulted -> Icons.ALERT_CIRCLE, Colors.red_accent
         | Nested (label, count, total, inner) ->
-            let text, color = fmt_status inner
+            let text, color = fmt_progress inner
             sprintf "%s (%i / %i) | %s" label count total text, color
 
-    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: ImportStatus) : float32 =
+    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: TrackedTask) : float32 =
         let fade_in_out =
             match task.CompletedAt with
             | ValueSome time ->
@@ -77,16 +77,16 @@ module ImportsInProgress =
         Render.border Style.PADDING bounds (Colors.cyan_accent.O4a alpha)
         Render.rect bounds (Colors.cyan_shadow.O4a alpha)
 
-        let status = task.Status
+        let progress = task.Status
 
         let top_text = task.Label
         Text.fill_b(Style.font, top_text, bounds.SlicePercentL(0.7f).ShrinkB(15.0f).ShrinkX(10.0f), (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.LEFT)
-        let bottom_text, bottom_text_color = fmt_status status
+        let bottom_text, bottom_text_color = fmt_progress progress
         Text.fill_b(Style.font, bottom_text, bounds.SlicePercentR(0.3f).ShrinkB(15.0f).ShrinkX(10.0f), (bottom_text_color.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.RIGHT)
 
         let bar_bounds = bounds.SliceB(15.0f).Shrink(5.0f)
 
-        match status with
+        match progress with
         | Generic _ -> Render.rect bar_bounds (Colors.shadow_2.O4a alpha)
         | Downloading p ->
             Render.rect bar_bounds (Colors.shadow_2.O4a alpha)
@@ -121,12 +121,12 @@ module ImportsInProgress =
         for task in list do
             y <- draw_task(now, opacity, x, y, task)
 
-    let import_in_progress () =
+    let in_progress () =
         import_queue.Status <> Async.ServiceStatus.Idle
         || general_task_queue.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
 
-    let current_task_status () =
+    let current_progress () =
         list
         |> Seq.map (_.Status)
         |> Seq.tryPick (function Complete -> None | otherwise -> Some otherwise)
@@ -142,14 +142,14 @@ type TaskProgressMiniBar() =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         animation.Update elapsed_ms
-        fade.Target <- if ImportsInProgress.import_in_progress() then 1.0f else 0.0f
+        fade.Target <- if TaskTracking.in_progress() then 1.0f else 0.0f
         fade.Update elapsed_ms
 
     override this.Draw() =
         let alpha = fade.Alpha
         if alpha > 0 then
 
-            match ImportsInProgress.current_task_status() with
+            match TaskTracking.current_progress() with
             | Downloading p ->
                 Render.rect this.Bounds (Colors.shadow_2.O4a alpha)
                 Render.rect (this.Bounds.SlicePercentL p) (Colors.cyan.O4a alpha)

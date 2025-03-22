@@ -30,7 +30,7 @@ module PersonalBests =
                 if not data.Scores.IsEmpty then
                     match ChartDatabase.get_chart cc.Hash chart_db with
                     | Error reason ->
-                        Logging.Debug "Couldn't load %s for pb processing: %s" cc.Hash reason
+                        Logging.Debug "Couldn't load '%s' for pb processing: %s" cc.Hash reason
                     | Ok chart ->
 
                     let existing_bests = data.PersonalBests

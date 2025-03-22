@@ -158,7 +158,7 @@ type Toolbar() =
             container.Draw()
 
             if import_status_fade.Value > 0.005f then
-                ImportsInProgress.draw (this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f), import_status_fade.Value)
+                TaskTracking.draw (this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f), import_status_fade.Value)
 
             Terminal.draw ()
 
@@ -185,7 +185,7 @@ type Toolbar() =
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
             QuickMenuPage().Show()
 
-        if Mouse.hover(import_button.Bounds) && ImportsInProgress.import_in_progress() then
+        if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then
             import_status_fade.Target <- 1.0f
         else
             import_status_fade.Target <- 0.0f

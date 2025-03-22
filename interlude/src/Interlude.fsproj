@@ -123,7 +123,7 @@
     <Compile Include="Features\Score\BottomBanner.fs" />
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\Score.fs" />
-    <Compile Include="Features\Import\Status.fs" />
+    <Compile Include="Features\Import\TaskTracking.fs" />
     <Compile Include="Features\Import\osu!\Skins.fs" />
     <Compile Include="Features\Import\osu!\Replays.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Mino.fs" />

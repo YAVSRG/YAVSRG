@@ -20,7 +20,7 @@ module Library =
 
     let recalculate_pbs () =
         let rulesets = Rulesets.list() |> Seq.map (fun (id, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
-        let task_status = ImportsInProgress.add %"library.recalculate_personal_bests"
+        let task_status = TaskTracking.add %"library.recalculate_personal_bests"
         let task = PersonalBests.recalculate(rulesets, false, Content.Charts, Content.UserData, task_status.set_Status)
         general_task_queue.Request(task,
             fun () ->
@@ -38,7 +38,7 @@ module Library =
         )
 
     let recalculate_patterns () =
-        let task_status = ImportsInProgress.add %"library.recache_patterns"
+        let task_status = TaskTracking.add %"library.recache_patterns"
         let task = Patterns.recalculate(Content.Charts, task_status.set_Status)
         general_task_queue.Request(task,
             fun () ->
@@ -62,14 +62,14 @@ type LibraryPage() =
         Container(NodeType.None, Position = pretty_pos(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
         |+ Text(
             (fun () ->
-                if ImportsInProgress.import_in_progress () then
+                if TaskTracking.in_progress () then
                     %"imports.in_progress"
                 else
                     %"imports.not_in_progress"
             ),
             Color =
                 (fun () ->
-                    if ImportsInProgress.import_in_progress () then
+                    if TaskTracking.in_progress () then
                         Colors.text_green
                     else
                         Colors.text_subheading
@@ -77,7 +77,7 @@ type LibraryPage() =
             Position = Position.SliceT(40.0f).Shrink(20.0f, 0.0f)
         )
         |+ LoadingIndicator.Strip(
-            ImportsInProgress.import_in_progress,
+            TaskTracking.in_progress,
             Position = Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f)
         )
         |+ Text(
