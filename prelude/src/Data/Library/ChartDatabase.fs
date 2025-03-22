@@ -173,6 +173,10 @@ module ChartDatabase =
 
     (* Loading operations & Migrations *)
 
+    let sqlite_vacuum (db: ChartDatabase) =
+        lock db.LockObject <| fun () ->
+        Database.exec_raw "VACUUM;" db.Database |> ignore
+
     let private fast_load (db: ChartDatabase) : ChartDatabase =
         lock db.LockObject
         <| fun () ->

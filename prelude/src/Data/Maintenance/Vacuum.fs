@@ -11,7 +11,8 @@ module Vacuum =
     let vacuum_charts (delete_missing_audio: bool, chart_db: ChartDatabase, progress: ImportProgressCallback) : Async<unit> =
         async {
             progress (Generic "Vacuuming")
-            // todo: an actual vacuum SQLite operation
+            Logging.Debug "Running SQLite VACUUM command on charts.db"
+            ChartDatabase.sqlite_vacuum chart_db
             Logging.Debug "Chart database vacuum started"
             let asset_hashes = HashSet<string>()
             for directory in Directory.EnumerateDirectories(chart_db.AssetsPath) do
