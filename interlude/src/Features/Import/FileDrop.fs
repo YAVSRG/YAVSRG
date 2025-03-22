@@ -33,8 +33,8 @@ type ConfirmUnlinkedSongsImport(path: string) =
             .Once(
                 %"unlinkedsongsimport.confirm",
                 fun () ->
-                    let task_status = TaskTracking.add (Path.GetFileName path)
-                    let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_status.set_Status)
+                    let task_tracking = TaskTracking.add (Path.GetFileName path)
+                    let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_tracking.set_Progress)
                     import_queue.Request(task,
                         function
                         | Ok result ->
@@ -110,8 +110,8 @@ module FileDrop =
                 ConfirmUnlinkedSongsImport(path).Show()
             else
 
-            let task_status = TaskTracking.add (Path.GetFileName path)
-            let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_status.set_Status)
+            let task_tracking = TaskTracking.add (Path.GetFileName path)
+            let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_tracking.set_Progress)
             import_queue.Request(task,
                 function
                 | Ok result ->

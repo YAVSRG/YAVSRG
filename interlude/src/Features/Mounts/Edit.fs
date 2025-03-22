@@ -19,9 +19,9 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
 
     let import_osu_scores () =
 
-        let task_status = TaskTracking.add %"mount.import_osu_scores"
+        let task_tracking = TaskTracking.add %"mount.import_osu_scores"
         let task =
-            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName mount.SourceFolder, Content.Charts, Content.UserData, task_status.set_Status)
+            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName mount.SourceFolder, Content.Charts, Content.UserData, task_tracking.set_Progress)
             async {
                 let! result = import_task
                 Notifications.task_feedback (
@@ -99,13 +99,13 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 }
 
         if import then
-            let task_status =
+            let task_tracking =
                 match setting.Value.Value.LastImported with
                 | Some _ -> %"mount.import"
                 | None -> %"mount.importall"
                 |> sprintf "%O: %s" game
                 |> TaskTracking.add
-            let task = Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_status.set_Status)
+            let task = Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
             import_queue.Request(task,
                 function
                 | Ok result ->

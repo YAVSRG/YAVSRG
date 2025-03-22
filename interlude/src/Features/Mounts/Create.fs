@@ -58,8 +58,8 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
                 | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
 
                 if setting.Value.IsSome then
-                    let task_status = sprintf "%O: %s" game %"mount.importall" |> TaskTracking.add
-                    let task = Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_status.set_Status)
+                    let task_tracking = sprintf "%O: %s" game %"mount.importall" |> TaskTracking.add
+                    let task = Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
                     import_queue.Request(task,
                         function
                         | Ok result ->

@@ -11,17 +11,17 @@ open Interlude.UI
 open Interlude.Features.Tables.Browser
 
 type TrackedTask(label: string) =
-    let mutable status: TaskProgress = Generic %"import.waiting"
+    let mutable progress: TaskProgress = Generic %"import.waiting"
 
     let start = Timestamp.now()
 
     let mutable completed = ValueNone
 
-    member this.Status
-        with get() = lock this (fun () -> status)
+    member this.Progress
+        with get() = lock this (fun () -> progress)
         and set v = lock this (fun () ->
-            status <- v
-            match status with
+            progress <- v
+            match progress with
             | Faulted
             | Complete -> completed <- ValueSome (Timestamp.now())
             | _ -> ()
@@ -77,7 +77,7 @@ module TaskTracking =
         Render.border Style.PADDING bounds (Colors.cyan_accent.O4a alpha)
         Render.rect bounds (Colors.cyan_shadow.O4a alpha)
 
-        let progress = task.Status
+        let progress = task.Progress
 
         let top_text = task.Label
         Text.fill_b(Style.font, top_text, bounds.SlicePercentL(0.7f).ShrinkB(15.0f).ShrinkX(10.0f), (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.LEFT)
@@ -128,7 +128,7 @@ module TaskTracking =
 
     let current_progress () =
         list
-        |> Seq.map (_.Status)
+        |> Seq.map (_.Progress)
         |> Seq.tryPick (function Complete -> None | otherwise -> Some otherwise)
         |> Option.defaultValue Complete
 
