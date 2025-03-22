@@ -134,10 +134,6 @@ module Settings =
                 yield PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
                     .Help(Help.Info("system.automatic_offset"))
 
-            if token_match tokens [|%"system.confirm_exit"|] then
-                yield PageSetting(%"system.confirm_exit", Checkbox options.ConfirmExit)
-                    .Help(Help.Info("system.confirm_exit"))
-
             if token_match tokens [|%"system.enable_console"|] then
                 yield PageSetting(%"system.enable_console", Checkbox options.EnableConsole)
 

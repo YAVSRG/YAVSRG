@@ -24,6 +24,8 @@ type Widget(node_type) =
     member val Bounds = Rect.ZERO with get, set
     member val VisibleBounds = Rect.ZERO with get, set
 
+    // todo: in .NET 9 you can make a .Position(pos) extension setter
+    // todo: apply this pattern on things like Text.Align(...).Color(...) etc too
     abstract member Position: Position with set
     abstract member Update: float * bool -> unit
 
@@ -69,7 +71,7 @@ type Widget(node_type) =
         if _parent.IsNone then "*" else _parent.Value.ToString()
         + " > "
         + this.GetType().Name
-    
+
     static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
         constructor (NodeType.Container (fun () -> Some child)) |+ child
 

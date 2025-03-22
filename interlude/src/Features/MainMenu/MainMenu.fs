@@ -8,8 +8,6 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User.Stats
-open Prelude.Data.Library
-open Interlude.Options
 open Interlude
 open Interlude.Utils
 open Interlude.Content
@@ -18,6 +16,27 @@ open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.LevelSelect
+open Interlude.Features.Import
+
+type ConfirmQuitPage(on_confirm: unit -> unit) =
+    inherit Page()
+
+    override this.Content() =
+        if TaskTracking.in_progress() then
+            page_container()
+            |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(7)
+            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back).Pos(5)
+            |+ Text(%"menu.exit_prompt", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+            |+ Text(%"menu.exit_task_warning", Color = K Colors.text_red_2, Align = Alignment.LEFT, Position = pretty_pos(2, 2, PageWidth.Full))
+        else
+            page_container()
+            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back).Pos(3)
+            |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
+            |+ Text(%"menu.exit_prompt", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+        :> Widget
+
+    override this.Title = %"confirm"
+    override this.OnClose() = ()
 
 type private MenuButton(on_click, label: string, pos: Position) =
     inherit
@@ -80,6 +99,16 @@ type private MenuButton(on_click, label: string, pos: Position) =
 type MainMenuScreen() as this =
     inherit Screen.T()
 
+    let mutable confirmed_quit = false
+    let confirm_quit () =
+        ConfirmQuitPage(
+            fun () ->
+                confirmed_quit <- true
+                Screen.back Transitions.UnderLogo |> ignore
+                GameThread.defer (fun () -> Song.set_low_pass 1.0f)
+        )
+            .Show()
+
     let play_action () =
         Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
 
@@ -112,8 +141,6 @@ type MainMenuScreen() as this =
     let splash_fade = Animation.Fade 0.0f
     let splash_subtitle_fade = Animation.Fade 0.0f
     let button_sequence = Animation.Group()
-
-    let mutable confirmed_exit = false
 
     do
         this
@@ -187,19 +214,8 @@ type MainMenuScreen() as this =
         Background.dim 0.7f
 
     override this.OnBack() =
-        if not options.ConfirmExit.Value || confirmed_exit then
-            Some Screen.Type.SplashScreen
-        else
-            ConfirmPage(
-                %"menu.exit_prompt",
-                fun () ->
-                    confirmed_exit <- true
-                    Screen.back Transitions.UnderLogo |> ignore
-                    GameThread.defer (fun () -> Song.set_low_pass 1.0f)
-            )
-                .Show()
-
-            None
+        if confirmed_quit then Some Screen.Type.SplashScreen
+        else confirm_quit(); None
 
     override this.Draw() =
         let c = this.Bounds.CenterX
