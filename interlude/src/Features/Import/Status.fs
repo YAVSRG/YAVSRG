@@ -112,4 +112,3 @@ module ImportsInProgress =
         import_queue.Status <> Async.ServiceStatus.Idle
         || general_task_queue.Status <> Async.ServiceStatus.Idle
         || TableDownloader.download_service.Status <> Async.ServiceStatus.Idle
-        || Scores.import_osu_scores_service.Status <> Async.ServiceStatus.Idle

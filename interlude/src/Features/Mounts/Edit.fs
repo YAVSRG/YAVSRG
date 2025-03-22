@@ -17,6 +17,27 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
     let import_on_startup = Setting.simple mount.ImportOnStartup
     let mutable import = false
 
+    let import_osu_scores () =
+
+        let task_status = ImportsInProgress.add %"mount.import_osu_scores"
+        let task =
+            let import_task = Scores.import_osu_scores_async(Path.GetDirectoryName mount.SourceFolder, Content.Charts, Content.UserData, task_status.set_Status)
+            async {
+                let! result = import_task
+                Notifications.task_feedback (
+                    Icons.FOLDER_PLUS,
+                    %"notification.score_import_success",
+                    [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
+                )
+            }
+        general_task_queue.Request(task, ignore)
+
+        Notifications.system_feedback (
+            Icons.ALERT_OCTAGON,
+            %"notification.score_import_queued",
+            ""
+        )
+
     override this.Content() =
         page_container()
         |+ PageSetting(%"mount.importatstartup", Checkbox import_on_startup)
@@ -48,26 +69,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
             then
                 PageButton.Once(
                     %"mount.import_osu_scores",
-                    fun () ->
-                        Scores.import_osu_scores_service.Request(
-                            {
-                                UserDatabase = Content.UserData
-                                ChartDatabase = Content.Charts
-                                OsuRootPath = Path.GetDirectoryName mount.SourceFolder
-                            },
-                            fun result ->
-                                Notifications.task_feedback (
-                                    Icons.FOLDER_PLUS,
-                                    %"notification.score_import_success",
-                                    [ result.NewScores.ToString(); result.Maps.ToString() ] %> "notification.score_import_success.body"
-                                )
-                        )
-
-                        Notifications.action_feedback (
-                            Icons.FOLDER_PLUS,
-                            %"notification.score_import_queued",
-                            ""
-                        )
+                    import_osu_scores
                 )
                     .Help(Help.Info("mount.import_osu_scores"))
                     .Pos(8)

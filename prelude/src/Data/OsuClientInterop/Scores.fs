@@ -7,6 +7,7 @@ open Prelude
 open Prelude.Charts
 open Prelude.Data.User
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 
 module Scores =
 
@@ -46,7 +47,7 @@ module Scores =
                     if not existing_score_replaced then
                         result.NewScores <- result.NewScores + 1
 
-    let private import_osu_scores (osu_root_folder: string) (user_db: UserDatabase, chart_db: ChartDatabase) : ScoreImportResult =
+    let private import_osu_scores (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : ScoreImportResult =
 
         let result =
             {
@@ -54,6 +55,8 @@ module Scores =
                 NewScores = 0
                 Maps = 0
             }
+
+        progress (Generic "Reading osu! database")
 
         let scores =
             use file = Path.Combine(osu_root_folder, "scores.db") |> File.OpenRead
@@ -81,7 +84,7 @@ module Scores =
             |> Seq.map (fun b -> b.Hash, b)
             |> Map.ofSeq
 
-        // MD5 -> Imported interlude data
+        // MD5 -> Imported Interlude data
         let interlude_db_map =
             seq {
                 for entry in chart_db.Entries do
@@ -92,52 +95,51 @@ module Scores =
             }
             |> Map.ofSeq
 
-        for beatmap_score_data in
-            scores.Beatmaps
-            |> Seq.where (fun b -> b.Scores.Length > 0 && b.Scores.[0].Mode = 3uy)
-            do
+        for i, beatmap_score_data in Seq.indexed scores.Beatmaps do
 
-            match Map.tryFind beatmap_score_data.Hash interlude_db_map with
-            | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
+            if beatmap_score_data.Scores.Length > 0 && beatmap_score_data.Scores.[0].Mode = 3uy then
 
-                match ChartDatabase.get_chart interlude_hash chart_db with
-                | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
-                | Ok chart ->
+                match Map.tryFind beatmap_score_data.Hash interlude_db_map with
+                | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
 
-                import_map_scores
-                    result
-                    osu_root_folder
-                    (beatmap_score_data, original_osu_file_first_note, original_osu_file_rate)
-                    (chart, interlude_hash)
-                    user_db
+                    match ChartDatabase.get_chart interlude_hash chart_db with
+                    | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
+                    | Ok chart ->
 
-            | None ->
-                match Map.tryFind beatmap_score_data.Hash osu_db_map with
-                | None -> Logging.Error "Beatmap %s not imported into Interlude (or known in osu! database?), skipping" beatmap_score_data.Hash
-                | Some beatmap_data ->
-                    Logging.Error "Beatmap %s (%s) not imported into Interlude, skipping" beatmap_score_data.Hash beatmap_data.Filename
+                    import_map_scores
+                        result
+                        osu_root_folder
+                        (beatmap_score_data, original_osu_file_first_note, original_osu_file_rate)
+                        (chart, interlude_hash)
+                        user_db
 
-                // todo: consider importing song folder here and now
+                | None ->
+                    match Map.tryFind beatmap_score_data.Hash osu_db_map with
+                    | None -> Logging.Error "Beatmap %s not imported into Interlude (or known in osu! database?), skipping" beatmap_score_data.Hash
+                    | Some beatmap_data ->
+                        Logging.Error "Beatmap %s (%s) not imported into Interlude, skipping" beatmap_score_data.Hash beatmap_data.Filename
 
-            result.Maps <- result.Maps + 1
+                    // todo: consider importing song folder here and now
+
+                result.Maps <- result.Maps + 1
+
+            progress (Processing (i + 1, scores.Beatmaps.Length))
 
         Logging.Info "Finished importing osu! scores: %i scores found from %i maps, +%i new scores imported" result.Scores result.Maps result.NewScores
+        progress Complete
         result
 
-    type ScoreImportRequest =
-        {
-            UserDatabase: UserDatabase
-            ChartDatabase: ChartDatabase
-            OsuRootPath: string
-        }
-
-    let import_osu_scores_service =
-        { new Async.Service<ScoreImportRequest, ScoreImportResult>() with
-            override this.Handle(request) =
-                async {
-                    return
-                        import_osu_scores
-                            request.OsuRootPath
-                            (request.UserDatabase, request.ChartDatabase)
+    let import_osu_scores_async (osu_root_folder: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ImportProgressCallback) : Async<ScoreImportResult> =
+        // todo: make the IO operations actually benefit from async
+        async {
+            try
+                return import_osu_scores (osu_root_folder, chart_db, user_db, progress)
+            with err ->
+                Logging.Error "Unhandled exception while importing osu! scores: %O" err
+                progress Faulted
+                return {
+                    Scores = 0
+                    NewScores = 0
+                    Maps = 0
                 }
         }
