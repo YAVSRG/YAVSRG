@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library.Imports
-open Prelude.Data.OsuClientInterop
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
@@ -41,8 +40,8 @@ module ImportsInProgress =
         list.Add(status)
         status
 
-    let DELAY_AFTER_COMPLETE = 5000L
-    let FADE_TIME = 1000L
+    let DELAY_AFTER_COMPLETE = 3000L
+    let FADE_TIME = 300L
 
     let WIDTH = 600.0f
     let HEIGHT = 45.0f
@@ -59,7 +58,7 @@ module ImportsInProgress =
             let text, color = fmt_status inner
             sprintf "%s (%i / %i) | %s" label count total text, color
 
-    let private draw_task (now: int64, opacity: float32, y: float32, task: ImportStatus) : float32 =
+    let private draw_task (now: int64, opacity: float32, x: float32, y: float32, task: ImportStatus) : float32 =
         let fade_in_out =
             match task.CompletedAt with
             | ValueSome time ->
@@ -73,7 +72,7 @@ module ImportsInProgress =
         let opacity = opacity * fade_in_out
         let alpha = 255f * opacity |> int |> max 0 |> min 255
 
-        let bounds = Rect.Box(10.0f, y, WIDTH, HEIGHT)
+        let bounds = Rect.Box(x, y, WIDTH, HEIGHT)
         Render.border Style.PADDING bounds (Colors.cyan_accent.O4a alpha)
         Render.rect bounds (Colors.cyan_shadow.O4a alpha)
 
@@ -87,26 +86,39 @@ module ImportsInProgress =
         let bar_bounds = bounds.SliceB(15.0f).Shrink(5.0f)
 
         match status with
-        | Generic _ -> Render.rect bar_bounds Colors.shadow_2
+        | Generic _ -> Render.rect bar_bounds (Colors.shadow_2.O4a alpha)
         | Downloading p ->
-            Render.rect bar_bounds Colors.shadow_2
-            Render.rect (bar_bounds.SlicePercentL p) Colors.cyan
+            Render.rect bar_bounds (Colors.shadow_2.O4a alpha)
+            Render.rect (bar_bounds.SlicePercentL p) (Colors.cyan.O4a alpha)
         | Processing (i, total) ->
-            Render.rect bar_bounds Colors.cyan
-            Render.rect (bar_bounds.SlicePercentL (float32 i / float32 total)) Colors.green_accent
-        | Complete -> Render.rect bar_bounds Colors.green_accent
-        | Faulted -> Render.rect bar_bounds Colors.red_accent
+            Render.rect bar_bounds (Colors.cyan.O4a alpha)
+            Render.rect (bar_bounds.SlicePercentL (float32 i / float32 total)) (Colors.green_accent.O4a alpha)
+        | Complete -> Render.rect bar_bounds (Colors.green_accent.O4a alpha)
+        | Faulted -> Render.rect bar_bounds (Colors.red_accent.O4a alpha)
         | Nested (_, i, total, _) ->
-            Render.rect bar_bounds Colors.cyan
-            Render.rect (bar_bounds.SlicePercentL (float32 i / float32 total)) Colors.green_accent
+            Render.rect bar_bounds (Colors.cyan.O4a alpha)
+            Render.rect (bar_bounds.SlicePercentL (float32 i / float32 total)) (Colors.green_accent.O4a alpha)
 
         y + (HEIGHT + SPACING) * fade_in_out
 
-    let draw (opacity: float32) =
+    let draw (bounds: Rect, opacity: float32) =
         let now = Timestamp.now()
-        let mutable y = Toolbar.HEIGHT + 10.0f
+
+        let bounds =
+            let MIN_WIDTH = WIDTH + SPACING * 2.0f
+            if bounds.Width < MIN_WIDTH then
+                bounds.SliceL(MIN_WIDTH)
+            else
+                bounds
+
+        let a = int (255.0f * opacity)
+        Render.rect (bounds.SlicePercentT opacity) (Colors.shadow_2.O3a a)
+
+        let x = bounds.Left + (bounds.Width - WIDTH) * 0.5f
+        let mutable y = bounds.Top + 70.0f
+        Text.fill_b(Style.font, sprintf "%s: %i" %"imports.queued" list.Count, bounds.SliceT(60.0f).Shrink(5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
         for task in list do
-            y <- draw_task(now, opacity, y, task)
+            y <- draw_task(now, opacity, x, y, task)
 
     let import_in_progress () =
         import_queue.Status <> Async.ServiceStatus.Idle

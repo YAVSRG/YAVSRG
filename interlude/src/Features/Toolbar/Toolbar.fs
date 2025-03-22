@@ -49,6 +49,7 @@ type Toolbar() =
                 (Rect.Box(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
                 (Palette.color (int level, 1.0f, 0.5f))
 
+    let import_status_fade = Animation.Fade 0.0f
     let import_button =
         InlaidButton(
             %"menu.import",
@@ -159,8 +160,8 @@ type Toolbar() =
 
             container.Draw()
 
-            if ImportsInProgress.import_in_progress() then
-                ImportsInProgress.draw 1.0f
+            if import_status_fade.Value > 0.005f then
+                ImportsInProgress.draw (this.Bounds.ShrinkY(HEIGHT).SlicePercentL(0.4f).Shrink(20.0f), import_status_fade.Value)
 
             Terminal.draw ()
 
@@ -186,6 +187,12 @@ type Toolbar() =
             OptionsMenuPage().Show()
         if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
             QuickMenuPage().Show()
+
+        if Mouse.hover(import_button.Bounds) && ImportsInProgress.import_in_progress() then
+            import_status_fade.Target <- 1.0f
+        else
+            import_status_fade.Target <- 0.0f
+        import_status_fade.Update elapsed_ms
 
         Terminal.update ()
 
