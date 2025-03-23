@@ -61,9 +61,12 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on
 
     let draw_bar (color_func: float32 -> Color) (bounds: Rect, percentage: float32) =
         for i = 0 to SEGMENTS - 1 do
-            Render.quad
-                <| bounds.SlicePercentL(float32 i * SEGMENT_SIZE, SEGMENT_SIZE).AsQuad
-                <| Quad.gradient_left_to_right (color_func(float32 i * SEGMENT_SIZE)) (color_func(float32 (i + 1) * SEGMENT_SIZE))
+            Render.rect_c
+                (bounds.SlicePercentL(float32 i * SEGMENT_SIZE, SEGMENT_SIZE))
+                (Quad.gradient_left_to_right
+                    (color_func(float32 i * SEGMENT_SIZE))
+                    (color_func(float32 (i + 1) * SEGMENT_SIZE))
+                )
 
         let cursor = bounds.ShrinkPercentL(percentage).SliceL(0.0f)
         Render.rect (cursor.Expand(5f, 5f)) (if v > 0.5f then Colors.black else Colors.white)

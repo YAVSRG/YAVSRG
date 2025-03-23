@@ -14,15 +14,15 @@ module Lanecover =
         let upper (amount: float32) =
             Render.rect (bounds.SliceT(amount - fade_length)) options.LaneCover.Color.Value
 
-            Render.quad
-                (bounds.SliceT(amount).SliceB(fade_length).AsQuad)
+            Render.rect_c
+                (bounds.SliceT(amount).SliceB(fade_length))
                 (Quad.gradient_top_to_bottom options.LaneCover.Color.Value (options.LaneCover.Color.Value.O4a 0))
 
         let lower (amount: float32) =
             Render.rect (bounds.SliceB(amount - fade_length)) options.LaneCover.Color.Value
 
-            Render.quad
-                (bounds.SliceB(amount).SliceT(fade_length).AsQuad)
+            Render.rect_c
+                (bounds.SliceB(amount).SliceT(fade_length))
                 (Quad.gradient_top_to_bottom (options.LaneCover.Color.Value.O4a 0) options.LaneCover.Color.Value)
 
         let height = bounds.Height

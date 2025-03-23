@@ -113,7 +113,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     override this.Draw() =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
         Background.draw (this.Bounds, Colors.white, 2.0f)
-        Render.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
+        Render.rect_c this.Bounds (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
         base.Draw()
 
         // accuracy info

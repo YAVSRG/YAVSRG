@@ -15,7 +15,7 @@ module ProgressMeter =
     let private PIE_SEGMENTS_F = float32 PIE_SEGMENTS
     let private SECTOR_ANGLE = 2.0f * MathF.PI / PIE_SEGMENTS_F
 
-    let draw_pie (bounds: Rect, color_fg: Color, color_bg: Color, progress: float32) =
+    let draw_pie (bounds: Rect, color_fg: Color, color_bg: Color, progress: float32) : unit =
         let x, y = bounds.Center
         let r = (min bounds.Width bounds.Height) * 0.5f
 
@@ -32,25 +32,37 @@ module ProgressMeter =
         let inner (i: int32) = inner_exact (float32 i)
 
         for i = 1 to PIE_SEGMENTS do
-            Render.quad
-                (Quad.from_points((x, y), (x, y), (inner (i - 1)), (inner i)))
-                color_bg.AsQuad
+            Render.quad_points
+                (x, y)
+                (x, y)
+                (inner (i - 1))
+                (inner i)
+                color_bg
 
-            Render.quad
-                (Quad.from_points((inner (i - 1)), (outer (i - 1)), (outer i), (inner i)))
-                Colors.white.O2.AsQuad
+            Render.quad_points
+                (inner (i - 1))
+                (outer (i - 1))
+                (outer i)
+                (inner i)
+                Colors.white.O2
 
         let progress_rounded_down = progress * (PIE_SEGMENTS_F - 0.1f) |> floor |> int
         for i = 1 to progress_rounded_down do
-            Render.quad
-                (Quad.from_points((x, y), (x, y), (inner (i - 1)), (inner i)))
-                color_fg.AsQuad
+            Render.quad_points
+                (x, y)
+                (x, y)
+                (inner (i - 1))
+                (inner i)
+                color_fg
 
-        Render.quad
-            (Quad.from_points((x, y), (x, y), (inner progress_rounded_down), (inner_exact (progress * PIE_SEGMENTS_F))))
-            color_fg.AsQuad
+        Render.quad_points
+            (x, y)
+            (x, y)
+            (inner progress_rounded_down)
+            (inner_exact (progress * PIE_SEGMENTS_F))
+            color_fg
 
-    let draw_percent_progress_centered (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) =
+    let draw_percent_progress_centered (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) : unit =
         let progress_text = sprintf "%.0f%%" (progress * 100.0f)
         let char_width = float32 texture.Width
         let width = (percent_spacing + float32 progress_text.Length + (float32 progress_text.Length - 1.0f) * spacing) * char_width
@@ -73,13 +85,13 @@ module ProgressMeter =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-    let fmt_time_left (time_left: float32<ms / rate>) =
+    let fmt_time_left (time_left: float32<ms / rate>) : string =
         sprintf
             "%i:%02i"
             (time_left / 60000.0f<ms / rate> |> floor |> int)
             ((time_left % 60000.0f<ms / rate>) / 1000.0f<ms / rate> |> floor |> int)
 
-    let draw_countdown_centered (texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) =
+    let draw_countdown_centered (texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) : unit =
         let time_left_text = fmt_time_left time_left
 
         let char_width = float32 texture.Width

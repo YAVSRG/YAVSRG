@@ -98,7 +98,7 @@ type FailOverlay(pacemaker_state: PacemakerState, retry: unit -> unit, score_scr
 
         let text_color = (Colors.white.O4a alpha, Colors.shadow_2.O4a alpha)
 
-        Render.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom (Colors.red.O4a 0) (Colors.red.O2a alpha))
+        Render.rect_c this.Bounds (Quad.gradient_top_to_bottom (Colors.red.O4a 0) (Colors.red.O2a alpha))
         Render.rect (this.Bounds.SliceY(main_fade.Value * 200.0f).TranslateY(-200.0f)) Colors.shadow_2.O2
 
         Text.fill_b(Style.font, "MISSION FAILED", this.Bounds.SliceY(160.0f).TranslateY(-200.0f), text_color, Alignment.CENTER)

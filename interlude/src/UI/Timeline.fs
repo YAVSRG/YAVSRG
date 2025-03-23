@@ -52,25 +52,37 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let note_next = HEIGHT * note_density.[i] / max_note_density
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
-            Render.quad
-                (Quad.from_points((x, b.Bottom), (x, b.Bottom - note_prev), (x + w, b.Bottom - note_next), (x + w, b.Bottom)))
-                Colors.white.O2.AsQuad
+            Render.quad_points
+                (x, b.Bottom)
+                (x, b.Bottom - note_prev)
+                (x + w, b.Bottom - note_next)
+                (x + w, b.Bottom)
+                Colors.white.O2
 
-            Render.quad
-                (Quad.from_points((x, b.Bottom), (x, b.Bottom - chord_prev), (x + w, b.Bottom - chord_next), (x + w, b.Bottom)))
-                Colors.cyan_accent.O1.AsQuad
+            Render.quad_points
+                (x, b.Bottom)
+                (x, b.Bottom - chord_prev)
+                (x + w, b.Bottom - chord_next)
+                (x + w, b.Bottom)
+                Colors.cyan_accent.O1
 
             x <- x + w
             note_prev <- note_next
             chord_prev <- chord_next
 
-        Render.quad
-            (Quad.from_points((x, b.Bottom), (x, b.Bottom - note_prev), (b.Right, b.Bottom - note_prev), (b.Right, b.Bottom)))
-            Colors.white.O2.AsQuad
+        Render.quad_points
+            (x, b.Bottom)
+            (x, b.Bottom - note_prev)
+            (b.Right, b.Bottom - note_prev)
+            (b.Right, b.Bottom)
+            Colors.white.O2
 
-        Render.quad
-            (Quad.from_points((x, b.Bottom), (x, b.Bottom - chord_prev), (b.Right, b.Bottom - chord_prev), (b.Right, b.Bottom)))
-            Colors.cyan_accent.O1.AsQuad
+        Render.quad_points
+            (x, b.Bottom)
+            (x, b.Bottom - chord_prev)
+            (b.Right, b.Bottom - chord_prev)
+            (b.Right, b.Bottom)
+            Colors.cyan_accent.O1
 
         let now = Song.time()
         let percent = (now - start) / (LAST_NOTE - start) |> min 1.0f

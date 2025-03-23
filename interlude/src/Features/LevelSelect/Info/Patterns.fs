@@ -86,15 +86,11 @@ type Patterns(display: Setting<Display>) =
             let bar_scale = min 1.0f (entry.Amount / 1000.0f<ms / rate> / SelectedChart.rate.Value / 100.0f)
 
             let bar (lo_pc, lo_val, hi_pc, hi_val) =
-                Render.quad
-                    (Rect
-                        .Create(
-                            BAR_L + lo_pc * BAR_WIDTH * bar_scale,
-                            b.Top + 12.5f,
-                            BAR_L + hi_pc * BAR_WIDTH * bar_scale,
-                            b.Top + 27.5f
-                        )
-                        .AsQuad)
+                Render.rect_edges_c
+                    (BAR_L + lo_pc * BAR_WIDTH * bar_scale)
+                    (b.Top + 12.5f)
+                    (BAR_L + hi_pc * BAR_WIDTH * bar_scale)
+                    (b.Top + 27.5f)
                     (Quad.gradient_left_to_right (density_color lo_val) (density_color hi_val))
 
             bar (0.0f, entry.Density10, 0.1f, entry.Density10)

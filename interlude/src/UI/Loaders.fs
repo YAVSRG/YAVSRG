@@ -156,6 +156,11 @@ type NewAndShiny() =
             (x + r * a, y - r * b)
 
         for i = 0 to 29 do
-            Render.quad (Quad.from_points((x, y), (x, y), (vec i), (vec (i + 1)))) Colors.red_accent.AsQuad
+            Render.quad_points
+                (x, y)
+                (x, y)
+                (vec i)
+                (vec (i + 1))
+                Colors.red_accent
 
         Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

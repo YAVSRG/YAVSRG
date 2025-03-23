@@ -74,14 +74,12 @@ module Logo =
                     let UPPER_TRIANGLE_2 = Vector2(r - 0.1f * w, t + 0.1f * w)
                     let UPPER_TRIANGLE_3 = Vector2(l + 0.5f * w, t + (0.1f + TRIANGLE_HEIGHT) * w)
 
-                    Render.quad
-                    <| Quad.from_vectors(
-                        UPPER_TRIANGLE_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING),
-                        UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING),
-                        UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT),
-                        UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT)
-                    )
-                    <| Colors.blue.AsQuad
+                    Render.quad_vecs
+                        (UPPER_TRIANGLE_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING))
+                        (UPPER_TRIANGLE_2 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING))
+                        (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                        (UPPER_TRIANGLE_3 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT))
+                        Colors.blue
 
                     let LOWER_LEFT_1 = Vector2(l + 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
 
@@ -91,14 +89,12 @@ module Logo =
                     let LOWER_LEFT_3 = Vector2(l + 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_LEFT_4 = Vector2(l + 0.5f * w, t + 0.95f * w)
 
-                    Render.quad
-                    <| Quad.from_vectors(
-                        LOWER_LEFT_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING + breathe_2),
-                        LOWER_LEFT_2 + Vector2(X_PADDING_FOR_GRADIENT_INNER, -PADDING + breathe_2),
-                        LOWER_LEFT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT + breathe_2),
-                        LOWER_LEFT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT + breathe_2)
-                    )
-                    <| Colors.blue.AsQuad
+                    Render.quad_vecs
+                        (LOWER_LEFT_1 + Vector2(-X_PADDING_FOR_GRADIENT, -PADDING + breathe_2))
+                        (LOWER_LEFT_2 + Vector2(X_PADDING_FOR_GRADIENT_INNER, -PADDING + breathe_2))
+                        (LOWER_LEFT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT + breathe_2))
+                        (LOWER_LEFT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT + breathe_2))
+                        Colors.blue
 
                     let LOWER_RIGHT_1 = Vector2(r - 0.1f * w, t + (0.95f - TRIANGLE_HEIGHT) * w)
 
@@ -108,23 +104,24 @@ module Logo =
                     let LOWER_RIGHT_3 = Vector2(r - 0.5f * w, t + (0.95f - LOWER_Y_THICKNESS) * w)
                     let LOWER_RIGHT_4 = Vector2(r - 0.5f * w, t + 0.95f * w)
 
-                    Render.quad
-                    <| Quad.from_vectors(
-                        LOWER_RIGHT_1 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING + breathe_2),
-                        LOWER_RIGHT_2 + Vector2(-X_PADDING_FOR_GRADIENT_INNER, -PADDING + breathe_2),
-                        LOWER_RIGHT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT + breathe_2),
-                        LOWER_RIGHT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT + breathe_2)
-                    )
-                    <| Colors.blue.AsQuad
+                    Render.quad_vecs
+                        (LOWER_RIGHT_1 + Vector2(X_PADDING_FOR_GRADIENT, -PADDING + breathe_2))
+                        (LOWER_RIGHT_2 + Vector2(-X_PADDING_FOR_GRADIENT_INNER, -PADDING + breathe_2))
+                        (LOWER_RIGHT_3 + Vector2(0.0f, -Y_PADDING_FOR_GRADIENT + breathe_2))
+                        (LOWER_RIGHT_4 + Vector2(0.0f, Y_PADDING_FOR_GRADIENT + breathe_2))
+                        Colors.blue
 
                     // STENCIL FOR LIGHT BLUE PARTS WITH RAIN AND VISUALISER IN THEM
 
                     Render.stencil_create(true)
 
                     // center triangle
-                    Render.quad
-                        (Quad.from_vectors(UPPER_TRIANGLE_1, UPPER_TRIANGLE_2, UPPER_TRIANGLE_3, UPPER_TRIANGLE_3))
-                        Colors.cyan_accent.AsQuad
+                    Render.quad_vecs
+                        UPPER_TRIANGLE_1
+                        UPPER_TRIANGLE_2
+                        UPPER_TRIANGLE_3
+                        UPPER_TRIANGLE_3
+                        Colors.cyan_accent
 
                     Render.quad
                         (Quad.from_vectors(LOWER_LEFT_1, LOWER_LEFT_2, LOWER_LEFT_3, LOWER_LEFT_4)
@@ -177,14 +174,12 @@ module Logo =
 
                         let i = float32 i
 
-                        Render.quad
-                            (Quad.from_points(
-                                (l + i * w / 32.0f, m - prev),
-                                (l + (i + 1.0f) * w / 32.0f, m - level),
-                                (l + (i + 1.0f) * w / 32.0f, b),
-                                (l + i * w / 32.0f, b)
-                            ))
-                            Colors.blue_accent.O3.AsQuad
+                        Render.quad_points
+                            (l + i * w / 32.0f, m - prev)
+                            (l + (i + 1.0f) * w / 32.0f, m - level)
+                            (l + (i + 1.0f) * w / 32.0f, b)
+                            (l + i * w / 32.0f, b)
+                            Colors.blue_accent.O3
 
                         prev <- level
 

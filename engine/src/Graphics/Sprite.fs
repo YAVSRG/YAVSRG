@@ -118,13 +118,13 @@ module Texture =
             texture.TextureUnit <- texture_unit
             texture.TextureUnit <> 0
 
-    let unclaim_texture_unit (texture: Texture) =
+    let unclaim_texture_unit (texture: Texture) : unit =
         if texture.TextureUnit <> 0 then
             if TRACE then Logging.Debug "Texture slot [%i] -> %i" texture.TextureUnit texture.Handle
             texture_unit_in_use.[texture.TextureUnit] <- false
             texture.TextureUnit <- 0
 
-    let destroy (texture: Texture) =
+    let destroy (texture: Texture) : unit =
         assert (texture.References = 0)
         unclaim_texture_unit texture
         GL.DeleteTexture texture.Handle
@@ -164,7 +164,7 @@ module Texture =
             PrecomputedQuad = ValueNone
         }
 
-    let create_default_sprite (texture: Texture) =
+    let create_default_sprite (texture: Texture) : Sprite =
         {
             Texture = texture
 
@@ -183,7 +183,7 @@ module Texture =
 
 module Sprite =
 
-    let precompute_1x1 (sprite: Sprite) =
+    let precompute_1x1 (sprite: Sprite) : Sprite =
         let stride_x = float32 sprite.GridWidth / float32 sprite.Texture.Width
         let stride_y = float32 sprite.GridHeight / float32 sprite.Texture.Height
 
@@ -338,7 +338,7 @@ module Sprite =
         let _, results = upload_many info.Label use_texture_unit use_smoothing [| info |]
         snd results.[0]
 
-    let destroy (sprite: Sprite) =
+    let destroy (sprite: Sprite) : bool =
         if sprite.Z > 0 then
             sprite.Texture.References <- sprite.Texture.References - 1
 

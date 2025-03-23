@@ -206,5 +206,5 @@ type private Profile() =
         base.Init parent
 
     override this.Draw() =
-        Render.quad this.Bounds.AsQuad (Quad.gradient_top_to_bottom !*Palette.DARK_100 Colors.shadow_2.O2)
+        Render.rect_c this.Bounds (Quad.gradient_top_to_bottom !*Palette.DARK_100 Colors.shadow_2.O2)
         base.Draw()

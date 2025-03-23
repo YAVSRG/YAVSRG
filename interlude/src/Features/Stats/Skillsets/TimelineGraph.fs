@@ -107,17 +107,26 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
                     let theta = MathF.Atan((previous_y - y) / (previous_x - x))
                     let dy = -HTHICKNESS * MathF.Cos theta
                     let dx = HTHICKNESS * MathF.Sin theta
-                    Render.quad
-                        <| Quad.from_points((x, y), (previous_x, previous_y), (previous_x, previous_y + DROP_GRADIENT_SIZE), (x, y + DROP_GRADIENT_SIZE))
-                        <| Quad.gradient_top_to_bottom color.O1 color.O0
+                    Render.quad_points_c
+                        (x, y)
+                        (previous_x, previous_y)
+                        (previous_x, previous_y + DROP_GRADIENT_SIZE)
+                        (x, y + DROP_GRADIENT_SIZE)
+                        (Quad.gradient_top_to_bottom color.O1 color.O0)
 
-                    Render.quad
-                        <| Quad.from_points((x + dx, y + dy), (previous_x + dx, previous_y + dy), (previous_x - dx, previous_y - dy), (x - dx, y - dy))
-                        <| color.AsQuad
+                    Render.quad_points
+                        (x + dx, y + dy)
+                        (previous_x + dx, previous_y + dy)
+                        (previous_x - dx, previous_y - dy)
+                        (x - dx, y - dy)
+                        color
 
-                Render.quad
-                    <| Quad.from_points((previous_x, previous_y - 7.5f), (previous_x + 7.5f, previous_y), (previous_x, previous_y + 7.5f), (previous_x - 7.5f, previous_y))
-                    <| (if i - 1 = hover_index && show_tooltip then Colors.white else color).AsQuad
+                Render.quad_points
+                    (previous_x, previous_y - 7.5f)
+                    (previous_x + 7.5f, previous_y)
+                    (previous_x, previous_y + 7.5f)
+                    (previous_x - 7.5f, previous_y)
+                    (if i - 1 = hover_index && show_tooltip then Colors.white else color)
 
                 previous_x <- x
                 previous_y <- y

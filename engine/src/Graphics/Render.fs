@@ -30,13 +30,13 @@ module Render =
     let mutable internal _bounds = Rect.ZERO
     let mutable private _batch : Batch = Unchecked.defaultof<_>
 
-    let private create_flipped_projection (width: float32, height: float32) =
+    let private create_flipped_projection (width: float32, height: float32) : Matrix4 =
         Matrix4.Identity
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
         * Matrix4.CreateScale(1.0f, -1.0f, 1.0f)
 
-    let private create_projection (width: float32, height: float32) =
+    let private create_projection (width: float32, height: float32) : Matrix4 =
         Matrix4.Identity
         * Matrix4.CreateOrthographic(width, height, 0.0f, 1.0f)
         * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
@@ -67,7 +67,7 @@ module Render =
 
         /// Binds this FBO, so drawing goes to its buffer instead of the screen.
         /// Must not be called if already bound.
-        member this.Bind(clear) =
+        member this.Bind(clear: bool) : unit =
             _batch.Draw ()
 
             if List.isEmpty fbo_stack then
@@ -83,7 +83,7 @@ module Render =
 
         /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
         /// Must not be called if not already bound.
-        member this.Unbind() =
+        member this.Unbind() : unit =
             _batch.Draw ()
             fbo_stack <- List.tail fbo_stack
 
@@ -97,7 +97,7 @@ module Render =
         interface IDisposable with
             override this.Dispose() = in_use.[this.fbo_index] <- false
 
-    let private initialise_fbos () =
+    let private initialise_fbos () : unit =
         for i in 0 .. (FBO_POOL_SIZE - 1) do
             if (texture_ids.[i] <> 0) then
                 GL.DeleteTexture(texture_ids.[i])
@@ -189,7 +189,7 @@ module Render =
     /// Retrieves the width of the screen in virtual pixels.<br/>
     /// Virtual pixels are scaled, preserving aspect ratio but always keeping the screen at a virtual 1080 pixels tall.
     /// </summary>
-    let width() = _width
+    let width() : float32 = _width
 
     /// <summary>
     /// Retrieves the height of the screen in virtual pixels.<br/>
@@ -198,14 +198,14 @@ module Render =
     /// <remarks>
     /// This function therefore always returns 1080.0 - A future feature may come to customise virtual pixel rules
     /// </remarks>
-    let height() = _height
+    let height() : float32 = _height
 
     /// <summary>
     /// Retrieves the bounding box of the screen in virtual pixels.<br/>
     /// Virtual pixels are scaled, preserving aspect ratio but always keeping the screen at a virtual 1080 pixels tall.
     /// Equivalent to <c>Rect.Box(0.0f, 0.0f, width(), height())</c>.
     /// </summary>
-    let bounds() = _bounds
+    let bounds() : Rect = _bounds
 
     /// <summary>
     /// Gets the real dimensions of the framebuffer, as screen pixels.<br/>
@@ -213,21 +213,21 @@ module Render =
     /// This is not necessarily the dimensions of the game UI, as user could be using letterboxing.<br/><br/>
     /// For the viewport area of the game use <c>viewport_size()</c>
     /// </summary>
-    let framebuffer_size() = _framebuffer_width, _framebuffer_height
+    let framebuffer_size() : int * int = _framebuffer_width, _framebuffer_height
 
     /// <summary>
     /// Gets the real dimensions of the viewport, as screen pixels.<br/>
     /// This is the dimensions of the part of the monitor the game is rendering on.<br/><br/>
     /// This is not necessarily the dimensions of the window, as this does account for the window border/decorations OR for letterboxing<br/>
     /// </summary>
-    let viewport_size() = _viewport_width, _viewport_height
+    let viewport_size() : int * int = _viewport_width, _viewport_height
 
     /// <summary>
     /// Gets and binds an <see cref="FBO"/> from the pool.<br/>
     /// While an FBO is bound, all draw calls render to a virtual image buffer instead of the screen.<br/>
     /// The FBO can then later be used as a sprite to be drawn to the screen.
     /// </summary>
-    let borrow_fbo () =
+    let borrow_fbo () : FBO =
         { 0 .. (FBO_POOL_SIZE - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
@@ -285,7 +285,7 @@ module Render =
     /// Stencils can be nested through nested calls to stencil_create.
     /// </summary>
     /// <remarks>To create a stencil layer without drawing anything on-screen, use transparent rectangles and quads with no alpha masking.</remarks>
-    let stencil_create (use_alpha_masking: bool) =
+    let stencil_create (use_alpha_masking: bool) : unit =
         _batch.Draw ()
 
         if stencil_depth = 0 then
@@ -304,7 +304,7 @@ module Render =
     /// In this mode, pixels can only be updated if they were stencilled during the previous step.<br/>
     /// <see cref="stencil_begin_finish"/> should be called next to finish using the stencil and return to normal drawing.
     /// </summary>
-    let stencil_begin_draw () =
+    let stencil_begin_draw () : unit =
         _batch.Draw ()
 
         GL.ColorMask(true, true, true, true)
@@ -316,7 +316,7 @@ module Render =
     /// In this mode, pixels can only be updated if they were stencilled during the previous step.<br/>
     /// <see cref="stencil_begin_finish"/> should be called next to finish using the stencil and return to normal drawing.
     /// </summary>
-    let stencil_finish () =
+    let stencil_finish () : unit =
         _batch.Draw ()
 
         stencil_depth <- stencil_depth - 1
@@ -351,7 +351,7 @@ module Render =
     /// <paramref name="multiplier"/> is a multiplier from 0.0 to 1.0.<br/>
     /// Restore should be used to revert a multiplier previously used, and each rendered frame should end with this multiplier reset to 1.0
     /// </summary>
-    let alpha_multiplier_restore (multiplier: float32) =
+    let alpha_multiplier_restore (multiplier: float32) : unit =
         assert(multiplier >= 0.0f && multiplier <= 1.0f)
         if multiplier <> alpha_mult then
             _batch.Draw ()
@@ -361,7 +361,9 @@ module Render =
     /// <summary>
     /// Draws an untextured quad to the screen.
     /// </summary>
-    let quad (q: Quad) (c: QuadColors) =
+
+    // todo: consider renaming quad_c and having just `quad` which takes a color
+    let quad (q: Quad) (c: QuadColors) : unit =
         _batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
         _batch.Vertex(q.TopRight, Vector2.Zero, c.TopRight, 0)
         _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
@@ -369,10 +371,34 @@ module Render =
         _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
         _batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
 
+    let inline quad_vecs (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: Color) : unit =
+        quad (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+
+    let inline quad_vecs_c (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: QuadColors) : unit =
+        quad (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c
+
+    let inline quad_points
+        (top_left: float32 * float32)
+        (top_right: float32 * float32)
+        (bottom_right: float32 * float32)
+        (bottom_left: float32 * float32)
+        (c: Color)
+        : unit =
+        quad (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+
+    let inline quad_points_c
+        (top_left: float32 * float32)
+        (top_right: float32 * float32)
+        (bottom_right: float32 * float32)
+        (bottom_left: float32 * float32)
+        (c: QuadColors)
+        : unit =
+        quad (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c
+
     /// <summary>
     /// Draws a textured quad to the screen.
     /// </summary>
-    let tex_quad (q: Quad) (c: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) =
+    let tex_quad (q: Quad) (c: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) : unit =
         _batch.Texture t
         _batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
         _batch.Vertex(q.TopRight, uv.TopRight, c.TopRight, layer)
@@ -384,19 +410,34 @@ module Render =
     /// <summary>
     /// Draws a rectangular sprite to the screen.
     /// </summary>
-    let sprite (r: Rect) (c: Color) (s: Sprite) =
+    let inline sprite (r: Rect) (c: Color) (s: Sprite) =
         tex_quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
 
     /// <summary>
     /// Draws an untextured rectangle to the screen.
     /// </summary>
-    let rect (r: Rect) (c: Color) =
+    let inline rect (r: Rect) (c: Color) =
         quad r.AsQuad c.AsQuad
+
+    let inline rect_c (r: Rect) (c: QuadColors) =
+        quad r.AsQuad c
+
+    let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) =
+        quad (Rect.Create(left, top, right, bottom).AsQuad) c.AsQuad
+
+    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
+        quad (Rect.Create(left, top, right, bottom).AsQuad) c
+
+    let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) =
+        quad (Rect.Box(left, top, width, height).AsQuad) c.AsQuad
+
+    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
+        quad (Rect.Box(left, top, right, bottom).AsQuad) c
 
     /// <summary>
     /// Draws a border around a rectangle to the screen.
     /// </summary>
-    let border (thickness: float32) (r: Rect) (c: Color) =
+    let inline border (thickness: float32) (r: Rect) (c: Color) =
         quad (r.BorderL(thickness).AsQuad) c.AsQuad
         quad (r.BorderCornersT(thickness).AsQuad) c.AsQuad
         quad (r.BorderR(thickness).AsQuad) c.AsQuad

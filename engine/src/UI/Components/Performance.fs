@@ -62,7 +62,7 @@ type PerformanceMonitor() =
 
     override this.Draw() =
         if enable then
-            Render.quad (this.Bounds.SliceL(600.0f).AsQuad) (Quad.gradient_left_to_right Colors.black.O3 Colors.black.O0)
+            Render.rect_c (this.Bounds.SliceL(600.0f)) (Quad.gradient_left_to_right Colors.black.O3 Colors.black.O0)
 
             Text.draw_b (
                 Style.font,

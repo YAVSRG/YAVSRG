@@ -89,13 +89,13 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
                 let y2, c2 = point previous
-                Render.quad
+                Render.rect_c
                     (Rect.Create(
                         this.Bounds.Left + column_width * float32 k,
                         y1,
                         this.Bounds.Left + column_width * (1.0f + float32 k),
                         y2
-                    ).SliceX(box.Width).AsQuad)
+                    ).SliceX(box.Width))
                     (Quad.gradient_top_to_bottom c1 c2)
 
             let mutable previous = now

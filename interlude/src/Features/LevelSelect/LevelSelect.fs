@@ -176,23 +176,19 @@ type LevelSelectScreen() =
             } =
             this.Bounds
 
-        Render.quad
-        <| Quad.from_points(
-            (left, top),
-            (left + w + TOP_BAR_HEIGHT * 0.5f, top),
-            (left + w, top + TOP_BAR_HEIGHT),
-            (left, top + TOP_BAR_HEIGHT)
-        )
-        <| Quad.gradient_top_to_bottom (!*Palette.MAIN_100) (!*Palette.DARK_100)
-
-        Render.quad
-        <| Quad.from_points(
-            (left + w + TOP_BAR_HEIGHT * 0.5f, top),
-            (right, top),
-            (right, top + TOP_BAR_HEIGHT),
+        Render.quad_points_c
+            (left, top)
+            (left + w + TOP_BAR_HEIGHT * 0.5f, top)
             (left + w, top + TOP_BAR_HEIGHT)
-        )
-        <| Colors.shadow_2.O2.AsQuad
+            (left, top + TOP_BAR_HEIGHT)
+            (Quad.gradient_top_to_bottom (!*Palette.MAIN_100) (!*Palette.DARK_100))
+
+        Render.quad_points
+            (left + w + TOP_BAR_HEIGHT * 0.5f, top)
+            (right, top)
+            (right, top + TOP_BAR_HEIGHT)
+            (left + w, top + TOP_BAR_HEIGHT)
+            Colors.shadow_2.O2
 
         Render.rect (this.Bounds.SliceT(TOP_BAR_HEIGHT).BorderB(5.0f)) (!*Palette.MAIN)
 
