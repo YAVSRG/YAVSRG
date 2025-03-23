@@ -97,7 +97,7 @@ module FileDrop =
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile path with
             | Some replay ->
-                if Screen.current_type = Screen.Type.LevelSelect || Screen.current_type = Screen.Type.MainMenu then
+                if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
                     osu.Replay.figure_out_replay replay
                 else
                     Notifications.error("Replay import failed!", "Must be on level select or main menu screen")

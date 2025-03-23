@@ -14,23 +14,24 @@ open Interlude.Content
 open Interlude.UI
 
 module Toolbar =
+
     let HEIGHT = 70.0f
     let slideout_amount = Animation.Fade 1.0f
     let mutable hidden = false
     let mutable cursor_hidden = false
     let mutable was_hidden = false
 
-    let hide () = hidden <- true
-    let show () = hidden <- false
+    let hide () : unit = hidden <- true
+    let show () : unit = hidden <- false
 
-    let hide_cursor() = cursor_hidden <- true
-    let show_cursor() = cursor_hidden <- false
+    let hide_cursor() : unit = cursor_hidden <- true
+    let show_cursor() : unit = cursor_hidden <- false
 
-    let moving () =
+    let moving () : bool =
         was_hidden <> hidden || slideout_amount.Moving
 
     let mutable screenshot_queued = false
-    let take_screenshot_internal () =
+    let take_screenshot_internal () : unit =
         let id = DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
         let path = Path.Combine(get_game_folder "Screenshots", id)
         let img = Render.take_screenshot ()
@@ -47,28 +48,31 @@ module Toolbar =
 
         screenshot_queued <- false
 
-    let take_screenshot() =
+    /// Called during Update(), but it actually "queues" the screenshot to be taken midway through Draw()
+    /// Allows screenshotting to not include certain overlays:
+    ///  Screenshot is taken after most of the screen has rendered but before any debug overlays or notifications
+    let take_screenshot() : unit =
         screenshot_queued <- true
 
+type ScreenType =
+    | SplashScreen = 0
+    | MainMenu = 1
+    | Lobby = 2
+    | LevelSelect = 3
+    | Play = 4
+    | Practice = 5
+    | EditHud = 6
+    | Replay = 7
+    | Score = 8
+
+[<AbstractClass>]
+type Screen() =
+    inherit Container(NodeType.None)
+    abstract member OnEnter: ScreenType -> unit
+    abstract member OnExit: ScreenType -> unit
+    abstract member OnBack: unit -> ScreenType option
+
 module Screen =
-
-    type Type =
-        | SplashScreen = 0
-        | MainMenu = 1
-        | Lobby = 2
-        | LevelSelect = 3
-        | Play = 4
-        | Practice = 5
-        | EditHud = 6
-        | Replay = 7
-        | Score = 8
-
-    [<AbstractClass>]
-    type T() =
-        inherit Container(NodeType.None)
-        abstract member OnEnter: Type -> unit
-        abstract member OnExit: Type -> unit
-        abstract member OnBack: unit -> Type option
 
     let animations = Animation.fork [ Palette.accent_color; Toolbar.slideout_amount ]
 
@@ -76,11 +80,11 @@ module Screen =
 
     let mutable enable_background = true
     let mutable timescale = 1.0
-    let mutable current_type = Type.SplashScreen
-    let mutable private current = Unchecked.defaultof<T>
-    let private screens: T array = Array.zeroCreate 5
+    let mutable current_type = ScreenType.SplashScreen
+    let mutable private current = Unchecked.defaultof<Screen>
+    let private screens: Screen array = Array.zeroCreate 5
 
-    let init (_screens: T array) =
+    let init (_screens: Screen array) : unit =
         assert (_screens.Length = 4)
 
         for i = 0 to 3 do
@@ -124,10 +128,12 @@ module Screen =
 
     let screen_container = ScreenContainer()
 
-    let change_new (thunk: unit -> #T) (screen_type: Type) (transition_type: Transitions.Transition) : bool =
+    /// Returns true if the transition could be triggered and is now in motion
+    /// false if the requested change was rejected (transition already in progress)
+    let change_new (thunk: unit -> #Screen) (screen_type: ScreenType) (transition_type: Transitions.Transition) : bool =
         if
             not Song.loading
-            && (screen_type <> current_type || screen_type = Type.Play)
+            && (screen_type <> current_type || screen_type = ScreenType.Play)
             && not (Transitions.in_progress())
         then
             Transitions.animate (
@@ -152,9 +158,13 @@ module Screen =
         else
             false
 
-    let change (screen_type: Type) (transition_type: Transitions.Transition) =
+    /// Returns true if the transition could be triggered and is now in motion
+    /// false if the requested change was rejected (transition already in progress)
+    let change (screen_type: ScreenType) (transition_type: Transitions.Transition) : bool =
         change_new (K screens.[int screen_type]) screen_type transition_type
 
+    /// Returns true if the transition could be triggered and is now in motion
+    /// false if the requested change was rejected (transition already in progress or the current Screen denied it)
     let back (transition_type: Transitions.Transition) : bool =
         match current.OnBack() with
         | Some t -> change t transition_type
@@ -174,7 +184,7 @@ module Screen =
             Background.update elapsed_ms
             HelpOverlay.display.Update(elapsed_ms, moved)
 
-            if current_type <> Type.Play || Dialog.exists () then
+            if current_type <> ScreenType.Play || Dialog.exists () then
                 Notifications.display.Update(elapsed_ms, moved)
 
             assert(Render.width() > 0.0f)
@@ -192,9 +202,9 @@ module Screen =
                 back Transitions.UnderLogo |> ignore
 
         override this.Draw() =
-            if enable_background && current_type <> Type.SplashScreen then
+            if enable_background && current_type <> ScreenType.SplashScreen then
                 if
-                    (current_type <> Type.Play || Background.dim_percent.Value < 1.0f)
+                    (current_type <> ScreenType.Play || Background.dim_percent.Value < 1.0f)
                 then
                     Background.draw_with_dim (this.Bounds, Color.White, 1.0f)
                 else Render.rect this.Bounds Color.Black
@@ -238,6 +248,4 @@ module Screen =
             Dialog.display.Init this
             screen_container.Init this
             perf.Init this
-            current.OnEnter Type.SplashScreen
-
-type Screen = Screen.T
+            current.OnEnter ScreenType.SplashScreen

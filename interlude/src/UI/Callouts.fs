@@ -25,28 +25,28 @@ type Callout =
         _Icon: string option
     }
 
-    static member Tiny =
+    static member Tiny : Callout =
         {
             Size = Tiny
             Contents = []
             _Icon = None
         }
 
-    static member Small =
+    static member Small : Callout =
         {
             Size = Small
             Contents = []
             _Icon = None
         }
 
-    static member Normal =
+    static member Normal : Callout =
         {
             Size = Large
             Contents = []
             _Icon = None
         }
 
-    member this.Title(s: string) =
+    member this.Title(s: string) : Callout =
         if s <> "" then
             { this with
                 Contents = this.Contents @ [ CalloutContent.Header s ]
@@ -54,7 +54,7 @@ type Callout =
         else
             this
 
-    member this.Body(s: string) =
+    member this.Body(s: string) : Callout=
         if s <> "" then
             { this with
                 Contents = this.Contents @ [ CalloutContent.Body(s.Split "\n") ]
@@ -62,25 +62,25 @@ type Callout =
         else
             this
 
-    member this.Hotkey(h: Hotkey) =
+    member this.Hotkey(h: Hotkey) : Callout =
         assert(Hotkeys.get h |> K true)
         { this with
             Contents = this.Contents @ [ CalloutContent.Hotkey(None, h) ]
         }
 
-    member this.Hotkey(desc: string, h: Hotkey) =
+    member this.Hotkey(desc: string, h: Hotkey) : Callout =
         assert(Hotkeys.get h |> K true)
         { this with
             Contents = this.Contents @ [ CalloutContent.Hotkey(Some desc, h) ]
         }
 
-    member this.Icon(icon: string) =
+    member this.Icon(icon: string) : Callout =
         if icon <> "" then
             { this with _Icon = Some icon }
         else
             { this with _Icon = None }
 
-    member this.Button(label: string, action: unit -> unit) =
+    member this.Button(label: string, action: unit -> unit) : Callout =
         { this with
             Contents = this.Contents @ [ CalloutContent.Button(label, action) ]
         }
@@ -89,27 +89,27 @@ module Callout =
 
     let private PADDING_X = 30.0f
     let private PADDING_Y = 20.0f
-    let private spacing =
+    let private spacing : CalloutSize -> float32 =
         function
         | Tiny -> 10.0f
         | Small -> 10.0f
         | Large -> 15.0f
-    let private header_size =
+    let private header_size : CalloutSize -> float32 =
         function
         | Tiny -> 20.0f
         | Small -> 25.0f
         | Large -> 35.0f
-    let private text_size =
+    let private text_size : CalloutSize -> float32 =
         function
         | Tiny -> 15.0f
         | Small -> 18.0f
         | Large -> 25.0f
-    let private text_spacing =
+    let private text_spacing : CalloutSize -> float32 =
         function
         | Tiny -> 6.0f
         | Small -> 8.0f
         | Large -> 10.0f
-    let private icon_size =
+    let private icon_size : CalloutSize -> float32 =
         function
         | Tiny -> 25.0f
         | Small -> 30.0f
@@ -153,28 +153,28 @@ module Callout =
 
         width + icon_size + PADDING_X, height
 
-    let draw (x, y, width, height, col, c: Callout) =
+    let draw (x, y, width, height, col, callout: Callout) : unit =
         let x, width =
-            match c._Icon with
+            match callout._Icon with
             | Some i ->
-                let icon_size = min (icon_size c.Size) height
+                let icon_size = min (icon_size callout.Size) height
                 Text.draw_b (Style.font, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
                 x + icon_size + PADDING_X * 2.0f, width - icon_size - PADDING_X * 3.0f
             | None -> x + PADDING_X, width - PADDING_X * 2.0f
 
-        let spacing = spacing c.Size
+        let spacing = spacing callout.Size
         let mutable y = y + PADDING_Y
         let a = int (fst col).A
 
-        for b in c.Contents do
+        for b in callout.Contents do
             match b with
             | CalloutContent.Header s ->
-                let size = header_size c.Size
+                let size = header_size callout.Size
                 Text.draw_b (Style.font, s, size, x, y, col)
                 y <- y + size
             | CalloutContent.Body xs ->
-                let size = text_size c.Size
-                let tspacing = text_spacing c.Size
+                let size = text_size callout.Size
+                let tspacing = text_spacing callout.Size
 
                 for line in xs do
                     Text.draw_b (Style.font, line, size, x, y, col)
@@ -183,7 +183,7 @@ module Callout =
 
                 y <- y - tspacing
             | CalloutContent.Hotkey(desc, hotkey) ->
-                let size = text_size c.Size
+                let size = text_size callout.Size
 
                 let text = sprintf "%s: %O" (Option.defaultValue DEFAULT_HOTKEY_TEXT desc) %%hotkey
 
@@ -191,7 +191,7 @@ module Callout =
                 y <- y + size
             | CalloutContent.Button(label, _) ->
                 y <- y + spacing
-                let tsize = text_size c.Size
+                let tsize = text_size callout.Size
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.Box(x, y, width, button_size)
                 Render.rect bounds (Colors.shadow_2.O2a a)
@@ -216,29 +216,29 @@ module Callout =
 
             y <- y + spacing
 
-    let update (x, y, width, height, c) =
+    let update (x: float32, y: float32, width: float32, height: float32, callout: Callout) : unit =
         let x, width =
-            match c._Icon with
+            match callout._Icon with
             | Some i ->
-                let icon_size = min (icon_size c.Size) height
+                let icon_size = min (icon_size callout.Size) height
                 x + icon_size + PADDING_X * 2.0f, width - icon_size - PADDING_X * 3.0f
             | None -> x + PADDING_X, width - PADDING_X * 2.0f
 
-        let spacing = spacing c.Size
+        let spacing = spacing callout.Size
         let mutable y = y
 
-        for b in c.Contents do
+        for b in callout.Contents do
             match b with
-            | CalloutContent.Header s -> y <- y + header_size c.Size
+            | CalloutContent.Header s -> y <- y + header_size callout.Size
             | CalloutContent.Body xs ->
                 y <-
                     y
-                    + (float32 xs.Length * text_size c.Size)
-                    + (float32 (xs.Length - 1) * text_spacing c.Size)
-            | CalloutContent.Hotkey(desc, hk) -> y <- y + text_size c.Size
+                    + (float32 xs.Length * text_size callout.Size)
+                    + (float32 (xs.Length - 1) * text_spacing callout.Size)
+            | CalloutContent.Hotkey(desc, hk) -> y <- y + text_size callout.Size
             | CalloutContent.Button(_, action) ->
                 y <- y + spacing
-                let tsize = text_size c.Size
+                let tsize = text_size callout.Size
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.Box(x, y, width, button_size)
 
@@ -273,7 +273,7 @@ module Callout =
         interface IWidth with
             member _.Width = w
 
-    let frame (callout: Callout) (pos: float32 * float32 -> Position) =
+    let frame (callout: Callout) (pos: float32 * float32 -> Position) : Card =
         let c = Card(callout, Colors.cyan_accent, Colors.cyan.O3)
         c.Position <- pos ((c :> IWidth).Width, (c :> IHeight).Height)
         c

@@ -27,12 +27,12 @@ type SkipButton(config: HudConfig, state: PlayState) =
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
-            this 
+            this
             |* Image(
                 Content.Texture "skip-button-bg",
                 StretchToFill = false,
-                Position = 
-                    { 
+                Position =
+                    {
                         Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
                         Top = (lo - 0.5f + background.AlignmentY) %+ 0.0f
                         Right = (hi - 0.5f + background.AlignmentX) %+ 0.0f
@@ -46,7 +46,7 @@ type SkipButton(config: HudConfig, state: PlayState) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if active && Screen.current_type <> Screen.Type.Practice then // hack for HUD editor
+        if active && Screen.current_type <> ScreenType.Practice then // hack for HUD editor
 
             if state.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Tapped() then

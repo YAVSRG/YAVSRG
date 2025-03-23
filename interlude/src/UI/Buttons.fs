@@ -105,7 +105,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
 
         let text =
             if this.Focused then
-                if this.HoverIcon = "" then this.HoverText 
+                if this.HoverIcon = "" then this.HoverText
                 else sprintf "%s %s" this.HoverIcon this.HoverText
             elif icon = "" then label_func()
             else sprintf "%s %s" icon (label_func())
@@ -149,7 +149,7 @@ module RadioButtons =
             base.Draw()
 
     // alternative designed to represent tabs on a tabbed container or view
-    let create_tabs (options: RadioButtonOptions<'T>) =
+    let create_tabs (options: RadioButtonOptions<'T>) : GridFlowContainer<TabButton> =
         GridFlowContainer(options.Height, options.Options.Length, Spacing = (0.0f, 0.0f), WrapNavigation = false)
         |+ seq {
             for value, label, disabled in options.Options do
@@ -162,4 +162,3 @@ module RadioButtons =
         }
 
     // todo: alternative designed to look like actual radio buttons
-    let create (options: RadioButtonOptions<'T>) = failwith "nyi"

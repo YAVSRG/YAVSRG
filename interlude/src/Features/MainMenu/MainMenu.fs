@@ -108,7 +108,7 @@ type private MenuButton(on_click, label: string, pos: Position) =
 // todo: cool redesign with news feed and stuff
 
 type MainMenuScreen() as this =
-    inherit Screen.T()
+    inherit Screen()
 
     let mutable confirmed_quit = false
     let confirm_quit () =
@@ -121,7 +121,7 @@ type MainMenuScreen() as this =
             .Show()
 
     let play_action () =
-        Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
+        Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
 
     let play_button =
         MenuButton(play_action, %"menu.play", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
@@ -180,7 +180,7 @@ type MainMenuScreen() as this =
                 %"notification.update_available.body"
             )
 
-        if prev = Screen.Type.SplashScreen then
+        if prev = ScreenType.SplashScreen then
 
             if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
                 Library.Library.recalculate_patterns()
@@ -214,7 +214,7 @@ type MainMenuScreen() as this =
         DiscordRPC.in_menus ("Main menu")
 
     override this.OnExit next =
-        if next <> Screen.Type.SplashScreen then
+        if next <> ScreenType.SplashScreen then
             Logo.move_offscreen ()
 
         splash_fade.Target <- 0.0f
@@ -225,7 +225,7 @@ type MainMenuScreen() as this =
         Background.dim 0.7f
 
     override this.OnBack() =
-        if confirmed_quit then Some Screen.Type.SplashScreen
+        if confirmed_quit then Some ScreenType.SplashScreen
         else confirm_quit(); None
 
     override this.Draw() =

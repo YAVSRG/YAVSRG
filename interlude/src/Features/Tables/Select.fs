@@ -26,8 +26,8 @@ type private TableButton(name, action) =
             K(sprintf "%s  >" name),
             Color =
                 (fun () ->
-                    if this.Focused then Colors.text_yellow_2 
-                    elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2 
+                    if this.Focused then Colors.text_yellow_2
+                    elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2
                     else Colors.text
                 ),
             Align = Alignment.LEFT,
@@ -70,7 +70,7 @@ type SelectTablePage(refresh_table_view) =
                 fun () ->
                     options.Table.Set(Some e.Id)
 
-                    if options.ChartGroupMode.Value = "level" && Screen.current_type = Screen.Type.LevelSelect then
+                    if options.ChartGroupMode.Value = "level" && Screen.current_type = ScreenType.LevelSelect then
                         refresh_table_view()
 
                     GameThread.defer refresh

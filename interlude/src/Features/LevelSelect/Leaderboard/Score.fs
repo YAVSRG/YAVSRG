@@ -19,7 +19,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
                 (fun () ->
                     Screen.change_new
                         (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore
                 )
@@ -137,6 +137,6 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
             else
                 Screen.change_new
                         (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore

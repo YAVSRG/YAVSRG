@@ -156,7 +156,7 @@ module Skinning =
             SelectedChart.WITH_COLORS.IsSome
             && Screen.change_new
                 (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, on_exit))
-                Screen.Type.EditHud
+                ScreenType.EditHud
                 Transitions.Default
         then
             Menu.Exit()

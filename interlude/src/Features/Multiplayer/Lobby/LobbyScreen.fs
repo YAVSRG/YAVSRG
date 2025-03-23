@@ -137,7 +137,7 @@ type LobbyUI(lobby: Lobby) =
 
         lobby.OnGameStart.Add(fun () ->
             if
-                Screen.current_type = Screen.Type.Lobby
+                Screen.current_type = ScreenType.Lobby
                 && lobby.ReadyStatus = ReadyFlag.Play
             then
                 SelectedChart.if_loaded
@@ -145,7 +145,7 @@ type LobbyUI(lobby: Lobby) =
                     if
                         Screen.change_new
                             (fun () -> PlayScreenMultiplayer.multiplayer_screen(info, lobby))
-                            Screen.Type.Play
+                            ScreenType.Play
                             Transitions.EnterGameplayFadeAudio
                         |> not
                     then
@@ -196,12 +196,12 @@ type LobbyUI(lobby: Lobby) =
                     }
                 lobby.AddReplayInfo(username, replay_info)
 
-                if Screen.current_type = Screen.Type.Lobby && lobby.ReadyStatus = ReadyFlag.Spectate
+                if Screen.current_type = ScreenType.Lobby && lobby.ReadyStatus = ReadyFlag.Spectate
                 then
                     if
                         Screen.change_new
                             (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
-                            Screen.Type.Replay
+                            ScreenType.Replay
                             Transitions.Default
                         |> not
                     then
@@ -239,7 +239,7 @@ type LobbyScreen() =
         | Some lobby ->
             ConfirmPage("Leave this lobby?", lobby.Leave).Show()
             None
-        | None -> Some Screen.Type.LevelSelect
+        | None -> Some ScreenType.LevelSelect
 
     override this.Init(parent) =
         this |* current_lobby_ui

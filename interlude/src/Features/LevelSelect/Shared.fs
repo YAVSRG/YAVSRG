@@ -30,7 +30,7 @@ module LevelSelect =
     let on_refresh_details = refresh_details_event.Publish
 
     do
-        Content.OnChartAdded.Add (fun () -> if Screen.current_type = Screen.Type.LevelSelect then refresh_all())
+        Content.OnChartAdded.Add (fun () -> if Screen.current_type = ScreenType.LevelSelect then refresh_all())
 
         CollectionActions.collection_modified.Add(fun () ->
             if options.ChartGroupMode.Value = "collection" || (options.ChartGroupMode.Value <> "level" && options.TreeAlwaysShowCollections.Value) then
@@ -111,7 +111,7 @@ module LevelSelect =
                             PacemakerCreationContext.None
                     )
                 )
-                Screen.Type.Play
+                ScreenType.Play
                 Transitions.EnterGameplayFadeAudio
         then enter_gameplay info.LibraryContext
 
@@ -209,13 +209,13 @@ module LevelSelect =
 
             match Network.lobby with
             | Some lobby ->
-                if Screen.change Screen.Type.Lobby Transitions.Default then
+                if Screen.change ScreenType.Lobby Transitions.Default then
                     lobby.SelectChart (info.ChartMeta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None ->
                 if SelectedChart.autoplay then
                     Screen.change_new
-                        (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen.T)
-                        Screen.Type.Replay
+                        (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen)
+                        ScreenType.Replay
                         Transitions.EnterGameplayFadeAudio
                     |> ignore
                 else
@@ -228,7 +228,7 @@ module LevelSelect =
             if
                 Screen.change_new
                     (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
-                    Screen.Type.Play
+                    ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then
                 enter_gameplay info.LibraryContext
@@ -240,9 +240,9 @@ module LevelSelect =
             Screen.change_new
                 (fun () ->
                     ReplayScreen.replay_screen (score_info.Chart, ReplayMode.Replay(score_info, with_colors))
-                    :> Screen.T
+                    :> Screen
                 )
-                Screen.Type.Replay
+                ScreenType.Replay
                 Transitions.EnterGameplayFadeAudio
         then
             SelectedChart.rate.Value <- score_info.Rate

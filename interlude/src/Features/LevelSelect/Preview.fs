@@ -80,13 +80,13 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             LevelSelect.choose_this_chart ()
         elif (%%"screenshot").Tapped() then
             Toolbar.take_screenshot ()
-        elif Screen.current_type = Screen.Type.LevelSelect && (%%"random_chart").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"random_chart").Tapped() then
             LevelSelect.random_chart()
-        elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous_random_chart").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous_random_chart").Tapped() then
             LevelSelect.History.back()
-        elif Screen.current_type = Screen.Type.LevelSelect && (%%"next").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"next").Tapped() then
             Tree.next()
-        elif Screen.current_type = Screen.Type.LevelSelect && (%%"previous").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous").Tapped() then
             Tree.previous()
         elif (%%"difficulty_overlay").Tapped() then
             show_difficulty_overlay <- not show_difficulty_overlay

@@ -123,9 +123,9 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     override this.OnBack() =
         if Network.lobby.IsSome then
-            Some Screen.Type.Lobby
+            Some ScreenType.Lobby
         else
-            Some Screen.Type.LevelSelect
+            Some ScreenType.LevelSelect
 
     override this.Draw() =
 

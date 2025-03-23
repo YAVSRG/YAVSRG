@@ -108,7 +108,7 @@ module PlayScreenMultiplayer =
                                     quit_out_early
                             ScoreScreen(score_info, (ImprovementFlags.None, None), true)
                         )
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.LeaveGameplay
                 else
                     Screen.back Transitions.LeaveGameplay
@@ -133,7 +133,7 @@ module PlayScreenMultiplayer =
                         (score_info, Gameplay.set_score false score_info info.SaveData, true)
                         |> ScoreScreen
                     )
-                    Screen.Type.Score
+                    ScreenType.Score
                     Transitions.EnterGameplayNoFadeAudio
             then
                 CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1

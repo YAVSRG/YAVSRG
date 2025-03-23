@@ -108,7 +108,7 @@ type Toolbar() =
                 Icons.BOOK_OPEN,
                 Hotkey = "wiki"
             )
-                .Conditional(fun () -> Screen.current_type = Screen.Type.MainMenu)
+                .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
         )
         |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
         |+ HotkeyAction(
@@ -163,7 +163,7 @@ type Toolbar() =
             Terminal.draw ()
 
     override this.Update(elapsed_ms, moved) =
-        if Screen.current_type <> Screen.Type.SplashScreen then
+        if Screen.current_type <> ScreenType.SplashScreen then
             CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
 
         let moved =
@@ -177,12 +177,12 @@ type Toolbar() =
             collapsed_by_user <- not collapsed_by_user
             Toolbar.slideout_amount.Target <- if collapsed_by_user then 0.0f else 1.0f
 
-        if Screen.current_type <> Screen.Type.Score && (%%"screenshot").Tapped() then
+        if Screen.current_type <> ScreenType.Score && (%%"screenshot").Tapped() then
             Toolbar.take_screenshot()
 
-        if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"options").Tapped() then
+        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"options").Tapped() then
             OptionsMenuPage().Show()
-        if (Screen.current_type = Screen.Type.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
+        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
             QuickMenuPage().Show()
 
         if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then

@@ -124,7 +124,9 @@ module HelpOverlay =
 
     let display : Widget = Display()
 
-    let show (by_mouse: bool, w: Widget, body: Callout) =
+    /// Returns an ID of the newly created help popup
+    /// `keep_alive` must be called with the ID each frame, the first frame it is not, the popup will disappear
+    let show (by_mouse: bool, w: Widget, body: Callout) : int =
         let t: HelpInfo =
             {
                 Data = body
@@ -139,7 +141,7 @@ module HelpOverlay =
         current_id <- current_id + 1
         current_id
 
-    let keep_alive (id: int) =
+    let keep_alive (id: int) : unit =
         if id = current_id then
             _keep_alive <- true
 

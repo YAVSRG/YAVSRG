@@ -175,7 +175,7 @@ module SelectedChart =
                                     (cc.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
-                                            if Screen.current_type = Screen.Type.MainMenu then
+                                            if Screen.current_type = ScreenType.MainMenu then
                                                 SongLoadAction.PlayFromBeginning
                                             else
                                                 SongLoadAction.PlayFromPreview

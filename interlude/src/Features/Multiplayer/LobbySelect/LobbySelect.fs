@@ -8,7 +8,7 @@ open Interlude.Features.Online
 type LobbySelectPage() =
     inherit Page()
 
-    let lobby_list = 
+    let lobby_list =
         LobbyList(
             Position =
                 { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with
@@ -27,7 +27,7 @@ type LobbySelectPage() =
     let subscribed_events =
         NetworkEvents.receive_lobby_list.Subscribe (fun lobbies -> lobby_list.UpdateList lobbies),
         NetworkEvents.receive_invite.Subscribe (fun _ -> invite_list.UpdateList()),
-        NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change Screen.Type.Lobby Transitions.Default |> ignore)
+        NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
 
     override this.Content() =
         Container(NodeType.Leaf)

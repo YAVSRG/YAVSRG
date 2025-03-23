@@ -148,7 +148,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
 
 module NumberEntry =
 
-    let create_int (setting: Setting<int, _>) =
+    let create_int (setting: Setting<int, _>) : FrameContainer =
 
         let try_parse (s: string) =
             match Int32.TryParse(s, CultureInfo.InvariantCulture) with
@@ -187,7 +187,7 @@ module NumberEntry =
         )
         |+ entry
 
-    let create (setting: Setting<float, _>) =
+    let create (setting: Setting<float, _>) : FrameContainer =
 
         let try_parse (s: string) =
             match Double.TryParse(s, CultureInfo.InvariantCulture) with
@@ -226,7 +226,7 @@ module NumberEntry =
         )
         |+ entry
 
-    let create_uom (units: string) (setting: Setting<float32<'u>, _>) =
+    let create_uom (units: string) (setting: Setting<float32<'u>, _>) : FrameContainer =
 
         let try_parse (s: string) =
             match Single.TryParse(s, CultureInfo.InvariantCulture) with

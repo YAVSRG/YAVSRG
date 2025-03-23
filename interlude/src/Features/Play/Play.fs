@@ -50,8 +50,8 @@ module PlayScreen =
         let retry () =
             if
                 Screen.change_new
-                    (fun () -> play_screen (info, pacemaker_ctx) :> Screen.T)
-                    Screen.Type.Play
+                    (fun () -> play_screen (info, pacemaker_ctx) :> Screen)
+                    ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then
                 CURRENT_SESSION.PlaysRetried <- CURRENT_SESSION.PlaysRetried + 1
@@ -88,7 +88,7 @@ module PlayScreen =
                                     true
                             ScoreScreen(score_info, Gameplay.set_score true score_info info.SaveData, true)
                         )
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.LeaveGameplay
 
                 | QuitOutBehaviour.Ignore ->
@@ -122,7 +122,7 @@ module PlayScreen =
                             (score_info, Gameplay.set_score false score_info info.SaveData, true)
                             |> ScoreScreen
                         )
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
                     CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
@@ -148,7 +148,7 @@ module PlayScreen =
                             (score_info, Gameplay.set_score false score_info info.SaveData, true)
                             |> ScoreScreen
                         )
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
                     CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
@@ -206,7 +206,7 @@ module PlayScreen =
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()
-                if previous <> Screen.Type.Play then
+                if previous <> ScreenType.Play then
                     CURRENT_SESSION.PlaysStarted <- CURRENT_SESSION.PlaysStarted + 1
                 Stats.save_current_session now Content.UserData
                 info.SaveData.LastPlayed <- now

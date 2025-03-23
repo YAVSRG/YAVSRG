@@ -47,7 +47,7 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
     member this.Active = current.IsSome
 
     member val FocusTrap = false with get, set
-    member val OnClose = ignore with get, set
+    member val OnClose : unit -> unit = ignore with get, set
 
     override this.Init(parent) =
         base.Init parent
@@ -81,7 +81,7 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
             if Mouse.hover dropdown.Bounds then
                 Input.finish_frame_events ()
 
-    member this.Show<'T when 'T :> Widget and 'T :> IHeight>(dropdown: 'T) =
+    member this.Show<'T when 'T :> Widget and 'T :> IHeight>(dropdown: 'T) : unit =
         dropdown.Position <- positioning (dropdown :> IHeight)
         current <- Some dropdown
         if this.Initialised then
@@ -91,16 +91,17 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
         if not dropdown.Focused then dropdown.Focus false
         if this.FocusTrap then Selection.clamp_to dropdown
 
-    member this.Dismiss() =
+    member this.Dismiss() : unit =
         current <- None
         if this.FocusTrap then Selection.unclamp()
         this.OnClose()
 
-    member this.Toggle(thunk: unit -> 'T) =
+    member this.Toggle(thunk: unit -> 'T) : unit =
         if current.IsSome then this.Dismiss()
         else this.Show(thunk())
 
-/// Represents a dropdown menu where items represent different values for one setting, supports one value being pre-selected
+/// Represents a dropdown menu where user picks a value for setting
+/// The current value of the setting starts pre-selected
 type DropdownOptions<'T when 'T: equality> =
     {
         Items: ('T * string) seq
@@ -145,7 +146,7 @@ type Dropdown<'T when 'T: equality>(options: DropdownOptions<'T>) as this =
     interface IHeight with
         member this.Height = float32 (Seq.length options.Items) * Dropdown.ITEMSIZE
 
-/// Represents a dropdown where each item represents a menu option
+/// Represents a dropdown where each item represents an action
 type DropdownMenuOptions =
     {
         Items: ((unit -> unit) * string) seq

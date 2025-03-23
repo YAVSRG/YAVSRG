@@ -54,7 +54,7 @@ type Score(score_info: ScoreInfo) =
                 (fun _ ->
                     if Screen.change_new
                         (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false))
-                        Screen.Type.Score
+                        ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                     then Menu.Exit()
                 )

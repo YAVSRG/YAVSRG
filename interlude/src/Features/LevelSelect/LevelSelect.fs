@@ -87,7 +87,7 @@ type LevelSelectScreen() =
                 <| fun info ->
                     Screen.change_new
                         (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
-                        Screen.Type.Practice
+                        ScreenType.Practice
                         Transitions.Default
                     |> ignore
             ),
@@ -207,6 +207,6 @@ type LevelSelectScreen() =
 
     override this.OnBack() =
         if Network.lobby.IsSome then
-            Some Screen.Type.Lobby
+            Some ScreenType.Lobby
         else
-            Some Screen.Type.MainMenu
+            Some ScreenType.MainMenu

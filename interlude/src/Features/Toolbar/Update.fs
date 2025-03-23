@@ -49,7 +49,7 @@ type Updater() as this =
     member this.Click() =
         if Updates.update_complete then
             Updates.restart_on_exit <- true
-            Screen.change Screen.Type.SplashScreen Transitions.UnderLogo |> ignore
+            Screen.change ScreenType.SplashScreen Transitions.UnderLogo |> ignore
         elif Updates.update_started then
             ()
         else

@@ -78,7 +78,7 @@ module Notifications =
 
     let display : Widget = Display()
 
-    let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
+    let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
         GameThread.on_game_thread
         <| fun () ->
             let n: Notification =
@@ -93,7 +93,7 @@ module Notifications =
 
             displayed_notifications.Add n
 
-    let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) =
+    let private add_long (body: Callout, colors: Color * Color, content_colors: Color * Color) : unit =
         GameThread.on_game_thread
         <| fun () ->
             let n: Notification =
@@ -108,11 +108,11 @@ module Notifications =
 
             displayed_notifications.Add n
 
-    let task_feedback (icon: string, title: string, description: string) =
+    let task_feedback (icon: string, title: string, description: string) : unit =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
         GameThread.on_game_thread Style.notify_task.Play
 
-    let action_feedback (icon: string, title: string, description: string) =
+    let action_feedback (icon: string, title: string, description: string) : unit =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
         GameThread.on_game_thread Style.notify_info.Play
 
@@ -123,7 +123,7 @@ module Notifications =
             description: string,
             button_label: string,
             button_action: unit -> unit
-        ) =
+        ) : unit =
         add_long (
             Callout.Small
                 .Icon(icon)
@@ -136,11 +136,11 @@ module Notifications =
 
         GameThread.on_game_thread Style.notify_info.Play
 
-    let system_feedback (icon: string, title: string, description: string) =
+    let system_feedback (icon: string, title: string, description: string) : unit =
         add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
         GameThread.on_game_thread Style.notify_system.Play
 
-    let error (title, description) =
+    let error (title: string, description: string) : unit =
         add_long (
             Callout.Small.Icon(Icons.ALERT_CIRCLE).Title(title).Body(description),
             (Colors.red_accent, Colors.red),

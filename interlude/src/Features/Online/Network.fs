@@ -114,7 +114,7 @@ module Network =
 
                     API.Client.authenticate credentials.Token
 
-                    if Screen.current_type <> Screen.Type.SplashScreen then
+                    if Screen.current_type <> ScreenType.SplashScreen then
                         Notifications.system_feedback (Icons.GLOBE, [ name ] %> "notification.network.login", "")
 
                     NetworkEvents.successful_login_ev.Trigger name
@@ -124,7 +124,7 @@ module Network =
 
                 GameThread.defer
                 <| fun () ->
-                    if Screen.current_type <> Screen.Type.SplashScreen then
+                    if Screen.current_type <> ScreenType.SplashScreen then
                         Notifications.error (%"notification.network.loginfailed", reason)
 
                     NetworkEvents.login_failed_ev.Trigger reason

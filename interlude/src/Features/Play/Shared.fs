@@ -85,14 +85,14 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
     override this.OnExit next =
         Background.dim 0.7f
 
-        if next <> Screen.Type.Score then
+        if next <> ScreenType.Score then
             Toolbar.show ()
 
-        if next <> Screen.Type.Play then
+        if next <> ScreenType.Play then
             WindowThread.defer WindowThread.enable_windows_key
 
     override this.OnBack() =
         if Network.lobby.IsSome then
-            Some Screen.Type.Lobby
+            Some ScreenType.Lobby
         else
-            Some Screen.Type.LevelSelect
+            Some ScreenType.LevelSelect

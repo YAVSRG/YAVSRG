@@ -68,7 +68,7 @@ module EditHudScreen =
 
             override this.OnExit s =
                 base.OnExit s
-                if s <> Screen.Type.Play then on_exit ()
+                if s <> ScreenType.Play then on_exit ()
 
             override this.Update(elapsed_ms, moved) =
                 let now = Song.time_with_offset ()

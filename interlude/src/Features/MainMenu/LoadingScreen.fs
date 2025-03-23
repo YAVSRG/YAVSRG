@@ -32,7 +32,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
                 animation.Add(Animation.Delay 50.0)
                 animation.Add(Animation.Action(fun () -> audio_fade.Target <- 1.0f))
                 animation.Add(Animation.Delay 500.0)
-                animation.Add(Animation.Action(fun () -> Screen.change Screen.Type.MainMenu Transitions.UnderLogo |> ignore))
+                animation.Add(Animation.Action(fun () -> Screen.change ScreenType.MainMenu Transitions.UnderLogo |> ignore))
             | Error error ->
                 GameThread.defer (fun () -> raise error)
         }
@@ -46,13 +46,13 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         )
         base.Init parent
 
-    override this.OnEnter(prev: Screen.Type) =
+    override this.OnEnter(prev: ScreenType) =
         Toolbar.hide ()
 
         background_fade.Reset()
 
         match prev with
-        | Screen.Type.SplashScreen ->
+        | ScreenType.SplashScreen ->
             animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 100.0)
             animation.Add(Animation.Action(fun () -> Logo.move_center ()))

@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 
 module Beam =
 
-    let private draw (direction_deg: float32) (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
+    let private draw (direction_deg: float32) (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
         // angle is measured clockwise from vertical
         let cos = MathF.Cos(direction_deg / 180.0f * MathF.PI)
         let sin = MathF.Sin(direction_deg / 180.0f * MathF.PI)
@@ -29,15 +29,15 @@ module Beam =
 
 module Glint =
 
-    let COLOR = Colors.white.O4a(26)
+    let COLOR = Colors.white.O4a 26
     let RECIPROCAL_GRADIENT = 0.35f
 
-    let draw (percent: float32) (bounds: Rect) (color: Color) =
+    let draw (percent: float32) (bounds: Rect) (color: Color) : unit =
         if percent <= 0.0f || percent >= 1.0f then () else
 
         let stripe_width = bounds.Height * RECIPROCAL_GRADIENT
         let travel_distance = bounds.Width + stripe_width * 4.5f
-        
+
         let start = bounds.Left - stripe_width * 4.5f + travel_distance * percent
 
         Render.quad
@@ -47,7 +47,7 @@ module Glint =
             (start + stripe_width * 2.0f, bounds.Bottom)
             (start, bounds.Bottom)
         <| color.AsQuad
-        
+
         Render.quad
         <| Quad.createv
             (start + 3.5f * stripe_width, bounds.Top)
@@ -56,7 +56,7 @@ module Glint =
             (start + 2.5f * stripe_width, bounds.Bottom)
         <| color.AsQuad
 
-    let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) =
+    let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) : unit =
         if percent <= 0.0f || percent >= 1.0f then () else
 
         Render.stencil_create false
@@ -68,7 +68,7 @@ module Glint =
 
         Render.stencil_finish()
 
-    let spot_draw (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) =
+    let spot_draw (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
         let t = 4.0f * (time - time * time)
         let size = r1 * t
         let direction_deg = 65.0f - time * 10.0f
@@ -97,7 +97,7 @@ module Glint =
 
 module Wedge =
 
-    let draw (x: float32, y: float32) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
+    let draw (x: float32, y: float32) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) : unit =
         let segments = int ((a2 - a1) / 0.10) |> max 1
         let segsize = (a2 - a1) / float segments
 
@@ -113,16 +113,15 @@ module Wedge =
                 (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
                 col.AsQuad
 
-    let draw_centered =
-        draw (Render.width() * 0.5f, Render.height() * 0.5f)
+    let draw_centered = draw (Render.width() * 0.5f, Render.height() * 0.5f)
 
-    let variant_1 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+    let variant_1 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
         let head = Math.Pow(pos, 0.5) * Math.PI * 2.0
         let tail = Math.Pow(pos, 2.0) * Math.PI * 2.0
         draw_centered r1 r2 tail head col
 
-    let variant_2 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+    let variant_2 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = (amount - lo) / (hi - lo)
         let head = float (Math.Clamp(pos * 2.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
         let tail = float (Math.Clamp(pos * 2.0f - 1.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
@@ -130,7 +129,7 @@ module Wedge =
 
 module Bubble =
 
-    let draw (x, y) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+    let draw (x, y) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
         let head = float32 (Math.Pow(pos, 0.5)) * (r2 - r1) + r1
         let tail = float32 (Math.Pow(pos, 2.0)) * (r2 - r1) + r1
@@ -140,7 +139,7 @@ module DiamondsWipe =
 
     let SCALE = 150.0f
 
-    let draw (inbound: bool) (amount: float32) (bounds: Rect) =
+    let draw (inbound: bool) (amount: float32) (bounds: Rect) : unit =
         let width = bounds.Width
         let height = bounds.Height
 
@@ -167,7 +166,6 @@ module DiamondsWipe =
                  )
                 Color.Transparent.AsQuad
 
-
         for x in 0 .. (width / SCALE |> float |> Math.Ceiling |> int) do
             for y in 0 .. (height / SCALE |> float |> Math.Ceiling |> int) do
                 draw_diamond (SCALE * float32 x) (SCALE * float32 y)
@@ -175,15 +173,15 @@ module DiamondsWipe =
 
 module TriangleWipe =
 
-    let draw_upward (inbound: bool) (amount: float32) (bounds: Rect) =
+    let draw_upward (inbound: bool) (amount: float32) (bounds: Rect) : unit =
         let height = bounds.Height
         let center = bounds.CenterX
-        
-        let y = if inbound then bounds.Bottom - amount * height * 2.0f else bounds.Bottom - (1.0f - amount) * height * 2.0f 
+
+        let y = if inbound then bounds.Bottom - amount * height * 2.0f else bounds.Bottom - (1.0f - amount) * height * 2.0f
 
         if inbound then
 
-            Render.quad 
+            Render.quad
                 (Quad.createv
                     (bounds.Left, y + height * 2.0f)
                     (bounds.Left, y + height)
@@ -191,8 +189,8 @@ module TriangleWipe =
                     (center, y + height * 2.0f)
                 )
                 Color.Transparent.AsQuad
-            
-            Render.quad 
+
+            Render.quad
                 (Quad.createv
                     (bounds.Right, y + height * 2.0f)
                     (bounds.Right, y + height)
@@ -203,7 +201,7 @@ module TriangleWipe =
 
         else
 
-            Render.quad 
+            Render.quad
                 (Quad.createv
                     (bounds.Left, y - height)
                     (bounds.Left, y + height)
@@ -211,8 +209,8 @@ module TriangleWipe =
                     (center, y - height)
                 )
                 Color.Transparent.AsQuad
-            
-            Render.quad 
+
+            Render.quad
                 (Quad.createv
                     (bounds.Right, y - height)
                     (bounds.Right, y + height)
@@ -220,16 +218,16 @@ module TriangleWipe =
                     (center, y - height)
                 )
                 Color.Transparent.AsQuad
-        
-    let draw_downward (inbound: bool) (amount: float32) (bounds: Rect) =
+
+    let draw_downward (inbound: bool) (amount: float32) (bounds: Rect) : unit =
         let height = bounds.Height
         let center = bounds.CenterX
-        
-        let y = if inbound then bounds.Top + amount * height * 2.0f else bounds.Top + (1.0f - amount) * height * 2.0f 
+
+        let y = if inbound then bounds.Top + amount * height * 2.0f else bounds.Top + (1.0f - amount) * height * 2.0f
 
         if inbound then
 
-            Render.quad 
+            Render.quad
                 (Quad.createv
                     (bounds.Left, y - height * 2.0f)
                     (bounds.Left, y - height)
@@ -237,8 +235,8 @@ module TriangleWipe =
                     (center, y - height * 2.0f)
                 )
                 Color.Transparent.AsQuad
-            
-            Render.quad 
+
+            Render.quad
                 (Quad.createv
                     (bounds.Right, y - height * 2.0f)
                     (bounds.Right, y - height)
@@ -249,7 +247,7 @@ module TriangleWipe =
 
         else
 
-            Render.quad 
+            Render.quad
                 (Quad.createv
                     (bounds.Left, y + height)
                     (bounds.Left, y - height)
@@ -257,8 +255,8 @@ module TriangleWipe =
                     (center, y + height)
                 )
                 Color.Transparent.AsQuad
-            
-            Render.quad 
+
+            Render.quad
                 (Quad.createv
                     (bounds.Right, y + height)
                     (bounds.Right, y - height)
@@ -268,13 +266,13 @@ module TriangleWipe =
                 Color.Transparent.AsQuad
 
 module StripeWipe =
-        
+
     let RECIPROCAL_GRADIENT = 0.35f
 
-    let draw_left_to_right (left: float32) (right: float32) (bounds: Rect) (color: Color) =
+    let draw_left_to_right (left: float32) (right: float32) (bounds: Rect) (color: Color) : unit =
         let stripe_width = bounds.Height * RECIPROCAL_GRADIENT
         let travel_distance = bounds.Width + stripe_width * 2.0f
-        
+
         let left = bounds.Left - stripe_width + travel_distance * left
         let right = bounds.Left - stripe_width + travel_distance * right
 
@@ -289,7 +287,7 @@ module StripeWipe =
 
 module LoadingAnimation =
 
-    let draw_border_piece (bounds: Rect) (start: float32) (length: float32) (color: Color) =
+    let draw_border_piece (bounds: Rect) (start: float32) (length: float32) (color: Color) : unit =
         let perimeter = (bounds.Width + bounds.Height) * 2.0f
         let a = start % 1.0f
         let b = a + length
@@ -341,7 +339,7 @@ module LoadingAnimation =
                 ))
                 color
 
-    let draw_border (bounds: Rect) (offset: float32) (color: Color) =
+    let draw_border (bounds: Rect) (offset: float32) (color: Color) : unit =
         draw_border_piece bounds offset 0.1f color
         draw_border_piece bounds (offset + 0.333f) 0.1f color
         draw_border_piece bounds (offset + 0.666f) 0.1f color

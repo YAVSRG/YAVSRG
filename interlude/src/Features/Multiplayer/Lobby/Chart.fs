@@ -117,7 +117,7 @@ module LobbyChart =
             match Network.lobby with
             | Some lobby ->
                 if
-                    Screen.current_type = Screen.Type.Lobby
+                    Screen.current_type = ScreenType.Lobby
                     && not (is_loaded_or_loading())
                 then
                     attempt_match_lobby_chart (lobby)
@@ -217,7 +217,7 @@ type SelectedChart(lobby: Lobby) =
         )
 
         |+ Clickable(
-            fun () -> if lobby.YouAreHost then Screen.change Screen.Type.LevelSelect Transitions.Default |> ignore
+            fun () -> if lobby.YouAreHost then Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
             , Position = Position.SliceT(100.0f)
         )
 
@@ -249,7 +249,7 @@ type SelectedChart(lobby: Lobby) =
                     | Some info ->
                         Screen.change_new
                             (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
-                            Screen.Type.Replay
+                            ScreenType.Replay
                             Transitions.Default
                         |> ignore
                     | None -> ()
@@ -328,7 +328,7 @@ type SelectedChart(lobby: Lobby) =
             )
 
         lobby.OnChartChanged.Add(fun _ ->
-            if Screen.current_type = Screen.Type.Lobby then
+            if Screen.current_type = ScreenType.Lobby then
                 LobbyChart.attempt_match_lobby_chart lobby
         )
 

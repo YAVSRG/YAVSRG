@@ -24,7 +24,7 @@ module Transitions =
             | EnterGameplayFadeAudio
             | LeaveGameplay -> 350.0
 
-    let private fancy_transition inbound amount bounds =
+    let private fancy_transition (inbound: bool) (amount: float32) (bounds: Rect) =
         let amount = if inbound then amount else 2.0f - amount
         let a = int (255.0f * (1.0f - Math.Abs(amount - 1.0f)))
         Wedge.variant_2 0.0f 1111.0f (Color.FromArgb(a, 0, 160, 255)) 0.0f 1.8f amount
@@ -36,7 +36,7 @@ module Transitions =
         Bubble.draw (1600.0f, 600.0f) 80.0f 120.0f Color.White 1.0f 1.3f amount
         Bubble.draw (1400.0f, 700.0f) 50.0f 75.0f Color.White 1.4f 1.7f amount
 
-    let private draw_internal (t: Transition) inbound amount bounds =
+    let private draw_internal (t: Transition) (inbound: bool) (amount: float32) (bounds: Rect) =
         Render.stencil_create false
         match t with
         | Default
@@ -65,7 +65,7 @@ module Transitions =
 
     let in_progress () = current.IsSome
 
-    let draw (transition_type: Transition) (bounds: Rect) =
+    let draw (transition_type: Transition) (bounds: Rect) : unit =
         let inbound = not in_timer.Complete
 
         let amount =

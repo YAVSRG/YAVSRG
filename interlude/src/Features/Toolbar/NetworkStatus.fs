@@ -37,7 +37,7 @@ type NetworkStatus() as this =
         if Network.credentials.Host = "localhost" then
             Text.fill_b (Style.font, "LOCALHOST", this.Bounds.SliceB(20.0f), Colors.text, Alignment.CENTER)
 
-        if Screen.current_type <> Screen.Type.Lobby && Network.lobby.IsSome then
+        if Screen.current_type <> ScreenType.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
             Render.rect area (Colors.shadow_1.O2)
 
@@ -90,7 +90,7 @@ type NetworkStatus() as this =
             [
                 fun () ->
                     match Network.lobby with
-                    | Some l ->  Screen.change Screen.Type.Lobby Transitions.Default |> ignore
+                    | Some l ->  Screen.change ScreenType.Lobby Transitions.Default |> ignore
                     | None -> LobbySelectPage().Show()
                 , Icons.USERS + " " + %"network.multiplayer"
                 (fun () -> PlayerListPage().Show()), Icons.SEARCH + " " + %"network.players"

@@ -193,7 +193,7 @@ module Logo =
             base.Update(elapsed_ms, moved)
             counter.Update elapsed_ms
 
-    let display =
+    let display : Display =
         Display(
             Position =
                 {
@@ -204,12 +204,12 @@ module Logo =
                 }
         )
 
-    let move_center () =
+    let move_center () : unit =
         display.Position <- CENTER
 
-    let move_offscreen () =
+    let move_offscreen () : unit =
         display.Position <- HIDDEN
         display.SnapPosition()
 
-    let move_menu () =
+    let move_menu () : unit =
         display.Position <- MENU

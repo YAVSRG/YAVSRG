@@ -15,13 +15,13 @@ module Background =
     let private parallaxZ = Animation.Fade 40.0f
     let internal dim_percent = Animation.Fade 1.0f
 
-    let dim (amount: float32) = dim_percent.Target <- amount
+    let dim (amount: float32) : unit = dim_percent.Target <- amount
 
-    let set_parallax_pos (x: float32, y: float32) =
+    let set_parallax_pos (x: float32, y: float32) : unit =
         parallaxX.Target <- x
         parallaxY.Target <- y
 
-    let set_parallax_amount (amount: float32) = parallaxZ.Target <- amount
+    let set_parallax_amount (amount: float32) : unit = parallaxZ.Target <- amount
 
     let mutable private background: (Sprite * Animation.Fade * bool) list = []
 
@@ -100,16 +100,16 @@ module Background =
                     Palette.accent_color.Target <- Content.ThemeConfig.DefaultAccentColor
         }
 
-    let get_current () =
+    let get_current () : Sprite option =
         match List.tryHead background with
         | Some (sprite, _, false) -> Some sprite
         | _ -> None
 
-    let load (path: string option) =
+    let load (path: string option) : unit =
         List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
         loader.Request(if Content.ThemeConfig.AlwaysUseDefaultBackground then None else path)
 
-    let update elapsed_ms =
+    let update (elapsed_ms: float) : unit =
 
         loader.Join()
 
@@ -133,7 +133,7 @@ module Background =
                 )
                 background
 
-    let drawq (q: Quad, color: Color, depth: float32) =
+    let drawq (q: Quad, color: Color, depth: float32) : unit =
         Render.quad q Color.Black.AsQuad
         List.iter
             (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
@@ -162,8 +162,8 @@ module Background =
             )
             background
 
-    let draw (bounds: Rect, color, depth) = drawq (bounds.AsQuad, color, depth)
+    let draw (bounds: Rect, color: Color, depth: float32) : unit = drawq (bounds.AsQuad, color, depth)
 
-    let draw_with_dim (bounds: Rect, color, depth) =
+    let draw_with_dim (bounds: Rect, color: Color, depth: float32) : unit =
         draw (bounds, color, depth)
         Render.rect bounds (Color.Black.O4a dim_percent.Alpha)
