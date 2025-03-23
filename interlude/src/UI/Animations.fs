@@ -86,12 +86,12 @@ module Glint =
             Quad.from_vectors(o, o - p, o + r2 * 0.6f * d, o + p2)
             |> Quad.rotate_about o 90.0
 
-        let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
+        let color = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
-        Render.quad q c.AsQuad
-        Render.quad q2 c.AsQuad
-        Render.quad (Quad.rotate_about o 180.0 q) c.AsQuad
-        Render.quad (Quad.rotate_about o 180.0 q2) c.AsQuad
+        Render.quad q color
+        Render.quad q2 color
+        Render.quad (Quad.rotate_about o 180.0 q) color
+        Render.quad (Quad.rotate_about o 180.0 q2) color
 
 module Wedge =
 

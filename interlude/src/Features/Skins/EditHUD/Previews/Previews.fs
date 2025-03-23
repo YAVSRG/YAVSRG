@@ -61,7 +61,7 @@ module SelectPreviews =
             )
         Render.quad
             moving_average
-            config.TimingDisplayMovingAverageColor.AsQuad
+            config.TimingDisplayMovingAverageColor
 
     let private create_judgement (config: HudConfig) : SelectPreview =
         let texture = Content.Texture "judgements"

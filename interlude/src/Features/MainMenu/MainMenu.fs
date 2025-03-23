@@ -83,9 +83,9 @@ type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
         Style.hover.Play()
 
     override this.Draw() =
-        Render.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100).AsQuad
+        Render.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (!*Palette.HIGHLIGHT_100)
 
-        Render.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100).AsQuad
+        Render.quad (Quad.parallelogram 0.5f this.Bounds) (!*Palette.MAIN_100)
         base.Draw()
 
     member this.Hide() =

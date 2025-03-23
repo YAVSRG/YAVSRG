@@ -233,7 +233,7 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                         (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
                         (center + moving_average.Value, this.Bounds.Top - 10.0f)
                     )
-            Render.quad quad config.TimingDisplayMovingAverageColor.AsQuad
+            Render.quad quad config.TimingDisplayMovingAverageColor
         | _ -> ()
 
         for hit in hits do

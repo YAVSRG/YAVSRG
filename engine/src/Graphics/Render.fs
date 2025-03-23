@@ -363,7 +363,7 @@ module Render =
     /// </summary>
 
     // todo: consider renaming quad_c and having just `quad` which takes a color
-    let quad (q: Quad) (c: QuadColors) : unit =
+    let quad_c (q: Quad) (c: QuadColors) : unit =
         _batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
         _batch.Vertex(q.TopRight, Vector2.Zero, c.TopRight, 0)
         _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
@@ -371,11 +371,14 @@ module Render =
         _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
         _batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
 
+    let inline quad (q: Quad) (c: Color) : unit =
+        quad_c q c.AsQuad
+
     let inline quad_vecs (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: Color) : unit =
-        quad (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
 
     let inline quad_vecs_c (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: QuadColors) : unit =
-        quad (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c
+        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c
 
     let inline quad_points
         (top_left: float32 * float32)
@@ -384,7 +387,7 @@ module Render =
         (bottom_left: float32 * float32)
         (c: Color)
         : unit =
-        quad (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
 
     let inline quad_points_c
         (top_left: float32 * float32)
@@ -393,7 +396,7 @@ module Render =
         (bottom_left: float32 * float32)
         (c: QuadColors)
         : unit =
-        quad (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c
+        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c
 
     /// <summary>
     /// Draws a textured quad to the screen.
@@ -417,31 +420,31 @@ module Render =
     /// Draws an untextured rectangle to the screen.
     /// </summary>
     let inline rect (r: Rect) (c: Color) =
-        quad r.AsQuad c.AsQuad
+        quad_c r.AsQuad c.AsQuad
 
     let inline rect_c (r: Rect) (c: QuadColors) =
-        quad r.AsQuad c
+        quad_c r.AsQuad c
 
     let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) =
-        quad (Rect.Create(left, top, right, bottom).AsQuad) c.AsQuad
+        quad_c (Rect.Create(left, top, right, bottom).AsQuad) c.AsQuad
 
     let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
-        quad (Rect.Create(left, top, right, bottom).AsQuad) c
+        quad_c (Rect.Create(left, top, right, bottom).AsQuad) c
 
     let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) =
-        quad (Rect.Box(left, top, width, height).AsQuad) c.AsQuad
+        quad_c (Rect.Box(left, top, width, height).AsQuad) c.AsQuad
 
     let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
-        quad (Rect.Box(left, top, right, bottom).AsQuad) c
+        quad_c (Rect.Box(left, top, right, bottom).AsQuad) c
 
     /// <summary>
     /// Draws a border around a rectangle to the screen.
     /// </summary>
     let inline border (thickness: float32) (r: Rect) (c: Color) =
-        quad (r.BorderL(thickness).AsQuad) c.AsQuad
-        quad (r.BorderCornersT(thickness).AsQuad) c.AsQuad
-        quad (r.BorderR(thickness).AsQuad) c.AsQuad
-        quad (r.BorderCornersB(thickness).AsQuad) c.AsQuad
+        quad_c (r.BorderL(thickness).AsQuad) c.AsQuad
+        quad_c (r.BorderCornersT(thickness).AsQuad) c.AsQuad
+        quad_c (r.BorderR(thickness).AsQuad) c.AsQuad
+        quad_c (r.BorderCornersB(thickness).AsQuad) c.AsQuad
 
     (*
         Internal functions used by the Game and Window threads

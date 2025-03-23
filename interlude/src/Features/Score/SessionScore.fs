@@ -57,9 +57,9 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
         let counterq =
             let q = counter.AsQuad
             { q with TopLeft = q.TopLeft - OpenTK.Mathematics.Vector2(30.0f, 0.0f) }
-        Render.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black.AsQuad
+        Render.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black
         Background.drawq (counterq, (Color.FromArgb(40, 40, 40)), 2.0f)
-        Render.quad counterq (!*Palette.MAIN_100).AsQuad
+        Render.quad counterq (!*Palette.MAIN_100)
 
         Text.fill_b(Style.font, sprintf "%.0f" xp_display.Value, counter, Colors.text, Alignment.CENTER)
         Text.fill_b(Style.font, sprintf "Level %i" level, counter.BorderB(40.0f).TranslateY(10.0f), Colors.text, Alignment.CENTER)

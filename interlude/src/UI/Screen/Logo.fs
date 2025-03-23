@@ -126,12 +126,12 @@ module Logo =
                     Render.quad
                         (Quad.from_vectors(LOWER_LEFT_1, LOWER_LEFT_2, LOWER_LEFT_3, LOWER_LEFT_4)
                          |> Quad.translate (0.0f, breathe_2))
-                        Colors.cyan_accent.AsQuad
+                        Colors.cyan_accent
 
                     Render.quad
                         (Quad.from_vectors(LOWER_RIGHT_1, LOWER_RIGHT_2, LOWER_RIGHT_3, LOWER_RIGHT_4)
                          |> Quad.translate (0.0f, breathe_2))
-                        Colors.cyan_accent.AsQuad
+                        Colors.cyan_accent
 
                     Render.sprite breathe_bounds Colors.white (Content.Texture "logo")
 
