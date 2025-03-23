@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
@@ -11,7 +12,7 @@ module Alignment =
     let RIGHT = 1.0f
 
 [<Sealed>]
-type Text(text_func) =
+type Text(text_func: unit -> string) =
     inherit StaticWidget(NodeType.None)
 
     new(text: string) = Text(K text)
@@ -24,16 +25,31 @@ type Text(text_func) =
 
     override this.Init(parent) = base.Init parent
 
+[<Extension>]
+type TextExtensions =
+    [<Extension>]
+    static member Align (text: Text, alignment: float32) : Text =
+        text.Align <- alignment
+        text
+    [<Extension>]
+    static member Color (text: Text, color: Color * Color) : Text =
+        text.Color <- K color
+        text
+    [<Extension>]
+    static member Color (text: Text, color: unit -> Color * Color) : Text =
+        text.Color <- color
+        text
+
 [<Sealed>]
-type Clickable(on_left_click) =
+type Clickable(on_left_click: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let mutable hover = false
 
-    member val OnLeftClick = on_left_click with get, set
-    member val OnRightClick = ignore with get, set
-    member val OnHover = ignore with get, set
-    member val Floating = false with get, set
+    member val OnLeftClick : unit -> unit = on_left_click with get, set
+    member val OnRightClick : unit -> unit = ignore with get, set
+    member val OnHover : bool -> unit = ignore with get, set
+    member val Floating : bool = false with get, set
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -65,7 +81,7 @@ type Clickable(on_left_click) =
         )
 
 [<Sealed>]
-type HotkeyAction(hotkey: Hotkey, action) =
+type HotkeyAction(hotkey: Hotkey, action: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsed_ms, moved) =
@@ -77,7 +93,7 @@ type HotkeyAction(hotkey: Hotkey, action) =
     override this.Draw() = ()
 
 [<Sealed>]
-type HotkeyHoldAction(hotkey: Hotkey, on_tap, on_hold) =
+type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let HOLD_TIME_MS = 200.0

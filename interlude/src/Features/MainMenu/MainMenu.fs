@@ -24,15 +24,26 @@ type ConfirmQuitPage(on_confirm: unit -> unit) =
     override this.Content() =
         if TaskTracking.in_progress() then
             page_container()
-            |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(7)
-            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back).Pos(5)
-            |+ Text(%"menu.exit_prompt", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
-            |+ Text(%"menu.exit_task_warning", Color = K Colors.text_red_2, Align = Alignment.LEFT, Position = pretty_pos(2, 2, PageWidth.Full))
+            |+ PageButton.Once(%"confirm.no", Menu.Back)
+                .Pos(7)
+            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back)
+                .Pos(5)
+            |+ Text(%"menu.exit_prompt")
+                .Align(Alignment.LEFT)
+                .Pos(0, 2, PageWidth.Full)
+            |+ Text(%"menu.exit_task_warning")
+                .Color(Colors.text_red_2)
+                .Align(Alignment.LEFT)
+                .Pos(2, 2, PageWidth.Full)
         else
             page_container()
-            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back).Pos(3)
-            |+ PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
-            |+ Text(%"menu.exit_prompt", Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back)
+                .Pos(3)
+            |+ PageButton.Once(%"confirm.no", Menu.Back)
+                .Pos(5)
+            |+ Text(%"menu.exit_prompt")
+                .Align(Alignment.LEFT)
+                .Pos(0, 2, PageWidth.Full)
         :> Widget
 
     override this.Title = %"confirm"

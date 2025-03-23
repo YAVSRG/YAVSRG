@@ -1,9 +1,10 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Flux.Graphics
 
 [<AbstractClass>]
-type Widget(node_type) =
+type Widget(node_type: NodeType) =
     inherit ISelection(node_type)
 
     let mutable _parent = None
@@ -24,8 +25,6 @@ type Widget(node_type) =
     member val Bounds = Rect.ZERO with get, set
     member val VisibleBounds = Rect.ZERO with get, set
 
-    // todo: in .NET 9 you can make a .Position(pos) extension setter
-    // todo: apply this pattern on things like Text.Align(...).Color(...) etc too
     abstract member Position: Position with set
     abstract member Update: float * bool -> unit
 
@@ -74,6 +73,12 @@ type Widget(node_type) =
 
     static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
         constructor (NodeType.Container (fun () -> Some child)) |+ child
+
+[<Extension>]
+type WidgetExt =
+    [<Extension>]
+    static member Position (w: #Widget, position: Position) : #Widget =
+        w.Position <- position; w
 
 [<AbstractClass>]
 type StaticWidget(node_type) =
