@@ -17,7 +17,7 @@ let crash_text_file (message: string) =
     File.WriteAllText(path, message)
     open_directory(path)
 
-let launch (instance: int) =
+let launch (instance: int) : unit =
     Logging.Verbosity <- if DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
 
     Logging.LogFile <- Some(Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
@@ -25,12 +25,12 @@ let launch (instance: int) =
     if OperatingSystem.IsWindows() then
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
-    let crash_splash =
+    let show_crash_splash =
         Utils.splash_message_picker "CrashSplashes.txt" >> Logging.Critical "%s"
 
     let init () =
         let ui_root = Startup.init instance
-        AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash crash_splash)
+        AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash show_crash_splash)
         ui_root :> UIEntryPoint
 
     WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error "Multiple file drops not supported" else Import.FileDrop.handle paths.[0])
@@ -41,10 +41,10 @@ let launch (instance: int) =
 
     let result = Launch.entry_point (Options.load_window_config instance, Updates.version, init, icon)
 
-    Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) crash_splash
+    Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) show_crash_splash
 
 [<EntryPoint>]
-let main argv =
+let main (argv: string array) : int =
     let executable_location = AppDomain.CurrentDomain.BaseDirectory
     Directory.SetCurrentDirectory(executable_location)
 
@@ -84,7 +84,7 @@ let main argv =
             | None -> printfn "Error: Connection timed out!"
 
     else if m.WaitOne(TimeSpan.Zero, true) then
-        launch (0)
+        launch 0
         m.ReleaseMutex()
 
         if Updates.restart_on_exit then

@@ -24,7 +24,7 @@ module Terminal =
 
         let LINEWIDTH = 113
 
-        let add (s: string) =
+        let add (s: string) : unit =
             lock
                 LOCK_OBJ
                 (fun () ->
@@ -49,25 +49,25 @@ module Terminal =
                         printfn "%O" x
                 )
 
-        let up () =
+        let up () : unit =
             if log.Count - 15 > pos then
                 pos <- pos + 5
                 visible <- Seq.skip pos log
 
-        let down () =
+        let down () : unit =
             if pos - 5 >= 0 then
                 pos <- pos - 5
                 visible <- Seq.skip pos log
 
-        let home () =
+        let home () : unit =
             pos <- 0
             visible <- log
 
-        let clear () =
+        let clear () : unit =
             log.Clear()
             home ()
 
-    let add_message (s: string) = Log.add s
+    let add_message (s: string) : unit = Log.add s
 
     let private current_line = Setting.simple ""
 
@@ -80,30 +80,31 @@ module Terminal =
     let private cmd_send_key = Bind.mk Keys.Enter
 
     module private History =
+
         let mutable private pos = -1
         let mutable private history: string list = []
 
-        let up () =
+        let up () : unit=
             if history.Length - 1 > pos then
                 pos <- pos + 1
                 current_line.Value <- history.[pos]
 
-        let down () =
+        let down () : unit =
             if pos > 0 then
                 pos <- pos - 1
                 current_line.Value <- history.[pos]
 
-        let add (l) =
-            history <- l :: history
+        let add (command: string) : unit =
+            history <- command :: history
             pos <- -1
 
     let mutable shown = false
 
-    let private hide () =
+    let private hide () : unit =
         shown <- false
         Input.remove_listener ()
 
-    let private show () =
+    let private show () : unit =
         shown <- true
 
         let rec add_input () =
@@ -117,7 +118,7 @@ module Terminal =
 
         add_input ()
 
-    let drop_file (path: string) =
+    let drop_file (path: string) : unit =
         let path = path.Replace("""\""", """\\""")
         let v = current_line.Value
 
@@ -129,7 +130,7 @@ module Terminal =
     let font =
         lazy (Fonts.create "Courier Prime Sans" { SpriteFontOptions.Default with SpaceWidth = 0.75f })
 
-    let draw () =
+    let draw () : unit =
         if not shown then
             ()
         else
@@ -164,7 +165,7 @@ module Terminal =
                         )
             )
 
-    let update () =
+    let update () : unit =
         if shown && (%%"exit").Tapped() then
             hide ()
 

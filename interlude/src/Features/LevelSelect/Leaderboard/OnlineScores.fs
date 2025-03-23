@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Mods
-open Prelude.Gameplay
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Gameplay.Rulesets
@@ -44,13 +43,13 @@ module OnlineScores =
     let private leaderboard_loaded_ev = Event<bool>()
     let leaderboard_loaded = leaderboard_loaded_ev.Publish
 
-    let private load_score (score: LeaderboardScore, score_info: ScoreInfo) =
+    let private load_score (score: LeaderboardScore, score_info: ScoreInfo) : unit =
         if score_info.Ruleset <> Rulesets.current then
             score_info.Ruleset <- Rulesets.current
         leaderboard_scores.Add score_info
         leaderboard_score_loaded_ev.Trigger (score, score_info)
 
-    let private finish_loading (new_state: State) =
+    let private finish_loading (new_state: State) : unit =
         state <- new_state
         leaderboard_loaded_ev.Trigger (state <> State.NoLeaderboard)
 
@@ -113,7 +112,7 @@ module OnlineScores =
             member this.Handle(action) = action ()
         }
 
-    let load (info: LoadedChartInfo) =
+    let load (info: LoadedChartInfo) : unit =
         if Network.status <> Network.Status.LoggedIn then
             state <- State.Offline
         elif state = State.Unloaded then

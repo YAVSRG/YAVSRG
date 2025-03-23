@@ -151,7 +151,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 
 module Skinning =
 
-    let edit_hud on_exit =
+    let edit_hud (on_exit: unit -> unit) : unit =
         if
             SelectedChart.WITH_COLORS.IsSome
             && Screen.change_new
@@ -161,7 +161,7 @@ module Skinning =
         then
             Menu.Exit()
 
-    let edit_or_extract_noteskin () =
+    let edit_or_extract_noteskin () : unit =
         let noteskin = Content.Noteskin
 
         if noteskin.IsEmbedded then

@@ -50,7 +50,7 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
     override this.Title = name
     override this.OnClose() = ()
 
-    static member ConfirmDelete(charts, ctx, is_submenu) =
+    static member ConfirmDelete(charts: ChartMeta seq, ctx: LibraryGroupContext, is_submenu: bool) =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
@@ -65,7 +65,7 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
         )
             .Show()
 
-    static member Show(name, charts, context) =
+    static member Show(name: string, charts: ChartMeta seq, context: LibraryGroupContext) =
         match context with
         | LibraryGroupContext.None
         | LibraryGroupContext.Pack _ -> GroupContextMenu(name, charts, context).Show()

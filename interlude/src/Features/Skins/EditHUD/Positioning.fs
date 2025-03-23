@@ -489,18 +489,18 @@ and PositionerContext =
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
     }
-    member this.Recreate(e: HudElement) =
-        match this.Positioners.TryFind e with
+    member this.Recreate(element: HudElement) =
+        match this.Positioners.TryFind element with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
         | None -> ()
 
-        let enabled = HudElement.enabled_setting e
+        let enabled = HudElement.enabled_setting element
 
         if enabled.Value then
 
-            let setting = HudElement.position_setting e
+            let setting = HudElement.position_setting element
 
-            let p = Positioner(e, this)
+            let p = Positioner(element, this)
             let pos = setting.Value
 
             p.Position <-
@@ -516,13 +516,13 @@ and PositionerContext =
             else
                 this.Screen.Add p
 
-            this.Positioners <- this.Positioners.Add(e, p)
+            this.Positioners <- this.Positioners.Add(element, p)
 
     member this.CreateAll() =
         for element in HudElement.FULL_LIST do
             this.Recreate element
 
-    member this.Select(e: HudElement) = this.Selected <- Some e
+    member this.Select(element: HudElement) = this.Selected <- Some element
     member this.ClearSelection() = this.Selected <- None
 
     member this.ChangeCurrentAnchor(to_playfield: bool, anchor: float32) =

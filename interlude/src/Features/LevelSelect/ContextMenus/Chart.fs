@@ -3,8 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-open Prelude.Charts
-open Prelude.Backbeat
 open Prelude
 open Prelude.Data.Library
 open Interlude.Content
@@ -12,7 +10,6 @@ open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Collections
-open Interlude.Features.Tables
 open Interlude.Features.Play
 open Interlude.Features.Export
 

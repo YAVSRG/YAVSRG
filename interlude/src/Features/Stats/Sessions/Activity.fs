@@ -200,7 +200,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
             i <- i + 1
             day <- day.AddDays 1
 
-    member this.EarliestVisibleDay =
+    member this.EarliestVisibleDay : DateOnly =
         let box_size = (this.Bounds.Height - PADDING * 2.0f) / 7.0f
         let weeks_shown = (this.Bounds.Width - PADDING * 2.0f) / box_size |> floor |> int
         today.AddDays(- int day_of_week - (weeks_shown - 1) * 7)

@@ -21,7 +21,7 @@ module Startup =
     let mutable private deinit_required = false
     let mutable private deinit_once = false
 
-    let init (instance) =
+    let init (instance: int) : Screen.ScreenRoot =
         Options.init ()
         Content.init ()
 
@@ -61,7 +61,7 @@ module Startup =
         | InternalCrash
         | ExternalCrash
 
-    let deinit shutdown_type crash_splash =
+    let deinit (shutdown_type: ShutdownType) (show_crash_splash: unit -> unit) : unit =
         if deinit_once then
             ()
         else
@@ -78,10 +78,10 @@ module Startup =
             match shutdown_type with
             | Normal -> Logging.Info "Thank you for playing"
             | InternalCrash ->
-                crash_splash ()
+                show_crash_splash ()
                 Logging.Shutdown()
                 Option.iter open_directory Logging.LogFile
             | ExternalCrash ->
-                crash_splash ()
+                show_crash_splash ()
                 Logging.Critical "The game was abnormally force-quit, but was able to shut down correctly"
                 Logging.Shutdown()

@@ -25,7 +25,7 @@ type private MultiSelection =
     }
 
     static member Create(items: (ChartMeta * LibraryContext) seq) : MultiSelection =
-        let ctx = 
+        let ctx =
             match snd (Seq.head items) with
             | LibraryContext.Likes -> MultiSelectContext.Likes
             | LibraryContext.Folder f -> MultiSelectContext.Folder f
@@ -39,10 +39,10 @@ type private MultiSelection =
             Selected = HashSet items
         }
 
-    member this.Select(items: (ChartMeta * LibraryContext) seq) =
+    member this.Select(items: (ChartMeta * LibraryContext) seq) : unit =
         for item in items do
             let ctx = snd item
-            if 
+            if
                 match this.Context, ctx with
 
                 | MultiSelectContext.Normal, LibraryContext.None
@@ -60,22 +60,22 @@ type private MultiSelection =
                 this.Selected.Add item |> ignore
         this.GroupSelectedCache <- Map.empty
 
-    member this.Deselect(items: (ChartMeta * LibraryContext) seq) =
+    member this.Deselect(items: (ChartMeta * LibraryContext) seq) : unit =
         Seq.iter (this.Selected.Remove >> ignore) items
         this.GroupSelectedCache <- Map.empty
 
-    member this.IsEmpty = this.Selected.Count = 0
+    member this.IsEmpty : bool = this.Selected.Count = 0
 
-    member this.IsSelected(chart_meta, ctx) = this.Selected.Contains (chart_meta, ctx)
+    member this.IsSelected(chart_meta: ChartMeta, ctx: LibraryContext) : bool = this.Selected.Contains (chart_meta, ctx)
 
-    member this.GroupAmountSelected(group_name, group_ctx, charts: (ChartMeta * LibraryContext) seq) : AmountSelected =
+    member this.GroupAmountSelected(group_name: string, group_ctx: LibraryGroupContext, charts: (ChartMeta * LibraryContext) seq) : AmountSelected =
         match this.GroupSelectedCache.TryFind (group_name, group_ctx) with
         | Some already_calculated -> already_calculated
         | None ->
             let mutable some = false
             let mutable all = true
             for c in charts do
-                if this.IsSelected c then 
+                if this.IsSelected c then
                     some <- true
                 else all <- false
             let result =

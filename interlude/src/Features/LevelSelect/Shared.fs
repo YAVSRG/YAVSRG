@@ -91,7 +91,7 @@ module LevelSelect =
     let private state: EndlessModeState = EndlessModeState.create()
     let mutable private suggestion_ctx : SuggestionContext option = None
 
-    let private enter_gameplay (ctx: LibraryContext) =
+    let private enter_gameplay (ctx: LibraryContext) : unit =
         match ctx with
         | LibraryContext.Playlist(index, playlist_id, data) ->
             match Content.Library.Collections.GetPlaylist playlist_id with
@@ -99,7 +99,7 @@ module LevelSelect =
             | None -> ()
         | _ -> ()
 
-    let play (info: LoadedChartInfo) =
+    let play (info: LoadedChartInfo) : unit =
         if
             Screen.change_new
                 (fun () ->
@@ -148,19 +148,19 @@ module LevelSelect =
             Notifications.action_feedback (Icons.ALERT_CIRCLE, %"notification.suggestion_failed", "")
             false
 
-    let start_playlist (playlist_id: string, playlist: Playlist) =
+    let start_playlist (playlist_id: string, playlist: Playlist) : unit =
         EndlessModeState.queue_playlist 0 playlist_id playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
-    let start_playlist_shuffled (playlist_id: string, playlist: Playlist) =
+    let start_playlist_shuffled (playlist_id: string, playlist: Playlist) : unit =
         EndlessModeState.queue_shuffled_playlist playlist_id playlist Content.Library filter state
         continue_endless_mode() |> ignore
 
-    let exit_gameplay () =
+    let exit_gameplay () : unit =
         suggestion_ctx <- None
         EndlessModeState.clear_queue state
 
-    let random_chart () =
+    let random_chart () : unit =
         let true_random_chart() =
             let ctx =
                 {
@@ -203,7 +203,7 @@ module LevelSelect =
             else
                 true_random_chart()
 
-    let choose_this_chart () =
+    let choose_this_chart () : unit =
         SelectedChart.when_loaded true
         <| fun info ->
 
@@ -221,7 +221,7 @@ module LevelSelect =
                 else
                     play info
 
-    let challenge_score (score_info: ScoreInfo) =
+    let challenge_score (score_info: ScoreInfo) : unit =
         SelectedChart.if_loaded
         <| fun info ->
 
@@ -235,7 +235,7 @@ module LevelSelect =
                 SelectedChart.rate.Set score_info.Rate
                 SelectedChart.selected_mods.Set score_info.Mods
 
-    let watch_replay (score_info: ScoreInfo, with_colors: ColoredChart) =
+    let watch_replay (score_info: ScoreInfo, with_colors: ColoredChart) : unit =
         if
             Screen.change_new
                 (fun () ->

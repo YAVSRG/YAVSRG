@@ -54,7 +54,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
     let a_accuracy_label =
         let base_label = sprintf "%g%% %s" (threshold_a * 100.0) SC_J4.Name
         if Rulesets.current_hash <> SC_J4_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_a * 100.0) SC_J4 Rulesets.current with
+            match RulesetComparison.compare (threshold_a * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
@@ -62,7 +62,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
     let c_accuracy_label =
         let base_label = sprintf "%g%% %s" (threshold_c * 100.0) SC_J4.Name
         if Rulesets.current_hash <> SC_J4_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_c * 100.0) SC_J4 Rulesets.current with
+            match RulesetComparison.compare (threshold_c * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
@@ -70,7 +70,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
     let p_accuracy_label =
         let base_label = sprintf "%g%% %s" (threshold_p * 100.0) SC_J4.Name
         if Rulesets.current_hash <> SC_J4_HASH then
-            match Rulesets.RulesetComparison.compare (threshold_p * 100.0) SC_J4 Rulesets.current with
+            match RulesetComparison.compare (threshold_p * 100.0) SC_J4 Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
@@ -133,6 +133,8 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
             Render.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 15.0f, x bpm, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         Text.draw_aligned(Style.font, "BPM", 18.0f, this.Bounds.CenterX, bottom + 32.5f, Colors.white, Alignment.CENTER)
+
+        // todo: a Y-axis
 
         // KEY
         Text.fill_b(Style.font, sprintf "%O rating: %.0f" pattern_type total_rating, this.Bounds.Shrink(10.0f).SliceT(50.0f).ShrinkR(10.0f), Colors.text, Alignment.RIGHT)

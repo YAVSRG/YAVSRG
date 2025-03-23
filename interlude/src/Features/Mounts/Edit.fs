@@ -17,7 +17,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
     let import_on_startup = Setting.simple mount.ImportOnStartup
     let mutable import = false
 
-    let import_osu_scores () =
+    let import_osu_scores () : unit =
 
         let task_tracking = TaskTracking.add %"mount.import_osu_scores"
         let task =

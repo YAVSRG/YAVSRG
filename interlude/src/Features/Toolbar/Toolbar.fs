@@ -27,14 +27,14 @@ type Toolbar() =
     let container = Container(NodeType.None)
     let volume_when_collapsed = VolumeSlider(Position = Position.Shrink(0.0f, HEIGHT))
 
-    let load_preset (i: int) =
+    let load_preset (i: int) : unit =
         match Presets.load i with
         | Some success_name ->
             SelectedChart.recolor ()
             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", success_name)
         | None -> ()
 
-    let draw_waveform (bounds: Rect) =
+    let draw_waveform (bounds: Rect) : unit =
         let s = bounds.Width / 48.0f
 
         for i in 0..47 do
@@ -212,4 +212,4 @@ type Toolbar() =
             container.Update(elapsed_ms, moved)
 
     override this.Position
-        with set _ = failwith "Position can not be set for toolbar"
+        with set _ = failwith "Position cannot be set for toolbar"

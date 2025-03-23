@@ -4,8 +4,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Gameplay.Replays
-open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content

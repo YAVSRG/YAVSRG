@@ -10,7 +10,7 @@ open Interlude.Features.Play
 
 module JudgementCounter =
 
-    let draw_count_aligned(texture: Sprite, bounds: Rect, color: Color, count: int, spacing: float32, alignment: float32) =
+    let draw_count_aligned (texture: Sprite, bounds: Rect, color: Color, count: int, spacing: float32, alignment: float32) =
         let count_text = count.ToString()
         let char_width = float32 texture.Width
 
@@ -33,7 +33,7 @@ module JudgementCounter =
             Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-    let draw_ratio_centered(texture: Sprite, bounds: Rect, color: Color, (mv, pf): int * int, spacing: float32, dot_spacing: float32, colon_spacing: float32) =
+    let draw_ratio_centered (texture: Sprite, bounds: Rect, color: Color, (mv, pf): int * int, spacing: float32, dot_spacing: float32, colon_spacing: float32) =
         let ratio_text =
             if pf = 0 then
                 sprintf "%.1f:0" (float mv)

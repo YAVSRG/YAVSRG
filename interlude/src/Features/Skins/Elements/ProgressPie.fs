@@ -45,19 +45,19 @@ module ProgressMeter =
             Render.quad
                 (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
                 color_fg.AsQuad
-        
+
         Render.quad
             (Quad.createv (x, y) (x, y) (inner progress_rounded_down) (inner_exact (progress * PIE_SEGMENTS_F)))
             color_fg.AsQuad
 
-    let draw_percent_progress_centered(texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) =
+    let draw_percent_progress_centered (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) =
         let progress_text = sprintf "%.0f%%" (progress * 100.0f)
         let char_width = float32 texture.Width
         let width = (percent_spacing + float32 progress_text.Length + (float32 progress_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
-        let mutable char_bounds = 
+        let mutable char_bounds =
             Rect.Box(
                 bounds.CenterX - width * scale * 0.5f,
                 bounds.CenterY - height * scale * 0.5f,
@@ -79,7 +79,7 @@ module ProgressMeter =
             (time_left / 60000.0f<ms / rate> |> floor |> int)
             ((time_left % 60000.0f<ms / rate>) / 1000.0f<ms / rate> |> floor |> int)
 
-    let draw_countdown_centered(texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) =
+    let draw_countdown_centered (texture: Sprite, bounds: Rect, color: Color, time_left: float32<ms / rate>, spacing: float32, colon_spacing: float32) =
         let time_left_text = fmt_time_left time_left
 
         let char_width = float32 texture.Width
@@ -87,7 +87,7 @@ module ProgressMeter =
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
-        let mutable char_bounds = 
+        let mutable char_bounds =
             Rect.Box(
                 bounds.CenterX - width * scale * 0.5f,
                 bounds.CenterY - height * scale * 0.5f,
@@ -126,7 +126,7 @@ type ProgressPie(config: HudConfig, state: PlayState) =
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
+                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
                         Color.White,
                         time_left,
                         config.ProgressMeterFontSpacing,
@@ -135,7 +135,7 @@ type ProgressPie(config: HudConfig, state: PlayState) =
                 | ProgressPieLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize), 
+                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
                         Color.White,
                         percent,
                         config.ProgressMeterFontSpacing,

@@ -33,7 +33,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
 
     let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) detected_rate |> Setting.roundf_uom 2
 
-    let import() =
+    let import () : unit =
         match OsuReplay.to_score replay chart chart.FirstNote rate.Value with
         | Ok score -> show_replay score
         | Error reason -> Notifications.error ("Replay import failed", reason)
@@ -49,7 +49,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
 
 module Replay =
 
-    let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) =
+    let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) : unit =
         let score_info =
             { ScoreInfo.from_score chart_meta chart Rulesets.current score with
                 PlayedBy = ScorePlayedBy.Username played_by
@@ -63,7 +63,7 @@ module Replay =
                 Transitions.EnterGameplayNoFadeAudio
             then Menu.Exit()
 
-    let figure_out_replay (replay: OsuReplay) =
+    let figure_out_replay (replay: OsuReplay) : unit =
 
         // Strategy 1: Scan chart database for a chart that was imported from this .osu's md5
         let database_match =

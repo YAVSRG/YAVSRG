@@ -84,7 +84,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
 
 module ElementGrid =
 
-    let create (select_element: HudElement -> unit) =
+    let create (select_element: HudElement -> unit) : GridFlowContainer<ElementCard> =
 
         let columns =
             let w = Render.width()

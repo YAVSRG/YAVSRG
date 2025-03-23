@@ -14,7 +14,7 @@ open Interlude.Features.Export
 
 module BulkActions =
 
-    let confirm_bulk_delete(charts: (ChartMeta * LibraryContext) seq) =
+    let confirm_bulk_delete (charts: (ChartMeta * LibraryContext) seq) : unit =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
@@ -32,7 +32,7 @@ module BulkActions =
         )
             .Show()
 
-    let confirm_bulk_export(charts: (ChartMeta * LibraryContext) seq) =
+    let confirm_bulk_export (charts: (ChartMeta * LibraryContext) seq) : unit =
         OsuExportOptionsPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_export",
             Map.empty,
@@ -49,7 +49,7 @@ module BulkActions =
 type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
 
-    let confirm_bulk_delete() =
+    let confirm_bulk_delete () =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_delete",
             fun () ->
@@ -60,7 +60,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         )
             .Show()
 
-    let confirm_bulk_unlike() =
+    let confirm_bulk_unlike () =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_unlike",
             fun () ->
@@ -71,7 +71,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         )
             .Show()
 
-    let add_to_collection() =
+    let add_to_collection () =
         SelectCollectionPage(
             (fun (_, collection) ->
                 match collection with
@@ -106,7 +106,7 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
 type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
 
-    let confirm_bulk_remove() =
+    let confirm_bulk_remove () =
         ConfirmPage(
             [ (Seq.length charts).ToString(); folder ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
@@ -118,7 +118,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         )
             .Show()
 
-    let confirm_bulk_like() =
+    let confirm_bulk_like () =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
@@ -129,7 +129,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         )
             .Show()
 
-    let add_to_collection() =
+    let add_to_collection () =
         SelectCollectionPage(
             (fun (_, collection) ->
                 match collection with
@@ -164,7 +164,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
 type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
 
-    let confirm_bulk_remove() =
+    let confirm_bulk_remove () =
         ConfirmPage(
             [ (Seq.length charts).ToString(); playlist ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
@@ -182,7 +182,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         )
             .Show()
 
-    let confirm_bulk_like() =
+    let confirm_bulk_like () =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
@@ -193,7 +193,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         )
             .Show()
 
-    let add_to_collection() =
+    let add_to_collection () =
         SelectCollectionPage(
             (fun (_, collection) ->
                 match collection with
@@ -228,7 +228,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
 type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
 
-    let confirm_bulk_like() =
+    let confirm_bulk_like () =
         ConfirmPage(
             [ (Seq.length charts).ToString() ] %> "bulk_actions.confirm_bulk_like",
             fun () ->
@@ -239,7 +239,7 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         )
             .Show()
 
-    let add_to_collection() =
+    let add_to_collection () =
         SelectCollectionPage(
             (fun (_, collection) ->
                 match collection with

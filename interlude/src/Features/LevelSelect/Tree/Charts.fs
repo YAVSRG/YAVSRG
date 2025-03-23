@@ -70,21 +70,21 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             | LibraryContext.Likes -> ""
             | _ -> if CollectionActions.is_liked cc then Icons.HEART else ""
 
-    override this.Bounds(top) =
+    override this.Bounds(top: float32) : Rect =
         Rect.Create(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
 
-    override this.Selected = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
+    override this.Selected : bool = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 
     override this.Spacing = 5.0f
     member this.Chart = cc
     member this.Context = ctx
 
-    member this.PlaylistDuration =
+    member this.PlaylistDuration : GameplayTime =
         match ctx with
         | LibraryContext.Playlist(_, _, data) -> cc.Length / data.Rate.Value
         | _ -> 0.0f<ms / rate>
 
-    member this.Select() = switch_chart (cc, ctx, group_name, group_ctx)
+    member this.Select() : unit = switch_chart (cc, ctx, group_name, group_ctx)
 
     member private this.OnDraw(bounds: Rect) =
         let {
@@ -178,10 +178,10 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         Text.draw_aligned_b (Style.font, icon, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
-    member this.Draw(top, origin, originB) =
+    member this.Draw(top: float32, origin: float32, originB: float32) : float32 =
         this.CheckBounds(top, origin, originB, this.OnDraw)
 
-    member private this.OnUpdate(origin, bounds, elapsed_ms) =
+    member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
 
         if last_cached_flag < cache_flag then
             update_cached_info ()
@@ -219,5 +219,5 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         hover.Update(elapsed_ms) |> ignore
 
-    member this.Update(top, origin, originB, elapsed_ms) =
+    member this.Update(top: float32, origin: float32, originB: float32, elapsed_ms: float) : float32 =
         this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))

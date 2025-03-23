@@ -13,8 +13,8 @@ module HudElement =
 
     let private show_pacemaker = Setting.simple true
 
-    let name (e: HudElement) : string =
-        match e with
+    let name (element: HudElement) : string =
+        match element with
         | HudElement.Accuracy -> %"hud.accuracy"
         | HudElement.ErrorBar -> %"hud.error_bar"
         | HudElement.Combo -> %"hud.combo"
@@ -30,8 +30,8 @@ module HudElement =
         | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
 
-    let tooltip (e: HudElement) : string =
-        match e with
+    let tooltip (element: HudElement) : string =
+        match element with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
         | HudElement.ErrorBar -> %"hud.error_bar.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
@@ -47,21 +47,21 @@ module HudElement =
         | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
 
-    let can_configure (e: HudElement) =
-        match e with
+    let can_configure (element: HudElement) : bool =
+        match element with
         | HudElement.BPM -> false
         | HudElement.Pacemaker -> false
         | _ -> true
 
-    let can_toggle (e: HudElement) =
-        match e with
+    let can_toggle (element: HudElement) : bool =
+        match element with
         | HudElement.Pacemaker -> false
         | _ -> true
 
-    let constructor (e: HudElement) : HudConfig * PlayState -> Widget =
+    let constructor (element: HudElement) : HudConfig * PlayState -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
-        match e with
+        match element with
         | HudElement.Accuracy -> cast Accuracy
         | HudElement.ErrorBar -> cast ErrorBar
         | HudElement.Combo -> cast Combo
@@ -77,8 +77,8 @@ module HudElement =
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
 
-    let enabled_setting (e: HudElement) : Setting<bool> =
-        match e with
+    let enabled_setting (element: HudElement) : Setting<bool> =
+        match element with
         | HudElement.Accuracy ->
             Setting.make
                 (fun v ->

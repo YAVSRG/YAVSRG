@@ -59,7 +59,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
     do update_cached_info ()
 
-    override this.Bounds(top) =
+    override this.Bounds(top: float32) =
         Rect.Create(
             Render.width() * (0.5f - 0.05f * select_animation.Value),
             top,
@@ -114,7 +114,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             Text.fill_b (Style.font, display_name, bounds.Shrink(15.0f, 5.0f).ShrinkR(100.0f), Colors.text, Alignment.LEFT)
             Text.fill_b (Style.font, label, bounds.Shrink(15.0f, 5.0f), Colors.text_subheading, Alignment.RIGHT)
 
-    member this.Draw(top, origin, originB) =
+    member this.Draw(top: float32, origin: float32, originB: float32) : float32 =
         let b = this.CheckBounds(top, origin, originB, this.OnDraw)
 
         if this.Expanded then
@@ -145,7 +145,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         else
             b
 
-    member private this.OnUpdate(origin, bounds, elapsed_ms) =
+    member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
                 if MULTI_SELECT_KEY.Pressed() then
@@ -171,7 +171,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 | LibraryGroupContext.Pack _
                 | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(items |> Seq.map (fun (x: ChartItem) -> x.Chart), context, false)
 
-    member this.Update(top, origin, originB, elapsed_ms) =
+    member this.Update(top: float32, origin: float32, originB: float32, elapsed_ms: float) : float32 =
         if last_cached_flag < cache_flag then
             update_cached_info ()
 

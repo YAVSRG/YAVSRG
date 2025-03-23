@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
-open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Features.Skins
 

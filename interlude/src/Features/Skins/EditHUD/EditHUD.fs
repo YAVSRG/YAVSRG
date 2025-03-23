@@ -18,7 +18,7 @@ open Interlude.Features.Pacemaker
 
 module EditHudScreen =
 
-    let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit) =
+    let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit: unit -> unit) =
 
         let replay_data: IReplayProvider =
             StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)

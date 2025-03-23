@@ -53,7 +53,7 @@ type BeatmapBrowserPage() =
                 | None -> ()
         }
 
-    let rec search (filter: FilterPart list) (page: int) =
+    let rec search (filter: FilterPart list) (page: int) : unit =
         loading <- true
         when_at_bottom <- None
 
@@ -83,11 +83,11 @@ type BeatmapBrowserPage() =
 
         json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
-    let begin_search (filter: FilterPart list) =
+    let begin_search (filter: FilterPart list) : unit =
         search filter 0
         items.Clear()
 
-    let status_button (label: string) (status: int) (position: Position) (color: Color) =
+    let status_button (label: string) (status: int) (position: Position) (color: Color) : StylishButton =
         StylishButton(
             (fun () ->
                 if statuses.Contains status then

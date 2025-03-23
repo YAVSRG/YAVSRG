@@ -49,7 +49,7 @@ type ConfirmQuitPage(on_confirm: unit -> unit) =
     override this.Title = %"confirm"
     override this.OnClose() = ()
 
-type private MenuButton(on_click, label: string, pos: Position) =
+type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
     inherit
         SlideContainer(
             NodeType.Button(fun () ->
@@ -172,7 +172,7 @@ type MainMenuScreen() as this =
             Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f)
         )
 
-    override this.OnEnter prev =
+    override this.OnEnter(prev: ScreenType) =
         if Updates.update_available then
             Notifications.system_feedback (
                 Icons.ALERT_OCTAGON,
@@ -213,7 +213,7 @@ type MainMenuScreen() as this =
 
         DiscordRPC.in_menus ("Main menu")
 
-    override this.OnExit next =
+    override this.OnExit(next: ScreenType) =
         if next <> ScreenType.SplashScreen then
             Logo.move_offscreen ()
 
@@ -224,7 +224,7 @@ type MainMenuScreen() as this =
         quit_button.Hide()
         Background.dim 0.7f
 
-    override this.OnBack() =
+    override this.OnBack() : ScreenType option =
         if confirmed_quit then Some ScreenType.SplashScreen
         else confirm_quit(); None
 

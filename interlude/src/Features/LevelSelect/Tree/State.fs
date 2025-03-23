@@ -26,7 +26,7 @@ module private TreeState =
 
     let scroll_pos = Animation.Fade 300.0f
 
-    let scroll (amount: float32) =
+    let scroll (amount: float32) : unit =
         scroll_pos.Target <- scroll_pos.Value + amount
 
     /// Set this value to have it "consumed" in the next frame by a level select item with sufficient knowledge to do so
@@ -45,7 +45,7 @@ module private TreeState =
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
     let mutable cache_flag = 0
 
-    let switch_chart (cc, context, group_name, group_ctx) =
+    let switch_chart (cc: ChartMeta, context: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
         if not (Transitions.in_progress()) then
             SelectedChart.change (cc, context, true)
             Selection.clear ()
@@ -56,12 +56,12 @@ module private TreeState =
 
     let mutable multi_selection: MultiSelection option = None
 
-    let select_multiple (items: (ChartMeta * LibraryContext) seq) =
+    let select_multiple (items: (ChartMeta * LibraryContext) seq) : unit =
         match multi_selection with
         | Some s -> s.Select items
         | None -> multi_selection <- Some (MultiSelection.Create items)
 
-    let deselect_multiple (items: (ChartMeta * LibraryContext) seq) =
+    let deselect_multiple (items: (ChartMeta * LibraryContext) seq) : unit =
         match multi_selection with
         | None -> ()
         | Some s ->
@@ -87,13 +87,13 @@ module private TreeState =
 
             top + bounds.Height + this.Spacing
 
-        member this.LeftClick(origin) =
+        member this.LeftClick(origin: float32) =
             click_debounce <= 0
             && Mouse.released Mouse.LEFT
             && drag_scroll_distance <= DRAG_THRESHOLD
             && Mouse.y () > origin
 
-        member this.RightClick(origin) =
+        member this.RightClick(origin: float32) =
             click_debounce <= 0
             && Mouse.released Mouse.RIGHT
             && drag_scroll_distance <= DRAG_THRESHOLD

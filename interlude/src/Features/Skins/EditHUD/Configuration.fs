@@ -5,8 +5,8 @@ open Prelude.Skins.HudLayouts
 [<AutoOpen>]
 module private ConfigurationPageHelper =
 
-    let show_menu (e: HudElement) (on_close: unit -> unit) =
-        match e with
+    let show_menu (element: HudElement) (on_close: unit -> unit) : unit =
+        match element with
         | HudElement.Accuracy -> AccuracyPage(on_close).Show()
         | HudElement.ErrorBar -> ErrorBarPage(on_close).Show()
         | HudElement.Combo -> ComboPage(on_close).Show()

@@ -79,7 +79,7 @@ module Skins =
         override this.Title = ini.General.Name
         override this.OnClose() = ()
 
-    let import_osu_skin (path: string) =
+    let import_osu_skin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
         let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
 

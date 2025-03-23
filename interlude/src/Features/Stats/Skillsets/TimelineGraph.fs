@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Calculator.Patterns
-open Prelude.Gameplay
 open Prelude.Data.User.Stats
 
 [<Struct>]
@@ -162,6 +161,8 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
                 Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
 
         Render.stencil_finish()
+
+        // todo: a Y-axis
 
         let inline draw_tooltip () =
             let date, days_ago = date_data.[hover_index]

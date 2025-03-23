@@ -46,7 +46,7 @@ type EtternaPacksBrowserPage() =
                     loading <- false
         }
 
-    let rec search (filter: FilterPart list) (page: int) =
+    let rec search (filter: FilterPart list) (page: int) : unit =
         loading <- true
         when_at_bottom <- None
         let mutable search_string = ""
@@ -73,7 +73,7 @@ type EtternaPacksBrowserPage() =
 
         json_downloader.Request(url, (fun () -> search filter (page + 1)))
 
-    let begin_search (filter: FilterPart list) =
+    let begin_search (filter: FilterPart list) : unit =
         search filter 0
         items.Clear()
 

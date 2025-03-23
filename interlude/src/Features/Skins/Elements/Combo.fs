@@ -10,15 +10,15 @@ open Interlude.Content
 open Interlude.Features.Play
 
 module Combo =
-    
-    let draw_combo_centered(texture: Sprite, bounds: Rect, color: Color, combo: int, spacing: float32) =
+
+    let draw_combo_centered (texture: Sprite, bounds: Rect, color: Color, combo: int, spacing: float32) =
         let combo_text = combo.ToString()
         let char_width = float32 texture.Width
         let width = (float32 combo_text.Length + (float32 combo_text.Length - 1.0f) * spacing) * char_width
         let height = float32 texture.Height
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
-        let mutable char_bounds = 
+        let mutable char_bounds =
             Rect.Box(
                 bounds.CenterX - width * scale * 0.5f,
                 bounds.CenterY - height * scale * 0.5f,

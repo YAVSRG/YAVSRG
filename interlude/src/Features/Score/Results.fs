@@ -219,7 +219,14 @@ type Lamp
                 Alignment.CENTER
             )
 
-type Results(grade, lamp, improvements, previous_personal_bests, stats, score_info) =
+type Results
+    (
+        grade: GradeResult ref,
+        lamp: LampResult ref,
+        improvements: ImprovementFlags ref,
+        previous_personal_bests: Bests option ref,
+        stats: ScoreScreenStats ref, score_info: ScoreInfo
+    ) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =

@@ -25,7 +25,7 @@ type TrackedTask(label: string) =
             progress <- v
             match progress with
             | Faulted
-            | Complete -> 
+            | Complete ->
                 let now = Timestamp.now()
                 Logging.Debug "Task '%s' complete after %s (including time waiting for its turn)" label (format_duration_ms (now - start))
                 completed <- ValueSome now
@@ -107,7 +107,7 @@ module TaskTracking =
 
         y + (HEIGHT + SPACING) * fade_in_out
 
-    let draw (bounds: Rect, opacity: float32) =
+    let draw (bounds: Rect, opacity: float32) : unit =
         let now = Timestamp.now()
 
         let bounds =
@@ -126,12 +126,12 @@ module TaskTracking =
         for task in list do
             y <- draw_task(now, opacity, x, y, task)
 
-    let in_progress () =
+    let in_progress () : bool =
         import_queue.Status <> Async.QueueStatus.Idle
         || general_task_queue.Status <> Async.QueueStatus.Idle
         || TableDownloader.download_service.Status <> Async.QueueStatus.Idle
 
-    let current_progress () =
+    let current_progress () : TaskProgress =
         list
         |> Seq.map (_.Progress)
         |> Seq.tryPick (function Complete -> None | otherwise -> Some otherwise)

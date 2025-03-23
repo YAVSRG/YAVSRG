@@ -38,7 +38,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         }
         |> Async.Start
 
-    override this.Init (parent: Widget) =
+    override this.Init(parent: Widget) =
         this
         |* LoadingIndicator.Strip(
             (fun () -> not closing),
