@@ -239,7 +239,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
                         PrecomputedQuad =
                             ValueSome(
                                 Rect
-                                    .Box(
+                                    .FromSize(
                                         glyph.Offset / float32 atlas_texture.Width,
                                         (sm_spacing * float32 i) / float32 atlas_texture.Height,
                                         glyph.Width / float32 atlas_texture.Width,
@@ -266,7 +266,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
                         PrecomputedQuad =
                             ValueSome(
                                 Rect
-                                    .Box(
+                                    .FromSize(
                                         glyph.Offset / float32 atlas_texture.Width,
                                         (md_spacing * float32 i) / float32 atlas_texture.Height,
                                         glyph.Width / float32 atlas_texture.Width,
@@ -293,7 +293,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
                         PrecomputedQuad =
                             ValueSome(
                                 Rect
-                                    .Box(
+                                    .FromSize(
                                         glyph.Offset / float32 atlas_texture.Width,
                                         (lg_spacing * float32 i) / float32 atlas_texture.Height,
                                         glyph.Width / float32 atlas_texture.Width,
@@ -419,7 +419,7 @@ module Text =
                 let s = char_lookup code
                 let w = float32 s.Width * scale_mult
                 let h = float32 s.Height * scale_mult
-                let r = Rect.Box(x, y, w, h)
+                let r = Rect.FromSize(x, y, w, h)
 
                 if (bg: Drawing.Color).A <> 0uy then
                     Render.tex_quad

@@ -39,7 +39,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
         let mutable i = int day.DayOfWeek
         while day.Year = year do
 
-            let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
+            let pos = Rect.FromSize(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
             let color =
                 match session_dates.TryFind day with
@@ -74,7 +74,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
         let mutable i = int day.DayOfWeek
         while day.Year = year do
 
-            let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
+            let pos = Rect.FromSize(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
             if Mouse.hover pos then
                 hovered_day <- Some day
@@ -148,7 +148,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
         let mutable i = 0
         while day <= today do
 
-            let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
+            let pos = Rect.FromSize(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
             let color =
                 match session_dates.TryFind day with
@@ -184,7 +184,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
         let mutable i = 0
         while day <= today do
 
-            let pos = Rect.Box(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
+            let pos = Rect.FromSize(this.Bounds.Left + x_padding + float32 (i / 7) * box_size, this.Bounds.Top + PADDING + float32 (i % 7) * box_size, box_size, box_size)
 
             if Mouse.hover pos then
                 hovered_day <- Some day

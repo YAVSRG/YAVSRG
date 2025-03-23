@@ -71,7 +71,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             | _ -> if CollectionActions.is_liked cc then Icons.HEART else ""
 
     override this.Bounds(top: float32) : Rect =
-        Rect.Create(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
+        Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
 
     override this.Selected : bool = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 
@@ -122,7 +122,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             let rate_label = sprintf "(%.2fx)" rate
 
             if color.A > 0uy then
-                Render.rect (Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
+                Render.rect (Rect.FromEdges(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
 
                 Text.draw_aligned_b (
                     Style.font,

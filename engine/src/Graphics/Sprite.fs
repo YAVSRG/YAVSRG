@@ -178,7 +178,7 @@ module Texture =
             Rows = 1
             Columns = 1
 
-            PrecomputedQuad = ValueSome Rect.ZERO.AsQuad
+            PrecomputedQuad = ValueSome Rect.Zero.AsQuad
         }
 
 module Sprite =
@@ -190,7 +190,7 @@ module Sprite =
         let origin_x = float32 sprite.X / float32 sprite.Texture.Width
         let origin_y = float32 sprite.X / float32 sprite.Texture.Height
 
-        let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
+        let quad = Rect.FromSize(origin_x, origin_y, stride_x, stride_y).AsQuad
         sprite.PrecomputedQuad <- ValueSome quad
 
         sprite
@@ -367,7 +367,7 @@ module Sprite =
                 float32 sprite.Y / float32 sprite.Texture.Height
                 + float32 (y % sprite.Rows) * stride_y
 
-            let quad = Rect.Box(origin_x, origin_y, stride_x, stride_y).AsQuad
+            let quad = Rect.FromSize(origin_x, origin_y, stride_x, stride_y).AsQuad
 
             if sprite.Rows = 1 && sprite.Columns = 1 then
                 sprite.PrecomputedQuad <- ValueSome quad
@@ -391,19 +391,19 @@ module Sprite =
         let height = float32 sprite.Height / float32 sprite.Width * width * y_mult
         let left = x_origin - x_offset * width
         let top = y_origin - y_offset * height
-        Rect.Box(left, top, width, height)
+        Rect.FromSize(left, top, width, height)
 
     let fill (bounds: Rect) (sprite: Sprite) : Rect =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
-        Rect.Box(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)
+        Rect.FromSize(bounds.CenterX - 0.5f * w, bounds.CenterY - 0.5f * h, w, h)
 
     let fill_left (bounds: Rect) (sprite: Sprite) : Rect =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
-        Rect.Box(bounds.Left, bounds.CenterY - 0.5f * h, w, h)
+        Rect.FromSize(bounds.Left, bounds.CenterY - 0.5f * h, w, h)
 
     let fill_right (bounds: Rect) (sprite: Sprite) : Rect =
         let scale = min (bounds.Width / float32 sprite.Width) (bounds.Height / float32 sprite.Height)
         let w, h = float32 sprite.Width * scale, float32 sprite.Height * scale
-        Rect.Box(bounds.Right - w, bounds.CenterY - 0.5f * h, w, h)
+        Rect.FromSize(bounds.Right - w, bounds.CenterY - 0.5f * h, w, h)

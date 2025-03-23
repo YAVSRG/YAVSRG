@@ -57,7 +57,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             + playfield.ColumnWidth * 0.5f
             |> scroll_direction_pos playfield.Bounds.Bottom
 
-        let note_area = Rect.Create(playfield.Bounds.Left, centre - playfield.ColumnWidth * 0.5f, playfield.Bounds.Right, centre + playfield.ColumnWidth * 0.5f)
+        let note_area = Rect.FromEdges(playfield.Bounds.Left, centre - playfield.ColumnWidth * 0.5f, playfield.Bounds.Right, centre + playfield.ColumnWidth * 0.5f)
 
         for k = 0 to chart.Keys - 1 do
             if chart.Notes.[index].Data.[k] = NoteType.NORMAL || chart.Notes.[index].Data.[k] = NoteType.HOLDHEAD then

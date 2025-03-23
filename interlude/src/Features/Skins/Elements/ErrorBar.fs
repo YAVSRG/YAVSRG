@@ -155,21 +155,21 @@ type ErrorBar(config: HudConfig, state: PlayState) =
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
                 fun time -> center + time / MAX_WINDOW * h
-            let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
+            let r time1 time2 = Rect.FromEdges(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
             draw r
         | ErrorBarRotation.Anticlockwise ->
             let center = this.Bounds.CenterY
             let ms_to_y =
                 let h = this.Bounds.Height * 0.5f
                 fun time -> center - time / MAX_WINDOW * h
-            let r time1 time2 = Rect.Create(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
+            let r time1 time2 = Rect.FromEdges(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
             draw r
         | _ ->
             let center = this.Bounds.CenterX
             let ms_to_x =
                 let w = this.Bounds.Width * 0.5f
                 fun time -> center + time / MAX_WINDOW * w
-            let r time1 time2 = Rect.Create(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
+            let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
             draw r
 
     override this.Draw() =
@@ -181,15 +181,15 @@ type ErrorBar(config: HudConfig, state: PlayState) =
             | ErrorBarRotation.Clockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
-                Rect.Create(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
+                Rect.FromEdges(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
             | ErrorBarRotation.Anticlockwise ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterY
-                Rect.Create(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
+                Rect.FromEdges(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
             | _ ->
                 fun p1 p2 ->
                 let center = this.Bounds.CenterX
-                Rect.Create(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
+                Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
 
         if config.TimingDisplayShowGuide then
             Render.rect

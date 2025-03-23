@@ -568,7 +568,7 @@ type AnimationSettingsPage() =
         if enable_judgement_line.Value then
             Render.tex_quad
                 (Rect
-                    .Box(left, position - COLUMN_WIDTH, preview_width * COLUMN_WIDTH, COLUMN_WIDTH)
+                    .FromSize(left, position - COLUMN_WIDTH, preview_width * COLUMN_WIDTH, COLUMN_WIDTH)
                     .ExpandPercentY(judgement_line_scale.Value * 0.5f - 0.5f)
                     .TranslateY(-COLUMN_WIDTH * judgement_line_offset.Value)
                     .AsQuad)
@@ -579,7 +579,7 @@ type AnimationSettingsPage() =
             if enable_receptors.Value then
                 Render.tex_quad
                     (Rect
-                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
+                        .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH / receptor.AspectRatio)
                         .TranslateY(-COLUMN_WIDTH * receptor_offset.Value)
                         .AsQuad)
                     Color.White.AsQuad
@@ -590,7 +590,7 @@ type AnimationSettingsPage() =
 
         Render.tex_quad
             (Rect
-                .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                 .AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (f_note.Loops, 0) note)
@@ -644,7 +644,7 @@ type AnimationSettingsPage() =
 
             Render.tex_quad
                 (Rect
-                    .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                    .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                     .Expand((explosion_scale_note.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                     .Expand(explosion_expand_note.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                     .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_note.Value)
@@ -670,7 +670,7 @@ type AnimationSettingsPage() =
 
                 Render.tex_quad
                     (Rect
-                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)
@@ -695,7 +695,7 @@ type AnimationSettingsPage() =
 
                 Render.tex_quad
                     (Rect
-                        .Box(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
+                        .FromSize(left, position - COLUMN_WIDTH, COLUMN_WIDTH, COLUMN_WIDTH)
                         .Expand((explosion_scale_hold.Value - 1.0f) * COLUMN_WIDTH * 0.5f)
                         .Expand(explosion_expand_hold.Value * (1.0f - percent_remaining) * COLUMN_WIDTH)
                         .Translate(0.0f, -COLUMN_WIDTH * explosion_offset_hold.Value)

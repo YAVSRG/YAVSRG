@@ -151,7 +151,7 @@ module Logo =
                             let mutable x = breathe_bounds.Left - stride + x % stride
 
                             while x < breathe_bounds.Right do
-                                Render.sprite (Rect.Box(x, y, stride, stride)) color rain
+                                Render.sprite (Rect.FromSize(x, y, stride, stride)) color rain
                                 x <- x + stride
 
                             y <- y + stride

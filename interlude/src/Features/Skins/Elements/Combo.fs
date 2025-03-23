@@ -19,7 +19,7 @@ module Combo =
         let scale = min (bounds.Width / width) (bounds.Height / height)
 
         let mutable char_bounds =
-            Rect.Box(
+            Rect.FromSize(
                 bounds.CenterX - width * scale * 0.5f,
                 bounds.CenterY - height * scale * 0.5f,
                 char_width * scale,

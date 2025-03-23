@@ -42,11 +42,11 @@ type Toolbar() =
                 System.Math.Min((Audio.waveform.[i] + 0.01f) * Toolbar.slideout_amount.Value * 0.4f, HEIGHT)
 
             Render.rect
-                (Rect.Box(bounds.Left + float32 i * s + 2.5f, bounds.Top, s - 5.0f, level))
+                (Rect.FromSize(bounds.Left + float32 i * s + 2.5f, bounds.Top, s - 5.0f, level))
                 (Palette.color (int level, 1.0f, 0.5f))
 
             Render.rect
-                (Rect.Box(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
+                (Rect.FromSize(bounds.Right - (float32 i + 1.0f) * s + 2.5f, bounds.Bottom - level, s - 5.0f, level))
                 (Palette.color (int level, 1.0f, 0.5f))
 
     let import_status_fade = Animation.Fade 0.0f

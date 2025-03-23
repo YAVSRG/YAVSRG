@@ -175,7 +175,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
         if this.Focused && Mouse.x () > this.Bounds.Right - 600.0f then
             let popover_bounds =
-                Rect.Box(
+                Rect.FromSize(
                     this.Bounds.Right - 900.0f,
                     this.Bounds.Bottom + 10.0f,
                     600.0f,

@@ -150,7 +150,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
         let mutable bpm = floor(min_bpm / SPACING) * SPACING
         while bpm < max_bpm - SPACING * 1.5f do
             bpm <- bpm + SPACING
-            Render.rect (Rect.Box(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+            Render.rect (Rect.FromSize(x bpm, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
             Text.draw_aligned(Style.font, sprintf "%.0f" bpm, 15.0f, x bpm, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         Text.draw_aligned(Style.font, "BPM", 18.0f, this.Bounds.CenterX, bottom + 32.5f, Colors.white, Alignment.CENTER)
 
@@ -174,7 +174,7 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
         | Some (c, (width, height)) ->
             let x, y = Mouse.pos()
             let x, y = x - width * 0.5f |> max (this.Bounds.Left + 20.0f) |> min (this.Bounds.Right - width - 20.0f), y - height - 20.0f
-            let b = Rect.Box(x, y, width, height)
+            let b = Rect.FromSize(x, y, width, height)
             Render.border Style.PADDING b Colors.cyan_accent
             Render.rect b Colors.cyan_shadow
             Callout.draw(x, y, width, height, Colors.text, c)

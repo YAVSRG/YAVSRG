@@ -33,7 +33,7 @@ module Notifications =
                 let width, height = i.Size
 
                 let bounds =
-                    Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height)
+                    Rect.FromSize(this.Bounds.Right - width - 10.0f, y, width, height)
 
                 Callout.update (bounds.Left, bounds.Top, width, height, i.Data)
 
@@ -59,7 +59,7 @@ module Notifications =
                 let accent, body = i.FillColor
 
                 let bounds =
-                    Rect.Box(this.Bounds.Right - width - 10.0f, y, width, height)
+                    Rect.FromSize(this.Bounds.Right - width - 10.0f, y, width, height)
 
                 Render.border Style.PADDING bounds (accent.O4a i.Fade.Alpha)
                 Render.rect bounds (Colors.shadow_2.O2a i.Fade.Alpha)

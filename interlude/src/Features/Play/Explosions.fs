@@ -183,11 +183,11 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                 let bounds =
                     (if options.Upscroll.Value then
                          Rect
-                             .Box(this.Bounds.Left + column_positions.[k], this.Bounds.Top + options.HitPosition.Value, column_width, column_width)
+                             .FromSize(this.Bounds.Left + column_positions.[k], this.Bounds.Top + options.HitPosition.Value, column_width, column_width)
                              .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
                      else
                          Rect
-                             .Box(
+                             .FromSize(
                                  this.Bounds.Left + column_positions.[k],
                                  this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                  column_width,
@@ -236,7 +236,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                     let bounds =
                         (if options.Upscroll.Value then
                              Rect
-                                 .Box(
+                                 .FromSize(
                                      this.Bounds.Left + column_positions.[ex.Column],
                                      this.Bounds.Top + options.HitPosition.Value,
                                      column_width,
@@ -245,7 +245,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                  .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
                          else
                              Rect
-                                 .Box(
+                                 .FromSize(
                                      this.Bounds.Left + column_positions.[ex.Column],
                                      this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                      column_width,
@@ -291,7 +291,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                     let bounds =
                         (if options.Upscroll.Value then
                              Rect
-                                 .Box(
+                                 .FromSize(
                                      this.Bounds.Left + column_positions.[ex.Column],
                                      this.Bounds.Top + options.HitPosition.Value,
                                      column_width,
@@ -300,7 +300,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                  .Translate(0.0f, column_width * ns.NoteExplosionSettings.Offset)
                          else
                              Rect
-                                 .Box(
+                                 .FromSize(
                                      this.Bounds.Left + column_positions.[ex.Column],
                                      this.Bounds.Bottom - column_width - options.HitPosition.Value,
                                      column_width,

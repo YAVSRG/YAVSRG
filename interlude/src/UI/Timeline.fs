@@ -116,7 +116,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
                 bpm_index <- bpm_index + 1
 
             let box =
-                Rect.Box(
+                Rect.FromSize(
                     this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
                     this.Bounds.Bottom - BOX_HEIGHT - 100.0f,
                     BOX_WIDTH,

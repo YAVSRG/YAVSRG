@@ -193,7 +193,7 @@ module Callout =
                 y <- y + spacing
                 let tsize = text_size callout.Size
                 let button_size = tsize + spacing * 2.0f
-                let bounds = Rect.Box(x, y, width, button_size)
+                let bounds = Rect.FromSize(x, y, width, button_size)
                 Render.rect bounds (Colors.shadow_2.O2a a)
 
                 let text_col =
@@ -240,7 +240,7 @@ module Callout =
                 y <- y + spacing
                 let tsize = text_size callout.Size
                 let button_size = tsize + spacing * 2.0f
-                let bounds = Rect.Box(x, y, width, button_size)
+                let bounds = Rect.FromSize(x, y, width, button_size)
 
                 if Mouse.hover bounds && Mouse.left_click () then
                     action ()

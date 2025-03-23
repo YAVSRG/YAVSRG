@@ -57,7 +57,7 @@ module HelpOverlay =
                     else
                         outline.Bottom + SPACING
 
-                let callout_bounds = Rect.Box(x, y, width, height)
+                let callout_bounds = Rect.FromSize(x, y, width, height)
                 Callout.update (callout_bounds.Left, callout_bounds.Top, width, height, t.Data)
 
             _keep_alive <- false
@@ -109,7 +109,7 @@ module HelpOverlay =
                     else
                         outline.Bottom + SPACING
 
-                let callout_bounds = Rect.Box(x, y, width, height)
+                let callout_bounds = Rect.FromSize(x, y, width, height)
                 Render.border Style.PADDING callout_bounds (Colors.cyan_accent.O4a alpha)
                 Render.rect callout_bounds (Colors.cyan_shadow.O4a alpha)
 

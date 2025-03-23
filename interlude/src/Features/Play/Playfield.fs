@@ -19,7 +19,7 @@ type private StageLeft() =
 
     override this.Draw() =
         let width = sprite.AspectRatio * this.Bounds.Height
-        Render.sprite (Rect.Box(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
+        Render.sprite (Rect.FromSize(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
 
 type private StageRight() =
     inherit StaticWidget(NodeType.None)
@@ -28,7 +28,7 @@ type private StageRight() =
 
     override this.Draw() =
         let width = sprite.AspectRatio * this.Bounds.Height
-        Render.sprite (Rect.Box(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
+        Render.sprite (Rect.FromSize(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
 
 [<Struct>]
 type private HoldRenderState =
@@ -183,7 +183,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let inline draw_judgement_line() =
             if noteskin_config.UseJudgementLine then
                 let area =
-                    Rect.Create(
+                    Rect.FromEdges(
                         left,
                         hitposition + (note_height - note_height * noteskin_config.JudgementLineScale) * 0.5f,
                         right,
@@ -201,7 +201,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             if noteskin_config.UseReceptors then
                 for k in 0 .. (keys - 1) do
                     Render.tex_quad
-                        (Rect.Box(
+                        (Rect.FromSize(
                             left + column_positions.[k],
                             hitposition + note_height - note_height / receptor_aspect_ratio,
                             column_width,
@@ -225,7 +225,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let inline draw_note (k, pos, color) =
             Render.tex_quad
-                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
                     .AsQuad
                  |> rotation k)
@@ -234,7 +234,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
             Render.tex_quad
-                ((Rect.Box(left + column_positions.[k], pos, column_width, note_height)
+                ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
                     .AsQuad
                  |> rotation k)
@@ -243,7 +243,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
             Render.tex_quad
-                ((Rect.Create(
+                ((Rect.FromEdges(
                     left + column_positions.[k],
                     pos_a + note_height * 0.5f,
                     left + column_positions.[k] + column_width,
@@ -267,7 +267,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Render.tex_quad
                 (
                     (
-                        Rect.Create(
+                        Rect.FromEdges(
                             left + column_positions.[k],
                             max clip pos,
                             left + column_positions.[k] + note_height,

@@ -60,7 +60,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     do update_cached_info ()
 
     override this.Bounds(top: float32) =
-        Rect.Create(
+        Rect.FromEdges(
             Render.width() * (0.5f - 0.05f * select_animation.Value),
             top,
             Render.width() - 25.0f,

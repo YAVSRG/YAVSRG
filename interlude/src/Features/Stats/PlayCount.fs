@@ -44,7 +44,7 @@ type PlayCount(plays: unit -> int, completed: unit -> int, retries: unit -> int,
         let quits = quits()
 
         if plays = 0 && quits = 0 && completed = 0 && retries = 0 then
-            Text.fill_b(Style.font, Icons.PIE_CHART, Rect.Box(graph_origin, this.Bounds.CenterY, 0.0f, 0.0f).Expand(graph_radius), Colors.text_greyout, Alignment.CENTER)
+            Text.fill_b(Style.font, Icons.PIE_CHART, Rect.FromSize(graph_origin, this.Bounds.CenterY, 0.0f, 0.0f).Expand(graph_radius), Colors.text_greyout, Alignment.CENTER)
 
         Text.fill_b(Style.font, sprintf "%s: %i" (%"stats.songs_played") plays, content_bounds.SliceT(45.0f), Colors.text, Alignment.LEFT)
 

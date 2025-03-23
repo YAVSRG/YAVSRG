@@ -27,7 +27,7 @@ module Render =
     let mutable internal _width = fst DEFAULT_SCREEN |> float32
     let mutable internal _height = snd DEFAULT_SCREEN |> float32
 
-    let mutable internal _bounds = Rect.ZERO
+    let mutable internal _bounds = Rect.Zero
     let mutable private _batch : Batch = Unchecked.defaultof<_>
 
     let private create_flipped_projection (width: float32, height: float32) : Matrix4 =
@@ -426,16 +426,16 @@ module Render =
         quad_c r.AsQuad c
 
     let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) : unit =
-        quad_c (Rect.Create(left, top, right, bottom).AsQuad) c.AsQuad
+        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) c.AsQuad
 
     let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
-        quad_c (Rect.Create(left, top, right, bottom).AsQuad) c
+        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) c
 
     let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) : unit =
-        quad_c (Rect.Box(left, top, width, height).AsQuad) c.AsQuad
+        quad_c (Rect.FromSize(left, top, width, height).AsQuad) c.AsQuad
 
     let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
-        quad_c (Rect.Box(left, top, right, bottom).AsQuad) c
+        quad_c (Rect.FromSize(left, top, right, bottom).AsQuad) c
 
     /// <summary>
     /// Draws a border around a rectangle to the screen.
@@ -478,7 +478,7 @@ module Render =
 
         Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
 
-        _bounds <- Rect.Box(0.0f, 0.0f, _width, _height)
+        _bounds <- Rect.FromSize(0.0f, 0.0f, _width, _height)
 
         initialise_fbos ()
 

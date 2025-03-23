@@ -63,7 +63,7 @@ type HoldNoteSettingsPage() =
 
             Render.tex_quad
                 (Rect
-                    .Create(
+                    .FromEdges(
                         left,
                         min headpos tailpos + COLUMN_WIDTH * 0.5f,
                         left + COLUMN_WIDTH,
@@ -74,12 +74,12 @@ type HoldNoteSettingsPage() =
                 (Sprite.pick_texture (animation.Loops, 0) body)
 
             Render.tex_quad
-                (Rect.Box(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
+                (Rect.FromSize(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) head)
 
             Render.tex_quad
-                (Rect.Box(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                (Rect.FromSize(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
                  |> if flip_hold_tail.Value && downscroll && use_tail_texture.Value then
                         fun (r: Rect) -> r.ShrinkY(r.Height)
                     else
@@ -88,7 +88,7 @@ type HoldNoteSettingsPage() =
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
-            Text.fill_b (Style.font, label, Rect.Box(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
+            Text.fill_b (Style.font, label, Rect.FromSize(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
 
             left <- left - COLUMN_WIDTH - 50.0f
 

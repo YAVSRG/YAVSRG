@@ -46,7 +46,7 @@ type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, 
                     + playfield.ColumnWidth * 0.5f
 
                 Rect
-                    .Create(
+                    .FromEdges(
                         playfield.Bounds.Left + playfield.ColumnPositions.[k],
                         y start,
                         playfield.Bounds.Left + playfield.ColumnPositions.[k] + playfield.ColumnWidth,

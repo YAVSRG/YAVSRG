@@ -62,4 +62,4 @@ type Confetti () =
     override this.Draw() =
         for i = 0 to confetti.Length - 1 do
             if confetti.[i].X > 0.0f && confetti.[i].Y > 0.0f && confetti.[i].Y < Render.height() then
-                Render.rect (Rect.Box(confetti.[i].X, confetti.[i].Y, 12.0f, 12.0f)) colors.[confetti.[i].Color]
+                Render.rect (Rect.FromSize(confetti.[i].X, confetti.[i].Y, 12.0f, 12.0f)) colors.[confetti.[i].Color]

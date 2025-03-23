@@ -167,4 +167,4 @@ type NewAndShiny() =
                 (vec (i + 1))
                 Colors.red_accent
 
-        Text.fill_b (Style.font, this.Icon, Rect.Box(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)
+        Text.fill_b (Style.font, this.Icon, Rect.FromSize(x, y, 0.0f, 0.0f).Expand(r), Colors.text, Alignment.CENTER)

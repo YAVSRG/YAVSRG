@@ -109,7 +109,7 @@ type PerformanceSettingsPage() =
             let anti_jitter = GameThread.frame_compensation () / 1.0f<ms / rate>
             let y = (float32 cycle.Progress + (float32 i / 10.0f)) % 1.0f
             Render.sprite
-                (Rect.Box(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
+                (Rect.FromSize(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
                 Color.White
                 texture
 

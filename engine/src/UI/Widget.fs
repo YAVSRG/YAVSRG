@@ -22,8 +22,8 @@ type Widget(node_type: NodeType) =
         | None -> failwithf "%O has no parent (probably due to not calling init)" this
 
     member val Initialised = false with get, set
-    member val Bounds = Rect.ZERO with get, set
-    member val VisibleBounds = Rect.ZERO with get, set
+    member val Bounds = Rect.Zero with get, set
+    member val VisibleBounds = Rect.Zero with get, set
 
     abstract member Position: Position with set
     abstract member Update: float * bool -> unit

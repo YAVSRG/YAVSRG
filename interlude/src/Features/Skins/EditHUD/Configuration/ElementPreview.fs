@@ -24,7 +24,7 @@ type ElementPreview(position: HudPosition) =
                         + Array.sum (cfg.KeymodeColumnSpacing keycount))
 
                 Rect
-                    .Box(0.0f, 0.0f,
+                    .FromSize(0.0f, 0.0f,
                         width,
                         Render.height()
                     )
@@ -35,7 +35,7 @@ type ElementPreview(position: HudPosition) =
 
     override this.Draw() =
 
-        let bounds = Rect.Box(this.Bounds.ShrinkL(PAGE_ITEM_WIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
+        let bounds = Rect.FromSize(this.Bounds.ShrinkL(PAGE_ITEM_WIDTH).CenterX - width * 0.5f, this.Bounds.CenterY - height * 0.5f, width, height)
         Render.border Style.PADDING bounds Color.Lime
 
         this.DrawComponent(bounds)

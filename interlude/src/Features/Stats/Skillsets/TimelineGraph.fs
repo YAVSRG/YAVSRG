@@ -152,21 +152,21 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
             while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddMonths(-1)
                 let x = x (TODAY.DayNumber - d.DayNumber)
-                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Render.rect (Rect.FromSize(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
                 Text.draw_aligned(Style.font, d.ToString("MMM yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         elif day_range.Value > 90.0f then
             let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
             while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddDays(-14)
                 let x = x (TODAY.DayNumber - d.DayNumber)
-                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Render.rect (Rect.FromSize(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
                 Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
         else
             let mutable d = TODAY.AddDays(7 - int TODAY.DayOfWeek) // start of week
             while float32 (TODAY.DayNumber - d.DayNumber) - day_offset.Value < day_range.Value do
                 d <- d.AddDays(-7)
                 let x = x (TODAY.DayNumber - d.DayNumber)
-                Render.rect (Rect.Box(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
+                Render.rect (Rect.FromSize(x, bottom, 5.0f, 7.5f).Translate(-2.5f, 0.0f)) Colors.white
                 Text.draw_aligned(Style.font, d.ToString("dd/MM/yy"), 15.0f, x, bottom + 7.5f, Colors.grey_1, Alignment.CENTER)
 
         Render.stencil_finish()
@@ -180,7 +180,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
             let stream_rating = stream_data.[hover_index].Value
             let x = x days_ago |> max (this.Bounds.Left + 180.0f + 20.0f) |> min (this.Bounds.Right - 180.0f - 20.0f)
             let y = bottom - Array.max [|jack_rating; chordstream_rating; stream_rating|] / all_time_max * height
-            let box = Rect.Create(x - 180.0f, y - 220.0f, x + 180.0f, y - 20.0f)
+            let box = Rect.FromEdges(x - 180.0f, y - 220.0f, x + 180.0f, y - 20.0f)
             Render.rect (box.Expand(Style.PADDING)) Colors.cyan
             Render.rect box Colors.shadow_2.O3
             Text.fill_b(Style.font, date.ToLongDateString(), box.SliceT(45.0f), Colors.text, Alignment.CENTER)

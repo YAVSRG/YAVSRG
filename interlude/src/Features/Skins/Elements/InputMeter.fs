@@ -90,7 +90,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 let y1, c1 = point timestamp
                 let y2, c2 = point previous
                 Render.rect_c
-                    (Rect.Create(
+                    (Rect.FromEdges(
                         this.Bounds.Left + column_width * float32 k,
                         y1,
                         this.Bounds.Left + column_width * (1.0f + float32 k),

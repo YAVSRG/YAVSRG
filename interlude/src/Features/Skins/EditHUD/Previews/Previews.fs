@@ -323,7 +323,7 @@ module SelectPreviews =
                     bounds.Bottom - column_width - y
             Render.rect
                 (
-                    Rect.Create(bounds.Left, p 0.0f, bounds.Left + column_width, p 1.0f)
+                    Rect.FromEdges(bounds.Left, p 0.0f, bounds.Left + column_width, p 1.0f)
                         .ShrinkPercentX(config.InputMeterColumnPadding * 0.5f)
                 )
                 config.InputMeterInputColor
@@ -331,7 +331,7 @@ module SelectPreviews =
                 let p1 = (float32 k / float32 keys) * 0.8f
                 Render.rect
                     (
-                        Rect.Create(bounds.Left + column_width * float32 k, p p1, bounds.Left + column_width * float32 (k + 1), p (p1 + 0.1f))
+                        Rect.FromEdges(bounds.Left + column_width * float32 k, p p1, bounds.Left + column_width * float32 (k + 1), p (p1 + 0.1f))
                             .ShrinkPercentX(config.InputMeterColumnPadding * 0.5f)
                     )
                     config.InputMeterInputColor

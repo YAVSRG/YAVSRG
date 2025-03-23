@@ -78,7 +78,7 @@ module TaskTracking =
         let opacity = opacity * fade_in_out
         let alpha = 255f * opacity |> int |> max 0 |> min 255
 
-        let bounds = Rect.Box(x, y, WIDTH, HEIGHT)
+        let bounds = Rect.FromSize(x, y, WIDTH, HEIGHT)
         Render.border Style.PADDING bounds (Colors.cyan_accent.O4a alpha)
         Render.rect bounds (Colors.cyan_shadow.O4a alpha)
 

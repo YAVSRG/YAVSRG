@@ -143,7 +143,7 @@ and PageHeaderBase() =
         let mutable first = true
         for t in titles do
             let width = Text.measure (Style.font, t) * this.Bounds.Height * 0.6f
-            let bounds = Rect.Box(x, this.Bounds.Top, width, this.Bounds.Height)
+            let bounds = Rect.FromSize(x, this.Bounds.Top, width, this.Bounds.Height)
             Render.rect (bounds.Expand(Style.PADDING * 2.0f, Style.PADDING)) Colors.shadow_2.O2
             Text.fill_b (Style.font, t, bounds, Colors.text, Alignment.CENTER)
             x <- x + width + GAP_BETWEEN_BOXES

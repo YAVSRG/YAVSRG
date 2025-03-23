@@ -187,7 +187,7 @@ type PlayfieldSettingsPage() =
         let PREVIEW_SCALE = 0.3f
 
         let preview_bounds =
-            Rect.Box(
+            Rect.FromSize(
                 this.Bounds.Right - 50.0f - this.Bounds.Width * PREVIEW_SCALE,
                 this.Bounds.Top + 50.0f,
                 this.Bounds.Width * PREVIEW_SCALE,

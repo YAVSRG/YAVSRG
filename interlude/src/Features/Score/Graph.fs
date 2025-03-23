@@ -155,7 +155,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         Render.rect black_cutoff_area Colors.black.O2
 
         let white_line =
-            Rect.Create(
+            Rect.FromEdges(
                 black_cutoff_area.Left,
                 bounds.Bottom,
                 black_cutoff_area.Left + Style.PADDING,
@@ -623,7 +623,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             let current_snapshot = snapshots.[snapshot_index]
 
             let box =
-                Rect.Box(
+                Rect.FromSize(
                     this.Bounds.Left + percent * (this.Bounds.Width - BOX_WIDTH),
                     this.Bounds.Top - BOX_HEIGHT - 20.0f,
                     BOX_WIDTH,

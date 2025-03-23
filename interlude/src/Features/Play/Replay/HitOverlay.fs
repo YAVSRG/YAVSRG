@@ -52,7 +52,7 @@ type private HitOverlay
 
     let draw_delta (column: int) (action_y: float32) (note_y: float32) (color: Color) : unit =
         Rect
-            .Create(
+            .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 note_y,
                 playfield.Bounds.Left
@@ -65,7 +65,7 @@ type private HitOverlay
         |> fun a -> Render.rect a Colors.grey_2.O2
 
         Rect
-            .Create(
+            .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 action_y,
                 playfield.Bounds.Left
@@ -78,7 +78,7 @@ type private HitOverlay
         |> fun a -> Render.rect a color
 
         Rect
-            .Create(
+            .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 action_y,
                 playfield.Bounds.Left
@@ -93,7 +93,7 @@ type private HitOverlay
     let label_before (column: int) (y: float32) (text: string) (color: Color) : unit =
         if show_hit_overlay_labels.Value then
             Rect
-                .Create(
+                .FromEdges(
                     playfield.Bounds.Left + playfield.ColumnPositions.[column],
                     y,
                     playfield.Bounds.Left
@@ -108,7 +108,7 @@ type private HitOverlay
     let label_after (column: int) (y: float32) (text: string) (color: Color) : unit =
         if show_hit_overlay_labels.Value then
             Rect
-                .Create(
+                .FromEdges(
                     playfield.Bounds.Left + playfield.ColumnPositions.[column],
                     y,
                     playfield.Bounds.Left
@@ -122,7 +122,7 @@ type private HitOverlay
 
     let draw_icon (column: int) (y: float32) (icon: string) (color: Color) : unit =
         Rect
-            .Create(
+            .FromEdges(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
                 y,
                 playfield.Bounds.Left

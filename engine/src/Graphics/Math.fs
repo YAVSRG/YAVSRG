@@ -15,7 +15,7 @@ type Rect =
         Bottom: float32
     }
 
-    static member Create(left: float32, top: float32, right: float32, bottom: float32) : Rect =
+    static member FromEdges(left: float32, top: float32, right: float32, bottom: float32) : Rect =
         {
             Left = left
             Top = top
@@ -23,7 +23,7 @@ type Rect =
             Bottom = bottom
         }
 
-    static member Box(left: float32, top: float32, width: float32, height: float32) : Rect =
+    static member FromSize(left: float32, top: float32, width: float32, height: float32) : Rect =
         {
             Left = left
             Top = top
@@ -31,8 +31,7 @@ type Rect =
             Bottom = top + height
         }
 
-    static member ZERO = Rect.Box(0.0f, 0.0f, 0.0f, 0.0f)
-    static member ONE = Rect.Box(0.0f, 0.0f, 1.0f, 1.0f)
+    static member Zero = Rect.FromSize(0.0f, 0.0f, 0.0f, 0.0f)
 
     member inline this.Width : float32 = this.Right - this.Left
     member inline this.Height : float32 = this.Bottom - this.Top
