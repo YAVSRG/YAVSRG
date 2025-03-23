@@ -58,7 +58,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
 
-    let render_char_level (font: Font) (c: int32) =
+    let render_char_level (font: Font) (c: int32) : Bitmap =
         let s = code_to_string c
         let render_options = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
         let size = TextMeasurer.Measure(s, render_options)
@@ -73,7 +73,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             Logging.Warn "Exception occurred rendering glyph with code point %i: %O" (int c) err
         img
 
-    let render_char (c: int32) =
+    let render_char (c: int32) : unit =
         let sm = render_char_level FONT_SM c
         let md = render_char_level FONT_MD c
         let lg = render_char_level FONT_LG c
@@ -188,7 +188,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     // render a font texture atlas, containing common characters + icons
     // characters outside this set are dynamically generated on use
-    let render_atlas() =
+    let render_atlas() : unit =
 
         let sm, sm_glyphs, sm_spacing = render_atlas_level FONT_SM
         let md, md_glyphs, md_spacing = render_atlas_level FONT_MD
@@ -308,7 +308,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     do render_atlas ()
 
-    member this.CharLookup (level: int) =
+    member this.CharLookup (level: int) : int32 -> Sprite =
 
         let target = match level with 2 -> char_lookup_lg | 1 -> char_lookup_md | _ -> char_lookup_sm
 
@@ -332,9 +332,9 @@ module Fonts =
 
     let collection = new FontCollection()
 
-    let add (stream: Stream) = collection.Install stream |> ignore
+    let add (stream: Stream) : unit = collection.Install stream |> ignore
 
-    let create (name: string) (options: SpriteFontOptions) =
+    let create (name: string) (options: SpriteFontOptions) : SpriteFont =
         let found, family = collection.TryFind name
 
         let family =
@@ -348,7 +348,7 @@ module Fonts =
 
     open System.Reflection
 
-    let init () =
+    let init () : unit =
         Assembly
             .GetCallingAssembly()
             .GetManifestResourceStream("Percyqaz.Flux.Resources.feather.ttf")
@@ -388,7 +388,7 @@ module Text =
 
         width
 
-    let draw_b (font: SpriteFont, text: string, scale, x, y, (fg: Drawing.Color, bg: Drawing.Color)) =
+    let draw_b (font: SpriteFont, text: string, scale: float32, x: float32, y: float32, (fg: Drawing.Color, bg: Drawing.Color)) : unit =
 
         let level, scale_mult =
             let l1 = scale / font.BaseScale
@@ -430,16 +430,16 @@ module Text =
                 Render.tex_quad r.AsQuad fg.AsQuad { Texture = s.Texture; Layer = s.Z; UV = s.PrecomputedQuad.Value }
                 x <- x + w + font.CharSpacing * scale
 
-    let draw (font, text, scale, x, y, color) =
+    let draw (font, text, scale, x, y, color) : unit =
         draw_b (font, text, scale, x, y, (color, Drawing.Color.Transparent))
 
-    let draw_aligned (font: SpriteFont, text, scale, x, y, color, just: float32) =
-        draw (font, text, scale, x - measure (font, text) * scale * just, y, color)
+    let draw_aligned (font: SpriteFont, text, scale, x, y, color, alignment: float32) : unit =
+        draw (font, text, scale, x - measure (font, text) * scale * alignment, y, color)
 
-    let draw_aligned_b (font: SpriteFont, text, scale, x, y, color, just: float32) =
-        draw_b (font, text, scale, x - measure (font, text) * scale * just, y, color)
+    let draw_aligned_b (font: SpriteFont, text, scale, x, y, color, alignment: float32) : unit =
+        draw_b (font, text, scale, x - measure (font, text) * scale * alignment, y, color)
 
-    let fill_b (font: SpriteFont, text: string, bounds: Rect, colors: Drawing.Color * Drawing.Color, just: float32) =
+    let fill_b (font: SpriteFont, text: string, bounds: Rect, colors: Drawing.Color * Drawing.Color, just: float32) : unit =
         let w = measure (font, text)
         let scale = Math.Min(bounds.Height * 0.6f, (bounds.Width / w))
 
@@ -450,5 +450,5 @@ module Text =
 
         draw_b (font, text, scale, x, bounds.CenterY - scale * 0.75f, colors)
 
-    let fill (font, text, bounds, color, just) =
-        fill_b (font, text, bounds, (color, Drawing.Color.Transparent), just)
+    let fill (font: SpriteFont, text: string, bounds: Rect, color: Drawing.Color, alignment: float32) : unit =
+        fill_b (font, text, bounds, (color, Drawing.Color.Transparent), alignment)

@@ -42,7 +42,7 @@ module Waveform =
             High = 0.0f
         }
 
-    let intensity (info: ChannelInfo, bins: float32 array, start_frequency: float32, end_frequency: float32) =
+    let intensity (info: ChannelInfo, bins: float32 array, start_frequency: float32, end_frequency: float32) : float32 =
         let start_bin =
             int <| float32 fft_bins * 2f * start_frequency / float32 info.Frequency
 
@@ -58,7 +58,7 @@ module Waveform =
 
         value
 
-    let generate (file: string) =
+    let generate (file: string) : Waveform =
         let decode_stream =
             Bass.CreateStream(file, 0L, 0L, BassFlags.Decode ||| BassFlags.Float)
 

@@ -25,7 +25,7 @@ type Song =
             LowPassFilterEffect = 0
         }
 
-    static member FromFile(preview_point: Time, last_note: Time, file: string) =
+    static member FromFile(preview_point: Time, last_note: Time, file: string) : Song =
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan ||| BassFlags.Decode)
 
         if ID = 0 then
@@ -53,10 +53,10 @@ type Song =
                 LowPassFilterEffect = 0
             }
 
-    member this.Free() =
+    member this.Free() : unit =
         Bass.StreamFree this.ID |> display_bass_error
 
-    member this.SetLowPass(amount: float32) =
+    member this.SetLowPass(amount: float32) : unit =
         match this.LowPassFilterEffect with
         | 0 when amount > 0.0f ->
             let effect = Bass.ChannelSetFX(this.ID, EffectType.BQF, 1)
@@ -112,25 +112,25 @@ module Song =
     let mutable private low_pass_amount = 0.0f
     let mutable private low_pass_target = 0.0f
 
-    let duration () = now_playing.Duration
+    let duration () : Time = now_playing.Duration
 
     let private update_time() =
         _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
 
-    let frame_compensation () =
+    let frame_compensation () : Time =
         (rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start) - _time
 
-    let time () = _time
+    let time () : Time = _time
 
-    let time_compensated () =
+    let time_compensated () : Time =
         time () - seek_inaccuracy_compensation
 
-    let time_with_offset () =
+    let time_with_offset () : Time =
         time_compensated () + _local_offset + _global_offset * rate
 
-    let playing () = timer.IsRunning
+    let playing () : bool = timer.IsRunning
 
-    let play_from (time) =
+    let play_from (time: Time) : unit =
 
         if time >= 0.0f<ms> && time < duration () then
 
@@ -152,10 +152,10 @@ module Song =
         paused <- false
         update_time()
 
-    let play_leadin (first_note: Time) =
+    let play_leadin (first_note: Time) : unit =
         play_from (min 0.0f<ms> (first_note - LEADIN_TIME * rate))
 
-    let seek (time) =
+    let seek (time: Time) : unit =
         if playing () then
             play_from time
         else
@@ -173,7 +173,7 @@ module Song =
             timer.Reset()
             update_time()
 
-    let pause () =
+    let pause () : unit =
         let time = time ()
 
         if time >= 0.0f<ms> && time < duration () then
@@ -182,7 +182,7 @@ module Song =
         timer.Stop()
         paused <- true
 
-    let resume () =
+    let resume () : unit =
         let time = time ()
 
         if time >= 0.0f<ms> && time < duration () then
@@ -191,7 +191,7 @@ module Song =
         timer.Start()
         paused <- false
 
-    let change_rate (new_rate) =
+    let change_rate (new_rate: float32<rate>) : unit =
         let rate_changed = rate <> new_rate
         let time = time ()
         rate <- new_rate
@@ -206,18 +206,18 @@ module Song =
         if rate_changed then
             seek time
 
-    let playback_rate () = rate
+    let playback_rate () : float32<rate> = rate
 
-    let set_pitch_rates_enabled (enabled: bool) =
+    let set_pitch_rates_enabled (enabled: bool) : unit =
         enable_pitch_rates <- enabled
         change_rate rate
 
-    let set_low_pass (amount: float32) =
+    let set_low_pass (amount: float32) : unit =
         low_pass_target <- amount
         now_playing.SetLowPass low_pass_amount
 
-    let set_local_offset (offset) = _local_offset <- offset
-    let set_global_offset (offset) = _global_offset <- offset
+    let set_local_offset (offset: Time): unit = _local_offset <- offset
+    let set_global_offset (offset: float32<ms / rate>) : unit = _global_offset <- offset
 
     let private song_loader =
         { new Async.CancelQueue<Time * Time * string option * SongLoadAction, Song * SongLoadAction>() with
@@ -250,7 +250,7 @@ module Song =
                 on_loaded_ev.Trigger()
         }
 
-    let change (path: string option, offset: Time, new_rate: float32<rate>, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) =
+    let change (path: string option, offset: Time, new_rate: float32<rate>, (preview: Time, chart_last_note: Time), after_load: SongLoadAction) : unit =
         let path_changed = path <> load_path
         load_path <- path
         set_local_offset offset
@@ -270,7 +270,7 @@ module Song =
             loading <- true
             song_loader.Request(preview, chart_last_note, path, after_load)
 
-    let update (elapsed_ms: float) =
+    let update (elapsed_ms: float) : unit =
         let time_last_update = _time
         update_time()
 

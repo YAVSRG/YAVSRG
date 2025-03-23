@@ -9,7 +9,7 @@ type SoundEffect =
         ID: int
         mutable ChannelID: int
     }
-    static member FromStream(source: string, stream: IO.Stream) =
+    static member FromStream(source: string, stream: IO.Stream) : SoundEffect =
         use ms = new IO.MemoryStream()
         stream.CopyTo ms
         let data = ms.ToArray()
@@ -23,11 +23,11 @@ type SoundEffect =
         let channel = Bass.SampleGetChannel(id)
         { ID = id; ChannelID = channel }
 
-    member this.Free() =
+    member this.Free() : unit =
         if this.ID <> 0 then
             Bass.SampleFree this.ID |> display_bass_error
 
-    member this.ChangeDevice() =
+    member this.ChangeDevice() : unit =
         Bass.ChannelSetDevice(this.ID, Bass.CurrentDevice) |> display_bass_error
         this.ChannelID <- Bass.SampleGetChannel(this.ID)
 
@@ -35,13 +35,13 @@ type SoundEffect =
 
 module SoundEffect =
 
-    let play (fx: SoundEffect) (volume: float) =
+    let play (fx: SoundEffect) (volume: float) : unit =
         Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 2.0)
         |> display_bass_error
 
         Bass.ChannelPlay(fx.ChannelID, true) |> display_bass_error
 
 type SoundEffect with
-    member this.Play() =
+    member this.Play() : unit =
         if this.ID <> 0 then
             SoundEffect.play this 1.0

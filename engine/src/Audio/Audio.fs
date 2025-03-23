@@ -21,7 +21,7 @@ module Audio =
     let private fft: float32 array = Array.zeroCreate 1024
     let waveform: float32 array = Array.zeroCreate 256
 
-    let private update_waveform (elapsed_ms) =
+    let private update_waveform (elapsed_ms: float) : unit =
         let lerp_amount = MathF.Pow(0.988f, float32 elapsed_ms)
 
         if Song.playing () then
@@ -49,7 +49,7 @@ module Audio =
             for i in 0..255 do
                 waveform.[i] <- waveform.[i] * lerp_amount
 
-    let update (elapsed_ms: float) =
+    let update (elapsed_ms: float) : unit =
         update_waveform elapsed_ms
         Song.update elapsed_ms
 
@@ -86,9 +86,9 @@ module Audio =
             }
             |> Array.ofSeq
 
-    let list_devices () = detected_devices
+    let list_devices () : Device array = detected_devices
 
-    let change_device (index: int) =
+    let change_device (index: int) : unit =
         try
             let device_index =
                 match detected_devices |> Array.tryFind (fun x -> x.Index = index) with
@@ -125,7 +125,7 @@ module Audio =
 
     let debug_info() : string =
 
-        let device_dump (dev: Device) =
+        let device_dump (dev: Device) : string =
             sprintf "  %i. %s | %O | DEFAULT: %A" dev.Index dev.Name dev.Type dev.IsDefault
 
         let devices = detected_devices |> Seq.map device_dump |> String.concat "\n"

@@ -363,88 +363,88 @@ module Render =
     /// </summary>
 
     // todo: consider renaming quad_c and having just `quad` which takes a color
-    let quad_c (q: Quad) (c: QuadColors) : unit =
-        _batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
-        _batch.Vertex(q.TopRight, Vector2.Zero, c.TopRight, 0)
-        _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
-        _batch.Vertex(q.TopLeft, Vector2.Zero, c.TopLeft, 0)
-        _batch.Vertex(q.BottomRight, Vector2.Zero, c.BottomRight, 0)
-        _batch.Vertex(q.BottomLeft, Vector2.Zero, c.BottomLeft, 0)
+    let quad_c (q: Quad) (colors: QuadColors) : unit =
+        _batch.Vertex(q.TopLeft, Vector2.Zero, colors.TopLeft, 0)
+        _batch.Vertex(q.TopRight, Vector2.Zero, colors.TopRight, 0)
+        _batch.Vertex(q.BottomRight, Vector2.Zero, colors.BottomRight, 0)
+        _batch.Vertex(q.TopLeft, Vector2.Zero, colors.TopLeft, 0)
+        _batch.Vertex(q.BottomRight, Vector2.Zero, colors.BottomRight, 0)
+        _batch.Vertex(q.BottomLeft, Vector2.Zero, colors.BottomLeft, 0)
 
-    let inline quad (q: Quad) (c: Color) : unit =
-        quad_c q c.AsQuad
+    let inline quad (q: Quad) (color: Color) : unit =
+        quad_c q color.AsQuad
 
-    let inline quad_vecs (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: Color) : unit =
-        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+    let inline quad_vecs (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (color: Color) : unit =
+        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) color.AsQuad
 
-    let inline quad_vecs_c (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (c: QuadColors) : unit =
-        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) c
+    let inline quad_vecs_c (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) (colors: QuadColors) : unit =
+        quad_c (Quad.from_vectors(top_left, top_right, bottom_right, bottom_left)) colors
 
     let inline quad_points
         (top_left: float32 * float32)
         (top_right: float32 * float32)
         (bottom_right: float32 * float32)
         (bottom_left: float32 * float32)
-        (c: Color)
+        (color: Color)
         : unit =
-        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c.AsQuad
+        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) color.AsQuad
 
     let inline quad_points_c
         (top_left: float32 * float32)
         (top_right: float32 * float32)
         (bottom_right: float32 * float32)
         (bottom_left: float32 * float32)
-        (c: QuadColors)
+        (colors: QuadColors)
         : unit =
-        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) c
+        quad_c (Quad.from_points(top_left, top_right, bottom_right, bottom_left)) colors
 
     /// <summary>
     /// Draws a textured quad to the screen.
     /// </summary>
-    let tex_quad (q: Quad) (c: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) : unit =
+    let tex_quad (q: Quad) (colors: QuadColors) ({ Texture = t; Layer = layer; UV = uv } : QuadTexture) : unit =
         _batch.Texture t
-        _batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
-        _batch.Vertex(q.TopRight, uv.TopRight, c.TopRight, layer)
-        _batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
-        _batch.Vertex(q.TopLeft, uv.TopLeft, c.TopLeft, layer)
-        _batch.Vertex(q.BottomRight, uv.BottomRight, c.BottomRight, layer)
-        _batch.Vertex(q.BottomLeft, uv.BottomLeft, c.BottomLeft, layer)
+        _batch.Vertex(q.TopLeft, uv.TopLeft, colors.TopLeft, layer)
+        _batch.Vertex(q.TopRight, uv.TopRight, colors.TopRight, layer)
+        _batch.Vertex(q.BottomRight, uv.BottomRight, colors.BottomRight, layer)
+        _batch.Vertex(q.TopLeft, uv.TopLeft, colors.TopLeft, layer)
+        _batch.Vertex(q.BottomRight, uv.BottomRight, colors.BottomRight, layer)
+        _batch.Vertex(q.BottomLeft, uv.BottomLeft, colors.BottomLeft, layer)
 
     /// <summary>
     /// Draws a rectangular sprite to the screen.
     /// </summary>
-    let inline sprite (r: Rect) (c: Color) (s: Sprite) : unit =
-        tex_quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
+    let inline sprite (r: Rect) (color: Color) (s: Sprite) : unit =
+        tex_quad r.AsQuad color.AsQuad <| Sprite.pick_texture (0, 0) s
 
     /// <summary>
     /// Draws an untextured rectangle to the screen.
     /// </summary>
-    let inline rect (r: Rect) (c: Color) : unit =
-        quad_c r.AsQuad c.AsQuad
+    let inline rect (r: Rect) (color: Color) : unit =
+        quad_c r.AsQuad color.AsQuad
 
-    let inline rect_c (r: Rect) (c: QuadColors) : unit =
-        quad_c r.AsQuad c
+    let inline rect_c (r: Rect) (colors: QuadColors) : unit =
+        quad_c r.AsQuad colors
 
-    let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) : unit =
-        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) c.AsQuad
+    let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (color: Color) : unit =
+        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) color.AsQuad
 
-    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
-        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) c
+    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (colors: QuadColors) : unit =
+        quad_c (Rect.FromEdges(left, top, right, bottom).AsQuad) colors
 
-    let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) : unit =
-        quad_c (Rect.FromSize(left, top, width, height).AsQuad) c.AsQuad
+    let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (color: Color) : unit =
+        quad_c (Rect.FromSize(left, top, width, height).AsQuad) color.AsQuad
 
-    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
-        quad_c (Rect.FromSize(left, top, right, bottom).AsQuad) c
+    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (colors: QuadColors) : unit =
+        quad_c (Rect.FromSize(left, top, right, bottom).AsQuad) colors
 
     /// <summary>
     /// Draws a border around a rectangle to the screen.
     /// </summary>
-    let inline border (thickness: float32) (r: Rect) (c: Color) : unit =
-        quad_c (r.BorderL(thickness).AsQuad) c.AsQuad
-        quad_c (r.BorderCornersT(thickness).AsQuad) c.AsQuad
-        quad_c (r.BorderR(thickness).AsQuad) c.AsQuad
-        quad_c (r.BorderCornersB(thickness).AsQuad) c.AsQuad
+    let inline border (thickness: float32) (r: Rect) (color: Color) : unit =
+        quad_c (r.BorderL(thickness).AsQuad) color.AsQuad
+        quad_c (r.BorderCornersT(thickness).AsQuad) color.AsQuad
+        quad_c (r.BorderR(thickness).AsQuad) color.AsQuad
+        quad_c (r.BorderCornersB(thickness).AsQuad) color.AsQuad
 
     (*
         Internal functions used by the Game and Window threads

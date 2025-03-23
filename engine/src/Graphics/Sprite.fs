@@ -55,7 +55,7 @@ type QuadTexture =
         Layer: int
         UV: Quad
     }
-    member this.Transform(func: Quad -> Quad) =
+    member this.Transform(func: Quad -> Quad) : QuadTexture =
         {
             Texture = this.Texture
             Layer = this.Layer
@@ -70,7 +70,7 @@ type SpriteUpload =
         Image: Bitmap
         DisposeImageAfter: bool
     }
-    static member OfImage(label: string, img: Bitmap) =
+    static member OfImage(label: string, img: Bitmap) : SpriteUpload =
         {
             Label = label
             Rows = 1
@@ -145,7 +145,7 @@ module Texture =
             References = 0
         }
 
-    let create_sprite (x: int, y: int) (layer: int) (w: int, h: int) (rows: int, columns: int) (texture: Texture) =
+    let create_sprite (x: int, y: int) (layer: int) (w: int, h: int) (rows: int, columns: int) (texture: Texture) : Sprite =
         texture.References <- texture.References + 1
 
         {
@@ -309,7 +309,7 @@ module Sprite =
 
         let mutable layer = 1
 
-        let gen_sprite (info: SpriteUpload) =
+        let gen_sprite (info: SpriteUpload) : string * Sprite =
 
             let sprite =
                 Texture.create_sprite
@@ -375,7 +375,7 @@ module Sprite =
             { Texture = sprite.Texture; Layer = sprite.Z; UV = quad }
 
     // todo: relocate, remove or rename this, only used for Interlude's song background image
-    let tiling (scale, left, top) (sprite: Sprite) (quad: Quad) : QuadTexture =
+    let tiling (scale: float32, left: float32, top: float32) (sprite: Sprite) (quad: Quad) : QuadTexture =
 
         let width = float32 sprite.Width * scale
         let height = float32 sprite.Height * scale
@@ -386,7 +386,7 @@ module Sprite =
             UV = Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad
         }
 
-    let aligned_box_x (x_origin, y_origin, x_offset, y_offset, x_scale, y_mult) (sprite: Sprite) : Rect =
+    let aligned_box_x (x_origin: float32, y_origin: float32, x_offset: float32, y_offset: float32, x_scale: float32, y_mult: float32) (sprite: Sprite) : Rect =
         let width = x_scale
         let height = float32 sprite.Height / float32 sprite.Width * width * y_mult
         let left = x_origin - x_offset * width

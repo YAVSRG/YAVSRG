@@ -31,15 +31,15 @@ type internal Batch =
         mutable vcount: int
         mutable last_texture_handle: int
     }
-    member this.Capacity = this.capacity
+    member this.Capacity : int = this.capacity
 
-    member this.Draw() =
+    member this.Draw() : unit =
         if this.vcount > 0 then
             GL.BufferSubData(BufferTarget.ArrayBuffer, 0, nativeint (this.vcount * sizeof<Vertex>), this.vertices)
             GL.DrawArrays(PrimitiveType.Triangles, 0, this.vcount)
         this.vcount <- 0
 
-    member this.Vertex(pos: Vector2, uv: Vector2, color: Color, texture_layer: int) =
+    member this.Vertex(pos: Vector2, uv: Vector2, color: Color, texture_layer: int) : unit =
         if this.vcount = this.vertices.Length then
             this.Draw()
 
@@ -58,7 +58,7 @@ type internal Batch =
 
         this.vcount <- this.vcount + 1
 
-    member inline this.Texture(t: Texture) =
+    member inline this.Texture(t: Texture) : unit =
         if this.last_texture_handle <> t.Handle then
             this.Draw()
 
@@ -67,15 +67,15 @@ type internal Batch =
 
             Shader.set_uniform_i32 (Shader.sampler_loc, t.TextureUnit)
             this.last_texture_handle <- t.Handle
-    
-    member this.Start () =
+
+    member this.Start () : unit =
         this.active <- true
 
-    member this.Finish () =
+    member this.Finish () : unit =
         this.Draw()
         this.active <- false
 
-    static member Create (capacity: int) =
+    static member Create (capacity: int) : Batch =
         assert(capacity > 0)
 
         let VERTICES_PER_ELEMENT = 6

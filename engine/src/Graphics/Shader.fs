@@ -50,9 +50,9 @@ module private Shader =
     let mutable alpha_masking_loc = 0
     let mutable sampler_loc = 0
 
-    let init() =
-        let shader_src (name: string) =
-            use s = 
+    let init() : unit =
+        let shader_src (name: string) : string =
+            use s =
                 System.Reflection.Assembly
                     .GetCallingAssembly()
                     .GetManifestResourceStream("Percyqaz.Flux.Resources." + name)
@@ -65,11 +65,11 @@ module private Shader =
         alpha_masking_loc <- get_uniform_location("alphaMasking", program)
         sampler_loc <- get_uniform_location("sampler", program)
 
-    let set_uniform_mat4 (location: int, value: Matrix4) =
+    let set_uniform_mat4 (location: int, value: Matrix4) : unit =
         GL.UniformMatrix4(location, false, ref value)
 
-    let set_uniform_f32 (location: int, value: float32) =
+    let set_uniform_f32 (location: int, value: float32) : unit =
         GL.Uniform1(location, value)
 
-    let set_uniform_i32 (location: int, value: int) =
+    let set_uniform_i32 (location: int, value: int) : unit =
         GL.Uniform1(location, value)

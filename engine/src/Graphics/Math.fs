@@ -31,7 +31,7 @@ type Rect =
             Bottom = top + height
         }
 
-    static member Zero = Rect.FromSize(0.0f, 0.0f, 0.0f, 0.0f)
+    static member Zero : Rect = Rect.FromSize(0.0f, 0.0f, 0.0f, 0.0f)
 
     member inline this.Width : float32 = this.Right - this.Left
     member inline this.Height : float32 = this.Bottom - this.Top
@@ -393,7 +393,7 @@ module Quad =
 
     let inline gradient_left_to_right (left: Color) (right: Color) : QuadColors = { TopLeft = left; TopRight = right; BottomRight = right; BottomLeft = left }
     let inline gradient_top_to_bottom (top: Color) (bottom: Color) : QuadColors = { TopLeft = top; TopRight = top; BottomRight = bottom; BottomLeft = bottom }
-    let inline from_color (color: Color) = { TopLeft = color; TopRight = color; BottomRight = color; BottomLeft = color }
+    let inline from_color (color: Color) : QuadColors = { TopLeft = color; TopRight = color; BottomRight = color; BottomLeft = color }
 
 [<AutoOpen>]
 module AsQuadExtensions =
