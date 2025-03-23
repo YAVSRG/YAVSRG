@@ -12,6 +12,7 @@ open Interlude.Features.Play.HUD
 module HudElement =
 
     let private show_pacemaker = Setting.simple true
+    let private show_skip_button = Setting.simple true
 
     let name (element: HudElement) : string =
         match element with
@@ -106,15 +107,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.ComboEnabled)
-        | HudElement.SkipButton ->
-            Setting.make
-                (fun v ->
-                    Skins.save_hud_config
-                        { Content.HUD with
-                            SkipButtonEnabled = v
-                        }
-                )
-                (fun () -> Content.HUD.SkipButtonEnabled)
+        | HudElement.SkipButton -> show_skip_button
         | HudElement.Judgement ->
             Setting.make
                 (fun v ->

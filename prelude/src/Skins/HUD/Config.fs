@@ -157,7 +157,6 @@ type HudConfig =
         ComboUseFont: bool
         ComboFontSpacing: float32
 
-        SkipButtonEnabled: bool
         SkipButtonPosition: HudPosition
         SkipButtonBackground: BackgroundTextureOptions
 
@@ -294,7 +293,6 @@ type HudConfig =
             ComboUseFont = false
             ComboFontSpacing = 0.0f
 
-            SkipButtonEnabled = true
             SkipButtonPosition =
                 {
                     RelativeToPlayfield = true
