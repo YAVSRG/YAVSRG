@@ -261,7 +261,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 if clip_percent > 0.0f then
                     let height = q.BottomRight.Y - q.TopRight.Y
                     let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
-                    Quad.create (q.TopLeft + correction) (q.TopRight + correction) q.BottomRight q.BottomLeft
+                    Quad.from_vectors(q.TopLeft + correction, q.TopRight + correction, q.BottomRight, q.BottomLeft)
                 else q
 
             Render.tex_quad

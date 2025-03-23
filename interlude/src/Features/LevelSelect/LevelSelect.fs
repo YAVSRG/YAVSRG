@@ -177,33 +177,35 @@ type LevelSelectScreen() =
             this.Bounds
 
         Render.quad
-            (Quad.create
-             <| Vector2(left, top)
-             <| Vector2(left + w + TOP_BAR_HEIGHT * 0.5f, top)
-             <| Vector2(left + w, top + TOP_BAR_HEIGHT)
-             <| Vector2(left, top + TOP_BAR_HEIGHT))
-            (Quad.gradient_top_to_bottom (!*Palette.MAIN_100) (!*Palette.DARK_100))
+        <| Quad.from_points(
+            (left, top),
+            (left + w + TOP_BAR_HEIGHT * 0.5f, top),
+            (left + w, top + TOP_BAR_HEIGHT),
+            (left, top + TOP_BAR_HEIGHT)
+        )
+        <| Quad.gradient_top_to_bottom (!*Palette.MAIN_100) (!*Palette.DARK_100)
 
         Render.quad
-            (Quad.create
-             <| Vector2(left + w + TOP_BAR_HEIGHT * 0.5f, top)
-             <| Vector2(right, top)
-             <| Vector2(right, top + TOP_BAR_HEIGHT)
-             <| Vector2(left + w, top + TOP_BAR_HEIGHT))
-            Colors.shadow_2.O2.AsQuad
+        <| Quad.from_points(
+            (left + w + TOP_BAR_HEIGHT * 0.5f, top),
+            (right, top),
+            (right, top + TOP_BAR_HEIGHT),
+            (left + w, top + TOP_BAR_HEIGHT)
+        )
+        <| Colors.shadow_2.O2.AsQuad
 
         Render.rect (this.Bounds.SliceT(TOP_BAR_HEIGHT).BorderB(5.0f)) (!*Palette.MAIN)
 
         base.Draw()
 
-    override this.OnEnter prev =
+    override this.OnEnter(_: ScreenType) =
         LevelSelect.exit_gameplay()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         refresh ()
         DiscordRPC.in_menus ("Choosing a song")
 
-    override this.OnExit next = Input.remove_listener ()
+    override this.OnExit(_: ScreenType) = Input.remove_listener ()
 
     override this.OnBack() =
         if Network.lobby.IsSome then

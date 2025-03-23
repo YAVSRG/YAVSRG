@@ -53,11 +53,12 @@ module SelectPreviews =
         Render.rect (bounds.SliceX(config.TimingDisplayThickness * 2.0f).TranslateX(-80.0f).ExpandY(config.TimingDisplayReleasesExtraHeight)) Color.Yellow
         let center = bounds.CenterX
         let moving_average =
-            Quad.createv
+            Quad.from_points(
+                (center - 24f, bounds.Top - 10.0f),
+                (center - 24f - 10f, bounds.Top - 20f),
+                (center - 24f + 10f, bounds.Top - 20f),
                 (center - 24f, bounds.Top - 10.0f)
-                (center - 24f - 10f, bounds.Top - 20f)
-                (center - 24f + 10f, bounds.Top - 20f)
-                (center - 24f, bounds.Top - 10.0f)
+            )
         Render.quad
             moving_average
             config.TimingDisplayMovingAverageColor.AsQuad

@@ -20,12 +20,13 @@ module Beam =
         let endpoint = r1 + (r2 - r1) * (time * (2.0f - time))
 
         Render.quad
-            (Quad.create
-                (o + d * startpoint + perp)
-                (o + d * endpoint + perp)
-                (o + d * endpoint - perp)
-                (o + d * startpoint - perp))
-            col.AsQuad
+        <| Quad.from_vectors(
+            (o + d * startpoint + perp),
+            (o + d * endpoint + perp),
+            (o + d * endpoint - perp),
+            (o + d * startpoint - perp)
+        )
+        <| col.AsQuad
 
 module Glint =
 
@@ -41,19 +42,21 @@ module Glint =
         let start = bounds.Left - stripe_width * 4.5f + travel_distance * percent
 
         Render.quad
-        <| Quad.createv
-            (start + stripe_width, bounds.Top)
-            (start + stripe_width * 3.0f, bounds.Top)
-            (start + stripe_width * 2.0f, bounds.Bottom)
+        <| Quad.from_points(
+            (start + stripe_width, bounds.Top),
+            (start + stripe_width * 3.0f, bounds.Top),
+            (start + stripe_width * 2.0f, bounds.Bottom),
             (start, bounds.Bottom)
+        )
         <| color.AsQuad
 
         Render.quad
-        <| Quad.createv
-            (start + 3.5f * stripe_width, bounds.Top)
-            (start + 4.5f * stripe_width, bounds.Top)
-            (start + 3.5f * stripe_width, bounds.Bottom)
+        <| Quad.from_points(
+            (start + 3.5f * stripe_width, bounds.Top),
+            (start + 4.5f * stripe_width, bounds.Top),
+            (start + 3.5f * stripe_width, bounds.Bottom),
             (start + 2.5f * stripe_width, bounds.Bottom)
+        )
         <| color.AsQuad
 
     let draw_stencilled (percent: float32) (bounds: Rect) (color: Color) : unit =
@@ -68,7 +71,7 @@ module Glint =
 
         Render.stencil_finish()
 
-    let spot_draw (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
+    let spot_draw (x: float32, y: float32) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
         let t = 4.0f * (time - time * time)
         let size = r1 * t
         let direction_deg = 65.0f - time * 10.0f
@@ -83,10 +86,11 @@ module Glint =
         let p = Vector2(-sin * size, cos * size)
         let p2 = Vector2(-cos * size, -sin * size)
 
-        let q = Quad.create o (o - p) (o + r2 * d) (o + p2)
+        let q = Quad.from_vectors(o, o - p, o + r2 * d, o + p2)
 
         let q2 =
-            Quad.create o (o - p) (o + r2 * 0.6f * d) (o + p2) |> Quad.rotate_about o 90.0
+            Quad.from_vectors(o, o - p, o + r2 * 0.6f * d, o + p2)
+            |> Quad.rotate_about o 90.0
 
         let c = Color.FromArgb(Math.Clamp(t * 255.0f |> int, 0, 255), col)
 
@@ -110,7 +114,7 @@ module Wedge =
             let ang2 = Vector2(Math.Sin a2 |> float32, -Math.Cos a2 |> float32)
 
             Render.quad
-                (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
+                (Quad.from_vectors(centre + ang1 * r2, centre + ang2 * r2, centre + ang2 * r1, centre + ang1 * r1))
                 col.AsQuad
 
     let draw_centered = draw (Render.width() * 0.5f, Render.height() * 0.5f)
@@ -154,22 +158,22 @@ module DiamondsWipe =
 
             if inbound then f * SCALE * 0.5f else (1.0f - f) * SCALE * 0.5f
 
-        let draw_diamond x y =
+        let draw_diamond (x: float32, y: float32) =
             let r = radius x
 
             Render.quad
-                (Quad.createv
-                    (x - r, y)
-                    (x, y - r)
-                    (x + r, y)
-                    (x, y + r)
-                 )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (x - r, y),
+                (x, y - r),
+                (x + r, y),
+                (x, y + r)
+                )
+            <| Color.Transparent.AsQuad
 
         for x in 0 .. (width / SCALE |> float |> Math.Ceiling |> int) do
             for y in 0 .. (height / SCALE |> float |> Math.Ceiling |> int) do
-                draw_diamond (SCALE * float32 x) (SCALE * float32 y)
-                draw_diamond (0.5f * SCALE + SCALE * float32 x) (0.5f * SCALE + SCALE * float32 y)
+                draw_diamond (SCALE * float32 x, SCALE * float32 y)
+                draw_diamond (0.5f * SCALE + SCALE * float32 x, 0.5f * SCALE + SCALE * float32 y)
 
 module TriangleWipe =
 
@@ -182,42 +186,42 @@ module TriangleWipe =
         if inbound then
 
             Render.quad
-                (Quad.createv
-                    (bounds.Left, y + height * 2.0f)
-                    (bounds.Left, y + height)
-                    (center, y)
-                    (center, y + height * 2.0f)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Left, y + height * 2.0f),
+                (bounds.Left, y + height),
+                (center, y),
+                (center, y + height * 2.0f)
+            )
+            <| Color.Transparent.AsQuad
 
             Render.quad
-                (Quad.createv
-                    (bounds.Right, y + height * 2.0f)
-                    (bounds.Right, y + height)
-                    (center, y)
-                    (center, y + height * 2.0f)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Right, y + height * 2.0f),
+                (bounds.Right, y + height),
+                (center, y),
+                (center, y + height * 2.0f)
+            )
+            <| Color.Transparent.AsQuad
 
         else
 
             Render.quad
-                (Quad.createv
-                    (bounds.Left, y - height)
-                    (bounds.Left, y + height)
-                    (center, y)
-                    (center, y - height)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Left, y - height),
+                (bounds.Left, y + height),
+                (center, y),
+                (center, y - height)
+            )
+            <| Color.Transparent.AsQuad
 
             Render.quad
-                (Quad.createv
-                    (bounds.Right, y - height)
-                    (bounds.Right, y + height)
-                    (center, y)
-                    (center, y - height)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Right, y - height),
+                (bounds.Right, y + height),
+                (center, y),
+                (center, y - height)
+            )
+            <| Color.Transparent.AsQuad
 
     let draw_downward (inbound: bool) (amount: float32) (bounds: Rect) : unit =
         let height = bounds.Height
@@ -228,42 +232,42 @@ module TriangleWipe =
         if inbound then
 
             Render.quad
-                (Quad.createv
-                    (bounds.Left, y - height * 2.0f)
-                    (bounds.Left, y - height)
-                    (center, y)
-                    (center, y - height * 2.0f)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Left, y - height * 2.0f),
+                (bounds.Left, y - height),
+                (center, y),
+                (center, y - height * 2.0f)
+            )
+            <| Color.Transparent.AsQuad
 
             Render.quad
-                (Quad.createv
-                    (bounds.Right, y - height * 2.0f)
-                    (bounds.Right, y - height)
-                    (center, y)
-                    (center, y - height * 2.0f)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Right, y - height * 2.0f),
+                (bounds.Right, y - height),
+                (center, y),
+                (center, y - height * 2.0f)
+            )
+            <| Color.Transparent.AsQuad
 
         else
 
             Render.quad
-                (Quad.createv
-                    (bounds.Left, y + height)
-                    (bounds.Left, y - height)
-                    (center, y)
-                    (center, y + height)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Left, y + height),
+                (bounds.Left, y - height),
+                (center, y),
+                (center, y + height)
+            )
+            <| Color.Transparent.AsQuad
 
             Render.quad
-                (Quad.createv
-                    (bounds.Right, y + height)
-                    (bounds.Right, y - height)
-                    (center, y)
-                    (center, y + height)
-                )
-                Color.Transparent.AsQuad
+            <| Quad.from_points(
+                (bounds.Right, y + height),
+                (bounds.Right, y - height),
+                (center, y),
+                (center, y + height)
+            )
+            <| Color.Transparent.AsQuad
 
 module StripeWipe =
 
@@ -277,13 +281,13 @@ module StripeWipe =
         let right = bounds.Left - stripe_width + travel_distance * right
 
         Render.quad
-            (Quad.createv
-                (left + stripe_width, bounds.Top)
-                (right, bounds.Top)
-                (right - stripe_width, bounds.Bottom)
-                (left, bounds.Bottom)
-            )
-            color.AsQuad
+        <| Quad.from_points(
+            (left + stripe_width, bounds.Top),
+            (right, bounds.Top),
+            (right - stripe_width, bounds.Bottom),
+            (left, bounds.Bottom)
+        )
+        <| color.AsQuad
 
 module LoadingAnimation =
 

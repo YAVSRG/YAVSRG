@@ -26,11 +26,12 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
         let h = this.Bounds.Height
 
         Render.quad
-            (Quad.createv
-                (this.Bounds.Left, this.Bounds.Top)
-                (this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
-                (this.Bounds.Right, this.Bounds.Bottom)
+            (Quad.from_points(
+                (this.Bounds.Left, this.Bounds.Top),
+                (this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top),
+                (this.Bounds.Right, this.Bounds.Bottom),
                 (this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom))
+            )
             (color_func()).AsQuad
 
         Text.fill_b (Style.font, label_func (), this.Bounds.ShrinkX(Style.PADDING), (if this.Disabled() then Colors.text_greyout elif this.Focused then Colors.text_yellow_2 else this.TextColor()), 0.5f)

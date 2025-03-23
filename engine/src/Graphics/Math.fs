@@ -318,6 +318,42 @@ type QuadColors =
 
 module Quad =
 
+    let inline from_vectors (top_left: Vector2, top_right: Vector2, bottom_right: Vector2, bottom_left: Vector2) : Quad =
+        {
+            TopLeft = top_left
+            TopRight = top_right
+            BottomRight = bottom_right
+            BottomLeft = bottom_left
+        }
+
+    let inline from_points
+        (
+            top_left: float32 * float32,
+            top_right: float32 * float32,
+            bottom_right: float32 * float32,
+            bottom_left: float32 * float32
+        ) : Quad =
+
+        let tl_x, tl_y = top_left
+        let tr_x, tr_y = top_right
+        let br_x, br_y = bottom_right
+        let bl_x, bl_y = bottom_left
+
+        {
+            TopLeft = Vector2(tl_x, tl_y)
+            TopRight = Vector2(tr_x, tr_y)
+            BottomRight = Vector2(br_x, br_y)
+            BottomLeft = Vector2(bl_x, bl_y)
+        }
+
+    let inline from_rect (r: Rect) : Quad =
+        {
+            TopLeft = Vector2(r.Left, r.Top)
+            TopRight = Vector2(r.Right, r.Top)
+            BottomRight = Vector2(r.Right, r.Bottom)
+            BottomLeft = Vector2(r.Left, r.Bottom)
+        }
+
     let inline parallelogram (lean_percentage: float32) (r: Rect) : Quad =
         let a = r.Height * 0.5f * lean_percentage
 
@@ -327,21 +363,6 @@ module Quad =
             BottomRight =  new Vector2(r.Right - a, r.Bottom)
             BottomLeft = new Vector2(r.Left - a, r.Bottom)
         }
-
-    // todo: revise these constructors
-    let inline create (top_left: Vector2) (top_right: Vector2) (bottom_right: Vector2) (bottom_left: Vector2) : Quad =
-        {
-            TopLeft = top_left
-            TopRight = top_right
-            BottomRight = bottom_right
-            BottomLeft = bottom_left
-        }
-
-    let inline createv (ax, ay) (bx, by) (cx, cy) (dx, dy) : Quad =
-        create (new Vector2(ax, ay)) (new Vector2(bx, by)) (new Vector2(cx, cy)) (new Vector2(dx, dy))
-
-    let inline gradient_left_to_right (left: Color) (right: Color) : QuadColors = { TopLeft = left; TopRight = right; BottomRight = right; BottomLeft = left }
-    let inline gradient_top_to_bottom (top: Color) (bottom: Color) : QuadColors = { TopLeft = top; TopRight = top; BottomRight = bottom; BottomLeft = bottom }
 
     let inline flip_vertical (q: Quad) : Quad =
         {
@@ -371,17 +392,15 @@ module Quad =
         let center = (q.TopLeft + q.TopRight + q.BottomRight + q.BottomLeft) * 0.25f
         rotate_about center degrees q
 
+    let inline gradient_left_to_right (left: Color) (right: Color) : QuadColors = { TopLeft = left; TopRight = right; BottomRight = right; BottomLeft = left }
+    let inline gradient_top_to_bottom (top: Color) (bottom: Color) : QuadColors = { TopLeft = top; TopRight = top; BottomRight = bottom; BottomLeft = bottom }
+    let inline from_color (color: Color) = { TopLeft = color; TopRight = color; BottomRight = color; BottomLeft = color }
+
 [<AutoOpen>]
 module AsQuadExtensions =
 
     type Color with
-        member inline this.AsQuad : QuadColors = { TopLeft = this; TopRight = this; BottomRight = this; BottomLeft = this }
+        member inline this.AsQuad : QuadColors = Quad.from_color this
 
     type Rect with
-        member inline this.AsQuad : Quad =
-            {
-                TopLeft = new Vector2(this.Left, this.Top)
-                TopRight = new Vector2(this.Right, this.Top)
-                BottomRight = new Vector2(this.Right, this.Bottom)
-                BottomLeft = new Vector2(this.Left, this.Bottom)
-            }
+        member inline this.AsQuad : Quad = Quad.from_rect this

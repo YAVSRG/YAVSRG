@@ -109,12 +109,13 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
         let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
         Render.quad
-            (Quad.create
-                <| new Vector2(left, top)
-                <| new Vector2(left + stripe_length, top)
-                <| new Vector2(left + stripe_length, bottom - 25.0f)
-                <| new Vector2(left, bottom - 25.0f))
-            (Quad.gradient_left_to_right accent Color.Transparent)
+        <| Quad.from_points(
+            (left, top),
+            (left + stripe_length, top),
+            (left + stripe_length, bottom - 25.0f),
+            (left, bottom - 25.0f)
+        )
+        <| Quad.gradient_left_to_right accent Color.Transparent
         Render.rect (bounds.BorderL Style.PADDING) hover_color
 
         // draw pbs

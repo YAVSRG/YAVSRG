@@ -318,12 +318,12 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             match filler with
             | ValueSome (_p2, _p3, _color) ->
                 Render.quad
-                    (Quad.createv p1 _p2 _p3 p4)
+                    (Quad.from_points(p1, _p2, _p3, p4))
                     _color.AsQuad
             | ValueNone -> ()
 
             Render.quad
-                (Quad.createv p1 p2 p3 p4)
+                (Quad.from_points(p1, p2, p3, p4))
                 color.AsQuad
 
             filler <- ValueSome (p2, p3, color)

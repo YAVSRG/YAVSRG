@@ -209,27 +209,30 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                 | ErrorBarRotation.Clockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
-                    Quad.createv
+                    Quad.from_points(
+                        (this.Bounds.Right + 10.0f, center + moving_average.Value),
+                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height),
+                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height),
                         (this.Bounds.Right + 10.0f, center + moving_average.Value)
-                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height)
-                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height)
-                        (this.Bounds.Right + 10.0f, center + moving_average.Value)
+                    )
                 | ErrorBarRotation.Anticlockwise ->
                     let center = this.Bounds.CenterY
                     let arrow_height = this.Bounds.Width * 0.5f
-                    Quad.createv
+                    Quad.from_points(
+                        (this.Bounds.Left - 10.0f, center - moving_average.Value),
+                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value + arrow_height),
+                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value - arrow_height),
                         (this.Bounds.Left - 10.0f, center - moving_average.Value)
-                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value + arrow_height)
-                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value - arrow_height)
-                        (this.Bounds.Left - 10.0f, center - moving_average.Value)
+                    )
                 | _ ->
                     let center = this.Bounds.CenterX
                     let arrow_height = this.Bounds.Height * 0.5f
-                    Quad.createv
+                    Quad.from_points(
+                        (center + moving_average.Value, this.Bounds.Top - 10.0f),
+                        (center + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height),
+                        (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
                         (center + moving_average.Value, this.Bounds.Top - 10.0f)
-                        (center + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height)
-                        (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height)
-                        (center + moving_average.Value, this.Bounds.Top - 10.0f)
+                    )
             Render.quad quad config.TimingDisplayMovingAverageColor.AsQuad
         | _ -> ()
 

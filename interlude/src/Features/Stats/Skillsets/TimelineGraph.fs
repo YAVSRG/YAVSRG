@@ -108,15 +108,15 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
                     let dy = -HTHICKNESS * MathF.Cos theta
                     let dx = HTHICKNESS * MathF.Sin theta
                     Render.quad
-                        <| Quad.createv (x, y) (previous_x, previous_y) (previous_x, previous_y + DROP_GRADIENT_SIZE) (x, y + DROP_GRADIENT_SIZE)
+                        <| Quad.from_points((x, y), (previous_x, previous_y), (previous_x, previous_y + DROP_GRADIENT_SIZE), (x, y + DROP_GRADIENT_SIZE))
                         <| Quad.gradient_top_to_bottom color.O1 color.O0
 
                     Render.quad
-                        <| Quad.createv (x + dx, y + dy) (previous_x + dx, previous_y + dy) (previous_x - dx, previous_y - dy) (x - dx, y - dy)
+                        <| Quad.from_points((x + dx, y + dy), (previous_x + dx, previous_y + dy), (previous_x - dx, previous_y - dy), (x - dx, y - dy))
                         <| color.AsQuad
 
                 Render.quad
-                    <| Quad.createv (previous_x, previous_y - 7.5f) (previous_x + 7.5f, previous_y) (previous_x, previous_y + 7.5f) (previous_x - 7.5f, previous_y)
+                    <| Quad.from_points((previous_x, previous_y - 7.5f), (previous_x + 7.5f, previous_y), (previous_x, previous_y + 7.5f), (previous_x - 7.5f, previous_y))
                     <| (if i - 1 = hover_index && show_tooltip then Colors.white else color).AsQuad
 
                 previous_x <- x

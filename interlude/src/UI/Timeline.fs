@@ -53,11 +53,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             let chord_next = HEIGHT * chord_density.[i] / max_note_density
 
             Render.quad
-                (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (x + w, b.Bottom - note_next) (x + w, b.Bottom))
+                (Quad.from_points((x, b.Bottom), (x, b.Bottom - note_prev), (x + w, b.Bottom - note_next), (x + w, b.Bottom)))
                 Colors.white.O2.AsQuad
 
             Render.quad
-                (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (x + w, b.Bottom - chord_next) (x + w, b.Bottom))
+                (Quad.from_points((x, b.Bottom), (x, b.Bottom - chord_prev), (x + w, b.Bottom - chord_next), (x + w, b.Bottom)))
                 Colors.cyan_accent.O1.AsQuad
 
             x <- x + w
@@ -65,11 +65,11 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             chord_prev <- chord_next
 
         Render.quad
-            (Quad.createv (x, b.Bottom) (x, b.Bottom - note_prev) (b.Right, b.Bottom - note_prev) (b.Right, b.Bottom))
+            (Quad.from_points((x, b.Bottom), (x, b.Bottom - note_prev), (b.Right, b.Bottom - note_prev), (b.Right, b.Bottom)))
             Colors.white.O2.AsQuad
 
         Render.quad
-            (Quad.createv (x, b.Bottom) (x, b.Bottom - chord_prev) (b.Right, b.Bottom - chord_prev) (b.Right, b.Bottom))
+            (Quad.from_points((x, b.Bottom), (x, b.Bottom - chord_prev), (b.Right, b.Bottom - chord_prev), (b.Right, b.Bottom)))
             Colors.cyan_accent.O1.AsQuad
 
         let now = Song.time()

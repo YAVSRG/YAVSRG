@@ -33,21 +33,21 @@ module ProgressMeter =
 
         for i = 1 to PIE_SEGMENTS do
             Render.quad
-                (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
+                (Quad.from_points((x, y), (x, y), (inner (i - 1)), (inner i)))
                 color_bg.AsQuad
 
             Render.quad
-                (Quad.createv (inner (i - 1)) (outer (i - 1)) (outer i) (inner i))
+                (Quad.from_points((inner (i - 1)), (outer (i - 1)), (outer i), (inner i)))
                 Colors.white.O2.AsQuad
 
         let progress_rounded_down = progress * (PIE_SEGMENTS_F - 0.1f) |> floor |> int
         for i = 1 to progress_rounded_down do
             Render.quad
-                (Quad.createv (x, y) (x, y) (inner (i - 1)) (inner i))
+                (Quad.from_points((x, y), (x, y), (inner (i - 1)), (inner i)))
                 color_fg.AsQuad
 
         Render.quad
-            (Quad.createv (x, y) (x, y) (inner progress_rounded_down) (inner_exact (progress * PIE_SEGMENTS_F)))
+            (Quad.from_points((x, y), (x, y), (inner progress_rounded_down), (inner_exact (progress * PIE_SEGMENTS_F))))
             color_fg.AsQuad
 
     let draw_percent_progress_centered (texture: Sprite, bounds: Rect, color: Color, progress: float32, spacing: float32, percent_spacing: float32) =
