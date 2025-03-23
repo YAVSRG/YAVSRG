@@ -39,7 +39,7 @@ type Slider(setting: Setting.Bounded<float32>) =
         let lo, hi = setting.Config
         setting.Value <- MathF.Round((hi - lo) * v + lo, decimal_places)
 
-    let add (v) =
+    let add (v: float32) =
         setting.Value <- MathF.Round(setting.Value + v, decimal_places)
         Style.click.Play()
 
@@ -74,8 +74,8 @@ type Slider(setting: Setting.Bounded<float32>) =
         base.Init parent
 
     member this.Step
-        with get () = step
-        and set (value) =
+        with get () : float32 = step
+        and set (value: float32) =
             step <- value
             decimal_places <- max 0 (int (MathF.Ceiling(- MathF.Log10(step))))
 

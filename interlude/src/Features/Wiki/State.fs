@@ -41,9 +41,9 @@ module private WikiState =
 
     let private page_loader =
         { new Async.Queue<Resource, MarkdownDocument array>() with
-            override this.Handle(req) =
+            override this.Handle(resource) =
                 async {
-                    match req with
+                    match resource with
                     | WikiIndex ->
                         if Cache.index_content.IsNone then
                             match!
@@ -125,14 +125,14 @@ module private WikiState =
     //Heading.scrollTo <- page.Substring(page.LastIndexOf '#' + 1).Replace('-', ' ')
     //page.Substring(0, page.LastIndexOf '#')
 
-    let load_resource (res) =
+    let load_resource (resource: Resource) =
         if not loading then
             loading <- true
-            page_history <- res :: (List.except [ res ] page_history)
-            current_page <- res
+            page_history <- resource :: (List.except [ resource ] page_history)
+            current_page <- resource
 
             page_loader.Request(
-                res,
+                resource,
                 fun md ->
                     loaded_content <- Some md
                     loading <- false

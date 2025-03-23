@@ -15,10 +15,10 @@ module CollectionActions =
     let private likes_modified_ev = Event<unit>()
     let likes_modified = likes_modified_ev.Publish
 
-    let is_liked (cc: ChartMeta) =
+    let is_liked (cc: ChartMeta) : bool =
         Content.Library.Collections.IsLiked cc.Hash
 
-    let toggle_liked (cc: ChartMeta) =
+    let toggle_liked (cc: ChartMeta) : unit =
         if is_liked cc then
             Content.Library.Collections.Unlike cc.Hash
             likes_modified_ev.Trigger()
@@ -28,7 +28,7 @@ module CollectionActions =
             likes_modified_ev.Trigger()
             Notifications.action_feedback (Icons.HEART, [ cc.Title ] %> "collections.liked", "")
 
-    let add_to (name: string, collection: Collection, cc: ChartMeta) =
+    let add_to (name: string, collection: Collection, cc: ChartMeta) : bool =
         if
             match collection with
             | Folder c -> c.Add cc
@@ -41,7 +41,7 @@ module CollectionActions =
         else
             false
 
-    let remove_from (name: string, collection: Collection, cc: ChartMeta, context: LibraryContext) =
+    let remove_from (name: string, collection: Collection, cc: ChartMeta, context: LibraryContext) : bool =
         if
             match collection with
             | Folder c -> c.Remove cc

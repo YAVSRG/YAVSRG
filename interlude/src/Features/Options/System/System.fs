@@ -13,7 +13,7 @@ module Monitors =
 
     let monitors = WindowThread.get_monitors ()
 
-    let get_current_supported_video_modes () =
+    let get_current_supported_video_modes () : FullscreenVideoMode array =
         let reported_modes =
             if config.Display.Value >= 0 && config.Display.Value < monitors.Length then
                 monitors.[config.Display.Value].DisplayModes
@@ -30,7 +30,7 @@ module Monitors =
         else
             reported_modes
 
-    let select_fullscreen_size () =
+    let select_fullscreen_size () : unit =
         try
             let supported_video_modes = get_current_supported_video_modes ()
 
@@ -39,7 +39,7 @@ module Monitors =
         with err ->
             Logging.Debug "Error setting fullscreen video mode - Possibly invalid display selected\n%O" err
 
-    let window_mode_changed (wm: WindowType) =
+    let window_mode_changed (wm: WindowType) : unit =
         if wm = WindowType.Fullscreen then
             select_fullscreen_size ()
 

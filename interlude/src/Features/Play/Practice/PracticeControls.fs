@@ -5,6 +5,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
+open Prelude.Mods
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Gameplay
@@ -129,7 +130,7 @@ type SyncSuggestionControls(state: PracticeState) =
 
         base.Init parent
 
-type PracticeControls(state: PracticeState, with_mods, on_seek, on_change_offset) =
+type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Time -> unit) =
     inherit Container(NodeType.None)
 
     let fade = Animation.Fade(1.0f)

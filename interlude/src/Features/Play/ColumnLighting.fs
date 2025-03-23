@@ -8,7 +8,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.Features.Play
 
-type ColumnLighting(keys, ns: NoteskinConfig, state) =
+type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
     let timers = Array.init keys (fun _ ->
         let anim = Animation.Delay ns.ColumnLightDuration

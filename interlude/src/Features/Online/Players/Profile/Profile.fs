@@ -29,7 +29,7 @@ type StatsHeader(data: ProfileData) =
 
         base.Draw()
 
-    override this.Init (parent: Widget): unit =
+    override this.Init(parent: Widget): unit =
         this
         |+ Text(
             sprintf "%.1fk / %.1fk" current_xp xp_to_next_level,
@@ -92,7 +92,7 @@ type private Profile() =
         else
             container.Offline()
 
-    let rerender (container: WebRequestContainer<_>) (data: ProfileData) =
+    let rerender (container: WebRequestContainer<_>) (data: ProfileData) : Widget =
 
         let has_colors = data.Badges |> Seq.exists (fun b -> not (List.isEmpty b.Colors))
 

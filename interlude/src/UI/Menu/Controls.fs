@@ -121,7 +121,7 @@ type PageButton(localised_text, on_click) as this =
         let mutable clicked = false
         PageButton(
             localised_text,
-            (fun () -> 
+            (fun () ->
                 clicked <- true
                 action()
             ),
@@ -132,7 +132,7 @@ type PageButton(localised_text, on_click) as this =
         let mutable clicked = false
         PageButton(
             localised_text,
-            (fun () -> 
+            (fun () ->
                 clicked <- true
                 action()
             ),
@@ -143,7 +143,7 @@ type PageTextEntry(name, setting) =
     inherit
         PageSetting(
             name,
-            let entry = 
+            let entry =
                 { new TextEntry(setting, "none", false) with
                     override this.OnFocus by_mouse =
                         base.OnFocus by_mouse
@@ -192,7 +192,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
             if is_highlighted then Colors.pink_accent
             elif this.Focused then Colors.black
             else Colors.shadow_1
-            
+
         let color =
             if is_highlighted then Colors.pink_accent.O2
             elif this.Focused then Colors.shadow_2.O3
@@ -214,18 +214,18 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
 [<AutoOpen>]
 module Helpers =
 
-    let page_container () =
+    let page_container () : NavigationContainer.Column =
         NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
-    let refreshable_row number cons =
+    let refreshable_row (get_count: unit -> int) (constructor: int -> int -> Widget) : NavigationContainer.Row * (unit -> unit) =
         let r = NavigationContainer.Row()
 
         let refresh () =
             r.Clear()
-            let n = number ()
+            let n = get_count ()
 
             for i in 0 .. (n - 1) do
-                r.Add(cons i n)
+                r.Add(constructor i n)
 
         refresh ()
         r, refresh

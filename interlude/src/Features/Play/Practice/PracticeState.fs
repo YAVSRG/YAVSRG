@@ -43,7 +43,7 @@ type PracticeState =
 
 module PracticeState =
 
-    let update_suggestions (scoring: ScoreProcessor) (state: PracticeState) =
+    let update_suggestions (scoring: ScoreProcessor) (state: PracticeState) : unit =
 
         let mutable sum = 0.0f<ms / rate>
         let mutable count = 1.0f
@@ -92,7 +92,7 @@ module PracticeState =
                     ScrollSpeed = scroll_speed_suggestion
                 }
 
-    let accept_suggested_offset (state: PracticeState) =
+    let accept_suggested_offset (state: PracticeState) : unit =
         match state.SyncSuggestions with
         | None -> ()
         | Some suggestions ->
@@ -104,8 +104,8 @@ module PracticeState =
         | SyncMode.VISUAL_OFFSET -> (options.VisualOffset |> Setting.roundf_uom 0).Set suggestions.VisualOffset
 
         state.SyncSuggestions <- None
-    
-    let reset_offset (state: PracticeState) =
+
+    let reset_offset (state: PracticeState) : unit =
         match state.SyncMode.Value with
         | SyncMode.AUDIO_OFFSET -> (LocalOffset.offset_setting state.SaveData).Set 0.0f<ms>
         | SyncMode.HIT_POSITION -> (options.HitPosition |> Setting.roundf 0).Set 0.0f

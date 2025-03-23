@@ -5,7 +5,6 @@ open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
-open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.Options
 open Interlude.Content
@@ -28,7 +27,7 @@ type PacemakerCreationContext =
 
 module PacemakerState =
 
-    let pacemaker_failed (scoring: ScoreProcessor) (state: PacemakerState) =
+    let pacemaker_failed (scoring: ScoreProcessor) (state: PacemakerState) : bool =
         match state with
         | PacemakerState.None -> false
         | PacemakerState.Accuracy x -> false
@@ -46,7 +45,7 @@ module PacemakerState =
         | PacemakerState.ComboBreaks count ->
             scoring.ComboBreaks > count
 
-    let pacemaker_met (scoring: ScoreProcessor) (state: PacemakerState) =
+    let pacemaker_met (scoring: ScoreProcessor) (state: PacemakerState) : bool =
         match state with
         | PacemakerState.None -> true
         | PacemakerState.Accuracy x -> scoring.Accuracy >= x
@@ -66,7 +65,7 @@ module PacemakerState =
         | PacemakerState.ComboBreaks count ->
             scoring.ComboBreaks <= count
 
-    let create (info: LoadedChartInfo) (ctx: PacemakerCreationContext) =
+    let create (info: LoadedChartInfo) (ctx: PacemakerCreationContext) : PacemakerState =
         match ctx with
         | PacemakerCreationContext.None -> PacemakerState.None
         | PacemakerCreationContext.FromScore score_info ->
@@ -120,7 +119,7 @@ module PacemakerState =
                     | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks n
                     | LampRequirement.JudgementAtMost (j, n) -> PacemakerState.Judgement (j, n)
 
-    let description (pacemaker: PacemakerState) =
+    let description (pacemaker: PacemakerState) : string =
         match pacemaker with
         | PacemakerState.None -> ""
         | PacemakerState.Accuracy acc ->

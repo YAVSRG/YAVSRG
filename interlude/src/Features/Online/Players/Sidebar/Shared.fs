@@ -17,7 +17,7 @@ module private Players =
 
     let update_friends_list () = friends_changed ()
 
-type private PlayerButton(username, color) =
+type private PlayerButton(username: string, color: int) =
     inherit Container(NodeType.Button(fun () -> Players.switch (Some username)))
 
     override this.Init(parent) =

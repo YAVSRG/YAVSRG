@@ -116,7 +116,7 @@ module PlayScreenMultiplayer =
                 lobby.AbandonPlaying()
                 CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
 
-        let finish_play(chart_time: ChartTime) =
+        let finish_play (chart_time: ChartTime) =
             liveplay.Finish()
             send_replay_packet chart_time
             lobby.FinishPlaying()

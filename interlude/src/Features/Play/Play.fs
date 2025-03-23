@@ -104,7 +104,7 @@ module PlayScreen =
                 Screen.back Transitions.LeaveGameplay
             |> function false -> () | true -> CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
 
-        let fail_midway(this: IPlayScreen) =
+        let fail_midway (this: IPlayScreen) =
             liveplay.Finish()
 
             let view_score() =
@@ -130,7 +130,7 @@ module PlayScreen =
             fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
-        let finish_play(this: IPlayScreen) =
+        let finish_play (this: IPlayScreen) =
             liveplay.Finish()
             let pacemaker_met = PacemakerState.pacemaker_met scoring pacemaker_state
 
@@ -159,7 +159,7 @@ module PlayScreen =
                 fade_in.Target <- 0.5f
                 this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
 
-        let change_offset(state) =
+        let change_offset (state: PlayState) =
             Song.pause()
             liveplay.Finish()
             offset_manually_changed <- true

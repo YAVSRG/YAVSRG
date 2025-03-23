@@ -89,8 +89,6 @@ module PracticeScreen =
                     state.PracticePoint.Set t
                     Song.seek t
                     resume_from_current_place <- false
-                ,
-                fun () -> Menu.Exit(); restart screen
             )
 
         { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with

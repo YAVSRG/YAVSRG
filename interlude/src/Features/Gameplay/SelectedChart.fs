@@ -99,7 +99,7 @@ module SelectedChart =
 
     let mutable WITH_COLORS: ColoredChart option = None
 
-    let private create_loaded_chart_info () =
+    let private create_loaded_chart_info () : LoadedChartInfo =
         {
             ChartMeta = CACHE_DATA.Value
             LibraryContext = LIBRARY_CTX
@@ -279,7 +279,7 @@ module SelectedChart =
         | Some cc -> cc.Keys |> enum
         | None -> Keymode.``4K``
 
-    let change (cc: ChartMeta, ctx: LibraryContext, auto_play_audio: bool) =
+    let change (cc: ChartMeta, ctx: LibraryContext, auto_play_audio: bool) : unit =
         // todo: show a one-time warning if chart loading takes over 1 second
         CACHE_DATA <- Some cc
         LIBRARY_CTX <- ctx
@@ -306,7 +306,7 @@ module SelectedChart =
 
         chart_loader.Request(Load(cc, auto_play_audio, _rate.Value, _selected_mods.Value))
 
-    let update () =
+    let update () : unit =
         if CACHE_DATA.IsSome then
 
             FMT_DURATION <- format_duration CACHE_DATA
@@ -324,14 +324,14 @@ module SelectedChart =
 
             chart_loader.Request(Update(is_interrupted, _rate.Value, _selected_mods.Value))
 
-    let recolor () =
+    let recolor () : unit =
         if WITH_MODS.IsSome then
 
             WITH_COLORS <- None
 
             chart_loader.Request Recolor
 
-    let if_loading (action: LoadingChartInfo -> unit) =
+    let if_loading (action: LoadingChartInfo -> unit) : unit =
         if CACHE_DATA.IsSome then
             action
                 {
@@ -339,22 +339,22 @@ module SelectedChart =
                     LibraryContext = LIBRARY_CTX
                 }
 
-    let if_loaded (action: LoadedChartInfo -> unit) =
+    let if_loaded (action: LoadedChartInfo -> unit) : unit =
         if WITH_COLORS.IsSome then
             action (create_loaded_chart_info ())
 
-    let when_loaded (also_require_song: bool) (action: LoadedChartInfo -> unit) =
+    let when_loaded (also_require_song: bool) (action: LoadedChartInfo -> unit) : unit =
         if WITH_COLORS.IsSome then
             action (create_loaded_chart_info ())
         else
             on_load_succeeded <- (also_require_song, fun () -> action (create_loaded_chart_info ())) :: on_load_succeeded
 
-    let private collections_on_rate_changed (library_ctx: LibraryContext) (v: Rate) =
+    let private collections_on_rate_changed (library_ctx: LibraryContext) (v: Rate) : unit =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) -> d.Rate.Value <- v
         | _ -> ()
 
-    let private collections_on_mods_changed (library_ctx: LibraryContext) (mods: ModState) =
+    let private collections_on_mods_changed (library_ctx: LibraryContext) (mods: ModState) : unit =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) -> d.Mods.Value <- mods
         | _ -> ()
@@ -362,7 +362,7 @@ module SelectedChart =
     let private collections_on_chart_changed
         (library_ctx: LibraryContext)
         (rate: Setting.Bounded<Rate>)
-        (mods: Setting<ModState>)
+        (mods: Setting<ModState>) : unit
         =
         match library_ctx with
         | LibraryContext.Playlist(_, _, d) ->
@@ -377,7 +377,7 @@ module SelectedChart =
             if previous_keymode <> Some cc.Keys then Presets.keymode_changed cc.Keys
             previous_keymode <- Some cc.Keys
 
-    let rate =
+    let rate : Setting.Bounded<float32<rate>> =
         _rate
         |> Setting.trigger (fun v ->
             if_loading
@@ -387,7 +387,7 @@ module SelectedChart =
                 update ()
         )
 
-    let selected_mods =
+    let selected_mods : Setting<ModState> =
         _selected_mods
         |> Setting.trigger (fun mods ->
             if_loading

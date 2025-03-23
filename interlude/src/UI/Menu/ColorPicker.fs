@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Prelude
 
 type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on_close: unit -> unit) =
@@ -155,10 +154,10 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on
     override this.Title = title
     override this.OnClose() = on_close()
 
-type ColorPicker(label: string, s: Setting<Color>, allow_alpha: bool) as this =
+type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as this =
     inherit Container(NodeType.Button(fun _ -> this.Edit()))
 
-    let mutable hex = s.Value.ToHex()
+    let mutable hex = color.Value.ToHex()
 
     override this.Init (parent: Widget) =
         this |* Clickable.Focus this
@@ -170,9 +169,9 @@ type ColorPicker(label: string, s: Setting<Color>, allow_alpha: bool) as this =
 
     override this.Draw() =
         let preview = this.Bounds.SliceY(PAGE_ITEM_HEIGHT * 0.6f).SliceL(50.0f).Shrink(5.0f)
-        Render.rect preview s.Value
-        Text.fill_b(Style.font, hex, this.Bounds.ShrinkL(60.0f), (s.Value.O4, Colors.black), Alignment.LEFT)
+        Render.rect preview color.Value
+        Text.fill_b(Style.font, hex, this.Bounds.ShrinkL(60.0f), (color.Value.O4, Colors.black), Alignment.LEFT)
 
     member this.Edit() =
         Style.click.Play()
-        ColorPickerPage(label, s, allow_alpha, fun () -> hex <- s.Value.ToHex()).Show()
+        ColorPickerPage(label, color, allow_alpha, fun () -> hex <- color.Value.ToHex()).Show()

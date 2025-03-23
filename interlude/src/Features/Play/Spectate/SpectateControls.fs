@@ -28,7 +28,7 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
         Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
-type private ControlOverlay(info: LoadedChartInfo, on_seek, who, cycle) =
+type private ControlOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: unit -> string, cycle: unit -> unit) =
     inherit SlideContainer(NodeType.None)
 
     let mutable show = true

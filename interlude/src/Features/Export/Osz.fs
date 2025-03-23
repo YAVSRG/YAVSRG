@@ -10,7 +10,7 @@ open Interlude.UI
 
 module OsuExport =
 
-    let export_chart_without_mods (chart: Chart) (chart_meta: ChartMeta) (options: OsuExportOptions) =
+    let export_chart_without_mods (chart: Chart) (chart_meta: ChartMeta) (options: OsuExportOptions) : unit =
         match Exports.create_osz options chart chart_meta (get_game_folder "Exports") with
         | Ok _ ->
             open_directory (get_game_folder "Exports")
@@ -19,7 +19,7 @@ module OsuExport =
             Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
 
-    let export_chart_with_mods (chart: ModdedChart) (chart_meta: ChartMeta) (options: OsuExportOptions) =
+    let export_chart_with_mods (chart: ModdedChart) (chart_meta: ChartMeta) (options: OsuExportOptions) : unit =
         let mod_string =
             chart.ModsApplied
             |> ModState.in_priority_order
@@ -39,7 +39,7 @@ module OsuExport =
             Notifications.error(%"notification.song_export_failed.title", %"notification.song_export_failed.body")
             Logging.Error "Error exporting '%s' as osz: %O" chart_meta.Title err
 
-    let bulk_export (charts: (Result<Chart, string> * ChartMeta) seq) (options: OsuExportOptions) =
+    let bulk_export (charts: (Result<Chart, string> * ChartMeta) seq) (options: OsuExportOptions) : unit =
         try
             let export_path = System.IO.Path.Combine(get_game_folder "Exports", sprintf "export-%i" (Timestamp.now()))
             System.IO.Directory.CreateDirectory export_path |> ignore

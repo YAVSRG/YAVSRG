@@ -1,14 +1,11 @@
 ﻿namespace Interlude.Features.Rulesets.Edit
 
-open System
-open System.Globalization
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Interlude.UI
 
-type private ColoredButton(label, color, action) =
+type private ColoredButton(label: string, color: Color, action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->

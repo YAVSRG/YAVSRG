@@ -50,7 +50,7 @@ type private HitOverlay
     let DROP_HOLD_ANNOTATION = %"replay.drop_hold"
     let REGRAB_HOLD_ANNOTATION = %"replay.regrab_hold"
 
-    let draw_delta (column: int) (action_y: float32) (note_y: float32) (color: Color) =
+    let draw_delta (column: int) (action_y: float32) (note_y: float32) (color: Color) : unit =
         Rect
             .Create(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
@@ -90,7 +90,7 @@ type private HitOverlay
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Render.rect a color
 
-    let label_before (column: int) (y: float32) (text: string) (color: Color) =
+    let label_before (column: int) (y: float32) (text: string) (color: Color) : unit =
         if show_hit_overlay_labels.Value then
             Rect
                 .Create(
@@ -105,7 +105,7 @@ type private HitOverlay
             |> scroll_direction_pos playfield.Bounds.Bottom
             |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
 
-    let label_after (column: int) (y: float32) (text: string) (color: Color) =
+    let label_after (column: int) (y: float32) (text: string) (color: Color) : unit =
         if show_hit_overlay_labels.Value then
             Rect
                 .Create(
@@ -120,7 +120,7 @@ type private HitOverlay
             |> scroll_direction_pos playfield.Bounds.Bottom
             |> fun a -> Text.fill_b (Style.font, text, a, (color, Colors.black), 0.5f)
 
-    let draw_icon (column: int) (y: float32) (icon: string) (color: Color) =
+    let draw_icon (column: int) (y: float32) (icon: string) (color: Color) : unit =
         Rect
             .Create(
                 playfield.Bounds.Left + playfield.ColumnPositions.[column],
@@ -134,7 +134,7 @@ type private HitOverlay
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
 
-    let draw_event (now: ChartTime) (ev: GameplayEvent) =
+    let draw_event (now: ChartTime) (ev: GameplayEvent) : unit =
         let ms_to_y (time: Time) =
             options.HitPosition.Value
             + (time - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
@@ -227,7 +227,7 @@ type private HitOverlay
                 draw_event now hit_events.[peek]
                 peek <- peek + 1
 
-    override this.Update (elapsed_ms, moved): unit =
+    override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()

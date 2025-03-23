@@ -160,7 +160,7 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
                 Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
                 Logging.Debug "Rename failed, maybe that name already exists?"
 
-type private CollectionButton(icon, name, action) as this =
+type private CollectionButton(icon: string, name: string, action: unit -> unit) as this =
     inherit
         Container(
             NodeType.Button(fun () ->

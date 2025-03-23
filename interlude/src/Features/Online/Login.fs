@@ -10,7 +10,7 @@ type RegisterPage(discord_tag) =
 
     let username = Setting.simple ""
 
-    let register () =
+    let register () : unit =
         Network.complete_registration (username.Value.Trim())
 
     let agree_tos = Setting.simple false
@@ -54,7 +54,7 @@ type LoginPage() =
 
     let mutable waiting_for_browser = false
 
-    let login () =
+    let login () : unit =
         if not waiting_for_browser then
             waiting_for_browser <- true
             Network.begin_login ()

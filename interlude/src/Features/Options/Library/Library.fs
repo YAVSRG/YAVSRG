@@ -18,7 +18,7 @@ open Interlude.Features.LevelSelect
 
 module Library =
 
-    let recalculate_pbs () =
+    let recalculate_pbs () : unit =
         let rulesets = Rulesets.list() |> Seq.map (fun (id, rs) -> Ruleset.hash rs, rs) |> Array.ofSeq
         let task_tracking = TaskTracking.add %"library.recalculate_personal_bests"
         let task = PersonalBests.recalculate(rulesets, false, Content.Charts, Content.UserData, task_tracking.set_Progress)
@@ -37,7 +37,7 @@ module Library =
             %"notification.score_recalculation_started.body"
         )
 
-    let recalculate_patterns () =
+    let recalculate_patterns () : unit =
         let task_tracking = TaskTracking.add %"library.recache_patterns"
         let task = Patterns.recalculate(Content.Charts, task_tracking.set_Progress)
         general_task_queue.Request(task,

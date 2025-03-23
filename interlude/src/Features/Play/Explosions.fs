@@ -28,7 +28,7 @@ type private Explosion =
             Time = -Time.infinity
         }
 
-type Explosions(keys, ns: NoteskinConfig, state: PlayState) =
+type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let mutable last_time : Time = -Time.infinity

@@ -24,7 +24,7 @@ type Credentials =
             Api = "api.yavsrg.net"
         }
 
-    static member Location = Path.Combine(get_game_folder "Data", "login.json")
+    static member Location : string = Path.Combine(get_game_folder "Data", "login.json")
 
     static member Load() =
         if File.Exists Credentials.Location then

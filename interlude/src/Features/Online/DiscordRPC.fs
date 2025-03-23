@@ -29,11 +29,11 @@ module DiscordRPC =
             let bytes = System.Text.Encoding.UTF8.GetBytes string
             System.Text.Encoding.UTF8.GetString(bytes, 0, 64).TrimEnd('�') + "..."
 
-    let clear() =
+    let clear () =
         if not client.IsDisposed then
             client.ClearPresence()
 
-    let large_image_text() =
+    let large_image_text () : string =
         if Network.status = Network.Status.LoggedIn then Network.credentials.Username else "www.yavsrg.net"
 
     let in_menus (details: string) =
@@ -48,7 +48,7 @@ module DiscordRPC =
 
             client.SetPresence(rp)
 
-    let playing (mode: string, song: string) =
+    let playing (mode: string, song: string) : unit =
         if not client.IsDisposed then
 
             let rp =
@@ -60,7 +60,7 @@ module DiscordRPC =
 
             client.SetPresence(rp)
 
-    let playing_timed (mode: string, song: string, time_left: GameplayTime) =
+    let playing_timed (mode: string, song: string, time_left: GameplayTime) : unit =
         if not client.IsDisposed then
 
             let rp =

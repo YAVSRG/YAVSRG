@@ -43,7 +43,7 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
 
     override this.OnFocus by_mouse = Style.hover.Play(); base.OnFocus by_mouse
 
-type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
+type FailOverlay(pacemaker_state: PacemakerState, retry: unit -> unit, score_screen: unit -> unit, next_song: unit -> unit) =
     inherit Container(NodeType.None)
 
     let main_fade = Animation.Fade(0.0f, Target = 1.0f)
@@ -53,7 +53,7 @@ type FailOverlay(pacemaker_state, retry, score_screen, next_song) =
 
     let pacemaker_desc = PacemakerState.description pacemaker_state
 
-    let animation = 
+    let animation =
         Animation.seq [
             Animation.Delay(50.0)
             Animation.Action(fun () -> b1_fade.Target <- 1.0f)

@@ -81,7 +81,7 @@ module Gameplay =
             IsFailed = failed
         }
 
-    let set_score (quit_out: bool) (score_info: ScoreInfo) (save_data: ChartSaveData)  : ImprovementFlags * SessionXPGain option =
+    let set_score (quit_out: bool) (score_info: ScoreInfo) (save_data: ChartSaveData) : ImprovementFlags * SessionXPGain option =
         let mod_status = score_info.ModStatus
 
         if

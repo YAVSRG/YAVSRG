@@ -34,7 +34,7 @@ type PlayState =
         this.Scoring <- scoring
         this.ScoringChanged.Trigger()
 
-    static member Dummy(info: LoadedChartInfo) =
+    static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
         let ruleset = Rulesets.current
         let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value

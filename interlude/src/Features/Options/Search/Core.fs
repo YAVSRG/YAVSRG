@@ -8,12 +8,12 @@ open Interlude.UI
 [<AutoOpen>]
 module Search =
 
-    let token_match (tokens: string array) (strings: string array) =
+    let token_match (tokens: string array) (strings: string array) : bool =
         tokens |> Array.exists (fun t -> strings |> Array.exists (fun s -> s.Contains(t, StringComparison.InvariantCultureIgnoreCase)))
 
     type SearchResult = Widget * int * int * PageWidth
 
-    type SearchResultBuilder() = 
+    type SearchResultBuilder() =
         member inline _.Zero() : SearchResult seq = Seq.empty
         member inline _.For(en, f) : SearchResult seq = Seq.collect f en
         member inline _.Yield((a, b, c, d): #Widget * int * int * PageWidth) : SearchResult seq = Seq.singleton (a :> Widget, b, c, d)
@@ -23,7 +23,7 @@ module Search =
         member inline _.Combine(a, b) : SearchResult seq = Seq.concat [a; b]
     let results = SearchResultBuilder()
 
-    type SearchResultContainer(height, node_type) =
+    type SearchResultContainer(height: float32, node_type: NodeType) =
         inherit Container(node_type)
 
         interface IHeight with
@@ -46,7 +46,7 @@ module Search =
                 (fun (w, h) -> Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y * 2.0f).SliceB(h).SliceX(w))
             :> Widget
         else
-            let content = 
+            let content =
                 NavigationContainer.Column(WrapNavigation = false)
                 |+ seq {
                     for widget, height, spacing, width in results do

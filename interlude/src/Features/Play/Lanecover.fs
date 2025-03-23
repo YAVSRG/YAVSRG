@@ -6,7 +6,7 @@ open Interlude.Options
 
 module Lanecover =
 
-    let draw(bounds: Rect) =
+    let draw (bounds: Rect) : unit =
 
         let bounds = bounds.Expand(0.0f, 2.0f)
         let fade_length = options.LaneCover.FadeLength.Value

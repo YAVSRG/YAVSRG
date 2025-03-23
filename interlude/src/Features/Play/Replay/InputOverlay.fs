@@ -10,7 +10,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playfield: Playfield)
+type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, playfield: Playfield)
     =
     inherit StaticWidget(NodeType.None)
 
@@ -56,7 +56,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 |> scroll_direction_pos playfield.Bounds.Bottom
                 |> fun a -> Render.rect a Colors.grey_2.O2
 
-            let now = 
+            let now =
                 state.CurrentChartTime() +
                 (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
@@ -98,7 +98,7 @@ type private InputOverlay(keys, replay_data: ReplayData, state: PlayState, playf
                 if keys_down.[k] then
                     draw_press (k, now, keys_times.[k], until_time)
 
-    override this.Update (elapsed_ms, moved): unit =
+    override this.Update (elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
         let time = state.CurrentChartTime()

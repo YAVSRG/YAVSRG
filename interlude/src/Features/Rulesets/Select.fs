@@ -9,7 +9,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Rulesets.Edit
 
-type private RulesetButton(id, name, action) =
+type private RulesetButton(id: string, name: string, action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->

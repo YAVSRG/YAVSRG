@@ -11,11 +11,11 @@ module PlayerListSidebar =
     let create (position: Position) =
         let online = OnlineList()
         let friends = FriendList()
-        let search = SearchList.create(Position.DEFAULT)
+        let search = SearchList.create()
 
         let tabs = SwapContainer(online, Position = Position.ShrinkT(60.0f).ShrinkB(40.0f))
 
-        let tab_buttons = 
+        let tab_buttons =
             RadioButtons.create_tabs
                 {
                     Setting = Setting.make (fun v -> tabs.Current <- v; Input.remove_listener()) tabs.get_Current

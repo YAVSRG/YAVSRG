@@ -10,7 +10,7 @@ open Interlude.Features.Online
 
 module SearchList =
 
-    let create(position: Position) =
+    let create () : NavigationContainer.Column =
 
         let query = Setting.simple ""
         let searcher =

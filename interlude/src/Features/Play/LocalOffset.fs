@@ -16,12 +16,12 @@ module LocalOffset =
 
     let mutable latest_suggestion: (Chart * Time) option = None
 
-    let offset_setting (save_data: ChartSaveData) =
+    let offset_setting (save_data: ChartSaveData) : Setting<Time> =
         Setting.make save_data.set_Offset save_data.get_Offset
         |> Setting.roundf_uom 0
         |> Setting.trigger Song.set_local_offset
 
-    let get_automatic (state: PlayState) (save_data: ChartSaveData) =
+    let get_automatic (state: PlayState) (save_data: ChartSaveData) : Time =
         let mutable sum = 0.0f<ms / rate>
         let mutable count = 1.0f
 
@@ -44,13 +44,13 @@ module LocalOffset =
             latest_suggestion <- Some (state.Chart, new_offset)
             new_offset
 
-    let automatic (state: PlayState) (save_data: ChartSaveData) (apply_now: bool) =
+    let automatic (state: PlayState) (save_data: ChartSaveData) (apply_now: bool) : unit =
         let offset = get_automatic state save_data
         if apply_now then
             let setting = offset_setting save_data
             setting.Value <- offset
 
-    let get_recent_suggestion (chart: Chart) (save_data: ChartSaveData) =
+    let get_recent_suggestion (chart: Chart) (save_data: ChartSaveData) : Time =
         match latest_suggestion with
         | Some (c, offset) when chart = c -> offset
         | _ -> save_data.Offset

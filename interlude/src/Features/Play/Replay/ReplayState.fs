@@ -22,7 +22,7 @@ module private ReplayModeSettings =
     let playfield_dim: Setting.Bounded<float32> = Setting.percentf 0.5f
     let fixed_scroll_speed = Setting.simple false
 
-type private ReplayModeSettingsPage(on_close) =
+type private ReplayModeSettingsPage(on_close: unit -> unit) =
     inherit Page()
 
     override this.Content() =

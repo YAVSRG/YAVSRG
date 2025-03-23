@@ -11,7 +11,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
-type private TableButton(name, action) =
+type private TableButton(name: string, action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun _ ->
@@ -47,7 +47,7 @@ type private TableButton(name, action) =
 
         base.Draw()
 
-type SelectTablePage(refresh_table_view) =
+type SelectTablePage(refresh_table_view: unit -> unit) =
     inherit Page()
 
     let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
