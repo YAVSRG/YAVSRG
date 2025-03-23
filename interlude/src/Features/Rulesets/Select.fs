@@ -48,7 +48,7 @@ type private RulesetButton(id, name, action) =
 type SelectRulesetPage() =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let refresh () =
         container.Clear()
@@ -73,14 +73,14 @@ type SelectRulesetPage() =
                     id,
                     ruleset.Name,
                     (fun () -> options.SelectedRuleset.Set id),
-                    Position = Position.ShrinkR(PRETTYHEIGHT * 3.0f)
+                    Position = Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f)
                 )
                 |+ Button(
                     Icons.EDIT,
                     (fun () ->
                         RulesetEditorPage(id, ruleset).Show()
                     ),
-                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT * 2.0f)
+                    Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f)
                 )
                 |+ Button(
                     Icons.COPY,
@@ -92,7 +92,7 @@ type SelectRulesetPage() =
                         )
                             .Show()
                     ),
-                    Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT)
+                    Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT)
                 )
                 |+ Button(
                     Icons.TRASH,
@@ -103,7 +103,7 @@ type SelectRulesetPage() =
                         )
                             .Show()
                     ),
-                    Position = Position.SliceR PRETTYHEIGHT,
+                    Position = Position.SliceR PAGE_ITEM_HEIGHT,
                     Disabled = K (id = Rulesets.DEFAULT_ID)
                 )
             )
@@ -113,7 +113,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

@@ -120,7 +120,7 @@ module Skins =
                 :> Widget
             else
                 ScrollContainer(
-                    FlowContainer.Vertical<_>(PRETTYHEIGHT)
+                    FlowContainer.Vertical<_>(PAGE_ITEM_HEIGHT)
                     |+ seq {
                         for path in osu_skin_paths do
                             yield PageButton(

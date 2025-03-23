@@ -87,7 +87,7 @@ type WifeRulesetPage() =
                 |],
                 judge
             )
-        ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))
+        ).Pos(0, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + 200.0f))
         |+ PageButton.Once(%"rulesets.create", create).Pos(3)
         :> Widget
 
@@ -120,7 +120,7 @@ type SCRulesetPage() =
                 |],
                 judge
             )
-        ).Pos(0, 2, PageWidth.Custom (PRETTYTEXTWIDTH + 200.0f))
+        ).Pos(0, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + 200.0f))
         |+ PageButton.Once(%"rulesets.create", create).Pos(3)
         :> Widget
 

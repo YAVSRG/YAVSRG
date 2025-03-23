@@ -72,7 +72,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
             )
 
     override this.Content() =
-        let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+        let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let mutable last_entry = None
         let add_entry (e: Widget) : Widget =
@@ -87,7 +87,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
             let early_window = early_window i
             let late_window = late_window i
 
-            let w = (PRETTYWIDTH - PRETTYTEXTWIDTH - 100.0f) * 0.5f
+            let w = (PAGE_ITEM_WIDTH - PAGE_LABEL_WIDTH - 100.0f) * 0.5f
 
             let early = NumberEntry.create_uom "ms" early_window
             early.Position <- Position.SliceR(w).TranslateX(-w).ShrinkR(15.0f)

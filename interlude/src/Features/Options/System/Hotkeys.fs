@@ -61,10 +61,10 @@ type HotkeysPage() =
     inherit Page()
 
     override this.Content() = 
-        let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+        let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let scroll_container =
-            ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+            ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
         let search_box =
             { new SearchBox(
@@ -90,8 +90,8 @@ type HotkeysPage() =
 
         let hotkey_editor (hotkey: Hotkey) =
             NavigationContainer.Row()
-            |+ Keybinder(hotkey, Position = Position.ShrinkR PRETTYHEIGHT)
-            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceR PRETTYHEIGHT)
+            |+ Keybinder(hotkey, Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
+            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceR PAGE_ITEM_HEIGHT)
 
         container.Add(
             PageButton(

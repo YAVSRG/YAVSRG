@@ -105,7 +105,7 @@ type WindowResolutionPicker(setting: Setting<WindowedResolution>) as this =
     let offset_setting = Setting.make (fun v -> setting.Set (fst setting.Value, v)) (setting.Get >> snd)
 
     let buttons =
-        GridFlowContainer(PRETTYHEIGHT - 10.0f, 2, WrapNavigation = false)
+        GridFlowContainer(PAGE_ITEM_HEIGHT - 10.0f, 2, WrapNavigation = false)
         |+ Button(
             (fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h),
             (fun () -> this.ToggleResolutionDropdown()),
@@ -166,7 +166,7 @@ type VideoMode(setting: Setting<FullscreenVideoMode>) as this =
     let setting = setting |> Setting.trigger (fun mode -> let gcd = gcd mode.Width mode.Height in aspect_ratio <- mode.Width / gcd, mode.Height / gcd)
 
     let buttons =
-        GridFlowContainer(PRETTYHEIGHT - 10.0f, 3, WrapNavigation = false)
+        GridFlowContainer(PAGE_ITEM_HEIGHT - 10.0f, 3, WrapNavigation = false)
         |+ Button(
             (fun () -> let mode = setting.Value in sprintf "%ix%i" mode.Width mode.Height),
             (fun () -> this.ToggleResolutionDropdown()),

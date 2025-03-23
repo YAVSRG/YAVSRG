@@ -53,5 +53,5 @@ module Search =
                         yield widget.Pos(y, height, width)
                         y <- y + spacing
                 }
-                |>> (fun nt -> SearchResultContainer(float32 y * 0.5f * PRETTYHEIGHT, nt))
+                |>> (fun nt -> SearchResultContainer(float32 y * 0.5f * PAGE_ITEM_HEIGHT, nt))
             ScrollContainer(content, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))

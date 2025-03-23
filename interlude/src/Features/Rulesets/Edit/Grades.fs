@@ -41,11 +41,11 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
 type EditGradesPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec grade_controls (i: int, g: Grade) =
         NavigationContainer.Row()
-        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
         |+ Button(
             Icons.TRASH,
             (fun () ->
@@ -54,7 +54,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                     fun () -> delete_grade i
                 ).Show()
             ),
-            Position = Position.SliceR PRETTYHEIGHT
+            Position = Position.SliceR PAGE_ITEM_HEIGHT
         )
 
     and refresh() =
@@ -79,7 +79,7 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
 
     override this.Content() =
         refresh()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.grades"
     override this.OnClose() = ()

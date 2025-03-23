@@ -8,7 +8,7 @@ open Interlude.UI
 type SelectTableLevelPage(table: Table, action: int -> unit) =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let refresh () =
         container.Clear()

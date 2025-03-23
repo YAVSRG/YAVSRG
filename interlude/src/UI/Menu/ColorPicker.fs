@@ -169,7 +169,7 @@ type ColorPicker(label: string, s: Setting<Color>, allow_alpha: bool) as this =
         Style.hover.Play()
 
     override this.Draw() =
-        let preview = this.Bounds.SliceY(PRETTYHEIGHT * 0.6f).SliceL(50.0f).Shrink(5.0f)
+        let preview = this.Bounds.SliceY(PAGE_ITEM_HEIGHT * 0.6f).SliceL(50.0f).Shrink(5.0f)
         Render.rect preview s.Value
         Text.fill_b(Style.font, hex, this.Bounds.ShrinkL(60.0f), (s.Value.O4, Colors.black), Alignment.LEFT)
 

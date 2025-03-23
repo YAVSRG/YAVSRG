@@ -77,7 +77,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
 
     override this.Content() =
         let content =
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT, Position = pretty_pos(0, PAGE_BOTTOM, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
             |+ like_button_swap
             |+ PageButton(
                 %"chart.add_to_collection",

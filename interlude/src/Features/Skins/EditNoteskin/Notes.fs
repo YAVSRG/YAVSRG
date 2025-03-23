@@ -181,7 +181,7 @@ type NotesSettingsPage() =
         let k = if note_colors.UseGlobalColors then 0 else int keycount - 2
         Setting.make (fun v -> note_colors.Colors.[k].[i] <- v) (fun () -> note_colors.Colors.[k].[i])
 
-    let NOTE_SCALE = PRETTYHEIGHT * 1.5f - Style.PADDING * 2.0f
+    let NOTE_SCALE = PAGE_ITEM_HEIGHT * 1.5f - Style.PADDING * 2.0f
 
     let rotations, refresh_rotations =
         refreshable_row

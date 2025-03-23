@@ -76,7 +76,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
             .Pos(2)
         |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
             .Help(Help.Info("gameplay.preset.keymode_preference"))
-            .Pos(4, 2, PageWidth.Custom (PRETTYTEXTWIDTH + (keymode_preference :> IWidth).Width))
+            .Pos(4, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + (keymode_preference :> IWidth).Width))
         |+ PageButton(
             %"gameplay.preset.delete",
             (fun () ->

@@ -50,7 +50,7 @@ type private TableButton(name, action) =
 type SelectTablePage(refresh_table_view) =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec refresh () =
         container.Clear()

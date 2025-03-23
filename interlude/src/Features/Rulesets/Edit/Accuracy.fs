@@ -29,7 +29,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
     let decimal_places = Setting.simple ruleset.Value.Formatting.DecimalPlaces
 
     override this.Content() =
-        let judgements_container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+        let judgements_container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             let setting =

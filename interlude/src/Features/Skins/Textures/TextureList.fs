@@ -58,7 +58,7 @@ module TextureGrid =
     let create_noteskin (noteskin: Noteskin) : Widget * (unit -> unit) =
         let textures_grid =
             GridFlowContainer<TextureCard>(
-                40.0f + PRETTYWIDTH / 5f,
+                40.0f + PAGE_ITEM_WIDTH / 5f,
                 5,
                 WrapNavigation = false,
                 Spacing = (15.0f, 15.0f)
@@ -79,7 +79,7 @@ module TextureGrid =
     let create_hud (hud: HudLayout) : Widget * (unit -> unit) =
         let textures_grid =
             GridFlowContainer<TextureCard>(
-                40.0f + PRETTYWIDTH / 5f,
+                40.0f + PAGE_ITEM_WIDTH / 5f,
                 5,
                 WrapNavigation = false,
                 Spacing = (15.0f, 15.0f)

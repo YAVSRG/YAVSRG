@@ -105,7 +105,7 @@ type EditNoteskinPage() =
             |+ tabs
         )
         |+ (
-            NavigationContainer.Column(Position = Position.ShrinkL(PRETTYWIDTH + PRETTY_MARGIN_X).Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceB(PRETTYHEIGHT * 3.0f))
+            NavigationContainer.Column(Position = Position.ShrinkL(PAGE_ITEM_WIDTH + PRETTY_MARGIN_X).Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceB(PAGE_ITEM_HEIGHT * 3.0f))
             |+ PageButton(
                 %"skins.export",
                 (fun () ->

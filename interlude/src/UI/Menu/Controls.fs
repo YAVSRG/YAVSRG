@@ -16,7 +16,7 @@ type PageSetting(localised_text, widget: Widget) as this =
         and set (w: Widget) =
             let old_widget = widget
             widget <- w
-            w.Position <- Position.ShrinkL(PRETTYTEXTWIDTH).Shrink(Style.PADDING)
+            w.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)
 
             if this.Initialised then
                 w.Init this
@@ -34,12 +34,12 @@ type PageSetting(localised_text, widget: Widget) as this =
             Align = Alignment.LEFT,
             Position =
                 Position
-                    .Box(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT)
+                    .Box(0.0f, 0.0f, 0.0f, 0.0f, PAGE_LABEL_WIDTH - 10.0f, PAGE_ITEM_HEIGHT)
                     .Shrink(Style.PADDING)
         )
 
         base.Init parent
-        widget.Position <- Position.ShrinkL(PRETTYTEXTWIDTH).Shrink(Style.PADDING)
+        widget.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)
         widget.Init this
 
     override this.Draw() =

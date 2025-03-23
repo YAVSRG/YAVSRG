@@ -172,7 +172,7 @@ type AnimationSettingsPage() =
     let f_hold_ex = Animation.Counter(float data.HoldExplosionSettings.AnimationFrameTime)
     let t_hold_ex = Animation.Delay(float data.HoldExplosionSettings.Duration)
 
-    let NOTE_SCALE = (PRETTYWIDTH - PRETTYTEXTWIDTH) / 10.0f
+    let NOTE_SCALE = (PAGE_ITEM_WIDTH - PAGE_LABEL_WIDTH) / 10.0f
 
     (* Receptors *)
 
@@ -560,7 +560,7 @@ type AnimationSettingsPage() =
             + (if enable_column_light.Value then 1.0f else 0.0f)
             + (if enable_explosions.Value then 2.0f else 0.0f)
 
-        let center = this.Bounds.Right - (this.Bounds.Width - PRETTYWIDTH - PRETTY_MARGIN_X * 2.0f) * 0.5f
+        let center = this.Bounds.Right - (this.Bounds.Width - PAGE_ITEM_WIDTH - PRETTY_MARGIN_X * 2.0f) * 0.5f
 
         let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f

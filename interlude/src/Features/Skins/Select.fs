@@ -246,25 +246,25 @@ type SelectSkinsPage() =
             |+ hud_tab
             |+ Text(
                 %"skins.current_noteskin",
-                Position = Position.SlicePercentL(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Position = Position.SlicePercentL(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.NoteskinMeta.Name),
-                Position = Position.SlicePercentL(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Position = Position.SlicePercentL(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 %"skins.current_hud",
-                Position = Position.SlicePercentR(0.5f).SliceT(PRETTYHEIGHT * 0.65f),
+                Position = Position.SlicePercentR(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f),
                 Color = K Colors.text_subheading,
                 Align = Alignment.LEFT
             )
             |+ Text(
                 (fun () -> Content.HUDMeta.Name),
-                Position = Position.SlicePercentR(0.5f).ShrinkT(PRETTYHEIGHT * 0.5f).SliceT(PRETTYHEIGHT),
+                Position = Position.SlicePercentR(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT),
                 Color = K Colors.text,
                 Align = Alignment.LEFT
             )

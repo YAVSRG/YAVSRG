@@ -34,11 +34,11 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
 type EditJudgementsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec judgement_controls (i: int, j: Judgement) =
         NavigationContainer.Row()
-        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR(PRETTYHEIGHT * 2.0f))
+        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
         |+ Button(
             Icons.COPY,
             (fun () ->
@@ -47,7 +47,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
                     fun () -> duplicate_judgement i
                 ).Show()
             ),
-            Position = Position.SliceR(PRETTYHEIGHT).TranslateX(-PRETTYHEIGHT)
+            Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT)
         )
         |+ Button(
             Icons.TRASH,
@@ -58,7 +58,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
                 ).Show()
             ),
             Disabled = (fun () -> ruleset.Value.Judgements.Length <= 1),
-            Position = Position.SliceR PRETTYHEIGHT
+            Position = Position.SliceR PAGE_ITEM_HEIGHT
         )
 
     and refresh() : unit =
@@ -76,7 +76,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     override this.Content() =
         refresh()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.judgements"
     override this.OnClose() = ()

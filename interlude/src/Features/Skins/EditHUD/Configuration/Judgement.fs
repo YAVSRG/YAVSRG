@@ -157,7 +157,7 @@ type JudgementPage(on_close: unit -> unit) =
             .Pos(10)
             .Conditional(use_texture.Get)
         |+ Conditional(use_texture.Get,
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
             |+ seq {
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     yield JudgementDisplayPicker(ruleset, i, judgement_display)

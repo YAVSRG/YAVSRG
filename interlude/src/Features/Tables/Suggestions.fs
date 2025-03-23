@@ -201,7 +201,7 @@ type SuggestionsList(table: Table) =
                 else
                     this.Offline()
             , fun _ data ->
-                let fc = FlowContainer.Vertical<PageButton>(PRETTYHEIGHT, Spacing = 5.0f)
+                let fc = FlowContainer.Vertical<PageButton>(PAGE_ITEM_HEIGHT, Spacing = 5.0f)
 
                 for server_suggestion in data.Suggestions do
                     let suggestion =

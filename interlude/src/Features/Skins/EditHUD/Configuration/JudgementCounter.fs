@@ -116,7 +116,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
             .Pos(0)
         |+ Conditional(
             use_texture.Get,
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
             |+ seq {
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     yield DisplayPicker(ruleset, i, display)

@@ -66,11 +66,11 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
 type EditLampsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
     let rec lamp_controls (i: int, l: Lamp) =
         NavigationContainer.Row()
-        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PRETTYHEIGHT)
+        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
         |+ Button(
             Icons.TRASH,
             (fun () ->
@@ -79,7 +79,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                     fun () -> delete_lamp i
                 ).Show()
             ),
-            Position = Position.SliceR PRETTYHEIGHT
+            Position = Position.SliceR PAGE_ITEM_HEIGHT
         )
 
     and refresh() =
@@ -104,7 +104,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
 
     override this.Content() =
         refresh()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.lamps"
     override this.OnClose() = ()

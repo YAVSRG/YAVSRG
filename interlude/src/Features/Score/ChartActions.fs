@@ -35,7 +35,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
 
     override this.Content() =
         let content =
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PRETTYWIDTH))
+            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
             |+ like_button_swap
             |+ PageButton(
                 %"chart.add_to_collection",
