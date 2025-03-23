@@ -98,13 +98,13 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
     let draw_performance_data (y: float32) (color: Color) (data: float32 seq) =
         let mutable x = 20.0f
         for d in Seq.truncate 100 data do
-            Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
+            Render.rect_size (x - 5.0f) y 5.0f (d * 0.5f) color
             x <- x + 5.0f
 
     let draw_note_data (y: float32) (color: Color) (data: float32 seq) =
         let mutable x = Render.width() - 20.0f
         for d in Seq.truncate 100 data do
-            Render.rect (Rect.Box (x - 5.0f, y, 5.0f, d * 0.5f)) color
+            Render.rect_size (x - 5.0f) y 5.0f (d * 0.5f) color
             x <- x - 5.0f
 
     let draw_octaves (y: float32) =
@@ -120,8 +120,8 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
             |> Seq.filter (fun (x, _ ) ->  x > 0.0f)
             |> Seq.truncate 100
             do
-                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, (stamina * 0.125f + burst * 0.875f) * 0.5f)) Colors.red_accent
-                Render.rect (Rect.Box (x - 5.0f, y, 5.0f, stamina * 0.125f * 0.5f)) Colors.red_shadow
+                Render.rect_size (x - 5.0f) y 5.0f ((stamina * 0.125f + burst * 0.875f) * 0.5f) Colors.red_accent
+                Render.rect_size (x - 5.0f) y 5.0f (stamina * 0.125f * 0.5f) Colors.red_shadow
                 x <- x - 5.0f
 
     let note_difficulties =

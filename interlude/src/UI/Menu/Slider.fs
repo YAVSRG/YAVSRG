@@ -147,15 +147,13 @@ type Slider(setting: Setting.Bounded<float32>) =
     default this.DrawBar (bounds: Rect, percent: float32) =
         let cursor_x = bounds.Left + bounds.Width * percent
 
-        Render.rect
-            (Rect.Create(cursor_x, bounds.Top, bounds.Right, bounds.Bottom))
+        Render.rect_edges cursor_x bounds.Top bounds.Right bounds.Bottom
             (if this.Selected then
                  Colors.pink_shadow.O3
              else
                  Colors.grey_2.O2)
 
-        Render.rect
-            (Rect.Create(bounds.Left, bounds.Top, cursor_x, bounds.Bottom))
+        Render.rect_edges bounds.Left bounds.Top cursor_x bounds.Bottom
             (if this.Selected then Colors.pink_accent else Colors.grey_2)
 
     override this.Draw() =

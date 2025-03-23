@@ -236,13 +236,11 @@ type MainMenuScreen() as this =
 
         let heading_width = Text.measure (Style.font, splash) * 40.0f
 
-        Render.rect
-            (Rect.Box(
-                c - heading_width * 0.5f - 20.0f,
-                this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value,
-                heading_width + 40.0f,
-                70.0f
-            ))
+        Render.rect_size
+            (c - heading_width * 0.5f - 20.0f)
+            (this.Bounds.Top - 25.0f + 40.0f * splash_fade.Value)
+            (heading_width + 40.0f)
+            70.0f
             (Colors.shadow_2.O1a a2)
 
         Text.draw_aligned_b (

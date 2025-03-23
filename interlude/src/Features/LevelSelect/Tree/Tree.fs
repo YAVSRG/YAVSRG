@@ -266,7 +266,7 @@ module Tree =
         let screen_bounds = Render.bounds()
 
         Render.stencil_create false
-        Render.rect (Rect.Create(0.0f, origin, screen_bounds.Width, originB)) Color.Transparent
+        Render.rect_edges 0.0f origin screen_bounds.Width originB Color.Transparent
 
         Render.stencil_begin_draw ()
 
@@ -275,13 +275,11 @@ module Tree =
 
         Render.stencil_finish ()
 
-        Render.rect
-            (Rect.Create(
-                screen_bounds.Right - 10.0f,
-                origin + 5.0f,
-                screen_bounds.Right,
-                originB - 50.0f
-            ))
+        Render.rect_edges
+            (screen_bounds.Right - 10.0f)
+            (origin + 5.0f)
+            (screen_bounds.Right)
+            (originB - 50.0f)
             (Colors.shadow_2.O3a scroll_fade.Alpha)
 
         let total_height = originB - origin
@@ -290,11 +288,9 @@ module Tree =
         let upper_bound = 20.0f + origin
         let scroll_bar_pos = -(scroll_pos.Value - upper_bound) / (upper_bound - lower_bound) * (total_height - 30.0f - 50.0f)
 
-        Render.rect
-            (Rect.Create(
-                screen_bounds.Right - 10.0f,
-                origin + 5.0f + scroll_bar_pos,
-                screen_bounds.Right,
-                origin + 30.0f + scroll_bar_pos
-            ))
+        Render.rect_edges
+            (screen_bounds.Right - 10.0f)
+            (origin + 5.0f + scroll_bar_pos)
+            screen_bounds.Right
+            (origin + 30.0f + scroll_bar_pos)
             Colors.white

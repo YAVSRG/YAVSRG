@@ -350,12 +350,18 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         for j in score_info.Ruleset.Judgements do
             match j.TimingWindows with
             | Some (early, late) ->
-                Render.rect
-                    (Rect.Create(this.Bounds.Left, ms_to_y previous_early, this.Bounds.Right, ms_to_y early))
+                Render.rect_edges
+                    this.Bounds.Left
+                    (ms_to_y previous_early)
+                    this.Bounds.Right
+                    (ms_to_y early)
                     (j.Color.O4a 100)
                 previous_early <- early
-                Render.rect
-                    (Rect.Create(this.Bounds.Left, ms_to_y late, this.Bounds.Right, ms_to_y previous_late))
+                Render.rect_edges
+                    this.Bounds.Left
+                    (ms_to_y late)
+                    this.Bounds.Right
+                    (ms_to_y previous_late)
                     (j.Color.O4a 100)
                 previous_late <- late
             | None -> ()
@@ -524,7 +530,12 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             | ValueNone -> ()
             | ValueSome (y, col) ->
                 let x = this.Bounds.Left + 5.0f + ev.Time * xscale
-                Render.rect (Rect.Box(x - HTHICKNESS, this.Bounds.Top + y - HTHICKNESS, THICKNESS, THICKNESS)) col
+                Render.rect_size
+                    (x - HTHICKNESS)
+                    (this.Bounds.Top + y - HTHICKNESS)
+                    THICKNESS
+                    THICKNESS
+                    col
 
     member private this.Redraw() =
         refresh <- false
@@ -537,14 +548,12 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         else
             Render.rect this.Bounds Colors.black.O1
 
-        Render.rect
-            (Rect.Create(
-                this.Bounds.Left,
-                (this.Bounds.Top + h - 2.5f),
-                this.Bounds.Right,
-                (this.Bounds.Top + h + 2.5f)
-            ))
-            (Colors.white.O2)
+        Render.rect_edges
+            this.Bounds.Left
+            (this.Bounds.Top + h - 2.5f)
+            this.Bounds.Right
+            (this.Bounds.Top + h + 2.5f)
+            Colors.white.O2
 
         if options.ScoreGraphLineOnTop.Value then
             this.DrawHits()

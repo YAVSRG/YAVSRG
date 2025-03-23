@@ -354,8 +354,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         for k in 0 .. (keys - 1) do
             if not fill_column_gaps then
-                Render.rect
-                    (Rect.Create(left + column_positions.[k], top, left + column_positions.[k] + column_width, bottom))
+                Render.rect_edges
+                    (left + column_positions.[k])
+                    top
+                    (left + column_positions.[k] + column_width)
+                    bottom
                     playfield_color
 
             hold_states.[k] <-

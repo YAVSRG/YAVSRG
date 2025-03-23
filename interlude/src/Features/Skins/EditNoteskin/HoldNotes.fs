@@ -51,7 +51,7 @@ type HoldNoteSettingsPage() =
 
         let draw_ln_preview (label: string, color: Color, downscroll: bool) =
 
-            Render.rect (Rect.Create(left, top, left + COLUMN_WIDTH, bottom)) Colors.black.O2
+            Render.rect_edges left top (left + COLUMN_WIDTH) bottom Colors.black.O2
 
             let headpos = if downscroll then bottom - COLUMN_WIDTH else top
 

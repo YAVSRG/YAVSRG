@@ -413,34 +413,34 @@ module Render =
     /// <summary>
     /// Draws a rectangular sprite to the screen.
     /// </summary>
-    let inline sprite (r: Rect) (c: Color) (s: Sprite) =
+    let inline sprite (r: Rect) (c: Color) (s: Sprite) : unit =
         tex_quad r.AsQuad c.AsQuad <| Sprite.pick_texture (0, 0) s
 
     /// <summary>
     /// Draws an untextured rectangle to the screen.
     /// </summary>
-    let inline rect (r: Rect) (c: Color) =
+    let inline rect (r: Rect) (c: Color) : unit =
         quad_c r.AsQuad c.AsQuad
 
-    let inline rect_c (r: Rect) (c: QuadColors) =
+    let inline rect_c (r: Rect) (c: QuadColors) : unit =
         quad_c r.AsQuad c
 
-    let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) =
+    let inline rect_edges (left: float32) (top: float32) (right: float32) (bottom: float32) (c: Color) : unit =
         quad_c (Rect.Create(left, top, right, bottom).AsQuad) c.AsQuad
 
-    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
+    let inline rect_edges_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
         quad_c (Rect.Create(left, top, right, bottom).AsQuad) c
 
-    let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) =
+    let inline rect_size (left: float32) (top: float32) (width: float32) (height: float32) (c: Color) : unit =
         quad_c (Rect.Box(left, top, width, height).AsQuad) c.AsQuad
 
-    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) =
+    let inline rect_size_c (left: float32) (top: float32) (right: float32) (bottom: float32) (c: QuadColors) : unit =
         quad_c (Rect.Box(left, top, right, bottom).AsQuad) c
 
     /// <summary>
     /// Draws a border around a rectangle to the screen.
     /// </summary>
-    let inline border (thickness: float32) (r: Rect) (c: Color) =
+    let inline border (thickness: float32) (r: Rect) (c: Color) : unit =
         quad_c (r.BorderL(thickness).AsQuad) c.AsQuad
         quad_c (r.BorderCornersT(thickness).AsQuad) c.AsQuad
         quad_c (r.BorderR(thickness).AsQuad) c.AsQuad
@@ -450,7 +450,9 @@ module Render =
         Internal functions used by the Game and Window threads
     *)
 
-    let internal framebuffer_resized (framebuffer_width, framebuffer_height) ((viewport_width, viewport_height), (viewport_offset_x, viewport_offset_y)) =
+    let internal framebuffer_resized
+        (framebuffer_width: int, framebuffer_height: int)
+        ((viewport_width: int, viewport_height: int), (viewport_offset_x: float32, viewport_offset_y: float32)) : unit =
         assert(viewport_width <> 0 && viewport_height <> 0)
         assert(framebuffer_width >= viewport_width && framebuffer_height >= viewport_height)
 
@@ -480,17 +482,17 @@ module Render =
 
         initialise_fbos ()
 
-    let internal start () =
+    let internal start () : unit=
         GL.Clear(ClearBufferMask.ColorBufferBit)
         _batch.Start ()
 
-    let internal finish () =
+    let internal finish () : unit =
         _batch.Finish ()
         assert(stencil_depth = 0)
         assert(alpha_mult = 1.0f)
         GL.Flush()
 
-    let internal init framebuffer viewport =
+    let internal init (framebuffer: int * int) (viewport: _) : unit =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)

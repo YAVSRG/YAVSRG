@@ -30,13 +30,11 @@ module LoadingIndicator =
                     -tick_width
                     + (this.Bounds.Width + tick_width) * float32 animation.Progress
 
-                Render.rect
-                    (Rect.Create(
-                        this.Bounds.Left + max 0.0f pos,
-                        this.Bounds.Top,
-                        this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
-                        this.Bounds.Bottom
-                    ))
+                Render.rect_edges
+                    (this.Bounds.Left + max 0.0f pos)
+                    this.Bounds.Top
+                    (this.Bounds.Left + min this.Bounds.Width (pos + tick_width))
+                    this.Bounds.Bottom
                     (Colors.white.O4a fade.Alpha)
 
     type Border(is_loading: unit -> bool) =
@@ -71,12 +69,18 @@ type WIP() as this =
         let w = this.Bounds.Width / 20.0f
 
         for i = 0 to 19 do
-            Render.rect
-                (Rect.Box(this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f))
+            Render.rect_size
+                (this.Bounds.Left + w * float32 i)
+                this.Bounds.Top
+                w
+                10.0f
                 (if i % 2 = 0 then Color.Yellow else Color.Black)
 
-            Render.rect
-                (Rect.Box(this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f))
+            Render.rect_size
+                (this.Bounds.Left + w * float32 i)
+                (this.Bounds.Bottom - 10.0f)
+                w
+                10.0f
                 (if i % 2 = 1 then Color.Yellow else Color.Black)
 
         Text.fill_b (Style.font, text, this.Bounds.Shrink(20.0f), Colors.text, Alignment.CENTER)

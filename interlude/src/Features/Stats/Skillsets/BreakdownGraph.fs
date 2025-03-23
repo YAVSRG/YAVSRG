@@ -108,21 +108,41 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
         let y d = bottom - d / max_duration * height
         let mutable last = min_bpm
         for point in push do
-            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.blue
+            Render.rect_edges
+                (x last)
+                (y point.Duration)
+                (x (float32 point.BPM))
+                bottom
+                Colors.blue
             last <- float32 point.BPM
 
         let mutable last = min_bpm
         for point in control do
-            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.green
+            Render.rect_edges
+                (x last)
+                (y point.Duration)
+                (x (float32 point.BPM))
+                bottom
+                Colors.green
             last <- float32 point.BPM
 
         let mutable last = min_bpm
         for point in accuracy do
-            Render.rect (Rect.Create(x last, y point.Duration, x (float32 point.BPM), bottom)) Colors.yellow_accent
+            Render.rect_edges
+                (x last)
+                (y point.Duration)
+                (x (float32 point.BPM))
+                bottom
+                Colors.yellow_accent
             last <- float32 point.BPM
 
         if max_duration > 60000.0f<ms / rate> then
-            Render.rect (Rect.Create(this.Bounds.Left, y 60000.0f<ms / rate> - 2.5f, this.Bounds.Right, y 60000.0f<ms / rate> + 2.5f)) Colors.white.O1
+            Render.rect_edges
+                this.Bounds.Left
+                (y 60000.0f<ms / rate> - 2.5f)
+                this.Bounds.Right
+                (y 60000.0f<ms / rate> + 2.5f)
+                Colors.white.O1
 
         // X AXIS
         Render.rect (this.Bounds.SliceB(AXIS_HEIGHT).SliceT(2.5f)) Colors.white

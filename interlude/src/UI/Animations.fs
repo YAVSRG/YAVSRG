@@ -278,46 +278,38 @@ module LoadingAnimation =
         let corner_3 = corner_1 + corner_2
 
         if b > 1.0f || a < corner_1 then
-            Render.rect
-                (Rect.Create(
-                    (if b > 1.0f then
-                            bounds.Left
-                        else
-                            bounds.Left + a * perimeter),
-                    bounds.Top,
-                    bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right,
-                    bounds.Top + Style.PADDING
-                ))
+            Render.rect_edges
+                (if b > 1.0f then
+                        bounds.Left
+                    else
+                        bounds.Left + a * perimeter)
+                bounds.Top
+                (bounds.Left + (b % 1.0f) * perimeter |> min bounds.Right)
+                (bounds.Top + Style.PADDING)
                 color
 
         if b > corner_1 && a < corner_2 then
-            Render.rect
-                (Rect.Create(
-                    bounds.Right - Style.PADDING,
-                    bounds.Top + (a - corner_1) * perimeter |> max bounds.Top,
-                    bounds.Right,
-                    bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom
-                ))
+            Render.rect_edges
+                (bounds.Right - Style.PADDING)
+                (bounds.Top + (a - corner_1) * perimeter |> max bounds.Top)
+                bounds.Right
+                (bounds.Top + (b - corner_1) * perimeter |> min bounds.Bottom)
                 color
 
         if b > corner_2 && a < corner_3 then
-            Render.rect
-                (Rect.Create(
-                    bounds.Right - (a - corner_2) * perimeter |> min bounds.Right,
-                    bounds.Bottom - Style.PADDING,
-                    bounds.Right - (b - corner_2) * perimeter |> max bounds.Left,
-                    bounds.Bottom
-                ))
+            Render.rect_edges
+                (bounds.Right - (a - corner_2) * perimeter |> min bounds.Right)
+                (bounds.Bottom - Style.PADDING)
+                (bounds.Right - (b - corner_2) * perimeter |> max bounds.Left)
+                bounds.Bottom
                 color
 
         if b > corner_3 && a < 1.0f then
-            Render.rect
-                (Rect.Create(
-                    bounds.Left,
-                    bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom,
-                    bounds.Left + Style.PADDING,
-                    bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top
-                ))
+            Render.rect_edges
+                bounds.Left
+                (bounds.Bottom - (a - corner_3) * perimeter |> min bounds.Bottom)
+                (bounds.Left + Style.PADDING)
+                (bounds.Bottom - (b - corner_3) * perimeter |> max bounds.Top)
                 color
 
     let draw_border (bounds: Rect) (offset: float32) (color: Color) : unit =

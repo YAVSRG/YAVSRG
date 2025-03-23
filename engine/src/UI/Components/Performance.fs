@@ -125,20 +125,32 @@ type PerformanceMonitor() =
             let draw_graphs j =
                 let x = this.Bounds.Left + (float32 ((j + 600 - i) % 600) * step)
 
-                Render.rect
-                    (Rect.Box(x, this.Bounds.Bottom - float32 frame_times.[j], step, float32 frame_times.[j]))
+                Render.rect_size
+                    x
+                    (this.Bounds.Bottom - float32 frame_times.[j])
+                    step
+                    (float32 frame_times.[j])
                     Color.Red
 
-                Render.rect
-                    (Rect.Box(x, this.Bounds.Bottom - 50.0f - float32 draw_times.[j], step, float32 draw_times.[j]))
+                Render.rect_size
+                    x
+                    (this.Bounds.Bottom - 50.0f - float32 draw_times.[j])
+                    step
+                    (float32 draw_times.[j])
                     Color.Orange
 
-                Render.rect
-                    (Rect.Box(x, this.Bounds.Bottom - 100.0f - float32 update_times.[j], step, float32 update_times.[j]))
+                Render.rect_size
+                    x
+                    (this.Bounds.Bottom - 100.0f - float32 update_times.[j])
+                    step
+                    (float32 update_times.[j])
                     Color.Yellow
 
-                Render.rect
-                    (Rect.Box(x, this.Bounds.Bottom - 150.0f - float32 latencies.[j], step, float32 latencies.[j]))
+                Render.rect_size
+                    x
+                    (this.Bounds.Bottom - 150.0f - float32 latencies.[j])
+                    step
+                    (float32 latencies.[j])
                     Color.Green
 
             for a = i to 599 do

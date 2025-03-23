@@ -230,27 +230,26 @@ type PlayfieldSettingsPage() =
 
                     left <- left + (width_setting.Value + s) * PREVIEW_SCALE
 
-        Render.rect
-        <| Rect.Box(preview_bounds.Left + start, preview_bounds.CenterY - 2.5f, pw * align_offset.Value, 5f)
-        <| Colors.cyan_accent.O2
-
-        Render.rect
-        <| Rect.Box(
-            preview_bounds.Left + start + pw,
-            preview_bounds.CenterY - 2.5f,
-            pw * (align_offset.Value - 1.0f),
+        Render.rect_size
+            (preview_bounds.Left + start)
+            (preview_bounds.CenterY - 2.5f)
+            (pw * align_offset.Value)
             5f
-        )
-        <| Colors.red_accent.O2
+            Colors.cyan_accent.O2
 
-        Render.rect
-        <| Rect.Box(
-            preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f,
-            preview_bounds.Top,
-            5f,
+        Render.rect_size
+            (preview_bounds.Left + start + pw)
+            (preview_bounds.CenterY - 2.5f)
+            (pw * (align_offset.Value - 1.0f))
+            5f
+            Colors.red_accent.O2
+
+        Render.rect_size
+            (preview_bounds.Left + preview_bounds.Width * align_anchor.Value - 2.5f)
+            preview_bounds.Top
+            5f
             preview_bounds.Height
-        )
-        <| Colors.green_accent.O2
+            Colors.green_accent.O2
 
     override this.Title = %"noteskin.playfield"
 

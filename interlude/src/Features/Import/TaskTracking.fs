@@ -173,11 +173,9 @@ type TaskProgressMiniBar() =
                     -tick_width
                     + (this.Bounds.Width + tick_width) * float32 animation.Progress
 
-                Render.rect
-                    (Rect.Create(
-                        this.Bounds.Left + max 0.0f pos,
-                        this.Bounds.Top,
-                        this.Bounds.Left + min this.Bounds.Width (pos + tick_width),
-                        this.Bounds.Bottom
-                    ))
+                Render.rect_edges
+                    (this.Bounds.Left + max 0.0f pos)
+                    this.Bounds.Top
+                    (this.Bounds.Left + min this.Bounds.Width (pos + tick_width))
+                    this.Bounds.Bottom
                     (Colors.white.O4a alpha)

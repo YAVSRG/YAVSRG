@@ -435,12 +435,18 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             let left_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Left
             let right_axis = this.Parent.Bounds.Left + this.Parent.Bounds.Width * snd pos.Right
 
-            Render.rect
-                (Rect.Create(left_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom))
+            Render.rect_edges
+                (left_axis - 2.5f)
+                this.Parent.Bounds.Top
+                (right_axis + 2.5f)
+                this.Parent.Bounds.Bottom
                 Colors.red_accent.O1
 
-            Render.rect
-                (Rect.Create(right_axis - 2.5f, this.Parent.Bounds.Top, right_axis + 2.5f, this.Parent.Bounds.Bottom))
+            Render.rect_edges
+                (right_axis - 2.5f)
+                this.Parent.Bounds.Top
+                (right_axis + 2.5f)
+                this.Parent.Bounds.Bottom
                 Colors.red_accent.O1
 
             let this_center_x, this_center_y = this.Bounds.Center
@@ -453,23 +459,19 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 let other_center_x, other_center_y = other_positioner.Bounds.Center
 
                 if abs (this_center_x - other_center_x) < 5.0f then
-                    Render.rect
-                        (Rect.Create(
-                            other_center_x - 2.5f,
-                            min this.Bounds.Top other_positioner.Bounds.Top,
-                            other_center_x + 2.5f,
-                            max this.Bounds.Bottom other_positioner.Bounds.Bottom
-                        ))
+                    Render.rect_edges
+                        (other_center_x - 2.5f)
+                        (min this.Bounds.Top other_positioner.Bounds.Top)
+                        (other_center_x + 2.5f)
+                        (max this.Bounds.Bottom other_positioner.Bounds.Bottom)
                         Colors.green_accent.O1
 
                 if abs (this_center_y - other_center_y) < 5.0f then
-                    Render.rect
-                        (Rect.Create(
-                            min this.Bounds.Left other_positioner.Bounds.Left,
-                            other_center_y - 2.5f,
-                            max this.Bounds.Right other_positioner.Bounds.Right,
-                            other_center_y + 2.5f
-                        ))
+                    Render.rect_edges
+                        (min this.Bounds.Left other_positioner.Bounds.Left)
+                        (other_center_y - 2.5f)
+                        (max this.Bounds.Right other_positioner.Bounds.Right)
+                        (other_center_y + 2.5f)
                         Colors.green_accent.O1
 
         base.Draw()
