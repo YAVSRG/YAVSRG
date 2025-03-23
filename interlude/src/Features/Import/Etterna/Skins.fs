@@ -25,7 +25,7 @@ module Skins =
                 match existing_folder with
                 | Some folder ->
                     [
-                        Text([folder] %> "etterna_skin_import.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Shrink(Style.PADDING))
+                        Text([folder] %> "etterna_skin_import.delete_prompt", Align = Alignment.LEFT, Position = page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
                         PageSetting(%"etterna_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []
@@ -64,7 +64,7 @@ module Skins =
                     .Title(%"etterna_skin_import.disclaimer.title")
                     .Body(%"etterna_skin_import.disclaimer.body")
                 )
-                (fun (w, h) -> pretty_pos(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
+                (fun (w, h) -> page_position(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
             :> Widget
 
         override this.Title = Path.GetFileName source_path

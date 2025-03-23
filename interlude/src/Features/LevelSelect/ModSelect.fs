@@ -84,7 +84,7 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
                 100.0f,
                 3,
                 Spacing = (30f, 30f),
-                Position = pretty_pos (5, PAGE_BOTTOM - 5, PageWidth.Full),
+                Position = page_position (5, PAGE_BOTTOM - 5, PageWidth.Full),
                 WrapNavigation = false
             )
             |+ ModSelector(
@@ -129,11 +129,11 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i",
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = pretty_pos(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            Position = page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
         |+ Text(%"gameplay.rate.hotkey_hint_ii",
             Color = K Colors.text_subheading,
             Align = Alignment.LEFT,
-            Position = pretty_pos(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            Position = page_position(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
 
         |+ mod_grid
 

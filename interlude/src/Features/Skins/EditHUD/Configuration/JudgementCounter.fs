@@ -122,7 +122,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
                     yield DisplayPicker(ruleset, i, display)
             }
             |> ScrollContainer,
-            Position = pretty_pos (2, PAGE_BOTTOM - 10, PageWidth.Normal)
+            Position = page_position (2, PAGE_BOTTOM - 10, PageWidth.Normal)
         )
         :> Widget
 

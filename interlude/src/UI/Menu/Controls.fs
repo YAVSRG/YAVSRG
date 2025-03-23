@@ -215,7 +215,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
 module Helpers =
 
     let page_container () =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     let refreshable_row number cons =
         let r = NavigationContainer.Row()

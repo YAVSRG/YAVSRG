@@ -18,10 +18,10 @@ module PageLayout =
 
     let PAGE_BOTTOM = 23
 
-    let PRETTY_MARGIN_Y = (1080.0f - (float32 PAGE_BOTTOM * 0.5f * PAGE_ITEM_HEIGHT)) * 0.5f
-    let PRETTY_MARGIN_X = 100.0f
+    let PAGE_MARGIN_Y = (1080.0f - (float32 PAGE_BOTTOM * 0.5f * PAGE_ITEM_HEIGHT)) * 0.5f
+    let PAGE_MARGIN_X = 100.0f
 
-    let pretty_pos(start: int, height: int, width: PageWidth) : Position =
+    let page_position (start: int, height: int, width: PageWidth) : Position =
         match width with
         | PageWidth.Normal ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PAGE_ITEM_HEIGHT, PAGE_ITEM_WIDTH, float32 height * 0.5f * PAGE_ITEM_HEIGHT)
@@ -33,13 +33,13 @@ module PageLayout =
     type Widget with
 
         member this.Pos(y: int) : Widget =
-            this.Position <- pretty_pos (y, 2, PageWidth.Normal)
+            this.Position <- page_position (y, 2, PageWidth.Normal)
             this
 
         member this.Pos(y: int, h: int) : Widget =
-            this.Position <- pretty_pos (y, h, PageWidth.Normal)
+            this.Position <- page_position (y, h, PageWidth.Normal)
             this
 
         member this.Pos(y: int, h: int, width: PageWidth) : Widget =
-            this.Position <- pretty_pos (y, h, width)
+            this.Position <- page_position (y, h, width)
             this

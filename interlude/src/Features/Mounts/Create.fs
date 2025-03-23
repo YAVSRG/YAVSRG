@@ -89,7 +89,7 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
             Disabled = K(not folder_detected)
         )
             .Pos(6)
-        |+ Callout.frame info (fun (w, h) -> pretty_pos (0, 5, PageWidth.Custom w))
+        |+ Callout.frame info (fun (w, h) -> page_position (0, 5, PageWidth.Custom w))
         :> Widget
 
     override this.Title = %"mount.create"

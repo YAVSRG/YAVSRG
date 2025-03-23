@@ -113,7 +113,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

@@ -478,7 +478,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        ScrollContainer(container, Margin = 10.0f, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+        ScrollContainer(container, Margin = 10.0f, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()

@@ -163,7 +163,7 @@ type JudgementPage(on_close: unit -> unit) =
                     yield JudgementDisplayPicker(ruleset, i, judgement_display)
             }
             |> ScrollContainer,
-            Position = pretty_pos(12, PAGE_BOTTOM - 10, PageWidth.Normal)
+            Position = page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal)
         )
         :> Widget
 

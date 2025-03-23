@@ -36,7 +36,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let HEIGHT = 90.0f
 
     let scaled_margins =
-        let pc = (PRETTY_MARGIN_X - 5.0f) / 480.0f
+        let pc = (PAGE_MARGIN_X - 5.0f) / 480.0f
         let offset = 5.0f - pc * 1440.0f
         { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 

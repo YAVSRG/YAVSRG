@@ -117,7 +117,7 @@ type TableBrowserPage() =
     inherit Page()
 
     let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
-    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Content() =
         Tables.List.get (

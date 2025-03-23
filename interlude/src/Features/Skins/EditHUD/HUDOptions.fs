@@ -68,7 +68,7 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Content() =
         refresh ()
-        let tabs = SwapContainer(elements_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).ExpandB(80.0f))
+        let tabs = SwapContainer(elements_tab, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandB(80.0f))
         let tab_buttons =
             RadioButtons.create_tabs
                 {
@@ -83,7 +83,7 @@ type EditHUDPage(ctx: PositionerContext) =
                     Height = 60.0f
                 }
 
-        tab_buttons.Position <- Position.SliceT(40.0f, 60.0f).ShrinkR(PRETTY_MARGIN_X).ShrinkL(PRETTY_MARGIN_X + 480.0f)
+        tab_buttons.Position <- Position.SliceT(40.0f, 60.0f).ShrinkR(PAGE_MARGIN_X).ShrinkL(PAGE_MARGIN_X + 480.0f)
 
         NavigationContainer.Column()
         |+ tab_buttons

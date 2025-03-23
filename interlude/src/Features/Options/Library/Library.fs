@@ -59,7 +59,7 @@ type LibraryPage() =
     inherit Page()
 
     let import_info =
-        Container(NodeType.None, Position = pretty_pos(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
+        Container(NodeType.None, Position = page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
         |+ Text(
             (fun () ->
                 if TaskTracking.in_progress () then
@@ -87,7 +87,7 @@ type LibraryPage() =
         )
 
     let main_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.5f %- 10.0f })
+        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
         |+ PageButton(
             %"library.collections",
             (fun () -> ManageCollectionsPage().Show()),
@@ -124,7 +124,7 @@ type LibraryPage() =
         |+ import_info
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
+        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
         |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.SliceT(100.0f, 150.0f))
         |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.SliceT(270.0f, 150.0f))
         |+ MountControl(MountedGameType.Etterna, options.EtternaMount, Position = Position.SliceT(440.0f, 150.0f))

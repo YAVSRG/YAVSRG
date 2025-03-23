@@ -27,7 +27,7 @@ type QuickMenuPage() =
         |+ Text(
             sprintf "%s: %O" (%"misc.hotkeyhint") (%%"quick_menu"),
             Color = K Colors.text_cyan,
-            Position = Position.ShrinkL(PRETTY_MARGIN_X).ShrinkT(110.0f).SliceT(35.0f),
+            Position = Position.ShrinkL(PAGE_MARGIN_X).ShrinkT(110.0f).SliceT(35.0f),
             Align = Alignment.LEFT
         )
         :> Widget

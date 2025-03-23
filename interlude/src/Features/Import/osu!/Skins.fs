@@ -31,7 +31,7 @@ module Skins =
                 match existing_folder with
                 | Some folder ->
                     [
-                        Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT, Position = pretty_pos(5, 2, PageWidth.Full).Shrink(Style.PADDING))
+                        Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT, Position = page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
                         PageSetting(%"osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []
@@ -73,7 +73,7 @@ module Skins =
                     .Title(%"osu_skin_import.disclaimer.title")
                     .Body(%"osu_skin_import.disclaimer.body")
                 )
-                (fun (w, h) -> pretty_pos(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
+                (fun (w, h) -> page_position(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
             :> Widget
 
         override this.Title = ini.General.Name
@@ -115,7 +115,7 @@ module Skins =
 
         override this.Content() =
             if List.isEmpty osu_skin_paths then
-                Container(NodeType.Leaf, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y))
+                Container(NodeType.Leaf, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
                 |+ EmptyState(Icons.IMAGE, %"osu_skin_import.no_skins_found")
                 :> Widget
             else
@@ -128,7 +128,7 @@ module Skins =
                                 fun () -> import_osu_skin(path)
                             )
                     },
-                    Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+                    Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
                 ) :> Widget
 
         override this.OnClose() = ()

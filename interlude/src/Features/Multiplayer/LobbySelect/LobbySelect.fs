@@ -11,16 +11,16 @@ type LobbySelectPage() =
     let lobby_list =
         LobbyList(
             Position =
-                { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with
-                    Right = 0.7f %- (PRETTY_MARGIN_X * 0.5f)
+                { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with
+                    Right = 0.7f %- (PAGE_MARGIN_X * 0.5f)
                 }
         )
 
     let invite_list =
         InviteList(
             Position =
-                { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with
-                    Left = 0.7f %+ (PRETTY_MARGIN_X * 0.5f)
+                { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with
+                    Left = 0.7f %+ (PAGE_MARGIN_X * 0.5f)
                 }
         )
 

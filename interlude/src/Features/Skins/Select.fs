@@ -219,18 +219,18 @@ type SelectSkinsPage() =
         refresh ()
 
         let left_info =
-            NavigationContainer.Column(Position = { Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y) with Right = 0.35f %- 10.0f })
+            NavigationContainer.Column(Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.35f %- 10.0f })
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
                 0.0f,
                 (fun () -> SkinsBrowserPage().Show()),
-                Position = pretty_pos(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f)
+                Position = page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f)
             )
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
                 0.0f,
                 (fun () -> osu.Skins.OsuSkinsListPage().Show()),
-                Position = pretty_pos(PAGE_BOTTOM - 2, 2, PageWidth.Full)
+                Position = page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full)
             )
 
         let right_side =
@@ -240,7 +240,7 @@ type SelectSkinsPage() =
                     { Position.DEFAULT with
                         Left = 0.35f %+ 10.0f
                     }
-                        .Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+                        .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
             )
             |+ noteskin_tab
             |+ hud_tab

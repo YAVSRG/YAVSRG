@@ -490,7 +490,7 @@ type AnimationSettingsPage() =
                     Height = 50.0f
                 }
 
-        subtab_buttons.Position <- pretty_pos(2, 2, PageWidth.Normal).TranslateY(20.0f)
+        subtab_buttons.Position <- page_position(2, 2, PageWidth.Normal).TranslateY(20.0f)
 
         NavigationContainer.Column()
         |+ PageSetting(%"noteskin.enable_explosions", Checkbox enable_explosions)
@@ -502,7 +502,7 @@ type AnimationSettingsPage() =
         :> Widget
 
     override this.Content() =
-        let tabs = SwapContainer(receptors_tab, Position = Position.Shrink(PRETTY_MARGIN_X, PRETTY_MARGIN_Y).ShrinkT(100.0f))
+        let tabs = SwapContainer(receptors_tab, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
 
         let tab_buttons =
             RadioButtons.create_tabs
@@ -518,7 +518,7 @@ type AnimationSettingsPage() =
                     Height = 50.0f
                 }
 
-        tab_buttons.Position <- pretty_pos(0, 2, PageWidth.Normal).Translate(PRETTY_MARGIN_X, PRETTY_MARGIN_Y)
+        tab_buttons.Position <- page_position(0, 2, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y)
 
         NavigationContainer.Column()
         |+ tab_buttons
@@ -560,7 +560,7 @@ type AnimationSettingsPage() =
             + (if enable_column_light.Value then 1.0f else 0.0f)
             + (if enable_explosions.Value then 2.0f else 0.0f)
 
-        let center = this.Bounds.Right - (this.Bounds.Width - PAGE_ITEM_WIDTH - PRETTY_MARGIN_X * 2.0f) * 0.5f
+        let center = this.Bounds.Right - (this.Bounds.Width - PAGE_ITEM_WIDTH - PAGE_MARGIN_X * 2.0f) * 0.5f
 
         let mutable left = center - preview_width * COLUMN_WIDTH * 0.5f
         let position = this.Bounds.Top + this.Bounds.Height * 0.6f

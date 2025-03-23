@@ -139,7 +139,7 @@ and PageHeaderBase() =
         base.Init parent
 
     override this.Draw() =
-        let mutable x = this.Bounds.Left + PRETTY_MARGIN_X
+        let mutable x = this.Bounds.Left + PAGE_MARGIN_X
         let mutable first = true
         for t in titles do
             let width = Text.measure (Style.font, t) * this.Bounds.Height * 0.6f
@@ -305,7 +305,7 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
                 PageButton.Once(label, fork action Menu.Back).Pos(p)
             )
         )
-        |+ Text(prompt, Align = Alignment.LEFT, Position = pretty_pos(0, 2, PageWidth.Full))
+        |+ Text(prompt, Align = Alignment.LEFT, Position = page_position(0, 2, PageWidth.Full))
         :> Widget
 
     override this.Title = %"confirm"
