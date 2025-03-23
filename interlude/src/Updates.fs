@@ -14,7 +14,7 @@ open Prelude.Data
 module Updates =
 
     /// Numeric version e.g. "0.5.16"
-    let short_version =
+    let short_version : string =
         let v = Assembly.GetExecutingAssembly().GetName()
 
         if v.Version.Revision <> 0 then
@@ -23,7 +23,7 @@ module Updates =
             v.Version.ToString(3)
 
     /// Github commit SHA
-    let short_hash =
+    let short_hash : string =
         let informational_version =
             Assembly
                 .GetExecutingAssembly()
@@ -34,7 +34,7 @@ module Updates =
         hash.Substring(0, min hash.Length 6)
 
     /// Full version string e.g. "Interlude 0.5.16"
-    let version =
+    let version : string =
         let v = Assembly.GetExecutingAssembly().GetName()
 
         if DEV_MODE then
@@ -42,11 +42,11 @@ module Updates =
         else
             sprintf "%s %s" v.Name short_version
 
-    let private get_interlude_location () =
+    let private get_interlude_location () : string =
         Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
 
     // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
-    let rec private swap_update_files source dest =
+    let rec private swap_update_files (source: string) (dest: string) : unit =
         Directory.EnumerateFiles source
         |> Seq.iter (fun source ->
             let target = Path.Combine(dest, Path.GetFileName source)
@@ -98,7 +98,7 @@ module Updates =
         | Architecture.X64 when OperatingSystem.IsLinux() -> Ok "interlude-linux-x64.zip"
         | other -> Error other
 
-    let private handle_update (release: GithubRelease) =
+    let private handle_update (release: GithubRelease) : unit =
         latest_release <- Some release
 
         let parse_version (s: string) =
@@ -128,7 +128,7 @@ module Updates =
         else
             Logging.Info "Game is up to date."
 
-    let check_for_updates () =
+    let check_for_updates () : unit =
         WebServices.download_json (
             "https://api.github.com/repos/YAVSRG/YAVSRG/releases/latest",
             function
@@ -142,7 +142,7 @@ module Updates =
         if Directory.Exists folder_path then
             Directory.Delete(folder_path, true)
 
-    let apply_update (callback) =
+    let apply_update (callback: unit -> unit) : unit =
         if not update_available then
             failwith "No update available to install"
 
@@ -158,7 +158,7 @@ module Updates =
             with
             | None ->
                 Logging.Error(
-                    "Update failed: The github release doesn't have a download for your platform. Report this to Percyqaz!"
+                    "Update failed: The github release doesn't have a download for your platform. Report this as a bug!"
                 )
             | Some asset ->
 

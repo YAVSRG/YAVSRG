@@ -45,6 +45,9 @@ type private LoadedSkin =
             | Some s -> Sprite.destroy s |> ignore
             | None -> ()
 
+/// Once a noteskin's textures have been loaded once, they stay in memory
+///  Allows swapping skin textures in the next time fast instead of slowly reading it all again
+/// Useful because presets can change skins when a chart is selected, this hugely reduces a lag spike when that happens
 type private LoadedNoteskin =
     {
         mutable Metadata: SkinMetadata
@@ -106,6 +109,8 @@ type private LoadedNoteskin =
         this.Textures <- Some (atlas, sprites)
         (atlas, sprites)
 
+    /// `force_reload` false: Load textures from disk if not loaded, otherwise fast-swap the existing data in
+    /// `force_reload` true: Always reload textures from disk
     member this.Active(force_reload: bool) =
         let atlas, sprites =
             match this.Textures with
@@ -130,6 +135,9 @@ type private LoadedNoteskin =
                     sprites |> Array.iter (snd >> Sprite.destroy >> ignore)
                 | None -> ()
 
+/// Once a HUD's textures have been loaded once, they stay in memory
+///  Allows swapping skin textures in the next time fast instead of slowly reading it all again
+/// Useful because presets can change skins when a chart is selected, this hugely reduces a lag spike when that happens
 type private LoadedHUD =
     {
         mutable Metadata: SkinMetadata
@@ -191,6 +199,8 @@ type private LoadedHUD =
         this.Textures <- Some (atlas, sprites)
         (atlas, sprites)
 
+    /// `force_reload` false: Load textures from disk if not loaded, otherwise fast-swap the existing data in
+    /// `force_reload` true: Always reload textures from disk
     member this.Active(force_reload: bool) =
         let atlas, sprites =
             match this.Textures with
@@ -224,6 +234,10 @@ module Skins =
             Author = "Percyqaz"
             Editor = None
         }
+
+    /// Skin IDs are: *chocolate_default (represents embedded skin/noteskin), or the name of a folder under Skins
+    /// Skins consist of a noteskin (optional) and a HUD (optional)
+    /// Skin IDs can interchangeably refer to the Skin container folder, the Noteskin within it, or the HUD within it
     let private DEFAULT_NOTESKIN_ID = "*chocolate_default"
     let private DEFAULT_NOTESKIN =
         "chocolate.zip"
@@ -232,6 +246,7 @@ module Skins =
     let mutable private DEFAULT_SKIN_ICON = None
 
     let private loaded_noteskins = new Dictionary<string, LoadedNoteskin>()
+    /// Skin ID representing which skin's noteskin is selected
     let private _selected_noteskin_id = Setting.simple DEFAULT_NOTESKIN_ID
     let mutable current_noteskin = DEFAULT_NOTESKIN
     let mutable current_noteskin_meta = DEFAULT_NOTESKIN_META
@@ -245,13 +260,14 @@ module Skins =
     let private DEFAULT_HUD_FOLDER = "User"
 
     let private loaded_huds = new Dictionary<string, LoadedHUD>()
+    /// Skin ID representing which skin's HUD is selected
     let private _selected_hud_id = Setting.simple DEFAULT_HUD_FOLDER
     let mutable current_hud = Unchecked.defaultof<HudLayout>
     let mutable current_hud_meta = DEFAULT_HUD_META
 
     let private loaded_skins = new Dictionary<string, LoadedSkin>()
 
-    let load () =
+    let load () : unit =
 
         for noteskin in loaded_noteskins.Values do (noteskin :> IDisposable).Dispose()
         for hud in loaded_huds.Values do (hud :> IDisposable).Dispose()
@@ -298,17 +314,19 @@ module Skins =
             |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk") do
             let target = Path.ChangeExtension(zip, null)
 
-            if Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target) |> Seq.isEmpty |> not then
-                Logging.Info "%s has already been extracted, deleting" (Path.GetFileName zip)
+            let target =
+                if Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target) |> Seq.isEmpty |> not then
+                    sprintf "%s_%i" target (Timestamp.now())
+                else
+                    target
+
+            try
+                try Directory.Delete target with _ -> ()
+                Logging.Info "Extracting %s to a folder" (Path.GetFileName zip)
+                ZipFile.ExtractToDirectory(zip, target)
                 File.Delete zip
-            else
-                try
-                    try Directory.Delete target with _ -> ()
-                    Logging.Info "Extracting %s to a folder" (Path.GetFileName zip)
-                    ZipFile.ExtractToDirectory(zip, target)
-                    File.Delete zip
-                with err ->
-                    Logging.Error "Error extracting noteskin '%s': %s" zip err.Message
+            with err ->
+                Logging.Error "Error extracting noteskin '%s': %s" zip err.Message
 
         // migrate old noteskins
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") do
@@ -320,6 +338,9 @@ module Skins =
         // load all skins and their parts
         for source in Directory.EnumerateDirectories(get_game_folder "Skins") |> Seq.where Skin.Exists do
             let id = Path.GetFileName source
+
+            if id = DEFAULT_NOTESKIN_ID then failwith "How did we get here?"
+
             match Skin.FromPath source with
             | Ok skin ->
 
@@ -387,19 +408,19 @@ module Skins =
         current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
         loaded_huds.[_selected_hud_id.Value].Active(false)
 
-    let reload_current_noteskin () =
+    let reload_current_noteskin () : unit =
         current_noteskin <- loaded_noteskins.[_selected_noteskin_id.Value].Noteskin
         current_noteskin_meta <- loaded_noteskins.[_selected_noteskin_id.Value].Metadata
         current_noteskin.ReloadFromDisk()
         loaded_noteskins.[_selected_noteskin_id.Value].Active(true)
 
-    let reload_current_hud () =
+    let reload_current_hud () : unit =
         current_hud <- loaded_huds.[_selected_hud_id.Value].HUD
         current_hud_meta <- loaded_huds.[_selected_hud_id.Value].Metadata
         current_hud.ReloadFromDisk()
         loaded_huds.[_selected_hud_id.Value].Active(true)
 
-    let selected_hud_id =
+    let selected_hud_id : Setting<string> =
         Setting.make
             (fun new_id ->
                 if initialised then
@@ -425,7 +446,7 @@ module Skins =
             )
             (fun () -> _selected_hud_id.Value)
 
-    let selected_noteskin_id =
+    let selected_noteskin_id : Setting<string> =
         Setting.make
             (fun new_id ->
                 if initialised then
@@ -463,14 +484,14 @@ module Skins =
             loaded_skins.[skin_id].Icon
         else None
 
-    let save_noteskin_config (new_config: NoteskinConfig) =
+    let save_noteskin_config (new_config: NoteskinConfig) : unit =
         if not current_noteskin.IsEmbedded then
             current_noteskin.Config <- new_config
 
-    let save_hud_config (new_config: HudConfig) =
+    let save_hud_config (new_config: HudConfig) : unit =
         current_hud.Config <- new_config
 
-    let save_skin_meta (id: string) (new_meta: SkinMetadata) =
+    let save_skin_meta (id: string) (new_meta: SkinMetadata) : unit =
         if loaded_skins.ContainsKey id then
             loaded_skins.[id].Skin.Metadata <- new_meta
 
@@ -508,28 +529,28 @@ module Skins =
         selected_noteskin_id.Value <- id
         true
 
-    let open_noteskin_folder (id: string) =
+    let open_noteskin_folder (id: string) : bool =
         if loaded_noteskins.ContainsKey id then
             match loaded_noteskins.[id].Noteskin.Source with
             | Embedded _ -> false
             | Folder f -> open_directory f; true
         else false
 
-    let open_hud_folder (id: string) =
+    let open_hud_folder (id: string) : bool =
         if loaded_huds.ContainsKey id then
             match loaded_huds.[id].HUD.Source with
             | Embedded _ -> false
             | Folder f -> open_directory f; true
         else false
 
-    let open_skin_folder (id: string) =
+    let open_skin_folder (id: string) : bool =
         if loaded_skins.ContainsKey id then
             match loaded_skins.[id].Skin.Source with
             | Embedded _ -> false
             | Folder f -> open_directory f; true
         else false
 
-    let delete_noteskin (id: string) =
+    let delete_noteskin (id: string) : bool =
         if loaded_noteskins.ContainsKey id then
             match loaded_noteskins.[id].Noteskin.Source with
             | Embedded _ -> false
@@ -548,7 +569,7 @@ module Skins =
                 | _ -> reraise()
         else false
 
-    let delete_hud (id: string) =
+    let delete_hud (id: string) : bool =
         if loaded_huds.ContainsKey id then
             match loaded_huds.[id].HUD.Source with
             | Embedded _ -> false
@@ -567,7 +588,7 @@ module Skins =
                 | _ -> reraise()
         else false
 
-    let export_skin (id: string) =
+    let export_skin (id: string) : bool =
         if loaded_skins.ContainsKey id then
             let file_name =
                 let original_name = loaded_skins.[id].Skin.Metadata.Name
@@ -585,6 +606,7 @@ module Skins =
                     false
         else false
 
+    /// Each skin ID (where that skin has a noteskin), its noteskin and the metadata of the containing skin, in no particular order
     let list_noteskins () : (string * Noteskin * SkinMetadata) seq =
         seq {
             for noteskin in loaded_noteskins do
@@ -592,16 +614,17 @@ module Skins =
         }
     let noteskin_exists = loaded_noteskins.ContainsKey
 
+    /// Each skin ID (where that skin has a HUD), its HUD and the metadata of the containing skin, in no particular order
     let list_huds () : (string * HudLayout * SkinMetadata) seq =
         seq {
             for hud in loaded_huds do
                 yield hud.Key, hud.Value.HUD, hud.Value.Metadata
         }
 
-    let hud_exists = loaded_huds.ContainsKey
+    let hud_exists (id: string) : bool = loaded_huds.ContainsKey id
 
-    // todo: move this
-    let note_rotation keys =
+    // todo: move this (to playfield? I'm sure theres a reason it got put here in the first place)
+    let note_rotation (keys: int) : int -> Quad -> Quad =
         let rotations =
             if current_noteskin.Config.UseRotation then
                 current_noteskin.Config.Rotations.[keys - 3]

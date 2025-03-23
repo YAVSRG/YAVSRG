@@ -14,8 +14,9 @@ open Interlude
 
 module Themes =
 
+    /// Theme IDs are: *default (represents embedded theme), or the name of a folder under Themes
     let private DEFAULT_ID = "*default"
-    let private DEFAULT = Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
+    let private DEFAULT : Theme = Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Theme>()
@@ -23,6 +24,8 @@ module Themes =
     let mutable current_config = current.Config
     let private _selected_id = Setting.simple DEFAULT_ID
 
+    /// Once called: All themes from the Themes folder have been read; The valid ones are loaded into the available list
+    /// Can be called multiple times to re-load with the latest data
     let private load () =
         loaded.Clear()
         loaded.Add("*default", DEFAULT)
@@ -31,16 +34,18 @@ module Themes =
             let id = Path.GetFileName source
 
             try
+                if id = DEFAULT_ID then failwith "How did we get here?"
                 let theme = Theme.FromFolderName id
                 loaded.Add(id, theme)
             with err ->
                 Logging.Error "  Failed to load theme '%s': %O" id err
 
-    let save_config (new_config: ThemeConfig) =
+    let save_config (new_config: ThemeConfig) : unit =
         current.Config <- new_config
         current_config <- current.Config
 
-    let private load_current () =
+    /// (Re)loads all textures, sounds, fonts from the currently active theme
+    let private load_current () : unit =
         let missing_textures = ResizeArray()
         let available_textures = ResizeArray()
 
@@ -105,6 +110,7 @@ module Themes =
         Style.notify_system <- Sounds.get "notify-system"
         Style.notify_task <- Sounds.get "notify-task"
 
+    /// Reloads the theme config, all textures, sounds, fonts from the currently active theme
     let reload_current() =
         current.ReloadFromDisk()
         current_config <- current.Config
@@ -143,7 +149,8 @@ module Themes =
             )
             (fun () -> _selected_id.Value)
 
-    let list () =
+    /// Each theme ID and its name, in no particular order
+    let list () : (string * string) array =
         loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
     let create_new (id: string) : bool =

@@ -82,7 +82,7 @@ module Common =
         let private mapping = new Dictionary<string, string>()
         let mutable private loaded_path = ""
 
-        let load_language (language_id: string) =
+        let load_language (language_id: string) : unit =
 
             let path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", language_id + ".txt")
 

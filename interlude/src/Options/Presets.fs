@@ -5,7 +5,7 @@ open Interlude.Content
 
 module Presets =
 
-    let get (id: int) =
+    let get (id: int) : Setting<Preset option> =
         [| options.Preset1; options.Preset2; options.Preset3 |].[id - 1]
 
     let create (name: string) : Preset =
@@ -33,7 +33,7 @@ module Presets =
             HUD = options.SelectedHUD.Value
         }
 
-    let load (id: int) =
+    let load (id: int) : string option =
         match options.SelectedPreset.Value with
         | None -> ()
         | Some i ->
@@ -70,7 +70,7 @@ module Presets =
             Some loaded_preset.Name
         | None -> None
 
-    let keymode_changed (keys: int) =
+    let keymode_changed (keys: int) : unit =
         match options.KeymodePreferredPresets.[keys - 3] with
         | Some preference -> load preference |> ignore
         | None -> ()

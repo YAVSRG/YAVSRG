@@ -348,7 +348,7 @@ module Options =
 
     let private CONFIG_PATH = Path.GetFullPath "config.json"
 
-    let load_window_config (instance: int) () =
+    let load_window_config (instance: int) () : WindowOptions =
         // Register decoding rules for Percyqaz.Flux config
         JSON
             .WithAutoCodec<FullscreenVideoMode>()
@@ -368,12 +368,12 @@ module Options =
 
         config.ToOptions
 
-    let init() =
+    let init() : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
         Localisation.load_language options.Language.Value
 
-    let deinit () =
+    let deinit () : unit =
         try
             save_important_json_file CONFIG_PATH config
             save_important_json_file (Path.Combine(get_game_folder "Data", "options.json")) options

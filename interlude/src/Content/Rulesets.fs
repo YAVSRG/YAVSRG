@@ -9,17 +9,26 @@ open Prelude.Gameplay.Rulesets
 
 module Rulesets =
 
+    /// Ruleset IDs are the name of the file under the Rulesets folder, without the extension
+    /// e.g. Rulesets/my-ruleset.ruleset is loaded with id 'my-ruleset'
+    /// Not to be confused with a ruleset 'hash' which uniquely identifies what its actual behaviour is
+    /// You could have two different versions of a ruleset with different grade colors
+    //   If their gameplay behaviour is the same they get the same hash for gameplay purposes
+    //   They get different IDs which allows the user to distinguish and select the version they want
     let DEFAULT_ID = "sc-j4"
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Ruleset>()
-    let mutable current = SC_J4
-    let mutable current_hash = SC_J4_HASH
+    let mutable current : Ruleset = SC_J4
+    let mutable current_hash : string = SC_J4_HASH
+    /// This is the ID (file name) of the selected ruleset, not a hash of its behaviour
     let private _selected_id = Setting.simple DEFAULT_ID
     let private on_changed_ev = Event<Ruleset>()
     let on_changed = on_changed_ev.Publish
 
-    let load () =
+    /// Once called: All rulesets from the Rulesets folder have been read; The valid ones are loaded into the available list
+    /// Can be called multiple times to re-load with the latest data
+    let load () : unit =
         loaded.Clear()
 
         let path = get_game_folder "Rulesets"
@@ -53,7 +62,7 @@ module Rulesets =
         load ()
         initialised <- true
 
-    let selected_id =
+    let selected_id : Setting<string> =
         Setting.make
             (fun new_id ->
                 if initialised then
@@ -71,21 +80,23 @@ module Rulesets =
             )
             (fun () -> _selected_id.Value)
 
-    let by_id (id) = loaded.[id]
+    let by_id (id: string) : Ruleset = loaded.[id]
 
-    let by_hash (hash) =
+    let by_hash (hash: string) : Ruleset option =
         loaded.Values |> Seq.tryFind (fun rs -> Ruleset.hash rs = hash)
 
-    let list () =
+    /// Each ruleset and its file ID, sorted alphabetically
+    let list () : (string * Ruleset) seq =
         seq {
             for k in loaded.Keys do
                 yield (k, loaded.[k])
         }
-        |> Seq.sortBy (fun (_, rs) -> rs.Name)
+        |> Seq.sortBy (fun (_, rs) -> rs.Name.ToLowerInvariant())
 
-    let exists = loaded.ContainsKey
+    let exists (id: string) : bool = loaded.ContainsKey id
 
-    let install (ruleset: Ruleset) =
+    /// Ruleset is saved as a new (non-conflicting) file and added to the available list
+    let install (ruleset: Ruleset) : unit =
 
         let new_id : string =
             ruleset.Name
@@ -103,7 +114,8 @@ module Rulesets =
 
         JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
-    let update (existing_id: string) (ruleset: Ruleset) =
+    /// This may change the file name (and therefore ID) based on the name given in the ruleset
+    let update (existing_id: string) (ruleset: Ruleset) : unit =
 
         let new_id : string =
             ruleset.Name
@@ -135,7 +147,7 @@ module Rulesets =
 
             JSON.ToFile (Path.Combine(get_game_folder "Rulesets", new_id + ".ruleset"), true) ruleset
 
-    let delete (id: string) =
+    let delete (id: string) : bool =
         if id <> DEFAULT_ID && exists id then
             try
                 File.Delete(Path.Combine(get_game_folder "Rulesets", id + ".ruleset"))
