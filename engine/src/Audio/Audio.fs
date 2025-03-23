@@ -15,8 +15,8 @@ type Device =
 
 module Audio =
 
-    /// In BASS units; 10000 is the max supported but it is deafening on
-    let MAX_VOLUME = 4000.0
+    /// In BASS units; 10000 is the actual max
+    let MAX_VOLUME = 8000.0
 
     let private fft: float32 array = Array.zeroCreate 1024
     let waveform: float32 array = Array.zeroCreate 256
