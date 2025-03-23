@@ -95,7 +95,7 @@ type StaticWidget(node_type) =
 
     member private this.UpdateBounds() =
         this.Bounds <- Position.calculate pos this.Parent.Bounds
-        this.VisibleBounds <- this.Bounds.Intersect this.Parent.VisibleBounds
+        this.VisibleBounds <- this.Bounds.IntersectWith this.Parent.VisibleBounds
 
     override this.Update(elapsed_ms, moved) =
         if moved then

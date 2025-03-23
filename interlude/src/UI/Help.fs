@@ -43,7 +43,7 @@ module HelpOverlay =
                 else
                     t.Fade.Update elapsed_ms
 
-                let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
+                let outline = t.Target.Bounds.Expand(20.0f).IntersectWith(screen_bounds)
                 let width, height = t.Size
 
                 let x =
@@ -67,7 +67,7 @@ module HelpOverlay =
             | None -> ()
             | Some t ->
                 let screen_bounds = Render.bounds()
-                let outline = t.Target.Bounds.Expand(20.0f).Intersect(screen_bounds)
+                let outline = t.Target.Bounds.Expand(20.0f).IntersectWith(screen_bounds)
 
                 let alpha = t.Fade.Alpha
 
