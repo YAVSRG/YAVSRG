@@ -44,7 +44,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
 
     let unpause_song_on_exit = Song.playing()
 
-    let volume = Volume()
+    let volume = VolumeSlider()
 
     override this.Init(parent: Widget) =
         base.Init parent

@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 
-type Volume() =
+type VolumeSlider() =
     inherit StaticWidget(NodeType.None)
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f

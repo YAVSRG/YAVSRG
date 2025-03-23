@@ -60,7 +60,7 @@
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
-    <Compile Include="UI\Menu\Volume.fs" />
+    <Compile Include="UI\Menu\VolumeSlider.fs" />
     <Compile Include="UI\Menu\Layout.fs" />
     <Compile Include="UI\Menu\Slider.fs" />
     <Compile Include="UI\Menu\Selector.fs" />

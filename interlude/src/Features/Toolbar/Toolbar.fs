@@ -25,7 +25,7 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume_when_collapsed = Volume(Position = Position.Shrink(0.0f, HEIGHT))
+    let volume_when_collapsed = VolumeSlider(Position = Position.Shrink(0.0f, HEIGHT))
 
     let load_preset (i: int) =
         match Presets.load i with
@@ -127,7 +127,7 @@ type Toolbar() =
         |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
-        |* Volume(Position = Position.ShrinkY(HEIGHT))
+        |* VolumeSlider(Position = Position.ShrinkY(HEIGHT))
 
         base.Init parent
 

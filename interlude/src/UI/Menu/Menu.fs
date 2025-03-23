@@ -162,7 +162,7 @@ and Menu(top_level: Page) as this =
     let mutable namestack = []
     let mutable nest_level = 0
 
-    let volume = Volume()
+    let volume = VolumeSlider()
     let exit_key = HotkeyHoldAction("exit", (fun () -> Selection.up false), Menu.Exit)
 
     static let mutable _instance = None
