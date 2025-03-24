@@ -137,7 +137,7 @@ type MainMenuScreen() as this =
         MenuButton(
             (fun () ->
                 if Screen.back Transitions.UnderLogo then
-                    Logo.move_center ()
+                    Screen.logo.MoveCenter ()
             ),
             %"menu.quit",
             Position.Box(0.0f, 0.5f, -300.0f, 100.0f, 1360.0f, 100.0f)
@@ -190,7 +190,7 @@ type MainMenuScreen() as this =
                 WikiBrowserPage.Show()
 
         splash_text <- choose_splash ()
-        Logo.move_menu ()
+        Screen.logo.MoveMenu()
         Background.dim 0.0f
         Toolbar.show ()
         Song.on_finish <-
@@ -215,7 +215,7 @@ type MainMenuScreen() as this =
 
     override this.OnExit(next: ScreenType) =
         if next <> ScreenType.SplashScreen then
-            Logo.move_offscreen ()
+            Screen.logo.MoveOffscreen()
 
         splash_fade.Target <- 0.0f
         splash_fade.Snap()

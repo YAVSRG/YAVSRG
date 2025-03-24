@@ -75,8 +75,7 @@ type Screen() =
 module Screen =
 
     let animations = Animation.fork [ Palette.accent_color; Toolbar.slideout_amount ]
-
-    let logo = Logo.display
+    let logo = Logo()
 
     let mutable enable_background = true
     let mutable timescale = 1.0
@@ -92,7 +91,7 @@ module Screen =
 
         current <- screens.[0]
 
-    type ScreenContainer() =
+    type private ScreenContainer() =
         inherit Widget(NodeType.None)
 
         override this.Position
@@ -126,7 +125,7 @@ module Screen =
 
         override this.Draw() = current.Draw()
 
-    let screen_container = ScreenContainer()
+    let private screen_container = ScreenContainer()
 
     /// Returns true if the transition could be triggered and is now in motion
     /// false if the requested change was rejected (transition already in progress)
@@ -241,7 +240,7 @@ module Screen =
         override this.Init() =
             base.Init()
 
-            Logo.display.Init this
+            logo.Init this
             toolbar.Init this
             Notifications.display.Init this
             HelpOverlay.display.Init this

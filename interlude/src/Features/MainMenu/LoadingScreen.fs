@@ -55,11 +55,11 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         | ScreenType.SplashScreen ->
             animation.Add(Animation.Action(fun () -> Sounds.get("hello").Play()))
             animation.Add(Animation.Delay 100.0)
-            animation.Add(Animation.Action(fun () -> Logo.move_center ()))
+            animation.Add(Animation.Action(fun () -> Screen.logo.MoveCenter()))
             animation.Add(Animation.Delay 900.0)
             animation.Add(Animation.Action(post_init))
         | _ ->
-            Logo.move_center ()
+            Screen.logo.MoveCenter()
             closing <- true
             DiscordRPC.clear()
             audio_fade.Snap()
