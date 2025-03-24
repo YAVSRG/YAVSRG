@@ -23,7 +23,7 @@ module Mods =
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.shuffle s mc
                 Exclusions = [ "random"; "mirror" ]
-                Shorthand = fun _ -> "RDC"
+                Shorthand = fun _ -> "SHF"
             }
 
             "random",
