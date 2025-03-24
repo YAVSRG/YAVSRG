@@ -27,27 +27,13 @@ type ReceptorColorPicker(color: Setting<int>) =
 
     override this.Init(parent: Widget) =
         this
-        |* MouseListener(
-            (fun () ->
-                if not this.Selected then
-                    this.Select true
-
-                fd ()
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                fun () ->
-                    if not this.Selected then
-                        this.Select true
-
-                    bk ()
-        )
+        |* MouseListener()
+            .SelectOnClick(this, fd)
+            .FocusOnHover(this)
+            .OnRightClick(fun () ->
+                this.Select true
+                bk()
+            )
 
         base.Init parent
 
@@ -94,27 +80,13 @@ type ColumnLightColorPicker(color: Setting<int>) =
 
     override this.Init(parent: Widget) =
         this
-        |* MouseListener(
-            (fun () ->
-                if not this.Selected then
-                    this.Select true
-
-                fd ()
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                fun () ->
-                    if not this.Selected then
-                        this.Select true
-
-                    bk ()
-        )
+        |* MouseListener()
+            .SelectOnClick(this, fd)
+            .FocusOnHover(this)
+            .OnRightClick(fun () ->
+                this.Select true
+                bk()
+            )
 
         base.Init parent
 

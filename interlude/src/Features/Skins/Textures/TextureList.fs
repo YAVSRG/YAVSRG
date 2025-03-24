@@ -39,10 +39,10 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
         this
         |+ Image(sprite, Position = Position.ShrinkB(65.0f).Shrink(20.0f), StretchToFill = false)
         |+ Text(id, Align = Alignment.CENTER, Position = Position.Shrink(Style.PADDING).SliceB(40.0f).Translate(0.0f, -40.0f))
-        |+ MouseListener.Focus this
+        |+ MouseListener().Button(this)
         |* Button(
-            (fun () -> if is_stitched then Icons.SQUARE + " " + %"skins.texture.grid" else Icons.GRID + " " + %"skins.texture.loose"), 
-            (fun () -> 
+            (fun () -> if is_stitched then Icons.SQUARE + " " + %"skins.texture.grid" else Icons.GRID + " " + %"skins.texture.loose"),
+            (fun () ->
                 (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
             ),

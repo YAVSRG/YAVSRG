@@ -163,7 +163,7 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
     let mutable hex = color.Value.ToHex()
 
     override this.Init (parent: Widget) =
-        this |* MouseListener.Focus this
+        this |* MouseListener().Button(this)
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =

@@ -28,7 +28,7 @@ type private PlayerButton(username: string, color: int) =
             Align = Alignment.LEFT,
             Position = Position.Shrink(20.0f, 5.0f)
         )
-        |* MouseListener.Focus this
+        |* MouseListener().Button(this)
 
         base.Init parent
 

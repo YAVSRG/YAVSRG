@@ -30,6 +30,24 @@ type ContainerExtensions =
         Seq.iter container.Add children
 
     [<Extension>]
+    static member AddConditional (container: #IContainer<'T>, condition: bool, [<ParamArray>] children: 'T array) : unit =
+        if condition then Array.iter container.Add children
+
+    [<Extension>]
+    static member AddConditional (container: #IContainer<'T>, condition: bool, children: 'T seq) : unit =
+        if condition then Seq.iter container.Add children
+
+    [<Extension>]
+    static member AddConditional (container: #IContainer<Widget>, condition: unit -> bool, [<ParamArray>] children: Widget array) : unit =
+        for c in children do
+            container.Add (c.Conditional(condition))
+
+    [<Extension>]
+    static member AddConditional (container: #IContainer<Widget>, condition: unit -> bool, children: Widget seq) : unit =
+        for c in children do
+            container.Add (c.Conditional(condition))
+
+    [<Extension>]
     static member With (container: #IContainer<'T>, [<ParamArray>] children: 'T array) : #IContainer<'T> =
         Array.iter container.Add children
         container

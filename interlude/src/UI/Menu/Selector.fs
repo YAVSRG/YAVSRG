@@ -26,18 +26,13 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
-        |* MouseListener(
-            (fun () ->
-                this.Select true
-                fd ()
-            ),
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
+            .Add(
+                Text(fun () -> snd items.[index])
+                    .Align(Alignment.LEFT),
+
+                MouseListener()
+                    .SelectOnClick(this, fd)
+                    .FocusOnHover(this)
         )
 
         base.Init parent
@@ -83,7 +78,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
     override this.Init(parent) =
         this
         |+ Text((fun () -> snd wrapped_setting.Value), Align = Alignment.LEFT)
-        |+ MouseListener.Focus this
+        |+ MouseListener().Button(this)
         |* dropdown_wrapper
 
         base.Init parent

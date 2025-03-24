@@ -21,7 +21,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
     member val Clickable = true with get, set
 
-    member val ColorFunc =
+    member val ColorFunc : unit -> Color * Color =
         fun () ->
             Colors.white,
             (if this.Selected then
@@ -30,30 +30,28 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                  Colors.shadow_1) with get, set
 
     override this.Init(parent) =
-        base.Init parent
 
         this
-        |+ Text(
-            (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
-            Align = Alignment.LEFT,
-            Color = this.ColorFunc
-        )
-        |* HotkeyListener(hotkey, toggle)
-
-        if this.Clickable then
-            this.Add(
-                MouseListener.Focus(
-                    this,
-                    OnHover =
-                        (fun b ->
-                            if b && not this.Focused then
-                                this.Focus true
-                            elif not b && not focus_trap && this.FocusedByMouse then
-                                Selection.up true
-                        ),
-                    OnRightClick = (fun () -> setting.Set "")
-                )
+            .With(
+                Text(fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else "")
+                    .Align(Alignment.LEFT)
+                    .Color(this.ColorFunc),
+                HotkeyListener(hotkey, toggle)
             )
+            .AddConditional(
+                this.Clickable,
+                MouseListener()
+                    .SelectOnClick(this)
+                    .OnHover(fun now_focused ->
+                        if now_focused && not this.Focused then
+                                this.Focus true
+                            elif not now_focused && not focus_trap && this.FocusedByMouse then
+                                Selection.up true
+                    )
+                    .OnRightClick(fun () -> setting.Set "")
+            )
+
+        base.Init parent
 
     override this.OnSelected(by_mouse: bool) =
         base.OnSelected by_mouse

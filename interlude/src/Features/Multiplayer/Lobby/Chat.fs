@@ -99,21 +99,15 @@ type Chat(lobby: Lobby) =
                         }
 
                     container
-                    |+ MouseListener(
-                        (fun () ->
+                    |+ MouseListener()
+                        .OnLeftClick(fun () ->
                             Screen.change_new
                                 (fun () -> ScoreScreen(data, (ImprovementFlags.None, None), false) :> Screen)
                                 ScreenType.Score
                                 Transitions.EnterGameplayNoFadeAudio
                             |> ignore
-                        ),
-                        OnHover =
-                            fun b ->
-                                if b && not container.Focused then
-                                    container.Focus true
-                                elif not b && container.FocusedByMouse then
-                                    Selection.up true
-                    )
+                        )
+                        .FocusOnHover(container)
                     |+ Text(
                         sprintf "%i. %s" place username,
                         Color =

@@ -86,7 +86,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
 
     override this.Init(parent) =
         this
-        |+ MouseListener.Focus this
+        |+ MouseListener().Button(this)
         |* HotkeyListener(
             this.Hotkey,
             fun () ->

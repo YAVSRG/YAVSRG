@@ -36,16 +36,15 @@ type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool 
                     else Color.Transparent
                 )
         )
-        |* MouseListener(
-            (fun () -> this.Select true),
-            OnHover =
-                fun b ->
-                    if b then
-                        if Mouse.held Mouse.LEFT then
+        |* MouseListener()
+            .SelectOnClick(this)
+            .OnHover(fun now_hovering ->
+                if now_hovering then
+                    if Mouse.held Mouse.LEFT then
                             this.Select true
                         else
                             this.Focus true
-        )
+            )
 
         base.Init parent
 

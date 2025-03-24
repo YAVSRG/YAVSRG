@@ -27,7 +27,7 @@ type private ColoredButton(label: string, color: Color, action: unit -> unit) =
             Align = Alignment.LEFT,
             Position = Position.Shrink(Style.PADDING)
         )
-        |* MouseListener.Focus this
+        |* MouseListener().Button(this)
 
         base.Init parent
 

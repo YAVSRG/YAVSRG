@@ -32,27 +32,13 @@ type RotationPicker(rotation: Setting<float>) as this =
             Align = Alignment.LEFT,
             Color = K Colors.text_subheading
         )
-        |* MouseListener(
-            (fun () ->
-                if not this.Selected then
-                    this.Select true
-
-                fd ()
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                fun () ->
-                    if not this.Selected then
-                        this.Select true
-
-                    bk ()
-        )
+        |* MouseListener()
+            .SelectOnClick(this, fd)
+            .FocusOnHover(this)
+            .OnRightClick(fun () ->
+                this.Select true
+                bk()
+            )
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -105,27 +91,13 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
                 .Title(sprintf "%s: %O" (%"noteskin.notecolors") style)
                 .Body(%(sprintf "noteskin.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
-        |* MouseListener(
-            (fun () ->
-                if not this.Selected then
-                    this.Select true
-
-                fd ()
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                fun () ->
-                    if not this.Selected then
-                        this.Select true
-
-                    bk ()
-        )
+        |* MouseListener()
+            .SelectOnClick(this, fd)
+            .FocusOnHover(this)
+            .OnRightClick(fun () ->
+                this.Select true
+                bk()
+            )
 
         base.Init parent
 

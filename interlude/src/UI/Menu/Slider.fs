@@ -45,32 +45,27 @@ type Slider(setting: Setting.Bounded<float32>) =
 
     override this.Init(parent) =
         this
-        |+ Text(
-            (fun () -> if typed_number.Value = "" then this.Format setting.Value else typed_number.Value),
-            Align = Alignment.LEFT,
-            Position = Position.SliceL TEXTWIDTH,
-            Color = fun () -> if typed_number.Value <> "" then Colors.text_yellow_2 else Colors.text
-        )
-        |* MouseListener(
-            (fun () ->
-                this.Select true
-                Style.click.Play()
-                if Mouse.x() > this.Bounds.Left + TEXTWIDTH then dragging <- true
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                (fun () ->
-                    Style.text_close.Play()
-                    typed_number.Set ""
-                    setting.Value <- ORIGINAL_VALUE
-                )
-        )
+            .Add(
+                Text(fun () -> if typed_number.Value = "" then this.Format setting.Value else typed_number.Value)
+                    .Align(Alignment.LEFT)
+                    .Color(fun () ->
+                        if typed_number.Value <> "" then Colors.text_yellow_2 else Colors.text
+                    )
+                    .Position(Position.SliceL TEXTWIDTH),
+
+                MouseListener()
+                    .OnLeftClick(fun () ->
+                        this.Select true
+                        Style.click.Play()
+                        if Mouse.x() > this.Bounds.Left + TEXTWIDTH then dragging <- true
+                    )
+                    .OnRightClick(fun () ->
+                        Style.text_close.Play()
+                        typed_number.Set ""
+                        setting.Value <- ORIGINAL_VALUE
+                    )
+                    .FocusOnHover(this)
+            )
         base.Init parent
 
     member this.Step

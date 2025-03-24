@@ -63,7 +63,7 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
             Align = Alignment.LEFT,
             Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
         )
-        |* MouseListener.Focus this
+        |* MouseListener().Button(this)
 
         match Skins.get_icon id with
         | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))
@@ -129,7 +129,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
             Align = Alignment.LEFT,
             Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
         )
-        |* MouseListener.Focus this
+        |* MouseListener().Button(this)
 
         match Skins.get_icon id with
         | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))

@@ -378,7 +378,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             Position = Position.Shrink(5.0f, 0.0f),
             Align = Alignment.RIGHT
         )
-        |+ MouseListener.Focus this
+        |+ MouseListener().Button(this)
         |* this.Button
 
         base.Init parent
@@ -443,7 +443,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
             Position = Position.Shrink(25.0f, 20.0f),
             Align = Alignment.RIGHT
         )
-        |+ MouseListener.Focus this
+        |+ MouseListener().Button(this)
         |* this.Button
 
         base.Init parent

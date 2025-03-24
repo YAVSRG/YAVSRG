@@ -34,18 +34,11 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
 
     override this.Init(parent: Widget) =
         this
-        |* MouseListener(
-            (fun () ->
-                this.Select true
-                fd ()
-            ),
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-        )
+            .Add(
+                MouseListener()
+                    .SelectOnClick(this, fd)
+                    .FocusOnHover(this)
+            )
 
         base.Init parent
 

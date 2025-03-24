@@ -51,7 +51,7 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
             Align = Alignment.LEFT,
             Position = Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING)
         )
-        |* MouseListener.Focus this
+        |* MouseListener().Button(this)
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =

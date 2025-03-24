@@ -4,12 +4,12 @@ open Percyqaz.Flux.Input
 open System.Runtime.CompilerServices
 
 [<Sealed>]
-type MouseListener(on_left_click: unit -> unit) =
+type MouseListener() =
     inherit StaticWidget(NodeType.None)
 
     let mutable hover = false
 
-    member val OnLeftClick : unit -> unit = on_left_click with get, set
+    member val OnLeftClick : unit -> unit = ignore with get, set
     member val OnRightClick : unit -> unit = ignore with get, set
     member val OnHover : bool -> unit = ignore with get, set
     member val Floating : bool = false with get, set
@@ -32,14 +32,14 @@ type MouseListener(on_left_click: unit -> unit) =
 
     override this.Draw() = ()
 
-    static member Focus(w: Widget) =
+    static member Focus(w: Widget) : MouseListener =
         MouseListener(
-            (fun () -> w.Select true),
+            OnLeftClick = (fun () -> w.Select true),
             OnHover =
-                fun b ->
-                    if b && not w.Focused then
+                fun now_hovering ->
+                    if now_hovering && not w.Focused then
                         w.Focus true
-                    elif not b && w.FocusedByMouse then
+                    elif not now_hovering && w.FocusedByMouse then
                         Selection.up true
         )
 
@@ -70,3 +70,29 @@ type MouseListenerExtensions =
     static member Floating (listener: MouseListener) : MouseListener =
         listener.Floating <- true
         listener
+
+    [<Extension>]
+    static member FocusOnHover (listener: MouseListener, widget: #Widget) : MouseListener =
+        listener.OnHover <-
+            fun now_hovering ->
+                if now_hovering && not widget.Focused then
+                    widget.Focus true
+                elif not now_hovering && widget.FocusedByMouse then
+                    Selection.up true
+        listener
+
+    [<Extension>]
+    static member SelectOnClick (listener: MouseListener, widget: #Widget) : MouseListener =
+        listener.OnLeftClick <- fun () -> widget.Select true
+        listener
+
+    [<Extension>]
+    static member SelectOnClick (listener: MouseListener, widget: #Widget, also_on_click: unit -> unit) : MouseListener =
+        listener.OnLeftClick <- fun () -> widget.Select true; also_on_click()
+        listener
+
+    [<Extension>]
+    static member Button (listener: MouseListener, widget: #Widget) : MouseListener =
+        listener
+            .SelectOnClick(widget)
+            .FocusOnHover(widget)

@@ -12,22 +12,28 @@ type LobbyInfoCard(info: LobbyInfo) =
 
     override this.Init(parent) =
         this
-        |+ Text(info.Name, Position = Position.SliceT(50.0f).Shrink(5.0f), Align = Alignment.LEFT)
-        |+ Text(
-            (match info.CurrentlyPlaying with
-             | None -> %"lobby.no_song_selected"
-             | Some s -> s),
-            Color = K Colors.text_subheading,
-            Position = Position.SliceB(40.0f).Shrink(5.0f),
-            Align = Alignment.LEFT
-        )
-        |+ MouseListener(fun () -> Network.join_lobby info.Id)
-        |* Text(
-            info.Players.ToString() + " " + Icons.USERS,
-            Color = K Colors.text_subheading,
-            Position = Position.SliceT(50.0f).Shrink(5.0f),
-            Align = Alignment.RIGHT
-        )
+            .Add(
+                Text(info.Name)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.SliceT(50.0f).Shrink(5.0f)),
+
+                Text(
+                    match info.CurrentlyPlaying with
+                    | None -> %"lobby.no_song_selected"
+                    | Some s -> s
+                )
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.SliceB(40.0f).Shrink(5.0f)),
+
+                Text(info.Players.ToString() + " " + Icons.USERS)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(50.0f).Shrink(5.0f)),
+
+                MouseListener()
+                    .OnLeftClick(fun () -> Network.join_lobby info.Id)
+            )
 
         base.Init parent
 

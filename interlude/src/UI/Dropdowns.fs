@@ -21,7 +21,7 @@ module private Dropdown =
 
         override this.Init(parent) =
             this
-            |+ MouseListener.Focus(this, Floating = true)
+            |+ MouseListener.Focus(this).Floating()
             |* Text(label, Align = Alignment.LEFT, Position = Position.Shrink(10.0f, 5.0f), Color = K color)
             base.Init parent
 

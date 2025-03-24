@@ -20,27 +20,18 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
     override this.Init(parent: Widget) =
         this
         |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
-        |* MouseListener(
-            (fun () ->
-                this.Select true
+        |* MouseListener()
+            .SelectOnClick(this, fun () ->
                 add 5.0f
                 Style.click.Play()
-            ),
-            OnHover =
-                (fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse then
-                        Selection.up true
-                ),
-            OnRightClick =
-                fun () ->
-                    if not this.Selected then
-                        this.Select true
-
-                    add -5.0f
-                    Style.click.Play()
-        )
+            )
+            .FocusOnHover(this)
+            .OnRightClick(fun () ->
+                this.Select true
+                add -5.0f
+                Style.click.Play()
+            )
+            .Floating()
 
         base.Init parent
 
