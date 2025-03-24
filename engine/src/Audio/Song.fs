@@ -114,11 +114,21 @@ module Song =
 
     let duration () : Time = now_playing.Duration
 
-    let private update_time() =
-        _time <- rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start
+    /// The exact audio position the engine thinks we are at; Can be called mid-frame for sub-frame precision
+    let private exact_time () : Time =
+        timer_start + rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>)
+
+    /// Used by the input engine at the instant an input is polled for precise mapping of inputs to audio positions
+    let exact_time_with_offset () : Time =
+        exact_time() - seek_inaccuracy_compensation + _local_offset + _global_offset * rate
+
+    /// For the rest of gameplay rendering, the current 'exact time' is set at the start of the frame
+    /// This value is then reused without being updated until next frame
+    let private update_time () : unit =
+        _time <- exact_time()
 
     let frame_compensation () : Time =
-        (rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms / rate>) + timer_start) - _time
+        exact_time() - _time
 
     let time () : Time = _time
 
@@ -156,7 +166,7 @@ module Song =
         play_from (min 0.0f<ms> (first_note - LEADIN_TIME * rate))
 
     let seek (time: Time) : unit =
-        if playing () then
+        if playing() then
             play_from time
         else
             if time >= 0.0f<ms> && time < duration () then

@@ -166,8 +166,8 @@ module GameThread =
 
         // Update
         start_of_frame <- now ()
-        Input.begin_frame_events ()
         run_action_queue()
+        Input.begin_frame_events ()
         Audio.update elapsed_ms
         ui_root.Update(elapsed_ms, resized)
         resized <- false

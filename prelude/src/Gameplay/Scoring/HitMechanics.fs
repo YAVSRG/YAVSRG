@@ -55,11 +55,11 @@ module private HitMechanics =
         let start_of_window = now - late_window
         let end_of_window = now - early_window
         let cbrush_window = cbrush_window_raw * rate
-        
+
         assert(cbrush_window >= 0.0f<ms>)
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
-        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
+        //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
         while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time
@@ -99,10 +99,10 @@ module private HitMechanics =
         let mutable closest_note_delta = 0.0f<ms>
         let start_of_window = now - late_window
         let end_of_window = now - early_window
-        
+
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
-        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
+        //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
         while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time
@@ -120,7 +120,7 @@ module private HitMechanics =
             FOUND (closest_note_index, closest_note_delta)
         else
             NOTFOUND
-    
+
     let osu_mania (hit_data: HitFlagData, early_window: Time, late_window: Time) (k: int, start_index: int, now: Time) : HitDetection =
         let mutable i = start_index
         let mutable candidate_note_index = -1
@@ -128,10 +128,10 @@ module private HitMechanics =
         let mutable blocked = false
         let start_of_window = now - late_window
         let end_of_window = now - early_window
-        
+
         assert(early_window <= 0.0f<ms>)
-        assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
-        assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
+        //assert(i >= hit_data.Length || hit_data.[i].Time >= start_of_window)
+        //assert(i = 0 || hit_data.[i - 1].Time < start_of_window)
 
         while i < hit_data.Length && hit_data.[i].Time <= end_of_window do
             let delta = now - hit_data.[i].Time

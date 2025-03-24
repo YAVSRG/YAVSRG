@@ -33,6 +33,8 @@ module PlayScreen =
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
+        let mutable liveplay_position = -Time.infinity
+
         let mutable play_time = 0.0
 
         scoring.OnEvent.Add(fun h ->
@@ -249,9 +251,11 @@ module PlayScreen =
                                 key_state <- Bitmask.set_key column key_state
 
                             liveplay.Add(time, key_state)
+                            liveplay_position <- max liveplay_position (time - first_note)
                     )
 
-                    this.State.Scoring.Update chart_time
+                    this.State.Scoring.Update liveplay_position
+                    liveplay_position <- max liveplay_position chart_time
 
                     if options.EnablePacemakerFailMidway.Value && PacemakerState.pacemaker_failed scoring pacemaker_state then fail_midway this
                     if this.State.Scoring.Finished then finish_play this

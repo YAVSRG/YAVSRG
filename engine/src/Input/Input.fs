@@ -5,6 +5,7 @@ open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 
 type Keys = Windowing.GraphicsLibraryFramework.Keys
 type MouseButton = Windowing.GraphicsLibraryFramework.MouseButton
@@ -14,7 +15,6 @@ type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
     | Mouse of MouseButton
-    // todo: joystick support ever?
 
     override this.ToString() =
         match this with
@@ -91,7 +91,14 @@ module Bind =
 
 type InputEvType = InputAction
 
-type InputEv = (struct (Bind * InputEvType * float))
+[<Struct>]
+type InputEv =
+    {
+        Bind: Bind
+        Type: InputEvType
+        GLFWTimestamp: float
+        AudioPosition: Time
+    }
 
 [<RequireQualifiedAccess>]
 type InputListener =
@@ -165,18 +172,19 @@ module internal InputThread =
 
     let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) =
         let event =
-            struct (
-                (
-                    key,
-                    (
-                        modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
-                        modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
-                        modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
-                    )
-                ) |> Bind.Key,
-                action,
-                GLFW.GetTime()
-            )
+            {
+                Bind =
+                    (key,
+                        (
+                            modifiers &&& KeyModifiers.Control = KeyModifiers.Control,
+                            modifiers &&& KeyModifiers.Alt = KeyModifiers.Alt,
+                            modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
+                        )
+                    ) |> Bind.Key
+                Type = action
+                GLFWTimestamp = GLFW.GetTime()
+                AudioPosition = Song.exact_time_with_offset()
+            }
         lock LOCK_OBJ (fun () ->
             if typing then
                 typing_buffered_input <- ValueSome event
@@ -201,11 +209,12 @@ module internal InputThread =
 
     let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) =
         let event =
-            struct (
-                Bind.Mouse button,
-                action,
-                GLFW.GetTime()
-            )
+            {
+                Bind = Bind.Mouse button
+                Type = action
+                GLFWTimestamp = GLFW.GetTime()
+                AudioPosition = Song.exact_time_with_offset()
+            }
         lock LOCK_OBJ (fun () ->
             events_buffer <- List.append events_buffer [ event ]
             if action = InputAction.Release then
@@ -257,10 +266,10 @@ module internal InputThread =
                         },
                         if typing then
                             match typing_buffered_input with
-                            | ValueSome (struct (b, t, ts)) ->
-                                if GLFW.GetTime() - ts > 0.002 then
+                            | ValueSome event ->
+                                if GLFW.GetTime() - event.GLFWTimestamp > 0.002 then
                                     typing_buffered_input <- ValueNone
-                                    (struct (b, t, ts)) :: events_buffer
+                                    event :: events_buffer
                                 else
                                     events_buffer
                             | _ -> events_buffer
@@ -325,7 +334,7 @@ module Input =
         let rec f evs =
             match evs with
             | [] -> []
-            | struct (B, T, _) :: xs when B = b && T = t ->
+            | event :: xs when event.Bind = b && event.Type = t ->
                 found <- true
                 xs
             | x :: xs -> x :: (f xs)
@@ -339,19 +348,18 @@ module Input =
         let rec f evs =
             match evs with
             | [] -> []
-            | struct (b: Bind, T, time) :: xs when T = t ->
-                match b with
+            | event :: xs when event.Type = t ->
+                match event.Bind with
                 | Bind.Key (k1, modifiers) when k1 = k ->
                     out <- ValueSome modifiers
                     xs
-                | _ -> struct (b, T, time) :: f xs
+                | _ -> event :: f xs
             | x :: xs -> x :: f xs
 
         events_this_frame <- f events_this_frame
         out
 
     let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
-        let rate = Percyqaz.Flux.Audio.Song.playback_rate()
 
         let bind_match bind target =
             match bind, target with
@@ -362,37 +370,37 @@ module Input =
         let rec pop_inputs_matching_binds evs =
             match evs with
             | [] -> []
-            | struct (b, t, time) :: xs when t <> InputEvType.Repeat ->
+            | event :: xs when event.Type <> InputEvType.Repeat ->
                 let mutable i = 0
                 let mutable matched = false
 
                 while i < binds.Length && not matched do
-                    if bind_match binds.[i] b then
-                        callback i (now - float32 (999.0 * (this_frame.Time - time)) * 1.0f<ms / rate> * rate) (t <> InputEvType.Press)
+                    if bind_match binds.[i] event.Bind then
+                        if event.AudioPosition <= now then callback i event.AudioPosition (event.Type <> InputEvType.Press)
                         matched <- true
 
                     i <- i + 1
 
-                if matched then pop_inputs_matching_binds xs else struct (b, t, time) :: (pop_inputs_matching_binds xs)
+                if matched then pop_inputs_matching_binds xs else event :: (pop_inputs_matching_binds xs)
             | _ :: xs -> pop_inputs_matching_binds xs
 
         events_this_frame <- pop_inputs_matching_binds events_this_frame
 
-    let pop_any (t: InputEvType) =
+    let private pop_any (t: InputEvType) : Bind voption =
         let mutable out = ValueNone
 
         let rec f evs =
             match evs with
             | [] -> []
-            | struct (b, T, time) :: xs when T = t ->
-                out <- ValueSome(b, time)
+            | event :: xs when event.Type = t ->
+                out <- ValueSome(event.Bind)
                 xs
             | x :: xs -> x :: (f xs)
 
         events_this_frame <- f events_this_frame
         out
 
-    let finish_frame_events () =
+    let finish_frame_events () : unit =
         input_listener_mouse_cancel <-
             input_listener_mouse_cancel
             + abs (this_frame.MouseX - last_frame.MouseX)
@@ -402,10 +410,10 @@ module Input =
         events_this_frame <- []
         this_frame_finished <- true
 
-    let key_held_any_modifiers (k: Keys) =
+    let key_held_any_modifiers (k: Keys) : bool =
         this_frame.HeldKeys.Contains k
 
-    let held (b: Bind) =
+    let held (b: Bind) : bool =
         if this_frame_finished then
             false
         else
@@ -423,7 +431,7 @@ module Input =
         | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
         | Bind.Dummy -> false
 
-    let init (_window: nativeptr<Window>) =
+    let init (_window: nativeptr<Window>) : unit =
         window <- _window
         InputThread.init window
 
@@ -432,7 +440,7 @@ module Input =
     let private COPY = Bind.ctrl Keys.C
     let private PASTE = Bind.ctrl Keys.V
 
-    let update_input_listener () =
+    let update_input_listener () : unit =
 
         match input_listener with
         | InputListener.Text(s, _) ->
@@ -464,7 +472,7 @@ module Input =
 
         | InputListener.Bind callback ->
             match pop_any InputEvType.Press with
-            | ValueSome(x, _) ->
+            | ValueSome x ->
                 match x with
                 | Bind.Key(k, m) ->
                     if Bind.IsModifier k then
@@ -477,7 +485,7 @@ module Input =
                     callback x
             | ValueNone ->
                 match pop_any InputEvType.Release with
-                | ValueSome(x, _) ->
+                | ValueSome x ->
                     match x with
                     | Bind.Key(k, m) ->
                         if Bind.IsModifier k then
@@ -488,7 +496,9 @@ module Input =
 
         | InputListener.None -> ()
 
-    let begin_frame_events () =
+    /// Fetches all inputs since last frame from the input polling thread
+    /// This makes the data available during the next game frame for UI to query
+    let begin_frame_events () : unit =
         last_frame <- this_frame
         InputThread.fetch (&events_this_frame, &this_frame)
 
@@ -508,7 +518,7 @@ module Input =
         this_frame_finished <- false
         update_input_listener ()
 
-    let button_pressed_recently () = GLFW.GetTime() - last_input_event < 0.100
+    let button_pressed_recently () : bool = GLFW.GetTime() - last_input_event < 0.100
 
 module Mouse =
 
@@ -516,30 +526,39 @@ module Mouse =
     let RIGHT = MouseButton.Right
     let MIDDLE = MouseButton.Middle
 
-    let pos () =
+    /// X and Y coordinates of the mouse relative to the screen
+    /// Position is updated at the start of each frame
+    /// Calling multiple times during the same frame will always return the same value
+    let pos () : float32 * float32 =
         (Input.this_frame.MouseX, Input.this_frame.MouseY)
 
-    let in_bounds () = Input.this_frame.CursorInBounds
+    /// False if the mouse cursor is not within the rendered area of the game, when in letterboxing mode
+    /// Used to hide the game cursor and restore the real one if your mouse leaves the letterboxing area
+    let in_bounds () : bool = Input.this_frame.CursorInBounds
 
-    let x () = fst (pos ())
-    let y () = snd (pos ())
+    let x () : float32 = fst (pos ())
+    let y () : float32 = snd (pos ())
 
-    let scroll () =
+    /// Get how much the mouse wheel was scrolled since last frame
+    /// Once called, the caller is now the **sole owner** of this scrolling and subsequent calls will get 0 until next frame
+    /// UI components should only call when they have focus/the mouse is in their bounding box
+    /// UI update order = first come first served
+    let scroll () : float32 =
         let v = Input.scrolled_this_frame
         Input.scrolled_this_frame <- 0.0f
         v
 
-    let private click b : bool =
-        Input.pop_matching(Bind.Mouse b, InputEvType.Press)
+    let private click (mouse_button: MouseButton) : bool =
+        Input.pop_matching(Bind.Mouse mouse_button, InputEvType.Press)
 
     let left_click () : bool = click LEFT
     let right_click () : bool = click RIGHT
     let middle_click () : bool = click MIDDLE
 
-    let held b : bool = Input.held (Bind.Mouse b)
+    let held (mouse_button: MouseButton) : bool = Input.held (Bind.Mouse mouse_button)
 
-    let released b : bool =
-        Input.pop_matching(Bind.Mouse b, InputEvType.Release)
+    let released (mouse_button: MouseButton) : bool =
+        Input.pop_matching(Bind.Mouse mouse_button, InputEvType.Release)
 
     let moved_recently () : bool = GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
 

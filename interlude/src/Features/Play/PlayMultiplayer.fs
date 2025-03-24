@@ -34,6 +34,7 @@ module PlayScreenMultiplayer =
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = 0us
+        let mutable liveplay_position = -Time.infinity
         let mutable packet_count = 0
         let mutable play_time = 0.0
 
@@ -205,12 +206,14 @@ module PlayScreenMultiplayer =
                                 key_state <- Bitmask.set_key column key_state
 
                             liveplay.Add(time, key_state)
+                            liveplay_position <- max liveplay_position (time - first_note)
                     )
 
                     if chart_time / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
-                        send_replay_packet chart_time
+                        send_replay_packet liveplay_position
 
-                    this.State.Scoring.Update chart_time
+                    this.State.Scoring.Update liveplay_position
+                    liveplay_position <- max liveplay_position chart_time
 
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then finish_play chart_time
         }
