@@ -173,16 +173,16 @@ type Toolbar() =
             else
                 moved || Toolbar.slideout_amount.Moving
 
-        if not Toolbar.hidden && (%%"toolbar").Tapped() then
+        if not Toolbar.hidden && (%%"toolbar").Pressed() then
             collapsed_by_user <- not collapsed_by_user
             Toolbar.slideout_amount.Target <- if collapsed_by_user then 0.0f else 1.0f
 
-        if Screen.current_type <> ScreenType.Score && (%%"screenshot").Tapped() then
+        if Screen.current_type <> ScreenType.Score && (%%"screenshot").Pressed() then
             Toolbar.take_screenshot()
 
-        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"options").Tapped() then
+        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"options").Pressed() then
             OptionsMenuPage().Show()
-        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Tapped() then
+        if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Pressed() then
             QuickMenuPage().Show()
 
         if Mouse.hover(import_button.Bounds) && TaskTracking.in_progress() then

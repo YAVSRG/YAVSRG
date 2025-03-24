@@ -589,12 +589,12 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     refresh <- true
 
         for k = 0 to score_info.WithMods.Keys - 1 do
-            if GraphSettings.COLUMN_FILTER_KEYS.[k].Tapped() then
+            if GraphSettings.COLUMN_FILTER_KEYS.[k].Pressed() then
                 GraphSettings.column_filter.[k] <- not GraphSettings.column_filter.[k]
                 this.ApplyColumnFilter()
                 this.Refresh()
 
-        if expanded && (%%"exit").Tapped() then
+        if expanded && (%%"exit").Pressed() then
             expanded <- false
             this.Position <- NORMAL_POSITION
             refresh <- true

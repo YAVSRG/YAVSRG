@@ -220,7 +220,7 @@ type Chat(lobby: Lobby) =
         base.Draw()
 
     override this.Update(elapsed_ms, moved) =
-        if (%%"select").Tapped() then
+        if (%%"select").Pressed() then
             if chatline.Selected && current_message.Value <> "" then
                 lobby.SendMessage current_message.Value
                 current_message.Set ""

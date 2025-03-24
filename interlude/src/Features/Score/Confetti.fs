@@ -36,12 +36,12 @@ type Confetti () =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         taken_screenshot_cooldown <- taken_screenshot_cooldown - elapsed_ms
-        if (%%"screenshot").Tapped() then
+        if (%%"screenshot").Pressed() then
             if taken_screenshot_cooldown < 0.0 then
                 Toolbar.take_screenshot ()
             else
                 for _ = 1 to 100 do
-                    let x, y = Mouse.pos() 
+                    let x, y = Mouse.pos()
                     confetti.[i] <-
                         {
                             X = x

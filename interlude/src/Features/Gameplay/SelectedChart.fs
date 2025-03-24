@@ -397,21 +397,21 @@ module SelectedChart =
         )
 
     let change_rate_hotkeys(change_rate_by: Rate -> unit) =
-        if (%%"uprate_small").Tapped() then
+        if (%%"uprate_small").Pressed() then
             change_rate_by (0.01f<rate>)
-        elif (%%"uprate_half").Tapped() then
+        elif (%%"uprate_half").Pressed() then
             change_rate_by (0.05f<rate>)
-        elif (%%"uprate_big").Tapped() then
+        elif (%%"uprate_big").Pressed() then
             change_rate_by (0.25f<rate>)
-        elif (%%"uprate").Tapped() then
+        elif (%%"uprate").Pressed() then
             change_rate_by (0.1f<rate>)
-        elif (%%"downrate_small").Tapped() then
+        elif (%%"downrate_small").Pressed() then
             change_rate_by (-0.01f<rate>)
-        elif (%%"downrate_half").Tapped() then
+        elif (%%"downrate_half").Pressed() then
             change_rate_by (-0.05f<rate>)
-        elif (%%"downrate_big").Tapped() then
+        elif (%%"downrate_big").Pressed() then
             change_rate_by (-0.25f<rate>)
-        elif (%%"downrate").Tapped() then
+        elif (%%"downrate").Pressed() then
             change_rate_by (-0.1f<rate>)
 
     let init () =

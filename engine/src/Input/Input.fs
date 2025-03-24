@@ -577,7 +577,7 @@ type Bind with
         | Mouse _ -> Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.TappedOrRepeated() =
+    member this.PressedOrRepeated() =
         match this with
         | Key _
         | Mouse _ ->
@@ -585,7 +585,7 @@ type Bind with
             || Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.Tapped() =
+    member this.Pressed() =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Press)

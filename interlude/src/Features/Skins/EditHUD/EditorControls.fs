@@ -26,7 +26,7 @@ type private HUDEditorButton(label: string, hotkey: Bind, action: unit -> unit) 
                 this.Select true
         elif this.Focused then
             Selection.up true
-        if hotkey.Tapped() then
+        if hotkey.Pressed() then
             this.Select false
         base.Update(elapsed_ms, moved)
 
@@ -164,26 +164,26 @@ type private HUDEditorControls(ctx: PositionerContext) =
         if fade.Alpha > 10 then
             base.Update(elapsed_ms, moved)
         else
-            if (%%"options").Tapped() then
+            if (%%"options").Pressed() then
                 EditHUDPage(ctx).Show()
-            elif (%%"context_menu").Tapped() then
+            elif (%%"context_menu").Pressed() then
                 let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)
-            elif (%%"hud_anchor").Tapped() then
+            elif (%%"hud_anchor").Pressed() then
                 AnchorPage(ctx).Show()
-            elif (%%"hud_reset_position").Tapped() then
+            elif (%%"hud_reset_position").Pressed() then
                 ctx.ResetCurrentPosition()
 
-        if (%%"undo").Tapped() then
+        if (%%"undo").Pressed() then
             ctx.Undo()
-        elif (%%"delete").Tapped() then
+        elif (%%"delete").Pressed() then
             ctx.RemoveElement()
-        elif (%%"hud_flip_horizontal").Tapped() then
+        elif (%%"hud_flip_horizontal").Pressed() then
             ctx.HorizontalFlip()
-        elif (%%"hud_flip_vertical").Tapped() then
+        elif (%%"hud_flip_vertical").Pressed() then
             ctx.VerticalFlip()
-        elif (%%"hud_flip_horizontal_all").Tapped() then
+        elif (%%"hud_flip_horizontal_all").Pressed() then
             ctx.HorizontalFlipAll()
-        elif (%%"hud_flip_vertical_all").Tapped() then
+        elif (%%"hud_flip_vertical_all").Pressed() then
             ctx.VerticalFlipAll()
 
         if fade.Target = 0.0f then

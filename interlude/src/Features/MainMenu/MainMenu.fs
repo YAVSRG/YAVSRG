@@ -277,5 +277,5 @@ type MainMenuScreen() as this =
             else
                 0.0f
 
-        if (%%"select").Tapped() then
+        if (%%"select").Pressed() then
             play_action ()

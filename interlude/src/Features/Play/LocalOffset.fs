@@ -94,7 +94,7 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
         :> Widget
 
     override this.Update(elapsed_ms, moved) =
-        if offset_slider.Selected && (%%"select").Tapped() then
+        if offset_slider.Selected && (%%"select").Pressed() then
             Menu.Back()
 
         base.Update(elapsed_ms, moved)

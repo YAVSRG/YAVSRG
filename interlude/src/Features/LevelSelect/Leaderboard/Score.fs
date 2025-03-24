@@ -126,10 +126,10 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
 
         if this.Focused && (not this.FocusedByMouse || Mouse.hover this.Bounds) then
 
-            if (%%"context_menu").Tapped() then
+            if (%%"context_menu").Pressed() then
                 ScoreContextMenu(true, score_info).Show()
 
-        elif this.Focused && (%%"select").Tapped() then
+        elif this.Focused && (%%"select").Pressed() then
 
             if this.FocusedByMouse then
                 LevelSelect.choose_this_chart()

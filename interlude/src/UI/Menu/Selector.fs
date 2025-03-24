@@ -25,7 +25,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         Style.click.Play()
 
     override this.Init(parent: Widget) =
-        this 
+        this
         |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
         |* Clickable(
             (fun () ->
@@ -50,13 +50,13 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"left").Tapped() then
+            if (%%"left").Pressed() then
                 bk ()
-            elif (%%"right").Tapped() then
+            elif (%%"right").Pressed() then
                 fd ()
-            elif (%%"up").Tapped() then
+            elif (%%"up").Pressed() then
                 fd ()
-            elif (%%"down").Tapped() then
+            elif (%%"down").Pressed() then
                 bk ()
 
     static member FromEnum(setting: Setting<'T>) =
@@ -72,7 +72,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
         Position.BorderB(height + 2.0f * Style.PADDING).Shrink(Style.PADDING)
     )
 
-    let wrapped_setting = 
+    let wrapped_setting =
         let current_value = setting.Value
         match items |> Array.tryFind (fun (v, _) -> v = current_value) with
         | Some v -> v
@@ -101,7 +101,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
         Style.hover.Play()
-    
+
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array

@@ -162,7 +162,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 match multi_selection with
                 | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
                 | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
-            elif (%%"delete").Tapped() then
+            elif (%%"delete").Pressed() then
                 match context with
                 | LibraryGroupContext.Folder _
                 | LibraryGroupContext.Playlist _
@@ -193,7 +193,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
         if this.Expanded then
 
-            if (%%"group_multi_select").Tapped() then
+            if (%%"group_multi_select").Pressed() then
                 match multi_selection with
                 | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
                     deselect_multiple charts_as_seq

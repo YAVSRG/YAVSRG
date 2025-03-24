@@ -145,20 +145,20 @@ type LevelSelectScreen() =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%"select").Tapped() then
+        if (%%"select").Pressed() then
             LevelSelect.choose_this_chart ()
 
-        elif (%%"next").Tapped() then
+        elif (%%"next").Pressed() then
             Tree.next ()
-        elif (%%"previous").Tapped() then
+        elif (%%"previous").Pressed() then
             Tree.previous ()
-        elif (%%"next_group").Tapped() then
+        elif (%%"next_group").Pressed() then
             Tree.next_group ()
-        elif (%%"previous_group").Tapped() then
+        elif (%%"previous_group").Pressed() then
             Tree.previous_group ()
-        elif (%%"start").Tapped() then
+        elif (%%"start").Pressed() then
             Tree.top_of_group ()
-        elif (%%"end").Tapped() then
+        elif (%%"end").Pressed() then
             Tree.bottom_of_group ()
 
         Tree.update (this.Bounds.Top + TOP_BAR_HEIGHT, this.Bounds.Bottom, elapsed_ms)

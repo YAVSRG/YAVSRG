@@ -75,13 +75,13 @@ type RotationPicker(rotation: Setting<float>) as this =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"up").Tapped() then
+            if (%%"up").Pressed() then
                 fd ()
-            elif (%%"down").Tapped() then
+            elif (%%"down").Pressed() then
                 bk ()
-            elif (%%"left").Tapped() then
+            elif (%%"left").Pressed() then
                 bk ()
-            elif (%%"right").Tapped() then
+            elif (%%"right").Pressed() then
                 fd ()
 
 type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
@@ -147,13 +147,13 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"up").Tapped() then
+            if (%%"up").Pressed() then
                 fd ()
-            elif (%%"down").Tapped() then
+            elif (%%"down").Pressed() then
                 bk ()
-            elif (%%"left").Tapped() then
+            elif (%%"left").Pressed() then
                 bk ()
-            elif (%%"right").Tapped() then
+            elif (%%"right").Pressed() then
                 fd ()
 
 type NotesSettingsPage() =

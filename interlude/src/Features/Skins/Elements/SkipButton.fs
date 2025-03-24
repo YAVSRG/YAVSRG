@@ -49,7 +49,7 @@ type SkipButton(config: HudConfig, state: PlayState) =
         if active && Screen.current_type <> ScreenType.Practice then // hack for HUD editor
 
             if state.CurrentChartTime() < -SKIP_THRESHOLD then
-                if (%%"skip").Tapped() then
+                if (%%"skip").Pressed() then
                     Song.pause ()
                     Song.play_from (first_note - SKIP_DISTANCE)
                     active <- false

@@ -37,7 +37,7 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
                 this.Focus true
             if Mouse.left_clicked() then
                 this.Select true
-        if hotkey.Tapped() then
+        if hotkey.Pressed() then
             this.Select false
         base.Update(elapsed_ms, moved)
 

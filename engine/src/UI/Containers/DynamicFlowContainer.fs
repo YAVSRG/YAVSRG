@@ -224,13 +224,13 @@ module DynamicFlowContainer =
                 size_change ()
 
         override this.Navigate() =
-            if (%%"up").Tapped() then
+            if (%%"up").Pressed() then
                 this.Previous()
 
-            if (%%"down").Tapped() then
+            if (%%"down").Pressed() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
         override this.Init(parent) = base.Init parent
@@ -265,13 +265,13 @@ module DynamicFlowContainer =
                 size_change ()
 
         override this.Navigate() =
-            if (%%"left").Tapped() then
+            if (%%"left").Pressed() then
                 this.Previous()
 
-            if (%%"right").Tapped() then
+            if (%%"right").Pressed() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
         interface IWidth with
@@ -312,13 +312,13 @@ module DynamicFlowContainer =
                     size_change ()
 
         override this.Navigate() =
-            if (%%"left").Tapped() then
+            if (%%"left").Pressed() then
                 this.Next()
 
-            if (%%"right").Tapped() then
+            if (%%"right").Pressed() then
                 this.Previous()
 
-            if (%%"select").Tapped() then
+            if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
         interface IWidth with

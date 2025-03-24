@@ -128,13 +128,13 @@ module NavigationContainer =
         inherit Base()
 
         override this.Navigate() =
-            if this.CanPrevious() && (%%"up").Tapped() then
+            if this.CanPrevious() && (%%"up").Pressed() then
                 this.Previous()
 
-            if this.CanNext() && (%%"down").Tapped() then
+            if this.CanNext() && (%%"down").Pressed() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
     [<Sealed>]
@@ -142,13 +142,13 @@ module NavigationContainer =
         inherit Base()
 
         override this.Navigate() =
-            if this.CanPrevious() && (%%"left").Tapped() then
+            if this.CanPrevious() && (%%"left").Pressed() then
                 this.Previous()
 
-            if this.CanNext() && (%%"right").Tapped() then
+            if this.CanNext() && (%%"right").Pressed() then
                 this.Next()
 
-            if (%%"select").Tapped() then
+            if (%%"select").Pressed() then
                 this.SelectFocusedChild()
 
     type private GridSwitchItem = { Widget: Widget; X: int; Y: int }
@@ -360,19 +360,19 @@ module NavigationContainer =
 
             if this.Focused then
 
-                if this.CanUp() && (%%"up").Tapped() then
+                if this.CanUp() && (%%"up").Pressed() then
                     this.Up()
 
-                if this.CanDown() && (%%"down").Tapped() then
+                if this.CanDown() && (%%"down").Pressed() then
                     this.Down()
 
-                if this.CanLeft() && (%%"left").Tapped() then
+                if this.CanLeft() && (%%"left").Pressed() then
                     this.Left()
 
-                if this.CanRight() && (%%"right").Tapped() then
+                if this.CanRight() && (%%"right").Pressed() then
                     this.Right()
 
-                if (%%"select").Tapped() then
+                if (%%"select").Pressed() then
                     match this.WhoIsFocused with
                     | Some i ->
                         last_selected <- i

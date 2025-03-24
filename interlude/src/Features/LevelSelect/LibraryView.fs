@@ -114,23 +114,23 @@ type LibraryViewControls() =
         base.Update(elapsed_ms, moved)
 
         if SelectedChart.CACHE_DATA.IsSome then
-            if (%%"move_up_in_playlist").Tapped() then
+            if (%%"move_up_in_playlist").Pressed() then
                 CollectionActions.reorder_up SelectedChart.LIBRARY_CTX |> ignore // todo: play sound effect
-            elif (%%"move_down_in_playlist").Tapped() then
+            elif (%%"move_down_in_playlist").Pressed() then
                 CollectionActions.reorder_down SelectedChart.LIBRARY_CTX |> ignore
-            elif (%%"like").Tapped() then
+            elif (%%"like").Pressed() then
                 CollectionActions.toggle_liked SelectedChart.CACHE_DATA.Value
 
-            //elif (%%"skip").Tapped() then
+            //elif (%%"skip").Pressed() then
             //    FiltersPage().Show()
 
-            elif (%%"collections").Tapped() then
+            elif (%%"collections").Pressed() then
                 ManageCollectionsPage().Show()
-            elif (%%"table").Tapped() then
+            elif (%%"table").Pressed() then
                 SelectTablePage(LevelSelect.refresh_all).Show()
-            elif (%%"reverse_sort_mode").Tapped() then
+            elif (%%"reverse_sort_mode").Pressed() then
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh_all ()
-            elif (%%"reverse_group_mode").Tapped() then
+            elif (%%"reverse_group_mode").Pressed() then
                 Setting.app not options.ChartGroupReverse
                 LevelSelect.refresh_all ()

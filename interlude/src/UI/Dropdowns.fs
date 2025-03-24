@@ -71,7 +71,7 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
             dropdown.Update(elapsed_ms, moved)
 
             if
-                (%%"exit").Tapped()
+                (%%"exit").Pressed()
                 || not this.Focused
                 || Mouse.left_clicked ()
                 || Mouse.right_clicked ()
