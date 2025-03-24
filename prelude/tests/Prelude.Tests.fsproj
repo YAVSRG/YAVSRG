@@ -34,6 +34,7 @@
     <Compile Include="Charts\Charts.fs" />
     <Compile Include="Charts\Origins.fs" />
     <Compile Include="Charts\Conversions.fs" />
+    <Compile Include="Calculator\Color.fs" />
     <Compile Include="Mods\Implementation.fs" />
     <Compile Include="Mods\State.fs" />
     <Compile Include="Replays\Replays.fs" />
