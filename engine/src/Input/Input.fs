@@ -299,8 +299,8 @@ module Input =
 
     let mutable internal window: nativeptr<Window> = Unchecked.defaultof<_>
 
-    /// Stops listening to text input OR to the next button pressed, if system previously was
-    let remove_listener () =
+    /// Stops listening to text input/next button pressed
+    let remove_listener () : unit =
         match input_listener with
         | InputListener.Text(_, on_remove) ->
             InputThread.enable_typing false
@@ -321,27 +321,16 @@ module Input =
         input_listener_mouse_cancel <- if mouse_cancel then 0f else -infinityf
 
     /// Used for UIs that let the user bind a key to a hotkey
-    /// The very next button (or modifier + button combo) they press will be passed to `callback`
+    /// The next key (including modifiers) pressed will be passed to `callback` as a Bind
     /// Then the listener is removed
     let listen_to_next_key (callback: Bind -> unit) : unit =
         remove_listener ()
         input_listener <- InputListener.Bind callback
 
-    let pop_matching (bind: Bind, action: InputAction) : bool =
-        let mutable found = false
+    let key_held_any_modifiers (key: Keys) : bool =
+        this_frame.HeldKeys.Contains key
 
-        let rec f evs =
-            match evs with
-            | [] -> []
-            | event :: xs when event.Bind = bind && event.Action = action ->
-                found <- true
-                xs
-            | x :: xs -> x :: (f xs)
-
-        events_this_frame <- f events_this_frame
-        found
-
-    let pop_key_with_any_modifiers (key: Keys, action: InputAction) : (bool * bool * bool) voption =
+    let pop_key_any_modifiers (key: Keys, action: InputAction) : (bool * bool * bool) voption =
         let mutable out = ValueNone
 
         let rec f evs =
@@ -349,7 +338,7 @@ module Input =
             | [] -> []
             | event :: xs when event.Action = action ->
                 match event.Bind with
-                | Bind.Key (k1, modifiers) when k1 = key ->
+                | Bind.Key (k, modifiers) when k = key ->
                     out <- ValueSome modifiers
                     xs
                 | _ -> event :: f xs
@@ -366,8 +355,8 @@ module Input =
             | Bind.Mouse b, Bind.Mouse B when b = B -> true
             | _ -> false
 
-        let rec pop_inputs_matching_binds evs =
-            match evs with
+        let rec pop_inputs_matching_binds events =
+            match events with
             | [] -> []
             | event :: xs when event.Action <> InputAction.Repeat ->
                 let mutable i = 0
@@ -385,31 +374,42 @@ module Input =
 
         events_this_frame <- pop_inputs_matching_binds events_this_frame
 
-    let private pop_any (action: InputAction) : Bind voption =
+    let internal pop_matching (bind: Bind, action: InputAction) : bool =
+        let mutable found = false
+
+        let rec search events =
+            match events with
+            | [] -> []
+            | event :: xs when event.Bind = bind && event.Action = action ->
+                found <- true
+                xs
+            | x :: xs -> x :: (search xs)
+
+        events_this_frame <- search events_this_frame
+        found
+
+    let internal pop_any (action: InputAction) : Bind voption =
         let mutable out = ValueNone
 
-        let rec f evs =
-            match evs with
+        let rec search events =
+            match events with
             | [] -> []
             | event :: xs when event.Action = action ->
                 out <- ValueSome(event.Bind)
                 xs
-            | x :: xs -> x :: (f xs)
+            | x :: xs -> x :: (search xs)
 
-        events_this_frame <- f events_this_frame
+        events_this_frame <- search events_this_frame
         out
-
-    let key_held_any_modifiers (key: Keys) : bool =
-        this_frame.HeldKeys.Contains key
 
     let button_pressed_recently () : bool = GLFW.GetTime() - last_input_event < 0.100
 
-    let held (b: Bind) : bool =
+    let held (bind: Bind) : bool =
         if this_frame_finished then
             false
         else
 
-        match b with
+        match bind with
         | Bind.Key(Keys.LeftControl, _)
         | Bind.Key(Keys.RightControl, _) -> this_frame.Ctrl
         | Bind.Key(Keys.LeftAlt, _)
@@ -422,47 +422,33 @@ module Input =
         | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
         | Bind.Dummy -> false
 
-    let finish_frame_events () : unit =
-        input_listener_mouse_cancel <-
-            input_listener_mouse_cancel
-            + abs (this_frame.MouseX - last_frame.MouseX)
-            + abs (this_frame.MouseY - last_frame.MouseY)
-
-        last_frame <- this_frame
-        events_this_frame <- []
-        this_frame_finished <- true
-
-    let init (_window: nativeptr<Window>) : unit =
-        window <- _window
-        InputThread.init window
-
     let private DELETE_CHARACTER = Bind.mk Keys.Backspace
     let private DELETE_WORD = Bind.ctrl Keys.Backspace
     let private COPY = Bind.ctrl Keys.C
     let private PASTE = Bind.ctrl Keys.V
 
-    let update_input_listener () : unit =
+    let private update_input_listener () : unit =
 
         match input_listener with
-        | InputListener.Text(s, _) ->
+        | InputListener.Text(text, _) ->
 
             if this_frame.TypedText <> "" then
-                s.Value <- s.Value + this_frame.TypedText
+                text.Value <- text.Value + this_frame.TypedText
 
-            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputAction.Press) || pop_matching(DELETE_CHARACTER, InputAction.Repeat)) then
-                Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
+            if text.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputAction.Press) || pop_matching(DELETE_CHARACTER, InputAction.Repeat)) then
+                Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) text
 
-            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputAction.Press) || pop_matching(DELETE_WORD, InputAction.Repeat)) then
-                s.Value <-
-                    let parts = s.Value.Split(" ")
+            elif text.Value.Length > 0 && (pop_matching(DELETE_WORD, InputAction.Press) || pop_matching(DELETE_WORD, InputAction.Repeat)) then
+                text.Value <-
+                    let parts = text.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
 
             elif pop_matching(COPY, InputAction.Press) then
-                GLFW.SetClipboardString(window, s.Value)
+                GLFW.SetClipboardString(window, text.Value)
 
             elif pop_matching(PASTE, InputAction.Press) then
-                s.Value <-
-                    s.Value
+                text.Value <-
+                    text.Value
                     + try
                         GLFW.GetClipboardString(window)
                       with _ ->
@@ -473,25 +459,25 @@ module Input =
 
         | InputListener.Bind callback ->
             match pop_any InputAction.Press with
-            | ValueSome x ->
-                match x with
-                | Bind.Key(k, m) ->
-                    if Bind.IsModifier k then
+            | ValueSome bind ->
+                match bind with
+                | Bind.Key(key, _) ->
+                    if Bind.IsModifier key then
                         ()
                     else
                         remove_listener ()
-                        callback x
+                        callback bind
                 | _ ->
                     remove_listener ()
-                    callback x
+                    callback bind
             | ValueNone ->
                 match pop_any InputAction.Release with
-                | ValueSome x ->
-                    match x with
-                    | Bind.Key(k, m) ->
-                        if Bind.IsModifier k then
+                | ValueSome bind ->
+                    match bind with
+                    | Bind.Key(key, _) ->
+                        if Bind.IsModifier key then
                             remove_listener ()
-                            callback x
+                            callback bind
                     | _ -> ()
                 | ValueNone -> ()
 
@@ -518,6 +504,20 @@ module Input =
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
         this_frame_finished <- false
         update_input_listener ()
+
+    let finish_frame_events () : unit =
+        input_listener_mouse_cancel <-
+            input_listener_mouse_cancel
+            + abs (this_frame.MouseX - last_frame.MouseX)
+            + abs (this_frame.MouseY - last_frame.MouseY)
+
+        last_frame <- this_frame
+        events_this_frame <- []
+        this_frame_finished <- true
+
+    let init (_window: nativeptr<Window>) : unit =
+        window <- _window
+        InputThread.init window
 
 module Mouse =
 

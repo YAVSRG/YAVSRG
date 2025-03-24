@@ -350,19 +350,19 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
         let mutable moved = moved
 
         if this.IsSelectedElement then
-            match Input.pop_key_with_any_modifiers(Keys.Up, InputAction.Press) with
+            match Input.pop_key_any_modifiers(Keys.Up, InputAction.Press) with
             | ValueSome modifiers -> this.KeyboardMovement(0.0f, -1.0f, modifiers)
             | _ -> ()
 
-            match Input.pop_key_with_any_modifiers(Keys.Down, InputAction.Press) with
+            match Input.pop_key_any_modifiers(Keys.Down, InputAction.Press) with
             | ValueSome modifiers -> this.KeyboardMovement(0.0f, 1.0f, modifiers)
             | _ -> ()
 
-            match Input.pop_key_with_any_modifiers(Keys.Left, InputAction.Press) with
+            match Input.pop_key_any_modifiers(Keys.Left, InputAction.Press) with
             | ValueSome modifiers -> this.KeyboardMovement(-1.0f, 0.0f, modifiers)
             | _ -> ()
 
-            match Input.pop_key_with_any_modifiers(Keys.Right, InputAction.Press) with
+            match Input.pop_key_any_modifiers(Keys.Right, InputAction.Press) with
             | ValueSome modifiers -> this.KeyboardMovement(1.0f, 0.0f, modifiers)
             | _ -> ()
 
@@ -372,10 +372,10 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             let hold_right = Input.key_held_any_modifiers Keys.Right
 
             let any_repeat =
-                Input.pop_key_with_any_modifiers(Keys.Up, InputAction.Repeat)
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Down, InputAction.Repeat))
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Left, InputAction.Repeat))
-                |> ValueOption.orElseWith (fun () -> Input.pop_key_with_any_modifiers(Keys.Right, InputAction.Repeat))
+                Input.pop_key_any_modifiers(Keys.Up, InputAction.Repeat)
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Down, InputAction.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Left, InputAction.Repeat))
+                |> ValueOption.orElseWith (fun () -> Input.pop_key_any_modifiers(Keys.Right, InputAction.Repeat))
             match any_repeat with
             | ValueSome modifiers ->
                 if hold_up then this.KeyboardMovement(0.0f, -1.0f, modifiers)
