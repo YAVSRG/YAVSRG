@@ -23,7 +23,7 @@ type private ModSelector(id: string, current_state: unit -> int option, action: 
     let TOP_HEIGHT = 70.0f
 
     override this.Init(parent) =
-        this |* Clickable.Focus this
+        this |* MouseListener.Focus this
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =

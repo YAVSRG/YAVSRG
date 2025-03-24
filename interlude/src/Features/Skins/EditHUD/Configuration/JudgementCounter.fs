@@ -34,7 +34,7 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
 
     override this.Init(parent: Widget) =
         this
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
                 fd ()

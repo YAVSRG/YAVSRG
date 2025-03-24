@@ -27,7 +27,7 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
     override this.Init(parent: Widget) =
         this
         |+ Text((fun () -> snd items.[index]), Align = Alignment.LEFT)
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
                 fd ()
@@ -83,7 +83,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
     override this.Init(parent) =
         this
         |+ Text((fun () -> snd wrapped_setting.Value), Align = Alignment.LEFT)
-        |+ Clickable.Focus this
+        |+ MouseListener.Focus this
         |* dropdown_wrapper
 
         base.Init parent

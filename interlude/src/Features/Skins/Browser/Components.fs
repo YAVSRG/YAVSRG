@@ -77,7 +77,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     | None -> Logging.Warn "Failed to load noteskin preview '%s'" version.Preview
                 )
         }
-        |* Clickable.Focus this
+        |* MouseListener.Focus this
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
@@ -156,7 +156,7 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     | None -> Logging.Warn "Failed to load noteskin thumbnail '%s'" group.Thumbnail
                 )
         }
-        |* Clickable.Focus this
+        |* MouseListener.Focus this
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =

@@ -60,7 +60,7 @@ type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
 
     override this.Init(parent) =
         this
-        |+ Clickable.Focus this
+        |+ MouseListener.Focus this
         |* Text(
             label,
             Align = Alignment.CENTER,

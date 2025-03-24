@@ -59,7 +59,7 @@ type TableCard(online_table: Tables.List.Table) as this =
             , Position = Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING)
         )
         |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
-        |* Clickable.Focus this
+        |* MouseListener.Focus this
 
         existing <- Tables.by_id online_table.Id
 

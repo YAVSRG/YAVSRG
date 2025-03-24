@@ -33,7 +33,7 @@ type private TableButton(name: string, action: unit -> unit) =
             Align = Alignment.LEFT,
             Position = Position.Shrink Style.PADDING
         )
-        |* Clickable.Focus this
+        |* MouseListener.Focus this
 
         base.Init parent
 

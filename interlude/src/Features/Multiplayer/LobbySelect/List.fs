@@ -21,7 +21,7 @@ type LobbyInfoCard(info: LobbyInfo) =
             Position = Position.SliceB(40.0f).Shrink(5.0f),
             Align = Alignment.LEFT
         )
-        |+ Clickable(fun () -> Network.join_lobby info.Id)
+        |+ MouseListener(fun () -> Network.join_lobby info.Id)
         |* Text(
             info.Players.ToString() + " " + Icons.USERS,
             Color = K Colors.text_subheading,

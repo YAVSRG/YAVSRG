@@ -32,7 +32,7 @@ type RotationPicker(rotation: Setting<float>) as this =
             Align = Alignment.LEFT,
             Color = K Colors.text_subheading
         )
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 if not this.Selected then
                     this.Select true
@@ -105,7 +105,7 @@ type NoteColorPicker(color: Setting<byte>, style: ColorScheme, index: int) =
                 .Title(sprintf "%s: %O" (%"noteskin.notecolors") style)
                 .Body(%(sprintf "noteskin.notecolors.%s.%i" (style.ToString().ToLower()) index))
         )
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 if not this.Selected then
                     this.Select true

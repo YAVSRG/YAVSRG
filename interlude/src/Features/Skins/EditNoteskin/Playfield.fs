@@ -20,7 +20,7 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
     override this.Init(parent: Widget) =
         this
         |+ Text((fun () -> sprintf "%.0f" spacing.Value), Align = Alignment.CENTER, Color = K Colors.text_subheading)
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
                 add 5.0f

@@ -99,7 +99,7 @@ type Chat(lobby: Lobby) =
                         }
 
                     container
-                    |+ Clickable(
+                    |+ MouseListener(
                         (fun () ->
                             Screen.change_new
                                 (fun () -> ScoreScreen(data, (ImprovementFlags.None, None), false) :> Screen)

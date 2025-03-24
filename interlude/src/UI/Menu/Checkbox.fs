@@ -13,7 +13,7 @@ type Checkbox(setting: Setting<bool>) =
             Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text), 
             Align = Alignment.LEFT
         )
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
             ),

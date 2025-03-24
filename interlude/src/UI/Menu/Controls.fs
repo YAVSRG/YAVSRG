@@ -87,7 +87,7 @@ type PageButton(localised_text, on_click) as this =
             Align = Alignment.LEFT,
             Position = Position.Shrink(Style.PADDING)
         )
-        |+ Clickable.Focus this
+        |+ MouseListener.Focus this
         |* seq {
             if this.Hotkey <> Bind.Dummy then
                 yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey,
@@ -179,7 +179,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
         Style.hover.Play()
 
     override this.Init(parent) =
-        this |* Clickable.Focus this
+        this |* MouseListener.Focus this
         base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =

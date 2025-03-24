@@ -160,7 +160,7 @@ type Score(score_info: ScoreInfo) =
         base.OnFocus(by_mouse)
 
     override this.Init(parent: Widget) =
-        this |* Clickable.Focus this
+        this |* MouseListener.Focus this
 
         base.Init parent
 

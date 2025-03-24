@@ -10,7 +10,7 @@ open Interlude.UI
 type UpdateButton() as this =
     inherit Container(NodeType.Button(fun () -> this.Click()))
 
-    do this |* Clickable.Focus this
+    do this |* MouseListener.Focus this
 
     let mutable download_progress = 0.0f
 

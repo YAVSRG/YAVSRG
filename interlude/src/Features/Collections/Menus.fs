@@ -186,7 +186,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
         )
         |> fun x ->
             if not this.Disabled then
-                x.Add <| Clickable.Focus this
+                x.Add <| MouseListener.Focus this
 
         base.Init parent
 

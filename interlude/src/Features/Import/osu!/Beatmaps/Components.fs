@@ -93,7 +93,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         //    fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
         //    ,
         //    Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
-        |* Clickable.Focus this
+        |* MouseListener.Focus this
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =

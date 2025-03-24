@@ -36,7 +36,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
                     elif this.Focused then Colors.text_yellow_2
                     else this.TextColor()
         )
-        |+ Clickable.Focus(this, Floating = this.Floating)
+        |+ MouseListener.Focus(this, Floating = this.Floating)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
@@ -94,7 +94,7 @@ type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click
                 ),
             Position = Position.ShrinkL icon_size
         )
-        |+ Clickable.Focus(this)
+        |+ MouseListener.Focus(this)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->

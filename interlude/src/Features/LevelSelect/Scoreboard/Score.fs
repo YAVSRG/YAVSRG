@@ -32,7 +32,7 @@ type private ScoreCard(score_info: ScoreInfo) =
 
     override this.Init(parent) =
         this
-        |* Clickable.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(false, score_info).Show()))
+        |* MouseListener.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(false, score_info).Show()))
 
         base.Init parent
 

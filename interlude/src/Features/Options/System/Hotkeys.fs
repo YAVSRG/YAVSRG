@@ -34,7 +34,7 @@ type private Keybinder(hotkey: Hotkey) as this =
             Align = Alignment.LEFT,
             Position = Position.ShrinkL 20.0f
         )
-        |* Clickable.Focus(
+        |* MouseListener.Focus(
             this,
             OnHover =
                 fun b ->

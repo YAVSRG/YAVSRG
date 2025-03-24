@@ -36,7 +36,7 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
         base.Draw()
 
     override this.Init(parent: Widget) =
-        this |+ Clickable.Focus(this, Floating = this.Floating)
+        this |+ MouseListener.Focus(this, Floating = this.Floating)
         |* HotkeyAction(
             this.Hotkey,
             fun () ->
@@ -86,7 +86,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
 
     override this.Init(parent) =
         this
-        |+ Clickable.Focus this
+        |+ MouseListener.Focus this
         |* HotkeyAction(
             this.Hotkey,
             fun () ->

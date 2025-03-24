@@ -42,7 +42,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
 
         if this.Clickable then
             this.Add(
-                Clickable.Focus(
+                MouseListener.Focus(
                     this,
                     OnHover =
                         (fun b ->

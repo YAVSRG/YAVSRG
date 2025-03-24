@@ -51,7 +51,7 @@ type Slider(setting: Setting.Bounded<float32>) =
             Position = Position.SliceL TEXTWIDTH,
             Color = fun () -> if typed_number.Value <> "" then Colors.text_yellow_2 else Colors.text
         )
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
                 Style.click.Play()

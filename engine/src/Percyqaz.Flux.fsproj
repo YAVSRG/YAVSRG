@@ -40,7 +40,7 @@
 	  <Compile Include="UI\Primitives\Image.fs" />
 	  <Compile Include="UI\Primitives\Frame.fs" />
 	  <Compile Include="UI\Primitives\Conditional.fs" />
-	  <Compile Include="UI\Primitives\ClickListener.fs" />
+	  <Compile Include="UI\Primitives\MouseListener.fs" />
 	  <Compile Include="UI\Primitives\HotkeyListener.fs" />
 	  <Compile Include="UI\Containers\Interfaces.fs" />
 	  <Compile Include="UI\Containers\Container.fs" />

@@ -3,7 +3,7 @@
 open Percyqaz.Flux.Input
 
 [<Sealed>]
-type Clickable(on_left_click: unit -> unit) =
+type MouseListener(on_left_click: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     let mutable hover = false
@@ -32,7 +32,7 @@ type Clickable(on_left_click: unit -> unit) =
     override this.Draw() = ()
 
     static member Focus(w: Widget) =
-        Clickable(
+        MouseListener(
             (fun () -> w.Select true),
             OnHover =
                 fun b ->

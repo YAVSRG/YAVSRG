@@ -39,7 +39,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
 
     override this.Init(parent: Widget) =
         this
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 this.Select true
                 fd ()

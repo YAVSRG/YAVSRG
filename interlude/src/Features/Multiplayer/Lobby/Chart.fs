@@ -216,7 +216,7 @@ type SelectedChart(lobby: Lobby) =
             Position = Position.ShrinkT(100.0f).SliceT(60.0f)
         )
 
-        |+ Clickable(
+        |+ MouseListener(
             fun () -> if lobby.YouAreHost then Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
             , Position = Position.SliceT(100.0f)
         )

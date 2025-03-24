@@ -36,7 +36,7 @@ type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool 
                     else Color.Transparent
                 )
         )
-        |* Clickable(
+        |* MouseListener(
             (fun () -> this.Select true),
             OnHover =
                 fun b ->

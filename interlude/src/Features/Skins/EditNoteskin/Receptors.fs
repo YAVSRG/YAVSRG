@@ -27,7 +27,7 @@ type ReceptorColorPicker(color: Setting<int>) =
 
     override this.Init(parent: Widget) =
         this
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 if not this.Selected then
                     this.Select true
@@ -94,7 +94,7 @@ type ColumnLightColorPicker(color: Setting<int>) =
 
     override this.Init(parent: Widget) =
         this
-        |* Clickable(
+        |* MouseListener(
             (fun () ->
                 if not this.Selected then
                     this.Select true
