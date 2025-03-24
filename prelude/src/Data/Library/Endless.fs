@@ -7,7 +7,6 @@ open Prelude.Mods
 open Prelude.Gameplay.Rulesets
 open Prelude.Calculator.Patterns
 open Prelude.Data.Library
-open Prelude.Data.Library.Collections
 open Prelude.Data.User
 
 type SuggestionContext =

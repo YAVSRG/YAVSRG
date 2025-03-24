@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Data.Library
-open Prelude.Data.Library.Collections
 open Interlude.Content
 open Interlude.UI
 

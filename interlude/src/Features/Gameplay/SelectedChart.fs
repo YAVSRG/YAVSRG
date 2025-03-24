@@ -12,7 +12,6 @@ open Prelude.Calculator.Patterns
 open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
 open Interlude.Content
 open Interlude.Options

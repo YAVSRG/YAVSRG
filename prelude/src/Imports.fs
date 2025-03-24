@@ -2,9 +2,6 @@
 
 open System
 open System.IO
-open System.Linq
-open System.Collections.Generic
-open System.Security.Cryptography
 open Percyqaz.Common
 open Percyqaz.Data
 open Prelude

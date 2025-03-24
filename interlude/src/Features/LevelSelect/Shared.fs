@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
-open Prelude.Data.Library.Collections
 open Prelude.Data.Library.Endless
 open Interlude.UI
 open Interlude.Content

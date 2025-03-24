@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
-open Prelude.Data.Library.Collections
+open Prelude.Data.Library
 
 type Library =
     {

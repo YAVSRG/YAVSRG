@@ -14,6 +14,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
+open Interlude.Features.Collections
 
 type MissingScore() =
     inherit StaticWidget(NodeType.None)
@@ -187,9 +188,6 @@ module private ScoreList =
 
             member this.Handle(action) = action ()
         }
-
-open Prelude.Data.Library.Collections
-open Interlude.Features.Collections
 
 type ScoreList(start_time: int64, end_time: int64) =
     inherit Container(NodeType.None)

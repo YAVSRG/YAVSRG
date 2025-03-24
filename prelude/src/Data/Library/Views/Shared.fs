@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Prelude.Calculator.Patterns
 open Prelude.Data.User
-open Prelude.Data.Library.Collections
+open Prelude.Data.Library
 
 [<AutoOpen>]
 module internal Shared =

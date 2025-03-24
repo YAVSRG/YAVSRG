@@ -3,7 +3,7 @@
 open System
 open System.Collections.Generic
 open Prelude.Backbeat
-open Prelude.Data.Library.Collections
+open Prelude.Data.Library
 
 module LibraryView =
 
@@ -71,7 +71,7 @@ module LibraryView =
                         }
                     )
 
-        let liked_songs : Group option = 
+        let liked_songs : Group option =
             ctx.Library.Collections.EnumerateLikes
             |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
             |> filter_by.Apply
@@ -93,7 +93,7 @@ module LibraryView =
             | None -> ()
 
             yield!
-                groups 
+                groups
                 |> Seq.sortBy (fun kvp -> group_name_to_smart_sort_list kvp.Key)
                 |> if reverse_groups then Seq.rev else id
                 |> Seq.map (|KeyValue|)
@@ -132,7 +132,7 @@ module LibraryView =
                         }
                     )
 
-        groups 
+        groups
         |> Seq.sortBy (_.Key >> (fun (index, group_name) -> (index, group_name.ToLowerInvariant())))
         |> if reverse_groups then Seq.rev else id
         |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value)
@@ -166,7 +166,7 @@ module LibraryView =
         |> Seq.sortBy (_.Key >> (fun (index, group_name) -> (index, group_name.ToLowerInvariant())))
         |> if reverse_groups then Seq.rev else id
         |> Seq.map (fun kvp -> snd kvp.Key, kvp.Value.ToGroup reverse_sorting)
-    
+
     let private get_packs
         (filter_by: FilteredSearch)
         (reverse_groups: bool)
@@ -195,7 +195,7 @@ module LibraryView =
         |> Seq.sortBy (fun kvp -> group_name_to_smart_sort_list kvp.Key)
         |> if reverse_groups then Seq.rev else id
         |> Seq.map (fun kvp -> kvp.Key, kvp.Value.ToGroup reverse_sorting)
-    
+
     let get_groups
         (filter_by: FilteredSearch)
         (group_by: GroupMethod)
@@ -213,7 +213,7 @@ module LibraryView =
                 get_normal_groups filter_by func reverse_groups sort_by reverse_sorting ctx
             | Packs -> get_packs filter_by reverse_groups sort_by reverse_sorting ctx
             | Collections -> get_collection_groups filter_by reverse_groups sort_by reverse_sorting ctx
-            | Levels -> 
+            | Levels ->
                 match table with
                 | Some t -> get_table_groups filter_by reverse_groups sort_by reverse_sorting t ctx
                 | None -> Seq.empty

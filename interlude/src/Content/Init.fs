@@ -7,7 +7,6 @@ open Prelude.Skins.HudLayouts
 open Prelude.Skins.Noteskins
 open Prelude.Skins.Themes
 open Prelude.Backbeat
-open Prelude.Data.Library.Collections
 open Prelude.Data.Library
 open Prelude.Data.User
 
