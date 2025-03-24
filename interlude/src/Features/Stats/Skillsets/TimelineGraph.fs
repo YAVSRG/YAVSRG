@@ -67,7 +67,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
                 hover_index <- hover_index - 1
             show_tooltip <- date_data.Length > 0
 
-            if show_tooltip && Mouse.left_click() then
+            if show_tooltip && Mouse.left_clicked() then
                 SkillTimelineGraph.view_date_ev.Trigger(fst date_data.[hover_index])
 
             if (%%"left").Pressed() then

@@ -61,10 +61,10 @@ type Clickable(on_left_click: unit -> unit) =
         elif not was_hovering && hover && Mouse.moved_recently () then
             this.OnHover true
         elif hover then
-            if Mouse.left_click () then
+            if Mouse.left_clicked () then
                 this.OnLeftClick()
 
-            if Mouse.right_click () then
+            if Mouse.right_clicked () then
                 this.OnRightClick()
 
     override this.Draw() = ()

@@ -242,7 +242,7 @@ module Callout =
                 let button_size = tsize + spacing * 2.0f
                 let bounds = Rect.FromSize(x, y, width, button_size)
 
-                if Mouse.hover bounds && Mouse.left_click () then
+                if Mouse.hover bounds && Mouse.left_clicked () then
                     action ()
 
                 y <- y + button_size

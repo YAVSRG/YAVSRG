@@ -33,7 +33,7 @@ type SubPositioner(drag: bool * (float32 * float32) * (float32 * float32) -> uni
                 finish_drag ()
                 this.Focus true
         | None ->
-            if hover && Mouse.left_click () then
+            if hover && Mouse.left_clicked () then
                 dragging_from <- Some(Mouse.pos ())
                 this.Select true
 
@@ -418,12 +418,12 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                 dragging_from <- None
                 save_pos ()
         | None ->
-            if hover && Mouse.left_click () then
+            if hover && Mouse.left_clicked () then
                 if this.IsSelectedElement then
                     dragging_from <- Some(Mouse.pos ())
                 else
                     ctx.Select element
-            elif hover && Mouse.right_click () && HudElement.can_configure element then
+            elif hover && Mouse.right_clicked () && HudElement.can_configure element then
                 show_menu element (fun () -> ctx.Recreate element)
 
         base.Update(elapsed_ms, moved)

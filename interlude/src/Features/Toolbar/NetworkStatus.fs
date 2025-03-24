@@ -61,7 +61,7 @@ type NetworkStatus() as this =
                 retry_timer.Reset()
                 Network.connect ()
 
-        if Mouse.hover this.Bounds && Mouse.left_click () then
+        if Mouse.hover this.Bounds && Mouse.left_clicked () then
             Selection.clear ()
             this.ToggleDropdown()
 

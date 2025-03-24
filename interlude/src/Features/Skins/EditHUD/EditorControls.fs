@@ -22,7 +22,7 @@ type private HUDEditorButton(label: string, hotkey: Bind, action: unit -> unit) 
         if Mouse.hover this.Bounds then
             if not this.Focused && Mouse.moved_recently() then
                 this.Focus true
-            if Mouse.left_click() then
+            if Mouse.left_clicked() then
                 this.Select true
         elif this.Focused then
             Selection.up true

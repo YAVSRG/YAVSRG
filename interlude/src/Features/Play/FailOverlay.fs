@@ -35,7 +35,7 @@ type FailButton(kind: FailButtonType, label: string, hotkey: Bind, action: unit 
         if Mouse.hover this.Bounds then
             if not this.Focused && Mouse.moved_recently() then
                 this.Focus true
-            if Mouse.left_click() then
+            if Mouse.left_clicked() then
                 this.Select true
         if hotkey.Tapped() then
             this.Select false

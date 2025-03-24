@@ -571,9 +571,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             this.Refresh()
 
         if Mouse.hover this.Bounds then
-            if Mouse.right_click() then
+            if Mouse.right_clicked() then
                 ScoreGraphSettingsPage(this).Show()
-            elif Mouse.left_click() then
+            elif Mouse.left_clicked() then
                 expanded <- not expanded
                 this.Position <- if expanded then EXPANDED_POSITION else NORMAL_POSITION
                 refresh <- true

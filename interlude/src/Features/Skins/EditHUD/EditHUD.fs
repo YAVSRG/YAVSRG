@@ -81,7 +81,7 @@ module EditHudScreen =
 
                 base.Update(elapsed_ms, moved)
 
-                if Mouse.left_click() then
+                if Mouse.left_clicked() then
                     ctx.ClearSelection()
 
                 this.State.Scoring.Update chart_time

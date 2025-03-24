@@ -240,7 +240,7 @@ module Tree =
 
             if currently_drag_scrolling then
                 update_drag_scroll (origin, total_height, tree_height)
-            elif mx > Render.width() * 0.2f && my < originB && my > origin && (Mouse.left_click () || Mouse.right_click ()) then
+            elif mx > Render.width() * 0.2f && my < originB && my > origin && (Mouse.left_clicked () || Mouse.right_clicked ()) then
                 start_drag_scroll ()
             elif mx < Render.width() * 0.2f then
                 if not scroll_to_chart_once then

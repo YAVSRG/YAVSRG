@@ -68,7 +68,7 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
         if hover && not was_hover then
             Style.hover.Play()
 
-        if hover && Mouse.left_click() then
+        if hover && Mouse.left_clicked() then
             on_select()
 
     override this.Draw() =

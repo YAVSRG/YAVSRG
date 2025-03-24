@@ -79,7 +79,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
             if Mouse.hover pos then
                 hovered_day <- Some day
 
-                if Mouse.left_click() then
+                if Mouse.left_clicked() then
                     match session_dates.TryFind day with
                     | Some (sessions, _) ->
                         selected.Value <- Some (day, sessions.[0])
@@ -189,7 +189,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
             if Mouse.hover pos then
                 hovered_day <- Some day
 
-                if Mouse.left_click() then
+                if Mouse.left_clicked() then
                     match session_dates.TryFind day with
                     | Some (sessions, _) ->
                         selected.Value <- Some (day, sessions.[0])

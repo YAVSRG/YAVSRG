@@ -547,12 +547,12 @@ module Mouse =
         Input.scrolled_this_frame <- 0.0f
         v
 
-    let private click (mouse_button: MouseButton) : bool =
+    let private clicked (mouse_button: MouseButton) : bool =
         Input.pop_matching(Bind.Mouse mouse_button, InputAction.Press)
 
-    let left_click () : bool = click LEFT
-    let right_click () : bool = click RIGHT
-    let middle_click () : bool = click MIDDLE
+    let left_clicked () : bool = clicked LEFT
+    let right_clicked () : bool = clicked RIGHT
+    let middle_clicked () : bool = clicked MIDDLE
 
     let held (mouse_button: MouseButton) : bool = Input.held (Bind.Mouse mouse_button)
 

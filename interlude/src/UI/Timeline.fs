@@ -170,7 +170,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if this.Bounds.Bottom - Mouse.y () < 100.0f && Mouse.left_click() then
+        if this.Bounds.Bottom - Mouse.y () < 100.0f && Mouse.left_clicked() then
             dragging <- true
             unpause_after_drag <- Song.playing()
             if unpause_after_drag then

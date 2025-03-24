@@ -39,7 +39,7 @@ type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if lobby.YouAreHost && Mouse.hover this.Bounds && Mouse.left_click () then
+        if lobby.YouAreHost && Mouse.hover this.Bounds && Mouse.left_clicked () then
             ConfirmPage([ name ] %> "lobby.confirm_transfer_host", (fun () -> lobby.TransferHost name))
                 .Show()
 

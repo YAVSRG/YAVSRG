@@ -73,8 +73,8 @@ type DropdownWrapper(positioning: IHeight -> Position) as this =
             if
                 (%%"exit").Tapped()
                 || not this.Focused
-                || Mouse.left_click ()
-                || Mouse.right_click ()
+                || Mouse.left_clicked ()
+                || Mouse.right_clicked ()
             then
                 this.Dismiss()
 
