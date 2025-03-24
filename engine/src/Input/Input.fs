@@ -375,7 +375,7 @@ module Input =
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] event.Bind then
-                        if event.AudioPosition <= now then callback i event.AudioPosition (event.Action <> InputAction.Press)
+                        callback i (min now event.AudioPosition) (event.Action <> InputAction.Press)
                         matched <- true
 
                     i <- i + 1
