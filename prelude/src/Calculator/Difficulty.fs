@@ -61,8 +61,8 @@ module Difficulty =
     let calculate = calculate_uncached |> cached
 
     let color (rating: float32) : Color =
-        try
-            let a = rating * 0.1f |> min 1.0f
-            let b = (rating * 0.1f |> max 1.0f) - 1.0f |> min 1.0f
-            Color.FromArgb(255.0f * a |> int, 255.0f * (1.0f - a) |> int, 255.0f * b |> int)
-        with _ -> Color.Red
+        let red = int(rating * 0.1f * 255.0f) |> min 255 |> max 0
+        let green = 255 - red
+        let blue = int(rating * 0.1f * 255.0f - 255.0f) |> min 255 |> max 0
+
+        Color.FromArgb(red, green, blue)
