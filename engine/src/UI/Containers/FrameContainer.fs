@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.Graphics
 
+// todo: generalise this concept into a container + a custom bit of rendering beneath all children
 type FrameContainer(nt: NodeType) =
     inherit Container(nt)
 

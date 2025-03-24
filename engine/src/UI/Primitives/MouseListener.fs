@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Input
+open System.Runtime.CompilerServices
 
 [<Sealed>]
 type MouseListener(on_left_click: unit -> unit) =
@@ -41,3 +42,31 @@ type MouseListener(on_left_click: unit -> unit) =
                     elif not b && w.FocusedByMouse then
                         Selection.up true
         )
+
+[<Extension>]
+type MouseListenerExtensions =
+
+    [<Extension>]
+    static member OnLeftClick (listener: MouseListener, action: unit -> unit) : MouseListener =
+        listener.OnLeftClick <- action
+        listener
+
+    [<Extension>]
+    static member OnRightClick (listener: MouseListener, action: unit -> unit) : MouseListener =
+        listener.OnRightClick <- action
+        listener
+
+    [<Extension>]
+    static member OnHover (listener: MouseListener, action: bool -> unit) : MouseListener =
+        listener.OnHover <- action
+        listener
+
+    [<Extension>]
+    static member Floating (listener: MouseListener, floating: bool) : MouseListener =
+        listener.Floating <- floating
+        listener
+
+    [<Extension>]
+    static member Floating (listener: MouseListener) : MouseListener =
+        listener.Floating <- true
+        listener

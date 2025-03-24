@@ -1,7 +1,9 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open System.Runtime.CompilerServices
 
 type Button(text: unit -> string, on_click: unit -> unit) as this =
     inherit
@@ -49,3 +51,51 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
         base.Init parent
 
     override this.Focusable : bool = not (this.Disabled()) && base.Focusable
+
+[<Extension>]
+type ButtonExtensions =
+
+    [<Extension>]
+    static member Hotkey (button: Button, hotkey: Hotkey) : Button =
+        button.Hotkey <- hotkey
+        button
+
+    [<Extension>]
+    static member Disabled (button: Button, d: bool) : Button =
+        button.Disabled <- K d
+        button
+
+    [<Extension>]
+    static member Floating (button: Button) : Button =
+        button.Floating <- true
+        button
+
+    [<Extension>]
+    static member Floating (button: Button, floating: bool) : Button =
+        button.Floating <- floating
+        button
+
+    [<Extension>]
+    static member Align (button: Button, alignment: float32) : Button =
+        button.Align <- alignment
+        button
+
+    [<Extension>]
+    static member Color (button: Button, color: Color * Color) : Button =
+        button.TextColor <- K color
+        button
+
+    [<Extension>]
+    static member Color (button: Button, color: Color) : Button =
+        button.TextColor <- K (color, Colors.shadow_2)
+        button
+
+    [<Extension>]
+    static member Color (button: Button, color: unit -> Color * Color) : Button =
+        button.TextColor <- color
+        button
+
+    [<Extension>]
+    static member Color (button: Button, color: unit -> Color) : Button =
+        button.TextColor <- fun () -> (color(), Colors.shadow_2)
+        button

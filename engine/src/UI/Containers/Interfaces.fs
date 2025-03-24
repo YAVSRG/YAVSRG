@@ -38,3 +38,25 @@ type ContainerExtensions =
     static member With (container: #IContainer<'T>, children: 'T seq) : #IContainer<'T> =
         Seq.iter container.Add children
         container
+
+    [<Extension>]
+    static member WithConditional (container: #IContainer<'T>, condition: bool, [<ParamArray>] children: 'T array) : #IContainer<'T> =
+        if condition then Array.iter container.Add children
+        container
+
+    [<Extension>]
+    static member WithConditional (container: #IContainer<'T>, condition: bool, children: 'T seq) : #IContainer<'T> =
+        if condition then Seq.iter container.Add children
+        container
+
+    [<Extension>]
+    static member WithConditional (container: #IContainer<Widget>, condition: unit -> bool, [<ParamArray>] children: Widget array) : #IContainer<Widget> =
+        for c in children do
+            container.Add (c.Conditional(condition))
+        container
+
+    [<Extension>]
+    static member WithConditional (container: #IContainer<Widget>, condition: unit -> bool, children: Widget seq) : #IContainer<Widget> =
+        for c in children do
+            container.Add (c.Conditional(condition))
+        container

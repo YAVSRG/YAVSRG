@@ -21,15 +21,28 @@ type Text(text_func: unit -> string) =
 
 [<Extension>]
 type TextExtensions =
+
     [<Extension>]
     static member Align (text: Text, alignment: float32) : Text =
         text.Align <- alignment
         text
+
     [<Extension>]
     static member Color (text: Text, color: Color * Color) : Text =
         text.Color <- K color
         text
+
+    [<Extension>]
+    static member Color (text: Text, color: Color) : Text =
+        text.Color <- K (color, Colors.shadow_2)
+        text
+
     [<Extension>]
     static member Color (text: Text, color: unit -> Color * Color) : Text =
         text.Color <- color
+        text
+
+    [<Extension>]
+    static member Color (text: Text, color: unit -> Color) : Text =
+        text.Color <- fun () -> (color(), Colors.shadow_2)
         text
