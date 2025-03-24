@@ -9,6 +9,7 @@ open Percyqaz.Flux.Audio
 
 type Keys = Windowing.GraphicsLibraryFramework.Keys
 type MouseButton = Windowing.GraphicsLibraryFramework.MouseButton
+type InputAction = Windowing.GraphicsLibraryFramework.InputAction
 
 [<RequireQualifiedAccess>]
 type Bind =
@@ -22,13 +23,13 @@ type Bind =
         | Key(k, m) -> Bind.ModifierString m + Bind.FormatKey k
         | Mouse b -> "M" + b.ToString()
 
-    member this.WithModifiers (ctrl, alt, shift) : Bind =
+    member this.WithModifiers(ctrl: bool, alt: bool, shift: bool) : Bind =
         match this with
         | Dummy -> Dummy
         | Key (k, m) -> Key (k, (ctrl, alt, shift))
         | Mouse b -> Mouse b
 
-    member this.IsKeyWithAnyModifiers (k: Keys) =
+    member this.IsKeyWithAnyModifiers(k: Keys) : bool =
         match this with
         | Key (k1, _) when k1 = k -> true
         | _ -> false
@@ -67,41 +68,39 @@ type Bind =
         | Keys.RightBracket -> "]"
         | _ -> k.ToString()
 
-    static member private ModifierString(ctrl, alt, shift) =
+    static member private ModifierString(ctrl: bool, alt: bool, shift: bool) : string =
         (if ctrl then "Ctrl + " else "")
         + (if alt then "Alt + " else "")
         + (if shift then "Shift + " else "")
 
-    static member internal IsModifier(k: Keys) =
-        k = Keys.LeftShift
-        || k = Keys.RightShift
-        || k = Keys.LeftControl
-        || k = Keys.RightControl
-        || k = Keys.LeftAlt
-        || k = Keys.RightAlt
+    static member internal IsModifier(key: Keys) : bool =
+        key = Keys.LeftShift
+        || key = Keys.RightShift
+        || key = Keys.LeftControl
+        || key = Keys.RightControl
+        || key = Keys.LeftAlt
+        || key = Keys.RightAlt
 
 module Bind =
 
-    let inline mk k = Bind.Key(k, (false, false, false))
-    let inline ctrl k = Bind.Key(k, (true, false, false))
-    let inline alt k = Bind.Key(k, (false, true, false))
-    let inline shift k = Bind.Key(k, (false, false, true))
-    let inline ctrl_shift k = Bind.Key(k, (true, false, true))
-    let inline ctrlAlt k = Bind.Key(k, (true, true, false))
-
-type InputEvType = InputAction
+    let inline mk key = Bind.Key(key, (false, false, false))
+    let inline ctrl key = Bind.Key(key, (true, false, false))
+    let inline alt key = Bind.Key(key, (false, true, false))
+    let inline shift key = Bind.Key(key, (false, false, true))
+    let inline ctrl_shift key = Bind.Key(key, (true, false, true))
+    let inline ctrl_alt key = Bind.Key(key, (true, true, false))
 
 [<Struct>]
-type InputEv =
+type internal InputEvent =
     {
         Bind: Bind
-        Type: InputEvType
+        Action: InputAction
         GLFWTimestamp: float
         AudioPosition: Time
     }
 
 [<RequireQualifiedAccess>]
-type InputListener =
+type internal InputListener =
     | Text of setting: Setting<string> * on_remove: (unit -> unit)
     | Bind of callback: (Bind -> unit)
     | None
@@ -129,7 +128,7 @@ module internal InputThread =
     let mutable private mouse_y = 0.0f
     let mutable private mouse_z = 0.0f
     let mutable private typed_text = ""
-    let mutable private events_buffer: InputEv list = []
+    let mutable private events_buffer: InputEvent list = []
     let mutable private ctrl = false
     let mutable private alt = false
     let mutable private shift = false
@@ -137,11 +136,11 @@ module internal InputThread =
     let mutable private held_mouse_buttons = Set.empty<MouseButton>
 
     let mutable private typing = false
-    let mutable private typing_buffered_input : InputEv voption = ValueNone
+    let mutable private typing_buffered_input : InputEvent voption = ValueNone
 
     let private LOCK_OBJ = Object()
 
-    let private char_callback (_: nativeptr<Window>) (char: uint32) =
+    let private char_callback (_: nativeptr<Window>) (char: uint32) : unit =
         if typing then
             lock LOCK_OBJ (fun () ->
                 typed_text <- typed_text + Char.ConvertFromUtf32(int32 char)
@@ -149,7 +148,7 @@ module internal InputThread =
             )
     let private char_callback_d = GLFWCallbacks.CharCallback char_callback
 
-    let private cursor_pos_callback (window: nativeptr<Window>) (x: float) (y: float) =
+    let private cursor_pos_callback (window: nativeptr<Window>) (x: float) (y: float) : unit =
         lock LOCK_OBJ (fun () ->
             let pc_x = (float32 x - float32 Render._viewport_left) / float32 Render._viewport_width
             mouse_x <- Math.Clamp(Render._width * pc_x, 0.0f, Render._width)
@@ -164,13 +163,13 @@ module internal InputThread =
         )
     let private cursor_pos_callback_d = GLFWCallbacks.CursorPosCallback(cursor_pos_callback)
 
-    let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) =
+    let private scroll_callback (_: nativeptr<Window>) (offset_x: float) (offset_y: float) : unit =
         lock LOCK_OBJ (fun () ->
             mouse_z <- mouse_z + float32 offset_y
         )
     let private scroll_callback_d = GLFWCallbacks.ScrollCallback(scroll_callback)
 
-    let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) =
+    let private key_callback (_: nativeptr<Window>) (key: Keys) (scancode: int) (action: InputAction) (modifiers: KeyModifiers) : unit =
         let event =
             {
                 Bind =
@@ -181,7 +180,7 @@ module internal InputThread =
                             modifiers &&& KeyModifiers.Shift = KeyModifiers.Shift
                         )
                     ) |> Bind.Key
-                Type = action
+                Action = action
                 GLFWTimestamp = GLFW.GetTime()
                 AudioPosition = Song.exact_time_with_offset()
             }
@@ -207,11 +206,11 @@ module internal InputThread =
         )
     let private key_callback_d = GLFWCallbacks.KeyCallback(key_callback)
 
-    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) =
+    let private mouse_button_callback (_: nativeptr<Window>) (button: MouseButton) (action: InputAction) (modifiers: KeyModifiers) : unit =
         let event =
             {
                 Bind = Bind.Mouse button
-                Type = action
+                Action = action
                 GLFWTimestamp = GLFW.GetTime()
                 AudioPosition = Song.exact_time_with_offset()
             }
@@ -224,10 +223,10 @@ module internal InputThread =
         )
     let private mouse_button_callback_d = GLFWCallbacks.MouseButtonCallback(mouse_button_callback)
 
-    let enable_typing (v: bool) =
+    let enable_typing (v: bool) : unit =
         lock LOCK_OBJ (fun () -> typing <- v; typing_buffered_input <- ValueNone)
 
-    let set_cursor_hidden (b: bool) (window: nativeptr<Window>) =
+    let set_cursor_hidden (b: bool) (window: nativeptr<Window>) : unit =
         hide_cursor <- b
         if not b then
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorNormal)
@@ -237,7 +236,7 @@ module internal InputThread =
         else
             GLFW.SetInputMode(window, CursorStateAttribute.Cursor, CursorModeValue.CursorHidden)
 
-    let init (window: nativeptr<Window>) =
+    let init (window: nativeptr<Window>) : unit =
         GLFW.SetInputMode(window, LockKeyModAttribute.LockKeyMods, true);
         GLFW.SetCharCallback(window, char_callback_d) |> ignore
         GLFW.SetKeyCallback(window, key_callback_d) |> ignore
@@ -245,7 +244,7 @@ module internal InputThread =
         GLFW.SetScrollCallback(window, scroll_callback_d) |> ignore
         GLFW.SetCursorPosCallback(window, cursor_pos_callback_d) |> ignore
 
-    let fetch (events_this_frame: InputEv list byref, this_frame: FrameEvents byref) =
+    let fetch (events_this_frame: InputEvent list byref, this_frame: FrameEvents byref) : unit =
         let a, b =
             lock
                 LOCK_OBJ
@@ -291,7 +290,7 @@ module Input =
     let mutable internal last_frame: FrameEvents = Unchecked.defaultof<_>
     let mutable internal this_frame_finished = false
 
-    let mutable internal events_this_frame: InputEv list = []
+    let mutable internal events_this_frame: InputEvent list = []
 
     let mutable internal input_listener: InputListener = InputListener.None
     let mutable internal input_listener_mouse_cancel = 0f
@@ -315,26 +314,26 @@ module Input =
     /// In this mode keybindings do not activate (so something bound to A will not fire, it will type 'a' into the buffer instead)
     /// `mouse_cancel` set to true will cause the listener to automatically disconnect itself when the mouse is moved too much
     /// `on_remove` is called when the text listening mode is exited
-    let listen_to_text (s: Setting<string>, mouse_cancel: bool, on_remove: unit -> unit) =
+    let listen_to_text (text: Setting<string>, mouse_cancel: bool, on_remove: unit -> unit) : unit =
         remove_listener ()
-        input_listener <- InputListener.Text(s, on_remove)
+        input_listener <- InputListener.Text(text, on_remove)
         InputThread.enable_typing true
         input_listener_mouse_cancel <- if mouse_cancel then 0f else -infinityf
 
     /// Used for UIs that let the user bind a key to a hotkey
     /// The very next button (or modifier + button combo) they press will be passed to `callback`
     /// Then the listener is removed
-    let listen_to_next_key (callback: Bind -> unit) =
+    let listen_to_next_key (callback: Bind -> unit) : unit =
         remove_listener ()
         input_listener <- InputListener.Bind callback
 
-    let pop_matching (b: Bind, t: InputEvType) =
+    let pop_matching (bind: Bind, action: InputAction) : bool =
         let mutable found = false
 
         let rec f evs =
             match evs with
             | [] -> []
-            | event :: xs when event.Bind = b && event.Type = t ->
+            | event :: xs when event.Bind = bind && event.Action = action ->
                 found <- true
                 xs
             | x :: xs -> x :: (f xs)
@@ -342,15 +341,15 @@ module Input =
         events_this_frame <- f events_this_frame
         found
 
-    let pop_key_with_any_modifiers (k: Keys, t: InputEvType) =
+    let pop_key_with_any_modifiers (key: Keys, action: InputAction) : (bool * bool * bool) voption =
         let mutable out = ValueNone
 
         let rec f evs =
             match evs with
             | [] -> []
-            | event :: xs when event.Type = t ->
+            | event :: xs when event.Action = action ->
                 match event.Bind with
-                | Bind.Key (k1, modifiers) when k1 = k ->
+                | Bind.Key (k1, modifiers) when k1 = key ->
                     out <- ValueSome modifiers
                     xs
                 | _ -> event :: f xs
@@ -359,7 +358,7 @@ module Input =
         events_this_frame <- f events_this_frame
         out
 
-    let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) =
+    let pop_gameplay (now: Time) (binds: Bind array) (callback: int -> Time -> bool -> unit) : unit =
 
         let bind_match bind target =
             match bind, target with
@@ -370,13 +369,13 @@ module Input =
         let rec pop_inputs_matching_binds evs =
             match evs with
             | [] -> []
-            | event :: xs when event.Type <> InputEvType.Repeat ->
+            | event :: xs when event.Action <> InputAction.Repeat ->
                 let mutable i = 0
                 let mutable matched = false
 
                 while i < binds.Length && not matched do
                     if bind_match binds.[i] event.Bind then
-                        if event.AudioPosition <= now then callback i event.AudioPosition (event.Type <> InputEvType.Press)
+                        if event.AudioPosition <= now then callback i event.AudioPosition (event.Action <> InputAction.Press)
                         matched <- true
 
                     i <- i + 1
@@ -386,13 +385,13 @@ module Input =
 
         events_this_frame <- pop_inputs_matching_binds events_this_frame
 
-    let private pop_any (t: InputEvType) : Bind voption =
+    let private pop_any (action: InputAction) : Bind voption =
         let mutable out = ValueNone
 
         let rec f evs =
             match evs with
             | [] -> []
-            | event :: xs when event.Type = t ->
+            | event :: xs when event.Action = action ->
                 out <- ValueSome(event.Bind)
                 xs
             | x :: xs -> x :: (f xs)
@@ -400,18 +399,10 @@ module Input =
         events_this_frame <- f events_this_frame
         out
 
-    let finish_frame_events () : unit =
-        input_listener_mouse_cancel <-
-            input_listener_mouse_cancel
-            + abs (this_frame.MouseX - last_frame.MouseX)
-            + abs (this_frame.MouseY - last_frame.MouseY)
+    let key_held_any_modifiers (key: Keys) : bool =
+        this_frame.HeldKeys.Contains key
 
-        last_frame <- this_frame
-        events_this_frame <- []
-        this_frame_finished <- true
-
-    let key_held_any_modifiers (k: Keys) : bool =
-        this_frame.HeldKeys.Contains k
+    let button_pressed_recently () : bool = GLFW.GetTime() - last_input_event < 0.100
 
     let held (b: Bind) : bool =
         if this_frame_finished then
@@ -431,6 +422,16 @@ module Input =
         | Bind.Mouse m -> this_frame.HeldMouseButtons.Contains m
         | Bind.Dummy -> false
 
+    let finish_frame_events () : unit =
+        input_listener_mouse_cancel <-
+            input_listener_mouse_cancel
+            + abs (this_frame.MouseX - last_frame.MouseX)
+            + abs (this_frame.MouseY - last_frame.MouseY)
+
+        last_frame <- this_frame
+        events_this_frame <- []
+        this_frame_finished <- true
+
     let init (_window: nativeptr<Window>) : unit =
         window <- _window
         InputThread.init window
@@ -448,18 +449,18 @@ module Input =
             if this_frame.TypedText <> "" then
                 s.Value <- s.Value + this_frame.TypedText
 
-            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputEvType.Press) || pop_matching(DELETE_CHARACTER, InputEvType.Repeat)) then
+            if s.Value.Length > 0 && (pop_matching(DELETE_CHARACTER, InputAction.Press) || pop_matching(DELETE_CHARACTER, InputAction.Repeat)) then
                 Setting.app (fun (x: string) -> x.Substring(0, x.Length - 1)) s
 
-            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputEvType.Press) || pop_matching(DELETE_WORD, InputEvType.Repeat)) then
+            elif s.Value.Length > 0 && (pop_matching(DELETE_WORD, InputAction.Press) || pop_matching(DELETE_WORD, InputAction.Repeat)) then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
 
-            elif pop_matching(COPY, InputEvType.Press) then
+            elif pop_matching(COPY, InputAction.Press) then
                 GLFW.SetClipboardString(window, s.Value)
 
-            elif pop_matching(PASTE, InputEvType.Press) then
+            elif pop_matching(PASTE, InputAction.Press) then
                 s.Value <-
                     s.Value
                     + try
@@ -471,7 +472,7 @@ module Input =
                 remove_listener ()
 
         | InputListener.Bind callback ->
-            match pop_any InputEvType.Press with
+            match pop_any InputAction.Press with
             | ValueSome x ->
                 match x with
                 | Bind.Key(k, m) ->
@@ -484,7 +485,7 @@ module Input =
                     remove_listener ()
                     callback x
             | ValueNone ->
-                match pop_any InputEvType.Release with
+                match pop_any InputAction.Release with
                 | ValueSome x ->
                     match x with
                     | Bind.Key(k, m) ->
@@ -518,8 +519,6 @@ module Input =
         this_frame_finished <- false
         update_input_listener ()
 
-    let button_pressed_recently () : bool = GLFW.GetTime() - last_input_event < 0.100
-
 module Mouse =
 
     let LEFT = MouseButton.Left
@@ -549,7 +548,7 @@ module Mouse =
         v
 
     let private click (mouse_button: MouseButton) : bool =
-        Input.pop_matching(Bind.Mouse mouse_button, InputEvType.Press)
+        Input.pop_matching(Bind.Mouse mouse_button, InputAction.Press)
 
     let left_click () : bool = click LEFT
     let right_click () : bool = click RIGHT
@@ -558,7 +557,7 @@ module Mouse =
     let held (mouse_button: MouseButton) : bool = Input.held (Bind.Mouse mouse_button)
 
     let released (mouse_button: MouseButton) : bool =
-        Input.pop_matching(Bind.Mouse mouse_button, InputEvType.Release)
+        Input.pop_matching(Bind.Mouse mouse_button, InputAction.Release)
 
     let moved_recently () : bool = GLFW.GetTime() - Input.last_time_mouse_moved < 0.100
 
@@ -575,25 +574,25 @@ type Bind with
     member this.Repeated() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Repeat)
+        | Mouse _ -> Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
     member this.TappedOrRepeated() =
         match this with
         | Key _
         | Mouse _ ->
-            Input.pop_matching(this, InputEvType.Press)
-            || Input.pop_matching(this, InputEvType.Repeat)
+            Input.pop_matching(this, InputAction.Press)
+            || Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
     member this.Tapped() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Press)
+        | Mouse _ -> Input.pop_matching(this, InputAction.Press)
         | _ -> false
 
     member this.Released() =
         match this with
         | Key _
-        | Mouse _ -> Input.pop_matching(this, InputEvType.Release)
+        | Mouse _ -> Input.pop_matching(this, InputAction.Release)
         | _ -> false
