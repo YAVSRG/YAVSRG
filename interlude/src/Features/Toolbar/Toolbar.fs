@@ -124,7 +124,7 @@ type Toolbar() =
         |+ HotkeyAction("preset1", fun () -> load_preset 1)
         |+ HotkeyAction("preset2", fun () -> load_preset 2)
         |+ HotkeyAction("preset3", fun () -> load_preset 3)
-        |+ Updater(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
+        |+ UpdateButton(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
         |* VolumeSlider(Position = Position.ShrinkY(HEIGHT))

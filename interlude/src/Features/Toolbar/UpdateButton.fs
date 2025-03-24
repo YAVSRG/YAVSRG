@@ -6,10 +6,13 @@ open Prelude
 open Interlude
 open Interlude.UI
 
-type Updater() as this =
+/// Shown on the toolbar when an update is available
+type UpdateButton() as this =
     inherit Container(NodeType.Button(fun () -> this.Click()))
 
     do this |* Clickable.Focus this
+
+    let mutable download_progress = 0.0f
 
     override this.Draw() =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
@@ -34,6 +37,12 @@ type Updater() as this =
                 Colors.text_yellow_2,
                 Alignment.CENTER
             )
+            Render.rect
+                (area.BorderB(Style.PADDING))
+                Colors.shadow_2
+            Render.rect
+                (area.BorderB(Style.PADDING).SlicePercentL(download_progress))
+                Colors.cyan
         else
             Text.fill_b (
                 Style.font,
@@ -59,10 +68,13 @@ type Updater() as this =
                 %"notification.update_installing.body"
             )
 
-            Updates.apply_update (fun () ->
-                Notifications.system_feedback (
-                    Icons.ALERT_OCTAGON,
-                    %"notification.update_installed.title",
-                    %"notification.update_installed.body"
+            Updates.apply_update (
+                (fun progress -> download_progress <- progress),
+                (fun () ->
+                    Notifications.system_feedback (
+                        Icons.ALERT_OCTAGON,
+                        %"notification.update_installed.title",
+                        %"notification.update_installed.body"
+                    )
                 )
             )

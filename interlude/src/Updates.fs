@@ -142,7 +142,7 @@ module Updates =
         if Directory.Exists folder_path then
             Directory.Delete(folder_path, true)
 
-    let apply_update (callback: unit -> unit) : unit =
+    let apply_update (progress: float32 -> unit, callback: unit -> unit) : unit =
         if not update_available then
             failwith "No update available to install"
 
@@ -172,7 +172,7 @@ module Updates =
                 Directory.Delete(folder_path, true)
 
             WebServices.download_file.Request(
-                (download_url, zip_path, ignore),
+                (download_url, zip_path, progress),
                 fun success ->
                     if success then
                         ZipFile.ExtractToDirectory(zip_path, folder_path)

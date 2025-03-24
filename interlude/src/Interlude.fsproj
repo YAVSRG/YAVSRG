@@ -289,7 +289,7 @@
     <Compile Include="Features\Printerlude\Printerlude.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
     <Compile Include="Features\Toolbar\NetworkStatus.fs" />
-    <Compile Include="Features\Toolbar\Update.fs" />
+    <Compile Include="Features\Toolbar\UpdateButton.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
