@@ -43,7 +43,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
             Hotkey = "ruleset_switch",
             HoverText = %"score.switch_ruleset"
         )
-        |+ HotkeyAction("native_ruleset", switch_to_native_ruleset)
+        |+ HotkeyListener("native_ruleset", switch_to_native_ruleset)
         |* dropdown_wrapper
 
         base.Init parent
@@ -78,8 +78,8 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                 Position = Position.BorderT(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
                 Floating = true
             )
-            |+ HotkeyAction("retry", Gameplay.retry)
-            |* HotkeyAction("select", Gameplay.continue_endless_mode >> ignore)
+            |+ HotkeyListener("retry", Gameplay.retry)
+            |* HotkeyListener("select", Gameplay.continue_endless_mode >> ignore)
 
         this
         |+ graph
@@ -120,6 +120,6 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                 score_info
             )
         )
-        |* HotkeyAction("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
+        |* HotkeyListener("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
 
         base.Init parent

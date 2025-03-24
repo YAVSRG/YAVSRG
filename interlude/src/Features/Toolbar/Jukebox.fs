@@ -28,7 +28,7 @@ type Jukebox() =
             Hotkey = "pause_music",
             Position = Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)
         )
-        |+ HotkeyAction("random_chart", (fun () -> if Screen.current_type <> ScreenType.Lobby then LevelSelect.random_chart()))
+        |+ HotkeyListener("random_chart", (fun () -> if Screen.current_type <> ScreenType.Lobby then LevelSelect.random_chart()))
         |* Button(Icons.SKIP_FORWARD,
             (fun () -> if LevelSelect.History.can_go_forward() then LevelSelect.History.forward() else LevelSelect.random_chart()),
             Disabled = (fun () -> Screen.current_type = ScreenType.Lobby),

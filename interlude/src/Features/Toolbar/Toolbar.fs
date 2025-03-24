@@ -111,7 +111,7 @@ type Toolbar() =
                 .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
         )
         |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
-        |+ HotkeyAction(
+        |+ HotkeyListener(
             "reload_content",
             fun () ->
                 if not (Dialog.exists()) then
@@ -121,9 +121,9 @@ type Toolbar() =
                     SelectedChart.recolor ()
                     Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
         )
-        |+ HotkeyAction("preset1", fun () -> load_preset 1)
-        |+ HotkeyAction("preset2", fun () -> load_preset 2)
-        |+ HotkeyAction("preset3", fun () -> load_preset 3)
+        |+ HotkeyListener("preset1", fun () -> load_preset 1)
+        |+ HotkeyListener("preset2", fun () -> load_preset 2)
+        |+ HotkeyListener("preset3", fun () -> load_preset 3)
         |+ UpdateButton(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
         |+ Jukebox(Position = Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))

@@ -204,7 +204,7 @@ module PlayScreen =
                     (if options.HoldToGiveUp.Value then ignore else give_up),
                     (if options.HoldToGiveUp.Value then give_up else ignore)
                 )
-                |* HotkeyAction("offset", fun () -> if not (liveplay :> IReplayProvider).Finished then change_offset this.State)
+                |* HotkeyListener("offset", fun () -> if not (liveplay :> IReplayProvider).Finished then change_offset this.State)
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()

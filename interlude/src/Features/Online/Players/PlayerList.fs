@@ -23,8 +23,8 @@ type PlayerListPage() =
                 }
                     .Shrink(40.0f)
         )
-        |+ HotkeyAction("exit", Menu.Back)
-        |+ HotkeyAction("player_list", Menu.Back)
+        |+ HotkeyListener("exit", Menu.Back)
+        |+ HotkeyListener("player_list", Menu.Back)
         :> Widget
 
     override this.OnClose() = ()

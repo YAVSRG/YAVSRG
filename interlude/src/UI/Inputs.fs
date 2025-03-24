@@ -38,7 +38,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
             Align = Alignment.LEFT,
             Color = this.ColorFunc
         )
-        |* HotkeyAction(hotkey, toggle)
+        |* HotkeyListener(hotkey, toggle)
 
         if this.Clickable then
             this.Add(

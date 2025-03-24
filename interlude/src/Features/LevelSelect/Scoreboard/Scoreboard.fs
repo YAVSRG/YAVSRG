@@ -122,7 +122,7 @@ type Scoreboard(display: Setting<Display>) =
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container
-        |+ HotkeyAction(
+        |+ HotkeyListener(
             "scoreboard",
             fun () ->
                 if container.Focused then

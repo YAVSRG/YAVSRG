@@ -3,7 +3,7 @@
 open Percyqaz.Flux.Input
 
 [<Sealed>]
-type HotkeyAction(hotkey: Hotkey, action: unit -> unit) =
+type HotkeyListener(hotkey: Hotkey, action: unit -> unit) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsed_ms, moved) =
@@ -14,7 +14,7 @@ type HotkeyAction(hotkey: Hotkey, action: unit -> unit) =
 
     override this.Draw() = ()
 
-// todo: remove and put a 'delay' setting on the main HotkeyAction ?
+// todo: remove and put a 'delay' setting on the main HotkeyListener ?
 [<Sealed>]
 type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> unit) =
     inherit StaticWidget(NodeType.None)
