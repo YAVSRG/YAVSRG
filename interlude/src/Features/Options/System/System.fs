@@ -70,8 +70,8 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
 
     override this.Update (elapsed_ms, moved) =
         let selected = Selection.get_selected_element() |> Option.map (fun w -> (w :?> Widget).Parent)
-        if selected = Some width_box && (tab.Tapped() || (%%"select").Tapped()) then height_box.Select false
-        elif selected = Some height_box && (tab.Tapped() || (%%"select").Tapped()) then Menu.Back()
+        if selected = Some width_box && (tab.Pressed() || (%%"select").Pressed()) then height_box.Select false
+        elif selected = Some height_box && (tab.Pressed() || (%%"select").Pressed()) then Menu.Back()
 
         base.Update(elapsed_ms, moved)
 

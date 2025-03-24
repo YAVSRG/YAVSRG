@@ -87,7 +87,7 @@ type HotkeyAction(hotkey: Hotkey, action: unit -> unit) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%hotkey).Tapped() then
+        if (%%hotkey).Pressed() then
             action ()
 
     override this.Draw() = ()
@@ -103,11 +103,11 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> uni
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%hotkey).Tapped() then
+        if (%%hotkey).Pressed() then
             on_tap ()
             hold_time_remaining <- HOLD_TIME_MS
 
-        if (%%hotkey).Pressed() then
+        if (%%hotkey).Held() then
             if hold_time_remaining > 0.0 then
                 hold_time_remaining <- hold_time_remaining - elapsed_ms
 

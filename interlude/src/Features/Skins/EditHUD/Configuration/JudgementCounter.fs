@@ -97,13 +97,13 @@ type private DisplayPicker(ruleset: Ruleset, i: int, data: int option array) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"left").Tapped() then
+            if (%%"left").Pressed() then
                 bk ()
-            elif (%%"right").Tapped() then
+            elif (%%"right").Pressed() then
                 fd ()
-            elif (%%"up").Tapped() then
+            elif (%%"up").Pressed() then
                 fd ()
-            elif (%%"down").Tapped() then
+            elif (%%"down").Pressed() then
                 bk ()
 
 type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: int option array, ruleset: Ruleset) =

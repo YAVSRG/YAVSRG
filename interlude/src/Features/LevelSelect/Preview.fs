@@ -73,24 +73,24 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
                 recreate_scoring()
             last_time <- now
 
-        if (%%"preview").Tapped() || (%%"exit").Tapped() || Mouse.released Mouse.RIGHT then
+        if (%%"preview").Pressed() || (%%"exit").Pressed() || Mouse.released Mouse.RIGHT then
             this.Close()
-        elif (%%"select").Tapped() then
+        elif (%%"select").Pressed() then
             this.Close()
             LevelSelect.choose_this_chart ()
-        elif (%%"screenshot").Tapped() then
+        elif (%%"screenshot").Pressed() then
             Toolbar.take_screenshot ()
-        elif Screen.current_type = ScreenType.LevelSelect && (%%"random_chart").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"random_chart").Pressed() then
             LevelSelect.random_chart()
-        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous_random_chart").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous_random_chart").Pressed() then
             LevelSelect.History.back()
-        elif Screen.current_type = ScreenType.LevelSelect && (%%"next").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"next").Pressed() then
             Tree.next()
-        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous").Tapped() then
+        elif Screen.current_type = ScreenType.LevelSelect && (%%"previous").Pressed() then
             Tree.previous()
-        elif (%%"difficulty_overlay").Tapped() then
+        elif (%%"difficulty_overlay").Pressed() then
             show_difficulty_overlay <- not show_difficulty_overlay
-        elif (%%"pause").Tapped() || (%%"pause_music").Tapped() then
+        elif (%%"pause").Pressed() || (%%"pause_music").Pressed() then
             if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())
             elif not (Mouse.held Mouse.LEFT) then Song.resume ()

@@ -48,7 +48,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
         base.Update(elapsed_ms, moved)
         timer.Update elapsed_ms
 
-        if fade.Target <> 0.0f && (timer.Complete || (%%"skip").Pressed()) then
+        if fade.Target <> 0.0f && (timer.Complete || (%%"skip").Held()) then
             on_ready()
             fade.Target <- 0.0f
 

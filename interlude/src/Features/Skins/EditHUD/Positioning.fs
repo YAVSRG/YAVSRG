@@ -397,7 +397,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
         hover <- Mouse.hover this.Bounds
 
-        increment <- if ALT.Pressed() then 1.0f else 5.0f
+        increment <- if ALT.Held() then 1.0f else 5.0f
 
         match dragging_from with
         | Some(x, y) ->

@@ -245,9 +245,9 @@ and Menu(top_level: Page) as this =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%"screenshot").Tapped() then
+        if (%%"screenshot").Pressed() then
             Toolbar.take_screenshot ()
-        elif (%%"reload_content").Tapped() then
+        elif (%%"reload_content").Pressed() then
             Notifications.action_feedback(Icons.IMAGE, %"notification.reload_content_hint", "")
 
         if nest_level > 0 then

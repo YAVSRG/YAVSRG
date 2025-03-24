@@ -147,12 +147,12 @@ type private ScoreCard(score_info: ScoreInfo) =
 
         if this.Focused && (not this.FocusedByMouse || Mouse.hover this.Bounds) then
 
-            if (%%"delete").Tapped() then
+            if (%%"delete").Pressed() then
                 ScoreContextMenu.ConfirmDeleteScore(score_info, false)
-            elif (%%"context_menu").Tapped() then
+            elif (%%"context_menu").Pressed() then
                 ScoreContextMenu(false, score_info).Show()
 
-        elif this.Focused && (%%"select").Tapped() then
+        elif this.Focused && (%%"select").Pressed() then
 
             if this.FocusedByMouse then
                 LevelSelect.choose_this_chart()

@@ -198,7 +198,7 @@ module Screen =
             logo.Update(elapsed_ms, moved)
             screen_container.Update(elapsed_ms, moved)
 
-            if (%%"exit").Tapped() then
+            if (%%"exit").Pressed() then
                 back Transitions.UnderLogo |> ignore
 
         override this.Draw() =

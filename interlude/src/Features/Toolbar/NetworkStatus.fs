@@ -68,7 +68,7 @@ type NetworkStatus() as this =
         if
             not Toolbar.hidden
             && Network.status = Network.LoggedIn
-            && (%%"player_list").Tapped()
+            && (%%"player_list").Pressed()
         then
             PlayerListPage().Show()
 

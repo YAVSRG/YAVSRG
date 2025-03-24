@@ -50,13 +50,13 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"left").Tapped() then
+            if (%%"left").Pressed() then
                 bk ()
-            elif (%%"right").Tapped() then
+            elif (%%"right").Pressed() then
                 fd ()
-            elif (%%"up").Tapped() then
+            elif (%%"up").Pressed() then
                 fd ()
-            elif (%%"down").Tapped() then
+            elif (%%"down").Pressed() then
                 bk ()
 
     static member FromEnum(setting: Setting<'T>) =
