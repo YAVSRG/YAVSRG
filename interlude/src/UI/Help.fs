@@ -163,7 +163,7 @@ type Help(content: Callout) =
 
         elif id >= 0 && not by_mouse then
 
-            if (%%"tooltip").Pressed() then
+            if (%%"tooltip").Held() then
                 HelpOverlay.keep_alive id
             else
                 id <- -1

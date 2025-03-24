@@ -148,7 +148,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
-                if MULTI_SELECT_KEY.Pressed() then
+                if MULTI_SELECT_KEY.Held() then
                     match multi_selection with
                     | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
                         deselect_multiple charts_as_seq

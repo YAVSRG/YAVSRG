@@ -109,7 +109,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
                 fade.Target <- 0.0f
                 Toolbar.hide_cursor ()
 
-            if (%%"hide_replay_overlay").Pressed() then
+            if (%%"hide_replay_overlay").Held() then
                 fade.Target <- 0.0f
                 Toolbar.hide_cursor ()
                 show_cooldown <- 1000.0

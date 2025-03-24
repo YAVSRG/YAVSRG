@@ -23,17 +23,17 @@ type VolumeSlider() =
         if Screen.current_type = ScreenType.EditHud && not (Dialog.exists()) then
             fade.Target <- 0.0f
 
-        elif (%%"volume_up").Pressed() then
+        elif (%%"volume_up").Held() then
             fade.Target <- 1.0f
             Setting.app ((+) (0.0003 * elapsed_ms)) volume
             slider.Target <- float32 volume.Value
 
-        elif (%%"volume_down").Pressed() then
+        elif (%%"volume_down").Held() then
             fade.Target <- 1.0f
             Setting.app ((+) (-0.0003 * elapsed_ms)) volume
             slider.Target <- float32 volume.Value
 
-        elif (%%"volume").Pressed() then
+        elif (%%"volume").Held() then
             fade.Target <- 1.0f
             Setting.app ((+) (float (Mouse.scroll ()) * 0.02)) volume
 

@@ -565,7 +565,7 @@ module Mouse =
         not Input.this_frame_finished && r.Contains(pos ())
 
 type Bind with
-    member this.Pressed() =
+    member this.Held() =
         match this with
         | Key _
         | Mouse _ -> Input.held this

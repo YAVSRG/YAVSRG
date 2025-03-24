@@ -107,7 +107,7 @@ type HotkeyHoldAction(hotkey: Hotkey, on_tap: unit -> unit, on_hold: unit -> uni
             on_tap ()
             hold_time_remaining <- HOLD_TIME_MS
 
-        if (%%hotkey).Pressed() then
+        if (%%hotkey).Held() then
             if hold_time_remaining > 0.0 then
                 hold_time_remaining <- hold_time_remaining - elapsed_ms
 

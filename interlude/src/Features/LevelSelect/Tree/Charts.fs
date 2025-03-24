@@ -194,7 +194,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
             hover.Target <- 1.0f
 
             if this.LeftClick(origin) then
-                if MULTI_SELECT_KEY.Pressed() then
+                if MULTI_SELECT_KEY.Held() then
                     match multi_selection with
                     | Some s when s.IsSelected(cc, ctx) -> deselect_multiple [(cc, ctx)]
                     | _ -> select_multiple [(cc, ctx)]

@@ -70,9 +70,9 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
             if show_tooltip && Mouse.left_clicked() then
                 SkillTimelineGraph.view_date_ev.Trigger(fst date_data.[hover_index])
 
-            if (%%"left").Pressed() then
+            if (%%"left").Held() then
                 day_offset.Target <- day_offset.Target + float32 elapsed_ms * 0.001f * day_range.Target
-            elif (%%"right").Pressed() then
+            elif (%%"right").Held() then
                 day_offset.Target <- day_offset.Target - float32 elapsed_ms * 0.001f * day_range.Target |> max 0.0f
 
         else

@@ -579,7 +579,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                 refresh <- true
 
             let s = Mouse.scroll()
-            if GraphSettings.show_slice.Value <> (%%"graph_alt_info").Pressed() then
+            if GraphSettings.show_slice.Value <> (%%"graph_alt_info").Held() then
                 show_slice_info <- true
                 GraphSettings.slice_size.Value <- GraphSettings.slice_size.Value + s * 0.005f
             else
