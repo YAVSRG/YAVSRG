@@ -27,23 +27,24 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
     override this.Init(parent: Widget) : unit =
         this
-        |+ Text(
-            text,
-            Align = this.Align,
-            Color =
-                fun () ->
-                    if this.Disabled() then Colors.text_greyout
-                    elif this.Focused then Colors.text_yellow_2
-                    else this.TextColor()
-        )
-        |+ MouseListener.Focus(this, Floating = this.Floating)
-        |* HotkeyListener(
-            this.Hotkey,
-            fun () ->
-                if not (this.Disabled()) then
-                    Style.click.Play()
-                    on_click ()
-        )
+            .Add(
+                Text(text)
+                    .Align(this.Align)
+                    .Color(
+                        fun () ->
+                            if this.Disabled() then Colors.text_greyout
+                            elif this.Focused then Colors.text_yellow_2
+                            else this.TextColor()
+                    ),
+                MouseListener.Focus(this, Floating = this.Floating),
+                HotkeyListener(
+                    this.Hotkey,
+                    fun () ->
+                        if not (this.Disabled()) then
+                            Style.click.Play()
+                            on_click ()
+                )
+            )
 
         base.Init parent
 

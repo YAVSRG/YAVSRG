@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 
 module Beam =
 
-    let private draw (direction_deg: float32) (x, y) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
+    let private draw (direction_deg: float32) (x: float32, y: float32) (r1: float32) (r2: float32) (col: Color) (time: float32) : unit =
         // angle is measured clockwise from vertical
         let cos = MathF.Cos(direction_deg / 180.0f * MathF.PI)
         let sin = MathF.Sin(direction_deg / 180.0f * MathF.PI)
@@ -130,7 +130,7 @@ module Wedge =
 
 module Bubble =
 
-    let draw (x, y) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
+    let draw (x: float32, y: float32) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) : unit =
         let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
         let head = float32 (Math.Pow(pos, 0.5)) * (r2 - r1) + r1
         let tail = float32 (Math.Pow(pos, 2.0)) * (r2 - r1) + r1

@@ -1,6 +1,5 @@
 ﻿namespace Percyqaz.Flux.UI
 
-open System.Drawing
 open Percyqaz.Flux.Graphics
 
 type FrameContainer(nt: NodeType) =
