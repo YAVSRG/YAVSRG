@@ -58,17 +58,13 @@ type LobbyList() =
         |+ ScrollContainer(list_container, Position = Position.Shrink(0.0f, 80.0f), Margin = Style.PADDING)
         |+ EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
             .Conditional(fun () -> no_lobbies)
-        |+ IconButton(
-            %"lobby_list.create",
-            Icons.PLUS_CIRCLE,
-            60.0f,
+        |+ Button(
+            Icons.PLUS_CIRCLE + "  " + %"lobby_list.create",
             create_lobby,
             Position = Position.SliceB(60.0f).ShrinkR(250.0f)
         )
-        |+ IconButton(
-            %"lobby_list.refresh",
-            Icons.REFRESH_CCW,
-            60.0f,
+        |+ Button(
+            Icons.REFRESH_CCW + "  " + %"lobby_list.refresh",
             refresh_list,
             Position = Position.SliceB(60.0f).SliceR(250.0f)
         )

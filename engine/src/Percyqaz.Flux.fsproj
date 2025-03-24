@@ -53,7 +53,7 @@
 	  <Compile Include="UI\Containers\SwapContainer.fs" />
 	  <Compile Include="UI\Containers\ScrollContainer.fs" />
 	  <Compile Include="UI\Containers\FrameContainer.fs" />
-    <Compile Include="UI\Components\Buttons.fs" />
+    <Compile Include="UI\Components\Button.fs" />
     <Compile Include="UI\Components\Dialogs.fs" />
     <Compile Include="UI\Components\Performance.fs" />
     <Compile Include="UI\Root.fs" />

@@ -47,11 +47,9 @@ type WikiBrowserPage() =
             Align = Alignment.LEFT,
             Position = Position.SliceL(200.0f, 900.0f)
         )
-        |+ IconButton(
-            %"wiki.openinbrowser"
-            , Icons.EXTERNAL_LINK
-            , 50.0f
-            , fun () ->
+        |+ Button(
+            Icons.EXTERNAL_LINK + " " + %"wiki.openinbrowser",
+            fun () ->
                 match current_page with
                 | WikiIndex -> open_url ("https://yavsrg.net/interlude/wiki/index.html")
                 | WikiPage p -> open_url ("https://yavsrg.net/interlude/wiki/" + p.Filename + ".html")
@@ -139,9 +137,9 @@ type WikiBrowserPage() =
     override this.OnClose() = ()
     override this.Title = %"menu.wiki"
 
-    static member Show() = 
+    static member Show() =
         (WikiBrowserPage() :> Page).Show()
-    
-    static member ShowChangelog() = 
+
+    static member ShowChangelog() =
         load_resource Changelog
         (WikiBrowserPage() :> Page).Show()
