@@ -119,7 +119,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if tab.Pressed() then
+        if tab.Tapped() then
             match Selection.get_focused_element() with
             | Some (:? Widget as w) ->
                 next_entry (w.Parent.Parent)

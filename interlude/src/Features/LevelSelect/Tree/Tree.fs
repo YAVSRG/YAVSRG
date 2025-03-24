@@ -211,7 +211,7 @@ module Tree =
 
         if Dialog.exists () then
             ()
-        elif (%%"context_menu").Pressed() && SelectedChart.CACHE_DATA.IsSome then
+        elif (%%"context_menu").Tapped() && SelectedChart.CACHE_DATA.IsSome then
             match multi_selection with
             | Some s -> s.ShowActions()
             | None ->
@@ -219,14 +219,14 @@ module Tree =
             match SelectedChart.CACHE_DATA with
             | Some cc -> ChartContextMenu(cc, SelectedChart.LIBRARY_CTX).Show()
             | _ -> ()
-        elif (%%"clear_multi_select").Pressed() then multi_selection <- None
+        elif (%%"clear_multi_select").Tapped() then multi_selection <- None
         else
 
-            if (%%"up").Pressed() && expanded_group <> ("", LibraryGroupContext.None) then
+            if (%%"up").Tapped() && expanded_group <> ("", LibraryGroupContext.None) then
                 scroll_to <- ScrollTo.Group expanded_group
                 expanded_group <- ("", LibraryGroupContext.None)
 
-            if (%%"down").Pressed() && expanded_group = ("", LibraryGroupContext.None) && selected_group <> ("", LibraryGroupContext.None) then
+            if (%%"down").Tapped() && expanded_group = ("", LibraryGroupContext.None) && selected_group <> ("", LibraryGroupContext.None) then
                 expanded_group <- selected_group
                 scroll_to <- ScrollTo.Group expanded_group
 

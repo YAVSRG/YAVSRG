@@ -140,9 +140,9 @@ type SessionsTab() =
         base.Update(elapsed_ms, moved)
 
         if this.Focused then
-            if (%%"left").Pressed() then
+            if (%%"left").Tapped() then
                 cycle_session_bk()
-            elif (%%"right").Pressed() then
+            elif (%%"right").Tapped() then
                 cycle_session_fd()
 
     member this.ShowSessionForDate(date: DateOnly) =

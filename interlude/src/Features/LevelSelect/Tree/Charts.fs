@@ -185,7 +185,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         if last_cached_flag < cache_flag then
             update_cached_info ()
 
-        if this.Selected && (%%"multi_select").Pressed() then
+        if this.Selected && (%%"multi_select").Tapped() then
             match multi_selection with
             | Some s when s.IsSelected(cc, ctx) -> deselect_multiple [(cc, ctx)]
             | _ -> select_multiple [(cc, ctx)]
@@ -209,7 +209,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 | Some s when s.IsSelected(cc, ctx) -> s.ShowActions()
                 | _ -> ChartContextMenu(cc, ctx).Show()
 
-            elif (%%"delete").Pressed() then
+            elif (%%"delete").Tapped() then
                 match multi_selection with
                 | Some s when s.IsSelected(cc, ctx) -> s.ConfirmDelete()
                 | _ -> ChartDeleteMenu(cc, ctx, false).Show()

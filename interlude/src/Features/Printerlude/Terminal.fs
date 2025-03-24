@@ -166,14 +166,14 @@ module Terminal =
             )
 
     let update () : unit =
-        if shown && (%%"exit").Pressed() then
+        if shown && (%%"exit").Tapped() then
             hide ()
 
         if
             options.EnableConsole.Value
             && not shown
             && Screen.current_type <> ScreenType.Play
-            && (%%"console").Pressed()
+            && (%%"console").Tapped()
         then
             show ()
 
@@ -184,20 +184,20 @@ module Terminal =
         lock
             LOCK_OBJ
             (fun () ->
-                if cmd_send_key.Pressed() && current_line.Value <> "" then
+                if cmd_send_key.Tapped() && current_line.Value <> "" then
                     add_message ("> " + current_line.Value)
                     exec_command current_line.Value
                     History.add current_line.Value
                     Log.home ()
                     current_line.Value <- ""
-                elif cmd_up_key.Pressed() then
+                elif cmd_up_key.Tapped() then
                     History.up ()
-                elif cmd_down_key.Pressed() then
+                elif cmd_down_key.Tapped() then
                     History.down ()
-                elif log_up_key.Pressed() then
+                elif log_up_key.Tapped() then
                     Log.up ()
-                elif log_down_key.Pressed() then
+                elif log_down_key.Tapped() then
                     Log.down ()
-                elif log_home_key.Pressed() then
+                elif log_home_key.Tapped() then
                     Log.home ()
             )

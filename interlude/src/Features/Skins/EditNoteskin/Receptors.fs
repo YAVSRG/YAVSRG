@@ -69,13 +69,13 @@ type ReceptorColorPicker(color: Setting<int>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"up").Pressed() then
+            if (%%"up").Tapped() then
                 fd ()
-            elif (%%"down").Pressed() then
+            elif (%%"down").Tapped() then
                 bk ()
-            elif (%%"left").Pressed() then
+            elif (%%"left").Tapped() then
                 bk ()
-            elif (%%"right").Pressed() then
+            elif (%%"right").Tapped() then
                 fd ()
 
 type ColumnLightColorPicker(color: Setting<int>) =
@@ -136,13 +136,13 @@ type ColumnLightColorPicker(color: Setting<int>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"up").Pressed() then
+            if (%%"up").Tapped() then
                 fd ()
-            elif (%%"down").Pressed() then
+            elif (%%"down").Tapped() then
                 bk ()
-            elif (%%"left").Pressed() then
+            elif (%%"left").Tapped() then
                 bk ()
-            elif (%%"right").Pressed() then
+            elif (%%"right").Tapped() then
                 fd ()
 
 type AnimationSettingsPage() =

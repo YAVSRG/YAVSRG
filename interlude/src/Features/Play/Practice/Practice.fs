@@ -127,10 +127,10 @@ module PracticeScreen =
                 let now = Song.time_with_offset ()
                 let chart_time = now - FIRST_NOTE
 
-                if (%%"retry").Pressed() then
+                if (%%"retry").Tapped() then
                     restart this
 
-                elif (%%"offset").Pressed() then
+                elif (%%"offset").Tapped() then
                     if not state.Paused.Value then pause this
                     LocalOffsetPage(
                         (match state.SyncSuggestions with Some s -> s.AudioOffset | None -> state.SaveData.Offset),
@@ -138,7 +138,7 @@ module PracticeScreen =
                         fun () -> restart this
                     ).Show()
 
-                elif (%%"accept_offset").Pressed() then
+                elif (%%"accept_offset").Tapped() then
                     if state.Paused.Value then
                         PracticeState.accept_suggested_offset state
                     else
@@ -146,7 +146,7 @@ module PracticeScreen =
                         PracticeState.accept_suggested_offset state
                         restart this
 
-                elif (%%"reset_offset").Pressed() then
+                elif (%%"reset_offset").Tapped() then
                     if state.Paused.Value then
                         PracticeState.reset_offset state
                     else
@@ -155,12 +155,12 @@ module PracticeScreen =
                         restart this
 
                 elif state.Paused.Value then
-                    if (%%"pause").Pressed() then
+                    if (%%"pause").Tapped() then
                         resume this
                     else
                         SelectedChart.change_rate_hotkeys (fun change_by -> SelectedChart.rate.Value <- SelectedChart.rate.Value + change_by)
 
-                elif (%%"exit").Pressed() then
+                elif (%%"exit").Tapped() then
                     if not state.Paused.Value then
                         pause this
                         input_key_state <- 0us

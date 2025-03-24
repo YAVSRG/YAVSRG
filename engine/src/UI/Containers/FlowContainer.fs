@@ -223,13 +223,13 @@ module FlowContainer =
                     t <- t + this.ItemSize + this.Spacing
 
         override this.Navigate() =
-            if (%%"up").Pressed() then
+            if (%%"up").Tapped() then
                 this.Previous()
 
-            if (%%"down").Pressed() then
+            if (%%"down").Tapped() then
                 this.Next()
 
-            if Selection.get_focused_element() <> Some this && (%%"select").Pressed() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface IHeight with
@@ -248,13 +248,13 @@ module FlowContainer =
                     l <- l + this.ItemSize + this.Spacing
 
         override this.Navigate() =
-            if (%%"left").Pressed() then
+            if (%%"left").Tapped() then
                 this.Previous()
 
-            if (%%"right").Pressed() then
+            if (%%"right").Tapped() then
                 this.Next()
 
-            if Selection.get_focused_element() <> Some this && (%%"select").Pressed() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface IWidth with
@@ -279,13 +279,13 @@ module FlowContainer =
                     r <- r + this.ItemSize + this.Spacing
 
         override this.Navigate() =
-            if (%%"left").Pressed() then
+            if (%%"left").Tapped() then
                 this.Next()
 
-            if (%%"right").Pressed() then
+            if (%%"right").Tapped() then
                 this.Previous()
 
-            if Selection.get_focused_element() <> Some this && (%%"select").Pressed() then
+            if Selection.get_focused_element() <> Some this && (%%"select").Tapped() then
                 this.SelectFocusedChild()
 
         interface IWidth with

@@ -78,13 +78,13 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"left").Pressed() then
+            if (%%"left").Tapped() then
                 bk ()
-            elif (%%"right").Pressed() then
+            elif (%%"right").Tapped() then
                 fd ()
-            elif (%%"up").Pressed() then
+            elif (%%"up").Tapped() then
                 fd ()
-            elif (%%"down").Pressed() then
+            elif (%%"down").Tapped() then
                 bk ()
 
 type JudgementPage(on_close: unit -> unit) =

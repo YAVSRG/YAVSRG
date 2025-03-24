@@ -143,7 +143,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
             search_timer.Reset()
             callback query_text.Value
         // eat a button press for some trigger happy users
-        elif search_timer.IsRunning && (%%"select").Pressed() then
+        elif search_timer.IsRunning && (%%"select").Tapped() then
             ()
 
 module NumberEntry =

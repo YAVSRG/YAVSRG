@@ -156,7 +156,7 @@ type Help(content: Callout) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if this.Parent.Focused && (%%"tooltip").Pressed() then
+        if this.Parent.Focused && (%%"tooltip").Tapped() then
 
             id <- HelpOverlay.show (false, this, content)
             by_mouse <- false

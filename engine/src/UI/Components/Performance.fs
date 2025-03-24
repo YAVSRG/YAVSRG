@@ -28,7 +28,7 @@ type PerformanceMonitor() =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if dump_debug.Pressed() then
+        if dump_debug.Tapped() then
             Logging.Debug "%s" (Audio.debug_info())
             Logging.Debug "%s" (Render.debug_info())
             WindowThread.defer (fun () ->
@@ -38,14 +38,14 @@ type PerformanceMonitor() =
                 )
             )
 
-        if dump_profiling.Pressed() then
+        if dump_profiling.Tapped() then
             dump_profiling_info ()
 
-        if fps_bind.Pressed() then
+        if fps_bind.Tapped() then
             enable <- enable_graph || not enable
             enable_graph <- false
 
-        if graph_bind.Pressed() then
+        if graph_bind.Tapped() then
             enable <- not enable_graph || not enable
             enable_graph <- enable
 

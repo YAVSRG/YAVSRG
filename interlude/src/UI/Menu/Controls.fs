@@ -101,7 +101,7 @@ type PageButton(localised_text, on_click) as this =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        if this.Hotkey.Pressed() && not (this.Disabled()) then
+        if this.Hotkey.Tapped() && not (this.Disabled()) then
             Style.click.Play()
             on_click ()
 
@@ -184,7 +184,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        if this.Keybind.Pressed() then on_click()
+        if this.Keybind.Tapped() then on_click()
 
     override this.Draw() =
         let is_highlighted = this.IsHighlighted()

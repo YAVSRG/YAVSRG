@@ -165,9 +165,9 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%"autoplay").Pressed() then
+        if (%%"autoplay").Tapped() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
-        elif (%%"mods").Pressed() then
+        elif (%%"mods").Tapped() then
             Menu.Back()
         else
             SelectedChart.change_rate_hotkeys change_rate
@@ -187,7 +187,7 @@ type ModSelect(change_rate: Rate -> unit, on_menu_close: unit -> unit) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if (%%"autoplay").Pressed() then
+        if (%%"autoplay").Tapped() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
         else
             SelectedChart.change_rate_hotkeys change_rate

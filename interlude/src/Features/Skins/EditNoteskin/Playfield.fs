@@ -60,16 +60,16 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
         base.Update(elapsed_ms, moved)
 
         if this.Selected then
-            if (%%"up").Pressed() then
+            if (%%"up").Tapped() then
                 add 5.0f
                 Style.click.Play()
-            elif (%%"down").Pressed() then
+            elif (%%"down").Tapped() then
                 add -5.0f
                 Style.click.Play()
-            elif (%%"left").Pressed() then
+            elif (%%"left").Tapped() then
                 add -1.0f
                 Style.click.Play()
-            elif (%%"right").Pressed() then
+            elif (%%"right").Tapped() then
                 add 1.0f
                 Style.click.Play()
 

@@ -565,7 +565,7 @@ module Mouse =
         not Input.this_frame_finished && r.Contains(pos ())
 
 type Bind with
-    member this.Held() =
+    member this.Pressed() =
         match this with
         | Key _
         | Mouse _ -> Input.held this
@@ -577,7 +577,7 @@ type Bind with
         | Mouse _ -> Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.PressedOrRepeated() =
+    member this.TappedOrRepeated() =
         match this with
         | Key _
         | Mouse _ ->
@@ -585,7 +585,7 @@ type Bind with
             || Input.pop_matching(this, InputAction.Repeat)
         | _ -> false
 
-    member this.Pressed() =
+    member this.Tapped() =
         match this with
         | Key _
         | Mouse _ -> Input.pop_matching(this, InputAction.Press)
