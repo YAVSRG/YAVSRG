@@ -38,7 +38,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
                             elif this.Focused then Colors.text_yellow_2
                             else this.TextColor()
                     ),
-                MouseListener.Focus(this).Floating(),
+                MouseListener().Button(this).Floating(),
                 HotkeyListener(
                     this.Hotkey,
                     fun () ->

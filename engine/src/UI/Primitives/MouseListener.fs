@@ -32,17 +32,6 @@ type MouseListener() =
 
     override this.Draw() = ()
 
-    static member Focus(w: Widget) : MouseListener =
-        MouseListener(
-            OnLeftClick = (fun () -> w.Select true),
-            OnHover =
-                fun now_hovering ->
-                    if now_hovering && not w.Focused then
-                        w.Focus true
-                    elif not now_hovering && w.FocusedByMouse then
-                        Selection.up true
-        )
-
 [<Extension>]
 type MouseListenerExtensions =
 
@@ -77,7 +66,7 @@ type MouseListenerExtensions =
             fun now_hovering ->
                 if now_hovering && not widget.Focused then
                     widget.Focus true
-                elif not now_hovering && widget.FocusedByMouse then
+                elif not now_hovering && widget.FocusedByMouse && not widget.Selected then
                     Selection.up true
         listener
 

@@ -108,7 +108,9 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
                 }
         )
 
-        |* MouseListener.Focus(this, OnRightClick = (fun () -> ScoreContextMenu(true, score_info).Show()))
+        |* MouseListener()
+            .Button(this)
+            .OnRightClick(fun () -> ScoreContextMenu(true, score_info).Show())
 
         base.Init parent
 

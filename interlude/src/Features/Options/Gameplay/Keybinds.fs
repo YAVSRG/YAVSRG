@@ -46,7 +46,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
 
             refresh_text ()
             Style.key.Play()
-        | _ -> 
+        | _ ->
             Input.listen_to_next_key input_callback
             Input.finish_frame_events()
 
@@ -57,15 +57,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
             Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
             Align = Alignment.LEFT
         )
-        |* MouseListener.Focus(
-            this,
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse && not this.Selected then
-                        Selection.up true
-        )
+        |* MouseListener().Button(this)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse

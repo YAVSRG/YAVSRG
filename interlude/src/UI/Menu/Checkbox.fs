@@ -12,7 +12,8 @@ type Checkbox(setting: Setting<bool>) =
                 Text(fun () -> if setting.Value then Icons.CHECK_CIRCLE else Icons.CIRCLE)
                     .Align(Alignment.LEFT)
                     .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
-                MouseListener.Focus(this)
+                MouseListener()
+                    .Button(this)
             )
 
         base.Init parent

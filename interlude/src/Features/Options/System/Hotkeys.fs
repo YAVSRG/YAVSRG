@@ -34,15 +34,7 @@ type private Keybinder(hotkey: Hotkey) as this =
             Align = Alignment.LEFT,
             Position = Position.ShrinkL 20.0f
         )
-        |* MouseListener.Focus(
-            this,
-            OnHover =
-                fun b ->
-                    if b && not this.Focused then
-                        this.Focus true
-                    elif not b && this.FocusedByMouse && not this.Selected then
-                        Selection.up true
-        )
+        |* MouseListener().Button(this)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -60,7 +52,7 @@ type private Keybinder(hotkey: Hotkey) as this =
 type HotkeysPage() =
     inherit Page()
 
-    override this.Content() = 
+    override this.Content() =
         let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let scroll_container =
@@ -68,7 +60,7 @@ type HotkeysPage() =
 
         let search_box =
             { new SearchBox(
-                    Setting.simple "", 
+                    Setting.simple "",
                     (fun query ->
                         if query = "" then
                             container.Filter <- K true
