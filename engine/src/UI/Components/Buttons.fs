@@ -21,11 +21,11 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
     new(text: string, on_click: unit -> unit) = Button(K text, on_click)
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus by_mouse
         Style.hover.Play()
 
-    override this.Init(parent: Widget) =
+    override this.Init(parent: Widget) : unit =
         this
         |+ Text(
             text,
@@ -47,7 +47,7 @@ type Button(text: unit -> string, on_click: unit -> unit) as this =
 
         base.Init parent
 
-    override this.Focusable = not (this.Disabled()) && base.Focusable
+    override this.Focusable : bool = not (this.Disabled()) && base.Focusable
 
 // todo: look into getting rid of this in favour of normal buttons with icons as part of the label
 type IconButton(text: unit -> string, icon: string, icon_size: float32, on_click: unit -> unit) as this =

@@ -36,6 +36,12 @@
 	  <Compile Include="UI\Selection.fs" />
 	  <Compile Include="UI\Widget.fs" />
 	  <Compile Include="UI\Style.fs" />
+	  <Compile Include="UI\Primitives\Text.fs" />
+	  <Compile Include="UI\Primitives\Image.fs" />
+	  <Compile Include="UI\Primitives\Frame.fs" />
+	  <Compile Include="UI\Primitives\Conditional.fs" />
+	  <Compile Include="UI\Primitives\ClickListener.fs" />
+	  <Compile Include="UI\Primitives\HotkeyListener.fs" />
 	  <Compile Include="UI\Containers\Interfaces.fs" />
 	  <Compile Include="UI\Containers\Container.fs" />
 	  <Compile Include="UI\Containers\Overlay.fs" />
@@ -46,7 +52,7 @@
 	  <Compile Include="UI\Containers\GridContainer.fs" />
 	  <Compile Include="UI\Containers\SwapContainer.fs" />
 	  <Compile Include="UI\Containers\ScrollContainer.fs" />
-	  <Compile Include="UI\Components\Primitives.fs" />
+	  <Compile Include="UI\Containers\FrameContainer.fs" />
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Dialogs.fs" />
     <Compile Include="UI\Components\Performance.fs" />

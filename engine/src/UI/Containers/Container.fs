@@ -2,7 +2,7 @@
 
 open Percyqaz.Flux.Windowing
 
-type Container(node_type) =
+type Container(node_type: NodeType) =
     inherit StaticWidget(node_type)
 
     let children = ResizeArray<Widget>()

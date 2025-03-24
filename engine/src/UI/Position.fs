@@ -1,5 +1,16 @@
 ﻿namespace Percyqaz.Flux.UI
 
+module Alignment =
+
+    [<Literal>]
+    let LEFT = 0.0f
+
+    [<Literal>]
+    let CENTER = 0.5f
+
+    [<Literal>]
+    let RIGHT = 1.0f
+
 type Position =
     {
         Left: float32 * float32
