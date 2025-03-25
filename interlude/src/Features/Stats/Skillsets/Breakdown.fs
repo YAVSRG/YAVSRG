@@ -34,7 +34,7 @@ type SkillBreakdown() =
         refresh_graph()
 
         let source_switcher =
-            LeaningButton(
+            AngledButton(
                 (fun () -> sprintf "%O" source.Value),
                 (fun () ->
                     source.Value <- match source.Value with AllTime -> Recent | _ -> AllTime
@@ -43,10 +43,10 @@ type SkillBreakdown() =
                 Colors.black.O2
             )
                 .LeanLeft(false)
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(400.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(400.0f))
 
         let keymode_switcher =
-            LeaningButton(
+            AngledButton(
                 (fun () -> sprintf "%iK" keymode.Value),
                 (fun () ->
                     keymode.Value <- available_keymodes.[(1 + Array.findIndex ((=) keymode.Value) available_keymodes) % available_keymodes.Length]
@@ -54,10 +54,10 @@ type SkillBreakdown() =
                 ),
                 Colors.shadow_2.O2
             )
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(275.0f).SliceR(100.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(275.0f).SliceR(100.0f))
 
         let skill_switcher =
-            LeaningButton(
+            AngledButton(
                 (fun () -> sprintf "%O" skill.Value),
                 (fun () ->
                     skill.Value <- match skill.Value with Jacks -> Chordstream | Chordstream -> Stream | Stream -> Jacks
@@ -66,7 +66,7 @@ type SkillBreakdown() =
                 Colors.black.O2
             )
                 .LeanRight(false)
-                .Position(Position.SliceT(LeaningButton.HEIGHT).SliceR(250.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(250.0f))
 
         this
         |+ source_switcher

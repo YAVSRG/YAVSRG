@@ -73,7 +73,7 @@ type Leaderboard(display: Setting<Display>) =
         Gameplay.leaderboard_rank_changed.Add (fun _ -> container.Clear(); count <- 0)
 
         this
-        |+ LeaningButton(
+        |+ AngledButton(
             %"levelselect.info.leaderboard",
             (fun () -> display.Set Display.Patterns),
             Palette.MAIN_100
@@ -82,11 +82,11 @@ type Leaderboard(display: Setting<Display>) =
             .LeanLeft(false)
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(1, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
-        |+ LeaningButton(
+        |+ AngledButton(
             Icons.CHEVRONS_UP + " " + %"levelselect.info.scoreboard.sort.accuracy",
             ignore,
             Palette.DARK_100
@@ -95,11 +95,11 @@ type Leaderboard(display: Setting<Display>) =
             .Disabled()
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(2, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
-        |+ LeaningButton(
+        |+ AngledButton(
             Icons.FILTER + " " + %"levelselect.info.scoreboard.filter.none",
             ignore,
             Palette.MAIN_100
@@ -109,8 +109,8 @@ type Leaderboard(display: Setting<Display>) =
             .LeanRight(false)
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container

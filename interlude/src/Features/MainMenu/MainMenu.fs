@@ -151,20 +151,20 @@ type MainMenuScreen() =
                 options_button,
                 quit_button,
 
-                LeaningButton(
+                AngledButton(
                     Icons.STAR + " " + %"menu.changelog",
                     WikiBrowserPage.ShowChangelog,
                     Palette.MAIN_100
                 )
                     .LeanRight(false)
-                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(300.0f)),
+                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(300.0f)),
 
-                LeaningButton(
+                AngledButton(
                     Icons.MESSAGE_SQUARE + " " + %"menu.discord",
                     (fun () -> open_url ("https://discord.gg/tA22tWR")),
                     Palette.DARK_100
                 )
-                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(300.0f).TranslateX(-325.0f))
+                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(300.0f).TranslateX(-325.0f))
             )
         base.Init(parent)
 

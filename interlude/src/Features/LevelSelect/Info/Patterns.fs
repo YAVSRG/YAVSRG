@@ -25,7 +25,7 @@ type Patterns(display: Setting<Display>) =
         SelectedChart.when_loaded false on_chart_update
 
         this
-        |* LeaningButton(
+        |* AngledButton(
             %"levelselect.info.details",
             (fun () -> display.Set Display.Local),
             Palette.MAIN_100
@@ -33,7 +33,7 @@ type Patterns(display: Setting<Display>) =
             .Hotkey("scoreboard_storage")
             .LeanLeft(false)
             .LeanRight(false)
-            .Position(Position.SliceT(LeaningButton.HEIGHT))
+            .Position(Position.SliceT(AngledButton.HEIGHT))
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
 
     override this.Draw() =

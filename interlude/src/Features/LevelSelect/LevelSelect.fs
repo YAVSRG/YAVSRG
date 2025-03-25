@@ -54,7 +54,7 @@ type LevelSelectScreen() =
                     .Position(
                         Position
                             .SliceT(TOP_BAR_HEIGHT)
-                            .ShrinkB(LeaningButton.HEIGHT)
+                            .ShrinkB(AngledButton.HEIGHT)
                             .SliceY(60.0f)
                             .ShrinkPercentL(0.4f)
                             .ShrinkL(290.0f)
@@ -104,16 +104,16 @@ type LevelSelectScreen() =
             .WithConditional(
                 (fun () -> TreeState.multi_selection.IsNone),
 
-                LeaningButton(
+                AngledButton(
                     sprintf "%s %s" Icons.PLAY %"levelselect.play",
                     LevelSelect.choose_this_chart,
                     Palette.MAIN.O2
                 )
                     .LeanRight(false)
-                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(PLAY_BUTTON_WIDTH))
+                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(PLAY_BUTTON_WIDTH))
                     .Help(Help.Info("levelselect.play", "select")),
 
-                LeaningButton(
+                AngledButton(
                     Icons.TARGET,
                     (fun () ->
                         SelectedChart.when_loaded true
@@ -129,35 +129,35 @@ type LevelSelectScreen() =
                     .Hotkey("practice_mode")
                     .Position(
                         Position
-                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceB(AngledButton.HEIGHT)
                             .SliceR(OTHER_BUTTONS_WIDTH)
-                            .TranslateX(-PLAY_BUTTON_WIDTH - LeaningButton.LEAN_AMOUNT)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT)
                     )
                     .Help(Help.Info("levelselect.practice_mode", "practice_mode")),
 
-                LeaningButton(
+                AngledButton(
                     Icons.REFRESH_CCW,
                     (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
                     Palette.MAIN.O2
                 )
                     .Position(
                         Position
-                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceB(AngledButton.HEIGHT)
                             .SliceR(OTHER_BUTTONS_WIDTH)
-                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH - LeaningButton.LEAN_AMOUNT * 2.0f)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH - AngledButton.LEAN_AMOUNT * 2.0f)
                     )
                     .Help(Help.Info("levelselect.random_chart", "random_chart")),
 
-                LeaningButton(
+                AngledButton(
                     Icons.LIST,
                     (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
                     Palette.DARK.O2
                 )
                     .Position(
                         Position
-                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceB(AngledButton.HEIGHT)
                             .SliceR(OTHER_BUTTONS_WIDTH)
-                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH * 2.0f - LeaningButton.LEAN_AMOUNT * 3.0f)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH * 2.0f - AngledButton.LEAN_AMOUNT * 3.0f)
                     )
                     .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
             )
@@ -165,20 +165,20 @@ type LevelSelectScreen() =
             .AddConditional(
                 (fun () -> TreeState.multi_selection.IsSome),
 
-                LeaningButton(
+                AngledButton(
                     sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection",
                     (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
                     Palette.DARK.O2
                 )
                     .LeanRight(false)
-                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH)),
+                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH)),
 
-                LeaningButton(
+                AngledButton(
                     sprintf "%s %s" Icons.LIST %"bulk_actions",
                     (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
                     Palette.MAIN.O2
                 )
-                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - LeaningButton.LEAN_AMOUNT))
+                    .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT))
             )
 
     override this.Update(elapsed_ms, moved) =

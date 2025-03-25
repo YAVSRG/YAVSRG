@@ -61,7 +61,7 @@ type RulesetSwitcher(setting: Setting<string>) =
     override this.Init(parent: Widget) =
         this
             .Add(
-                LeaningButton(
+                AngledButton(
                     (fun () -> Rulesets.current.Name),
                     (fun () -> this.ToggleDropdown()),
                     Palette.MAIN_100

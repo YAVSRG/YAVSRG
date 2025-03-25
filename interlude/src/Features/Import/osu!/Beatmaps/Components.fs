@@ -220,7 +220,7 @@ type private SortingDropdown
     override this.Init(parent: Widget) =
         this
             .Add(
-                LeaningButton(
+                AngledButton(
                     label + ":",
                     (fun () -> this.ToggleDropdown()),
                     Palette.HIGHLIGHT_100
@@ -228,7 +228,7 @@ type private SortingDropdown
                     .Hotkey(bind)
                     .Position(Position.SliceL LABEL_AREA_SIZE),
 
-                LeaningButton(
+                AngledButton(
                     (fun () ->
                         sprintf
                             "%s %s"
@@ -242,7 +242,7 @@ type private SortingDropdown
                     Palette.DARK_100
                 )
                     .LeanRight(false)
-                    .Position(Position.ShrinkL(LABEL_AREA_SIZE + LeaningButton.LEAN_AMOUNT)),
+                    .Position(Position.ShrinkL(LABEL_AREA_SIZE + AngledButton.LEAN_AMOUNT)),
 
                 dropdown_wrapper
             )

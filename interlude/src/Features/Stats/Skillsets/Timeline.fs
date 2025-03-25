@@ -33,7 +33,7 @@ type SkillTimeline() =
         refresh_graph()
 
         let keymode_switcher =
-            LeaningButton(
+            AngledButton(
                 (fun () -> sprintf "%iK" keymode.Value),
                 (fun () ->
                     keymode.Value <- available_keymodes.[(1 + Array.findIndex ((=) keymode.Value) available_keymodes) % available_keymodes.Length]
@@ -42,41 +42,41 @@ type SkillTimeline() =
                 Colors.shadow_2.O2
             )
                 .LeanRight(false)
-                .Position(Position.SliceT(LeaningButton.HEIGHT).SliceR(150.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f))
 
         let zoom_in =
-            LeaningButton(
+            AngledButton(
                 Icons.ZOOM_IN,
                 (fun () -> day_range.Target <- max 30.0f (day_range.Target - 30.0f)),
                 Colors.black.O2
             )
                 .Hotkey("uprate")
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(175.0f).SliceR(100.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(175.0f).SliceR(100.0f))
 
         let zoom_out =
-            LeaningButton(
+            AngledButton(
                 Icons.ZOOM_OUT,
                 (fun () -> day_range.Target <- min 390.0f (day_range.Target + 30.0f)),
                 Colors.shadow_2.O2
             )
                 .Hotkey("downrate")
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(300.0f).SliceR(100.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(300.0f).SliceR(100.0f))
 
         let show_newer =
-            LeaningButton(
+            AngledButton(
                 Icons.ARROW_RIGHT,
                 (fun () -> day_offset.Target <- max 0.0f (day_offset.Target - day_range.Target * 0.25f)),
                 Colors.black.O2
             )
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(425.0f).SliceR(100.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(425.0f).SliceR(100.0f))
 
         let show_older =
-            LeaningButton(
+            AngledButton(
                 Icons.ARROW_LEFT,
                 (fun () -> day_offset.Target <- day_offset.Target + day_range.Target * 0.25f),
                 Colors.shadow_2.O2
             )
-                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(550.0f).SliceR(100.0f))
+                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(550.0f).SliceR(100.0f))
 
         this
         |+ keymode_switcher

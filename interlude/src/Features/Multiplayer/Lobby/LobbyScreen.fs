@@ -78,7 +78,7 @@ type LobbyUI(lobby: Lobby) =
                     Bottom = 1.0f %- 100.0f
                 }
         )
-        |+ LeaningButton(
+        |+ AngledButton(
             sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
             (fun () -> SelectedChart.if_loaded <| fun info -> Preview(info, ignore).Show()),
             Palette.MAIN_100
@@ -87,12 +87,12 @@ type LobbyUI(lobby: Lobby) =
             .Hotkey("preview")
             .Position(
                 Position
-                    .SliceB(LeaningButton.HEIGHT)
+                    .SliceB(AngledButton.HEIGHT)
                     .SlicePercentL(0.4f)
-                    .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
+                    .GridX(1, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.preview"))
-        |+ LeaningButton(
+        |+ AngledButton(
             K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
             ignore,
             Palette.DARK_100
@@ -101,17 +101,17 @@ type LobbyUI(lobby: Lobby) =
             .Disabled()
             .Position(
                 Position
-                    .SliceB(LeaningButton.HEIGHT)
+                    .SliceB(AngledButton.HEIGHT)
                     .SlicePercentL(0.4f)
-                    .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
+                    .GridX(2, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.mods"))
         |+ RulesetSwitcher(options.SelectedRuleset)
             .Position(
                 Position
-                    .SliceB(LeaningButton.HEIGHT)
+                    .SliceB(AngledButton.HEIGHT)
                     .SlicePercentL(0.4f)
-                    .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
+                    .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
         |+ SelectedChart(lobby,

@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 
-type LeaningButton(label_func: unit -> string, on_click: unit -> unit, background_color: unit -> Color) as this =
+type AngledButton(label_func: unit -> string, on_click: unit -> unit, background_color: unit -> Color) as this =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -19,15 +19,15 @@ type LeaningButton(label_func: unit -> string, on_click: unit -> unit, backgroun
 
     static member HEIGHT : float32 = 50.0f
     static member LEAN_RATIO : float32 = 0.5f
-    static member LEAN_AMOUNT : float32 = LeaningButton.HEIGHT * LeaningButton.LEAN_RATIO
+    static member LEAN_AMOUNT : float32 = AngledButton.HEIGHT * AngledButton.LEAN_RATIO
 
-    new (label: string, on_click: unit -> unit, background_color: unit -> Color) = LeaningButton(K label, on_click, background_color)
+    new (label: string, on_click: unit -> unit, background_color: unit -> Color) = AngledButton(K label, on_click, background_color)
 
-    new (label_func: unit -> string, on_click: unit -> unit, background_color: PaletteColor) = LeaningButton(label_func, on_click, !%background_color)
-    new (label: string, on_click: unit -> unit, background_color: PaletteColor) = LeaningButton(K label, on_click, !%background_color)
+    new (label_func: unit -> string, on_click: unit -> unit, background_color: PaletteColor) = AngledButton(label_func, on_click, !%background_color)
+    new (label: string, on_click: unit -> unit, background_color: PaletteColor) = AngledButton(K label, on_click, !%background_color)
 
-    new (label_func: unit -> string, on_click: unit -> unit, background_color: Color) = LeaningButton(label_func, on_click, K background_color)
-    new (label: string, on_click: unit -> unit, background_color: Color) = LeaningButton(K label, on_click, K background_color)
+    new (label_func: unit -> string, on_click: unit -> unit, background_color: Color) = AngledButton(label_func, on_click, K background_color)
+    new (label: string, on_click: unit -> unit, background_color: Color) = AngledButton(K label, on_click, K background_color)
 
     member val Hotkey : Hotkey = "none" with get, set
     member val LeanLeft : bool = true with get, set
@@ -39,9 +39,9 @@ type LeaningButton(label_func: unit -> string, on_click: unit -> unit, backgroun
     override this.Draw() : unit =
         Render.quad_points
             (this.Bounds.Left, this.Bounds.Top)
-            (this.Bounds.Right + (if this.LeanRight then LeaningButton.LEAN_AMOUNT else 0.0f), this.Bounds.Top)
+            (this.Bounds.Right + (if this.LeanRight then AngledButton.LEAN_AMOUNT else 0.0f), this.Bounds.Top)
             (this.Bounds.Right, this.Bounds.Bottom)
-            (this.Bounds.Left - (if this.LeanLeft then LeaningButton.LEAN_AMOUNT else 0.0f), this.Bounds.Bottom)
+            (this.Bounds.Left - (if this.LeanLeft then AngledButton.LEAN_AMOUNT else 0.0f), this.Bounds.Bottom)
             (background_color())
 
         Text.fill_b (
@@ -83,56 +83,56 @@ type LeaningButton(label_func: unit -> string, on_click: unit -> unit, backgroun
 type LeaningButtonExtensions =
 
     [<Extension>]
-    static member Hotkey (button: LeaningButton, hotkey: Hotkey) : LeaningButton =
+    static member Hotkey (button: AngledButton, hotkey: Hotkey) : AngledButton =
         button.Hotkey <- hotkey
         button
 
     [<Extension>]
-    static member LeanLeft (button: LeaningButton, l: bool) : LeaningButton =
+    static member LeanLeft (button: AngledButton, l: bool) : AngledButton =
         button.LeanLeft <- l
         button
 
     [<Extension>]
-    static member LeanRight (button: LeaningButton, l: bool) : LeaningButton =
+    static member LeanRight (button: AngledButton, l: bool) : AngledButton =
         button.LeanRight <- l
         button
 
     [<Extension>]
-    static member Disabled (button: LeaningButton) : LeaningButton =
+    static member Disabled (button: AngledButton) : AngledButton =
         button.Disabled <- K true
         button
 
     [<Extension>]
-    static member Disabled (button: LeaningButton, d: bool) : LeaningButton =
+    static member Disabled (button: AngledButton, d: bool) : AngledButton =
         button.Disabled <- K d
         button
 
     [<Extension>]
-    static member Disabled (button: LeaningButton, d: unit -> bool) : LeaningButton =
+    static member Disabled (button: AngledButton, d: unit -> bool) : AngledButton =
         button.Disabled <- d
         button
 
     [<Extension>]
-    static member Floating (button: LeaningButton) : LeaningButton =
+    static member Floating (button: AngledButton) : AngledButton =
         button.Floating <- true
         button
 
     [<Extension>]
-    static member TextColor (button: LeaningButton, color: Color * Color) : LeaningButton =
+    static member TextColor (button: AngledButton, color: Color * Color) : AngledButton =
         button.TextColor <- K color
         button
 
     [<Extension>]
-    static member TextColor (button: LeaningButton, color: Color) : LeaningButton =
+    static member TextColor (button: AngledButton, color: Color) : AngledButton =
         button.TextColor <- K (color, Colors.shadow_2)
         button
 
     [<Extension>]
-    static member TextColor (button: LeaningButton, color: unit -> Color * Color) : LeaningButton =
+    static member TextColor (button: AngledButton, color: unit -> Color * Color) : AngledButton =
         button.TextColor <- color
         button
 
     [<Extension>]
-    static member TextColor (button: LeaningButton, color: unit -> Color) : LeaningButton =
+    static member TextColor (button: AngledButton, color: unit -> Color) : AngledButton =
         button.TextColor <- fun () -> (color(), Colors.shadow_2)
         button

@@ -81,7 +81,7 @@ type Scoreboard(display: Setting<Display>) =
         container.Sort <- sorter ()
 
         this
-        |+ LeaningButton(
+        |+ AngledButton(
             %"levelselect.info.scoreboard",
             (fun () -> display.Set Display.Online),
             Palette.MAIN_100
@@ -90,11 +90,11 @@ type Scoreboard(display: Setting<Display>) =
             .LeanLeft(false)
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(1, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
-        |+ LeaningButton(
+        |+ AngledButton(
             (fun () ->
                 Icons.CHEVRONS_UP + " " +
                 match sort.Value with
@@ -108,11 +108,11 @@ type Scoreboard(display: Setting<Display>) =
             .Hotkey("scoreboard_sort")
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(2, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
-        |+ LeaningButton(
+        |+ AngledButton(
             (fun () ->
                 Icons.FILTER + " " +
                 match filter.Value with
@@ -127,8 +127,8 @@ type Scoreboard(display: Setting<Display>) =
             .LeanRight(false)
             .Position(
                 Position
-                    .SliceT(LeaningButton.HEIGHT)
-                    .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
+                    .SliceT(AngledButton.HEIGHT)
+                    .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container

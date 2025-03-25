@@ -25,7 +25,7 @@ type private ModeDropdown
     override this.Init(parent: Widget) =
         this
             .Add(
-                LeaningButton(
+                AngledButton(
                     label + ":",
                     (fun () -> this.ToggleDropdown()),
                     Palette.HIGHLIGHT_100
@@ -33,7 +33,7 @@ type private ModeDropdown
                     .Hotkey(bind)
                     .Position(Position.SlicePercentL(LEFT_PERCENT)),
 
-                LeaningButton(
+                AngledButton(
                     (fun () ->
                         sprintf
                             "%s %s"
@@ -46,7 +46,7 @@ type private ModeDropdown
                     (fun () -> reverse.Value <- not reverse.Value),
                     Palette.DARK_100
                 )
-                    .Position(Position.ShrinkPercentL(LEFT_PERCENT).ShrinkL(LeaningButton.LEAN_AMOUNT)),
+                    .Position(Position.ShrinkPercentL(LEFT_PERCENT).ShrinkL(AngledButton.LEAN_AMOUNT)),
 
                 dropdown_wrapper
             )
@@ -74,13 +74,13 @@ type LibraryViewControls() =
 
     override this.Init(parent) =
         this
-        |+ LeaningButton(
+        |+ AngledButton(
             Icons.SETTINGS,
             (fun () -> LevelSelectOptionsPage().Show()),
             Palette.DARK_100
         )
             .Hotkey("level_select_options")
-            .Position(Position.SliceL(LeaningButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH))
+            .Position(Position.SliceL(AngledButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH))
 
         |+ ModeDropdown(
             Sorting.modes.Keys
@@ -93,8 +93,8 @@ type LibraryViewControls() =
             "sort_mode",
             Position =
                 Position
-                    .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
-                    .GridX(1, 2, LeaningButton.LEAN_AMOUNT)
+                    .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
+                    .GridX(1, 2, AngledButton.LEAN_AMOUNT)
         )
             .Help(
                 Help
@@ -111,8 +111,8 @@ type LibraryViewControls() =
             "group_mode",
             Position =
                 Position
-                    .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
-                    .GridX(2, 2, LeaningButton.LEAN_AMOUNT)
+                    .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
+                    .GridX(2, 2, AngledButton.LEAN_AMOUNT)
         )
             .Help(
                 Help

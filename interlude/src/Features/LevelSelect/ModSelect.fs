@@ -177,7 +177,7 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
 
 type ModSelect(change_rate: Rate -> unit, on_menu_close: unit -> unit) =
     inherit
-        LeaningButton(
+        AngledButton(
             sprintf "%s %s" Icons.ZAP (%"levelselect.mods"),
             (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
