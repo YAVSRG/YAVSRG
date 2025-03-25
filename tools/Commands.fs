@@ -21,6 +21,7 @@ module Commands =
             .WithCommand("locale_fix", "Tool to automatically add locale keys", (fun () -> Check.locale_check "en_GB" true))
             .WithCommand("locale_rename", "Tool to rename locale keys/namespaces", "replaced_key", (fun arg -> Check.locale_rename "en_GB" arg))
             .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> Check.check_linecounts ()))
+            .WithCommand("check_simple_view", "Experimental tool to see condensed versions of all files", (fun () -> Check.simple_view_all ()))
             .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Check.format_all_code ()))
 
             .WithCommand("version", "Displays the current version of Interlude", Version.version)
