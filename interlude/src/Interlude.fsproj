@@ -51,7 +51,8 @@
     <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Loaders.fs" />
     <Compile Include="UI\AngledButton.fs" />
-    <Compile Include="UI\Buttons.fs" />
+    <Compile Include="UI\InlaidButton.fs" />
+    <Compile Include="UI\RadioButtons.fs" />
     <Compile Include="UI\Inputs.fs" />
     <Compile Include="UI\Dropdowns.fs" />
     <Compile Include="UI\Web.fs" />

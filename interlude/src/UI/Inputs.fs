@@ -30,7 +30,6 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                  Colors.shadow_1) with get, set
 
     override this.Init(parent) =
-
         this
             .With(
                 Text(fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else "")

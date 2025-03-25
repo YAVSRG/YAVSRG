@@ -158,7 +158,7 @@ type private Profile() =
                     Icons.USER_MINUS),
             HoverText = %"online.players.profile.remove_friend",
             HoverIcon = Icons.USER_MINUS,
-            UnfocusedColor =
+            TextColor =
                 (if data.IsMutualFriend then
                         Colors.text_pink_2
                     else
@@ -170,7 +170,7 @@ type private Profile() =
             %"online.players.profile.add_friend",
             add_friend,
             Icons.USER_PLUS,
-            UnfocusedColor = Colors.text_green_2,
+            TextColor = Colors.text_green_2,
             Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
         )
             .Conditional(fun () -> not data.IsFriend && data.Username <> Network.credentials.Username)

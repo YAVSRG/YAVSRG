@@ -2,66 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
-
-type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: string) =
-    inherit
-        Container(
-            NodeType.Button(fun () ->
-                Style.click.Play()
-                on_click ()
-            )
-        )
-
-    static member HEIGHT = 55.0f
-
-    new (label: string, on_click: unit -> unit, icon: string) = InlaidButton(K label, on_click, icon)
-
-    member val Hotkey : Hotkey = "none" with get, set
-    member val HoverText : string = label_func() with get, set
-    member val HoverIcon : string = icon with get, set
-    member val UnfocusedColor = Colors.text_greyout with get, set
-
-    override this.Init(parent) =
-        this
-        |+ MouseListener().Button(this)
-        |* HotkeyListener(
-            this.Hotkey,
-            fun () ->
-                Style.click.Play()
-                on_click ()
-        )
-
-        base.Init parent
-
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
-        Style.hover.Play()
-
-    override this.Draw() =
-
-        let text =
-            if this.Focused then
-                if this.HoverIcon = "" then this.HoverText
-                else sprintf "%s %s" this.HoverIcon this.HoverText
-            elif icon = "" then label_func()
-            else sprintf "%s %s" icon (label_func())
-
-        Render.rect this.Bounds (Colors.shadow_1.O2)
-
-        Text.fill_b (
-            Style.font,
-            text,
-            this.Bounds.Shrink(10.0f, 5.0f),
-            (if this.Focused then
-                 Colors.text_yellow_2
-             else
-                 this.UnfocusedColor),
-            Alignment.CENTER
-        )
-
-        base.Draw()
 
 module RadioButtons =
 
