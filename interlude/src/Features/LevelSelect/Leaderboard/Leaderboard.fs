@@ -58,19 +58,16 @@ type Leaderboard(display: Setting<Display>) =
     let filter : Setting<Filter> = Setting.simple Filter.None
     let sort : Setting<Sort> = Setting.map enum int options.ScoreSortMode
 
-    let container = FlowContainer.Vertical<LeaderboardCard>(75.0f, Spacing = Style.PADDING * 3.0f)
-
-    let scroll_container =
-        ScrollContainer(container, Position = Position.ShrinkT(50.0f), Margin = Style.PADDING)
+    let scores_list = FlowContainer.Vertical<LeaderboardCard>(75.0f, Spacing = Style.PADDING * 3.0f)
 
     do
         ScoreSync.init()
-        OnlineScores.leaderboard_score_loaded.Add (fun score_info -> score_info |> LeaderboardCard |> container.Add; count <- count + 1)
+        OnlineScores.leaderboard_score_loaded.Add (fun score_info -> score_info |> LeaderboardCard |> scores_list.Add; count <- count + 1)
 
     override this.Init(parent) =
-        SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()))
-        SelectedChart.on_chart_change_finished.Add (fun _ -> container.Clear(); count <- 0; load_if_visible <- true)
-        Gameplay.leaderboard_rank_changed.Add (fun _ -> container.Clear(); count <- 0)
+        SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(fun s -> s.FadeOut()))
+        SelectedChart.on_chart_change_finished.Add (fun _ -> scores_list.Clear(); count <- 0; load_if_visible <- true)
+        Gameplay.leaderboard_rank_changed.Add (fun _ -> scores_list.Clear(); count <- 0)
 
         this
         |+ AngledButton(
@@ -113,12 +110,12 @@ type Leaderboard(display: Setting<Display>) =
                     .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
-        |+ scroll_container
+        |+ ScrollContainer(scores_list, Position = Position.ShrinkT(50.0f), Margin = Style.PADDING)
         |+ HotkeyListener("scoreboard", fun () ->
-            if container.Focused then
+            if scores_list.Focused then
                 Selection.clear ()
             else
-                container.Focus false
+                scores_list.Focus false
         )
         |+ EmptyState(
             Icons.FLAG,

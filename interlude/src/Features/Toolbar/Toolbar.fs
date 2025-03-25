@@ -82,7 +82,7 @@ type Toolbar() =
         |+ (FlowContainer.LeftToRight<Widget>(
                 180.0f,
                 Spacing = 10.0f,
-                AllowNavigation = false,
+                EnableNavigation = false,
                 Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f)
             )
 

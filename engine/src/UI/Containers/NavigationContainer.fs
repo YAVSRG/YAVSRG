@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Linq
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
@@ -403,3 +404,11 @@ module NavigationContainer =
 
             if this.Initialised then
                 child.Init this
+
+[<Extension>]
+type NavigationContainerExtensions =
+
+    [<Extension>]
+    static member WrapNavigation(this: NavigationContainer.Base, wrap: bool) : NavigationContainer.Base =
+        this.WrapNavigation <- wrap
+        this

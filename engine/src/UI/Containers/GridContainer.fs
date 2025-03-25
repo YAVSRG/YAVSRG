@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Linq
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
@@ -356,3 +357,35 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     interface IResize with
         member this.OnSizeChanged
             with set v = size_change <- v
+
+[<Extension>]
+type GridFlowContainerExtensions =
+
+    [<Extension>]
+    static member Spacing(container: #GridFlowContainer<'T>, spacing: float32 * float32) : #GridFlowContainer<'T> =
+        container.Spacing <- spacing
+        container
+
+    [<Extension>]
+    static member Spacing(container: #GridFlowContainer<'T>, spacing: float32) : #GridFlowContainer<'T> =
+        container.Spacing <- spacing, spacing
+        container
+
+    [<Extension>]
+    static member Filter(container: #GridFlowContainer<'T>, filter: 'T -> bool) : unit =
+        container.Filter <- filter
+
+    [<Extension>]
+    static member WithFilter(container: #GridFlowContainer<'T>, filter: 'T -> bool) : #GridFlowContainer<'T> =
+        container.Filter <- filter
+        container
+
+    [<Extension>]
+    static member Floating(container: #GridFlowContainer<'T>) : #GridFlowContainer<'T> =
+        container.Floating <- true
+        container
+
+    [<Extension>]
+    static member WrapNavigation(container: #GridFlowContainer<'T>, wrap: bool) : #GridFlowContainer<'T> =
+        container.WrapNavigation <- wrap
+        container

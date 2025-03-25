@@ -2,6 +2,7 @@
 
 open System
 open System.Drawing
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -113,3 +114,11 @@ type ScrollContainer<'T when 'T :> Widget and 'T :> IHeight>(child: 'T) =
             this.Scroll(target.Bottom - this.Bounds.Bottom + Style.PADDING)
         elif target.Top < this.Bounds.Top && target.Bottom < this.Bounds.CenterY then
             this.Scroll(target.Top - this.Bounds.Top - Style.PADDING)
+
+[<Extension>]
+type ScrollContainerExtensions =
+
+    [<Extension>]
+    static member Margin(container: ScrollContainer<'T>, margin: float32) : ScrollContainer<'T> =
+        container.Margin <- margin
+        container

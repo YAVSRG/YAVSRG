@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
@@ -113,12 +114,12 @@ module FlowContainer =
                 refresh <- true
                 size_change()
 
+        member val Floating = false with get, set
+        member val EnableNavigation = true with get, set
+
         member this.ContentSize =
             let count = children |> Seq.where (_.Visible) |> Seq.length
             float32 count * item_size + (float32 count - 1.0f) * spacing
-
-        member val Floating = false with get, set
-        member val AllowNavigation = true with get, set
 
         member this.Clear() =
             assert(GameThread.is_game_thread())
@@ -148,7 +149,7 @@ module FlowContainer =
                 if child.Visible && (moved || this.Floating || child.Widget.VisibleBounds.Visible) then
                     child.Widget.Update(elapsed_ms, moved)
 
-            if this.AllowNavigation && this.Focused && children.Count > 0 then
+            if this.EnableNavigation && this.Focused && children.Count > 0 then
                 this.Navigate()
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
@@ -290,3 +291,44 @@ module FlowContainer =
 
         interface IWidth with
             member this.Width = this.ContentSize
+
+[<Extension>]
+type FlowContainerExtensions =
+
+    [<Extension>]
+    static member Spacing(container: #FlowContainer.Base<'T>, spacing: float32) : #FlowContainer.Base<'T> =
+        container.Spacing <- spacing
+        container
+
+    [<Extension>]
+    static member ItemSize(container: #FlowContainer.Base<'T>, item_size: float32) : #FlowContainer.Base<'T> =
+        container.ItemSize <- item_size
+        container
+
+    [<Extension>]
+    static member Filter(container: #FlowContainer.Base<'T>, filter: 'T -> bool) : unit =
+        container.Filter <- filter
+
+    [<Extension>]
+    static member WithFilter(container: #FlowContainer.Base<'T>, filter: 'T -> bool) : #FlowContainer.Base<'T> =
+        container.Filter <- filter
+        container
+
+    [<Extension>]
+    static member Sort(container: #FlowContainer.Base<'T>, cmp: 'T -> 'T -> int) : unit =
+        container.Sort <- cmp
+
+    [<Extension>]
+    static member WithSort(container: #FlowContainer.Base<'T>, cmp: 'T -> 'T -> int) : #FlowContainer.Base<'T> =
+        container.Sort <- cmp
+        container
+
+    [<Extension>]
+    static member Floating(container: #FlowContainer.Base<'T>) : #FlowContainer.Base<'T> =
+        container.Floating <- true
+        container
+
+    [<Extension>]
+    static member DisableNavigation(container: #FlowContainer.Base<'T>) : #FlowContainer.Base<'T> =
+        container.EnableNavigation <- false
+        container

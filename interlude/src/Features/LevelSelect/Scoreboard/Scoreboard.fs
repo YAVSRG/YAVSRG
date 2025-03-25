@@ -44,17 +44,14 @@ type Scoreboard(display: Setting<Display>) =
         | Filter.CurrentMods -> (fun a -> a.Data.Mods = SelectedChart.selected_mods.Value)
         | _ -> K true
 
-    let container = FlowContainer.Vertical<ScoreCard>(50.0f, Spacing = Style.PADDING)
-
-    let scroll_container =
-        ScrollContainer(container, Position = Position.ShrinkT(50.0f))
+    let scores_list = FlowContainer.Vertical<ScoreCard>(50.0f, Spacing = Style.PADDING)
 
     do
-        LocalScores.score_loaded.Add (fun score_info -> score_info |> ScoreCard |> container.Add; count <- count + 1)
+        LocalScores.score_loaded.Add (fun score_info -> score_info |> ScoreCard |> scores_list.Add; count <- count + 1)
         LocalScores.scores_loaded.Add (fun () -> loading <- false)
 
     let refresh_filter () =
-        container.Filter <- filterer ()
+        scores_list.Filter <- filterer ()
 
     let cycle_filter () =
         filter.Value <-
@@ -70,15 +67,15 @@ type Scoreboard(display: Setting<Display>) =
             | Sort.Performance -> Sort.Accuracy
             | Sort.Accuracy -> Sort.Time
             | _ -> Sort.Performance
-        container.Sort <- sorter ()
+        scores_list.Sort <- sorter ()
 
     override this.Init(parent: Widget) =
-        SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()); loading <- true)
-        SelectedChart.on_chart_change_finished.Add (fun _ -> container.Clear(); count <- 0)
-        Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> container.Sort <- sorter ()))
+        SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(fun s -> s.FadeOut()); loading <- true)
+        SelectedChart.on_chart_change_finished.Add (fun _ -> scores_list.Clear(); count <- 0)
+        Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> scores_list.Sort <- sorter ()))
         SelectedChart.on_chart_update_finished.Add (fun _ -> refresh_filter())
-        Gameplay.score_deleted.Add (fun timestamp -> container.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> container.Remove sc)))
-        container.Sort <- sorter ()
+        Gameplay.score_deleted.Add (fun timestamp -> scores_list.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> scores_list.Remove sc)))
+        scores_list.Sort <- sorter ()
 
         this
         |+ AngledButton(
@@ -131,14 +128,15 @@ type Scoreboard(display: Setting<Display>) =
                     .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
-        |+ scroll_container
+        |+ ScrollContainer(scores_list)
+            .Position(Position.ShrinkT(AngledButton.HEIGHT))
         |+ HotkeyListener(
             "scoreboard",
             fun () ->
-                if container.Focused then
+                if scores_list.Focused then
                     Selection.clear ()
                 else
-                    container.Focus false
+                    scores_list.Focus false
         )
         |* EmptyState(Icons.WIND, %"levelselect.info.scoreboard.empty", Subtitle = %"levelselect.info.scoreboard.empty.subtitle")
             .Conditional(fun () -> not loading && count = 0)
