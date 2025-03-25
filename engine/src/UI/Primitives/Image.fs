@@ -7,8 +7,8 @@ open Percyqaz.Flux.Graphics
 type Image(sprite: Sprite) =
     inherit StaticWidget(NodeType.None)
 
-    member val Sprite = sprite with get, set
-    member val StretchToFill = true with get, set
+    member val Sprite : Sprite = sprite with get, set
+    member val StretchToFill : bool = true with get, set
 
     override this.Draw() =
         if this.StretchToFill then

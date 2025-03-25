@@ -61,8 +61,18 @@ type ButtonExtensions =
         button
 
     [<Extension>]
+    static member Disabled (button: Button) : Button =
+        button.Disabled <- K true
+        button
+
+    [<Extension>]
     static member Disabled (button: Button, d: bool) : Button =
         button.Disabled <- K d
+        button
+
+    [<Extension>]
+    static member Disabled (button: Button, d: unit -> bool) : Button =
+        button.Disabled <- d
         button
 
     [<Extension>]
@@ -71,31 +81,26 @@ type ButtonExtensions =
         button
 
     [<Extension>]
-    static member Floating (button: Button, floating: bool) : Button =
-        button.Floating <- floating
-        button
-
-    [<Extension>]
     static member Align (button: Button, alignment: float32) : Button =
         button.Align <- alignment
         button
 
     [<Extension>]
-    static member Color (button: Button, color: Color * Color) : Button =
+    static member TextColor (button: Button, color: Color * Color) : Button =
         button.TextColor <- K color
         button
 
     [<Extension>]
-    static member Color (button: Button, color: Color) : Button =
+    static member TextColor (button: Button, color: Color) : Button =
         button.TextColor <- K (color, Colors.shadow_2)
         button
 
     [<Extension>]
-    static member Color (button: Button, color: unit -> Color * Color) : Button =
+    static member TextColor (button: Button, color: unit -> Color * Color) : Button =
         button.TextColor <- color
         button
 
     [<Extension>]
-    static member Color (button: Button, color: unit -> Color) : Button =
+    static member TextColor (button: Button, color: unit -> Color) : Button =
         button.TextColor <- fun () -> (color(), Colors.shadow_2)
         button

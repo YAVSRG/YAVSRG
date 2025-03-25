@@ -56,7 +56,7 @@ type Scoreboard(display: Setting<Display>) =
     let refresh_filter () =
         container.Filter <- filterer ()
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()); loading <- true)
         SelectedChart.on_chart_change_finished.Add (fun _ -> container.Clear(); count <- 0)
         Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> container.Sort <- sorter ()))

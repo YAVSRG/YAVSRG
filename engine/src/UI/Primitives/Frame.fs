@@ -1,13 +1,14 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Drawing
 open Percyqaz.Flux.Graphics
 
 [<Sealed>]
 type Frame() =
     inherit StaticWidget(NodeType.None)
 
-    member val Fill = !%Palette.DARK with get, set
-    member val Border = !%Palette.LIGHT with get, set
+    member val Fill : unit -> Color = !%Palette.DARK with get, set
+    member val Border : unit -> Color = !%Palette.LIGHT with get, set
 
     override this.Draw() =
         let border = this.Border()

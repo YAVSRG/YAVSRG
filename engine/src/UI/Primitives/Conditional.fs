@@ -1,5 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Runtime.CompilerServices
+
 /// Each frame, evaluate `condition` - Only show contained component if true
 [<Sealed>]
 type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
@@ -21,10 +23,11 @@ type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
 
     override this.Focusable = condition () && base.Focusable
 
-    member this.Child = child
+    member this.Child : 'T = child
 
-[<AutoOpen>]
-module ConditionalExtensions =
+[<Extension>]
+type ConditionalExtensions =
 
-    type Widget with
-        member this.Conditional(condition: unit -> bool) = Conditional(condition, this)
+    [<Extension>]
+    static member Conditional (widget: #Widget, condition: unit -> bool) : Conditional<#Widget> =
+        Conditional(condition, widget)

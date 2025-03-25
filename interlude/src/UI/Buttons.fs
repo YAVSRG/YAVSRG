@@ -5,7 +5,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 
-type StylishButton(on_click, label_func: unit -> string, color_func: unit -> System.Drawing.Color) as this =
+type StylishButton(on_click: unit -> unit, label_func: unit -> string, color_func: unit -> System.Drawing.Color) as this =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -37,16 +37,17 @@ type StylishButton(on_click, label_func: unit -> string, color_func: unit -> Sys
 
     override this.Init(parent: Widget) =
         this
-        |+ MouseListener()
-            .Button(this)
-            .Floating(this.Floating)
-        |* HotkeyListener(
-            this.Hotkey,
-            fun () ->
-                if not (this.Disabled()) then
-                    Style.click.Play()
-                    on_click ()
-        )
+            .Add(
+                MouseListener()
+                    .Button(this)
+                    .Floating(this.Floating),
+
+                HotkeyListener(this.Hotkey, fun () ->
+                    if not (this.Disabled()) then
+                        Style.click.Play()
+                        on_click ()
+                )
+            )
 
         base.Init parent
 

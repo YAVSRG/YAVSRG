@@ -12,6 +12,10 @@ type MouseListener() =
     member val OnLeftClick : unit -> unit = ignore with get, set
     member val OnRightClick : unit -> unit = ignore with get, set
     member val OnHover : bool -> unit = ignore with get, set
+    /// By default, the listened area is restricted to the area that is also inside all parents of the component
+    /// This means elements that are partly obscured can't be interacted with outside the bounds of their parent
+    /// Example: Scroll container with elements such that one is half-in and half-out; Only the half that is in can be interacted with
+    /// Setting `Floating` to true will turn this behaviour off so the entire bounding box is interactable, all the time
     member val Floating : bool = false with get, set
 
     override this.Update(elapsed_ms, moved) =
