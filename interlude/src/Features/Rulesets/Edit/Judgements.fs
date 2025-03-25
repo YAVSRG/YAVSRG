@@ -38,7 +38,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     let rec judgement_controls (i: int, j: Judgement) =
         NavigationContainer.Row()
-        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show()), Position = Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
+        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show())).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
         |+ Button(
             Icons.COPY,
             (fun () ->
@@ -46,9 +46,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
                     [j.Name] %> "rulesets.judgement.confirm_duplicate",
                     fun () -> duplicate_judgement i
                 ).Show()
-            ),
-            Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT)
-        )
+            )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
         |+ Button(
             Icons.TRASH,
             (fun () ->
@@ -76,7 +74,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     override this.Content() =
         refresh()
-        ScrollContainer(container, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.judgements"
     override this.OnClose() = ()

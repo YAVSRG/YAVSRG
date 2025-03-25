@@ -150,9 +150,7 @@ module private Presets =
                     | None -> ()
                 ),
                 Floating = true,
-                Disabled = (fun () -> setting.Value.IsNone),
-                Position = Position.SliceT(40.0f)
-            )
+                Disabled = (fun () -> setting.Value.IsNone)).Position(Position.SliceT(40.0f))
 
         let load_preset_button =
             Button(
@@ -190,10 +188,7 @@ module private Presets =
                             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     | None -> ()
                 ),
-                Disabled = (fun () -> setting.Value.IsNone),
-                Position =
-                    Position.SliceB(40.0f).SlicePercentL(0.5f).ShrinkX(10.0f).ShrinkR(20.0f)
-            )
+                Disabled = (fun () -> setting.Value.IsNone)).Position(Position.SliceB(40.0f).SlicePercentL(0.5f).ShrinkX(10.0f).ShrinkR(20.0f))
 
         let save_preset_button =
             Button(
@@ -223,10 +218,7 @@ module private Presets =
                         match setting.Value with
                         | Some s -> s.Mode <> PresetMode.Unlocked
                         | None -> false
-                    ),
-                Position =
-                    Position.SliceB(40.0f).SlicePercentR(0.5f).ShrinkX(10.0f).ShrinkL(20.0f)
-            )
+                    )).Position(Position.SliceB(40.0f).SlicePercentR(0.5f).ShrinkX(10.0f).ShrinkL(20.0f))
 
         let lower_buttons =
             NavigationContainer.Row(WrapNavigation = false)
@@ -250,9 +242,8 @@ module private Presets =
         |+ create_preset_button
         |+ Text(
             sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
-            Color = K Colors.text_green,
-            Position = Position.SliceB(40.0f).ShrinkX(10.0f)
-        )
+            Color = K Colors.text_green)
+            .Position(Position.SliceB(40.0f).ShrinkX(10.0f))
             .Conditional(fun () ->
                 options.SelectedPreset.Value = Some preset_id
                 && match setting.Value with

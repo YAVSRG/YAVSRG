@@ -75,14 +75,10 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         this
         |+ Text(
             data.name,
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(45.0f).Shrink(10.0f, 0.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.SliceT(45.0f).Shrink(10.0f, 0.0f))
         |+ Text(
             data.size,
-            Align = Alignment.RIGHT,
-            Position = Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f)
-        )
+            Align = Alignment.RIGHT).Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f))
         |+ Text(
             (fun () ->
                 if status = Installed then "Downloaded!"
@@ -90,31 +86,24 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 else ""
             ),
             Color = (fun () -> if status = DownloadFailed then Colors.text_red else Colors.text_green),
-            Align = Alignment.RIGHT,
-            Position = Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f)
-        )
+            Align = Alignment.RIGHT).Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
         |+ Text(
             (sprintf "Average difficulty (MSD): %.2f" data.overall),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.SliceB(45.0f).Shrink(10.0f, 5.0f)
-        )
-        |+ Button(Icons.DOWNLOAD, download, Position = Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
+            Align = Alignment.LEFT).Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
+        |+ Button(Icons.DOWNLOAD, download).Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
         |+ MouseListener().Button(this)
         |* Button(
             Icons.EXTERNAL_LINK
             , fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id)
-            , Position = Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f)
-        )
+            ).Position(Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f))
 
         if data.contains_nsfw then
             this
             |* Text(
                 Icons.ALERT_TRIANGLE + " NFSW content",
                 Color = K Colors.text_red,
-                Align = Alignment.LEFT,
-                Position = Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f)
-            )
+                Align = Alignment.LEFT).Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
 
         base.Init parent
 

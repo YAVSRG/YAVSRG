@@ -181,9 +181,8 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
                 (if this.Disabled then
                      K Colors.text_greyout
                  else
-                     K Colors.text),
-            Position = Position.Shrink(20.0f, 15.0f)
-        )
+                     K Colors.text))
+                        .Position(Position.Shrink(20.0f, 15.0f))
         |> fun x ->
             if not this.Disabled then
                 x.Add <| MouseListener().Button(this)
@@ -254,7 +253,7 @@ type SelectCollectionPage
         )
             .Help(Help.Info("collections.create_playlist"))
             .Pos(2)
-        |+ ScrollContainer(grid, Position = page_position(5, PAGE_BOTTOM - 5, PageWidth.Full))
+        |+ ScrollContainer(grid).Position(page_position(5, PAGE_BOTTOM - 5, PageWidth.Full))
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")

@@ -43,7 +43,7 @@ type GameplayInfo() =
         SelectedChart.on_chart_update_finished.Add refresh
         SelectedChart.if_loaded refresh
 
-        this |* GameplayInfoBoxes(Position = Position.SliceT(100.0f).Shrink(10.0f))
+        this |* GameplayInfoBoxes().Position(Position.SliceT(100.0f).Shrink(10.0f))
 
         base.Init parent
 

@@ -82,12 +82,12 @@ type EtternaPacksBrowserPage() =
     override this.Content() =
         begin_search filter
 
-        NavigationContainer.Column(Position = Position.SliceX(1400.0f).ShrinkT(90.0f).ShrinkB(70.0f))
+        NavigationContainer.Column().Position(Position.SliceX(1400.0f).ShrinkT(90.0f).ShrinkB(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
-        |+ EmptyState(Icons.X, %"etterna_pack_browser.error", Position = Position.ShrinkT(120.0f))
+        |+ EmptyState(Icons.X, %"etterna_pack_browser.error").Position(Position.ShrinkT(120.0f))
             .Conditional(fun () -> failed)
-        |+ EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results", Position = Position.ShrinkT(120.0f))
+        |+ EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results").Position(Position.ShrinkT(120.0f))
             .Conditional(fun () -> not failed && not loading && items.Count = 0)
         :> Widget
 
@@ -97,14 +97,12 @@ type EtternaPacksBrowserPage() =
             (fun (f: FilterPart list) ->
                 filter <- f
                 GameThread.defer (fun () -> begin_search filter)
-            ),
-            Position = Position.SliceX(1400.0f).SliceT(60.0f).Translate(0.0f, 20.0f)
-        )
+            )).Position(Position.SliceX(1400.0f).SliceT(60.0f).Translate(0.0f, 20.0f))
         |+ LoadingIndicator.Border(fun () -> loading)
         :> Widget
 
     override this.Footer() =
-        Text(%"etterna_pack_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceB(55.0f).Translate(0.0f, -10.0f))
+        Text(%"etterna_pack_browser.disclaimer", Align = Alignment.CENTER).Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()

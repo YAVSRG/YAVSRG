@@ -45,12 +45,10 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     override this.Init(parent) =
         this
-        |+ Text(ruleset.Name, Align = Alignment.LEFT, Position = Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
+        |+ Text(ruleset.Name, Align = Alignment.LEFT).Position(Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
         |+ Text(
             ruleset.Description,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING))
         |* MouseListener().Button(this)
         base.Init parent
 
@@ -109,7 +107,7 @@ type RulesetSearch() as this =
         GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
 
     let scroll =
-        ScrollContainer(grid, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
+        ScrollContainer(grid, Margin = Style.PADDING).Position(Position.ShrinkT(70.0f))
 
     let mutable loading = true
     let mutable failed = false

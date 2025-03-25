@@ -41,9 +41,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
     override this.Init(parent: Widget) =
         this
         |* LoadingIndicator.Strip(
-            (fun () -> not closing),
-            Position = Position.SliceT(165.0f, 10.0f).SliceX(400.0f)
-        )
+            (fun () -> not closing)).Position(Position.SliceT(165.0f, 10.0f).SliceX(400.0f))
         base.Init parent
 
     override this.OnEnter(prev: ScreenType) =

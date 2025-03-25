@@ -72,16 +72,12 @@ type SelectRulesetPage() =
                 |+ RulesetButton(
                     id,
                     ruleset.Name,
-                    (fun () -> options.SelectedRuleset.Set id),
-                    Position = Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f)
-                )
+                    (fun () -> options.SelectedRuleset.Set id)).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f))
                 |+ Button(
                     Icons.EDIT,
                     (fun () ->
                         RulesetEditorPage(id, ruleset).Show()
-                    ),
-                    Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f)
-                )
+                    )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f))
                 |+ Button(
                     Icons.COPY,
                     (fun () ->
@@ -91,9 +87,7 @@ type SelectRulesetPage() =
                                 Rulesets.install { ruleset.Clone with Name = ruleset.Name + " (Copy)" }
                         )
                             .Show()
-                    ),
-                    Position = Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT)
-                )
+                    )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
                 |+ Button(
                     Icons.TRASH,
                     (fun () ->
@@ -113,7 +107,7 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

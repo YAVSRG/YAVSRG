@@ -132,9 +132,8 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
             sprintf "%s %s" Icons.ARROW_LEFT (%"stats.activity.view_older"),
             fun () -> AllYearsActivityPage(selected).Show()
             ,
-            Floating = true,
-            Position = Position.BorderB(30.0f).SliceL(120.0f).Translate(10.0f, 5.0f)
-        )
+            Floating = true)
+            .Position(Position.BorderB(30.0f).SliceL(120.0f).Translate(10.0f, 5.0f))
         base.Init parent
 
     override this.Draw() =

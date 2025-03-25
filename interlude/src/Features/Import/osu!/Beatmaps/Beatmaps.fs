@@ -107,16 +107,16 @@ type BeatmapBrowserPage() =
         )
 
     let search_results =
-        NavigationContainer.Column(Position = Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
+        NavigationContainer.Column().Position(Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
         |+ Dummy(NodeType.Leaf)
         |+ scroll_container
         |>> Container
-        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results", Position = Position.ShrinkT(135.0f))
+        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results").Position(Position.ShrinkT(135.0f))
             .Conditional(fun () -> not loading && items.Count = 0)
         :> Widget
 
     let header =
-        NavigationContainer.Row(Position = Position.SliceB(AngledButton.HEIGHT))
+        NavigationContainer.Row().Position(Position.SliceB(AngledButton.HEIGHT))
         |+ status_button("Ranked", 1, Colors.cyan)
             .LeanLeft(false)
             .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, AngledButton.LEAN_AMOUNT))
@@ -143,7 +143,7 @@ type BeatmapBrowserPage() =
                     .SlicePercentR(0.28f)
                     .ShrinkL(AngledButton.LEAN_AMOUNT)
         )
-        |>> (fun nt -> Container(nt, Position = Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
+        |>> (fun nt -> Container(nt).Position(Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: FilterPart list) ->
@@ -166,7 +166,8 @@ type BeatmapBrowserPage() =
         search_results
 
     override this.Header() =
-        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER, Position = Position.SliceB(55.0f).Translate(0.0f, -10.0f))
+        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER)
+            .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()

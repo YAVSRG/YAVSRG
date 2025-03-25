@@ -13,7 +13,7 @@ type CurrentSession() =
     override this.Init(parent: Widget) =
         this
         |+ Text("Current session", Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
-        |+ Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") current_session.NotesHit, Color = K Colors.text_subheading, Align = Alignment.LEFT, Position = Position.ShrinkT(70.0f).SliceT(40.0f))
+        |+ Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") current_session.NotesHit, Color = K Colors.text_subheading, Align = Alignment.LEFT).Position(Position.ShrinkT(70.0f).SliceT(40.0f))
         |+ Text(
             (fun () ->
                 sprintf "%s of playtime over %s, session started at %s"
@@ -22,9 +22,7 @@ type CurrentSession() =
                     ((Timestamp.to_datetime current_session.Start).ToLocalTime().ToShortTimeString())
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(105.0f).SliceT(40.0f)
-        )
-        |* ScoreList(current_session.Start, Timestamp.now(), Position = Position.ShrinkT(160.0f))
+            Align = Alignment.LEFT).Position(Position.ShrinkT(105.0f).SliceT(40.0f))
+        |* ScoreList(current_session.Start, Timestamp.now()).Position(Position.ShrinkT(160.0f))
 
         base.Init parent

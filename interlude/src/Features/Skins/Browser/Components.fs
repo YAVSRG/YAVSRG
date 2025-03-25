@@ -55,9 +55,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     else
                         Colors.text
                 ),
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING)
-        )
+            Align = Alignment.LEFT).Position(Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING))
         |+ Text(
             (
                 match version.Editor with
@@ -65,10 +63,8 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                 | None -> [version.Author] %> "skins.credit"
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING)
-        )
-        |+ { new Thumbnail(Position = Position.ShrinkT(130.0f).Shrink(10.0f)) with
+            Align = Alignment.LEFT).Position(Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING))
+        |+ { new Thumbnail() with
             override this.Load() =
                 ImageServices.get_cached_image.Request(
                     version.Preview,
@@ -77,6 +73,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                     | None -> Logging.Warn "Failed to load noteskin preview '%s'" version.Preview
                 )
         }
+            .Position(Position.ShrinkT(130.0f).Shrink(10.0f))
         |* MouseListener().Button(this)
         base.Init parent
 
@@ -138,16 +135,12 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     elif selected.Value then Colors.text_pink
                     else Colors.text
                 ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f))
         |+ Text(
             subtitle,
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f)
-        )
-        |+ { new Thumbnail(Position = Position.SliceL(100.0f).Shrink(Style.PADDING)) with
+            Align = Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f))
+        |+ { new Thumbnail() with
             override this.Load() =
                 ImageServices.get_cached_image.Request(
                     group.Thumbnail,
@@ -156,6 +149,7 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     | None -> Logging.Warn "Failed to load noteskin thumbnail '%s'" group.Thumbnail
                 )
         }
+            .Position(Position.SliceL(100.0f).Shrink(Style.PADDING))
         |* MouseListener().Button(this)
         base.Init parent
 

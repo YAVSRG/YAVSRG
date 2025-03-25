@@ -21,11 +21,12 @@ type SkinsBrowserPage() =
     let version_items =
         FlowContainer.Vertical<VersionDisplay>(520.0f, Spacing = 15.0f)
 
-    let search_groups = 
+    let search_groups =
         NavigationContainer.Column()
         |+ Dummy(NodeType.Leaf)
-        |+ ScrollContainer(noteskin_items, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
-        |>> (fun nt -> Container(nt, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.65f %- 10.0f }))
+        |+ ScrollContainer(noteskin_items, Margin = Style.PADDING)
+            .Position(Position.ShrinkT(70.0f))
+        |>> (fun nt -> Container(nt).Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.65f %- 10.0f }))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (query: string) -> noteskin_items.Filter <- GroupDisplay.Filter query),
@@ -38,9 +39,11 @@ type SkinsBrowserPage() =
         |+ EmptyState(Icons.X, %"skins.browser.error").Conditional(fun () -> error)
 
     let pick_versions =
-        ScrollContainer(version_items, Margin = Style.PADDING, Position = Position.ShrinkT(70.0f))
-        |>> (fun nt -> Container(nt, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
-        |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER, Position = Position.SliceT(70.0f).Shrink(10.0f)).Conditional(fun () -> selected_group.IsSome)
+        ScrollContainer(version_items, Margin = Style.PADDING)
+            .Position(Position.ShrinkT(70.0f))
+        |>> (fun nt -> Container(nt).Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
+        |+ Text(%"skins.browser.install_hint", Color = K Colors.text_subheading, Align = Alignment.CENTER)
+            .Position(Position.SliceT(70.0f).Shrink(10.0f)).Conditional(fun () -> selected_group.IsSome)
 
     let select_group(group: SkinGroup) =
         selected_group <- Some group

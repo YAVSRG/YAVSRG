@@ -92,9 +92,7 @@ type SkinPreview(position: Position) as this =
         |* (bounds_placeholder
             |+ Text(
                 Icons.EYE + " " + %"misc.preview",
-                Align = Alignment.LEFT,
-                Position = Position.Shrink(20.0f, 10.0f).SliceT(30.0f)
-            ))
+                Align = Alignment.LEFT).Position(Position.Shrink(20.0f, 10.0f).SliceT(30.0f)))
 
     member this.PreviewBounds = bounds_placeholder.Bounds
 

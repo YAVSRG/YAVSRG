@@ -41,7 +41,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f, Position = scaled_margins.SliceY(60.0f))
+        DynamicFlowContainer.LeftToRight(Spacing = 10.0f).Position(scaled_margins.SliceY(60.0f))
         |+ OptionsMenuButton(
             sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
             200.0f,

@@ -56,7 +56,7 @@ type HotkeysPage() =
         let container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         let scroll_container =
-            ScrollContainer(container, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+            ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
         let search_box =
             { new SearchBox(

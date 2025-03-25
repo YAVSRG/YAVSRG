@@ -29,9 +29,7 @@ type GameplayPage() =
                 ]
                 %> "gameplay.scrollspeed.info"
             ),
-            Align = Alignment.CENTER,
-            Position = page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH)
-        )
+            Align = Alignment.CENTER).Position(page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH))
         |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Help(Help.Info("gameplay.hitposition"))
             .Pos(3)

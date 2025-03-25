@@ -38,16 +38,14 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
     do
         this
         |+ Image(sprite, Position = Position.ShrinkB(65.0f).Shrink(20.0f), StretchToFill = false)
-        |+ Text(id, Align = Alignment.CENTER, Position = Position.Shrink(Style.PADDING).SliceB(40.0f).Translate(0.0f, -40.0f))
+        |+ Text(id, Align = Alignment.CENTER).Position(Position.Shrink(Style.PADDING).SliceB(40.0f).Translate(0.0f, -40.0f))
         |+ MouseListener().Button(this)
         |* Button(
             (fun () -> if is_stitched then Icons.SQUARE + " " + %"skins.texture.grid" else Icons.GRID + " " + %"skins.texture.loose"),
             (fun () ->
                 (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
-            ),
-            Position = Position.Shrink(Style.PADDING).SliceB(40.0f)
-        )
+            )).Position(Position.Shrink(Style.PADDING).SliceB(40.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -72,9 +70,7 @@ module TextureGrid =
 
         ScrollContainer(
             textures_grid,
-            Margin = Style.PADDING,
-            Position = page_position(3, PAGE_BOTTOM - 3, PageWidth.Normal)
-        ), refresh
+            Margin = Style.PADDING).Position(page_position(3, PAGE_BOTTOM - 3, PageWidth.Normal)), refresh
 
     let create_hud (hud: HudLayout) : Widget * (unit -> unit) =
         let textures_grid =
@@ -93,6 +89,4 @@ module TextureGrid =
 
         ScrollContainer(
             textures_grid,
-            Margin = Style.PADDING,
-            Position = page_position(0, PAGE_BOTTOM, PageWidth.Normal)
-        ), refresh
+            Margin = Style.PADDING).Position(page_position(0, PAGE_BOTTOM, PageWidth.Normal)), refresh

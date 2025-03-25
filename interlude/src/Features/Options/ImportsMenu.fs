@@ -16,13 +16,13 @@ type ImportsMenuPage() =
     inherit Page()
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
-        |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.SliceT(100.0f, 150.0f))
-        |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.SliceT(270.0f, 150.0f))
-        |+ MountControl(MountedGameType.Etterna, options.EtternaMount, Position = Position.SliceT(440.0f, 150.0f))
-        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.SliceT(610.0f, 150.0f))
-        |+ Text(%"imports.mount", Align = Alignment.CENTER, Position = Position.SliceT(0.0f, 80.0f))
-        |+ Text(%"imports.drag_and_drop_hint", Align = Alignment.CENTER, Position = Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
+        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
+        |+ MountControl(MountedGameType.Osu, options.OsuMount).Position(Position.SliceT(100.0f, 150.0f))
+        |+ MountControl(MountedGameType.Quaver, options.QuaverMount).Position(Position.SliceT(270.0f, 150.0f))
+        |+ MountControl(MountedGameType.Etterna, options.EtternaMount).Position(Position.SliceT(440.0f, 150.0f))
+        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount).Position(Position.SliceT(610.0f, 150.0f))
+        |+ Text(%"imports.mount", Align = Alignment.CENTER).Position(Position.SliceT(0.0f, 80.0f))
+        |+ Text(%"imports.drag_and_drop_hint", Align = Alignment.CENTER).Position(Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
 
     let main_options =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })

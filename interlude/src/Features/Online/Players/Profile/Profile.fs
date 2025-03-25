@@ -133,17 +133,13 @@ type private Profile() =
         |+ Text(
             data.Username,
             Color = (fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2),
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f)
-        )
-        |+ StatsHeader(data, Position = Position.SliceT(70.0f, 120.0f).ShrinkX(20.0f))
+            Align = Alignment.LEFT).Position(Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f))
+        |+ StatsHeader(data).Position(Position.SliceT(70.0f, 120.0f).ShrinkX(20.0f))
         |+ Text(
             %"online.players.profile.recent_scores",
             Color = K Colors.text,
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(180.0f, 45.0f).ShrinkX(40.0f)
-        )
-        |+ RecentScores(data.RecentScores, Position = Position.ShrinkT(190.0f).Shrink(40.0f))
+            Align = Alignment.LEFT).Position(Position.SliceT(180.0f, 45.0f).ShrinkX(40.0f))
+        |+ RecentScores(data.RecentScores).Position(Position.ShrinkT(190.0f).Shrink(40.0f))
 
         // Friend button when not your profile
         |+ InlaidButton(

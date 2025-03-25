@@ -56,9 +56,7 @@ type Page() as this =
     default this.Footer() =
         Button(
             Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back",
-            Menu.Back,
-            Position = Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f)
-        )
+            Menu.Back).Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f))
         |> OverlayContainer
         :> Widget
 
@@ -305,7 +303,7 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
                 PageButton.Once(label, fork action Menu.Back).Pos(p)
             )
         )
-        |+ Text(prompt, Align = Alignment.LEFT, Position = page_position(0, 2, PageWidth.Full))
+        |+ Text(prompt, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
         :> Widget
 
     override this.Title = %"confirm"

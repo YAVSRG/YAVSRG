@@ -38,7 +38,7 @@ type ScoreGraphSettingsPage(graph: ScoreGraph) =
 
     let mutable column_filter_changed = false
     let column_filter_setting k = Setting.make (fun v -> column_filter_changed <- true; GraphSettings.column_filter.[k] <- v) (fun () -> GraphSettings.column_filter.[k])
-    let column_filter_ui, _ = refreshable_row (fun () -> graph.Keys) (fun k _ -> Checkbox(column_filter_setting k, Position = Position.SliceL(50.0f).Translate(float32 k * 80.0f, 0.0f)))
+    let column_filter_ui, _ = refreshable_row (fun () -> graph.Keys) (fun k _ -> Checkbox(column_filter_setting k).Position(Position.SliceL(50.0f).Translate(float32 k * 80.0f, 0.0f)))
 
     override this.Content() =
         page_container()

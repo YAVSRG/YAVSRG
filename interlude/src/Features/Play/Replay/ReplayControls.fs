@@ -47,9 +47,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
         )
         |+ PageButton(
             sprintf "%s %s" Icons.SETTINGS (%"replay.settings"),
-            (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show()),
-            Position = Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
-        )
+            (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show())).Position(Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
         |+ HotkeyListener("options", (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show()))
         |+ Text(
             sprintf "%s: %O" (%"replay.hide_overlay") (%%"hide_replay_overlay"),

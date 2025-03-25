@@ -51,9 +51,7 @@ module Problems =
 
         ScrollContainer(
             problems_list,
-            Margin = Style.PADDING,
-            Position = page_position(3, PAGE_BOTTOM - 3, PageWidth.Normal)
-        ), refresh
+            Margin = Style.PADDING).Position(page_position(3, PAGE_BOTTOM - 3, PageWidth.Normal)), refresh
 
     let create_hud (hud: HudLayout) : Widget * (unit -> unit) =
         let problems_list =
@@ -65,6 +63,4 @@ module Problems =
 
         ScrollContainer(
             problems_list,
-            Margin = Style.PADDING,
-            Position = page_position(0, PAGE_BOTTOM, PageWidth.Normal)
-        ), refresh
+            Margin = Style.PADDING).Position(page_position(0, PAGE_BOTTOM, PageWidth.Normal)), refresh

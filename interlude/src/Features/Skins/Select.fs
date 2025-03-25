@@ -47,9 +47,7 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                     elif this.IsCurrent then Colors.text_pink
                     else Colors.text
                 ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then
@@ -60,13 +58,11 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                 else credit
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite).Position(Position.SliceL(70.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -113,9 +109,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
                     elif this.IsCurrent then Colors.text_green
                     else Colors.text
                 ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then
@@ -126,13 +120,11 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
                 else credit
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite, Position = Position.SliceL(70.0f).Shrink(Style.PADDING)))
+        | Some sprite -> this.Add(Image(sprite).Position(Position.SliceL(70.0f).Shrink(Style.PADDING)))
         | None -> ()
 
         base.Init parent
@@ -197,8 +189,8 @@ type SelectSkinsPage() =
     let hud_grid =
         GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
 
-    let noteskin_tab = ScrollContainer(noteskin_grid, Position = Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
-    let hud_tab = ScrollContainer(hud_grid, Position = Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
+    let noteskin_tab = ScrollContainer(noteskin_grid).Position(Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
+    let hud_tab = ScrollContainer(hud_grid).Position(Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
 
     let refresh () =
         preview.Refresh()
@@ -223,15 +215,11 @@ type SelectSkinsPage() =
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
                 0.0f,
-                (fun () -> SkinsBrowserPage().Show()),
-                Position = page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f)
-            )
+                (fun () -> SkinsBrowserPage().Show())).Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
                 0.0f,
-                (fun () -> osu.Skins.OsuSkinsListPage().Show()),
-                Position = page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full)
-            )
+                (fun () -> osu.Skins.OsuSkinsListPage().Show())).Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
 
         let right_side =
             NavigationContainer.Row(

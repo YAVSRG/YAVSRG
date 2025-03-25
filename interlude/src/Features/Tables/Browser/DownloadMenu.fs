@@ -284,7 +284,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
     override this.Init(parent: Widget) =
         this
         |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
-        |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT, Position = Position.Shrink(5.0f, 0.0f))
+        |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f))
         |* Text(
             fun () ->
                 match state.Status chart.Hash with
@@ -334,8 +334,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             , (fun () -> state.QueueLevel level)
-            , Position = Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f)
-        )
+            ).Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -347,9 +346,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         |+ Text(
             level_name,
             Align = Alignment.LEFT,
-            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
-            Position = Position.Shrink(5.0f, 0.0f)
-        )
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f, 0.0f))
         |+ Text(
             fun () ->
                 match state.LevelStatus level with
@@ -410,8 +407,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             , (fun () -> state.QueueSection info.Name)
-            , Position = Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f)
-        )
+            ).Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -423,15 +419,11 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
         |+ Text(
             info.Name,
             Align = Alignment.LEFT,
-            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
-            Position = Position.Shrink(5.0f).ShrinkB(50.0f)
-        )
+            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f).ShrinkB(50.0f))
         |+ Text(
             info.Description,
             Align = Alignment.LEFT,
-            Color = K Colors.text_subheading,
-            Position = Position.Shrink(5.0f).SliceB(50.0f)
-        )
+            Color = K Colors.text_subheading).Position(Position.Shrink(5.0f).SliceB(50.0f))
         |+ Text(
             (fun () ->
                 if state.OpenSection = info.Name then
@@ -478,7 +470,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        ScrollContainer(container, Margin = 10.0f, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        ScrollContainer(container, Margin = 10.0f).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()

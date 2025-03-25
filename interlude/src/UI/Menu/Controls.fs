@@ -84,17 +84,13 @@ type PageButton(localised_text, on_click) as this =
                     else
                         Colors.text_greyout
                 ),
-            Align = Alignment.LEFT,
-            Position = Position.Shrink(Style.PADDING)
-        )
+            Align = Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
         |+ MouseListener().Button(this)
         |* seq {
             if this.Hotkey <> Bind.Dummy then
                 yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey,
                     Color = K Colors.text_cyan,
-                    Align = Alignment.RIGHT,
-                    Position = Position.Shrink(10.0f, 5.0f)
-                )
+                    Align = Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
         }
 
         base.Init parent
@@ -215,7 +211,7 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
 module Helpers =
 
     let page_container () : NavigationContainer.Column =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     let refreshable_row (get_count: unit -> int) (constructor: int -> int -> Widget) : NavigationContainer.Row * (unit -> unit) =
         let r = NavigationContainer.Row()

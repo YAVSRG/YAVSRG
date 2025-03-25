@@ -66,14 +66,10 @@ type LobbyList() =
             .Conditional(fun () -> no_lobbies)
         |+ Button(
             Icons.PLUS_CIRCLE + "  " + %"lobby_list.create",
-            create_lobby,
-            Position = Position.SliceB(60.0f).ShrinkR(250.0f)
-        )
+            create_lobby).Position(Position.SliceB(60.0f).ShrinkR(250.0f))
         |+ Button(
             Icons.REFRESH_CCW + "  " + %"lobby_list.refresh",
-            refresh_list,
-            Position = Position.SliceB(60.0f).SliceR(250.0f)
-        )
+            refresh_list).Position(Position.SliceB(60.0f).SliceR(250.0f))
         |* SearchBox(
             search_text,
             (fun (query: string) -> list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)),

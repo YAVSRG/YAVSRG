@@ -83,9 +83,7 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
         Text(
             %"stats.leaderboards.rating.player",
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
 
     override this.Init(parent) =
         this
@@ -138,10 +136,8 @@ type private KeymodesLeaderboard() =
                         sprintf "%iK %s"
                             keymode.Value
                             %"stats.leaderboards.rating.all_time"
-                ),
-                Position = Position.SliceT(70.0f).ShrinkX(5.0f)
-            )
-        let header = KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload()), Position = Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
+                )).Position(Position.SliceT(70.0f).ShrinkX(5.0f))
+        let header = KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload())).Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
         let flow = FlowContainer.Vertical<Widget>(PlayerInfo.HEIGHT, Spacing = Style.PADDING)
         for i, d in Seq.indexed data.Leaderboard do
             PlayerInfo(i + 1, d)
@@ -152,13 +148,13 @@ type private KeymodesLeaderboard() =
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
-            |+ PlayerInfo(int32 rank, you, Position = Position.SliceB(PlayerInfo.HEIGHT))
+            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
+            |+ PlayerInfo(int32 rank, you).Position(Position.SliceB(PlayerInfo.HEIGHT))
         | None ->
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow, Position = Position.ShrinkT(125.0f))
+            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f))
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)

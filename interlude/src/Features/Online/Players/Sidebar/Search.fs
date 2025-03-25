@@ -47,9 +47,8 @@ module SearchList =
                             else
                                 %"online.players.search.empty_search_bar"
                         )
-                , Position = Position.ShrinkT(60.0f)
-            )
+                ).Position(Position.ShrinkT(60.0f))
 
         NavigationContainer.Column()
-        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()), Position = Position.Shrink(5.0f).SliceT(50.0f))
+        |+ SearchBox(query, (fun (_: string) -> searcher.Reload())).Position(Position.Shrink(5.0f).SliceT(50.0f))
         |+ searcher

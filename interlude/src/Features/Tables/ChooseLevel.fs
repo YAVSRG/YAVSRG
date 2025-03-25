@@ -21,7 +21,7 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container, Position = Position.Shrink(100.0f, 200.0f))
+        ScrollContainer(container).Position(Position.Shrink(100.0f, 200.0f))
 
     override this.Title = %"table"
     override this.OnClose() = ()

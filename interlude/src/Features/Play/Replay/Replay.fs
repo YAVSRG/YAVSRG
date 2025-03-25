@@ -107,9 +107,7 @@ module ReplayScreen =
                     .Conditional(show_difficulty_overlay.Get)
                 |+ Text(
                     %"replay.end_of_data",
-                    Color = (fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha),
-                    Position = Position.ShrinkB(100.0f).SliceB(60.0f)
-                )
+                    Color = (fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha)).Position(Position.ShrinkB(100.0f).SliceB(60.0f))
                 |* ReplayControls(
                     with_colors.Source,
                     is_auto,

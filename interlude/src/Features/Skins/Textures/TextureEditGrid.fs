@@ -92,9 +92,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
         items <-
             NavigationContainer.Grid(
                 WrapNavigation = false,
-                Floating = true,
-                Position = Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height)
-            )
+                Floating = true).Position(Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
 
         let grid = NavigationContainer.Grid(WrapNavigation = false, Floating = true)
 
@@ -106,10 +104,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                         sprite,
                         c,
                         r,
-                        selected,
-                        Position =
-                            Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)
-                    ),
+                        selected).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)),
                     c + 2,
                     r + 2
                 )
@@ -119,9 +114,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                         Text(
                             K(sprintf "Frame %i" (c + 1)),
                             Color = K Colors.text_subheading,
-                            Align = Alignment.CENTER,
-                            Position = Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)
-                        ),
+                            Align = Alignment.CENTER).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)),
                         c + 2,
                         0
                     )
@@ -138,9 +131,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                                 this.Refresh()
                                     )
                                         .Show()
-                                ),
-                                Position = Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)
-                            ),
+                                )).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)),
                             c + 2,
                             1
                         )
@@ -204,14 +195,13 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                  )
                                      .Show()
                              ),
-                             Floating = true,
-                             Position = Position.Shrink(0.0f, -50.0f).SliceB(40.0f)) with
+                             Floating = true) with
                     override this.Draw() =
                         if this.Focused then
                             Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
-                },
+                }.Position(Position.Shrink(0.0f, -50.0f).SliceB(40.0f)),
                 0,
                 1
             )
@@ -236,14 +226,13 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                  )
                                      .Show()
                              ),
-                             Floating = true,
-                             Position = Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)) with
+                             Floating = true) with
                     override this.Draw() =
                         if this.Focused then
                             Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
-                },
+                }.Position(Position.Shrink(-50.0f, 0.0f).SliceR(40.0f)),
                 1,
                 0
             )
@@ -292,16 +281,14 @@ type TextureEditPage(source: Storage, texture_id: string) =
             source,
             reload_source,
             texture_id,
-            texture_rules,
-            Position = Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f)
-        )
+            texture_rules).Position(Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f))
 
     override this.Content() =
         source.SplitTexture(texture_id)
 
         NavigationContainer.Column()
         |+ texture_editor
-        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f, Position = Position.SliceR(400.0f).Shrink(50.0f))
+        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f).Position(Position.SliceR(400.0f).Shrink(50.0f))
             |+ Button(
                 Icons.ROTATE_CW + " Rotate clockwise"
                 , fun () ->

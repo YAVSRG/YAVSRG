@@ -114,9 +114,7 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     yield DisplayPicker(ruleset, i, display)
             }
-            |> ScrollContainer,
-            Position = page_position (2, PAGE_BOTTOM - 10, PageWidth.Normal)
-        )
+            |> ScrollContainer).Position(page_position (2, PAGE_BOTTOM - 10, PageWidth.Normal))
         :> Widget
 
     override this.Title = %"hud.judgement_counter.textures"

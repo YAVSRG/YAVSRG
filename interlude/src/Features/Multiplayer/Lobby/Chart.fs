@@ -21,7 +21,7 @@ type MultiplayerChartContextMenu(cc: ChartMeta) =
     inherit Page()
 
     override this.Content() =
-        FlowContainer.Vertical(PAGE_ITEM_HEIGHT, Position = Position.Shrink(100.0f, 200.0f))
+        FlowContainer.Vertical(PAGE_ITEM_HEIGHT).Position(Position.Shrink(100.0f, 200.0f))
 
         |+ PageButton(
             %"chart.add_to_collection",
@@ -136,9 +136,7 @@ type SelectedChart(lobby: Lobby) =
                 | Some c -> c.Title
                 | None -> %"lobby.no_song_selected"
             ),
-            Align = Alignment.LEFT,
-            Position = Position.SliceT(40.0f).Shrink(10.0f, 0.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.SliceT(40.0f).Shrink(10.0f, 0.0f))
         |+ Text(
             (fun () ->
                 match lobby.Chart with
@@ -146,9 +144,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> ""
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
@@ -156,9 +152,7 @@ type SelectedChart(lobby: Lobby) =
                 | None -> "???"
             ),
             Color = K Colors.text_subheading,
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
 
         |+ Text(
             (fun () ->
@@ -166,45 +160,35 @@ type SelectedChart(lobby: Lobby) =
                 | Some info -> sprintf "%s %.2f" Icons.STAR info.Difficulty.Overall
                 | None -> ""
             ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.DurationString
                 | None -> ""
             ),
-            Align = Alignment.CENTER,
-            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
-        )
+            Align = Alignment.CENTER).Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.BpmString
                 | None -> ""
             ),
-            Align = Alignment.RIGHT,
-            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
-        )
+            Align = Alignment.RIGHT).Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                 | None -> ""
             ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkT(160.0f).SliceT(40.0f)
-        )
+            Align = Alignment.LEFT).Position(Position.ShrinkT(160.0f).SliceT(40.0f))
         |+ Text(
             (fun () ->
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.NotecountsString
                 | None -> ""
             ),
-            Align = Alignment.RIGHT,
-            Position = Position.ShrinkT(160.0f).SliceT(40.0f)
-        )
+            Align = Alignment.RIGHT).Position(Position.ShrinkT(160.0f).SliceT(40.0f))
         |+ Text(
             (fun () ->
                 if LobbyChart.is_loaded_or_loading() then
@@ -212,9 +196,7 @@ type SelectedChart(lobby: Lobby) =
                 else
                     %"lobby.missing_chart"
             ),
-            Align = Alignment.CENTER,
-            Position = Position.ShrinkT(100.0f).SliceT(60.0f)
-        )
+            Align = Alignment.CENTER).Position(Position.ShrinkT(100.0f).SliceT(60.0f))
 
         |+ MouseListener()
             .OnLeftClick(fun () ->

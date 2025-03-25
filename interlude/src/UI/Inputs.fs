@@ -81,9 +81,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
         TextEntry(
             query_text |> Setting.trigger (fun _ -> this.StartSearch()),
             "search",
-            true,
-            Position = Position.Shrink(10.0f, 0.0f)
-        )
+            true).Position(Position.Shrink(10.0f, 0.0f))
 
     member val DebounceTime = 400L with get, set
 
@@ -128,8 +126,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
                 | _ -> ""
             , Color = text_entry.ColorFunc
             , Align = Alignment.LEFT
-            , Position = Position.Shrink(10.0f, 0.0f)
-        )
+            ).Position(Position.Shrink(10.0f, 0.0f))
 
         base.Init parent
 

@@ -60,7 +60,7 @@ module private Span =
         match background with
         | Some b ->
             Container(NodeType.None)
-            |+ Frame(Border = K b, Fill = K b, Position = Position.Shrink(0.0f, 5.0f))
+            |+ Frame(Border = K b, Fill = K b).Position(Position.Shrink(0.0f, 5.0f))
             |+ t
             :> Widget
         | None -> t

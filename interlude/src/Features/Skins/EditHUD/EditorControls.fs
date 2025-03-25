@@ -56,9 +56,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.PLUS_CIRCLE (%"hud.add_more_elements"),
             %%"options",
-            (fun () -> EditHUDPage(ctx).Show()),
-            Position = Position.SliceT(65.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
-        )
+            (fun () -> EditHUDPage(ctx).Show())).Position(Position.SliceT(65.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
 
         |+ Text(
             "Click an element to move/configure",
@@ -76,23 +74,17 @@ type private HUDEditorControls(ctx: PositionerContext) =
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.SETTINGS (%"hud.configure"),
             %%"context_menu",
-            (fun () -> let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)),
-            Position = Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)
-        )
+            (fun () -> let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v))).Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
             .Conditional(fun () -> ctx.Selected.IsSome)
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.ANCHOR (%"hud.anchor"),
             %%"hud_anchor",
-            (fun () -> AnchorPage(ctx).Show()),
-            Position = Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(200.0f).Expand(Style.PADDING)
-        )
+            (fun () -> AnchorPage(ctx).Show())).Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(200.0f).Expand(Style.PADDING))
             .Conditional(fun () -> ctx.Selected.IsSome)
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.REFRESH_CW (%"hud.reset_position"),
             %%"hud_reset_position",
-            ctx.ResetCurrentPosition,
-            Position = Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(295.0f).Expand(Style.PADDING)
-        )
+            ctx.ResetCurrentPosition).Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(295.0f).Expand(Style.PADDING))
             .Conditional(fun () -> ctx.Selected.IsSome)
 
         |+ Text(

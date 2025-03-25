@@ -25,7 +25,7 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume_when_collapsed = VolumeSlider(Position = Position.Shrink(0.0f, HEIGHT))
+    let volume_when_collapsed = VolumeSlider().Position(Position.ShrinkY(HEIGHT))
 
     let load_preset (i: int) : unit =
         match Presets.load i with
@@ -57,20 +57,16 @@ type Toolbar() =
         )
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
-        |+ TaskProgressMiniBar(Position = Position.BorderB(Style.PADDING))
+        |+ TaskProgressMiniBar().Position(Position.BorderB(Style.PADDING))
 
     override this.Init(parent) =
         container
         |+ Text(
             Updates.version,
-            Align = Alignment.RIGHT,
-            Position = Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentT(0.5f)
-        )
+            Align = Alignment.RIGHT).Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentT(0.5f))
         |+ Text(
             (fun () -> System.DateTime.Now.ToString()),
-            Align = Alignment.RIGHT,
-            Position = Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f)
-        )
+            Align = Alignment.RIGHT).Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f))
         |+ InlaidButton(%"menu.back", fun () -> Screen.back Transitions.UnderLogo |> ignore)
             .Icon(Icons.ARROW_LEFT_CIRCLE)
             .Position(Position.SliceL(10.0f, 180.0f).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT))
@@ -82,9 +78,7 @@ type Toolbar() =
         |+ (FlowContainer.LeftToRight<Widget>(
                 180.0f,
                 Spacing = 10.0f,
-                EnableNavigation = false,
-                Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f)
-            )
+                EnableNavigation = false).Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f))
 
             |+ InlaidButton(%"menu.options", fun () -> OptionsMenuPage().Show())
                 .Icon(Icons.SETTINGS)

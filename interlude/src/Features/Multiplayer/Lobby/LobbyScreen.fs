@@ -57,9 +57,7 @@ type LobbyUI(lobby: Lobby) =
         this
         |+ Button(
             Icons.SETTINGS,
-            (fun () -> LobbySettingsPage(lobby).Show()),
-            Position = Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f)
-        )
+            (fun () -> LobbySettingsPage(lobby).Show())).Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
             .Conditional(fun () -> lobby.YouAreHost)
         |+ Text(
             (fun () -> lobby.Settings.Name),

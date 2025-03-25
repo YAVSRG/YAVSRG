@@ -59,7 +59,7 @@ type LibraryPage() =
     inherit Page()
 
     let import_info =
-        Container(NodeType.None, Position = page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
+        Container(NodeType.None).Position(page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
         |+ Text(
             (fun () ->
                 if TaskTracking.in_progress () then
@@ -73,18 +73,12 @@ type LibraryPage() =
                         Colors.text_green
                     else
                         Colors.text_subheading
-                ),
-            Position = Position.SliceT(40.0f).Shrink(20.0f, 0.0f)
-        )
+                )).Position(Position.SliceT(40.0f).Shrink(20.0f, 0.0f))
         |+ LoadingIndicator.Strip(
-            TaskTracking.in_progress,
-            Position = Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f)
-        )
+            TaskTracking.in_progress).Position(Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f))
         |+ Text(
             sprintf "%i charts installed" Content.Library.Charts.Entries.Count,
-            Color = K Colors.text_subheading,
-            Position = Position.SliceT(65.0f, 30.0f).Shrink(20.0f, 0.0f)
-        )
+            Color = K Colors.text_subheading).Position(Position.SliceT(65.0f, 30.0f).Shrink(20.0f, 0.0f))
 
     let main_options =
         NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
@@ -124,13 +118,13 @@ type LibraryPage() =
         |+ import_info
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
-        |+ MountControl(MountedGameType.Osu, options.OsuMount, Position = Position.SliceT(100.0f, 150.0f))
-        |+ MountControl(MountedGameType.Quaver, options.QuaverMount, Position = Position.SliceT(270.0f, 150.0f))
-        |+ MountControl(MountedGameType.Etterna, options.EtternaMount, Position = Position.SliceT(440.0f, 150.0f))
-        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount, Position = Position.SliceT(610.0f, 150.0f))
-        |+ Text(%"imports.mount", Align = Alignment.CENTER, Position = Position.SliceT(0.0f, 80.0f))
-        |+ Text(%"imports.drag_and_drop_hint", Align = Alignment.CENTER, Position = Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
+        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
+        |+ MountControl(MountedGameType.Osu, options.OsuMount).Position(Position.SliceT(100.0f, 150.0f))
+        |+ MountControl(MountedGameType.Quaver, options.QuaverMount).Position(Position.SliceT(270.0f, 150.0f))
+        |+ MountControl(MountedGameType.Etterna, options.EtternaMount).Position(Position.SliceT(440.0f, 150.0f))
+        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount).Position(Position.SliceT(610.0f, 150.0f))
+        |+ Text(%"imports.mount", Align = Alignment.CENTER).Position(Position.SliceT(0.0f, 80.0f))
+        |+ Text(%"imports.drag_and_drop_hint", Align = Alignment.CENTER).Position(Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
 
     override this.Content() =
         NavigationContainer.Row()

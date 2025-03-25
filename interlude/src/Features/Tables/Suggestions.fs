@@ -166,19 +166,19 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 |> String.concat ", "
             match suggestion.BackbeatInfo with
             | Some (server_chart, server_song) ->
-                yield Text(server_song.FormattedTitle, Align = Alignment.LEFT, Position = page_position(0, 2, PageWidth.Full))
-                yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = page_position(2, 1, PageWidth.Full))
-                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = page_position(3, 1, PageWidth.Full))
+                yield Text(server_song.FormattedTitle, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+                yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(3, 1, PageWidth.Full))
             | None ->
 
             match suggestion.LocalChart with
             | Some local_cc ->
-                yield Text(local_cc.Artist + " - " + local_cc.Title, Align = Alignment.LEFT, Position = page_position(0, 2, PageWidth.Full))
-                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = page_position(2, 1, PageWidth.Full))
-                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = page_position(3, 1, PageWidth.Full))
+                yield Text(local_cc.Artist + " - " + local_cc.Title, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(3, 1, PageWidth.Full))
             | None ->
-                yield Text(%"table.suggestions.info_missing", Align = Alignment.LEFT, Color = K Colors.text_red_2, Position = page_position(0, 2, PageWidth.Full))
-                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading, Position = page_position(2, 1, PageWidth.Full))
+                yield Text(%"table.suggestions.info_missing", Align = Alignment.LEFT, Color = K Colors.text_red_2).Position(page_position(0, 2, PageWidth.Full))
+                yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
         } :> Widget
 
     override this.Title = %"table.suggestion"
@@ -215,7 +215,8 @@ type SuggestionsList(table: Table) =
 
                 GameThread.defer (fun () -> fc.Focus false)
 
-                ScrollContainer(fc, Position = Position.Shrink(100.0f, 200.0f), Margin = 5.0f)
+                ScrollContainer(fc, Margin = 5.0f)
+                    .Position(Position.Shrink(100.0f, 200.0f))
         )
 
 type SuggestionsPage(table: Table) =
@@ -225,7 +226,8 @@ type SuggestionsPage(table: Table) =
 
     override this.Content() =
         NavigationContainer.Column()
-        |+ Button("", ignore, Position = Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
+        |+ Button("", ignore)
+            .Position(Position.Box(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
         |+ suggestions_list
         |>> Container
         :> Widget

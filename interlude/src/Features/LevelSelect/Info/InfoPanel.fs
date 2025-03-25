@@ -14,9 +14,9 @@ type InfoPanel() =
 
     let display = Setting.simple Display.Local
 
-    let scoreboard = Scoreboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
-    let online = Leaderboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
-    let patterns = Patterns(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    let scoreboard = Scoreboard(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    let online = Leaderboard(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    let patterns = Patterns(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
 
     override this.Init(parent) =
         let change_rate change_rate_by =

@@ -153,9 +153,7 @@ type JudgementPage(on_close: unit -> unit) =
                 for i = 0 to ruleset.Judgements.Length - 1 do
                     yield JudgementDisplayPicker(ruleset, i, judgement_display)
             }
-            |> ScrollContainer,
-            Position = page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal)
-        )
+            |> ScrollContainer).Position(page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal))
         :> Widget
 
     override this.Title = %"hud.judgement"

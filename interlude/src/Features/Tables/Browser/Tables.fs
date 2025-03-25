@@ -40,14 +40,10 @@ type TableCard(online_table: Tables.List.Table) as this =
         this
         |+ Text(
             online_table.Info.Name,
-            Align = Alignment.CENTER,
-            Position = Position.SliceT(80.0f).Shrink(20.0f, Style.PADDING)
-        )
+            Align = Alignment.CENTER).Position(Position.SliceT(80.0f).Shrink(20.0f, Style.PADDING))
         |+ Text(
             online_table.Info.Description,
-            Align = Alignment.CENTER,
-            Position = Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING)
-        )
+            Align = Alignment.CENTER).Position(Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING))
         |+ Text(
             fun () ->
                 match status with
@@ -56,8 +52,7 @@ type TableCard(online_table: Tables.List.Table) as this =
                 | TableStatus.Installing -> "Installing ..."
                 | TableStatus.Installed -> "Click to view"
             , Align = Alignment.CENTER
-            , Position = Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING)
-        )
+            ).Position(Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING))
         |+ LoadingIndicator.Border(fun () -> status = TableStatus.Installing)
         |* MouseListener().Button(this)
 
@@ -117,7 +112,7 @@ type TableBrowserPage() =
     inherit Page()
 
     let flow = FlowContainer.Vertical<TableCard>(200.0f, Spacing = 15.0f)
-    let scroll = ScrollContainer(flow, Margin = Style.PADDING, Position = Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+    let scroll = ScrollContainer(flow, Margin = Style.PADDING).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Content() =
         Tables.List.get (

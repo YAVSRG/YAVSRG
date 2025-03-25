@@ -46,15 +46,11 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
                 if enabled.Value then sprintf "%s %s" Icons.CHECK_CIRCLE %"hud.editor.enabled"
                 else sprintf "%s %s" Icons.CIRCLE %"hud.editor.disabled"
             ),
-            (fun () -> enabled.Value <- not enabled.Value),
-            Position = Position.ShrinkB(50.0f).SliceB(50.0f)
-        )
+            (fun () -> enabled.Value <- not enabled.Value)).Position(Position.ShrinkB(50.0f).SliceB(50.0f))
         |* Button(
             sprintf "%s %s" Icons.SETTINGS %"hud.configure",
             (fun () -> show_menu element (fun () -> draw_preview <- snd (SelectPreviews.create Content.HUD element))),
-            Disabled = K (not (HudElement.can_configure element)),
-            Position = Position.SliceB(50.0f)
-        )
+            Disabled = K (not (HudElement.can_configure element))).Position(Position.SliceB(50.0f))
 
         base.Init parent
 

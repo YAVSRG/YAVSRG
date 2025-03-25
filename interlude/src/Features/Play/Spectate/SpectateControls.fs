@@ -16,10 +16,8 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
         |+ Text(
             %"spectate.title",
             Color = K Colors.text_subheading,
-            Align = Alignment.CENTER,
-            Position = Position.SliceT(40.0f)
-        )
-        |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER, Position = Position.ShrinkT(40.0f))
+            Align = Alignment.CENTER).Position(Position.SliceT(40.0f))
+        |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER).Position(Position.ShrinkT(40.0f))
         |* MouseListener().OnLeftClick(cycle)
 
         base.Init parent
@@ -36,7 +34,7 @@ type private ControlOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: u
 
     override this.Init(parent) =
         this |+ Timeline(info.WithMods, on_seek, SelectedChart.rate)
-        |* Controls(who, cycle, Position = Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
+        |* Controls(who, cycle).Position(Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
 
         base.Init parent
 
