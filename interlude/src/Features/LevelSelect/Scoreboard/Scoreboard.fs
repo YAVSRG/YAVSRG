@@ -65,20 +65,19 @@ type Scoreboard(display: Setting<Display>) =
         container.Sort <- sorter ()
 
         this
-        |+ StylishButton(
+        |+ LeaningButton(
+            %"levelselect.info.scoreboard",
             (fun () -> display.Set Display.Online),
-            K <| %"levelselect.info.scoreboard",
-            !%Palette.MAIN_100,
-            Hotkey = "scoreboard_storage",
-            TiltLeft = false,
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 0.33f %- 25.0f
-                    Bottom = 0.0f %+ 50.0f
-                }
+            Palette.MAIN_100
         )
+            .Hotkey("scoreboard_storage")
+            .LeanLeft(false)
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.33f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+            )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
         |+ StylishButton
             .Selector(
@@ -92,12 +91,10 @@ type Scoreboard(display: Setting<Display>) =
                 !%Palette.DARK_100,
                 Hotkey = "scoreboard_sort",
                 Position =
-                    {
-                        Left = 0.33f %+ 0.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 0.66f %- 25.0f
-                        Bottom = 0.0f %+ 50.0f
-                    }
+                    Position
+                        .SliceT(LeaningButton.HEIGHT)
+                        .SlicePercentL(0.33f, 0.33f)
+                        .ShrinkR(LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton
@@ -113,12 +110,9 @@ type Scoreboard(display: Setting<Display>) =
                 Hotkey = "scoreboard_filter",
                 TiltRight = false,
                 Position =
-                    {
-                        Left = 0.66f %+ 0.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 1.0f %- 0.0f
-                        Bottom = 0.0f %+ 50.0f
-                    }
+                    Position
+                        .SliceT(LeaningButton.HEIGHT)
+                        .ShrinkPercentL(0.66f)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container

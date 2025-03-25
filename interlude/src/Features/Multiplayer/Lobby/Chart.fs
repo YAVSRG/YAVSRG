@@ -222,27 +222,30 @@ type SelectedChart(lobby: Lobby) =
             )
             .Position(Position.SliceT(100.0f))
 
-        |+ StylishButton(
-            (fun () -> lobby.Spectate <- not lobby.Spectate),
+        |+ LeaningButton(
             (fun () ->
                 if lobby.Spectate then
                     sprintf "%s %s" Icons.EYE (%"lobby.spectator")
                 else
                     sprintf "%s %s" Icons.PLAY (%"lobby.player")
             ),
-            !%Palette.MAIN_100,
-            Position =
-                { Position.SliceB(50.0f) with
-                    Right = 0.5f %- 25.0f
-                }
+            (fun () -> lobby.Spectate <- not lobby.Spectate),
+            Palette.MAIN_100
         )
+            .Position(
+                Position
+                    .SliceB(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.5f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+            )
             .Conditional(fun () ->
                 LobbyChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
                 && lobby.ReadyStatus = ReadyFlag.NotReady
             )
 
-        |+ StylishButton(
+        |+ LeaningButton(
+            sprintf "%s %s" Icons.EYE (%"lobby.spectate"),
             (fun () ->
                 match lobby.Replays |> Seq.tryHead with
                 | Some (KeyValue (username, replay_info)) ->
@@ -256,20 +259,25 @@ type SelectedChart(lobby: Lobby) =
                     | None -> ()
                 | None -> Logging.Debug("Couldn't find anyone with replay data to spectate")
             ),
-            K(sprintf "%s %s" Icons.EYE (%"lobby.spectate")),
-            !%Palette.DARK_100,
-            TiltRight = false,
-            Position =
-                { Position.SliceB(50.0f) with
-                    Left = 0.5f %- 0.0f
-                }
+            Palette.DARK_100
         )
+            .Position(Position.SliceB(LeaningButton.HEIGHT).SlicePercentR(0.5f))
+            .LeanRight(false)
             .Conditional(fun () ->
                 LobbyChart.info_if_selected().IsSome
                 && lobby.GameInProgress
             )
 
-        |+ StylishButton(
+        |+ LeaningButton(
+            (fun () ->
+                match lobby.ReadyStatus with
+                | ReadyFlag.NotReady ->
+                    if lobby.Spectate then
+                        sprintf "%s %s" Icons.EYE (%"lobby.ready")
+                    else
+                        sprintf "%s %s" Icons.CHECK (%"lobby.ready")
+                | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
+            ),
             (fun () ->
                 lobby.SetReadyStatus (
                     match lobby.ReadyStatus with
@@ -281,47 +289,37 @@ type SelectedChart(lobby: Lobby) =
                     | _ -> ReadyFlag.NotReady
                 )
             ),
-            (fun () ->
-                match lobby.ReadyStatus with
-                | ReadyFlag.NotReady ->
-                    if lobby.Spectate then
-                        sprintf "%s %s" Icons.EYE (%"lobby.ready")
-                    else
-                        sprintf "%s %s" Icons.CHECK (%"lobby.ready")
-                | _ -> sprintf "%s %s" Icons.X (%"lobby.not_ready")
-            ),
-            !%Palette.DARK_100,
-            TiltRight = false,
-            Position =
-                { Position.SliceB(50.0f) with
-                    Left = 0.5f %- 0.0f
-                }
+            Palette.DARK_100
         )
+            .LeanRight(false)
+            .Position(Position.SliceB(LeaningButton.HEIGHT).SlicePercentR(0.5f))
             .Conditional(fun () ->
                 LobbyChart.info_if_selected().IsSome
                 && not Song.loading
                 && not lobby.GameInProgress
             )
 
-        |* StylishButton(
-            (fun () ->
-                if lobby.Countdown then
-                    lobby.CancelRound()
-                else
-                    lobby.StartRound()
-            ),
+        |* LeaningButton(
             (fun () ->
                 if lobby.Countdown then
                     sprintf "%s %s" Icons.SLASH (%"lobby.cancel_game")
                 else
                     sprintf "%s %s" Icons.PLAY (%"lobby.start_game")
             ),
-            !%Palette.MAIN_100,
-            Position =
-                { Position.SliceB(50.0f) with
-                    Right = 0.5f %- 25.0f
-                }
+            (fun () ->
+                if lobby.Countdown then
+                    lobby.CancelRound()
+                else
+                    lobby.StartRound()
+            ),
+            Palette.MAIN_100
         )
+            .Position(
+                Position
+                    .SliceB(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.5f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+            )
             .Conditional(fun () ->
                 lobby.YouAreHost
                 && lobby.ReadyStatus <> ReadyFlag.NotReady

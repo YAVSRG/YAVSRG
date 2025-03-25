@@ -23,6 +23,12 @@ type LeaningButton(label_func: unit -> string, on_click: unit -> unit, backgroun
 
     new (label: string, on_click: unit -> unit, background_color: unit -> Color) = LeaningButton(K label, on_click, background_color)
 
+    new (label_func: unit -> string, on_click: unit -> unit, background_color: PaletteColor) = LeaningButton(label_func, on_click, !%background_color)
+    new (label: string, on_click: unit -> unit, background_color: PaletteColor) = LeaningButton(K label, on_click, !%background_color)
+
+    new (label_func: unit -> string, on_click: unit -> unit, background_color: Color) = LeaningButton(label_func, on_click, K background_color)
+    new (label: string, on_click: unit -> unit, background_color: Color) = LeaningButton(K label, on_click, K background_color)
+
     member val Hotkey : Hotkey = "none" with get, set
     member val LeanLeft : bool = true with get, set
     member val LeanRight : bool = true with get, set

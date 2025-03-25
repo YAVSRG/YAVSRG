@@ -60,14 +60,16 @@ type RulesetSwitcher(setting: Setting<string>) =
 
     override this.Init(parent: Widget) =
         this
-        |+ StylishButton(
-            (fun () -> this.ToggleDropdown()),
-            (fun () -> Rulesets.current.Name),
-            !%Palette.MAIN_100,
-            TiltRight = false,
-            Hotkey = "ruleset_switch"
-        )
-        |* dropdown_wrapper
+            .Add(
+                LeaningButton(
+                    (fun () -> Rulesets.current.Name),
+                    (fun () -> this.ToggleDropdown()),
+                    Palette.MAIN_100
+                )
+                    .LeanRight(false)
+                    .Hotkey("ruleset_switch"),
+                dropdown_wrapper
+            )
 
         base.Init parent
 

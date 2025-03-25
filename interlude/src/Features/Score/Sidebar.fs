@@ -117,7 +117,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         base.Draw()
 
         // accuracy info
-        let counters = Rect.FromSize(this.Bounds.Left + 25.0f, this.Bounds.Top + 160.0f + 10.0f, this.Bounds.Width - 50.0f, 350.0f)
+        let counters = this.Bounds.ShrinkX(25.0f).SliceT(170.0f, 350.0f)
 
         let judgement_counts = (!stats).Judgements
         let judgements = score_info.Ruleset.Judgements |> Array.indexed

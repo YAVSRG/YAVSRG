@@ -24,28 +24,32 @@ type private ModeDropdown
 
     override this.Init(parent: Widget) =
         this
-        |+ StylishButton(
-            (fun () -> this.ToggleDropdown()),
-            K(label + ":"),
-            !%Palette.HIGHLIGHT_100,
-            Hotkey = bind,
-            Position = { Position.DEFAULT with Right = LEFT_PERCENT %+ 0.0f }
-        )
-        |+ StylishButton(
-            (fun () -> reverse.Value <- not reverse.Value),
-            (fun () ->
-                sprintf
-                    "%s %s"
-                    display_value
-                    (if reverse.Value then
-                         Icons.CHEVRONS_DOWN
-                     else
-                         Icons.CHEVRONS_UP)
-            ),
-            !%Palette.DARK_100,
-            Position = { Position.DEFAULT with Left = LEFT_PERCENT %+ 25.0f }
-        )
-        |* dropdown_wrapper
+            .Add(
+                LeaningButton(
+                    label + ":",
+                    (fun () -> this.ToggleDropdown()),
+                    Palette.HIGHLIGHT_100
+                )
+                    .Hotkey(bind)
+                    .Position(Position.SlicePercentL(LEFT_PERCENT)),
+
+                LeaningButton(
+                    (fun () ->
+                        sprintf
+                            "%s %s"
+                            display_value
+                            (if reverse.Value then
+                                 Icons.CHEVRONS_DOWN
+                             else
+                                 Icons.CHEVRONS_UP)
+                    ),
+                    (fun () -> reverse.Value <- not reverse.Value),
+                    Palette.DARK_100
+                )
+                    .Position(Position.ShrinkPercentL(LEFT_PERCENT).ShrinkL(LeaningButton.LEAN_AMOUNT)),
+
+                dropdown_wrapper
+            )
 
         base.Init parent
 
@@ -66,15 +70,17 @@ type private ModeDropdown
 type LibraryViewControls() =
     inherit Container(NodeType.None)
 
+    let OPTIONS_BUTTON_WIDTH = 60.0f
+
     override this.Init(parent) =
         this
-        |+ StylishButton(
+        |+ LeaningButton(
+            Icons.SETTINGS,
             (fun () -> LevelSelectOptionsPage().Show()),
-            K Icons.SETTINGS,
-            !%Palette.DARK_100,
-            Hotkey = "level_select_options",
-            Position = Position.SliceL(25.0f, 60.0f)
+            Palette.DARK_100
         )
+            .Hotkey("level_select_options")
+            .Position(Position.SliceL(LeaningButton.LEAN_AMOUNT, OPTIONS_BUTTON_WIDTH))
 
         |+ ModeDropdown(
             Sorting.modes.Keys
@@ -85,7 +91,11 @@ type LibraryViewControls() =
             |> Setting.map not not
             |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "sort_mode",
-            Position = Position.ShrinkL(110.0f).SlicePercentL(0.5f).ShrinkR(12.5f)
+            Position =
+                Position
+                    .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
+                    .SlicePercentL(0.5f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT * 0.5f)
         )
             .Help(
                 Help
@@ -100,7 +110,11 @@ type LibraryViewControls() =
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             "group_mode",
-            Position = Position.ShrinkL(110.0f).SlicePercentR(0.5f).ShrinkL(12.5f)
+            Position =
+                Position
+                    .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
+                    .SlicePercentR(0.5f)
+                    .ShrinkL(LeaningButton.LEAN_AMOUNT * 0.5f)
         )
             .Help(
                 Help

@@ -31,22 +31,22 @@ type InfoPanel() =
         |+ online.Conditional(fun () -> display.Value = Display.Online)
         |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
 
-        |+ GameplayInfo(Position = Position.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f))
+        |+ GameplayInfo()
+            .Position(Position.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f))
 
-        |+ StylishButton(
+        |+ LeaningButton(
+            sprintf "%s %s" Icons.EYE %"levelselect.preview",
             (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
-            K(sprintf "%s %s" Icons.EYE %"levelselect.preview"),
-            !%Palette.MAIN_100,
-            Hotkey = "preview",
-            TiltLeft = false,
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 1.0f %- 50.0f
-                    Right = 0.33f %- 25.0f
-                    Bottom = 1.0f %- 0.0f
-                }
+            Palette.MAIN_100
         )
+            .Hotkey("preview")
+            .LeanLeft(false)
+            .Position(
+                Position
+                    .SliceB(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.33f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+            )
             .Help(Help.Info("levelselect.preview", "preview"))
 
         |+ ModSelect(

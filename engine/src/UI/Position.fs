@@ -208,6 +208,13 @@ type Position with
     static member inline Expand (x, y) = Position.DEFAULT.Expand(x, y)
     static member inline Expand amount = Position.DEFAULT.Expand(amount, amount)
 
+    static member inline ExpandPercentL percent = Position.DEFAULT.ExpandPercentL percent
+    static member inline ExpandPercentT percent = Position.DEFAULT.ExpandPercentT percent
+    static member inline ExpandPercentR percent = Position.DEFAULT.ExpandPercentR percent
+    static member inline ExpandPercentB percent = Position.DEFAULT.ExpandPercentB percent
+    static member inline ExpandPercentX percent = Position.DEFAULT.ExpandPercentX percent
+    static member inline ExpandPercentY percent = Position.DEFAULT.ExpandPercentY percent
+
     static member inline ShrinkL amount = Position.DEFAULT.ShrinkL amount
     static member inline ShrinkT amount = Position.DEFAULT.ShrinkT amount
     static member inline ShrinkR amount = Position.DEFAULT.ShrinkR amount
@@ -216,6 +223,13 @@ type Position with
     static member inline ShrinkY amount = Position.DEFAULT.ShrinkY amount
     static member inline Shrink (x, y) = Position.DEFAULT.Shrink(x, y)
     static member inline Shrink amount = Position.DEFAULT.Shrink(amount, amount)
+
+    static member inline ShrinkPercentL percent = Position.DEFAULT.ShrinkPercentL percent
+    static member inline ShrinkPercentT percent = Position.DEFAULT.ShrinkPercentT percent
+    static member inline ShrinkPercentR percent = Position.DEFAULT.ShrinkPercentR percent
+    static member inline ShrinkPercentB percent = Position.DEFAULT.ShrinkPercentB percent
+    static member inline ShrinkPercentX percent = Position.DEFAULT.ShrinkPercentX percent
+    static member inline ShrinkPercentY percent = Position.DEFAULT.ShrinkPercentY percent
 
     static member inline SliceL thickness = Position.DEFAULT.SliceL thickness
     static member inline SliceL (start, thickness) = Position.DEFAULT.SliceL (start, thickness)

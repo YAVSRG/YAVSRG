@@ -177,9 +177,9 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
 
 type ModSelect(change_rate: Rate -> unit, on_menu_close: unit -> unit) =
     inherit
-        StylishButton(
+        LeaningButton(
+            sprintf "%s %s" Icons.ZAP (%"levelselect.mods"),
             (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),
-            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"
         )

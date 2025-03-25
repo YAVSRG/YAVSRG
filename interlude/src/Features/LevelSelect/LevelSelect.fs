@@ -20,6 +20,9 @@ type LevelSelectScreen() =
 
     let TOP_BAR_HEIGHT = 150.0f
     let INFO_SCREEN_SPLIT = 0.4f
+    let PLAY_BUTTON_WIDTH = 250.0f
+    let BULK_ACTION_BUTTON_WIDTH = 300.0f
+    let OTHER_BUTTONS_WIDTH = 60.0f
 
     let search_text = Setting.simple ""
 
@@ -51,11 +54,11 @@ type LevelSelectScreen() =
                     .Position(
                         Position
                             .SliceT(TOP_BAR_HEIGHT)
-                            .ShrinkB(50.0f)
+                            .ShrinkB(LeaningButton.HEIGHT)
                             .SliceY(60.0f)
                             .ShrinkPercentL(0.4f)
                             .ShrinkL(290.0f)
-                            .ShrinkR(25.0f)
+                            .ShrinkR(20.0f)
                     )
                     .Help(Help.Info("levelselect.search", "search")),
 
@@ -101,16 +104,17 @@ type LevelSelectScreen() =
             .WithConditional(
                 (fun () -> TreeState.multi_selection.IsNone),
 
-                StylishButton(
+                LeaningButton(
+                    sprintf "%s %s" Icons.PLAY %"levelselect.play",
                     LevelSelect.choose_this_chart,
-                    K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
-                    !%Palette.MAIN.O2,
-                    TiltRight = false
+                    Palette.MAIN.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(250.0f))
-                    .Help(Help.Info("levelselect.play").Hotkey("select")),
+                    .LeanRight(false)
+                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(PLAY_BUTTON_WIDTH))
+                    .Help(Help.Info("levelselect.play", "select")),
 
-                StylishButton(
+                LeaningButton(
+                    Icons.TARGET,
                     (fun () ->
                         SelectedChart.when_loaded true
                         <| fun info ->
@@ -120,47 +124,61 @@ type LevelSelectScreen() =
                                 Transitions.Default
                             |> ignore
                     ),
-                    K Icons.TARGET,
-                    !%Palette.DARK.O2,
-                    Hotkey = "practice_mode"
+                    Palette.DARK.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-275.0f))
-                    .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode")),
+                    .Hotkey("practice_mode")
+                    .Position(
+                        Position
+                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceR(OTHER_BUTTONS_WIDTH)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - LeaningButton.LEAN_AMOUNT)
+                    )
+                    .Help(Help.Info("levelselect.practice_mode", "practice_mode")),
 
-                StylishButton(
+                LeaningButton(
+                    Icons.REFRESH_CCW,
                     (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
-                    K Icons.REFRESH_CCW,
-                    !%Palette.MAIN.O2
+                    Palette.MAIN.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-360.0f))
-                    .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart")),
+                    .Position(
+                        Position
+                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceR(OTHER_BUTTONS_WIDTH)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH - LeaningButton.LEAN_AMOUNT * 2.0f)
+                    )
+                    .Help(Help.Info("levelselect.random_chart", "random_chart")),
 
-                StylishButton(
+                LeaningButton(
+                    Icons.LIST,
                     (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
-                    K Icons.LIST,
-                    !%Palette.DARK.O2
+                    Palette.DARK.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-445.0f))
+                    .Position(
+                        Position
+                            .SliceB(LeaningButton.HEIGHT)
+                            .SliceR(OTHER_BUTTONS_WIDTH)
+                            .TranslateX(-PLAY_BUTTON_WIDTH - OTHER_BUTTONS_WIDTH * 2.0f - LeaningButton.LEAN_AMOUNT * 3.0f)
+                    )
                     .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
             )
             // Bulk select actions
             .AddConditional(
                 (fun () -> TreeState.multi_selection.IsSome),
 
-                StylishButton(
+                LeaningButton(
+                    sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection",
                     (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
-                    K (sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection"),
-                    !%Palette.DARK.O2,
-                    TiltRight = false
+                    Palette.DARK.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(300.0f)),
+                    .LeanRight(false)
+                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH)),
 
-                StylishButton(
+                LeaningButton(
+                    sprintf "%s %s" Icons.LIST %"bulk_actions",
                     (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
-                    K (sprintf "%s %s" Icons.LIST %"bulk_actions"),
-                    !%Palette.MAIN.O2
+                    Palette.MAIN.O2
                 )
-                    .Position(Position.SliceB(50.0f).SliceR(300.0f).TranslateX(-325.0f))
+                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - LeaningButton.LEAN_AMOUNT))
             )
 
     override this.Update(elapsed_ms, moved) =

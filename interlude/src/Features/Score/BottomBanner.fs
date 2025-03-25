@@ -63,21 +63,21 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
 
         if Network.lobby.IsNone && played_just_now then
             this
-            |+ StylishButton(
+            |+ LeaningButton(
+                sprintf "%s %s" Icons.PLAY %"score.continue",
                 Gameplay.continue_endless_mode >> ignore,
-                K (sprintf "%s %s" Icons.PLAY %"score.continue"),
-                !%Palette.MAIN.O2,
-                TiltRight = false,
-                Position = Position.BorderT(50.0f).SliceR(300.0f),
-                Floating = true
+                Palette.MAIN.O2
             )
-            |+ StylishButton(
+                .LeanRight(false)
+                .Floating()
+                .Position(Position.BorderT(LeaningButton.HEIGHT).SliceR(300.0f))
+            |+ LeaningButton(
+                sprintf "%s %s" Icons.REPEAT %"score.retry",
                 Gameplay.retry,
-                K (sprintf "%s %s" Icons.REPEAT %"score.retry"),
-                !%Palette.DARK.O2,
-                Position = Position.BorderT(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f),
-                Floating = true
+                Palette.DARK.O2
             )
+                .Floating()
+                .Position(Position.BorderT(LeaningButton.HEIGHT).SliceR(300.0f).Translate(-325.0f, 0.0f))
             |+ HotkeyListener("retry", Gameplay.retry)
             |* HotkeyListener("select", Gameplay.continue_endless_mode >> ignore)
 

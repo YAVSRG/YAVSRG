@@ -55,8 +55,8 @@ type Leaderboard(display: Setting<Display>) =
     let mutable count = 0
     let mutable load_if_visible = true
 
-    let filter = Setting.simple Filter.None
-    let sort = Setting.map enum int options.ScoreSortMode
+    let filter : Setting<Filter> = Setting.simple Filter.None
+    let sort : Setting<Sort> = Setting.map enum int options.ScoreSortMode
 
     let container = FlowContainer.Vertical<LeaderboardCard>(75.0f, Spacing = Style.PADDING * 3.0f)
 
@@ -73,66 +73,54 @@ type Leaderboard(display: Setting<Display>) =
         Gameplay.leaderboard_rank_changed.Add (fun _ -> container.Clear(); count <- 0)
 
         this
-        |+ StylishButton(
+        |+ LeaningButton(
+            %"levelselect.info.leaderboard",
             (fun () -> display.Set Display.Patterns),
-            K <| %"levelselect.info.leaderboard",
-            !%Palette.MAIN_100,
-            Hotkey = "scoreboard_storage",
-            TiltLeft = false,
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 0.33f %- 25.0f
-                    Bottom = 0.0f %+ 50.0f
-                }
+            Palette.MAIN_100
         )
+            .Hotkey("scoreboard_storage")
+            .LeanLeft(false)
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.33f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+            )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
-        |+ StylishButton
-            .Selector(
-                Icons.CHEVRONS_UP,
-                [|
-                    Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
-                |],
-                sort,
-                !%Palette.DARK_100,
-                Hotkey = "scoreboard_sort",
-                Position =
-                    {
-                        Left = 0.33f %+ 0.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 0.66f %- 25.0f
-                        Bottom = 0.0f %+ 50.0f
-                    }
+        |+ LeaningButton(
+            Icons.CHEVRONS_UP + " " + %"levelselect.info.scoreboard.sort.accuracy",
+            ignore,
+            Palette.DARK_100
+        )
+            .Hotkey("scoreboard_sort")
+            .Disabled()
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .SlicePercentL(0.33f, 0.33f)
+                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
-        |+ StylishButton
-            .Selector(
-                Icons.FILTER,
-                [|
-                    Filter.None, %"levelselect.info.scoreboard.filter.none"
-                |],
-                filter,
-                !%Palette.MAIN_100,
-                Hotkey = "scoreboard_filter",
-                TiltRight = false,
-                Position =
-                    {
-                        Left = 0.66f %+ 0.0f
-                        Top = 0.0f %+ 0.0f
-                        Right = 1.0f %- 0.0f
-                        Bottom = 0.0f %+ 50.0f
-                    }
+        |+ LeaningButton(
+            Icons.FILTER + " " + %"levelselect.info.scoreboard.filter.none",
+            ignore,
+            Palette.MAIN_100
+        )
+            .Hotkey("scoreboard_filter")
+            .Disabled()
+            .LeanRight(false)
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .ShrinkPercentL(0.66f)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container
-        |+ HotkeyListener(
-            "scoreboard",
-            fun () ->
-                if container.Focused then
-                    Selection.clear ()
-                else
-                    container.Focus false
+        |+ HotkeyListener("scoreboard", fun () ->
+            if container.Focused then
+                Selection.clear ()
+            else
+                container.Focus false
         )
         |+ EmptyState(
             Icons.FLAG,

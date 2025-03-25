@@ -105,12 +105,8 @@ type SlideContainer(node_type) =
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsed_ms, moved)
 
-    member this.Add(child: #Widget) =
-        assert(GameThread.is_game_thread())
-        children.Add child
-
-        if this.Initialised then
-            child.Init this
+    member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add child
+    member this.Remove(child: Widget) : bool = (this :> IContainer<Widget>).Remove child
 
     override this.Init(parent: Widget) =
         base.Init parent
@@ -129,3 +125,16 @@ type SlideContainer(node_type) =
 
     static member (|*)(parent: #SlideContainer, child: #Widget) = parent.Add child
     static member (|*)(parent: #SlideContainer, children: #Widget seq) = Seq.iter parent.Add children
+
+    interface IContainer<Widget> with
+
+        member this.Add (child: Widget) : unit =
+            assert(GameThread.is_game_thread())
+            children.Add child
+
+            if this.Initialised then
+                child.Init this
+
+        member this.Remove (child: Widget) : bool =
+            assert(GameThread.is_game_thread())
+            children.Remove child

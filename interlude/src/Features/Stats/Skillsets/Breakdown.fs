@@ -34,39 +34,39 @@ type SkillBreakdown() =
         refresh_graph()
 
         let source_switcher =
-            StylishButton(
+            LeaningButton(
+                (fun () -> sprintf "%O" source.Value),
                 (fun () ->
                     source.Value <- match source.Value with AllTime -> Recent | _ -> AllTime
                     refresh_graph()
                 ),
-                (fun () -> sprintf "%O" source.Value),
-                K Colors.black.O2,
-                TiltLeft = false,
-                Position = Position.SliceT(50.0f).ShrinkR(400.0f)
+                Colors.black.O2
             )
+                .LeanLeft(false)
+                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(400.0f))
 
         let keymode_switcher =
-            StylishButton(
+            LeaningButton(
+                (fun () -> sprintf "%iK" keymode.Value),
                 (fun () ->
                     keymode.Value <- available_keymodes.[(1 + Array.findIndex ((=) keymode.Value) available_keymodes) % available_keymodes.Length]
                     refresh_graph()
                 ),
-                (fun () -> sprintf "%iK" keymode.Value),
-                K Colors.shadow_2.O2,
-                Position = Position.SliceT(50.0f).ShrinkR(275.0f).SliceR(100.0f)
+                Colors.shadow_2.O2
             )
+                .Position(Position.SliceT(LeaningButton.HEIGHT).ShrinkR(275.0f).SliceR(100.0f))
 
         let skill_switcher =
-            StylishButton(
+            LeaningButton(
+                (fun () -> sprintf "%O" skill.Value),
                 (fun () ->
                     skill.Value <- match skill.Value with Jacks -> Chordstream | Chordstream -> Stream | Stream -> Jacks
                     refresh_graph()
                 ),
-                (fun () -> sprintf "%O" skill.Value),
-                K Colors.black.O2,
-                TiltRight = false,
-                Position = Position.SliceT(50.0f).SliceR(250.0f)
+                Colors.black.O2
             )
+                .LeanRight(false)
+                .Position(Position.SliceT(LeaningButton.HEIGHT).SliceR(250.0f))
 
         this
         |+ source_switcher

@@ -78,29 +78,32 @@ type LobbyUI(lobby: Lobby) =
                     Bottom = 1.0f %- 100.0f
                 }
         )
-        |+ StylishButton(
+        |+ LeaningButton(
+            sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
             (fun () -> SelectedChart.if_loaded <| fun info -> Preview(info, ignore).Show()),
-            K(sprintf "%s %s" Icons.EYE (%"levelselect.preview")),
-            !%Palette.MAIN_100,
-            TiltLeft = false,
-            Hotkey = "preview",
-            Position =
-                { Position.SliceB(50.0f) with
+            Palette.MAIN_100
+        )
+            .LeanLeft(false)
+            .Hotkey("preview")
+            .Position(
+                { Position.SliceB(LeaningButton.HEIGHT) with
                     Right = (0.4f / 3f) %- 25.0f
                 }
-        )
+            )
             .Help(Help.Info("levelselect.preview"))
-        |+ StylishButton(
-            ignore,
+        |+ LeaningButton(
             K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
-            !%Palette.DARK_100,
-            Hotkey = "mods",
-            Position =
-                { Position.SliceB(50.0f) with
+            ignore,
+            Palette.DARK_100
+        )
+            .Hotkey("mods")
+            .Disabled()
+            .Position(
+                { Position.SliceB(LeaningButton.HEIGHT) with
                     Left = (0.4f / 3f) %- 0.0f
                     Right = (0.4f / 1.5f) %- 25.0f
                 }
-        )
+            )
             .Help(Help.Info("levelselect.mods"))
         |+ RulesetSwitcher(
                 options.SelectedRuleset,

@@ -87,8 +87,14 @@ type BeatmapBrowserPage() =
         search filter 0
         items.Clear()
 
-    let status_button (label: string) (status: int) (position: Position) (color: Color) : StylishButton =
-        StylishButton(
+    let status_button (label: string, status: int, color: Color) : LeaningButton =
+        LeaningButton(
+            (fun () ->
+                if statuses.Contains status then
+                    Icons.CHECK + " " + label
+                else
+                    Icons.X + " " + label
+            ),
             (fun () ->
                 if statuses.Contains status then
                     statuses <- Set.remove status statuses
@@ -97,14 +103,7 @@ type BeatmapBrowserPage() =
 
                 begin_search filter
             ),
-            (fun () ->
-                if statuses.Contains status then
-                    Icons.CHECK + " " + label
-                else
-                    Icons.X + " " + label
-            ),
-            (fun () -> if statuses.Contains status then color.O3 else color.O1),
-            Position = position
+            (fun () -> if statuses.Contains status then color.O3 else color.O1)
         )
 
     let search_results =
@@ -117,42 +116,16 @@ type BeatmapBrowserPage() =
         :> Widget
 
     let header =
-        NavigationContainer.Row(Position = Position.SliceB(50.0f))
-        |+ (let r =
-                status_button
-                    "Ranked"
-                    1
-                    { Position.DEFAULT with
-                        Right = 0.18f %- 25.0f
-                    }
-                    Colors.cyan
-
-            r.TiltLeft <- false
-            r)
-        |+ status_button
-            "Qualified"
-            3
-            { Position.DEFAULT with
-                Left = 0.18f %+ 0.0f
-                Right = 0.36f %- 25.0f
-            }
-            Colors.green
-        |+ status_button
-            "Loved"
-            4
-            { Position.DEFAULT with
-                Left = 0.36f %+ 0.0f
-                Right = 0.54f %- 25.0f
-            }
-            Colors.pink
-        |+ status_button
-            "Unranked"
-            0
-            { Position.DEFAULT with
-                Left = 0.54f %+ 0.0f
-                Right = 0.72f %- 25.0f
-            }
-            Colors.grey_2
+        NavigationContainer.Row(Position = Position.SliceB(LeaningButton.HEIGHT))
+        |+ status_button("Ranked", 1, Colors.cyan)
+            .LeanLeft(false)
+            .Position(Position.SlicePercentL(0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+        |+ status_button("Qualified", 3, Colors.green)
+            .Position(Position.SlicePercentL(0.18f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+        |+ status_button("Loved", 4, Colors.pink)
+            .Position(Position.SlicePercentL(0.36f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+        |+ status_button("Unranked", 0, Colors.grey_2)
+            .Position(Position.SlicePercentL(0.54f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
         // todo: this should not use accent color and should be keyboard navigatable
         |+ SortingDropdown(
             [
@@ -165,10 +138,7 @@ type BeatmapBrowserPage() =
             query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             "sort_mode",
-            Position =
-                { Position.DEFAULT with
-                    Left = 0.72f %+ 0.0f
-                }
+            Position = Position.SlicePercentR(0.28f)
         )
         |>> (fun nt -> Container(nt, Position = Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(

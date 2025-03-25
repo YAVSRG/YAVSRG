@@ -215,31 +215,37 @@ type private SortingDropdown
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
+    let LABEL_AREA_SIZE = 120.0f
+
     override this.Init(parent: Widget) =
         this
-        |+ StylishButton(
-            (fun () -> this.ToggleDropdown()),
-            K(label + ":"),
-            !%Palette.HIGHLIGHT_100,
-            Hotkey = bind,
-            Position = Position.SliceL 120.0f
-        )
-        |+ StylishButton(
-            (fun () -> reverse.Value <- not reverse.Value),
-            (fun () ->
-                sprintf
-                    "%s %s"
-                    display_value
-                    (if reverse.Value then
-                         Icons.CHEVRONS_DOWN
-                     else
-                         Icons.CHEVRONS_UP)
-            ),
-            !%Palette.DARK_100,
-            TiltRight = false,
-            Position = Position.ShrinkL 145.0f
-        )
-        |* dropdown_wrapper
+            .Add(
+                LeaningButton(
+                    label + ":",
+                    (fun () -> this.ToggleDropdown()),
+                    Palette.HIGHLIGHT_100
+                )
+                    .Hotkey(bind)
+                    .Position(Position.SliceL LABEL_AREA_SIZE),
+
+                LeaningButton(
+                    (fun () ->
+                        sprintf
+                            "%s %s"
+                            display_value
+                            (if reverse.Value then
+                                 Icons.CHEVRONS_DOWN
+                             else
+                                 Icons.CHEVRONS_UP)
+                    ),
+                    (fun () -> reverse.Value <- not reverse.Value),
+                    Palette.DARK_100
+                )
+                    .LeanRight(false)
+                    .Position(Position.ShrinkL(LABEL_AREA_SIZE + LeaningButton.LEAN_AMOUNT)),
+
+                dropdown_wrapper
+            )
 
         base.Init parent
 

@@ -49,7 +49,7 @@ type ConfirmQuitPage(on_confirm: unit -> unit) =
     override this.Title = %"confirm"
     override this.OnClose() = ()
 
-type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
+type private MenuButton(label: string, on_click: unit -> unit, position: Position) =
     inherit
         SlideContainer(
             NodeType.Button(fun () ->
@@ -60,23 +60,20 @@ type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
 
     override this.Init(parent) =
         this
-        |+ MouseListener().Button(this)
-        |* Text(
-            label,
-            Align = Alignment.CENTER,
-            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text),
-            Position =
-                {
-                    Left = 0.7f %+ 0.0f
-                    Top = 0.0f %+ 10.0f
-                    Right = 1.0f %+ 0.0f
-                    Bottom = 1.0f %- 20.0f
-                }
-        )
+            .With(
+                MouseListener().Button(this),
+                Text(label)
+                    .Align(Alignment.CENTER)
+                    .Color(fun () ->
+                        if this.Focused then Colors.text_yellow_2
+                        else Colors.text
+                    )
+                    .Position(Position.SlicePercentR(0.3f).ShrinkY(10.0f).ShrinkB(10.0f))
+            )
+            .Position(position)
+            .Hide()
 
-        this.Position <- pos
         base.Init parent
-        this.Hide()
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -89,25 +86,15 @@ type private MenuButton(on_click: unit -> unit, label: string, pos: Position) =
         base.Draw()
 
     member this.Hide() =
-        this.Position <-
-            { pos with
-                Right = 0.0f %- 100.0f
-            }
-
-        this.SnapPosition()
+        this.Position(position.SliceL(-100.0f)).SnapPosition()
 
     member this.Show() =
-        this.Position <-
-            { pos with
-                Right = 0.0f %- 100.0f
-            }
-
-        this.SnapPosition()
-        this.Position <- pos
+        this.Hide()
+        this.Position <- position
 
 // todo: cool redesign with news feed and stuff
 
-type MainMenuScreen() as this =
+type MainMenuScreen() =
     inherit Screen()
 
     let mutable confirmed_quit = false
@@ -124,22 +111,26 @@ type MainMenuScreen() as this =
         Screen.change ScreenType.LevelSelect Transitions.Default |> ignore
 
     let play_button =
-        MenuButton(play_action, %"menu.play", Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f))
+        MenuButton(
+            %"menu.play",
+            play_action,
+            Position.Box(0.0f, 0.5f, -300.0f, -200.0f, 1500.0f, 100.0f)
+        )
 
     let options_button =
         MenuButton(
-            (fun () -> OptionsMenuPage().Show()),
             %"menu.options",
+            (fun () -> OptionsMenuPage().Show()),
             Position.Box(0.0f, 0.5f, -300.0f, -50.0f, 1430.0f, 100.0f)
         )
 
     let quit_button =
         MenuButton(
+            %"menu.quit",
             (fun () ->
                 if Screen.back Transitions.UnderLogo then
                     Screen.logo.MoveCenter ()
             ),
-            %"menu.quit",
             Position.Box(0.0f, 0.5f, -300.0f, 100.0f, 1360.0f, 100.0f)
         )
 
@@ -153,24 +144,29 @@ type MainMenuScreen() as this =
     let splash_subtitle_fade = Animation.Fade 0.0f
     let button_sequence = Animation.Group()
 
-    do
+    override this.Init (parent: Widget): unit =
         this
-        |+ play_button
-        |+ options_button
-        |+ quit_button
-        |+ (StylishButton(
-            WikiBrowserPage.ShowChangelog,
-            K(Icons.STAR + " " + %"menu.changelog"),
-            !%Palette.MAIN_100,
-            TiltRight = false,
-            Position = Position.SliceB(50.0f).SliceR(300.0f)
-        ))
-        |* StylishButton(
-            (fun () -> open_url ("https://discord.gg/tA22tWR")),
-            K(Icons.MESSAGE_SQUARE + " " + %"menu.discord"),
-            !%Palette.DARK_100,
-            Position = Position.SliceB(50.0f).SliceR(300.0f).Translate(-325.0f, 0.0f)
-        )
+            .Add(
+                play_button,
+                options_button,
+                quit_button,
+
+                LeaningButton(
+                    Icons.STAR + " " + %"menu.changelog",
+                    WikiBrowserPage.ShowChangelog,
+                    Palette.MAIN_100
+                )
+                    .LeanRight(false)
+                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(300.0f)),
+
+                LeaningButton(
+                    Icons.MESSAGE_SQUARE + " " + %"menu.discord",
+                    (fun () -> open_url ("https://discord.gg/tA22tWR")),
+                    Palette.DARK_100
+                )
+                    .Position(Position.SliceB(LeaningButton.HEIGHT).SliceR(300.0f).TranslateX(-325.0f))
+            )
+        base.Init(parent)
 
     override this.OnEnter(prev: ScreenType) =
         if Updates.update_available then

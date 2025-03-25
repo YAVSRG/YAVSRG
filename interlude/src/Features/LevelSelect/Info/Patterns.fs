@@ -25,21 +25,15 @@ type Patterns(display: Setting<Display>) =
         SelectedChart.when_loaded false on_chart_update
 
         this
-        |* StylishButton(
+        |* LeaningButton(
+            %"levelselect.info.details",
             (fun () -> display.Set Display.Local),
-            K <| %"levelselect.info.details",
-            !%Palette.MAIN_100,
-            Hotkey = "scoreboard_storage",
-            TiltLeft = false,
-            TiltRight = false,
-            Position =
-                {
-                    Left = 0.0f %+ 0.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 1.0f %- 0.0f
-                    Bottom = 0.0f %+ 50.0f
-                }
+            Palette.MAIN_100
         )
+            .Hotkey("scoreboard_storage")
+            .LeanLeft(false)
+            .LeanRight(false)
+            .Position(Position.SliceT(LeaningButton.HEIGHT))
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
 
     override this.Draw() =
