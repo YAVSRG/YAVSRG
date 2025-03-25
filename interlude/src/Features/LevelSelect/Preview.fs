@@ -47,6 +47,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     let volume = VolumeSlider()
 
     override this.Init(parent: Widget) =
+        Selection.clear()
         base.Init parent
         playfield.Init this
         difficulty_overlay.Init this
