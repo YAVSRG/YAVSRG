@@ -7,7 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 
-type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: string) =
+type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -18,7 +18,7 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
 
     static member HEIGHT = 55.0f
 
-    new (label: string, on_click: unit -> unit, icon: string) = InlaidButton(K label, on_click, icon)
+    new (label: string, on_click: unit -> unit) = InlaidButton(K label, on_click)
 
     member val Hotkey : Hotkey = "none" with get, set
     member val Icon : string = "" with get, set
@@ -48,8 +48,8 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit, icon: stri
             if this.Focused then
                 if this.HoverIcon = "" then this.HoverText
                 else sprintf "%s %s" this.HoverIcon this.HoverText
-            elif icon = "" then label_func()
-            else sprintf "%s %s" icon (label_func())
+            elif this.Icon = "" then label_func()
+            else sprintf "%s %s" this.Icon (label_func())
 
         Render.rect this.Bounds (Colors.shadow_1.O2)
 

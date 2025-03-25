@@ -36,15 +36,18 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
 
     override this.Init(parent: Widget) =
         this
-        |+ InlaidButton(
-            (fun () -> score_info.Ruleset.Name),
-            (fun () -> this.ToggleDropdown()),
-            "",
-            Hotkey = "ruleset_switch",
-            HoverText = %"score.switch_ruleset"
-        )
-        |+ HotkeyListener("native_ruleset", switch_to_native_ruleset)
-        |* dropdown_wrapper
+            .Add(
+                InlaidButton(
+                    (fun () -> score_info.Ruleset.Name),
+                    (fun () -> this.ToggleDropdown())
+                )
+                    .Hotkey("ruleset_switch")
+                    .HoverText(%"score.switch_ruleset"),
+
+                HotkeyListener("native_ruleset", switch_to_native_ruleset),
+
+                dropdown_wrapper
+            )
 
         base.Init parent
 
@@ -89,37 +92,39 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER
         )
-        |+ (
-            GridFlowContainer<Widget>(50.0f, 4, Spacing = (30.0f, 0.0f), Position = { Position.SliceB(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
-            |+ InlaidButton(
-                %"score.graph.settings",
-                (fun () -> ScoreGraphSettingsPage(graph).Show()
-                ),
-                Icons.EDIT_2
-            )
-            |+ InlaidButton(
-                %"score.chart_actions",
-                (fun () -> ScoreChartContextMenu(score_info).Show()),
-                Icons.SETTINGS,
-                Hotkey = "context_menu"
-            )
-            |+ InlaidButton(
-                %"score.watch_replay",
-                (fun () ->
+        |+ NavigationContainer.Row()
+            .Position({ Position.SliceB(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
+            .With(
+                InlaidButton(%"score.graph.settings", fun () ->
+                    ScoreGraphSettingsPage(graph).Show()
+                )
+                    .Icon(Icons.EDIT_2)
+                    .Position(Position.GridX(1, 4, 30.0f)),
+
+                InlaidButton(%"score.chart_actions", fun () ->
+                    ScoreChartContextMenu(score_info).Show()
+                )
+                    .Icon(Icons.SETTINGS)
+                    .Hotkey("context_menu")
+                    .Position(Position.GridX(2, 4, 30.0f)),
+
+                InlaidButton(%"score.watch_replay", fun () ->
                     Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
-                ),
-                Icons.FILM
+                )
+                    .Icon(Icons.FILM)
+                    .Position(Position.GridX(3, 4, 30.0f)),
+
+                RulesetSwitcher(
+                    Setting.simple Rulesets.selected_id.Value
+                    |> Setting.trigger (fun id ->
+                        score_info.Ruleset <- Rulesets.by_id id
+                        refresh ()
+                    ),
+                    (fun ruleset -> score_info.Ruleset <- ruleset; refresh()),
+                    score_info
+                )
+                    .Position(Position.GridX(4, 4, 30.0f))
             )
-            |+ RulesetSwitcher(
-                Setting.simple Rulesets.selected_id.Value
-                |> Setting.trigger (fun id ->
-                    score_info.Ruleset <- Rulesets.by_id id
-                    refresh ()
-                ),
-                (fun ruleset -> score_info.Ruleset <- ruleset; refresh()),
-                score_info
-            )
-        )
         |* HotkeyListener("like", fun () -> CollectionActions.toggle_liked score_info.ChartMeta)
 
         base.Init parent

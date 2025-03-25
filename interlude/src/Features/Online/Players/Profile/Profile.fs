@@ -151,37 +151,40 @@ type private Profile() =
                     %"online.players.profile.mutual_friend"
                 else
                     %"online.players.profile.remove_friend"),
-            remove_friend,
-            (if data.IsMutualFriend then
+            remove_friend
+        )
+            .Icon(
+                if data.IsMutualFriend then
                     Icons.HEART
                 else
-                    Icons.USER_MINUS),
-            HoverText = %"online.players.profile.remove_friend",
-            HoverIcon = Icons.USER_MINUS,
-            TextColor =
-                (if data.IsMutualFriend then
-                        Colors.text_pink_2
-                    else
-                        Colors.text_red_2),
-            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
-        )
+                    Icons.USER_MINUS
+            )
+            .HoverText(%"online.players.profile.remove_friend")
+            .HoverIcon(Icons.USER_MINUS)
+            .TextColor(
+                if data.IsMutualFriend then
+                    Colors.text_pink_2
+                else
+                    Colors.text_red_2
+            )
+            .Position(Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f))
             .Conditional(fun () -> data.IsFriend)
         |+ InlaidButton(
             %"online.players.profile.add_friend",
-            add_friend,
-            Icons.USER_PLUS,
-            TextColor = Colors.text_green_2,
-            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
+            add_friend
         )
+            .Icon(Icons.USER_PLUS)
+            .TextColor(Colors.text_green_2)
+            .Position(Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f))
             .Conditional(fun () -> not data.IsFriend && data.Username <> Network.credentials.Username)
 
         // Profile settings
         |+ InlaidButton(
             %"profile_settings",
-            (fun () -> ProfileSettingsPage(data, profile_color).Show()),
-            Icons.SETTINGS,
-            Position = Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
+            (fun () -> ProfileSettingsPage(data, profile_color).Show())
         )
+            .Icon(Icons.SETTINGS)
+            .Position(Position.ShrinkR(40.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f))
             .Conditional(fun () -> data.Username = Network.credentials.Username && has_colors)
 
         // Invite button
@@ -190,10 +193,10 @@ type private Profile() =
             (fun () ->
                 Network.lobby.Value.InvitePlayer(data.Username)
                 Notifications.action_feedback (Icons.SEND, %"notification.lobby_invite_sent", data.Username)
-            ),
-            Icons.SEND,
-            Position = Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f)
+            )
         )
+            .Icon(Icons.SEND)
+            .Position(Position.ShrinkR(380.0f).SliceT(InlaidButton.HEIGHT).SliceR(300.0f))
             .Conditional(fun () -> Network.lobby.IsSome && data.Username <> Network.credentials.Username && (not (Network.lobby.Value.Players.ContainsKey data.Username)))
         :> Widget
 

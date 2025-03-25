@@ -53,10 +53,10 @@ type Toolbar() =
     let import_button =
         InlaidButton(
             %"menu.import",
-            (fun () -> ImportsMenuPage().Show()),
-            Icons.DOWNLOAD,
-            Hotkey = "import"
+            (fun () -> ImportsMenuPage().Show())
         )
+            .Icon(Icons.DOWNLOAD)
+            .Hotkey("import")
         |+ TaskProgressMiniBar(Position = Position.BorderB(Style.PADDING))
 
     override this.Init(parent) =
@@ -71,63 +71,55 @@ type Toolbar() =
             Align = Alignment.RIGHT,
             Position = Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f)
         )
-        |+ InlaidButton(
-            %"menu.back",
-            (fun () -> Screen.back Transitions.UnderLogo |> ignore),
-            Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.SliceL(10.0f, 180.0f).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT)
-        )
-        |+ InlaidButton(
-            Icons.MENU,
-            (fun () -> QuickMenuPage().Show()),
-            "",
-            Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT)
-        )
+        |+ InlaidButton(%"menu.back", fun () -> Screen.back Transitions.UnderLogo |> ignore)
+            .Icon(Icons.ARROW_LEFT_CIRCLE)
+            .Position(Position.SliceL(10.0f, 180.0f).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT))
+
+        |+ InlaidButton(Icons.MENU, fun () -> QuickMenuPage().Show())
+            .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT))
             .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
+
         |+ (FlowContainer.LeftToRight<Widget>(
                 180.0f,
                 Spacing = 10.0f,
                 AllowNavigation = false,
                 Position = Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f)
             )
-            |+ InlaidButton(
-                %"menu.options",
-                (fun () -> OptionsMenuPage().Show()),
-                Icons.SETTINGS
-            )
+
+            |+ InlaidButton(%"menu.options", fun () -> OptionsMenuPage().Show())
+                .Icon(Icons.SETTINGS)
+
             |+ import_button
-            |+ InlaidButton(
-                %"menu.stats",
-                (fun () -> StatsPage().Show()),
-                Icons.TRENDING_UP,
-                Hotkey = "stats"
-            )
-            |+ InlaidButton(
-                %"menu.wiki",
-                WikiBrowserPage.Show,
-                Icons.BOOK_OPEN,
-                Hotkey = "wiki"
-            )
+
+            |+ InlaidButton(%"menu.stats", fun () -> StatsPage().Show())
+                .Icon(Icons.TRENDING_UP)
+                .Hotkey("stats")
+
+            |+ InlaidButton(%"menu.wiki", WikiBrowserPage.Show)
+                .Icon(Icons.BOOK_OPEN)
+                .Hotkey("wiki")
                 .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
         )
-        |+ NetworkStatus(Position = Position.SliceT(HEIGHT).SliceR(300.0f))
-        |+ HotkeyListener(
-            "reload_content",
-            fun () ->
-                if not (Dialog.exists()) then
-                    Themes.reload_current ()
-                    Skins.load()
-                    Rulesets.load()
-                    SelectedChart.recolor ()
-                    Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
+        |+ NetworkStatus()
+            .Position(Position.SliceT(HEIGHT).SliceR(300.0f))
+        |+ HotkeyListener("reload_content", fun () ->
+            if not (Dialog.exists()) then
+                Themes.reload_current ()
+                Skins.load()
+                Rulesets.load()
+                SelectedChart.recolor ()
+                Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
         )
         |+ HotkeyListener("preset1", fun () -> load_preset 1)
         |+ HotkeyListener("preset2", fun () -> load_preset 2)
         |+ HotkeyListener("preset3", fun () -> load_preset 3)
-        |+ UpdateButton(Position = Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
+        |+ UpdateButton()
+            .Position(Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
             .Conditional(fun () -> Updates.update_available)
-        |+ Jukebox(Position = Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
-        |* VolumeSlider(Position = Position.ShrinkY(HEIGHT))
+        |+ Jukebox()
+            .Position(Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
+        |* VolumeSlider()
+            .Position(Position.ShrinkY(HEIGHT))
 
         base.Init parent
 

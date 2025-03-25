@@ -95,12 +95,8 @@ module NavigationContainer =
             if this.Focused && children.Count > 0 then
                 this.Navigate()
 
-        member this.Add(child: Widget) =
-            assert(GameThread.is_game_thread())
-            children.Add child
-
-            if this.Initialised then
-                child.Init this
+        member this.Add(child: #Widget) = (this :> IContainer<Widget>).Add child
+        member this.Remove(child: Widget) : bool = (this :> IContainer<Widget>).Remove child
 
         override this.Init(parent: Widget) =
             base.Init parent
@@ -122,6 +118,19 @@ module NavigationContainer =
 
         static member (|*)(parent: #Base, child: Widget) = parent.Add child
         static member (|*)(parent: #Base, children: Widget seq) = Seq.iter parent.Add children
+
+        interface IContainer<Widget> with
+
+            member this.Add (child: Widget) : unit =
+                assert(GameThread.is_game_thread())
+                children.Add child
+
+                if this.Initialised then
+                    child.Init this
+
+            member this.Remove (child: Widget) : bool =
+                assert(GameThread.is_game_thread())
+                children.Remove child
 
     [<Sealed>]
     type Column() =

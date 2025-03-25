@@ -164,38 +164,56 @@ type private OptionsMenuFooter() as this =
 
     let HEIGHT = 70.0f
 
-    let items =
-        NavigationContainer.Row()
-        |+ InlaidButton(
-            %"menu.back",
-            Menu.Back,
-            Icons.ARROW_LEFT_CIRCLE,
-            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).SliceL(10.0f, 180.0f)
-        )
-        |+ InlaidButton(
-            %"noteskin.edit",
-            Skinning.edit_or_extract_noteskin,
-            Icons.IMAGE,
-            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).ShrinkPercentR(0.5f).ShrinkL(210.0f).SlicePercentL(0.5f).ShrinkR(10.0f)
-        )
-        |+ InlaidButton(
-            %"hud.edit",
-            (fun () -> Skinning.edit_hud ignore),
-            Icons.ZAP,
-            Position = Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).ShrinkPercentR(0.5f).ShrinkL(210.0f).SlicePercentR(0.5f).ShrinkL(10.0f)
-        )
-        |+ (
-            GridFlowContainer(HEIGHT, 3, Spacing = (20.0f, 20.0f), Position = Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))
-            |+ Presets.preset_buttons 1 options.Preset1
-            |+ Presets.preset_buttons 2 options.Preset2
-            |+ Presets.preset_buttons 3 options.Preset3
-        )
+    let presets =
+        NavigationContainer.Row(WrapNavigation = false)
+            .With(
+                Presets.preset_buttons(1, options.Preset1)
+                    .Position(Position.GridX(1, 3, 20.0f)),
+                Presets.preset_buttons(2, options.Preset2)
+                    .Position(Position.GridX(2, 3, 20.0f)),
+                Presets.preset_buttons(3, options.Preset3)
+                    .Position(Position.GridX(3, 3, 20.0f))
+            )
+            .Position(Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))
 
-    member this.Items = items
+    let content =
+        NavigationContainer.Row()
+            .With(
+                InlaidButton(%"menu.back", Menu.Back)
+                    .Icon(Icons.ARROW_LEFT_CIRCLE)
+                    .Position(Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).SliceL(10.0f, 180.0f)),
+
+                InlaidButton(%"noteskin.edit", Skinning.edit_or_extract_noteskin)
+                    .Icon(Icons.IMAGE)
+                    .Position(
+                        Position
+                            .SliceB(HEIGHT)
+                            .SliceY(InlaidButton.HEIGHT)
+                            .ShrinkPercentR(0.5f)
+                            .ShrinkL(210.0f)
+                            .GridX(1, 2, 20.0f)
+                    ),
+
+                InlaidButton(%"hud.edit", fun () ->
+                    Skinning.edit_hud ignore
+                )
+                    .Icon(Icons.ZAP)
+                    .Position(
+                        Position
+                            .SliceB(HEIGHT)
+                            .SliceY(InlaidButton.HEIGHT)
+                            .ShrinkPercentR(0.5f)
+                            .ShrinkL(210.0f)
+                            .GridX(2, 2, 20.0f)
+                    ),
+
+                presets
+            )
+
+    member this.Items = content
 
     override this.Init(parent) =
-        this |* items
-        this.Position <- Position.SliceB HEIGHT
+        this.With(content).Position <- Position.SliceB HEIGHT
         base.Init parent
 
     override this.Draw() =

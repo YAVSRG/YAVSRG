@@ -113,7 +113,7 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
 
 module private Presets =
 
-    let preset_buttons (preset_id: int) (setting: Setting<Preset option>) : NavigationContainer.Column =
+    let preset_buttons (preset_id: int, setting: Setting<Preset option>) : NavigationContainer.Column =
 
         let create_preset_button =
             Button(
