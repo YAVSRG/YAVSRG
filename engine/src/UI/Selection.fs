@@ -48,7 +48,7 @@ module Selection =
         if leaf_is_selected then List.tryHead current_tree else None
 
     // Test if a proposed tree is rooted under the required parent
-    let private check_clamp (by_mouse: bool) (tree: ISelection list) =
+    let private check_clamp (by_mouse: bool) (tree: ISelection list) : bool =
 
         if
             by_mouse
@@ -128,7 +128,6 @@ module Selection =
         leaf_is_selected <- true
         current_tree <- tree
 
-
     let rec focus (by_mouse: bool) (item: ISelection) =
         match item.NodeType with
         | NodeType.None -> focus_tree by_mouse []
@@ -182,6 +181,7 @@ module Selection =
 
 // drag and drop system is unfinished
 // todo: finish it
+// todo: or delete it
 
 type DragAndDropEvent<'T> =
     {

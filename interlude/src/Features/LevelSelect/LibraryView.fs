@@ -94,8 +94,7 @@ type LibraryViewControls() =
             Position =
                 Position
                     .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
-                    .SlicePercentL(0.5f)
-                    .ShrinkR(LeaningButton.LEAN_AMOUNT * 0.5f)
+                    .GridX(1, 2, LeaningButton.LEAN_AMOUNT)
         )
             .Help(
                 Help
@@ -113,8 +112,7 @@ type LibraryViewControls() =
             Position =
                 Position
                     .ShrinkL(OPTIONS_BUTTON_WIDTH + LeaningButton.LEAN_AMOUNT * 2.0f)
-                    .SlicePercentR(0.5f)
-                    .ShrinkL(LeaningButton.LEAN_AMOUNT * 0.5f)
+                    .GridX(2, 2, LeaningButton.LEAN_AMOUNT)
         )
             .Help(
                 Help

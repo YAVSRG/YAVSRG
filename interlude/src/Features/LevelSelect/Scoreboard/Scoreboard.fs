@@ -75,8 +75,7 @@ type Scoreboard(display: Setting<Display>) =
             .Position(
                 Position
                     .SliceT(LeaningButton.HEIGHT)
-                    .SlicePercentL(0.33f)
-                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+                    .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
         |+ StylishButton
@@ -93,8 +92,7 @@ type Scoreboard(display: Setting<Display>) =
                 Position =
                     Position
                         .SliceT(LeaningButton.HEIGHT)
-                        .SlicePercentL(0.33f, 0.33f)
-                        .ShrinkR(LeaningButton.LEAN_AMOUNT)
+                        .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
         |+ StylishButton
@@ -112,7 +110,7 @@ type Scoreboard(display: Setting<Display>) =
                 Position =
                     Position
                         .SliceT(LeaningButton.HEIGHT)
-                        .ShrinkPercentL(0.66f)
+                        .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container

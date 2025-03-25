@@ -44,34 +44,27 @@ type InfoPanel() =
             .Position(
                 Position
                     .SliceB(LeaningButton.HEIGHT)
-                    .SlicePercentL(0.33f)
-                    .ShrinkR(LeaningButton.LEAN_AMOUNT)
+                    .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.preview", "preview"))
 
         |+ ModSelect(
             change_rate,
-            scoreboard.ModsChanged,
-            Position =
-                {
-                    Left = 0.33f %+ 0.0f
-                    Top = 1.0f %- 50.0f
-                    Right = 0.66f %- 25.0f
-                    Bottom = 1.0f %- 0.0f
-                }
+            scoreboard.ModsChanged
         )
+            .Position(
+                Position
+                    .SliceB(LeaningButton.HEIGHT)
+                    .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
+            )
             .Help(Help.Info("levelselect.mods", "mods"))
 
-        |* RulesetSwitcher(
-            options.SelectedRuleset,
-            Position =
-                {
-                    Left = 0.66f %+ 0.0f
-                    Top = 1.0f %- 50.0f
-                    Right = 1.0f %- 0.0f
-                    Bottom = 1.0f %- 0.0f
-                }
-        )
+        |* RulesetSwitcher(options.SelectedRuleset)
+            .Position(
+                Position
+                    .SliceB(LeaningButton.HEIGHT)
+                    .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
+            )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
 
         base.Init(parent)

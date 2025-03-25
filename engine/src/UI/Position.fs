@@ -198,6 +198,29 @@ type Position with
             Bottom = this.Bottom ^+ amount
         }
 
+    // Methods to cut an area into even slices, with spacing between the slices
+    member inline this.GridX (position: int, columns: int, spacing: float32) : Position =
+        let flerp = Percyqaz.Common.Combinators.lerp
+        let l = float32 (position - 1) / float32 columns
+        let r = float32 position / float32 columns
+        { this with
+            Left = Position.lerp l this.Left this.Right ^+ (flerp l 0.0f spacing)
+            Right = Position.lerp r this.Left this.Right ^- (flerp r spacing 0.0f)
+        }
+
+    member inline this.GridX(position: int, columns: int) : Position = this.GridX(position, columns, 0.0f)
+
+    member inline this.GridY (position: int, rows: int, spacing: float32) : Position =
+        let flerp = Percyqaz.Common.Combinators.lerp
+        let t = float32 (position - 1) / float32 rows
+        let b = float32 position / float32 rows
+        { this with
+            Top = Position.lerp t this.Top this.Bottom ^+ (flerp t 0.0f spacing)
+            Bottom = Position.lerp b this.Top this.Bottom ^- (flerp b spacing 0.0f)
+        }
+
+    member inline this.GridY(position: int, rows: int) : Position = this.GridY(position, rows, 0.0f)
+
     // Static equivalents of all methods, to write as Position.___ instead of Position.DEFAULT.___
     static member inline ExpandL amount = Position.DEFAULT.ExpandL amount
     static member inline ExpandT amount = Position.DEFAULT.ExpandT amount
@@ -260,13 +283,10 @@ type Position with
     static member inline BorderCornersT thickness = Position.DEFAULT.BorderCornersT thickness
     static member inline BorderCornersB thickness = Position.DEFAULT.BorderCornersB thickness
 
-    static member Grid(l, t, r, b) =
-        {
-            Left = l %+ 0.0f
-            Top = t %+ 0.0f
-            Right = r %+ 0.0f
-            Bottom = b %+ 0.0f
-        }
+    static member inline GridX(position: int, columns: int, spacing: float32) : Position = Position.DEFAULT.GridX(position, columns, spacing)
+    static member inline GridX(position: int, columns: int) : Position = Position.DEFAULT.GridX(position, columns)
+    static member inline GridY(position: int, rows: int, spacing: float32) : Position = Position.DEFAULT.GridY(position, rows, spacing)
+    static member inline GridY(position: int, rows: int) : Position = Position.DEFAULT.GridY(position, rows)
 
     static member Box(anchorx, anchory, x, y, width, height) =
         {

@@ -119,13 +119,13 @@ type BeatmapBrowserPage() =
         NavigationContainer.Row(Position = Position.SliceB(LeaningButton.HEIGHT))
         |+ status_button("Ranked", 1, Colors.cyan)
             .LeanLeft(false)
-            .Position(Position.SlicePercentL(0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+            .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, LeaningButton.LEAN_AMOUNT))
         |+ status_button("Qualified", 3, Colors.green)
-            .Position(Position.SlicePercentL(0.18f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+            .Position(Position.ShrinkPercentR(0.28f).GridX(2, 4, LeaningButton.LEAN_AMOUNT))
         |+ status_button("Loved", 4, Colors.pink)
-            .Position(Position.SlicePercentL(0.36f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+            .Position(Position.ShrinkPercentR(0.28f).GridX(3, 4, LeaningButton.LEAN_AMOUNT))
         |+ status_button("Unranked", 0, Colors.grey_2)
-            .Position(Position.SlicePercentL(0.54f, 0.18f).ShrinkR(LeaningButton.LEAN_AMOUNT))
+            .Position(Position.ShrinkPercentR(0.28f).GridX(4, 4, LeaningButton.LEAN_AMOUNT))
         // todo: this should not use accent color and should be keyboard navigatable
         |+ SortingDropdown(
             [
@@ -138,7 +138,10 @@ type BeatmapBrowserPage() =
             query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             "sort_mode",
-            Position = Position.SlicePercentR(0.28f)
+            Position =
+                Position
+                    .SlicePercentR(0.28f)
+                    .ShrinkL(LeaningButton.LEAN_AMOUNT)
         )
         |>> (fun nt -> Container(nt, Position = Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
