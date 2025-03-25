@@ -56,6 +56,22 @@ type Scoreboard(display: Setting<Display>) =
     let refresh_filter () =
         container.Filter <- filterer ()
 
+    let cycle_filter () =
+        filter.Value <-
+            match filter.Value with
+            | Filter.CurrentMods -> Filter.None
+            | Filter.CurrentRate -> Filter.CurrentMods
+            | _ -> Filter.CurrentRate
+        refresh_filter()
+
+    let cycle_sort () =
+        sort.Value <-
+            match sort.Value with
+            | Sort.Performance -> Sort.Accuracy
+            | Sort.Accuracy -> Sort.Time
+            | _ -> Sort.Performance
+        container.Sort <- sorter ()
+
     override this.Init(parent: Widget) =
         SelectedChart.on_chart_change_started.Add (fun _ -> container.Iter(fun s -> s.FadeOut()); loading <- true)
         SelectedChart.on_chart_change_finished.Add (fun _ -> container.Clear(); count <- 0)
@@ -78,39 +94,41 @@ type Scoreboard(display: Setting<Display>) =
                     .GridX(1, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.mode", "scoreboard_storage"))
-        |+ StylishButton
-            .Selector(
-                Icons.CHEVRONS_UP,
-                [|
-                    Sort.Accuracy, %"levelselect.info.scoreboard.sort.accuracy"
-                    Sort.Performance, %"levelselect.info.scoreboard.sort.performance"
-                    Sort.Time, %"levelselect.info.scoreboard.sort.time"
-                |],
-                sort |> Setting.trigger (fun _ -> container.Sort <- sorter ()),
-                !%Palette.DARK_100,
-                Hotkey = "scoreboard_sort",
-                Position =
-                    Position
-                        .SliceT(LeaningButton.HEIGHT)
-                        .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
+        |+ LeaningButton(
+            (fun () ->
+                Icons.CHEVRONS_UP + " " +
+                match sort.Value with
+                | Sort.Accuracy -> %"levelselect.info.scoreboard.sort.accuracy"
+                | Sort.Performance -> %"levelselect.info.scoreboard.sort.performance"
+                | _ -> %"levelselect.info.scoreboard.sort.time"
+            ),
+            cycle_sort,
+            Palette.DARK_100
+        )
+            .Hotkey("scoreboard_sort")
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .GridX(2, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.sort", "scoreboard_sort"))
-        |+ StylishButton
-            .Selector(
-                Icons.FILTER,
-                [|
-                    Filter.None, %"levelselect.info.scoreboard.filter.none"
-                    Filter.CurrentRate, %"levelselect.info.scoreboard.filter.currentrate"
-                    Filter.CurrentMods, %"levelselect.info.scoreboard.filter.currentmods"
-                |],
-                filter |> Setting.trigger (fun _ -> refresh_filter()),
-                !%Palette.MAIN_100,
-                Hotkey = "scoreboard_filter",
-                TiltRight = false,
-                Position =
-                    Position
-                        .SliceT(LeaningButton.HEIGHT)
-                        .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
+        |+ LeaningButton(
+            (fun () ->
+                Icons.FILTER + " " +
+                match filter.Value with
+                | Filter.CurrentMods -> %"levelselect.info.scoreboard.filter.currentmods"
+                | Filter.CurrentRate -> %"levelselect.info.scoreboard.filter.currentrate"
+                | _ -> %"levelselect.info.scoreboard.filter.none"
+            ),
+            cycle_filter,
+            Palette.MAIN_100
+        )
+            .Hotkey("scoreboard_filter")
+            .LeanRight(false)
+            .Position(
+                Position
+                    .SliceT(LeaningButton.HEIGHT)
+                    .GridX(3, 3, LeaningButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
         |+ scroll_container
