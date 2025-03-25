@@ -9,10 +9,10 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type InfoPanel() as this =
+type InfoPanel() =
     inherit Container(NodeType.None)
 
-    let display = Setting.simple Display.Local |> Setting.trigger (fun _ -> this.Refresh())
+    let display = Setting.simple Display.Local
 
     let scoreboard = Scoreboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
     let online = Leaderboard(display, Position = Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
@@ -74,10 +74,6 @@ type InfoPanel() as this =
         )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
 
-        LevelSelect.on_refresh_all.Add this.Refresh
-        LevelSelect.on_refresh_details.Add this.Refresh
-        SelectedChart.on_chart_change_finished.Add this.OnChartUpdated
-
         base.Init(parent)
 
     override this.Draw() =
@@ -85,10 +81,3 @@ type InfoPanel() as this =
         Render.rect (info_area.BorderT(Style.PADDING)) (!*Palette.MAIN)
         Render.rect info_area (!*Palette.DARK_100)
         base.Draw()
-
-    member this.OnChartUpdated(info: LoadedChartInfo) =
-        match display.Value with
-        | Display.Patterns -> patterns.OnChartUpdated(info)
-        | _ -> ()
-
-    member this.Refresh() = SelectedChart.when_loaded false this.OnChartUpdated

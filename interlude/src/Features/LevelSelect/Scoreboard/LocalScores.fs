@@ -89,6 +89,17 @@ module LocalScores =
                 }
         )
 
+        SelectedChart.when_loaded false (fun info ->
+            score_loader.Request
+                {
+                    RulesetId = Rulesets.current_hash
+                    Ruleset = Rulesets.current
+                    ChartMeta = info.ChartMeta
+                    CurrentChart = info.Chart
+                    ChartSaveData = info.SaveData
+                }
+        )
+
         Rulesets.on_changed.Add (fun ruleset ->
             for score_info in local_scores do
                 score_info.Ruleset <- ruleset

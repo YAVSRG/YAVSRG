@@ -15,8 +15,14 @@ type Patterns(display: Setting<Display>) =
     let mutable patterns: Cluster array = [||]
     let mutable category: string = ""
 
+    let on_chart_update(info: LoadedChartInfo) =
+        patterns <- info.Patterns.Clusters |> Array.truncate 6
+        category <- info.Patterns.Category
+
     override this.Init(parent: Widget) =
         base.Init parent
+        SelectedChart.on_chart_change_finished.Add on_chart_update
+        SelectedChart.when_loaded false on_chart_update
 
         this
         |* StylishButton(
@@ -101,7 +107,3 @@ type Patterns(display: Setting<Display>) =
             bar (0.9f, entry.Density90, 1.0f, entry.Density90)
 
             b <- b.Translate(0.0f, 60.0f)
-
-    member this.OnChartUpdated(info: LoadedChartInfo) =
-        patterns <- info.Patterns.Clusters |> Array.truncate 6
-        category <- info.Patterns.Category

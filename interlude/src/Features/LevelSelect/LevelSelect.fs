@@ -23,124 +23,145 @@ type LevelSelectScreen() =
 
     let search_text = Setting.simple ""
 
-    let info_panel =
-        InfoPanel(Position = Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT))
-
-    let refresh () =
-        SelectedChart.if_loaded (fun info -> info_panel.OnChartUpdated(info))
-        Tree.refresh ()
-
     override this.Init(parent: Widget) =
         base.Init parent
 
-        Setting.app (fun s -> if Sorting.modes.ContainsKey s then s else "title") options.ChartSortMode
-        Setting.app (fun s -> if Grouping.modes.ContainsKey s then s else "pack") options.ChartGroupMode
-
-        this
-        |+ CurrentChart(Position = Position.SliceT(TOP_BAR_HEIGHT).SlicePercentL(INFO_SCREEN_SPLIT))
-        |+ SearchBox(
-            search_text,
-            (fun f ->
-                LevelSelect.filter <- f
-                refresh ()
-            ),
-            Position =
-                Position
-                    .SliceT(TOP_BAR_HEIGHT)
-                    .ShrinkB(50.0f)
-                    .SliceY(60.0f)
-                    .ShrinkPercentL(0.4f)
-                    .ShrinkL(290.0f)
-                    .ShrinkR(25.0f)
-        )
-            .Help(Help.Info("levelselect.search", "search"))
-
-        |+ (
-            Container(NodeType.None, Position = Position.ShrinkT(TOP_BAR_HEIGHT).ShrinkPercentL(INFO_SCREEN_SPLIT))
-            |+ EmptyState(Icons.SEARCH, %"levelselect.empty.search")
-                .Conditional(fun () -> search_text.Value <> "")
-            |+ EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
-                .Conditional(fun () ->
-                    search_text.Value = ""
-                    && options.ChartGroupMode.Value = "level"
-                    && Content.Table.IsNone
-                )
-            |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
-                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value = "collection")
-            |+ EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
-                .Conditional(fun () -> search_text.Value = "" && options.ChartGroupMode.Value <> "collection" && options.ChartGroupMode.Value <> "level")
-        )
-            .Conditional(fun () -> Tree.is_empty)
-
-        |+ StylishButton(
-            LevelSelect.choose_this_chart,
-            K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
-            !%Palette.MAIN.O2,
-            TiltRight = false,
-            Position = Position.SliceB(50.0f).SliceR(250.0f)
-        )
-            .Help(Help.Info("levelselect.play").Hotkey("select"))
-            .Conditional(fun () -> TreeState.multi_selection.IsNone)
-        |+ StylishButton(
-            (fun () ->
-                SelectedChart.when_loaded true
-                <| fun info ->
-                    Screen.change_new
-                        (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
-                        ScreenType.Practice
-                        Transitions.Default
-                    |> ignore
-            ),
-            K Icons.TARGET,
-            !%Palette.DARK.O2,
-            Hotkey = "practice_mode",
-            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-275.0f)
-        )
-            .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode"))
-            .Conditional(fun () -> TreeState.multi_selection.IsNone)
-        |+ StylishButton(
-            (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
-            K Icons.REFRESH_CCW,
-            !%Palette.MAIN.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-360.0f)
-        )
-            .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart"))
-            .Conditional(fun () -> TreeState.multi_selection.IsNone)
-        |+ StylishButton(
-            (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
-            K Icons.LIST,
-            !%Palette.DARK.O2,
-            Position = Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-445.0f)
-        )
-            .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
-            .Conditional(fun () -> TreeState.multi_selection.IsNone)
-
-        |+ StylishButton(
-            (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
-            K (sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection"),
-            !%Palette.DARK.O2,
-            TiltRight = false,
-            Position = Position.SliceB(50.0f).SliceR(300.0f)
-        )
-            .Conditional(fun () -> TreeState.multi_selection.IsSome)
-        |+ StylishButton(
-            (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
-            K (sprintf "%s %s" Icons.LIST %"bulk_actions"),
-            !%Palette.MAIN.O2,
-            Position = Position.SliceB(50.0f).SliceR(300.0f).TranslateX(-325.0f)
-        )
-            .Conditional(fun () -> TreeState.multi_selection.IsSome)
-
-        |+ LibraryViewControls(Position = Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT))
-        |* info_panel
-
-        LevelSelect.on_refresh_all.Add refresh
+        LevelSelect.on_refresh_all.Add Tree.refresh
         Rulesets.on_changed.Add (fun _ ->
             match options.ChartGroupMode.Value with
             | "grade"
             | "lamp" -> LevelSelect.refresh_all()
             | _ -> LevelSelect.refresh_details()
         )
+
+        if not (Sorting.modes.ContainsKey options.ChartSortMode.Value) then
+            options.ChartSortMode.Value <- "title"
+        if not (Grouping.modes.ContainsKey options.ChartGroupMode.Value) then
+            options.ChartGroupMode.Value <- "pack"
+
+        this
+            .With(
+                CurrentChart()
+                    .Position(Position.SliceT(TOP_BAR_HEIGHT).SlicePercentL(INFO_SCREEN_SPLIT)),
+
+                SearchBox(search_text, fun f ->
+                    LevelSelect.filter <- f
+                    Tree.refresh ()
+                )
+                    .Position(
+                        Position
+                            .SliceT(TOP_BAR_HEIGHT)
+                            .ShrinkB(50.0f)
+                            .SliceY(60.0f)
+                            .ShrinkPercentL(0.4f)
+                            .ShrinkL(290.0f)
+                            .ShrinkR(25.0f)
+                    )
+                    .Help(Help.Info("levelselect.search", "search")),
+
+                LibraryViewControls()
+                    .Position(Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT)),
+
+                InfoPanel()
+                    .Position(Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT)),
+
+                // Empty states explaining why there are no charts to show
+                Container(NodeType.None)
+                    .Position(Position.ShrinkT(TOP_BAR_HEIGHT).ShrinkPercentL(INFO_SCREEN_SPLIT))
+                    .WithConditional(
+                        (fun () -> search_text.Value <> ""),
+                        EmptyState(Icons.SEARCH, %"levelselect.empty.search")
+                    )
+                    .WithConditional(
+                        (fun () ->
+                            search_text.Value = ""
+                            && options.ChartGroupMode.Value = "level"
+                            && Content.Table.IsNone
+                        ),
+                        EmptyState(Icons.SIDEBAR, %"levelselect.empty.no_table")
+                    )
+                    .WithConditional(
+                        (fun () ->
+                            search_text.Value = ""
+                            && options.ChartGroupMode.Value = "collection"
+                        ),
+                        EmptyState(Icons.FOLDER, %"levelselect.empty.no_collections")
+                    )
+                    .WithConditional(
+                        (fun () ->
+                            search_text.Value = ""
+                            && options.ChartGroupMode.Value <> "collection"
+                            && options.ChartGroupMode.Value <> "level"
+                        ),
+                        EmptyState(Icons.FOLDER, %"levelselect.empty.no_charts")
+                    )
+                    .Conditional(fun () -> Tree.is_empty)
+            )
+            // Normal chart actions (no bulk select)
+            .WithConditional(
+                (fun () -> TreeState.multi_selection.IsNone),
+
+                StylishButton(
+                    LevelSelect.choose_this_chart,
+                    K (sprintf "%s %s" Icons.PLAY %"levelselect.play"),
+                    !%Palette.MAIN.O2,
+                    TiltRight = false
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(250.0f))
+                    .Help(Help.Info("levelselect.play").Hotkey("select")),
+
+                StylishButton(
+                    (fun () ->
+                        SelectedChart.when_loaded true
+                        <| fun info ->
+                            Screen.change_new
+                                (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                                ScreenType.Practice
+                                Transitions.Default
+                            |> ignore
+                    ),
+                    K Icons.TARGET,
+                    !%Palette.DARK.O2,
+                    Hotkey = "practice_mode"
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-275.0f))
+                    .Help(Help.Info("levelselect.practice_mode").Hotkey("practice_mode")),
+
+                StylishButton(
+                    (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
+                    K Icons.REFRESH_CCW,
+                    !%Palette.MAIN.O2
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-360.0f))
+                    .Help(Help.Info("levelselect.random_chart").Hotkey("random_chart")),
+
+                StylishButton(
+                    (fun () -> SelectedChart.if_loaded(fun info -> ChartContextMenu(info.ChartMeta, info.LibraryContext).Show())),
+                    K Icons.LIST,
+                    !%Palette.DARK.O2
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(60.0f).TranslateX(-445.0f))
+                    .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
+            )
+            // Bulk select actions
+            .AddConditional(
+                (fun () -> TreeState.multi_selection.IsSome),
+
+                StylishButton(
+                    (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
+                    K (sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection"),
+                    !%Palette.DARK.O2,
+                    TiltRight = false
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(300.0f)),
+
+                StylishButton(
+                    (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
+                    K (sprintf "%s %s" Icons.LIST %"bulk_actions"),
+                    !%Palette.MAIN.O2
+                )
+                    .Position(Position.SliceB(50.0f).SliceR(300.0f).TranslateX(-325.0f))
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -198,7 +219,7 @@ type LevelSelectScreen() =
         LevelSelect.exit_gameplay()
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
-        refresh ()
+        Tree.refresh ()
         DiscordRPC.in_menus ("Choosing a song")
 
     override this.OnExit(_: ScreenType) = Input.remove_listener ()
