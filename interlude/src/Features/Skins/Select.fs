@@ -39,14 +39,14 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            K meta.Name,
-            Color =
-                (fun () ->
-                    if this.Focused then Colors.text_yellow_2
-                    elif this.IsCurrent then Colors.text_pink
-                    else Colors.text
-                )).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
+        |+ Text(meta.Name)
+            .Color(fun () ->
+                if this.Focused then Colors.text_yellow_2
+                elif this.IsCurrent then Colors.text_pink
+                else Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then
@@ -101,14 +101,14 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            K meta.Name,
-            Color =
-                (fun () ->
-                    if this.Focused then Colors.text_yellow_2
-                    elif this.IsCurrent then Colors.text_green
-                    else Colors.text
-                )).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
+        |+ Text(meta.Name)
+            .Color(fun () ->
+                if this.Focused then Colors.text_yellow_2
+                elif this.IsCurrent then Colors.text_green
+                else Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then

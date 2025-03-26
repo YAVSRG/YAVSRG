@@ -45,39 +45,17 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
     inherit Container(NodeType.None)
 
     let button (for_sort: Stats.Leaderboard.Sort) (label: string) (pos: Position) =
+        let align = if for_sort = Stats.Leaderboard.Sort.Playtime then Alignment.RIGHT else Alignment.CENTER
         if sort = for_sort then
-            Text(
-                Icons.CHEVRON_DOWN + " " + label,
-                Color = K Colors.text_cyan_2,
-                Align = Alignment.CENTER,
-                Position = pos
-            )
+            Text(Icons.CHEVRON_DOWN + " " + label)
+                .Color(Colors.text_cyan_2)
+                .Align(align)
+                .Position(pos)
             :> Widget
         else
-            Button(
-                label,
-                (fun () -> change_sort for_sort),
-                Align = Alignment.CENTER,
-                Position = pos
-            )
-
-    let playtime =
-        let pos = Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f)
-        if sort <> Stats.Leaderboard.Sort.Playtime then
-            Button(
-                %"stats.leaderboards.rating.playtime",
-                (fun () -> change_sort Stats.Leaderboard.Sort.Playtime),
-                Align = Alignment.RIGHT,
-                Position = pos
-            )
-            :> Widget
-        else
-            Text(
-                Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.rating.playtime",
-                Color = K Colors.text_cyan_2,
-                Align = Alignment.RIGHT,
-                Position = pos
-            )
+            Button(label, (fun () -> change_sort for_sort))
+                .Align(align)
+                .Position(pos)
 
     let player =
         Text(%"stats.leaderboards.rating.player")
@@ -92,7 +70,7 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
         |+ button Stats.Leaderboard.Sort.Jacks %"stats.leaderboards.rating.jacks" (Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f))
         |+ button Stats.Leaderboard.Sort.Chordstream %"stats.leaderboards.rating.chordstream" (Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f))
         |+ button Stats.Leaderboard.Sort.Stream %"stats.leaderboards.rating.stream" (Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f))
-        |* playtime
+        |* button Stats.Leaderboard.Sort.Playtime %"stats.leaderboards.rating.playtime" (Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f))
         base.Init parent
 
     override this.Draw() =

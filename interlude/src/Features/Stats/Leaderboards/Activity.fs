@@ -58,38 +58,34 @@ type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
     let playtime =
         let pos = Position.SlicePercentR(0.33f).Shrink(10.0f, 5.0f)
         if by_playtime then
-            Text(
-                Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.playtime",
-                Color = K Colors.text_cyan_2,
-                Align = Alignment.RIGHT,
-                Position = pos
-            )
+            Text(Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.playtime")
+                .Color(Colors.text_cyan_2)
+                .Align(Alignment.RIGHT)
+                .Position(pos)
             :> Widget
         else
             Button(
                 %"stats.leaderboards.activity.playtime",
-                (fun () -> change_sort true),
-                Align = Alignment.RIGHT,
-                Position = pos
+                (fun () -> change_sort true)
             )
+                .Align(Alignment.RIGHT)
+                .Position(pos)
 
     let xp =
         let pos = Position.SlicePercentX(0.33f).Shrink(10.0f, 5.0f)
         if by_playtime then
             Button(
                 %"stats.leaderboards.activity.xp",
-                (fun () -> change_sort false),
-                Align = Alignment.CENTER,
-                Position = pos
+                (fun () -> change_sort false)
             )
+                .Align(Alignment.CENTER)
+                .Position(pos)
             :> Widget
         else
-            Text(
-                Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.xp",
-                Color = K Colors.text_cyan_2,
-                Align = Alignment.CENTER,
-                Position = pos
-            )
+            Text(Icons.CHEVRON_DOWN + " " + %"stats.leaderboards.activity.xp")
+                .Color(Colors.text_cyan_2)
+                .Align(Alignment.CENTER)
+                .Position(pos)
 
     let player =
         Text(%"stats.leaderboards.activity.player")

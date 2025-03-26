@@ -62,27 +62,17 @@ type Accuracy(config: HudConfig, state: PlayState) =
 
         if not config.AccuracyUseFont then
             this
-            |* Text(
-                (fun () -> state.Scoring.FormattedAccuracy),
-                Color = (fun () -> color.Value, Color.Transparent),
-                Align = alignment,
-                Position =
-                    { Position.DEFAULT with
-                        Bottom = 0.7f %+ 0.0f
-                    }
-            )
+            |* Text(fun () -> state.Scoring.FormattedAccuracy)
+                .Color(fun () -> color.Value, Color.Transparent)
+                .Align(alignment)
+                .Position(Position.SlicePercentT(0.7f))
 
         if config.AccuracyShowName then
             this
-            |* Text(
-                K state.Ruleset.Name,
-                Color = K Colors.text_subheading,
-                Align = alignment,
-                Position =
-                    { Position.DEFAULT with
-                        Top = 0.6f %+ 0.0f
-                    }
-            )
+            |* Text(state.Ruleset.Name)
+                .Color(Colors.text_subheading)
+                .Align(alignment)
+                .Position(Position.SlicePercentB(0.6f))
         base.Init parent
 
     override this.Draw() =
