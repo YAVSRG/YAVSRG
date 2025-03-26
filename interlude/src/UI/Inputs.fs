@@ -258,4 +258,5 @@ module NumberEntry =
                     else Colors.grey_2
         )
         |+ entry
-        |+ Text(units, Position = Position.SliceR 100.0f, Color = K Colors.text_subheading)
+        |+ Text(units, Position = Position.SliceR 100.0f)
+            .Color(Colors.text_subheading)

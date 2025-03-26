@@ -13,7 +13,8 @@ type CurrentSession() =
     override this.Init(parent: Widget) =
         this
         |+ Text("Current session", Align = Alignment.LEFT, Position = Position.SliceT 80.0f)
-        |+ Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") current_session.NotesHit, Color = K Colors.text_subheading)
+        |+ Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") current_session.NotesHit)
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(70.0f).SliceT(40.0f))
         |+ Text(

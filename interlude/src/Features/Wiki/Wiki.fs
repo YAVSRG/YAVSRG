@@ -91,7 +91,8 @@ type WikiBrowserPage() =
                             Fill = K Colors.cyan.O2,
                             Border = K Colors.cyan_accent
                         )
-                        |+ Text(key, Position = Position.SliceT(60.0f), Color = K Colors.text_subheading)
+                        |+ Text(key, Position = Position.SliceT(60.0f))
+                            .Color(Colors.text_subheading)
                         |+ links
                     )
 
