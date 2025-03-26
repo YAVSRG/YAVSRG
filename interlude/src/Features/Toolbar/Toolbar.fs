@@ -25,7 +25,7 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume_when_collapsed = VolumeSlider().Position(Position.ShrinkY(HEIGHT))
+    let volume_when_hidden = VolumeSlider().Position(Position.ShrinkY(HEIGHT))
 
     let load_preset (i: int) : unit =
         match Presets.load i with
@@ -127,12 +127,12 @@ type Toolbar() =
             else
                 this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
-        volume_when_collapsed.Init this
+        volume_when_hidden.Init this
         container.Init this
 
     override this.Draw() =
         if Toolbar.hidden then
-            volume_when_collapsed.Draw()
+            volume_when_hidden.Draw()
         else
             Render.rect (this.Bounds.SliceT HEIGHT) !*Palette.MAIN_100
             Render.rect (this.Bounds.SliceB HEIGHT) !*Palette.MAIN_100
@@ -149,6 +149,8 @@ type Toolbar() =
     override this.Update(elapsed_ms, moved) =
         if Screen.current_type <> ScreenType.SplashScreen then
             CURRENT_SESSION.GameTime <- CURRENT_SESSION.GameTime + elapsed_ms
+
+        Toolbar.slideout_amount.Update elapsed_ms
 
         let moved =
             if Toolbar.was_hidden <> Toolbar.hidden then
@@ -191,7 +193,7 @@ type Toolbar() =
                     this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
         if Toolbar.hidden then
-            volume_when_collapsed.Update(elapsed_ms, moved)
+            volume_when_hidden.Update(elapsed_ms, moved)
         else
             container.Update(elapsed_ms, moved)
 

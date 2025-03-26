@@ -74,7 +74,7 @@ type Screen() =
 
 module Screen =
 
-    let animations = Animation.fork [ Palette.accent_color; Toolbar.slideout_amount ]
+    let animations = Animation.fork [ Palette.accent_color ]
     let logo = Logo()
 
     let mutable enable_background = true
