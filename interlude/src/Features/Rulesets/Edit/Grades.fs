@@ -45,7 +45,8 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
 
     let rec grade_controls (i: int, g: Grade) =
         NavigationContainer.Row()
-        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()))
+        |+ PageButton(g.Name, fun () -> EditGradePage(ruleset, i).Show())
+            .TextColor(g.Color)
             .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
         |+ Button(
             Icons.TRASH,

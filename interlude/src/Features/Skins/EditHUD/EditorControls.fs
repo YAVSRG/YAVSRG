@@ -3,7 +3,6 @@
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Percyqaz.Common
 open Prelude
 open Interlude.UI
 open Interlude.Features.Skins

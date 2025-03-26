@@ -68,7 +68,8 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
 
     let rec lamp_controls (i: int, l: Lamp) =
         NavigationContainer.Row()
-        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()))
+        |+ PageButton(l.Name, fun () -> EditLampPage(ruleset, i).Show())
+            .TextColor(l.Color)
             .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
         |+ Button(
             Icons.TRASH,

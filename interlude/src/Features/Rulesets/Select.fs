@@ -9,39 +9,6 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Rulesets.Edit
 
-type private RulesetButton(id: string, name: string, action: unit -> unit) =
-    inherit
-        Container(
-            NodeType.Button(fun _ ->
-                Style.click.Play()
-                action ()
-            )
-        )
-
-    override this.Init(parent: Widget) =
-        this
-        |+ Text(sprintf "%s  >" name)
-            .Color(fun () ->
-                if this.Focused then Colors.text_yellow_2
-                elif Rulesets.selected_id.Value = id then Colors.text_pink_2
-                else Colors.text
-            )
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(Style.PADDING))
-        |* MouseListener().Button(this)
-
-        base.Init parent
-
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
-        Style.hover.Play()
-
-    override this.Draw() =
-        if this.Focused then
-            Render.rect this.Bounds Colors.yellow_accent.O1
-
-        base.Draw()
-
 type SelectRulesetPage() =
     inherit Page()
 
@@ -66,25 +33,18 @@ type SelectRulesetPage() =
         for id, ruleset in Rulesets.list () do
             container.Add(
                 NavigationContainer.Row()
-                |+ RulesetButton(
-                    id,
-                    ruleset.Name,
-                    (fun () -> options.SelectedRuleset.Set id)).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f))
-                |+ Button(
-                    Icons.EDIT,
-                    (fun () -> RulesetEditorPage(id, ruleset).Show())
-                )
+                |+ PageButton(ruleset.Name, fun () -> options.SelectedRuleset.Set id)
+                    .TextColor(fun () -> if options.SelectedRuleset.Value = id then Colors.text_pink_2 else Colors.text)
+                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f))
+                |+ Button(Icons.EDIT, fun () -> RulesetEditorPage(id, ruleset).Show())
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f))
-                |+ Button(
-                    Icons.COPY,
-                    (fun () ->
-                        ConfirmPage(
-                            [ruleset.Name] %> "rulesets.confirm_copy",
-                            fun () ->
-                                Rulesets.install { ruleset.Clone with Name = ruleset.Name + " (Copy)" }
-                        )
-                            .Show()
+                |+ Button(Icons.COPY, fun () ->
+                    ConfirmPage(
+                        [ruleset.Name] %> "rulesets.confirm_copy",
+                        fun () ->
+                            Rulesets.install { ruleset.Clone with Name = ruleset.Name + " (Copy)" }
                     )
+                        .Show()
                 )
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
                 |+ Button(
@@ -106,7 +66,8 @@ type SelectRulesetPage() =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = sprintf "%s %s" Icons.SLIDERS (%"rulesets")
     override this.OnClose() = ()

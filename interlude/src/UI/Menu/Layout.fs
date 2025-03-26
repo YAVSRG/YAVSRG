@@ -31,6 +31,22 @@ module PageLayout =
         | PageWidth.Custom w ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PAGE_ITEM_HEIGHT, w, float32 height * 0.5f * PAGE_ITEM_HEIGHT)
 
+    let page_container () : NavigationContainer.Column =
+        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+
+    let refreshable_row (get_count: unit -> int) (constructor: int -> int -> Widget) : NavigationContainer.Row * (unit -> unit) =
+        let r = NavigationContainer.Row()
+
+        let refresh () =
+            r.Clear()
+            let n = get_count ()
+
+            for i in 0 .. (n - 1) do
+                r.Add(constructor i n)
+
+        refresh ()
+        r, refresh
+
 [<Extension>]
 type PageLayoutExtensions =
 

@@ -11,40 +11,6 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
-// todo: all these buttons should be generalised by PageButton having a TextColor property
-type private TableButton(name: string, action: unit -> unit) =
-    inherit
-        Container(
-            NodeType.Button(fun _ ->
-                Style.click.Play()
-                action ()
-            )
-        )
-
-    override this.Init(parent: Widget) =
-        this
-        |+ Text(sprintf "%s  >" name)
-            .Color(
-                if this.Focused then Colors.text_yellow_2
-                elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2
-                else Colors.text
-            )
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(Style.PADDING))
-        |* MouseListener().Button(this)
-
-        base.Init parent
-
-    override this.OnFocus(by_mouse: bool) =
-        base.OnFocus by_mouse
-        Style.hover.Play()
-
-    override this.Draw() =
-        if this.Focused then
-            Render.rect this.Bounds Colors.yellow_accent.O1
-
-        base.Draw()
-
 type SelectTablePage(refresh_table_view: unit -> unit) =
     inherit Page()
 
@@ -63,7 +29,7 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
 
         for e in Tables.list () do
             container
-            |* TableButton(
+            |* PageButton(
                 e.Info.Name,
                 fun () ->
                     options.Table.Set(Some e.Id)
@@ -73,6 +39,11 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
 
                     GameThread.defer refresh
             )
+                .TextColor(fun () ->
+                    match Content.Table with
+                    | Some t when t.Info.Name = e.Info.Name -> Colors.text_pink_2
+                    | _ -> Colors.text
+                )
 
         match Content.Table with
         | Some table ->

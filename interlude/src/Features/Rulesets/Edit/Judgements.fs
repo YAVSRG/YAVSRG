@@ -38,23 +38,21 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     let rec judgement_controls (i: int, j: Judgement) =
         NavigationContainer.Row()
-        |+ ColoredButton(j.Name, j.Color, (fun () -> EditJudgementPage(ruleset, i).Show())).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
-        |+ Button(
-            Icons.COPY,
-            (fun () ->
-                ConfirmPage(
-                    [j.Name] %> "rulesets.judgement.confirm_duplicate",
-                    fun () -> duplicate_judgement i
-                ).Show()
-            )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
-        |+ Button(
-            Icons.TRASH,
-            (fun () ->
-                ConfirmPage(
-                    [j.Name] %> "rulesets.judgement.confirm_delete",
-                    fun () -> delete_judgement i
-                ).Show()
-            )
+        |+ PageButton(j.Name, fun () -> EditJudgementPage(ruleset, i).Show())
+            .TextColor(j.Color)
+            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
+        |+ Button(Icons.COPY, fun () ->
+            ConfirmPage(
+                [j.Name] %> "rulesets.judgement.confirm_duplicate",
+                fun () -> duplicate_judgement i
+            ).Show()
+        )
+            .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
+        |+ Button(Icons.TRASH, fun () ->
+            ConfirmPage(
+                [j.Name] %> "rulesets.judgement.confirm_delete",
+                fun () -> delete_judgement i
+            ).Show()
         )
             .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
             .Position(Position.SliceR(PAGE_ITEM_HEIGHT))

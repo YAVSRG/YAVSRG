@@ -67,6 +67,8 @@
     <Compile Include="UI\Menu\Slider.fs" />
     <Compile Include="UI\Menu\Selector.fs" />
     <Compile Include="UI\Menu\Checkbox.fs" />
+    <Compile Include="UI\Menu\PageSetting.fs" />
+    <Compile Include="UI\Menu\PageButton.fs" />
     <Compile Include="UI\Menu\Controls.fs" />
     <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Menu\ColorPicker.fs" />
@@ -88,7 +90,6 @@
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerList.fs" />
     <Compile Include="Features\Export\Osz.fs" />
-    <Compile Include="Features\Rulesets\Edit\Shared.fs" />
     <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
     <Compile Include="Features\Rulesets\Edit\Windows.fs" />
     <Compile Include="Features\Rulesets\Edit\Accuracy.fs" />

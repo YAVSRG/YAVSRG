@@ -81,13 +81,13 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
 
         page_container ()
         |+ PageButton(
-            (if folder_detected then
-                 %"mount.create.use_detected_folder"
-             else
-                 %"mount.create.game_not_detected"),
-            (fun () -> FileDrop.on_file_drop.Value auto_detect_location),
-            Disabled = K(not folder_detected)
+            (
+                if folder_detected then %"mount.create.use_detected_folder"
+                else %"mount.create.game_not_detected"
+            ),
+            fun () -> FileDrop.on_file_drop.Value auto_detect_location
         )
+            .Disabled(not folder_detected)
             .Pos(6)
         |+ Callout.frame info (fun (w, h) -> page_position (0, 5, PageWidth.Custom w))
         :> Widget
