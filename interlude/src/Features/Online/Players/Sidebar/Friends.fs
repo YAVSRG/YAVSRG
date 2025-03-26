@@ -36,8 +36,9 @@ type private FriendList() =
                                         Colors.text_green_2
                                     else
                                         Colors.text_greyout
-                                ),
-                            Align = Alignment.RIGHT).Position(Position.Shrink(20.0f, 15.0f))
+                                ))
+                                .Align(Alignment.RIGHT)
+                                .Position(Position.Shrink(20.0f, 15.0f))
                     )
 
                 ScrollContainer(contents) :> Widget

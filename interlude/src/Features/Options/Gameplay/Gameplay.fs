@@ -28,8 +28,7 @@ type GameplayPage() =
                     "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                 ]
                 %> "gameplay.scrollspeed.info"
-            ),
-            Align = Alignment.CENTER).Position(page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH))
+            )).Align(Alignment.CENTER).Position(page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH))
         |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Help(Help.Info("gameplay.hitposition"))
             .Pos(3)

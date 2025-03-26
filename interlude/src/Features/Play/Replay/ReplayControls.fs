@@ -42,9 +42,7 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
         this
         |+ Text(
             Icons.FILM + " " + (if is_auto then %"replay.title.autoplay" else %"replay.title"),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
-            Align = Alignment.LEFT
-        )
+            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.LEFT)
         |+ PageButton(
             sprintf "%s %s" Icons.SETTINGS (%"replay.settings"),
             (fun () -> ReplayModeSettingsPage(refresh_playback_speed).Show())).Position(Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
@@ -52,33 +50,23 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
         |+ Text(
             sprintf "%s: %O" (%"replay.hide_overlay") (%%"hide_replay_overlay"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.LEFT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.LEFT)
 
         |+ Text(
             (fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD playback_speed.Value),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
-            Align = Alignment.RIGHT
-        )
+            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.RIGHT)
         |+ Text(
             (fun () -> sprintf "%s: %.2fx" (%"replay.original_rate") rate),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(105.0f),
-            Color = K Colors.text_subheading,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_subheading).Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O/%O" (%"replay.change_playback_rate") (%%"uprate") (%%"downrate"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O" (%"replay.pause") (%%"pause"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
 
         |* Timeline(with_mods, on_seek, SelectedChart.rate)
 

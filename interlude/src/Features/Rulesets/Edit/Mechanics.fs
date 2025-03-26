@@ -119,7 +119,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         )
             .Pos(7)
 
-        |+ Text(%"rulesets.mechanics.cannot_edit", Align = Alignment.LEFT)
+        |+ Text(%"rulesets.mechanics.cannot_edit").Align(Alignment.LEFT)
             .Color(Colors.text_subheading)
             .Position(Position.Shrink(Style.PADDING))
             .Conditional(fun () -> hold_mechanics_type.Value = 0)

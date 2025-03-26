@@ -42,8 +42,7 @@ type WikiBrowserPage() =
                 | Changelog -> sprintf "%s %s" Icons.EDIT_2 (%"wiki.changelog")
                 | WikiPage p -> sprintf "%s %s  >  %s" Icons.BOOK_OPEN p.Folder p.Title
                 | WikiIndex -> sprintf "%s %s" Icons.HOME (%"wiki.home")
-            ),
-            Align = Alignment.LEFT).Position(Position.SliceL(200.0f, 900.0f))
+            )).Align(Alignment.LEFT).Position(Position.SliceL(200.0f, 900.0f))
         |+ Button(
             Icons.EXTERNAL_LINK + " " + %"wiki.openinbrowser",
             fun () ->
@@ -101,9 +100,7 @@ type WikiBrowserPage() =
                         NodeType.Container(fun () -> Some folders)).Position(Position.Box(0.0f, 0.0f, 0.0f, y, PAGE_WIDTH, 400.0f))
                     |+ Text(
                         sprintf "%s %s" Icons.BOOK_OPEN (%"wiki.contents"),
-                        Position = Position.SliceT(70.0f).Shrink(20.0f, 0.0f),
-                        Align = Alignment.LEFT
-                    )
+                        Position = Position.SliceT(70.0f).Shrink(20.0f, 0.0f)).Align(Alignment.LEFT)
                     |+ folders
                 )
 

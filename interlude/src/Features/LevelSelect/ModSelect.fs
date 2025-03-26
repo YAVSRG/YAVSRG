@@ -127,11 +127,13 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
             )
             .Pos(0)
         |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i",
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            Color = K Colors.text_subheading)
+            .Align(Alignment.LEFT)
+            .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
         |+ Text(%"gameplay.rate.hotkey_hint_ii",
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(page_position(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            Color = K Colors.text_subheading)
+            .Align(Alignment.LEFT)
+            .Position(page_position(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
 
         |+ mod_grid
 
@@ -153,9 +155,7 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
                         | ModStatus.Ranked -> Colors.text_green_2
                         | ModStatus.Unranked -> Colors.text_yellow_2
                         | _ -> Colors.text_greyout
-                    ),
-                Align = Alignment.LEFT
-            )
+                    )).Align(Alignment.LEFT)
         )
             .Pos(20)
         :> Widget

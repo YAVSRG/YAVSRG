@@ -73,24 +73,24 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            data.name,
-            Align = Alignment.LEFT).Position(Position.SliceT(45.0f).Shrink(10.0f, 0.0f))
-        |+ Text(
-            data.size,
-            Align = Alignment.RIGHT).Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f))
+        |+ Text(data.name)
+            .Align(Alignment.LEFT)
+            .Position(Position.SliceT(45.0f).Shrink(10.0f, 0.0f))
+        |+ Text(data.size)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f))
         |+ Text(
             (fun () ->
                 if status = Installed then "Downloaded!"
                 elif status = DownloadFailed then "Download failed!"
                 else ""
             ),
-            Color = (fun () -> if status = DownloadFailed then Colors.text_red else Colors.text_green),
-            Align = Alignment.RIGHT).Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
+            Color = (fun () -> if status = DownloadFailed then Colors.text_red else Colors.text_green)).Align(Alignment.RIGHT).Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
         |+ Text(
             (sprintf "Average difficulty (MSD): %.2f" data.overall),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
+            Color = K Colors.text_subheading)
+            .Align(Alignment.LEFT)
+            .Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
         |+ Button(Icons.DOWNLOAD, download).Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
         |+ MouseListener().Button(this)
         |* Button(
@@ -102,8 +102,9 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
             this
             |* Text(
                 Icons.ALERT_TRIANGLE + " NFSW content",
-                Color = K Colors.text_red,
-                Align = Alignment.LEFT).Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
+                Color = K Colors.text_red)
+                .Align(Alignment.LEFT)
+                .Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
 
         base.Init parent
 

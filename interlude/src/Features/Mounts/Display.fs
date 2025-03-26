@@ -40,8 +40,8 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
         |+ Text(
             game.ToString()
             , Position = Position.SliceT(0.0f, 60.0f)
-            , Align = Alignment.CENTER
-        )
+            )
+            .Align(Alignment.CENTER)
         |* Text(
             fun () ->
                 match setting.Value with
@@ -55,8 +55,8 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
                 | None -> %"mount.notlinked"
             , Color = K Colors.text_subheading
             , Position = Position.SliceT(60.0f, 40.0f)
-            , Align = Alignment.CENTER
-        )
+            )
+            .Align(Alignment.CENTER)
 
         base.Init parent
         create_button.Init this

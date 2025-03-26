@@ -23,8 +23,7 @@ type private ColoredButton(label: string, color: Color, action: unit -> unit) =
             Color =
                 (fun () ->
                     if this.Focused then Colors.text_yellow_2 else (color, Colors.shadow_2)
-                ),
-            Align = Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
+                )).Align(Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
         |* MouseListener().Button(this)
 
         base.Init parent

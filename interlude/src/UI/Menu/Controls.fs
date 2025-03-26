@@ -83,14 +83,12 @@ type PageButton(localised_text, on_click) as this =
                         (if this.Focused then Colors.text_yellow_2 else Colors.text)
                     else
                         Colors.text_greyout
-                ),
-            Align = Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
+                )).Align(Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
         |+ MouseListener().Button(this)
         |* seq {
             if this.Hotkey <> Bind.Dummy then
                 yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey,
-                    Color = K Colors.text_cyan,
-                    Align = Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
+                    Color = K Colors.text_cyan).Align(Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
         }
 
         base.Init parent

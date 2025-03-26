@@ -165,9 +165,7 @@ module Settings =
                             "C" + (60000.0f * float32 options.ScrollSpeed.Value / Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                         ]
                         %> "gameplay.scrollspeed.info"
-                    ),
-                    Align = Alignment.CENTER
-                ), 1, 1, PageWidth.Custom (PAGE_LABEL_WIDTH + PAGE_ITEM_WIDTH)
+                    )).Align(Alignment.CENTER), 1, 1, PageWidth.Custom (PAGE_LABEL_WIDTH + PAGE_ITEM_WIDTH)
             if token_match tokens [|%"gameplay.hitposition"|] then
                 yield PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Help(Help.Info("gameplay.hitposition"))

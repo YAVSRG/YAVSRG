@@ -24,8 +24,8 @@ type CurrentSession() =
                     (format_short_time current_session.GameTime)
                     ((Timestamp.to_datetime current_session.Start).ToLocalTime().ToShortTimeString())
             ),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.ShrinkT(105.0f).SliceT(40.0f))
+            Color = K Colors.text_subheading).Align(Alignment.LEFT)
+            .Position(Position.ShrinkT(105.0f).SliceT(40.0f))
         |* ScoreList(current_session.Start, Timestamp.now()).Position(Position.ShrinkT(160.0f))
 
         base.Init parent

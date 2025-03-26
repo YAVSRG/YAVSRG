@@ -89,9 +89,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
         |+ Text(
             Updates.version + "  : :  www.yavsrg.net",
             Position = { Position.SliceB(40.0f) with Right = 0.35f %+ 0.0f }.ShrinkX(20.0f).TranslateY(-15.0f),
-            Color = K Colors.text_subheading,
-            Align = Alignment.CENTER
-        )
+            Color = K Colors.text_subheading).Align(Alignment.CENTER)
         |+ NavigationContainer.Row()
             .Position({ Position.SliceB(65.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
             .With(

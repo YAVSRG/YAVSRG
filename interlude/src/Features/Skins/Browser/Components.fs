@@ -54,16 +54,14 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
                         Colors.text_yellow_2
                     else
                         Colors.text
-                ),
-            Align = Alignment.LEFT).Position(Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING))
+                )).Align(Alignment.LEFT).Position(Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING))
         |+ Text(
             (
                 match version.Editor with
                 | Some e -> [version.Author; e] %> "skins.credit.edited"
                 | None -> [version.Author] %> "skins.credit"
             ),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING))
+            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING))
         |+ { new Thumbnail() with
             override this.Load() =
                 ImageServices.get_cached_image.Request(
@@ -134,12 +132,10 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
                     if this.Focused then Colors.text_yellow_2
                     elif selected.Value then Colors.text_pink
                     else Colors.text
-                ),
-            Align = Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f))
+                )).Align(Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f))
         |+ Text(
             subtitle,
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f))
+            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f))
         |+ { new Thumbnail() with
             override this.Load() =
                 ImageServices.get_cached_image.Request(

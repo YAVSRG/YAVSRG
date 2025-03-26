@@ -71,14 +71,10 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ Text(
             title,
             Position = Position.SliceT(60.0f).ShrinkX(25.0f),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT
-        )
+            Color = K Colors.text_subheading).Align(Alignment.LEFT)
         |+ Text(
             current_value,
-            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(60.0f),
-            Align = Alignment.LEFT
-        )
+            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(60.0f)).Align(Alignment.LEFT)
         |+ Text(
             suggested_value,
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f),
@@ -139,9 +135,7 @@ type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Tim
         this
         |+ Text(
             Icons.TARGET + " " + (%"practice.title"),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
-            Align = Alignment.LEFT
-        )
+            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.LEFT)
         |+ PageButton(
             sprintf "%s %s" Icons.SETTINGS (%"practice.tools"),
             (fun () -> PracticeToolsPage(state).Show())).Position(Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
@@ -150,27 +144,19 @@ type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Tim
 
         |+ Text(
             (fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD SelectedChart.rate.Value),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f),
-            Align = Alignment.RIGHT
-        )
+            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O/%O" (%"replay.change_playback_rate") (%%"uprate") (%%"downrate"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O" (%"practice.play") (%%"pause"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O" (%"practice.restart") (%%"retry"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
-            Color = K Colors.text_cyan,
-            Align = Alignment.RIGHT
-        )
+            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
 
         |* Timeline(with_mods, on_seek, SelectedChart.rate)
 

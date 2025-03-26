@@ -284,9 +284,7 @@ type private ListBlock(max_width: float32, paragraphs: IParagraph list) as this 
             this |+ p
             |* Text(
                 "•",
-                Position = Position.Box(0.0f, 0.0f, 0.0f, y, ListBlock.INDENT, ListBlock.BULLET_SIZE),
-                Align = Alignment.CENTER
-            )
+                Position = Position.Box(0.0f, 0.0f, 0.0f, y, ListBlock.INDENT, ListBlock.BULLET_SIZE)).Align(Alignment.CENTER)
 
             y <- y + p.Height
 

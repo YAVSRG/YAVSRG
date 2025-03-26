@@ -24,8 +24,7 @@ type private PlayerButton(username: string, color: int) =
         this
         |+ Text(
             username,
-            Color = K(Color.FromArgb color, Colors.shadow_2),
-            Align = Alignment.LEFT).Position(Position.Shrink(20.0f, 5.0f))
+            Color = K(Color.FromArgb color, Colors.shadow_2)).Align(Alignment.LEFT).Position(Position.Shrink(20.0f, 5.0f))
         |* MouseListener().Button(this)
 
         base.Init parent

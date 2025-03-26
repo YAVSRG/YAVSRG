@@ -61,9 +61,8 @@ type Chat(lobby: Lobby) =
             add_msg (
                 Text(
                     sprintf "== Results for: %s ==" lobby.Chart.Value.Title,
-                    Color = K Colors.text,
-                    Align = Alignment.CENTER
-                )
+                    Color = K Colors.text)
+                    .Align(Alignment.CENTER)
             )
 
             let scores =
@@ -118,33 +117,28 @@ type Chat(lobby: Lobby) =
                                     Colors.text_yellow_2
                                 else
                                     (color, Colors.shadow_1)
-                            ),
-                        Align = Alignment.LEFT
-                    )
+                            ))
+                            .Align(Alignment.LEFT)
                     |+ Text(
                         data.Scoring.FormattedAccuracy,
-                        Color = K(data.Ruleset.GradeColor grade, Colors.shadow_1),
-                        Align = Alignment.CENTER
-                    )
+                        Color = K(data.Ruleset.GradeColor grade, Colors.shadow_1))
+                        .Align(Alignment.CENTER)
                     |+ Text(
                         data.Ruleset.LampName lamp,
-                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1),
-                        Align = 0.75f
-                    )
+                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1))
+                        .Align(0.75f)
                     |+ Text(
                         sprintf "%ix" (data.Scoring.BestCombo),
-                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1),
-                        Align = Alignment.RIGHT
-                    )
+                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1))
+                        .Align(Alignment.RIGHT)
 
                 add_msg cmp
 
             add_msg (
                 Text(
                     "Click a score to view details",
-                    Color = K Colors.text_greyout,
-                    Align = Alignment.CENTER
-                )
+                    Color = K Colors.text_greyout)
+                    .Align(Alignment.CENTER)
             )
 
     let countdown (reason, seconds) =
@@ -165,9 +159,7 @@ type Chat(lobby: Lobby) =
                         Colors.text_green_2
                     else
                         Colors.text_greyout
-                ),
-            Align = Alignment.CENTER
-        )
+                )).Align(Alignment.CENTER)
         |> add_msg
 
     override this.Init(parent) =
@@ -181,9 +173,8 @@ type Chat(lobby: Lobby) =
                     ""
             ),
             Color = K Colors.text_subheading,
-            Position = Position.SliceB(50.0f).Shrink(5.0f),
-            Align = Alignment.LEFT
-        )
+            Position = Position.SliceB(50.0f).Shrink(5.0f))
+            .Align(Alignment.LEFT)
         |* message_history
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)

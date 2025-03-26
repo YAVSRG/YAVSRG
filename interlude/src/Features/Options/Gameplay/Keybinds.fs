@@ -54,9 +54,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
         this
         |+ Text(
             (fun () -> text),
-            Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1),
-            Align = Alignment.LEFT
-        )
+            Color = (fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1)).Align(Alignment.LEFT)
         |* MouseListener().Button(this)
 
     override this.OnFocus(by_mouse: bool) =

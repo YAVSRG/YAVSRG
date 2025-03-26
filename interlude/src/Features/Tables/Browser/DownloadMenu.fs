@@ -304,8 +304,7 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
                     | ChartStatus.Downloaded -> Colors.text_green_2
                     | ChartStatus.DownloadFailed -> Colors.text_red_2
             , Position = Position.Shrink(5.0f, 0.0f)
-            , Align = Alignment.RIGHT
-        )
+            ).Align(Alignment.RIGHT)
 
         base.Init parent
 
@@ -364,8 +363,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
                     | GroupStatus.Downloading -> Colors.text_yellow_2
                     | GroupStatus.Downloaded -> Colors.text_green_2
             , Position = Position.Shrink(85.0f, 0.0f)
-            , Align = Alignment.RIGHT
-        )
+            ).Align(Alignment.RIGHT)
         |+ Text(
             (fun () ->
                 if state.OpenLevel = level then
@@ -374,9 +372,7 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
                     Icons.CHEVRON_DOWN
             ),
             Color = K Colors.text,
-            Position = Position.Shrink(5.0f, 0.0f),
-            Align = Alignment.RIGHT
-        )
+            Position = Position.Shrink(5.0f, 0.0f)).Align(Alignment.RIGHT)
         |+ MouseListener().Button(this)
         |* this.Button
 
@@ -434,9 +430,7 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
                     Icons.CHEVRON_DOWN
             ),
             Color = K Colors.text,
-            Position = Position.Shrink(25.0f, 20.0f),
-            Align = Alignment.RIGHT
-        )
+            Position = Position.Shrink(25.0f, 20.0f)).Align(Alignment.RIGHT)
         |+ MouseListener().Button(this)
         |* this.Button
 

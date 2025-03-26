@@ -46,8 +46,7 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                     if this.Focused then Colors.text_yellow_2
                     elif this.IsCurrent then Colors.text_pink
                     else Colors.text
-                ),
-            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
+                )).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then
@@ -57,8 +56,7 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
                         if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
                 else credit
             ),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
+            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
@@ -108,8 +106,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
                     if this.Focused then Colors.text_yellow_2
                     elif this.IsCurrent then Colors.text_green
                     else Colors.text
-                ),
-            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
+                )).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
         |+ Text(
             (fun () ->
                 if this.Focused then
@@ -119,8 +116,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
                         if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
                 else credit
             ),
-            Color = K Colors.text_subheading,
-            Align = Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
+            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
@@ -235,27 +231,19 @@ type SelectSkinsPage() =
             |+ Text(
                 %"skins.current_noteskin",
                 Position = Position.SlicePercentL(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f),
-                Color = K Colors.text_subheading,
-                Align = Alignment.LEFT
-            )
+                Color = K Colors.text_subheading).Align(Alignment.LEFT)
             |+ Text(
                 (fun () -> Content.NoteskinMeta.Name),
                 Position = Position.SlicePercentL(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT),
-                Color = K Colors.text,
-                Align = Alignment.LEFT
-            )
+                Color = K Colors.text).Align(Alignment.LEFT)
             |+ Text(
                 %"skins.current_hud",
                 Position = Position.SlicePercentR(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f),
-                Color = K Colors.text_subheading,
-                Align = Alignment.LEFT
-            )
+                Color = K Colors.text_subheading).Align(Alignment.LEFT)
             |+ Text(
                 (fun () -> Content.HUDMeta.Name),
                 Position = Position.SlicePercentR(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT),
-                Color = K Colors.text,
-                Align = Alignment.LEFT
-            )
+                Color = K Colors.text).Align(Alignment.LEFT)
 
         NavigationContainer.Row()
         |+ right_side

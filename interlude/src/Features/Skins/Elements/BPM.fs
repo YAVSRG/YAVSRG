@@ -22,9 +22,7 @@ type BPM(config: HudConfig, state: PlayState) =
                 let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
                 sprintf "%.0f BPM" (60000.0f<ms / minute> / ms_per_beat)
             ),
-            Color = K Colors.text_subheading,
-            Align = Alignment.CENTER
-        )
+            Color = K Colors.text_subheading).Align(Alignment.CENTER)
         base.Init parent
 
     override this.Update(elapsed_ms, moved) =
