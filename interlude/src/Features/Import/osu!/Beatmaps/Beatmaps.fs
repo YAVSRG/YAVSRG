@@ -116,7 +116,8 @@ type BeatmapBrowserPage() =
         :> Widget
 
     let header =
-        NavigationContainer.Row().Position(Position.SliceB(AngledButton.HEIGHT))
+        NavigationContainer.Row()
+            .Position(Position.SliceB(AngledButton.HEIGHT))
         |+ status_button("Ranked", 1, Colors.cyan)
             .LeanLeft(false)
             .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, AngledButton.LEAN_AMOUNT))
@@ -137,12 +138,9 @@ type BeatmapBrowserPage() =
             "Sort",
             query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
             descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
-            "sort_mode",
-            Position =
-                Position
-                    .SlicePercentR(0.28f)
-                    .ShrinkL(AngledButton.LEAN_AMOUNT)
+            "sort_mode"
         )
+            .Position(Position.SlicePercentR(0.28f).ShrinkL(AngledButton.LEAN_AMOUNT))
         |>> (fun nt -> Container(nt).Position(Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
         |+ (SearchBox(
                 Setting.simple "",
@@ -150,11 +148,11 @@ type BeatmapBrowserPage() =
                     filter <- f
                     GameThread.defer (fun () -> begin_search filter)
                 ),
-                Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan
             )
+                .Position(Position.SliceT(60.0f))
             |+ LoadingIndicator.Border(fun () -> loading)
         )
 

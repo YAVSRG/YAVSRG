@@ -61,20 +61,19 @@ type LobbyList() =
 
     override this.Init(parent) =
         this
-        |+ ScrollContainer(list_container, Position = Position.Shrink(0.0f, 80.0f), Margin = Style.PADDING)
+        |+ ScrollContainer(list_container)
+            .Margin(Style.PADDING)
+            .Position(Position.Shrink(0.0f, 80.0f))
         |+ EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
             .Conditional(fun () -> no_lobbies)
-        |+ Button(
-            Icons.PLUS_CIRCLE + "  " + %"lobby_list.create",
-            create_lobby).Position(Position.SliceB(60.0f).ShrinkR(250.0f))
-        |+ Button(
-            Icons.REFRESH_CCW + "  " + %"lobby_list.refresh",
-            refresh_list).Position(Position.SliceB(60.0f).SliceR(250.0f))
-        |* SearchBox(
-            search_text,
-            (fun (query: string) -> list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)),
-            Position = Position.SliceT(60.0f)
+        |+ Button(Icons.PLUS_CIRCLE + "  " + %"lobby_list.create", create_lobby)
+            .Position(Position.SliceB(60.0f).ShrinkR(250.0f))
+        |+ Button(Icons.REFRESH_CCW + "  " + %"lobby_list.refresh", refresh_list)
+            .Position(Position.SliceB(60.0f).SliceR(250.0f))
+        |* SearchBox(search_text, fun (query: string) ->
+            list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
         )
+            .Position(Position.SliceT(60.0f))
         base.Init parent
 
         refresh_list()

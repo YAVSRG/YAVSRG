@@ -71,7 +71,7 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
             | Some e -> [version.Author; e] %> "skins.credit.edited"
             | None -> [version.Author] %> "skins.credit"
         )
-            .Color(K Colors.text_subheading)
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING))
         |+ thumbnail

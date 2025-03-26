@@ -80,7 +80,6 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                     else
                         current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
                 ),
-                Position = { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }.SliceY(60.0f).ShrinkL(900.0f).Shrink(Style.PADDING, 0.0f),
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan) with
@@ -88,6 +87,12 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                 base.OnFocus by_mouse
                 if not by_mouse then GameThread.defer (fun () -> this.Select false)
         }
+            .Position(
+                { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }
+                    .SliceY(60.0f)
+                    .ShrinkL(900.0f)
+                    .Shrink(Style.PADDING, 0.0f)
+            )
 
     let transition_timer = Animation.Delay(400.0)
     let mutable transition = Transition.In

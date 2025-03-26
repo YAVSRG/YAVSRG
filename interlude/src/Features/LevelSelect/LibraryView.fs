@@ -90,12 +90,13 @@ type LibraryViewControls() =
             options.ChartSortReverse
             |> Setting.map not not
             |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            "sort_mode",
-            Position =
+            "sort_mode"
+        )
+            .Position(
                 Position
                     .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
                     .GridX(1, 2, AngledButton.LEAN_AMOUNT)
-        )
+            )
             .Help(
                 Help
                     .Info("levelselect.sortby", "sort_mode")
@@ -108,12 +109,13 @@ type LibraryViewControls() =
             "Group",
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),
-            "group_mode",
-            Position =
+            "group_mode"
+        )
+            .Position(
                 Position
                     .ShrinkL(OPTIONS_BUTTON_WIDTH + AngledButton.LEAN_AMOUNT * 2.0f)
                     .GridX(2, 2, AngledButton.LEAN_AMOUNT)
-        )
+            )
             .Help(
                 Help
                     .Info("levelselect.groupby", "group_mode")

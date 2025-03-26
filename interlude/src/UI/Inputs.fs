@@ -119,12 +119,14 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
                     existing()
 
         this |+ text_entry
-        |* Text(
-            fun () ->
-                match query_text.Value with
-                | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
-                | _ -> ""
-            ).Color(text_entry.ColorFunc).Align(Alignment.LEFT).Position(Position.Shrink(10.0f, 0.0f))
+        |* Text(fun () ->
+            match query_text.Value with
+            | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
+            | _ -> ""
+        )
+            .Color(text_entry.ColorFunc)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkX(10.0f))
 
         base.Init parent
 
@@ -152,7 +154,7 @@ module NumberEntry =
             |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '-') |> Array.ofSeq |> System.String)
 
         let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true, Position = Position.ShrinkX 15.0f) with
+            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
@@ -167,9 +169,7 @@ module NumberEntry =
                     base.Update(elapsed_ms, moved)
             }
 
-        FrameContainer(
-            NodeType.Container (fun () -> Some entry),
-            Position = Position.ExpandX 15.0f,
+        FrameContainer(NodeType.Container (fun () -> Some entry),
             Fill = K Color.Transparent,
             Border =
                 fun () ->
@@ -177,7 +177,8 @@ module NumberEntry =
                     elif entry.Focused then Colors.yellow_accent
                     else Colors.grey_2
         )
-        |+ entry
+            .Position(Position.ExpandX(15.0f))
+        |+ entry.Position(Position.ShrinkX(15.0f))
 
     let create (setting: Setting<float, _>) : FrameContainer =
 
@@ -191,7 +192,7 @@ module NumberEntry =
             |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> System.String)
 
         let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true, Position = Position.ShrinkX 15.0f) with
+            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
@@ -207,8 +208,7 @@ module NumberEntry =
             }
 
         FrameContainer(
-            NodeType.Container (fun () -> Some entry),
-            Position = Position.ExpandX 15.0f,
+            NodeType.Container(fun () -> Some entry),
             Fill = K Color.Transparent,
             Border =
                 fun () ->
@@ -216,7 +216,8 @@ module NumberEntry =
                     elif entry.Focused then Colors.yellow_accent
                     else Colors.grey_2
         )
-        |+ entry
+            .Position(Position.ExpandX(15.0f))
+        |+ entry.Position(Position.ShrinkX 15.0f)
 
     let create_uom (units: string) (setting: Setting<float32<'u>, _>) : FrameContainer =
 
@@ -230,7 +231,7 @@ module NumberEntry =
             |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> System.String)
 
         let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true, Position = Position.ShrinkX(15.0f).ShrinkR 100.0f) with
+            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
@@ -247,7 +248,6 @@ module NumberEntry =
 
         FrameContainer(
             NodeType.Container (fun () -> Some entry),
-            Position = Position.ExpandX 15.0f,
             Fill = K Color.Transparent,
             Border =
                 fun () ->
@@ -255,6 +255,8 @@ module NumberEntry =
                     elif entry.Focused then Colors.yellow_accent
                     else Colors.grey_2
         )
-        |+ entry
-        |+ Text(units, Position = Position.SliceR 100.0f)
+            .Position(Position.ExpandX(15.0f))
+        |+ entry.Position(Position.ShrinkX(15.0f).ShrinkR(100.0f))
+        |+ Text(units)
             .Color(Colors.text_subheading)
+            .Position(Position.SliceR(100.0f))

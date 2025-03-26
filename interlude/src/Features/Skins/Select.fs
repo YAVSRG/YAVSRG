@@ -222,33 +222,32 @@ type SelectSkinsPage() =
                 (fun () -> osu.Skins.OsuSkinsListPage().Show())).Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
 
         let right_side =
-            NavigationContainer.Row(
-                WrapNavigation = false,
-                Position =
-                    { Position.DEFAULT with
-                        Left = 0.35f %+ 10.0f
-                    }
+            NavigationContainer.Row()
+                .WrapNavigation(false)
+                .Position(
+                    Position
+                        .ShrinkPercentL(0.35f)
+                        .ShrinkL(10.0f)
                         .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
-            )
+                )
             |+ noteskin_tab
             |+ hud_tab
-            |+ Text(%"skins.current_noteskin",
-                Position = Position.SlicePercentL(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f))
+            |+ Text(%"skins.current_noteskin")
                 .Color(Colors.text_subheading)
                 .Align(Alignment.LEFT)
-            |+ Text((fun () -> Content.NoteskinMeta.Name),
-                Position = Position.SlicePercentL(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT))
+                .Position(Position.SlicePercentL(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f))
+            |+ Text(fun () -> Content.NoteskinMeta.Name)
                 .Color(Colors.text)
                 .Align(Alignment.LEFT)
-            |+ Text(%"skins.current_hud",
-                Position = Position.SlicePercentR(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f))
+                .Position(Position.SlicePercentL(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT))
+            |+ Text(%"skins.current_hud")
                 .Color(Colors.text_subheading)
                 .Align(Alignment.LEFT)
-            |+ Text(
-                (fun () -> Content.HUDMeta.Name),
-                Position = Position.SlicePercentR(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT))
+                .Position(Position.SlicePercentR(0.5f).SliceT(PAGE_ITEM_HEIGHT * 0.65f))
+            |+ Text(fun () -> Content.HUDMeta.Name)
                 .Color(Colors.text)
                 .Align(Alignment.LEFT)
+                .Position(Position.SlicePercentR(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT))
 
         NavigationContainer.Row()
         |+ right_side

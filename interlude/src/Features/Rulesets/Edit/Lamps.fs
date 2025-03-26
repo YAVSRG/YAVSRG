@@ -29,16 +29,14 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
                     for i, j in ruleset.Value.Judgements |> Array.indexed do
                         yield i, j.Name
                     yield -1, "Combo breaks"
-                } |> Array.ofSeq,
-                judgement_type,
-                Position = { Position.DEFAULT with Right = 0.5f %- 100.0f }
+                }
+                |> Array.ofSeq,
+                judgement_type
             )
+                .Position(Position.GridX(1, 2, 200.0f))
             |+ Text("<=")
-            |+ Selector(
-                [|99, "99"; 9, "9"; 1, "1"; 0, "0";|],
-                judgement_threshold,
-                Position = { Position.DEFAULT with Left = 0.5f %+ 100.0f }
-            )
+            |+ Selector([|99, "99"; 9, "9"; 1, "1"; 0, "0";|], judgement_threshold)
+                .Position(Position.GridX(2, 2, 200.0f))
         )
             .Pos(4)
         :> Widget
@@ -70,7 +68,8 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
 
     let rec lamp_controls (i: int, l: Lamp) =
         NavigationContainer.Row()
-        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()), Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
+        |+ ColoredButton(l.Name, l.Color, (fun () -> EditLampPage(ruleset, i).Show()))
+            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
         |+ Button(
             Icons.TRASH,
             (fun () ->
@@ -78,9 +77,9 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                     [l.Name] %> "rulesets.lamp.confirm_delete",
                     fun () -> delete_lamp i
                 ).Show()
-            ),
-            Position = Position.SliceR PAGE_ITEM_HEIGHT
+            )
         )
+            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() =
         container.Clear()

@@ -37,7 +37,8 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
 
     do
         this
-        |+ Image(sprite, Position = Position.ShrinkB(65.0f).Shrink(20.0f), StretchToFill = false)
+        |+ Image(sprite, StretchToFill = false)
+            .Position(Position.ShrinkB(65.0f).Shrink(20.0f))
         |+ Text(id)
             .Align(Alignment.CENTER)
             .Position(Position.Shrink(Style.PADDING).SliceB(40.0f).Translate(0.0f, -40.0f))
@@ -47,7 +48,9 @@ type TextureCard(source: Storage, id: string, on_click: unit -> unit) as this =
             (fun () ->
                 (if is_stitched then source.SplitTexture id else source.StitchTexture id)
                 is_stitched <- not is_stitched
-            )).Position(Position.Shrink(Style.PADDING).SliceB(40.0f))
+            )
+        )
+            .Position(Position.Shrink(Style.PADDING).SliceB(40.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -57,12 +60,9 @@ module TextureGrid =
 
     let create_noteskin (noteskin: Noteskin) : Widget * (unit -> unit) =
         let textures_grid =
-            GridFlowContainer<TextureCard>(
-                40.0f + PAGE_ITEM_WIDTH / 5f,
-                5,
-                WrapNavigation = false,
-                Spacing = (15.0f, 15.0f)
-            )
+            GridFlowContainer<TextureCard>(40.0f + PAGE_ITEM_WIDTH / 5f, 5)
+                .WrapNavigation(false)
+                .Spacing(15.0f)
 
         let refresh () =
             textures_grid.Clear()

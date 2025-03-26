@@ -87,29 +87,37 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
         )
             .Pos(7)
         // todo: localise
-        |+ Text("Current preset options:").Align(Alignment.LEFT)
+        |+ Text("Current preset options:")
             .Color(Colors.text)
+            .Align(Alignment.LEFT)
             .Pos(10, 1)
-        |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed).Align(Alignment.LEFT)
+        |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(11, 1)
-        |+ Text(sprintf "Upscroll: %s" (if preset.Upscroll then "ON" else "OFF")).Align(Alignment.LEFT)
+        |+ Text(sprintf "Upscroll: %s" (if preset.Upscroll then "ON" else "OFF"))
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(12, 1)
-        |+ Text(sprintf "Hit position: %.0f" preset.HitPosition).Align(Alignment.LEFT)
+        |+ Text(sprintf "Hit position: %.0f" preset.HitPosition)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(13, 1)
-        |+ Text(sprintf "Visual offset: %.0f" preset.VisualOffset).Align(Alignment.LEFT)
+        |+ Text(sprintf "Visual offset: %.0f" preset.VisualOffset)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(14, 1)
-        |+ Text(sprintf "Noteskin: %s" preset.Noteskin).Align(Alignment.LEFT)
+        |+ Text(sprintf "Noteskin: %s" preset.Noteskin)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(15, 1)
-        |+ Text(sprintf "HUD: %s" preset.HUD).Align(Alignment.LEFT)
+        |+ Text(sprintf "HUD: %s" preset.HUD)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(16, 1)
-        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF")).Align(Alignment.LEFT)
+        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF"))
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Pos(17, 1)
         :> Widget
 
@@ -228,13 +236,14 @@ module private Presets =
                                 )
                         )
                             .Show()
-                ),
-                Disabled =
-                    (fun () ->
-                        match setting.Value with
-                        | Some s -> s.Mode <> PresetMode.Unlocked
-                        | None -> false
-                    )).Position(Position.SliceB(40.0f).SlicePercentR(0.5f).ShrinkX(10.0f).ShrinkL(20.0f))
+                )
+            )
+                .Disabled(fun () ->
+                    match setting.Value with
+                    | Some s -> s.Mode <> PresetMode.Unlocked
+                    | None -> false
+                )
+                .Position(Position.SliceB(40.0f).SlicePercentR(0.5f).ShrinkX(10.0f).ShrinkL(20.0f))
 
         let lower_buttons =
             NavigationContainer.Row(WrapNavigation = false)
@@ -257,7 +266,7 @@ module private Presets =
         |+ lower_buttons
         |+ create_preset_button
         |+ Text(sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"))
-            .Color(K Colors.text_green)
+            .Color(Colors.text_green)
             .Position(Position.SliceB(40.0f).ShrinkX(10.0f))
             .Conditional(fun () ->
                 options.SelectedPreset.Value = Some preset_id

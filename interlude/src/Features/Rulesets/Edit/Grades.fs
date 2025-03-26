@@ -45,7 +45,8 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
 
     let rec grade_controls (i: int, g: Grade) =
         NavigationContainer.Row()
-        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()), Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
+        |+ ColoredButton(g.Name, g.Color, (fun () -> EditGradePage(ruleset, i).Show()))
+            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
         |+ Button(
             Icons.TRASH,
             (fun () ->
@@ -53,9 +54,9 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
                     [g.Name] %> "rulesets.grade.confirm_delete",
                     fun () -> delete_grade i
                 ).Show()
-            ),
-            Position = Position.SliceR PAGE_ITEM_HEIGHT
+            )
         )
+            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() =
         container.Clear()

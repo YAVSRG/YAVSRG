@@ -77,10 +77,8 @@ type SkinPreview(position: Position) as this =
     let mutable expand = false
 
     let bounds_placeholder =
-        SlideContainer(
-            NodeType.None,
-            Position = position
-        )
+        SlideContainer(NodeType.None)
+            .Position(position)
 
     do
         instances <- this :: instances
@@ -90,8 +88,9 @@ type SkinPreview(position: Position) as this =
 
         this
         |* (bounds_placeholder
-            |+ Text(
-                Icons.EYE + " " + %"misc.preview").Align(Alignment.LEFT).Position(Position.Shrink(20.0f, 10.0f).SliceT(30.0f)))
+            |+ Text(Icons.EYE + " " + %"misc.preview")
+                .Align(Alignment.LEFT)
+                .Position(Position.Shrink(20.0f, 10.0f).SliceT(30.0f)))
 
     member this.PreviewBounds = bounds_placeholder.Bounds
 

@@ -19,7 +19,7 @@ type Chat(lobby: Lobby) =
 
     let current_message = Setting.simple ""
 
-    let chat_msg (sender: string, message: string) =
+    let chat_msg (sender: string, message: string) : Container =
         let w = Text.measure (Style.font, sender) * 0.6f * MESSAGE_HEIGHT
 
         let sender_color =
@@ -29,18 +29,24 @@ type Chat(lobby: Lobby) =
                 lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
-        |+ Text(sender).Color(K sender_color).Position(Position.SliceL(w))
+        |+ Text(sender)
+            .Color(sender_color)
             .Align(Alignment.RIGHT)
-        |+ Text(": " + message).Color(K Colors.text).Position(Position.ShrinkL(w))
+            .Position(Position.SliceL(w))
+        |+ Text(": " + message)
+            .Color(Colors.text)
             .Align(Alignment.LEFT)
+            .Position(Position.ShrinkL(w))
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
     let message_history =
-        ScrollContainer(messages).Position(Position.ShrinkB(60.0f).Shrink(5.0f))
+        ScrollContainer(messages)
+            .Position(Position.ShrinkB(60.0f).Shrink(5.0f))
 
     let chatline =
-        TextEntry(current_message, "none", true).Position(Position.SliceB(50.0f).Shrink(5.0f))
+        TextEntry(current_message, "none", true)
+            .Position(Position.SliceB(50.0f).Shrink(5.0f))
 
     let mutable last_msg: Widget option = None
 
@@ -130,7 +136,7 @@ type Chat(lobby: Lobby) =
 
             add_msg (
                 Text("Click a score to view details")
-                    .Color(K Colors.text_greyout)
+                    .Color(Colors.text_greyout)
                     .Align(Alignment.CENTER)
             )
 
@@ -157,16 +163,11 @@ type Chat(lobby: Lobby) =
     override this.Init(parent) =
         this
         |+ chatline
-        |+ Text(
-            (fun () ->
-                if current_message.Value = "" then
-                    "Press ENTER to chat"
-                else
-                    ""
-            ))
+        |+ Text("Press ENTER to chat")
             .Color(Colors.text_subheading)
-            .Position(Position.SliceB(50.0f).Shrink(5.0f))
             .Align(Alignment.LEFT)
+            .Position(Position.SliceB(50.0f).Shrink(5.0f))
+            .Conditional(fun () -> current_message.Value = "")
         |* message_history
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)
@@ -185,7 +186,11 @@ type Chat(lobby: Lobby) =
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 
-            add_msg (Text(text).Color((fun () -> color, Colors.shadow_1)).Align(Alignment.CENTER))
+            add_msg(
+                Text(text)
+                    .Color((fun () -> color, Colors.shadow_1))
+                    .Align(Alignment.CENTER)
+            )
         )
 
         lobby.OnGameEnd.Add game_end_report

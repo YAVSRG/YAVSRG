@@ -156,8 +156,7 @@ module Settings =
             if token_match tokens [|%"gameplay.scrollspeed"|] then
                 yield PageSetting(%"gameplay.scrollspeed", Slider.Percent(Setting.uom options.ScrollSpeed))
                     .Help(Help.Info("gameplay.scrollspeed"))
-                yield Text(
-                    (fun () ->
+                yield Text(fun () ->
                         [
                             ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
                             (float32 options.ScrollSpeed.Value * 12.698412f).ToString("F1")
@@ -165,7 +164,9 @@ module Settings =
                             "C" + (60000.0f * float32 options.ScrollSpeed.Value / Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                         ]
                         %> "gameplay.scrollspeed.info"
-                    )).Align(Alignment.CENTER), 1, 1, PageWidth.Custom (PAGE_LABEL_WIDTH + PAGE_ITEM_WIDTH)
+                    )
+                    .Align(Alignment.CENTER),
+                    1, 1, PageWidth.Custom (PAGE_LABEL_WIDTH + PAGE_ITEM_WIDTH)
             if token_match tokens [|%"gameplay.hitposition"|] then
                 yield PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
                     .Help(Help.Info("gameplay.hitposition"))

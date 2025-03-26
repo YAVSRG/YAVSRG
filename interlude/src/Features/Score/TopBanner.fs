@@ -23,8 +23,9 @@ type TopBanner(score_info: ScoreInfo) as this =
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(125.0f, 40.0f).ShrinkX(20.0f))
 
-        |+ Text(
-            (score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString()).Align(Alignment.RIGHT).Position(Position.SliceT(65.0f, 55.0f).ShrinkX(20.0f))
+        |+ Text((score_info.TimePlayed |> Timestamp.to_datetime).ToLocalTime().ToString())
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceT(65.0f, 55.0f).ShrinkX(20.0f))
         |* Text(
             match score_info.PlayedBy with
             | ScorePlayedBy.Username p -> K([p] %> "score.played_by")

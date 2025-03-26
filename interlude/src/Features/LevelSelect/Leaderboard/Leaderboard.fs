@@ -110,7 +110,9 @@ type Leaderboard(display: Setting<Display>) =
                     .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.info.scoreboard.filter", "scoreboard_filter"))
-        |+ ScrollContainer(scores_list, Position = Position.ShrinkT(50.0f), Margin = Style.PADDING)
+        |+ ScrollContainer(scores_list)
+            .Margin(Style.PADDING)
+            .Position(Position.ShrinkT(50.0f))
         |+ HotkeyListener("scoreboard", fun () ->
             if scores_list.Focused then
                 Selection.clear ()

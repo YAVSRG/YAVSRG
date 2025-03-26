@@ -99,7 +99,9 @@ type AllYearsActivityPage(selected: Setting<(DateOnly * Session) option>) =
         for year in PREVIOUS_SESSIONS |> Seq.map (fun kvp -> kvp.Key.Year) |> Seq.distinct |> Seq.sortDescending do
             flow.Add(YearActivityGrid(year, selected |> Setting.trigger(fun _ -> Menu.Back())))
 
-        ScrollContainer(flow, Position = Position.ShrinkT(120.0f).ShrinkB(80.0f).SliceX(1380.0f), Margin = 50.0f)
+        ScrollContainer(flow)
+            .Margin(50.0f)
+            .Position(Position.ShrinkT(120.0f).ShrinkB(80.0f).SliceX(1380.0f))
 
     override this.Title = %"stats.activity"
     override this.OnClose() = ()
@@ -131,8 +133,8 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
         |* Button(
             sprintf "%s %s" Icons.ARROW_LEFT (%"stats.activity.view_older"),
             fun () -> AllYearsActivityPage(selected).Show()
-            ,
-            Floating = true)
+        )
+            .Floating()
             .Position(Position.BorderB(30.0f).SliceL(120.0f).Translate(10.0f, 5.0f))
         base.Init parent
 

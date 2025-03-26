@@ -169,9 +169,13 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 yield Text(server_song.FormattedTitle)
                     .Align(Alignment.LEFT)
                     .Pos(0, 2, PageWidth.Full)
-                yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators).Align(Alignment.LEFT).Color(K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
-                yield Text(vote_text).Align(Alignment.LEFT)
+                yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators)
                     .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Pos(2, 1, PageWidth.Full)
+                yield Text(vote_text)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
                     .Pos(3, 1, PageWidth.Full)
             | None ->
 
@@ -180,16 +184,22 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 yield Text(local_cc.Artist + " - " + local_cc.Title)
                     .Align(Alignment.LEFT)
                     .Pos(0, 2, PageWidth.Full)
-                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator).Align(Alignment.LEFT).Color(K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
-                yield Text(vote_text).Align(Alignment.LEFT)
+                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator)
                     .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Pos(2, 1, PageWidth.Full)
+                yield Text(vote_text)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
                     .Pos(3, 1, PageWidth.Full)
             | None ->
-                yield Text(%"table.suggestions.info_missing").Align(Alignment.LEFT)
+                yield Text(%"table.suggestions.info_missing")
                     .Color(Colors.text_red_2)
+                    .Align(Alignment.LEFT)
                     .Pos(0, 2, PageWidth.Full)
-                yield Text(vote_text).Align(Alignment.LEFT)
+                yield Text(vote_text)
                     .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
                     .Pos(2, 1, PageWidth.Full)
         } :> Widget
 
@@ -227,7 +237,8 @@ type SuggestionsList(table: Table) =
 
                 GameThread.defer (fun () -> fc.Focus false)
 
-                ScrollContainer(fc, Margin = 5.0f)
+                ScrollContainer(fc)
+                    .Margin(Style.PADDING)
                     .Position(Position.Shrink(100.0f, 200.0f))
         )
 

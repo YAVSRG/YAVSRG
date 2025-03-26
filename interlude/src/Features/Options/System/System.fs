@@ -110,7 +110,9 @@ type WindowResolutionPicker(setting: Setting<WindowedResolution>) as this =
         GridFlowContainer(PAGE_ITEM_HEIGHT - 10.0f, 2, WrapNavigation = false)
         |+ Button(
             (fun () -> let w, h = res_setting.Value in sprintf "%ix%i" w h),
-            (fun () -> this.ToggleResolutionDropdown())).Align(Alignment.LEFT)
+            (fun () -> this.ToggleResolutionDropdown())
+        )
+                .Align(Alignment.LEFT)
         |+ Button(
             (fun () -> if offset_setting.Value = (0.5f, 0.5f) then %"system.windowresolution.offset.center" else %"system.windowresolution.offset.custom"),
             (fun () -> CustomWindowedOffsetPage(offset_setting).Show())
@@ -169,7 +171,9 @@ type VideoMode(setting: Setting<FullscreenVideoMode>) as this =
         GridFlowContainer(PAGE_ITEM_HEIGHT - 10.0f, 3, WrapNavigation = false)
         |+ Button(
             (fun () -> let mode = setting.Value in sprintf "%ix%i" mode.Width mode.Height),
-            (fun () -> this.ToggleResolutionDropdown())).Align(Alignment.LEFT)
+            (fun () -> this.ToggleResolutionDropdown())
+        )
+            .Align(Alignment.LEFT)
         |+ Button(
             (fun () -> sprintf "%ihz" setting.Value.RefreshRate),
             (fun () -> this.ToggleRefreshRateDropdown())

@@ -80,13 +80,10 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
 
     override this.Content() =
         let mod_grid =
-            GridFlowContainer<Widget>(
-                100.0f,
-                3,
-                Spacing = (30f, 30f),
-                Position = page_position (5, PAGE_BOTTOM - 5, PageWidth.Full),
-                WrapNavigation = false
-            )
+            GridFlowContainer<Widget>(100.0f, 3)
+                .Spacing(30.0f)
+                .WrapNavigation(false)
+                .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
             |+ ModSelector(
                 "auto",
                 (fun _ -> if SelectedChart.autoplay then Some 0 else None),

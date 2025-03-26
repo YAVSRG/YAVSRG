@@ -282,8 +282,9 @@ type private ListBlock(max_width: float32, paragraphs: IParagraph list) as this 
             p.Position <- Position.Box(0.0f, 0.0f, ListBlock.INDENT, y, p.Width, p.Height)
 
             this |+ p
-            |* Text(
-                "•").Position(Position.Box(0.0f, 0.0f, 0.0f, y, ListBlock.INDENT, ListBlock.BULLET_SIZE)).Align(Alignment.CENTER)
+            |* Text("•")
+                .Align(Alignment.CENTER)
+                .Position(Position.Box(0.0f, 0.0f, 0.0f, y, ListBlock.INDENT, ListBlock.BULLET_SIZE))
 
             y <- y + p.Height
 

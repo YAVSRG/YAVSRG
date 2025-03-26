@@ -99,22 +99,16 @@ type LobbyUI(lobby: Lobby) =
                     .GridX(3, 3, AngledButton.LEAN_AMOUNT)
             )
             .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
-        |+ SelectedChart(lobby,
-            Position =
-                {
-                    Left = 0.5f %+ 20.0f
-                    Top = 0.0f %+ 100.0f
-                    Right = 1.0f %- 20.0f
-                    Bottom = 0.5f %- 0.0f
-                }
-        )
-        |* Chat(lobby,
-            Position =
-                { Position.Shrink(20.0f) with
-                    Left = 0.4f %+ 20.0f
-                    Top = 0.5f %+ 0.0f
-                }
-        )
+        |+ SelectedChart(lobby)
+            .Position(Position.SlicePercentT(0.5f).SlicePercentR(0.5f).ShrinkX(20.0f).ShrinkT(100.0f))
+        |* Chat(lobby)
+            .Position(
+                Position
+                    .ShrinkPercentL(0.4f)
+                    .SlicePercentB(0.5f)
+                    .ShrinkX(20.0f)
+                    .ShrinkB(20.0f)
+            )
 
         base.Init parent
 

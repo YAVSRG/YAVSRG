@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Flux.UI
 
 [<AutoOpen>]
@@ -30,16 +31,20 @@ module PageLayout =
         | PageWidth.Custom w ->
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PAGE_ITEM_HEIGHT, w, float32 height * 0.5f * PAGE_ITEM_HEIGHT)
 
-    type Widget with
+[<Extension>]
+type PageLayoutExtensions =
 
-        member this.Pos(y: int) : Widget =
-            this.Position <- page_position (y, 2, PageWidth.Normal)
-            this
+    [<Extension>]
+    static member Pos(widget: #Widget, y: int) : #Widget =
+        widget.Position <- page_position (y, 2, PageWidth.Normal)
+        widget
 
-        member this.Pos(y: int, h: int) : Widget =
-            this.Position <- page_position (y, h, PageWidth.Normal)
-            this
+    [<Extension>]
+    static member Pos(widget: #Widget, y: int, h: int) : #Widget =
+        widget.Position <- page_position (y, h, PageWidth.Normal)
+        widget
 
-        member this.Pos(y: int, h: int, width: PageWidth) : Widget =
-            this.Position <- page_position (y, h, width)
-            this
+    [<Extension>]
+    static member Pos(widget: #Widget, y: int, h: int, width: PageWidth) : #Widget =
+        widget.Position <- page_position (y, h, width)
+        widget

@@ -19,8 +19,7 @@ type GameplayPage() =
         |+ PageSetting(%"gameplay.scrollspeed", Slider.Percent(Setting.uom options.ScrollSpeed))
             .Help(Help.Info("gameplay.scrollspeed"))
             .Pos(0)
-        |+ Text(
-            (fun () ->
+        |+ Text(fun () ->
                 [
                     ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
                     (float32 options.ScrollSpeed.Value * 12.698412f).ToString("F1")
@@ -28,7 +27,9 @@ type GameplayPage() =
                     "C" + (60000.0f * float32 options.ScrollSpeed.Value / Interlude.Content.Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
                 ]
                 %> "gameplay.scrollspeed.info"
-            )).Align(Alignment.CENTER).Position(page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH))
+            )
+            .Align(Alignment.CENTER)
+            .Position(page_position(2, 1, PageWidth.Normal).ShrinkL(PAGE_LABEL_WIDTH))
         |+ PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
             .Help(Help.Info("gameplay.hitposition"))
             .Pos(3)

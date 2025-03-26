@@ -30,11 +30,11 @@ type SkinsBrowserPage() =
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (query: string) -> noteskin_items.Filter <- GroupDisplay.Filter query),
-                Position = Position.SliceT 60.0f,
                 Fill = K Colors.cyan.O3,
                 Border = K Colors.cyan_accent,
                 TextColor = K Colors.text_cyan
             )
+                .Position(Position.SliceT(60.0f))
             |+ LoadingIndicator.Border(fun () -> loading))
         |+ EmptyState(Icons.X, %"skins.browser.error").Conditional(fun () -> error)
 

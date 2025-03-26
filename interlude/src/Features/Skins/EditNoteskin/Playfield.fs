@@ -19,8 +19,9 @@ type SpacingPicker(spacing: Setting.Bounded<float32>) =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> sprintf "%.0f" spacing.Value)).Align(Alignment.CENTER)
+        |+ Text((fun () -> sprintf "%.0f" spacing.Value))
             .Color(Colors.text_subheading)
+            .Align(Alignment.CENTER)
         |* MouseListener()
             .SelectOnClick(this, fun () ->
                 add 5.0f
@@ -120,14 +121,13 @@ type PlayfieldSettingsPage() =
                 let x = -60.0f * float32 k
                 let n = float32 i
 
-                SpacingPicker(
-                    spacing_setting keymode.Value i,
-                    Position =
+                SpacingPicker(spacing_setting keymode.Value i)
+                    .Position(
                         { Position.DEFAULT with
                             Left = 0.5f %+ (x + PICKER_WIDTH * n)
                             Right = 0.5f %+ (x + PICKER_WIDTH * n + PICKER_WIDTH)
                         }
-                )
+                    )
             )
 
     override this.Content() =

@@ -16,7 +16,9 @@ type ImportsMenuPage() =
     inherit Page()
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkL(10.0f).TranslateY(-50.0f))
         |+ MountControl(MountedGameType.Osu, options.OsuMount).Position(Position.SliceT(100.0f, 150.0f))
         |+ MountControl(MountedGameType.Quaver, options.QuaverMount).Position(Position.SliceT(270.0f, 150.0f))
         |+ MountControl(MountedGameType.Etterna, options.EtternaMount).Position(Position.SliceT(440.0f, 150.0f))
@@ -29,7 +31,9 @@ type ImportsMenuPage() =
             .Position(Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
 
     let main_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f))
         |+ PageButton(%"beatmap_browser", fun () -> BeatmapBrowserPage().Show()).Pos(0, 2, PageWidth.Full)
         |+ PageButton(%"etterna_pack_browser", fun () -> EtternaPacksBrowserPage().Show()).Pos(2, 2, PageWidth.Full)
         |+ PageButton(%"skins.browser", fun () -> SkinsBrowserPage().Show()).Pos(4, 2, PageWidth.Full)

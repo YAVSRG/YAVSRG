@@ -73,6 +73,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 )
                     .Help(Help.Info("mount.import_osu_scores"))
                     .Pos(8)
+                    :> Widget
             else
                 Dummy()
         |+
@@ -85,6 +86,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 )
                     .Help(Help.Info("mount.import_osu_skins"))
                     .Pos(10)
+                    :> Widget
             else
                 Dummy()
         :> Widget

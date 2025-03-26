@@ -77,7 +77,7 @@ type LibraryPage() =
         |+ LoadingIndicator.Strip(
             TaskTracking.in_progress).Position(Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f))
         |+ Text(sprintf "%i charts installed" Content.Library.Charts.Entries.Count)
-            .Color(K Colors.text_subheading)
+            .Color(Colors.text_subheading)
             .Position(Position.SliceT(65.0f, 30.0f).Shrink(20.0f, 0.0f))
 
     let main_options =

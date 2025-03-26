@@ -159,14 +159,13 @@ type NotesSettingsPage() =
                 let x = NOTE_SCALE * -0.5f * float32 k
                 let n = float32 i
 
-                RotationPicker(
-                    rotate_picker keymode.Value i,
-                    Position =
+                RotationPicker(rotate_picker keymode.Value i)
+                    .Position(
                         { Position.DEFAULT with
                             Left = 0.5f %+ (x + NOTE_SCALE * n)
                             Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }
-                )
+                    )
             )
 
     let colors, refresh_colors =
@@ -179,13 +178,14 @@ type NotesSettingsPage() =
                 NoteColorPicker(
                     color_picker keymode.Value i,
                     note_colors.Style,
-                    i,
-                    Position =
+                    i
+                )
+                    .Position(
                         { Position.DEFAULT with
                             Left = 0.5f %+ (x + NOTE_SCALE * n)
                             Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                         }
-                )
+                    )
             )
 
     override this.Content() =

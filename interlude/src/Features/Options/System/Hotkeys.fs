@@ -75,7 +75,6 @@ type HotkeysPage() =
                             | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
                             | _ -> false
                     ),
-                    Position = Position.SliceT(40.0f, 60.0f).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f),
                     Fill = K Colors.cyan.O3,
                     Border = K Colors.cyan_accent,
                     TextColor = K Colors.text_cyan) with
@@ -83,11 +82,14 @@ type HotkeysPage() =
                     base.OnFocus by_mouse
                     if not by_mouse then GameThread.defer (fun () -> this.Select false)
             }
+                .Position(Position.SliceT(40.0f, 60.0f).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
 
         let hotkey_editor (hotkey: Hotkey) =
             NavigationContainer.Row()
-            |+ Keybinder(hotkey, Position = Position.ShrinkR PAGE_ITEM_HEIGHT)
-            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey), Position = Position.SliceR PAGE_ITEM_HEIGHT)
+            |+ Keybinder(hotkey)
+                .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
+            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
+                .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
         container.Add(
             PageButton(

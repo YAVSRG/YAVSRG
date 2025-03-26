@@ -227,33 +227,36 @@ type Results
 
     override this.Init(parent) =
         this
-        |+ Grade(grade, score_info).Position(Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
+        |+ Grade(grade, score_info)
+            .Position(Position.Box(0.0f, 0.0f, 40.0f, 40.0f, 160.0f, 160.0f))
         |+ Accuracy(
             grade,
             improvements,
             previous_personal_bests,
             stats,
-            score_info,
-            Position =
+            score_info
+        )
+            .Position(
                 {
                     Left = 0.0f %+ 200.0f ^+ 40.0f
                     Right = 0.5f %+ 100.0f ^- 20.0f
                     Top = 0.0f %+ 40.0f
                     Bottom = 0.0f %+ 200.0f
                 }
-        )
+            )
         |* Lamp(
             lamp,
             improvements,
             previous_personal_bests,
-            score_info,
-            Position =
+            score_info
+        )
+            .Position(
                 {
                     Left = 0.5f %+ 100.0f ^+ 20.0f
                     Right = 1.0f %- 40.0f
                     Top = 0.0f %+ 40.0f
                     Bottom = 0.0f %+ 200.0f
                 }
-        )
+            )
 
         base.Init parent

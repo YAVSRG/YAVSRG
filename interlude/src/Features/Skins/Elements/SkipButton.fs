@@ -28,17 +28,15 @@ type SkipButton(config: HudConfig, state: PlayState) =
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
             this
-            |* Image(
-                Content.Texture "skip-button-bg",
-                StretchToFill = false,
-                Position =
+            |* Image(Content.Texture "skip-button-bg", StretchToFill = false)
+                .Position(
                     {
                         Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
                         Top = (lo - 0.5f + background.AlignmentY) %+ 0.0f
                         Right = (hi - 0.5f + background.AlignmentX) %+ 0.0f
                         Bottom = (hi - 0.5f + background.AlignmentY) %+ 0.0f
                     }
-            )
+                )
         this
         |* Text(text)
             .Color(Colors.text)

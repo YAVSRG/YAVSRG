@@ -72,7 +72,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
             |* Text(state.Ruleset.Name)
                 .Color(Colors.text_subheading)
                 .Align(alignment)
-                .Position(Position.SlicePercentB(0.6f))
+                .Position(Position.SlicePercentB(0.4f))
         base.Init parent
 
     override this.Draw() =

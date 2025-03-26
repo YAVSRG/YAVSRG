@@ -212,7 +212,9 @@ type ScoreList(start_time: int64, end_time: int64) =
         let mutable has_scores = false
 
         this
-        |+ ScrollContainer(scores, Position = Position.Shrink(20.0f), Margin = 5.0f)
+        |+ ScrollContainer(scores)
+            .Margin(Style.PADDING)
+            .Position(Position.Shrink(20.0f))
         |+ Button(Icons.LIST + " " + %"stats.session.make_playlist", make_playlist)
             .Align(Alignment.RIGHT)
             .Floating()

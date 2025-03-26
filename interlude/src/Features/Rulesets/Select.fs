@@ -95,10 +95,10 @@ type SelectRulesetPage() =
                             fun () -> Rulesets.delete id |> ignore
                         )
                             .Show()
-                    ),
-                    Position = Position.SliceR PAGE_ITEM_HEIGHT,
-                    Disabled = K (id = Rulesets.DEFAULT_ID)
+                    )
                 )
+                    .Disabled(Rulesets.DEFAULT_ID = id)
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
 
         if container.Focused then

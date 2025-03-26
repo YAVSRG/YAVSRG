@@ -104,8 +104,9 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                         else
                             early_window.Set (-infinityf * 1.0f<_>)
                             late_window.Set (infinityf * 1.0f<_>)
-                    ),
-                    Position = Position.SliceL 100.0f)
+                    )
+                )
+                    .Position(Position.SliceL(100.0f))
                 |+ add_entry(early.Conditional(fun () -> windows.[i].Value.IsSome))
                 |+ add_entry(late.Conditional(fun () -> windows.[i].Value.IsSome))
 

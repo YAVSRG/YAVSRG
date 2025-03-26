@@ -12,28 +12,24 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
     let create_button =
         Button(
             sprintf "%s %s" Icons.LINK (%"mount.create"),
-            (fun () -> CreateMountPage(game, setting).Show()),
-            Position = Position.SliceB(50.0f).Shrink 5.0f
+            (fun () -> CreateMountPage(game, setting).Show())
         )
+            .Position(Position.SliceB(50.0f).Shrink(5.0f))
 
     let edit_buttons =
-        NavigationContainer.Row(WrapNavigation = false).Position(Position.SliceB(50.0f).Shrink(5.0f))
+        NavigationContainer.Row()
+            .WrapNavigation(false)
+            .Position(Position.SliceB(50.0f).Shrink(5.0f))
         |+ Button(
             sprintf "%s %s" Icons.EDIT_2 (%"mount.edit"),
-            (fun () -> EditMountPage(game, setting).Show()),
-            Position =
-                { Position.DEFAULT with
-                    Right = 0.5f %+ 0.0f
-                }
+            (fun () -> EditMountPage(game, setting).Show())
         )
+            .Position(Position.SlicePercentL(0.5f))
         |+ Button(
             sprintf "%s %s" Icons.TRASH (%"mount.delete"),
-            (fun () -> setting.Value <- None),
-            Position =
-                { Position.DEFAULT with
-                    Left = 0.5f %+ 0.0f
-                }
+            (fun () -> setting.Value <- None)
         )
+            .Position(Position.SlicePercentR(0.5f))
 
     override this.Init(parent: Widget) =
         this

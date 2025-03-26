@@ -54,10 +54,10 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
                     [j.Name] %> "rulesets.judgement.confirm_delete",
                     fun () -> delete_judgement i
                 ).Show()
-            ),
-            Disabled = (fun () -> ruleset.Value.Judgements.Length <= 1),
-            Position = Position.SliceR PAGE_ITEM_HEIGHT
+            )
         )
+            .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
+            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() : unit =
         container.Clear()

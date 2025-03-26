@@ -48,8 +48,9 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
         |+ Text(ruleset.Name)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
-        |+ Text(
-            ruleset.Description).Align(Alignment.LEFT).Position(Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING))
+        |+ Text(ruleset.Description)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING))
         |* MouseListener().Button(this)
         base.Init parent
 
@@ -135,9 +136,9 @@ type RulesetSearch() as this =
         this
         |+ (SearchBox(
                 Setting.simple "",
-                (fun (f: FilterPart list) -> grid.Filter <- RulesetCard.Filter f),
-                Position = Position.SliceT 60.0f
+                (fun (f: FilterPart list) -> grid.Filter <- RulesetCard.Filter f)
             )
+                .Position(Position.SliceT 60.0f)
             |+ LoadingIndicator.Border(fun () -> loading))
         |+ EmptyState(Icons.X, %"rulesets.browser.error").Conditional(fun () -> failed)
         |* scroll

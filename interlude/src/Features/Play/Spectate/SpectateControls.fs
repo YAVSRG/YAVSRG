@@ -13,8 +13,10 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
 
     override this.Init(parent) =
         this
-        |+ Text(
-            %"spectate.title").Color(K Colors.text_subheading).Align(Alignment.CENTER).Position(Position.SliceT(40.0f))
+        |+ Text(%"spectate.title")
+            .Color(Colors.text_subheading)
+            .Align(Alignment.CENTER)
+            .Position(Position.SliceT(40.0f))
         |+ Text(who)
             .Color(Colors.text)
             .Align(Alignment.CENTER)

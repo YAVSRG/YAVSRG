@@ -60,12 +60,9 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             score_info,
             played_just_now,
             graph,
-            refresh,
-            Position =
-                { Position.DEFAULT with
-                    Top = 0.65f %- 0.0f
-                }
+            refresh
         )
+            .Position(Position.SlicePercentB(0.35f))
 
     override this.Init(parent) =
         this
@@ -75,26 +72,28 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             personal_bests,
             previous_personal_bests,
             stats,
-            score_info,
-            Position =
+            score_info
+        )
+            .Position(
                 { Position.DEFAULT with
                     Left = 0.35f %+ 0.0f
                     Top = 0.0f %+ 175.0f
                     Bottom = 0.65f %+ 0.0f
                 }
-        )
+            )
         |+ TopBanner(score_info).Position(Position.SliceT(180.0f))
         |+ Sidebar(
             stats,
-            score_info,
-            Position =
+            score_info
+        )
+            .Position(
                 {
                     Left = 0.0f %+ 20.0f
                     Top = 0.0f %+ 215.0f
                     Right = 0.35f %- 0.0f
                     Bottom = 1.0f %- 70.0f
                 }
-        )
+            )
         |+ bottom_info
         |* Confetti()
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)

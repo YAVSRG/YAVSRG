@@ -162,12 +162,13 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                             )
                                 .Show()
                         ),
-                        VerticalPad = item_height * 0.5f - 20.0f,
-                        Position =
+                        VerticalPad = item_height * 0.5f - 20.0f
+                    )
+                        .Position(
                             Position
                                 .Box(0.0f, 0.0f, -50.0f, float32 r * (item_height + 10.0f), 40.0f, item_height)
                                 .Shrink(0.0f, item_height * 0.5f - 20.0f)
-                    ),
+                        ),
                     1,
                     r + 2
                 )
@@ -176,31 +177,33 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
 
         if sprite.Rows < fst rules.MaxGridSize then
             items.Add(
-                { new Button(K Icons.PLUS_CIRCLE,
-                             (fun () ->
-                                 let src_row =
-                                     match Seq.tryHead this.SelectedTextures with
-                                     | Some(x, y) -> y
-                                     | None -> 0
+                { new Button(
+                    K Icons.PLUS_CIRCLE,
+                    (fun () ->
+                        let src_row =
+                            match Seq.tryHead this.SelectedTextures with
+                            | Some(x, y) -> y
+                            | None -> 0
 
-                                 ConfirmPage(
-                                     sprintf
-                                         "Add a new color to this texture? (will be a copy of color %i)"
-                                         (src_row + 1),
-                                     fun () ->
-                                        if source.AddLooseTextureRow(src_row, texture_id) then
-                                            reload_source()
-                                            this.Refresh()
-                                 )
-                                     .Show()
-                             ),
-                             Floating = true) with
+                        ConfirmPage(
+                            sprintf
+                                "Add a new color to this texture? (will be a copy of color %i)"
+                                (src_row + 1),
+                            fun () ->
+                            if source.AddLooseTextureRow(src_row, texture_id) then
+                                reload_source()
+                                this.Refresh()
+                        )
+                            .Show()
+                    )) with
                     override this.Draw() =
                         if this.Focused then
                             Render.rect this.Bounds Colors.yellow_accent.O2
 
                         base.Draw()
-                }.Position(Position.Shrink(0.0f, -50.0f).SliceB(40.0f)),
+                }
+                    .Floating()
+                    .Position(Position.Shrink(0.0f, -50.0f).SliceB(40.0f)),
                 0,
                 1
             )

@@ -86,13 +86,17 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
 
         this
         |+ graph
-        |+ Text(
-            Updates.version + "  : :  www.yavsrg.net",
-            Position = { Position.SliceB(40.0f) with Right = 0.35f %+ 0.0f }.ShrinkX(20.0f).TranslateY(-15.0f))
+        |+ Text(Updates.version + "  : :  www.yavsrg.net")
             .Color(Colors.text_subheading)
             .Align(Alignment.CENTER)
+            .Position(
+                Position
+                    .SlicePercentL(0.35f)
+                    .ShrinkX(20.0f)
+                    .SliceB(15.0f, 40.0f)
+            )
         |+ NavigationContainer.Row()
-            .Position({ Position.SliceB(15.0f, 50.0f) with Left = 0.35f %+ 30.0f; Right = 1.0f %- 20.0f }.Translate(0.0f, 5.0f))
+            .Position(Position.ShrinkPercentL(0.35f).ShrinkX(20.0f).ShrinkL(10.0f).SliceB(10.0f, 50.0f))
             .With(
                 InlaidButton(%"score.graph.settings", fun () ->
                     ScoreGraphSettingsPage(graph).Show()

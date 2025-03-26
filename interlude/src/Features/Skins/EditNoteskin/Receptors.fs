@@ -170,14 +170,13 @@ type AnimationSettingsPage() =
                     let x = NOTE_SCALE * -0.5f * float32 k
                     let n = float32 i
 
-                    ReceptorColorPicker(
-                        color_picker keymode.Value i,
-                        Position =
+                    ReceptorColorPicker(color_picker keymode.Value i)
+                        .Position(
                             { Position.DEFAULT with
                                 Left = 0.5f %+ (x + NOTE_SCALE * n)
                                 Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                             }
-                    )
+                        )
                 )
 
         NavigationContainer.Column(WrapNavigation = false)
@@ -272,14 +271,13 @@ type AnimationSettingsPage() =
                     let x = NOTE_SCALE * -0.5f * float32 k
                     let n = float32 i
 
-                    ColumnLightColorPicker(
-                        color_picker keymode.Value i,
-                        Position =
+                    ColumnLightColorPicker(color_picker keymode.Value i)
+                        .Position(
                             { Position.DEFAULT with
                                 Left = 0.5f %+ (x + NOTE_SCALE * n)
                                 Right = 0.5f %+ (x + NOTE_SCALE * n + NOTE_SCALE)
                             }
-                    )
+                        )
                 )
 
         NavigationContainer.Column(WrapNavigation = false)

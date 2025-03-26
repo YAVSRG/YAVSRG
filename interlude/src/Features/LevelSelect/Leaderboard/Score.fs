@@ -58,7 +58,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
         )
             .Color(text_color)
             .Align(Alignment.LEFT)
-            .Position(Position.SlicePercentT(0.6f).ShrinkPercentL(0.6f).ShrinkL(10.0f))
+            .Position(Position.SlicePercentT(0.6f).SlicePercentL(0.6f).ShrinkL(10.0f))
 
         |+ Text(fun () ->
             sprintf

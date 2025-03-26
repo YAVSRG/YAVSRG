@@ -53,7 +53,7 @@ type StatsHeader(data: ProfileData) =
         |* Text(
             [ if data.Stats.LastUpdated = 0L then "--" else format_long_time data.Stats.TotalPlaytime ]
             %> "online.players.profile.playtime")
-            .Color(K Colors.text_subheading)
+            .Color(Colors.text_subheading)
             .Align(Alignment.RIGHT)
             .Position(Position.SlicePercentR(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f))
         base.Init parent
@@ -130,7 +130,7 @@ type private Profile() =
         |+ StatsHeader(data)
             .Position(Position.SliceT(70.0f, 120.0f).ShrinkX(20.0f))
         |+ Text(%"online.players.profile.recent_scores")
-            .Color(K Colors.text)
+            .Color(Colors.text)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(180.0f, 45.0f).ShrinkX(40.0f))
         |+ RecentScores(data.RecentScores)
