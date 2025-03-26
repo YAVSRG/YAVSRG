@@ -45,7 +45,9 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     override this.Init(parent) =
         this
-        |+ Text(ruleset.Name, Align = Alignment.LEFT).Position(Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
+        |+ Text(ruleset.Name)
+            .Align(Alignment.LEFT)
+            .Position(Position.SliceT(50.0f).Shrink(10.0f, Style.PADDING))
         |+ Text(
             ruleset.Description,
             Align = Alignment.LEFT).Position(Position.ShrinkT(40.0f).Shrink(10.0f, Style.PADDING))

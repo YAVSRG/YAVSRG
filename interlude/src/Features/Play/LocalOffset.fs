@@ -83,7 +83,9 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
             offset_slider
         )
             .Pos(0)
-        |+ Text(%"play.localoffset.slider_hint", Align = Alignment.LEFT).Pos(2, 1)
+        |+ Text(%"play.localoffset.slider_hint")
+            .Align(Alignment.LEFT)
+            .Pos(2, 1)
         |+ PageButton(
                 [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
                 apply_recommended,

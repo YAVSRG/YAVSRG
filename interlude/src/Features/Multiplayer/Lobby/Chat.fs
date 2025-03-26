@@ -29,8 +29,10 @@ type Chat(lobby: Lobby) =
                 lobby.Players.[sender].Color, Colors.shadow_2
 
         Container(NodeType.None)
-        |+ Text(sender, Color = K sender_color, Position = Position.SliceL w, Align = Alignment.RIGHT)
-        |+ Text(": " + message, Color = K Colors.text, Position = Position.ShrinkL w, Align = Alignment.LEFT)
+        |+ Text(sender, Color = K sender_color, Position = Position.SliceL w)
+            .Align(Alignment.RIGHT)
+        |+ Text(": " + message, Color = K Colors.text, Position = Position.ShrinkL w)
+            .Align(Alignment.LEFT)
 
     let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
 
@@ -185,7 +187,7 @@ type Chat(lobby: Lobby) =
         |* message_history
 
         lobby.OnChatMessage.Add(chat_msg >> add_msg)
-        lobby.OnSystemMessage.Add(fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
+        lobby.OnSystemMessage.Add(fun msg -> add_msg (Text(msg).Align(Alignment.CENTER)))
 
         lobby.OnLobbyEvent.Add(fun (kind, data) ->
             let text, color =
@@ -200,7 +202,7 @@ type Chat(lobby: Lobby) =
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 
-            add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1), Align = Alignment.CENTER))
+            add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1)).Align(Alignment.CENTER))
         )
 
         lobby.OnGameEnd.Add game_end_report

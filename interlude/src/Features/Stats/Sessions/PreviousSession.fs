@@ -19,7 +19,9 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
             else
                 sprintf "%s %s" Icons.ALERT_CIRCLE (%"stats.sessions.estimated_data")
             ,
-            Color = K Colors.text_subheading, Align = Alignment.LEFT).Position(Position.ShrinkT(70.0f).SliceT(40.0f))
+            Color = K Colors.text_subheading)
+                .Align(Alignment.LEFT)
+                .Position(Position.ShrinkT(70.0f).SliceT(40.0f))
         |+ Text(
             (fun () ->
                 sprintf "%s of playtime over %s, session started at %s"

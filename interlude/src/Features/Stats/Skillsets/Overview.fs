@@ -28,13 +28,19 @@ type KeymodeOverview(keymode: int, button_callback: GraphSource -> CorePattern o
         Container(NodeType.None, Position = pos)
         |+ Button(sprintf "%O: %.0f" source total, (fun () -> button_callback source None)).Position(Position.SliceT(40.0f))
 
-        |+ Button(Jacks.ToString(), (fun () -> button_callback source (Some Jacks)), Align = Alignment.RIGHT).Position(Position.SliceL(150.0f).ShrinkT(40.0f).SliceT(35.0f))
+        |+ Button(Jacks.ToString(), (fun () -> button_callback source (Some Jacks)))
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceL(150.0f).ShrinkT(40.0f).SliceT(35.0f))
         |+ bar data.Jacks max Colors.text_red (Position.ShrinkL(150.0f).ShrinkT(40.0f).SliceT(35.0f))
 
-        |+ Button(Chordstream.ToString(), (fun () -> button_callback source (Some Chordstream)), Align = Alignment.RIGHT).Position(Position.SliceL(150.0f).ShrinkT(75.0f).SliceT(35.0f))
+        |+ Button(Chordstream.ToString(), (fun () -> button_callback source (Some Chordstream)))
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceL(150.0f).ShrinkT(75.0f).SliceT(35.0f))
         |+ bar data.Chordstream max Colors.text_green (Position.ShrinkL(150.0f).ShrinkT(75.0f).SliceT(35.0f))
 
-        |+ Button(Stream.ToString(), (fun () -> button_callback source (Some Stream)), Align = Alignment.RIGHT).Position(Position.SliceL(150.0f).ShrinkT(110.0f).SliceT(35.0f))
+        |+ Button(Stream.ToString(), (fun () -> button_callback source (Some Stream)))
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceL(150.0f).ShrinkT(110.0f).SliceT(35.0f))
         |+ bar data.Stream max Colors.text_cyan (Position.ShrinkL(150.0f).ShrinkT(110.0f).SliceT(35.0f))
 
     override this.Draw() =

@@ -17,7 +17,9 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
             %"spectate.title",
             Color = K Colors.text_subheading,
             Align = Alignment.CENTER).Position(Position.SliceT(40.0f))
-        |+ Text(who, Color = K Colors.text, Align = Alignment.CENTER).Position(Position.ShrinkT(40.0f))
+        |+ Text(who, Color = K Colors.text)
+            .Align(Alignment.CENTER)
+            .Position(Position.ShrinkT(40.0f))
         |* MouseListener().OnLeftClick(cycle)
 
         base.Init parent

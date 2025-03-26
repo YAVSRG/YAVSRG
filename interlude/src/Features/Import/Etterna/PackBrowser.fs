@@ -102,7 +102,9 @@ type EtternaPacksBrowserPage() =
         :> Widget
 
     override this.Footer() =
-        Text(%"etterna_pack_browser.disclaimer", Align = Alignment.CENTER).Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
+        Text(%"etterna_pack_browser.disclaimer")
+            .Align(Alignment.CENTER)
+            .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =
         json_downloader.Join()

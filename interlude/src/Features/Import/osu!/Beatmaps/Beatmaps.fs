@@ -166,7 +166,8 @@ type BeatmapBrowserPage() =
         search_results
 
     override this.Header() =
-        Text(%"beatmap_browser.disclaimer", Align = Alignment.CENTER)
+        Text(%"beatmap_browser.disclaimer")
+            .Align(Alignment.CENTER)
             .Position(Position.SliceB(55.0f).Translate(0.0f, -10.0f))
 
     override this.Update(elapsed_ms, moved) =

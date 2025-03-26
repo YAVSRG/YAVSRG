@@ -17,5 +17,5 @@ type RateMods(config: HudConfig, state: PlayState) =
             else
                 sprintf "%.2fx" SelectedChart.rate.Value
 
-        this |* Text(text, Color = K Colors.text_subheading, Align = Alignment.CENTER)
+        this |* Text(text, Color = K Colors.text_subheading).Align(Alignment.CENTER)
         base.Init parent

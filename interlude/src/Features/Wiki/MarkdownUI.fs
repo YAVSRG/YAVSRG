@@ -55,7 +55,7 @@ type private SpanRenderingContext =
 module private Span =
 
     let fragment (text: string, colors: Color * Color, background: Color option) =
-        let t = Text(text, Color = K colors, Align = Alignment.LEFT)
+        let t = Text(text, Color = K colors).Align(Alignment.LEFT)
 
         match background with
         | Some b ->

@@ -303,7 +303,9 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
                 PageButton.Once(label, fork action Menu.Back).Pos(p)
             )
         )
-        |+ Text(prompt, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+        |+ Text(prompt)
+            .Align(Alignment.LEFT)
+            .Pos(0, 2, PageWidth.Full)
         :> Widget
 
     override this.Title = %"confirm"

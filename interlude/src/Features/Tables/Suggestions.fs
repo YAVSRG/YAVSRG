@@ -166,14 +166,18 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 |> String.concat ", "
             match suggestion.BackbeatInfo with
             | Some (server_chart, server_song) ->
-                yield Text(server_song.FormattedTitle, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+                yield Text(server_song.FormattedTitle)
+                    .Align(Alignment.LEFT)
+                    .Pos(0, 2, PageWidth.Full)
                 yield Text(server_chart.DifficultyName + "  •  " + server_chart.FormattedCreators, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
                 yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(3, 1, PageWidth.Full))
             | None ->
 
             match suggestion.LocalChart with
             | Some local_cc ->
-                yield Text(local_cc.Artist + " - " + local_cc.Title, Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+                yield Text(local_cc.Artist + " - " + local_cc.Title)
+                    .Align(Alignment.LEFT)
+                    .Pos(0, 2, PageWidth.Full)
                 yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(2, 1, PageWidth.Full))
                 yield Text(vote_text, Align = Alignment.LEFT, Color = K Colors.text_subheading).Position(page_position(3, 1, PageWidth.Full))
             | None ->

@@ -284,7 +284,9 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
     override this.Init(parent: Widget) =
         this
         |+ Frame(Fill = K Colors.shadow_2.O2, Border = K Colors.shadow_2.O2)
-        |+ Text(chart.Song.FormattedTitle, Align = Alignment.LEFT).Position(Position.Shrink(5.0f, 0.0f))
+        |+ Text(chart.Song.FormattedTitle)
+            .Align(Alignment.LEFT)
+            .Position(Position.Shrink(5.0f, 0.0f))
         |* Text(
             fun () ->
                 match state.Status chart.Hash with

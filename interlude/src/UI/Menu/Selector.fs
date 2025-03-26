@@ -77,7 +77,8 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
 
     override this.Init(parent) =
         this
-        |+ Text((fun () -> snd wrapped_setting.Value), Align = Alignment.LEFT)
+        |+ Text((fun () -> snd wrapped_setting.Value))
+            .Align(Alignment.LEFT)
         |+ MouseListener().Button(this)
         |* dropdown_wrapper
 

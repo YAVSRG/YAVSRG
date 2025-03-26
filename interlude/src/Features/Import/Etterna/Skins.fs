@@ -25,7 +25,9 @@ module Skins =
                 match existing_folder with
                 | Some folder ->
                     [
-                        Text([folder] %> "etterna_skin_import.delete_prompt", Align = Alignment.LEFT).Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
+                        Text([folder] %> "etterna_skin_import.delete_prompt")
+                            .Align(Alignment.LEFT)
+                            .Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
                         PageSetting(%"etterna_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []

@@ -45,7 +45,9 @@ type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
                     fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
         }
-        |+ Text([ sprintf "%s [%s]" cc.Title cc.DifficultyName ] %> "misc.confirmdelete", Align = Alignment.LEFT).Position(page_position(0, 2, PageWidth.Full))
+        |+ Text([ sprintf "%s [%s]" cc.Title cc.DifficultyName ] %> "misc.confirmdelete")
+            .Align(Alignment.LEFT)
+            .Pos(0, 2, PageWidth.Full)
         :> Widget
 
     override this.Title = %"chart.delete"

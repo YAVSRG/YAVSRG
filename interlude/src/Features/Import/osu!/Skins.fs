@@ -31,7 +31,9 @@ module Skins =
                 match existing_folder with
                 | Some folder ->
                     [
-                        Text([folder] %> "osu_skin_import.delete_prompt", Align = Alignment.LEFT).Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
+                        Text([folder] %> "osu_skin_import.delete_prompt")
+                            .Align(Alignment.LEFT)
+                            .Position(page_position(5, 2, PageWidth.Full).Shrink(Style.PADDING))
                         PageSetting(%"osu_skin_import.delete_existing", Checkbox delete_existing).Pos(7)
                     ]
                 | None -> []

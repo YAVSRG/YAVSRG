@@ -40,7 +40,8 @@ type SkipButton(config: HudConfig, state: PlayState) =
                     }
             )
         this
-        |* Text(text, Color = K Colors.text, Align = Alignment.CENTER)
+        |* Text(text, Color = K Colors.text)
+            .Align(Alignment.CENTER)
         base.Init parent
 
     override this.Update(elapsed_ms, moved) =
