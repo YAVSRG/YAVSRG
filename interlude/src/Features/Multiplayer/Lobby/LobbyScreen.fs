@@ -55,27 +55,14 @@ type LobbyUI(lobby: Lobby) =
 
     override this.Init(parent) =
         this
-        |+ Button(
-            Icons.SETTINGS,
-            (fun () -> LobbySettingsPage(lobby).Show())).Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
+        |+ Button(Icons.SETTINGS, fun () -> LobbySettingsPage(lobby).Show())
+            .Position(Position.SliceT(90.0f).Shrink(10.0f).SliceR(70.0f))
             .Conditional(fun () -> lobby.YouAreHost)
-        |+ Text(
-            (fun () -> lobby.Settings.Name),
-            Align = Alignment.CENTER,
-            Position =
-                { Position.SliceT(90.0f).Shrink(10.0f) with
-                    Right = 0.4f %- 0.0f
-                }
-        )
-        |+ PlayerList(lobby,
-            Position =
-                {
-                    Left = 0.0f %+ 50.0f
-                    Right = 0.4f %- 50.0f
-                    Top = 0.0f %+ 100.0f
-                    Bottom = 1.0f %- 100.0f
-                }
-        )
+        |+ Text(fun () -> lobby.Settings.Name)
+            .Align(Alignment.CENTER)
+            .Position(Position.SliceT(90.0f).ShrinkPercentL(0.4f).Shrink(10.0f))
+        |+ PlayerList(lobby)
+            .Position(Position.SlicePercentL(0.4f).Shrink(50.0f, 100.0f))
         |+ AngledButton(
             sprintf "%s %s" Icons.EYE (%"levelselect.preview"),
             (fun () -> SelectedChart.if_loaded <| fun info -> Preview(info, ignore).Show()),
@@ -91,7 +78,7 @@ type LobbyUI(lobby: Lobby) =
             )
             .Help(Help.Info("levelselect.preview"))
         |+ AngledButton(
-            K(sprintf "%s %s" Icons.ZAP (%"levelselect.mods")),
+            sprintf "%s %s" Icons.ZAP (%"levelselect.mods"),
             ignore,
             Palette.DARK_100
         )

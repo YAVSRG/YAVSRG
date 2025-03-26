@@ -346,10 +346,10 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
     override this.Init(parent: Widget) =
         this
         |+ Frame(Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
-        |+ Text(
-            level_name,
-            Align = Alignment.LEFT)
-            .Color((fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f, 0.0f))
+        |+ Text(level_name)
+            .Align(Alignment.LEFT)
+            .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+            .Position(Position.Shrink(5.0f, 0.0f))
         |+ Text(fun () ->
             match state.LevelStatus level with
             | GroupStatus.AllMissing -> Icons.X
@@ -417,15 +417,13 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
     override this.Init(parent: Widget) =
         this
         |+ Frame(Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
-        |+ Text(
-            info.Name,
-            Align = Alignment.LEFT)
+        |+ Text(info.Name)
             .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+            .Align(Alignment.LEFT)
             .Position(Position.Shrink(5.0f).ShrinkB(50.0f))
-        |+ Text(
-            info.Description,
-            Align = Alignment.LEFT)
+        |+ Text(info.Description)
             .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Position(Position.Shrink(5.0f).SliceB(50.0f))
         |+ Text(
             (fun () ->

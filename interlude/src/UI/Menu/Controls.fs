@@ -28,18 +28,19 @@ type PageSetting(localised_text, widget: Widget) as this =
 
     override this.Init(parent) =
         this
-        |* Text(
-            localised_text + ":").Color((fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
-            Align = Alignment.LEFT,
-            Position =
+        |* Text(localised_text + ":")
+            .Color(fun () -> if widget.Focused then Colors.text_yellow_2 else Colors.text)
+            .Align(Alignment.LEFT)
+            .Position(
                 Position
                     .Box(0.0f, 0.0f, 0.0f, 0.0f, PAGE_LABEL_WIDTH - 10.0f, PAGE_ITEM_HEIGHT)
                     .Shrink(Style.PADDING)
-        )
+            )
 
         base.Init parent
-        widget.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)
-        widget.Init this
+        widget
+            .Position(Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING))
+            .Init(this)
 
     override this.Draw() =
         if widget.Selected then

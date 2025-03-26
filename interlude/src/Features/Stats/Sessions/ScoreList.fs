@@ -213,11 +213,10 @@ type ScoreList(start_time: int64, end_time: int64) =
 
         this
         |+ ScrollContainer(scores, Position = Position.Shrink(20.0f), Margin = 5.0f)
-        |+ Button(
-            Icons.LIST + " " + %"stats.session.make_playlist",
-            make_playlist,
-            Align = Alignment.RIGHT,
-            Floating = true).Position(Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f))
+        |+ Button(Icons.LIST + " " + %"stats.session.make_playlist", make_playlist)
+            .Align(Alignment.RIGHT)
+            .Floating()
+            .Position(Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f))
             .Conditional(fun () -> has_scores)
         |* EmptyState(Icons.WIND, "No scores this session").Position(Position.ShrinkT(160.0f))
             .Conditional(fun () -> finished_loading && not has_scores)
