@@ -111,9 +111,10 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
 
                 if r = 0 then
                     grid.Add(
-                        Text(
-                            K(sprintf "Frame %i" (c + 1)),
-                            Color = K Colors.text_subheading).Align(Alignment.CENTER).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)),
+                        Text(sprintf "Frame %i" (c + 1))
+                            .Color(Colors.text_subheading)
+                            .Align(Alignment.CENTER)
+                            .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)),
                         c + 2,
                         0
                     )

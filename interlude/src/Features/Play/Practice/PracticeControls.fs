@@ -70,11 +70,12 @@ type SyncSuggestionControls(state: PracticeState) =
         this
         |+ Text(
             title,
-            Position = Position.SliceT(60.0f).ShrinkX(25.0f),
-            Color = K Colors.text_subheading).Align(Alignment.LEFT)
-        |+ Text(
-            current_value,
-            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(60.0f)).Align(Alignment.LEFT)
+            Position = Position.SliceT(60.0f).ShrinkX(25.0f))
+            .Color(K Colors.text_subheading)
+            .Align(Alignment.LEFT)
+        |+ Text(current_value)
+            .Position(Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(60.0f))
+            .Align(Alignment.LEFT)
         |+ Text(
             suggested_value,
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f),
@@ -84,44 +85,38 @@ type SyncSuggestionControls(state: PracticeState) =
         |+ Text(
             %"practice.unmute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_red_2
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_red_2)
             .Conditional(fun () -> state.SyncMode.Value.Audio = 2 && options.AudioVolume.Value = 0.0)
         |+ Text(
             %"practice.mute_mandatory_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_red_2
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_red_2)
             .Conditional(fun () -> state.SyncMode.Value.Audio = 0 && options.AudioVolume.Value > 0.0)
         |+ Text(
             %"practice.mute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_yellow_2
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_yellow_2)
             .Conditional(fun () -> state.SyncMode.Value.Audio = 1 && options.AudioVolume.Value > 0.0)
         |+ Text(
             %"practice.mute_hint",
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_yellow_2
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_yellow_2)
             .Conditional(fun () -> state.SyncMode.Value.Audio = 1 && options.AudioVolume.Value > 0.0)
         |+ Text(
             sprintf "%s: %O" (%"practice.accept_suggestion") (%%"accept_offset"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_cyan
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_cyan)
             .Conditional(fun () -> (state.SyncMode.Value.Audio < 2) <> (options.AudioVolume.Value <> 0.0))
         |* Text(
             sprintf "%s: %O" (%"practice.reset_offset") (%%"reset_offset"),
             Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_cyan
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_cyan)
             .Conditional(fun () -> (state.SyncMode.Value.Audio < 2) <> (options.AudioVolume.Value <> 0.0))
 
         base.Init parent
@@ -133,30 +128,33 @@ type PracticeControls(state: PracticeState, with_mods: ModdedChart, on_seek: Tim
 
     override this.Init(parent) =
         this
-        |+ Text(
-            Icons.TARGET + " " + (%"practice.title"),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.LEFT)
+        |+ Text(Icons.TARGET + " " + (%"practice.title"))
+            .Align(Alignment.LEFT)
+            .Position(Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f))
         |+ PageButton(
             sprintf "%s %s" Icons.SETTINGS (%"practice.tools"),
             (fun () -> PracticeToolsPage(state).Show())).Position(Position.SliceT(50.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
         |+ HotkeyListener("context_menu", fun () -> PracticeToolsPage(state).Show())
         |+ SyncSuggestionControls(state).Position(Position.ShrinkT(160.0f))
 
-        |+ Text(
-            (fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD SelectedChart.rate.Value),
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f)).Align(Alignment.RIGHT)
+        |+ Text((fun () -> sprintf "%s %.2fx" Icons.FAST_FORWARD SelectedChart.rate.Value))
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceT(90.0f).ShrinkX(25.0f).TranslateY(10.0f))
         |+ Text(
             sprintf "%s: %O/%O" (%"replay.change_playback_rate") (%%"uprate") (%%"downrate"),
-            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f),
-            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
+            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(110.0f))
+            .Color(K Colors.text_cyan)
+            .Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O" (%"practice.play") (%%"pause"),
-            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f),
-            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
+            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(160.0f))
+            .Color(K Colors.text_cyan)
+            .Align(Alignment.RIGHT)
         |+ Text(
             sprintf "%s: %O" (%"practice.restart") (%%"retry"),
-            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f),
-            Color = K Colors.text_cyan).Align(Alignment.RIGHT)
+            Position = Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(210.0f))
+            .Color(K Colors.text_cyan)
+            .Align(Alignment.RIGHT)
 
         |* Timeline(with_mods, on_seek, SelectedChart.rate)
 

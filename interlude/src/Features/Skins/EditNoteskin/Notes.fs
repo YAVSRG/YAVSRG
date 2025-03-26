@@ -29,9 +29,8 @@ type RotationPicker(rotation: Setting<float>) as this =
         |+ Text(
             (fun () -> sprintf "%.1f" rotation.Value),
             Position = Position.SliceB(30.0f),
-            Align = Alignment.LEFT,
-            Color = K Colors.text_subheading
-        )
+            Align = Alignment.LEFT)
+            .Color(Colors.text_subheading)
         |* MouseListener()
             .SelectOnClick(this, fd)
             .FocusOnHover(this)

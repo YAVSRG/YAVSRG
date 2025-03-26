@@ -10,8 +10,9 @@ type InviteCard(invite: LobbyInvite) =
 
     override this.Init(parent) =
         this
-        |+ Text(Icons.MAIL + " " + invite.InvitedBy, Position = Position.Shrink(5.0f))
+        |+ Text(Icons.MAIL + " " + invite.InvitedBy)
             .Align(Alignment.LEFT)
+            .Position(Position.Shrink(5.0f))
         |+ Button(
             Icons.CHECK,
             (fun () ->

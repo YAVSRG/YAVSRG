@@ -303,8 +303,9 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
                     | ChartStatus.Downloading -> Colors.text_yellow_2
                     | ChartStatus.Downloaded -> Colors.text_green_2
                     | ChartStatus.DownloadFailed -> Colors.text_red_2
-            , Position = Position.Shrink(5.0f, 0.0f)
-            ).Align(Alignment.RIGHT)
+            )
+            .Position(Position.Shrink(5.0f, 0.0f))
+            .Align(Alignment.RIGHT)
 
         base.Init parent
 
@@ -346,8 +347,8 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         |+ Frame(Fill = (K <| Color.FromArgb(section.Color).O1), Border = (K <| Color.FromArgb(section.Color).O1))
         |+ Text(
             level_name,
-            Align = Alignment.LEFT,
-            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f, 0.0f))
+            Align = Alignment.LEFT)
+            .Color((fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f, 0.0f))
         |+ Text(
             fun () ->
                 match state.LevelStatus level with
@@ -362,17 +363,19 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
                     | GroupStatus.SomeMissing -> Colors.text_yellow_2
                     | GroupStatus.Downloading -> Colors.text_yellow_2
                     | GroupStatus.Downloaded -> Colors.text_green_2
-            , Position = Position.Shrink(85.0f, 0.0f)
-            ).Align(Alignment.RIGHT)
+            )
+            .Position(Position.Shrink(85.0f, 0.0f))
+            .Align(Alignment.RIGHT)
         |+ Text(
             (fun () ->
                 if state.OpenLevel = level then
                     Icons.CHEVRON_UP
                 else
                     Icons.CHEVRON_DOWN
-            ),
-            Color = K Colors.text,
-            Position = Position.Shrink(5.0f, 0.0f)).Align(Alignment.RIGHT)
+            ))
+            .Color(Colors.text)
+            .Align(Alignment.RIGHT)
+            .Position(Position.Shrink(5.0f, 0.0f))
         |+ MouseListener().Button(this)
         |* this.Button
 
@@ -416,21 +419,24 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
         |+ Frame(Fill = (K <| Color.FromArgb(info.Color).O2), Border = (K <| Color.FromArgb(info.Color).O3))
         |+ Text(
             info.Name,
-            Align = Alignment.LEFT,
-            Color = (fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f).ShrinkB(50.0f))
+            Align = Alignment.LEFT)
+            .Color(fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)
+            .Position(Position.Shrink(5.0f).ShrinkB(50.0f))
         |+ Text(
             info.Description,
-            Align = Alignment.LEFT,
-            Color = K Colors.text_subheading).Position(Position.Shrink(5.0f).SliceB(50.0f))
+            Align = Alignment.LEFT)
+            .Color(Colors.text_subheading)
+            .Position(Position.Shrink(5.0f).SliceB(50.0f))
         |+ Text(
             (fun () ->
                 if state.OpenSection = info.Name then
                     Icons.CHEVRON_UP
                 else
                     Icons.CHEVRON_DOWN
-            ),
-            Color = K Colors.text,
-            Position = Position.Shrink(25.0f, 20.0f)).Align(Alignment.RIGHT)
+            ))
+            .Color(Colors.text)
+            .Align(Alignment.RIGHT)
+            .Position(Position.Shrink(25.0f, 20.0f))
         |+ MouseListener().Button(this)
         |* this.Button
 

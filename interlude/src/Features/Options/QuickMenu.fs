@@ -24,10 +24,10 @@ type QuickMenuPage() =
     override this.Header() =
         Container(NodeType.None)
         |+ PageHeaderBase()
-        |+ Text(
-            sprintf "%s: %O" (%"misc.hotkeyhint") (%%"quick_menu"),
-            Color = K Colors.text_cyan,
-            Position = Position.ShrinkL(PAGE_MARGIN_X).ShrinkT(110.0f).SliceT(35.0f)).Align(Alignment.LEFT)
+        |+ Text(sprintf "%s: %O" (%"misc.hotkeyhint") (%%"quick_menu"))
+            .Color(K Colors.text_cyan)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkL(PAGE_MARGIN_X).ShrinkT(110.0f).SliceT(35.0f))
         :> Widget
 
     override this.Direction = PageEasing.Right

@@ -92,8 +92,9 @@ type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
             )
 
     let player =
-        Text(%"stats.leaderboards.activity.player",
-            Color = K Colors.text_subheading).Align(Alignment.LEFT)
+        Text(%"stats.leaderboards.activity.player")
+            .Color(K Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Position(Position.SlicePercentL(0.33f).ShrinkL(PlayerXP.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
 
     override this.Init(parent) =

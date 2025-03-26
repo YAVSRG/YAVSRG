@@ -31,22 +31,23 @@ type OverallHeader() =
             (if Network.credentials.Username <> "" then
                  Network.credentials.Username
              else
-                 %"stats.name_placeholder"),
-            Position = Position.SliceT(100.0f).ShrinkX(10.0f)).Align(Alignment.LEFT)
-        |+ Text(
-            sprintf "%s: %i" (%"stats.sessions.notes_hit") (TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit),
-            Color = K Colors.text_subheading,
-            Position = Position.SliceT(50.0f).ShrinkT(15.0f).ShrinkX(10.0f)).Align(Alignment.RIGHT)
-        |+ Text(
-            sprintf "XP: %i" xp,
-            Color = K Colors.text_subheading,
-            Position = Position.ShrinkT(50.0f).SliceT(50.0f).ShrinkB(15.0f).ShrinkX(10.0f)).Align(Alignment.RIGHT)
-        |+ Text(
-            sprintf "%i / %i" current_xp xp_to_next_level,
-            Color = K Colors.text_subheading,
-            Position = Position.ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f)).Align(Alignment.RIGHT)
-        |* Text(
-            sprintf "Level %i" level,
-            Position = Position.ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f)).Align(Alignment.LEFT)
+                 %"stats.name_placeholder"))
+                 .Position(Position.SliceT(100.0f).ShrinkX(10.0f))
+                 .Align(Alignment.LEFT)
+        |+ Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") (TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit))
+            .Color(K Colors.text_subheading)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceT(50.0f).ShrinkT(15.0f).ShrinkX(10.0f))
+        |+ Text(sprintf "XP: %i" xp)
+            .Color(Colors.text_subheading)
+            .Align(Alignment.RIGHT)
+            .Position(Position.ShrinkT(50.0f).SliceT(50.0f).ShrinkB(15.0f).ShrinkX(10.0f))
+        |+ Text(sprintf "%i / %i" current_xp xp_to_next_level)
+            .Color(K Colors.text_subheading)
+            .Align(Alignment.RIGHT)
+            .Position(Position.ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f))
+        |* Text(sprintf "Level %i" level)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f))
 
         base.Init parent

@@ -143,8 +143,8 @@ type SelectedChart(lobby: Lobby) =
                 match lobby.Chart with
                 | Some c -> c.Artist + "  •  " + c.Creator
                 | None -> ""
-            ),
-            Color = K Colors.text_subheading)
+            ))
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
         |+ Text(
@@ -152,8 +152,8 @@ type SelectedChart(lobby: Lobby) =
                 match LobbyChart.info_if_selected() with
                 | Some info -> info.ChartMeta.DifficultyName
                 | None -> "???"
-            ),
-            Color = K Colors.text_subheading)
+            ))
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
 

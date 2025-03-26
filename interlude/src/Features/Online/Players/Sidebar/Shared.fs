@@ -22,9 +22,10 @@ type private PlayerButton(username: string, color: int) =
 
     override this.Init(parent) =
         this
-        |+ Text(
-            username,
-            Color = K(Color.FromArgb color, Colors.shadow_2)).Align(Alignment.LEFT).Position(Position.Shrink(20.0f, 5.0f))
+        |+ Text(username)
+            .Color(K(Color.FromArgb color, Colors.shadow_2))
+            .Align(Alignment.LEFT)
+            .Position(Position.Shrink(20.0f, 5.0f))
         |* MouseListener().Button(this)
 
         base.Init parent

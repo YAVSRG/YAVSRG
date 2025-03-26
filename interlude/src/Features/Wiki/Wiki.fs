@@ -90,7 +90,7 @@ type WikiBrowserPage() =
                             Fill = K Colors.cyan.O2,
                             Border = K Colors.cyan_accent
                         )
-                        |+ Text(key, Position = Position.SliceT(60.0f))
+                        |+ Text(key).Position(Position.SliceT(60.0f))
                             .Color(Colors.text_subheading)
                         |+ links
                     )
@@ -99,8 +99,7 @@ type WikiBrowserPage() =
                     Container(
                         NodeType.Container(fun () -> Some folders)).Position(Position.Box(0.0f, 0.0f, 0.0f, y, PAGE_WIDTH, 400.0f))
                     |+ Text(
-                        sprintf "%s %s" Icons.BOOK_OPEN (%"wiki.contents"),
-                        Position = Position.SliceT(70.0f).Shrink(20.0f, 0.0f)).Align(Alignment.LEFT)
+                        sprintf "%s %s" Icons.BOOK_OPEN (%"wiki.contents")).Position(Position.SliceT(70.0f).Shrink(20.0f, 0.0f)).Align(Alignment.LEFT)
                     |+ folders
                 )
 

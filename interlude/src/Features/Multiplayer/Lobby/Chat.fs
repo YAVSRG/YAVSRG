@@ -59,9 +59,8 @@ type Chat(lobby: Lobby) =
         let replays = lobby.Replays
         if replays.Keys.Count > 0 then
             add_msg (
-                Text(
-                    sprintf "== Results for: %s ==" lobby.Chart.Value.Title,
-                    Color = K Colors.text)
+                Text(sprintf "== Results for: %s ==" lobby.Chart.Value.Title)
+                    .Color(Colors.text)
                     .Align(Alignment.CENTER)
             )
 
@@ -119,25 +118,21 @@ type Chat(lobby: Lobby) =
                                     (color, Colors.shadow_1)
                             ))
                             .Align(Alignment.LEFT)
-                    |+ Text(
-                        data.Scoring.FormattedAccuracy,
-                        Color = K(data.Ruleset.GradeColor grade, Colors.shadow_1))
+                    |+ Text(data.Scoring.FormattedAccuracy)
+                        .Color(data.Ruleset.GradeColor grade, Colors.shadow_1)
                         .Align(Alignment.CENTER)
-                    |+ Text(
-                        data.Ruleset.LampName lamp,
-                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1))
+                    |+ Text(data.Ruleset.LampName lamp)
+                        .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
                         .Align(0.75f)
-                    |+ Text(
-                        sprintf "%ix" (data.Scoring.BestCombo),
-                        Color = K(data.Ruleset.LampColor lamp, Colors.shadow_1))
+                    |+ Text(sprintf "%ix" (data.Scoring.BestCombo))
+                        .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
                         .Align(Alignment.RIGHT)
 
                 add_msg cmp
 
             add_msg (
-                Text(
-                    "Click a score to view details",
-                    Color = K Colors.text_greyout)
+                Text("Click a score to view details")
+                    .Color(K Colors.text_greyout)
                     .Align(Alignment.CENTER)
             )
 
@@ -171,9 +166,9 @@ type Chat(lobby: Lobby) =
                     "Press ENTER to chat"
                 else
                     ""
-            ),
-            Color = K Colors.text_subheading,
-            Position = Position.SliceB(50.0f).Shrink(5.0f))
+            ))
+            .Color(Colors.text_subheading)
+            .Position(Position.SliceB(50.0f).Shrink(5.0f))
             .Align(Alignment.LEFT)
         |* message_history
 
@@ -193,7 +188,7 @@ type Chat(lobby: Lobby) =
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 
-            add_msg (Text(text, Color = (fun () -> color, Colors.shadow_1)).Align(Alignment.CENTER))
+            add_msg (Text(text).Color((fun () -> color, Colors.shadow_1)).Align(Alignment.CENTER))
         )
 
         lobby.OnGameEnd.Add game_end_report

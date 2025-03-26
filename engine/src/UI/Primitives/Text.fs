@@ -33,6 +33,11 @@ type TextExtensions =
         text
 
     [<Extension>]
+    static member Color (text: Text, fg: Color, bg: Color) : Text =
+        text.Color <- K (fg, bg)
+        text
+
+    [<Extension>]
     static member Color (text: Text, color: Color) : Text =
         text.Color <- K (color, Colors.shadow_2)
         text

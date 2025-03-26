@@ -18,8 +18,8 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
                 sprintf "%s: %i" (%"stats.sessions.notes_hit") session.NotesHit
             else
                 sprintf "%s %s" Icons.ALERT_CIRCLE (%"stats.sessions.estimated_data")
-            ,
-            Color = K Colors.text_subheading)
+            )
+                .Color(Colors.text_subheading)
                 .Align(Alignment.LEFT)
                 .Position(Position.ShrinkT(70.0f).SliceT(40.0f))
         |+ Text(
@@ -28,8 +28,10 @@ type PreviousSession(session: Session, sessions_today: Session list, close: unit
                     (format_short_time session.PlayTime)
                     (format_short_time session.GameTime)
                     ((Timestamp.to_datetime session.Start).ToLocalTime().ToShortTimeString())
-            ),
-            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.ShrinkT(105.0f).SliceT(40.0f))
+            ))
+            .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkT(105.0f).SliceT(40.0f))
         |+ Button(Icons.X, close).Position(Position.SliceT(60.0f).SliceR(60.0f))
         |+ Button(
             sprintf "%s %s" Icons.ARROW_LEFT (%"stats.sessions.back"),

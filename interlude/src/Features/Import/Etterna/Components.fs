@@ -87,8 +87,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
             ),
             Color = (fun () -> if status = DownloadFailed then Colors.text_red else Colors.text_green)).Align(Alignment.RIGHT).Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
         |+ Text(
-            (sprintf "Average difficulty (MSD): %.2f" data.overall),
-            Color = K Colors.text_subheading)
+            (sprintf "Average difficulty (MSD): %.2f" data.overall))
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
         |+ Button(Icons.DOWNLOAD, download).Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
@@ -100,9 +100,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
         if data.contains_nsfw then
             this
-            |* Text(
-                Icons.ALERT_TRIANGLE + " NFSW content",
-                Color = K Colors.text_red)
+            |* Text(Icons.ALERT_TRIANGLE + " NFSW content")
+                .Color(Colors.text_red)
                 .Align(Alignment.LEFT)
                 .Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
 

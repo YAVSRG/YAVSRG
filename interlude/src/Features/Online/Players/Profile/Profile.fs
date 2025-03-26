@@ -31,31 +31,31 @@ type StatsHeader(data: ProfileData) =
 
     override this.Init(parent: Widget): unit =
         this
-        |+ Text(
-            sprintf "%.1fk / %.1fk" current_xp xp_to_next_level,
-            Color = K Colors.text_subheading,
-            Position = Position.SlicePercentL(BAR_PC).SliceB(60.0f, 35.0f).ShrinkX(20.0f))
+        |+ Text(sprintf "%.1fk / %.1fk" current_xp xp_to_next_level)
+            .Color(Colors.text_subheading)
+            .Position(Position.SlicePercentL(BAR_PC).SliceB(60.0f, 35.0f).ShrinkX(20.0f))
             .Align(Alignment.RIGHT)
-        |+ Text(
-            sprintf "Level %i" level,
-            Position = Position.SlicePercentL(BAR_PC).SliceB(55.0f, 50.0f).ShrinkX(20.0f))
+        |+ Text(sprintf "Level %i" level)
             .Align(Alignment.LEFT)
+            .Position(Position.SlicePercentL(BAR_PC).SliceB(55.0f, 50.0f).ShrinkX(20.0f))
         |+ Text(
             [ (Timestamp.to_datetimeoffset data.DateSignedUp).ToLocalTime().DateTime.ToShortDateString() ]
-            %> "online.players.profile.signed_up",
-            Color = K Colors.text_subheading,
-            Position = Position.SlicePercentR(1.0f - BAR_PC).SliceT(40.0f).ShrinkX(20.0f))
+            %> "online.players.profile.signed_up")
+            .Color(Colors.text_subheading)
             .Align(Alignment.RIGHT)
+            .Position(Position.SlicePercentR(1.0f - BAR_PC).SliceT(40.0f).ShrinkX(20.0f))
         |+ Text(
             [ if data.Stats.LastUpdated = 0L then "--" else (Timestamp.to_datetimeoffset data.Stats.LastUpdated).ToLocalTime().DateTime.ToShortDateString() ]
-            %> "online.players.profile.last_seen",
-            Color = K Colors.text_subheading,
-            Position = Position.SlicePercentR(1.0f - BAR_PC).ShrinkT(40.0f).SliceT(40.0f).ShrinkX(20.0f)).Align(Alignment.RIGHT)
+            %> "online.players.profile.last_seen")
+            .Color(Colors.text_subheading)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SlicePercentR(1.0f - BAR_PC).ShrinkT(40.0f).SliceT(40.0f).ShrinkX(20.0f))
         |* Text(
             [ if data.Stats.LastUpdated = 0L then "--" else format_long_time data.Stats.TotalPlaytime ]
-            %> "online.players.profile.playtime",
-            Color = K Colors.text_subheading,
-            Position = Position.SlicePercentR(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f)).Align(Alignment.RIGHT)
+            %> "online.players.profile.playtime")
+            .Color(K Colors.text_subheading)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SlicePercentR(1.0f - BAR_PC).SliceB(40.0f).ShrinkX(20.0f))
         base.Init parent
 
 type private Profile() =
@@ -123,15 +123,14 @@ type private Profile() =
 
         Container(NodeType.None)
         // Main details
-        |+ Text(
-            data.Username,
-            Color = (fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2))
+        |+ Text(data.Username)
+            .Color((fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2))
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f))
-        |+ StatsHeader(data).Position(Position.SliceT(70.0f, 120.0f).ShrinkX(20.0f))
-        |+ Text(
-            %"online.players.profile.recent_scores",
-            Color = K Colors.text)
+        |+ StatsHeader(data)
+            .Position(Position.SliceT(70.0f, 120.0f).ShrinkX(20.0f))
+        |+ Text(%"online.players.profile.recent_scores")
+            .Color(K Colors.text)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(180.0f, 45.0f).ShrinkX(40.0f))
         |+ RecentScores(data.RecentScores)

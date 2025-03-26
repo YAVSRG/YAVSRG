@@ -29,8 +29,7 @@ type PageSetting(localised_text, widget: Widget) as this =
     override this.Init(parent) =
         this
         |* Text(
-            localised_text + ":",
-            Color = (fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
+            localised_text + ":").Color((fun () -> (if widget.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
             Position =
                 Position
@@ -87,8 +86,7 @@ type PageButton(localised_text, on_click) as this =
         |+ MouseListener().Button(this)
         |* seq {
             if this.Hotkey <> Bind.Dummy then
-                yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey,
-                    Color = K Colors.text_cyan).Align(Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
+                yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey).Color(K Colors.text_cyan).Align(Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
         }
 
         base.Init parent

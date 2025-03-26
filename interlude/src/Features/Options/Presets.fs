@@ -256,9 +256,8 @@ module private Presets =
         NavigationContainer.Column(WrapNavigation = false)
         |+ lower_buttons
         |+ create_preset_button
-        |+ Text(
-            sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"),
-            Color = K Colors.text_green)
+        |+ Text(sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"))
+            .Color(K Colors.text_green)
             .Position(Position.SliceB(40.0f).ShrinkX(10.0f))
             .Conditional(fun () ->
                 options.SelectedPreset.Value = Some preset_id

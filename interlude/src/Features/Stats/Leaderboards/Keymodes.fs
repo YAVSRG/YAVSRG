@@ -80,9 +80,10 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
             )
 
     let player =
-        Text(
-            %"stats.leaderboards.rating.player",
-            Color = K Colors.text_subheading).Align(Alignment.LEFT).Position(Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
+        Text(%"stats.leaderboards.rating.player")
+            .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
+            .Position(Position.SlicePercentL(0.25f).ShrinkL(PlayerInfo.HEIGHT * 1.5f).Shrink(10.0f, 5.0f))
 
     override this.Init(parent) =
         this

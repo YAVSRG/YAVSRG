@@ -16,9 +16,9 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
 
     override this.Init(parent) =
         this
-        |* Text(
-            (fun () -> score_info.Ruleset.GradeName (!grade).Grade),
-            Color = (fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black))).Position(Position.Shrink(-10.0f))
+        |* Text((fun () -> score_info.Ruleset.GradeName (!grade).Grade))
+            .Color((fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)))
+            .Position(Position.Expand(10.0f))
 
         base.Init parent
 
@@ -148,9 +148,9 @@ type Lamp
 
     override this.Init(parent) =
         this
-        |* Text(
-            (fun () -> score_info.Ruleset.LampName (!lamp).Lamp),
-            Color = (fun () -> (score_info.Ruleset.LampColor (!lamp).Lamp, Colors.black))).Position(Position.Shrink(10.0f, 0.0f).ShrinkB(LOWER_SIZE))
+        |* Text((fun () -> score_info.Ruleset.LampName (!lamp).Lamp))
+            .Color((fun () -> (score_info.Ruleset.LampColor (!lamp).Lamp, Colors.black)))
+            .Position(Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE))
 
         if (!improvements).Lamp <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
 

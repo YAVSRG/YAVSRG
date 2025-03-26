@@ -124,8 +124,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
                 match query_text.Value with
                 | "" -> Icons.SEARCH + " " + [ (%%"search").ToString() ] %> "misc.search"
                 | _ -> ""
-            , Color = text_entry.ColorFunc
-            ).Align(Alignment.LEFT).Position(Position.Shrink(10.0f, 0.0f))
+            ).Color(text_entry.ColorFunc).Align(Alignment.LEFT).Position(Position.Shrink(10.0f, 0.0f))
 
         base.Init parent
 

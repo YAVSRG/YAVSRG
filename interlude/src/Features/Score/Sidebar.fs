@@ -25,21 +25,26 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     override this.Init(parent) =
         this
         |+ Text(
-            sprintf "%s  %s" Icons.ZAP mod_string,
-            Position = Position.SliceT(90.0f).ShrinkX(25.0f)).Align(Alignment.CENTER)
+            sprintf "%s  %s" Icons.ZAP mod_string)
+            .Align(Alignment.CENTER)
+            .Position(Position.SliceT(90.0f).ShrinkX(25.0f))
         |+ Text(
             (fun () -> sprintf "%s  %iK  •  %s" Icons.BAR_CHART score_info.Chart.Keys score_info.Ruleset.Name),
-            Position = Position.ShrinkT(90.0f).SliceT(70.0f).ShrinkX(25.0f),
-            Color = K Colors.text_subheading).Align(Alignment.CENTER)
+            Position = Position.ShrinkT(90.0f).SliceT(70.0f).ShrinkX(25.0f))
+            .Color(Colors.text_subheading)
+            .Align(Alignment.CENTER)
         |+ Text(
-            sprintf "%s %.2f" Icons.STAR score_info.Rating.Overall,
-            Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f)).Align(Alignment.LEFT)
+            sprintf "%s %.2f" Icons.STAR score_info.Rating.Overall)
+            .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
+            .Align(Alignment.LEFT)
         |+ Text(
-            (fun () -> sprintf "%ix" score_info.Scoring.BestCombo),
-            Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f)).Align(Alignment.CENTER)
+            (fun () -> sprintf "%ix" score_info.Scoring.BestCombo))
+            .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
+            .Align(Alignment.CENTER)
         |+ Text(
-            sprintf "%.2f" score_info.Physical,
-            Position = Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f)).Align(Alignment.RIGHT)
+            sprintf "%.2f" score_info.Physical)
+            .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
+            .Align(Alignment.RIGHT)
 
         |+ Button(
             (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
@@ -48,14 +53,15 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             TextColor = fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text
         )
             .Conditional(show_more_info.Get >> not)
-        |+ Text(
-            category,
-            Position = Position.ShrinkB(85.0f).SliceB(60.0f).ShrinkX(25.0f)).Align(Alignment.LEFT)
+        |+ Text(category)
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkB(85.0f).SliceB(60.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get >> not)
         |+ Text(
             main_clusters,
-            Position = Position.ShrinkB(50.0f).SliceB(40.0f).ShrinkX(25.0f),
-            Color = K Colors.text_subheading).Align(Alignment.LEFT)
+            Position = Position.ShrinkB(50.0f).SliceB(40.0f).ShrinkX(25.0f))
+            .Color(Colors.text_subheading)
+            .Align(Alignment.LEFT)
             .Conditional(show_more_info.Get >> not)
 
         |+ Button(

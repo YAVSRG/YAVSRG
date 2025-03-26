@@ -42,9 +42,10 @@ type PerformanceSettingsPage() =
         )
             .Help(Help.Info("system.framelimit"))
             .Pos(0)
-        |+ Text(%"system.framelimit.unlimited_warning",
-            Color = K Colors.text_red,
-            Position = page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)).Align(Alignment.LEFT)
+        |+ Text(%"system.framelimit.unlimited_warning")
+            .Color(K Colors.text_red)
+            .Align(Alignment.LEFT)
+            .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
             .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
         |+ PageSetting(
             %"system.cpu_saver",
@@ -58,9 +59,10 @@ type PerformanceSettingsPage() =
         )
             .Help(Help.Info("system.msaa"))
             .Pos(5)
-        |+ Text(%"system.msaa.restart_warning",
-            Color = K Colors.text_red,
-            Position = page_position(7, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)).Align(Alignment.LEFT)
+        |+ Text(%"system.msaa.restart_warning")
+            .Color(K Colors.text_red)
+            .Position(page_position(7, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            .Align(Alignment.LEFT)
             .Conditional(fun () -> msaa_restart)
 
         |+ PageSetting(%"system.performance.antijitter",
@@ -82,9 +84,10 @@ type PerformanceSettingsPage() =
         )
             .Pos(12)
             .Conditional(show_tearline_settings)
-        |+ Text(%"system.performance.screen_tear_alignment.hint",
-            Color = K Colors.text,
-            Position = page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)).Align(Alignment.LEFT)
+        |+ Text(%"system.performance.screen_tear_alignment.hint")
+            .Color(K Colors.text)
+            .Align(Alignment.LEFT)
+            .Position(page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
             .Conditional(show_tearline_settings)
         :> Widget
 
