@@ -62,9 +62,6 @@ type LevelSelectScreen() =
                     )
                     .Help(Help.Info("levelselect.search", "search")),
 
-                LibraryViewControls()
-                    .Position(Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT)),
-
                 InfoPanel()
                     .Position(Position.ShrinkT(TOP_BAR_HEIGHT + 5.0f).SlicePercentL(INFO_SCREEN_SPLIT)),
 
@@ -162,7 +159,7 @@ type LevelSelectScreen() =
                     .Help(Help.Info("levelselect.context_menu").Hotkey("context_menu"))
             )
             // Bulk select actions
-            .AddConditional(
+            .WithConditional(
                 (fun () -> TreeState.multi_selection.IsSome),
 
                 AngledButton(
@@ -179,6 +176,11 @@ type LevelSelectScreen() =
                     Palette.MAIN.O2
                 )
                     .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT))
+            )
+            .Add(
+                // Goes last so that its dropdowns draw over action buttons
+                LibraryViewControls()
+                    .Position(Position.SliceT(TOP_BAR_HEIGHT).SliceB(50.0f).ShrinkPercentL(INFO_SCREEN_SPLIT))
             )
 
     override this.Update(elapsed_ms, moved) =
