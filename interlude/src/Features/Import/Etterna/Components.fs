@@ -79,13 +79,17 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
         |+ Text(data.size)
             .Align(Alignment.RIGHT)
             .Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f))
-        |+ Text(
-            (fun () ->
-                if status = Installed then "Downloaded!"
-                elif status = DownloadFailed then "Download failed!"
-                else ""
-            ),
-            Color = (fun () -> if status = DownloadFailed then Colors.text_red else Colors.text_green)).Align(Alignment.RIGHT).Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
+        |+ Text(fun () ->
+            if status = Installed then "Downloaded!"
+            elif status = DownloadFailed then "Download failed!"
+            else ""
+        )
+            .Color(fun () ->
+                if status = DownloadFailed then Colors.text_red
+                else Colors.text_green
+            )
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
         |+ Text(
             (sprintf "Average difficulty (MSD): %.2f" data.overall))
             .Color(Colors.text_subheading)

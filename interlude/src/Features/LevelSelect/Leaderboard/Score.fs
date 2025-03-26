@@ -50,63 +50,36 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
             fun () -> let a = fade.Alpha in (Colors.grey_1.O4a a, Colors.shadow_2.O4a a)
 
         this
-        |+ Text(
-            (fun () -> sprintf "#%i %s  •  %s" score.Rank score.Username score_info.Scoring.FormattedAccuracy),
-            Color = text_color,
-            Align = Alignment.LEFT,
-            Position =
-                {
-                    Left = 0.0f %+ 10.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 0.8f %+ 0.0f
-                    Bottom = 0.6f %+ 0.0f
-                }
+        |+ Text(fun () ->
+            sprintf "#%i %s  •  %s"
+                score.Rank
+                score.Username
+                score_info.Scoring.FormattedAccuracy
         )
+            .Color(text_color)
+            .Align(Alignment.LEFT)
+            .Position(Position.SlicePercentT(0.6f).ShrinkPercentL(0.6f).ShrinkL(10.0f))
 
-        |+ Text(
-            (fun () ->
-                sprintf
-                    "%s  •  %ix  •  %.2f"
-                    (score_info.Ruleset.LampName score_info.Lamp)
-                    score_info.Scoring.BestCombo
-                    score_info.Physical
-            ),
-            Color = text_subcolor,
-            Align = Alignment.LEFT,
-            Position =
-                {
-                    Left = 0.0f %+ 10.0f
-                    Top = 0.6f %- 5.0f
-                    Right = 0.5f %+ 0.0f
-                    Bottom = 1.0f %- 2.0f
-                }
+        |+ Text(fun () ->
+            sprintf
+                "%s  •  %ix  •  %.2f"
+                (score_info.Ruleset.LampName score_info.Lamp)
+                score_info.Scoring.BestCombo
+                score_info.Physical
         )
+            .Color(text_subcolor)
+            .Align(Alignment.LEFT)
+            .Position(Position.SlicePercentB(0.4f).SlicePercentL(0.5f).ShrinkL(10.0f).ExpandT(5.0f).ShrinkB(2.0f))
 
-        |+ Text(
-            K(format_timespan (Timestamp.since score_info.TimePlayed)),
-            Color = text_subcolor,
-            Align = Alignment.RIGHT,
-            Position =
-                {
-                    Left = 0.5f %+ 0.0f
-                    Top = 0.6f %- 5.0f
-                    Right = 1.0f %- 10.0f
-                    Bottom = 1.0f %- 2.0f
-                }
-        )
+        |+ Text(format_timespan (Timestamp.since score_info.TimePlayed))
+            .Color(text_subcolor)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SlicePercentB(0.4f).SlicePercentR(0.5f).ShrinkR(10.0f).ExpandT(5.0f).ShrinkB(2.0f))
 
-        |+ Text(
-            score_info.ModString(),
-            Color = text_color,
-            Align = Alignment.RIGHT,
-            Position =
-                {
-                    Left = 0.5f %+ 0.0f
-                    Top = 0.0f %+ 0.0f
-                    Right = 1.0f %- 10.0f
-                    Bottom = 0.6f %+ 0.0f
-                }
-        )
+        |+ Text(score_info.ModString())
+            .Color(text_color)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SlicePercentT(0.6f).SlicePercentR(0.4f).ShrinkR(10.0f))
 
         |* MouseListener()
             .Button(this)

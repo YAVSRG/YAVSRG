@@ -287,22 +287,21 @@ type private Chart(chart: Tables.Charts.ChartInfo, state: DownloaderState) =
         |+ Text(chart.Song.FormattedTitle)
             .Align(Alignment.LEFT)
             .Position(Position.Shrink(5.0f, 0.0f))
-        |* Text(
-            fun () ->
+        |* Text(fun () ->
+            match state.Status chart.Hash with
+            | ChartStatus.Missing -> Icons.X
+            | ChartStatus.Queued -> Icons.REFRESH_CW
+            | ChartStatus.Downloading -> Icons.DOWNLOAD
+            | ChartStatus.Downloaded -> Icons.CHECK
+            | ChartStatus.DownloadFailed -> Icons.X
+        )
+            .Color(fun () ->
                 match state.Status chart.Hash with
-                | ChartStatus.Missing -> Icons.X
-                | ChartStatus.Queued -> Icons.REFRESH_CW
-                | ChartStatus.Downloading -> Icons.DOWNLOAD
-                | ChartStatus.Downloaded -> Icons.CHECK
-                | ChartStatus.DownloadFailed -> Icons.X
-            , Color =
-                fun () ->
-                    match state.Status chart.Hash with
-                    | ChartStatus.Missing -> Colors.text_greyout
-                    | ChartStatus.Queued -> Colors.text_subheading
-                    | ChartStatus.Downloading -> Colors.text_yellow_2
-                    | ChartStatus.Downloaded -> Colors.text_green_2
-                    | ChartStatus.DownloadFailed -> Colors.text_red_2
+                | ChartStatus.Missing -> Colors.text_greyout
+                | ChartStatus.Queued -> Colors.text_subheading
+                | ChartStatus.Downloading -> Colors.text_yellow_2
+                | ChartStatus.Downloaded -> Colors.text_green_2
+                | ChartStatus.DownloadFailed -> Colors.text_red_2
             )
             .Position(Position.Shrink(5.0f, 0.0f))
             .Align(Alignment.RIGHT)
@@ -329,14 +328,16 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
 
     member this.Button =
         Button(
-            fun () ->
+            (fun () ->
                 match state.LevelStatus level with
                 | GroupStatus.AllMissing -> Icons.DOWNLOAD + " Download"
                 | GroupStatus.SomeMissing -> Icons.DOWNLOAD + " Update"
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
-            , (fun () -> state.QueueLevel level)
-            ).Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
+            ),
+            (fun () -> state.QueueLevel level)
+        )
+            .Position(Position.ShrinkR(160.0f).SliceR(200.0f).Shrink(20.0f, 5.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -349,20 +350,19 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             level_name,
             Align = Alignment.LEFT)
             .Color((fun () -> if this.Focused then Colors.text_yellow_2 else Colors.text)).Position(Position.Shrink(5.0f, 0.0f))
-        |+ Text(
-            fun () ->
+        |+ Text(fun () ->
+            match state.LevelStatus level with
+            | GroupStatus.AllMissing -> Icons.X
+            | GroupStatus.SomeMissing -> Icons.X
+            | GroupStatus.Downloading -> Icons.REFRESH_CW
+            | GroupStatus.Downloaded -> Icons.CHECK
+        )
+            .Color(fun () ->
                 match state.LevelStatus level with
-                | GroupStatus.AllMissing -> Icons.X
-                | GroupStatus.SomeMissing -> Icons.X
-                | GroupStatus.Downloading -> Icons.REFRESH_CW
-                | GroupStatus.Downloaded -> Icons.CHECK
-            , Color =
-                fun () ->
-                    match state.LevelStatus level with
-                    | GroupStatus.AllMissing -> Colors.text_greyout
-                    | GroupStatus.SomeMissing -> Colors.text_yellow_2
-                    | GroupStatus.Downloading -> Colors.text_yellow_2
-                    | GroupStatus.Downloaded -> Colors.text_green_2
+                | GroupStatus.AllMissing -> Colors.text_greyout
+                | GroupStatus.SomeMissing -> Colors.text_yellow_2
+                | GroupStatus.Downloading -> Colors.text_yellow_2
+                | GroupStatus.Downloaded -> Colors.text_green_2
             )
             .Position(Position.Shrink(85.0f, 0.0f))
             .Align(Alignment.RIGHT)

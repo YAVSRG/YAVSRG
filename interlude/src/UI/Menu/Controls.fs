@@ -70,23 +70,26 @@ type PageButton(localised_text, on_click) as this =
     override this.Init(parent: Widget) =
         this
         |+ Text(
-            K(
-                if this.Icon <> "" then
-                    sprintf "%s %s  >" this.Icon localised_text
+            if this.Icon <> "" then
+                sprintf "%s %s  >" this.Icon localised_text
+            else
+                sprintf "%s  >" localised_text
+        )
+            .Color(fun () ->
+                if not (this.Disabled()) then
+                    (if this.Focused then Colors.text_yellow_2 else Colors.text)
                 else
-                    sprintf "%s  >" localised_text
-            ),
-            Color =
-                (fun () ->
-                    if not (this.Disabled()) then
-                        (if this.Focused then Colors.text_yellow_2 else Colors.text)
-                    else
-                        Colors.text_greyout
-                )).Align(Alignment.LEFT).Position(Position.Shrink(Style.PADDING))
+                    Colors.text_greyout
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.Shrink(Style.PADDING))
         |+ MouseListener().Button(this)
         |* seq {
             if this.Hotkey <> Bind.Dummy then
-                yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey).Color(K Colors.text_cyan).Align(Alignment.RIGHT).Position(Position.Shrink(10.0f, 5.0f))
+                yield Text(sprintf "%s: %O" (%"misc.hotkeyhint") this.Hotkey)
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.Shrink(10.0f, 5.0f))
         }
 
         base.Init parent
@@ -109,7 +112,7 @@ type PageButton(localised_text, on_click) as this =
 
     member val Disabled = K false with get, set
 
-    static member Once(localised_text, action) =
+    static member Once(localised_text: string, action: unit -> unit) =
         let mutable clicked = false
         PageButton(
             localised_text,
@@ -120,7 +123,7 @@ type PageButton(localised_text, on_click) as this =
             Disabled = fun () -> clicked
         )
 
-    static member Once(localised_text, action, disabled: unit -> bool) =
+    static member Once(localised_text: string, action: unit -> unit, disabled: unit -> bool) =
         let mutable clicked = false
         PageButton(
             localised_text,
@@ -131,7 +134,7 @@ type PageButton(localised_text, on_click) as this =
             Disabled = fun () -> clicked || disabled()
         )
 
-type PageTextEntry(name, setting) =
+type PageTextEntry(name: string, setting: Setting<string>) =
     inherit
         PageSetting(
             name,

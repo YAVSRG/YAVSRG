@@ -29,16 +29,17 @@ type private FriendList() =
                     contents.Add(
                         PlayerButton(player.Username, player.Color)
                         |+ Text(
-                            (if player.Online then %"online.players.status.online" else %"online.players.status.offline"),
-                            Color =
-                                K(
-                                    if player.Online then
-                                        Colors.text_green_2
-                                    else
-                                        Colors.text_greyout
-                                ))
-                                .Align(Alignment.RIGHT)
-                                .Position(Position.Shrink(20.0f, 15.0f))
+                            if player.Online then %"online.players.status.online"
+                            else %"online.players.status.offline"
+                        )
+                            .Color(
+                                if player.Online then
+                                    Colors.text_green_2
+                                else
+                                    Colors.text_greyout
+                            )
+                            .Align(Alignment.RIGHT)
+                            .Position(Position.Shrink(20.0f, 15.0f))
                     )
 
                 ScrollContainer(contents) :> Widget

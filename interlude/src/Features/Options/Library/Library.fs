@@ -59,21 +59,21 @@ type LibraryPage() =
     inherit Page()
 
     let import_info =
-        Container(NodeType.None).Position(page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
-        |+ Text(
-            (fun () ->
+        Container(NodeType.None)
+            .Position(page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
+        |+ Text(fun () ->
+            if TaskTracking.in_progress () then
+                %"imports.in_progress"
+            else
+                %"imports.not_in_progress"
+        )
+            .Color(fun () ->
                 if TaskTracking.in_progress () then
-                    %"imports.in_progress"
+                    Colors.text_green
                 else
-                    %"imports.not_in_progress"
-            ),
-            Color =
-                (fun () ->
-                    if TaskTracking.in_progress () then
-                        Colors.text_green
-                    else
-                        Colors.text_subheading
-                )).Position(Position.SliceT(40.0f).Shrink(20.0f, 0.0f))
+                    Colors.text_subheading
+            )
+            .Position(Position.SliceT(40.0f).Shrink(20.0f, 0.0f))
         |+ LoadingIndicator.Strip(
             TaskTracking.in_progress).Position(Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f))
         |+ Text(sprintf "%i charts installed" Content.Library.Charts.Entries.Count)
@@ -81,7 +81,9 @@ type LibraryPage() =
             .Position(Position.SliceT(65.0f, 30.0f).Shrink(20.0f, 0.0f))
 
     let main_options =
-        NavigationContainer.Column(WrapNavigation = false, Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
         |+ PageButton(
             %"library.collections",
             (fun () -> ManageCollectionsPage().Show()),
@@ -118,11 +120,17 @@ type LibraryPage() =
         |+ import_info
 
     let mount_options =
-        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
-        |+ MountControl(MountedGameType.Osu, options.OsuMount).Position(Position.SliceT(100.0f, 150.0f))
-        |+ MountControl(MountedGameType.Quaver, options.QuaverMount).Position(Position.SliceT(270.0f, 150.0f))
-        |+ MountControl(MountedGameType.Etterna, options.EtternaMount).Position(Position.SliceT(440.0f, 150.0f))
-        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount).Position(Position.SliceT(610.0f, 150.0f))
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
+        |+ MountControl(MountedGameType.Osu, options.OsuMount)
+            .Position(Position.SliceT(100.0f, 150.0f))
+        |+ MountControl(MountedGameType.Quaver, options.QuaverMount)
+            .Position(Position.SliceT(270.0f, 150.0f))
+        |+ MountControl(MountedGameType.Etterna, options.EtternaMount)
+            .Position(Position.SliceT(440.0f, 150.0f))
+        |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount)
+            .Position(Position.SliceT(610.0f, 150.0f))
         |+ Text(%"imports.mount")
             .Align(Alignment.CENTER)
             .Position(Position.SliceT(0.0f, 80.0f))

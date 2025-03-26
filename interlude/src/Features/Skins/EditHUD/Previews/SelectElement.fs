@@ -36,21 +36,23 @@ type ElementCard(element: HudElement, on_select: unit -> unit) =
 
     override this.Init (parent: Widget) =
         this
-        |+ Text(
-            HudElement.name element,
-            Position = Position.SliceT(50.0f),
-            Color = fun () -> if hover then Colors.text_yellow_2 else Colors.text
-        )
+        |+ Text(HudElement.name element)
+            .Color(fun () -> if hover then Colors.text_yellow_2 else Colors.text)
+            .Position(Position.SliceT(50.0f))
         |+ Button(
             (fun () ->
                 if enabled.Value then sprintf "%s %s" Icons.CHECK_CIRCLE %"hud.editor.enabled"
                 else sprintf "%s %s" Icons.CIRCLE %"hud.editor.disabled"
             ),
-            (fun () -> enabled.Value <- not enabled.Value)).Position(Position.ShrinkB(50.0f).SliceB(50.0f))
+            (fun () -> enabled.Value <- not enabled.Value)
+        )
+            .Position(Position.ShrinkB(50.0f).SliceB(50.0f))
         |* Button(
             sprintf "%s %s" Icons.SETTINGS %"hud.configure",
-            (fun () -> show_menu element (fun () -> draw_preview <- snd (SelectPreviews.create Content.HUD element))),
-            Disabled = K (not (HudElement.can_configure element))).Position(Position.SliceB(50.0f))
+            (fun () -> show_menu element (fun () -> draw_preview <- snd (SelectPreviews.create Content.HUD element)))
+        )
+            .Disabled(not (HudElement.can_configure element))
+            .Position(Position.SliceB(50.0f))
 
         base.Init parent
 

@@ -20,21 +20,25 @@ type private Keybinder(hotkey: Hotkey) as this =
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback
 
-    do
+    override this.Init(parent) =
         this
-        |+ Text(
-            (fun () -> (%%hotkey).ToString()),
-            Color =
-                (fun () ->
-                    (if this.Selected then Colors.pink_accent
-                        elif this.Focused then Colors.yellow_accent
-                        else Colors.white),
-                    Colors.shadow_1
-                ),
-            Align = Alignment.LEFT,
-            Position = Position.ShrinkL 20.0f
-        )
-        |* MouseListener().Button(this)
+            .Add(
+                Text(fun () -> (%%hotkey).ToString())
+                    .Color(fun () ->
+                        (
+                            if this.Selected then Colors.pink_accent
+                            elif this.Focused then Colors.yellow_accent
+                            else Colors.white
+                        ),
+                        Colors.shadow_1
+                    )
+                    .Align(Alignment.LEFT)
+                    .Position(Position.ShrinkL(20.0f)),
+
+                MouseListener().Button(this)
+            )
+
+        base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse

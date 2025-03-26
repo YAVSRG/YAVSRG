@@ -20,17 +20,14 @@ type private RulesetButton(id: string, name: string, action: unit -> unit) =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            K(sprintf "%s  >" name),
-            Color =
-                (fun () ->
-                    if this.Focused then Colors.text_yellow_2
-                    elif Rulesets.selected_id.Value = id then Colors.text_pink_2
-                    else Colors.text
-                ),
-            Align = Alignment.LEFT,
-            Position = Position.Shrink Style.PADDING
-        )
+        |+ Text(sprintf "%s  >" name)
+            .Color(fun () ->
+                if this.Focused then Colors.text_yellow_2
+                elif Rulesets.selected_id.Value = id then Colors.text_pink_2
+                else Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.Shrink(Style.PADDING))
         |* MouseListener().Button(this)
 
         base.Init parent
@@ -75,9 +72,9 @@ type SelectRulesetPage() =
                     (fun () -> options.SelectedRuleset.Set id)).Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 3.0f))
                 |+ Button(
                     Icons.EDIT,
-                    (fun () ->
-                        RulesetEditorPage(id, ruleset).Show()
-                    )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f))
+                    (fun () -> RulesetEditorPage(id, ruleset).Show())
+                )
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT * 2.0f))
                 |+ Button(
                     Icons.COPY,
                     (fun () ->
@@ -87,7 +84,9 @@ type SelectRulesetPage() =
                                 Rulesets.install { ruleset.Clone with Name = ruleset.Name + " (Copy)" }
                         )
                             .Show()
-                    )).Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
+                    )
+                )
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
                 |+ Button(
                     Icons.TRASH,
                     (fun () ->

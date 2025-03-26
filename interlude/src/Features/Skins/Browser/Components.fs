@@ -34,6 +34,17 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
 
     let folder_when_downloaded = group.Name + "_" + version.Version
 
+    let thumbnail =
+        { new Thumbnail() with
+            override this.Load() =
+                ImageServices.get_cached_image.Request(
+                    version.Preview,
+                    function
+                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
+                    | None -> Logging.Warn "Failed to load noteskin preview '%s'" version.Preview
+                )
+        }
+
     let mutable status =
         if
             Skins.list_noteskins ()
@@ -46,33 +57,24 @@ type VersionDisplay(group: SkinGroup, version: SkinVersion) as this =
 
     override this.Init(parent) =
         this
+        |+ Text(title)
+            .Color(fun () ->
+                if this.Focused then
+                    Colors.text_yellow_2
+                else
+                    Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING))
         |+ Text(
-            title,
-            Color =
-                (fun () ->
-                    if this.Focused then
-                        Colors.text_yellow_2
-                    else
-                        Colors.text
-                )).Align(Alignment.LEFT).Position(Position.SliceT(0.0f, 70.0f).Shrink(Style.PADDING))
-        |+ Text(
-            (
-                match version.Editor with
-                | Some e -> [version.Author; e] %> "skins.credit.edited"
-                | None -> [version.Author] %> "skins.credit"
-            ))
+            match version.Editor with
+            | Some e -> [version.Author; e] %> "skins.credit.edited"
+            | None -> [version.Author] %> "skins.credit"
+        )
             .Color(K Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(60.0f, 50.0f).Shrink(Style.PADDING))
-        |+ { new Thumbnail() with
-            override this.Load() =
-                ImageServices.get_cached_image.Request(
-                    version.Preview,
-                    function
-                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
-                    | None -> Logging.Warn "Failed to load noteskin preview '%s'" version.Preview
-                )
-        }
+        |+ thumbnail
             .Position(Position.ShrinkT(130.0f).Shrink(10.0f))
         |* MouseListener().Button(this)
         base.Init parent
@@ -117,6 +119,17 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
             )
         )
 
+    let thumbnail =
+        { new Thumbnail() with
+            override this.Load() =
+                ImageServices.get_cached_image.Request(
+                    group.Thumbnail,
+                    function
+                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
+                    | None -> Logging.Warn "Failed to load noteskin thumbnail '%s'" group.Thumbnail
+                )
+        }
+
     let subtitle =
         match List.tryExactlyOne group.Versions with
         | Some version ->
@@ -127,28 +140,19 @@ type GroupDisplay(group: SkinGroup, selected: Setting<bool>) =
 
     override this.Init(parent) =
         this
-        |+ Text(
-            group.Name,
-            Color =
-                (fun () ->
-                    if this.Focused then Colors.text_yellow_2
-                    elif selected.Value then Colors.text_pink
-                    else Colors.text
-                )).Align(Alignment.LEFT).Position(Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f))
-        |+ Text(
-            subtitle)
-            .Color(K Colors.text_subheading)
+        |+ Text(group.Name)
+            .Color(fun () ->
+                if this.Focused then Colors.text_yellow_2
+                elif selected.Value then Colors.text_pink
+                else Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.ShrinkL(100.0f).Shrink(Style.PADDING).SliceT(70.0f))
+        |+ Text(subtitle)
+            .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkL(100.0f).Shrink(7.5f, Style.PADDING).SliceB(30.0f))
-        |+ { new Thumbnail() with
-            override this.Load() =
-                ImageServices.get_cached_image.Request(
-                    group.Thumbnail,
-                    function
-                    | Some img -> GameThread.defer (fun () -> this.FinishLoading img)
-                    | None -> Logging.Warn "Failed to load noteskin thumbnail '%s'" group.Thumbnail
-                )
-        }
+        |+ thumbnail
             .Position(Position.SliceL(100.0f).Shrink(Style.PADDING))
         |* MouseListener().Button(this)
         base.Init parent

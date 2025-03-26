@@ -48,12 +48,9 @@ type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<in
         page_container()
         |+ PageSetting(
             %"profile_settings.color",
-            Button(
-                K profile.Username,
-                change_color_dropdown,
-                Align = Alignment.LEFT,
-                TextColor = fun () -> Color.FromArgb(profile_color.Value), Colors.shadow_2
-            )
+            Button(profile.Username, change_color_dropdown)
+                .Align(Alignment.LEFT)
+                .TextColor(fun () -> Color.FromArgb(profile_color.Value))
             |+ color_picker
         )
             .Pos(0)

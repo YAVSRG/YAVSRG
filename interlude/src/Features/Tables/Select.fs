@@ -11,6 +11,7 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Tables.Browser
 
+// todo: all these buttons should be generalised by PageButton having a TextColor property
 type private TableButton(name: string, action: unit -> unit) =
     inherit
         Container(
@@ -22,17 +23,14 @@ type private TableButton(name: string, action: unit -> unit) =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            K(sprintf "%s  >" name),
-            Color =
-                (fun () ->
-                    if this.Focused then Colors.text_yellow_2
-                    elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2
-                    else Colors.text
-                ),
-            Align = Alignment.LEFT,
-            Position = Position.Shrink Style.PADDING
-        )
+        |+ Text(sprintf "%s  >" name)
+            .Color(
+                if this.Focused then Colors.text_yellow_2
+                elif (match Content.Table with Some t -> t.Info.Name = name | _ -> false) then Colors.text_pink_2
+                else Colors.text
+            )
+            .Align(Alignment.LEFT)
+            .Position(Position.Shrink(Style.PADDING))
         |* MouseListener().Button(this)
 
         base.Init parent

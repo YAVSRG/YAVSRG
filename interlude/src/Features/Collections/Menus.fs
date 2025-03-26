@@ -174,18 +174,16 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(
-            K(sprintf "%s %s" icon name),
-            Align = Alignment.LEFT,
-            Color =
-                (if this.Disabled then
-                     K Colors.text_greyout
-                 else
-                     K Colors.text))
-                        .Position(Position.Shrink(20.0f, 15.0f))
-        |> fun x ->
-            if not this.Disabled then
-                x.Add <| MouseListener().Button(this)
+            .With(
+                Text(sprintf "%s %s" icon name)
+                    .Align(Alignment.LEFT)
+                    .Color(if this.Disabled then Colors.text_greyout else Colors.text)
+                    .Position(Position.Shrink(20.0f, 15.0f))
+            )
+            .AddConditional(
+                not this.Disabled,
+                MouseListener().Button(this)
+            )
 
         base.Init parent
 
