@@ -42,7 +42,9 @@ type LobbyInfoCard(info: LobbyInfo) =
 type LobbyList() =
     inherit Container(NodeType.None)
 
-    let list_container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = Style.PADDING * 3.0f)
+    let lobby_list_container =
+        FlowContainer.Vertical<LobbyInfoCard>(80.0f)
+            .Spacing(Style.PADDING * 3.0f)
 
     let mutable no_lobbies = false
     // todo: loading state
@@ -52,27 +54,33 @@ type LobbyList() =
 
     member this.UpdateList (lobbies: LobbyInfo array) =
         no_lobbies <- lobbies.Length = 0
-        list_container.Clear()
+        lobby_list_container.Clear()
 
         for lobby in lobbies do
-            list_container.Add(LobbyInfoCard lobby)
+            lobby_list_container.Add(LobbyInfoCard lobby)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         this
-        |+ ScrollContainer(list_container)
-            .Margin(Style.PADDING)
-            .Position(Position.Shrink(0.0f, 80.0f))
-        |+ EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
-            .Conditional(fun () -> no_lobbies)
-        |+ Button(Icons.PLUS_CIRCLE + "  " + %"lobby_list.create", create_lobby)
-            .Position(Position.SliceB(60.0f).ShrinkR(250.0f))
-        |+ Button(Icons.REFRESH_CCW + "  " + %"lobby_list.refresh", refresh_list)
-            .Position(Position.SliceB(60.0f).SliceR(250.0f))
-        |* SearchBox(fun query ->
-            list_container
-                .Filter(fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
+            .Add(
+                ScrollContainer(lobby_list_container)
+                    .Margin(Style.PADDING)
+                    .Position(Position.Shrink(0.0f, 80.0f)),
+
+                EmptyState(Icons.USERS, %"lobby_list.none", Subtitle = %"lobby_list.none.subtitle")
+                    .Conditional(fun () -> no_lobbies),
+
+                Button(Icons.PLUS_CIRCLE + "  " + %"lobby_list.create", create_lobby)
+                    .Position(Position.SliceB(60.0f).ShrinkR(250.0f)),
+                Button(Icons.REFRESH_CCW + "  " + %"lobby_list.refresh", refresh_list)
+                    .Position(Position.SliceB(60.0f).SliceR(250.0f)),
+
+                SearchBox(fun query ->
+                    lobby_list_container
+                        .Filter(fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
+                )
+                    .Position(Position.SliceT(SearchBox.HEIGHT))
         )
-            .Position(Position.SliceT(SearchBox.HEIGHT))
+
         base.Init parent
 
         refresh_list()

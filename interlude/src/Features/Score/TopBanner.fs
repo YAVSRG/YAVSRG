@@ -36,7 +36,10 @@ type TopBanner(score_info: ScoreInfo) as this =
 
         match score_info.PlayedBy with
         | ScorePlayedBy.You ->
-            this |* Username().Position(Position.SliceT(Toolbar.HEIGHT).SliceR(300.0f))
+            this.Add(
+                Username()
+                    .Position(Position.SliceT(Toolbar.HEIGHT).SliceR(300.0f))
+            )
         | _ -> ()
 
     override this.Draw() =

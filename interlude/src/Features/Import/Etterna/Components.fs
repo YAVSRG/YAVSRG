@@ -95,12 +95,11 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
-        |+ Button(Icons.DOWNLOAD, download).Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
+        |+ Button(Icons.DOWNLOAD, download)
+            .Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
         |+ MouseListener().Button(this)
-        |* Button(
-            Icons.EXTERNAL_LINK
-            , fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id)
-            ).Position(Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f))
+        |* Button(Icons.EXTERNAL_LINK, fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id))
+            .Position(Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f))
 
         if data.contains_nsfw then
             this

@@ -68,7 +68,9 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Content() =
         refresh ()
-        let tabs = SwapContainer(elements_tab).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandB(80.0f))
+        let tabs =
+            SwapContainer(elements_tab)
+                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandB(80.0f))
         let tab_buttons =
             RadioButtons.create_tabs
                 {

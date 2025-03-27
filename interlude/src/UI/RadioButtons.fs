@@ -4,6 +4,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 
+// todo: make into a static class with constructors
+// todo: possible way to create tab view + tabs along top together?
 module RadioButtons =
 
     type RadioButtonOptions<'T> =

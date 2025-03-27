@@ -408,7 +408,8 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             , (fun () -> state.QueueSection info.Name)
-            ).Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
+        )
+            .Position(Position.ShrinkR(100.0f).SliceR(200.0f).Shrink(20.0f, 20.0f))
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -470,7 +471,9 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
                 for chart in level_charts do
                     container.Add(Chart(chart, state))
 
-        ScrollContainer(container, Margin = 10.0f).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        ScrollContainer(container)
+            .Margin(Style.PADDING * 2.0f)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = table.Info.Name
     override this.OnClose() = ()

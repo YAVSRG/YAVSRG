@@ -29,6 +29,7 @@ type CurrentSession() =
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(105.0f).SliceT(40.0f))
-        |* ScoreList(current_session.Start, Timestamp.now()).Position(Position.ShrinkT(160.0f))
+        |* ScoreList(current_session.Start, Timestamp.now())
+            .Position(Position.ShrinkT(160.0f))
 
         base.Init parent

@@ -9,7 +9,9 @@ open Interlude.UI
 type SkillTimeline() =
     inherit Container(NodeType.None)
 
-    let graph_container = SwapContainer().Position(Position.ShrinkT(50.0f))
+    let graph_container =
+        SwapContainer()
+            .Position(Position.ShrinkT(50.0f))
 
     let day_range = Animation.Fade(90.0f)
     let day_offset = Animation.Fade(0.0f)

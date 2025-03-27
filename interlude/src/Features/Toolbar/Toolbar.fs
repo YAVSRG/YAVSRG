@@ -25,7 +25,10 @@ type Toolbar() =
     let mutable collapsed_by_user = false
 
     let container = Container(NodeType.None)
-    let volume_when_hidden = VolumeSlider().Position(Position.ShrinkY(HEIGHT))
+
+    let volume_when_hidden =
+        VolumeSlider()
+            .Position(Position.ShrinkY(HEIGHT))
 
     let load_preset (i: int) : unit =
         match Presets.load i with
@@ -57,7 +60,8 @@ type Toolbar() =
         )
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
-        |+ TaskProgressMiniBar().Position(Position.BorderB(Style.PADDING))
+        |+ TaskProgressMiniBar()
+            .Position(Position.BorderB(Style.PADDING))
 
     override this.Init(parent) =
         container

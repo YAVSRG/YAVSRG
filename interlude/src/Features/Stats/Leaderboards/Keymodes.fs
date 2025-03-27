@@ -104,18 +104,20 @@ type private KeymodesLeaderboard() =
 
         let title =
             Text(
-                (
-                    if monthly.Value then
-                        sprintf "%iK %s  -  %s"
-                            keymode.Value
-                            %"stats.leaderboards.rating.monthly"
-                            ((Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy"))
-                    else
-                        sprintf "%iK %s"
-                            keymode.Value
-                            %"stats.leaderboards.rating.all_time"
-                )).Position(Position.SliceT(70.0f).ShrinkX(5.0f))
-        let header = KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload())).Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
+                if monthly.Value then
+                    sprintf "%iK %s  -  %s"
+                        keymode.Value
+                        %"stats.leaderboards.rating.monthly"
+                        ((Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy"))
+                else
+                    sprintf "%iK %s"
+                        keymode.Value
+                        %"stats.leaderboards.rating.all_time"
+            )
+                .Position(Position.SliceT(70.0f).ShrinkX(5.0f))
+        let header =
+            KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload()))
+                .Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
         let flow = FlowContainer.Vertical<Widget>(PlayerInfo.HEIGHT, Spacing = Style.PADDING)
         for i, d in Seq.indexed data.Leaderboard do
             PlayerInfo(i + 1, d)
@@ -126,13 +128,16 @@ type private KeymodesLeaderboard() =
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
-            |+ PlayerInfo(int32 rank, you).Position(Position.SliceB(PlayerInfo.HEIGHT))
+            |+ ScrollContainer(flow)
+                .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
+            |+ PlayerInfo(int32 rank, you)
+                .Position(Position.SliceB(PlayerInfo.HEIGHT))
         | None ->
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f))
+            |+ ScrollContainer(flow)
+                .Position(Position.ShrinkT(125.0f))
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)

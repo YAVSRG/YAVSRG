@@ -69,18 +69,25 @@ type FailOverlay(pacemaker_state: PacemakerState, retry: unit -> unit, score_scr
         Song.set_low_pass 1.0f
         Toolbar.show_cursor()
 
-    override this.Init(parent) =
-        let b_retry = FailButton(FailButtonType.RETRY, %"failed.retry", %%"retry", retry, b1_fade).Position(Position.SliceT(0.0f, 70.0f))
-        let b_score_screen = FailButton(FailButtonType.SCORE_SCREEN, %"failed.score_screen", %%"save_score", score_screen, b2_fade).Position(Position.SliceT(100.0f, 70.0f))
-        let b_next_song = FailButton(FailButtonType.CONTINUE, %"failed.next_song", %%"next_song", next_song, b3_fade).Position(Position.SliceT(200.0f, 70.0f))
+    override this.Init(parent: Widget) =
+        let b_retry = FailButton(FailButtonType.RETRY, %"failed.retry", %%"retry", retry, b1_fade)
+        let b_score_screen = FailButton(FailButtonType.SCORE_SCREEN, %"failed.score_screen", %%"save_score", score_screen, b2_fade)
+        let b_next_song = FailButton(FailButtonType.CONTINUE, %"failed.next_song", %%"next_song", next_song, b3_fade)
         let b_none = Dummy(NodeType.Leaf)
 
-        NavigationContainer.Column().Position(Position.SliceX(300.0f).ShrinkT(560.0f))
-        |+ b_none
-        |+ b_retry
-        |+ b_score_screen
-        |+ b_next_song
+        NavigationContainer.Column()
+            .Position(Position.SliceX(300.0f).ShrinkT(560.0f))
+            .With(
+                b_none,
+                b_retry
+                    .Position(Position.SliceT(0.0f, 70.0f)),
+                b_score_screen
+                    .Position(Position.SliceT(100.0f, 70.0f)),
+                b_next_song
+                    .Position(Position.SliceT(200.0f, 70.0f))
+            )
         |> this.Add
+
         base.Init parent
 
         let initial_focus : Widget =

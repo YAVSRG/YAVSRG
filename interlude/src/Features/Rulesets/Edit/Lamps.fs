@@ -104,7 +104,8 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
 
     override this.Content() =
         refresh()
-        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
+        ScrollContainer(container)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.lamps"
     override this.OnClose() = ()

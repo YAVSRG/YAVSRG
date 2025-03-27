@@ -172,9 +172,11 @@ module private Presets =
                             SkinPreview.RefreshAll()
                             EditPresetPage(preset_id, setting).Show()
                     | None -> ()
-                ),
-                Floating = true,
-                Disabled = (fun () -> setting.Value.IsNone)).Position(Position.SliceT(40.0f))
+                )
+            )
+                .Floating()
+                .Disabled(fun () -> setting.Value.IsNone)
+                .Position(Position.SliceT(40.0f))
 
         let load_preset_button =
             Button(
@@ -211,8 +213,10 @@ module private Presets =
                             SkinPreview.RefreshAll()
                             Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_loaded", s.Name)
                     | None -> ()
-                ),
-                Disabled = (fun () -> setting.Value.IsNone)).Position(Position.SliceB(40.0f).SlicePercentL(0.5f).ShrinkX(10.0f).ShrinkR(20.0f))
+                )
+            )
+                .Disabled(fun () -> setting.Value.IsNone)
+                .Position(Position.SliceB(40.0f).SlicePercentL(0.5f).ShrinkX(10.0f).ShrinkR(20.0f))
 
         let save_preset_button =
             Button(

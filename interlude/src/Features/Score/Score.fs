@@ -81,7 +81,8 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
                     Bottom = 0.65f %+ 0.0f
                 }
             )
-        |+ TopBanner(score_info).Position(Position.SliceT(180.0f))
+        |+ TopBanner(score_info)
+            .Position(Position.SliceT(180.0f))
         |+ Sidebar(
             stats,
             score_info
@@ -100,7 +101,8 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
         //match xp_gain with
         //| Some x ->
-        //    SessionScoreBar(x).Position(Position.SliceRPercent(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
+        //    SessionScoreBar(x)
+        //        .Position(Position.SlicePercentR(0.65f).ShrinkT(395.0f).SliceT(40.0f).ShrinkX(40.0f))
         //    |> this.Add
         //| None -> ()
 

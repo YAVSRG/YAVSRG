@@ -62,7 +62,11 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite).Position(Position.SliceL(70.0f).Shrink(Style.PADDING)))
+        | Some sprite ->
+            this.Add(
+                Image(sprite)
+                    .Position(Position.SliceL(70.0f).Shrink(Style.PADDING))
+            )
         | None -> ()
 
         base.Init parent
@@ -124,7 +128,11 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
         |* MouseListener().Button(this)
 
         match Skins.get_icon id with
-        | Some sprite -> this.Add(Image(sprite).Position(Position.SliceL(70.0f).Shrink(Style.PADDING)))
+        | Some sprite ->
+            this.Add(
+                Image(sprite)
+                    .Position(Position.SliceL(70.0f).Shrink(Style.PADDING))
+            )
         | None -> ()
 
         base.Init parent
@@ -184,13 +192,21 @@ type SelectSkinsPage() =
     let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
 
     let noteskin_grid =
-        GridFlowContainer<NoteskinButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+        GridFlowContainer<NoteskinButton>(70.0f, 1)
+            .WrapNavigation(false)
+            .Spacing(20.0f)
 
     let hud_grid =
-        GridFlowContainer<HUDButton>(70.0f, 1, WrapNavigation = false, Spacing = (20.0f, 20.0f))
+        GridFlowContainer<HUDButton>(70.0f, 1)
+            .WrapNavigation(false)
+            .Spacing(20.0f)
 
-    let noteskin_tab = ScrollContainer(noteskin_grid).Position(Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
-    let hud_tab = ScrollContainer(hud_grid).Position(Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
+    let noteskin_tab =
+        ScrollContainer(noteskin_grid)
+            .Position(Position.SlicePercentL(0.5f).ShrinkT(110.0f).ShrinkR(Style.PADDING))
+    let hud_tab =
+        ScrollContainer(hud_grid)
+            .Position(Position.SlicePercentR(0.5f).ShrinkT(110.0f).ShrinkL(Style.PADDING))
 
     let refresh () =
         preview.Refresh()
@@ -211,13 +227,19 @@ type SelectSkinsPage() =
         refresh ()
 
         let left_info =
-            NavigationContainer.Column(Position = { Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.35f %- 10.0f })
+            NavigationContainer.Column()
+                .Position(
+                    Position
+                        .SlicePercentL(0.35f)
+                        .ShrinkR(Style.PADDING * 2.0f)
+                        .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
+                )
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
                 0.0f,
                 (fun () -> SkinsBrowserPage().Show())
             )
-                .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f))
+                .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).TranslateY(-10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
                 0.0f,
@@ -231,8 +253,9 @@ type SelectSkinsPage() =
                 .Position(
                     Position
                         .ShrinkPercentL(0.35f)
-                        .ShrinkL(10.0f)
-                        .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
+                        .ShrinkL(Style.PADDING * 2.0f)
+                        .ShrinkR(PAGE_MARGIN_X)
+                        .ShrinkY(PAGE_MARGIN_Y)
                 )
             |+ noteskin_tab
             |+ hud_tab

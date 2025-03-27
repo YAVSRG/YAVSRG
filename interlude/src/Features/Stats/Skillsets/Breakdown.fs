@@ -14,7 +14,9 @@ type SkillBreakdown() =
     let skill = Setting.simple Jacks
     let source = Setting.simple AllTime
 
-    let graph_container = SwapContainer().Position(Position.ShrinkT(50.0f))
+    let graph_container =
+        SwapContainer()
+            .Position(Position.ShrinkT(50.0f))
     let refresh_graph() =
         graph_container.Current <- SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value)
 

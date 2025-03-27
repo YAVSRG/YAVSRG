@@ -74,9 +74,11 @@ type EtternaPacksBrowserPage() =
             .With(
                 Dummy(NodeType.Leaf),
                 scroll_container,
-                EmptyState(Icons.X, %"etterna_pack_browser.error").Position(Position.ShrinkT(120.0f))
+                EmptyState(Icons.X, %"etterna_pack_browser.error")
+                    .Position(Position.ShrinkT(120.0f))
                     .Conditional(fun () -> failed),
-                EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results").Position(Position.ShrinkT(120.0f))
+                EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results")
+                    .Position(Position.ShrinkT(120.0f))
                     .Conditional(fun () -> not failed && not loading && items.Count = 0)
             )
 

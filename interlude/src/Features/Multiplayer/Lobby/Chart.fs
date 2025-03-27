@@ -21,7 +21,8 @@ type MultiplayerChartContextMenu(cc: ChartMeta) =
     inherit Page()
 
     override this.Content() =
-        FlowContainer.Vertical(PAGE_ITEM_HEIGHT).Position(Position.Shrink(100.0f, 200.0f))
+        FlowContainer.Vertical(PAGE_ITEM_HEIGHT)
+            .Position(Position.Shrink(100.0f, 200.0f))
 
         |+ PageButton(
             %"chart.add_to_collection",

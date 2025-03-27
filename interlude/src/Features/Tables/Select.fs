@@ -56,7 +56,8 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
 
     override this.Content() =
         refresh ()
-        ScrollContainer(container).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        ScrollContainer(container)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
     override this.OnClose() = ()

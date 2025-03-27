@@ -68,7 +68,7 @@ type private ModSelector(id: string, current_state: unit -> int option, action: 
 
         base.Draw()
 
-type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
+type private ModSelectPage(change_rate: Rate -> unit) =
     inherit Page()
 
     let mutable last_seen_mod_status = ModStatus.Ranked
@@ -167,13 +167,13 @@ type private ModSelectPage(change_rate: Rate -> unit, on_close: unit -> unit) =
             SelectedChart.change_rate_hotkeys change_rate
 
     override this.Title = sprintf "%s %s" Icons.ZAP (%"mods")
-    override this.OnClose() = on_close ()
+    override this.OnClose() = ()
 
-type ModSelect(change_rate: Rate -> unit, on_menu_close: unit -> unit) =
+type ModSelect(change_rate: Rate -> unit) =
     inherit
         AngledButton(
             sprintf "%s %s" Icons.ZAP (%"levelselect.mods"),
-            (fun () -> ModSelectPage(change_rate, on_menu_close).Show()),
+            (fun () -> ModSelectPage(change_rate).Show()),
             (fun () -> Palette.color (100, 0.5f, 0.0f)),
             Hotkey = "mods"
         )

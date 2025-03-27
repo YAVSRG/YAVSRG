@@ -129,16 +129,19 @@ type private ActivityLeaderboard() =
 
         let title =
             Text(
-                (
-                    if monthly.Value then
-                        %"stats.leaderboards.activity.monthly"
-                        + "  -  "
-                        + (Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy")
-                    else
-                        %"stats.leaderboards.activity.all_time"
-                )).Position(Position.SliceT(70.0f).ShrinkX(5.0f))
-        let header = ActivityHeader(by_playtime.Value, (fun v -> by_playtime.Set v; container.Reload())).Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
-        let flow = FlowContainer.Vertical<Widget>(PlayerXP.HEIGHT, Spacing = Style.PADDING)
+                if monthly.Value then
+                    %"stats.leaderboards.activity.monthly"
+                    + "  -  "
+                    + (Timestamp.now() |> Timestamp.to_datetime).ToString("MMMM yyyy")
+                else
+                    %"stats.leaderboards.activity.all_time"
+            )
+                .Position(Position.SliceT(70.0f).ShrinkX(5.0f))
+        let header =
+            ActivityHeader(by_playtime.Value, fun v -> by_playtime.Set v; container.Reload())
+                .Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
+
+        let flow = FlowContainer.Vertical<Widget>(PlayerXP.HEIGHT).Spacing(Style.PADDING)
         for i, d in Seq.indexed data.Leaderboard do
             PlayerXP(i + 1, d.Username, Color.FromArgb(d.Color), d.XP, d.Playtime)
             |> flow.Add
@@ -148,13 +151,18 @@ type private ActivityLeaderboard() =
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f).ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
-            |+ PlayerXP(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime).Position(Position.SliceB(PlayerXP.HEIGHT))
+
+            |+ ScrollContainer(flow)
+                .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerXP.HEIGHT + Style.PADDING))
+
+            |+ PlayerXP(int32 rank, you.Username, Color.FromArgb(you.Color), you.XP, you.Playtime)
+                .Position(Position.SliceB(PlayerXP.HEIGHT))
         | None ->
             Container(NodeType.None)
             |+ title
             |+ header
-            |+ ScrollContainer(flow).Position(Position.ShrinkT(125.0f))
+            |+ ScrollContainer(flow)
+                .Position(Position.ShrinkT(125.0f))
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.XPResponse>(load, rerender)

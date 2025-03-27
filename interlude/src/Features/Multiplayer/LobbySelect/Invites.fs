@@ -8,20 +8,26 @@ open Interlude.Features.Online
 type InviteCard(invite: LobbyInvite) =
     inherit FrameContainer(NodeType.None)
 
-    override this.Init(parent) =
+    let dismiss_invite (this: InviteCard) : unit =
+        GameThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this |> ignore)
+
+    let accept_invite (this: InviteCard) : unit =
+        dismiss_invite(this)
+        Network.join_lobby invite.LobbyId
+
+    let BUTTON_SIZE = 50.0f
+
+    override this.Init(parent: Widget) =
         this
-        |+ Text(Icons.MAIL + " " + invite.InvitedBy)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(5.0f))
-        |+ Button(
-            Icons.CHECK,
-            (fun () ->
-                GameThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)
-                Network.join_lobby invite.LobbyId
-            )).Position(Position.ShrinkR(50.0f).SliceR(50.0f))
-        |* Button(
-            Icons.X,
-            (fun () -> GameThread.defer (fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this))).Position(Position.SliceR(50.0f))
+            .Add(
+                Text(Icons.MAIL + " " + invite.InvitedBy)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.Shrink(5.0f)),
+                Button(Icons.CHECK, fun () -> accept_invite this)
+                    .Position(Position.SliceR(BUTTON_SIZE, BUTTON_SIZE)),
+                Button(Icons.X, fun () -> dismiss_invite this)
+                    .Position(Position.SliceR(BUTTON_SIZE))
+            )
 
         base.Init parent
 
@@ -29,7 +35,9 @@ type InviteList() =
     inherit Container(NodeType.None)
 
     let container =
-        FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f).Position(Position.Shrink(0.0f, 80.0f))
+        FlowContainer.Vertical<InviteCard>(50.0f)
+            .Spacing(Style.PADDING * 3.0f)
+            .Position(Position.ShrinkY(80.0f))
 
     member this.UpdateList() =
         container.Clear()

@@ -12,60 +12,69 @@ open Interlude.Features.Gameplay
 type InfoPanel() =
     inherit Container(NodeType.None)
 
-    let display = Setting.simple Display.Local
+    let info_panel_mode = Setting.simple InfoPanelMode.Local
 
-    let scoreboard = Scoreboard(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
-    let online = Leaderboard(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
-    let patterns = Patterns(display).Position(Position.ShrinkB(GameplayInfo.HEIGHT + 55.0f))
+    override this.Init(parent: Widget) =
 
-    override this.Init(parent) =
-        let change_rate change_rate_by =
+        let change_rate (change_rate_by: Rate) : unit =
             if Transitions.in_progress() then
                 ()
             else
                 SelectedChart.rate.Value <- SelectedChart.rate.Value + change_rate_by
                 LevelSelect.refresh_details ()
 
+        let main_display =
+            Container(NodeType.None)
+                .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
+                .With(
+                    Scoreboard(info_panel_mode)
+                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
+                        .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Local),
+                    Leaderboard(info_panel_mode)
+                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
+                        .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Online),
+                    Patterns(info_panel_mode)
+                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
+                        .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Patterns)
+                )
+
         this
-        |+ scoreboard.Conditional(fun () -> display.Value = Display.Local)
-        |+ online.Conditional(fun () -> display.Value = Display.Online)
-        |+ patterns.Conditional(fun () -> display.Value = Display.Patterns)
+            .Add(
+                main_display,
 
-        |+ GameplayInfo()
-            .Position(Position.SliceB(GameplayInfo.HEIGHT).TranslateY(-50.0f))
+                GameplayInfo()
+                    .Position(Position.SliceB(AngledButton.HEIGHT, GameplayInfo.HEIGHT)),
 
-        |+ AngledButton(
-            sprintf "%s %s" Icons.EYE %"levelselect.preview",
-            (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
-            Palette.MAIN_100
-        )
-            .Hotkey("preview")
-            .LeanLeft(false)
-            .Position(
-                Position
-                    .SliceB(AngledButton.HEIGHT)
-                    .GridX(1, 3, AngledButton.LEAN_AMOUNT)
+                AngledButton(
+                    sprintf "%s %s" Icons.EYE %"levelselect.preview",
+                    (fun () -> SelectedChart.when_loaded false <| fun info -> Preview(info, change_rate).Show()),
+                    Palette.MAIN_100
+                )
+                    .Hotkey("preview")
+                    .LeanLeft(false)
+                    .Position(
+                        Position
+                            .SliceB(AngledButton.HEIGHT)
+                            .GridX(1, 3, AngledButton.LEAN_AMOUNT)
+                    )
+                    .Help(Help.Info("levelselect.preview", "preview")),
+
+                ModSelect(change_rate)
+                    .Position(
+                        Position
+                            .SliceB(AngledButton.HEIGHT)
+                            .GridX(2, 3, AngledButton.LEAN_AMOUNT)
+                    )
+                    .Help(Help.Info("levelselect.mods", "mods")),
+
+                RulesetSwitcher(options.SelectedRuleset)
+                    .Position(
+                        Position
+                            .SliceB(AngledButton.HEIGHT)
+                            .GridX(3, 3, AngledButton.LEAN_AMOUNT)
+                    )
+                    .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
             )
-            .Help(Help.Info("levelselect.preview", "preview"))
-
-        |+ ModSelect(
-            change_rate,
-            scoreboard.ModsChanged
-        )
-            .Position(
-                Position
-                    .SliceB(AngledButton.HEIGHT)
-                    .GridX(2, 3, AngledButton.LEAN_AMOUNT)
-            )
-            .Help(Help.Info("levelselect.mods", "mods"))
-
-        |* RulesetSwitcher(options.SelectedRuleset)
-            .Position(
-                Position
-                    .SliceB(AngledButton.HEIGHT)
-                    .GridX(3, 3, AngledButton.LEAN_AMOUNT)
-            )
-            .Help(Help.Info("levelselect.rulesets", "ruleset_switch"))
 
         base.Init(parent)
 

@@ -32,8 +32,11 @@ module PageLayout =
             Position.Box(0.0f, 0.0f, 0.0f, float32 start * 0.5f * PAGE_ITEM_HEIGHT, w, float32 height * 0.5f * PAGE_ITEM_HEIGHT)
 
     let page_container () : NavigationContainer.Column =
-        NavigationContainer.Column(WrapNavigation = false).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
+    // todo: make this a component instead of this goofy ass
     let refreshable_row (get_count: unit -> int) (constructor: int -> int -> Widget) : NavigationContainer.Row * (unit -> unit) =
         let r = NavigationContainer.Row()
 

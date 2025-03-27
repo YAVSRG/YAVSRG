@@ -22,7 +22,7 @@ type private Filter =
     | CurrentRate = 1
     | CurrentMods = 2
 
-type Scoreboard(display: Setting<Display>) =
+type Scoreboard(display: Setting<InfoPanelMode>) =
     inherit Container(NodeType.None)
 
     let mutable count = 0
@@ -74,13 +74,13 @@ type Scoreboard(display: Setting<Display>) =
         SelectedChart.on_chart_change_finished.Add (fun _ -> scores_list.Clear(); count <- 0)
         Rulesets.on_changed.Add (fun _ -> GameThread.defer (fun () -> scores_list.Sort <- sorter ()))
         SelectedChart.on_chart_update_finished.Add (fun _ -> refresh_filter())
-        Gameplay.score_deleted.Add (fun timestamp -> scores_list.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> scores_list.Remove sc)))
+        Gameplay.score_deleted.Add (fun timestamp -> scores_list.Iter(fun sc -> if sc.Data.TimePlayed = timestamp then GameThread.defer (fun () -> scores_list.Remove sc |> ignore)))
         scores_list.Sort <- sorter ()
 
         this
         |+ AngledButton(
             %"levelselect.info.scoreboard",
-            (fun () -> display.Set Display.Online),
+            (fun () -> display.Set InfoPanelMode.Online),
             Palette.MAIN_100
         )
             .Hotkey("scoreboard_storage")
@@ -145,5 +145,3 @@ type Scoreboard(display: Setting<Display>) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         LocalScores.score_loader.Join()
-
-    member this.ModsChanged() = refresh_filter()

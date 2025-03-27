@@ -447,7 +447,9 @@ type AnimationSettingsPage() =
             .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 
     let explosions_tab =
-        let subtabs = SwapContainer(note_explosions_subtab).Position(Position.ShrinkT(150.0f))
+        let subtabs =
+            SwapContainer(note_explosions_subtab)
+                .Position(Position.ShrinkT(150.0f))
         let subtab_buttons =
             RadioButtons.create_tabs
                 {
@@ -472,7 +474,9 @@ type AnimationSettingsPage() =
         :> Widget
 
     override this.Content() =
-        let tabs = SwapContainer(receptors_tab).Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
+        let tabs =
+            SwapContainer(receptors_tab)
+                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
 
         let tab_buttons =
             RadioButtons.create_tabs

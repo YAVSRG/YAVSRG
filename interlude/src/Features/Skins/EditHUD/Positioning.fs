@@ -159,7 +159,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom ^+ (new_y - old_y) |> round
                         }
             ),
-            save_pos).Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f))
+            save_pos
+        )
+            .Position(Position.BorderCornersB(15.0f).SliceR(15.0f).Translate(5.0f, 5.0f))
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
                 let current = position.Value
@@ -181,7 +183,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom ^+ (new_y - old_y) |> round
                         }
             ),
-            save_pos).Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f))
+            save_pos
+        )
+            .Position(Position.BorderCornersB(15.0f).SliceL(15.0f).Translate(-5.0f, 5.0f))
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
                 let current = position.Value
@@ -203,7 +207,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom
                         }
             ),
-            save_pos).Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f))
+            save_pos
+        )
+            .Position(Position.BorderCornersT(15.0f).SliceR(15.0f).Translate(5.0f, -5.0f))
         |+ SubPositioner(
             (fun (preserve_center, (old_x, old_y), (new_x, new_y)) ->
                 let current = position.Value
@@ -225,7 +231,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom
                         }
             ),
-            save_pos).Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f))
+            save_pos
+        )
+            .Position(Position.BorderCornersT(15.0f).SliceL(15.0f).Translate(-5.0f, -5.0f))
 
         |+ SubPositioner(
             (fun (preserve_center, (old_x, _), (new_x, _)) ->
@@ -248,7 +256,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom
                         }
             ),
-            save_pos).Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f))
+            save_pos
+        )
+            .Position(Position.BorderL(15.0f).SliceY(15.0f).TranslateX(-5.0f))
         |+ SubPositioner(
             (fun (preserve_center, (_, old_y), (_, new_y)) ->
                 let current = position.Value
@@ -270,7 +280,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom
                         }
             ),
-            save_pos).Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f))
+            save_pos
+        )
+            .Position(Position.BorderT(15.0f).SliceX(15.0f).TranslateY(-5.0f))
         |+ SubPositioner(
             (fun (preserve_center, (old_x, _), (new_x, _)) ->
                 let current = position.Value
@@ -292,7 +304,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom
                         }
             ),
-            save_pos).Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f))
+            save_pos
+        )
+            .Position(Position.BorderR(15.0f).SliceY(15.0f).TranslateX(5.0f))
         |* SubPositioner(
             (fun (preserve_center, (_, old_y), (_, new_y)) ->
                 let current = position.Value
@@ -314,7 +328,9 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
                             Bottom = current.Bottom ^+ (new_y - old_y) |> round
                         }
             ),
-            save_pos).Position(Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f))
+            save_pos
+        )
+            .Position(Position.BorderB(15.0f).SliceX(15.0f).TranslateY(5.0f))
 
         base.Init parent
 

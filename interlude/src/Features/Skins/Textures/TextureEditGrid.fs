@@ -90,9 +90,10 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
             item_width * float32 sprite.Columns + 10.0f * float32 (sprite.Columns - 1)
 
         items <-
-            NavigationContainer.Grid(
-                WrapNavigation = false,
-                Floating = true).Position(Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
+            NavigationContainer.Grid()
+                .WrapNavigation(false)
+                .Floating()
+                .Position(Position.Box(0.5f, 0.0f, -grid_width * 0.5f, 0.0f, grid_width, this.Bounds.Height))
 
         let grid = NavigationContainer.Grid(WrapNavigation = false, Floating = true)
 
@@ -104,7 +105,9 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                         sprite,
                         c,
                         r,
-                        selected).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)),
+                        selected
+                    )
+                        .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), float32 r * (item_height + 10.0f), item_width, item_height)),
                     c + 2,
                     r + 2
                 )
@@ -121,17 +124,17 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
 
                     if sprite.Columns > 1 then
                         grid.Add(
-                            DeleteButton(
-                                (fun () ->
-                                    ConfirmPage(
-                                        sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
-                                        fun () ->
-                                            if source.DeleteLooseTextureColumn(c, texture_id) then
-                                                reload_source()
-                                                this.Refresh()
-                                    )
-                                        .Show()
-                                )).Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)),
+                            DeleteButton(fun () ->
+                                ConfirmPage(
+                                    sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
+                                    fun () ->
+                                        if source.DeleteLooseTextureColumn(c, texture_id) then
+                                            reload_source()
+                                            this.Refresh()
+                                )
+                                    .Show()
+                            )
+                                .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -50.0f, item_width, 40.0f)),
                             c + 2,
                             1
                         )
@@ -283,62 +286,66 @@ type TextureEditPage(source: Storage, texture_id: string) =
             source,
             reload_source,
             texture_id,
-            texture_rules).Position(Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f))
+            texture_rules
+        )
+            .Position(Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f))
+
+    // todo: separate file, TextureActions.Create(texture_editor: TextureEditGrid)
+    let selected_texture_actions =
+        FlowContainer.Vertical(45.0f)
+            .Spacing(Style.PADDING * 3.0f)
+            .Position(Position.SliceR(400.0f).Shrink(50.0f))
+            .With(
+                Button(Icons.ROTATE_CW + " Rotate clockwise", fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        source.RotateClockwise((col, row), texture_id) |> ignore
+
+                    reload_source()
+                    texture_editor.Refresh()
+                )
+                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
+
+                Button(Icons.ROTATE_CCW + " Rotate anticlockwise", fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        source.RotateAnticlockwise((col, row), texture_id) |> ignore
+
+                    reload_source()
+                    texture_editor.Refresh()
+                )
+                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
+
+                Button(Icons.CORNER_LEFT_UP + " Vertical flip", fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        source.VerticalFlipTexture((col, row), texture_id) |> ignore
+
+                    reload_source()
+                    texture_editor.Refresh()
+                )
+                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
+
+                Button(Icons.CORNER_DOWN_LEFT + " Horizontal flip", fun () ->
+                    for (col, row) in texture_editor.SelectedTextures do
+                        source.HorizontalFlipTexture((col, row), texture_id) |> ignore
+
+                    reload_source()
+                    texture_editor.Refresh()
+                )
+                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
+
+                Button(Icons.REFRESH_CW + " Cycle selected", fun () ->
+                    if source.CycleTextures(texture_editor.SelectedTextures |> Array.ofSeq, texture_id) then
+                        reload_source()
+                        texture_editor.Refresh()
+                )
+                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty)
+            )
 
     override this.Content() =
         source.SplitTexture(texture_id)
 
         NavigationContainer.Column()
         |+ texture_editor
-        |+ (FlowContainer.Vertical(45.0f, Spacing = 15.0f).Position(Position.SliceR(400.0f).Shrink(50.0f))
-            |+ Button(
-                Icons.ROTATE_CW + " Rotate clockwise"
-                , fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.RotateClockwise((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-            )
-            |+ Button(
-                Icons.ROTATE_CCW + " Rotate anticlockwise"
-                , fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.RotateAnticlockwise((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-            )
-            |+ Button(
-                Icons.CORNER_LEFT_UP + " Vertical flip"
-                , fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.VerticalFlipTexture((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-            )
-            |+ Button(
-                Icons.CORNER_DOWN_LEFT + " Horizontal flip"
-                , fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.HorizontalFlipTexture((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-            )
-            |+ Button(
-                Icons.REFRESH_CW + " Cycle selected"
-                , fun () ->
-                    if source.CycleTextures(texture_editor.SelectedTextures |> Array.ofSeq, texture_id) then
-                        reload_source()
-                        texture_editor.Refresh()
-                , Disabled = fun () -> texture_editor.SelectedTextures |> Seq.isEmpty
-            ))
+        |+ selected_texture_actions
         :> Widget
 
     override this.Title = Icons.IMAGE + " " + texture_id

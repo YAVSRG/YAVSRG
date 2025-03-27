@@ -10,12 +10,15 @@ type LeaderboardsTab() =
 
     let keymodes = KeymodesLeaderboard()
     let activity = ActivityLeaderboard()
-    let content_panel = SwapContainer(activity).Position(Position.SlicePercentR(0.6f).Shrink(40.0f, 40.0f))
+    let content_panel =
+        SwapContainer(activity)
+            .Position(Position.SlicePercentR(0.6f).Shrink(40.0f, 40.0f))
 
     override this.Init(parent) =
 
         let options =
-            NavigationContainer.Column().Position(Position.SlicePercentL(0.4f).ShrinkT(150.0f).ShrinkX(40.0f))
+            NavigationContainer.Column()
+                .Position(Position.SlicePercentL(0.4f).ShrinkT(150.0f).ShrinkX(40.0f))
             |+ PageSetting("Leaderboard",
                 Selector(
                     [| activity :> Widget, %"stats.leaderboards.activity"; keymodes, %"stats.leaderboards.rating" |],

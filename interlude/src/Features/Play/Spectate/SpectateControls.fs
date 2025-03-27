@@ -35,8 +35,10 @@ type private ControlOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: u
     let mutable show_timeout = 3000.0
 
     override this.Init(parent) =
-        this |+ Timeline(info.WithMods, on_seek, SelectedChart.rate)
-        |* Controls(who, cycle).Position(Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
+        this
+        |+ Timeline(info.WithMods, on_seek, SelectedChart.rate)
+        |* Controls(who, cycle)
+            .Position(Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
 
         base.Init parent
 

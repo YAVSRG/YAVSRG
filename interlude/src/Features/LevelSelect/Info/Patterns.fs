@@ -9,7 +9,7 @@ open Prelude.Calculator
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type Patterns(display: Setting<Display>) =
+type Patterns(display: Setting<InfoPanelMode>) =
     inherit Container(NodeType.None)
 
     let mutable patterns: Cluster array = [||]
@@ -27,7 +27,7 @@ type Patterns(display: Setting<Display>) =
         this
         |* AngledButton(
             %"levelselect.info.details",
-            (fun () -> display.Set Display.Local),
+            (fun () -> display.Set InfoPanelMode.Local),
             Palette.MAIN_100
         )
             .Hotkey("scoreboard_storage")

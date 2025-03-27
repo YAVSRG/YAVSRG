@@ -409,6 +409,16 @@ module NavigationContainer =
 type NavigationContainerExtensions =
 
     [<Extension>]
-    static member WrapNavigation(this: NavigationContainer.Base, wrap: bool) : NavigationContainer.Base =
+    static member WrapNavigation(this: #NavigationContainer.Base, wrap: bool) : #NavigationContainer.Base =
         this.WrapNavigation <- wrap
+        this
+
+    [<Extension>]
+    static member WrapNavigation(this: NavigationContainer.Grid, wrap: bool) : NavigationContainer.Grid =
+        this.WrapNavigation <- wrap
+        this
+
+    [<Extension>]
+    static member Floating(this: NavigationContainer.Grid) : NavigationContainer.Grid =
+        this.Floating <- true
         this

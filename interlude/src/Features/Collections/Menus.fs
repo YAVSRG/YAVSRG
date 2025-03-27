@@ -251,7 +251,8 @@ type SelectCollectionPage
         )
             .Help(Help.Info("collections.create_playlist"))
             .Pos(2)
-        |+ ScrollContainer(grid).Position(page_position(5, PAGE_BOTTOM - 5, PageWidth.Full))
+        |+ ScrollContainer(grid)
+            .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")

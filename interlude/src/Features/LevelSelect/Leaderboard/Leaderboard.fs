@@ -49,7 +49,7 @@ module ScoreSync =
         OnlineScores.leaderboard_loaded.Add(fun b -> lb <- b; sync_if_ready())
         LocalScores.scores_loaded.Add(fun _ -> local <- true; sync_if_ready())
 
-type Leaderboard(display: Setting<Display>) =
+type Leaderboard(display: Setting<InfoPanelMode>) =
     inherit Container(NodeType.None)
 
     let mutable count = 0
@@ -72,7 +72,7 @@ type Leaderboard(display: Setting<Display>) =
         this
         |+ AngledButton(
             %"levelselect.info.leaderboard",
-            (fun () -> display.Set Display.Patterns),
+            (fun () -> display.Set InfoPanelMode.Patterns),
             Palette.MAIN_100
         )
             .Hotkey("scoreboard_storage")

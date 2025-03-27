@@ -73,14 +73,16 @@ type WikiBrowserPage() =
                 let fcount = float32 Cache.index_table_of_contents.Keys.Count
 
                 let folders =
-                    FlowContainer.LeftToRight<_>(
-                        (PAGE_WIDTH - 10.0f - (fcount - 1.0f) * 20.0f) / fcount,
-                        Spacing = 20.0f).Position(Position.ShrinkT(80.0f).Shrink(5.0f, 0.0f))
+                    FlowContainer.LeftToRight<_>((PAGE_WIDTH - 10.0f - (fcount - 1.0f) * 20.0f) / fcount)
+                        .Spacing(20.0f)
+                        .Position(Position.ShrinkT(80.0f).ShrinkX(5.0f))
 
                 for key in Cache.index_table_of_contents.Keys do
                     let pages = Cache.index_table_of_contents.[key]
 
-                    let links = FlowContainer.Vertical(50.0f).Position(Position.ShrinkT(60.0f))
+                    let links =
+                        FlowContainer.Vertical(50.0f)
+                            .Position(Position.ShrinkT(60.0f))
 
                     for p in pages do
                         links.Add(Button(p.Title, (fun () -> load_resource (WikiPage p))))

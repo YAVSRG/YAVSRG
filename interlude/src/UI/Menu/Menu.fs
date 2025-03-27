@@ -54,9 +54,8 @@ type Page() as this =
 
     abstract member Footer : unit -> Widget
     default this.Footer() =
-        Button(
-            Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back",
-            Menu.Back).Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f))
+        Button(Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back", Menu.Back)
+            .Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkL(10.0f).SliceL(180.0f))
         |> OverlayContainer
         :> Widget
 

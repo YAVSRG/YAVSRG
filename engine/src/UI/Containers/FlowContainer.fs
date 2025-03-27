@@ -154,34 +154,8 @@ module FlowContainer =
 
         abstract member FlowContent: ResizeArray<FlowItem<'T>> -> unit
 
-        member this.Add(child: 'T) =
-            assert(GameThread.is_game_thread())
-
-            children.Add
-                {
-                    Widget = child
-                    Visible = filter child
-                }
-
-            match sort with
-            | Some comp -> children.Sort(fun { Widget = a } { Widget = b } -> comp a b)
-            | None -> ()
-
-            if this.Initialised then
-                child.Init this
-                refresh <- true
-
-            size_change()
-
-        member this.Remove(child: 'T) =
-            assert(GameThread.is_game_thread())
-
-            match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
-            | Some x ->
-                children.Remove x |> ignore
-                refresh <- true
-                size_change()
-            | None -> Logging.Error "%O is not in flow container %O, can't remove" child this
+        member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
+        member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
 
         override this.Init(parent: Widget) =
             base.Init parent
@@ -206,6 +180,38 @@ module FlowContainer =
 
         static member (|*)(parent: #Base<'T>, child: 'T) = parent.Add child
         static member (|*)(parent: #Base<'T>, children: 'T seq) = Seq.iter parent.Add children
+
+        interface IContainer<'T> with
+
+            member this.Add(child: 'T) : unit =
+                assert(GameThread.is_game_thread())
+
+                children.Add
+                    {
+                        Widget = child
+                        Visible = filter child
+                    }
+
+                match sort with
+                | Some comp -> children.Sort(fun { Widget = a } { Widget = b } -> comp a b)
+                | None -> ()
+
+                if this.Initialised then
+                    child.Init this
+                    refresh <- true
+
+                size_change()
+
+            member this.Remove(child: 'T) : bool =
+                assert(GameThread.is_game_thread())
+
+                match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
+                | Some x ->
+                    children.Remove x |> ignore
+                    refresh <- true
+                    size_change()
+                    true
+                | None -> false
 
         interface IResize with
             member this.OnSizeChanged

@@ -248,7 +248,7 @@ module LevelSelect =
 
 // todo: rename; relocate
 [<RequireQualifiedAccess>]
-type Display =
+type InfoPanelMode =
     | Local
     | Online
     | Patterns
