@@ -5,20 +5,38 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library
 open Prelude.Data
 open Interlude.UI
+
+type BeatmapStatusToggle =
+    static member Create(label: string, status: int, color: Color, statuses: Setting<Set<int>>) =
+        AngledButton(
+            (fun () ->
+                if statuses.Value.Contains status then Icons.CHECK + " " + label
+                else Icons.X + " " + label
+            ),
+            (fun () ->
+                if statuses.Value.Contains status then
+                    Setting.app (Set.remove status) statuses
+                else
+                    Setting.app (Set.add status) statuses
+            ),
+            (fun () -> if statuses.Value.Contains status then color.O3 else color.O1)
+        )
 
 type BeatmapBrowserPage() =
     inherit Page()
 
+    let WIDTH = 1400.0f
+    let MARGIN_TOP = 20.0f
+
     let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
-    let mutable filter: FilterPart list = []
+    let search_text = Setting.simple ""
     let query_order = Setting.simple "submitted_date"
     let descending_order = Setting.simple true
-    let mutable statuses = Set.singleton 1
+    let statuses = Setting.simple (Set.singleton 1)
     let mutable when_at_bottom: (unit -> unit) option = None
     let mutable loading = false
 
@@ -53,25 +71,13 @@ type BeatmapBrowserPage() =
                 | None -> ()
         }
 
-    let rec search (filter: FilterPart list) (page: int) : unit =
+    let rec search (query: string) (page: int) : unit =
         loading <- true
         when_at_bottom <- None
 
-        let mutable query = ""
-
-        let mutable invalid = false
-
-        List.iter
-            (function
-            | Impossible -> invalid <- true
-            | String s ->
-                query <- if query = "" then s else query + " " + s
-            | _ -> ())
-            filter
-
         let status_string =
-            (if statuses.Contains 0 then "status=-2&status=-1&" else "")
-            + (statuses |> Seq.map (sprintf "status=%i") |> String.concat "&")
+            (if statuses.Value.Contains 0 then "status=-2&status=-1&" else "")
+            + (statuses.Value |> Seq.map (sprintf "status=%i") |> String.concat "&")
 
         let url =
             sprintf "https://catboy.best/api/v2/search?query=%s&mode=3&sort=%s:%s&limit=50&offset=%i&%s"
@@ -81,93 +87,76 @@ type BeatmapBrowserPage() =
                 (page * 50)
                 status_string
 
-        json_downloader.Request(url, (fun () -> search filter (page + 1)))
+        json_downloader.Request(url, (fun () -> search query (page + 1)))
 
-    let begin_search (filter: FilterPart list) : unit =
-        search filter 0
+    let begin_search (query: string) : unit =
+        search query 0
         items.Clear()
 
-    let status_button (label: string, status: int, color: Color) : AngledButton =
-        AngledButton(
-            (fun () ->
-                if statuses.Contains status then
-                    Icons.CHECK + " " + label
-                else
-                    Icons.X + " " + label
-            ),
-            (fun () ->
-                if statuses.Contains status then
-                    statuses <- Set.remove status statuses
-                else
-                    statuses <- Set.add status statuses
-
-                begin_search filter
-            ),
-            (fun () -> if statuses.Contains status then color.O3 else color.O1)
-        )
+    let statuses = statuses |> Setting.trigger (fun _ -> begin_search search_text.Value)
 
     let search_results =
-        Container.Create(
-            NavigationContainer.Column()
-                .Position(Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
-                .With(
-                    Dummy(NodeType.Leaf),
-                    scroll_container
-                )
-        )
+        NavigationContainer.Column()
+            .Position(Position.ShrinkT(MARGIN_TOP + AngledButton.HEIGHT + SearchBox.HEIGHT + Style.PADDING * 2.0f).SliceX(WIDTH).ShrinkB(70.0f))
             .With(
+                Dummy(NodeType.Leaf),
+                scroll_container,
                 EmptyState(Icons.SEARCH, %"beatmap_browser.no_results")
-                    .Position(Position.ShrinkT(135.0f))
                     .Conditional(fun () -> not loading && items.Count = 0)
             )
 
-    let header =
+    let sort_filter_buttons =
         NavigationContainer.Row()
-            .Position(Position.SliceB(AngledButton.HEIGHT))
-        |+ status_button("Ranked", 1, Colors.cyan)
-            .LeanLeft(false)
-            .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, AngledButton.LEAN_AMOUNT))
-        |+ status_button("Qualified", 3, Colors.green)
-            .Position(Position.ShrinkPercentR(0.28f).GridX(2, 4, AngledButton.LEAN_AMOUNT))
-        |+ status_button("Loved", 4, Colors.pink)
-            .Position(Position.ShrinkPercentR(0.28f).GridX(3, 4, AngledButton.LEAN_AMOUNT))
-        |+ status_button("Unranked", 0, Colors.grey_2)
-            .Position(Position.ShrinkPercentR(0.28f).GridX(4, 4, AngledButton.LEAN_AMOUNT))
-        // todo: this should not use accent color and should be keyboard navigatable
-        |+ SortingDropdown(
-            [
-                "play_count", "Play count"
-                "submitted_date", "Date"
-                "beatmaps.difficulty_rating", "Difficulty"
-                "favourite_count", "Favourites"
-            ],
-            "Sort",
-            query_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
-            descending_order |> Setting.trigger (fun _ -> begin_search filter; search_results.Focus false),
-            "sort_mode"
-        )
-            .Position(Position.SlicePercentR(0.28f).ShrinkL(AngledButton.LEAN_AMOUNT))
-        |> Container.Create
-        |> _.Position(Position.SliceT(20.0f, 115.0f).SliceX(1400.0f))
-        |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: FilterPart list) ->
-                    filter <- f
-                    GameThread.defer (fun () -> begin_search filter)
-                ),
-                Fill = K Colors.cyan.O3,
-                Border = K Colors.cyan_accent,
-                TextColor = K Colors.text_cyan
+            .With(
+                BeatmapStatusToggle.Create("Ranked", 1, Colors.cyan, statuses)
+                    .LeanLeft(false)
+                    .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, AngledButton.LEAN_AMOUNT)),
+                BeatmapStatusToggle.Create("Qualified", 3, Colors.green, statuses)
+                    .Position(Position.ShrinkPercentR(0.28f).GridX(2, 4, AngledButton.LEAN_AMOUNT)),
+                BeatmapStatusToggle.Create("Loved", 4, Colors.pink, statuses)
+                    .Position(Position.ShrinkPercentR(0.28f).GridX(3, 4, AngledButton.LEAN_AMOUNT)),
+                BeatmapStatusToggle.Create("Unranked", 0, Colors.grey_2, statuses)
+                    .Position(Position.ShrinkPercentR(0.28f).GridX(4, 4, AngledButton.LEAN_AMOUNT)),
+
+                // todo: this should not use accent color and should be keyboard navigatable
+                SortingDropdown(
+                    [
+                        "play_count", "Play count"
+                        "submitted_date", "Date"
+                        "beatmaps.difficulty_rating", "Difficulty"
+                        "favourite_count", "Favourites"
+                    ],
+                    "Sort",
+                    query_order |> Setting.trigger (fun _ -> begin_search search_text.Value; search_results.Focus false),
+                    descending_order |> Setting.trigger (fun _ -> begin_search search_text.Value; search_results.Focus false),
+                    "sort_mode"
+                )
+                    .Position(Position.SlicePercentR(0.28f).ShrinkL(AngledButton.LEAN_AMOUNT))
             )
-                .Position(Position.SliceT(60.0f))
-            |+ LoadingIndicator.Border(fun () -> loading)
-        )
+
+    let header =
+        NavigationContainer.Column()
+            .WrapNavigation(false)
+            .Position(Position.SliceT(MARGIN_TOP, AngledButton.HEIGHT + SearchBox.HEIGHT + Style.PADDING).SliceX(WIDTH))
+            .With(
+                SearchBox(search_text, fun (query: string) ->
+                    GameThread.defer (fun () -> begin_search query)
+                )
+                    .Fill(Colors.cyan.O3)
+                    .Border(Colors.cyan_accent)
+                    .TextColor(Colors.text_cyan)
+                    .Position(Position.SliceT(SearchBox.HEIGHT))
+                    .With(LoadingIndicator.Border(fun () -> loading)),
+
+                sort_filter_buttons
+                    .Position(Position.SliceB(AngledButton.HEIGHT))
+            )
 
     // page parts are rotated around to give correct draw order for the dropdowns in the header
     override this.Content() = header
 
     override this.Footer() =
-        begin_search filter
+        begin_search search_text.Value
         search_results
 
     override this.Header() =

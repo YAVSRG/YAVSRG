@@ -42,9 +42,7 @@ type LobbyInfoCard(info: LobbyInfo) =
 type LobbyList() =
     inherit Container(NodeType.None)
 
-    let search_text = Setting.simple ""
-
-    let list_container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f)
+    let list_container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = Style.PADDING * 3.0f)
 
     let mutable no_lobbies = false
     // todo: loading state
@@ -70,10 +68,11 @@ type LobbyList() =
             .Position(Position.SliceB(60.0f).ShrinkR(250.0f))
         |+ Button(Icons.REFRESH_CCW + "  " + %"lobby_list.refresh", refresh_list)
             .Position(Position.SliceB(60.0f).SliceR(250.0f))
-        |* SearchBox(search_text, fun (query: string) ->
-            list_container.Filter <- fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
+        |* SearchBox(fun query ->
+            list_container
+                .Filter(fun l -> l.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
         )
-            .Position(Position.SliceT(60.0f))
+            .Position(Position.SliceT(SearchBox.HEIGHT))
         base.Init parent
 
         refresh_list()

@@ -93,23 +93,17 @@ type RulesetCard(id: string, ruleset: Ruleset) as this =
 
     member this.Name = ruleset.Name
 
-    static member Filter(filter: FilterPart list) =
+    static member Filter(query: string) =
         fun (c: RulesetCard) ->
-            List.forall
-                (function
-                | Impossible -> false
-                | String str -> c.Name.ToLower().Contains(str)
-                | _ -> true)
-                filter
+            c.Name.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
 
 type RulesetSearch() as this =
     inherit Container(NodeType.Container(fun _ -> Some this.Items))
 
     let grid =
-        GridFlowContainer<RulesetCard>(80.0f, 2, Spacing = (15.0f, 15.0f), WrapNavigation = false)
-
-    let scroll =
-        ScrollContainer(grid, Margin = Style.PADDING).Position(Position.ShrinkT(70.0f))
+        GridFlowContainer<RulesetCard>(80.0f, 2)
+            .Spacing(Style.PADDING * 3.0f)
+            .WrapNavigation(false)
 
     let mutable loading = true
     let mutable failed = false
@@ -134,14 +128,18 @@ type RulesetSearch() as this =
         )
 
         this
-        |+ (SearchBox(
-                Setting.simple "",
-                (fun (f: FilterPart list) -> grid.Filter <- RulesetCard.Filter f)
+            .Add(
+                SearchBox(Setting.simple "", (fun (query: string) -> grid.Filter <- RulesetCard.Filter query))
+                    .Position(Position.SliceT(SearchBox.HEIGHT))
+                    .With(LoadingIndicator.Border(fun () -> loading)),
+
+                ScrollContainer(grid)
+                    .Margin(Style.PADDING)
+                    .Position(Position.ShrinkT(SearchBox.HEIGHT + Style.PADDING * 2.0f)),
+
+                EmptyState(Icons.X, %"rulesets.browser.error")
+                    .Conditional(fun () -> failed)
             )
-                .Position(Position.SliceT 60.0f)
-            |+ LoadingIndicator.Border(fun () -> loading))
-        |+ EmptyState(Icons.X, %"rulesets.browser.error").Conditional(fun () -> failed)
-        |* scroll
 
         base.Init parent
 

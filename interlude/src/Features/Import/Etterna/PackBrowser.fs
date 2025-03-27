@@ -4,17 +4,18 @@ open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.Library
 open Prelude.Data
 open Interlude.UI
 
 type EtternaPacksBrowserPage() =
     inherit Page()
 
+    let WIDTH = 1400.0f
+    let MARGIN_TOP = 20.0f
+
     let items = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
-    let mutable filter: FilterPart list = []
     let query_order = Setting.simple "popularity"
     let descending_order = Setting.simple true
     let mutable when_at_bottom: (unit -> unit) option = None
@@ -46,60 +47,43 @@ type EtternaPacksBrowserPage() =
                     loading <- false
         }
 
-    let rec search (filter: FilterPart list) (page: int) : unit =
+    let rec search (query: string) (page: int) : unit =
         loading <- true
         when_at_bottom <- None
-        let mutable search_string = ""
-
-        let mutable invalid = false
-
-        List.iter
-            (function
-            | Impossible -> invalid <- true
-            | String s ->
-                search_string <-
-                    match search_string with
-                    | "" -> s
-                    | t -> search_string + " " + s
-            | _ -> ())
-            filter
 
         let url =
             sprintf "https://api.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
                 (page + 1)
                 (if descending_order.Value then "-" else "")
                 (query_order.Value)
-                (if search_string = "" then "" else "&filter[search]=" + System.Net.WebUtility.UrlEncode search_string)
+                (if query = "" then "" else "&filter[search]=" + System.Net.WebUtility.UrlEncode query)
 
-        json_downloader.Request(url, (fun () -> search filter (page + 1)))
+        json_downloader.Request(url, (fun () -> search query (page + 1)))
 
-    let begin_search (filter: FilterPart list) : unit =
-        search filter 0
+    let begin_search (query: string) : unit =
+        search query 0
         items.Clear()
 
     override this.Focusable = items.Focusable
 
     override this.Content() =
-        begin_search filter
+        begin_search ""
 
-        NavigationContainer.Column().Position(Position.SliceX(1400.0f).ShrinkT(90.0f).ShrinkB(70.0f))
-        |+ Dummy(NodeType.Leaf)
-        |+ scroll_container
-        |+ EmptyState(Icons.X, %"etterna_pack_browser.error").Position(Position.ShrinkT(120.0f))
-            .Conditional(fun () -> failed)
-        |+ EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results").Position(Position.ShrinkT(120.0f))
-            .Conditional(fun () -> not failed && not loading && items.Count = 0)
-        :> Widget
+        NavigationContainer.Column()
+            .Position(Position.SliceX(WIDTH).ShrinkT(MARGIN_TOP + SearchBox.HEIGHT + Style.PADDING * 2.0f).ShrinkB(70.0f))
+            .With(
+                Dummy(NodeType.Leaf),
+                scroll_container,
+                EmptyState(Icons.X, %"etterna_pack_browser.error").Position(Position.ShrinkT(120.0f))
+                    .Conditional(fun () -> failed),
+                EmptyState(Icons.SEARCH, %"etterna_pack_browser.no_results").Position(Position.ShrinkT(120.0f))
+                    .Conditional(fun () -> not failed && not loading && items.Count = 0)
+            )
 
     override this.Header() =
-        SearchBox(
-            Setting.simple "",
-            (fun (f: FilterPart list) ->
-                filter <- f
-                GameThread.defer (fun () -> begin_search filter)
-            )).Position(Position.SliceX(1400.0f).SliceT(60.0f).Translate(0.0f, 20.0f))
-        |+ LoadingIndicator.Border(fun () -> loading)
-        :> Widget
+        SearchBox(fun query -> GameThread.defer (fun () -> begin_search query))
+            .Position(Position.SliceX(WIDTH).SliceT(SearchBox.HEIGHT).TranslateY(MARGIN_TOP))
+            .With(LoadingIndicator.Border(fun () -> loading))
 
     override this.Footer() =
         Text(%"etterna_pack_browser.disclaimer")

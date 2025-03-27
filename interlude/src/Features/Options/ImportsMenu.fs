@@ -33,7 +33,7 @@ type ImportsMenuPage() =
     let main_options =
         NavigationContainer.Column()
             .WrapNavigation(false)
-            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f))
+            .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentL(0.5f).ShrinkR(10.0f))
         |+ PageButton(%"beatmap_browser", fun () -> BeatmapBrowserPage().Show()).Pos(0, 2, PageWidth.Full)
         |+ PageButton(%"etterna_pack_browser", fun () -> EtternaPacksBrowserPage().Show()).Pos(2, 2, PageWidth.Full)
         |+ PageButton(%"skins.browser", fun () -> SkinsBrowserPage().Show()).Pos(4, 2, PageWidth.Full)

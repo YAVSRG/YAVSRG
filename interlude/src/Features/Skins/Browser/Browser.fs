@@ -15,42 +15,61 @@ type SkinsBrowserPage() =
     let mutable error = false
     let mutable selected_group = None
 
+    let PREVIEW_SPLIT = 0.35f
+
     let noteskin_items =
-        GridFlowContainer<GroupDisplay>(100.0f, 2, WrapNavigation = false, Spacing = (15.0f, 15.0f))
+        GridFlowContainer<GroupDisplay>(100.0f, 2).WrapNavigation(false).Spacing(Style.PADDING * 3.0f)
 
     let version_items =
-        FlowContainer.Vertical<VersionDisplay>(520.0f, Spacing = 15.0f)
+        FlowContainer.Vertical<VersionDisplay>(520.0f, Spacing = Style.PADDING * 3.0f)
 
     let search_groups =
         NavigationContainer.Column()
-        |+ Dummy(NodeType.Leaf)
-        |+ ScrollContainer(noteskin_items, Margin = Style.PADDING)
-            .Position(Position.ShrinkT(70.0f))
-        |> Container.Create
-        |> _.Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.65f %- 10.0f })
-        |+ (SearchBox(
-                Setting.simple "",
-                (fun (query: string) -> noteskin_items.Filter <- GroupDisplay.Filter query),
-                Fill = K Colors.cyan.O3,
-                Border = K Colors.cyan_accent,
-                TextColor = K Colors.text_cyan
+            .Position(
+                Position
+                    .ShrinkPercentR(PREVIEW_SPLIT)
+                    .ShrinkR(Style.PADDING * 2.0f)
+                    .ShrinkL(PAGE_MARGIN_X)
+                    .ShrinkY(PAGE_MARGIN_Y)
             )
-                .Position(Position.SliceT(60.0f))
-            |+ LoadingIndicator.Border(fun () -> loading))
-        |+ EmptyState(Icons.X, %"skins.browser.error").Conditional(fun () -> error)
+            .With(
+                SearchBox(fun query -> noteskin_items.Filter <- GroupDisplay.Filter query)
+                    .Fill(Colors.cyan.O3)
+                    .Border(Colors.cyan_accent)
+                    .TextColor(Colors.text_cyan)
+                    .Position(Position.SliceT(SearchBox.HEIGHT))
+                    .With(LoadingIndicator.Border(fun () -> loading)),
+
+                ScrollContainer(noteskin_items)
+                    .Margin(Style.PADDING)
+                    .Position(Position.ShrinkT(SearchBox.HEIGHT + Style.PADDING * 2.0f)),
+
+                EmptyState(Icons.X, %"skins.browser.error")
+                    .Conditional(fun () -> error)
+            )
 
     let pick_versions =
-        ScrollContainer(version_items, Margin = Style.PADDING)
-            .Position(Position.ShrinkT(70.0f))
-        |> Container.Create
-        |> _.Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.65f %+ 10.0f })
-        |+ Text(%"skins.browser.install_hint")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceT(70.0f).Shrink(10.0f))
-            .Conditional(fun () -> selected_group.IsSome)
+        Container.Create(
+            ScrollContainer(version_items)
+                .Margin(Style.PADDING)
+                .Position(Position.ShrinkT(70.0f))
+            )
+            .Position(
+                Position
+                    .SlicePercentR(PREVIEW_SPLIT)
+                    .ShrinkL(Style.PADDING * 2.0f)
+                    .ShrinkL(PAGE_MARGIN_X)
+                    .ShrinkY(PAGE_MARGIN_Y)
+            )
+            .With(
+                Text(%"skins.browser.install_hint")
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.CENTER)
+                    .Position(Position.SliceT(70.0f).Shrink(10.0f))
+                    .Conditional(fun () -> selected_group.IsSome)
+            )
 
-    let select_group(group: SkinGroup) =
+    let select_group (group: SkinGroup) : unit =
         selected_group <- Some group
         version_items.Clear()
         for version in group.Versions do

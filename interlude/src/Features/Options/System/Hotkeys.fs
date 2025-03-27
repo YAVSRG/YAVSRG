@@ -82,7 +82,7 @@ type HotkeysPage() =
                     base.OnFocus by_mouse
                     if not by_mouse then GameThread.defer (fun () -> this.Select false)
             }
-                .Position(Position.SliceT(40.0f, 60.0f).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
+                .Position(Position.SliceT(40.0f, SearchBox.HEIGHT).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
 
         let hotkey_editor (hotkey: Hotkey) =
             NavigationContainer.Row()

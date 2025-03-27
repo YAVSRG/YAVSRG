@@ -55,10 +55,10 @@ type LevelSelectScreen() =
                         Position
                             .SliceT(TOP_BAR_HEIGHT)
                             .ShrinkB(AngledButton.HEIGHT)
-                            .SliceY(60.0f)
+                            .SliceY(SearchBox.HEIGHT)
                             .ShrinkPercentL(0.4f)
-                            .ShrinkL(290.0f)
-                            .ShrinkR(20.0f)
+                            .ShrinkL(200.0f)
+                            .ShrinkR((TOP_BAR_HEIGHT - AngledButton.HEIGHT - SearchBox.HEIGHT - Style.PADDING) * 0.5f)
                     )
                     .Help(Help.Info("levelselect.search", "search")),
 

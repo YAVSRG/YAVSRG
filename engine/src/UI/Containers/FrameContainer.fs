@@ -1,5 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Drawing
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 
@@ -15,13 +17,7 @@ type FrameContainer(nt: NodeType) =
 
         if border.A > 0uy then
 
-            let r = this.Bounds.Expand Style.PADDING
-            Render.rect (r.SliceL Style.PADDING) border
-            Render.rect (r.SliceR Style.PADDING) border
-
-            let r = this.Bounds.Expand(0.0f, Style.PADDING)
-            Render.rect (r.SliceT Style.PADDING) border
-            Render.rect (r.SliceB Style.PADDING) border
+            Render.border Style.PADDING base.Bounds border
 
         let fill = this.Fill()
 
@@ -33,3 +29,26 @@ type FrameContainer(nt: NodeType) =
 
     static member Create(child: Widget) =
         FrameContainer(NodeType.Container(K (Some child))).With(child)
+
+[<Extension>]
+type FrameContainerExtensions() =
+
+    [<Extension>]
+    static member inline Fill(container: #FrameContainer, color: Color) : #FrameContainer =
+        container.Fill <- K color
+        container
+
+    [<Extension>]
+    static member inline Fill(container: #FrameContainer, color: unit -> Color) : #FrameContainer =
+        container.Fill <- color
+        container
+
+    [<Extension>]
+    static member inline Border(container: #FrameContainer, color: Color) : #FrameContainer =
+        container.Border <- K color
+        container
+
+    [<Extension>]
+    static member inline Border(container: #FrameContainer, color: unit -> Color) : #FrameContainer =
+        container.Border <- color
+        container

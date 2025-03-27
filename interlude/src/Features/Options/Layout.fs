@@ -89,7 +89,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         }
             .Position(
                 { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }
-                    .SliceY(60.0f)
+                    .SliceY(SearchBox.HEIGHT)
                     .ShrinkL(900.0f)
                     .Shrink(Style.PADDING, 0.0f)
             )
