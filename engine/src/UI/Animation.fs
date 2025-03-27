@@ -17,38 +17,44 @@ module Animation =
 
     // PERMANENT ANIMATIONS - These will run indefinitely and are used for long term counting/sliding effects
 
-    type Fade(value) =
+    type Fade(initial_value: float32) =
         inherit Animation()
-        let mutable value = value
-        let mutable target = value
-        let mutable time = 0.0
+
+        static let DURATION_MS = 1500.0
+
+        let mutable start_value = initial_value
+        let mutable end_value = initial_value
+        let mutable time_remaining = 0.0
 
         member this.Value
-            with get () = if time > 0.0 then value else target
+            with get () =
+                if time_remaining > 0.0 then
+                    lerp (float32 <| Math.Pow(0.994, DURATION_MS - time_remaining)) end_value start_value
+                else end_value
             and set (v) =
-                value <- v
-                time <- 1500.0
+                start_value <- v
+                time_remaining <- DURATION_MS
 
-        member this.Alpha = int (MathF.Round(255.0f * value))
+        member this.Alpha = int (MathF.Round(255.0f * this.Value))
 
         member this.Target
-            with get () = target
+            with get () = end_value
             and set (t) =
-                target <- t
-                time <- 1500.0
+                start_value <- this.Value
+                end_value <- t
+                time_remaining <- DURATION_MS
 
-        member this.Moving = time > 0.0
+        member this.Moving = time_remaining > 0.0
 
-        override this.Update(elapsed_ms) =
-            if time > 0.0 then
-                value <- lerp (float32 <| Math.Pow(0.994, elapsed_ms)) target value
-                time <- time - elapsed_ms
+        override this.Update(elapsed_ms: float) =
+            if time_remaining > 0.0 then
+                time_remaining <- time_remaining - elapsed_ms
 
         override this.Complete = false
 
         member this.Snap() =
-            value <- target
-            time <- 0.0
+            start_value <- end_value
+            time_remaining <- 0.0
 
     type Color(color: Drawing.Color) =
         inherit Animation()
