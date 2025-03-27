@@ -252,15 +252,17 @@ module Common =
                 sprintf "#%02x%02x%02x%02x" this.R this.G this.B this.A
 
         static member FromHex(s: string) : Color option =
-            if s.Length = 9 && s.[0] = '#' then
-                let alpha = Convert.ToByte(s.Substring(7), 16)
-                Color.FromArgb(int alpha, ColorTranslator.FromHtml(s.Substring(0, 7))) |> Some
-            elif s.Length = 7 && s.[0] = '#' then
-                ColorTranslator.FromHtml(s) |> Some
-            elif s.Length > 0 && s.[0] <> '#' then
-                ColorTranslator.FromHtml(s) |> Some
-            else
-                None
+            try
+                if s.Length = 9 && s.[0] = '#' then
+                    let alpha = Convert.ToByte(s.Substring(7), 16)
+                    Color.FromArgb(int alpha, ColorTranslator.FromHtml(s.Substring(0, 7))) |> Some
+                elif s.Length = 7 && s.[0] = '#' then
+                    ColorTranslator.FromHtml(s) |> Some
+                elif s.Length > 0 && s.[0] <> '#' then
+                    ColorTranslator.FromHtml(s) |> Some
+                else
+                    None
+            with _ -> None
 
     let open_directory (path: string) =
         ProcessStartInfo("file://" + System.IO.Path.GetFullPath path, UseShellExecute = true)

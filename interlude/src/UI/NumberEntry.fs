@@ -6,21 +6,15 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 
-module NumberEntry =
+type NumberEntry =
 
-    let create_int (setting: Setting<int, _>) : FrameContainer =
-
-        let try_parse (s: string) =
-            match Int32.TryParse(s, CultureInfo.InvariantCulture) with
-            | true, v -> setting.Set v
-            | false, _ -> ()
-
+    static member private CreateInternal<'T>(char_allowed: char -> bool, to_string: unit -> string, from_string: string -> unit, right_margin: float32) : FrameContainer =
         let text_setting =
-            Setting.simple (setting.Value.ToString())
-            |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '-') |> Array.ofSeq |> System.String)
+            Setting.simple (to_string())
+            |> Setting.map id (fun s -> s |> Seq.filter char_allowed |> Array.ofSeq |> String)
 
         let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
+            { new TextEntry(text_setting |> Setting.trigger from_string, "none", true) with
                 override this.OnSelected by_mouse =
                     text_setting.Set ""
                     base.OnSelected by_mouse
@@ -31,98 +25,60 @@ module NumberEntry =
 
                 override this.Update(elapsed_ms, moved) =
                     if not this.Selected then
-                        text_setting.Set ((float32 setting.Value).ToString())
+                        text_setting.Set (to_string())
                     base.Update(elapsed_ms, moved)
             }
 
-        FrameContainer(NodeType.Container (fun () -> Some entry),
-            Fill = K Color.Transparent,
-            Border =
-                fun () ->
-                    if entry.Selected then Colors.pink_accent
-                    elif entry.Focused then Colors.yellow_accent
-                    else Colors.grey_2
-        )
-            .Position(Position.ExpandX(15.0f))
-        |+ entry.Position(Position.ShrinkX(15.0f))
+        FrameContainer.Create(entry.Position(Position.ShrinkX(Style.PADDING * 3.0f).ShrinkR(right_margin)))
+            .Fill(Color.Transparent)
+            .Border(fun () ->
+                if entry.Selected then Colors.pink_accent
+                elif entry.Focused then Colors.yellow_accent
+                else Colors.grey_2
+            )
+            .Position(Position.ExpandX(Style.PADDING * 3.0f))
 
-    let create (setting: Setting<float, _>) : FrameContainer =
+    static member private CreateInternal<'T>(char_allowed: char -> bool, to_string: unit -> string, from_string: string -> unit) : FrameContainer =
+        NumberEntry.CreateInternal(char_allowed, to_string, from_string, 0.0f)
 
-        let try_parse (s: string) =
-            match Double.TryParse(s, CultureInfo.InvariantCulture) with
+    static member Create(setting: Setting<int, _>) : FrameContainer =
+        let from_string (text: string) : unit =
+            match Int32.TryParse(text, CultureInfo.InvariantCulture) with
             | true, v -> setting.Set v
             | false, _ -> ()
+        let to_string () = setting.Value.ToString()
 
-        let text_setting =
-            Setting.simple (setting.Value.ToString("R"))
-            |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> System.String)
+        NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-'), to_string, from_string)
 
-        let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
-                override this.OnSelected by_mouse =
-                    text_setting.Set ""
-                    base.OnSelected by_mouse
+    static member Create(setting: Setting<float, _>) : FrameContainer =
+        let from_string (text: string) : unit =
+            match Double.TryParse(text, CultureInfo.InvariantCulture) with
+            | true, v -> setting.Set v
+            | false, _ -> ()
+        let to_string () : string = setting.Value.ToString("R")
 
-                override this.OnFocus by_mouse =
-                    base.OnFocus by_mouse
-                    Style.hover.Play()
+        NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-' || c = '.'), to_string, from_string)
 
-                override this.Update(elapsed_ms, moved) =
-                    if not this.Selected then
-                        text_setting.Set ((float32 setting.Value).ToString("R"))
-                    base.Update(elapsed_ms, moved)
-            }
+    static member Create(setting: Setting<float32<'u>, _>, units_label: string) : FrameContainer =
+        let UNITS_LABEL_WIDTH = 100.0f
 
-        FrameContainer(
-            NodeType.Container(fun () -> Some entry),
-            Fill = K Color.Transparent,
-            Border =
-                fun () ->
-                    if entry.Selected then Colors.pink_accent
-                    elif entry.Focused then Colors.yellow_accent
-                    else Colors.grey_2
-        )
-            .Position(Position.ExpandX(15.0f))
-        |+ entry.Position(Position.ShrinkX 15.0f)
-
-    let create_uom (units: string) (setting: Setting<float32<'u>, _>) : FrameContainer =
-
-        let try_parse (s: string) =
-            match Single.TryParse(s, CultureInfo.InvariantCulture) with
+        let from_string (text: string) : unit =
+            match Single.TryParse(text, CultureInfo.InvariantCulture) with
             | true, v -> setting.Set (v |> LanguagePrimitives.Float32WithMeasure)
             | false, _ -> ()
+        let to_string () : string = (float32 setting.Value).ToString("R")
 
-        let text_setting =
-            Setting.simple ((float32 setting.Value).ToString("R"))
-            |> Setting.map id (fun s -> s |> Seq.filter (fun c -> Char.IsAsciiDigit c || c = '.' || c = '-') |> Array.ofSeq |> System.String)
+        NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-' || c = '.'), to_string, from_string, UNITS_LABEL_WIDTH)
+            .With(
+                Text(units_label)
+                    .Color(Colors.text_subheading)
+                    .Position(Position.SliceR(UNITS_LABEL_WIDTH))
+            )
 
-        let entry =
-            { new TextEntry(text_setting |> Setting.trigger try_parse, "none", true) with
-                override this.OnSelected by_mouse =
-                    text_setting.Set ""
-                    base.OnSelected by_mouse
-
-                override this.OnFocus by_mouse =
-                    base.OnFocus by_mouse
-                    Style.hover.Play()
-
-                override this.Update(elapsed_ms, moved) =
-                    if not this.Selected then
-                        text_setting.Set ((float32 setting.Value).ToString("R"))
-                    base.Update(elapsed_ms, moved)
-            }
-
-        FrameContainer(
-            NodeType.Container (fun () -> Some entry),
-            Fill = K Color.Transparent,
-            Border =
-                fun () ->
-                    if entry.Selected then Colors.pink_accent
-                    elif entry.Focused then Colors.yellow_accent
-                    else Colors.grey_2
-        )
-            .Position(Position.ExpandX(15.0f))
-        |+ entry.Position(Position.ShrinkX(15.0f).ShrinkR(100.0f))
-        |+ Text(units)
-            .Color(Colors.text_subheading)
-            .Position(Position.SliceR(100.0f))
+    static member Create(setting: Setting<Color>) : FrameContainer =
+        let from_string (text: string) : unit =
+            match Color.FromHex(text) with
+            | Some c -> setting.Set c
+            | None -> ()
+        let to_string () : string = setting.Value.ToHex()
+        NumberEntry.CreateInternal(K true, to_string, from_string)

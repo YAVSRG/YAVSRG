@@ -9,13 +9,13 @@ open Interlude.UI
 type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
     inherit Page()
 
-    let is_wife_curve = 
+    let is_wife_curve =
         match ruleset.Value.Accuracy with
         | AccuracyPoints.WifeCurve _ -> true
         | AccuracyPoints.PointsPerJudgement _ -> false
         |> Setting.simple
 
-    let wife_judge = 
+    let wife_judge =
         match ruleset.Value.Accuracy with
         | AccuracyPoints.WifeCurve j -> j
         | AccuracyPoints.PointsPerJudgement _ -> 4
@@ -33,11 +33,11 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
 
         for i, j in ruleset.Value.Judgements |> Array.indexed do
             let setting =
-                Setting.make 
+                Setting.make
                     (fun v -> points_per_judgement.[i] <- v)
                     (fun () -> points_per_judgement.[i])
                 |> Setting.bound (-10.0, 1.0)
-            judgements_container.Add (PageSetting(j.Name, NumberEntry.create setting))
+            judgements_container.Add (PageSetting(j.Name, NumberEntry.Create setting))
 
         page_container()
         |+ PageSetting(%"rulesets.accuracy.decimal_places", SelectDropdown([| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |], decimal_places))
@@ -51,14 +51,14 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
             .Conditional(is_wife_curve.Get >> not)
             .Pos(5, PAGE_BOTTOM - 5)
         :> Widget
-        
+
     override this.Title = %"rulesets.edit.accuracy"
     override this.OnClose() =
-        ruleset.Set 
-            { ruleset.Value with 
+        ruleset.Set
+            { ruleset.Value with
                 Formatting = { DecimalPlaces = decimal_places.Value }
-                Accuracy = 
-                    if is_wife_curve.Value then 
+                Accuracy =
+                    if is_wife_curve.Value then
                         AccuracyPoints.WifeCurve wife_judge.Value
                     else
                         AccuracyPoints.PointsPerJudgement points_per_judgement

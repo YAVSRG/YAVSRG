@@ -55,8 +55,8 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
     let width = Setting.bounded (min 320 (max_width - 1), max_width) (fst setting.Value)
     let height = Setting.bounded (min 240 (max_height - 1), max_height) (snd setting.Value)
 
-    let width_box = NumberEntry.create_int width
-    let height_box = NumberEntry.create_int height
+    let width_box = NumberEntry.Create width
+    let height_box = NumberEntry.Create height
 
     override this.Content () =
         page_container()

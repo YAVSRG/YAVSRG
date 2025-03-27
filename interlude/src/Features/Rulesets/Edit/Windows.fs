@@ -23,7 +23,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
     do
         assert(judgements.Length = windows.Length)
 
-    let early_window j : Setting<GameplayTime> =
+    let early_window (j: int) : Setting<GameplayTime> =
         Setting.make
             (fun v ->
                 let mutable v = -(abs v) |> max -500.0f<ms / rate>
@@ -47,7 +47,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                 | None -> 0.0f<ms / rate>
             )
 
-    let late_window j : Setting<GameplayTime> =
+    let late_window (j: int) : Setting<GameplayTime> =
         Setting.make
             (fun v ->
                 let mutable v = max 0.0f<ms / rate> v |> min 500.0f<ms / rate>
@@ -82,35 +82,40 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
             last_entry <- Some e
             e
 
+        let ADD_REMOVE_BUTTON_WIDTH = 100.0f
+
         for i, j in judgements |> Array.indexed do
 
             let early_window = early_window i
             let late_window = late_window i
 
-            let w = (PAGE_ITEM_WIDTH - PAGE_LABEL_WIDTH - 100.0f) * 0.5f
-
-            let early = NumberEntry.create_uom "ms" early_window
-            early.Position <- Position.SliceR(w).TranslateX(-w).ShrinkR(15.0f)
-            let late = NumberEntry.create_uom "ms" late_window
-            late.Position <- Position.SliceR(w).ShrinkL(15.0f)
-
-            let c =
+            let window_editor =
                 NavigationContainer.Row()
-                |+ Button(
-                    (fun () -> if windows.[i].Value.IsSome then Icons.X_CIRCLE else Icons.PLUS_CIRCLE),
-                    (fun () ->
-                        if windows.[i].Value.IsSome then
-                            windows.[i].Value <- None
-                        else
-                            early_window.Set (-infinityf * 1.0f<_>)
-                            late_window.Set (infinityf * 1.0f<_>)
-                    )
-                )
-                    .Position(Position.SliceL(100.0f))
-                |+ add_entry(early.Conditional(fun () -> windows.[i].Value.IsSome))
-                |+ add_entry(late.Conditional(fun () -> windows.[i].Value.IsSome))
+                    .With(
+                        NumberEntry.Create(early_window, "ms")
+                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(1, 2, 15.0f))
+                            .Conditional(fun () -> windows.[i].Value.IsSome)
+                        |> add_entry,
+                        
+                        NumberEntry.Create(late_window, "ms")
+                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(2, 2, 15.0f))
+                            .Conditional(fun () -> windows.[i].Value.IsSome)
+                        |> add_entry,
 
-            container.Add (PageSetting(j.Name, c))
+                        Button(
+                            (fun () -> if windows.[i].Value.IsSome then Icons.X_CIRCLE else Icons.PLUS_CIRCLE),
+                            (fun () ->
+                                if windows.[i].Value.IsSome then
+                                    windows.[i].Value <- None
+                                else
+                                    early_window.Set (-infinityf * 1.0f<_>)
+                                    late_window.Set (infinityf * 1.0f<_>)
+                            )
+                        )
+                            .Position(Position.SliceL(ADD_REMOVE_BUTTON_WIDTH))
+                    )
+
+            container.Add (PageSetting(j.Name, window_editor))
 
         page_container()
         |+ ScrollContainer(container)

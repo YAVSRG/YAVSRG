@@ -36,25 +36,15 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on
         b <- float32 color.Value.B
         hex <- color.Value.ToHex()
 
-    let hex_setting =
-        Setting.make (fun s -> hex <- s) (fun () -> hex)
+    let hex_color_setting =
+        color
         |> Setting.trigger (fun color ->
-            match Color.FromHex color with
-            | Some color ->
-                if allow_alpha then a <- float32 color.A
-                r <- float32 color.R
-                g <- float32 color.G
-                b <- float32 color.B
-                update_rgb()
-            | _ -> ()
+            if allow_alpha then a <- float32 color.A
+            r <- float32 color.R
+            g <- float32 color.G
+            b <- float32 color.B
+            update_rgb()
         )
-
-    let hex_editor =
-        { new TextEntry(hex_setting, "none", false) with
-            override this.OnDeselected(by_mouse: bool) =
-                base.OnDeselected by_mouse
-                hex <- color.Value.ToHex()
-        }
 
     let SEGMENTS = 6
     let SEGMENT_SIZE = 1.0f / float32 SEGMENTS
@@ -136,7 +126,7 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on
 
     override this.Content() =
         page_container()
-        |+ PageSetting("Hex", hex_editor).Pos(0)
+        |+ PageSetting("Hex", NumberEntry.Create(hex_color_setting)).Pos(0)
         |+ red_slider.Pos(3)
         |+ green_slider.Pos(5)
         |+ blue_slider.Pos(7)
