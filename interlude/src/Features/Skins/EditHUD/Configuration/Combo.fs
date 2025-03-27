@@ -56,7 +56,7 @@ type ComboPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.generic.font_spacing"))
             .Pos(9)
             .Conditional(use_font.Get)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

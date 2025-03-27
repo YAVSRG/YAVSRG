@@ -86,9 +86,8 @@ type EditHUDPage(ctx: PositionerContext) =
         tab_buttons.Position <- Position.SliceT(40.0f, 60.0f).ShrinkR(PAGE_MARGIN_X).ShrinkL(PAGE_MARGIN_X + 480.0f)
 
         NavigationContainer.Column()
-        |+ tab_buttons
-        |+ tabs
-        |>> Container
+            .With(tab_buttons, tabs)
+        |> Container.Create
         |+ preview.Conditional(fun () -> tabs.Current <> elements_tab)
         :> Widget
 

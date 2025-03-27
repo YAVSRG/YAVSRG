@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 
 type Container(node_type: NodeType) =
@@ -46,6 +47,9 @@ type Container(node_type: NodeType) =
 
     static member (|*)(parent: #Container, child: #Widget) = parent.Add child
     static member (|*)(parent: #Container, children: #Widget seq) = Seq.iter parent.Add children
+
+    static member Create(child: Widget) =
+        Container(NodeType.Container(K (Some child))).With(child)
 
     interface IContainer<Widget> with
 

@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 
 // todo: generalise this concept into a container + a custom bit of rendering beneath all children
@@ -29,3 +30,6 @@ type FrameContainer(nt: NodeType) =
             Render.rect base.Bounds fill
 
         base.Draw()
+
+    static member Create(child: Widget) =
+        FrameContainer(NodeType.Container(K (Some child))).With(child)

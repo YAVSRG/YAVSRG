@@ -140,7 +140,7 @@ type EditNoteskinPage() =
             )
                 .Pos(4, 2, PageWidth.Full)
         )
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

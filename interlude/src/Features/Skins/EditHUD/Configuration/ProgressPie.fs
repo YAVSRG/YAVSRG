@@ -110,7 +110,7 @@ type ProgressPiePage(on_close: unit -> unit) =
             .Help(Help.Info("hud.generic.percent_spacing"))
             .Pos(15)
             .Conditional(use_font.Get)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

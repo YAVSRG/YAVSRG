@@ -28,7 +28,7 @@ type LanecoverPage() =
             .Pos(9)
         |+ PageSetting(%"gameplay.lanecover.color", ColorPicker(%"gameplay.lanecover.color", options.LaneCover.Color, true))
             .Pos(11)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

@@ -302,7 +302,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.generic.colon_spacing"))
             .Pos(20)
             .Conditional(use_font.Get)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

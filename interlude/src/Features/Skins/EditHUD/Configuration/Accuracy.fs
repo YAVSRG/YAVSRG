@@ -68,7 +68,7 @@ type AccuracyPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.generic.percent_spacing"))
             .Pos(13)
             .Conditional(use_font.Get)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

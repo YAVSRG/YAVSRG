@@ -107,13 +107,19 @@ type BeatmapBrowserPage() =
         )
 
     let search_results =
-        NavigationContainer.Column().Position(Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
-        |+ Dummy(NodeType.Leaf)
-        |+ scroll_container
-        |>> Container
-        |+ EmptyState(Icons.SEARCH, %"beatmap_browser.no_results").Position(Position.ShrinkT(135.0f))
-            .Conditional(fun () -> not loading && items.Count = 0)
-        :> Widget
+        Container.Create(
+            NavigationContainer.Column()
+                .Position(Position.ShrinkT(140.0f).SliceX(1400.0f).ShrinkB(70.0f))
+                .With(
+                    Dummy(NodeType.Leaf),
+                    scroll_container
+                )
+        )
+            .With(
+                EmptyState(Icons.SEARCH, %"beatmap_browser.no_results")
+                    .Position(Position.ShrinkT(135.0f))
+                    .Conditional(fun () -> not loading && items.Count = 0)
+            )
 
     let header =
         NavigationContainer.Row()
@@ -141,7 +147,8 @@ type BeatmapBrowserPage() =
             "sort_mode"
         )
             .Position(Position.SlicePercentR(0.28f).ShrinkL(AngledButton.LEAN_AMOUNT))
-        |>> (fun nt -> Container(nt).Position(Position.SliceT(20.0f, 115.0f).SliceX(1400.0f)))
+        |> Container.Create
+        |> _.Position(Position.SliceT(20.0f, 115.0f).SliceX(1400.0f))
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (f: FilterPart list) ->

@@ -71,14 +71,12 @@ type Widget(node_type: NodeType) =
         + " > "
         + this.GetType().Name
 
-    static member inline (|>>)(child: Widget, constructor: NodeType -> 'T) : 'T =
-        constructor (NodeType.Container (fun () -> Some child)) |+ child
-
 [<Extension>]
-type WidgetExt =
+type WidgetExtensions =
     [<Extension>]
     static member Position (w: #Widget, position: Position) : #Widget =
-        w.Position <- position; w
+        w.Position <- position
+        w
 
 [<AbstractClass>]
 type StaticWidget(node_type) =

@@ -215,11 +215,15 @@ type SelectSkinsPage() =
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
                 0.0f,
-                (fun () -> SkinsBrowserPage().Show())).Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f))
+                (fun () -> SkinsBrowserPage().Show())
+            )
+                .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).Translate(0.0f, -10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
                 0.0f,
-                (fun () -> osu.Skins.OsuSkinsListPage().Show())).Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
+                (fun () -> osu.Skins.OsuSkinsListPage().Show())
+            )
+                .Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
 
         let right_side =
             NavigationContainer.Row()
@@ -250,9 +254,8 @@ type SelectSkinsPage() =
                 .Position(Position.SlicePercentR(0.5f).ShrinkT(PAGE_ITEM_HEIGHT * 0.5f).SliceT(PAGE_ITEM_HEIGHT))
 
         NavigationContainer.Row()
-        |+ right_side
-        |+ left_info
-        |>> Container
+            .With(right_side, left_info)
+        |> Container.Create
         |+ preview
         :> Widget
 

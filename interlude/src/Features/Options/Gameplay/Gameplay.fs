@@ -57,7 +57,7 @@ type GameplayPage() =
         |+ PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
             .Help(Help.Info("gameplay.keybinds"))
             .Pos(21)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 

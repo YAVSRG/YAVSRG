@@ -26,7 +26,8 @@ type SkinsBrowserPage() =
         |+ Dummy(NodeType.Leaf)
         |+ ScrollContainer(noteskin_items, Margin = Style.PADDING)
             .Position(Position.ShrinkT(70.0f))
-        |>> (fun nt -> Container(nt).Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.65f %- 10.0f }))
+        |> Container.Create
+        |> _.Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.65f %- 10.0f })
         |+ (SearchBox(
                 Setting.simple "",
                 (fun (query: string) -> noteskin_items.Filter <- GroupDisplay.Filter query),
@@ -41,7 +42,8 @@ type SkinsBrowserPage() =
     let pick_versions =
         ScrollContainer(version_items, Margin = Style.PADDING)
             .Position(Position.ShrinkT(70.0f))
-        |>> (fun nt -> Container(nt).Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.65f %+ 10.0f }))
+        |> Container.Create
+        |> _.Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Left = 0.65f %+ 10.0f })
         |+ Text(%"skins.browser.install_hint")
             .Color(Colors.text_subheading)
             .Align(Alignment.CENTER)

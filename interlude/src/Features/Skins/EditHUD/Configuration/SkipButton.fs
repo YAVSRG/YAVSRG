@@ -44,7 +44,7 @@ type SkipButtonPage(on_close: unit -> unit) =
             .Help(Help.Info("hud.skip_button.background_offset_y"))
             .Pos(6)
             .Conditional(use_background.Get)
-        |>> Container
+        |> Container.Create
         |+ preview
         :> Widget
 
