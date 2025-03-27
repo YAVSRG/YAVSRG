@@ -33,7 +33,7 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
         let texts : (unit -> string) seq =
             seq {
                 if config.KeysPerSecondMeterShowAverage then
-                    yield fun () -> sprintf "AVG: %.0f" (count / (state.CurrentChartTime() / 1000.0f<ms> |> max 0.1f) / state.Scoring.Rate)
+                    yield fun () -> sprintf "AVG: %.0f" (count / (state.CurrentChartTime() / state.Scoring.Rate / 1000.0f<ms / rate> |> max 0.1f))
                 if config.KeysPerSecondMeterShowMax then
                     yield fun () -> sprintf "MAX: %.0f" max_kps
                 if config.KeysPerSecondMeterShowTotal then
