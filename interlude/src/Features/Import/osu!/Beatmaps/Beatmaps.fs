@@ -118,8 +118,7 @@ type BeatmapBrowserPage() =
                 BeatmapStatusToggle.Create("Unranked", 0, Colors.grey_2, statuses)
                     .Position(Position.ShrinkPercentR(0.28f).GridX(4, 4, AngledButton.LEAN_AMOUNT)),
 
-                // todo: this should not use accent color and should be keyboard navigatable
-                SortingDropdown(
+                SortingDropdown.Create(
                     [
                         "play_count", "Play count"
                         "submitted_date", "Date"

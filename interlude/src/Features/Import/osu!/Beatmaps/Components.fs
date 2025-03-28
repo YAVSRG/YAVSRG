@@ -206,24 +206,38 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
 
     member private this.Download() = download ()
 
-type private SortingDropdown
-    (options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
-    inherit Container(NodeType.None)
+type SortingDropdown =
 
-    let mutable display_value =
-        Seq.find (fun (id, _) -> id = setting.Value) options |> snd
+    static member Create(options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
 
-    let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
+        let mutable display_value =
+            Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
-    let LABEL_AREA_SIZE = 120.0f
+        let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
+        let toggle_dropdown() =
+            dropdown_wrapper.Toggle(fun () ->
+                Dropdown
+                    {
+                        Items = options
+                        ColorFunc = K Colors.text
+                        Setting =
+                            setting
+                            |> Setting.trigger (fun v ->
+                                display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
+                            )
+                    }
+            )
+
+        let LABEL_AREA_SIZE = 120.0f
+
+        NavigationContainer.Row()
+            .WrapNavigation(false)
+            .With(
                 AngledButton(
                     label + ":",
-                    (fun () -> this.ToggleDropdown()),
-                    Palette.HIGHLIGHT_100
+                    toggle_dropdown,
+                    Colors.cyan.O3
                 )
                     .Hotkey(bind)
                     .Position(Position.SliceL LABEL_AREA_SIZE),
@@ -234,31 +248,15 @@ type private SortingDropdown
                             "%s %s"
                             display_value
                             (if reverse.Value then
-                                 Icons.CHEVRONS_DOWN
-                             else
-                                 Icons.CHEVRONS_UP)
+                                    Icons.CHEVRONS_DOWN
+                                else
+                                    Icons.CHEVRONS_UP)
                     ),
                     (fun () -> reverse.Value <- not reverse.Value),
-                    Palette.DARK_100
+                    Colors.cyan_shadow.O3
                 )
                     .LeanRight(false)
                     .Position(Position.ShrinkL(LABEL_AREA_SIZE + AngledButton.LEAN_AMOUNT)),
 
                 dropdown_wrapper
             )
-
-        base.Init parent
-
-    member this.ToggleDropdown() =
-        dropdown_wrapper.Toggle(fun () ->
-            Dropdown
-                {
-                    Items = options
-                    ColorFunc = K Colors.text
-                    Setting =
-                        setting
-                        |> Setting.trigger (fun v ->
-                            display_value <- Seq.find (fun (id, _) -> id = v) options |> snd
-                        )
-                }
-        )
