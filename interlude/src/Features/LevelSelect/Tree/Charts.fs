@@ -1,12 +1,10 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Gameplay
 open Prelude.Data.User
 open Prelude.Data.Library
 open Interlude.Content

@@ -6,8 +6,8 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 
 // todo: generalise this concept into a container + a custom bit of rendering beneath all children
-type FrameContainer(nt: NodeType) =
-    inherit Container(nt)
+type FrameContainer(node_type: NodeType) =
+    inherit Container(node_type)
 
     member val Fill = !%Palette.DARK with get, set
     member val Border = !%Palette.LIGHT with get, set
