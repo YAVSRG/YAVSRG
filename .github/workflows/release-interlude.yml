@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   build:
-
+    if: github.repository == 'YAVSRG/YAVSRG'
     runs-on: ubuntu-latest
 
     steps:

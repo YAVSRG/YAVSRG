@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   build_and_push:
+    if: github.repository == 'YAVSRG/YAVSRG'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

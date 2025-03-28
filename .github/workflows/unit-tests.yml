@@ -2,7 +2,7 @@ name: Check suite
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main" ]
 jobs:
@@ -30,7 +30,7 @@ jobs:
         ./run_tests.sh
         
     - name: Post failure message via webhook
-      if: failure()
+      if: failure() && github.repository == 'YAVSRG/YAVSRG'
       uses: tsickert/discord-webhook@v5.3.0
       with:
         webhook-url: ${{ secrets.DEV_WEBHOOK_URL }}
