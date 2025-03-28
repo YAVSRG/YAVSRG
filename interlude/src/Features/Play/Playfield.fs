@@ -83,12 +83,17 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holds_offscreen = Array.create keys -1
     let hold_states = Array.create keys NoHold
 
-    let rotation = Skins.note_rotation keys
+    let rotation : int -> Quad -> Quad =
+        if noteskin_config.UseRotation then
+            let rotations = noteskin_config.Rotations.[keys - 3]
+            fun k -> Quad.rotate (rotations.[k])
+        else
+            fun _ quad -> quad
 
     let mutable has_negative_sv = false
     let mutable time = -Time.infinity
 
-    let handle_seek_back_in_time () =
+    let handle_seek_back_in_time () : unit =
         note_seek <- 0
         sv_seek <- 0
 
@@ -96,7 +101,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             hold_states.[k] <- NoHold
             holds_offscreen.[k] <- -1
 
-    let scroll_direction_transform bottom : Rect -> Rect =
+    let scroll_direction_transform (bottom: float32) : Rect -> Rect =
         if options.Upscroll.Value then
             id
         else
@@ -108,20 +113,20 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     Bottom = bottom - r.Top
                 }
 
-    let hold_tail_transform k =
+    let hold_tail_transform (k: int) : Quad -> Quad =
         if not noteskin_config.UseHoldTailTexture then rotation k
         elif not noteskin_config.FlipHoldTail || options.Upscroll.Value then
             id
         else
             Quad.flip_vertical
 
-    let receptor_transform k =
+    let receptor_transform (k: int) : Quad -> Quad =
         if noteskin_config.ReceptorStyle = ReceptorStyle.Flip then
             if options.Upscroll.Value then Quad.flip_vertical else id
         else
             rotation k
 
-    let judgement_line_transform =
+    let judgement_line_transform : Quad -> Quad =
         if options.Upscroll.Value then Quad.flip_vertical else id
 
     do
@@ -180,7 +185,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
         let receptor_aspect_ratio = receptor.AspectRatio
 
-        let inline draw_judgement_line() =
+        let inline draw_judgement_line () : unit =
             if noteskin_config.UseJudgementLine then
                 let area =
                     Rect.FromEdges(
@@ -197,7 +202,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     Color.White.AsQuad
                     (Sprite.pick_texture (animation.Loops, 0) judgement_line)
 
-        let inline draw_receptors() =
+        let inline draw_receptors () : unit =
             if noteskin_config.UseReceptors then
                 for k in 0 .. (keys - 1) do
                     Render.tex_quad
@@ -223,7 +228,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             if noteskin_config.EnableColumnLight then
                 column_lighting.Draw()
 
-        let inline draw_note (k, pos, color) =
+        let inline draw_note (k: int, pos: float32, color: int) : unit =
             Render.tex_quad
                 ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
@@ -232,7 +237,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 Color.White.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) note)
 
-        let inline draw_head (k: int, pos: float32, color: int, tint: Color) =
+        let inline draw_head (k: int, pos: float32, color: int, tint: Color) : unit =
             Render.tex_quad
                 ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
                   |> scroll_direction_transform bottom)
@@ -241,7 +246,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
-        let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) =
+        let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) : unit =
             Render.tex_quad
                 ((Rect.FromEdges(
                     left + column_positions.[k],
@@ -254,7 +259,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
-        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
+        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
             let clip_percent = (clip - pos) / note_height
 
             let quad_clip_correction (q: Quad) : Quad =

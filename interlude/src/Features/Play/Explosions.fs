@@ -28,7 +28,7 @@ type private Explosion =
             Time = -Time.infinity
         }
 
-type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
+type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
     let mutable last_time : Time = -Time.infinity
@@ -41,25 +41,25 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
     let hold_explosion = Content.Texture "holdexplosion"
 
     let release_explosion =
-        if ns.HoldExplosionSettings.UseReleaseExplosion then
+        if noteskin.HoldExplosionSettings.UseReleaseExplosion then
             Content.Texture "releaseexplosion"
         else
             hold_explosion
 
     let note_duration =
-        if ns.NoteExplosionSettings.UseBuiltInAnimation then
-            float32 ns.NoteExplosionSettings.Duration * 1.0f<ms / rate> * SelectedChart.rate.Value
+        if noteskin.NoteExplosionSettings.UseBuiltInAnimation then
+            float32 noteskin.NoteExplosionSettings.Duration * 1.0f<ms / rate> * SelectedChart.rate.Value
         else
-            float32 ns.NoteExplosionSettings.AnimationFrameTime
+            float32 noteskin.NoteExplosionSettings.AnimationFrameTime
             * float32 note_explosion.Columns
             * 1.0f<ms / rate>
             * SelectedChart.rate.Value
 
     let release_duration =
-        if ns.HoldExplosionSettings.UseBuiltInAnimation then
-            float32 ns.HoldExplosionSettings.Duration * 1.0f<ms / rate> * SelectedChart.rate.Value
+        if noteskin.HoldExplosionSettings.UseBuiltInAnimation then
+            float32 noteskin.HoldExplosionSettings.Duration * 1.0f<ms / rate> * SelectedChart.rate.Value
         else
-            float32 ns.HoldExplosionSettings.AnimationFrameTime
+            float32 noteskin.HoldExplosionSettings.AnimationFrameTime
             * float32 release_explosion.Columns
             * 1.0f<ms / rate>
             * SelectedChart.rate.Value
@@ -95,12 +95,17 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         explosion_pool_pointer <- (explosion_pool_pointer + 1) % EXPLOSION_POOL_SIZE
 
-    let rotation = Skins.note_rotation keys
+    let rotation =
+        if noteskin.UseRotation then
+            let rotations = noteskin.Rotations.[keys - 3]
+            fun k -> Quad.rotate (rotations.[k])
+        else
+            fun _ quad -> quad
 
-    let column_width = ns.KeymodeColumnWidth keys
+    let column_width = noteskin.KeymodeColumnWidth keys
 
     let column_positions =
-        let column_spacing = ns.KeymodeColumnSpacing keys
+        let column_spacing = noteskin.KeymodeColumnSpacing keys
         let mutable x = 0.0f
 
         Array.init
@@ -118,7 +123,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
         match ev.Action with
         | Hold e when not e.Missed ->
             hold_colors.[ev.Column] <-
-                match ns.HoldExplosionSettings.Colors with
+                match noteskin.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
                 | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
 
@@ -127,7 +132,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         | Hit e when not e.Missed ->
             let color =
-                match ns.NoteExplosionSettings.Colors with
+                match noteskin.NoteExplosionSettings.Colors with
                 | ExplosionColors.Note -> int state.WithColors.Colors.[ev.Index].Data.[ev.Column]
                 | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
 
@@ -135,7 +140,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         | Release e when holding.[ev.Column] ->
             let color =
-                match ns.HoldExplosionSettings.Colors with
+                match noteskin.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
                 | ExplosionColors.Judgements -> match e.Judgement with Some (j, _) -> j | None -> -1
 
@@ -144,7 +149,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         | DropHold ->
             let color =
-                match ns.HoldExplosionSettings.Colors with
+                match noteskin.HoldExplosionSettings.Colors with
                 | ExplosionColors.Note -> hold_colors.[ev.Column]
                 | ExplosionColors.Judgements -> -1
 
@@ -176,7 +181,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                 let frame =
                     float32 (now - holding_since.[k])
                     / float32 SelectedChart.rate.Value
-                    / float32 ns.HoldExplosionSettings.AnimationFrameTime
+                    / float32 noteskin.HoldExplosionSettings.AnimationFrameTime
                     |> floor
                     |> int
 
@@ -184,7 +189,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                     (if options.Upscroll.Value then
                          Rect
                              .FromSize(this.Bounds.Left + column_positions.[k], this.Bounds.Top + options.HitPosition.Value, column_width, column_width)
-                             .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
+                             .Translate(0.0f, column_width * noteskin.HoldExplosionSettings.Offset)
                      else
                          Rect
                              .FromSize(
@@ -193,8 +198,8 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                  column_width,
                                  column_width
                              )
-                             .Translate(0.0f, -column_width * ns.HoldExplosionSettings.Offset))
-                        .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
+                             .Translate(0.0f, -column_width * noteskin.HoldExplosionSettings.Offset))
+                        .Expand((noteskin.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
 
                 Render.tex_quad
                     (bounds.AsQuad |> rotation k)
@@ -217,18 +222,18 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                     let frame =
                         float32 (now - ex.Time)
                         / float32 SelectedChart.rate.Value
-                        / float32 ns.HoldExplosionSettings.AnimationFrameTime
+                        / float32 noteskin.HoldExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int
 
                     let expand =
-                        if ns.HoldExplosionSettings.UseBuiltInAnimation then
+                        if noteskin.HoldExplosionSettings.UseBuiltInAnimation then
                             1.0f - percent_remaining
                         else
                             0.0f
 
                     let alpha =
-                        if ns.HoldExplosionSettings.UseBuiltInAnimation then
+                        if noteskin.HoldExplosionSettings.UseBuiltInAnimation then
                             255.0f * percent_remaining |> int |> max 0 |> min 255
                         else
                             255
@@ -242,7 +247,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                      column_width,
                                      column_width
                                  )
-                                 .Translate(0.0f, column_width * ns.HoldExplosionSettings.Offset)
+                                 .Translate(0.0f, column_width * noteskin.HoldExplosionSettings.Offset)
                          else
                              Rect
                                  .FromSize(
@@ -251,9 +256,9 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                      column_width,
                                      column_width
                                  )
-                                 .Translate(0.0f, -column_width * ns.HoldExplosionSettings.Offset))
-                            .Expand((ns.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
-                            .Expand(ns.HoldExplosionSettings.ExpandAmount * expand * column_width)
+                                 .Translate(0.0f, -column_width * noteskin.HoldExplosionSettings.Offset))
+                            .Expand((noteskin.HoldExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
+                            .Expand(noteskin.HoldExplosionSettings.ExpandAmount * expand * column_width)
 
                     Render.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)
@@ -272,18 +277,18 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                     let frame =
                         float32 (now - ex.Time)
                         / float32 SelectedChart.rate.Value
-                        / float32 ns.NoteExplosionSettings.AnimationFrameTime
+                        / float32 noteskin.NoteExplosionSettings.AnimationFrameTime
                         |> floor
                         |> int
 
                     let expand =
-                        if ns.NoteExplosionSettings.UseBuiltInAnimation then
+                        if noteskin.NoteExplosionSettings.UseBuiltInAnimation then
                             1.0f - percent_remaining
                         else
                             0.0f
 
                     let alpha =
-                        if ns.NoteExplosionSettings.UseBuiltInAnimation then
+                        if noteskin.NoteExplosionSettings.UseBuiltInAnimation then
                             255.0f * percent_remaining |> int |> max 0 |> min 255
                         else
                             255
@@ -297,7 +302,7 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                      column_width,
                                      column_width
                                  )
-                                 .Translate(0.0f, column_width * ns.NoteExplosionSettings.Offset)
+                                 .Translate(0.0f, column_width * noteskin.NoteExplosionSettings.Offset)
                          else
                              Rect
                                  .FromSize(
@@ -306,9 +311,9 @@ type Explosions(keys: int, ns: NoteskinConfig, state: PlayState) =
                                      column_width,
                                      column_width
                                  )
-                                 .Translate(0.0f, -column_width * ns.NoteExplosionSettings.Offset))
-                            .Expand((ns.NoteExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
-                            .Expand(ns.NoteExplosionSettings.ExpandAmount * expand * column_width)
+                                 .Translate(0.0f, -column_width * noteskin.NoteExplosionSettings.Offset))
+                            .Expand((noteskin.NoteExplosionSettings.Scale - 1.0f) * column_width * 0.5f)
+                            .Expand(noteskin.NoteExplosionSettings.ExpandAmount * expand * column_width)
 
                     Render.tex_quad
                         (bounds.AsQuad |> rotation ex.Column)

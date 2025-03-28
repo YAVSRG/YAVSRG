@@ -622,13 +622,3 @@ module Skins =
         }
 
     let hud_exists (id: string) : bool = loaded_huds.ContainsKey id
-
-    // todo: move this (to playfield? I'm sure theres a reason it got put here in the first place)
-    let note_rotation (keys: int) : int -> Quad -> Quad =
-        let rotations =
-            if current_noteskin.Config.UseRotation then
-                current_noteskin.Config.Rotations.[keys - 3]
-            else
-                Array.zeroCreate keys
-
-        fun k -> Quad.rotate (rotations.[k])
