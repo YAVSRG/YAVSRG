@@ -28,13 +28,10 @@ type InfoPanel() =
                 .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
                 .With(
                     Scoreboard(info_panel_mode)
-                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
                         .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Local),
                     Leaderboard(info_panel_mode)
-                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
                         .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Online),
                     Patterns(info_panel_mode)
-                        .Position(Position.ShrinkB(GameplayInfo.HEIGHT + AngledButton.HEIGHT + Style.PADDING))
                         .Conditional(fun () -> info_panel_mode.Value = InfoPanelMode.Patterns)
                 )
 

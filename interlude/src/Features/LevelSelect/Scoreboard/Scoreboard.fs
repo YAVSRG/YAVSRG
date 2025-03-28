@@ -44,7 +44,9 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
         | Filter.CurrentMods -> (fun a -> a.Data.Mods = SelectedChart.selected_mods.Value)
         | _ -> K true
 
-    let scores_list = FlowContainer.Vertical<ScoreCard>(50.0f, Spacing = Style.PADDING)
+    let scores_list =
+        FlowContainer.Vertical<ScoreCard>(50.0f)
+            .Spacing(Style.PADDING)
 
     do
         LocalScores.score_loaded.Add (fun score_info -> score_info |> ScoreCard |> scores_list.Add; count <- count + 1)
