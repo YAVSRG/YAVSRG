@@ -182,7 +182,7 @@ module private Clustering =
                 BPM = bpm
                 Mixed = mixed
 
-                Rating = data |> Seq.map (fst >> _.Strains) |> Seq.concat |> Difficulty.weighted_overall_difficulty
+                Rating = data |> Seq.map (fst >> _.Strains) |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Difficulty.weighted_overall_difficulty
 
                 Density10 = find_percentile 0.1f densities
                 Density25 = find_percentile 0.25f densities

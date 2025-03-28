@@ -68,7 +68,16 @@ module Performance =
             rr.NoteDifficulty
             |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
         let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
-        Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
+
+        let note_values =
+            seq {
+                for i, s in Seq.indexed strains do
+                    for k = 0 to scoring.Keys - 1 do
+                        if rr.Strains.[i].NotesV1.[k] > 0.0f then
+                            yield s.StrainV1Notes.[k]
+            }
+
+        Difficulty.weighted_overall_difficulty (note_values |> Array.ofSeq)
 
     let accuracy_to_rating (accuracy: float32, rate: Rate, notes: TimeArray<_>, rr: Difficulty) : float32 =
         // naive approach

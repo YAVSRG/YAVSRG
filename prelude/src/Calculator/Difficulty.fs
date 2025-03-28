@@ -29,7 +29,7 @@ module Difficulty =
     /// Perception is not a concrete term so I've ruled: In my experience players perception is concentrated on the very hardest parts of a chart
     let weighted_overall_difficulty (data: float32 seq) : float32 =
 
-        let data_array = data |> Seq.filter (fun x -> x > 0.0f) |> Seq.sort |> Array.ofSeq
+        let data_array = data |> Seq.sort |> Array.ofSeq
         let length = float32 data_array.Length
 
         let mutable weight = 0.0f
