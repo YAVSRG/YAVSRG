@@ -5,6 +5,8 @@ on:
     workflows: [ "Check suite" ]
     types:
         - completed
+  workflow_dispatch:
+  
 jobs:
   continuous-integration:
   
