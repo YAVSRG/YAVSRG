@@ -15,21 +15,25 @@ type Jukebox() =
     let CAROUSEL_SPEED = 0.05
     let CAROUSEL_GAP = 50.0f
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
-        |+ Button(Icons.SKIP_BACK, LevelSelect.History.back)
-            .Hotkey("previous_random_chart")
-            .Disabled(fun () -> Screen.current_type = ScreenType.Lobby || not (LevelSelect.History.can_go_back()))
-            .Position(Position.Shrink(5.0f).SliceL(45.0f))
+            .Add(
+                Button(Icons.SKIP_BACK, LevelSelect.History.back)
+                    .Hotkey("previous_random_chart")
+                    .Disabled(fun () -> Screen.current_type = ScreenType.Lobby || not (LevelSelect.History.can_go_back()))
+                    .Position(Position.Shrink(5.0f).SliceL(45.0f)),
 
-        |+ Button(Icons.PAUSE, fun () -> if Song.playing() then Song.pause() else Song.resume())
-            .Hotkey("pause_music")
-            .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f))
+                Button(Icons.PAUSE, fun () -> if Song.playing() then Song.pause() else Song.resume())
+                    .Hotkey("pause_music")
+                    .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)),
 
-        |+ HotkeyListener("random_chart", (fun () -> if Screen.current_type <> ScreenType.Lobby then LevelSelect.random_chart()))
-        |* Button(Icons.SKIP_FORWARD, fun () -> if LevelSelect.History.can_go_forward() then LevelSelect.History.forward() else LevelSelect.random_chart())
-            .Disabled(fun () -> Screen.current_type = ScreenType.Lobby)
-            .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f))
+                HotkeyListener("random_chart", fun () -> if Screen.current_type <> ScreenType.Lobby then LevelSelect.random_chart()),
+
+                // Goes forward in history if possible, otherwise it will go random chart, vs hotkey that always goes to random
+                Button(Icons.SKIP_FORWARD, fun () -> if LevelSelect.History.can_go_forward() then LevelSelect.History.forward() else LevelSelect.random_chart())
+                    .Disabled(fun () -> Screen.current_type = ScreenType.Lobby)
+                    .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(90.0f, 0.0f))
+            )
         base.Init parent
 
     override this.Draw() =

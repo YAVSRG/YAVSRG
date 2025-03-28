@@ -21,6 +21,7 @@ type Toolbar() =
     inherit Widget(NodeType.None)
 
     let HEIGHT = Toolbar.HEIGHT
+    let BUTTON_WIDTH = 180.0f
 
     let mutable collapsed_by_user = false
 
@@ -60,64 +61,83 @@ type Toolbar() =
         )
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
-        |+ TaskProgressMiniBar()
-            .Position(Position.BorderB(Style.PADDING))
+            .With(
+                TaskProgressMiniBar()
+                    .Position(Position.BorderB(Style.PADDING))
+            )
 
     override this.Init(parent) =
         container
-        |+ Text(Updates.version)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentT(0.5f))
-        |+ Text(fun () -> System.DateTime.Now.ToString())
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f))
-        |+ InlaidButton(%"menu.back", fun () -> Screen.back Transitions.UnderLogo |> ignore)
-            .Icon(Icons.ARROW_LEFT_CIRCLE)
-            .Position(Position.SliceL(10.0f, 180.0f).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT))
+            // Bottom right info
+            .With(
+                Text(Updates.version)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentT(0.5f)),
 
-        |+ InlaidButton(Icons.MENU, fun () -> QuickMenuPage().Show())
-            .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT))
-            .Help(Help.Info("menu.quick").Hotkey("quick_menu"))
+                Text(fun () -> System.DateTime.Now.ToString())
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceR(5.0f, 300.0f).SliceB(HEIGHT).SlicePercentB(0.5f)),
 
-        |+ (FlowContainer.LeftToRight<Widget>(
-                180.0f,
-                Spacing = 10.0f,
-                EnableNavigation = false).Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + 20.0f))
+                UpdateButton()
+                    .Position(Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
+                    .Conditional(fun () -> Updates.update_available)
+            )
+            // Bottom left back/jukebox
+            .With(
+                InlaidButton(%"menu.back", fun () -> Screen.back Transitions.UnderLogo |> ignore)
+                    .Icon(Icons.ARROW_LEFT_CIRCLE)
+                    .Position(Position.SliceL(Style.PADDING * 2.0f, BUTTON_WIDTH).SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT)),
 
-            |+ InlaidButton(%"menu.options", fun () -> OptionsMenuPage().Show())
-                .Icon(Icons.SETTINGS)
+                Jukebox()
+                    .Position(Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(BUTTON_WIDTH + Style.PADDING * 4.0f).SliceY(InlaidButton.HEIGHT)),
 
-            |+ import_button
+                VolumeSlider()
+                    .Position(Position.ShrinkY(HEIGHT))
+            )
+            // Top buttons (quick, options, etc)
+            .With(
+                InlaidButton(Icons.MENU, fun () -> QuickMenuPage().Show())
+                    .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(10.0f).SliceL(HEIGHT))
+                    .Help(Help.Info("menu.quick").Hotkey("quick_menu")),
 
-            |+ InlaidButton(%"menu.stats", fun () -> StatsPage().Show())
-                .Icon(Icons.TRENDING_UP)
-                .Hotkey("stats")
+                FlowContainer.LeftToRight<Widget>(BUTTON_WIDTH)
+                    .Spacing(Style.PADDING * 2.0f)
+                    .DisableNavigation()
+                    .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + Style.PADDING * 4.0f))
+                    .With(
+                        InlaidButton(%"menu.options", fun () -> OptionsMenuPage().Show())
+                            .Icon(Icons.SETTINGS),
 
-            |+ InlaidButton(%"menu.wiki", WikiBrowserPage.Show)
-                .Icon(Icons.BOOK_OPEN)
-                .Hotkey("wiki")
-                .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
-        )
-        |+ NetworkStatus()
-            .Position(Position.SliceT(HEIGHT).SliceR(300.0f))
-        |+ HotkeyListener("reload_content", fun () ->
-            if not (Dialog.exists()) then
-                Themes.reload_current ()
-                Skins.load()
-                Rulesets.load()
-                SelectedChart.recolor ()
-                Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
-        )
-        |+ HotkeyListener("preset1", fun () -> load_preset 1)
-        |+ HotkeyListener("preset2", fun () -> load_preset 2)
-        |+ HotkeyListener("preset3", fun () -> load_preset 3)
-        |+ UpdateButton()
-            .Position(Position.Box(1.0f, 1.0f, -600.0f, -HEIGHT, 300.0f, HEIGHT))
-            .Conditional(fun () -> Updates.update_available)
-        |+ Jukebox()
-            .Position(Position.SliceB(HEIGHT).SlicePercentL(0.4f).ShrinkL(200.0f).SliceY(InlaidButton.HEIGHT))
-        |* VolumeSlider()
-            .Position(Position.ShrinkY(HEIGHT))
+                        import_button,
+
+                        InlaidButton(%"menu.stats", fun () -> StatsPage().Show())
+                            .Icon(Icons.TRENDING_UP)
+                            .Hotkey("stats"),
+
+                        InlaidButton(%"menu.wiki", WikiBrowserPage.Show)
+                            .Icon(Icons.BOOK_OPEN)
+                            .Hotkey("wiki")
+                            .Conditional(fun () -> Screen.current_type = ScreenType.MainMenu)
+                    ),
+
+                NetworkStatus()
+                    .Position(Position.SliceT(HEIGHT).SliceR(300.0f))
+            )
+            // Hotkey behaviours when toolbar isn't hidden
+            .Add(
+                HotkeyListener("reload_content", fun () ->
+                    if not (Dialog.exists()) then
+                        Themes.reload_current ()
+                        Skins.load()
+                        Rulesets.load()
+                        SelectedChart.recolor ()
+                        Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
+                ),
+
+                HotkeyListener("preset1", fun () -> load_preset 1),
+                HotkeyListener("preset2", fun () -> load_preset 2),
+                HotkeyListener("preset3", fun () -> load_preset 3)
+            )
 
         base.Init parent
 

@@ -29,6 +29,7 @@ type UpdateButton() as this =
                      Colors.text_green_2),
                 Alignment.CENTER
             )
+
         elif Updates.update_started then
             Text.fill_b (
                 Style.font,
@@ -43,6 +44,7 @@ type UpdateButton() as this =
             Render.rect
                 (area.BorderB(Style.PADDING).SlicePercentL(download_progress))
                 Colors.cyan
+
         else
             Text.fill_b (
                 Style.font,
@@ -56,12 +58,13 @@ type UpdateButton() as this =
             )
 
     member this.Click() =
+
         if Updates.update_complete then
             Updates.restart_on_exit <- true
             Screen.change ScreenType.SplashScreen Transitions.UnderLogo |> ignore
-        elif Updates.update_started then
-            ()
-        else
+
+        elif not Updates.update_started then
+
             Notifications.system_feedback (
                 Icons.ALERT_OCTAGON,
                 %"notification.update_installing.title",
