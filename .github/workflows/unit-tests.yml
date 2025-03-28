@@ -29,17 +29,6 @@ jobs:
         chmod +x ./run_tests.sh
         ./run_tests.sh
         
-    - name: Attempt fast-forward + push
-      if: |
-        github.repository == 'percyqaz/YAVSRG' &&
-        github.ref == 'refs/heads/develop'
-      run: | 
-        git remote add YAVSRG https://github.com/YAVSRG/YAVSRG
-        git fetch YAVSRG
-        git checkout main
-        git merge develop --ff-only
-        git push
-        
     - name: Notify of failure in main
       if: failure() && github.repository == 'YAVSRG/YAVSRG'
       uses: tsickert/discord-webhook@v5.3.0
