@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
@@ -12,7 +11,7 @@ type private Keybinder(hotkey: Hotkey) as this =
 
     let set = fun v -> Hotkeys.set hotkey v
 
-    let rec input_callback (b) =
+    let rec input_callback (b: Bind) : unit =
         match b with
         | Bind.Key(k, (ctrl, _, shift)) ->
             set <| Bind.Key(k, (ctrl, false, shift))
@@ -20,7 +19,7 @@ type private Keybinder(hotkey: Hotkey) as this =
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) : unit =
         this
             .Add(
                 Text(fun () -> (%%hotkey).ToString())
@@ -40,16 +39,16 @@ type private Keybinder(hotkey: Hotkey) as this =
 
         base.Init parent
 
-    override this.OnFocus(by_mouse: bool) =
+    override this.OnFocus(by_mouse: bool) : unit =
         base.OnFocus by_mouse
         Style.hover.Play()
 
-    override this.OnSelected(by_mouse: bool) =
+    override this.OnSelected(by_mouse: bool) : unit =
         base.OnSelected by_mouse
         Style.click.Play()
         Input.listen_to_next_key input_callback
 
-    override this.OnDeselected(by_mouse: bool) =
+    override this.OnDeselected(by_mouse: bool) : unit =
         base.OnDeselected by_mouse
         Input.remove_listener ()
 
@@ -64,33 +63,30 @@ type HotkeysPage() =
                 .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
         let search_box =
-            { new SearchBox(
-                    Setting.simple "",
-                    (fun query ->
-                        if query = "" then
-                            container.Filter <- K true
-                        else
-                            let query = query
-                            container.Filter <-
-                            function
-                            | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
-                            | _ -> false
-                    ),
-                    Fill = K Colors.cyan.O3,
-                    Border = K Colors.cyan_accent,
-                    TextColor = K Colors.text_cyan) with
-                override this.OnFocus by_mouse =
-                    base.OnFocus by_mouse
-                    if not by_mouse then GameThread.defer (fun () -> this.Select false)
-            }
+            SearchBox(fun query ->
+                if query = "" then
+                    container.Filter <- K true
+                else
+                    let query = query.Trim()
+                    container.Filter <-
+                    function
+                    | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
+                    | _ -> false
+            )
+                .Fill(Colors.cyan.O3)
+                .Border(Colors.cyan_accent)
+                .TextColor(Colors.text_cyan)
+                .KeyboardAutoSelect()
                 .Position(Position.SliceT(40.0f, SearchBox.HEIGHT).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
 
         let hotkey_editor (hotkey: Hotkey) =
             NavigationContainer.Row()
-            |+ Keybinder(hotkey)
-                .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
-            |+ Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
-                .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+                .With(
+                    Keybinder(hotkey)
+                        .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
+                    Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
+                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+                )
 
         container.Add(
             PageButton(
@@ -108,9 +104,7 @@ type HotkeysPage() =
                 )
 
         NavigationContainer.Column()
-        |+ scroll_container
-        |+ search_box
-        :> Widget
+            .With(scroll_container, search_box)
 
     override this.Title = %"system.hotkeys"
     override this.OnClose() = ()

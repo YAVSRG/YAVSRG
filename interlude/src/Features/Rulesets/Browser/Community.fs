@@ -8,7 +8,6 @@ open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Backbeat
 open Prelude.Data
-open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 
@@ -129,7 +128,7 @@ type RulesetSearch() as this =
 
         this
             .Add(
-                SearchBox(Setting.simple "", (fun (query: string) -> grid.Filter <- RulesetCard.Filter query))
+                SearchBox(fun query -> grid.Filter <- RulesetCard.Filter query)
                     .Position(Position.SliceT(SearchBox.HEIGHT))
                     .With(LoadingIndicator.Border(fun () -> loading)),
 

@@ -5,6 +5,7 @@ open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Library
 
@@ -32,6 +33,7 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
 
     member val DebounceTime = 400L with get, set
     member val TextColor : unit -> Color * Color = fun () -> !*Palette.LIGHT, !*Palette.DARKER with get, set
+    member val KeyboardAutoSelect : bool = false with get, set
 
     override this.Init(parent) =
         text_entry.TextColor <-
@@ -88,6 +90,10 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
         elif search_timer.IsRunning && (%%"select").Pressed() then
             ignore ()
 
+    override this.OnFocus (by_mouse: bool) : unit =
+        base.OnFocus(by_mouse: bool)
+        if this.KeyboardAutoSelect && not by_mouse then GameThread.defer (fun () -> this.Select false)
+
 [<Extension>]
 type SearchBoxExtensions() =
 
@@ -110,3 +116,10 @@ type SearchBoxExtensions() =
     static member inline TextColor(container: #SearchBox, color: unit -> Color * Color) : #SearchBox =
         container.TextColor <- color
         container
+
+    [<Extension>]
+    static member inline KeyboardAutoSelect(container: #SearchBox) : #SearchBox =
+        container.KeyboardAutoSelect <- true
+        container
+
+    // todo: consider an extension to set all cyan settings at once

@@ -41,53 +41,49 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight(Spacing = 10.0f)
-            .Position(scaled_margins.SliceY(60.0f))
-        |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
-            Keybind = Bind.mk Keys.D1
-        )
-        |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.AIRPLAY (%"system"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.System),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
-            Keybind = Bind.mk Keys.D2
-        )
-        |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.IMAGE (%"skins"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins),
-            Keybind = Bind.mk Keys.D3
-        )
-        |+ OptionsMenuButton(
-            sprintf "%s %s" Icons.ARCHIVE (%"library"),
-            200.0f,
-            (fun () -> current_tab.Set OptionsMenuTab.Library),
-            IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library),
-            Keybind = Bind.mk Keys.D4
-        )
+        DynamicFlowContainer.LeftToRight()
+            .Spacing(Style.PADDING * 2.0f)
+            .Position(scaled_margins.SliceY(SearchBox.HEIGHT))
+            .With(
+                OptionsMenuButton(
+                    sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
+                    200.0f,
+                    (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
+                    Keybind = Bind.mk Keys.D1
+                ),
+                OptionsMenuButton(
+                    sprintf "%s %s" Icons.AIRPLAY (%"system"),
+                    200.0f,
+                    (fun () -> current_tab.Set OptionsMenuTab.System),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
+                    Keybind = Bind.mk Keys.D2
+                ),
+                OptionsMenuButton(
+                    sprintf "%s %s" Icons.IMAGE (%"skins"),
+                    200.0f,
+                    (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins),
+                    Keybind = Bind.mk Keys.D3
+                ),
+                OptionsMenuButton(
+                    sprintf "%s %s" Icons.ARCHIVE (%"library"),
+                    200.0f,
+                    (fun () -> current_tab.Set OptionsMenuTab.Library),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library),
+                    Keybind = Bind.mk Keys.D4
+                )
+            )
 
     let search_box =
-        { new SearchBox(
-                Setting.simple "",
-                (fun query ->
-                    if query = "" then
-                        current_tab.Set State.recent_tab
-                    else
-                        current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
-                ),
-                Fill = K Colors.cyan.O3,
-                Border = K Colors.cyan_accent,
-                TextColor = K Colors.text_cyan) with
-            override this.OnFocus by_mouse =
-                base.OnFocus by_mouse
-                if not by_mouse then GameThread.defer (fun () -> this.Select false)
-        }
+        SearchBox(fun query ->
+            if query = "" then current_tab.Set State.recent_tab
+            else current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
+        )
+            .Fill(Colors.cyan.O3)
+            .Border(Colors.cyan_accent)
+            .TextColor(Colors.text_cyan)
+            .KeyboardAutoSelect()
             .Position(
                 { scaled_margins with Left = fst scaled_margins.Left * 2.0f, snd scaled_margins.Left * 2.0f }
                     .SliceY(SearchBox.HEIGHT)
@@ -101,10 +97,10 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     member private this.Buttons = tab_buttons
 
     override this.Init(parent) =
-        this.Position <- Position.SliceT(HEIGHT)
         this
-        |+ search_box
-        |* tab_buttons
+            .Position(Position.SliceT(HEIGHT))
+            .Add(search_box, tab_buttons)
+
         base.Init parent
 
     override this.Update(elapsed_ms, moved) =
