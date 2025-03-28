@@ -8,6 +8,8 @@ open System.Drawing
 
 module Colors =
 
+    // todo: capitalise all of these constants
+
     let black = Color.Black
     let shadow_1 = Color.FromArgb 0xFF_050308
     let shadow_2 = Color.FromArgb 0xFF_0a0911
@@ -68,6 +70,8 @@ module ColorExtensions =
 
 module Style =
 
+    // todo: auto-open padding constants
+    // todo: create PAD, PAD2, PAD3, PAD4 constants for shorthand multiples of 5
     let PADDING = 5.0f
     let mutable font = Unchecked.defaultof<SpriteFont>
 

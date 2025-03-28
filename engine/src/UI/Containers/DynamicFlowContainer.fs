@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Windowing
@@ -327,3 +328,11 @@ module DynamicFlowContainer =
         interface IResize with
             member this.OnSizeChanged
                 with set v = size_change <- v
+
+[<Extension>]
+type DynamicFlowContainerExtensions =
+
+    [<Extension>]
+    static member Spacing(container: #DynamicFlowContainer.Base<'T>, spacing: float32) : #DynamicFlowContainer.Base<'T> =
+        container.Spacing <- spacing
+        container

@@ -203,6 +203,8 @@
     <Compile Include="Features\Skins\Preview.fs" />
     <Compile Include="Features\Skins\Problems.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
+    <Compile Include="Features\Skins\Textures\TextureActions.fs" />
+    <Compile Include="Features\Skins\Textures\EditTexturePage.fs" />
     <Compile Include="Features\Skins\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ElementPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Accuracy.fs" />

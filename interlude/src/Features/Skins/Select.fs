@@ -232,7 +232,8 @@ type SelectSkinsPage() =
                     Position
                         .SlicePercentL(0.35f)
                         .ShrinkR(Style.PADDING * 2.0f)
-                        .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
+                        .ShrinkL(PAGE_MARGIN_X)
+                        .ShrinkY(PAGE_MARGIN_Y)
                 )
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
@@ -254,8 +255,7 @@ type SelectSkinsPage() =
                     Position
                         .ShrinkPercentL(0.35f)
                         .ShrinkL(Style.PADDING * 2.0f)
-                        .ShrinkR(PAGE_MARGIN_X)
-                        .ShrinkY(PAGE_MARGIN_Y)
+                        .Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y)
                 )
             |+ noteskin_tab
             |+ hud_tab

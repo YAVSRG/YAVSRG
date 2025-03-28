@@ -362,7 +362,6 @@ module Render =
     /// Draws an untextured quad to the screen.
     /// </summary>
 
-    // todo: consider renaming quad_c and having just `quad` which takes a color
     let quad_c (q: Quad) (colors: QuadColors) : unit =
         _batch.Vertex(q.TopLeft, Vector2.Zero, colors.TopLeft, 0)
         _batch.Vertex(q.TopRight, Vector2.Zero, colors.TopRight, 0)

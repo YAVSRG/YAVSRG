@@ -20,8 +20,8 @@ type EditHUDPage(ctx: PositionerContext) =
 
     let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
 
-    let textures_tab, refresh_texture_grid = TextureGrid.create_hud hud
-    let problems_tab, refresh_problems_list = Problems.create_hud hud
+    let textures_tab = TextureGrid.HUD(hud)
+    let problems_tab = ProblemList.HUD(hud)
     let general_tab =
         NavigationContainer.Column(WrapNavigation = false)
         |+ PageTextEntry(%"skin.name", name).Pos(0)
@@ -63,8 +63,8 @@ type EditHUDPage(ctx: PositionerContext) =
     let elements_tab = ScrollContainer(ElementGrid.create(fun element -> HudElement.enabled_setting(element).Set true; ctx.Select element; Menu.Exit()))
 
     let refresh () =
-        refresh_texture_grid()
-        refresh_problems_list()
+        textures_tab.Refresh()
+        problems_tab.Refresh()
 
     override this.Content() =
         refresh ()
@@ -79,8 +79,8 @@ type EditHUDPage(ctx: PositionerContext) =
                         [|
                             elements_tab, %"hud.elements", K false
                             general_tab, %"skins.general", K false
-                            textures_tab, %"skins.textures", K false
-                            problems_tab, %"skins.problems", K false
+                            textures_tab.Container, %"skins.textures", K false
+                            problems_tab.Container, %"skins.problems", K false
                         |]
                     Height = 60.0f
                 }
@@ -95,7 +95,7 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        Problems.problems_loader.Join()
+        ProblemList.loader.Join()
 
     override this.Title = meta.Name
     override this.OnDestroy() = preview.Destroy()

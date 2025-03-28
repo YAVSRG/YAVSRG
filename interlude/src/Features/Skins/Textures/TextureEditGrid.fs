@@ -11,6 +11,23 @@ open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 
+[<AutoOpen>]
+module TextureEditorExtensions =
+
+    type Storage with
+
+        member this.Reload() =
+            match this with
+            | :? Noteskin as ns -> Skins.reload_current_noteskin()
+            | :? HudLayout as hud -> Skins.reload_current_hud()
+            | _ -> failwith "Unrecognised storage object (maybe a theme)"
+
+        member this.GetTextureRules(texture_id: string) : TextureRules =
+            match this with
+            | :? Noteskin as ns -> NoteskinTextureRules.get ns.Config texture_id
+            | :? HudLayout as hud -> HudTextureRules.get hud.Config texture_id
+            | _ -> failwith "Unrecognised storage object (maybe a theme)"
+
 type private TextureEditGridItem(sprite: Sprite, x: int, y: int, selected: bool array array) =
     inherit
         Container(
@@ -67,8 +84,10 @@ type private DeleteButton(on_click: unit -> unit) =
 
         base.Draw()
 
-type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: string, rules: TextureRules) as this =
+type TextureEditGrid(source: Storage, texture_id: string) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Items))
+
+    let rules = source.GetTextureRules texture_id
 
     let mutable sprite = Unchecked.defaultof<Sprite>
     let mutable selected: bool array array = [||]
@@ -129,7 +148,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                     sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
                                     fun () ->
                                         if source.DeleteLooseTextureColumn(c, texture_id) then
-                                            reload_source()
+                                            source.Reload()
                                             this.Refresh()
                                 )
                                     .Show()
@@ -160,7 +179,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                 sprintf "Really PERMANENTLY delete color %i?" (r + 1),
                                 fun () ->
                                     if source.DeleteLooseTextureRow(r, texture_id) then
-                                        reload_source()
+                                        source.Reload()
                                         this.Refresh()
                             )
                                 .Show()
@@ -194,7 +213,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                 (src_row + 1),
                             fun () ->
                             if source.AddLooseTextureRow(src_row, texture_id) then
-                                reload_source()
+                                source.Reload()
                                 this.Refresh()
                         )
                             .Show()
@@ -226,7 +245,7 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
                                          (src_col + 1),
                                      fun () ->
                                         if source.AddLooseTextureColumn(src_col, texture_id) then
-                                            reload_source()
+                                            source.Reload()
                                             this.Refresh()
                                  )
                                      .Show()
@@ -265,88 +284,3 @@ type TextureEditGrid(source: Storage, reload_source: unit -> unit, texture_id: s
     override this.Draw() =
         base.Draw()
         items.Draw()
-
-type TextureEditPage(source: Storage, texture_id: string) =
-    inherit Page()
-
-    let texture_rules =
-        match source with
-        | :? Noteskin as ns -> NoteskinTextureRules.get ns.Config texture_id
-        | :? HudLayout as hud -> HudTextureRules.get hud.Config texture_id
-        | _ -> failwith "Unrecognised storage object (maybe a theme)"
-
-    let reload_source : unit -> unit =
-        match source with
-        | :? Noteskin -> Skins.reload_current_noteskin
-        | :? HudLayout -> Skins.reload_current_hud
-        | _ -> failwith "Unrecognised storage object (maybe a theme)"
-
-    let texture_editor =
-        TextureEditGrid(
-            source,
-            reload_source,
-            texture_id,
-            texture_rules
-        )
-            .Position(Position.Box(0.5f, 0.0f, -375.0f, 200.0f, 750.0f, 750.0f))
-
-    // todo: separate file, TextureActions.Create(texture_editor: TextureEditGrid)
-    let selected_texture_actions =
-        FlowContainer.Vertical(45.0f)
-            .Spacing(Style.PADDING * 3.0f)
-            .Position(Position.SliceR(400.0f).Shrink(50.0f))
-            .With(
-                Button(Icons.ROTATE_CW + " Rotate clockwise", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.RotateClockwise((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                )
-                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
-
-                Button(Icons.ROTATE_CCW + " Rotate anticlockwise", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.RotateAnticlockwise((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                )
-                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
-
-                Button(Icons.CORNER_LEFT_UP + " Vertical flip", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.VerticalFlipTexture((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                )
-                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
-
-                Button(Icons.CORNER_DOWN_LEFT + " Horizontal flip", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
-                        source.HorizontalFlipTexture((col, row), texture_id) |> ignore
-
-                    reload_source()
-                    texture_editor.Refresh()
-                )
-                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
-
-                Button(Icons.REFRESH_CW + " Cycle selected", fun () ->
-                    if source.CycleTextures(texture_editor.SelectedTextures |> Array.ofSeq, texture_id) then
-                        reload_source()
-                        texture_editor.Refresh()
-                )
-                    .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty)
-            )
-
-    override this.Content() =
-        source.SplitTexture(texture_id)
-
-        NavigationContainer.Column()
-        |+ texture_editor
-        |+ selected_texture_actions
-        :> Widget
-
-    override this.Title = Icons.IMAGE + " " + texture_id
-    override this.OnClose() = ()

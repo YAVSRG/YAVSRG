@@ -21,12 +21,12 @@ type EditNoteskinPage() =
 
     let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
 
-    let textures_tab, refresh_texture_grid = TextureGrid.create_noteskin noteskin
-    let problems_tab, refresh_problems_list = Problems.create_noteskin noteskin
+    let textures_tab = TextureGrid.Noteskin(noteskin)
+    let problems_tab = ProblemList.Noteskin(noteskin)
 
     let refresh () =
-        refresh_texture_grid()
-        refresh_problems_list()
+        textures_tab.Refresh()
+        problems_tab.Refresh()
 
     override this.Content() =
         refresh ()
@@ -92,8 +92,8 @@ type EditNoteskinPage() =
                     Options =
                         [|
                             general_tab, %"skins.general", K false
-                            textures_tab, %"skins.textures", K false
-                            problems_tab, %"skins.problems", K false
+                            textures_tab.Container, %"skins.textures", K false
+                            problems_tab.Container, %"skins.problems", K false
                         |]
                     Height = 50.0f
                 }
@@ -149,7 +149,7 @@ type EditNoteskinPage() =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        Problems.problems_loader.Join()
+        ProblemList.loader.Join()
 
     override this.Title = meta.Name
     override this.OnDestroy() = preview.Destroy()
