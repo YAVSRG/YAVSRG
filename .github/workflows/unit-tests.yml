@@ -28,10 +28,6 @@ jobs:
         cd scripts
         chmod +x ./run_tests.sh
         ./run_tests.sh
-
-        if: |
-      github.repository == 'percyqaz/YAVSRG' &&
-      github.ref == 'refs/heads/develop'
         
     - name: Attempt fast-forward + push
       if: |
