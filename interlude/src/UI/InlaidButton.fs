@@ -44,14 +44,14 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
 
     override this.Draw() =
 
+        Render.rect this.Bounds (if this.Focused then Colors.shadow_1.O2 else Colors.shadow_2.O2)
+
         let text =
             if this.Focused then
                 if this.HoverIcon = "" then this.HoverText
                 else sprintf "%s %s" this.HoverIcon this.HoverText
             elif this.Icon = "" then label_func()
             else sprintf "%s %s" this.Icon (label_func())
-
-        Render.rect this.Bounds (Colors.shadow_1.O2)
 
         Text.fill_b (
             Style.font,
