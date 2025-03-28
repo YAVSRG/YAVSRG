@@ -1,6 +1,8 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
+open System.Runtime.CompilerServices
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 
 [<Sealed>]
@@ -28,3 +30,26 @@ type Frame() =
         if fill.A > 0uy then
 
             Render.rect base.Bounds fill
+
+[<Extension>]
+type FrameExtensions() =
+
+    [<Extension>]
+    static member inline Fill(container: Frame, color: Color) : Frame =
+        container.Fill <- K color
+        container
+
+    [<Extension>]
+    static member inline Fill(container: Frame, color: unit -> Color) : Frame =
+        container.Fill <- color
+        container
+
+    [<Extension>]
+    static member inline Border(container: Frame, color: Color) : Frame =
+        container.Border <- K color
+        container
+
+    [<Extension>]
+    static member inline Border(container: Frame, color: unit -> Color) : Frame =
+        container.Border <- color
+        container

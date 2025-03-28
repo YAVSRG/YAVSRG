@@ -3,13 +3,13 @@ namespace Interlude.Features.OptionsMenu
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Skins
 open Interlude.Features.OptionsMenu.Search
+open Interlude.Features.OptionsMenu.Presets
 
 [<RequireQualifiedAccess>]
 type private Transition =
@@ -169,11 +169,11 @@ type private OptionsMenuFooter() as this =
     let presets =
         NavigationContainer.Row(WrapNavigation = false)
             .With(
-                Presets.preset_buttons(1, options.Preset1)
+                PresetSlotControls.Create(1, options.Preset1)
                     .Position(Position.GridX(1, 3, 20.0f)),
-                Presets.preset_buttons(2, options.Preset2)
+                PresetSlotControls.Create(2, options.Preset2)
                     .Position(Position.GridX(2, 3, 20.0f)),
-                Presets.preset_buttons(3, options.Preset3)
+                PresetSlotControls.Create(3, options.Preset3)
                     .Position(Position.GridX(3, 3, 20.0f))
             )
             .Position(Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))

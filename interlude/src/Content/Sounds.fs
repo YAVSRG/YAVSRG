@@ -20,7 +20,7 @@ module Sounds =
 
         cache.Add(id, sound)
 
-    let init() =
+    let init () =
         Audio.current_device_changed.Add(
             fun () ->
                 for fx in cache.Keys do
