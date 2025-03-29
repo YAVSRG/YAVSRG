@@ -312,11 +312,12 @@ type SpecificPatterns =
 
     static member SPECIFIC_7K =
         {
+            // todo: roll, trill
             Stream = []
             Chordstream =
                 [
                     "Brackets", Chordstream_7K.BRACKETS
-                    "Chord Rolls", Chordstream_7K.CHORD_ROLL
+                    //"Chord Rolls", Chordstream_7K.CHORD_ROLL
                     "Double Stream", Chordstream_7K.DOUBLE_STREAMS
                     "Dense Chordstream", Chordstream_7K.DENSE_CHORDSTREAM
                     "Light Chordstream", Chordstream_7K.LIGHT_CHORDSTREAM
@@ -331,6 +332,7 @@ type SpecificPatterns =
 
     static member SPECIFIC_OTHER =
         {
+            // todo: roll, trill
             Stream = []
             Chordstream =
                 [
