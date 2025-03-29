@@ -531,6 +531,7 @@ levelselect.only_show_grades.tooltip=When turned off, your best accuracy is show
 levelselect.only_suggest_new_songs=Only suggest new songs
 levelselect.only_suggest_new_songs.tooltip=When turned on, suggestions can only be songs you haven't played in over a month.
 levelselect.options=Level select options
+levelselect.personal_best_timestamps=Show PB timestamps
 levelselect.play=Play
 levelselect.play.tooltip=Play the selected chart!
 levelselect.practice_mode=Practice mode

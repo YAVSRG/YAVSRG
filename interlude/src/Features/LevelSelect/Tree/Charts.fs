@@ -15,6 +15,14 @@ open Interlude.Features.Collections
 
 open TreeState
 
+[<Struct>]
+type PersonalBestCached =
+    {
+        Text: string
+        Color: Color
+        Details: string
+    }
+
 type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: ChartMeta, ctx: LibraryContext) =
     inherit TreeItem()
 
@@ -22,17 +30,71 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
     let mutable last_cached_flag = -1
     let mutable chart_save_data = None
     let mutable personal_bests: Bests option = None
-    let mutable grade = None
-    let mutable lamp = None
+    let mutable grade_or_accuracy : PersonalBestCached option = None
+    let mutable lamp : PersonalBestCached option = None
     let mutable markers = ""
 
-    let get_pb (bests: PersonalBests<'T>) (rate: Rate) (color_func: 'T -> Color) (format: 'T -> string) =
+    let get_pb (bests: PersonalBests<'T>) (rate: Rate) =
         match PersonalBests.get_best_above rate bests with
-        | Some(v, r, _) -> Some(v, r, color_func v, format v)
-        | None ->
+        | Some pb_above_rate -> Some pb_above_rate
+        | None -> PersonalBests.get_best_below rate bests
 
-        match PersonalBests.get_best_below rate bests with
-        | Some(v, r, _) -> Some(v, r, Colors.white.O2, format v)
+    let details (rate: Rate) (timestamp: int64) =
+        if options.TreeShowTimestamps.Value then
+            sprintf "%.2fx • %s" rate (timestamp |> Timestamp.since |> format_timespan)
+        else
+            sprintf "(%.2fx)" rate
+
+    let grade_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+        match get_pb bests.Grade rate with
+        | Some (grade, r, timestamp) when r >= rate ->
+            Some {
+                Text = Rulesets.current.GradeName grade
+                Color = Rulesets.current.GradeColor grade
+                Details = details r timestamp
+            }
+        | Some (grade, r, timestamp) ->
+            Some {
+                Text = Rulesets.current.GradeName grade
+                Color = Colors.white.O2
+                Details = details r timestamp
+            }
+        | None -> None
+
+    let acc_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+        match grade_pb bests rate with
+        | None -> None
+        | Some d ->
+
+        match get_pb bests.Accuracy rate with
+        | Some (accuracy, r, timestamp) when r >= rate ->
+            Some
+                { d with
+                    Text = Rulesets.current.FormatAccuracy accuracy
+                    Details = details r timestamp
+                }
+        | Some (accuracy, r, timestamp) ->
+            Some
+                { d with
+                    Text = Rulesets.current.FormatAccuracy accuracy
+                    Details = details r timestamp
+                }
+        | None -> None
+
+    let lamp_pb (bests: Bests) (rate: Rate) : PersonalBestCached option =
+        match get_pb bests.Lamp rate with
+        | Some (lamp, r, timestamp) when r >= rate ->
+            Some {
+                Text = Rulesets.current.LampName lamp
+                Color = Rulesets.current.LampColor lamp
+                Details = details r timestamp
+            }
+        | Some (lamp, r, timestamp) ->
+            Some {
+                Text = Rulesets.current.LampName lamp
+                Color = Colors.white.O2
+                Details = details r timestamp
+            }
         | None -> None
 
     let update_cached_info () =
@@ -49,18 +111,11 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
                 | _ -> SelectedChart.rate.Value
 
             personal_bests <- Some d.PersonalBests.[Rulesets.current_hash]
-            grade <-
-                match get_pb personal_bests.Value.Grade rate Rulesets.current.GradeColor Rulesets.current.GradeName with
-                | Some (grade, grade_rate, color, text) when not options.TreeShowGradesOnly.Value ->
-                    match get_pb personal_bests.Value.Accuracy rate (K Colors.white) Rulesets.current.FormatAccuracy with
-                    | Some (accuracy, accuracy_rate, _, text) ->
-                        Some (grade, accuracy_rate, color, text)
-                    | None -> Some (grade, grade_rate, color, text)
-                | otherwise -> otherwise
-            lamp <- get_pb personal_bests.Value.Lamp rate Rulesets.current.LampColor Rulesets.current.LampName
+            grade_or_accuracy <- if options.TreeShowGradesOnly.Value then grade_pb personal_bests.Value rate else acc_pb personal_bests.Value rate
+            lamp <- lamp_pb personal_bests.Value rate
         | _ ->
             personal_bests <- None
-            grade <- None
+            grade_or_accuracy <- None
             lamp <- None
 
         markers <-
@@ -73,7 +128,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
 
     override this.Selected : bool = selected_chart = cc.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 
-    override this.Spacing = 5.0f
+    override this.Spacing = Style.PADDING
     member this.Chart = cc
     member this.Context = ctx
 
@@ -115,35 +170,33 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, cc: C
         Render.rect (bounds.BorderL Style.PADDING) hover_color
 
         // draw pbs
-        let disp (data: 'T * Rate * Color * string) (pos: float32) =
-            let _, rate, color, formatted = data
-            let rate_label = sprintf "(%.2fx)" rate
+        let disp (data: PersonalBestCached) (pos: float32) =
 
-            if color.A > 0uy then
+            if data.Color.A > 0uy then
                 Render.rect (Rect.FromEdges(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
 
                 Text.draw_aligned_b (
                     Style.font,
-                    formatted,
+                    data.Text,
                     20.0f,
                     right - pos,
                     top + 8.0f,
-                    (color, Color.Black),
+                    (data.Color, Color.Black),
                     0.5f
                 )
 
                 Text.draw_aligned_b (
                     Style.font,
-                    rate_label,
+                    data.Details,
                     14.0f,
                     right - pos,
                     top + 35.0f,
-                    (color, Color.Black),
+                    (data.Color, Color.Black),
                     0.5f
                 )
 
         if personal_bests.IsSome then
-            disp grade.Value 290.0f
+            disp grade_or_accuracy.Value 290.0f
             disp lamp.Value 165.0f
 
         // draw text

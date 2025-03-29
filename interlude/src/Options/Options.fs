@@ -187,6 +187,7 @@ type GameOptions =
         ChartGroupReverse: Setting<bool>
         ScoreSortMode: Setting<int>
         TreeShowGradesOnly: Setting<bool>
+        TreeShowTimestamps: Setting<bool>
         TreeAlwaysShowCollections: Setting<bool>
         TreeShowNativeText: Setting<bool>
         Table: Setting<string option>
@@ -254,6 +255,7 @@ type GameOptions =
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
             TreeShowGradesOnly = Setting.simple true
+            TreeShowTimestamps = Setting.simple false
             TreeAlwaysShowCollections = Setting.simple false
             TreeShowNativeText = Setting.simple false
             Table = Tables.selected_id
