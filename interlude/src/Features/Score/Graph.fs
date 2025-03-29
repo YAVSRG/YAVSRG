@@ -16,7 +16,7 @@ module GraphSettings =
     let column_filter = Array.create 10 true
     let scale = 1.0f |> Setting.bounded (1.0f, 6.0f)
     let show_slice = Setting.simple false
-    let slice_size = 0.04f |> Setting.bounded (0.01f, 0.50f)
+    let slice_size = 0.04f |> Setting.bounded (0.01f, 1.0f)
 
     let COLUMN_FILTER_KEYS =
         [|
