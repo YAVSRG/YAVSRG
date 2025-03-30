@@ -48,6 +48,7 @@ type FullscreenVideoMode =
 type FrameLimit =
     | Unlimited = 0
     | Smart = 1
+    | Custom = 2
 
 type WindowOptions =
     {
@@ -55,6 +56,7 @@ type WindowOptions =
         WindowedResolution: WindowedResolution
         FullscreenVideoMode: FullscreenVideoMode
         RenderMode: FrameLimit
+        CustomFrameLimit: int
         SmartCapAntiJitter: bool
         SmartCapFramerateMultiplier: float
         SmartCapTearlinePosition: float

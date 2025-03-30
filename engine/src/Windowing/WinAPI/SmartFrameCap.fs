@@ -88,12 +88,6 @@ module private FrameTimeStrategies =
     [<DllImport("gdi32.dll")>]
     extern int64 D3DKMTWaitForVerticalBlankEvent(D3DKMT_WAITFORVERTICALBLANKEVENT& info)
 
-    [<DllImport("winmm.dll")>]
-    extern int64 private timeBeginPeriod(int msec)
-
-    [<DllImport("winmm.dll")>]
-    extern int64 private timeEndPeriod(int msec)
-
     // https://stackoverflow.com/questions/49244480/correct-way-to-wait-for-vblank-on-windows-10-in-windowed-mode
     [<DllImport("dwmapi.dll")>]
     extern int64 DwmFlush()

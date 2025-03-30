@@ -223,7 +223,11 @@ module WindowThread =
 
         | _ -> Logging.Error "Tried to change to invalid window mode"
 
-        refresh_rate <- NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
+        refresh_rate <-
+            if config.RenderMode = FrameLimit.Custom then
+                config.CustomFrameLimit
+            else
+                NativePtr.read(GLFW.GetVideoMode(monitor_ptr)).RefreshRate
 
         InputThread.set_cursor_hidden config.HideCursor window
 

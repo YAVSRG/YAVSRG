@@ -16,6 +16,7 @@ type UIEntryPoint =
 
 type private Strategy =
     | Unlimited
+    | FrameCap of frame_time: float
     | WindowsDwmFlush
     | WindowsVblankSync
 
@@ -118,26 +119,25 @@ module GameThread =
         assert(is_game_thread())
         uses_compositor <- not entire_monitor
         strategy <-
-            if OperatingSystem.IsWindows() then
-                // On windows:
-                //  Smart = Custom frame pacing strategies
-                //  Unlimited = Unlimited
+            match frame_limit with
+            | FrameLimit.Custom ->
                 GLFW.SwapInterval(0)
-                if frame_limit = FrameLimit.Smart then
+                FrameCap (1000.0 / float refresh_rate)
+
+            | FrameLimit.Smart ->
+                // On windows: smart cap = do some cool stuff for frame times that outperforms vsync
+                if OperatingSystem.IsWindows() then
+                    GLFW.SwapInterval(0)
                     FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor) (GLFW.GetWin32Monitor monitor)
                     if entire_monitor then WindowsVblankSync else WindowsDwmFlush
+                // On non-windows: smart cap = vsync
                 else
-                    Unlimited
-            else
-                // On non-windows:
-                //  Smart = GLFW's default Vsync
-                //  Unlimited = Unlimited
-                if frame_limit = FrameLimit.Smart then
                     GLFW.SwapInterval(1)
                     Unlimited
-                else
-                    GLFW.SwapInterval(0)
-                    Unlimited
+
+            | _ ->
+                GLFW.SwapInterval(0)
+                Unlimited
 
     let private dispatch_frame (ui_root: UIEntryPoint) =
 
@@ -145,8 +145,11 @@ module GameThread =
         visual_latency_hi <- real_next_frame - start_of_frame
 
         match strategy with
+        | Unlimited -> ignore ()
 
-        | Unlimited -> ()
+        | FrameCap frame_time ->
+            estimated_next_frame <- start_of_frame + frame_time
+            FrameTimeStrategies.sleep_accurate (total_frame_timer, start_of_frame + frame_time)
 
         | WindowsVblankSync ->
             let last_vblank, est_refresh_period = FrameTimeStrategies.VBlankThread.get(tearline_position, total_frame_timer)

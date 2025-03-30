@@ -28,72 +28,85 @@ type PerformanceSettingsPage() =
 
     let mutable msaa_restart = false
 
+    let mutable pending_custom_frame_limit = false
+    let custom_frame_limit_box = NumberEntry.Create(config.CustomFrameLimit |> Setting.trigger (fun _ -> pending_custom_frame_limit <- true))
+
     override this.Content() =
         page_container()
-        |+ PageSetting(
-            %"system.framelimit",
-            SelectDropdown(
-                [|
-                    FrameLimit.Unlimited, %"system.framelimit.unlimited"
-                    FrameLimit.Smart, %"system.framelimit.smart"
-                |],
-                config.RenderMode |> Setting.trigger (ignore >> config.Apply)
-            )
-        )
-            .Help(Help.Info("system.framelimit"))
-            .Pos(0)
-        |+ Text(%"system.framelimit.unlimited_warning")
-            .Color(Colors.text_red)
-            .Align(Alignment.LEFT)
-            .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
-            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited)
-        |+ PageSetting(
-            %"system.cpu_saver",
-            Checkbox(config.InputCPUSaver |> Setting.trigger (ignore >> config.Apply))
-        )
-            .Help(Help.Info("system.cpu_saver"))
-            .Pos(3)
-        |+ PageSetting(
-            %"system.msaa",
-            Selector([| 0, sprintf "%s (0x)" %"system.msaa.off"; 4, sprintf "%s (4x)" %"system.msaa.normal"; 16, sprintf "%s (16x)" %"system.msaa.fancy" |], config.MSAASamples |> Setting.trigger (fun _ -> msaa_restart <- true))
-        )
-            .Help(Help.Info("system.msaa"))
-            .Pos(5)
-        |+ Text(%"system.msaa.restart_warning")
-            .Color(Colors.text_red)
-            .Position(page_position(7, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
-            .Align(Alignment.LEFT)
-            .Conditional(fun () -> msaa_restart)
+            .With(
+                PageSetting(
+                    %"system.framelimit",
+                    SelectDropdown(
+                        [|
+                            FrameLimit.Unlimited, %"system.framelimit.unlimited"
+                            FrameLimit.Smart, %"system.framelimit.smart"
+                            FrameLimit.Custom, %"system.framelimit.custom"
+                        |],
+                        config.RenderMode |> Setting.trigger (ignore >> config.Apply)
+                    )
+                )
+                    .Help(Help.Info("system.framelimit"))
+                    .Pos(0),
+                Text(%"system.framelimit.unlimited_warning")
+                    .Color(Colors.text_red)
+                    .Align(Alignment.LEFT)
+                    .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+                    .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Unlimited),
 
-        |+ PageSetting(%"system.performance.antijitter",
-            Checkbox(
-                config.SmartCapAntiJitter
-                |> Setting.trigger (fun v -> GameThread.anti_jitter <- v)
+                PageSetting(%"system.performance.antijitter",
+                    Checkbox(
+                        config.SmartCapAntiJitter
+                        |> Setting.trigger (fun v -> GameThread.anti_jitter <- v)
+                    )
+                )
+                    .Help(Help.Info("system.performance.antijitter"))
+                    .Pos(2)
+                    .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart),
+
+                PageSetting(%"system.performance.custom_frame_limit", custom_frame_limit_box)
+                    .Pos(2)
+                    .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Custom),
+
+                PageSetting(
+                    %"system.cpu_saver",
+                    Checkbox(config.InputCPUSaver |> Setting.trigger (ignore >> config.Apply))
+                )
+                    .Help(Help.Info("system.cpu_saver"))
+                    .Pos(4),
+                PageSetting(
+                    %"system.msaa",
+                    Selector([| 0, sprintf "%s (0x)" %"system.msaa.off"; 4, sprintf "%s (4x)" %"system.msaa.normal"; 16, sprintf "%s (16x)" %"system.msaa.fancy" |], config.MSAASamples |> Setting.trigger (fun _ -> msaa_restart <- true))
+                )
+                    .Help(Help.Info("system.msaa"))
+                    .Pos(6),
+                Text(%"system.msaa.restart_warning")
+                    .Color(Colors.text_red)
+                    .Position(page_position(8, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+                    .Align(Alignment.LEFT)
+                    .Conditional(fun () -> msaa_restart)
             )
-        )
-            .Help(Help.Info("system.performance.antijitter"))
-            .Pos(8)
-            .Conditional(fun () -> config.RenderMode.Value = FrameLimit.Smart)
-        |+ PageSetting(%"system.performance.frame_multiplier",
-            SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
-        )
-            .Pos(10)
-            .Conditional(show_tearline_settings)
-        |+ PageSetting(%"system.performance.screen_tear_alignment",
-            Slider.Percent(screen_tear_alignment)
-        )
-            .Pos(12)
-            .Conditional(show_tearline_settings)
-        |+ Text(%"system.performance.screen_tear_alignment.hint")
-            .Color(Colors.text)
-            .Align(Alignment.LEFT)
-            .Position(page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
-            .Conditional(show_tearline_settings)
-        :> Widget
+            .WithConditional(
+                show_tearline_settings,
+                PageSetting(%"system.performance.frame_multiplier",
+                    SelectDropdown([| 4.0, "4x"; 8.0, "8x"; 16.0, "16x"|], framerate_multiplier)
+                )
+                    .Pos(10),
+                PageSetting(%"system.performance.screen_tear_alignment",
+                    Slider.Percent(screen_tear_alignment)
+                )
+                    .Pos(12),
+                Text(%"system.performance.screen_tear_alignment.hint")
+                    .Color(Colors.text)
+                    .Align(Alignment.LEFT)
+                    .Position(page_position(14, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
         cycle.Update elapsed_ms
+        if pending_custom_frame_limit && not custom_frame_limit_box.Focused then
+            pending_custom_frame_limit <- false
+            config.Apply()
 
     override this.Draw() =
         base.Draw()
@@ -110,6 +123,10 @@ type PerformanceSettingsPage() =
                 Color.White
                 texture
 
-    override this.OnClose() = closed <- true
+    override this.OnClose() =
+        if pending_custom_frame_limit then
+            pending_custom_frame_limit <- false
+            config.Apply()
+        closed <- true
 
     override this.Title = %"system.performance"

@@ -13,6 +13,7 @@ type WindowSettings =
         WindowedResolution: Setting<WindowedResolution>
         FullscreenVideoMode: Setting<FullscreenVideoMode>
         RenderMode: Setting<FrameLimit>
+        CustomFrameLimit : Setting.Bounded<int>
         SmartCapAntiJitter: Setting<bool>
         SmartCapFramerateMultiplier: Setting<float>
         SmartCapTearlinePosition: Setting.Bounded<float>
@@ -27,7 +28,7 @@ type WindowSettings =
     static member Default =
         {
             WorkingDirectory = ""
-            WindowMode = Setting.simple WindowType.Fullscreen
+            WindowMode = Setting.simple WindowType.BorderlessNoTaskbar
             WindowedResolution = Setting.simple WindowedResolution.DEFAULT
             FullscreenVideoMode =
                 Setting.simple
@@ -37,6 +38,7 @@ type WindowSettings =
                         RefreshRate = 60
                     }
             RenderMode = Setting.simple FrameLimit.Smart
+            CustomFrameLimit = Setting.bounded (30, 5000) 1000
             SmartCapAntiJitter = Setting.simple false
             SmartCapFramerateMultiplier = Setting.simple 8.0
             SmartCapTearlinePosition = Setting.percent 0.85
@@ -44,7 +46,7 @@ type WindowSettings =
             AudioDevice = Setting.simple -1
             AudioDevicePeriod = Setting.simple 2
             AudioDeviceBufferLengthMultiplier = Setting.simple 2
-            InputCPUSaver = Setting.simple false
+            InputCPUSaver = Setting.simple true
             MSAASamples = Setting.simple 4
         }
 
@@ -54,6 +56,7 @@ type WindowSettings =
             WindowedResolution = this.WindowedResolution.Value
             FullscreenVideoMode = this.FullscreenVideoMode.Value
             RenderMode = this.RenderMode.Value
+            CustomFrameLimit = this.CustomFrameLimit.Value
             SmartCapAntiJitter = this.SmartCapAntiJitter.Value
             SmartCapFramerateMultiplier = this.SmartCapFramerateMultiplier.Value
             SmartCapTearlinePosition = this.SmartCapTearlinePosition.Value
