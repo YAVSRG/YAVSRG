@@ -136,7 +136,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 PageButton(%"rulesets.mechanics.osu_mania_change",
                     fun () ->
                         ConfirmPage(%"rulesets.mechanics.osu_mania_change_confirm",
-                            fun () -> hold_mechanics_type.Value <- 0
+                            fun () -> hold_mechanics_type.Value <- 1
                         )
                             .Show()
                 )
