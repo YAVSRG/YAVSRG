@@ -1,26 +1,13 @@
-0.7.27.12
+0.7.27.13
 ====
 
-Mostly bug fixes and changes to the codebase that won't matter to you as a player (but some of it might!)
+Hi it's me again
 
 # Improvements
-- You can now hover over the imports button when tasks are running to see live progress bars
-- The imports button itself also has a mini progress bar reflecting the current task
-- Red warning shows if you are going to close the game while tasks are running
-- The update button has a loading bar when downloading
-- Exporting a .osz will now succeed even if the audio or background are missing
-- Un-halved the volume slider after some players complained
-- Some subtle things have been improved (symmetry, pixel accuracy) in many parts of the UI
-- Charts that have assets 'linked' to external folders have a chain icon in level select
-- Abbreviation for the Shuffle mod is now "SHF"
+- Experimental change to the engine/frame cap, to see if it affects the Intel Crash of Death
+- You can now view wider "slices" of the score graph when holding shift + hovering
+- New option to show timestamps next to PBs on the song wheel (found in Level select options)
+- You can now change the osu! hold mechanics to something else via the ruleset editor
 
-# Bug fixes
-- Fixed an issue causing inputs to be more or less tied to framerate, affecting non-fullscreen users
-- Fixed many minor issues with importing charts
-- Fixed an issue where the wrong chart appears selected on level select
-- Fixed skip button being deletable from your HUD, preventing you from skipping
-- Fixed hitting 0 notes awarding NaN as the performance rating
-- Fixed search box staying focused when opening preview
-- Fixed chat box staying focused when entering multiplayer gameplay
-- Fixed failing on scores with unranked mods always saving regardless of setting
+Editing osu! scorev1 LN windows still can't be done ingame but this will help players who are trying to modify an osu! ruleset to emulate ScoreV2
 
