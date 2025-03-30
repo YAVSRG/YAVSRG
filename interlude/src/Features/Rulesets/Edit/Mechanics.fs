@@ -86,107 +86,126 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
             SelectDropdown(ruleset.Value.Judgements |> Array.map _.Name |> Array.indexed, setting)
 
         page_container()
-        |+ PageSetting(%"rulesets.mechanics.ghost_tap_judgement",
-            SelectDropdown(ghost_tap_judgement_options, ghost_tap_judgement))
-            .Help(Help.Info("rulesets.mechanics.ghost_tap_judgement"))
-            .Pos(0)
-        |+ PageSetting(%"rulesets.mechanics.note_priority",
-            SelectDropdown(
-                [|
-                    0, %"rulesets.mechanics.note_priority.interlude"
-                    1, %"rulesets.mechanics.note_priority.osu_mania"
-                    2, %"rulesets.mechanics.note_priority.etterna"
-                |], note_priority))
-            .Help(Help.Info("rulesets.mechanics.note_priority"))
-            .Pos(2)
-        |+ PageSetting(%"rulesets.mechanics.cbrush_window", NumberEntry.Create(cbrush_window, "ms"))
-            .Help(Help.Info("rulesets.mechanics.cbrush_window"))
-            .Conditional(fun () -> note_priority.Value = 0)
-            .Pos(4)
-        |+ PageSetting(%"rulesets.mechanics.hold_mechanics",
-            SelectDropdown(
-                if hold_mechanics_type.Value = 0 then
-                    [| 0, %"rulesets.mechanics.osu_mania" |]
-                else
-                    [|
-                        1, %"rulesets.mechanics.head_judgement_or"
-                        2, %"rulesets.mechanics.just_require_hold"
-                        3, %"rulesets.mechanics.judge_releases_separately"
-                        4, %"rulesets.mechanics.judge_releases_only"
-                    |]
-                , hold_mechanics_type
+            .With(
+                PageSetting(%"rulesets.mechanics.ghost_tap_judgement",
+                    SelectDropdown(ghost_tap_judgement_options, ghost_tap_judgement))
+                    .Help(Help.Info("rulesets.mechanics.ghost_tap_judgement"))
+                    .Pos(0),
+                PageSetting(%"rulesets.mechanics.note_priority",
+                    SelectDropdown(
+                        [|
+                            0, %"rulesets.mechanics.note_priority.interlude"
+                            1, %"rulesets.mechanics.note_priority.osu_mania"
+                            2, %"rulesets.mechanics.note_priority.etterna"
+                        |], note_priority))
+                    .Help(Help.Info("rulesets.mechanics.note_priority"))
+                    .Pos(2),
+                PageSetting(%"rulesets.mechanics.cbrush_window", NumberEntry.Create(cbrush_window, "ms"))
+                    .Help(Help.Info("rulesets.mechanics.cbrush_window"))
+                    .Conditional(fun () -> note_priority.Value = 0)
+                    .Pos(4),
+                PageSetting(%"rulesets.mechanics.hold_mechanics",
+                    SelectDropdown(
+                        [| 0, %"rulesets.mechanics.osu_mania" |],
+                        hold_mechanics_type
+                    )
+                )
+                    .Conditional(fun () -> hold_mechanics_type.Value = 0)
+                    .Pos(7),
+                PageSetting(%"rulesets.mechanics.hold_mechanics",
+                    SelectDropdown(
+                        [|
+                            1, %"rulesets.mechanics.head_judgement_or"
+                            2, %"rulesets.mechanics.just_require_hold"
+                            3, %"rulesets.mechanics.judge_releases_separately"
+                            4, %"rulesets.mechanics.judge_releases_only"
+                        |],
+                        hold_mechanics_type
+                    )
+                )
+                    .Conditional(fun () -> hold_mechanics_type.Value <> 0)
+                    .Pos(7)
             )
-        )
-            .Pos(7)
+            // osu!mania hold mechanics
+            .WithConditional(
+                (fun () -> hold_mechanics_type.Value = 0),
+                Text(%"rulesets.mechanics.osu_mania_cannot_edit")
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Position(page_position(9, 2, PageWidth.Normal).Shrink(Style.PADDING)),
+                PageButton(%"rulesets.mechanics.osu_mania_change",
+                    fun () ->
+                        ConfirmPage(%"rulesets.mechanics.osu_mania_change_confirm",
+                            fun () -> hold_mechanics_type.Value <- 0
+                        )
+                            .Show()
+                )
+                    .Pos(11)
+            )
+            // breaks lower judgement
+            .WithConditional(
+                (fun () -> hold_mechanics_type.Value = 1),
+                PageSetting(%"rulesets.mechanics.early_release_window", NumberEntry.Create(release_early_window, "ms"))
+                    .Help(Help.Info("rulesets.mechanics.early_release_window"))
+                    .Pos(9),
+                PageSetting(%"rulesets.mechanics.late_release_window", NumberEntry.Create(release_early_window, "ms"))
+                    .Help(Help.Info("rulesets.mechanics.late_release_window"))
+                    .Pos(11),
+                PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
+                    .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
+                    .Pos(13),
+                PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
+                    .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
+                    .Pos(15),
+                (
+                    Callout.frame
+                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.head_judgement_or").Body(%"rulesets.mechanics.head_judgement_or.desc"))
+                        (fun (w, h) -> page_position(18, 5, PageWidth.Custom w))
+                )
+            )
+            // just require hold
+            .WithConditional(
+                (fun () -> hold_mechanics_type.Value = 2),
 
-        |+ Text(%"rulesets.mechanics.cannot_edit")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(Style.PADDING))
-            .Conditional(fun () -> hold_mechanics_type.Value = 0)
-            .Pos(9)
+                PageSetting(%"rulesets.mechanics.release_window", NumberEntry.Create(release_window, "ms"))
+                    .Help(Help.Info("rulesets.mechanics.release_window"))
+                    .Pos(9),
+                (
+                    Callout.frame
+                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.just_require_hold").Body(%"rulesets.mechanics.just_require_hold.desc"))
+                        (fun (w, h) -> page_position(12, 5, PageWidth.Custom w))
+                )
+            )
+            // judge releases separately
+            .WithConditional(
+                (fun () -> hold_mechanics_type.Value = 3),
 
-        |+ PageSetting(%"rulesets.mechanics.early_release_window", NumberEntry.Create(release_early_window, "ms"))
-            .Help(Help.Info("rulesets.mechanics.early_release_window"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 1)
-            .Pos(9)
-        |+ PageSetting(%"rulesets.mechanics.late_release_window", NumberEntry.Create(release_early_window, "ms"))
-            .Help(Help.Info("rulesets.mechanics.late_release_window"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 1)
-            .Pos(11)
-        |+ PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
-            .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 1)
-            .Pos(13)
-        |+ PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
-            .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 1)
-            .Pos(15)
-        |+ (
-            Callout.frame
-                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.head_judgement_or").Body(%"rulesets.mechanics.head_judgement_or.desc"))
-                (fun (w, h) -> page_position(18, 5, PageWidth.Custom w))
-        )
-            .Conditional(fun () -> hold_mechanics_type.Value = 1)
+                PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
+                    .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
+                    .Pos(9),
+                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.release_windows(ruleset.Value.Judgements, release_timing_windows).Show())
+                    .Pos(11),
+                (
+                    Callout.frame
+                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_separately").Body(%"rulesets.mechanics.judge_releases_separately.desc"))
+                        (fun (w, h) -> page_position(14, 6, PageWidth.Custom w))
+                )
+            )
+            // judge releases only
+            .WithConditional(
+                (fun () -> hold_mechanics_type.Value = 4),
 
-        |+ PageSetting(%"rulesets.mechanics.release_window", NumberEntry.Create(release_window, "ms"))
-            .Help(Help.Info("rulesets.mechanics.release_window"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 2)
-            .Pos(9)
-        |+ (
-            Callout.frame
-                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.just_require_hold").Body(%"rulesets.mechanics.just_require_hold.desc"))
-                (fun (w, h) -> page_position(12, 5, PageWidth.Custom w))
-        )
-            .Conditional(fun () -> hold_mechanics_type.Value = 2)
-
-        |+ PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
-            .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 3)
-            .Pos(9)
-        |+ PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.release_windows(ruleset.Value.Judgements, release_timing_windows).Show())
-            .Conditional(fun () -> hold_mechanics_type.Value = 3)
-            .Pos(11)
-        |+ (
-            Callout.frame
-                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_separately").Body(%"rulesets.mechanics.judge_releases_separately.desc"))
-                (fun (w, h) -> page_position(14, 6, PageWidth.Custom w))
-        )
-            .Conditional(fun () -> hold_mechanics_type.Value = 3)
-
-        |+ PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
-            .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
-            .Conditional(fun () -> hold_mechanics_type.Value = 4)
-            .Pos(9)
-        |+ PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.notes_windows_as_release_windows(ruleset).Show())
-            .Conditional(fun () -> hold_mechanics_type.Value = 4)
-            .Pos(11)
-        |+ (
-            Callout.frame
-                (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_only").Body(%"rulesets.mechanics.judge_releases_only.desc"))
-                (fun (w, h) -> page_position(14, 5, PageWidth.Custom w))
-        )
-            .Conditional(fun () -> hold_mechanics_type.Value = 4)
+                PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
+                    .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
+                    .Pos(9),
+                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.notes_windows_as_release_windows(ruleset).Show())
+                    .Pos(11),
+                (
+                    Callout.frame
+                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_only").Body(%"rulesets.mechanics.judge_releases_only.desc"))
+                        (fun (w, h) -> page_position(14, 5, PageWidth.Custom w))
+                )
+            )
 
         :> Widget
 

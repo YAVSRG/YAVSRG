@@ -293,19 +293,19 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
     new(prompt, if_yes) = ConfirmPage(prompt, [|%"confirm.yes", if_yes; %"confirm.no", ignore|])
 
     override this.Content() =
-        let mutable p = 1
+        let lines = prompt.Split("\n", System.StringSplitOptions.TrimEntries)
+
         page_container()
-        |+ (
-            options
-            |> Seq.map (fun (label, action) ->
-                p <- p + 2
-                PageButton.Once(label, fork action Menu.Back).Pos(p)
-            )
-        )
-        |+ Text(prompt)
-            .Align(Alignment.LEFT)
-            .Pos(0, 2, PageWidth.Full)
-        :> Widget
+            .With(seq {
+                for i, (label, action) in Seq.indexed options do
+                    yield PageButton.Once(label, fork action Menu.Back).Pos(lines.Length * 2 + 1 + i * 2)
+            } : Widget seq)
+            .With(seq {
+                for i, line in Seq.indexed lines do
+                    yield Text(line)
+                        .Align(Alignment.LEFT)
+                        .Position(page_position(i * 2, 2, PageWidth.Full).Shrink(if i > 0 then Style.PADDING else 0.0f))
+            } : Widget seq)
 
     override this.Title = %"confirm"
     override this.OnClose() = ()

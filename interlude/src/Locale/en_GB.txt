@@ -1004,7 +1004,6 @@ rulesets.lamp.color=Color
 rulesets.lamp.confirm_delete=Really delete lamp '%0'?
 rulesets.lamp.name=Name
 rulesets.lamp.requirement=Requirement
-rulesets.mechanics.cannot_edit=Cannot currently be edited
 rulesets.mechanics.cbrush_window=Note lock window
 rulesets.mechanics.cbrush_window.tooltip=A special window designed to reduce 'Note locking' or 'CB rushing':\n 1. Hit a note badly\n 2. Press the key again at the right time \n 3. This hits another note badly instead \n 4. Repeat\n\nInterlude prioritises hitting notes inside this window before notes outside it.\nInterlude ignores an input if you hit a note outside this window and then inside it.
 rulesets.mechanics.early_release_window=Early release window
@@ -1033,6 +1032,9 @@ rulesets.mechanics.note_priority.interlude=Interlude
 rulesets.mechanics.note_priority.osu_mania=osu!mania
 rulesets.mechanics.note_priority.tooltip=Different games will determine which note you hit with a key press differently.\n Etterna = Note NEAREST to receptor when you press the key takes priority.\n osu!mania = EARLIEST note within the timing windows takes priority.\n Interlude = EARLIEST note within the 'Note lock window' takes priority, otherwise earliest note like osu!.
 rulesets.mechanics.osu_mania=osu!mania
+rulesets.mechanics.osu_mania_cannot_edit=Cannot currently be edited
+rulesets.mechanics.osu_mania_change=Change to something else
+rulesets.mechanics.osu_mania_change_confirm=Change hold mechanics on this ruleset?\nThere is no undoing this to get the special behaviour for osu! holds back!
 rulesets.mechanics.release_window=Release window
 rulesets.mechanics.release_window.tooltip=Releasing a hold before this window results in a drop, breaking combo.\nHolding a note past this window results in an overhold, which has no penalty.
 rulesets.mechanics.release_windows=Release timing windows
