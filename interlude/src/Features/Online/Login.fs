@@ -34,7 +34,7 @@ type RegisterPage(discord_tag) =
             "Creating an account linked to " + discord_tag)
             .Align(Alignment.LEFT)
             .Position(page_position(0, 2, PageWidth.Full).Shrink(0.0f, 10.0f))
-        |+ Callout.frame info (fun (w, h) -> page_position(4, 9, PageWidth.Custom w).Translate(0.0f, 25.0f))
+        |+ CalloutCard(info).Position(fun (w, h) -> page_position(4, 9, PageWidth.Custom w).Translate(0.0f, 25.0f))
         |+ PageButton(%"register.terms_of_service", (fun () -> open_url ("https://yavsrg.net/terms_of_service")))
             .Pos(14)
         |+ PageButton(%"register.privacy_policy", (fun () -> open_url ("https://yavsrg.net/privacy_policy")))
@@ -72,7 +72,7 @@ type LoginPage() =
     override this.Content() =
         page_container()
         |+ PageButton(%"login.login_with_discord", login).Pos(0)
-        |+ (Callout.frame info (fun (w, h) -> Position.SliceT(400.0f, h)))
+        |+ (CalloutCard(info).Position(fun (w, h) -> Position.SliceT(400.0f, h)))
             .Conditional(fun () -> waiting_for_browser)
         :> Widget
 

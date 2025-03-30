@@ -40,9 +40,8 @@ type AnchorPage(ctx: PositionerContext) =
             (fun () -> ctx.ChangeCurrentAnchor(false, Alignment.RIGHT); Menu.Exit())
         )
             .Pos(11)
-        |+ Callout.frame
-            (Help.Info("hud.anchor"))
-            (fun (w, h) -> page_position(15, 5, PageWidth.Custom w))
+        |+ CalloutCard(Help.Info("hud.anchor"))
+            .Pos(15)
         :> Widget
 
     override this.Title = %"hud.anchor" + " - " + HudElement.name ctx.Selected.Value

@@ -67,3 +67,13 @@ type PageLayoutExtensions =
     static member Pos(widget: #Widget, y: int, h: int, width: PageWidth) : #Widget =
         widget.Position <- page_position (y, h, width)
         widget
+
+    [<Extension>]
+    static member Pos(card: CalloutCard, y: int) : CalloutCard =
+        card.Position <-
+            page_position (
+                y,
+                (card :> IHeight).Height / PAGE_ITEM_HEIGHT * 2.0f |> ceil |> int,
+                PageWidth.Custom (card :> IWidth).Width
+            )
+        card

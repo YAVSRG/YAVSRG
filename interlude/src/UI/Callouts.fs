@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -249,33 +250,37 @@ module Callout =
 
             y <- y + spacing
 
-    type Card(callout: Callout, border: Color, fill: Color) =
-        inherit StaticWidget(NodeType.None)
+[<Sealed>]
+type CalloutCard(callout: Callout, border: Color, fill: Color) =
+    inherit StaticWidget(NodeType.None)
 
-        let w, h = measure callout
+    let w, h = Callout.measure callout
 
-        member val ContentColor = Colors.text with get, set
+    new(callout: Callout) = CalloutCard(callout, Colors.cyan_accent, Colors.cyan.O3)
 
-        override this.Draw() =
+    member val ContentColor = Colors.text with get, set
 
-            Render.border Style.PADDING this.Bounds border
-            Render.rect this.Bounds fill
+    override this.Draw() =
 
-            draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)
+        Render.border Style.PADDING this.Bounds border
+        Render.rect this.Bounds fill
 
-        override this.Update(elapsed_ms, moved) =
-            base.Update(elapsed_ms, moved)
-            update (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
+        Callout.draw (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, this.ContentColor, callout)
 
-        interface IHeight with
-            member _.Height = h
+    override this.Update(elapsed_ms, moved) =
+        base.Update(elapsed_ms, moved)
+        Callout.update (this.Bounds.Left, this.Bounds.CenterY - h * 0.5f, w, h, callout)
 
-        interface IWidth with
-            member _.Width = w
+    interface IHeight with
+        member _.Height = h
 
-    let frame (callout: Callout) (pos: float32 * float32 -> Position) : Card =
-        let c = Card(callout, Colors.cyan_accent, Colors.cyan.O3)
-        c.Position <- pos ((c :> IWidth).Width, (c :> IHeight).Height)
-        c
+    interface IWidth with
+        member _.Width = w
 
-type CalloutCard = Callout.Card
+[<Extension>]
+type CalloutCardExtensions =
+
+    [<Extension>]
+    static member Position (card: CalloutCard, position: float32 * float32 -> Position) : CalloutCard =
+        card.Position <- position((card :> IWidth).Width, (card :> IHeight).Height)
+        card

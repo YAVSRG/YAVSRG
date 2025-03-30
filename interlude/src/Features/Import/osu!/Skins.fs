@@ -69,13 +69,13 @@ module Skins =
                         Menu.Back()
                 )
                 .Pos(if existing_folder.IsSome then 10 else 5)
-            |+ Callout.frame
-                (Callout.Normal
+            |+ CalloutCard(
+                Callout.Normal
                     .Icon(Icons.INFO)
                     .Title(%"osu_skin_import.disclaimer.title")
                     .Body(%"osu_skin_import.disclaimer.body")
-                )
-                (fun (w, h) -> page_position(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
+            )
+                .Pos(15)
             :> Widget
 
         override this.Title = ini.General.Name

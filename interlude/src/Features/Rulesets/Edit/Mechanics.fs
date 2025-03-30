@@ -157,11 +157,13 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
                     .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
                     .Pos(15),
-                (
-                    Callout.frame
-                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.head_judgement_or").Body(%"rulesets.mechanics.head_judgement_or.desc"))
-                        (fun (w, h) -> page_position(18, 5, PageWidth.Custom w))
+                CalloutCard(
+                    Callout.Normal
+                        .Icon(Icons.INFO)
+                        .Title(%"rulesets.mechanics.head_judgement_or")
+                        .Body(%"rulesets.mechanics.head_judgement_or.desc")
                 )
+                    .Pos(18)
             )
             // just require hold
             .WithConditional(
@@ -170,11 +172,13 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 PageSetting(%"rulesets.mechanics.release_window", NumberEntry.Create(release_window, "ms"))
                     .Help(Help.Info("rulesets.mechanics.release_window"))
                     .Pos(9),
-                (
-                    Callout.frame
-                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.just_require_hold").Body(%"rulesets.mechanics.just_require_hold.desc"))
-                        (fun (w, h) -> page_position(12, 5, PageWidth.Custom w))
+                CalloutCard(
+                    Callout.Normal
+                        .Icon(Icons.INFO)
+                        .Title(%"rulesets.mechanics.just_require_hold")
+                        .Body(%"rulesets.mechanics.just_require_hold.desc")
                 )
+                    .Pos(12)
             )
             // judge releases separately
             .WithConditional(
@@ -185,11 +189,13 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                     .Pos(9),
                 PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.release_windows(ruleset.Value.Judgements, release_timing_windows).Show())
                     .Pos(11),
-                (
-                    Callout.frame
-                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_separately").Body(%"rulesets.mechanics.judge_releases_separately.desc"))
-                        (fun (w, h) -> page_position(14, 6, PageWidth.Custom w))
+                CalloutCard(
+                    Callout.Normal
+                        .Icon(Icons.INFO)
+                        .Title(%"rulesets.mechanics.judge_releases_separately")
+                        .Body(%"rulesets.mechanics.judge_releases_separately.desc")
                 )
+                    .Pos(14)
             )
             // judge releases only
             .WithConditional(
@@ -200,11 +206,13 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                     .Pos(9),
                 PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.notes_windows_as_release_windows(ruleset).Show())
                     .Pos(11),
-                (
-                    Callout.frame
-                        (Callout.Normal.Icon(Icons.INFO).Title(%"rulesets.mechanics.judge_releases_only").Body(%"rulesets.mechanics.judge_releases_only.desc"))
-                        (fun (w, h) -> page_position(14, 5, PageWidth.Custom w))
+                CalloutCard(
+                    Callout.Normal
+                        .Icon(Icons.INFO)
+                        .Title(%"rulesets.mechanics.judge_releases_only")
+                        .Body(%"rulesets.mechanics.judge_releases_only.desc")
                 )
+                    .Pos(14)
             )
 
         :> Widget

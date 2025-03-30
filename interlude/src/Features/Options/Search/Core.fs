@@ -42,12 +42,13 @@ module Search =
                 .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
                 .With(
                     EmptyState(Icons.SEARCH, %"options.search.no_results"),
-                    Callout.frame(
+                    CalloutCard(
                         Callout.Normal
                             .Icon(Icons.SEARCH)
                             .Title(%"options.search.no_results.title")
                             .Body(%"options.search.no_results.body")
-                    ) (fun (w, h) -> Position.ShrinkY(PAGE_MARGIN_Y).SliceB(h).SliceX(w))
+                    )
+                        .Position(fun (w, h) -> Position.ShrinkY(PAGE_MARGIN_Y).SliceB(h).SliceX(w))
                 )
         else
             NavigationContainer.Column()

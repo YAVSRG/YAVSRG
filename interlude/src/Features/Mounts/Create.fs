@@ -88,8 +88,8 @@ type private CreateMountPage(game: MountedGameType, setting: Setting<MountedChar
             fun () -> FileDrop.on_file_drop.Value auto_detect_location
         )
             .Disabled(not folder_detected)
-            .Pos(6)
-        |+ Callout.frame info (fun (w, h) -> page_position (0, 5, PageWidth.Custom w))
+            .Pos(7)
+        |+ CalloutCard(info).Pos(0)
         :> Widget
 
     override this.Title = %"mount.create"

@@ -52,7 +52,7 @@ type ConfirmUnlinkedSongsImport(path: string) =
                     Menu.Back()
             )
             .Pos(11)
-        |+ Callout.frame info (fun (w, h) -> Position.Box(0.0f, 0.0f, 0.0f, -10.0f, w, h))
+        |+ CalloutCard(info).Position(fun (w, h) -> Position.Box(0.0f, 0.0f, 0.0f, -10.0f, w, h))
         :> Widget
 
     override this.Title = %"unlinkedsongsimport"

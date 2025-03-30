@@ -60,13 +60,13 @@ module Skins =
                         Menu.Back()
                 )
                 .Pos(if existing_folder.IsSome then 10 else 5)
-            |+ Callout.frame
-                (Callout.Normal
+            |+ CalloutCard(
+                Callout.Normal
                     .Icon(Icons.INFO)
                     .Title(%"etterna_skin_import.disclaimer.title")
                     .Body(%"etterna_skin_import.disclaimer.body")
-                )
-                (fun (w, h) -> page_position(15, PAGE_BOTTOM - 15, PageWidth.Custom w))
+            )
+                .Pos(15)
             :> Widget
 
         override this.Title = Path.GetFileName source_path
