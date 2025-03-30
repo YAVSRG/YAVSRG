@@ -126,40 +126,11 @@ module private FrameTimeStrategies =
 
     (* THREAD SLEEPING STRATEGIES *)
 
-    let NATIVE_SLEEP_TRUST_THRESHOLD_MS =
-        if OperatingSystem.IsWindows() then 1.0 else 0.125
-
     let spin_wait = SpinWait()
+    let sleep_accurate (timer: Stopwatch, until: float) =
 
-    /// Sleep the thread until a stopwatch time is reached
-    /// Strategy is to natively sleep the thread as far as it can be trusted, then spin-wait until it's time
-    /// Native sleep can still wake up much later if threads are busy
-    /// CPU intensive
-    /// Works on all operating systems
-    let sleep_accurate: Stopwatch * float -> unit =
-        if OperatingSystem.IsWindows() then
-
-            fun (timer: Stopwatch, until: float) ->
-                let delta = until - timer.Elapsed.TotalMilliseconds
-
-                if delta > NATIVE_SLEEP_TRUST_THRESHOLD_MS then
-                    timeBeginPeriod 1 |> ignore
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delta - NATIVE_SLEEP_TRUST_THRESHOLD_MS))
-                    timeEndPeriod 1 |> ignore
-
-                while timer.Elapsed.TotalMilliseconds < until do
-                    spin_wait.SpinOnce -1
-
-        else
-
-            fun (timer: Stopwatch, until: float) ->
-                let delta = until - timer.Elapsed.TotalMilliseconds
-
-                if delta > NATIVE_SLEEP_TRUST_THRESHOLD_MS then
-                    Thread.Sleep(TimeSpan.FromMilliseconds(delta - NATIVE_SLEEP_TRUST_THRESHOLD_MS))
-
-                while timer.Elapsed.TotalMilliseconds < until do
-                    spin_wait.SpinOnce -1
+        while timer.Elapsed.TotalMilliseconds < until do
+            spin_wait.SpinOnce -1
 
     module VBlankThread =
 
