@@ -110,7 +110,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         base.Init(parent)
 
     override this.Draw() =
-        Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
+        Render.rect (this.Bounds.Translate(Style.PADDING * 2.0f, Style.PADDING * 2.0f)) Colors.black
         Background.draw (this.Bounds, Colors.white, 2.0f)
         Render.rect_c this.Bounds (Quad.gradient_top_to_bottom (!*Palette.DARKER.O3) Colors.shadow_2.O3)
         base.Draw()
@@ -121,25 +121,44 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         let judgement_counts = (!stats).Judgements
         let judgements = score_info.Ruleset.Judgements |> Array.indexed
         let h = counters.Height / float32 judgements.Length
-        let mutable y = counters.Top
+        let mutable y = 0.0f
 
         for i, j in judgements do
-            let b = Rect.FromEdges(counters.Left, y, counters.Right, y + h)
-            Render.rect b j.Color.O1
+            let percentage_of_total = if (!stats).JudgementCount = 0 then 0.0f else float32 judgement_counts.[i] / float32 (!stats).JudgementCount
 
-            Render.rect
-                (b.SliceL(
-                    counters.Width
-                    * (float32 judgement_counts.[i] / float32 (!stats).JudgementCount)
-                ))
-                j.Color.O2
+            let judgement_box = counters.SliceT(y, h)
+            Render.rect judgement_box j.Color.O1
+            Render.rect (judgement_box.SlicePercentL(percentage_of_total)) j.Color.O2
+
+            let padding = Style.PADDING + 6.0f - float32 judgement_counts.Length |> max 0.0f
 
             Text.fill_b (
                 Style.font,
                 sprintf "%s: %i" j.Name judgement_counts.[i],
-                b.Shrink(10.0f, 2.0f),
+                judgement_box.Shrink(Style.PADDING * 2.0f, padding).ShrinkR(150.0f),
                 (if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text),
                 Alignment.LEFT
             )
+
+            Text.fill_b (
+                Style.font,
+                sprintf "%.2f%%" (percentage_of_total * 100.0f),
+                judgement_box.Shrink(Style.PADDING * 2.0f, if show_more_info.Value then padding * 2.0f else padding),
+                (if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text),
+                Alignment.RIGHT
+            )
+
+            if show_more_info.Value && i > 0 then
+                let ratio =
+                    if judgement_counts.[i] = 0 then sprintf "%i : 0" judgement_counts.[i - 1]
+                    else sprintf "%.1f : 1" (float32 judgement_counts.[i - 1] / float32 judgement_counts.[i])
+
+                Text.fill_b (
+                    Style.font,
+                    ratio,
+                    judgement_box.TranslateY(-h * 0.5f).Shrink(Style.PADDING * 2.0f, Style.PADDING + padding * 2.0f),
+                    (if (!stats).ColumnFilterApplied then (Colors.green_accent.O3, Colors.green_shadow) else (Colors.white.O3, Colors.shadow_2)),
+                    Alignment.RIGHT
+                )
 
             y <- y + h
