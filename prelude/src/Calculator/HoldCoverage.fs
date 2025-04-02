@@ -38,21 +38,24 @@ module HoldCoverage =
                 back_index <- back_index + 1
 
             for k = 0 to keys - 1 do
-                start <- time - window
-                in_hold <- false
-                for j = back_index to front_index do
-                    if notes.[j].Data.[k] = NoteType.HOLDHEAD then
-                        start <- max start notes.[j].Time |> min (time + window)
-                        in_hold <- true
-                    elif notes.[j].Data.[k] = NoteType.HOLDBODY then
-                        output.[i] <- output.[i] + float32 (min (time + window) notes.[j].Time - start)
-                        start <- max start notes.[j].Time |> min (time + window)
-                        in_hold <- true
-                    elif notes.[j].Data.[k] = NoteType.HOLDTAIL then
-                        output.[i] <- output.[i] + float32 (notes.[j].Time - shorten - start)
-                        in_hold <- false
-                if in_hold then
-                    output.[i] <- output.[i] + float32 (time + window - start)
+
+                if holds_in_view.[k] > 0 then
+
+                    start <- time - window
+                    in_hold <- false
+                    for j = back_index to front_index do
+                        if notes.[j].Data.[k] = NoteType.HOLDHEAD then
+                            start <- max start notes.[j].Time |> min (time + window)
+                            in_hold <- true
+                        elif notes.[j].Data.[k] = NoteType.HOLDBODY then
+                            output.[i] <- output.[i] + float32 (min (time + window) notes.[j].Time - start)
+                            start <- max start notes.[j].Time |> min (time + window)
+                            in_hold <- true
+                        elif notes.[j].Data.[k] = NoteType.HOLDTAIL then
+                            output.[i] <- output.[i] + float32 (notes.[j].Time - shorten - start)
+                            in_hold <- false
+                    if in_hold then
+                        output.[i] <- output.[i] + float32 (time + window - start)
 
             output.[i] <- output.[i] / 2.0f / float32 window / float32 keys
 
