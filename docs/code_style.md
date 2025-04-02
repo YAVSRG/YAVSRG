@@ -49,7 +49,6 @@ There will soon be a script to run automatic indentation/formatting on all code 
 So basically don't worry about or pay much mind to your formatting as it will be automatically corrected
 
 Top-level functions inside modules must have type annotations on all arguments and the return type  
-The return type may be omitted if it's `unit`
 ```fsharp
 module Difficulty =
 
@@ -62,9 +61,9 @@ module Difficulty =
 Nested functions may not need types if they are short and clear, but lean towards also adding annotations anyway
 
 Methods on classes must have type annotations on all parameters and the return type  
-The return type may be omitted if it's `unit` or the same as the class itself
+`.Draw()` and `.Update(elapsed_ms, moved)` are excepted from this for the time being
 
-Methods should avoid currying and have a single bracketed arguments list
+Methods should never use currying and instead have a single bracketed arguments list
 ```fsharp
 type ScoreProcessor(...) =
 
@@ -107,6 +106,20 @@ let caller () =
 	match beatmap_from_file "my_file.osu" with
 	| Ok beatmap -> ...
 	| Error exn -> Logging.Error("Error while trying to do ...: ...")
+```
+
+For consistency, array subscripting should always use a `.`, even where not having it would parse due to F#'s idiotic subscript parsing rules  
+This intentionally ignores [the recommendation here](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/arrays#access-elements)  
+```fsharp
+my_array.[i] // OK
+my_array[i] // parses but not OK
+
+my_2d_array.[i].[j] // OK
+my_2d_array[i].[j] // parses but not OK
+my_2d_array[i][j] // does not parse
+
+my_string.Split().[0] // OK
+my_string.Split()[0] // does not parse
 ```
 
 ### Development principles
