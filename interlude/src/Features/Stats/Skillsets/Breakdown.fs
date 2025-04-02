@@ -6,11 +6,13 @@ open Prelude.Calculator
 open Prelude.Calculator.Patterns
 open Prelude.Data.User.Stats
 open Interlude.UI
+open Interlude.Features.Gameplay
 
 type SkillBreakdown() =
     inherit Container(NodeType.None)
 
-    let keymode = Setting.simple 4
+    let default_keymode = SelectedChart.keymode() |> int
+    let keymode = Setting.simple default_keymode
     let skill = Setting.simple Jacks
     let source = Setting.simple AllTime
 
@@ -24,14 +26,10 @@ type SkillBreakdown() =
         let available_keymodes =
             seq {
                 for i = 3 to 10 do
-                    if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
+                    if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default || i = default_keymode then
                         yield i
             }
             |> Array.ofSeq
-
-        let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
-
-        keymode.Value <- available_keymodes.[0]
 
         refresh_graph()
 

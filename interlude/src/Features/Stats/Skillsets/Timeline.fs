@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude.Calculator
 open Prelude.Data.User.Stats
 open Interlude.UI
+open Interlude.Features.Gameplay
 
 type SkillTimeline() =
     inherit Container(NodeType.None)
@@ -15,23 +16,22 @@ type SkillTimeline() =
 
     let day_range = Animation.Fade(90.0f)
     let day_offset = Animation.Fade(0.0f)
-    let keymode = Setting.simple 4
+
+    let default_keymode = SelectedChart.keymode() |> int
+    let keymode = Setting.simple default_keymode
 
     let refresh_graph() =
         graph_container.Current <- SkillTimelineGraph(keymode.Value, day_range, day_offset)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         let available_keymodes =
             seq {
                 for i = 3 to 10 do
-                    if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default then
+                    if TOTAL_STATS.KeymodeSkills.[i - 3] <> KeymodeSkillBreakdown.Default || i = default_keymode then
                         yield i
             }
             |> Array.ofSeq
 
-        let available_keymodes = if available_keymodes.Length = 0 then [|4|] else available_keymodes
-
-        keymode.Value <- available_keymodes.[0]
         refresh_graph()
 
         let keymode_switcher =
@@ -81,12 +81,14 @@ type SkillTimeline() =
                 .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(550.0f).SliceR(100.0f))
 
         this
-        |+ keymode_switcher
-        |+ zoom_in
-        |+ zoom_out
-        |+ show_newer
-        |+ show_older
-        |* graph_container
+            .Add(
+                keymode_switcher,
+                zoom_in,
+                zoom_out,
+                show_newer,
+                show_older,
+                graph_container
+            )
         base.Init parent
 
     member this.Switch(k: int) =
