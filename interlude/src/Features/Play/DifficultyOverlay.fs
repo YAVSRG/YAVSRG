@@ -35,6 +35,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         |> Array.mapi (fun i nr -> Array.map (Performance.scale_note accuracy_timeline.[i] difficulty.Variety.[i]) nr)
     let performance_strains = Strain.calculate_finger_strains (state.Scoring.Rate, chart.Notes) performance_notes
     let performance_rating = Difficulty.weighted_overall_difficulty (performance_strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
+    let ln_coverage = HoldCoverage.calculate_coverage (chart.Keys, chart.Notes, state.Scoring.Rate)
 
     let first_note = chart.FirstNote
     let mutable seek = 0
@@ -168,6 +169,14 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
                 peek <- peek - 1
         }
 
+    let ln_coverage =
+        seq {
+            let mutable peek = seek
+            while peek >= 0 do
+                yield (ln_coverage.[peek]) * 201.0f
+                peek <- peek - 1
+        }
+
     override this.Draw() =
         let now =
             state.CurrentChartTime() +
@@ -192,6 +201,8 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_performance_data 400.0f Colors.blue performance_strains
         Text.draw(Style.font, "Accuracy", 20.0f, 200.0f, 570.0f, Colors.white)
         draw_performance_data 600.0f Colors.yellow_accent accuracies
+        Text.draw(Style.font, "Hold coverage", 20.0f, 200.0f, 770.0f, Colors.white)
+        draw_performance_data 800.0f Colors.cyan_accent.O3 ln_coverage
 
         Text.draw(Style.font, sprintf "Variety/Tech: %.2f" difficulty.Variety.[peek], 20.0f, this.Bounds.Right - 200.0f, 170.0f, Colors.white)
         Text.draw(Style.font, sprintf "Star rating: %.2f" difficulty.Overall, 20.0f, this.Bounds.Right - 400.0f, 170.0f, Colors.white)
