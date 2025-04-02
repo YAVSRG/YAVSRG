@@ -67,6 +67,7 @@
     <Compile Include="Calculator\Utils.fs" />
     <Compile Include="Calculator\Notes.fs" />
     <Compile Include="Calculator\Variety.fs" />
+    <Compile Include="Calculator\HoldCoverage.fs" />
     <Compile Include="Calculator\Strain.fs" />
     <Compile Include="Calculator\Difficulty.fs" />
     <Compile Include="Calculator\Performance.fs" />
