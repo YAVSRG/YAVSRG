@@ -259,7 +259,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
-        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
+        let inline draw_tail_using_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
             let clip_percent = (clip - pos) / note_height
 
             let quad_clip_correction (q: Quad) : Quad =
@@ -286,9 +286,34 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (
                     Sprite.pick_texture
                         (animation.Loops, color)
-                        (if noteskin_config.UseHoldTailTexture then holdtail else holdhead)
+                        holdtail
                     |> fun x -> x.Transform(quad_clip_correction)
                 )
+
+        let inline draw_tail_using_head (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
+            let pos = max (clip - note_height * 0.5f) pos
+
+            Render.tex_quad
+                (
+                    (
+                        Rect.FromEdges(
+                            left + column_positions.[k],
+                            pos,
+                            left + column_positions.[k] + note_height,
+                            pos + note_height
+                        )
+                        |> scroll_direction_transform bottom
+                    ).AsQuad
+                    |> hold_tail_transform k
+                )
+                tint.AsQuad
+                (
+                    Sprite.pick_texture
+                        (animation.Loops, color)
+                        holdhead
+                )
+
+        let draw_tail = if noteskin_config.UseHoldTailTexture then draw_tail_using_tail else draw_tail_using_head
 
         // CALCULATE TIME + SV STUFF
 
