@@ -163,15 +163,15 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member this.SendReplayData (timestamp: float32, data: byte array) = client.Send(Upstream.PLAY_DATA (timestamp, data))
     member this.FinishPlaying() = client.Send(Upstream.FINISH_PLAYING false)
     member this.AbandonPlaying() = client.Send(Upstream.FINISH_PLAYING true)
-    member this.SelectChart (cc: ChartMeta, rate: Rate, mods: ModState) =
+    member this.SelectChart (chart_meta: ChartMeta, rate: Rate, mods: ModState) =
         if this.YouAreHost then
             client.Send(
                 Upstream.SELECT_CHART
                     {
-                        Hash = cc.Hash
-                        Artist = cc.Artist
-                        Title = cc.Title
-                        Creator = cc.Creator
+                        Hash = chart_meta.Hash
+                        Artist = chart_meta.Artist
+                        Title = chart_meta.Title
+                        Creator = chart_meta.Creator
                         Rate = rate
                         Mods = Map.toArray mods
                     }

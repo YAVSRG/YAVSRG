@@ -215,14 +215,14 @@ module Upload =
 
     let upload_folder (folder_name: string) =
         seq {
-            for cc in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
+            for chart_meta in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
                 async {
-                    match ChartDatabase.get_chart cc.Hash interlude_chart_db with
+                    match ChartDatabase.get_chart chart_meta.Hash interlude_chart_db with
                     | Ok chart ->
-                        match! upload_chart cc chart with
-                        | Ok () -> Logging.Debug "Uploaded '%s'" cc.Title
-                        | Error reason -> Logging.Warn "Upload of '%s' failed: %s" cc.Title reason
-                    | Error reason -> Logging.Error "Loading '%s' from disk failed: %s" cc.Title reason
+                        match! upload_chart chart_meta chart with
+                        | Ok () -> Logging.Debug "Uploaded '%s'" chart_meta.Title
+                        | Error reason -> Logging.Warn "Upload of '%s' failed: %s" chart_meta.Title reason
+                    | Error reason -> Logging.Error "Loading '%s' from disk failed: %s" chart_meta.Title reason
                 }
         }
         |> fun upload_tasks -> Async.Parallel(upload_tasks, UPLOAD_POOL_CONCURRENCY)

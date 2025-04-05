@@ -22,23 +22,23 @@ module Tree =
     let private find_selected_chart_in_tree () : unit =
         match SelectedChart.CACHE_DATA with
         | None -> ()
-        | Some current_cc ->
+        | Some chart_meta ->
 
         seq {
             for group in groups do
                 for chart in group.Items do
-                    if chart.Chart.Hash = current_cc.Hash && chart.Context.Matches SelectedChart.LIBRARY_CTX then
+                    if chart.Chart.Hash = chart_meta.Hash && chart.Context.Matches SelectedChart.LIBRARY_CTX then
                         yield chart.Context, group
             for group in groups do
                 for chart in group.Items do
-                    if chart.Chart.Hash = current_cc.Hash && chart.Context.SoftMatches SelectedChart.LIBRARY_CTX then
+                    if chart.Chart.Hash = chart_meta.Hash && chart.Context.SoftMatches SelectedChart.LIBRARY_CTX then
                         yield chart.Context, group
         }
         |> Seq.tryHead
         |> function
         | Some (ctx, group) ->
             SelectedChart.LIBRARY_CTX <- ctx
-            selected_chart <- current_cc.Hash
+            selected_chart <- chart_meta.Hash
             selected_group <- group.Name, group.Context
             expanded_group <- selected_group
             scroll_to <- ScrollTo.Chart
@@ -74,10 +74,10 @@ module Tree =
             let group_name, group = library_groups.[0]
 
             if group.Charts.Length = 1 then
-                let cc, context = group.Charts.[0]
+                let chart_meta, context = group.Charts.[0]
 
-                if cc.Hash <> selected_chart then
-                    switch_chart (cc, context, group_name, group.Context)
+                if chart_meta.Hash <> selected_chart then
+                    switch_chart (chart_meta, context, group_name, group.Context)
         // build groups ui
         last_item <- None
 
@@ -85,8 +85,8 @@ module Tree =
             library_groups
             |> Seq.map (fun (group_name, group) ->
                 group.Charts
-                |> Seq.map (fun (cc, context) ->
-                    let i = ChartItem(group_name, group.Context, cc, context)
+                |> Seq.map (fun (chart_meta, context) ->
+                    let i = ChartItem(group_name, group.Context, chart_meta, context)
                     last_item <- Some i
                     i
                 )
@@ -217,7 +217,7 @@ module Tree =
             | None ->
 
             match SelectedChart.CACHE_DATA with
-            | Some cc -> ChartContextMenu(cc, SelectedChart.LIBRARY_CTX).Show()
+            | Some chart_meta -> ChartContextMenu(chart_meta, SelectedChart.LIBRARY_CTX).Show()
             | _ -> ()
         elif (%%"clear_multi_select").Pressed() then multi_selection <- None
         else

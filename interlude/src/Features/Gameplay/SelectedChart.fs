@@ -48,17 +48,17 @@ module SelectedChart =
     let _rate = Setting.rate 1.0f<rate>
     let _selected_mods = options.SelectedMods
 
-    let private format_duration (cc: ChartMeta option) =
-        match cc with
-        | Some cc -> cc.Length
+    let private format_duration (chart_meta: ChartMeta option) =
+        match chart_meta with
+        | Some chart_meta -> chart_meta.Length
         | None -> 0.0f<ms>
         |> fun x -> x / _rate.Value
         |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
         |> fun (x, y) -> sprintf "%s %i:%02i" Icons.CLOCK x y
 
-    let private format_bpm (cc: ChartMeta option) =
-        match cc with
-        | Some cc -> sprintf "%s %i" Icons.MUSIC (float32 cc.BPM * float32 _rate.Value |> round |> int)
+    let private format_bpm (chart_meta: ChartMeta option) =
+        match chart_meta with
+        | Some chart_meta -> sprintf "%s %i" Icons.MUSIC (float32 chart_meta.BPM * float32 _rate.Value |> round |> int)
         | None -> sprintf "%s 120" Icons.MUSIC
 
     let private format_notecounts (chart: ModdedChart) =
@@ -140,9 +140,9 @@ module SelectedChart =
         { new Async.CancelQueueSeq<LoadRequest, unit -> unit>() with
             override this.Process(req) =
                 match req with
-                | Load(cc, play_audio, rate, mods) ->
+                | Load(chart_meta, play_audio, rate, mods) ->
                     seq {
-                        match ChartDatabase.get_chart cc.Hash Content.Charts with
+                        match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
                         | Error reason ->
 
                             Logging.Error "Couldn't load chart: %s" reason
@@ -160,18 +160,18 @@ module SelectedChart =
                                     chart_change_failed.Trigger ()
                         | Ok chart ->
 
-                        Background.load cc.Background.Path
-                        let save_data = UserDatabase.get_chart_data cc.Hash Content.UserData
+                        Background.load chart_meta.Background.Path
+                        let save_data = UserDatabase.get_chart_data chart_meta.Hash Content.UserData
 
                         yield
                             fun () ->
                                 CHART <- Some chart
 
                                 Song.change (
-                                    cc.Audio.Path,
+                                    chart_meta.Audio.Path,
                                     save_data.Offset,
                                     rate,
-                                    (cc.PreviewTime, chart.LastNote),
+                                    (chart_meta.PreviewTime, chart.LastNote),
                                     (
                                         if play_audio then
                                             if Screen.current_type = ScreenType.MainMenu then
@@ -275,14 +275,14 @@ module SelectedChart =
 
     let keymode () : Keymode =
         match CACHE_DATA with
-        | Some cc -> cc.Keys |> enum
+        | Some chart_meta -> chart_meta.Keys |> enum
         | None -> Keymode.``4K``
 
-    let change (cc: ChartMeta, ctx: LibraryContext, auto_play_audio: bool) : unit =
+    let change (chart_meta: ChartMeta, ctx: LibraryContext, auto_play_audio: bool) : unit =
         // todo: show a one-time warning if chart loading takes over 1 second
-        CACHE_DATA <- Some cc
+        CACHE_DATA <- Some chart_meta
         LIBRARY_CTX <- ctx
-        options.CurrentChart.Value <- cc.Hash
+        options.CurrentChart.Value <- chart_meta.Hash
 
         CHART <- None
         SAVE_DATA <- None
@@ -295,7 +295,7 @@ module SelectedChart =
 
         chart_change_started.Trigger
             {
-                ChartMeta = cc
+                ChartMeta = chart_meta
                 LibraryContext = LIBRARY_CTX
             }
 
@@ -303,7 +303,7 @@ module SelectedChart =
         FMT_BPM <- format_bpm CACHE_DATA
         on_song_load_succeeded <- []
 
-        chart_loader.Request(Load(cc, auto_play_audio, _rate.Value, _selected_mods.Value))
+        chart_loader.Request(Load(chart_meta, auto_play_audio, _rate.Value, _selected_mods.Value))
 
     let update () : unit =
         if CACHE_DATA.IsSome then
@@ -372,9 +372,9 @@ module SelectedChart =
     let private presets_on_chart_changed =
         let mutable previous_keymode = None
 
-        fun (cc: ChartMeta) ->
-            if previous_keymode <> Some cc.Keys then Presets.keymode_changed cc.Keys
-            previous_keymode <- Some cc.Keys
+        fun (chart_meta: ChartMeta) ->
+            if previous_keymode <> Some chart_meta.Keys then Presets.keymode_changed chart_meta.Keys
+            previous_keymode <- Some chart_meta.Keys
 
     let rate : Setting.Bounded<float32<rate>> =
         _rate
@@ -416,7 +416,7 @@ module SelectedChart =
     let init () =
 
         match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
-        | Some cc -> change (cc, LibraryContext.None, true)
+        | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
         | None ->
             match
                 Suggestion.get_random
@@ -429,7 +429,7 @@ module SelectedChart =
                         UserDatabase = Content.UserData
                     }
             with
-            | Some cc -> change (cc, LibraryContext.None, true)
+            | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
             | None ->
                 Logging.Debug "No charts installed (or loading failed twice)"
                 Background.load None

@@ -19,12 +19,12 @@ module BulkActions =
             fun () ->
                 // delete charts selected from packs, just from their packs
                 charts
-                |> Seq.choose (function cc, LibraryContext.Pack p -> Some (cc, p) | _ -> None)
+                |> Seq.choose (function chart_meta, LibraryContext.Pack p -> Some (chart_meta, p) | _ -> None)
                 |> Seq.groupBy snd
                 |> Seq.iter (fun (pack, charts_in_pack) -> ChartDatabase.delete_many_from_pack (charts_in_pack |> Seq.map fst) pack Content.Charts)
 
                 // delete charts picked by custom grouping, from all packs
-                ChartDatabase.delete_many (charts |> Seq.filter (function cc, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst) Content.Charts
+                ChartDatabase.delete_many (charts |> Seq.filter (function chart_meta, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst) Content.Charts
 
                 LevelSelect.refresh_all ()
                 Menu.Back()
@@ -38,8 +38,8 @@ module BulkActions =
             fun _ options ->
                 let loaded_charts =
                     seq {
-                        for cc, _ in charts do
-                            yield ChartDatabase.get_chart cc.Hash Content.Library.Charts, cc
+                        for chart_meta, _ in charts do
+                            yield ChartDatabase.get_chart chart_meta.Hash Content.Library.Charts, chart_meta
                     }
                 OsuExport.bulk_export loaded_charts options
         )
@@ -75,14 +75,14 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
-                    for cc, ctx in charts do
+                    for chart_meta, ctx in charts do
                         match ctx with
                         | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(cc, data.Rate.Value, data.Mods.Value)
-                        | _ -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for cc, _ in charts do f.Add cc |> ignore
+                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),
@@ -110,7 +110,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
             [ (Seq.length charts).ToString(); folder ] %> "bulk_actions.confirm_bulk_remove",
             fun () ->
                 match Content.Library.Collections.GetFolder folder with
-                | Some f -> for cc, _ in charts do f.Remove cc |> ignore
+                | Some f -> for chart_meta, _ in charts do f.Remove chart_meta |> ignore
                 | _ -> ()
                 LevelSelect.refresh_all ()
                 Menu.Back()
@@ -133,14 +133,14 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
-                    for cc, ctx in charts do
+                    for chart_meta, ctx in charts do
                         match ctx with
                         | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(cc, data.Rate.Value, data.Mods.Value)
-                        | _ -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for cc, _ in charts do f.Add cc |> ignore
+                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),
@@ -197,14 +197,14 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
-                    for cc, ctx in charts do
+                    for chart_meta, ctx in charts do
                         match ctx with
                         | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(cc, data.Rate.Value, data.Mods.Value)
-                        | _ -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for cc, _ in charts do f.Add cc |> ignore
+                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),
@@ -243,14 +243,14 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
             (fun (_, collection) ->
                 match collection with
                 | Playlist p ->
-                    for cc, ctx in charts do
+                    for chart_meta, ctx in charts do
                         match ctx with
                         | LibraryContext.Playlist (_, _, data) ->
-                            p.Add(cc, data.Rate.Value, data.Mods.Value)
-                        | _ -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+                            p.Add(chart_meta, data.Rate.Value, data.Mods.Value)
+                        | _ -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
                         |> ignore
                 | Folder f ->
-                    for cc, _ in charts do f.Add cc |> ignore
+                    for chart_meta, _ in charts do f.Add chart_meta |> ignore
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),

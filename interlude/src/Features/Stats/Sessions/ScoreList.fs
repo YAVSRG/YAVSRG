@@ -176,10 +176,10 @@ module private ScoreList =
                 seq {
                     for chart_hash, score in UserDatabase.get_scores_between start_time end_time Content.UserData do
                         match ChartDatabase.get_meta_cached chart_hash Content.Charts with
-                        | Some cc ->
+                        | Some chart_meta ->
                             match ChartDatabase.get_chart chart_hash Content.Charts with
                             | Ok chart ->
-                                let score_info = ScoreInfo.from_score cc chart ruleset score
+                                let score_info = ScoreInfo.from_score chart_meta chart ruleset score
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())

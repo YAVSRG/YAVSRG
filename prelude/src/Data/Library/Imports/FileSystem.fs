@@ -89,7 +89,7 @@ module Imports =
                         let after_hash = Chart.hash with_pruned_svs
                         if before_hash <> after_hash then
                             match ChartDatabase.get_meta before_hash chart_db with
-                            | Some cc -> ChartDatabase.delete cc chart_db
+                            | Some chart_meta -> ChartDatabase.delete chart_meta chart_db
                             | None -> ()
                             if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
                                 UserDatabase.transfer_scores before_hash after_hash user_db

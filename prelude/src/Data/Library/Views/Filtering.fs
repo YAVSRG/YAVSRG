@@ -98,42 +98,42 @@ type Filter =
     member internal this.Compile : ChartMeta -> bool =
         seq {
             match this.Keymode with
-            | Some k -> yield fun cc -> cc.Keys = k
+            | Some k -> yield fun chart_meta -> chart_meta.Keys = k
             | None -> ()
 
             match this.LengthMin with
-            | Some min_length -> yield fun cc -> cc.Length / 1000.0f<ms> >= min_length
+            | Some min_length -> yield fun chart_meta -> chart_meta.Length / 1000.0f<ms> >= min_length
             | None -> ()
             match this.LengthMax with
-            | Some max_length -> yield fun cc -> cc.Length / 1000.0f<ms> <= max_length
+            | Some max_length -> yield fun chart_meta -> chart_meta.Length / 1000.0f<ms> <= max_length
             | None -> ()
 
             match this.DifficultyMin with
-            | Some min_diff -> yield fun cc -> cc.Rating >= min_diff
+            | Some min_diff -> yield fun chart_meta -> chart_meta.Rating >= min_diff
             | None -> ()
             match this.DifficultyMax with
-            | Some max_diff -> yield fun cc -> cc.Rating <= max_diff
+            | Some max_diff -> yield fun chart_meta -> chart_meta.Rating <= max_diff
             | None -> ()
 
             match this.LNPercentMin with
-            | Some min_pc -> yield fun cc -> cc.Patterns.LNPercent > min_pc
+            | Some min_pc -> yield fun chart_meta -> chart_meta.Patterns.LNPercent > min_pc
             | None -> ()
             match this.LNPercentMax with
-            | Some max_pc -> yield fun cc -> cc.Patterns.LNPercent < max_pc
+            | Some max_pc -> yield fun chart_meta -> chart_meta.Patterns.LNPercent < max_pc
             | None -> ()
 
             match this.SV with
-            | Some false -> yield fun cc -> not (cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
-            | Some true -> yield fun cc -> cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
+            | Some false -> yield fun chart_meta -> not (chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD)
+            | Some true -> yield fun chart_meta -> chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
             | None -> ()
 
             match this.Creator with
-            | Some creator -> yield fun cc -> cc.Creator.Contains(creator, StringComparison.InvariantCultureIgnoreCase)
+            | Some creator -> yield fun chart_meta -> chart_meta.Creator.Contains(creator, StringComparison.InvariantCultureIgnoreCase)
             | None -> ()
 
             if this.PatternTerms.Length <> 0 || this.PatternAntiTerms.Length <> 0 then
-                yield fun cc ->
-                    let report = cc.Patterns
+                yield fun chart_meta ->
+                    let report = chart_meta.Patterns
 
                     let matches (pattern: string) =
                         report.Category.Contains(pattern, StringComparison.OrdinalIgnoreCase)
@@ -142,7 +142,7 @@ type Filter =
                             |> Array.exists (fun f ->
                                 f.SpecificTypes
                                 |> List.exists (fun (p, amount) ->
-                                    amount * f.Amount / cc.Length > 0.1f && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
+                                    amount * f.Amount / chart_meta.Length > 0.1f && p.Contains(pattern, StringComparison.OrdinalIgnoreCase)
                                 )
                             )
                         )
@@ -151,7 +151,7 @@ type Filter =
                     && Array.forall (matches >> not) this.PatternAntiTerms
         }
         |> Array.ofSeq
-        |> fun checks -> (fun (cc: ChartMeta) -> Array.forall (fun f -> f cc) checks)
+        |> fun checks -> (fun (chart_meta: ChartMeta) -> Array.forall (fun f -> f chart_meta) checks)
 
     member this.Apply (charts: ChartMeta seq) =
         Seq.filter this.Compile charts
@@ -231,21 +231,21 @@ type FilteredSearch =
 
         if this.SearchTerms.Length <> 0 || this.SearchAntiTerms.Length <> 0 then
 
-            fun cc ->
-                if not (matches_filter cc) then false else
+            fun chart_meta ->
+                if not (matches_filter chart_meta) then false else
 
                 let s =
-                    (cc.Title
+                    (chart_meta.Title
                         + " "
-                        + cc.Artist
+                        + chart_meta.Artist
                         + " "
-                        + cc.Creator
+                        + chart_meta.Creator
                         + " "
-                        + cc.DifficultyName
+                        + chart_meta.DifficultyName
                         + " "
-                        + (cc.Subtitle |> Option.defaultValue "")
+                        + (chart_meta.Subtitle |> Option.defaultValue "")
                         + " "
-                        + String.concat " " cc.Packs)
+                        + String.concat " " chart_meta.Packs)
                         .ToLowerInvariant()
                 Array.forall (s.Contains : string -> bool) this.SearchTerms
                 && Array.forall (s.Contains >> not : string -> bool) this.SearchAntiTerms

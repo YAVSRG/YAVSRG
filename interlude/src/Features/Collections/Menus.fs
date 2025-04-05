@@ -270,15 +270,15 @@ type ManageCollectionsPage() =
             , false
         )
 
-type AddToCollectionPage(cc: ChartMeta) =
+type AddToCollectionPage(chart_meta: ChartMeta) =
     inherit
         SelectCollectionPage(
             fun (name, collection) ->
-                if CollectionActions.add_to (name, collection, cc) then
+                if CollectionActions.add_to (name, collection, chart_meta) then
                     Menu.Back()
             , fun (_, collection) ->
                 match collection with
-                | Folder f -> f.Contains cc
+                | Folder f -> f.Contains chart_meta
                 | Playlist _ -> false
             , true
         )

@@ -50,23 +50,23 @@ module LevelSelect =
 
         let append_current () =
             match SelectedChart.CACHE_DATA with
-            | Some cc ->
+            | Some chart_meta ->
                 forward_history <- []
-                history <- (cc, SelectedChart.rate.Value) :: history
+                history <- (chart_meta, SelectedChart.rate.Value) :: history
             | None -> ()
 
         let back () =
             if not (Transitions.in_progress()) then
                 match history with
-                | (cc, rate) :: xs ->
+                | (chart_meta, rate) :: xs ->
 
                     match SelectedChart.CACHE_DATA with
-                    | Some cc -> forward_history <- (cc, SelectedChart.rate.Value) :: forward_history
+                    | Some chart_meta -> forward_history <- (chart_meta, SelectedChart.rate.Value) :: forward_history
                     | None -> ()
 
                     history <- xs
                     SelectedChart._rate.Set rate
-                    SelectedChart.change(cc, LibraryContext.None, true)
+                    SelectedChart.change(chart_meta, LibraryContext.None, true)
                 | _ -> ()
 
         let can_go_back() = (List.isEmpty >> not) history
@@ -74,15 +74,15 @@ module LevelSelect =
         let forward () =
             if not (Transitions.in_progress()) then
                 match forward_history with
-                | (cc, rate) :: xs ->
+                | (chart_meta, rate) :: xs ->
 
                     match SelectedChart.CACHE_DATA with
-                    | Some cc -> history <- (cc, SelectedChart.rate.Value) :: history
+                    | Some chart_meta -> history <- (chart_meta, SelectedChart.rate.Value) :: history
                     | None -> ()
 
                     forward_history <- xs
                     SelectedChart._rate.Set rate
-                    SelectedChart.change(cc, LibraryContext.None, true)
+                    SelectedChart.change(chart_meta, LibraryContext.None, true)
                 | _ -> ()
 
         let can_go_forward() = (List.isEmpty >> not) forward_history
@@ -171,9 +171,9 @@ module LevelSelect =
                 }
 
             match Suggestion.get_random filter.Filter ctx with
-            | Some cc ->
+            | Some chart_meta ->
                 History.append_current()
-                SelectedChart.change(cc, LibraryContext.None, true)
+                SelectedChart.change(chart_meta, LibraryContext.None, true)
             | None -> ()
 
         if not (Transitions.in_progress()) then
@@ -193,10 +193,10 @@ module LevelSelect =
                     }
 
                 match Suggestion.get_suggestion ctx with
-                | Some (cc, rate) ->
+                | Some (chart_meta, rate) ->
                     History.append_current()
                     SelectedChart._rate.Value <- rate
-                    SelectedChart.change(cc, LibraryContext.None, true)
+                    SelectedChart.change(chart_meta, LibraryContext.None, true)
                 | None ->
                     true_random_chart()
             else

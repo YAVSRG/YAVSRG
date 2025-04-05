@@ -13,11 +13,11 @@ open Interlude.Features.Collections
 open Interlude.Features.Play
 open Interlude.Features.Export
 
-type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
+type ChartDeleteMenu(chart_meta: ChartMeta, context: LibraryContext, is_submenu: bool) =
     inherit Page()
 
     let delete_from_everywhere() =
-        ChartDatabase.delete cc Content.Charts
+        ChartDatabase.delete chart_meta Content.Charts
         LevelSelect.refresh_all ()
 
         if is_submenu then
@@ -27,25 +27,25 @@ type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
         page_container()
         |+ seq {
             match context with
-            | LibraryContext.Pack p when cc.Packs.Count > 1 ->
+            | LibraryContext.Pack p when chart_meta.Packs.Count > 1 ->
 
                 let delete_from_pack() =
-                    ChartDatabase.delete_from_pack cc p Content.Charts
+                    ChartDatabase.delete_from_pack chart_meta p Content.Charts
                     LevelSelect.refresh_all ()
 
                     if is_submenu then
                         Menu.Back()
 
                 yield PageButton.Once([p] %> "chart.delete.from_pack", fun () -> delete_from_pack(); Menu.Back()).Pos(3)
-                yield PageButton.Once([cc.Packs.Count.ToString()] %> "chart.delete.from_everywhere", fun () -> delete_from_everywhere(); Menu.Back()).Pos(5)
+                yield PageButton.Once([chart_meta.Packs.Count.ToString()] %> "chart.delete.from_everywhere", fun () -> delete_from_everywhere(); Menu.Back()).Pos(5)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(7)
             | _ ->
                 yield PageButton.Once(
-                    (if cc.Packs.Count > 1 then [cc.Packs.Count.ToString()] %> "chart.delete.from_everywhere" else %"confirm.yes"),
+                    (if chart_meta.Packs.Count > 1 then [chart_meta.Packs.Count.ToString()] %> "chart.delete.from_everywhere" else %"confirm.yes"),
                     fun () -> delete_from_everywhere(); Menu.Back()).Pos(3)
                 yield PageButton.Once(%"confirm.no", Menu.Back).Pos(5)
         }
-        |+ Text([ sprintf "%s [%s]" cc.Title cc.DifficultyName ] %> "misc.confirmdelete")
+        |+ Text([ sprintf "%s [%s]" chart_meta.Title chart_meta.DifficultyName ] %> "misc.confirmdelete")
             .Align(Alignment.LEFT)
             .Pos(0, 2, PageWidth.Full)
         :> Widget
@@ -55,24 +55,24 @@ type ChartDeleteMenu(cc: ChartMeta, context: LibraryContext, is_submenu: bool) =
 
 #nowarn "40"
 
-type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
+type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
     inherit Page()
 
     let rec like_button =
         PageButton(
             %"chart.add_to_likes",
-            (fun () -> CollectionActions.toggle_liked cc; like_button_swap.Current <- unlike_button),
+            (fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- unlike_button),
             Icon = Icons.HEART,
             Hotkey = %%"like"
         )
     and unlike_button =
         PageButton(
             %"chart.remove_from_likes",
-            (fun () -> CollectionActions.toggle_liked cc; like_button_swap.Current <- like_button),
+            (fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- like_button),
             Icon = Icons.FOLDER_MINUS,
             Hotkey = %%"like"
         )
-    and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked cc then unlike_button else like_button)
+    and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked chart_meta then unlike_button else like_button)
 
     override this.Content() =
         let content =
@@ -81,10 +81,10 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |+ like_button_swap
             |+ PageButton(
                 %"chart.add_to_collection",
-                (fun () -> AddToCollectionPage(cc).Show()),
+                (fun () -> AddToCollectionPage(chart_meta).Show()),
                 Icon = Icons.FOLDER_PLUS
             )
-            |+ PageButton(%"chart.delete", (fun () -> ChartDeleteMenu(cc, context, true).Show()), Hotkey = %%"delete", Icon = Icons.TRASH)
+            |+ PageButton(%"chart.delete", (fun () -> ChartDeleteMenu(chart_meta, context, true).Show()), Hotkey = %%"delete", Icon = Icons.TRASH)
 
         match context with
         | LibraryContext.None
@@ -96,7 +96,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |* PageButton(
                 [ name ] %> "chart.remove_from_collection",
                 (fun () ->
-                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
+                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, chart_meta, context) then
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS
@@ -126,7 +126,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
             |+ PageButton(
                 [ name ] %> "chart.remove_from_collection",
                 (fun () ->
-                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, cc, context) then
+                    if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, chart_meta, context) then
                         Menu.Back()
                 ),
                 Icon = Icons.FOLDER_MINUS
@@ -148,7 +148,7 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                 Disabled = K Network.lobby.IsSome
             )
 
-        if Some cc = SelectedChart.CACHE_DATA then
+        if Some chart_meta = SelectedChart.CACHE_DATA then
             content
             |+ PageButton(%"chart.change_offset",
                 fun () ->
@@ -185,8 +185,8 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
                             %"chart.export_osz",
                             m.ModsApplied,
                             function
-                            | true -> OsuExport.export_chart_with_mods m cc
-                            | false -> OsuExport.export_chart_without_mods c cc
+                            | true -> OsuExport.export_chart_with_mods m chart_meta
+                            | false -> OsuExport.export_chart_without_mods c chart_meta
                         )
                             .Show()
                     | _ -> ()
@@ -196,5 +196,5 @@ type ChartContextMenu(cc: ChartMeta, context: LibraryContext) =
 
         content
 
-    override this.Title = cc.Title
+    override this.Title = chart_meta.Title
     override this.OnClose() = ()

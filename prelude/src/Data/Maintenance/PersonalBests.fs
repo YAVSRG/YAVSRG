@@ -24,13 +24,13 @@ module PersonalBests =
 
         async {
             let charts = chart_db.Entries |> Seq.toArray
-            for i, cc in Seq.indexed charts do
-                let data = UserDatabase.get_chart_data cc.Hash user_db
+            for i, chart_meta in Seq.indexed charts do
+                let data = UserDatabase.get_chart_data chart_meta.Hash user_db
 
                 if not data.Scores.IsEmpty then
-                    match ChartDatabase.get_chart cc.Hash chart_db with
+                    match ChartDatabase.get_chart chart_meta.Hash chart_db with
                     | Error reason ->
-                        Logging.Debug "Couldn't load '%s' for pb processing: %s" cc.Hash reason
+                        Logging.Debug "Couldn't load '%s' for pb processing: %s" chart_meta.Hash reason
                     | Ok chart ->
 
                     let existing_bests = data.PersonalBests
@@ -38,7 +38,7 @@ module PersonalBests =
 
                     for score in data.Scores do
                         let _, initial_ruleset = rulesets.[0]
-                        let score_info = ScoreInfo.from_score cc chart initial_ruleset score
+                        let score_info = ScoreInfo.from_score chart_meta chart initial_ruleset score
 
                         if score_info.ModStatus = ModStatus.Ranked then
 

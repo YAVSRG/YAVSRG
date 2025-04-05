@@ -65,7 +65,7 @@ type GameplayInfo() =
         | _ -> ()
 
         let chart_info = this.Bounds.SliceT(130.0f, 30.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, (match SelectedChart.CACHE_DATA with Some cc -> cc.DifficultyName | None -> ""), chart_info.SlicePercentL 0.5f, Colors.text_subheading, Alignment.LEFT)
+        Text.fill_b (Style.font, (match SelectedChart.CACHE_DATA with Some chart_meta -> chart_meta.DifficultyName | None -> ""), chart_info.SlicePercentL 0.5f, Colors.text_subheading, Alignment.LEFT)
         Text.fill_b (Style.font, notecounts, chart_info, Colors.text_subheading, Alignment.RIGHT)
 
         let three_icon_infos = this.Bounds.SliceT(155.0f, 70.0f).ShrinkX(15.0f)

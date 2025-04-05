@@ -32,11 +32,11 @@ module LibraryView =
             collection.Charts
             |> Seq.choose (fun entry ->
                 match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
-                | Some cc -> Some(cc, LibraryContext.Folder name)
+                | Some chart_meta -> Some(chart_meta, LibraryContext.Folder name)
                 | None -> None
             )
             |> filter_by.Apply
-            |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> Seq.sortBy (fun (chart_meta, _) -> sort_by (chart_meta, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
             |> fun x ->
@@ -56,7 +56,7 @@ module LibraryView =
             |> Seq.indexed
             |> Seq.choose (fun (i, (entry, info)) ->
                 match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
-                | Some cc -> Some(cc, LibraryContext.Playlist(i, name, info))
+                | Some chart_meta -> Some(chart_meta, LibraryContext.Playlist(i, name, info))
                 | None -> None
             )
             |> filter_by.Apply
@@ -75,9 +75,9 @@ module LibraryView =
             ctx.Library.Collections.EnumerateLikes
             |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
             |> filter_by.Apply
-            |> Seq.sortBy (fun cc -> sort_by (cc, ctx))
+            |> Seq.sortBy (fun chart_meta -> sort_by (chart_meta, ctx))
             |> if reverse_sorting then Seq.rev else id
-            |> Seq.map (fun cc -> (cc, LibraryContext.Likes))
+            |> Seq.map (fun chart_meta -> (chart_meta, LibraryContext.Likes))
             |> Array.ofSeq
             |> fun x ->
                 if x.Length > 0 then
@@ -113,11 +113,11 @@ module LibraryView =
             charts
             |> Seq.choose (fun (c: TableChart) ->
                 match ChartDatabase.get_meta c.Hash ctx.Library.Charts with
-                | Some cc -> Some(cc, LibraryContext.Table level)
+                | Some chart_meta -> Some(chart_meta, LibraryContext.Table level)
                 | None -> None
             )
             |> filter_by.Apply
-            |> Seq.sortBy (fun (cc, _) -> sort_by (cc, ctx))
+            |> Seq.sortBy (fun (chart_meta, _) -> sort_by (chart_meta, ctx))
             |> if reverse_sorting then Seq.rev else id
             |> Array.ofSeq
             |> fun x ->
@@ -148,8 +148,8 @@ module LibraryView =
 
         let found_groups = new Dictionary<int * string, GroupWithSorting>()
 
-        for cc in filter_by.Apply ctx.Library.Charts.Cache.Values do
-            let group_key = group_by (cc, ctx)
+        for chart_meta in filter_by.Apply ctx.Library.Charts.Cache.Values do
+            let group_key = group_by (chart_meta, ctx)
 
             if found_groups.ContainsKey group_key |> not then
                 found_groups.Add(
@@ -160,7 +160,7 @@ module LibraryView =
                     }
                 )
 
-            found_groups.[group_key].Charts.Add(cc, LibraryContext.None, sort_by (cc, ctx))
+            found_groups.[group_key].Charts.Add(chart_meta, LibraryContext.None, sort_by (chart_meta, ctx))
 
         found_groups
         |> Seq.sortBy (_.Key >> (fun (index, group_name) -> (index, group_name.ToLowerInvariant())))
@@ -177,8 +177,8 @@ module LibraryView =
 
         let found_groups = new Dictionary<string, GroupWithSorting>()
 
-        for cc in filter_by.Apply ctx.Library.Charts.Cache.Values do
-            for pack in cc.Packs do
+        for chart_meta in filter_by.Apply ctx.Library.Charts.Cache.Values do
+            for pack in chart_meta.Packs do
 
                 if found_groups.ContainsKey pack |> not then
                     found_groups.Add(
@@ -189,7 +189,7 @@ module LibraryView =
                         }
                     )
 
-                found_groups.[pack].Charts.Add(cc, LibraryContext.Pack pack, sort_by (cc, ctx))
+                found_groups.[pack].Charts.Add(chart_meta, LibraryContext.Pack pack, sort_by (chart_meta, ctx))
 
         found_groups
         |> Seq.sortBy (fun kvp -> group_name_to_smart_sort_list kvp.Key)

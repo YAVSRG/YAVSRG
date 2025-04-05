@@ -93,12 +93,12 @@ module Replay =
         // Strategy 2: Ask the user some details then assume it's the chart they have selected
         Logging.Info "No chart in the database matched MD5 hash '%s' for dropped replay" replay.BeatmapHash
         match SelectedChart.CACHE_DATA, SelectedChart.CHART with
-        | Some cc, Some chart ->
+        | Some chart_meta, Some chart ->
             Menu.Exit()
             ImportReplayPage(
                 replay,
                 chart,
-                show_replay replay.Player cc chart
+                show_replay replay.Player chart_meta chart
             )
                 .Show()
         | _ -> ()

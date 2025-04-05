@@ -45,11 +45,11 @@ module private TreeState =
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
     let mutable cache_flag = 0
 
-    let switch_chart (cc: ChartMeta, context: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
+    let switch_chart (chart_meta: ChartMeta, context: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
         if not (Transitions.in_progress()) then
-            SelectedChart.change (cc, context, true)
+            SelectedChart.change (chart_meta, context, true)
             Selection.clear ()
-            selected_chart <- cc.Hash
+            selected_chart <- chart_meta.Hash
             expanded_group <- group_name, group_ctx
             selected_group <- group_name, group_ctx
             scroll_to <- ScrollTo.Chart

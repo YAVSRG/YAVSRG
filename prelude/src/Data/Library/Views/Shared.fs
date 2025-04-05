@@ -30,8 +30,8 @@ module internal Shared =
                 .Date
         (local_date_now - local_date).TotalDays |> floor |> int
 
-    let format_date_last_played (cc: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let days_ago = days_ago (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed
+    let format_date_last_played (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
+        let days_ago = days_ago (UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase).LastPlayed
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -44,8 +44,8 @@ module internal Shared =
         elif days_ago < 3600 then 8, "A long time ago"
         else 9, "Never"
 
-    let format_difficulty (cc: ChartMeta, _) : int * string =
-        let stars = cc.Rating |> floor |> int
+    let format_difficulty (chart_meta: ChartMeta, _) : int * string =
+        let stars = chart_meta.Rating |> floor |> int
         if stars >= 15 then
             15, "15+ Stars"
         else
@@ -64,8 +64,8 @@ module internal Shared =
         elif days_ago < 210 then 7, "6 months ago"
         else 8, "A long time ago"
 
-    let grade_achieved (cc: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
+    let grade_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
+        let data = UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase
 
         match
             data.PersonalBests
@@ -74,8 +74,8 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
         | None -> -2, "No grade achieved"
 
-    let lamp_achieved (cc: ChartMeta, ctx: LibraryViewContext) : int * string  =
-        let data = UserDatabase.get_chart_data cc.Hash ctx.UserDatabase
+    let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string  =
+        let data = UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase
 
         match
             data.PersonalBests
@@ -84,14 +84,14 @@ module internal Shared =
         | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"
 
-    let below_ln_percent (threshold: float32) (cc: ChartMeta, _: LibraryViewContext) : bool =
-        cc.Patterns.LNPercent < threshold
+    let below_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
+        chart_meta.Patterns.LNPercent < threshold
 
-    let above_ln_percent (threshold: float32) (cc: ChartMeta, _: LibraryViewContext) : bool =
-        cc.Patterns.LNPercent > threshold
+    let above_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
+        chart_meta.Patterns.LNPercent > threshold
 
-    let has_sv (cc: ChartMeta, _: LibraryViewContext) =
-        cc.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
+    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) =
+        chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]
 [<NoEquality>]

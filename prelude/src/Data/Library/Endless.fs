@@ -92,19 +92,19 @@ module Suggestion =
 
         let candidates =
             ctx.Library.Charts.Cache.Values
-            |> Seq.filter (fun cc -> cc.Keys = base_chart.Keys)
-            |> Seq.filter (fun cc -> not (recommended_already.Contains cc.Hash))
-            |> Seq.filter (fun cc -> not (recommended_already.Contains (cc.Title.ToLower())))
-            |> Seq.choose (fun cc ->
-                let best_rate = target_density / cc.Patterns.Density50
+            |> Seq.filter (fun chart_meta -> chart_meta.Keys = base_chart.Keys)
+            |> Seq.filter (fun chart_meta -> not (recommended_already.Contains chart_meta.Hash))
+            |> Seq.filter (fun chart_meta -> not (recommended_already.Contains (chart_meta.Title.ToLower())))
+            |> Seq.choose (fun chart_meta ->
+                let best_rate = target_density / chart_meta.Patterns.Density50
                 let best_approx_rate = round(best_rate / 0.05f<rate>) * 0.05f<rate>
                 if best_approx_rate >= ctx.MinimumRate && best_approx_rate <= ctx.MaximumRate then
-                    Some (cc, (best_approx_rate, cc.Patterns))
+                    Some (chart_meta, (best_approx_rate, chart_meta.Patterns))
                 else None
             )
-            |> Seq.filter (fun (cc, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
+            |> Seq.filter (fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then
-                Seq.filter (fun (cc, (rate, p)) -> now - (UserDatabase.get_chart_data cc.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
+                Seq.filter (fun (chart_meta, (rate, p)) -> now - (UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
                else
                 id
             |> ctx.Filter.Apply
@@ -113,7 +113,7 @@ module Suggestion =
         let spikiness = patterns.Density90 / patterns.Density50
 
         seq {
-            for cc, (c_rate, c_patterns) in candidates do
+            for chart_meta, (c_rate, c_patterns) in candidates do
 
                 let sv_compatibility =
                     if (patterns.SVAmount < 30000.0f<ms>) <> (c_patterns.SVAmount < 30000.0f<ms>) then
@@ -122,7 +122,7 @@ module Suggestion =
 
                 let length_compatibility =
                     let l1 = base_chart.Length / rate
-                    let l2 = cc.Length / c_rate
+                    let l2 = chart_meta.Length / c_rate
                     1.0f - min 1.0f (abs (l2 - l1) / l1 * 10.0f)
 
                 let difficulty_compatibility =
@@ -135,7 +135,7 @@ module Suggestion =
                 let compatibility =
                     sv_compatibility * length_compatibility * difficulty_compatibility * pattern_compatibility
 
-                yield (cc, c_rate), compatibility
+                yield (chart_meta, c_rate), compatibility
         }
         |> Seq.sortByDescending snd
         |> Seq.map fst
@@ -148,7 +148,7 @@ module Suggestion =
             None
         else
 
-            let cc, rate =
+            let chart_meta, rate =
                 let index =
                     rand.NextDouble()
                     |> fun x -> x * x
@@ -158,10 +158,10 @@ module Suggestion =
 
                 best_matches.[index]
 
-            recommended_already <- Set.add cc.Hash recommended_already
-            recommended_already <- Set.add (cc.Title.ToLower()) recommended_already
+            recommended_already <- Set.add chart_meta.Hash recommended_already
+            recommended_already <- Set.add (chart_meta.Title.ToLower()) recommended_already
 
-            Some (cc, rate)
+            Some (chart_meta, rate)
 
 type EndlessModeState =
     internal {
@@ -185,7 +185,7 @@ module EndlessModeState =
             |> Seq.skip from
             |> Seq.choose (fun (i, (c, info)) ->
                 match ChartDatabase.get_meta c.Hash library.Charts with
-                | Some cc -> Some(cc, (i, info))
+                | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
             )
             |> filter.Apply
@@ -198,7 +198,7 @@ module EndlessModeState =
             |> Seq.indexed
             |> Seq.choose (fun (i, (c, info)) ->
                 match ChartDatabase.get_meta c.Hash library.Charts with
-                | Some cc -> Some(cc, (i, info))
+                | Some chart_meta -> Some(chart_meta, (i, info))
                 | None -> None
             )
             |> filter.Apply
@@ -232,10 +232,10 @@ module EndlessModeState =
                 }
         | [] ->
             match Suggestion.get_suggestion ctx with
-            | Some (next_cc, rate) ->
+            | Some (next_chart_meta, rate) ->
                 Some
                     {
-                        Chart = next_cc
+                        Chart = next_chart_meta
                         Rate = rate
                         Mods = ctx.Mods
                         LibraryContext = LibraryContext.None

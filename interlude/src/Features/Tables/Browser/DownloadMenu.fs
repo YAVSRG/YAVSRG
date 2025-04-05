@@ -69,7 +69,7 @@ module TableDownloader =
             for chart in charts do
                 statuses.[chart.Hash] <-
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
-                    | Some cc when cc.Packs.Contains table.Info.Name -> ChartStatus.Downloaded
+                    | Some chart_meta when chart_meta.Packs.Contains table.Info.Name -> ChartStatus.Downloaded
                     | _ -> ChartStatus.Missing
 
             for level in charts_by_level.Keys do
@@ -249,8 +249,8 @@ module TableDownloader =
                     GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloading))
 
                     match ChartDatabase.get_meta chart.Hash Content.Charts with
-                    | Some cc ->
-                        ChartDatabase.change_packs cc (cc.Packs.Add table_name) Content.Charts
+                    | Some chart_meta ->
+                        ChartDatabase.change_packs chart_meta (chart_meta.Packs.Add table_name) Content.Charts
                         GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! OnlineImports.cdn_install (table_name, chart.Hash, chart.Chart, chart.Song, Content.Charts) with

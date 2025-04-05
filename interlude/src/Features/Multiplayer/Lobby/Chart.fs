@@ -17,7 +17,7 @@ open Interlude.Features.Online
 open Interlude.Features.Play.Spectate
 
 // todo: find out when this shows up? if it doesnt then make it do so
-type MultiplayerChartContextMenu(cc: ChartMeta) =
+type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
     inherit Page()
 
     override this.Content() =
@@ -26,12 +26,12 @@ type MultiplayerChartContextMenu(cc: ChartMeta) =
 
         |+ PageButton(
             %"chart.add_to_collection",
-            (fun () -> AddToCollectionPage(cc).Show()),
+            (fun () -> AddToCollectionPage(chart_meta).Show()),
             Icon = Icons.FOLDER_PLUS
         )
         :> Widget
 
-    override this.Title = cc.Title
+    override this.Title = chart_meta.Title
     override this.OnClose() = ()
 
 module LobbyChart =
@@ -91,8 +91,8 @@ module LobbyChart =
                             |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
                         )
                 )
-            | Some cc ->
-                SelectedChart.change (cc, LibraryContext.None, true)
+            | Some chart_meta ->
+                SelectedChart.change (chart_meta, LibraryContext.None, true)
                 SelectedChart.rate.Set chart.Rate
 
                 SelectedChart.selected_mods.Set(

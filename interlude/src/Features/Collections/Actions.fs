@@ -14,46 +14,46 @@ module CollectionActions =
     let private likes_modified_ev = Event<unit>()
     let likes_modified = likes_modified_ev.Publish
 
-    let is_liked (cc: ChartMeta) : bool =
-        Content.Library.Collections.IsLiked cc.Hash
+    let is_liked (chart_meta: ChartMeta) : bool =
+        Content.Library.Collections.IsLiked chart_meta.Hash
 
-    let toggle_liked (cc: ChartMeta) : unit =
-        if is_liked cc then
-            Content.Library.Collections.Unlike cc.Hash
+    let toggle_liked (chart_meta: ChartMeta) : unit =
+        if is_liked chart_meta then
+            Content.Library.Collections.Unlike chart_meta.Hash
             likes_modified_ev.Trigger()
-            Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title ] %> "collections.unliked", "")
+            Notifications.action_feedback (Icons.FOLDER_MINUS, [ chart_meta.Title ] %> "collections.unliked", "")
         else
-            Content.Library.Collections.Like cc.Hash
+            Content.Library.Collections.Like chart_meta.Hash
             likes_modified_ev.Trigger()
-            Notifications.action_feedback (Icons.HEART, [ cc.Title ] %> "collections.liked", "")
+            Notifications.action_feedback (Icons.HEART, [ chart_meta.Title ] %> "collections.liked", "")
 
-    let add_to (name: string, collection: Collection, cc: ChartMeta) : bool =
+    let add_to (name: string, collection: Collection, chart_meta: ChartMeta) : bool =
         if
             match collection with
-            | Folder c -> c.Add cc
-            | Playlist p -> p.Add(cc, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
+            | Folder c -> c.Add chart_meta
+            | Playlist p -> p.Add(chart_meta, SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
         then
             collection_modified_ev.Trigger()
 
-            Notifications.action_feedback (Icons.FOLDER_PLUS, [ cc.Title; name ] %> "collections.added", "")
+            Notifications.action_feedback (Icons.FOLDER_PLUS, [ chart_meta.Title; name ] %> "collections.added", "")
             true
         else
             false
 
-    let remove_from (name: string, collection: Collection, cc: ChartMeta, context: LibraryContext) : bool =
+    let remove_from (name: string, collection: Collection, chart_meta: ChartMeta, context: LibraryContext) : bool =
         if
             match collection with
-            | Folder c -> c.Remove cc
+            | Folder c -> c.Remove chart_meta
             | Playlist p ->
                 match context with
                 | LibraryContext.Playlist(i, in_name, _) when name = in_name -> p.RemoveAt i
-                | _ -> p.RemoveSingle cc
+                | _ -> p.RemoveSingle chart_meta
         then
             collection_modified_ev.Trigger()
 
-            Notifications.action_feedback (Icons.FOLDER_MINUS, [ cc.Title; name ] %> "collections.removed", "")
+            Notifications.action_feedback (Icons.FOLDER_MINUS, [ chart_meta.Title; name ] %> "collections.removed", "")
 
-            if Some cc = SelectedChart.CACHE_DATA then
+            if Some chart_meta = SelectedChart.CACHE_DATA then
                 SelectedChart.LIBRARY_CTX <- LibraryContext.None
 
             true

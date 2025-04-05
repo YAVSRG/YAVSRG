@@ -16,14 +16,14 @@ module private Migration =
         let sc_j4 = SC.create 4
         let sc_j4_id = Ruleset.hash sc_j4
 
-        for cc_key in library.Charts.Cache.Keys do
-            let cc = library.Charts.Cache.[cc_key]
+        for chart_meta_key in library.Charts.Cache.Keys do
+            let chart_meta = library.Charts.Cache.[chart_meta_key]
 
-            let data = UserDatabase.get_chart_data cc.Hash database
+            let data = UserDatabase.get_chart_data chart_meta.Hash database
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
                 for (acc, rate, _) in pbs.Accuracy do
-                    KeymodeSkillBreakdown.score cc.Patterns acc rate TOTAL_STATS.KeymodeSkills.[cc.Keys - 3] |> ignore
+                    KeymodeSkillBreakdown.score chart_meta.Patterns acc rate TOTAL_STATS.KeymodeSkills.[chart_meta.Keys - 3] |> ignore
             | None -> ()
 
         // calculate session
@@ -39,7 +39,7 @@ module private Migration =
         let first_score_length =
             if scores.Length = 0 then 0L else
             match ChartDatabase.get_meta (fst scores.[0]) library.Charts with
-            | Some cc -> cc.Length / (snd scores.[0]).Rate |> int64
+            | Some chart_meta -> chart_meta.Length / (snd scores.[0]).Rate |> int64
             | None -> 2L * 60L * 1000L
 
         let mutable session_start_time = if scores.Length = 0 then 0L else (snd scores.[0]).Timestamp - first_score_length
@@ -53,19 +53,19 @@ module private Migration =
 
                 let score_length =
                     match ChartDatabase.get_meta chart_id library.Charts with
-                    | Some cc ->
+                    | Some chart_meta ->
 
-                        let data = UserDatabase.get_chart_data cc.Hash database
+                        let data = UserDatabase.get_chart_data chart_meta.Hash database
                         match data.PersonalBests.TryFind(sc_j4_id) with
                         | Some pbs ->
                             match PersonalBests.get_best_above score.Rate pbs.Accuracy with
                             | Some (acc, rate, _) ->
-                                KeymodeSkillBreakdown.score cc.Patterns acc score.Rate skills.[cc.Keys - 3] |> ignore
+                                KeymodeSkillBreakdown.score chart_meta.Patterns acc score.Rate skills.[chart_meta.Keys - 3] |> ignore
                             | None -> ()
                         | None -> ()
 
-                        session_playing_time <- session_playing_time + cc.Length / score.Rate
-                        cc.Length / score.Rate |> int64
+                        session_playing_time <- session_playing_time + chart_meta.Length / score.Rate
+                        chart_meta.Length / score.Rate |> int64
                     | None -> 2L * 60L * 1000L
 
                 if score.Timestamp - last_time > SESSION_TIMEOUT then
@@ -157,7 +157,7 @@ module private Migration =
 
         let length_of_score (score: struct {| ChartId: string; Score: Score |}) =
             match ChartDatabase.get_meta score.ChartId library.Charts with
-            | Some cc -> cc.Length / score.Score.Rate |> float
+            | Some chart_meta -> chart_meta.Length / score.Score.Rate |> float
             | None -> 123056.0
 
         let sessions =

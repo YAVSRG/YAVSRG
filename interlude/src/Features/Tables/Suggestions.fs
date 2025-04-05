@@ -55,7 +55,7 @@ type Suggestion =
         | None ->
 
         match this.LocalChart with
-        | Some cc -> cc.Title
+        | Some chart_meta -> chart_meta.Title
         | None ->
 
         "???"
@@ -65,7 +65,7 @@ type Suggestion =
         | None ->
 
         match this.LocalChart with
-        | Some cc -> cc.Artist + " - " + cc.Title
+        | Some chart_meta -> chart_meta.Artist + " - " + chart_meta.Title
         | None ->
 
         "???"
@@ -120,8 +120,8 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
     let mutable still_open = true
     let playtest_suggestion () =
         match suggestion.LocalChart with
-        | Some cc ->
-            SelectedChart.change(cc, LibraryContext.None, true)
+        | Some chart_meta ->
+            SelectedChart.change(chart_meta, LibraryContext.None, true)
             Menu.Exit()
         | None ->
 
@@ -133,8 +133,8 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
                 GameThread.defer (fun () ->
                     if still_open then
                         match ChartDatabase.get_meta suggestion.ChartId Content.Charts with
-                        | Some cc ->
-                            SelectedChart.change(cc, LibraryContext.None, true)
+                        | Some chart_meta ->
+                            SelectedChart.change(chart_meta, LibraryContext.None, true)
                             Menu.Exit()
                         | None -> ()
                 )
@@ -180,11 +180,11 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
             | None ->
 
             match suggestion.LocalChart with
-            | Some local_cc ->
-                yield Text(local_cc.Artist + " - " + local_cc.Title)
+            | Some local_chart_meta ->
+                yield Text(local_chart_meta.Artist + " - " + local_chart_meta.Title)
                     .Align(Alignment.LEFT)
                     .Pos(0, 2, PageWidth.Full)
-                yield Text(local_cc.DifficultyName + "  •  " + local_cc.Creator)
+                yield Text(local_chart_meta.DifficultyName + "  •  " + local_chart_meta.Creator)
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .Pos(2, 1, PageWidth.Full)

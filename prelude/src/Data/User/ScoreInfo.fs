@@ -66,7 +66,7 @@ type ScoreInfo =
 
 module ScoreInfo =
 
-    let from_score (cc: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+    let from_score (chart_meta: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
         let replay_data = score.Replay |> Replay.decompress_bytes
 
@@ -76,7 +76,7 @@ module ScoreInfo =
         let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
 
         {
-            ChartMeta = cc
+            ChartMeta = chart_meta
             Chart = chart
             WithMods = with_mods
 

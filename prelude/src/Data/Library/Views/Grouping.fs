@@ -48,7 +48,7 @@ type private GroupWithSorting =
                 this.Charts
                 |> Seq.sortBy (fun (_, _, key) -> key)
                 |> if reverse_sorting then Seq.rev else id
-                |> Seq.map (fun (cc, ctx, _) -> (cc, ctx))
+                |> Seq.map (fun (chart_meta, ctx, _) -> (chart_meta, ctx))
                 |> Array.ofSeq
             Context = this.Context
         }

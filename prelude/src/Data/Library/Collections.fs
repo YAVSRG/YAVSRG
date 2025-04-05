@@ -13,7 +13,7 @@ type CollectionEntry =
     {
         mutable Hash: string
     }
-    static member OfChart(cc: ChartMeta) = { Hash = cc.Hash }
+    static member OfChart(chart_meta: ChartMeta) = { Hash = chart_meta.Hash }
 
 [<Json.AutoCodec>]
 type Folder =

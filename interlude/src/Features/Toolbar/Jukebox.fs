@@ -45,7 +45,7 @@ type Jukebox() =
 
         let song_title =
             match SelectedChart.CACHE_DATA with
-            | Some cc -> cc.Artist + " - " + cc.Title
+            | Some chart_meta -> chart_meta.Artist + " - " + chart_meta.Title
             | None -> %"jukebox.no_chart_selected"
 
         let song_title_width = Text.measure(Style.font, song_title) * 25.0f
