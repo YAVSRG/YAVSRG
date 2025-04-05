@@ -78,6 +78,8 @@
     <Compile Include="Calculator\Patterns\Clustering.fs" />
     <Compile Include="Calculator\Patterns\Categorise.fs" />
     <Compile Include="Calculator\Patterns\Summary.fs" />
+    <Compile Include="Calculator\Patterns\PatternInfo.fs" />
+    <Compile Include="Calculator\Patterns\LibraryPatternInfo.fs" />
     <Compile Include="Calculator\Skillsets\PatternStats.fs" />
     <Compile Include="Calculator\Skillsets\CombinedStats.fs" />
     <Compile Include="Calculator\Skillsets\Skillsets.fs" />

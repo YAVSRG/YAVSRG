@@ -105,7 +105,7 @@ module private Clustering =
 
         total_time
 
-    let calculate_clustered_patterns (patterns: FoundPattern array) : Cluster array =
+    let assign_clusters (patterns: FoundPattern array) : (FoundPattern * ClusterBuilder) array =
         let bpms_non_mixed = ResizeArray<ClusterBuilder>()
         let bpms_mixed = Dictionary<CorePattern, ClusterBuilder>()
 
@@ -160,6 +160,10 @@ module private Clustering =
         bpms_mixed.Values |> Seq.iter (fun cluster -> cluster.Calculate())
 
         patterns_with_clusters
+
+    let specific_clusters (patterns_with_clusters: (FoundPattern * ClusterBuilder) array) : Cluster array =
+
+        patterns_with_clusters
         |> Array.groupBy (fun (pattern, c) ->
             pattern.Pattern, pattern.Mixed, c.Value
         )
@@ -193,3 +197,48 @@ module private Clustering =
                 Amount = pattern_amount starts_ends
             }
         )
+
+    let core_pattern_cluster (pattern_type: CorePattern) (patterns_with_clusters: (FoundPattern * ClusterBuilder) array) : Cluster =
+
+        let data =
+            patterns_with_clusters
+            |> Array.filter (fun (pattern, _) -> pattern.Pattern = pattern_type)
+
+        let starts_ends = data |> Array.map (fun (m, _) -> m.Start, m.End)
+        let densities = data |> Array.map (fst >> _.Density) |> Array.sort
+
+        let data_count = float32 data.Length
+        let specific_types =
+            data
+            |> Array.choose (fst >> _.SpecificType)
+            |> Array.countBy id
+            |> Seq.map (fun (specific_type, count) -> (specific_type, float32 count / data_count))
+            |> Seq.sortByDescending snd
+            |> List.ofSeq
+
+        {
+            Pattern = pattern_type
+            SpecificTypes = specific_types
+            // todo: type ClusterType = | Normal of bpm: int | Mixed of bpm: int | Combined
+            BPM = 0<beat / minute / rate>
+            Mixed = true
+
+            Rating = data |> Seq.map (fst >> _.Strains) |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Difficulty.weighted_overall_difficulty
+
+            Density10 = find_percentile 0.1f densities
+            Density25 = find_percentile 0.25f densities
+            Density50 = find_percentile 0.5f densities
+            Density75 = find_percentile 0.75f densities
+            Density90 = find_percentile 0.9f densities
+
+            Amount = pattern_amount starts_ends
+        }
+
+    let calculate_clustered_patterns (patterns: FoundPattern array) : Cluster array =
+        let patterns_with_clusters = assign_clusters patterns
+        let specific_clusters = specific_clusters patterns_with_clusters
+        specific_clusters
+        //let core_patterns =
+        //    [| Jacks; Chordstream; Stream; |]
+        //    |> Array.map (fun pattern_type -> core_pattern_cluster pattern_type patterns_with_clusters)
+        //Array.append specific_clusters core_patterns

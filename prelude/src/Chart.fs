@@ -24,7 +24,7 @@ module NoteRow =
 
     let create_empty (keycount: int) : NoteRow = Array.create keycount NoteType.NOTHING
 
-    let create_notes (keycount: int) (notes: Bitmask) =
+    let create_notes (keycount: int) (notes: Bitmask) : NoteRow =
         let nr = create_empty keycount
 
         for k in Bitmask.toSeq notes do
@@ -32,7 +32,7 @@ module NoteRow =
 
         nr
 
-    let create_ln_bodies (keycount: int) (notes: Bitmask) =
+    let create_ln_bodies (keycount: int) (notes: Bitmask) : NoteRow =
         let nr = create_empty keycount
 
         for k in Bitmask.toSeq notes do
@@ -63,7 +63,7 @@ module NoteRow =
 
         row
 
-    let write (bw: BinaryWriter) (row: NoteRow) =
+    let write (bw: BinaryWriter) (row: NoteRow) : unit =
         let columns =
             seq {
                 for i in 0 .. row.Length - 1 do
