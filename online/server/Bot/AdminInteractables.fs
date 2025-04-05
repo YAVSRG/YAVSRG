@@ -3,11 +3,8 @@
 open Discord
 open Discord.WebSocket
 open Prelude.Backbeat.Archive
-open Interlude.Web.Server.Domain
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Backbeat
-open Interlude.Web.Server.Domain.Services
-open Interlude.Web.Server.Online
 
 module AdminInteractables =
 

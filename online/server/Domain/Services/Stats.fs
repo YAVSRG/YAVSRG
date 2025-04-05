@@ -29,13 +29,13 @@ module Stats =
                         (format_long_time(incoming.GameTime - all_time_stats.GameTime))
                         (format_long_time(time_since_sync))
                 )
-        elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime + 120000.0 then
-            Error
-                (
-                    sprintf "Increase in playtime is notably greater than increase in gametime: +%s vs +%s"
-                        (format_long_time(incoming.Playtime - all_time_stats.Playtime))
-                        (format_long_time(incoming.GameTime - all_time_stats.GameTime))
-                )
+        //elif incoming.Playtime - all_time_stats.Playtime > incoming.GameTime - all_time_stats.GameTime + 120000.0 then
+        //    Error
+        //        (
+        //            sprintf "Increase in playtime is notably greater than increase in gametime: +%s vs +%s"
+        //                (format_long_time(incoming.Playtime - all_time_stats.Playtime))
+        //                (format_long_time(incoming.GameTime - all_time_stats.GameTime))
+        //        )
         else
 
         let new_all_time_stats: Stats =
