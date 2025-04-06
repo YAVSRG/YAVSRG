@@ -1,9 +1,9 @@
 ﻿namespace Interlude.Web.Server.API.Tables.Suggestions
 
 open NetCoreServer
+open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
-open Interlude.Web.Server.Domain.Backbeat
 open Interlude.Web.Server.Domain.Services
 
 module Missing =

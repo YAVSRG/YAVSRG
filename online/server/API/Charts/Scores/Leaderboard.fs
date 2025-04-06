@@ -2,6 +2,7 @@
 
 open System
 open NetCoreServer
+open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
@@ -44,5 +45,5 @@ module Leaderboard =
                 response.ReplyJson<Response>({ Scores = scores })
 
             | None ->
-                response.MakeErrorResponse(404) |> ignore
+                response.ReplyError(404, "Chart not leaderboarded") |> ignore
         }

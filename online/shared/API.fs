@@ -10,6 +10,28 @@ open System.Diagnostics
 open Percyqaz.Common
 open Prelude
 
+[<AutoOpen>]
+module HttpResponseExtensions =
+
+    type HttpResponse with
+        member this.ReplyJson<'T>(data: 'T) =
+            this.MakeGetResponse(JSON.ToString data, "application/json") |> ignore
+
+        member this.ReplyRedirect(url: string) =
+            this.Clear()
+                .SetBegin(303)
+                .SetHeader("Location", url)
+                .SetBody()
+            |> ignore
+
+        member this.ReplyError(code: int, reason: string) =
+            this.Clear()
+                .SetBegin(code)
+                .SetHeader("Cache-Control", "no-cache, no-store")
+                .SetHeader("Content-Type", "text/plain; charset=UTF-8")
+                .SetBody(reason)
+            |> ignore
+
 module API =
 
     let escape : string -> string = Uri.EscapeDataString
@@ -64,7 +86,9 @@ module API =
                 | "POST" ->
                     config.Handle_Request(POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
                     |> Async.RunSynchronously
-                | _ -> this.Response.MakeErrorResponse(404, "Not found") |> ignore
+                | _ -> this.Response.ReplyError(404, "Not found") |> ignore
+
+                Logging.Info "%O" this.Response.Cache
 
                 Logging.Info "%s %s responded %i in %.0fms" request.Method uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
 

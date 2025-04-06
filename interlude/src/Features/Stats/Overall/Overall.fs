@@ -41,9 +41,9 @@ type OverallTab() =
 
     override this.Init(parent) =
 
-        tabs.Position <- Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f)
         this
         |+ tabs
+            .Position(Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f))
         |+ OverallHeader()
             .Position(Position.SlicePercentL(0.4f).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f))
         |+ OverallTime(

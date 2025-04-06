@@ -7,13 +7,6 @@ open Interlude.Web.Server.Domain.Core
 [<AutoOpen>]
 module Utils =
 
-    type HttpResponse with
-        member this.ReplyJson<'T>(data: 'T) =
-            this.MakeGetResponse(JSON.ToString data, "application/json") |> ignore
-
-        member this.ReplyRedirect(url: string) =
-            this.Clear().SetBegin(303).SetHeader("Location", url).SetBody() |> ignore
-
     exception NotAuthorizedException
     exception NotFoundException
     exception AuthorizeFailedException

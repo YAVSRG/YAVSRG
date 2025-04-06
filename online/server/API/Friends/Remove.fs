@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Web.Server.API.Friends
 
 open NetCoreServer
+open Interlude.Web.Shared
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Core
 

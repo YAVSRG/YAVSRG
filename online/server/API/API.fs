@@ -3,9 +3,10 @@
 open System.Collections.Generic
 open NetCoreServer
 open Percyqaz.Common
-open Interlude.Web.Server
+open Interlude.Web.Shared
 open Interlude.Web.Shared.API
 open Interlude.Web.Shared.Requests
+open Interlude.Web.Server
 open Interlude.Web.Server.API
 
 module API =
@@ -75,17 +76,21 @@ module API =
                     let handler = handlers.[(method, route)]
                     do! handler (body, query_params, headers, response)
                 with
-                | :? NotAuthorizedException -> response.MakeErrorResponse(401, "Needs authorization token") |> ignore
-                | :? NotFoundException -> response.MakeErrorResponse(404, "Not found") |> ignore
-                | :? AuthorizeFailedException -> response.MakeErrorResponse(403, "Bad authorization token") |> ignore
-                | :? PermissionDeniedException -> response.MakeErrorResponse(403, "Permission denied") |> ignore
+                | :? NotAuthorizedException ->
+                    response.ReplyError(401, "Missing authorization token") |> ignore
+                | :? NotFoundException ->
+                    response.ReplyError(404, "Not found") |> ignore
+                | :? AuthorizeFailedException ->
+                    response.ReplyError(403, "Bad authorization token") |> ignore
+                | :? PermissionDeniedException ->
+                    response.ReplyError(403, "Permission denied") |> ignore
                 | :? BadRequestException as err ->
-                    response.MakeErrorResponse(400, Option.defaultValue "Bad request" err.Message)
+                    response.ReplyError(400, Option.defaultValue "Bad request" err.Message)
                     |> ignore
                 | err ->
                     Logging.Error "Unhandled exception in %O %s: %O" method route err
                     Discord.debug_log (sprintf "Unhandled exception in %O %s\n%s" method route (err.ToString()))
-                    response.MakeErrorResponse(500, "Internal error") |> ignore
+                    response.ReplyError(500, "Internal error") |> ignore
             else
-                response.MakeErrorResponse(404, "Route not found") |> ignore
+                response.ReplyError(404, "Route not found") |> ignore
         }

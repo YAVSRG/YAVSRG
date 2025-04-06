@@ -2,6 +2,7 @@
 
 open NetCoreServer
 open Prelude
+open Interlude.Web.Shared
 open Interlude.Web.Shared.Requests
 open Interlude.Web.Server.API
 open Interlude.Web.Server.Domain.Services
