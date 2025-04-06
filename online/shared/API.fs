@@ -140,7 +140,7 @@ module API =
             }
 
         let authenticate (token: string) =
-            client.DefaultRequestHeaders.Authorization <- new Headers.AuthenticationHeaderValue("Bearer", token)
+            client.DefaultRequestHeaders.Add("X-Auth-Token", token)
 
         let rec private _send_retry (retries_left: int) (client: HttpClient) (message: HttpRequestMessage)  =
             async {
