@@ -17,15 +17,7 @@ module Utils =
 
     let authorize (header: Map<string, string>) =
 
-        if header.ContainsKey("X-Auth-Token") then
-            let auth_header = header.["X-Auth-Token"]
-            if auth_header.Length > BEARER_LENGTH then
-                match User.by_auth_token (header.["X-Auth-Token"]) with
-                | Some(id, user) -> id, user
-                | None -> raise AuthorizeFailedException
-            else raise AuthorizeFailedException
-
-        elif header.ContainsKey("Authorization") then
+        if header.ContainsKey("Authorization") then
             let auth_header = header.["Authorization"]
             if auth_header.Length > BEARER_LENGTH then
                 match User.by_auth_token (header.["Authorization"].Substring(BEARER_LENGTH)) with
