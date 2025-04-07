@@ -255,7 +255,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
         | HoldMechanics.JudgeReleasesSeparately (windows, judgement_if_overheld) ->
             let judgement =
-                if overheld then judgement_if_overheld
+                if dropped then ruleset.DefaultJudgement
+                elif overheld then judgement_if_overheld
                 elif missed then ruleset.DefaultJudgement
                 else
                     assert(windows.Length = ruleset.Judgements.Length)

@@ -38,6 +38,60 @@ module QuaverParity =
         )
 
     [<Test>]
+    let Quaver_ExpectedBehaviour_DropHold_Regrab () =
+        let notes =
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownUntil(0.0f<ms>, 30.0f<ms>)
+                .KeyDownUntil(60.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        Assert.AreEqual(
+            [
+                Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
+                DropHold
+                RegrabHold
+                Release{| Delta = 0.0f<ms / rate>; Judgement = Some (5, -0.5); Missed = false; Overhold = false; Dropped = true |}
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
+    let Quaver_ExpectedBehaviour_DropHold_Regrab_Overhold () =
+        let notes =
+            ChartBuilder(4)
+                .Hold(0.0f<ms>, 1000.0f<ms>)
+                .Build()
+
+        let replay =
+            ReplayBuilder()
+                .KeyDownUntil(0.0f<ms>, 30.0f<ms>)
+                .KeyDownUntil(60.0f<ms>, 2000.0f<ms>)
+                .Build()
+
+        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        event_processing.Update Time.infinity
+
+        let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
+
+        Assert.AreEqual(
+            [
+                Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
+                DropHold
+                RegrabHold
+                Release{| Delta = CONVENTIONAL_LATE_WINDOW; Judgement = Some (5, -0.5); Missed = true; Overhold = true; Dropped = true |}
+            ],
+            event_processing.Events |> Seq.map _.Action
+        )
+
+    [<Test>]
     let Quaver_ExpectedBehaviour_Overhold () =
         let notes =
             ChartBuilder(4)
