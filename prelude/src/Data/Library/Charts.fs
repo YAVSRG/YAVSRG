@@ -223,7 +223,7 @@ module DbCharts =
                 calc_version <- r.Byte
                 r.Float32
             Patterns =
-                if calc_version < CALC_VERSION then
+                if calc_version <> CALC_VERSION then
                     r.String |> ignore
                     PatternReport.Default
                 else r.Json JSON
