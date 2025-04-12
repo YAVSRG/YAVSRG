@@ -98,7 +98,7 @@ module Check =
                 find (sprintf "mod.%s.desc" m) "Mods"
 
                 if Mods.AVAILABLE_MODS.[m].RandomSeed |> not then
-                    for i in 1 .. Mods.AVAILABLE_MODS.[m].States - 1 do
+                    for i in 1L .. Mods.AVAILABLE_MODS.[m].States - 1L do
                         find (sprintf "mod.%s.%i" m i) "Mods"
                         find (sprintf "mod.%s.%i.desc" m i) "Mods"
 

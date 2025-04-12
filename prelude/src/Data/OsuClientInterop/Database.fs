@@ -70,7 +70,7 @@ module Mods =
             let mod_state =
                 seq {
                     if mods &&& Mods.Mirror = Mods.Mirror then
-                        yield ("mirror", 0)
+                        yield ("mirror", 0L)
                 }
                 |> Map.ofSeq
 

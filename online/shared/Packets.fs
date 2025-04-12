@@ -7,7 +7,7 @@ open Prelude
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 17uy
+    let PROTOCOL_VERSION = 18uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 1
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -31,7 +31,7 @@ module Packets =
             Title: string
             Creator: string
             Rate: Rate
-            Mods: (string * int) array
+            Mods: (string * int64) array
         }
         member this.Write(bw: BinaryWriter) =
             bw.Write this.Hash
@@ -52,7 +52,7 @@ module Packets =
                 Title = br.ReadString()
                 Creator = br.ReadString()
                 Rate = br.ReadSingle() * 1.0f<rate>
-                Mods = Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32())
+                Mods = Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt64())
             }
 
     type LobbySettings =

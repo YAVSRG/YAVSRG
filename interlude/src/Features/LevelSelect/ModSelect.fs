@@ -11,7 +11,7 @@ open Interlude.UI
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 
-type private ModSelector(id: string, current_state: unit -> int option, action: unit -> unit) =
+type private ModSelector(id: string, current_state: unit -> int64 option, action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun () ->

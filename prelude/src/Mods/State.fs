@@ -4,7 +4,7 @@ open System
 open Prelude
 open Prelude.Charts
 
-type ModState = Map<string, int>
+type ModState = Map<string, int64>
 
 module ModState =
 
@@ -14,7 +14,7 @@ module ModState =
 
     let cycle (id: string) (mods: ModState) : ModState =
         if mods.ContainsKey id then
-            let state = mods.[id] + 1
+            let state = mods.[id] + 1L
 
             if state >= AVAILABLE_MODS.[id].States || AVAILABLE_MODS.[id].RandomSeed then
                 Map.remove id mods
@@ -29,7 +29,7 @@ module ModState =
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
-    let in_priority_order (mods: ModState) : (string * Mod * int) seq =
+    let in_priority_order (mods: ModState) : (string * Mod * int64) seq =
         APPLICATION_PRIORITY_ORDER
         |> Seq.choose (fun id ->
             match Map.tryFind id mods with
