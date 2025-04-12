@@ -168,6 +168,11 @@ type private ModSelectPage(change_rate: Rate -> unit) =
 
         if (%%"autoplay").Pressed() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
+            Style.click.Play()
+        elif (%%"reset_mods").Pressed() then
+            SelectedChart.autoplay <- false
+            SelectedChart.selected_mods.Set Map.empty
+            Style.click.Play()
         elif (%%"mods").Pressed() then
             Menu.Back()
         else
@@ -190,5 +195,10 @@ type ModSelect(change_rate: Rate -> unit) =
 
         if (%%"autoplay").Pressed() then
             SelectedChart.autoplay <- not SelectedChart.autoplay
+            Style.click.Play()
+        elif (%%"reset_mods").Pressed() then
+            SelectedChart.autoplay <- false
+            SelectedChart.selected_mods.Set Map.empty
+            Style.click.Play()
         else
             SelectedChart.change_rate_hotkeys change_rate

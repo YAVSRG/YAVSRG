@@ -33,7 +33,7 @@ module ModState =
                 | MultipleModes _ -> 0L
                 | RandomSeed -> (seed_generation.Next(-Int32.MinValue,0))
                 | ColumnSwap ->
-                    ColumnSwap.parse "0123210"
+                    ColumnSwap.parse "0123012"
                     |> Percyqaz.Common.Combinators.expect
                     |> ColumnSwap.pack
 
