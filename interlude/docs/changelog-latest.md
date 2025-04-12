@@ -1,13 +1,22 @@
-0.7.27.13
+0.7.27.14
 ====
 
-Hi it's me again
+Small update while I work on more pattern, difficulty and performance analysis improvements
+
+# New features
+- You can now set a custom frame cap via the performance settings  
+  Useful for people that have various issues with Smart Cap or for more reliable recording/streaming
+- New 'Column Swap' mod that lets you put columns in a custom order  
+  UI to be improved further in a future update
 
 # Improvements
-- Experimental change to the engine/frame cap, to see if it affects the Intel Crash of Death
-- You can now view wider "slices" of the score graph when holding shift + hovering
-- New option to show timestamps next to PBs on the song wheel (found in Level select options)
-- You can now change the osu! hold mechanics to something else via the ruleset editor
+- Smart frame cap now uses VSync on Intel hardware, again this change will be used to study the Intel-Graphics-Only crashes
+- Stats graphs now open switched to the keymode you're playing
+- Judgement percentages now show on score screen, also ratios if you switch to showing more details
+- Made a change to the chart/score databases that should make them less prone to locking
 
-Editing osu! scorev1 LN windows still can't be done ingame but this will help players who are trying to modify an osu! ruleset to emulate ScoreV2
+# Bug fixes
+- Fixed a visual issue with LN tails under certain circumstances
+- Fixed an issue where the wrong judgement would be awarded for LN releases on Quaver rulesets
+- Fixed sporadic 'Server error' messages showing ingame
 
