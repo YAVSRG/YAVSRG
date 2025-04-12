@@ -22,12 +22,18 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
         c.Category,
         c.ImportantClusters |> Seq.truncate 3 |> Seq.map (fun c -> c.Format score_info.Rate) |> String.concat ", "
 
+    let keymode_label =
+        if score_info.WithMods.Keys <> score_info.Chart.Keys then
+            sprintf "%iK->%iK" score_info.Chart.Keys score_info.WithMods.Keys
+        else
+            sprintf "%iK" score_info.WithMods.Keys
+
     override this.Init(parent) =
         this
         |+ Text(sprintf "%s  %s" Icons.ZAP mod_string)
             .Align(Alignment.CENTER)
             .Position(Position.SliceT(90.0f).ShrinkX(25.0f))
-        |+ Text(fun () -> sprintf "%s  %iK  •  %s" Icons.BAR_CHART score_info.Chart.Keys score_info.Ruleset.Name)
+        |+ Text(fun () -> sprintf "%s  %s  •  %s" Icons.BAR_CHART keymode_label score_info.Ruleset.Name)
             .Color(Colors.text_subheading)
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(90.0f).SliceT(70.0f).ShrinkX(25.0f))

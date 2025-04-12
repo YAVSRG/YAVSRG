@@ -3,7 +3,6 @@
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Gameplay
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Prelude.Data.User.Stats
@@ -64,7 +63,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         )
             .Position(Position.SlicePercentB(0.35f))
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         this
         |+ Results(
             grade,
@@ -97,6 +96,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             )
         |+ bottom_info
         |* Confetti()
+
         ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
 
         //match xp_gain with
