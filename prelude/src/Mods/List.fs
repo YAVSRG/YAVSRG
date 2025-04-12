@@ -105,9 +105,9 @@ module Mods =
     let MENU_DISPLAY_ORDER =
         [
             "mirror"
+            "inverse"
             "random"
             "shuffle"
-            "inverse"
             "column_swap"
             "more_notes"
             "noln"

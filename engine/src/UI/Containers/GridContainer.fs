@@ -325,20 +325,8 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
             if visible && (this.Floating || c.VisibleBounds.Visible) then
                 c.Draw()
 
-    member this.Add(child: 'T) : unit =
-        assert(GameThread.is_game_thread())
-
-        children.Add
-            {
-                Widget = child
-                Visible = filter child
-                X = -1
-                Y = -1
-            }
-
-        if this.Initialised then
-            child.Init this
-            refresh <- true
+    member this.Add(child: 'T) = (this :> IContainer<'T>).Add child
+    member this.Remove(child: 'T) : bool = (this :> IContainer<'T>).Remove child
 
     static member (|+)(parent: #GridFlowContainer<'T>, child: 'T) =
         parent.Add child
@@ -357,6 +345,26 @@ type GridFlowContainer<'T when 'T :> Widget>(row_height, columns: int) as this =
     interface IResize with
         member this.OnSizeChanged
             with set v = size_change <- v
+
+    interface IContainer<'T> with
+
+        member this.Add (child: 'T) : unit =
+            assert(GameThread.is_game_thread())
+            children.Add
+                {
+                    Widget = child
+                    Visible = filter child
+                    X = -1
+                    Y = -1
+                }
+
+            if this.Initialised then
+                child.Init this
+                refresh <- true
+
+        member this.Remove (child: 'T) : bool =
+            assert(GameThread.is_game_thread())
+            children.RemoveAll(fun x -> System.Object.ReferenceEquals(x.Widget, child)) > 0
 
 [<Extension>]
 type GridFlowContainerExtensions =

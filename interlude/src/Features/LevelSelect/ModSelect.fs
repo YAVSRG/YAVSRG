@@ -20,10 +20,12 @@ type private ModSelector(id: string, current_state: unit -> int64 option, action
             )
         )
 
-    let TOP_HEIGHT = 70.0f
+    static let TOP_HEIGHT = 60.0f
+    static let DESCRIPTION_HEIGHT = 30.0f
+    static member HEIGHT = DESCRIPTION_HEIGHT + TOP_HEIGHT
 
-    override this.Init(parent) =
-        this |* MouseListener().Button(this)
+    override this.Init(parent: Widget) =
+        this.Add(MouseListener().Button(this))
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
@@ -80,81 +82,86 @@ type private ModSelectPage(change_rate: Rate -> unit) =
 
     override this.Content() =
         let mod_grid =
-            GridFlowContainer<Widget>(100.0f, 3)
-                .Spacing(30.0f)
+            GridFlowContainer<ModSelector>(ModSelector.HEIGHT, 3)
+                .Spacing(20.0f)
                 .WrapNavigation(false)
                 .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
-            |+ ModSelector(
-                "auto",
-                (fun _ -> if SelectedChart.autoplay then Some 0 else None),
-                (fun _ -> SelectedChart.autoplay <- not SelectedChart.autoplay)
-            )
-            |+ seq {
-                for id in Mods.MENU_DISPLAY_ORDER do
-                    yield ModSelector(
-                        id,
-                        (fun _ ->
-                            if SelectedChart.selected_mods.Value.ContainsKey id then
-                                Some SelectedChart.selected_mods.Value.[id]
-                            else
-                                None
-                        ),
-                        (fun _ -> Setting.app (ModState.cycle id) SelectedChart.selected_mods)
+                .With(
+                    ModSelector(
+                        "auto",
+                        (fun _ -> if SelectedChart.autoplay then Some 0 else None),
+                        (fun _ -> SelectedChart.autoplay <- not SelectedChart.autoplay)
                     )
-            }
-            |+ ModSelector(
-                "pacemaker",
-                (fun _ -> if options.EnablePacemaker.Value then Some 0 else None),
-                (fun _ -> Setting.app not options.EnablePacemaker)
-            )
+                )
+                .With(seq {
+                    for id in Mods.MENU_DISPLAY_ORDER do
+                        yield ModSelector(
+                            id,
+                            (fun _ ->
+                                if SelectedChart.selected_mods.Value.ContainsKey id then
+                                    Some SelectedChart.selected_mods.Value.[id]
+                                else
+                                    None
+                            ),
+                            (fun _ -> Setting.app (ModState.cycle id) SelectedChart.selected_mods)
+                        )
+                })
+                .With(
+                    ModSelector(
+                        "pacemaker",
+                        (fun _ -> if options.EnablePacemaker.Value then Some 0 else None),
+                        (fun _ -> Setting.app not options.EnablePacemaker)
+                    )
+                )
 
         page_container()
-        |+ PageSetting(%"gameplay.rate",
-            Slider(
-                SelectedChart.rate
-                |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>)
-                |> Setting.uom,
-                Format = sprintf "%.02fx"
-            )
-        )
-            .Help(
-                Help.Info("gameplay.rate")
-                    .Hotkey(%"levelselect.selected_mods.uprate.hint", "uprate")
-                    .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
-            )
-            .Pos(0)
-        |+ Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
-        |+ Text(%"gameplay.rate.hotkey_hint_ii")
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(page_position(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
-
-        |+ mod_grid
-
-        |+ PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()), Icon = Icons.FLAG)
-            .Help(Help.Info("gameplay.pacemaker"))
-            .Pos(17)
-
-        |+ PageSetting(%"mods.mod_status",
-            Text(fun () ->
-                match mod_status() with
-                | ModStatus.Ranked -> %"mods.mod_status.ranked"
-                | ModStatus.Unranked -> %"mods.mod_status.unranked"
-                | _ -> %"mods.mod_status.unstored"
-             )
-                .Color(fun () ->
-                    match mod_status() with
-                    | ModStatus.Ranked -> Colors.text_green_2
-                    | ModStatus.Unranked -> Colors.text_yellow_2
-                    | _ -> Colors.text_greyout
+            .With(
+                PageSetting(%"gameplay.rate",
+                    Slider(
+                        SelectedChart.rate
+                        |> Setting.map id (fun v -> round (v / 0.05f<rate>) * 0.05f<rate>)
+                        |> Setting.uom,
+                        Format = sprintf "%.02fx"
+                    )
                 )
-                .Align(Alignment.LEFT)
-        )
-            .Pos(20)
-        :> Widget
+                    .Help(
+                        Help.Info("gameplay.rate")
+                            .Hotkey(%"levelselect.selected_mods.uprate.hint", "uprate")
+                            .Hotkey(%"levelselect.selected_mods.downrate.hint", "downrate")
+                    )
+                    .Pos(0),
+                Text([(%%"uprate").ToString(); (%%"downrate").ToString()] %> "gameplay.rate.hotkey_hint_i")
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Position(page_position(2, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)),
+                Text(%"gameplay.rate.hotkey_hint_ii")
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Position(page_position(3, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH)),
+
+                mod_grid,
+
+                PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()), Icon = Icons.FLAG)
+                    .Help(Help.Info("gameplay.pacemaker"))
+                    .Pos(17),
+
+                PageSetting(%"mods.mod_status",
+                    Text(fun () ->
+                        match mod_status() with
+                        | ModStatus.Ranked -> %"mods.mod_status.ranked"
+                        | ModStatus.Unranked -> %"mods.mod_status.unranked"
+                        | _ -> %"mods.mod_status.unstored"
+                     )
+                        .Color(fun () ->
+                            match mod_status() with
+                            | ModStatus.Ranked -> Colors.text_green_2
+                            | ModStatus.Unranked -> Colors.text_yellow_2
+                            | _ -> Colors.text_greyout
+                        )
+                        .Align(Alignment.LEFT)
+                )
+                    .Pos(20)
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
