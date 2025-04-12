@@ -12,7 +12,7 @@ module Mods =
             "mirror",
             { Mod.Default with
                 Status = ModStatus.Ranked
-                Exclusions = [ "shuffle"; "random" ]
+                Exclusions = [ "shuffle"; "random"; "column_swap" ]
                 Apply = fun _ mc -> Mirror.apply mc
                 Shorthand = fun _ -> "MR"
             }
@@ -22,7 +22,7 @@ module Mods =
                 Status = ModStatus.Unranked
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.shuffle (int32 s) mc
-                Exclusions = [ "random"; "mirror" ]
+                Exclusions = [ "random"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "SHF"
             }
 
@@ -31,7 +31,7 @@ module Mods =
                 Status = ModStatus.Unranked
                 RandomSeed = true
                 Apply = fun s mc -> Randomise.randomise (int32 s) mc
-                Exclusions = [ "shuffle"; "mirror" ]
+                Exclusions = [ "shuffle"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "RD"
             }
 
@@ -79,12 +79,21 @@ module Mods =
                 Apply = fun s mc -> if s = 1L then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
                 Shorthand = function 1L -> "MNC" | _ -> "MNM"
             }
+
+            "column_swap",
+            { Mod.Default with
+                Status = ModStatus.Unstored
+                Exclusions = [ "shuffle"; "random"; "mirror" ]
+                Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.parse "0123012" |> Percyqaz.Common.Combinators.expect) mc
+                Shorthand = fun _ -> "CSW"
+            }
         ]
 
     let APPLICATION_PRIORITY_ORDER =
         [
             "noln"
             "more_notes"
+            "column_swap"
             "mirror"
             "shuffle"
             "random"
@@ -98,6 +107,7 @@ module Mods =
             "random"
             "shuffle"
             "inverse"
+            "column_swap"
             "more_notes"
             "noln"
             "nosv"

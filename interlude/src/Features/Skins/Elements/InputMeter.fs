@@ -12,9 +12,9 @@ open Interlude.Features.Gameplay
 type InputMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
-    let colors = Array.create state.Chart.Keys config.InputMeterKeyColor
-    let color_fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
-    let fades = Array.init state.Chart.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
+    let colors = Array.create state.WithColors.Keys config.InputMeterKeyColor
+    let color_fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
+    let fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
 
     let SCROLL_SPEED = config.InputMeterScrollSpeed / SelectedChart.rate.Value
 
@@ -34,14 +34,14 @@ type InputMeter(config: HudConfig, state: PlayState) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        for k = 0 to state.Chart.Keys - 1 do
+        for k = 0 to state.WithColors.Keys - 1 do
             color_fades.[k].Update elapsed_ms
             fades.[k].Update elapsed_ms
             if Bitmask.has_key k state.Scoring.KeyState then
                 fades.[k].Reset()
 
     override this.Draw() =
-        let column_width = this.Bounds.Width / float32 state.Chart.Keys
+        let column_width = this.Bounds.Width / float32 state.WithColors.Keys
 
         let mutable box =
             (
@@ -53,7 +53,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
                 .SliceL(column_width)
                 .ShrinkPercent(config.InputMeterColumnPadding * 0.5f)
 
-        for k = 0 to state.Chart.Keys - 1 do
+        for k = 0 to state.WithColors.Keys - 1 do
 
             let press_f = float32 fades.[k].Progress
             let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * press_f) |> int
@@ -102,7 +102,7 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let cutoff = now - (this.Bounds.Height - column_width) / SCROLL_SPEED
             let fade_edge = now - (this.Bounds.Height - column_width - config.InputMeterInputFadeDistance) / SCROLL_SPEED
             for struct (timestamp, keystate) in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
-                for k = 0 to state.Chart.Keys - 1 do
+                for k = 0 to state.WithColors.Keys - 1 do
                     if Bitmask.has_key k keystate then
                         if previous > fade_edge && timestamp < fade_edge then
                             bar (k, fade_edge, previous)
