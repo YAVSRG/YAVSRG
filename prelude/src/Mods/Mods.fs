@@ -86,7 +86,7 @@ module Mods =
                 Type = ColumnSwap
                 Exclusions = [ "shuffle"; "random"; "mirror" ]
                 Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.unpack s) mc
-                Shorthand = fun _ -> "CSW"
+                Shorthand = fun state -> sprintf "[%s]" (ColumnSwap.format (ColumnSwap.unpack state))
             }
         ]
 

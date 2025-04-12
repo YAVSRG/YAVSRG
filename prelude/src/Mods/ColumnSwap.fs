@@ -16,6 +16,22 @@ module ColumnSwap =
 
         s |> Seq.map (function '-' -> -1 | '0' -> 9 | c -> int (c - '1')) |> Array.ofSeq |> Ok
 
+    let format (swap: int array) : string =
+        swap
+        |> Array.map (function
+            | 0 -> '1'
+            | 1 -> '2'
+            | 2 -> '3'
+            | 3 -> '4'
+            | 4 -> '5'
+            | 5 -> '6'
+            | 6 -> '7'
+            | 7 -> '8'
+            | 8 -> '9'
+            | 9 -> '0'
+            | _ -> '-'
+        ) |> String
+
     let apply (swap: int array) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
         if swap.Length < 3 || swap.Length > 10 then failwithf "Invalid key count: %i" swap.Length
 

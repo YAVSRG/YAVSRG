@@ -45,8 +45,8 @@
     <Compile Include="Mods\Inverse.fs" />
     <Compile Include="Mods\MoreNotes.fs" />
     <Compile Include="Mods\Randomise.fs" />
-    <Compile Include="Mods\List.fs" />
-    <Compile Include="Mods\State.fs" />
+    <Compile Include="Mods\Mods.fs" />
+    <Compile Include="Mods\ModState.fs" />
     <Compile Include="Gameplay\Replays\Replays.fs" />
     <Compile Include="Gameplay\Replays\Readers.fs" />
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
