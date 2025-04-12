@@ -369,13 +369,6 @@ module SelectedChart =
             mods.Value <- d.Mods.Value
         | _ -> ()
 
-    let private presets_on_chart_changed =
-        let mutable previous_keymode = None
-
-        fun (chart_meta: ChartMeta) ->
-            if previous_keymode <> Some chart_meta.Keys then Presets.keymode_changed chart_meta.Keys
-            previous_keymode <- Some chart_meta.Keys
-
     let rate : Setting.Bounded<float32<rate>> =
         _rate
         |> Setting.trigger (fun v ->
@@ -392,6 +385,7 @@ module SelectedChart =
             if_loading
             <| fun info ->
                 collections_on_mods_changed info.LibraryContext mods
+                Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
                 update ()
         )
 
@@ -435,7 +429,7 @@ module SelectedChart =
                 Background.load None
 
         on_chart_change_started.Add(fun info -> collections_on_chart_changed info.LibraryContext _rate _selected_mods)
-        on_chart_change_started.Add(fun info -> presets_on_chart_changed info.ChartMeta)
+        on_chart_change_started.Add(fun info -> Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value))
 
         Song.on_loaded.Add(fun () ->
             for action in on_song_load_succeeded do action()

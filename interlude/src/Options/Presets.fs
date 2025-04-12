@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Options
 
 open Percyqaz.Common
+open Prelude.Mods
 open Interlude.Content
 
 module Presets =
@@ -70,7 +71,19 @@ module Presets =
             Some loaded_preset.Name
         | None -> None
 
-    let keymode_changed (keys: int) : unit =
-        match options.KeymodePreferredPresets.[keys - 3] with
-        | Some preference -> load preference |> ignore
-        | None -> ()
+    let mutable private previous_keymode: int option = None
+    let check_for_keymode_change (base_keys: int, mods: ModState) : unit =
+
+        // todo: push down into Prelude
+        let keys = 
+            if mods.ContainsKey "column_swap" then
+                ColumnSwap.keys mods.["column_swap"]
+            else base_keys
+
+        if previous_keymode <> Some keys then 
+            
+            match options.KeymodePreferredPresets.[keys - 3] with
+            | Some preference -> load preference |> ignore
+            | None -> ()
+
+            previous_keymode <- Some keys
