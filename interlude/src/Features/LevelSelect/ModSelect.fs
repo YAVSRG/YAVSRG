@@ -11,6 +11,30 @@ open Interlude.UI
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 
+type private ColumnSwapPage() =
+    inherit Page()
+
+    static let columns_setting = Setting.simple "1234123"
+
+    override this.Content() =
+        page_container()
+            .With(
+                PageTextEntry(%"mods.column_swap_columns", columns_setting)
+                    .Help(Help.Info("mods.column_swap_columns"))
+                    .Pos(0),
+                PageButton(%"confirm.yes", Menu.Back)
+                    .Pos(3),
+                WIP()
+            )
+
+    override this.Title = %"mod.column_swap"
+    override this.OnClose() =
+        match ColumnSwap.parse columns_setting.Value with
+        | Ok columns ->
+            SelectedChart.selected_mods.Value <-
+                Map.add "column_swap" (ColumnSwap.pack columns) SelectedChart.selected_mods.Value
+        | Error reason -> Notifications.error (reason, "")
+
 type private ModSelector(id: string, current_state: unit -> int64 option, action: unit -> unit) =
     inherit
         Container(
@@ -103,7 +127,12 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                                 else
                                     None
                             ),
-                            (fun _ -> Setting.app (ModState.cycle id) SelectedChart.selected_mods)
+                            (fun _ ->
+                                if id = "column_swap" && not (SelectedChart.selected_mods.Value.ContainsKey id) then
+                                    ColumnSwapPage().Show()
+                                else
+                                    Setting.app (ModState.cycle id) SelectedChart.selected_mods
+                            )
                         )
                 })
                 .With(
@@ -143,7 +172,7 @@ type private ModSelectPage(change_rate: Rate -> unit) =
 
                 PageButton(%"gameplay.pacemaker", (fun () -> PacemakerOptionsPage().Show()), Icon = Icons.FLAG)
                     .Help(Help.Info("gameplay.pacemaker"))
-                    .Pos(17),
+                    .Pos(19),
 
                 PageSetting(%"mods.mod_status",
                     Text(fun () ->
@@ -160,7 +189,7 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                         )
                         .Align(Alignment.LEFT)
                 )
-                    .Pos(20)
+                    .Pos(21)
             )
 
     override this.Update(elapsed_ms, moved) =
