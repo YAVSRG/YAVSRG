@@ -154,8 +154,7 @@
     <Compile Include="Features\Stats\Sessions\SessionTime.fs" />
     <Compile Include="Features\Stats\Sessions\ScoreList.fs" />
     <Compile Include="Features\Stats\Sessions\Activity.fs" />
-    <Compile Include="Features\Stats\Sessions\PreviousSession.fs" />
-    <Compile Include="Features\Stats\Sessions\CurrentSession.fs" />
+    <Compile Include="Features\Stats\Sessions\SessionPanel.fs" />
     <Compile Include="Features\Stats\Sessions\Sessions.fs" />
     <Compile Include="Features\Stats\Overall\OverallHeader.fs" />
     <Compile Include="Features\Stats\Overall\OverallTime.fs" />

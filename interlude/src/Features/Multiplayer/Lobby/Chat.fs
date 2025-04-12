@@ -65,7 +65,7 @@ type Chat(lobby: Lobby) =
         let replays = lobby.Replays
         if replays.Keys.Count > 0 then
             add_msg (
-                Text(sprintf "== Results for: %s ==" lobby.Chart.Value.Title)
+                Text(sprintf "== %s ==" ([lobby.Chart.Value.Title] %> "lobby.results_title"))
                     .Color(Colors.text)
                     .Align(Alignment.CENTER)
             )
@@ -135,7 +135,7 @@ type Chat(lobby: Lobby) =
                 add_msg cmp
 
             add_msg (
-                Text("Click a score to view details")
+                Text(%"lobby.results_hint")
                     .Color(Colors.text_greyout)
                     .Align(Alignment.CENTER)
             )
@@ -163,7 +163,7 @@ type Chat(lobby: Lobby) =
     override this.Init(parent) =
         this
         |+ chatline
-        |+ Text("Press ENTER to chat")
+        |+ Text([ (%%"select").ToString().ToUpperInvariant() ] %> "lobby.chat_hint")
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.SliceB(50.0f).Shrink(5.0f))
@@ -176,13 +176,13 @@ type Chat(lobby: Lobby) =
         lobby.OnLobbyEvent.Add(fun (kind, data) ->
             let text, color =
                 match (kind, data) with
-                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.LOG_IN who, Colors.green_accent
-                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.LOG_OUT who, Colors.red_accent
-                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.STAR who, Colors.yellow_accent
-                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.CHECK who, Colors.green
-                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s is ready" Icons.EYE who, Colors.green
-                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.X who, Colors.pink
-                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.MAIL who, Colors.cyan_accent
+                | LobbyEvent.Join, who -> sprintf "%s %s %s" Icons.LOG_IN who %"lobby.action.joined", Colors.green_accent
+                | LobbyEvent.Leave, who -> sprintf "%s %s %s" Icons.LOG_OUT who %"lobby.action.left", Colors.red_accent
+                | LobbyEvent.Host, who -> sprintf "%s %s %s" Icons.STAR who %"lobby.action.became_host", Colors.yellow_accent
+                | LobbyEvent.Ready, who -> sprintf "%s %s %s" Icons.CHECK who %"lobby.action.ready", Colors.green
+                | LobbyEvent.Ready_Spectate, who -> sprintf "%s %s %s" Icons.EYE who %"lobby.action.ready", Colors.green
+                | LobbyEvent.NotReady, who -> sprintf "%s %s %s" Icons.X who %"lobby.action.not_ready", Colors.pink
+                | LobbyEvent.Invite, who -> sprintf "%s %s %s" Icons.MAIL who %"lobby.action.invited", Colors.cyan_accent
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.INFO msg, Colors.grey_1
                 | _, msg -> msg, Colors.white
 

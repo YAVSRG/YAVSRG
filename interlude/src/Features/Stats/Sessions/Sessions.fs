@@ -4,7 +4,6 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
-open Prelude
 open Prelude.Data.User.Stats
 
 #nowarn "40"
@@ -12,9 +11,7 @@ open Prelude.Data.User.Stats
 type SessionsTab() =
     inherit Container(NodeType.Leaf)
 
-    let session_panel =
-        SwapContainer(CurrentSession())
-            .Position(Position.SlicePercentR(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
+    let session_panel = SwapContainer(SessionPanel.CreateCurrent())
 
     let TODAY = Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
 
@@ -26,9 +23,9 @@ type SessionsTab() =
                 | Some (date, session) ->
                     let sessions_today =
                         PREVIOUS_SESSIONS.[date]
-                    PreviousSession(session, sessions_today, (fun () -> selected_session.Set None), cycle_session_fd, cycle_session_bk) :> Widget
+                    SessionPanel.CreatePrevious(session, sessions_today, (fun () -> selected_session.Set None), cycle_session_fd, cycle_session_bk) :> Widget
                 | None ->
-                    CurrentSession()
+                    SessionPanel.CreateCurrent()
         )
 
     and cycle_session_fd() =
@@ -85,58 +82,60 @@ type SessionsTab() =
                     selected_session.Value <- Some (date,  List.last PREVIOUS_SESSIONS.[date])
                 date <- date.AddDays(-1)
 
-    and activity : RecentActivityGrid =
-        RecentActivityGrid(selected_session)
-            .Position(Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f))
+    and activity : RecentActivityGrid = RecentActivityGrid(selected_session)
 
     override this.Init(parent) =
         this
-        |+ activity
+            .Add(
+                activity
+                    .Position(Position.SlicePercentL(0.4f).ShrinkT(200.0f).SliceT(200.0f).ShrinkX(40.0f)),
 
-        |+ SessionTime(
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.GameTime
-                | Some (_, a) -> a.GameTime
-            ),
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PlayTime
-                | Some (_, a) -> a.PlayTime
-            ),
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PracticeTime
-                | Some (_, a) -> a.PracticeTime
+                SessionTime(
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.GameTime
+                        | Some (_, a) -> a.GameTime
+                    ),
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PlayTime
+                        | Some (_, a) -> a.PlayTime
+                    ),
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PracticeTime
+                        | Some (_, a) -> a.PracticeTime
+                    )
+                )
+                    .Position(Position.SlicePercentL(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f)),
+
+                PlayCount(
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PlaysStarted
+                        | Some (_, a) -> a.PlaysStarted
+                    ),
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PlaysCompleted
+                        | Some (_, a) -> a.PlaysCompleted
+                    ),
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PlaysRetried
+                        | Some (_, a) -> a.PlaysRetried
+                    ),
+                    (fun () ->
+                        match selected_session.Value with
+                        | None -> CURRENT_SESSION.PlaysQuit
+                        | Some (_, a) -> a.PlaysQuit
+                    )
+                )
+                    .Position(Position.SlicePercentL(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f)),
+
+                session_panel
+                    .Position(Position.SlicePercentR(0.6f).ShrinkT(40.0f).ShrinkB(80.0f).ShrinkX(40.0f))
             )
-        )
-            .Position(Position.SlicePercentL(0.4f).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f))
-
-        |+ PlayCount(
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PlaysStarted
-                | Some (_, a) -> a.PlaysStarted
-            ),
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PlaysCompleted
-                | Some (_, a) -> a.PlaysCompleted
-            ),
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PlaysRetried
-                | Some (_, a) -> a.PlaysRetried
-            ),
-            (fun () ->
-                match selected_session.Value with
-                | None -> CURRENT_SESSION.PlaysQuit
-                | Some (_, a) -> a.PlaysQuit
-            )
-        )
-            .Position(Position.SlicePercentL(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
-
-        |* session_panel
 
         base.Init parent
 
