@@ -97,10 +97,12 @@ module Check =
                 find (sprintf "mod.%s" m) "Mods"
                 find (sprintf "mod.%s.desc" m) "Mods"
 
-                if Mods.AVAILABLE_MODS.[m].RandomSeed |> not then
-                    for i in 1L .. Mods.AVAILABLE_MODS.[m].States - 1L do
+                match Mods.AVAILABLE_MODS.[m].Type with
+                | MultipleModes states ->
+                    for i in 1L .. states - 1L do
                         find (sprintf "mod.%s.%i" m i) "Mods"
                         find (sprintf "mod.%s.%i.desc" m i) "Mods"
+                | _ -> ()
 
             for i = 0 to 9 do
                 find (sprintf "noteskin.notecolors.chord.%i" i) "Note color tooltips"

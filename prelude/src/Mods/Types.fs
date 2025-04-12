@@ -51,13 +51,17 @@ type ModdedChartInternal =
             BPM = chart.BPM
         }
 
+type ModStateType =
+    | Stateless
+    | MultipleModes of states: int64
+    | RandomSeed
+    | ColumnSwap
+
 type Mod =
     {
         Status: ModStatus
         /// Mods can have an integer "state" passed to them when they are applied - This allows some sub-behaviours within mods
-        States: int64
-        /// If true, state should be a randomised seed
-        RandomSeed: bool
+        Type: ModStateType
         /// List of mod ids this mod cannot be used with
         Exclusions: string list
         /// Returns resulting chart + flag
@@ -70,9 +74,8 @@ type Mod =
     static member internal Default =
         {
             Status = ModStatus.Unstored
-            States = 1L
+            Type = Stateless
             Exclusions = []
-            RandomSeed = false
             Apply = (fun _ mc -> mc, false)
             Shorthand = fun _ -> "??"
         }

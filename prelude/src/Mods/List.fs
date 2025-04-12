@@ -20,7 +20,7 @@ module Mods =
             "shuffle",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                RandomSeed = true
+                Type = RandomSeed
                 Apply = fun s mc -> Randomise.shuffle (int32 s) mc
                 Exclusions = [ "random"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "SHF"
@@ -29,7 +29,7 @@ module Mods =
             "random",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                RandomSeed = true
+                Type = RandomSeed
                 Apply = fun s mc -> Randomise.randomise (int32 s) mc
                 Exclusions = [ "shuffle"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "RD"
@@ -45,7 +45,7 @@ module Mods =
             "noln",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                States = 4
+                Type = MultipleModes 4L
                 Exclusions = []
                 Apply =
                     fun state mc ->
@@ -61,7 +61,7 @@ module Mods =
             "inverse",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                States = 3
+                Type = MultipleModes 3L
                 Exclusions = []
                 Apply = fun state mc ->
                     match state with
@@ -75,7 +75,7 @@ module Mods =
             "more_notes",
             { Mod.Default with
                 Status = ModStatus.Unstored
-                States = 2
+                Type = MultipleModes 2L
                 Apply = fun s mc -> if s = 1L then MoreNotes.apply_chordjacks mc else MoreNotes.apply_minijacks mc
                 Shorthand = function 1L -> "MNC" | _ -> "MNM"
             }
@@ -83,8 +83,9 @@ module Mods =
             "column_swap",
             { Mod.Default with
                 Status = ModStatus.Unstored
+                Type = ColumnSwap
                 Exclusions = [ "shuffle"; "random"; "mirror" ]
-                Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.parse "0123012" |> Percyqaz.Common.Combinators.expect) mc
+                Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.unpack s) mc
                 Shorthand = fun _ -> "CSW"
             }
         ]
@@ -119,10 +120,10 @@ module Mods =
 
     let name (id: string) (state: int64 option) : string =
         match state with
-        | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i" id i)
+        | Some i when i > 0 && AVAILABLE_MODS.[id].Type.IsMultipleModes -> Localisation.localise (sprintf "mod.%s.%i" id i)
         | _ -> Localisation.localise (sprintf "mod.%s" id)
 
     let desc (id: string) (state: int64 option) : string =
         match state with
-        | Some i when i > 0 -> Localisation.localise (sprintf "mod.%s.%i.desc" id i)
+        | Some i when i > 0 && AVAILABLE_MODS.[id].Type.IsMultipleModes -> Localisation.localise (sprintf "mod.%s.%i.desc" id i)
         | _ -> Localisation.localise (sprintf "mod.%s.desc" id)
