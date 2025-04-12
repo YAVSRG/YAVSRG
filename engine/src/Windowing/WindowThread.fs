@@ -17,31 +17,10 @@ open Percyqaz.Flux.Graphics
 module WindowThread =
 
     let mutable private window: nativeptr<Window> = Unchecked.defaultof<_>
-    let private LOCK_OBJ = obj()
 
-    (*
-        Action queuing
-
-        Most of the game runs from the 'game thread' where draws and updates take place
-        `defer` can be used to queue up an action that needs to execute on the window thread
-
-        Deferred actions are fire-and-forget, they will execute in the order they are queued
-    *)
-
-    let mutable internal WINDOW_THREAD_ID = -1
-    let is_window_thread() = Thread.CurrentThread.ManagedThreadId = WINDOW_THREAD_ID
-
-    let mutable private action_queue : (unit -> unit) list = []
-    let private run_action_queue() =
-        lock (LOCK_OBJ) (fun () ->
-            while not (List.isEmpty action_queue) do
-                let actions = action_queue
-                action_queue <- []
-                (for action in actions do action())
-        )
-    let defer (action: unit -> unit) =
-        lock (LOCK_OBJ) (fun () -> action_queue <- action_queue @ [ action ])
-        GLFW.PostEmptyEvent()
+    let ACTION_QUEUE = ThreadActionQueue()
+    let is_window_thread() = ACTION_QUEUE.IsCurrent()
+    let defer (action: unit -> unit) : unit = ACTION_QUEUE.Defer action
 
     (*
         Monitor detection
@@ -81,9 +60,9 @@ module WindowThread =
                 }
             )
             |> List.ofSeq
-        lock (LOCK_OBJ) (fun () -> detected_monitors <- monitors)
+        lock (ACTION_QUEUE) (fun () -> detected_monitors <- monitors)
 
-    let get_monitors() = lock (LOCK_OBJ) (fun () -> detected_monitors)
+    let get_monitors() = lock (ACTION_QUEUE) (fun () -> detected_monitors)
 
     (*
         Window options
@@ -330,7 +309,7 @@ module WindowThread =
 
     let internal init(config: WindowOptions, title: string, init_thunk: unit -> UIEntryPoint, icon: Bitmap option) =
         last_applied_config <- config
-        WINDOW_THREAD_ID <- Environment.CurrentManagedThreadId
+        ACTION_QUEUE.BindToCurrent()
 
         GLFWProvider.EnsureInitialized()
         GLFW.SetErrorCallback(error_callback_d) |> ignore
@@ -414,7 +393,7 @@ module WindowThread =
         GameThread.start()
 
         while not (GLFW.WindowShouldClose window) do
-            run_action_queue()
+            ACTION_QUEUE.RunQueue()
             if last_applied_config.InputCPUSaver then
                 GLFW.WaitEventsTimeout(5)
             else
