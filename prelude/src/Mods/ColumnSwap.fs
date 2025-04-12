@@ -14,7 +14,7 @@ module ColumnSwap =
             Error "String must be all digits or '-'"
         else
 
-        s |> Seq.map (function '-' -> -1 | c -> int (c - '0')) |> Array.ofSeq |> Ok
+        s |> Seq.map (function '-' -> -1 | '0' -> 9 | c -> int (c - '1')) |> Array.ofSeq |> Ok
 
     let apply (swap: int array) (chart: ModdedChartInternal) : ModdedChartInternal * bool =
         if swap.Length < 3 || swap.Length > 10 then failwithf "Invalid key count: %i" swap.Length
@@ -32,6 +32,8 @@ module ColumnSwap =
             true
         else
             chart, false
+
+    let keys (packed_bits: int64) = int (packed_bits &&& 0x0FL)
 
     let pack (swap: int array) : int64 =
         if swap.Length < 3 || swap.Length > 10 then failwithf "Invalid key count: %i" swap.Length
