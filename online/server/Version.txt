@@ -1,1 +1,1 @@
-﻿Wasted 4 hours on cloudflare issues and counting
+﻿New protocol version bump for column swap
