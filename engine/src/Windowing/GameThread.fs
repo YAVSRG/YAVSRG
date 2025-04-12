@@ -126,7 +126,8 @@ module GameThread =
 
             | FrameLimit.Smart ->
                 // On windows: smart cap = do some cool stuff for frame times that outperforms vsync
-                if OperatingSystem.IsWindows() then
+                // Disabled on Intel to see if it solves the random crashes
+                if FrameTimeStrategies.VBlankThread.ENABLED then
                     GLFW.SwapInterval(0)
                     FrameTimeStrategies.VBlankThread.switch (1000.0 / float refresh_rate) (GLFW.GetWin32Adapter monitor) (GLFW.GetWin32Monitor monitor)
                     if entire_monitor then WindowsVblankSync else WindowsDwmFlush
