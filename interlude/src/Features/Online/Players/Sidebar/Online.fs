@@ -21,10 +21,12 @@ type private OnlineList() =
                 else
                     this.Offline()
             , fun _ data ->
-                let contents = FlowContainer.Vertical<Widget>(60.0f, Spacing = Style.PADDING)
-
-                for player in data.Players do
-                    contents.Add(PlayerButton(player.Username, player.Color))
-
-                ScrollContainer(contents) :> Widget
+                FlowContainer.Vertical<PlayerButton>(PlayerButton.HEIGHT)
+                    .Spacing(Style.PADDING)
+                    .With(seq{
+                        for player in data.Players do
+                            yield PlayerButton(player.Username, player.Color)
+                    })
+                |> ScrollContainer
+                :> Widget
         )

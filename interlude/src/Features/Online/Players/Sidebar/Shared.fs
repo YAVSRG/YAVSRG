@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Online.Players
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
@@ -20,14 +19,17 @@ module private Players =
 type private PlayerButton(username: string, color: int) =
     inherit Container(NodeType.Button(fun () -> Players.switch (Some username)))
 
-    override this.Init(parent) =
+    static member HEIGHT = 55.0f
+
+    override this.Init(parent: Widget) =
         this
-        |+ Text(username)
-            .Color(Color.FromArgb color, Colors.shadow_2)
-            .Align(Alignment.LEFT)
-            .Position(Position.Shrink(20.0f, 5.0f)
-        )
-        |* MouseListener().Button(this)
+            .Add(
+                Text(username)
+                    .Color(Color.FromArgb color, Colors.shadow_2)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.Shrink(20.0f, 5.0f)),
+                MouseListener().Button(this)
+            )
 
         base.Init parent
 
