@@ -37,7 +37,7 @@ If you are having this issue, **you could try turning on the Anti-Jitter setting
 *Visual latency problems* are when the frames displayed on your monitor are too out-of-date.  
 If this is the case, after pressing a key you would see a significant lag before the screen actually updates in response to your input.  
 To reduce the impact on your gameplay, you can compensate for visual latency by **adjusting Visual Offset under Options > System**.  
-If it is still too much, see the guide on using 'Unlimited' frame cap.
+If it is still too much, consider using a custom frame cap or the "Unlimited" frame cap mode
 
 **Please note:** Visual latency doesn't mean that your inputs are going into the game with a delay, just that the effects show up on the screen with a delay.  
 If you can prove you are actually experiencing significant **input lag**, where the game processes your inputs with a delay, please report this in the Discord. 

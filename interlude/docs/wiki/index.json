@@ -42,10 +42,6 @@
         "Filename": "performance_recording",
         "Folder": "Performance",
         "Title": "Recording"
-    }, {
-        "Filename": "performance_unlimited_fps",
-        "Folder": "Performance",
-        "Title": "Advanced settings"
     }],
     "Skinning": [{
         "Filename": "skinning",

@@ -11,8 +11,8 @@ Because of this and how the game tries to sync with your monitor, you may see st
 
 I'm still looking into this and don't want to offer any misinformation, but what works for me is:
 
-- Smart frame limit
-- Borderless windowed mode
+- Smart frame limit, (a fixed frame cap may work better in some cases)
+- Borderless windowed or Borderless fullscreen mode
 - In OBS, use a 'Display Capture' instead of a 'Game Capture'
 - In OBS, right-click on the stream preview and *disable it*
 - Minimise the OBS window before recording, if convenient

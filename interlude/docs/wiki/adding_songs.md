@@ -30,4 +30,6 @@ You can also manually drag and drop .zips, folders, .osu files, .osz archives, e
 Not sure what to play? **Tables** are hand-picked sets of charts, organised by difficulty so you can progressively work up the level ladder and improve your skills.  
 On the **Tables** tab in the import screen, you can download a table.
 
-Currently, the only existing table is Crescent, which has a wide selection of 4K charts to play
+Currently, the only existing table is Crescent, which has a wide selection of 4K charts to play.
+
+*Tables are planned to be removed in favour of users being able to upload and share collections.*

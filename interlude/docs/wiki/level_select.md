@@ -49,17 +49,6 @@ Got an idea for a modifier? Suggest it in the Discord!
 
 ::::
 
-## Comments
-
-Comments let you make notes or tag charts, for example "play this again", "this is good" or anything else you want to note to yourself.  
-
-Charts with comments will show an icon next to them.  
-You can write a comment on the current chart by pressing `F`, and `Shift+F` toggles an overlay displaying all comments.
-
-You can search for keywords in comments by typing `comment="keywords here"` or `c="keywords here"` in the search box.
-
-::::
-
 ## Random chart suggestions
 
 Hitting the 'random chart' button (hotkey `R`) will select a random chart from the visible charts.
