@@ -60,6 +60,25 @@ module Implementation =
         Assert.False(mod_applied)
 
     [<Test>]
+    let ColumnSwap_Pack_RoundTrip() =
+
+        let example = ColumnSwap.parse "54325-" |> expect
+        let packed = ColumnSwap.pack example
+        printfn "%B" packed
+
+        let unpacked = ColumnSwap.unpack packed
+
+        Assert.AreEqual(example, unpacked)
+
+        let example2 = ColumnSwap.parse "9090990909" |> expect
+        let packed2 = ColumnSwap.pack example2
+        printfn "%B" packed2
+
+        let unpacked2 = ColumnSwap.unpack packed2
+
+        Assert.AreEqual(example2, unpacked2)
+
+    [<Test>]
     let Inverse() =
 
         let inverted, _ = Inverse.apply (0.5f<beat>) (ModdedChartInternal.OfChart SAMPLE_CHART)
