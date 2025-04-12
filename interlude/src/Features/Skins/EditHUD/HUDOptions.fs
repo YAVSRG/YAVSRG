@@ -68,29 +68,26 @@ type EditHUDPage(ctx: PositionerContext) =
 
     override this.Content() =
         refresh ()
-        let tabs =
-            SwapContainer(elements_tab)
-                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandB(80.0f))
-        let tab_buttons =
-            RadioButtons.create_tabs
-                {
-                    Setting = Setting.make tabs.set_Current tabs.get_Current
-                    Options =
-                        [|
-                            elements_tab, %"hud.elements", K false
-                            general_tab, %"skins.general", K false
-                            textures_tab.Container, %"skins.textures", K false
-                            problems_tab.Container, %"skins.problems", K false
-                        |]
-                    Height = 60.0f
-                }
 
-        tab_buttons.Position <- Position.SliceT(40.0f, 60.0f).ShrinkR(PAGE_MARGIN_X).ShrinkL(PAGE_MARGIN_X + 480.0f)
+        let tab_view_container = SwapContainer(elements_tab)
+
+        let tab_options : (Widget * string) array =
+            [|
+                elements_tab, %"hud.elements"
+                general_tab, %"skins.general"
+                textures_tab.Container, %"skins.textures"
+                problems_tab.Container, %"skins.problems"
+            |]
 
         NavigationContainer.Column()
-            .With(tab_buttons, tabs)
+            .With(
+                TabButtons.Create(tab_options, tab_view_container)
+                    .Position(Position.SliceT(40.0f, 60.0f).ShrinkR(PAGE_MARGIN_X).ShrinkL(PAGE_MARGIN_X + 480.0f)),
+                tab_view_container
+                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandB(80.0f))
+            )
         |> Container.Create
-        |+ preview.Conditional(fun () -> tabs.Current <> elements_tab)
+        |+ preview.Conditional(fun () -> tab_view_container.Current <> elements_tab)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

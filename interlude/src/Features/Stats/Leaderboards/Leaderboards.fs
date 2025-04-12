@@ -6,7 +6,9 @@ open Prelude
 open Interlude.UI
 
 type LeaderboardsTab() =
-    inherit Container(NodeType.None)
+    inherit Container(NodeType.Leaf)
+
+    // todo: persist keymodes vs activity leaderboard on reopen
 
     let keymodes = KeymodesLeaderboard()
     let activity = ActivityLeaderboard()

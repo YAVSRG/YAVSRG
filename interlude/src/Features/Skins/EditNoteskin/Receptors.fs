@@ -447,57 +447,43 @@ type AnimationSettingsPage() =
             .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 
     let explosions_tab =
-        let subtabs =
-            SwapContainer(note_explosions_subtab)
-                .Position(Position.ShrinkT(150.0f))
-        let subtab_buttons =
-            RadioButtons.create_tabs
-                {
-                    Setting = Setting.make subtabs.set_Current subtabs.get_Current
-                    Options =
-                        [|
-                            note_explosions_subtab, %"noteskin.note_explosions", K false
-                            hold_explosions_subtab, %"noteskin.hold_explosions", K false
-                        |]
-                    Height = 50.0f
-                }
+        let subtab_container = SwapContainer(note_explosions_subtab)
 
-        subtab_buttons.Position <- page_position(2, 2, PageWidth.Normal).TranslateY(20.0f)
+        let subtab_options : (Widget * string) array =
+            [|
+                note_explosions_subtab, %"noteskin.note_explosions"
+                hold_explosions_subtab, %"noteskin.hold_explosions"
+            |]
 
         NavigationContainer.Column()
-        |+ PageSetting(%"noteskin.enable_explosions", Checkbox enable_explosions)
-            .Pos(0)
-        |+ subtab_buttons
-            .Conditional(enable_explosions.Get)
-        |+ subtabs
-            .Conditional(enable_explosions.Get)
-        :> Widget
+            .With(
+                PageSetting(%"noteskin.enable_explosions", Checkbox enable_explosions).Pos(0),
+                TabButtons.Create(subtab_options, subtab_container)
+                    .Position(page_position(2, 2, PageWidth.Normal).TranslateY(20.0f).SliceT(TabButtons.HEIGHT))
+                    .Conditional(enable_explosions.Get),
+                subtab_container
+                    .Position(Position.ShrinkT(150.0f))
+                    .Conditional(enable_explosions.Get)
+            )
 
     override this.Content() =
-        let tabs =
-            SwapContainer(receptors_tab)
-                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
+        let tab_container = SwapContainer(receptors_tab)
 
-        let tab_buttons =
-            RadioButtons.create_tabs
-                {
-                    Setting = Setting.make tabs.set_Current tabs.get_Current
-                    Options =
-                        [|
-                            receptors_tab, %"noteskin.receptors", K false
-                            judgement_line_tab, %"noteskin.judgement_line", K false
-                            column_light_tab, %"noteskin.column_lighting", K false
-                            explosions_tab, %"noteskin.explosions", K false
-                        |]
-                    Height = 50.0f
-                }
-
-        tab_buttons.Position <- page_position(0, 2, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y)
+        let tab_options : (Widget * string) array =
+            [|
+                receptors_tab, %"noteskin.receptors"
+                judgement_line_tab, %"noteskin.judgement_line"
+                column_light_tab, %"noteskin.column_lighting"
+                explosions_tab, %"noteskin.explosions"
+            |]
 
         NavigationContainer.Column()
-        |+ tab_buttons
-        |+ tabs
-        :> Widget
+            .With(
+                TabButtons.Create(tab_options, tab_container)
+                    .Position(page_position(0, 2, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceT(TabButtons.HEIGHT)),
+                tab_container
+                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
+            )
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

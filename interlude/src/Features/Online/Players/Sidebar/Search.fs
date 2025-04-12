@@ -8,9 +8,9 @@ open Interlude.UI
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 
-module SearchList =
+type SearchList =
 
-    let create () : NavigationContainer.Column =
+    static member Create() : NavigationContainer.Column =
 
         let query = Setting.simple ""
         let searcher =
@@ -48,9 +48,11 @@ module SearchList =
                                 %"online.players.search.empty_search_bar"
                         )
                 )
-                .Position(Position.ShrinkT(60.0f))
 
         NavigationContainer.Column()
-        |+ SearchBox(query, (fun (_: string) -> searcher.Reload()))
-            .Position(Position.Shrink(5.0f).SliceT(50.0f))
-        |+ searcher
+            .With(
+                SearchBox(query, (fun (_: string) -> searcher.Reload()))
+                    .Position(Position.Shrink(5.0f).SliceT(50.0f)),
+                searcher
+                    .Position(Position.ShrinkT(60.0f))
+            )

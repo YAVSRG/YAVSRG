@@ -45,6 +45,6 @@ type private FriendList() =
                 ScrollContainer(contents) :> Widget
         )
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         base.Init parent
         Players.friends_changed <- this.Reload

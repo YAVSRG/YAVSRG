@@ -9,11 +9,12 @@ open Interlude.UI
 type OverallTab() =
     inherit Container(NodeType.Leaf)
 
+    static let selected_tab = Setting.simple 0
+
+    let content_panel = SwapContainer()
+
     let skill_breakdown = SkillBreakdown()
     let timeline = SkillTimeline()
-    let content_panel =
-        SwapContainer()
-            .Position(Position.SlicePercentR(0.6f).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
     let overview =
         Overview(
             fun keymode source pattern ->
@@ -26,24 +27,17 @@ type OverallTab() =
                     content_panel.Current <- skill_breakdown
         )
 
-    do content_panel.Current <- overview
+    let tab_options : (Widget * string) array =
+        [|
+            overview, %"stats.overall.overview"
+            timeline, %"stats.overall.timeline"
+            skill_breakdown, %"stats.overall.breakdown"
+        |]
 
-    let tabs =
-        RadioButtons.create_tabs {
-            Setting = Setting.make content_panel.set_Current content_panel.get_Current
-            Options = [|
-                overview, %"stats.overall.overview", K false
-                timeline, %"stats.overall.timeline", K false
-                skill_breakdown, %"stats.overall.breakdown", K false
-            |]
-            Height = 50.0f
-        }
-
-    override this.Init(parent) =
-
+    override this.Init(parent: Widget) =
         this
-        |+ tabs
-            .Position(Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(50.0f).ShrinkX(40.0f))
+        |+ TabButtons.CreatePersistent(tab_options, content_panel, selected_tab)
+            .Position(Position.SlicePercentR(0.6f).ShrinkT(50.0f).SliceT(TabButtons.HEIGHT).ShrinkX(40.0f))
         |+ OverallHeader()
             .Position(Position.SlicePercentL(0.4f).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f))
         |+ OverallTime(
@@ -60,5 +54,6 @@ type OverallTab() =
          )
             .Position(Position.SlicePercentL(0.4f).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f))
         |* content_panel
+            .Position(Position.SlicePercentR(0.6f).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
 
         base.Init parent

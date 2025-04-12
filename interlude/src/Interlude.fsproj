@@ -52,7 +52,7 @@
     <Compile Include="UI\Loaders.fs" />
     <Compile Include="UI\AngledButton.fs" />
     <Compile Include="UI\InlaidButton.fs" />
-    <Compile Include="UI\RadioButtons.fs" />
+    <Compile Include="UI\TabButtons.fs" />
     <Compile Include="UI\TextEntry.fs" />
     <Compile Include="UI\NumberEntry.fs" />
     <Compile Include="UI\SearchBox.fs" />

@@ -2,36 +2,27 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Prelude
 open Interlude.UI
 
-module PlayerListSidebar =
+type PlayerListSidebar =
 
-    let create (position: Position) =
-        let online = OnlineList()
-        let friends = FriendList()
-        let search = SearchList.create()
+    static let selected_tab = Setting.simple 0
 
-        let tabs =
-            SwapContainer(online)
-                .Position(Position.ShrinkT(60.0f).ShrinkB(40.0f))
+    static member Create() =
+        let list_container = SwapContainer()
 
-        let tab_buttons =
-            RadioButtons.create_tabs
-                {
-                    Setting = Setting.make (fun v -> tabs.Current <- v; Input.remove_listener()) tabs.get_Current
-                    Options =
-                        [|
-                            online, %"online.players.online", K false
-                            friends, %"online.players.friends", K false
-                            search, %"online.players.search", K false
-                        |]
-                    Height = 50.0f
-                }
+        let tab_options : (Widget * string) array =
+            [|
+                OnlineList(), %"online.players.online"
+                FriendList(), %"online.players.friends"
+                SearchList.Create(), %"online.players.search"
+            |]
 
-        tab_buttons.Position <- Position.SliceT(50.0f).TranslateY(Style.PADDING)
-
-        NavigationContainer.Column(Position = position)
-        |+ tab_buttons
-        |+ tabs
+        NavigationContainer.Column()
+            .With(
+                TabButtons.CreatePersistent(tab_options, list_container, selected_tab)
+                    .Position(Position.SliceT(TabButtons.HEIGHT).TranslateY(Style.PADDING)),
+                list_container
+                    .Position(Position.ShrinkT(TabButtons.HEIGHT + Style.PADDING * 2.0f).ShrinkB(40.0f))
+            )

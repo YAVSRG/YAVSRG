@@ -107,8 +107,8 @@ type ActivityHeader(by_playtime: bool, change_sort: bool -> unit) =
 type private ActivityLeaderboard() =
     inherit Container(NodeType.None)
 
-    let by_playtime = Setting.simple false
-    let monthly = Setting.simple false
+    static let by_playtime = Setting.simple false
+    static let monthly = Setting.simple false
 
     let load (container: WebRequestContainer<_>) =
         if Network.status = Network.Status.LoggedIn then

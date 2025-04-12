@@ -80,9 +80,9 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
 type private KeymodesLeaderboard() =
     inherit Container(NodeType.None)
 
-    let sort_by = Setting.simple Stats.Leaderboard.Sort.Combined
-    let monthly = Setting.simple false
-    let keymode = Setting.simple 4
+    static let sort_by = Setting.simple Stats.Leaderboard.Sort.Combined
+    static let monthly = Setting.simple false
+    static let keymode = Setting.simple 4
 
     let load (container: WebRequestContainer<_>) =
         if Network.status = Network.Status.LoggedIn then
