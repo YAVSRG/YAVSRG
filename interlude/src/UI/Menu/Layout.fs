@@ -20,7 +20,7 @@ module PageLayout =
     let PAGE_BOTTOM = 23
 
     let PAGE_MARGIN_Y = (1080.0f - (float32 PAGE_BOTTOM * 0.5f * PAGE_ITEM_HEIGHT)) * 0.5f
-    let PAGE_MARGIN_X = 100.0f
+    let PAGE_MARGIN_X = 90.0f
 
     let page_position (start: int, height: int, width: PageWidth) : Position =
         match width with
