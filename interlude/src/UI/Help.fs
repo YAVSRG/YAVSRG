@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -197,8 +198,8 @@ type Help(content: Callout) =
             .Body(%(sprintf "%s.tooltip" feature))
             .Hotkey(hotkey)
 
-[<AutoOpen>]
-module Help =
+[<Extension>]
+type HelpExtensions =
 
-    type Container with
-        member this.Help(content: Callout) = this |+ Help(content)
+    [<Extension>]
+    static member Help(this: #IContainer<Widget>, content: Callout) = this.With(Help(content))

@@ -6,14 +6,11 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
 open Prelude
-open Prelude.Data.Library
-open Interlude.Content
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.OptionsMenu.Library
-open Interlude.Features.Pacemaker
 open Interlude.Features.Rulesets
 open Interlude.Features.Collections
 open Interlude.Features.Tables
@@ -154,49 +151,26 @@ module Settings =
     let search_gameplay_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"gameplay.scrollspeed"|] then
-                yield PageSetting(%"gameplay.scrollspeed", Slider.Percent(Setting.uom options.ScrollSpeed))
-                    .Help(Help.Info("gameplay.scrollspeed"))
-                yield Text(fun () ->
-                        [
-                            ((1080.0f - options.HitPosition.Value) / float32 options.ScrollSpeed.Value).ToString("F0")
-                            (float32 options.ScrollSpeed.Value * 12.698412f).ToString("F1")
-                            (float32 options.ScrollSpeed.Value * 33.9f / 2.38f).ToString("F1")
-                            "C" + (60000.0f * float32 options.ScrollSpeed.Value / Content.NoteskinConfig.DefaultColumnWidth).ToString("F0")
-                        ]
-                        %> "gameplay.scrollspeed.info"
-                    )
-                    .Align(Alignment.CENTER),
-                    1, 1, PageWidth.Custom (PAGE_LABEL_WIDTH + PAGE_ITEM_WIDTH)
+                yield GameplayPage.ScrollSpeed().Pos(0), 2, 3, PageWidth.Normal
             if token_match tokens [|%"gameplay.hitposition"|] then
-                yield PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
-                    .Help(Help.Info("gameplay.hitposition"))
+                yield GameplayPage.HitPosition()
             if token_match tokens [|%"gameplay.upscroll"|] then
-                yield PageSetting(%"gameplay.upscroll", Checkbox options.Upscroll)
-                    .Help(Help.Info("gameplay.upscroll"))
+                yield GameplayPage.Upscroll()
             if token_match tokens [|%"gameplay.backgrounddim"|] then
-                yield PageSetting(%"gameplay.backgrounddim", Slider.Percent(options.BackgroundDim))
-                    .Help(Help.Info("gameplay.backgrounddim"))
-            if token_match tokens [|%"gameplay.lanecover"|] then
-                yield PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show())
-                    .Help(Help.Info("gameplay.lanecover"))
+                yield GameplayPage.BackgroundDim()
+            if token_match tokens [|%"gameplay.lanecover"; %"gameplay.lanecover.hidden"; %"gameplay.lanecover.sudden"|] then
+                yield GameplayPage.Lanecover()
             if token_match tokens [|%"gameplay.pacemaker"; %"gameplay.pacemaker.fail_mid_song"; %"gameplay.pacemaker.onlysavenewrecords"; %"gameplay.pacemaker.save_failed_scores"|] then
-                yield PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
-            if token_match tokens [|%"rulesets"|] then
-                yield PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
-                    .Help(Help.Info("rulesets"))
-            if token_match tokens [|%"rulesets.add"|] then
+                yield GameplayPage.Pacemaker()
+            if token_match tokens [|%"rulesets"; %"rulesets.add"|] then
+                yield GameplayPage.Rulesets()
                 yield PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show())
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
-                yield PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
-                    .Help(Help.Info("gameplay.keybinds"))
-
+                yield GameplayPage.Keybinds()
             if token_match tokens [|%"gameplay.hold_to_give_up"|] then
-                yield PageSetting(%"gameplay.hold_to_give_up", Checkbox options.HoldToGiveUp)
-                    .Help(Help.Info("gameplay.hold_to_give_up"))
-
+                yield GameplayPage.HoldToGiveUp()
             if token_match tokens [|%"gameplay.hide_hit_notes"|] then
-                yield PageSetting(%"gameplay.hide_hit_notes", Checkbox options.VanishingNotes)
-                    .Help(Help.Info("gameplay.hide_hit_notes"))
+                yield GameplayPage.HideHitNotes()
         }
 
     let search_library_settings (tokens: string array) : SearchResult seq =

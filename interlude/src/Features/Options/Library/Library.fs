@@ -1,6 +1,5 @@
 namespace Interlude.Features.OptionsMenu.Library
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets

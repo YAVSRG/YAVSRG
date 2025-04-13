@@ -76,7 +76,7 @@ type ScoreGraphLineColor =
     | Grade = 2
 
 [<Json.AutoCodec(false)>]
-type LaneCoverPresetOptions =
+type LanecoverPresetOptions =
     {
         Enabled: bool
         DrawUnderReceptors: bool
@@ -87,7 +87,7 @@ type LaneCoverPresetOptions =
     }
 
 [<Json.AutoCodec(false)>]
-type LaneCoverOptions =
+type LanecoverOptions =
     {
         Enabled: Setting<bool>
         DrawUnderReceptors: Setting<bool>
@@ -97,7 +97,7 @@ type LaneCoverOptions =
         Color: Setting<Color>
     }
 
-    member this.LoadPreset(p: LaneCoverPresetOptions) =
+    member this.LoadPreset(p: LanecoverPresetOptions) =
         this.Enabled.Set p.Enabled
         this.DrawUnderReceptors.Set p.DrawUnderReceptors
         this.Sudden.Set p.Sudden
@@ -105,7 +105,7 @@ type LaneCoverOptions =
         this.FadeLength.Set p.FadeLength
         this.Color.Set p.Color
 
-    member this.ToPreset : LaneCoverPresetOptions =
+    member this.ToPreset : LanecoverPresetOptions =
         {
             Enabled = this.Enabled.Value
             DrawUnderReceptors = this.DrawUnderReceptors.Value
@@ -142,7 +142,7 @@ type Preset =
         ScrollSpeed: float32<rate/ms>
         HitPosition: float32
         Upscroll: bool
-        LaneCover: LaneCoverPresetOptions
+        LaneCover: LanecoverPresetOptions
         Noteskin: string
         HUD: string
     }
@@ -164,7 +164,7 @@ type GameOptions =
         HitLighting: Setting<bool>
         Upscroll: Setting<bool>
         BackgroundDim: Setting.Bounded<float32>
-        LaneCover: LaneCoverOptions
+        LaneCover: LanecoverOptions
         Noteskin: Setting<string>
         SelectedHUD: Setting<string>
         SelectedRuleset: Setting<string>
@@ -232,7 +232,7 @@ type GameOptions =
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percentf 0.5f
-            LaneCover = LaneCoverOptions.Default
+            LaneCover = LanecoverOptions.Default
             Noteskin = Skins.selected_noteskin_id
             SelectedHUD = Skins.selected_hud_id
             SelectedRuleset = Rulesets.selected_id

@@ -50,12 +50,16 @@ type GameplayKeybinder(keymode: Keymode) as this =
             Input.listen_to_next_key input_callback
             Input.finish_frame_events()
 
-    do
+    override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> text))
-            .Color((fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1))
-            .Align(Alignment.LEFT)
-        |* MouseListener().Button(this)
+            .Add(
+                Text(fun () -> text)
+                    .Color((fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1))
+                    .Align(Alignment.LEFT),
+                MouseListener().Button(this)
+            )
+
+        base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse
@@ -84,15 +88,11 @@ type GameplayBindsPage() =
 
     override this.Content() =
         page_container()
-        |+ PageSetting("3K", GameplayKeybinder Keymode.``3K``).Pos(0, 2, PageWidth.Full)
-        |+ PageSetting("4K", GameplayKeybinder Keymode.``4K``).Pos(2, 2, PageWidth.Full)
-        |+ PageSetting("5K", GameplayKeybinder Keymode.``5K``).Pos(4, 2, PageWidth.Full)
-        |+ PageSetting("6K", GameplayKeybinder Keymode.``6K``).Pos(6, 2, PageWidth.Full)
-        |+ PageSetting("7K", GameplayKeybinder Keymode.``7K``).Pos(8, 2, PageWidth.Full)
-        |+ PageSetting("8K", GameplayKeybinder Keymode.``8K``).Pos(10, 2, PageWidth.Full)
-        |+ PageSetting("9K", GameplayKeybinder Keymode.``9K``).Pos(12, 2, PageWidth.Full)
-        |+ PageSetting("10K", GameplayKeybinder Keymode.``10K``).Pos(14, 2, PageWidth.Full)
-        :> Widget
+            .With(seq {
+                for keys = 3 to 10 do
+                    yield PageSetting($"{keys}K", GameplayKeybinder (enum keys))
+                        .Pos((keys - 3) * 2, 2, PageWidth.Full) :> Widget
+            })
 
     override this.Title = %"gameplay.keybinds"
     override this.OnClose() = ()

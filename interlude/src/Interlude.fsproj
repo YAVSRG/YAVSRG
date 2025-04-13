@@ -272,10 +272,10 @@
     <Compile Include="Features\Options\Gameplay\Lanecover.fs" />
     <Compile Include="Features\Options\Gameplay\Gameplay.fs" />
     <Compile Include="Features\Options\Library\Library.fs" />
-    <Compile Include="Features\Options\Search\Core.fs" />
+    <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\Search\Settings.fs" />
     <Compile Include="Features\Options\Search\Skins.fs" />
-    <Compile Include="Features\Options\Search\Search.fs" />
+    <Compile Include="Features\Options\Search\SearchResults.fs" />
     <Compile Include="Features\Options\Presets\EditPreset.fs" />
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
     <Compile Include="Features\Options\OptionsMenuLayout.fs" />
