@@ -10,12 +10,10 @@ open Interlude.Features.Gameplay
 type SkillTimeline() =
     inherit Container(NodeType.None)
 
-    let graph_container =
-        SwapContainer()
-            .Position(Position.ShrinkT(50.0f))
+    let graph_container = SwapContainer()
 
-    let day_range = Animation.Fade(90.0f)
-    let day_offset = Animation.Fade(0.0f)
+    static let day_range = Animation.Fade(90.0f)
+    static let day_offset = Animation.Fade(0.0f)
 
     let default_keymode = SelectedChart.keymode() |> int
     let keymode = Setting.simple default_keymode
@@ -44,7 +42,6 @@ type SkillTimeline() =
                 Colors.shadow_2.O2
             )
                 .LeanRight(false)
-                .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f))
 
         let zoom_in =
             AngledButton(
@@ -53,7 +50,6 @@ type SkillTimeline() =
                 Colors.black.O2
             )
                 .Hotkey("uprate")
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(175.0f).SliceR(100.0f))
 
         let zoom_out =
             AngledButton(
@@ -62,7 +58,6 @@ type SkillTimeline() =
                 Colors.shadow_2.O2
             )
                 .Hotkey("downrate")
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(300.0f).SliceR(100.0f))
 
         let show_newer =
             AngledButton(
@@ -70,7 +65,6 @@ type SkillTimeline() =
                 (fun () -> day_offset.Target <- max 0.0f (day_offset.Target - day_range.Target * 0.25f)),
                 Colors.black.O2
             )
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(425.0f).SliceR(100.0f))
 
         let show_older =
             AngledButton(
@@ -78,19 +72,24 @@ type SkillTimeline() =
                 (fun () -> day_offset.Target <- day_offset.Target + day_range.Target * 0.25f),
                 Colors.shadow_2.O2
             )
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(550.0f).SliceR(100.0f))
 
         this
             .Add(
-                keymode_switcher,
-                zoom_in,
-                zoom_out,
-                show_newer,
-                show_older,
+                keymode_switcher
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f)),
+                zoom_in
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f + AngledButton.LEAN_AMOUNT, 100.0f)),
+                zoom_out
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f + 100.0f + AngledButton.LEAN_AMOUNT * 2.0f, 100.0f)),
+                show_newer
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f + 100.0f * 2.0f + AngledButton.LEAN_AMOUNT * 3.0f, 100.0f)),
+                show_older
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(150.0f + 100.0f * 3.0f + AngledButton.LEAN_AMOUNT * 4.0f, 100.0f)),
                 graph_container
+                    .Position(Position.ShrinkT(AngledButton.HEIGHT))
             )
         base.Init parent
 
-    member this.Switch(k: int) =
+    member this.Switch(k: int) : unit =
         keymode.Value <- k
         refresh_graph()

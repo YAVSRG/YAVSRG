@@ -13,16 +13,14 @@ type SkillBreakdown() =
 
     let default_keymode = SelectedChart.keymode() |> int
     let keymode = Setting.simple default_keymode
-    let skill = Setting.simple Jacks
-    let source = Setting.simple AllTime
+    static let skill = Setting.simple Jacks
+    static let source = Setting.simple AllTime
 
-    let graph_container =
-        SwapContainer()
-            .Position(Position.ShrinkT(50.0f))
+    let graph_container = SwapContainer()
     let refresh_graph() =
         graph_container.Current <- SkillBreakdownGraph.Create(keymode.Value, skill.Value, source.Value)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         let available_keymodes =
             seq {
                 for i = 3 to 10 do
@@ -43,7 +41,6 @@ type SkillBreakdown() =
                 Colors.black.O2
             )
                 .LeanLeft(false)
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(400.0f))
 
         let keymode_switcher =
             AngledButton(
@@ -54,7 +51,6 @@ type SkillBreakdown() =
                 ),
                 Colors.shadow_2.O2
             )
-                .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(275.0f).SliceR(100.0f))
 
         let skill_switcher =
             AngledButton(
@@ -66,13 +62,19 @@ type SkillBreakdown() =
                 Colors.black.O2
             )
                 .LeanRight(false)
-                .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(250.0f))
 
         this
-        |+ source_switcher
-        |+ keymode_switcher
-        |+ skill_switcher
-        |* graph_container
+            .Add(
+                skill_switcher
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(250.0f)),
+                keymode_switcher
+                    .Position(Position.SliceT(AngledButton.HEIGHT).SliceR(250.0f + AngledButton.LEAN_AMOUNT, 100.0f)),
+                source_switcher
+                    .Position(Position.SliceT(AngledButton.HEIGHT).ShrinkR(250.0f + 100.0f + AngledButton.LEAN_AMOUNT * 2.0f)),
+
+                graph_container
+                    .Position(Position.ShrinkT(AngledButton.HEIGHT))
+            )
         base.Init parent
 
     member this.Switch(_keymode: int, _source: GraphSource, _skill: CorePattern) =

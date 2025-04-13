@@ -212,17 +212,21 @@ type ScoreList(start_time: int64, end_time: int64) =
         let mutable has_scores = false
 
         this
-        |+ ScrollContainer(scores)
-            .Margin(Style.PADDING)
-            .Position(Position.Shrink(20.0f))
-        |+ Button(Icons.LIST + " " + %"stats.session.make_playlist", make_playlist)
-            .Align(Alignment.RIGHT)
-            .Floating()
-            .Position(Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f))
-            .Conditional(fun () -> has_scores)
-        |* EmptyState(Icons.WIND, "No scores this session")
-            .Position(Position.ShrinkT(160.0f))
-            .Conditional(fun () -> finished_loading && not has_scores)
+            .Add(
+                ScrollContainer(scores)
+                    .Margin(Style.PADDING)
+                    .Position(Position.Shrink(20.0f)),
+
+                Button(Icons.LIST + " " + %"stats.session.make_playlist", make_playlist)
+                    .Align(Alignment.RIGHT)
+                    .Floating()
+                    .Position(Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f))
+                    .Conditional(fun () -> has_scores),
+
+                EmptyState(Icons.WIND, "No scores this session")
+                    .Position(Position.ShrinkT(160.0f))
+                    .Conditional(fun () -> finished_loading && not has_scores)
+            )
 
         ScoreList.loader.Request((start_time, end_time, Rulesets.current, (fun s -> has_scores <- true; scores.Add s), fun () -> finished_loading <- true))
 
