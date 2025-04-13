@@ -93,6 +93,11 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 type PageButtonExtensions =
 
     [<Extension>]
+    static member Icon (button: PageButton, icon: string) : PageButton =
+        button.Icon <- icon
+        button
+
+    [<Extension>]
     static member Hotkey (button: PageButton, hotkey: Hotkey) : PageButton =
         button.Hotkey <- %%hotkey
         button

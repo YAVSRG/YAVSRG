@@ -57,7 +57,7 @@ type Toolbar() =
     let import_button =
         InlaidButton(
             %"menu.import",
-            (fun () -> ImportsMenuPage().Show())
+            (fun () -> ImportsPage().Show())
         )
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
@@ -66,7 +66,7 @@ type Toolbar() =
                     .Position(Position.BorderB(Style.PADDING))
             )
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         container
             // Bottom right info
             .With(

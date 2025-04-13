@@ -14,10 +14,21 @@ type QuickMenuPage() =
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"menu.options", (fun () -> OptionsMenuPage().Show()), Hotkey = Bind.mk Keys.O, Icon = Icons.SETTINGS).Pos(0)
-        |+ PageButton(%"noteskin.edit", Skinning.edit_or_extract_noteskin, Hotkey = Bind.mk Keys.N, Icon = Icons.IMAGE).Pos(3)
-        |+ PageButton(%"hud.edit", (fun () -> Skinning.edit_hud ignore), Hotkey = Bind.mk Keys.H, Icon = Icons.ZAP).Pos(5)
-        |+ PageButton(%"system.hotkeys", (fun () -> HotkeysPage().Show()), Hotkey = Bind.mk Keys.K).Pos(8)
+        |+ PageButton(%"menu.options", fun () -> OptionsPage().Show())
+            .Hotkey(Bind.mk Keys.O)
+            .Icon(Icons.SETTINGS)
+            .Pos(0)
+        |+ PageButton(%"noteskin.edit", Skinning.edit_or_extract_noteskin)
+            .Hotkey(Bind.mk Keys.N)
+            .Icon(Icons.IMAGE)
+            .Pos(3)
+        |+ PageButton(%"hud.edit", fun () -> Skinning.edit_hud ignore)
+            .Hotkey(Bind.mk Keys.H)
+            .Icon(Icons.ZAP)
+            .Pos(5)
+        |+ PageButton(%"system.hotkeys", fun () -> HotkeysPage().Show())
+            .Hotkey(Bind.mk Keys.K)
+            .Pos(8)
         :> Widget
 
     override this.Header() =

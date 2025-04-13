@@ -6,57 +6,57 @@ open Prelude
 open Interlude.UI
 open Interlude.Features.Skins
 
-type OptionsMenuPage() =
+type OptionsPage() =
     inherit Page()
 
     let page_body = SwapContainer()
-    let mutable current_tab = OptionsMenuTab.System
+    let mutable current_tab = OptionsTab.System
     let mutable on_destroy_current_tab = ignore
     let mutable on_return_current_tab = ignore
 
-    let content_setting : Setting<OptionsMenuTab> =
+    let content_setting : Setting<OptionsTab> =
         Setting.make
             (fun new_tab ->
                 if current_tab = new_tab then () else
                 on_destroy_current_tab()
                 current_tab <- new_tab
                 match new_tab with
-                | OptionsMenuTab.System ->
+                | OptionsTab.System ->
                     let p = SystemSettings.SystemPage()
                     on_destroy_current_tab <- p.OnClose
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                     State.recent_tab <- new_tab
-                | OptionsMenuTab.Gameplay ->
+                | OptionsTab.Gameplay ->
                     let p = Gameplay.GameplayPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                     State.recent_tab <- new_tab
-                | OptionsMenuTab.Library ->
+                | OptionsTab.Library ->
                     let p = Library.LibraryPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                     State.recent_tab <- new_tab
-                | OptionsMenuTab.Noteskins ->
+                | OptionsTab.Noteskins ->
                     let p = SelectSkinsPage()
                     on_destroy_current_tab <- p.OnDestroy
                     on_return_current_tab <- p.OnReturnFromNestedPage
                     page_body.Current <- p.Content()
                     State.recent_tab <- new_tab
-                | OptionsMenuTab.SearchResults contents ->
+                | OptionsTab.SearchResults contents ->
                     on_destroy_current_tab <- ignore
                     on_return_current_tab <- ignore
                     page_body.Current <- contents
             )
             (fun () -> current_tab)
 
-    do content_setting.Set OptionsMenuTab.Gameplay
+    do content_setting.Set OptionsTab.Gameplay
 
-    let header = OptionsMenuHeader(content_setting)
+    let header = OptionsPageHeader(content_setting)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         base.Init parent
         header.Focus false
 
@@ -66,7 +66,7 @@ type OptionsMenuPage() =
         :> Widget
 
     override this.Footer() =
-        OptionsMenuFooter()
+        OptionsPageFooter()
         |> OverlayContainer
         :> Widget
 

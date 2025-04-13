@@ -278,9 +278,9 @@
     <Compile Include="Features\Options\Search\SearchResults.fs" />
     <Compile Include="Features\Options\Presets\EditPresetPage.fs" />
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
-    <Compile Include="Features\Options\OptionsMenuLayout.fs" />
-    <Compile Include="Features\Options\OptionsMenu.fs" />
-    <Compile Include="Features\Options\ImportsMenu.fs" />
+    <Compile Include="Features\Options\OptionsLayout.fs" />
+    <Compile Include="Features\Options\OptionsPage.fs" />
+    <Compile Include="Features\Options\ImportsPage.fs" />
     <Compile Include="Features\Options\QuickMenu.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />

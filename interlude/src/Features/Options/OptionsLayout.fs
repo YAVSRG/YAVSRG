@@ -19,7 +19,7 @@ type private Transition =
     | Hidden
 
 [<RequireQualifiedAccess>]
-type private OptionsMenuTab =
+type private OptionsTab =
     | System
     | Gameplay
     | Library
@@ -28,9 +28,9 @@ type private OptionsMenuTab =
 
 module private State =
 
-    let mutable recent_tab = OptionsMenuTab.System
+    let mutable recent_tab = OptionsTab.System
 
-type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
+type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
     let HEIGHT = 90.0f
@@ -48,29 +48,29 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
                     200.0f,
-                    (fun () -> current_tab.Set OptionsMenuTab.Gameplay),
-                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Gameplay),
+                    (fun () -> current_tab.Set OptionsTab.Gameplay),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Gameplay),
                     Keybind = Bind.mk Keys.D1
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.AIRPLAY (%"system"),
                     200.0f,
-                    (fun () -> current_tab.Set OptionsMenuTab.System),
-                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.System),
+                    (fun () -> current_tab.Set OptionsTab.System),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsTab.System),
                     Keybind = Bind.mk Keys.D2
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.IMAGE (%"skins"),
                     200.0f,
-                    (fun () -> current_tab.Set OptionsMenuTab.Noteskins),
-                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Noteskins),
+                    (fun () -> current_tab.Set OptionsTab.Noteskins),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Noteskins),
                     Keybind = Bind.mk Keys.D3
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.ARCHIVE (%"library"),
                     200.0f,
-                    (fun () -> current_tab.Set OptionsMenuTab.Library),
-                    IsHighlighted = (fun () -> current_tab.Value = OptionsMenuTab.Library),
+                    (fun () -> current_tab.Set OptionsTab.Library),
+                    IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Library),
                     Keybind = Bind.mk Keys.D4
                 )
             )
@@ -78,7 +78,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
     let search_box =
         SearchBox(fun query ->
             if query = "" then current_tab.Set State.recent_tab
-            else current_tab.Set (OptionsMenuTab.SearchResults <| SearchResults.get query)
+            else current_tab.Set (OptionsTab.SearchResults <| SearchResults.get query)
         )
             .Fill(Colors.cyan.O3)
             .Border(Colors.cyan_accent)
@@ -96,7 +96,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
     member private this.Buttons = tab_buttons
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         this
             .Position(Position.SliceT(HEIGHT))
             .Add(search_box, tab_buttons)
@@ -161,7 +161,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
         transition_timer.Reset()
         transition <- Transition.In
 
-type private OptionsMenuFooter() as this =
+type private OptionsPageFooter() as this =
     inherit Container(NodeType.Container(fun () -> Some this.Items))
 
     let HEIGHT = 70.0f
@@ -214,7 +214,7 @@ type private OptionsMenuFooter() as this =
 
     member this.Items = content
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         this.With(content).Position <- Position.SliceB HEIGHT
         base.Init parent
 

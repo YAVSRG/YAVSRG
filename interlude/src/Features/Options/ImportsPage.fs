@@ -12,7 +12,7 @@ open Interlude.Features.Skins.Browser
 open Interlude.Features.Rulesets
 open Interlude.Features.Tables
 
-type ImportsMenuPage() =
+type ImportsPage() =
     inherit Page()
 
     let mount_options =
