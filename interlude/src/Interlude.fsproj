@@ -267,6 +267,7 @@
     <Compile Include="Features\Options\System\HotkeysPage.fs" />
     <Compile Include="Features\Options\System\PerformanceSettingsPage.fs" />
     <Compile Include="Features\Options\System\AudioPage.fs" />
+    <Compile Include="Features\Options\System\WindowSettings.fs" />
     <Compile Include="Features\Options\System\SystemPage.fs" />
     <Compile Include="Features\Options\Gameplay\LanecoverPage.fs" />
     <Compile Include="Features\Options\Gameplay\GameplayBindsPage.fs" />
