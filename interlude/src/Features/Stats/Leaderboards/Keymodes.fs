@@ -44,20 +44,18 @@ type PlayerInfo(rank: int, data: Stats.Leaderboard.KeymodeLeaderboardEntry) =
 type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.Sort -> unit) =
     inherit Container(NodeType.None)
 
-    let button (for_sort: Stats.Leaderboard.Sort) (label: string) (pos: Position) =
+    let label_or_button (for_sort: Stats.Leaderboard.Sort, label: string) =
         let align = if for_sort = Stats.Leaderboard.Sort.Playtime then Alignment.RIGHT else Alignment.CENTER
         if sort = for_sort then
             Text(Icons.CHEVRON_DOWN + " " + label)
                 .Color(Colors.text_cyan_2)
                 .Align(align)
-                .Position(pos)
             :> Widget
         else
             Button(label, (fun () -> change_sort for_sort))
                 .Align(align)
-                .Position(pos)
 
-    let player =
+    let player_column_label =
         Text(%"stats.leaderboards.rating.player")
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
@@ -65,12 +63,24 @@ type KeymodeHeader(sort: Stats.Leaderboard.Sort, change_sort: Stats.Leaderboard.
 
     override this.Init(parent) =
         this
-        |+ player
-        |+ button Stats.Leaderboard.Sort.Combined %"stats.leaderboards.rating.combined" (Position.SlicePercentL(0.20f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Jacks %"stats.leaderboards.rating.jacks" (Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Chordstream %"stats.leaderboards.rating.chordstream" (Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f))
-        |+ button Stats.Leaderboard.Sort.Stream %"stats.leaderboards.rating.stream" (Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f))
-        |* button Stats.Leaderboard.Sort.Playtime %"stats.leaderboards.rating.playtime" (Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f))
+            .Add(
+                player_column_label,
+
+                label_or_button(Stats.Leaderboard.Sort.Combined, %"stats.leaderboards.rating.combined")
+                    .Position(Position.SlicePercentL(0.20f, 0.25f).ShrinkY(5.0f)),
+
+                label_or_button(Stats.Leaderboard.Sort.Jacks, %"stats.leaderboards.rating.jacks")
+                    .Position(Position.SlicePercentL(0.35f, 0.25f).ShrinkY(5.0f)),
+
+                label_or_button(Stats.Leaderboard.Sort.Chordstream, %"stats.leaderboards.rating.chordstream")
+                    .Position(Position.SlicePercentL(0.5f, 0.25f).ShrinkY(5.0f)),
+
+                label_or_button(Stats.Leaderboard.Sort.Stream, %"stats.leaderboards.rating.stream")
+                    .Position(Position.SlicePercentL(0.65f, 0.25f).ShrinkY(5.0f)),
+
+                label_or_button(Stats.Leaderboard.Sort.Playtime, %"stats.leaderboards.rating.playtime")
+                    .Position(Position.SlicePercentR(0.20f).Shrink(10.0f, 5.0f))
+            )
         base.Init parent
 
     override this.Draw() =
@@ -114,30 +124,40 @@ type private KeymodesLeaderboard() =
                         keymode.Value
                         %"stats.leaderboards.rating.all_time"
             )
-                .Position(Position.SliceT(70.0f).ShrinkX(5.0f))
-        let header =
-            KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload()))
-                .Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
-        let flow = FlowContainer.Vertical<Widget>(PlayerInfo.HEIGHT, Spacing = Style.PADDING)
-        for i, d in Seq.indexed data.Leaderboard do
-            PlayerInfo(i + 1, d)
-            |> flow.Add
+
+        let header = KeymodeHeader(sort_by.Value, (fun v -> sort_by.Set v; container.Reload()))
+
+        let player_content =
+            FlowContainer.Vertical<PlayerInfo>(PlayerInfo.HEIGHT)
+                .Spacing(Style.PADDING)
+                .With(seq {
+                    for i, d in Seq.indexed data.Leaderboard do
+                        yield PlayerInfo(i + 1, d)
+                })
+
+        let title_and_header =
+            Container(NodeType.None)
+                .With(
+                    title.Position(Position.SliceT(70.0f).ShrinkX(5.0f)),
+                    header.Position(Position.ShrinkT(80.0f).SliceT(45.0f).ShrinkX(20.0f))
+                )
 
         match data.You with
         | Some (rank, you) ->
-            Container(NodeType.None)
-            |+ title
-            |+ header
-            |+ ScrollContainer(flow)
-                .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING))
-            |+ PlayerInfo(int32 rank, you)
-                .Position(Position.SliceB(PlayerInfo.HEIGHT))
+            title_and_header
+                .With(
+                    ScrollContainer(player_content)
+                        .Position(Position.ShrinkT(125.0f).ShrinkB(PlayerInfo.HEIGHT + Style.PADDING)),
+                    PlayerInfo(int32 rank, you)
+                        .Position(Position.SliceB(PlayerInfo.HEIGHT))
+                )
+
         | None ->
-            Container(NodeType.None)
-            |+ title
-            |+ header
-            |+ ScrollContainer(flow)
-                .Position(Position.ShrinkT(125.0f))
+            title_and_header
+                .With(
+                    ScrollContainer(player_content)
+                        .Position(Position.ShrinkT(125.0f))
+                )
         :> Widget
 
     let container = WebRequestContainer<Stats.Leaderboard.KeymodeResponse>(load, rerender)

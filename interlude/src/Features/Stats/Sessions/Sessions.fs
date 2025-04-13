@@ -84,7 +84,7 @@ type SessionsTab() =
 
     and activity : RecentActivityGrid = RecentActivityGrid(selected_session)
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         this
             .Add(
                 activity

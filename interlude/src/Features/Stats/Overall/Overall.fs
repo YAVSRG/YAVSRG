@@ -6,39 +6,38 @@ open Prelude
 open Prelude.Data.User.Stats
 open Interlude.UI
 
-type OverallTab() =
-    inherit Container(NodeType.Leaf)
+type OverallTab =
 
-    let LEFT_SIDE_SPLIT = 0.4f
-
+    static let LEFT_SIDE_SPLIT = 0.4f
     static let selected_tab = Setting.simple 0
 
-    let content_panel = SwapContainer()
+    static member Create() : Container =
 
-    let skill_breakdown = SkillBreakdown()
-    let timeline = SkillTimeline()
-    let overview =
-        Overview(
-            fun keymode source pattern ->
-                match pattern with
-                | None ->
-                    timeline.Switch keymode
-                    content_panel.Current <- timeline
-                | Some p ->
-                    skill_breakdown.Switch (keymode, source, p)
-                    content_panel.Current <- skill_breakdown
-        )
+        let content_panel = SwapContainer()
 
-    let tab_options : (Widget * string) array =
-        [|
-            overview, %"stats.overall.overview"
-            timeline, %"stats.overall.timeline"
-            skill_breakdown, %"stats.overall.breakdown"
-        |]
+        let skill_breakdown = SkillBreakdown()
+        let timeline = SkillTimeline()
+        let overview =
+            Overview(
+                fun keymode source pattern ->
+                    match pattern with
+                    | None ->
+                        timeline.Switch keymode
+                        content_panel.Current <- timeline
+                    | Some p ->
+                        skill_breakdown.Switch (keymode, source, p)
+                        content_panel.Current <- skill_breakdown
+            )
 
-    override this.Init(parent: Widget) =
-        this
-            .Add(
+        let tab_options : (Widget * string) array =
+            [|
+                overview, %"stats.overall.overview"
+                timeline, %"stats.overall.timeline"
+                skill_breakdown, %"stats.overall.breakdown"
+            |]
+
+        Container(NodeType.Leaf)
+            .With(
                 OverallHeader()
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
@@ -63,5 +62,3 @@ type OverallTab() =
                 content_panel
                     .Position(Position.ShrinkPercentL(LEFT_SIDE_SPLIT).ShrinkB(80.0f).ShrinkT(150.0f).ShrinkX(40.0f))
             )
-
-        base.Init parent

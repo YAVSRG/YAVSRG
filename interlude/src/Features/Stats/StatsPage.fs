@@ -13,8 +13,8 @@ type StatsPage() =
     let tab_container = SwapContainer()
 
     let session_stats = SessionsTab()
-    let all_time_stats = OverallTab()
-    let leaderboards = LeaderboardsTab()
+    let all_time_stats = OverallTab.Create()
+    let leaderboards = LeaderboardsTab.Create()
 
     let view_date_listener = SkillTimelineGraph.on_view_date.Subscribe(fun date -> session_stats.ShowSessionForDate date; tab_container.Current <- session_stats)
 
