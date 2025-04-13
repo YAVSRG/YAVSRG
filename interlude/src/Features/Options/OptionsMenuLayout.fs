@@ -169,11 +169,11 @@ type private OptionsMenuFooter() as this =
     let presets =
         NavigationContainer.Row(WrapNavigation = false)
             .With(
-                PresetSlotControls.Create(1, options.Preset1)
+                PresetControls.Create(1, options.Preset1)
                     .Position(Position.GridX(1, 3, 20.0f)),
-                PresetSlotControls.Create(2, options.Preset2)
+                PresetControls.Create(2, options.Preset2)
                     .Position(Position.GridX(2, 3, 20.0f)),
-                PresetSlotControls.Create(3, options.Preset3)
+                PresetControls.Create(3, options.Preset3)
                     .Position(Position.GridX(3, 3, 20.0f))
             )
             .Position(Position.SlicePercentR(0.5f).SliceB(15.0f, HEIGHT).ShrinkX(25.0f))

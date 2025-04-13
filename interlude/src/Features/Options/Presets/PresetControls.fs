@@ -49,7 +49,7 @@ module Presets =
             else
                 action (preset_id, setting)
 
-type PresetSlotControls =
+type PresetControls =
 
     static member private EditPresetButton(preset_id: int, setting: Setting<Preset option>) : Button =
         Button(
@@ -107,9 +107,9 @@ type PresetSlotControls =
                 NavigationContainer.Row()
                     .WrapNavigation(false)
                     .With(
-                        PresetSlotControls.LoadPresetButton(preset_id, setting)
+                        PresetControls.LoadPresetButton(preset_id, setting)
                             .Position(Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(1, 2, Style.PADDING * 4.0f)),
-                        PresetSlotControls.SavePresetButton(preset_id, setting)
+                        PresetControls.SavePresetButton(preset_id, setting)
                             .Position(Position.SliceB(40.0f).ShrinkX(Style.PADDING * 2.0f).GridX(2, 2, Style.PADDING * 4.0f))
                     )
                     .Conditional(fun () ->
@@ -119,7 +119,7 @@ type PresetSlotControls =
                            | None -> true
                     ),
 
-                PresetSlotControls.EditPresetButton(preset_id, setting)
+                PresetControls.EditPresetButton(preset_id, setting)
                     .Position(Position.SliceT(40.0f)),
 
                 Text(sprintf "%s %s" Icons.REFRESH_CW (%"gameplay.preset.autosaving"))
