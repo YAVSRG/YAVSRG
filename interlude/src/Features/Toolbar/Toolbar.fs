@@ -105,7 +105,7 @@ type Toolbar() =
                     .DisableNavigation()
                     .Position(Position.SliceT(InlaidButton.HEIGHT).ShrinkL(HEIGHT + Style.PADDING * 4.0f))
                     .With(
-                        InlaidButton(%"menu.options", fun () -> OptionsMenuPage().Show())
+                        InlaidButton(%"menu.options", fun () -> OptionsPage().Show())
                             .Icon(Icons.SETTINGS),
 
                         import_button,
@@ -193,7 +193,7 @@ type Toolbar() =
             Toolbar.take_screenshot()
 
         if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"options").Pressed() then
-            OptionsMenuPage().Show()
+            OptionsPage().Show()
         if (Screen.current_type = ScreenType.Score || not Toolbar.hidden) && (%%"quick_menu").Pressed() then
             QuickMenuPage().Show()
 

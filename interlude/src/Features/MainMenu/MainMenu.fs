@@ -120,7 +120,7 @@ type MainMenuScreen() =
     let options_button =
         MenuButton(
             %"menu.options",
-            (fun () -> OptionsMenuPage().Show()),
+            (fun () -> OptionsPage().Show()),
             Position.Box(0.0f, 0.5f, -300.0f, -50.0f, 1430.0f, 100.0f)
         )
 

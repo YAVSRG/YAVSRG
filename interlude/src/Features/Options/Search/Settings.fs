@@ -24,112 +24,36 @@ module Settings =
     let search_system_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"system.performance"; %"system.cpu_saver"; %"system.msaa"; %"system.performance.antijitter"; %"search_keywords.performance"; |] then
-                yield PageButton(
-                    %"system.performance",
-                    (fun () -> PerformanceSettingsPage().Show())
-                )
-                    .Help(Help.Info("system.performance"))
+                yield SystemPage.Performance()
+
             if token_match tokens [|%"system.windowmode"; %"system.windowresolution"; %"system.monitor"; %"system.videomode"; %"system.windowmode.windowed"; %"system.windowmode.borderless"; %"system.windowmode.fullscreen"; %"search_keywords.monitor"|] then
-                yield PageSetting(
-                    %"system.windowmode",
-                    SelectDropdown(
-                        [|
-                            WindowType.Windowed, %"system.windowmode.windowed"
-                            WindowType.Borderless, %"system.windowmode.borderless"
-                            WindowType.Fullscreen, %"system.windowmode.fullscreen"
-                            WindowType.FullscreenLetterbox, %"system.windowmode.fullscreen_letterbox"
-                        |],
-                        config.WindowMode
-                        |> Setting.trigger window_mode_changed
-                        |> Setting.trigger (ignore >> config.Apply)
-                    )
-                )
-                yield PageSetting(
-                    %"system.windowresolution",
-                    WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
-                )
-                    .Help(Help.Info("system.windowresolution"))
-                    .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
-                , 2, 0, PageWidth.Normal
-                yield PageSetting(
-                    %"system.monitor",
-                    SelectDropdown(
-                        monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
-                        config.Display
-                        |> Setting.trigger (fun _ -> select_fullscreen_size (); config.Apply())
-                    )
-                )
-                    .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
-                yield PageSetting(
-                    %"system.letterbox_resolution",
-                    WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
-                )
-                    .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
-                , 2, 0, PageWidth.Normal
-                yield PageSetting(
-                    %"system.videomode",
-                    VideoMode(
-                        config.FullscreenVideoMode
-                        |> Setting.trigger (ignore >> config.Apply)
-                    )
-                )
-                    .Help(Help.Info("system.videomode"))
-                    .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
+                yield SystemPage.WindowMode()
+                yield SystemPage.WindowedResolution(), 2, 0, PageWidth.Normal
+                yield SystemPage.Monitor()
+                yield SystemPage.VideoMode(), 2, 0, PageWidth.Normal
+                yield SystemPage.LetterboxResolution()
+
             if token_match tokens [|%"system.audiovolume"|] then
-                yield PageSetting(
-                    %"system.audiovolume",
-                    Slider.Percent(
-                        options.AudioVolume
-                        |> Setting.trigger (fun v -> Audio.change_volume (v, v))
-                        |> Setting.f32
-                    )
-                )
+                yield AudioPage.AudioVolume()
             if token_match tokens [|%"system.audiodevice"|] then
-                yield PageSetting(
-                    %"system.audiodevice",
-                    SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
-                )
+                yield AudioPage.AudioDevice()
 
             if token_match tokens [|%"system.audiooffset"|] then
-                yield PageSetting(
-                    %"system.audiooffset",
-                    { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
-                        override this.OnDeselected(by_mouse: bool) =
-                            base.OnDeselected by_mouse
-                            Song.set_global_offset options.AudioOffset.Value
-                    }
-                )
-                    .Help(Help.Info("system.audiooffset"))
+                yield AudioPage.AudioOffset()
+            if token_match tokens [|%"system.visualoffset"|] then
+                yield SystemPage.VisualOffset()
+            if token_match tokens [|%"system.automatic_offset"|] then
+                yield AudioPage.AutomaticOffset()
 
             if token_match tokens [|%"system.audio_pitch_rates"|] then
-                yield PageSetting(
-                    %"system.audio_pitch_rates",
-                    Checkbox(
-                        options.AudioPitchRates
-                        |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
-                    )
-                )
-                    .Help(Help.Info("system.audio_pitch_rates"))
-
+                yield AudioPage.RatesChangePitch()
             if token_match tokens [|%"system.menus_muffle_song"|] then
-                yield PageSetting(%"system.menus_muffle_song",
-                    Checkbox(
-                        options.MenusMuffleSong
-                        |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
-                    )
-                )
-                    .Help(Help.Info("system.menus_muffle_song"))
-
-            if token_match tokens [|%"system.visualoffset"|] then
-                yield PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
-                    .Help(Help.Info("system.visualoffset"))
+                yield AudioPage.MenusMuffleSong()
 
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"|] then
-                yield PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
+                yield SystemPage.Hotkeys()
 
-            if token_match tokens [|%"system.automatic_offset"|] then
-                yield PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
-                    .Help(Help.Info("system.automatic_offset"))
+            // Secret, search-only results
 
             if token_match tokens [|%"system.enable_console"|] then
                 yield PageSetting(%"system.enable_console", Checkbox options.EnableConsole)

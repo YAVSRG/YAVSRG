@@ -10,9 +10,8 @@ open Interlude.UI
 type AudioPage() =
     inherit Page()
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(
+    static member AudioVolume() : PageSetting =
+        PageSetting(
             %"system.audiovolume",
             Slider.Percent(
                 options.AudioVolume
@@ -20,13 +19,15 @@ type AudioPage() =
                 |> Setting.f32
             )
         )
-            .Pos(0)
-        |+ PageSetting(
+
+    static member AudioDevice() : PageSetting =
+        PageSetting(
             %"system.audiodevice",
             SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
         )
-            .Pos(2)
-        |+ PageSetting(
+
+    static member RatesChangePitch() : PageSetting =
+        PageSetting(
             %"system.audio_pitch_rates",
             Checkbox(
                 options.AudioPitchRates
@@ -34,16 +35,18 @@ type AudioPage() =
             )
         )
             .Help(Help.Info("system.audio_pitch_rates"))
-            .Pos(5)
-        |+ PageSetting(%"system.menus_muffle_song",
+
+    static member MenusMuffleSong() : PageSetting =
+        PageSetting(%"system.menus_muffle_song",
             Checkbox (
                 options.MenusMuffleSong
                 |> Setting.trigger (fun b -> if b then Song.set_low_pass 1.0f else Song.set_low_pass 0.0f)
             )
         )
             .Help(Help.Info("system.menus_muffle_song"))
-            .Pos(7)
-        |+ PageSetting(
+
+    static member AudioOffset() : PageSetting =
+        PageSetting(
             %"system.audiooffset",
             { new Slider(Setting.uom options.AudioOffset, Step = 1f) with
                 override this.OnDeselected(by_mouse: bool) =
@@ -52,11 +55,21 @@ type AudioPage() =
             }
         )
             .Help(Help.Info("system.audiooffset"))
-            .Pos(10)
-        |+ PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
+
+    static member AutomaticOffset() : PageSetting =
+        PageSetting(%"system.automatic_offset", Checkbox options.AutoCalibrateOffset)
             .Help(Help.Info("system.automatic_offset"))
-            .Pos(12)
-        :> Widget
+
+    override this.Content() =
+        page_container()
+            .With(
+                AudioPage.AudioVolume().Pos(0),
+                AudioPage.AudioDevice().Pos(2),
+                AudioPage.RatesChangePitch().Pos(5),
+                AudioPage.MenusMuffleSong().Pos(7),
+                AudioPage.AudioOffset().Pos(10),
+                AudioPage.AutomaticOffset().Pos(12)
+            )
 
     override this.OnClose() = ()
 

@@ -99,7 +99,7 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     override this.Title = %"system.windowresolution.offset"
     override this.OnClose() = setting.Set (horizontal.Value, vertical.Value)
 
-type WindowResolutionPicker(setting: Setting<WindowedResolution>) as this =
+type WindowedResolutionPicker(setting: Setting<WindowedResolution>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
 
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + 60.0f |> min 600.0f).ShrinkT(60.0f).Shrink(Style.PADDING, 0.0f))
@@ -255,11 +255,8 @@ type VideoMode(setting: Setting<FullscreenVideoMode>) as this =
 type SystemPage() =
     inherit Page()
 
-    override this.Content() =
-        window_mode_changed config.WindowMode.Value
-
-        page_container()
-        |+ PageSetting(
+    static member WindowMode() : PageSetting =
+        PageSetting(
             %"system.windowmode",
             SelectDropdown(
                 [|
@@ -271,28 +268,31 @@ type SystemPage() =
                 |],
                 config.WindowMode
                 |> Setting.trigger window_mode_changed
-                |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply))
+                |> Setting.trigger (ignore >> config.Apply)
             )
         )
-            .Pos(0)
-        |+ PageSetting(
+
+    // -> windowed
+    static member WindowedResolution() : Conditional<PageSetting> =
+        PageSetting(
             %"system.windowresolution",
-            WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowedResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
         )
-            .Help(Help.Info("system.windowresolution"))
-            .Pos(2)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
-        |+ PageSetting(
+
+    static member Monitor() : Conditional<PageSetting> =
+        PageSetting(
             %"system.monitor",
             SelectDropdown(
                 monitors |> Seq.map (fun m -> m.Id, m.FriendlyName) |> Array.ofSeq,
                 config.Display
-                |> Setting.trigger (fun _ -> select_fullscreen_size (); WindowThread.defer (ignore >> config.Apply))
+                |> Setting.trigger (fun _ -> select_fullscreen_size (); config.Apply())
             )
         )
-            .Pos(2)
             .Conditional(fun () -> config.WindowMode.Value <> WindowType.Windowed)
-        |+ PageSetting(
+
+    static member VideoMode() : Conditional<PageSetting> =
+        PageSetting(
             %"system.videomode",
             VideoMode(
                 config.FullscreenVideoMode
@@ -300,31 +300,45 @@ type SystemPage() =
             )
         )
             .Help(Help.Info("system.videomode"))
-            .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Fullscreen)
-        |+ PageSetting(
+
+    static member LetterboxResolution() : Conditional<PageSetting> =
+        PageSetting(
             %"system.letterbox_resolution",
-            WindowResolutionPicker(config.WindowedResolution |> Setting.trigger (fun _ -> WindowThread.defer (ignore >> config.Apply)))
+            WindowedResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
         )
-            .Pos(4)
             .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
 
-        |+ PageButton(
+    static member Performance() : PageButton =
+        PageButton(
             %"system.performance",
             (fun () -> PerformanceSettingsPage().Show())
         )
-            .Help(Help.Info("system.performance"))
-            .Pos(7)
 
-        |+ PageButton(%"system.hotkeys", (fun () -> Menu.ShowPage HotkeysPage))
-            .Pos(9)
+    static member Hotkeys() : PageButton =
+        PageButton(%"system.hotkeys", (fun () -> HotkeysPage().Show()))
 
-        |+ PageButton(%"system.audio", fun () -> AudioPage().Show())
-            .Pos(12)
-        |+ PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
+    static member VisualOffset() : PageSetting =
+        PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
             .Help(Help.Info("system.visualoffset"))
-            .Pos(14)
-        :> Widget
+
+    override this.Content() =
+        window_mode_changed config.WindowMode.Value
+
+        page_container()
+            .With(
+                SystemPage.WindowMode().Pos(0),
+                SystemPage.WindowedResolution().Pos(2),
+                SystemPage.Monitor().Pos(2),
+                SystemPage.VideoMode().Pos(4),
+                SystemPage.LetterboxResolution().Pos(4),
+
+                SystemPage.Performance().Pos(7),
+                SystemPage.Hotkeys().Pos(9),
+
+                PageButton(%"system.audio", fun () -> AudioPage().Show()).Pos(12),
+                SystemPage.VisualOffset().Pos(14)
+            )
 
     override this.OnClose() = ()
 
