@@ -179,7 +179,7 @@ type MainMenuScreen() =
         if prev = ScreenType.SplashScreen then
 
             if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
-                Library.Library.recalculate_patterns()
+                Library.LibraryActions.recalculate_patterns()
 
             if TOTAL_STATS.NotesHit = 0 then
                 // todo: quick start wizard instead

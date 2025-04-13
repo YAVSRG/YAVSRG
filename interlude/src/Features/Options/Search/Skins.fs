@@ -17,32 +17,23 @@ module Skins =
     let search_skin_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"skins"|] then
-                yield PageButton(
-                    %"skins",
-                    (fun () -> SelectSkinsPage().Show())
-                )
+                yield PageButton(%"skins", fun () -> SelectSkinsPage().Show())
 
                 if not Content.Noteskin.IsEmbedded then
-                    yield PageButton(
-                        %"noteskin.edit",
-                        (fun () -> EditNoteskinPage().Show())
-                    )
+                    yield PageButton(%"noteskin.edit", fun () -> EditNoteskinPage().Show())
 
-                yield PageButton(
-                    %"skins.browser",
-                    (fun () -> SkinsBrowserPage().Show())
-                )
+                yield PageButton(%"skins.browser", fun () -> SkinsBrowserPage().Show())
 
             if token_match tokens [|%"skins"; %"skins.import_from_osu"|] then
                 yield PageButton(
                     %"skins.import_from_osu",
-                    (fun () -> Skins.OsuSkinsListPage().Show())
+                    fun () -> Skins.OsuSkinsListPage().Show()
                 )
 
             if token_match tokens [|%"hud.edit"|] || token_match tokens (HudElement.FULL_LIST |> Seq.map HudElement.name |> Array.ofSeq) then
                 yield PageButton(
                     %"hud.edit",
-                    (fun () ->
+                    fun () ->
                         if
                             SelectedChart.WITH_COLORS.IsSome
                             && Screen.change_new
@@ -51,7 +42,6 @@ module Skins =
                                 Transitions.Default
                         then
                             Menu.Exit()
-                    )
                 )
                     .Help(Help.Info("hud.edit"))
 
@@ -61,6 +51,6 @@ module Skins =
                 )
                 yield PageButton(
                     %"themes.showthemesfolder",
-                    (fun () -> open_directory (get_game_folder "Themes"))
+                    fun () -> open_directory (get_game_folder "Themes")
                 )
         }

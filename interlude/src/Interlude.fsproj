@@ -99,7 +99,6 @@
     <Compile Include="Features\Rulesets\Edit\Grades.fs" />
     <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
     <Compile Include="Features\Rulesets\Edit\RulesetEditor.fs" />
-    <Compile Include="Features\Rulesets\Browser\Community.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
     <Compile Include="Features\Rulesets\Add.fs" />
     <Compile Include="Features\Rulesets\SelectRuleset.fs" />
@@ -272,6 +271,7 @@
     <Compile Include="Features\Options\Gameplay\LanecoverPage.fs" />
     <Compile Include="Features\Options\Gameplay\GameplayBindsPage.fs" />
     <Compile Include="Features\Options\Gameplay\GameplayPage.fs" />
+    <Compile Include="Features\Options\Library\ImportsPage.fs" />
     <Compile Include="Features\Options\Library\LibraryPage.fs" />
     <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\Search\Settings.fs" />
@@ -281,7 +281,6 @@
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
     <Compile Include="Features\Options\OptionsLayout.fs" />
     <Compile Include="Features\Options\OptionsPage.fs" />
-    <Compile Include="Features\Options\ImportsPage.fs" />
     <Compile Include="Features\Options\QuickMenu.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />

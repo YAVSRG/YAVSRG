@@ -59,6 +59,7 @@ type GameplayPage() =
         PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
             .Help(Help.Info("gameplay.pacemaker"))
 
+    // todo: remove
     static member Rulesets() : PageButton =
         PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
             .Help(Help.Info("rulesets"))

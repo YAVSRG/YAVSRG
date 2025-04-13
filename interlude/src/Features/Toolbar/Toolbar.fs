@@ -15,6 +15,7 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Stats
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
+open Interlude.Features.OptionsMenu.Library
 open Interlude.Features.Printerlude
 
 type Toolbar() =

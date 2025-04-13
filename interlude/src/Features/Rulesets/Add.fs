@@ -2,7 +2,6 @@ namespace Interlude.Features.Rulesets
 
 open Prelude
 open Percyqaz.Flux.UI
-open Interlude.Features.Rulesets.Browser
 open Interlude.UI
 
 type AddRulesetsPage() =
@@ -18,7 +17,6 @@ type AddRulesetsPage() =
             .Pos(4)
         |+ PageButton(%"rulesets.create.wife", fun () -> WifeRulesetPage().Show())
             .Pos(6)
-        //|+ RulesetSearch().Pos(7, PAGE_BOTTOM - 7)
         :> Widget
 
     override this.Title = %"rulesets.add"

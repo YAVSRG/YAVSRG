@@ -1,7 +1,6 @@
 namespace Interlude.Features.OptionsMenu.Search
 
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.Graphics
@@ -12,12 +11,6 @@ open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.OptionsMenu.Library
 open Interlude.Features.Rulesets
-open Interlude.Features.Collections
-open Interlude.Features.Tables
-open Interlude.Features.Tables.Browser
-open Interlude.Features.LevelSelect
-open Interlude.Features.Import.osu
-open Interlude.Features.Import.Etterna
 
 module Settings =
 
@@ -100,44 +93,17 @@ module Settings =
     let search_library_settings (tokens: string array) : SearchResult seq =
         results {
             if token_match tokens [|%"library.collections"|] then
-                yield PageButton(
-                    %"library.collections",
-                    (fun () -> ManageCollectionsPage().Show()),
-                    Icon = Icons.FOLDER
-                )
-                    .Help(Help.Info("library.collections"))
+                yield LibraryPage.ManageCollections()
             if token_match tokens [|%"library.tables"|] then
-                yield PageButton(
-                    %"library.tables",
-                    (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
-                    Icon = Icons.SIDEBAR
-                )
-                    .Help(Help.Info("library.tables"))
-            if token_match tokens [|%"tables.browser"|] then
-                yield PageButton(
-                    %"tables.browser",
-                    (fun () -> TableBrowserPage().Show())
-                )
-            if token_match tokens [|%"etterna_pack_browser"|] then
-                yield PageButton(
-                    %"etterna_pack_browser",
-                    fun () -> EtternaPacksBrowserPage().Show()
-                )
-            if token_match tokens [|%"beatmap_browser"|] then
-                yield PageButton(
-                    %"beatmap_browser",
-                    fun () -> BeatmapBrowserPage().Show()
-                )
+                yield LibraryPage.ManageTables()
+            if token_match tokens [|%"tables.browser"; %"menu.import"|] then
+                yield ImportsPage.GetTables()
+            if token_match tokens [|%"etterna_pack_browser"; %"menu.import"|] then
+                yield ImportsPage.GetEtternaPacks()
+            if token_match tokens [|%"beatmap_browser"; %"menu.import"|] then
+                yield ImportsPage.GetOsuSongs()
             if token_match tokens [|%"library.recache_patterns"|] then
-                yield PageButton.Once(
-                    %"library.recache_patterns",
-                    Library.recalculate_patterns
-                )
-                    .Help(Help.Info("library.recache_patterns"))
+                yield LibraryPage.RecachePatterns()
             if token_match tokens [|%"library.recalculate_personal_bests"|] then
-                yield PageButton.Once(
-                    %"library.recalculate_personal_bests",
-                    Library.recalculate_pbs
-                )
-                    .Help(Help.Info("library.recalculate_personal_bests"))
+                yield LibraryPage.RecalculateScores()
         }
