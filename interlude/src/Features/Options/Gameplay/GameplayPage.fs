@@ -51,6 +51,18 @@ type GameplayPage() =
         PageSetting(%"gameplay.hide_hit_notes", Checkbox options.VanishingNotes)
             .Help(Help.Info("gameplay.hide_hit_notes"))
 
+    static member OnQuitOut() : PageSetting =
+        PageSetting(%"gameplay.on_quit_out",
+            SelectDropdown(
+                [|
+                    QuitOutBehaviour.SaveAndShow, %"gameplay.on_quit_out.save_and_show"
+                    QuitOutBehaviour.Show, %"gameplay.on_quit_out.show"
+                    QuitOutBehaviour.Ignore, %"gameplay.on_quit_out.ignore"
+                |],
+                options.QuitOutBehaviour
+            )
+        )
+
     static member Lanecover() : PageButton =
         PageButton(%"gameplay.lanecover", fun () -> LanecoverPage().Show())
             .Help(Help.Info("gameplay.lanecover"))
@@ -58,11 +70,6 @@ type GameplayPage() =
     static member Pacemaker() : PageButton =
         PageButton(%"gameplay.pacemaker", fun () -> PacemakerOptionsPage().Show())
             .Help(Help.Info("gameplay.pacemaker"))
-
-    // todo: remove
-    static member Rulesets() : PageButton =
-        PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
-            .Help(Help.Info("rulesets"))
 
     static member Keybinds() : PageButton =
         PageButton(%"gameplay.keybinds", fun () -> GameplayBindsPage().Show())
@@ -77,9 +84,9 @@ type GameplayPage() =
                 GameplayPage.BackgroundDim().Pos(7),
                 GameplayPage.HoldToGiveUp().Pos(9),
                 GameplayPage.HideHitNotes().Pos(11),
-                GameplayPage.Lanecover().Pos(14),
-                GameplayPage.Pacemaker().Pos(16),
-                GameplayPage.Rulesets().Pos(18),
+                GameplayPage.OnQuitOut().Pos(13),
+                GameplayPage.Lanecover().Pos(16),
+                GameplayPage.Pacemaker().Pos(18),
                 GameplayPage.Keybinds().Pos(21)
             )
         |> Container.Create

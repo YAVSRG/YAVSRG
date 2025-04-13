@@ -10,7 +10,6 @@ open Interlude.UI
 open Interlude.Features.OptionsMenu.SystemSettings
 open Interlude.Features.OptionsMenu.Gameplay
 open Interlude.Features.OptionsMenu.Library
-open Interlude.Features.Rulesets
 
 module Settings =
 
@@ -79,15 +78,16 @@ module Settings =
                 yield GameplayPage.Lanecover()
             if token_match tokens [|%"gameplay.pacemaker"; %"gameplay.pacemaker.fail_mid_song"; %"gameplay.pacemaker.onlysavenewrecords"; %"gameplay.pacemaker.save_failed_scores"|] then
                 yield GameplayPage.Pacemaker()
-            if token_match tokens [|%"rulesets"; %"rulesets.add"|] then
-                yield GameplayPage.Rulesets()
-                yield PageButton(%"rulesets.add", fun () -> AddRulesetsPage().Show())
             if token_match tokens [|%"system.hotkeys"; %"gameplay.keybinds"; %"search_keywords.binds"|] then
                 yield GameplayPage.Keybinds()
             if token_match tokens [|%"gameplay.hold_to_give_up"|] then
                 yield GameplayPage.HoldToGiveUp()
             if token_match tokens [|%"gameplay.hide_hit_notes"|] then
                 yield GameplayPage.HideHitNotes()
+            if token_match tokens [|%"gameplay.on_quit_out"|] then
+                yield GameplayPage.OnQuitOut()
+            if token_match tokens [|%"rulesets"|] then
+                yield LibraryPage.ManageRulesets()
         }
 
     let search_library_settings (tokens: string array) : SearchResult seq =
@@ -96,6 +96,8 @@ module Settings =
                 yield LibraryPage.ManageCollections()
             if token_match tokens [|%"library.tables"|] then
                 yield LibraryPage.ManageTables()
+            if token_match tokens [|%"levelselect.options"|] then
+                yield LibraryPage.LevelSelectOptions()
             if token_match tokens [|%"tables.browser"; %"menu.import"|] then
                 yield ImportsPage.GetTables()
             if token_match tokens [|%"etterna_pack_browser"; %"menu.import"|] then

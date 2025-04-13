@@ -88,6 +88,9 @@ type LibraryPage() =
         PageButton(%"menu.import", fun () -> ImportsPage().Show())
             .Icon(Icons.DOWNLOAD)
 
+    static member LevelSelectOptions() : PageButton =
+        PageButton(%"levelselect.options", fun () -> LevelSelectOptionsPage().Show())
+
     override this.Content() =
         let import_info =
             Container(NodeType.None)
@@ -118,10 +121,10 @@ type LibraryPage() =
             |+ LibraryPage.Imports().Pos(0, 2, PageWidth.Full)
             |+ LibraryPage.ManageCollections().Pos(2, 2, PageWidth.Full)
             |+ LibraryPage.ManageTables().Pos(4, 2, PageWidth.Full)
-            |+ LibraryPage.RecachePatterns().Pos(7, 2, PageWidth.Full)
-            |+ LibraryPage.RecalculateScores().Pos(9, 2, PageWidth.Full)
-            |+ PageButton(%"levelselect.options", fun () -> LevelSelectOptionsPage().Show())
-                .Pos(12, 2, PageWidth.Full)
+            |+ LibraryPage.ManageRulesets().Pos(6, 2, PageWidth.Full)
+            |+ LibraryPage.RecachePatterns().Pos(9, 2, PageWidth.Full)
+            |+ LibraryPage.RecalculateScores().Pos(11, 2, PageWidth.Full)
+            |+ LibraryPage.LevelSelectOptions().Pos(13, 2, PageWidth.Full)
             |+ import_info
 
         let mount_options =

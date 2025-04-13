@@ -49,24 +49,15 @@ type PacemakerOptionsPage() =
         |+ PageSetting(%"gameplay.pacemaker.onlysavenewrecords", Checkbox options.OnlySaveNewRecords)
             .Help(Help.Info("gameplay.pacemaker.onlysavenewrecords"))
             .Pos(4)
-        |+ PageSetting(%"gameplay.pacemaker.on_quit_out", SelectDropdown(
-                [|
-                    QuitOutBehaviour.SaveAndShow, %"gameplay.pacemaker.on_quit_out.save_and_show"
-                    QuitOutBehaviour.Show, %"gameplay.pacemaker.on_quit_out.show"
-                    QuitOutBehaviour.Ignore, %"gameplay.pacemaker.on_quit_out.ignore"
-                |],
-                options.QuitOutBehaviour)
-        )
-            .Pos(6)
         |+ PageSetting(%"gameplay.pacemaker.type",
             SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
         )
-            .Pos(9)
+            .Pos(7)
         |+ PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
-            .Pos(11)
+            .Pos(9)
             .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy)
         |+ PageSetting(%"gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
-            .Pos(11)
+            .Pos(9)
             .Conditional(fun () -> mode.Value = PacemakerMode.Lamp)
         |+ PageSetting(%"gameplay.pacemaker.use_personal_best",
             SelectDropdown(
@@ -78,7 +69,7 @@ type PacemakerOptionsPage() =
                 use_personal_best)
         )
             .Help(Help.Info("gameplay.pacemaker.use_personal_best"))
-            .Pos(13)
+            .Pos(11)
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
