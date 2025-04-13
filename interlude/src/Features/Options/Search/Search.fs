@@ -10,7 +10,7 @@ open Interlude.UI
 module Search =
 
     let token_match (tokens: string array) (strings: string array) : bool =
-        tokens |> Array.exists (fun t -> strings |> Array.exists (fun s -> s.Contains(t, StringComparison.InvariantCultureIgnoreCase)))
+        tokens |> Array.exists (fun t -> t = "*" || strings |> Array.exists (fun s -> s.Contains(t, StringComparison.InvariantCultureIgnoreCase)))
 
     type SearchResult = Widget * int * int * PageWidth
 
