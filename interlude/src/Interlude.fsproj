@@ -278,7 +278,7 @@
     <Compile Include="Features\Options\Search\Search.fs" />
     <Compile Include="Features\Options\Presets\EditPreset.fs" />
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
-    <Compile Include="Features\Options\Layout.fs" />
+    <Compile Include="Features\Options\OptionsMenuLayout.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\Options\ImportsMenu.fs" />
     <Compile Include="Features\Options\QuickMenu.fs" />

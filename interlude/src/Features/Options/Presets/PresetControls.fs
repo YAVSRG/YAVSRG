@@ -133,6 +133,6 @@ type PresetSlotControls =
                     ),
 
                 Frame()
-                    .Border(Colors.cyan_accent.O2)
+                    .Border(Colors.cyan)
                     .Fill(Colors.cyan_shadow)
             )

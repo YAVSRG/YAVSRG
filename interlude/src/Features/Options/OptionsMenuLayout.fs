@@ -125,7 +125,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
             Render.stencil_begin_draw()
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan_accent.O2
+            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
             base.Draw()
             StripeWipe.draw_left_to_right (pc2 - 0.05f) pc this.Bounds Colors.cyan
 
@@ -139,7 +139,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
             Render.stencil_begin_draw()
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan_accent.O2
+            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
             base.Draw()
             StripeWipe.draw_left_to_right (pc - 0.05f) pc2 this.Bounds Colors.cyan
 
@@ -147,7 +147,7 @@ type private OptionsMenuHeader(current_tab: Setting<OptionsMenuTab>) as this =
 
         | Transition.Shown ->
             Render.rect this.Bounds Colors.shadow_2.O1
-            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan_accent.O2
+            Render.rect (this.Bounds.BorderB Style.PADDING) Colors.cyan
             base.Draw()
 
         | Transition.Hidden -> ()
@@ -220,5 +220,5 @@ type private OptionsMenuFooter() as this =
 
     override this.Draw() =
         Render.rect this.Bounds Colors.shadow_2.O1
-        Render.rect (this.Bounds.BorderT Style.PADDING) Colors.cyan_accent.O2
+        Render.rect (this.Bounds.BorderT Style.PADDING) Colors.cyan
         base.Draw()
