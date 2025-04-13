@@ -30,7 +30,7 @@ type SystemPage() =
     static member WindowedResolution() : Conditional<PageSetting> =
         PageSetting(
             %"system.windowresolution",
-            WindowedResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
+            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
         )
             .Conditional(fun () -> config.WindowMode.Value = WindowType.Windowed)
 
@@ -48,7 +48,7 @@ type SystemPage() =
     static member VideoMode() : Conditional<PageSetting> =
         PageSetting(
             %"system.videomode",
-            VideoMode(
+            VideoModePicker.Create(
                 config.FullscreenVideoMode
                 |> Setting.trigger (ignore >> config.Apply)
             )
@@ -59,7 +59,7 @@ type SystemPage() =
     static member LetterboxResolution() : Conditional<PageSetting> =
         PageSetting(
             %"system.letterbox_resolution",
-            WindowedResolutionPicker(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
+            WindowedResolutionPicker.Create(config.WindowedResolution |> Setting.trigger (ignore >> config.Apply))
         )
             .Conditional(fun () -> config.WindowMode.Value = WindowType.FullscreenLetterbox)
 
