@@ -87,6 +87,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                     .Align(Alignment.LEFT)
                     .Pos(0),
                 Text(sprintf "%s: %s" %"mount.create.path" path)
+                    .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .Pos(2, 1),
                 CalloutCard(info)
