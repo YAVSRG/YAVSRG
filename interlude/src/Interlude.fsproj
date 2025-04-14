@@ -138,11 +138,10 @@
     <Compile Include="Features\Import\Etterna\Components.fs" />
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
-    <Compile Include="Features\Mounts\Types.fs" />
-    <Compile Include="Features\Mounts\Create.fs" />
-    <Compile Include="Features\Mounts\Edit.fs" />
+    <Compile Include="Features\Mounts\MountActions.fs" />
+    <Compile Include="Features\Mounts\CreateMount.fs" />
+    <Compile Include="Features\Mounts\EditMount.fs" />
     <Compile Include="Features\Mounts\Display.fs" />
-    <Compile Include="Features\Mounts\Mounts.fs" />
     <Compile Include="Features\Stats\Sync.fs" />
     <Compile Include="Features\Stats\PlayCount.fs" />
     <Compile Include="Features\Stats\Skillsets\BreakdownGraph.fs" />

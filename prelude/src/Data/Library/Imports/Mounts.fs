@@ -19,27 +19,18 @@ type MountedChartSource =
     {
         SourceFolder: string
         Type: MountedChartSourceType
-        mutable LastImported: DateTime option
         ImportOnStartup: bool
         CopyAssetFiles: bool
+        mutable LastImported: DateTime option
     }
 
-    static member Pack(name: string, path: string) : MountedChartSource =
+    static member Create(source_type: MountedChartSourceType, path: string, import_on_startup: bool, copy_assets: bool) : MountedChartSource =
         {
             SourceFolder = path
+            Type = source_type
+            ImportOnStartup = import_on_startup
+            CopyAssetFiles = copy_assets
             LastImported = None
-            Type = Pack name
-            ImportOnStartup = false
-            CopyAssetFiles = false
-        }
-
-    static member Library(path: string) : MountedChartSource =
-        {
-            SourceFolder = path
-            LastImported = None
-            Type = Library
-            ImportOnStartup = false
-            CopyAssetFiles = false
         }
 
 module Mount =

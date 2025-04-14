@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Data.Library
 open Prelude.Data.Library.Imports
 open Interlude.UI
-open Interlude.Content
 
 type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.VisibleButtons), Fill = K Colors.cyan.O2, Border = K Colors.cyan_accent)
@@ -14,7 +13,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
     let create_button =
         Button(
             sprintf "%s %s" Icons.LINK (%"mount.create"),
-            (fun () -> CreateMountPage(game, setting).Show())
+            fun () -> Mounts.detect_or_drop_folder game (fun path -> CreateMountPage(game, path, setting).Show())
         )
             .Position(Position.SliceB(50.0f).Shrink(5.0f))
 
