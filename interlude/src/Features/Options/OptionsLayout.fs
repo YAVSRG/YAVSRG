@@ -41,34 +41,30 @@ type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
         { Position.DEFAULT with Left = pc %+ offset; Right = (1.0f - pc) %- offset }
 
     let tab_buttons =
-        DynamicFlowContainer.LeftToRight()
+        FlowContainer.LeftToRight(200.0f)
             .Spacing(Style.PADDING * 2.0f)
             .Position(scaled_margins.SliceY(SearchBox.HEIGHT))
             .With(
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.SLIDERS (%"gameplay"),
-                    200.0f,
                     (fun () -> current_tab.Set OptionsTab.Gameplay),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Gameplay),
                     Keybind = Bind.mk Keys.D1
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.AIRPLAY (%"system"),
-                    200.0f,
                     (fun () -> current_tab.Set OptionsTab.System),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.System),
                     Keybind = Bind.mk Keys.D2
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.IMAGE (%"skins"),
-                    200.0f,
                     (fun () -> current_tab.Set OptionsTab.Noteskins),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Noteskins),
                     Keybind = Bind.mk Keys.D3
                 ),
                 OptionsMenuButton(
                     sprintf "%s %s" Icons.ARCHIVE (%"library"),
-                    200.0f,
                     (fun () -> current_tab.Set OptionsTab.Library),
                     IsHighlighted = (fun () -> current_tab.Value = OptionsTab.Library),
                     Keybind = Bind.mk Keys.D4
@@ -185,7 +181,7 @@ type private OptionsPageFooter() as this =
                     .Icon(Icons.ARROW_LEFT_CIRCLE)
                     .Position(Position.SliceB(HEIGHT).SliceY(InlaidButton.HEIGHT).SliceL(10.0f, 180.0f)),
 
-                InlaidButton(%"noteskin.edit", Skinning.edit_or_extract_noteskin)
+                InlaidButton(%"noteskin.edit", SkinActions.edit_or_extract_noteskin)
                     .Icon(Icons.IMAGE)
                     .Position(
                         Position
@@ -197,7 +193,7 @@ type private OptionsPageFooter() as this =
                     ),
 
                 InlaidButton(%"hud.edit", fun () ->
-                    Skinning.edit_hud ignore
+                    SkinActions.edit_hud ignore
                 )
                     .Icon(Icons.ZAP)
                     .Position(

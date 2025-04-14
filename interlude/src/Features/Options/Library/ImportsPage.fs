@@ -2,7 +2,6 @@ namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Flux.UI
 open Prelude
-open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Mounts
 open Interlude.Features.Import.osu
@@ -27,33 +26,38 @@ type ImportsPage() =
     static member GetTables() : PageButton =
         PageButton(%"tables.browser", fun () -> TableBrowserPage().Show())
 
+    static member ImportOsuSkins() : PageButton =
+         PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
+
     override this.Content() =
 
-        let main_options =
-            NavigationContainer.Column()
-                .WrapNavigation(false)
-                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentL(0.5f).ShrinkR(10.0f))
-            |+ ImportsPage.GetOsuSongs().Pos(0, 2, PageWidth.Full)
-            |+ ImportsPage.GetEtternaPacks().Pos(2, 2, PageWidth.Full)
-            |+ ImportsPage.GetSkins().Pos(4, 2, PageWidth.Full)
-            |+ ImportsPage.GetTables().Pos(6, 2, PageWidth.Full)
+        let lhs_actions =
+            page_container()
+                .With(
+                    ImportsPage.GetOsuSongs().Pos(0),
+                    ImportsPage.GetEtternaPacks().Pos(2),
+                    ImportsPage.GetSkins().Pos(4),
+                    ImportsPage.GetTables().Pos(6),
+                    ImportsPage.ImportOsuSkins().Pos(9),
 
-            |+ PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
-                .Pos(9, 2, PageWidth.Full)
-
-            |+ PageButton(%"rulesets", fun () -> SelectRulesetPage().Show())
-                .Pos(12, 2, PageWidth.Full)
-            |+ PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show())
-                .Pos(14, 2, PageWidth.Full)
+                    PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(12),
+                    PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(14)
+                )
 
         NavigationContainer.Row()
-        |+ main_options
-        |+ MountDisplay.CreateAll()
-            .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
-        |+ Text(Icons.INFO + " " + %"imports.drag_and_drop_hint")
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkR(40.0f).ShrinkL(300.0f))
-        :> Widget
+            .With(
+                lhs_actions,
+                MountDisplay.CreateAll()
+                    .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
+            )
+
+    override this.Footer() =
+        Container.Create(base.Footer())
+            .With(
+                Text(Icons.INFO + " " + %"imports.drag_and_drop_hint")
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceB(80.0f).SliceY(55.0f).ShrinkR(40.0f).ShrinkL(300.0f))
+            )
 
     override this.Title = sprintf "%s %s" Icons.DOWNLOAD (%"menu.import")
     override this.OnClose() = ()

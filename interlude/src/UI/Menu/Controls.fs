@@ -29,7 +29,7 @@ type PageTextEntry(name: string, setting: Setting<string>) =
             )
         )
 
-type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
+type OptionsMenuButton(label: string, on_click: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun () ->
@@ -74,6 +74,3 @@ type OptionsMenuButton(label: string, width: float32, on_click: unit -> unit) =
         Render.rect (this.Bounds.BorderB Style.PADDING) trim_color
 
         Text.fill_b (Style.font, label, this.Bounds.Shrink(Style.PADDING * 2.0f), text_color, Alignment.CENTER)
-
-    interface IWidth with
-        member this.Width = width

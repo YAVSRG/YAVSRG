@@ -149,7 +149,7 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 
         base.Draw()
 
-module Skinning =
+module SkinActions =
 
     let edit_hud (on_exit: unit -> unit) : unit =
         if
@@ -213,13 +213,13 @@ type SelectSkinsPage() =
 
         noteskin_grid.Clear()
         for id, _, meta in Skins.list_noteskins () do
-            let nb = NoteskinButton(id, meta, preview.Refresh, Skinning.edit_or_extract_noteskin)
+            let nb = NoteskinButton(id, meta, preview.Refresh, SkinActions.edit_or_extract_noteskin)
             if nb.IsCurrent then GameThread.defer (fun () -> noteskin_tab.ScrollTo(nb))
             noteskin_grid |* nb
 
         hud_grid.Clear()
         for id, _, meta in Skins.list_huds () do
-            let hb = HUDButton(id, meta, preview.Refresh, fun () -> Skinning.edit_hud (fun () -> SelectSkinsPage().Show()))
+            let hb = HUDButton(id, meta, preview.Refresh, fun () -> SkinActions.edit_hud (fun () -> SelectSkinsPage().Show()))
             if hb.IsCurrent then GameThread.defer (fun () -> hud_tab.ScrollTo(hb))
             hud_grid |* hb
 
@@ -237,13 +237,11 @@ type SelectSkinsPage() =
                 )
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD_CLOUD + " " + %"skins.browser",
-                0.0f,
                 (fun () -> SkinsBrowserPage().Show())
             )
                 .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).TranslateY(-10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
-                0.0f,
                 (fun () -> osu.Skins.OsuSkinsListPage().Show())
             )
                 .Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
