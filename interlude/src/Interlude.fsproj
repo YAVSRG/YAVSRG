@@ -81,7 +81,8 @@
     <Compile Include="Features\Online\LobbyState.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Online\DiscordRPC.fs" />
-    <Compile Include="Features\Online\Login.fs" />
+    <Compile Include="Features\Online\RegisterPage.fs" />
+    <Compile Include="Features\Online\LoginPage.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Shared.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Online.fs" />
     <Compile Include="Features\Online\Players\Sidebar\Friends.fs" />

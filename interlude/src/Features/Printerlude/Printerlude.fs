@@ -7,21 +7,13 @@ open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Flux.Windowing
-open Prelude
-open Prelude.Data
-open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Prelude.Data.Library
-open Prelude.Data.Library.Imports
-open Prelude.Data.Maintenance
-open Prelude.Gameplay.Replays
 open Prelude.Calculator
 open Interlude
-open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
-open Interlude.Web.Shared.Requests
 
 module Printerlude =
 
@@ -56,54 +48,6 @@ module Printerlude =
         let toggle_experiments (b: bool) =
             options.EnableExperiments.Value <- b
 
-        open SixLabors.ImageSharp
-
-        let private banner (hex: string) (emoji: string) =
-            use banner =
-                ImageServices.generate_banner
-                    {
-                        BaseColor = (Color.FromHex hex).Value
-                        Emoji = emoji.ToLower()
-                    }
-
-            banner.SaveAsPng("banner.png")
-
-        let private sync_table_scores () =
-            match Content.Table with
-            | None -> ()
-            | Some table ->
-
-            Tables.Records.get (
-                Interlude.Features.Online.Network.credentials.Username,
-                table.Id,
-                function
-                | None -> ()
-                | Some res ->
-                    let lookup = res.Scores |> Seq.map (fun s -> s.Hash, s.Score) |> Map.ofSeq
-
-                    for chart in table.Charts do
-                        let data = UserDatabase.get_chart_data chart.Hash Content.UserData
-
-                        match
-                            data.PersonalBests
-                            |> Bests.ruleset_best_above table.Info.RulesetId (_.Accuracy) 1.0f<rate>
-                        with
-                        | Some (acc, _, _) when acc > (Map.tryFind chart.Hash lookup |> Option.defaultValue 0.0) ->
-                            for score in data.Scores do
-                                Charts.Scores.Save.post (
-                                    ({
-                                        ChartId = chart.Hash
-                                        Replay = score.Replay |> Replay.compressed_bytes_to_string
-                                        Rate = score.Rate
-                                        Mods = score.Mods
-                                        Timestamp = score.Timestamp
-                                    }
-                                    : Charts.Scores.Save.Request),
-                                    ignore
-                                )
-                        | _ -> ()
-            )
-
         let challenge_level (io: IOContext) =
             match SelectedChart.CACHE_DATA with
             | Some chart_meta ->
@@ -127,15 +71,10 @@ module Printerlude =
                     |> io.WriteLine
             | None -> ()
 
-        let vacuum () =
-            let task = Vacuum.vacuum_charts(true, Content.Charts, TaskProgress.log_progress_bar "Vacuum")
-            general_task_queue.Request(task, ignore)
-
         let register_commands (ctx: ShellContext) =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> WindowThread.exit()))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithCommand("sync_table_scores", "Sync local table scores with online server", sync_table_scores)
                 .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
                 .WithIOCommand(
                     "local_server",
@@ -150,11 +89,10 @@ module Printerlude =
                 .WithIOCommand("timescale", "Sets the timescale of all UI animations, for testing", "speed", timescale)
                 .WithIOCommand("toggle_background", "Enables/disables background rendering", "enabled", toggle_background)
                 .WithCommand("enable_experiments", "Enables/disables developer experiments", "enabled", toggle_experiments)
-                .WithCommand("banner", "Generates a banner image (for testing)", "color", "emoji", banner)
                 .WithCommand("fake_update", "Fakes an update for testing the update UI button", fun () -> if Updates.latest_release.IsSome then Updates.update_available <- true)
+                .WithCommand("fake_register", "Fakes a signup event for testing the registration page", fun () -> RegisterPage("your_discord_tag_here").Show())
                 .WithCommand("chart_info", "Dumps chart meta info", chart_info)
                 .WithIOCommand("difficulty", "Dumps chart difficulty info", difficulty)
-                .WithCommand("vacuum", "Debug tool for cleaning up chart database", vacuum)
 
         let register_ipc_commands (ctx: ShellContext) =
             ctx
