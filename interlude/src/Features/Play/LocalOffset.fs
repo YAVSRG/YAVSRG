@@ -87,12 +87,14 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
             .Align(Alignment.LEFT)
             .Pos(2, 1)
         |+ PageButton(
-                [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
-                apply_recommended,
-                Hotkey = %%"accept_offset"
+            [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
+            apply_recommended
         )
+            .Hotkey("accept_offset")
             .Pos(3)
-        |+ PageButton(%"play.localoffset.reset", reset_offset, Hotkey = %%"reset_offset").Pos(5)
+        |+ PageButton(%"play.localoffset.reset", reset_offset)
+            .Hotkey("reset_offset")
+            .Pos(5)
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

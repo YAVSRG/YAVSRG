@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.Options
@@ -65,15 +64,15 @@ type LevelSelectOptionsPage() =
             .Pos(15)
         |+ PageButton(
             %"library.tables",
-            (fun () -> SelectTablePage(LevelSelect.refresh_all).Show()),
-            Hotkey = %%"table"
+            fun () -> SelectTablePage(LevelSelect.refresh_all).Show()
         )
+            .Hotkey("table")
             .Pos(17)
         |+ PageButton(
             %"library.collections",
-            (fun () -> ManageCollectionsPage().Show()),
-            Hotkey = %%"collections"
+            fun () -> ManageCollectionsPage().Show()
         )
+            .Hotkey("collections")
             .Pos(19)
         :> Widget
 

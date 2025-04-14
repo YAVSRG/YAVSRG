@@ -27,17 +27,14 @@ type EditHUDPage(ctx: PositionerContext) =
         |+ PageTextEntry(%"skin.name", name).Pos(0)
         |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(2)
         |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(4)
-        |+ PageButton(
-            %"skins.export",
-            (fun () ->
-                if not (Skins.export_skin hud_id) then
-                    Notifications.error (
-                        %"notification.export_skin_failure.title",
-                        %"notification.export_skin_failure.body"
-                    )
-            ),
-            Icon = Icons.UPLOAD
+        |+ PageButton( %"skins.export", fun () ->
+            if not (Skins.export_skin hud_id) then
+                Notifications.error (
+                    %"notification.export_skin_failure.title",
+                    %"notification.export_skin_failure.body"
+                )
         )
+            .Icon(Icons.UPLOAD)
             .Help(Help.Info("skins.export"))
             .Pos(8, 2, PageWidth.Full)
         |+ PageButton(%"skins.open_folder", fun () ->

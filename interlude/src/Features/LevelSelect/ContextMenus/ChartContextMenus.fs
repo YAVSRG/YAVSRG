@@ -1,7 +1,5 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
@@ -61,17 +59,15 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
     let rec like_button =
         PageButton(
             %"chart.add_to_likes",
-            (fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- unlike_button),
-            Icon = Icons.HEART,
-            Hotkey = %%"like"
-        )
+            fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- unlike_button)
+            .Icon(Icons.HEART)
+            .Hotkey("like")
     and unlike_button =
         PageButton(
             %"chart.remove_from_likes",
-            (fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- like_button),
-            Icon = Icons.FOLDER_MINUS,
-            Hotkey = %%"like"
-        )
+            fun () -> CollectionActions.toggle_liked chart_meta; like_button_swap.Current <- like_button)
+            .Icon(Icons.FOLDER_MINUS)
+            .Hotkey("like")
     and like_button_swap : SwapContainer = SwapContainer(if CollectionActions.is_liked chart_meta then unlike_button else like_button)
 
     override this.Content() =
@@ -94,104 +90,91 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
             content
             |* PageButton(
                 [ name ] %> "chart.remove_from_collection",
-                (fun () ->
+                fun () ->
                     if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, chart_meta, context) then
                         Menu.Back()
-                ),
-                Icon = Icons.FOLDER_MINUS
             )
+                .Icon(Icons.FOLDER_MINUS)
         | LibraryContext.Playlist(index, name, _) ->
             content
             |+ PageButton(
                 %"chart.move_up_in_playlist",
-                (fun () ->
+                fun () ->
                     if CollectionActions.reorder_up context then
                         Menu.Back()
-                ),
-                Icon = Icons.ARROW_UP_CIRCLE,
-                Disabled = K (index = 0),
-                Hotkey = %%"move_up_in_playlist"
             )
+                .Disabled((index = 0))
+                .Icon(Icons.ARROW_UP_CIRCLE)
+                .Hotkey("move_up_in_playlist")
             |+ PageButton(
                 %"chart.move_down_in_playlist",
-                (fun () ->
+                fun () ->
                     if CollectionActions.reorder_down context then
                         Menu.Back()
-                ),
-                Icon = Icons.ARROW_DOWN_CIRCLE,
-                Disabled = K (index + 1 = Content.Collections.GetPlaylist(name).Value.Charts.Count),
-                Hotkey = %%"move_down_in_playlist"
             )
+                .Disabled((index + 1 = Content.Collections.GetPlaylist(name).Value.Charts.Count))
+                .Icon(Icons.ARROW_DOWN_CIRCLE)
+                .Hotkey("move_down_in_playlist")
             |+ PageButton(
                 [ name ] %> "chart.remove_from_collection",
-                (fun () ->
+                fun () ->
                     if CollectionActions.remove_from (name, Content.Collections.Get(name).Value, chart_meta, context) then
                         Menu.Back()
-                ),
-                Icon = Icons.FOLDER_MINUS
             )
+                .Icon(Icons.FOLDER_MINUS)
             |+ PageButton.Once(
                 %"playlist.play",
-                (fun () ->
+                fun () ->
                     LevelSelect.start_playlist (name, Content.Collections.GetPlaylist(name).Value)
-                ),
-                Icon = Icons.PLAY,
-                Disabled = K Network.lobby.IsSome
             )
+                .Disabled(Network.lobby.IsSome)
+                .Icon(Icons.PLAY)
             |* PageButton.Once(
                 %"playlist.play_shuffled",
-                (fun () ->
+                fun () ->
                     LevelSelect.start_playlist_shuffled (name, Content.Collections.GetPlaylist(name).Value)
-                ),
-                Icon = Icons.SHUFFLE,
-                Disabled = K Network.lobby.IsSome
             )
+                .Disabled(Network.lobby.IsSome)
+                .Icon(Icons.SHUFFLE)
 
         if Some chart_meta = SelectedChart.CACHE_DATA then
             content
-            |+ PageButton(%"chart.change_offset",
-                fun () ->
-                    match SelectedChart.CHART, SelectedChart.SAVE_DATA with
-                    | Some chart, Some save_data ->
-                        LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
-                            .Show()
-                    | _ -> ()
-                , Icon = Icons.SPEAKER
+            |+ PageButton(%"chart.change_offset", fun () ->
+                match SelectedChart.CHART, SelectedChart.SAVE_DATA with
+                | Some chart, Some save_data ->
+                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
+                        .Show()
+                | _ -> ()
             )
-            |+ PageButton.Once(
-                %"chart.practice",
-                (fun () ->
-                    Menu.Exit()
-                    SelectedChart.when_loaded
-                        true
-                        (fun info ->
-                            Screen.change_new
-                                (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
-                                ScreenType.Practice
-                                Transitions.Default
-                            |> ignore
-                        )
-                ),
-                Icon = Icons.TARGET,
-                Hotkey = %%"practice_mode"
+                .Icon(Icons.SPEAKER)
+            |+ PageButton.Once(%"chart.practice", fun () ->
+                Menu.Exit()
+                SelectedChart.when_loaded
+                    true
+                    (fun info ->
+                        Screen.change_new
+                            (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                            ScreenType.Practice
+                            Transitions.Default
+                        |> ignore
+                    )
             )
-            |* PageButton.Once(
-                %"chart.export_osz",
-                (fun () ->
-                    match SelectedChart.CHART, SelectedChart.WITH_MODS with
-                    | Some c, Some m ->
-                        OsuExportOptionsPage(
-                            %"chart.export_osz",
-                            m.ModsApplied,
-                            function
-                            | true -> OsuExport.export_chart_with_mods m chart_meta
-                            | false -> OsuExport.export_chart_without_mods c chart_meta
-                        )
-                            .Show()
-                    | _ -> ()
-                ),
-                Icon = Icons.UPLOAD
+                .Icon(Icons.TARGET)
+                .Hotkey("practice_mode")
+            |* PageButton.Once(%"chart.export_osz", fun () ->
+                match SelectedChart.CHART, SelectedChart.WITH_MODS with
+                | Some c, Some m ->
+                    OsuExportOptionsPage(
+                        %"chart.export_osz",
+                        m.ModsApplied,
+                        function
+                        | true -> OsuExport.export_chart_with_mods m chart_meta
+                        | false -> OsuExport.export_chart_without_mods c chart_meta
+                    )
+                        .Show()
+                | _ -> ()
             )
+                .Icon(Icons.UPLOAD)
 
         content
         |+ PageButton(%"chart.delete", fun () -> ChartDeleteMenu(chart_meta, context, true).Show())

@@ -14,7 +14,11 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
         container.Clear()
 
         for level in table.Info.LevelDisplayNames.Keys do
-            container |* PageButton(table.Info.LevelName level, (fun () -> action level), Icon = Icons.FOLDER)
+            container
+                .Add(
+                    PageButton(table.Info.LevelName level, fun () -> action level)
+                        .Icon(Icons.FOLDER)
+                )
 
         if container.Focused then
             container.Focus false

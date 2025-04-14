@@ -12,21 +12,22 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"collections.edit", (fun () -> EditPlaylistPage(name, playlist).Show()), Icon = Icons.EDIT_2)
+        |+ PageButton(%"collections.edit", fun () -> EditPlaylistPage(name, playlist).Show())
+            .Icon(Icons.EDIT_2)
             .Pos(0)
         |+ PageButton
             .Once(
                 %"playlist.play",
-                (fun () -> LevelSelect.start_playlist (name, playlist)),
-                Icon = Icons.PLAY
-            )
+                fun () -> LevelSelect.start_playlist (name, playlist)
+        )
+            .Icon(Icons.PLAY)
             .Pos(3)
         |+ PageButton
             .Once(
                 %"playlist.play_shuffled",
-                (fun () -> LevelSelect.start_playlist_shuffled (name, playlist)),
-                Icon = Icons.SHUFFLE
-            )
+                fun () -> LevelSelect.start_playlist_shuffled (name, playlist)
+        )
+            .Icon(Icons.SHUFFLE)
             .Pos(5)
         :> Widget
 

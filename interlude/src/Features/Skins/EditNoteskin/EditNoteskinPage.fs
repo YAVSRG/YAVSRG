@@ -75,26 +75,22 @@ type EditNoteskinPage() =
 
     let noteskin_actions =
         NavigationContainer.Column()
-        |+ PageButton(
-            %"skins.export",
-            (fun () ->
-                if not (Skins.export_skin noteskin_id) then
-                    Notifications.error (
-                        %"notification.export_skin_failure.title",
-                        %"notification.export_skin_failure.body"
-                    )
-            ),
-            Icon = Icons.UPLOAD
+        |+ PageButton(%"skins.export", fun () ->
+            if not (Skins.export_skin noteskin_id) then
+                Notifications.error (
+                    %"notification.export_skin_failure.title",
+                    %"notification.export_skin_failure.body"
+                )
         )
+            .Icon(Icons.UPLOAD)
             .Help(Help.Info("skins.export"))
             .Pos(0, 2, PageWidth.Full)
         |+ PageButton(
             %"skins.open_folder",
-            (fun () ->
+            fun () ->
                 Skins.open_noteskin_folder noteskin_id |> ignore
-            ),
-            Icon = Icons.FOLDER
         )
+            .Icon(Icons.FOLDER)
             .Pos(2, 2, PageWidth.Full)
         |+ PageButton(%"skins.delete", fun () ->
             ConfirmPage([meta.Name] %> "noteskin.delete.confirm",

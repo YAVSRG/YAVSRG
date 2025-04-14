@@ -26,9 +26,9 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
 
         |+ PageButton(
             %"chart.add_to_collection",
-            (fun () -> AddToCollectionPage(chart_meta).Show()),
-            Icon = Icons.FOLDER_PLUS
+            fun () -> AddToCollectionPage(chart_meta).Show()
         )
+            .Icon(Icons.FOLDER_PLUS)
         :> Widget
 
     override this.Title = chart_meta.Title

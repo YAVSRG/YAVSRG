@@ -144,18 +144,22 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
 
     override this.Content() =
         page_container()
-        |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, K (suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone), Icon = Icons.PLAY)
+        |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, K (suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone))
+            .Icon(Icons.PLAY)
             .Pos(6)
         |+ PageButton(
             %"table.suggestions.vote_another_level",
-            (fun () -> SuggestChartPage(table, suggestion.ChartId).Show()),
-            Icon = Icons.EDIT_2
+            fun () -> SuggestChartPage(table, suggestion.ChartId).Show()
         )
+            .Icon(Icons.EDIT_2)
             .Pos(8)
-        |+ PageButton(%"table.suggestions.accept", (fun () -> SelectTableLevelPage(table, accept_level).Show()), Icon = Icons.CHECK, Disabled = K suggestion.BackbeatInfo.IsNone)
+        |+ PageButton(%"table.suggestions.accept", fun () -> SelectTableLevelPage(table, accept_level).Show())
+            .Icon(Icons.CHECK)
+            .Disabled(suggestion.BackbeatInfo.IsNone)
             .Conditional(fun () -> Network.credentials.Username = "Percyqaz") // todo: add permission check instead of temporary check
             .Pos(10)
-        |+ PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()), Icon = Icons.X)
+        |+ PageButton(%"table.suggestions.reject", (fun () -> RejectSuggestionPage(table, suggestion).Show()))
+            .Icon(Icons.X)
             .Conditional(fun () -> Network.credentials.Username = "Percyqaz")
             .Pos(12)
         |+ seq {

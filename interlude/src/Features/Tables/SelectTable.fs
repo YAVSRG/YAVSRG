@@ -1,7 +1,6 @@
 namespace Interlude.Features.Tables
 
 open Percyqaz.Common
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
@@ -22,9 +21,9 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
         container
         |+ PageButton(
             %"tables.browser",
-            (fun () -> TableBrowserPage().Show()),
-            Icon = Icons.DOWNLOAD
+            (fun () -> TableBrowserPage().Show())
         )
+            .Icon(Icons.DOWNLOAD)
         |* Dummy()
 
         for e in Tables.list () do
