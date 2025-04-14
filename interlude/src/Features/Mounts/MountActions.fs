@@ -24,6 +24,12 @@ type MountedGameType =
         | Quaver -> "Quaver"
         | Etterna -> "Etterna"
         | Stepmania -> "Stepmania"
+    member this.Color =
+        match this with
+        | Osu -> Color.FromArgb(0xFF_FF79B8)
+        | Quaver -> Color.FromArgb(0xFF_39B6D1)
+        | Etterna -> Color.FromArgb(0xFF_8F60F6)
+        | Stepmania -> Color.FromArgb(0xFF_FF703C)
 
 type private MountFileDropPage(game: MountedGameType, callback: string -> unit) =
     inherit Page()

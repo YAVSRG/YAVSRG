@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
 
-type RegisterPage(discord_tag) =
+type RegisterPage(discord_tag: string) =
     inherit Page()
 
     let username = Setting.simple ""
@@ -33,7 +33,7 @@ type RegisterPage(discord_tag) =
         |+ Text(
             "Creating an account linked to " + discord_tag)
             .Align(Alignment.LEFT)
-            .Position(page_position(0, 2, PageWidth.Full).Shrink(0.0f, 10.0f))
+            .TextPos(0)
         |+ CalloutCard(info).Position(fun (w, h) -> page_position(4, 9, PageWidth.Custom w).Translate(0.0f, 25.0f))
         |+ PageButton(%"register.terms_of_service", (fun () -> open_url ("https://yavsrg.net/terms_of_service")))
             .Pos(14)

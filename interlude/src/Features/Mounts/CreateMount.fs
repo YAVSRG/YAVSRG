@@ -85,11 +85,11 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                     .Pos(21),
                 Text([game.ToString()] %> "mount.create.title")
                     .Align(Alignment.LEFT)
-                    .Pos(0),
+                    .TextPos(0),
                 Text(sprintf "%s: %s" %"mount.create.path" path)
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
-                    .Pos(2, 1),
+                    .TextPosSmall(2),
                 CalloutCard(info)
                     .Pos(if score_import_available then 11 else 9)
             )

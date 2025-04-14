@@ -108,4 +108,6 @@ module Settings =
                 yield LibraryPage.RecachePatterns()
             if token_match tokens [|%"library.recalculate_personal_bests"|] then
                 yield LibraryPage.RecalculateScores()
+            if token_match tokens [|%"library.vacuum"|] then
+                yield LibraryPage.Vacuum()
         }

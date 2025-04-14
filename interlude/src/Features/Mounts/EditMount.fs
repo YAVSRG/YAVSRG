@@ -9,10 +9,8 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
 
-type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartSource option>) =
+type private EditMountPage(game: MountedGameType, mount: MountedChartSource, setting: Setting<MountedChartSource option>) =
     inherit Page()
-
-    let mount = setting.Value.Value
 
     let copy_assets = Setting.simple mount.CopyAssetFiles
     let import_on_startup = Setting.simple mount.ImportOnStartup
@@ -98,7 +96,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
 
                 Text([game.ToString()] %> "mount.edit.title")
                     .Align(Alignment.LEFT)
-                    .Pos(0),
+                    .TextPos(0),
                 Text(
                     [
                         match mount.LastImported with
@@ -109,7 +107,7 @@ type private EditMountPage(game: MountedGameType, setting: Setting<MountedChartS
                 )
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
-                    .Pos(2, 1)
+                    .TextPosSmall(2)
             )
 
     override this.Title = %"mount"

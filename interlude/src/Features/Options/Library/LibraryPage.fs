@@ -6,7 +6,6 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Data.Library
 open Prelude.Data.Library.Imports
 open Prelude.Data.Maintenance
-open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Import
@@ -53,6 +52,17 @@ module LibraryActions =
             %"notification.pattern_cache_started.body"
         )
 
+    let vacuum () : unit =
+        let task_tracking = TaskTracking.add %"library.vacuum"
+        let task = Vacuum.vacuum_charts(true, Content.Charts, task_tracking.set_Progress)
+        general_task_queue.Request(task, fun () ->
+            Notifications.system_feedback (
+                Icons.ALERT_OCTAGON,
+                %"notification.vacuum_complete.title",
+                ""
+            )
+        )
+
 type LibraryPage() =
     inherit Page()
 
@@ -91,65 +101,43 @@ type LibraryPage() =
     static member LevelSelectOptions() : PageButton =
         PageButton(%"levelselect.options", fun () -> LevelSelectOptionsPage().Show())
 
+    static member Vacuum() : PageButton =
+        PageButton.Once(%"library.vacuum", LibraryActions.vacuum)
+            .Help(Help.Info("library.vacuum"))
+
     override this.Content() =
-        let import_info =
-            Container(NodeType.None)
-                .Position(page_position(PAGE_BOTTOM - 4, 4, PageWidth.Custom 300.0f))
-            |+ Text(fun () ->
-                if TaskTracking.in_progress () then
-                    %"imports.in_progress"
-                else
-                    %"imports.not_in_progress"
-            )
-                .Color(fun () ->
-                    if TaskTracking.in_progress () then
-                        Colors.text_green
-                    else
-                        Colors.text_subheading
-                )
-                .Position(Position.SliceT(40.0f).Shrink(20.0f, 0.0f))
-            |+ LoadingIndicator.Strip(TaskTracking.in_progress)
-                .Position(Position.SliceT(40.0f, Style.PADDING).Shrink(150.0f, 0.0f))
-            |+ Text(sprintf "%i charts installed" Content.Library.Charts.Entries.Count)
-                .Color(Colors.text_subheading)
-                .Position(Position.SliceT(65.0f, 30.0f).Shrink(20.0f, 0.0f))
 
         let main_options =
             NavigationContainer.Column()
                 .WrapNavigation(false)
                 .Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f })
-            |+ LibraryPage.Imports().Pos(0, 2, PageWidth.Full)
-            |+ LibraryPage.ManageCollections().Pos(2, 2, PageWidth.Full)
-            |+ LibraryPage.ManageTables().Pos(4, 2, PageWidth.Full)
-            |+ LibraryPage.ManageRulesets().Pos(6, 2, PageWidth.Full)
-            |+ LibraryPage.RecachePatterns().Pos(9, 2, PageWidth.Full)
-            |+ LibraryPage.RecalculateScores().Pos(11, 2, PageWidth.Full)
-            |+ LibraryPage.LevelSelectOptions().Pos(13, 2, PageWidth.Full)
-            |+ import_info
-
-        let mount_options =
-            NavigationContainer.Column()
-                .WrapNavigation(false)
-                .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentR(0.5f).ShrinkR(10.0f).TranslateY(-50.0f))
-            |+ MountControl(MountedGameType.Osu, options.OsuMount)
-                .Position(Position.SliceT(100.0f, 150.0f))
-            |+ MountControl(MountedGameType.Quaver, options.QuaverMount)
-                .Position(Position.SliceT(270.0f, 150.0f))
-            |+ MountControl(MountedGameType.Etterna, options.EtternaMount)
-                .Position(Position.SliceT(440.0f, 150.0f))
-            |+ MountControl(MountedGameType.Stepmania, options.StepmaniaMount)
-                .Position(Position.SliceT(610.0f, 150.0f))
-            |+ Text(%"imports.mount")
-                .Align(Alignment.CENTER)
-                .Position(Position.SliceT(0.0f, 80.0f))
-            |+ Text(%"imports.drag_and_drop_hint")
-                .Align(Alignment.CENTER)
-                .Position(Position.SliceT(770.0f, 80.0f).Translate(0.0f, -10.0f))
+                .With(
+                    LibraryPage.Imports().Pos(0, 2, PageWidth.Full),
+                    LibraryPage.ManageCollections().Pos(2, 2, PageWidth.Full),
+                    LibraryPage.ManageTables().Pos(4, 2, PageWidth.Full),
+                    LibraryPage.ManageRulesets().Pos(6, 2, PageWidth.Full),
+                    LibraryPage.LevelSelectOptions().Pos(9, 2, PageWidth.Full),
+                    LibraryPage.RecachePatterns().Pos(11, 2, PageWidth.Full),
+                    LibraryPage.RecalculateScores().Pos(13, 2, PageWidth.Full),
+                    LibraryPage.Vacuum().Pos(15, 2, PageWidth.Full),
+                    Text([Content.Library.Charts.Entries.Count.ToString()] %> "library.chart_count")
+                        .Align(Alignment.LEFT)
+                        .TextPos(21),
+                    Text(%"library.import_in_progress_hint")
+                        .Color(Colors.text_green)
+                        .Align(Alignment.LEFT)
+                        .Conditional(TaskTracking.in_progress)
+                        .TextPosSmall(20)
+                )
 
         NavigationContainer.Row()
-        |+ main_options
-        |+ mount_options
-        :> Widget
+            .With(
+                main_options
+                    .Position({ Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y) with Right = 0.5f %- 10.0f }),
+
+                MountDisplay.CreateAll()
+                    .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
+            )
 
     override this.Title = %"library"
     override this.OnClose() = ()

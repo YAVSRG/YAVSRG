@@ -141,7 +141,7 @@
     <Compile Include="Features\Mounts\MountActions.fs" />
     <Compile Include="Features\Mounts\CreateMount.fs" />
     <Compile Include="Features\Mounts\EditMount.fs" />
-    <Compile Include="Features\Mounts\Display.fs" />
+    <Compile Include="Features\Mounts\MountDisplay.fs" />
     <Compile Include="Features\Stats\Sync.fs" />
     <Compile Include="Features\Stats\PlayCount.fs" />
     <Compile Include="Features\Stats\Skillsets\BreakdownGraph.fs" />

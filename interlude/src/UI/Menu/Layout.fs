@@ -55,25 +55,35 @@ type PageLayoutExtensions =
 
     [<Extension>]
     static member Pos(widget: #Widget, y: int) : #Widget =
-        widget.Position <- page_position (y, 2, PageWidth.Normal)
+        widget.Position <- page_position(y, 2, PageWidth.Normal)
         widget
 
     [<Extension>]
     static member Pos(widget: #Widget, y: int, h: int) : #Widget =
-        widget.Position <- page_position (y, h, PageWidth.Normal)
+        widget.Position <- page_position(y, h, PageWidth.Normal)
         widget
 
     [<Extension>]
     static member Pos(widget: #Widget, y: int, h: int, width: PageWidth) : #Widget =
-        widget.Position <- page_position (y, h, width)
+        widget.Position <- page_position(y, h, width)
         widget
 
     [<Extension>]
     static member Pos(card: CalloutCard, y: int) : CalloutCard =
         card.Position <-
-            page_position (
+            page_position(
                 y,
                 (card :> IHeight).Height / PAGE_ITEM_HEIGHT * 2.0f |> ceil |> int,
                 PageWidth.Custom (card :> IWidth).Width
-            )
+            ).TranslateX(-Style.PADDING * 2.0f)
         card
+
+    [<Extension>]
+    static member TextPos(text: #Widget, y: int) : #Widget =
+        text.Position <- page_position(y, 2, PageWidth.Normal).Shrink(Style.PADDING * 3.0f, Style.PADDING)
+        text
+
+    [<Extension>]
+    static member TextPosSmall(text: #Widget, y: int) : #Widget =
+        text.Position <- page_position(y, 1, PageWidth.Normal).ShrinkX(Style.PADDING * 3.0f)
+        text
