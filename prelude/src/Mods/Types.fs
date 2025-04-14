@@ -10,10 +10,11 @@ open Prelude.Charts
         2 = Scores with this mod enabled should not be saved at all e.g. something experimental or still in development
 *)
 
+[<RequireQualifiedAccess>]
 type ModStatus =
-    | Ranked = 0
-    | Unranked = 1
-    | Unstored = 2
+    | Ranked
+    | Unranked
+    | Unstored
 
 type ModdedChart =
     {

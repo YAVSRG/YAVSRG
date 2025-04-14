@@ -4,6 +4,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
+open Prelude
 open Prelude.Mods
 open Interlude.UI
 open Interlude.Features.Gameplay
@@ -23,6 +24,20 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
 
     override this.Draw() =
         let alpha = fade.Alpha
+
+        if info.WithMods.Status <> ModStatus.Ranked then
+            let status, desc, color =
+                match info.WithMods.Status with
+                | ModStatus.Unstored -> %"mods.mod_status.unstored", %"mods.mod_status.unstored.desc", Colors.red_accent
+                | ModStatus.Unranked -> %"mods.mod_status.unranked", %"mods.mod_status.unranked.desc", Colors.yellow_accent
+                | ModStatus.Ranked -> failwith "impossible"
+
+            let banner_area = this.Bounds.SliceT(100.0f, 100.0f)
+
+            Render.rect_c (this.Bounds.SliceT(600.0f)) (Quad.gradient_top_to_bottom (color.O1a alpha) color.O0)
+            Render.rect (banner_area.SlicePercentY(fade.Value)) (Colors.shadow_2.O2a alpha)
+            Text.fill_b(Style.font, status, banner_area.Shrink(100.0f, Style.PADDING * 2.0f).SlicePercentT(0.7f), (color.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
+            Text.fill_b(Style.font, desc, banner_area.Shrink(100.0f, Style.PADDING * 2.0f).ShrinkPercentT(0.6f), (color.O4a alpha, Colors.shadow_2.O4a alpha), Alignment.CENTER)
 
         let bg_panel = this.Bounds.SlicePercentX(BG_SCALE).SlicePercentY(BG_SCALE).Translate(0.0f, -120.0f)
         let song_title = bg_panel.BorderB(80.0f).ExpandX(200.0f)
