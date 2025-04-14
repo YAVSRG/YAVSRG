@@ -14,28 +14,32 @@ type MountedChartSourceType =
     | Pack of name: string
     | Library
 
-[<Json.AutoCodec>]
+[<Json.AutoCodec(false)>]
 type MountedChartSource =
     {
         SourceFolder: string
-        mutable LastImported: DateTime option
         Type: MountedChartSourceType
+        mutable LastImported: DateTime option
         ImportOnStartup: bool
+        CopyAssetFiles: bool
     }
-    static member Pack(name: string, path: string) =
+
+    static member Pack(name: string, path: string) : MountedChartSource =
         {
             SourceFolder = path
             LastImported = None
             Type = Pack name
             ImportOnStartup = false
+            CopyAssetFiles = false
         }
 
-    static member Library(path: string) =
+    static member Library(path: string) : MountedChartSource =
         {
             SourceFolder = path
             LastImported = None
             Type = Library
             ImportOnStartup = false
+            CopyAssetFiles = false
         }
 
 module Mount =
@@ -49,7 +53,7 @@ module Mount =
                     match source.LastImported with
                     | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
                     | None -> ()
-                    let config = ConversionOptions.Pack(packname, source.LastImported, LinkAssetFiles)
+                    let config = ConversionOptions.Pack(packname, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
                     let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db, progress)
 
                     log_conversion result
@@ -71,7 +75,7 @@ module Mount =
                         let! result =
                             Imports.convert_pack_folder(
                                 pack_folder,
-                                ConversionOptions.Pack(pack_name, source.LastImported, LinkAssetFiles),
+                                ConversionOptions.Pack(pack_name, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
                                 chart_db,
                                 user_db,
                                 (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
@@ -88,8 +92,21 @@ module Mount =
                 return Error err.Message
         }
 
-    let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
+    let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             source.LastImported <- None
             return! import_new(source, chart_db, user_db, progress)
         }
+
+    let find_linked_charts (source: MountedChartSource, chart_db: ChartDatabase) : ChartMeta seq =
+        seq {
+            for chart_meta in chart_db.Entries |> Array.ofSeq do
+                match chart_meta.Audio with
+                | AssetPath.Absolute path when path.StartsWith(source.SourceFolder) ->
+                    yield chart_meta
+                | _ -> ()
+        }
+
+    let delete_linked_charts (source: MountedChartSource, chart_db: ChartDatabase) : unit =
+        let charts = find_linked_charts (source, chart_db)
+        ChartDatabase.delete_many charts chart_db
