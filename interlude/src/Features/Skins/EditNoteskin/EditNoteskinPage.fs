@@ -96,17 +96,15 @@ type EditNoteskinPage() =
             Icon = Icons.FOLDER
         )
             .Pos(2, 2, PageWidth.Full)
-        |+ PageButton(
-            %"skins.delete",
-            (fun () ->
-                ConfirmPage([meta.Name] %> "noteskin.delete.confirm",
-                    fun () ->
-                        if Skins.delete_noteskin noteskin_id then
-                            Menu.Back()
-                ).Show()
-            ),
-            Icon = Icons.TRASH
+        |+ PageButton(%"skins.delete", fun () ->
+            ConfirmPage([meta.Name] %> "noteskin.delete.confirm",
+                fun () ->
+                    if Skins.delete_noteskin noteskin_id then
+                        Menu.Back()
+            ).Show()
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
             .Pos(4, 2, PageWidth.Full)
 
     let refresh () =

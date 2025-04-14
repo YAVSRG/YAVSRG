@@ -80,7 +80,7 @@ type private DeleteButton(on_click: unit -> unit) =
 
     override this.Draw() =
         if this.Focused then
-            Render.rect (this.Bounds.Expand(0.0f, this.VerticalPad)) Colors.yellow_accent.O2
+            Render.rect (this.Bounds.ExpandY(this.VerticalPad)) Colors.yellow_accent.O2
 
         base.Draw()
 

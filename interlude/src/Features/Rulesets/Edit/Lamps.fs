@@ -80,6 +80,7 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
                 ).Show()
             )
         )
+            .TextColor(Colors.red_accent)
             .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() =

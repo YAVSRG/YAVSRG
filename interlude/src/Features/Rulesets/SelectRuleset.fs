@@ -57,6 +57,7 @@ type SelectRulesetPage() =
                     )
                 )
                     .Disabled(Rulesets.DEFAULT_ID = id)
+                    .TextColor(Colors.red_accent)
                     .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
 

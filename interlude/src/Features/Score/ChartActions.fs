@@ -38,45 +38,40 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
             FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
                 .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
             |+ like_button_swap
-            |+ PageButton(
-                %"chart.add_to_collection",
-                (fun () -> AddToCollectionPage(score_info.ChartMeta).Show()),
-                Icon = Icons.FOLDER_PLUS
+            |+ PageButton(%"chart.add_to_collection", fun () ->
+                AddToCollectionPage(score_info.ChartMeta).Show()
             )
-            |+ PageButton(%"chart.change_offset",
-                fun () ->
-                    match SelectedChart.CHART, SelectedChart.SAVE_DATA with
-                    | Some chart, Some save_data ->
-                        LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
-                            .Show()
-                    | _ -> ()
-                , Icon = Icons.SPEAKER
-            )
-            |+ PageButton(
-                %"chart.delete",
-                fun () ->
-                    let chart_name = sprintf "%s [%s]" score_info.ChartMeta.Title score_info.ChartMeta.DifficultyName
-                    ConfirmPage(
-                        [ chart_name ] %> "misc.confirmdelete",
-                        fun () -> ChartDatabase.delete score_info.ChartMeta Content.Charts
-                    )
+                .Icon(Icons.FOLDER_PLUS)
+            |+ PageButton(%"chart.change_offset", fun () ->
+                match SelectedChart.CHART, SelectedChart.SAVE_DATA with
+                | Some chart, Some save_data ->
+                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
                         .Show()
-                , Icon = Icons.TRASH, Hotkey = %%"delete"
+                | _ -> ()
             )
-            |+ PageButton.Once(
-                %"chart.export_osz",
-                (fun () ->
-                    OsuExportOptionsPage(
-                        %"chart.export_osz",
-                        score_info.WithMods.ModsApplied,
-                        function
-                        | true -> OsuExport.export_chart_with_mods score_info.WithMods score_info.ChartMeta
-                        | false -> OsuExport.export_chart_without_mods score_info.Chart score_info.ChartMeta
-                    )
-                        .Show()
-                ),
-                Icon = Icons.UPLOAD
+                .Icon(Icons.SPEAKER)
+            |+ PageButton(%"chart.delete", fun () ->
+                let chart_name = sprintf "%s [%s]" score_info.ChartMeta.Title score_info.ChartMeta.DifficultyName
+                ConfirmPage(
+                    [ chart_name ] %> "misc.confirmdelete",
+                    fun () -> ChartDatabase.delete score_info.ChartMeta Content.Charts
+                )
+                    .Show()
             )
+                .TextColor(Colors.red_accent)
+                .Icon(Icons.TRASH)
+                .Hotkey("delete")
+            |+ PageButton.Once(%"chart.export_osz", fun () ->
+                OsuExportOptionsPage(
+                    %"chart.export_osz",
+                    score_info.WithMods.ModsApplied,
+                    function
+                    | true -> OsuExport.export_chart_with_mods score_info.WithMods score_info.ChartMeta
+                    | false -> OsuExport.export_chart_without_mods score_info.Chart score_info.ChartMeta
+                )
+                    .Show()
+            )
+                .Icon(Icons.UPLOAD)
 
         content
 

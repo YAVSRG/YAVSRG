@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Noteskins
@@ -16,32 +15,26 @@ type ScoreContextMenu(is_leaderboard: bool, score_info: ScoreInfo) =
 
     override this.Content() =
         page_container()
-        |+ PageButton(
-            %"score.watch_replay",
-            (fun () ->
-                Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
-                Menu.Back()
-            ),
-            Icon = Icons.FILM
+        |+ PageButton(%"score.watch_replay", fun () ->
+            Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
+            Menu.Back()
         )
+            .Icon(Icons.FILM)
             .Pos(0)
-        |+ PageButton(
-            %"score.challenge",
-            (fun () ->
-                LevelSelect.challenge_score score_info
-                Menu.Back()
-            ),
-            Icon = Icons.FLAG,
-            Disabled = K Network.lobby.IsSome
+        |+ PageButton(%"score.challenge", fun () ->
+            LevelSelect.challenge_score score_info
+            Menu.Back()
         )
+            .Icon(Icons.FLAG)
+            .Disabled(Network.lobby.IsSome)
             .Help(Help.Info("score.challenge"))
             .Pos(2)
-        |+ PageButton(
-            %"score.delete",
-            (fun () -> ScoreContextMenu.ConfirmDeleteScore(score_info, true)),
-            Icon = Icons.TRASH,
-            Hotkey = %%"delete"
+        |+ PageButton(%"score.delete", fun () ->
+            ScoreContextMenu.ConfirmDeleteScore(score_info, true)
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
+            .Hotkey("delete")
             .Pos(4)
             .Conditional(K (not is_leaderboard))
         :> Widget

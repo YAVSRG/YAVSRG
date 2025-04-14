@@ -38,11 +38,12 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
 
     override this.Content() =
         page_container()
-        |+ PageButton(
-            %"bulk_actions.delete",
-            (fun () -> GroupContextMenu.ConfirmDelete(charts, context, true)),
-            Icon = Icons.TRASH
+        |+ PageButton(%"bulk_actions.delete", fun () ->
+            GroupContextMenu.ConfirmDelete(charts, context, true)
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
+            .Hotkey("delete")
             .Pos(0)
         :> Widget
 

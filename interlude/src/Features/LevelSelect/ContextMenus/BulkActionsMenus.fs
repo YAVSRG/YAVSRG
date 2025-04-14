@@ -93,10 +93,21 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"bulk_actions.unlike", confirm_bulk_unlike, Icon = Icons.FOLDER_MINUS, Hotkey = %%"like").Pos(0)
-        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton(%"bulk_actions.delete", confirm_bulk_delete, Icon = Icons.TRASH, Hotkey = %%"delete").Pos(4)
-        |+ PageButton(%"bulk_actions.export_oszs", (fun () -> BulkActions.confirm_bulk_export charts), Icon = Icons.UPLOAD).Pos(6)
+        |+ PageButton(%"bulk_actions.unlike", confirm_bulk_unlike)
+            .Icon(Icons.FOLDER_MINUS)
+            .Hotkey("like")
+            .Pos(0)
+        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection)
+            .Icon(Icons.FOLDER_PLUS)
+            .Pos(2)
+        |+ PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
+            .Icon(Icons.UPLOAD)
+            .Pos(4)
+        |+ PageButton(%"bulk_actions.delete", confirm_bulk_delete)
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
+            .Hotkey("delete")
+            .Pos(6)
         :> Widget
 
     override this.Title = %"bulk_actions"
@@ -151,10 +162,19 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"bulk_actions.like", confirm_bulk_like, Icon = Icons.HEART, Hotkey = %%"like").Pos(0)
-        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton([folder] %> "bulk_actions.remove_from_collection", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
-        |+ PageButton(%"bulk_actions.export_oszs", (fun () -> BulkActions.confirm_bulk_export charts), Icon = Icons.UPLOAD).Pos(6)
+        |+ PageButton(%"bulk_actions.like", confirm_bulk_like)
+            .Icon(Icons.HEART)
+            .Hotkey("like")
+            .Pos(0)
+        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection)
+            .Icon(Icons.FOLDER_PLUS)
+            .Pos(2)
+        |+ PageButton([folder] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
+            .Icon(Icons.FOLDER_MINUS)
+            .Pos(4)
+        |+ PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
+            .Icon(Icons.UPLOAD)
+            .Pos(6)
         :> Widget
 
     override this.Title = %"bulk_actions"
@@ -215,10 +235,19 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"bulk_actions.like", confirm_bulk_like, Icon = Icons.HEART, Hotkey = %%"like").Pos(0)
-        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton([playlist] %> "bulk_actions.remove_from_collection", confirm_bulk_remove, Icon = Icons.FOLDER_MINUS).Pos(4)
-        |+ PageButton(%"bulk_actions.export_oszs", (fun () -> BulkActions.confirm_bulk_export charts), Icon = Icons.UPLOAD).Pos(6)
+        |+ PageButton(%"bulk_actions.like", confirm_bulk_like)
+            .Icon(Icons.HEART)
+            .Hotkey("like")
+            .Pos(0)
+        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection)
+            .Icon(Icons.FOLDER_PLUS)
+            .Pos(2)
+        |+ PageButton([playlist] %> "bulk_actions.remove_from_collection", confirm_bulk_remove)
+            .Icon(Icons.FOLDER_MINUS)
+            .Pos(4)
+        |+ PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
+            .Icon(Icons.UPLOAD)
+            .Pos(6)
         :> Widget
 
     override this.Title = %"bulk_actions"
@@ -261,10 +290,21 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
 
     override this.Content() =
         page_container()
-        |+ PageButton(%"bulk_actions.like", confirm_bulk_like, Icon = Icons.HEART, Hotkey = %%"like").Pos(0)
-        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection, Icon = Icons.FOLDER_PLUS).Pos(2)
-        |+ PageButton(%"bulk_actions.delete", (fun () -> BulkActions.confirm_bulk_delete charts), Icon = Icons.TRASH, Hotkey = %%"delete").Pos(4)
-        |+ PageButton(%"bulk_actions.export_oszs", (fun () -> BulkActions.confirm_bulk_export charts), Icon = Icons.UPLOAD).Pos(6)
+        |+ PageButton(%"bulk_actions.like", confirm_bulk_like)
+            .Icon(Icons.HEART)
+            .Hotkey("like")
+            .Pos(0)
+        |+ PageButton(%"bulk_actions.add_to_collection", add_to_collection)
+            .Icon(Icons.FOLDER_PLUS)
+            .Pos(2)
+        |+ PageButton(%"bulk_actions.export_oszs", fun () -> BulkActions.confirm_bulk_export charts)
+            .Icon(Icons.UPLOAD)
+            .Pos(4)
+        |+ PageButton(%"bulk_actions.delete", fun () -> BulkActions.confirm_bulk_delete charts)
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
+            .Hotkey("delete")
+            .Pos(6)
         :> Widget
 
     override this.Title = %"bulk_actions"

@@ -4,7 +4,9 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.Library
+open Prelude.Data.Library.Imports
 open Interlude.UI
+open Interlude.Content
 
 type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSource option>) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.VisibleButtons), Fill = K Colors.cyan.O2, Border = K Colors.cyan_accent)
@@ -29,6 +31,7 @@ type MountControl(game: MountedGameType, setting: Setting<Imports.MountedChartSo
             sprintf "%s %s" Icons.TRASH (%"mount.delete"),
             (fun () -> setting.Value <- None)
         )
+            .TextColor(Colors.red_accent)
             .Position(Position.SlicePercentR(0.5f))
 
     override this.Init(parent: Widget) =

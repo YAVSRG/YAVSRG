@@ -40,25 +40,20 @@ type EditHUDPage(ctx: PositionerContext) =
         )
             .Help(Help.Info("skins.export"))
             .Pos(8, 2, PageWidth.Full)
-        |+ PageButton(
-            %"skins.open_folder",
-            (fun () ->
-                Skins.open_hud_folder hud_id |> ignore
-            ),
-            Icon = Icons.FOLDER
+        |+ PageButton(%"skins.open_folder", fun () ->
+            Skins.open_hud_folder hud_id |> ignore
         )
+            .Icon(Icons.FOLDER)
             .Pos(10, 2, PageWidth.Full)
-        |+ PageButton(
-            %"skins.delete",
-            (fun () ->
-                ConfirmPage([meta.Name] %> "hud.delete.confirm",
-                    fun () ->
-                        if Skins.delete_hud hud_id then
-                            Menu.Back()
-                ).Show()
-            ),
-            Icon = Icons.TRASH
+        |+ PageButton(%"skins.delete", fun () ->
+            ConfirmPage([meta.Name] %> "hud.delete.confirm",
+                fun () ->
+                    if Skins.delete_hud hud_id then
+                        Menu.Back()
+            ).Show()
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
             .Pos(12, 2, PageWidth.Full)
     let elements_tab = ScrollContainer(ElementGrid.create(fun element -> HudElement.enabled_setting(element).Set true; ctx.Select element; Menu.Exit()))
 

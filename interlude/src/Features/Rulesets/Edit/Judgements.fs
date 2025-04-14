@@ -55,6 +55,7 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
             ).Show()
         )
             .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
+            .TextColor(Colors.red_accent)
             .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() : unit =

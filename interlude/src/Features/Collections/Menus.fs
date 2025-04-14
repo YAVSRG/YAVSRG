@@ -94,21 +94,19 @@ type EditFolderPage(name: string, folder: Folder) =
         |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
         |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
             .Pos(2)
-        |+ PageButton(
-            %"collections.edit.delete",
-            (fun () ->
-                ConfirmPage(
-                    [ name ] %> "misc.confirmdelete",
-                    fun () ->
-                        // todo: these operations should live in Actions.fs and collection_modified_ev should be private
-                        if Content.Collections.Delete name then
-                            CollectionActions.collection_modified_ev.Trigger()
-                            Menu.Back()
-                )
-                    .Show()
-            ),
-            Icon = Icons.TRASH
+        |+ PageButton(%"collections.edit.delete", fun () ->
+            ConfirmPage(
+                [ name ] %> "misc.confirmdelete",
+                fun () ->
+                    // todo: these operations should live in Actions.fs and collection_modified_ev should be private
+                    if Content.Collections.Delete name then
+                        CollectionActions.collection_modified_ev.Trigger()
+                        Menu.Back()
+            )
+                .Show()
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
             .Pos(5)
         :> Widget
 
@@ -132,20 +130,18 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
         |+ PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0)
         |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
             .Pos(2)
-        |+ PageButton(
-            %"collections.edit.delete",
-            (fun () ->
-                ConfirmPage(
-                    [ name ] %> "misc.confirmdelete",
-                    fun () ->
-                        if Content.Collections.Delete name then
-                            CollectionActions.collection_modified_ev.Trigger()
-                            Menu.Back()
-                )
-                    .Show()
-            ),
-            Icon = Icons.TRASH
+        |+ PageButton(%"collections.edit.delete", fun () ->
+            ConfirmPage(
+                [ name ] %> "misc.confirmdelete",
+                fun () ->
+                    if Content.Collections.Delete name then
+                        CollectionActions.collection_modified_ev.Trigger()
+                        Menu.Back()
+            )
+                .Show()
         )
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
             .Pos(5)
         :> Widget
 

@@ -81,10 +81,9 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
             |+ like_button_swap
             |+ PageButton(
                 %"chart.add_to_collection",
-                (fun () -> AddToCollectionPage(chart_meta).Show()),
-                Icon = Icons.FOLDER_PLUS
+                fun () -> AddToCollectionPage(chart_meta).Show()
             )
-            |+ PageButton(%"chart.delete", (fun () -> ChartDeleteMenu(chart_meta, context, true).Show()), Hotkey = %%"delete", Icon = Icons.TRASH)
+                .Icon(Icons.FOLDER_PLUS)
 
         match context with
         | LibraryContext.None
@@ -195,6 +194,11 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
             )
 
         content
+        |+ PageButton(%"chart.delete", fun () -> ChartDeleteMenu(chart_meta, context, true).Show())
+            .TextColor(Colors.red_accent)
+            .Icon(Icons.TRASH)
+            .Hotkey("delete")
+        :> Widget
 
     override this.Title = chart_meta.Title
     override this.OnClose() = ()
