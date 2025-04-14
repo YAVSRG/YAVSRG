@@ -13,7 +13,7 @@ type PageSetting(localised_text, widget: Widget) as this =
         and set (w: Widget) =
             let old_widget = widget
             widget <- w
-            w.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING)
+            w.Position <- Position.ShrinkL(PAGE_LABEL_WIDTH).Shrink(Style.PADDING).ShrinkR(Style.PADDING * 2.0f)
 
             if this.Initialised then
                 w.Init this

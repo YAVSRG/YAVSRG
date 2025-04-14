@@ -63,7 +63,7 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
 
     override this.Draw() =
         if this.Focused then
-            Render.rect (this.Bounds.ExpandR(10.0f)) Colors.yellow_accent.O1
+            Render.rect this.Bounds Colors.yellow_accent.O1
 
         base.Draw()
 
