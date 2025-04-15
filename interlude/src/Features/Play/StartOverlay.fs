@@ -30,6 +30,7 @@ type StartOverlay(info: LoadedChartInfo, pacemaker: PacemakerState, on_ready: un
                 match info.WithMods.Status with
                 | ModStatus.Unstored -> %"mods.mod_status.unstored", %"mods.mod_status.unstored.desc", Colors.red_accent
                 | ModStatus.Unranked -> %"mods.mod_status.unranked", %"mods.mod_status.unranked.desc", Colors.yellow_accent
+                | ModStatus.Offline -> %"mods.mod_status.offline", %"mods.mod_status.offline.desc", Colors.yellow_accent
                 | ModStatus.Ranked -> failwith "impossible"
 
             let banner_area = this.Bounds.SliceT(100.0f, 100.0f)

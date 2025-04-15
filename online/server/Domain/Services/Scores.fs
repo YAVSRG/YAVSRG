@@ -63,6 +63,7 @@ module Scores =
             | Error message ->
                 Logging.Error "Mod validation failed from user #%i: %s" user_id message
                 return ScoreUploadOutcome.Failed
+            | Ok ModStatus.Offline
             | Ok ModStatus.Unstored -> return ScoreUploadOutcome.Failed
             | Ok mod_ranked_status ->
 

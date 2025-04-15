@@ -180,13 +180,15 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                         match mod_status() with
                         | ModStatus.Ranked -> %"mods.mod_status.ranked"
                         | ModStatus.Unranked -> %"mods.mod_status.unranked"
-                        | _ -> %"mods.mod_status.unstored"
+                        | ModStatus.Offline -> %"mods.mod_status.offline"
+                        | ModStatus.Unstored -> %"mods.mod_status.unstored"
                      )
                         .Color(fun () ->
                             match mod_status() with
                             | ModStatus.Ranked -> Colors.text_green_2
                             | ModStatus.Unranked -> Colors.text_yellow_2
-                            | _ -> Colors.text_greyout
+                            | ModStatus.Offline -> Colors.text_yellow_2
+                            | ModStatus.Unstored -> Colors.text_red
                         )
                         .Align(Alignment.LEFT)
                 )

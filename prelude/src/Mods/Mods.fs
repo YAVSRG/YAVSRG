@@ -82,7 +82,7 @@ module Mods =
 
             "column_swap",
             { Mod.Default with
-                Status = ModStatus.Unstored
+                Status = ModStatus.Offline
                 Type = ColumnSwap
                 Exclusions = [ "shuffle"; "random"; "mirror" ]
                 Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.unpack s) mc

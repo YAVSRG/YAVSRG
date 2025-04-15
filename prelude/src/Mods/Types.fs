@@ -3,17 +3,18 @@
 open Prelude
 open Prelude.Charts
 
-(*
-    Marker for status of mods.
-        0 = This is a non-silly mod suitable for online upload, personal bests, leaderboards
-        1 = This is a for-fun mod that may transform a chart in large ways or are otherwise not suitable for leaderboards e.g. randomiser
-        2 = Scores with this mod enabled should not be saved at all e.g. something experimental or still in development
-*)
-
+[<Struct>]
 [<RequireQualifiedAccess>]
 type ModStatus =
+    /// Scores are suitable for online upload, personal bests, leaderboards
     | Ranked
+    /// Scores are not suitable for leaderboards but may still be uploaded for "unranked leaderboards" and the like
     | Unranked
+    /// Scores are not worthy of submitting online at all
+    /// Mainly for (practice) mods that are so highly configurable that it's just not worth storing them all online
+    | Offline
+    /// Unstored = Scores should not be saved
+    /// For mods that are in development or will otherwise change and corrupt scores if they were saved
     | Unstored
 
 type ModdedChart =
