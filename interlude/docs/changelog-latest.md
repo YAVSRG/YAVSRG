@@ -1,22 +1,20 @@
-0.7.27.14
+0.7.28
 ====
 
-Small update while I work on more pattern, difficulty and performance analysis improvements
-
-# New features
-- You can now set a custom frame cap via the performance settings  
-  Useful for people that have various issues with Smart Cap or for more reliable recording/streaming
-- New 'Column Swap' mod that lets you put columns in a custom order  
-  UI to be improved further in a future update
+When you don't see it :(
 
 # Improvements
-- Smart frame cap now uses VSync on Intel hardware, again this change will be used to study the Intel-Graphics-Only crashes
-- Stats graphs now open switched to the keymode you're playing
-- Judgement percentages now show on score screen, also ratios if you switch to showing more details
-- Made a change to the chart/score databases that should make them less prone to locking
+- New setting to normalise short holds, to prevent visual issues with high values of Hold Note Trim
+- Overhaul to import/library menus, mainly to improve the process of adding and removing links to other game's songs
+- 'Vacuum' is no longer a hidden console command and can be run from the library menu
+- Mod status is shown to remind you as you enter gameplay
+- Some options have moved to better places, such as quit-out behaviour now being on the Gameplay options tab
+- Column swap mod now shows columns as its shorthand, and scores now save
+- Type `*` in the options menu search to see all possible search results
+- All delete buttons are now red
+- Various other small and subtle UI improvements
 
 # Bug fixes
-- Fixed a visual issue with LN tails under certain circumstances
-- Fixed an issue where the wrong judgement would be awarded for LN releases on Quaver rulesets
-- Fixed sporadic 'Server error' messages showing ingame
+- Fixed black seams showing under certain circumstances with hold notes and other textures
+- Reverted a change from last update that worsened windowed-mode latency for some users
 
