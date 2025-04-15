@@ -80,6 +80,12 @@ type SpriteUpload =
             DisposeImageAfter = true
         }
 
+[<Struct>]
+type SpriteSmoothing =
+    | NoSampling
+    | LinearSampling
+    | LinearSamplingFixEdges
+
 module Texture =
 
     let TRACE = false
@@ -185,19 +191,30 @@ module Texture =
 module Sprite =
 
     [<Literal>]
-    let FRILL_DEBUG_ALPHA = 1uy
+    let private FRILL_OPACITY = 1uy
     [<Literal>]
-    let FRILL_SIZE = 2
+    let private FRILL_SIZE = 3
+    [<Literal>]
+    let private FRILL_THRESHOLD = 0uy
 
-    let internal fix_frills (image: Bitmap) : unit =
+    /// Fix for scenario when linear sampling is used on edges within a texture:
+    ///  - Some pixels that are fully opaque, part of the sprite
+    ///  - Some pixels are fully transparent, empty space in the sprite
+    ///  - ImageSharp sets all full transparent pixels to 0x00000000 (Black + Fully transparent)
+    /// Result of sampling: Mid-opacity color partway between color at edge and black
+    /// This causes black "frills" to be seen at the edges of textures ingame
+    ///
+    /// This fix adds a few pixels in all directions that have alpha 0x01 and the same color as the nearby opaque edge
+    /// When sampling, no more frills! :)
+    let private fix_frills (image: Bitmap) : unit =
 
         for x = 0 to image.Width - 1 do
             let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
             let mutable s: int = 0
             for y = 0 to image.Height - 1 do
                 let pixel = image.[x, y]
-                if pixel.A > 0uy then
-                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                if pixel.A > FRILL_THRESHOLD then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
                 elif s > 0 then
                     s <- s - 1
@@ -207,8 +224,8 @@ module Sprite =
             let mutable s: int = 0
             for y = image.Height - 1 downto 0 do
                 let pixel = image.[x, y]
-                if pixel.A > 0uy then
-                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                if pixel.A > FRILL_THRESHOLD then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
                 elif s > 0 then
                     s <- s - 1
@@ -219,8 +236,8 @@ module Sprite =
             let mutable s: int = 0
             for x = 0 to image.Width - 1 do
                 let pixel = image.[x, y]
-                if pixel.A > 0uy then
-                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                if pixel.A > FRILL_THRESHOLD then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
                 elif s > 0 then
                     s <- s - 1
@@ -230,16 +247,21 @@ module Sprite =
             let mutable s: int = 0
             for x = image.Width - 1 downto 0 do
                 let pixel = image.[x, y]
-                if pixel.A > 0uy then
-                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                if pixel.A > FRILL_THRESHOLD then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_OPACITY)
                     s <- FRILL_SIZE
                 elif s > 0 then
                     s <- s - 1
                     image.[x, y] <- p
 
-    let fix_frills_2 (image: Bitmap) : Bitmap =
-
-        fix_frills image
+    /// Fix for scenario when linear sampling is used at the boundaries of a texture
+    ///  - Some pixels at border that are fully opaque, part of the sprite
+    ///  - Some pixels out of bounds of texture (due to atlasing, etc)
+    ///  These pixels get blended to produce fading frills/artifacts on textures that touch the border of an image (like hold bodies)
+    ///
+    /// This fix adds 1 pixel all around an image, with the same color as the edge pixel
+    /// When sampling, produces a solid edge as intended :)
+    let private extend_image_boundary (image: Bitmap) : Bitmap =
 
         let new_image = new Bitmap(image.Width + 2, image.Height + 2)
         new_image.Mutate(fun img -> img.DrawImage(image, Point(1, 1), 1.0f) |> ignore)
@@ -275,12 +297,20 @@ module Sprite =
     let upload_many
         (label: string)
         (use_texture_unit: bool)
-        (use_smoothing: bool)
+        (smoothing: SpriteSmoothing)
         (images: SpriteUpload array)
         : Texture * (string * Sprite) array =
 
-        let width = 2 + if images.Length = 0 then 1 else images |> Array.map _.Image.Width |> Array.max
-        let height = 2 + if images.Length = 0 then 1 else images |> Array.map _.Image.Height |> Array.max
+        let width =
+            if images.Length = 0 then 1 else
+                (images |> Array.map _.Image.Width |> Array.max) +
+                (if smoothing = LinearSamplingFixEdges then 2 else 0)
+
+        let height =
+            if images.Length = 0 then 1 else
+                (images |> Array.map _.Image.Height |> Array.max) +
+                (if smoothing = LinearSamplingFixEdges then 2 else 0)
+
         let layers = images.Length + 1
 
         let texture = Texture.create (width, height, layers)
@@ -324,9 +354,14 @@ module Sprite =
 
         for image in images do
 
-            let frills = fix_frills_2 image.Image
+            let image_data =
+                if smoothing = LinearSamplingFixEdges then
+                    fix_frills image.Image
+                    extend_image_boundary image.Image
+                else
+                    image.Image
 
-            let success = frills.TryGetSinglePixelSpan(&pixel_data)
+            let success = image_data.TryGetSinglePixelSpan(&pixel_data)
 
             if not success then
                 Logging.Critical "Couldn't get pixel span for image!"
@@ -337,8 +372,8 @@ module Sprite =
                 0,
                 0,
                 layer,
-                frills.Width,
-                frills.Height,
+                image_data.Width,
+                image_data.Height,
                 1,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
@@ -346,6 +381,9 @@ module Sprite =
             )
 
             layer <- layer + 1
+
+            if smoothing = LinearSamplingFixEdges then
+                image_data.Dispose()
 
         // Finish the texture by setting wrap and interpolation behaviours
 
@@ -361,7 +399,7 @@ module Sprite =
             int TextureWrapMode.ClampToEdge
         )
 
-        if use_smoothing then
+        if smoothing <> NoSampling then
             GL.TexParameter(
                 TextureTarget.Texture2DArray,
                 TextureParameterName.TextureMinFilter,
@@ -392,7 +430,7 @@ module Sprite =
 
             let sprite =
                 Texture.create_sprite
-                    (1, 1)
+                    (if smoothing = LinearSamplingFixEdges then (1, 1) else (0, 0))
                     layer
                     (info.Image.Width, info.Image.Height)
                     (info.Rows, info.Columns)
@@ -413,8 +451,8 @@ module Sprite =
 
         texture, images |> Array.map gen_sprite
 
-    let upload_one (use_texture_unit: bool) (use_smoothing: bool) (info: SpriteUpload) : Sprite =
-        let _, results = upload_many info.Label use_texture_unit use_smoothing [| info |]
+    let upload_one (use_texture_unit: bool) (smoothing: SpriteSmoothing) (info: SpriteUpload) : Sprite =
+        let _, results = upload_many info.Label use_texture_unit smoothing [| info |]
         snd results.[0]
 
     let destroy (sprite: Sprite) : bool =

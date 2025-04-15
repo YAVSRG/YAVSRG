@@ -87,7 +87,7 @@ module Background =
             member this.Handle(res) =
                 match res with
                 | Some(bmp, col) ->
-                    let sprite = Sprite.upload_one true true (SpriteUpload.OfImage("BACKGROUND", bmp))
+                    let sprite = Sprite.upload_one true LinearSampling (SpriteUpload.OfImage("BACKGROUND", bmp))
 
                     bmp.Dispose()
                     Palette.accent_color.Target <- col

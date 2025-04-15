@@ -22,7 +22,7 @@ type private LoadedSkin =
         let sprite =
             match skin.GetIcon() with
             | TextureOk(img, columns, rows) ->
-                Sprite.upload_one false true
+                Sprite.upload_one false LinearSampling
                     {
                         Label = skin.Metadata.Name + "_icon"
                         Rows = rows
@@ -94,7 +94,7 @@ type private LoadedNoteskin =
             Sprite.upload_many
                 (this.Metadata.Name + "::Noteskin")
                 false
-                this.Noteskin.Config.LinearSampling
+                (if this.Noteskin.Config.LinearSampling then LinearSamplingFixEdges else NoSampling)
                 (available_textures.ToArray())
 
         let sprites =
@@ -184,7 +184,7 @@ type private LoadedHUD =
             Sprite.upload_many
                 (this.Metadata.Name + "::HUD")
                 false
-                true
+                LinearSamplingFixEdges
                 (available_textures.ToArray())
 
         let sprites =
@@ -289,7 +289,7 @@ module Skins =
             DEFAULT_SKIN_ICON <-
                 match DEFAULT_NOTESKIN.GetTexture("note") with
                 | TextureOk(img, columns, rows) ->
-                    Sprite.upload_one false true
+                    Sprite.upload_one false LinearSampling
                         {
                             Label = "DEFAULT_SKIN_ICON"
                             Rows = rows

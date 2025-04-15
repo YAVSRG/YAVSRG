@@ -192,7 +192,7 @@ type private Image(width, title, url) as this =
             function
             | Some bmp ->
                 GameThread.defer (fun () ->
-                    sprite <- Some(Sprite.upload_one false true (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
+                    sprite <- Some(Sprite.upload_one false LinearSampling (SpriteUpload.OfImage("WIKI_IMAGE", bmp)))
                     fade.Target <- 1.0f
                 )
             | None -> Logging.Warn "Failed to load wiki image '%s'" url

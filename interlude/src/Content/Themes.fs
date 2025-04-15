@@ -69,7 +69,7 @@ module Themes =
             | TextureNotRequired -> failwith "currently impossible as all theme textures are required"
 
         let atlas, sprites =
-            Sprite.upload_many "THEME" true false (available_textures.ToArray())
+            Sprite.upload_many "THEME" true LinearSampling (available_textures.ToArray())
 
         for id, sprite in sprites do
             Sprites.add true id sprite

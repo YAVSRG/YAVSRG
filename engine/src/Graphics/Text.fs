@@ -82,7 +82,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             Sprite.upload_many
                 "LOOSE_CHAR"
                 false
-                true
+                LinearSamplingFixEdges
                 [|
                     {
                         Label = "LOOSE_CHAR_SM"
@@ -198,7 +198,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             Sprite.upload_many
                 "FONT_ATLASES"
                 true
-                true
+                LinearSamplingFixEdges
                 [|
                     {
                         Label = "FONT_ATLAS_SM"

@@ -25,18 +25,18 @@ type Thumbnail() =
     override this.Draw() =
 
         match loaded_thumbnail with
-        | Some p -> 
-            Render.sprite 
-                (Sprite.fill this.Bounds p) 
+        | Some p ->
+            Render.sprite
+                (Sprite.fill this.Bounds p)
                 (Colors.white.O4a fade.Alpha) p
         | None -> ()
 
     member this.FinishLoading(img: Bitmap) =
         loaded_thumbnail <-
             Some
-            <| Sprite.upload_one false true (SpriteUpload.OfImage("NOTESKIN_PREVIEW", img))
+            <| Sprite.upload_one false LinearSampling (SpriteUpload.OfImage("NOTESKIN_PREVIEW", img))
         fade.Target <- 1.0f
-    
+
     member this.FinishLoading(sprite: Sprite) =
         loaded_thumbnail <- Some sprite
         fade.Target <- 1.0f
