@@ -23,8 +23,7 @@ type private ColumnSwapPage() =
                     .Help(Help.Info("mods.column_swap_columns"))
                     .Pos(0),
                 PageButton(%"confirm.yes", Menu.Back)
-                    .Pos(3),
-                WIP()
+                    .Pos(3)
             )
 
     override this.Title = %"mod.column_swap"
