@@ -250,9 +250,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Render.tex_quad
                 ((Rect.FromEdges(
                     left + column_positions.[k],
-                    pos_a + note_height * 0.5f,
+                    pos_a + note_height * 0.5f - 0.5f,
                     left + column_positions.[k] + column_width,
-                    pos_b + note_height * 0.5f + 2.0f |> min playfield_height
+                    pos_b + note_height * 0.5f + 0.5f |> min playfield_height
                   )
                   |> scroll_direction_transform bottom)
                     .AsQuad)

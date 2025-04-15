@@ -65,9 +65,9 @@ type HoldNoteSettingsPage() =
                 (Rect
                     .FromEdges(
                         left,
-                        min headpos tailpos + COLUMN_WIDTH * 0.5f,
+                        min headpos tailpos + COLUMN_WIDTH * 0.5f - 0.5f,
                         left + COLUMN_WIDTH,
-                        max headpos tailpos + COLUMN_WIDTH * 0.5f
+                        max headpos tailpos + COLUMN_WIDTH * 0.5f + 0.5f
                     )
                     .AsQuad)
                 color.AsQuad
