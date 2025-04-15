@@ -15,6 +15,7 @@ type HoldNoteSettingsPage() =
     let data = Content.NoteskinConfig
 
     let hold_note_trim = data.HoldNoteTrim |> Setting.bounded (-1.0f, 2.0f) |> Setting.roundf 2
+    let minimum_hold_note_length = Setting.simple data.MinimumHoldNoteLength
     let use_tail_texture = Setting.simple data.UseHoldTailTexture
     let flip_hold_tail = Setting.simple data.FlipHoldTail
     let dropped_color = Setting.simple data.DroppedHoldColor
@@ -29,16 +30,19 @@ type HoldNoteSettingsPage() =
         |+ PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
             .Help(Help.Info("noteskin.holdnotetrim"))
             .Pos(0)
+        |+ PageSetting(%"noteskin.minimum_hold_note_length", Checkbox minimum_hold_note_length)
+            .Help(Help.Info("noteskin.minimum_hold_note_length"))
+            .Pos(2)
         |+ PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)
             .Help(Help.Info("noteskin.usetailtexture"))
-            .Pos(3)
+            .Pos(5)
         |+ PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
             .Help(Help.Info("noteskin.flipholdtail"))
             .Conditional(use_tail_texture.Get)
-            .Pos(5)
-        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, true))
+            .Pos(7)
+        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
             .Help(Help.Info("noteskin.droppedholdcolor"))
-            .Pos(8)
+            .Pos(10)
         :> Widget
 
     override this.Draw() =
@@ -65,9 +69,9 @@ type HoldNoteSettingsPage() =
                 (Rect
                     .FromEdges(
                         left,
-                        min headpos tailpos + COLUMN_WIDTH * 0.5f - 0.5f,
+                        min headpos tailpos + COLUMN_WIDTH * 0.5f - 1f,
                         left + COLUMN_WIDTH,
-                        max headpos tailpos + COLUMN_WIDTH * 0.5f + 0.5f
+                        max headpos tailpos + COLUMN_WIDTH * 0.5f + 1f
                     )
                     .AsQuad)
                 color.AsQuad
@@ -106,6 +110,7 @@ type HoldNoteSettingsPage() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 HoldNoteTrim = hold_note_trim.Value
+                MinimumHoldNoteLength = minimum_hold_note_length.Value
                 UseHoldTailTexture = use_tail_texture.Value
                 FlipHoldTail = flip_hold_tail.Value
                 DroppedHoldColor = dropped_color.Value

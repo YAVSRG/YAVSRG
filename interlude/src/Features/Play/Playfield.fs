@@ -250,9 +250,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Render.tex_quad
                 ((Rect.FromEdges(
                     left + column_positions.[k],
-                    pos_a + note_height * 0.5f - 0.5f,
+                    pos_a + note_height * 0.5f - 1f,
                     left + column_positions.[k] + column_width,
-                    pos_b + note_height * 0.5f + 0.5f |> min playfield_height
+                    pos_b + note_height * 0.5f + 1f |> min playfield_height
                   )
                   |> scroll_direction_transform bottom)
                     .AsQuad)
@@ -436,9 +436,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     | HeadOffscreen i ->
                         let hold_state = state.Scoring.HoldState i k
 
-                        if vanishing_notes && hold_state = HoldState.Released then
-                            ()
-                        else
+                        if not vanishing_notes || hold_state <> HoldState.Released then
 
                             let tint =
                                 if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
@@ -446,12 +444,12 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                 else
                                     Color.White
 
-                            let tailpos = column_pos - holdnote_trim
                             let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
+                            let tailpos = (column_pos - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
 
                             let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
-                            if headpos < tailpos then
+                            if headpos <= tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                             if headpos - tailpos < note_height * 0.5f then
@@ -465,9 +463,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     | HeadOnscreen(headpos, i) ->
                         let hold_state = state.Scoring.HoldState i k
 
-                        if vanishing_notes && hold_state = HoldState.Released then
-                            ()
-                        else
+                        if not vanishing_notes || hold_state <> HoldState.Released then
 
                             let tint =
                                 if hold_state = HoldState.Dropped || hold_state = HoldState.MissedHead then
@@ -475,17 +471,16 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                 else
                                     Color.White
 
-                            let tailpos = column_pos - holdnote_trim
-
                             let headpos =
                                 if hold_state.ShowInReceptor then
                                     max hitposition headpos
                                 else
                                     headpos
+                            let tailpos = (column_pos - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
 
                             let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
-                            if headpos < tailpos then
+                            if headpos <= tailpos then
                                 draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                             if headpos - tailpos < note_height * 0.5f then
@@ -518,7 +513,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                     let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
-                    if headpos < tailpos then
+                    if headpos <= tailpos then
                         draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                     if not vanishing_notes || hold_state.ShowInReceptor then
@@ -549,8 +544,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                     let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
-                    if headpos < tailpos then
-                        draw_body (k, headpos, tailpos, head_and_body_color, tint)
+                    draw_body (k, headpos, tailpos, head_and_body_color, tint)
 
                     draw_head (k, headpos, head_and_body_color, tint)
 

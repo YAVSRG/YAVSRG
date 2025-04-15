@@ -73,7 +73,7 @@ module NoteskinExplosionMigration =
             }
         | None -> config
 
-type Noteskin(storage) as this =
+type Noteskin(storage: StorageType) as this =
     inherit Storage(storage)
 
     let mutable config: NoteskinConfig = NoteskinConfig.Default
@@ -82,10 +82,10 @@ type Noteskin(storage) as this =
         this.ReloadFromDisk()
 
     member this.Config
-        with set conf =
+        with set (conf: NoteskinConfig) =
             config <- conf
             this.WriteJson(config, "noteskin.json")
-        and get () = config
+        and get () : NoteskinConfig = config
 
     override this.ReloadFromDisk() =
         base.ReloadFromDisk()
@@ -100,7 +100,7 @@ type Noteskin(storage) as this =
     member this.GetTexture(name: string) : TextureLoadResult =
         this.LoadTexture(name, NoteskinTextureRules.get this.Config name)
 
-    member this.RequiredTextures =
+    member this.RequiredTextures : string seq =
         NoteskinTextureRules.list ()
         |> Seq.filter (NoteskinTextureRules.get this.Config >> _.IsRequired)
 
@@ -150,12 +150,12 @@ type Noteskin(storage) as this =
 
         }
 
-    static member FromZipStream(stream: Stream) =
+    static member FromZipStream(stream: Stream) : Noteskin =
         new Noteskin(Embedded(new ZipArchive(stream)))
 
-    static member FromPath(path: string) =
+    static member FromPath(path: string) : Result<Noteskin, exn> =
         try new Noteskin(Folder path) |> Ok
         with err -> Error err
 
-    static member Exists(path: string) =
+    static member Exists(path: string) : bool =
         Directory.Exists path && File.Exists (Path.Combine(path, "noteskin.json"))
