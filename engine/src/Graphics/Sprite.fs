@@ -3,6 +3,7 @@
 open System
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.PixelFormats
+open SixLabors.ImageSharp.Processing
 open OpenTK.Mathematics
 open OpenTK.Graphics.OpenGL
 open Percyqaz.Common
@@ -183,7 +184,83 @@ module Texture =
 
 module Sprite =
 
-    let precompute_1x1 (sprite: Sprite) : Sprite =
+    [<Literal>]
+    let FRILL_DEBUG_ALPHA = 1uy
+    [<Literal>]
+    let FRILL_SIZE = 2
+
+    let internal fix_frills (image: Bitmap) : unit =
+
+        for x = 0 to image.Width - 1 do
+            let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
+            let mutable s: int = 0
+            for y = 0 to image.Height - 1 do
+                let pixel = image.[x, y]
+                if pixel.A > 0uy then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                    s <- FRILL_SIZE
+                elif s > 0 then
+                    s <- s - 1
+                    image.[x, y] <- p
+
+            let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
+            let mutable s: int = 0
+            for y = image.Height - 1 downto 0 do
+                let pixel = image.[x, y]
+                if pixel.A > 0uy then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                    s <- FRILL_SIZE
+                elif s > 0 then
+                    s <- s - 1
+                    image.[x, y] <- p
+
+        for y = 0 to image.Height - 1 do
+            let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
+            let mutable s: int = 0
+            for x = 0 to image.Width - 1 do
+                let pixel = image.[x, y]
+                if pixel.A > 0uy then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                    s <- FRILL_SIZE
+                elif s > 0 then
+                    s <- s - 1
+                    image.[x, y] <- p
+
+            let mutable p: Rgba32 = Rgba32(0uy, 0uy, 0uy, 0uy)
+            let mutable s: int = 0
+            for x = image.Width - 1 downto 0 do
+                let pixel = image.[x, y]
+                if pixel.A > 0uy then
+                    p <- Rgba32(pixel.R, pixel.G, pixel.B, FRILL_DEBUG_ALPHA)
+                    s <- FRILL_SIZE
+                elif s > 0 then
+                    s <- s - 1
+                    image.[x, y] <- p
+
+    let fix_frills_2 (image: Bitmap) : Bitmap =
+
+        fix_frills image
+
+        let new_image = new Bitmap(image.Width + 2, image.Height + 2)
+        new_image.Mutate(fun img -> img.DrawImage(image, Point(1, 1), 1.0f) |> ignore)
+
+        for y = 0 to image.Height - 1 do
+            let left = image.[0, y]
+            new_image.[0, y + 1] <- left
+
+            let right = image.[image.Width - 1, y]
+            new_image.[image.Width, y + 1] <- right
+
+        for x = 0 to new_image.Width - 1 do
+            let top = new_image.[x, 1]
+            new_image.[x, 0] <- top
+
+            let bottom = new_image.[x, new_image.Height - 2]
+            new_image.[x, new_image.Height - 1] <- bottom
+
+        new_image
+
+    let internal precompute_1x1 (sprite: Sprite) : Sprite =
         let stride_x = float32 sprite.GridWidth / float32 sprite.Texture.Width
         let stride_y = float32 sprite.GridHeight / float32 sprite.Texture.Height
 
@@ -202,8 +279,8 @@ module Sprite =
         (images: SpriteUpload array)
         : Texture * (string * Sprite) array =
 
-        let width = if images.Length = 0 then 1 else images |> Array.map _.Image.Width |> Array.max
-        let height = if images.Length = 0 then 1 else images |> Array.map _.Image.Height |> Array.max
+        let width = 2 + if images.Length = 0 then 1 else images |> Array.map _.Image.Width |> Array.max
+        let height = 2 + if images.Length = 0 then 1 else images |> Array.map _.Image.Height |> Array.max
         let layers = images.Length + 1
 
         let texture = Texture.create (width, height, layers)
@@ -247,7 +324,9 @@ module Sprite =
 
         for image in images do
 
-            let success = image.Image.TryGetSinglePixelSpan(&pixel_data)
+            let frills = fix_frills_2 image.Image
+
+            let success = frills.TryGetSinglePixelSpan(&pixel_data)
 
             if not success then
                 Logging.Critical "Couldn't get pixel span for image!"
@@ -258,8 +337,8 @@ module Sprite =
                 0,
                 0,
                 layer,
-                image.Image.Width,
-                image.Image.Height,
+                frills.Width,
+                frills.Height,
                 1,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
@@ -313,7 +392,7 @@ module Sprite =
 
             let sprite =
                 Texture.create_sprite
-                    (0, 0)
+                    (1, 1)
                     layer
                     (info.Image.Width, info.Image.Height)
                     (info.Rows, info.Columns)

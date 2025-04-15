@@ -6,7 +6,6 @@ open SixLabors.ImageSharp.Processing
 open SixLabors.ImageSharp.Drawing.Processing
 open Percyqaz.Common
 open Prelude
-open Prelude.Calculator
 open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
