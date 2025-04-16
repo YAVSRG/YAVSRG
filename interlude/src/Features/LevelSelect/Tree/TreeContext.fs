@@ -16,7 +16,9 @@ module TreeConstants =
     let MULTI_SELECT_KEY = Bind.mk Keys.LeftShift
 
     let [<Literal>] CHART_HEIGHT = 90.0f
+    let [<Literal>] CHART_SPACING = Style.PADDING
     let [<Literal>] GROUP_HEIGHT = 55.0f
+    let [<Literal>] GROUP_SPACING = Style.PADDING * 4.0f
 
 [<Struct>]
 [<RequireQualifiedAccess>]
@@ -31,16 +33,16 @@ type private TreeContext =
         mutable ExpandedGroup: string * LibraryGroupContext
         mutable SelectedChart: string
 
-        // todo: should this be part of Tree object and not context?
         ScrollPosition: Animation.Fade
 
         // todo: make these methods instead of this hook into update
         mutable ScrollTo: ScrollTo
+        mutable ClickDebounce: float
+
+        // todo: all 4 should be local to Tree?
         mutable CurrentlyDragScrolling: bool
         mutable DragScrollDistance: float32
         mutable DragScrollPosition: float32
-        mutable ClickDebounce: float
-        // todo: this should be local to Tree, not here
         mutable ScrollToChartOnce: bool
 
         // todo: needs better name
@@ -49,10 +51,22 @@ type private TreeContext =
         mutable MultiSelection: MultiSelection option
     }
 
-    member this.Scroll(amount: float32) : unit =
-        let remaining = this.ScrollPosition.Target - this.ScrollPosition.Value
+    member this.IsSelected(chart_meta: ChartMeta, library_ctx: LibraryContext) : bool =
+        this.SelectedChart = chart_meta.Hash &&
+        SelectedChart.LIBRARY_CTX.Matches library_ctx
 
-        // todo: should it add target instead of value (with a clamp for exceedingly long auto scrolls)
+    member this.IsMultiSelected(chart_meta: ChartMeta, library_ctx: LibraryContext) : bool =
+        match this.MultiSelection with
+        | Some s -> s.Contains(chart_meta, library_ctx)
+        | None -> false
+
+    member this.IsGroupSelected(name: string, group_ctx: LibraryGroupContext) : bool =
+        this.SelectedGroup = (name, group_ctx)
+
+    member this.IsGroupExpanded(name: string, group_ctx: LibraryGroupContext) : bool =
+        this.ExpandedGroup = (name, group_ctx)
+
+    member this.Scroll(amount: float32) : unit =
         this.ScrollPosition.Target <- this.ScrollPosition.Value + amount
 
     member this.SelectChart(chart_meta: ChartMeta, library_ctx: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
@@ -80,6 +94,17 @@ type private TreeContext =
 
     member this.RemoveFromMultiSelect(chart_meta: ChartMeta, library_ctx: LibraryContext) : unit = this.RemoveFromMultiSelect([chart_meta, library_ctx])
 
+    member this.ToggleMultiSelect(chart_meta: ChartMeta, library_ctx: LibraryContext) : unit =
+        match this.MultiSelection with
+        | Some s when s.Contains(chart_meta, library_ctx) -> this.RemoveFromMultiSelect(chart_meta, library_ctx)
+        | _ -> this.AddToMultiSelect(chart_meta, library_ctx)
+
+    member this.ToggleMultiSelect(group_name: string, group_ctx: LibraryGroupContext, charts_as_seq: (ChartMeta * LibraryContext) seq) : unit =
+        match this.MultiSelection with
+        | Some s when s.GroupAmountSelected(group_name, group_ctx, charts_as_seq) = AmountSelected.All ->
+            this.RemoveFromMultiSelect charts_as_seq
+        | _ -> this.AddToMultiSelect charts_as_seq
+
     static member Create : TreeContext =
         {
             SelectedGroup = "", LibraryGroupContext.None
@@ -103,7 +128,6 @@ type private TreeContext =
 [<AbstractClass>]
 type private TreeItem(ctx: TreeContext) =
     abstract member Bounds: float32 -> Rect
-    abstract member Selected: bool
     abstract member Spacing: float32
 
     member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
@@ -114,13 +138,13 @@ type private TreeItem(ctx: TreeContext) =
 
         top + bounds.Height + this.Spacing
 
-    member this.LeftClick(origin: float32) : bool =
+    member this.LeftClicked(origin: float32) : bool =
         ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.LEFT
         && ctx.DragScrollDistance <= DRAG_THRESHOLD
         && Mouse.y () > origin
 
-    member this.RightClick(origin: float32) : bool =
+    member this.RightClicked(origin: float32) : bool =
         ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.RIGHT
         && ctx.DragScrollDistance <= DRAG_THRESHOLD

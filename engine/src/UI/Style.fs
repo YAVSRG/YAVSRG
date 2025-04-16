@@ -72,7 +72,7 @@ module Style =
 
     // todo: auto-open padding constants
     // todo: create PAD, PAD2, PAD3, PAD4 constants for shorthand multiples of 5
-    let PADDING = 5.0f
+    let [<Literal>] PADDING = 5.0f
     let mutable font = Unchecked.defaultof<SpriteFont>
 
     let mutable hover = SoundEffect.Default

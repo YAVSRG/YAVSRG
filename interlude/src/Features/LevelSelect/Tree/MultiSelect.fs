@@ -66,7 +66,7 @@ type MultiSelection =
 
     member this.IsEmpty : bool = this.Selected.Count = 0
 
-    member this.IsSelected(chart_meta: ChartMeta, ctx: LibraryContext) : bool = this.Selected.Contains (chart_meta, ctx)
+    member this.Contains(chart_meta: ChartMeta, ctx: LibraryContext) : bool = this.Selected.Contains (chart_meta, ctx)
 
     member this.GroupAmountSelected(group_name: string, group_ctx: LibraryGroupContext, charts: (ChartMeta * LibraryContext) seq) : AmountSelected =
         match this.GroupSelectedCache.TryFind (group_name, group_ctx) with
@@ -75,7 +75,7 @@ type MultiSelection =
             let mutable some = false
             let mutable all = true
             for c in charts do
-                if this.IsSelected c then
+                if this.Contains c then
                     some <- true
                 else all <- false
             let result =

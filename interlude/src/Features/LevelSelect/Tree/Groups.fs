@@ -65,13 +65,13 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
             top + GROUP_HEIGHT
         )
 
-    override this.Selected = tree_ctx.SelectedGroup = (name, context)
-    override this.Spacing = 20.0f
+    member this.Selected : bool = tree_ctx.IsGroupSelected(name, context)
+    override this.Spacing : float32 = GROUP_SPACING
 
-    member this.Items = items
-    member this.Name = name
-    member this.Context = context
-    member this.Expanded = tree_ctx.ExpandedGroup = (name, context)
+    member this.Items : ResizeArray<ChartItem> = items
+    member this.Name : string = name
+    member this.Context : LibraryGroupContext = context
+    member this.Expanded : bool =  tree_ctx.IsGroupExpanded(name, context)
 
     member this.SelectFirst() = items.First().Select()
     member this.SelectLast() = items.Last().Select()
@@ -144,22 +144,22 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
             b
 
     member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
-        if Mouse.hover bounds then
-            if this.LeftClick(origin) then
+        if Mouse.hover(bounds) then
+
+            if this.LeftClicked(origin) then
                 if MULTI_SELECT_KEY.Held() then
-                    match tree_ctx.MultiSelection with
-                    | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
-                        tree_ctx.RemoveFromMultiSelect charts_as_seq
-                    | _ -> tree_ctx.AddToMultiSelect charts_as_seq
+                    tree_ctx.ToggleMultiSelect(name, context, charts_as_seq)
                 elif this.Expanded then
                     tree_ctx.ExpandedGroup <- "", LibraryGroupContext.None
                 else
                     tree_ctx.ExpandedGroup <- name, context
                     tree_ctx.ScrollTo <- ScrollTo.Group (name, context)
-            elif this.RightClick(origin) then
+
+            elif this.RightClicked(origin) then
                 match tree_ctx.MultiSelection with
                 | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
                 | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
+
             elif (%%"delete").Pressed() then
                 match context with
                 | LibraryGroupContext.Folder _
@@ -192,12 +192,9 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
         if this.Expanded then
 
             if (%%"group_multi_select").Pressed() then
-                match tree_ctx.MultiSelection with
-                | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
-                    tree_ctx.RemoveFromMultiSelect charts_as_seq
-                | _ -> tree_ctx.AddToMultiSelect charts_as_seq
+                tree_ctx.ToggleMultiSelect(name, context, charts_as_seq)
 
-            let h = CHART_HEIGHT + 5.0f
+            let h = CHART_HEIGHT + CHART_SPACING
 
             if tree_ctx.ScrollTo = ScrollTo.Chart && this.Selected then
                 match Seq.tryFindIndex (fun (s: ChartItem) -> s.Selected) items with

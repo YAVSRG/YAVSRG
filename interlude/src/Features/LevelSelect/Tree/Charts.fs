@@ -123,10 +123,9 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
     override this.Bounds(top: float32) : Rect =
         Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
+    override this.Spacing = CHART_SPACING
 
-    override this.Selected : bool = tree_ctx.SelectedChart = chart_meta.Hash && SelectedChart.LIBRARY_CTX.Matches library_ctx
-
-    override this.Spacing = Style.PADDING
+    member this.Selected : bool = tree_ctx.IsSelected(chart_meta, library_ctx)
     member this.Chart = chart_meta
     member this.Context = library_ctx
 
@@ -146,7 +145,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             } =
             bounds
 
-        let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.IsSelected(chart_meta, library_ctx) | None -> false
+        let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.Contains(chart_meta, library_ctx) | None -> false
 
         let accent =
             let alpha = 80 + int (hover.Value * 40.0f)
@@ -220,9 +219,9 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         )
 
         let icon =
-            match tree_ctx.MultiSelection with
-            | Some s -> if s.IsSelected(chart_meta, library_ctx) then Icons.CHECK_SQUARE else Icons.SQUARE
-            | None -> markers
+            if tree_ctx.MultiSelection.IsSome then
+                if is_multi_selected then Icons.CHECK_SQUARE else Icons.SQUARE
+            else markers
 
         Text.draw_aligned_b (Style.font, icon, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
@@ -235,32 +234,28 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             update_cached_info ()
 
         if this.Selected && (%%"multi_select").Pressed() then
-            match tree_ctx.MultiSelection with
-            | Some s when s.IsSelected(chart_meta, library_ctx) -> tree_ctx.RemoveFromMultiSelect(chart_meta, library_ctx)
-            | _ -> tree_ctx.AddToMultiSelect(chart_meta, library_ctx)
+            tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
 
         if Mouse.hover bounds then
             hover.Target <- 1.0f
 
-            if this.LeftClick(origin) then
+            if this.LeftClicked(origin) then
                 if MULTI_SELECT_KEY.Held() then
-                    match tree_ctx.MultiSelection with
-                    | Some s when s.IsSelected(chart_meta, library_ctx) -> tree_ctx.RemoveFromMultiSelect(chart_meta, library_ctx)
-                    | _ -> tree_ctx.AddToMultiSelect(chart_meta, library_ctx)
+                    tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
                 elif this.Selected then
                     LevelSelect.choose_this_chart ()
                 else
                     if not (Transitions.in_progress()) then LevelSelect.History.append_current ()
                     this.Select()
 
-            elif this.RightClick(origin) then
+            elif this.RightClicked(origin) then
                 match tree_ctx.MultiSelection with
-                | Some s when s.IsSelected(chart_meta, library_ctx) -> s.ShowActions()
+                | Some selection when selection.Contains(chart_meta, library_ctx) -> selection.ShowActions()
                 | _ -> ChartContextMenu(chart_meta, library_ctx).Show()
 
             elif (%%"delete").Pressed() then
                 match tree_ctx.MultiSelection with
-                | Some s when s.IsSelected(chart_meta, library_ctx) -> s.ConfirmDelete()
+                | Some selection when selection.Contains(chart_meta, library_ctx) -> selection.ConfirmDelete()
                 | _ -> ChartDeleteMenu(chart_meta, library_ctx, false).Show()
         else
             hover.Target <- 0.0f
