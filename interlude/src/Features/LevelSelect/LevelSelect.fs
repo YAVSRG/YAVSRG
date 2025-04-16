@@ -98,7 +98,7 @@ type LevelSelectScreen() =
             )
             // Normal chart actions (no bulk select)
             .WithConditional(
-                (fun () -> TreeState.multi_selection.IsNone),
+                (fun () -> Tree.multi_selection().IsNone),
 
                 AngledButton(
                     sprintf "%s %s" Icons.PLAY %"levelselect.play",
@@ -133,7 +133,7 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     Icons.REFRESH_CCW,
-                    (fun () -> LevelSelect.random_chart(); TreeState.click_debounce <- 500.0),
+                    (fun () -> LevelSelect.random_chart(); Tree.debounce()),
                     Palette.MAIN.O2
                 )
                     .Position(
@@ -159,11 +159,11 @@ type LevelSelectScreen() =
             )
             // Bulk select actions
             .WithConditional(
-                (fun () -> TreeState.multi_selection.IsSome),
+                (fun () -> Tree.multi_selection().IsSome),
 
                 AngledButton(
                     sprintf "%s %s" Icons.X %"levelselect.clear_multi_selection",
-                    (fun () -> TreeState.multi_selection <- None; TreeState.click_debounce <- 500.0),
+                    (fun () -> Tree.clear_multi_selection(); Tree.debounce()),
                     Palette.DARK.O2
                 )
                     .LeanRight(false)
@@ -171,7 +171,7 @@ type LevelSelectScreen() =
 
                 AngledButton(
                     sprintf "%s %s" Icons.LIST %"bulk_actions",
-                    (fun () -> match TreeState.multi_selection with Some s -> s.ShowActions() | None -> ()),
+                    (fun () -> match Tree.multi_selection() with Some s -> s.ShowActions() | None -> ()),
                     Palette.MAIN.O2
                 )
                     .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(BULK_ACTION_BUTTON_WIDTH).TranslateX(-BULK_ACTION_BUTTON_WIDTH - AngledButton.LEAN_AMOUNT))

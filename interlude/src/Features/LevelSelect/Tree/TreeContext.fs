@@ -7,13 +7,6 @@ open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-[<Struct>]
-[<RequireQualifiedAccess>]
-type private ScrollTo =
-    | Nothing
-    | Chart
-    | Group of string * LibraryGroupContext
-
 [<AutoOpen>]
 module TreeConstants =
 
@@ -25,59 +18,90 @@ module TreeConstants =
     let [<Literal>] CHART_HEIGHT = 90.0f
     let [<Literal>] GROUP_HEIGHT = 55.0f
 
-module private TreeState =
+[<Struct>]
+[<RequireQualifiedAccess>]
+type private ScrollTo =
+    | Nothing
+    | Chart
+    | Group of string * LibraryGroupContext
 
-    /// Group's name = this string => Selected chart is in this group
-    let mutable selected_group = "", LibraryGroupContext.None
-    /// Group's name = this string => That group is expanded in level select
-    /// Only one group can be expanded at a time, and it is independent of the "selected" group
-    let mutable expanded_group = "", LibraryGroupContext.None
-    /// Chart's hash = this string && contexts match => It's the selected chart
-    let mutable selected_chart = ""
+type private TreeContext =
+    {
+        mutable SelectedGroup: string * LibraryGroupContext
+        mutable ExpandedGroup: string * LibraryGroupContext
+        mutable SelectedChart: string
 
-    let scroll_pos = Animation.Fade 300.0f
+        // todo: should this be part of Tree object and not context?
+        ScrollPosition: Animation.Fade
 
-    let scroll (amount: float32) : unit =
-        scroll_pos.Target <- scroll_pos.Value + amount
+        // todo: make these methods instead of this hook into update
+        mutable ScrollTo: ScrollTo
+        mutable CurrentlyDragScrolling: bool
+        mutable DragScrollDistance: float32
+        mutable DragScrollPosition: float32
+        mutable ClickDebounce: float
+        // todo: this should be local to Tree, not here
+        mutable ScrollToChartOnce: bool
 
-    /// Set this value to have it "consumed" in the next frame by a level select item with sufficient knowledge to do so
-    let mutable scroll_to = ScrollTo.Nothing
+        // todo: needs better name
+        mutable CacheFlag: int
 
-    let mutable currently_drag_scrolling = false
-    let mutable drag_scroll_distance = 0.0f
-    let mutable drag_scroll_position = 0.0f
-    let mutable click_debounce = 0.0
-    let mutable scroll_to_chart_once = false
+        mutable MultiSelection: MultiSelection option
+    }
 
-    /// Increment the flag to recalculate cached data on tree items
-    /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
-    let mutable cache_flag = 0
+    member this.Scroll(amount: float32) : unit =
+        let remaining = this.ScrollPosition.Target - this.ScrollPosition.Value
 
-    let switch_chart (chart_meta: ChartMeta, context: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
+        // todo: should it add target instead of value (with a clamp for exceedingly long auto scrolls)
+        this.ScrollPosition.Target <- this.ScrollPosition.Value + amount
+
+    member this.SelectChart(chart_meta: ChartMeta, library_ctx: LibraryContext, group_name: string, group_ctx: LibraryGroupContext) : unit =
         if not (Transitions.in_progress()) then
-            SelectedChart.change (chart_meta, context, true)
+            SelectedChart.change (chart_meta, library_ctx, true)
             Selection.clear ()
-            selected_chart <- chart_meta.Hash
-            expanded_group <- group_name, group_ctx
-            selected_group <- group_name, group_ctx
-            scroll_to <- ScrollTo.Chart
+            this.SelectedChart <- chart_meta.Hash
+            this.ExpandedGroup <- group_name, group_ctx
+            this.SelectedGroup <- group_name, group_ctx
+            this.ScrollTo <- ScrollTo.Chart
 
-    let mutable multi_selection: MultiSelection option = None
-
-    let select_multiple (items: (ChartMeta * LibraryContext) seq) : unit =
-        match multi_selection with
+    member this.AddToMultiSelect(items: (ChartMeta * LibraryContext) seq) : unit =
+        match this.MultiSelection with
         | Some s -> s.Select items
-        | None -> multi_selection <- Some (MultiSelection.Create items)
+        | None -> this.MultiSelection <- Some (MultiSelection.Create items)
 
-    let deselect_multiple (items: (ChartMeta * LibraryContext) seq) : unit =
-        match multi_selection with
+    member this.AddToMultiSelect(chart_meta: ChartMeta, library_ctx: LibraryContext) : unit = this.AddToMultiSelect([chart_meta, library_ctx])
+
+    member this.RemoveFromMultiSelect(items: (ChartMeta * LibraryContext) seq) : unit =
+        match this.MultiSelection with
         | None -> ()
         | Some s ->
             s.Deselect items
-            if s.IsEmpty then multi_selection <- None
+            if s.IsEmpty then this.MultiSelection <- None
+
+    member this.RemoveFromMultiSelect(chart_meta: ChartMeta, library_ctx: LibraryContext) : unit = this.RemoveFromMultiSelect([chart_meta, library_ctx])
+
+    static member Create : TreeContext =
+        {
+            SelectedGroup = "", LibraryGroupContext.None
+            ExpandedGroup = "", LibraryGroupContext.None
+            SelectedChart = ""
+
+            ScrollPosition = Animation.Fade 300.0f
+
+            ScrollTo = ScrollTo.Nothing
+            CurrentlyDragScrolling = false
+            DragScrollDistance = 0.0f
+            DragScrollPosition = 0.0f
+            ClickDebounce = 0.0
+            ScrollToChartOnce = false
+
+            CacheFlag = 0
+
+            MultiSelection = None
+        }
 
 [<AbstractClass>]
-type private TreeItem() =
+type private TreeItem(ctx: TreeContext) =
     abstract member Bounds: float32 -> Rect
     abstract member Selected: bool
     abstract member Spacing: float32
@@ -90,14 +114,14 @@ type private TreeItem() =
 
         top + bounds.Height + this.Spacing
 
-    member this.LeftClick(origin: float32) =
-        TreeState.click_debounce <= 0
+    member this.LeftClick(origin: float32) : bool =
+        ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.LEFT
-        && TreeState.drag_scroll_distance <= DRAG_THRESHOLD
+        && ctx.DragScrollDistance <= DRAG_THRESHOLD
         && Mouse.y () > origin
 
-    member this.RightClick(origin: float32) =
-        TreeState.click_debounce <= 0
+    member this.RightClick(origin: float32) : bool =
+        ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.RIGHT
-        && TreeState.drag_scroll_distance <= DRAG_THRESHOLD
+        && ctx.DragScrollDistance <= DRAG_THRESHOLD
         && Mouse.y () > origin

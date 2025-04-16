@@ -12,12 +12,12 @@ type private MultiSelectContext =
     | Normal
 
 [<RequireQualifiedAccess>]
-type private AmountSelected =
+type AmountSelected =
     | All
     | Some
     | None
 
-type private MultiSelection =
+type MultiSelection =
     private {
         Context: MultiSelectContext
         mutable GroupSelectedCache: Map<string * LibraryGroupContext, AmountSelected>

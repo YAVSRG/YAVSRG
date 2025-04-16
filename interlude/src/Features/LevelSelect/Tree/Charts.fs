@@ -21,8 +21,8 @@ type PersonalBestCached =
         Details: string
     }
 
-type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, ctx: LibraryContext) =
-    inherit TreeItem()
+type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, library_ctx: LibraryContext) =
+    inherit TreeItem(tree_ctx)
 
     let hover = Animation.Fade 0.0f
     let mutable last_cached_flag = -1
@@ -96,7 +96,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
         | None -> None
 
     let update_cached_info () =
-        last_cached_flag <- TreeState.cache_flag
+        last_cached_flag <- tree_ctx.CacheFlag
 
         if chart_save_data.IsNone then
             chart_save_data <- Some(UserDatabase.get_chart_data chart_meta.Hash Content.UserData)
@@ -104,7 +104,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
         match chart_save_data with
         | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->
             let rate =
-                match ctx with
+                match library_ctx with
                 | LibraryContext.Playlist (_, _, d) -> d.Rate.Value
                 | _ -> SelectedChart.rate.Value
 
@@ -117,25 +117,25 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
             lamp <- None
 
         markers <-
-            match ctx with
+            match library_ctx with
             | LibraryContext.Likes -> ""
             | _ -> if CollectionActions.is_liked chart_meta then Icons.HEART else ""
 
     override this.Bounds(top: float32) : Rect =
         Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
 
-    override this.Selected : bool = TreeState.selected_chart = chart_meta.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
+    override this.Selected : bool = tree_ctx.SelectedChart = chart_meta.Hash && SelectedChart.LIBRARY_CTX.Matches library_ctx
 
     override this.Spacing = Style.PADDING
     member this.Chart = chart_meta
-    member this.Context = ctx
+    member this.Context = library_ctx
 
     member this.PlaylistDuration : GameplayTime =
-        match ctx with
+        match library_ctx with
         | LibraryContext.Playlist(_, _, data) -> chart_meta.Length / data.Rate.Value
         | _ -> 0.0f<ms / rate>
 
-    member this.Select() : unit = TreeState.switch_chart (chart_meta, ctx, group_name, group_ctx)
+    member this.Select() : unit = tree_ctx.SelectChart(chart_meta, library_ctx, group_name, group_ctx)
 
     member private this.OnDraw(bounds: Rect) =
         let {
@@ -146,7 +146,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
             } =
             bounds
 
-        let is_multi_selected = match TreeState.multi_selection with Some s -> s.IsSelected(chart_meta, ctx) | None -> false
+        let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.IsSelected(chart_meta, library_ctx) | None -> false
 
         let accent =
             let alpha = 80 + int (hover.Value * 40.0f)
@@ -220,8 +220,8 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
         )
 
         let icon =
-            match TreeState.multi_selection with
-            | Some s -> if s.IsSelected(chart_meta, ctx) then Icons.CHECK_SQUARE else Icons.SQUARE
+            match tree_ctx.MultiSelection with
+            | Some s -> if s.IsSelected(chart_meta, library_ctx) then Icons.CHECK_SQUARE else Icons.SQUARE
             | None -> markers
 
         Text.draw_aligned_b (Style.font, icon, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
@@ -231,22 +231,22 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
 
     member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
 
-        if last_cached_flag < TreeState.cache_flag then
+        if last_cached_flag < tree_ctx.CacheFlag then
             update_cached_info ()
 
         if this.Selected && (%%"multi_select").Pressed() then
-            match TreeState.multi_selection with
-            | Some s when s.IsSelected(chart_meta, ctx) -> TreeState.deselect_multiple [(chart_meta, ctx)]
-            | _ -> TreeState.select_multiple [(chart_meta, ctx)]
+            match tree_ctx.MultiSelection with
+            | Some s when s.IsSelected(chart_meta, library_ctx) -> tree_ctx.RemoveFromMultiSelect(chart_meta, library_ctx)
+            | _ -> tree_ctx.AddToMultiSelect(chart_meta, library_ctx)
 
         if Mouse.hover bounds then
             hover.Target <- 1.0f
 
             if this.LeftClick(origin) then
                 if MULTI_SELECT_KEY.Held() then
-                    match TreeState.multi_selection with
-                    | Some s when s.IsSelected(chart_meta, ctx) -> TreeState.deselect_multiple [(chart_meta, ctx)]
-                    | _ -> TreeState.select_multiple [(chart_meta, ctx)]
+                    match tree_ctx.MultiSelection with
+                    | Some s when s.IsSelected(chart_meta, library_ctx) -> tree_ctx.RemoveFromMultiSelect(chart_meta, library_ctx)
+                    | _ -> tree_ctx.AddToMultiSelect(chart_meta, library_ctx)
                 elif this.Selected then
                     LevelSelect.choose_this_chart ()
                 else
@@ -254,14 +254,14 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
                     this.Select()
 
             elif this.RightClick(origin) then
-                match TreeState.multi_selection with
-                | Some s when s.IsSelected(chart_meta, ctx) -> s.ShowActions()
-                | _ -> ChartContextMenu(chart_meta, ctx).Show()
+                match tree_ctx.MultiSelection with
+                | Some s when s.IsSelected(chart_meta, library_ctx) -> s.ShowActions()
+                | _ -> ChartContextMenu(chart_meta, library_ctx).Show()
 
             elif (%%"delete").Pressed() then
-                match TreeState.multi_selection with
-                | Some s when s.IsSelected(chart_meta, ctx) -> s.ConfirmDelete()
-                | _ -> ChartDeleteMenu(chart_meta, ctx, false).Show()
+                match tree_ctx.MultiSelection with
+                | Some s when s.IsSelected(chart_meta, library_ctx) -> s.ConfirmDelete()
+                | _ -> ChartDeleteMenu(chart_meta, library_ctx, false).Show()
         else
             hover.Target <- 0.0f
 
