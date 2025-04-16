@@ -20,6 +20,8 @@ module TreeConstants =
     let [<Literal>] GROUP_HEIGHT = 55.0f
     let [<Literal>] GROUP_SPACING = Style.PADDING * 4.0f
 
+    let [<Literal>] TREE_LEFT_SPLIT = 0.4f
+
 [<Struct>]
 [<RequireQualifiedAccess>]
 type private ScrollTo =
@@ -32,6 +34,7 @@ type private TreeContext =
         mutable SelectedGroup: string * LibraryGroupContext
         mutable ExpandedGroup: string * LibraryGroupContext
         mutable SelectedChart: string
+        mutable MultiSelection: MultiSelection option
 
         ScrollPosition: Animation.Fade
 
@@ -39,16 +42,15 @@ type private TreeContext =
         mutable ScrollTo: ScrollTo
         mutable ClickDebounce: float
 
-        // todo: all 4 should be local to Tree?
-        mutable CurrentlyDragScrolling: bool
         mutable DragScrollDistance: float32
+        // todo: these 3 should be local to Tree?
+        mutable CurrentlyDragScrolling: bool
         mutable DragScrollPosition: float32
         mutable ScrollToChartOnce: bool
 
         // todo: needs better name
         mutable CacheFlag: int
 
-        mutable MultiSelection: MultiSelection option
     }
 
     member this.IsSelected(chart_meta: ChartMeta, library_ctx: LibraryContext) : bool =
@@ -110,6 +112,7 @@ type private TreeContext =
             SelectedGroup = "", LibraryGroupContext.None
             ExpandedGroup = "", LibraryGroupContext.None
             SelectedChart = ""
+            MultiSelection = None
 
             ScrollPosition = Animation.Fade 300.0f
 
@@ -121,8 +124,6 @@ type private TreeContext =
             ScrollToChartOnce = false
 
             CacheFlag = 0
-
-            MultiSelection = None
         }
 
 [<AbstractClass>]

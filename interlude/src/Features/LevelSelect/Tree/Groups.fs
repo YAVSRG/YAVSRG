@@ -59,7 +59,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
 
     override this.Bounds(this_top: float32) =
         Rect.FromEdges(
-            Render.width() * (0.5f - 0.05f * select_animation.Value),
+            Render.width() * (TREE_LEFT_SPLIT + 0.1f - 0.05f * select_animation.Value),
             this_top,
             Render.width() - 25.0f,
             this_top + GROUP_HEIGHT
@@ -73,8 +73,8 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
     member this.Context : LibraryGroupContext = group_ctx
     member this.Expanded : bool =  tree_ctx.IsGroupExpanded(name, group_ctx)
 
-    member this.SelectFirst() = items.First().Select()
-    member this.SelectLast() = items.Last().Select()
+    member this.SelectFirst() : unit = items.First().Select()
+    member this.SelectLast() : unit = items.Last().Select()
 
     /// Only called if this group can be seen on screen
     member private this.DrawCulled(bounds: Rect) : unit =

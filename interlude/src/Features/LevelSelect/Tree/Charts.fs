@@ -24,12 +24,12 @@ type PersonalBestCached =
 type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, library_ctx: LibraryContext) =
     inherit TreeItem(tree_ctx)
 
-    let hover = Animation.Fade 0.0f
+    let hover_animation = Animation.Fade 0.0f
     let mutable last_cached_flag = -1
     let mutable chart_save_data = None
     let mutable personal_bests: Bests option = None
-    let mutable grade_or_accuracy : PersonalBestCached option = None
-    let mutable lamp : PersonalBestCached option = None
+    let mutable grade_or_accuracy: PersonalBestCached option = None
+    let mutable lamp: PersonalBestCached option = None
     let mutable markers = ""
 
     let get_pb (bests: PersonalBests<'T>) (rate: Rate) =
@@ -122,12 +122,12 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             | _ -> if CollectionActions.is_liked chart_meta then Icons.HEART else ""
 
     override this.Bounds(top: float32) : Rect =
-        Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
-    override this.Spacing = CHART_SPACING
+        Rect.FromEdges(Render.width() * TREE_LEFT_SPLIT + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
+    override this.Spacing : float32 = CHART_SPACING
 
     member this.Selected : bool = tree_ctx.IsSelected(chart_meta, library_ctx)
-    member this.Chart = chart_meta
-    member this.Context = library_ctx
+    member this.Chart : ChartMeta = chart_meta
+    member this.Context : LibraryContext = library_ctx
 
     member this.PlaylistDuration : GameplayTime =
         match library_ctx with
@@ -136,60 +136,58 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
     member this.Select() : unit = tree_ctx.SelectChart(chart_meta, library_ctx, group_name, group_ctx)
 
+    member private this.DrawPersonalBests(bounds: Rect, data: PersonalBestCached, pos: float32, accent: Color) : unit =
+        if data.Color.A > 0uy then
+            Render.rect (bounds.SliceR(pos - 40.0f, 80.0f)) accent
+
+            Text.draw_aligned_b (
+                Style.font,
+                data.Text,
+                20.0f,
+                bounds.Right - pos,
+                bounds.Top + 8.0f,
+                (data.Color, Color.Black),
+                0.5f
+            )
+
+            Text.draw_aligned_b (
+                Style.font,
+                data.Details,
+                14.0f,
+                bounds.Right - pos,
+                bounds.Top + 35.0f,
+                (data.Color, Color.Black),
+                0.5f
+            )
+
     /// Only called if this chart can be seen on screen
     member private this.DrawCulled(bounds: Rect) : unit =
 
         let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.Contains(chart_meta, library_ctx) | None -> false
 
-        let accent =
-            let alpha = 80 + int (hover.Value * 40.0f)
+        let accent_color =
+            let alpha = 80 + int (hover_animation.Value * 40.0f)
             if is_multi_selected then Colors.grey_2.O2a alpha else Palette.color (alpha, 1.0f, 0.4f)
 
-        let color, hover_color =
+        let color, left_ribbon_color =
             if is_multi_selected then Colors.grey_2.O2, Colors.white.O2
             elif this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
             else Colors.shadow_1.O2, Colors.grey_2.O2
 
         Render.rect bounds color
+        Render.rect (bounds.BorderL Style.PADDING) left_ribbon_color
 
-        let stripe_length = bounds.Width * (0.4f + 0.6f * hover.Value)
+        let stripe_length = bounds.Width * (0.4f + 0.6f * hover_animation.Value)
         Render.quad_points_c
             (bounds.Left, bounds.Top)
             (bounds.Left + stripe_length, bounds.Top)
             (bounds.Left + stripe_length, bounds.Bottom - 25.0f)
             (bounds.Left, bounds.Bottom - 25.0f)
-            (Quad.gradient_left_to_right accent Color.Transparent)
-        Render.rect (bounds.BorderL Style.PADDING) hover_color
-
-        // draw pbs
-        let disp (data: PersonalBestCached) (pos: float32) =
-
-            if data.Color.A > 0uy then
-                Render.rect (bounds.SliceR(pos - 40.0f, 80.0f)) accent
-
-                Text.draw_aligned_b (
-                    Style.font,
-                    data.Text,
-                    20.0f,
-                    bounds.Right - pos,
-                    bounds.Top + 8.0f,
-                    (data.Color, Color.Black),
-                    0.5f
-                )
-
-                Text.draw_aligned_b (
-                    Style.font,
-                    data.Details,
-                    14.0f,
-                    bounds.Right - pos,
-                    bounds.Top + 35.0f,
-                    (data.Color, Color.Black),
-                    0.5f
-                )
+            (Quad.gradient_left_to_right accent_color Color.Transparent)
 
         if personal_bests.IsSome then
-            disp grade_or_accuracy.Value 290.0f
-            disp lamp.Value 165.0f
+            this.DrawPersonalBests(bounds, grade_or_accuracy.Value, 290.0f, accent_color)
+            this.DrawPersonalBests(bounds, lamp.Value, 165.0f, accent_color)
 
         // draw text
         Render.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
@@ -245,7 +243,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
 
         if Mouse.hover bounds then
-            hover.Target <- 1.0f
+            hover_animation.Target <- 1.0f
 
             if this.LeftClicked(tree_top) then
                 if MULTI_SELECT_KEY.Held() then
@@ -266,9 +264,9 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                 | Some selection when selection.Contains(chart_meta, library_ctx) -> selection.ConfirmDelete()
                 | _ -> ChartDeleteMenu(chart_meta, library_ctx, false).Show()
         else
-            hover.Target <- 0.0f
+            hover_animation.Target <- 0.0f
 
-        hover.Update(elapsed_ms) |> ignore
+        hover_animation.Update(elapsed_ms) |> ignore
 
     member this.Update(this_top: float32, tree_top: float32, tree_bottom: float32, elapsed_ms: float) : float32 =
         this.IfVisible(this_top, tree_top, tree_bottom, (fun b -> this.UpdateCulled(tree_top, b, elapsed_ms)))
