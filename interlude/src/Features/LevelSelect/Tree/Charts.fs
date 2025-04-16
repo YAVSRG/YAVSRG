@@ -122,7 +122,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
             | _ -> if CollectionActions.is_liked chart_meta then Icons.HEART else ""
 
     override this.Bounds(top: float32) : Rect =
-        Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + TreeState.CHART_HEIGHT)
+        Rect.FromEdges(Render.width() * 0.4f + Style.PADDING, top, Render.width(), top + CHART_HEIGHT)
 
     override this.Selected : bool = TreeState.selected_chart = chart_meta.Hash && SelectedChart.LIBRARY_CTX.Matches ctx
 
@@ -243,7 +243,7 @@ type private ChartItem(group_name: string, group_ctx: LibraryGroupContext, chart
             hover.Target <- 1.0f
 
             if this.LeftClick(origin) then
-                if TreeState.MULTI_SELECT_KEY.Held() then
+                if MULTI_SELECT_KEY.Held() then
                     match TreeState.multi_selection with
                     | Some s when s.IsSelected(chart_meta, ctx) -> TreeState.deselect_multiple [(chart_meta, ctx)]
                     | _ -> TreeState.select_multiple [(chart_meta, ctx)]

@@ -14,6 +14,17 @@ type private ScrollTo =
     | Chart
     | Group of string * LibraryGroupContext
 
+[<AutoOpen>]
+module TreeConstants =
+
+    let [<Literal>] DRAG_THRESHOLD = 40.0f
+    let [<Literal>] DRAG_LEFTCLICK_SCALE = 1.75f
+
+    let MULTI_SELECT_KEY = Bind.mk Keys.LeftShift
+
+    let [<Literal>] CHART_HEIGHT = 90.0f
+    let [<Literal>] GROUP_HEIGHT = 55.0f
+
 module private TreeState =
 
     /// Group's name = this string => Selected chart is in this group
@@ -37,9 +48,6 @@ module private TreeState =
     let mutable drag_scroll_position = 0.0f
     let mutable click_debounce = 0.0
     let mutable scroll_to_chart_once = false
-
-    let DRAG_THRESHOLD = 40.0f
-    let DRAG_LEFTCLICK_SCALE = 1.75f
 
     /// Increment the flag to recalculate cached data on tree items
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
@@ -68,11 +76,6 @@ module private TreeState =
             s.Deselect items
             if s.IsEmpty then multi_selection <- None
 
-    let MULTI_SELECT_KEY = Bind.mk Keys.LeftShift
-
-    let CHART_HEIGHT = 90.0f
-    let GROUP_HEIGHT = 55.0f
-
 [<AbstractClass>]
 type private TreeItem() =
     abstract member Bounds: float32 -> Rect
@@ -90,11 +93,11 @@ type private TreeItem() =
     member this.LeftClick(origin: float32) =
         TreeState.click_debounce <= 0
         && Mouse.released Mouse.LEFT
-        && TreeState.drag_scroll_distance <= TreeState.DRAG_THRESHOLD
+        && TreeState.drag_scroll_distance <= DRAG_THRESHOLD
         && Mouse.y () > origin
 
     member this.RightClick(origin: float32) =
         TreeState.click_debounce <= 0
         && Mouse.released Mouse.RIGHT
-        && TreeState.drag_scroll_distance <= TreeState.DRAG_THRESHOLD
+        && TreeState.drag_scroll_distance <= DRAG_THRESHOLD
         && Mouse.y () > origin

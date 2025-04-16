@@ -62,7 +62,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             Render.width() * (0.5f - 0.05f * select_animation.Value),
             top,
             Render.width() - 25.0f,
-            top + TreeState.GROUP_HEIGHT
+            top + GROUP_HEIGHT
         )
 
     override this.Selected = TreeState.selected_group = (name, context)
@@ -116,7 +116,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         let b = this.CheckBounds(top, origin, originB, this.OnDraw)
 
         if this.Expanded then
-            let h = TreeState.CHART_HEIGHT + 5.0f
+            let h = CHART_HEIGHT + 5.0f
 
             let mutable index = (origin - b) / h |> floor |> int |> max 0
 
@@ -146,7 +146,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
-                if TreeState.MULTI_SELECT_KEY.Held() then
+                if MULTI_SELECT_KEY.Held() then
                     match TreeState.multi_selection with
                     | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
                         TreeState.deselect_multiple charts_as_seq
@@ -197,7 +197,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                     TreeState.deselect_multiple charts_as_seq
                 | _ -> TreeState.select_multiple charts_as_seq
 
-            let h = TreeState.CHART_HEIGHT + 5.0f
+            let h = CHART_HEIGHT + 5.0f
 
             if TreeState.scroll_to = ScrollTo.Chart && this.Selected then
                 match Seq.tryFindIndex (fun (s: ChartItem) -> s.Selected) items with

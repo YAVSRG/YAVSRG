@@ -195,11 +195,11 @@ module Tree =
         TreeState.drag_scroll_distance <- TreeState.drag_scroll_distance + abs d
 
         if Mouse.held Mouse.RIGHT then
-            if TreeState.drag_scroll_distance > TreeState.DRAG_THRESHOLD then
+            if TreeState.drag_scroll_distance > DRAG_THRESHOLD then
                 TreeState.scroll_pos.Target <- -(Mouse.y () - origin) / total_height * tree_height
         elif Mouse.held Mouse.LEFT then
-            if TreeState.drag_scroll_distance > TreeState.DRAG_THRESHOLD then
-                TreeState.scroll_pos.Target <- TreeState.scroll_pos.Target + d * TreeState.DRAG_LEFTCLICK_SCALE
+            if TreeState.drag_scroll_distance > DRAG_THRESHOLD then
+                TreeState.scroll_pos.Target <- TreeState.scroll_pos.Target + d * DRAG_LEFTCLICK_SCALE
         else
             finish_drag_scroll ()
 

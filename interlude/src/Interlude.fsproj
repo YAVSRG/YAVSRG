@@ -245,7 +245,7 @@
     <Compile Include="Features\LevelSelect\ContextMenus\BulkActionsMenus.fs" />
     <Compile Include="Features\LevelSelect\ContextMenus\ScoreContextMenu.fs" />
     <Compile Include="Features\LevelSelect\Tree\MultiSelect.fs" />
-    <Compile Include="Features\LevelSelect\Tree\State.fs" />
+    <Compile Include="Features\LevelSelect\Tree\TreeContext.fs" />
     <Compile Include="Features\LevelSelect\Tree\Charts.fs" />
     <Compile Include="Features\LevelSelect\Tree\Groups.fs" />
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
