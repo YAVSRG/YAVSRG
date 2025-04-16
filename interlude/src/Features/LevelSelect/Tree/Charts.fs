@@ -136,20 +136,15 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
     member this.Select() : unit = tree_ctx.SelectChart(chart_meta, library_ctx, group_name, group_ctx)
 
-    member private this.OnDraw(bounds: Rect) =
-        let {
-                Rect.Left = left
-                Top = top
-                Right = right
-                Bottom = bottom
-            } =
-            bounds
+    /// Only called if this chart can be seen on screen
+    member private this.DrawCulled(bounds: Rect) : unit =
 
         let is_multi_selected = match tree_ctx.MultiSelection with Some s -> s.Contains(chart_meta, library_ctx) | None -> false
 
         let accent =
             let alpha = 80 + int (hover.Value * 40.0f)
             if is_multi_selected then Colors.grey_2.O2a alpha else Palette.color (alpha, 1.0f, 0.4f)
+
         let color, hover_color =
             if is_multi_selected then Colors.grey_2.O2, Colors.white.O2
             elif this.Selected then !*Palette.MAIN_100, !*Palette.LIGHT
@@ -157,12 +152,12 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
         Render.rect bounds color
 
-        let stripe_length = (right - left) * (0.4f + 0.6f * hover.Value)
+        let stripe_length = bounds.Width * (0.4f + 0.6f * hover.Value)
         Render.quad_points_c
-            (left, top)
-            (left + stripe_length, top)
-            (left + stripe_length, bottom - 25.0f)
-            (left, bottom - 25.0f)
+            (bounds.Left, bounds.Top)
+            (bounds.Left + stripe_length, bounds.Top)
+            (bounds.Left + stripe_length, bounds.Bottom - 25.0f)
+            (bounds.Left, bounds.Bottom - 25.0f)
             (Quad.gradient_left_to_right accent Color.Transparent)
         Render.rect (bounds.BorderL Style.PADDING) hover_color
 
@@ -170,14 +165,14 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         let disp (data: PersonalBestCached) (pos: float32) =
 
             if data.Color.A > 0uy then
-                Render.rect (Rect.FromEdges(right - pos - 40.0f, top, right - pos + 40.0f, bottom)) accent
+                Render.rect (bounds.SliceR(pos - 40.0f, 80.0f)) accent
 
                 Text.draw_aligned_b (
                     Style.font,
                     data.Text,
                     20.0f,
-                    right - pos,
-                    top + 8.0f,
+                    bounds.Right - pos,
+                    bounds.Top + 8.0f,
                     (data.Color, Color.Black),
                     0.5f
                 )
@@ -186,8 +181,8 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                     Style.font,
                     data.Details,
                     14.0f,
-                    right - pos,
-                    top + 35.0f,
+                    bounds.Right - pos,
+                    bounds.Top + 35.0f,
                     (data.Color, Color.Black),
                     0.5f
                 )
@@ -198,14 +193,26 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
         // draw text
         Render.rect (bounds.SliceB 25.0f) Colors.shadow_1.O1
-        Text.draw_b (Style.font, (if options.TreeShowNativeText.Value then chart_meta.TitleNative |> Option.defaultValue chart_meta.Title else chart_meta.Title), 23.0f, left + 7f, top, if is_multi_selected then Colors.text_yellow_2 else Colors.text)
+        Text.draw_b (
+            Style.font,
+            (
+                if options.TreeShowNativeText.Value then
+                    chart_meta.TitleNative |> Option.defaultValue chart_meta.Title
+                else
+                    chart_meta.Title
+            ),
+            23.0f,
+            bounds.Left + 7f,
+            bounds.Top,
+            if is_multi_selected then Colors.text_yellow_2 else Colors.text
+        )
 
         Text.draw_b (
             Style.font,
             sprintf "%s  •  %s" (if options.TreeShowNativeText.Value then chart_meta.ArtistNative |> Option.defaultValue chart_meta.Artist else chart_meta.Artist) chart_meta.Creator,
             18.0f,
-            left + 7f,
-            top + 34.0f,
+            bounds.Left + 7f,
+            bounds.Top + 34.0f,
             Colors.text_subheading
         )
 
@@ -213,8 +220,8 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             Style.font,
             chart_meta.Subtitle |> Option.defaultValue chart_meta.DifficultyName,
             15.0f,
-            left + 7f,
-            top + 65.0f,
+            bounds.Left + 7f,
+            bounds.Top + 65.0f,
             Colors.text_subheading
         )
 
@@ -223,12 +230,13 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                 if is_multi_selected then Icons.CHECK_SQUARE else Icons.SQUARE
             else markers
 
-        Text.draw_aligned_b (Style.font, icon, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
+        Text.draw_aligned_b (Style.font, icon, 25.0f, bounds.Right - 65.0f, bounds.Top + 15.0f, Colors.text, Alignment.CENTER)
 
-    member this.Draw(top: float32, origin: float32, originB: float32) : float32 =
-        this.CheckBounds(top, origin, originB, this.OnDraw)
+    member this.Draw(this_top: float32, tree_top: float32, tree_bottom: float32) : float32 =
+        this.IfVisible(this_top, tree_top, tree_bottom, this.DrawCulled)
 
-    member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
+    /// Only called if this chart can be seen on screen
+    member private this.UpdateCulled(tree_top: float32, bounds: Rect, elapsed_ms: float) : unit =
 
         if last_cached_flag < tree_ctx.CacheFlag then
             update_cached_info ()
@@ -239,7 +247,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         if Mouse.hover bounds then
             hover.Target <- 1.0f
 
-            if this.LeftClicked(origin) then
+            if this.LeftClicked(tree_top) then
                 if MULTI_SELECT_KEY.Held() then
                     tree_ctx.ToggleMultiSelect(chart_meta, library_ctx)
                 elif this.Selected then
@@ -248,7 +256,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                     if not (Transitions.in_progress()) then LevelSelect.History.append_current ()
                     this.Select()
 
-            elif this.RightClicked(origin) then
+            elif this.RightClicked(tree_top) then
                 match tree_ctx.MultiSelection with
                 | Some selection when selection.Contains(chart_meta, library_ctx) -> selection.ShowActions()
                 | _ -> ChartContextMenu(chart_meta, library_ctx).Show()
@@ -262,5 +270,5 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
 
         hover.Update(elapsed_ms) |> ignore
 
-    member this.Update(top: float32, origin: float32, originB: float32, elapsed_ms: float) : float32 =
-        this.CheckBounds(top, origin, originB, (fun b -> this.OnUpdate(origin, b, elapsed_ms)))
+    member this.Update(this_top: float32, tree_top: float32, tree_bottom: float32, elapsed_ms: float) : float32 =
+        this.IfVisible(this_top, tree_top, tree_bottom, (fun b -> this.UpdateCulled(tree_top, b, elapsed_ms)))

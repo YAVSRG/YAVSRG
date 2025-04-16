@@ -130,22 +130,24 @@ type private TreeItem(ctx: TreeContext) =
     abstract member Bounds: float32 -> Rect
     abstract member Spacing: float32
 
-    member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
-        let bounds = this.Bounds(top + this.Spacing * 0.5f)
+    /// Runs the passed function if this item is visible
+    /// Returns the new "this_top" that the next element should use
+    member this.IfVisible(this_top: float32, tree_top: float32, tree_bottom: float32, if_visible: Rect -> unit) : float32 =
+        let bounds = this.Bounds(this_top + this.Spacing * 0.5f)
 
-        if bounds.Bottom > origin && top < originB then
+        if bounds.Bottom > tree_top && this_top < tree_bottom then
             if_visible bounds
 
-        top + bounds.Height + this.Spacing
+        this_top + bounds.Height + this.Spacing
 
-    member this.LeftClicked(origin: float32) : bool =
+    member this.LeftClicked(tree_top: float32) : bool =
         ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.LEFT
         && ctx.DragScrollDistance <= DRAG_THRESHOLD
-        && Mouse.y () > origin
+        && Mouse.y () > tree_top
 
-    member this.RightClicked(origin: float32) : bool =
+    member this.RightClicked(tree_top: float32) : bool =
         ctx.ClickDebounce <= 0.0
         && Mouse.released Mouse.RIGHT
         && ctx.DragScrollDistance <= DRAG_THRESHOLD
-        && Mouse.y () > origin
+        && Mouse.y () > tree_top
