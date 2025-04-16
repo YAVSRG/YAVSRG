@@ -9,8 +9,6 @@ open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 
-open TreeState
-
 type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: LibraryGroupContext) =
     inherit TreeItem()
 
@@ -31,7 +29,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         | LibraryGroupContext.Playlist _ -> Some (Colors.green, Colors.green_shadow)
 
     let update_cached_info () =
-        last_cached_flag <- cache_flag
+        last_cached_flag <- TreeState.cache_flag
 
         label <-
             match context with
@@ -64,16 +62,16 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
             Render.width() * (0.5f - 0.05f * select_animation.Value),
             top,
             Render.width() - 25.0f,
-            top + GROUP_HEIGHT
+            top + TreeState.GROUP_HEIGHT
         )
 
-    override this.Selected = selected_group = (name, context)
+    override this.Selected = TreeState.selected_group = (name, context)
     override this.Spacing = 20.0f
 
     member this.Items = items
     member this.Name = name
     member this.Context = context
-    member this.Expanded = expanded_group = (name, context)
+    member this.Expanded = TreeState.expanded_group = (name, context)
 
     member this.SelectFirst() = items.First().Select()
     member this.SelectLast() = items.Last().Select()
@@ -81,7 +79,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnDraw(bounds: Rect) =
 
         let color, bg_color =
-            match multi_selection with
+            match TreeState.multi_selection with
             | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None ->
                 Colors.grey_2.O2, Colors.shadow_2.O2
             | _ ->
@@ -100,7 +98,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
 
         Render.rect bounds color
 
-        match multi_selection with
+        match TreeState.multi_selection with
         | Some s ->
             let filled_icon, name_color =
                 match s.GroupAmountSelected(name, context, charts_as_seq) with
@@ -118,7 +116,7 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         let b = this.CheckBounds(top, origin, originB, this.OnDraw)
 
         if this.Expanded then
-            let h = CHART_HEIGHT + 5.0f
+            let h = TreeState.CHART_HEIGHT + 5.0f
 
             let mutable index = (origin - b) / h |> floor |> int |> max 0
 
@@ -148,18 +146,18 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
     member private this.OnUpdate(origin: float32, bounds: Rect, elapsed_ms: float) =
         if Mouse.hover bounds then
             if this.LeftClick(origin) then
-                if MULTI_SELECT_KEY.Held() then
-                    match multi_selection with
+                if TreeState.MULTI_SELECT_KEY.Held() then
+                    match TreeState.multi_selection with
                     | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
-                        deselect_multiple charts_as_seq
-                    | _ -> select_multiple charts_as_seq
+                        TreeState.deselect_multiple charts_as_seq
+                    | _ -> TreeState.select_multiple charts_as_seq
                 elif this.Expanded then
-                    expanded_group <- "", LibraryGroupContext.None
+                    TreeState.expanded_group <- "", LibraryGroupContext.None
                 else
-                    expanded_group <- name, context
-                    scroll_to <- ScrollTo.Group (name, context)
+                    TreeState.expanded_group <- name, context
+                    TreeState.scroll_to <- ScrollTo.Group (name, context)
             elif this.RightClick(origin) then
-                match multi_selection with
+                match TreeState.multi_selection with
                 | Some s when s.GroupAmountSelected(name, context, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
                 | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
             elif (%%"delete").Pressed() then
@@ -172,20 +170,20 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
                 | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(items |> Seq.map (fun (x: ChartItem) -> x.Chart), context, false)
 
     member this.Update(top: float32, origin: float32, originB: float32, elapsed_ms: float) : float32 =
-        if last_cached_flag < cache_flag then
+        if last_cached_flag < TreeState.cache_flag then
             update_cached_info ()
 
         select_animation.Target <- if this.Selected then 1.0f else 0.0f
         select_animation.Update elapsed_ms
 
-        match scroll_to with
+        match TreeState.scroll_to with
         | ScrollTo.Group (a, b) when (a, b) = (name, context) ->
             if this.Expanded then
-                scroll (-top + origin + 185.0f)
+                TreeState.scroll (-top + origin + 185.0f)
             else
-                scroll (-top + origin + 400.0f)
+                TreeState.scroll (-top + origin + 400.0f)
 
-            scroll_to <- ScrollTo.Nothing
+            TreeState.scroll_to <- ScrollTo.Nothing
         | _ -> ()
 
         let b =
@@ -194,18 +192,18 @@ type private GroupItem(name: string, items: ResizeArray<ChartItem>, context: Lib
         if this.Expanded then
 
             if (%%"group_multi_select").Pressed() then
-                match multi_selection with
+                match TreeState.multi_selection with
                 | Some s when s.GroupAmountSelected(name, context, charts_as_seq) = AmountSelected.All ->
-                    deselect_multiple charts_as_seq
-                | _ -> select_multiple charts_as_seq
+                    TreeState.deselect_multiple charts_as_seq
+                | _ -> TreeState.select_multiple charts_as_seq
 
-            let h = CHART_HEIGHT + 5.0f
+            let h = TreeState.CHART_HEIGHT + 5.0f
 
-            if scroll_to = ScrollTo.Chart && this.Selected then
+            if TreeState.scroll_to = ScrollTo.Chart && this.Selected then
                 match Seq.tryFindIndex (fun (s: ChartItem) -> s.Selected) items with
-                | Some i -> scroll (-(b + float32 i * h) + 500.0f)
+                | Some i -> TreeState.scroll (-(b + float32 i * h) + 500.0f)
                 | None -> ()
-                scroll_to <- ScrollTo.Nothing
+                TreeState.scroll_to <- ScrollTo.Nothing
 
             let mutable index = (origin - b) / h |> floor |> int |> max 0
             let mutable p = b + float32 index * h

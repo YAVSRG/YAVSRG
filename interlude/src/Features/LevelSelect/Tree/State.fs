@@ -73,28 +73,28 @@ module private TreeState =
     let CHART_HEIGHT = 90.0f
     let GROUP_HEIGHT = 55.0f
 
-    [<AbstractClass>]
-    type TreeItem() =
-        abstract member Bounds: float32 -> Rect
-        abstract member Selected: bool
-        abstract member Spacing: float32
+[<AbstractClass>]
+type private TreeItem() =
+    abstract member Bounds: float32 -> Rect
+    abstract member Selected: bool
+    abstract member Spacing: float32
 
-        member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
-            let bounds = this.Bounds(top + this.Spacing * 0.5f)
+    member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
+        let bounds = this.Bounds(top + this.Spacing * 0.5f)
 
-            if bounds.Bottom > origin && top < originB then
-                if_visible bounds
+        if bounds.Bottom > origin && top < originB then
+            if_visible bounds
 
-            top + bounds.Height + this.Spacing
+        top + bounds.Height + this.Spacing
 
-        member this.LeftClick(origin: float32) =
-            click_debounce <= 0
-            && Mouse.released Mouse.LEFT
-            && drag_scroll_distance <= DRAG_THRESHOLD
-            && Mouse.y () > origin
+    member this.LeftClick(origin: float32) =
+        TreeState.click_debounce <= 0
+        && Mouse.released Mouse.LEFT
+        && TreeState.drag_scroll_distance <= TreeState.DRAG_THRESHOLD
+        && Mouse.y () > origin
 
-        member this.RightClick(origin: float32) =
-            click_debounce <= 0
-            && Mouse.released Mouse.RIGHT
-            && drag_scroll_distance <= DRAG_THRESHOLD
-            && Mouse.y () > origin
+    member this.RightClick(origin: float32) =
+        TreeState.click_debounce <= 0
+        && Mouse.released Mouse.RIGHT
+        && TreeState.drag_scroll_distance <= TreeState.DRAG_THRESHOLD
+        && Mouse.y () > origin

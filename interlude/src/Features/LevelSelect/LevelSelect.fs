@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.LevelSelect
 
-open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
