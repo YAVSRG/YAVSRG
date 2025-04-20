@@ -21,7 +21,9 @@ type InputMeterPage(on_close: unit -> unit) =
     let judgement_colors = Setting.simple config.InputMeterJudgementColors
     let input_fade_distance = Setting.bounded (0.0f, 1000.0f) config.InputMeterInputFadeDistance
     let scroll_downwards = Setting.simple config.InputMeterScrollDownwards
-
+    let show_keybinds = Setting.simple config.InputMeterShowKeybinds
+    let keybind_color = Setting.simple config.InputMeterKeybindColor
+    
     override this.Content() =
         page_container()
         |+ PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
@@ -43,9 +45,12 @@ type InputMeterPage(on_close: unit -> unit) =
             .Pos(15)
             .Conditional(show_inputs.Get)
         |+ PageSetting(%"hud.input_meter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
-            .Pos(18)
+            .Pos(17)
             .Conditional(show_inputs.Get)
-
+        |+ PageSetting(%"hud.input_meter.show_keybinds", Checkbox show_keybinds)
+            .Pos(19)
+        |+ PageSetting(%"hud.input_meter.keybind_color", ColorPicker(%"hud.input_meter.keybind_color", keybind_color, true))
+            .Pos(21)
         :> Widget
 
     override this.Title = %"hud.input_meter"
@@ -62,5 +67,7 @@ type InputMeterPage(on_close: unit -> unit) =
                 InputMeterInputFadeDistance = input_fade_distance.Value
                 InputMeterScrollDownwards = scroll_downwards.Value
                 InputMeterJudgementColors = judgement_colors.Value
+                InputMeterShowKeybinds = show_keybinds.Value
+                InputMeterKeybindColor = keybind_color.Value
             }
         on_close ()
