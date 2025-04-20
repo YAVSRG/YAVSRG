@@ -66,6 +66,15 @@ type Bind =
         | Keys.RightShift -> "RShift"
         | Keys.LeftBracket -> "["
         | Keys.RightBracket -> "]"
+        | Keys.Comma -> ","
+        | Keys.Period -> "."
+        | Keys.GraveAccent -> "`"
+        | Keys.Slash -> "/"
+        | Keys.Backslash -> "\\"
+        | Keys.Semicolon -> ";"
+        | Keys.Apostrophe -> "'"
+        | Keys.Minus -> "-"
+        | Keys.Equal -> "="
         | _ -> k.ToString()
 
     static member private ModifierString(ctrl: bool, alt: bool, shift: bool) : string =
