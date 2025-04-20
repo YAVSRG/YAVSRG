@@ -8,10 +8,12 @@ open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
+open Interlude.Options
 
 type InputMeter(config: HudConfig, state: PlayState) =
     inherit StaticWidget(NodeType.None)
 
+    let binds = options.GameplayBinds.[state.WithColors.Keys - 3]
     let colors = Array.create state.WithColors.Keys config.InputMeterKeyColor
     let color_fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
     let fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
@@ -62,8 +64,9 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let g = lerp_color color_f colors.[k].G config.InputMeterKeyColor.G
             let b = lerp_color color_f colors.[k].B config.InputMeterKeyColor.B
             let color = Color.FromArgb(key_alpha, r, g, b)
-
             Render.rect box color
+            if config.InputMeterShowKeybinds then
+                Text.fill(Style.font, binds.[k].ToString(), box, config.InputMeterKeybindColor, Alignment.CENTER)          
             box <- box.Translate(column_width, 0.0f)
 
         if config.InputMeterShowInputs then
