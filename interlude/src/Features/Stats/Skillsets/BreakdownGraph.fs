@@ -50,29 +50,18 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
         else sprintf "%is" (floor (ms / 1000.0f<ms / rate>) |> int)
 
     let threshold_a, threshold_c, threshold_p = pattern_type.AccuracyBreakpoints
-    let a_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_a * 100.0) SC_J4.Name
-        if Rulesets.current_hash <> SC_J4_HASH then
-            match RulesetComparison.compare (threshold_a * 100.0) SC_J4 Rulesets.current with
+
+    let accuracy_label (threshold: float) =
+        let base_label = sprintf "%g%% %s" (threshold * 100.0) Rulesets.DEFAULT_RULESET.Name
+        if Rulesets.current_hash <> Rulesets.DEFAULT_RULESET_HASH then
+            match RulesetComparison.compare (threshold * 100.0) Rulesets.DEFAULT_RULESET Rulesets.current with
             | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
             | None -> base_label
         else base_label
 
-    let c_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_c * 100.0) SC_J4.Name
-        if Rulesets.current_hash <> SC_J4_HASH then
-            match RulesetComparison.compare (threshold_c * 100.0) SC_J4 Rulesets.current with
-            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
-            | None -> base_label
-        else base_label
-
-    let p_accuracy_label =
-        let base_label = sprintf "%g%% %s" (threshold_p * 100.0) SC_J4.Name
-        if Rulesets.current_hash <> SC_J4_HASH then
-            match RulesetComparison.compare (threshold_p * 100.0) SC_J4 Rulesets.current with
-            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
-            | None -> base_label
-        else base_label
+    let a_accuracy_label = accuracy_label threshold_a
+    let c_accuracy_label = accuracy_label threshold_c
+    let p_accuracy_label = accuracy_label threshold_p
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
