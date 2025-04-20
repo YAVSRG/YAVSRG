@@ -132,7 +132,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 Text(%"rulesets.mechanics.osu_mania_cannot_edit")
                     .Color(Colors.text_subheading)
                     .Align(Alignment.LEFT)
-                    .Position(page_position(9, 2, PageWidth.Normal).Shrink(Style.PADDING)),
+                    .TextPos(9),
                 PageButton(%"rulesets.mechanics.osu_mania_change",
                     fun () ->
                         ConfirmPage(%"rulesets.mechanics.osu_mania_change_confirm",
