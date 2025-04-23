@@ -221,10 +221,10 @@ module private FrameTimeStrategies =
                     let before = sw.Elapsed.TotalMilliseconds
                     if not (wait_for_vblank()) then sync_broken <- true
                     _last_time <- sw.Elapsed.TotalMilliseconds
-                    if _vblank_number > 240uL && abs (before + est_period - _last_time) > 1.0 then
+                    if _vblank_number > 240uL && abs (est_period - (_last_time - before)) > 2.0 then
                         _last_time <- before + est_period
                     else
-                        est_period <- est_period * 0.95 + (_last_time - before) * 0.05
+                        est_period <- est_period * 0.99 + (_last_time - before) * 0.01
                     _vblank_number <- _vblank_number + 1uL
                 lock LOCK_OBJ <| fun () ->
                     last_time <- _last_time
