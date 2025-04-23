@@ -432,7 +432,7 @@ type HudConfig =
             InputMeterInputFadeDistance = 100.0f
             InputMeterScrollDownwards = false
             InputMeterJudgementColors = false
-            InputMeterShowKeybinds = true
+            InputMeterShowKeybinds = false
             InputMeterKeybindColor = Color.FromArgb(127, 0, 0, 0)
 
             KeysPerSecondMeterEnabled = false
