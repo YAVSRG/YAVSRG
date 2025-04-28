@@ -10,6 +10,7 @@ open System.IO.Compression
 open Percyqaz.Data
 open Prelude
 open Prelude.Data
+open Prelude.Data.Library.Imports
 
 module Updates =
 
@@ -139,8 +140,7 @@ module Updates =
         let path = get_interlude_location ()
         let folder_path = Path.Combine(path, "update")
 
-        if Directory.Exists folder_path then
-            Directory.Delete(folder_path, true)
+        Imports.delete_folder.Request(folder_path, ignore)
 
     let apply_update (progress: float32 -> unit, callback: unit -> unit) : unit =
         if not update_available then
@@ -168,15 +168,12 @@ module Updates =
             let folder_path = Path.Combine(path, "update")
             File.Delete zip_path
 
-            if Directory.Exists folder_path then
-                Directory.Delete(folder_path, true)
-
             WebServices.download_file.Request(
                 (download_url, zip_path, progress),
                 fun success ->
                     if success then
                         ZipFile.ExtractToDirectory(zip_path, folder_path)
-                        File.Delete zip_path
+                        Imports.delete_file.Request(zip_path, ignore)
                         swap_update_files folder_path path
                         callback ()
                         update_complete <- true
