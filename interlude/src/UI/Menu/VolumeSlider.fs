@@ -51,8 +51,8 @@ type VolumeSlider() =
             let volume_box = r.SliceX(220.0f).BorderT(50.0f).TranslateY(-5.0f)
             Render.rect volume_box (Colors.shadow_1.O1a (a * 3))
             let icon =
-                if slider.Value <= 0.005f then Icons.VOLUME_X
-                elif slider.Value < 0.05f then Icons.VOLUME
-                elif slider.Value < 0.4f then Icons.VOLUME_1
+                if volume.Value <= 0.005 then Icons.VOLUME_X
+                elif volume.Value < 0.05 then Icons.VOLUME
+                elif volume.Value < 0.4 then Icons.VOLUME_1
                 else Icons.VOLUME_2
             Text.fill_b (Style.font, sprintf "%s Volume: %.0f%%" icon (volume.Value * 100.0), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
