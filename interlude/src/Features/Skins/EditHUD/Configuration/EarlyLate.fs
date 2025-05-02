@@ -2,6 +2,7 @@ namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Content
 open Interlude.UI
@@ -42,7 +43,10 @@ type EarlyLatePage(on_close: unit -> unit) =
             .Help(Help.Info("hud.early_late.earlytext"))
             .Pos(4)
             .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.earlycolor", ColorPicker(%"hud.early_late.earlycolor", early_color, false))
+        |+ PageSetting(%"hud.early_late.earlycolor",
+            ColorPicker(%"hud.early_late.earlycolor", early_color, false)
+                .Preview(early_text.get_Value)
+        )
             .Help(Help.Info("hud.early_late.earlycolor"))
             .Pos(6)
             .Conditional(use_texture.Get >> not)
@@ -50,7 +54,10 @@ type EarlyLatePage(on_close: unit -> unit) =
             .Help(Help.Info("hud.early_late.latetext"))
             .Pos(9)
             .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.latecolor", ColorPicker(%"hud.early_late.latecolor", late_color, false))
+        |+ PageSetting(%"hud.early_late.latecolor",
+            ColorPicker(%"hud.early_late.latecolor", late_color, false)
+                .Preview(late_text.get_Value)
+        )
             .Help(Help.Info("hud.early_late.latecolor"))
             .Pos(11)
             .Conditional(use_texture.Get >> not)

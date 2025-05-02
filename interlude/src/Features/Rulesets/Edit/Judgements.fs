@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
@@ -19,7 +20,10 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
         page_container()
         |+ PageTextEntry(%"rulesets.judgement.name", name)
             .Pos(0)
-        |+ PageSetting(%"rulesets.judgement.color", ColorPicker(%"rulesets.judgement.color", color, false))
+        |+ PageSetting(%"rulesets.judgement.color",
+            ColorPicker(%"rulesets.judgement.color", color, false)
+                .Preview(name.get_Value)
+        )
             .Pos(2)
         |+ PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
             .Pos(4)

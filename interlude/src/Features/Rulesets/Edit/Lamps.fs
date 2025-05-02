@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
@@ -20,7 +21,10 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
         page_container()
         |+ PageTextEntry(%"rulesets.lamp.name", name)
             .Pos(0)
-        |+ PageSetting(%"rulesets.lamp.color", ColorPicker(%"rulesets.lamp.color", color, false))
+        |+ PageSetting(%"rulesets.lamp.color",
+            ColorPicker(%"rulesets.lamp.color", color, false)
+                .Preview(name.get_Value)
+        )
             .Pos(2)
         |+ PageSetting(%"rulesets.lamp.requirement",
             NavigationContainer.Row()

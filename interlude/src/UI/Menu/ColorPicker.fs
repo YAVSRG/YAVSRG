@@ -1,11 +1,12 @@
 ﻿namespace Interlude.UI
 
+open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 
-type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on_close: unit -> unit) =
+type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, draw_preview: Rect -> Color -> unit, on_close: unit -> unit) =
     inherit Page()
 
     let mutable hex = color.Value.ToHex()
@@ -126,23 +127,30 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, on
 
     override this.Content() =
         page_container()
-        |+ PageSetting("Hex", NumberEntry.Create(hex_color_setting)).Pos(0)
-        |+ red_slider.Pos(3)
-        |+ green_slider.Pos(5)
-        |+ blue_slider.Pos(7)
-        |> fun c ->
-            if allow_alpha then
-                c
-                |+ alpha_slider.Pos(10)
-                |+ hue_slider.Pos(13)
-                |+ saturation_slider.Pos(15)
-                |+ value_slider.Pos(17)
-            else
-                c
-                |+ hue_slider.Pos(10)
-                |+ saturation_slider.Pos(12)
-                |+ value_slider.Pos(14)
-        :> Widget
+            .With(
+                PageSetting("Hex", NumberEntry.Create(hex_color_setting)).Pos(0),
+                red_slider.Pos(3),
+                green_slider.Pos(5),
+                blue_slider.Pos(7)
+            )
+            .WithConditional(
+                allow_alpha,
+                alpha_slider.Pos(10),
+                hue_slider.Pos(13),
+                saturation_slider.Pos(15),
+                value_slider.Pos(17)
+            )
+            .WithConditional(
+                not allow_alpha,
+                hue_slider.Pos(10),
+                saturation_slider.Pos(12),
+                value_slider.Pos(14)
+            )
+
+    override this.Draw() =
+        let preview_box = this.Bounds.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkL(PAGE_ITEM_WIDTH).ShrinkX(30.0f).SliceT(PAGE_ITEM_HEIGHT)
+        draw_preview preview_box color.Value
+        base.Draw()
 
     override this.Title = title
     override this.OnClose() = on_close()
@@ -151,6 +159,8 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
     inherit Container(NodeType.Button(fun _ -> this.Edit()))
 
     let mutable hex = color.Value.ToHex()
+
+    member val Preview: Rect -> Color -> unit = Render.rect with get, set
 
     override this.Init (parent: Widget) =
         this |* MouseListener().Button(this)
@@ -167,4 +177,15 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
 
     member this.Edit() =
         Style.click.Play()
-        ColorPickerPage(label, color, allow_alpha, fun () -> hex <- color.Value.ToHex()).Show()
+        ColorPickerPage(label, color, allow_alpha, this.Preview, fun () -> hex <- color.Value.ToHex()).Show()
+
+[<Extension>]
+type ColorPickerExtensions =
+    [<Extension>]
+    static member Preview(this: ColorPicker, preview: Rect -> Color -> unit) =
+        this.Preview <- preview
+        this
+    [<Extension>]
+    static member Preview(this: ColorPicker, text: unit -> string) =
+        this.Preview <- fun bounds color -> Text.fill_b(Style.font, text(), bounds, (color, Colors.shadow_2), Alignment.CENTER)
+        this

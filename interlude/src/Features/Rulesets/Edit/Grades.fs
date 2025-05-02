@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -19,7 +20,10 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
         page_container()
         |+ PageTextEntry(%"rulesets.grade.name", name)
             .Pos(0)
-        |+ PageSetting(%"rulesets.grade.color", ColorPicker(%"rulesets.grade.color", color, false))
+        |+ PageSetting(%"rulesets.grade.color",
+            ColorPicker(%"rulesets.grade.color", color, false)
+                .Preview(name.get_Value)
+        )
             .Pos(2)
         |+ PageSetting(%"rulesets.grade.accuracy",
             Slider(acc_required, Format = (fun v -> sprintf "%.4f%%" (v * 100.0f)), Step = 0.001f)
