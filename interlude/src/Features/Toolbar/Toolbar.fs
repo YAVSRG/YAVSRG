@@ -56,10 +56,7 @@ type Toolbar() =
 
     let import_status_fade = Animation.Fade 0.0f
     let import_button =
-        InlaidButton(
-            %"menu.import",
-            (fun () -> ImportsPage().Show())
-        )
+        InlaidButton(%"menu.import", fun () -> ImportsPage().Show())
             .Icon(Icons.DOWNLOAD)
             .Hotkey("import")
             .With(
@@ -140,7 +137,7 @@ type Toolbar() =
                 HotkeyListener("preset3", fun () -> load_preset 3)
             )
 
-        base.Init parent
+        base.Init(parent)
 
         this.Bounds <-
             if Toolbar.hidden then
@@ -154,8 +151,8 @@ type Toolbar() =
             else
                 this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
 
-        volume_when_hidden.Init this
-        container.Init this
+        volume_when_hidden.Init(this)
+        container.Init(this)
 
     override this.Draw() =
         if Toolbar.hidden then

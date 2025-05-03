@@ -17,7 +17,7 @@ type NetworkStatus() as this =
     let dropdown_wrapper = DropdownWrapper(fun d -> Position.SliceT(d.Height + this.Bounds.Height).ShrinkT(this.Bounds.Height).Shrink(Style.PADDING, 0.0f))
 
     override this.Init(parent) =
-        this |* dropdown_wrapper
+        this.Add(dropdown_wrapper)
         base.Init parent
 
     override this.Draw() =

@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.MainMenu
 
-open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -16,38 +15,6 @@ open Interlude.Features.Online
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.LevelSelect
-open Interlude.Features.Import
-
-type ConfirmQuitPage(on_confirm: unit -> unit) =
-    inherit Page()
-
-    override this.Content() =
-        if TaskTracking.in_progress() then
-            page_container()
-            |+ PageButton.Once(%"confirm.no", Menu.Back)
-                .Pos(7)
-            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back)
-                .Pos(5)
-            |+ Text(%"menu.exit_prompt")
-                .Align(Alignment.LEFT)
-                .Pos(0, 2, PageWidth.Full)
-            |+ Text(%"menu.exit_task_warning")
-                .Color(Colors.text_red_2)
-                .Align(Alignment.LEFT)
-                .Pos(2, 2, PageWidth.Full)
-        else
-            page_container()
-            |+ PageButton.Once(%"confirm.yes", fork on_confirm Menu.Back)
-                .Pos(3)
-            |+ PageButton.Once(%"confirm.no", Menu.Back)
-                .Pos(5)
-            |+ Text(%"menu.exit_prompt")
-                .Align(Alignment.LEFT)
-                .Pos(0, 2, PageWidth.Full)
-        :> Widget
-
-    override this.Title = %"confirm"
-    override this.OnClose() = ()
 
 type private MenuButton(label: string, on_click: unit -> unit, position: Position) =
     inherit

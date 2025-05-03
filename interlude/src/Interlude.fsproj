@@ -293,6 +293,7 @@
     <Compile Include="Features\Multiplayer\Lobby\Chat.fs" />
     <Compile Include="Features\Multiplayer\Lobby\LobbyScreen.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
+    <Compile Include="Features\MainMenu\ConfirmQuitPage.fs" />
     <Compile Include="Features\MainMenu\MainMenuScreen.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
