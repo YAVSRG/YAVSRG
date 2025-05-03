@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
@@ -19,31 +18,36 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"rulesets.lamp.name", name)
-            .Pos(0)
-        |+ PageSetting(%"rulesets.lamp.color",
-            ColorPicker(%"rulesets.lamp.color", color, false)
-                .Preview(name.get_Value)
-        )
-            .Pos(2)
-        |+ PageSetting(%"rulesets.lamp.requirement",
-            NavigationContainer.Row()
-            |+ SelectDropdown(
-                seq {
-                    for i, j in ruleset.Value.Judgements |> Array.indexed do
-                        yield i, j.Name
-                    yield -1, "Combo breaks"
-                }
-                |> Array.ofSeq,
-                judgement_type
+            .With(
+                PageTextEntry(%"rulesets.lamp.name", name)
+                    .Pos(0),
+                PageSetting(%"rulesets.lamp.color",
+                    ColorPicker(%"rulesets.lamp.color", color, false)
+                        .Preview(name.get_Value)
+                )
+                    .Pos(2),
+                PageSetting(%"rulesets.lamp.requirement",
+                    NavigationContainer.Row()
+                        .With(
+                            SelectDropdown(
+                                seq {
+                                    for i, j in ruleset.Value.Judgements |> Array.indexed do
+                                        yield i, j.Name
+                                    yield -1, "Combo breaks"
+                                }
+                                |> Array.ofSeq,
+                                judgement_type
+                            )
+                                .Position(Position.GridX(1, 2, 200.0f)),
+
+                            Text("<="),
+
+                            Selector([|99, "99"; 9, "9"; 1, "1"; 0, "0";|], judgement_threshold)
+                                .Position(Position.GridX(2, 2, 200.0f))
+                        )
+                )
+                    .Pos(4)
             )
-                .Position(Position.GridX(1, 2, 200.0f))
-            |+ Text("<=")
-            |+ Selector([|99, "99"; 9, "9"; 1, "1"; 0, "0";|], judgement_threshold)
-                .Position(Position.GridX(2, 2, 200.0f))
-        )
-            .Pos(4)
-        :> Widget
 
     override this.Title = lamp.Name
     override this.OnClose() =
@@ -72,20 +76,22 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
 
     let rec lamp_controls (i: int, l: Lamp) =
         NavigationContainer.Row()
-        |+ PageButton(l.Name, fun () -> EditLampPage(ruleset, i).Show())
-            .TextColor(l.Color)
-            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
-        |+ Button(
-            Icons.TRASH,
-            (fun () ->
-                ConfirmPage(
-                    [l.Name] %> "rulesets.lamp.confirm_delete",
-                    fun () -> delete_lamp i
-                ).Show()
+            .With(
+                PageButton(l.Name, fun () -> EditLampPage(ruleset, i).Show())
+                    .TextColor(l.Color)
+                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
+                Button(
+                    Icons.TRASH,
+                    (fun () ->
+                        ConfirmPage(
+                            [l.Name] %> "rulesets.lamp.confirm_delete",
+                            fun () -> delete_lamp i
+                        ).Show()
+                    )
+                )
+                    .TextColor(Colors.red_accent)
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
-        )
-            .TextColor(Colors.red_accent)
-            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() =
         container.Clear()

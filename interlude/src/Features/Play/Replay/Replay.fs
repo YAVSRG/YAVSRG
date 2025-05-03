@@ -78,42 +78,44 @@ module ReplayScreen =
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
 
                 this
-                |+ { new StaticWidget(NodeType.None) with
-                       override _.Draw() =
-                           if show_input_overlay.Value || show_hit_overlay.Value then
-                               Render.rect
-                                   this.Playfield.Bounds
-                                   (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
-                   }
-                |+ InputOverlay(
-                    with_colors.Keys,
-                    replay_data.GetFullReplay(),
-                    this.State,
-                    this.Playfield
-                )
-                |+ HitOverlay(
-                    rate,
-                    with_colors.Source,
-                    replay_data.GetFullReplay(),
-                    this.State,
-                    this.Playfield
-                )
-                |+ DifficultyOverlay(
-                    with_colors.Source,
-                    this.Playfield,
-                    Difficulty.calculate(rate, with_colors.Notes), // todo: get from chart info
-                    this.State
-                )
-                    .Conditional(show_difficulty_overlay.Get)
-                |+ Text(%"replay.end_of_data")
-                    .Color((fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha))
-                    .Position(Position.ShrinkB(100.0f).SliceB(60.0f))
-                |* ReplayControls(
-                    with_colors.Source,
-                    is_auto,
-                    rate,
-                    fun t -> Song.seek t
-                )
+                    .Add(
+                        { new StaticWidget(NodeType.None) with
+                            override _.Draw() =
+                                if show_input_overlay.Value || show_hit_overlay.Value then
+                                    Render.rect
+                                        this.Playfield.Bounds
+                                        (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
+                        },
+                        InputOverlay(
+                            with_colors.Keys,
+                            replay_data.GetFullReplay(),
+                            this.State,
+                            this.Playfield
+                        ),
+                        HitOverlay(
+                            rate,
+                            with_colors.Source,
+                            replay_data.GetFullReplay(),
+                            this.State,
+                            this.Playfield
+                        ),
+                        DifficultyOverlay(
+                            with_colors.Source,
+                            this.Playfield,
+                            Difficulty.calculate(rate, with_colors.Notes), // todo: get from chart info
+                            this.State
+                        )
+                            .Conditional(show_difficulty_overlay.Get),
+                        Text(%"replay.end_of_data")
+                            .Color((fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha))
+                            .Position(Position.ShrinkB(100.0f).SliceB(60.0f)),
+                        ReplayControls(
+                            with_colors.Source,
+                            is_auto,
+                            rate,
+                            fun t -> Song.seek t
+                        )
+                    )
 
             override this.OnEnter p =
                 DiscordRPC.playing ("Watching a replay", SelectedChart.CACHE_DATA.Value.Title)

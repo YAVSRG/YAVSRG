@@ -57,66 +57,67 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
             keymode_preference.Add(PresetKeymodeCheckbox(preset_id, keymode))
 
         page_container()
-        |+ PageTextEntry(%"gameplay.preset.name", name).Pos(0)
-        |+ PageSetting(
-            %"gameplay.preset.mode",
-            SelectDropdown<PresetMode>(
-                [|
-                    PresetMode.Unlocked, %"gameplay.preset.mode.unlocked"
-                    PresetMode.Locked, %"gameplay.preset.mode.locked"
-                    PresetMode.Autosave, %"gameplay.preset.mode.autosave"
-                |],
-                mode
+            .With(
+                PageTextEntry(%"gameplay.preset.name", name).Pos(0),
+                PageSetting(
+                    %"gameplay.preset.mode",
+                    SelectDropdown<PresetMode>(
+                        [|
+                            PresetMode.Unlocked, %"gameplay.preset.mode.unlocked"
+                            PresetMode.Locked, %"gameplay.preset.mode.locked"
+                            PresetMode.Autosave, %"gameplay.preset.mode.autosave"
+                        |],
+                        mode
+                    )
+                )
+                    .Help(Help.Info("gameplay.preset.mode"))
+                    .Pos(2),
+                PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
+                    .Help(Help.Info("gameplay.preset.keymode_preference"))
+                    .Pos(4, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + (keymode_preference :> IWidth).Width)),
+                PageButton(
+                    %"gameplay.preset.delete",
+                    (fun () ->
+                        delete <- true
+                        Menu.Back()
+                    ),
+                    Disabled = fun () -> mode.Value = PresetMode.Locked
+                )
+                    .Pos(7),
+
+                Text(%"gameplay.preset.current_options")
+                    .Color(Colors.text)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(10),
+                Text(sprintf "%s: %.2f" %"gameplay.scrollspeed" preset.ScrollSpeed)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(11),
+                Text(sprintf "%s: %s" %"gameplay.upscroll" (if preset.Upscroll then "ON" else "OFF"))
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(12),
+                Text(sprintf "%s: %.0f" %"gameplay.hitposition" preset.HitPosition)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(13),
+                Text(sprintf "%s: %.0f" %"system.visualoffset" preset.VisualOffset)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(14),
+                Text(sprintf "%s %s" %"skins.current_noteskin" preset.Noteskin)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(15),
+                Text(sprintf "%s %s" %"skins.current_hud" preset.HUD)
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(16),
+                Text(sprintf "%s: %s" %"gameplay.lanecover" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF"))
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .TextPosSmall(17)
             )
-        )
-            .Help(Help.Info("gameplay.preset.mode"))
-            .Pos(2)
-        |+ PageSetting(%"gameplay.preset.keymode_preference", keymode_preference)
-            .Help(Help.Info("gameplay.preset.keymode_preference"))
-            .Pos(4, 2, PageWidth.Custom (PAGE_LABEL_WIDTH + (keymode_preference :> IWidth).Width))
-        |+ PageButton(
-            %"gameplay.preset.delete",
-            (fun () ->
-                delete <- true
-                Menu.Back()
-            ),
-            Disabled = fun () -> mode.Value = PresetMode.Locked
-        )
-            .Pos(7)
-        // todo: localise
-        |+ Text("Current preset options:")
-            .Color(Colors.text)
-            .Align(Alignment.LEFT)
-            .Pos(10, 1)
-        |+ Text(sprintf "Scroll speed: %.2f" preset.ScrollSpeed)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(11, 1)
-        |+ Text(sprintf "Upscroll: %s" (if preset.Upscroll then "ON" else "OFF"))
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(12, 1)
-        |+ Text(sprintf "Hit position: %.0f" preset.HitPosition)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(13, 1)
-        |+ Text(sprintf "Visual offset: %.0f" preset.VisualOffset)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(14, 1)
-        |+ Text(sprintf "Noteskin: %s" preset.Noteskin)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(15, 1)
-        |+ Text(sprintf "HUD: %s" preset.HUD)
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(16, 1)
-        |+ Text(sprintf "Lane cover: %s" (if preset.LaneCover.Enabled then "ON + Settings" else "OFF"))
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Pos(17, 1)
-        :> Widget
 
     override this.Title = preset.Name
 

@@ -16,24 +16,26 @@ type private CreateFolderPage(on_create: (string * Collection) -> unit) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
-        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
-            .Pos(3)
-        |+ PageButton(
-            %"confirm.yes",
-            (fun () ->
-                match Content.Collections.CreateFolder(new_name.Value, icon.Value) with
-                | Some folder ->
-                    Menu.Back()
-                    on_create (new_name.Value, Folder folder)
-                    CollectionActions.collection_modified_ev.Trigger()
-                | None ->
-                    Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
-            ),
-            Disabled = fun () -> new_name.Value = ""
-        )
-            .Pos(6)
-        :> Widget
+            .With(
+                PageTextEntry(%"collections.edit.folder_name", new_name)
+                    .Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, icon))
+                    .Pos(3),
+                PageButton(
+                    %"confirm.yes",
+                    (fun () ->
+                        match Content.Collections.CreateFolder(new_name.Value, icon.Value) with
+                        | Some folder ->
+                            Menu.Back()
+                            on_create (new_name.Value, Folder folder)
+                            CollectionActions.collection_modified_ev.Trigger()
+                        | None ->
+                            Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
+                    )
+                )
+                    .Disabled(fun () -> new_name.Value = "")
+                    .Pos(6)
+            )
 
     override this.Title = %"collections.create_folder"
     override this.OnClose() = ()
@@ -54,23 +56,23 @@ type CreatePlaylistPage(starting_name: string, on_create: (string * Collection) 
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0)
-        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, icon))
-            .Pos(3)
-        |+ PageButton(
-            %"confirm.yes",
-            (fun () ->
-                match Content.Collections.CreatePlaylist(new_name.Value, icon.Value) with
-                | Some playlist ->
-                    Menu.Back()
-                    on_create (new_name.Value, Playlist playlist)
-                    CollectionActions.collection_modified_ev.Trigger()
-                | None ->
-                    Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
-            ),
-            Disabled = fun () -> new_name.Value = ""
-        )
-            .Pos(6)
+            .With(
+                PageTextEntry(%"collections.edit.playlist_name", new_name)
+                    .Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, icon))
+                    .Pos(3),
+                PageButton(%"confirm.yes", fun () ->
+                    match Content.Collections.CreatePlaylist(new_name.Value, icon.Value) with
+                    | Some playlist ->
+                        Menu.Back()
+                        on_create (new_name.Value, Playlist playlist)
+                        CollectionActions.collection_modified_ev.Trigger()
+                    | None ->
+                        Notifications.action_feedback (Icons.X, %"notification.collection_create_failed.title", %"notification.collection_create_failed.body")
+                )
+                    .Disabled(fun() -> new_name.Value = "")
+                    .Pos(6)
+            )
         :> Widget
 
     override this.Title = %"collections.create_playlist"
@@ -91,24 +93,26 @@ type EditFolderPage(name: string, folder: Folder) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"collections.edit.folder_name", new_name).Pos(0)
-        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
-            .Pos(2)
-        |+ PageButton(%"collections.edit.delete", fun () ->
-            ConfirmPage(
-                [ name ] %> "misc.confirmdelete",
-                fun () ->
-                    // todo: these operations should live in Actions.fs and collection_modified_ev should be private
-                    if Content.Collections.Delete name then
-                        CollectionActions.collection_modified_ev.Trigger()
-                        Menu.Back()
+            .With(
+                PageTextEntry(%"collections.edit.folder_name", new_name)
+                    .Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreateFolderPage.Icons, folder.Icon))
+                    .Pos(2),
+                PageButton(%"collections.edit.delete", fun () ->
+                    ConfirmPage(
+                        [ name ] %> "misc.confirmdelete",
+                        fun () ->
+                            // todo: these operations should live in Actions.fs and collection_modified_ev should be private
+                            if Content.Collections.Delete name then
+                                CollectionActions.collection_modified_ev.Trigger()
+                                Menu.Back()
+                    )
+                        .Show()
+                )
+                    .TextColor(Colors.red_accent)
+                    .Icon(Icons.TRASH)
+                    .Pos(5)
             )
-                .Show()
-        )
-            .TextColor(Colors.red_accent)
-            .Icon(Icons.TRASH)
-            .Pos(5)
-        :> Widget
 
     override this.Title = name
 
@@ -127,23 +131,25 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"collections.edit.playlist_name", new_name).Pos(0)
-        |+ PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
-            .Pos(2)
-        |+ PageButton(%"collections.edit.delete", fun () ->
-            ConfirmPage(
-                [ name ] %> "misc.confirmdelete",
-                fun () ->
-                    if Content.Collections.Delete name then
-                        CollectionActions.collection_modified_ev.Trigger()
-                        Menu.Back()
+            .With(
+                PageTextEntry(%"collections.edit.playlist_name", new_name)
+                    .Pos(0),
+                PageSetting(%"collections.edit.icon", SelectDropdown(CreatePlaylistPage.Icons, playlist.Icon))
+                    .Pos(2),
+                PageButton(%"collections.edit.delete", fun () ->
+                    ConfirmPage(
+                        [ name ] %> "misc.confirmdelete",
+                        fun () ->
+                            if Content.Collections.Delete name then
+                                CollectionActions.collection_modified_ev.Trigger()
+                                Menu.Back()
+                    )
+                        .Show()
+                )
+                    .TextColor(Colors.red_accent)
+                    .Icon(Icons.TRASH)
+                    .Pos(5)
             )
-                .Show()
-        )
-            .TextColor(Colors.red_accent)
-            .Icon(Icons.TRASH)
-            .Pos(5)
-        :> Widget
 
     override this.Title = name
 
@@ -235,21 +241,22 @@ type SelectCollectionPage
         refresh ()
 
         page_container()
-        |+ PageButton(
-            %"collections.create_folder",
-            (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
-        )
-            .Help(Help.Info("collections.create_folder"))
-            .Pos(0)
-        |+ PageButton(
-            %"collections.create_playlist",
-            (fun () -> CreatePlaylistPage("", if select_on_create then on_select else ignore).Show())
-        )
-            .Help(Help.Info("collections.create_playlist"))
-            .Pos(2)
-        |+ ScrollContainer(grid)
-            .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
-        :> Widget
+            .With(
+                PageButton(
+                    %"collections.create_folder",
+                    (fun () -> CreateFolderPage(if select_on_create then on_select else ignore).Show())
+                )
+                    .Help(Help.Info("collections.create_folder"))
+                    .Pos(0),
+                PageButton(
+                    %"collections.create_playlist",
+                    (fun () -> CreatePlaylistPage("", if select_on_create then on_select else ignore).Show())
+                )
+                    .Help(Help.Info("collections.create_playlist"))
+                    .Pos(2),
+                ScrollContainer(grid)
+                    .Pos(5, PAGE_BOTTOM - 5, PageWidth.Full)
+            )
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
     override this.OnClose() = ()

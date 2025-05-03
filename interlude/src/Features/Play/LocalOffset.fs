@@ -78,24 +78,22 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
         GameThread.defer (fun () -> offset_slider.Select false)
 
         page_container()
-        |+ PageSetting(
-            %"play.localoffset",
-            offset_slider
-        )
-            .Pos(0)
-        |+ Text(%"play.localoffset.slider_hint")
-            .Align(Alignment.LEFT)
-            .Pos(2, 1)
-        |+ PageButton(
-            [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
-            apply_recommended
-        )
-            .Hotkey("accept_offset")
-            .Pos(3)
-        |+ PageButton(%"play.localoffset.reset", reset_offset)
-            .Hotkey("reset_offset")
-            .Pos(5)
-        :> Widget
+            .With(
+                PageSetting(%"play.localoffset", offset_slider)
+                    .Pos(0),
+                Text(%"play.localoffset.slider_hint")
+                    .Align(Alignment.LEFT)
+                    .Pos(2, 1),
+                PageButton(
+                    [sprintf "%.0fms" recommended_offset] %> "play.localoffset.use_recommended",
+                    apply_recommended
+                )
+                    .Hotkey("accept_offset")
+                    .Pos(3),
+                PageButton(%"play.localoffset.reset", reset_offset)
+                    .Hotkey("reset_offset")
+                    .Pos(5)
+            )
 
     override this.Update(elapsed_ms, moved) =
         if offset_slider.Selected && (%%"select").Pressed() then

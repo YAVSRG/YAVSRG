@@ -100,6 +100,7 @@ gameplay.pacemaker.use_personal_best.if_better=If better
 gameplay.pacemaker.use_personal_best.never=Never
 gameplay.pacemaker.use_personal_best.tooltip=When enabled, your best lamp or accuracy will be used as the pacemaker instead of the fixed values.\nIf you don't have a personal best, the fixed values will be used instead.
 gameplay.preset.autosaving=Autosaving
+gameplay.preset.current_options=Current preset options
 gameplay.preset.delete=Delete preset
 gameplay.preset.keymode_preference=Keymodes
 gameplay.preset.keymode_preference.tooltip=When switching to a chart from a selected keymode, this preset will automatically be loaded.\nUseful if you use different skins and scroll speeds for different keymodes.

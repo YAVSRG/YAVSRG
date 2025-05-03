@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
@@ -18,18 +17,19 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"rulesets.grade.name", name)
-            .Pos(0)
-        |+ PageSetting(%"rulesets.grade.color",
-            ColorPicker(%"rulesets.grade.color", color, false)
-                .Preview(name.get_Value)
-        )
-            .Pos(2)
-        |+ PageSetting(%"rulesets.grade.accuracy",
-            Slider(acc_required, Format = (fun v -> sprintf "%.4f%%" (v * 100.0f)), Step = 0.001f)
-        )
-            .Pos(4)
-        :> Widget
+            .With(
+                PageTextEntry(%"rulesets.grade.name", name)
+                    .Pos(0),
+                PageSetting(%"rulesets.grade.color",
+                    ColorPicker(%"rulesets.grade.color", color, false)
+                        .Preview(name.get_Value)
+                )
+                    .Pos(2),
+                PageSetting(%"rulesets.grade.accuracy",
+                    Slider(acc_required, Format = (fun v -> sprintf "%.4f%%" (v * 100.0f)), Step = 0.001f)
+                )
+                    .Pos(4)
+            )
 
     override this.Title = grade.Name
     override this.OnClose() =
@@ -49,20 +49,22 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
 
     let rec grade_controls (i: int, g: Grade) =
         NavigationContainer.Row()
-        |+ PageButton(g.Name, fun () -> EditGradePage(ruleset, i).Show())
-            .TextColor(g.Color)
-            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT))
-        |+ Button(
-            Icons.TRASH,
-            (fun () ->
-                ConfirmPage(
-                    [g.Name] %> "rulesets.grade.confirm_delete",
-                    fun () -> delete_grade i
-                ).Show()
+            .With(
+                PageButton(g.Name, fun () -> EditGradePage(ruleset, i).Show())
+                    .TextColor(g.Color)
+                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
+                Button(
+                    Icons.TRASH,
+                    (fun () ->
+                        ConfirmPage(
+                            [g.Name] %> "rulesets.grade.confirm_delete",
+                            fun () -> delete_grade i
+                        ).Show()
+                    )
+                )
+                    .TextColor(Colors.red_accent)
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
             )
-        )
-            .TextColor(Colors.red_accent)
-            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
 
     and refresh() =
         container.Clear()

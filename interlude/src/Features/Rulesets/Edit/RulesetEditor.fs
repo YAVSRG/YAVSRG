@@ -15,45 +15,45 @@ type RulesetEditorPage(id: string, original: Ruleset) =
     let ruleset =
         Setting.simple original
         |> Setting.trigger (fun rs ->
+            validation_message.Current <-
             match Ruleset.check rs with
-            | Ok _ -> validation_message.Current <- Dummy()
+            | Ok _ -> Dummy() :> Widget
             | Error reason ->
-                let card =
-                    CalloutCard(
-                        (Callout
-                            .Normal
-                            .Icon(Icons.ALERT_OCTAGON)
-                            .Title(%"rulesets.edit.validation_error.title")
-                            .Body(reason)
-                            .Body(%"rulesets.edit.validation_error.body")
-                        ),
-                        Colors.red_accent,
-                        Colors.red.O3
-                    )
-                card.Position <- Position.Box(0.0f, 0.0f, 0.0f, 0.0f, (card :> IWidth).Width, (card :> IHeight).Height)
-                validation_message.Current <- card
+                CalloutCard(
+                    (Callout
+                        .Normal
+                        .Icon(Icons.ALERT_OCTAGON)
+                        .Title(%"rulesets.edit.validation_error.title")
+                        .Body(reason)
+                        .Body(%"rulesets.edit.validation_error.body")
+                    ),
+                    Colors.red_accent,
+                    Colors.red.O3
+                )
+                    .Position(fun (w, h) -> Position.Box(0.0f, 0.0f, 0.0f, 0.0f, w, h))
         )
 
     let name = Setting.simple ruleset.Value.Name
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"rulesets.edit.name", name)
-            .Pos(0)
-        |+ PageButton(%"rulesets.edit.judgements", fun () -> EditJudgementsPage(ruleset).Show())
-            .Pos(3)
-        |+ PageButton(%"rulesets.edit.windows", fun () -> EditWindows.note_windows(ruleset).Show())
-            .Pos(5)
-        |+ PageButton(%"rulesets.edit.accuracy", fun () -> ConfigureAccuracyPage(ruleset).Show())
-            .Pos(7)
-        |+ PageButton(%"rulesets.edit.mechanics", fun () -> EditMechanicsPage(ruleset).Show())
-            .Pos(9)
-        |+ PageButton(%"rulesets.edit.grades", fun () -> EditGradesPage(ruleset).Show())
-            .Pos(12)
-        |+ PageButton(%"rulesets.edit.lamps", fun () -> EditLampsPage(ruleset).Show())
-            .Pos(14)
-        |+ validation_message.Pos(17, PAGE_BOTTOM - 17)
-        :> Widget
+            .With(
+                PageTextEntry(%"rulesets.edit.name", name)
+                    .Pos(0),
+                PageButton(%"rulesets.edit.judgements", fun () -> EditJudgementsPage(ruleset).Show())
+                    .Pos(3),
+                PageButton(%"rulesets.edit.windows", fun () -> EditWindows.note_windows(ruleset).Show())
+                    .Pos(5),
+                PageButton(%"rulesets.edit.accuracy", fun () -> ConfigureAccuracyPage(ruleset).Show())
+                    .Pos(7),
+                PageButton(%"rulesets.edit.mechanics", fun () -> EditMechanicsPage(ruleset).Show())
+                    .Pos(9),
+                PageButton(%"rulesets.edit.grades", fun () -> EditGradesPage(ruleset).Show())
+                    .Pos(12),
+                PageButton(%"rulesets.edit.lamps", fun () -> EditLampsPage(ruleset).Show())
+                    .Pos(14),
+                validation_message.Pos(17, PAGE_BOTTOM - 17)
+            )
 
     override this.Title = original.Name
     override this.OnClose() =

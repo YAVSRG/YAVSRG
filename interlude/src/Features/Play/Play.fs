@@ -159,7 +159,7 @@ module PlayScreen =
                 view_score()
             else
                 fade_in.Target <- 0.5f
-                this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
+                this.Add(FailOverlay(pacemaker_state, retry, view_score, skip_song))
 
         let change_offset (state: PlayState) =
             Song.pause()
@@ -189,22 +189,24 @@ module PlayScreen =
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
 
                 this
-                |+ HotkeyHoldAction(
-                    "retry",
-                    (if options.HoldToGiveUp.Value then ignore else retry),
-                    (if options.HoldToGiveUp.Value then retry else ignore)
-                )
-                |+ HotkeyHoldAction(
-                    "next_song",
-                    (if options.HoldToGiveUp.Value then ignore else skip_song),
-                    (if options.HoldToGiveUp.Value then skip_song else ignore)
-                )
-                |+ HotkeyHoldAction(
-                    "exit",
-                    (if options.HoldToGiveUp.Value then ignore else give_up),
-                    (if options.HoldToGiveUp.Value then give_up else ignore)
-                )
-                |* HotkeyListener("offset", fun () -> if not (liveplay :> IReplayProvider).Finished then change_offset this.State)
+                    .Add(
+                        HotkeyHoldAction(
+                            "retry",
+                            (if options.HoldToGiveUp.Value then ignore else retry),
+                            (if options.HoldToGiveUp.Value then retry else ignore)
+                        ),
+                        HotkeyHoldAction(
+                            "next_song",
+                            (if options.HoldToGiveUp.Value then ignore else skip_song),
+                            (if options.HoldToGiveUp.Value then skip_song else ignore)
+                        ),
+                        HotkeyHoldAction(
+                            "exit",
+                            (if options.HoldToGiveUp.Value then ignore else give_up),
+                            (if options.HoldToGiveUp.Value then give_up else ignore)
+                        ),
+                        HotkeyListener("offset", fun () -> if not (liveplay :> IReplayProvider).Finished then change_offset this.State)
+                    )
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()

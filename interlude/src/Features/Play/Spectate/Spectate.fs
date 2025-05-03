@@ -70,11 +70,13 @@ module Spectate =
                     (fun (hud_config, state) -> MultiplayerScoreTracker(hud_config, state, lobby.Replays))
 
                 this
-                |* ControlOverlay(
-                    info,
-                    ignore,
-                    (fun () -> currently_spectating),
-                    fun () -> cycle_spectator this
+                    .Add(
+                        ControlOverlay(
+                            info,
+                            ignore,
+                            (fun () -> currently_spectating),
+                            fun () -> cycle_spectator this
+                        )
                 )
 
             override this.OnEnter(prev) =

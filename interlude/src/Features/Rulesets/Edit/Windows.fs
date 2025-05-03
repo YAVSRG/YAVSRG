@@ -96,7 +96,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                             .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(1, 2, 15.0f))
                             .Conditional(fun () -> windows.[i].Value.IsSome)
                         |> add_entry,
-                        
+
                         NumberEntry.Create(late_window, "ms")
                             .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(2, 2, 15.0f))
                             .Conditional(fun () -> windows.[i].Value.IsSome)
@@ -117,10 +117,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
 
             container.Add (PageSetting(j.Name, window_editor))
 
-        page_container()
-        |+ ScrollContainer(container)
-            .Pos(0, PAGE_BOTTOM)
-        :> Widget
+        page_container().With(ScrollContainer(container).Pos(0, PAGE_BOTTOM))
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

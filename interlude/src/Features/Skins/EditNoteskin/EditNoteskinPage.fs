@@ -28,50 +28,10 @@ type EditNoteskinPage() =
         |+ PageTextEntry(%"skin.name", name).Pos(4)
         |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
         |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
-        |+ PageButton(
-            %"noteskin.playfield",
-            fun () ->
-                { new PlayfieldSettingsPage() with
-                    override this.OnClose() =
-                        base.OnClose()
-                        preview.Refresh()
-                }
-                    .Show()
-        )
-            .Pos(11)
-        |+ PageButton(
-            %"noteskin.notes",
-            fun () ->
-                { new NotesSettingsPage() with
-                    override this.OnClose() =
-                        base.OnClose()
-                        preview.Refresh()
-                }
-                    .Show()
-        )
-            .Pos(13)
-        |+ PageButton(
-            %"noteskin.holdnotes",
-            fun () ->
-                { new HoldNoteSettingsPage() with
-                    override this.OnClose() =
-                        base.OnClose()
-                        preview.Refresh()
-                }
-                    .Show()
-        )
-            .Pos(15)
-        |+ PageButton(
-            %"noteskin.receptors",
-            fun () ->
-                { new AnimationSettingsPage() with
-                    override this.OnClose() =
-                        base.OnClose()
-                        preview.Refresh()
-                }
-                    .Show()
-        )
-            .Pos(17)
+        |+ PageButton(%"noteskin.playfield", fun () -> PlayfieldSettingsPage().Show()).Pos(11)
+        |+ PageButton(%"noteskin.notes", fun () -> NotesSettingsPage().Show()).Pos(13)
+        |+ PageButton(%"noteskin.holdnotes", fun () -> HoldNoteSettingsPage().Show()).Pos(15)
+        |+ PageButton(%"noteskin.receptors", fun () -> AnimationSettingsPage().Show()).Pos(17)
 
     let noteskin_actions =
         NavigationContainer.Column()

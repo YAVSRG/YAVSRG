@@ -29,7 +29,7 @@ type PageSetting(localised_text, widget: Widget) as this =
                 Text(localised_text + ":")
                     .Color(fun () -> if widget.Focused then Colors.text_yellow_2 else Colors.text)
                     .Align(Alignment.LEFT)
-                    .Position(Position.SliceL(PAGE_LABEL_WIDTH).ShrinkY(Style.PADDING).ShrinkL(15.0f))
+                    .Position(Position.SliceT(PAGE_ITEM_HEIGHT).SliceL(PAGE_LABEL_WIDTH).ShrinkY(Style.PADDING).ShrinkL(15.0f))
             )
 
         base.Init parent

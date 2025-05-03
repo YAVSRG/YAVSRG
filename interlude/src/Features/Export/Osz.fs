@@ -75,22 +75,23 @@ type OsuExportOptionsPage(title: string, selected_mods: ModState, on_submit: boo
 
     override this.Content() =
         page_container()
-        |+ PageSetting(%"osz_export.od", Slider(od, Step = 0.1f))
-            .Pos(0)
-        |+ PageSetting(%"osz_export.hp", Slider(hp, Step = 0.1f))
-            .Pos(2)
-        |+ PageSetting(%"osz_export.apply_mods", Checkbox apply_mods)
-            .Pos(5)
-            .Conditional(K (not selected_mods.IsEmpty))
-        |+ PageButton
-            .Once(
-                %"osz_export.confirm",
-                fun () ->
-                    on_submit apply_mods.Value { OD = float od.Value; HP = float hp.Value }
-                    Menu.Exit()
+            .With(
+                PageSetting(%"osz_export.od", Slider(od, Step = 0.1f))
+                    .Pos(0),
+                PageSetting(%"osz_export.hp", Slider(hp, Step = 0.1f))
+                    .Pos(2),
+                PageSetting(%"osz_export.apply_mods", Checkbox apply_mods)
+                    .Pos(5)
+                    .Conditional(K (not selected_mods.IsEmpty)),
+                PageButton
+                    .Once(
+                        %"osz_export.confirm",
+                        fun () ->
+                            on_submit apply_mods.Value { OD = float od.Value; HP = float hp.Value }
+                            Menu.Exit()
+                    )
+                    .Pos(8)
             )
-            .Pos(8)
-        :> Widget
 
     override this.Title = title
     override this.OnClose() = ()

@@ -162,11 +162,13 @@ module PlayScreenMultiplayer =
                     (fun (config, state) -> MultiplayerScoreTracker(config, state, lobby.Replays))
 
                 this
-                |* HotkeyHoldAction(
-                    "exit",
-                    (if options.HoldToGiveUp.Value then ignore else give_up),
-                    (if options.HoldToGiveUp.Value then give_up else ignore)
-                )
+                    .Add(
+                        HotkeyHoldAction(
+                            "exit",
+                            (if options.HoldToGiveUp.Value then ignore else give_up),
+                            (if options.HoldToGiveUp.Value then give_up else ignore)
+                        )
+                    )
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()

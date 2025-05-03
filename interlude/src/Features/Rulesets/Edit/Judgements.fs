@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Interlude.UI
@@ -18,16 +17,17 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
 
     override this.Content() =
         page_container()
-        |+ PageTextEntry(%"rulesets.judgement.name", name)
-            .Pos(0)
-        |+ PageSetting(%"rulesets.judgement.color",
-            ColorPicker(%"rulesets.judgement.color", color, false)
-                .Preview(name.get_Value)
-        )
-            .Pos(2)
-        |+ PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
-            .Pos(4)
-        :> Widget
+            .With(
+                PageTextEntry(%"rulesets.judgement.name", name)
+                    .Pos(0),
+                PageSetting(%"rulesets.judgement.color",
+                    ColorPicker(%"rulesets.judgement.color", color, false)
+                        .Preview(name.get_Value)
+                )
+                    .Pos(2),
+                PageSetting(%"rulesets.judgement.breaks_combo", Checkbox breaks_combo)
+                    .Pos(4)
+            )
 
     override this.Title = judgement.Name
     override this.OnClose() =
@@ -42,25 +42,27 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
 
     let rec judgement_controls (i: int, j: Judgement) =
         NavigationContainer.Row()
-        |+ PageButton(j.Name, fun () -> EditJudgementPage(ruleset, i).Show())
-            .TextColor(j.Color)
-            .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f))
-        |+ Button(Icons.COPY, fun () ->
-            ConfirmPage(
-                [j.Name] %> "rulesets.judgement.confirm_duplicate",
-                fun () -> duplicate_judgement i
-            ).Show()
-        )
-            .Position(Position.SliceR(PAGE_ITEM_HEIGHT).TranslateX(-PAGE_ITEM_HEIGHT))
-        |+ Button(Icons.TRASH, fun () ->
-            ConfirmPage(
-                [j.Name] %> "rulesets.judgement.confirm_delete",
-                fun () -> delete_judgement i
-            ).Show()
-        )
-            .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
-            .TextColor(Colors.red_accent)
-            .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+            .With(
+                PageButton(j.Name, fun () -> EditJudgementPage(ruleset, i).Show())
+                    .TextColor(j.Color)
+                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT * 2.0f)),
+                Button(Icons.COPY, fun () ->
+                    ConfirmPage(
+                        [j.Name] %> "rulesets.judgement.confirm_duplicate",
+                        fun () -> duplicate_judgement i
+                    ).Show()
+                )
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT, PAGE_ITEM_HEIGHT)),
+                Button(Icons.TRASH, fun () ->
+                    ConfirmPage(
+                        [j.Name] %> "rulesets.judgement.confirm_delete",
+                        fun () -> delete_judgement i
+                    ).Show()
+                )
+                    .Disabled(fun () -> ruleset.Value.Judgements.Length <= 1)
+                    .TextColor(Colors.red_accent)
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+            )
 
     and refresh() : unit =
         container.Clear()

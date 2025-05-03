@@ -40,18 +40,24 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
             judgements_container.Add (PageSetting(j.Name, NumberEntry.Create setting))
 
         page_container()
-        |+ PageSetting(%"rulesets.accuracy.decimal_places", SelectDropdown([| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |], decimal_places))
-            .Pos(0)
-        |+ PageSetting(%"rulesets.accuracy.accuracy_type", SelectDropdown([| true, "Wife3"; false, %"rulesets.accuracy.accuracy_type.points_per_judgement" |], is_wife_curve))
-            .Pos(3)
-        |+ PageSetting(%"rulesets.accuracy.wife_judge", SelectDropdown([| 4, "4"; 5, "5"; 6, "6"; 7, "7"; 8, "8"; 9, "JUSTICE"|], wife_judge))
-            .Conditional(is_wife_curve.Get)
-            .Pos(5)
-        |+ ScrollContainer(judgements_container)
-            .Conditional(is_wife_curve.Get >> not)
-            .Pos(5, PAGE_BOTTOM - 5)
-        :> Widget
-
+            .With(
+                PageSetting(%"rulesets.accuracy.decimal_places",
+                    SelectDropdown([| DecimalPlaces.TWO, "2"; DecimalPlaces.THREE, "3"; DecimalPlaces.FOUR, "4" |], decimal_places)
+                )
+                    .Pos(0),
+                PageSetting(%"rulesets.accuracy.accuracy_type",
+                    SelectDropdown([| true, "Wife3"; false, %"rulesets.accuracy.accuracy_type.points_per_judgement" |], is_wife_curve)
+                )
+                    .Pos(3),
+                PageSetting(%"rulesets.accuracy.wife_judge",
+                    SelectDropdown([| 4, "4"; 5, "5"; 6, "6"; 7, "7"; 8, "8"; 9, "JUSTICE"|], wife_judge)
+                )
+                    .Conditional(is_wife_curve.Get)
+                    .Pos(5),
+                ScrollContainer(judgements_container)
+                    .Conditional(is_wife_curve.Get >> not)
+                    .Pos(5, PAGE_BOTTOM - 5)
+            )
     override this.Title = %"rulesets.edit.accuracy"
     override this.OnClose() =
         ruleset.Set
