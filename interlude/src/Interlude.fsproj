@@ -76,7 +76,7 @@
     <Compile Include="UI\Menu\ColorPicker.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\State.fs" />
-    <Compile Include="Features\Wiki\Wiki.fs" />
+    <Compile Include="Features\Wiki\WikiBrowserPage.fs" />
     <Compile Include="Features\Online\Credentials.fs" />
     <Compile Include="Features\Online\LobbyState.fs" />
     <Compile Include="Features\Online\Network.fs" />
@@ -91,7 +91,7 @@
     <Compile Include="Features\Online\Players\Profile\Settings.fs" />
     <Compile Include="Features\Online\Players\Profile\RecentScores.fs" />
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
-    <Compile Include="Features\Online\Players\PlayerList.fs" />
+    <Compile Include="Features\Online\Players\PlayerListPage.fs" />
     <Compile Include="Features\Export\Osz.fs" />
     <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
     <Compile Include="Features\Rulesets\Edit\Windows.fs" />
@@ -99,10 +99,10 @@
     <Compile Include="Features\Rulesets\Edit\Mechanics.fs" />
     <Compile Include="Features\Rulesets\Edit\Grades.fs" />
     <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
-    <Compile Include="Features\Rulesets\Edit\RulesetEditor.fs" />
+    <Compile Include="Features\Rulesets\Edit\RulesetEditorPage.fs" />
     <Compile Include="Features\Rulesets\GameRulesets.fs" />
     <Compile Include="Features\Rulesets\Add.fs" />
-    <Compile Include="Features\Rulesets\SelectRuleset.fs" />
+    <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
     <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
     <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
@@ -110,9 +110,9 @@
     <Compile Include="Features\Tables\Browser\Tables.fs" />
     <Compile Include="Features\Tables\ChooseLevel.fs" />
     <Compile Include="Features\Tables\Suggestions.fs" />
-    <Compile Include="Features\Tables\SelectTable.fs" />
+    <Compile Include="Features\Tables\SelectTablePage.fs" />
     <Compile Include="Features\Pacemaker\State.fs" />
-    <Compile Include="Features\Pacemaker\Menus.fs" />
+    <Compile Include="Features\Pacemaker\PacemakerOptionsPage.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\CreateFolderPage.fs" />
     <Compile Include="Features\Collections\EditFolderPage.fs" />
@@ -144,8 +144,8 @@
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
     <Compile Include="Features\Mounts\MountActions.fs" />
-    <Compile Include="Features\Mounts\CreateMount.fs" />
-    <Compile Include="Features\Mounts\EditMount.fs" />
+    <Compile Include="Features\Mounts\CreateMountPage.fs" />
+    <Compile Include="Features\Mounts\EditMountPage.fs" />
     <Compile Include="Features\Mounts\MountDisplay.fs" />
     <Compile Include="Features\Stats\Sync.fs" />
     <Compile Include="Features\Stats\PlayCount.fs" />
@@ -283,7 +283,7 @@
     <Compile Include="Features\Options\Presets\PresetControls.fs" />
     <Compile Include="Features\Options\OptionsLayout.fs" />
     <Compile Include="Features\Options\OptionsPage.fs" />
-    <Compile Include="Features\Options\QuickMenu.fs" />
+    <Compile Include="Features\Options\QuickMenuPage.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\List.fs" />
@@ -293,7 +293,7 @@
     <Compile Include="Features\Multiplayer\Lobby\Chat.fs" />
     <Compile Include="Features\Multiplayer\Lobby\LobbyScreen.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
-    <Compile Include="Features\MainMenu\MainMenu.fs" />
+    <Compile Include="Features\MainMenu\MainMenuScreen.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
