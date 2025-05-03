@@ -93,6 +93,11 @@
     <Compile Include="Features\Online\Players\Profile\Profile.fs" />
     <Compile Include="Features\Online\Players\PlayerListPage.fs" />
     <Compile Include="Features\Export\Osz.fs" />
+    <Compile Include="Features\Rulesets\Create\SCRulesetPage.fs" />
+    <Compile Include="Features\Rulesets\Create\OsuRulesetPage.fs" />
+    <Compile Include="Features\Rulesets\Create\QuaverRulesetPage.fs" />
+    <Compile Include="Features\Rulesets\Create\WifeRulesetPage.fs" />
+    <Compile Include="Features\Rulesets\Create\AddRulesetsPage.fs" />
     <Compile Include="Features\Rulesets\Edit\Judgements.fs" />
     <Compile Include="Features\Rulesets\Edit\Windows.fs" />
     <Compile Include="Features\Rulesets\Edit\Accuracy.fs" />
@@ -100,8 +105,6 @@
     <Compile Include="Features\Rulesets\Edit\Grades.fs" />
     <Compile Include="Features\Rulesets\Edit\Lamps.fs" />
     <Compile Include="Features\Rulesets\Edit\RulesetEditorPage.fs" />
-    <Compile Include="Features\Rulesets\GameRulesets.fs" />
-    <Compile Include="Features\Rulesets\Add.fs" />
     <Compile Include="Features\Rulesets\SelectRulesetPage.fs" />
     <Compile Include="Features\Rulesets\QuickSwitch.fs" />
     <Compile Include="Features\Gameplay\SelectedChart.fs" />
