@@ -114,7 +114,11 @@
     <Compile Include="Features\Pacemaker\State.fs" />
     <Compile Include="Features\Pacemaker\Menus.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
-    <Compile Include="Features\Collections\Menus.fs" />
+    <Compile Include="Features\Collections\CreateFolderPage.fs" />
+    <Compile Include="Features\Collections\EditFolderPage.fs" />
+    <Compile Include="Features\Collections\CreatePlaylistPage.fs" />
+    <Compile Include="Features\Collections\EditPlaylistPage.fs" />
+    <Compile Include="Features\Collections\SelectCollectionsPage.fs" />
     <Compile Include="Features\Play\State.fs" />
     <Compile Include="Features\Play\LocalOffset.fs" />
     <Compile Include="Features\Score\Username.fs" />
