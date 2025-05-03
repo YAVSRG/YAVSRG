@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="Localisation.fs" />
     <Compile Include="Random.fs" />
     <Compile Include="Types.fs" />
     <Compile Include="Chart.fs" />

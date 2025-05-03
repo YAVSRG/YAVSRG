@@ -60,77 +60,6 @@ module Common =
 
         override this.Default(ctx: Json.Context) = fun () -> Color.White
 
-    type ConcurrentDictionaryCodec<'K, 'V when 'K: equality>() =
-        inherit Json.Codec<Collections.Concurrent.ConcurrentDictionary<'K, 'V>>()
-
-        override this.To(ctx: Json.Context) =
-            let cdc = ctx.GetCodec<Dictionary<'K, 'V>>()
-            fun cd -> cdc.To(Dictionary cd)
-
-        override this.From(ctx: Json.Context) =
-            let cdc = ctx.GetCodec<Dictionary<'K, 'V>>()
-            fun _ json -> Collections.Concurrent.ConcurrentDictionary(cdc.FromDefault json)
-
-        override this.Default(ctx: Json.Context) =
-            fun () -> Collections.Concurrent.ConcurrentDictionary()
-
-    (*
-        Localisation
-    *)
-
-    module Localisation =
-        let private mapping = new Dictionary<string, string>()
-        let mutable private loaded_path = ""
-
-        let load_language (language_id: string) : unit =
-
-            let path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", language_id + ".txt")
-
-            try
-                let lines = File.ReadAllLines path
-
-                Array.iter
-                    (fun (l: string) ->
-                        let s: string[] = l.Split([| '=' |], 2)
-                        mapping.Add(s.[0], s.[1].Replace("\\n", "\n"))
-                    )
-                    lines
-
-                loaded_path <- Path.GetFullPath path
-            with err ->
-                Logging.Critical "Failed to load localisation file '%s': %O" path err
-
-        let localise (key: string) : string =
-            if mapping.ContainsKey key then
-                mapping.[key]
-            else
-                key
-
-        let localise_with (data: string list) (key: string) =
-            let mutable s = localise key
-            List.iteri (fun i x -> s <- s.Replace("%" + i.ToString(), x)) data
-            s
-
-    [<AutoOpen>]
-    module LocalisationOperators =
-
-        /// Shorthand operator to get the localised text from a locale string id
-        let (~%) = Localisation.localise
-
-        let inline (%>) (args: string list) (localisation_key: string) : string =
-            Localisation.localise_with args localisation_key
-
-    (*
-        Misc helpers (mostly data storage)
-    *)
-
-    let JSON =
-        Json(Json.Settings.Default)
-            .WithDefaults()
-            .WithCodec<SettingCodec<_, _>>()
-            .WithCodec<ColorCodec>()
-            .WithCodec<ConcurrentDictionaryCodec<_, _>>()
-
     /// Takes a function and returns an equivalent function BUT if given the same input repeatedly it will reuse the previous value instead of recalculating
     /// Used to optimise repeated calls to chart calculations where you are likely to make several for one selected chart before changing to another
     let internal cached (f: 'A -> 'B) : 'A -> 'B =
@@ -279,6 +208,16 @@ module Common =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
         Directory.CreateDirectory p |> ignore
         p
+
+    (*
+        Misc helpers (mostly data storage)
+    *)
+
+    let JSON =
+        Json(Json.Settings.Default)
+            .WithDefaults()
+            .WithCodec<SettingCodec<_, _>>()
+            .WithCodec<ColorCodec>()
 
     let load_important_json_file<'T> (name: string) (path: string) (prompt: bool) : 'T =
         if File.Exists path then

@@ -3,7 +3,6 @@
 open System
 open System.IO
 open SixLabors.ImageSharp
-open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
 open Prelude
 
