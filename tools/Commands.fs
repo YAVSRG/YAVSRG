@@ -44,7 +44,6 @@ module Commands =
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)
 
             .WithCommand("skin_add", "Add a local skin to YAVSRG's skin repo", "folder_name", Skins.add_skin)
-            .WithCommand("rulesets_update", "Update the rulesets repo based on rulesets in the folder", Rulesets.generate_index)
 
             .WithCommand("debug_run", "Build and run the game in debug mode", Play.debug_run)
             .WithCommand("update", "Update user copy of Interlude to the latest release", Play.update)

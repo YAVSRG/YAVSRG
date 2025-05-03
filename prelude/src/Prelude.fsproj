@@ -97,7 +97,6 @@
     <Compile Include="Skins\Conversions\osu!\Textures.fs" />
     <Compile Include="Skins\Conversions\osu!\Converter.fs" />
     <Compile Include="Skins\Conversions\StepMania\Converter.fs" />
-    <Compile Include="Backbeat\Rulesets.fs" />
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\TaskProgress.fs" />

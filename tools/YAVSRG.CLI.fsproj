@@ -27,7 +27,6 @@
     <Compile Include="Content\Charts\Metadata.fs" />
     <Compile Include="Content\Charts\Check.fs" />
     <Compile Include="Content\Charts\Upload.fs" />
-    <Compile Include="Content\Rulesets.fs" />
     <Compile Include="Content\Skins.fs" />
     <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />

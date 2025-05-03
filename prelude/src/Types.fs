@@ -1,7 +1,5 @@
 ﻿namespace Prelude
 
-open System
-
 [<AutoOpen>]
 module Types =
 
@@ -66,7 +64,8 @@ module Types =
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }
 
-    type TimeArray<'T> = TimeItem<'T> array // with the invariant that it is sorted ascending by time
+    /// Invariant: Sorted nondecreasing by time
+    type TimeArray<'T> = TimeItem<'T> array
 
     module TimeArray =
 
