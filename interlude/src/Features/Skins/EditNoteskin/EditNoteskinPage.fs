@@ -21,6 +21,8 @@ type EditNoteskinPage() =
 
     let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
 
+    let ACTION_BUTTON_WIDTH = 450.0f
+
     let textures_tab = TextureGrid.Noteskin(noteskin)
     let problems_tab = ProblemList.Noteskin(noteskin)
     let general_tab =
@@ -28,10 +30,10 @@ type EditNoteskinPage() =
         |+ PageTextEntry(%"skin.name", name).Pos(4)
         |+ PageTextEntry(%"skin.author", author).Help(Help.Info("skin.author")).Pos(6)
         |+ PageTextEntry(%"skin.editor", editor).Help(Help.Info("skin.editor")).Pos(8)
-        |+ PageButton(%"noteskin.playfield", fun () -> PlayfieldSettingsPage().Show()).Pos(11)
-        |+ PageButton(%"noteskin.notes", fun () -> NotesSettingsPage().Show()).Pos(13)
-        |+ PageButton(%"noteskin.holdnotes", fun () -> HoldNoteSettingsPage().Show()).Pos(15)
-        |+ PageButton(%"noteskin.receptors", fun () -> AnimationSettingsPage().Show()).Pos(17)
+        |+ PageButton(%"noteskin.playfield", fun () -> PlayfieldSettingsPage().Show()).Pos(11, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH))
+        |+ PageButton(%"noteskin.notes", fun () -> NotesSettingsPage().Show()).Pos(13, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH))
+        |+ PageButton(%"noteskin.holdnotes", fun () -> HoldNoteSettingsPage().Show()).Pos(15, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH))
+        |+ PageButton(%"noteskin.receptors", fun () -> AnimationSettingsPage().Show()).Pos(17, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH))
 
     let noteskin_actions =
         NavigationContainer.Column()
@@ -90,7 +92,7 @@ type EditNoteskinPage() =
                     ),
 
                 noteskin_actions
-                    .Position(Position.ShrinkL(PAGE_ITEM_WIDTH + PAGE_MARGIN_X).Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceB(PAGE_ITEM_HEIGHT * 3.0f))
+                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceR(ACTION_BUTTON_WIDTH).SliceB(PAGE_ITEM_HEIGHT * 3.0f))
             )
         |> Container.Create
         |+ preview

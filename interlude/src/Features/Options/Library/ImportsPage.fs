@@ -32,21 +32,23 @@ type ImportsPage() =
     override this.Content() =
 
         let lhs_actions =
-            page_container()
+            NavigationContainer.Column()
+                .WrapNavigation(false)
                 .With(
-                    ImportsPage.GetOsuSongs().Pos(0),
-                    ImportsPage.GetEtternaPacks().Pos(2),
-                    ImportsPage.GetSkins().Pos(4),
-                    ImportsPage.GetTables().Pos(6),
-                    ImportsPage.ImportOsuSkins().Pos(9),
+                    ImportsPage.GetOsuSongs().Pos(0, 2, PageWidth.Full),
+                    ImportsPage.GetEtternaPacks().Pos(2, 2, PageWidth.Full),
+                    ImportsPage.GetSkins().Pos(4, 2, PageWidth.Full),
+                    ImportsPage.GetTables().Pos(6, 2, PageWidth.Full),
+                    ImportsPage.ImportOsuSkins().Pos(9, 2, PageWidth.Full),
 
-                    PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(12),
-                    PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(14)
+                    PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(12, 2, PageWidth.Full),
+                    PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(14, 2, PageWidth.Full)
                 )
 
         NavigationContainer.Row()
             .With(
-                lhs_actions,
+                lhs_actions
+                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SlicePercentL(0.5f)),
                 MountDisplay.CreateAll()
                     .Position(Position.Shrink(PAGE_MARGIN_X).SliceR(MountDisplay.WIDTH).SliceY(MountDisplay.ALL_HEIGHT))
             )
