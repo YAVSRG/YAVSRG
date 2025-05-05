@@ -49,7 +49,7 @@ type RulesetEditorPage(id: string, original: Ruleset) =
                     .Pos(0),
                 PageButton(%"rulesets.edit.judgements", fun () -> EditJudgementsPage(ruleset).Show())
                     .Pos(3),
-                PageButton(%"rulesets.edit.windows", fun () -> EditWindows.note_windows(ruleset).Show())
+                PageButton(%"rulesets.edit.windows", fun () -> EditWindowsPage.NoteWindowsPage(ruleset).Show())
                     .Pos(5),
                 PageButton(%"rulesets.edit.accuracy", fun () -> ConfigureAccuracyPage(ruleset).Show())
                     .Pos(7),

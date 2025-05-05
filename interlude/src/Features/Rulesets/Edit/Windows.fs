@@ -130,10 +130,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
 
     override this.Title = %"rulesets.edit.windows"
 
-// todo: make into type with uppercase static constructors
-module EditWindows =
-
-    let note_windows (ruleset: Setting<Ruleset>) : Page =
+    static member NoteWindowsPage(ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
         EditWindowsPage(
             new_judgements,
@@ -145,7 +142,7 @@ module EditWindows =
         )
             .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
-    let notes_windows_as_release_windows (ruleset: Setting<Ruleset>) : Page =
+    static member NoteWindowsAsReleaseWindows(ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
         { new EditWindowsPage(
                 new_judgements,
@@ -159,7 +156,7 @@ module EditWindows =
         }
             .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
-    let release_windows (judgements: Judgement array, windows: (GameplayTime * GameplayTime) option array) : Page =
+    static member ReleaseWindows(judgements: Judgement array, windows: (GameplayTime * GameplayTime) option array) : Page =
         { new EditWindowsPage(
                 judgements,
                 Array.init windows.Length (fun i ->

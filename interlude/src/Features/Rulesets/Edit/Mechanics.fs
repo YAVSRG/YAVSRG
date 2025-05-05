@@ -216,7 +216,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 PageSetting(%"rulesets.mechanics.judgement_if_overheld", judgement_dropdown judgement_if_overheld)
                     .Help(Help.Info("rulesets.mechanics.judgement_if_overheld"))
                     .Pos(9),
-                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.release_windows(ruleset.Value.Judgements, release_timing_windows).Show())
+                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindowsPage.ReleaseWindows(ruleset.Value.Judgements, release_timing_windows).Show())
                     .Pos(11),
                 CalloutCard(
                     Callout.Normal
@@ -233,7 +233,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                 PageSetting(%"rulesets.mechanics.judgement_if_dropped", judgement_dropdown judgement_if_dropped)
                     .Help(Help.Info("rulesets.mechanics.judgement_if_dropped"))
                     .Pos(9),
-                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindows.notes_windows_as_release_windows(ruleset).Show())
+                PageButton(%"rulesets.mechanics.release_windows", fun () -> EditWindowsPage.NoteWindowsAsReleaseWindows(ruleset).Show())
                     .Pos(11),
                 CalloutCard(
                     Callout.Normal

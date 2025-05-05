@@ -430,7 +430,6 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
             elif not hover && this.IsSelectedElement && Mouse.left_clicked() then
                 ctx.ClearSelection()
 
-
     override this.Draw() =
 
         if dragging_from.IsSome then
