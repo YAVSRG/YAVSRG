@@ -131,9 +131,10 @@ type SkinPreview(position: Position) as this =
         this.Bounds <- Render.bounds()
         renderer.Init this
 
-    member this.Destroy() =
-        instances <- instances |> List.except [this]
-        (fbo :> System.IDisposable).Dispose()
+    interface System.IDisposable with
+        member this.Dispose() =
+            instances <- instances |> List.except [this]
+            (fbo :> System.IDisposable).Dispose()
 
     static member LEFT_HAND_SIDE (scale: float32) : Position =
         let w = Render.width() * scale

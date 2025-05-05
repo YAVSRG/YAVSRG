@@ -25,7 +25,10 @@ type RegisterPage(discord_tag: string) =
 
     override this.Content() : Widget =
 
-        this.OnClose(NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back()))
+        this.DisposeOnClose(
+            NetworkEvents.successful_login
+                .Subscribe(fun _ -> Menu.Back())
+        )
 
         page_container()
             .With(

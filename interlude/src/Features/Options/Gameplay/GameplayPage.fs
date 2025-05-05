@@ -12,8 +12,6 @@ open Interlude.Features.Rulesets
 type GameplayPage() =
     inherit Page()
 
-    let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(200.0f))
-
     static member ScrollSpeed() : PageSetting =
         PageSetting(%"gameplay.scrollspeed", Slider.Percent(Setting.uom options.ScrollSpeed))
             .With(
@@ -76,6 +74,8 @@ type GameplayPage() =
             .Help(Help.Info("gameplay.keybinds"))
 
     override this.Content() =
+        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(200.0f))
+        this.DisposeOnDestroy(preview)
         page_container()
             .With(
                 GameplayPage.ScrollSpeed().Pos(0),
@@ -94,4 +94,3 @@ type GameplayPage() =
         :> Widget
 
     override this.Title = %"gameplay"
-    override this.OnDestroy() = preview.Destroy()

@@ -9,9 +9,9 @@ open Interlude.Features.Skins
 type LanecoverPage() =
     inherit Page()
 
-    let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE 0.35f)
-
     override this.Content() =
+        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE 0.35f)
+        this.DisposeOnDestroy(preview)
         page_container()
             .With(
                 PageSetting(%"gameplay.lanecover.enabled", Checkbox options.LaneCover.Enabled)
@@ -35,4 +35,3 @@ type LanecoverPage() =
         :> Widget
 
     override this.Title = %"gameplay.lanecover"
-    override this.OnDestroy() = preview.Destroy()

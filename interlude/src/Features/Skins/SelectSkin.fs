@@ -189,7 +189,7 @@ module SkinActions =
 type SelectSkinsPage() =
     inherit Page()
 
-    let preview = SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
+    let preview = new SkinPreview(SkinPreview.LEFT_HAND_SIDE 0.35f)
 
     let noteskin_grid =
         GridFlowContainer<NoteskinButton>(70.0f, 1)
@@ -224,6 +224,7 @@ type SelectSkinsPage() =
             hud_grid |* hb
 
     override this.Content() =
+        this.DisposeOnDestroy(preview)
         refresh ()
 
         let left_info =
@@ -281,7 +282,5 @@ type SelectSkinsPage() =
         :> Widget
 
     override this.Title = %"skins"
-
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnReturnFromNestedPage() = refresh()

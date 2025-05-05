@@ -18,21 +18,18 @@ type LoginPage() =
 
     override this.Content() =
 
-        this.OnClose(
-            NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back())
-        )
-        this.OnClose(
+        this.DisposeOnClose(
+            NetworkEvents.successful_login
+                .Subscribe(fun _ -> Menu.Back()),
+
             NetworkEvents.waiting_registration
                 .Subscribe(fun discord_tag ->
                     waiting_for_browser <- false
                     RegisterPage(discord_tag).Show()
-                )
-        )
-        this.OnClose(
+                ),
+
             NetworkEvents.login_failed
-                .Subscribe(fun _ -> waiting_for_browser <- false)
-        )
-        this.OnClose(
+                .Subscribe(fun _ -> waiting_for_browser <- false),
             NetworkEvents.registration_failed
                 .Subscribe(fun _ -> waiting_for_browser <- false)
         )

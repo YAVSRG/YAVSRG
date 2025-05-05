@@ -19,8 +19,6 @@ type EditNoteskinPage() =
     let author = Setting.simple meta.Author
     let editor = Setting.simple (meta.Editor |> Option.defaultValue "")
 
-    let preview = SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
-
     let ACTION_BUTTON_WIDTH = 450.0f
 
     let textures_tab = TextureGrid.Noteskin(noteskin)
@@ -76,6 +74,8 @@ type EditNoteskinPage() =
                     .Pos(4, 2, PageWidth.Full)
             )
 
+    let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
+
     let refresh () =
         textures_tab.Refresh()
         problems_tab.Refresh()
@@ -90,6 +90,8 @@ type EditNoteskinPage() =
 
     override this.Content() =
         this.OnClose(this.SaveChanges)
+        this.DisposeOnDestroy(preview)
+
         refresh ()
 
         let tab_view_container = SwapContainer(general_tab)
@@ -123,7 +125,6 @@ type EditNoteskinPage() =
         ProblemList.loader.Join()
 
     override this.Title = meta.Name
-    override this.OnDestroy() = preview.Destroy()
 
     override this.OnReturnFromNestedPage() =
         refresh ()

@@ -30,9 +30,12 @@ type StatsPage() =
             .Position(Position.SlicePercentL(0.4f).ShrinkT(50.0f).SliceT(TabButtons.HEIGHT).ShrinkX(40.0f))
 
     override this.Content() =
-        this.OnClose(
+        this.DisposeOnClose(
             SkillTimelineGraph.on_view_date
-                .Subscribe(fun date -> session_stats.ShowSessionForDate date; tab_container.Current <- session_stats)
+                .Subscribe(fun date ->
+                    session_stats.ShowSessionForDate date
+                    tab_container.Current <- session_stats
+                )
         )
         tab_container
 

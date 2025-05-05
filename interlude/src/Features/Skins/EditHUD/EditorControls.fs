@@ -72,7 +72,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
         |+ HUDEditorButton(
             sprintf "%s %s" Icons.SETTINGS (%"hud.configure"),
             %%"context_menu",
-            fun () -> let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)
+            fun () -> ctx.ConfigureElement()
         )
             .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
             .Conditional(fun () -> ctx.Selected.IsSome)
@@ -147,7 +147,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
             if (%%"options").Pressed() then
                 EditHUDPage(ctx).Show()
             elif (%%"context_menu").Pressed() then
-                let v = ctx.Selected.Value in show_menu v (fun () -> ctx.Recreate v)
+                ctx.ConfigureElement()
             elif (%%"hud_anchor").Pressed() then
                 AnchorPage(ctx).Show()
             elif (%%"hud_reset_position").Pressed() then

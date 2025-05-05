@@ -36,20 +36,23 @@ type Page() as this =
     let on_close_ev = Event<unit>()
     let on_close = on_close_ev.Publish
 
+    let on_destroy_ev = Event<unit>()
+    let on_destroy = on_destroy_ev.Publish
+
     member val Opacity : Animation.Fade = Animation.Fade(0.0f, Target = 1.0f) with get
 
     member internal this.OnClose() : unit = on_close_ev.Trigger()
+    member internal this.OnDestroy() : unit = on_destroy_ev.Trigger()
 
     member this.OnClose(action: unit -> unit) = on_close.Add action
-    member this.OnClose(resource: IDisposable) = on_close.Add resource.Dispose
-
+    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) = on_close.Add (fun () -> resources |> Array.iter _.Dispose())
     member this.WithOnClose(action: unit -> unit) = this.OnClose(action); this
+
+    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) = on_destroy.Add (fun () -> resources |> Array.iter _.Dispose())
 
     member private this._content = content
 
     abstract member Title: string
-    abstract member OnDestroy: unit -> unit
-    default this.OnDestroy() = ()
 
     abstract member OnReturnFromNestedPage: unit -> unit
     default this.OnReturnFromNestedPage() = ()
