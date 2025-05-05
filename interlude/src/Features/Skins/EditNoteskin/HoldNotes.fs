@@ -15,6 +15,7 @@ type HoldNoteSettingsPage() =
     let data = Content.NoteskinConfig
 
     let hold_note_trim = data.HoldNoteTrim |> Setting.bounded (-1.0f, 2.0f) |> Setting.roundf 2
+    let hold_note_fade = data.HoldNoteFade |> Setting.bounded (0.0f, 5.0f) |> Setting.roundf 2
     let minimum_hold_note_length = Setting.simple data.MinimumHoldNoteLength
     let use_tail_texture = Setting.simple data.UseHoldTailTexture
     let flip_hold_tail = Setting.simple data.FlipHoldTail
@@ -30,19 +31,22 @@ type HoldNoteSettingsPage() =
         |+ PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
             .Help(Help.Info("noteskin.holdnotetrim"))
             .Pos(0)
+        |+ PageSetting(%"noteskin.holdnotefade", Slider.Percent(hold_note_fade))
+            .Help(Help.Info("noteskin.holdnotefade"))
+            .Pos(2)
         |+ PageSetting(%"noteskin.minimum_hold_note_length", Checkbox minimum_hold_note_length)
             .Help(Help.Info("noteskin.minimum_hold_note_length"))
-            .Pos(2)
+            .Pos(4)
         |+ PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)
             .Help(Help.Info("noteskin.usetailtexture"))
-            .Pos(5)
+            .Pos(7)
         |+ PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
             .Help(Help.Info("noteskin.flipholdtail"))
             .Conditional(use_tail_texture.Get)
-            .Pos(7)
+            .Pos(9)
         |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
             .Help(Help.Info("noteskin.droppedholdcolor"))
-            .Pos(10)
+            .Pos(12)
         :> Widget
 
     override this.Draw() =
@@ -55,7 +59,7 @@ type HoldNoteSettingsPage() =
 
         let draw_ln_preview (label: string, color: Color, downscroll: bool) =
 
-            Render.rect_edges left top (left + COLUMN_WIDTH) bottom Colors.black.O2
+            Render.rect_edges left top (left + COLUMN_WIDTH) bottom data.PlayfieldColor
 
             let headpos = if downscroll then bottom - COLUMN_WIDTH else top
 
@@ -77,20 +81,31 @@ type HoldNoteSettingsPage() =
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) body)
 
+            //draw fade
+            Render.quad_c
+                (Rect.FromSize(
+                    left, 
+                    tailpos + COLUMN_WIDTH * 0.5f - (if downscroll then 1.0f else -1.0f), 
+                    COLUMN_WIDTH, 
+                    COLUMN_WIDTH * hold_note_fade.Value * (if downscroll then 1.0f else -1.0f))
+                ).AsQuad
+                (Quad.gradient_top_to_bottom (Color.FromArgb(255, data.PlayfieldColor)) (Color.FromArgb(0, 0, 0, 0)))
+
             Render.tex_quad
                 (Rect.FromSize(left, headpos, COLUMN_WIDTH, COLUMN_WIDTH).AsQuad)
                 color.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) head)
 
-            Render.tex_quad
-                (Rect.FromSize(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
-                 |> if flip_hold_tail.Value && downscroll && use_tail_texture.Value then
-                        fun (r: Rect) -> r.ShrinkY(r.Height)
-                    else
-                        id)
-                    .AsQuad
-                color.AsQuad
-                (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
+            if hold_note_fade.Value < 0.01f then
+                Render.tex_quad
+                    (Rect.FromSize(left, tailpos, COLUMN_WIDTH, COLUMN_WIDTH)
+                        |> if flip_hold_tail.Value && downscroll && use_tail_texture.Value then
+                                fun (r: Rect) -> r.ShrinkY(r.Height)
+                            else
+                                id)
+                            .AsQuad
+                    color.AsQuad
+                    (Sprite.pick_texture (animation.Loops, 0) (if use_tail_texture.Value then tail else head))
 
             Text.fill_b (Style.font, label, Rect.FromSize(left, bottom, COLUMN_WIDTH, 30.0f), Colors.text, Alignment.CENTER)
 
@@ -110,6 +125,7 @@ type HoldNoteSettingsPage() =
         Skins.save_noteskin_config
             { Content.NoteskinConfig with
                 HoldNoteTrim = hold_note_trim.Value
+                HoldNoteFade = hold_note_fade.Value
                 MinimumHoldNoteLength = minimum_hold_note_length.Value
                 UseHoldTailTexture = use_tail_texture.Value
                 FlipHoldTail = flip_hold_tail.Value

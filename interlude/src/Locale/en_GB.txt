@@ -778,6 +778,8 @@ noteskin.hold_explosions=Hold explosions
 noteskin.holdnotes=Hold notes
 noteskin.holdnotetrim=Hold note trim
 noteskin.holdnotetrim.tooltip=Shortens hold notes visually.\n100% = Shorten by 1 column width.\nMay be helpful for reading/timing releases.
+noteskin.holdnotefade=Hold note fade
+noteskin.holdnotefade.tooltip=Blends tail of hold notes with the stage.\n100% = by 1 column width.\nPrevents hold tail from being drawn.
 noteskin.judgement_line=Judgement line
 noteskin.judgement_line_offset=Judgement line offset
 noteskin.judgement_line_offset.tooltip=Increase this value to adjust your judgement line closer to the middle of the screen.\nNegative values will move it away from the center instead.

@@ -65,6 +65,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
     let note_height = column_width
     let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
+    let holdnote_fade = column_width * noteskin_config.HoldNoteFade
     let playfield_color = noteskin_config.PlayfieldColor
     let fill_column_gaps = noteskin_config.FillColumnGaps
     let receptor_colors = noteskin_config.ReceptorColors.[keys - 3]
@@ -119,7 +120,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             id
         else
             Quad.flip_vertical
-
+    let fade_transform : Quad -> Quad =
+        if options.Upscroll.Value then
+            Quad.flip_vertical
+        else
+            id
     let receptor_transform (k: int) : Quad -> Quad =
         if noteskin_config.ReceptorStyle = ReceptorStyle.Flip then
             if options.Upscroll.Value then Quad.flip_vertical else id
@@ -260,6 +265,18 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail_using_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
+          if holdnote_fade > 0.0f then 
+                Render.quad_c
+                    ((Rect.FromSize(
+                        left + column_positions.[k], 
+                        pos + note_height * 0.5f + 1f - holdnote_fade, 
+                        column_width,
+                        holdnote_fade
+                    )
+                    |> scroll_direction_transform bottom)
+                        .AsQuad |> fade_transform)
+                    (Quad.gradient_top_to_bottom (Color.FromArgb(255, playfield_color)) (Color.FromArgb(0, 0, 0, 0)))
+          else
             let clip_percent = (clip - pos) / note_height
 
             let quad_clip_correction (q: Quad) : Quad =
@@ -291,6 +308,17 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 )
 
         let inline draw_tail_using_head (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
+          if holdnote_fade > 0.0f then 
+                Render.quad_c
+                    ((Rect.FromSize(
+                        left + column_positions.[k], 
+                        pos + note_height * 0.5f + 1f - holdnote_fade, 
+                        column_width,
+                        holdnote_fade
+                    )|> scroll_direction_transform bottom)
+                    .AsQuad |> fade_transform )
+                    (Quad.gradient_top_to_bottom (Color.FromArgb(255, playfield_color)) (Color.FromArgb(0, 0, 0, 0)))
+          else
             let pos = max (clip - note_height * 0.5f) pos
 
             Render.tex_quad

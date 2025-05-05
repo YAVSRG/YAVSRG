@@ -81,6 +81,8 @@ type NoteskinConfig =
         UseHoldTailTexture: bool
         /// Visually shortens hold notes by the given number of pixels
         HoldNoteTrim: float32
+        /// makes end of the hold blend with background
+        HoldNoteFade: float32
         /// Set to true to ensure hold notes can never have negative visual length due to HoldNoteTrim
         MinimumHoldNoteLength: bool
         /// Sets the color that hold notes should turn when they are not being held
@@ -152,6 +154,7 @@ type NoteskinConfig =
             FlipHoldTail = true
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f
+            HoldNoteFade = 0.0f
             MinimumHoldNoteLength = false
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             AnimationFrameTime = 200.0f<ms / rate>
