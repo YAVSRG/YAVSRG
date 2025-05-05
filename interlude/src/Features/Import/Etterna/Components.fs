@@ -36,9 +36,8 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     let mutable progress = 0.0f
 
-    let mutable status =
-        let path = Path.Combine(get_game_folder "Songs", data.name)
-        if Directory.Exists path then Installed else NotDownloaded
+    // todo: check if a chart exists with this pack as its source
+    let mutable status = NotDownloaded
 
     let download () =
         if status <> Downloading then
@@ -73,42 +72,44 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text(data.name)
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceT(45.0f).Shrink(10.0f, 0.0f))
-        |+ Text(data.size)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f))
-        |+ Text(fun () ->
-            if status = Installed then "Downloaded!"
-            elif status = DownloadFailed then "Download failed!"
-            else ""
-        )
-            .Color(fun () ->
-                if status = DownloadFailed then Colors.text_red
-                else Colors.text_green
+            .With(
+                Text(data.name)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.SliceT(45.0f).Shrink(10.0f, 0.0f)),
+                Text(data.size)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(45.0f).ShrinkR(165.0f).Shrink(10.0f, 0.0f)),
+                Text(fun () ->
+                    if status = Installed then "Downloaded!"
+                    elif status = DownloadFailed then "Download failed!"
+                    else ""
+                )
+                    .Color(fun () ->
+                        if status = DownloadFailed then Colors.text_red
+                        else Colors.text_green
+                    )
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f)),
+                Text(
+                    (sprintf "Average difficulty (MSD): %.2f" data.overall))
+                    .Color(Colors.text_subheading)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f)),
+                Button(Icons.DOWNLOAD, download)
+                    .Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f)),
+                MouseListener().Button(this),
+                Button(Icons.EXTERNAL_LINK, fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id))
+                    .Position(Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f))
             )
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceB(45.0f).ShrinkR(165.0f).Shrink(10.0f, 5.0f))
-        |+ Text(
-            (sprintf "Average difficulty (MSD): %.2f" data.overall))
-            .Color(Colors.text_subheading)
-            .Align(Alignment.LEFT)
-            .Position(Position.SliceB(45.0f).Shrink(10.0f, 5.0f))
-        |+ Button(Icons.DOWNLOAD, download)
-            .Position(Position.SliceR(80.0f).Shrink(10.0f, 10.0f))
-        |+ MouseListener().Button(this)
-        |* Button(Icons.EXTERNAL_LINK, fun () -> open_url (sprintf "https://etternaonline.com/packs/%i" data.id))
-            .Position(Position.SliceR(160.0f).ShrinkR(80.0f).Shrink(10.0f, 10.0f))
+            .AddConditional(
+                data.contains_nsfw,
+                Text(Icons.ALERT_TRIANGLE + " NFSW content")
+                    .Color(Colors.text_red)
+                    .Align(Alignment.LEFT)
+                    .Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
+            )
 
-        if data.contains_nsfw then
-            this
-            |* Text(Icons.ALERT_TRIANGLE + " NFSW content")
-                .Color(Colors.text_red)
-                .Align(Alignment.LEFT)
-                .Position(Position.SliceT(45.0f).Shrink(10.0f, 5.0f).Translate(15.0f + Text.measure (Style.font, data.name) * 45.0f * 0.6f, 0.0f))
-
-        base.Init parent
+        base.Init(parent)
 
     override this.OnFocus(by_mouse: bool) =
         base.OnFocus by_mouse

@@ -145,6 +145,7 @@
     <Compile Include="Features\Import\Etterna\EtternaOnline.fs" />
     <Compile Include="Features\Import\Etterna\Components.fs" />
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />
+    <Compile Include="Features\Import\ConfirmUnlinkedImportPage.fs" />
     <Compile Include="Features\Import\FileDrop.fs" />
     <Compile Include="Features\Mounts\MountActions.fs" />
     <Compile Include="Features\Mounts\CreateMountPage.fs" />

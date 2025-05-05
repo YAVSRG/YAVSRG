@@ -88,7 +88,7 @@ type SpriteSmoothing =
 
 module Texture =
 
-    let TRACE = false
+    let [<Literal>] TRACE = false
 
     let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
     let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
