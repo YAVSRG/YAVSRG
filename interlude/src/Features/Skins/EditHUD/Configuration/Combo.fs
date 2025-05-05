@@ -8,7 +8,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play.HUD
 
-type ComboPage(on_close: unit -> unit) =
+type ComboPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -38,31 +38,7 @@ type ComboPage(on_close: unit -> unit) =
                     Text.fill (Style.font, "727", bounds, Color.White, Alignment.CENTER)
         }
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.combo.lampcolors", Checkbox lamp_colors)
-            .Help(Help.Info("hud.combo.lampcolors"))
-            .Pos(0)
-        |+ PageSetting(%"hud.combo.pop", Slider(pop_amount, Step = 1f))
-            .Help(Help.Info("hud.combo.pop"))
-            .Pos(2)
-        |+ PageSetting(%"hud.combo.growth", Slider(growth_amount))
-            .Help(Help.Info("hud.combo.growth"))
-            .Pos(4)
-        |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
-            .Help(Help.Info("hud.generic.use_font"))
-            .Pos(7)
-        |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
-            .Help(Help.Info("hud.generic.font_spacing"))
-            .Pos(9)
-            .Conditional(use_font.Get)
-        |> Container.Create
-        |+ preview
-        :> Widget
-
-    override this.Title = %"hud.combo"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 ComboLampColors = lamp_colors.Value
@@ -72,4 +48,30 @@ type ComboPage(on_close: unit -> unit) =
                 ComboFontSpacing = font_spacing.Value
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.combo.lampcolors", Checkbox lamp_colors)
+                    .Help(Help.Info("hud.combo.lampcolors"))
+                    .Pos(0),
+                PageSetting(%"hud.combo.pop", Slider(pop_amount, Step = 1f))
+                    .Help(Help.Info("hud.combo.pop"))
+                    .Pos(2),
+                PageSetting(%"hud.combo.growth", Slider(growth_amount))
+                    .Help(Help.Info("hud.combo.growth"))
+                    .Pos(4),
+                PageSetting(%"hud.generic.use_font", Checkbox use_font)
+                    .Help(Help.Info("hud.generic.use_font"))
+                    .Pos(7),
+                PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Help(Help.Info("hud.generic.font_spacing"))
+                    .Pos(9)
+                    .Conditional(use_font.Get)
+            )
+        |> Container.Create
+        |+ preview
+        :> Widget
+
+    override this.Title = %"hud.combo"

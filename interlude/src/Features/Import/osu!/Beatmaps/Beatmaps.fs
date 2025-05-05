@@ -172,4 +172,3 @@ type BeatmapBrowserPage() =
             when_at_bottom <- None
 
     override this.Title = %"beatmap_browser"
-    override this.OnClose() = ()

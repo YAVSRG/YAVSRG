@@ -106,7 +106,6 @@ type SelectCollectionPage
             )
 
     override this.Title = sprintf "%s %s" Icons.FOLDER (%"collections")
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh ()
 
 type ManageCollectionsPage() =

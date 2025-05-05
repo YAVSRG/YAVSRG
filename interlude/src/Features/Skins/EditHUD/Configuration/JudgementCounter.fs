@@ -118,9 +118,8 @@ type private JudgementCounterDisplayPage(use_texture: Setting<bool>, display: in
         :> Widget
 
     override this.Title = %"hud.judgement_counter.textures"
-    override this.OnClose() = ()
 
-type JudgementCounterPage(on_close: unit -> unit) =
+type JudgementCounterPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -265,50 +264,7 @@ type JudgementCounterPage(on_close: unit -> unit) =
                         )
         }
 
-    override this.Content() =
-        page_container ()
-        |+ PageSetting(%"hud.judgement_counter.animationtime", Slider(Setting.uom animation_time, Step = 5f))
-            .Help(Help.Info("hud.judgement_counter.animationtime"))
-            .Pos(0)
-        |+ PageSetting(%"hud.judgement_counter.pop_amount", Slider.Percent(pop_amount))
-            .Help(Help.Info("hud.judgement_counter.pop_amount"))
-            .Pos(2)
-        |+ PageSetting(%"hud.judgement_counter.opacity", Slider.Percent(opacity))
-            .Help(Help.Info("hud.judgement_counter.opacity"))
-            .Pos(4)
-        |+ PageSetting(%"hud.judgement_counter.text_scale", Slider.Percent(text_scale))
-            .Help(Help.Info("hud.judgement_counter.text_scale"))
-            .Pos(6)
-        |+ PageSetting(%"hud.judgement_counter.showratio", Checkbox show_ratio)
-            .Help(Help.Info("hud.judgement_counter.showratio"))
-            .Pos(8)
-        |+ PageButton(
-            %"hud.judgement_counter.judgement_labels",
-            fun () -> JudgementCounterDisplayPage(show_labels, display, ruleset).Show()
-        )
-            .Pos(11)
-        |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
-            .Help(Help.Info("hud.generic.use_font"))
-            .Pos(14)
-        |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
-            .Help(Help.Info("hud.generic.font_spacing"))
-            .Pos(16)
-            .Conditional(use_font.Get)
-        |+ PageSetting(%"hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
-            .Help(Help.Info("hud.generic.dot_spacing"))
-            .Pos(18)
-            .Conditional(use_font.Get)
-        |+ PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
-            .Help(Help.Info("hud.generic.colon_spacing"))
-            .Pos(20)
-            .Conditional(use_font.Get)
-        |> Container.Create
-        |+ preview
-        :> Widget
-
-    override this.Title = %"hud.judgement_counter"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 JudgementCounterFadeTime = animation_time.Value
@@ -326,4 +282,50 @@ type JudgementCounterPage(on_close: unit -> unit) =
                 JudgementCounterCustomDisplay = Content.HUD.JudgementCounterCustomDisplay.Add(JUDGEMENT_COUNT, display)
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.judgement_counter.animationtime", Slider(Setting.uom animation_time, Step = 5f))
+                    .Help(Help.Info("hud.judgement_counter.animationtime"))
+                    .Pos(0),
+                PageSetting(%"hud.judgement_counter.pop_amount", Slider.Percent(pop_amount))
+                    .Help(Help.Info("hud.judgement_counter.pop_amount"))
+                    .Pos(2),
+                PageSetting(%"hud.judgement_counter.opacity", Slider.Percent(opacity))
+                    .Help(Help.Info("hud.judgement_counter.opacity"))
+                    .Pos(4),
+                PageSetting(%"hud.judgement_counter.text_scale", Slider.Percent(text_scale))
+                    .Help(Help.Info("hud.judgement_counter.text_scale"))
+                    .Pos(6),
+                PageSetting(%"hud.judgement_counter.showratio", Checkbox show_ratio)
+                    .Help(Help.Info("hud.judgement_counter.showratio"))
+                    .Pos(8),
+                PageButton(
+                    %"hud.judgement_counter.judgement_labels",
+                    fun () -> JudgementCounterDisplayPage(show_labels, display, ruleset).Show()
+                )
+                    .Pos(11),
+                PageSetting(%"hud.generic.use_font", Checkbox use_font)
+                    .Help(Help.Info("hud.generic.use_font"))
+                    .Pos(14)
+            )
+            .WithConditional(
+                use_font.Get,
+
+                PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Help(Help.Info("hud.generic.font_spacing"))
+                    .Pos(16),
+                PageSetting(%"hud.generic.dot_spacing", Slider.Percent(font_dot_spacing))
+                    .Help(Help.Info("hud.generic.dot_spacing"))
+                    .Pos(18),
+                PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+                    .Help(Help.Info("hud.generic.colon_spacing"))
+                    .Pos(20)
+            )
+        |> Container.Create
+        |+ preview
+        :> Widget
+
+    override this.Title = %"hud.judgement_counter"

@@ -32,7 +32,6 @@ type PlaylistContextMenu(name: string, playlist: Playlist) =
         :> Widget
 
     override this.Title = name
-    override this.OnClose() = ()
 
 type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroupContext) =
     inherit Page()
@@ -49,7 +48,6 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
         :> Widget
 
     override this.Title = name
-    override this.OnClose() = ()
 
     static member ConfirmDelete(charts: ChartMeta seq, ctx: LibraryGroupContext, is_submenu: bool) =
         ConfirmPage(

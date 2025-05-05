@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play.HUD
 
-type ProgressPiePage(on_close: unit -> unit) =
+type ProgressPiePage() =
     inherit Page()
 
     let config = Content.HUD
@@ -75,48 +75,7 @@ type ProgressPiePage(on_close: unit -> unit) =
                     )
         }
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.progress_pie.label",
-            SelectDropdown(
-                [|
-                    ProgressPieLabel.None, %"hud.progress_pie.label.none"
-                    ProgressPieLabel.Countdown, %"hud.progress_pie.label.countdown"
-                    ProgressPieLabel.Percentage, %"hud.progress_pie.label.percentage"
-                |],
-                label
-            )
-        )
-            .Pos(0)
-        |+ PageSetting(%"hud.progress_pie.label_size", Slider.Percent(label_size))
-            .Help(Help.Info("hud.progress_pie.label_size"))
-            .Pos(2)
-        |+ PageSetting(%"hud.progress_pie.color", ColorPicker(%"hud.progress_pie.color", color, true))
-            .Pos(4)
-        |+ PageSetting(%"hud.progress_pie.backgroundcolor", ColorPicker(%"hud.progress_pie.backgroundcolor", background_color, true))
-            .Pos(6)
-        |+ PageSetting(%"hud.generic.use_font", Checkbox use_font)
-            .Help(Help.Info("hud.generic.use_font"))
-            .Pos(9)
-        |+ PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
-            .Help(Help.Info("hud.generic.font_spacing"))
-            .Pos(11)
-            .Conditional(use_font.Get)
-        |+ PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
-            .Help(Help.Info("hud.generic.colon_spacing"))
-            .Pos(13)
-            .Conditional(use_font.Get)
-        |+ PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
-            .Help(Help.Info("hud.generic.percent_spacing"))
-            .Pos(15)
-            .Conditional(use_font.Get)
-        |> Container.Create
-        |+ preview
-        :> Widget
-
-    override this.Title = %"hud.progress_pie"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 ProgressMeterLabel = label.Value
@@ -130,4 +89,48 @@ type ProgressPiePage(on_close: unit -> unit) =
                 ProgressMeterPercentExtraSpacing = font_percent_spacing.Value
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.progress_pie.label",
+                    SelectDropdown(
+                        [|
+                            ProgressPieLabel.None, %"hud.progress_pie.label.none"
+                            ProgressPieLabel.Countdown, %"hud.progress_pie.label.countdown"
+                            ProgressPieLabel.Percentage, %"hud.progress_pie.label.percentage"
+                        |],
+                        label
+                    )
+                )
+                    .Pos(0),
+                PageSetting(%"hud.progress_pie.label_size", Slider.Percent(label_size))
+                    .Help(Help.Info("hud.progress_pie.label_size"))
+                    .Pos(2),
+                PageSetting(%"hud.progress_pie.color", ColorPicker(%"hud.progress_pie.color", color, true))
+                    .Pos(4),
+                PageSetting(%"hud.progress_pie.backgroundcolor", ColorPicker(%"hud.progress_pie.backgroundcolor", background_color, true))
+                    .Pos(6),
+                PageSetting(%"hud.generic.use_font", Checkbox use_font)
+                    .Help(Help.Info("hud.generic.use_font"))
+                    .Pos(9)
+            )
+            .WithConditional(
+                use_font.Get,
+
+                PageSetting(%"hud.generic.font_spacing", Slider.Percent(font_spacing))
+                    .Help(Help.Info("hud.generic.font_spacing"))
+                    .Pos(11),
+                PageSetting(%"hud.generic.colon_spacing", Slider.Percent(font_colon_spacing))
+                    .Help(Help.Info("hud.generic.colon_spacing"))
+                    .Pos(13),
+                PageSetting(%"hud.generic.percent_spacing", Slider.Percent(font_percent_spacing))
+                    .Help(Help.Info("hud.generic.percent_spacing"))
+                    .Pos(15)
+            )
+        |> Container.Create
+        |+ preview
+        :> Widget
+
+    override this.Title = %"hud.progress_pie"

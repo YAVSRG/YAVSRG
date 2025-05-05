@@ -140,4 +140,3 @@ type LibraryPage() =
             )
 
     override this.Title = %"library"
-    override this.OnClose() = ()

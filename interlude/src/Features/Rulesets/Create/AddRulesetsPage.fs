@@ -21,4 +21,3 @@ type AddRulesetsPage() =
             )
 
     override this.Title = %"rulesets.add"
-    override this.OnClose() = ()

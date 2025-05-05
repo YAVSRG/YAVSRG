@@ -12,7 +12,18 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
 
     let new_name = Setting.simple name |> Setting.alphanumeric
 
+    member this.SaveChanges() =
+        if new_name.Value <> name && new_name.Value.Length > 0 then
+            if Content.Collections.RenamePlaylist(name, new_name.Value) then
+                CollectionActions.collection_modified_ev.Trigger()
+            else
+                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
+                Logging.Debug "Rename failed, maybe that name already exists?"
+
     override this.Content() =
+
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageTextEntry(%"collections.edit.playlist_name", new_name)
@@ -35,11 +46,3 @@ type EditPlaylistPage(name: string, playlist: Playlist) =
             )
 
     override this.Title = name
-
-    override this.OnClose() =
-        if new_name.Value <> name && new_name.Value.Length > 0 then
-            if Content.Collections.RenamePlaylist(name, new_name.Value) then
-                CollectionActions.collection_modified_ev.Trigger()
-            else
-                Notifications.action_feedback (Icons.X, %"notification.collection_rename_failed.title", %"notification.collection_rename_failed.body")
-                Logging.Debug "Rename failed, maybe that name already exists?"

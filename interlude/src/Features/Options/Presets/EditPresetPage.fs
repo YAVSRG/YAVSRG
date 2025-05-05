@@ -49,7 +49,21 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
     let name = Setting.simple preset.Name
     let mode = Setting.simple preset.Mode
 
+    member this.SaveChanges() =
+        if delete then
+            setting.Set None
+        else
+            setting.Set(
+                Some
+                    { preset with
+                        Name = name.Value
+                        Mode = mode.Value
+                    }
+            )
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         let keymode_preference =
             FlowContainer.LeftToRight<PresetKeymodeCheckbox>(100.0f, Spacing = 10.0f)
 
@@ -120,15 +134,3 @@ type private EditPresetPage(preset_id: int, setting: Setting<Preset option>) =
             )
 
     override this.Title = preset.Name
-
-    override this.OnClose() =
-        if delete then
-            setting.Set None
-        else
-            setting.Set(
-                Some
-                    { preset with
-                        Name = name.Value
-                        Mode = mode.Value
-                    }
-            )

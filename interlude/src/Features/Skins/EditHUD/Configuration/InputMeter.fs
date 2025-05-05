@@ -6,7 +6,7 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 
-type InputMeterPage(on_close: unit -> unit) =
+type InputMeterPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -23,39 +23,8 @@ type InputMeterPage(on_close: unit -> unit) =
     let scroll_downwards = Setting.simple config.InputMeterScrollDownwards
     let show_keybinds = Setting.simple config.InputMeterShowKeybinds
     let keybind_color = Setting.simple config.InputMeterKeybindColor
-    
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
-            .Pos(0)
-        |+ PageSetting(%"hud.input_meter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
-            .Pos(2)
-        |+ PageSetting(%"hud.input_meter.key_color", ColorPicker(%"hud.input_meter.key_color", key_color, true))
-            .Pos(4)
-        |+ PageSetting(%"hud.input_meter.judgement_colors", Checkbox judgement_colors)
-            .Help(Help.Info("hud.input_meter.judgement_colors"))
-            .Pos(7)
-        |+ PageSetting(%"hud.input_meter.column_padding", Slider.Percent column_padding)
-            .Pos(9)
-        |+ PageSetting(%"hud.input_meter.scroll_downwards", Checkbox scroll_downwards)
-            .Pos(11)
-        |+ PageSetting(%"hud.input_meter.show_inputs", Checkbox show_inputs)
-            .Pos(13)
-        |+ PageSetting(%"hud.input_meter.input_color", ColorPicker(%"hud.input_meter.input_color", input_color, true))
-            .Pos(15)
-            .Conditional(show_inputs.Get)
-        |+ PageSetting(%"hud.input_meter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
-            .Pos(17)
-            .Conditional(show_inputs.Get)
-        |+ PageSetting(%"hud.input_meter.show_keybinds", Checkbox show_keybinds)
-            .Pos(19)
-        |+ PageSetting(%"hud.input_meter.keybind_color", ColorPicker(%"hud.input_meter.keybind_color", keybind_color, true))
-            .Pos(21)
-        :> Widget
 
-    override this.Title = %"hud.input_meter"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 InputMeterScrollSpeed = scroll_speed.Value
@@ -70,4 +39,38 @@ type InputMeterPage(on_close: unit -> unit) =
                 InputMeterShowKeybinds = show_keybinds.Value
                 InputMeterKeybindColor = keybind_color.Value
             }
-        on_close ()
+
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.input_meter.scroll_speed", Slider.Percent(Setting.uom scroll_speed))
+                    .Pos(0),
+                PageSetting(%"hud.input_meter.key_fade_time", Slider(Setting.uom key_fade_time, Step = 5f))
+                    .Pos(2),
+                PageSetting(%"hud.input_meter.key_color", ColorPicker(%"hud.input_meter.key_color", key_color, true))
+                    .Pos(4),
+                PageSetting(%"hud.input_meter.judgement_colors", Checkbox judgement_colors)
+                    .Help(Help.Info("hud.input_meter.judgement_colors"))
+                    .Pos(7),
+                PageSetting(%"hud.input_meter.column_padding", Slider.Percent column_padding)
+                    .Pos(9),
+                PageSetting(%"hud.input_meter.scroll_downwards", Checkbox scroll_downwards)
+                    .Pos(11),
+                PageSetting(%"hud.input_meter.show_inputs", Checkbox show_inputs)
+                    .Pos(13),
+                PageSetting(%"hud.input_meter.input_color", ColorPicker(%"hud.input_meter.input_color", input_color, true))
+                    .Pos(15)
+                    .Conditional(show_inputs.Get),
+                PageSetting(%"hud.input_meter.input_fade_distance", Slider(input_fade_distance, Step = 5f))
+                    .Pos(17)
+                    .Conditional(show_inputs.Get),
+                PageSetting(%"hud.input_meter.show_keybinds", Checkbox show_keybinds)
+                    .Pos(19),
+                PageSetting(%"hud.input_meter.keybind_color", ColorPicker(%"hud.input_meter.keybind_color", keybind_color, true))
+                    .Pos(21)
+                    .Conditional(show_keybinds.Get)
+            )
+
+    override this.Title = %"hud.input_meter"

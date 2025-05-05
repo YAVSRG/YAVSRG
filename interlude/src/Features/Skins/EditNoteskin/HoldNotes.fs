@@ -25,25 +25,37 @@ type HoldNoteSettingsPage() =
     let tail = Content.Texture "holdtail"
     let animation = Animation.Counter(float data.AnimationFrameTime)
 
+    member this.SaveChanges() =
+        Skins.save_noteskin_config
+            { Content.NoteskinConfig with
+                HoldNoteTrim = hold_note_trim.Value
+                MinimumHoldNoteLength = minimum_hold_note_length.Value
+                UseHoldTailTexture = use_tail_texture.Value
+                FlipHoldTail = flip_hold_tail.Value
+                DroppedHoldColor = dropped_color.Value
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
         page_container()
-        |+ PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
-            .Help(Help.Info("noteskin.holdnotetrim"))
-            .Pos(0)
-        |+ PageSetting(%"noteskin.minimum_hold_note_length", Checkbox minimum_hold_note_length)
-            .Help(Help.Info("noteskin.minimum_hold_note_length"))
-            .Pos(2)
-        |+ PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)
-            .Help(Help.Info("noteskin.usetailtexture"))
-            .Pos(5)
-        |+ PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
-            .Help(Help.Info("noteskin.flipholdtail"))
-            .Conditional(use_tail_texture.Get)
-            .Pos(7)
-        |+ PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
-            .Help(Help.Info("noteskin.droppedholdcolor"))
-            .Pos(10)
-        :> Widget
+            .With(
+                PageSetting(%"noteskin.holdnotetrim", Slider.Percent(hold_note_trim))
+                    .Help(Help.Info("noteskin.holdnotetrim"))
+                    .Pos(0),
+                PageSetting(%"noteskin.minimum_hold_note_length", Checkbox minimum_hold_note_length)
+                    .Help(Help.Info("noteskin.minimum_hold_note_length"))
+                    .Pos(2),
+                PageSetting(%"noteskin.usetailtexture", Checkbox use_tail_texture)
+                    .Help(Help.Info("noteskin.usetailtexture"))
+                    .Pos(5),
+                PageSetting(%"noteskin.flipholdtail", Checkbox flip_hold_tail)
+                    .Help(Help.Info("noteskin.flipholdtail"))
+                    .Conditional(use_tail_texture.Get)
+                    .Pos(7),
+                PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
+                    .Help(Help.Info("noteskin.droppedholdcolor"))
+                    .Pos(10)
+            )
 
     override this.Draw() =
         base.Draw()
@@ -105,13 +117,3 @@ type HoldNoteSettingsPage() =
         animation.Update elapsed_ms
 
     override this.Title = %"noteskin.holdnotes"
-
-    override this.OnClose() =
-        Skins.save_noteskin_config
-            { Content.NoteskinConfig with
-                HoldNoteTrim = hold_note_trim.Value
-                MinimumHoldNoteLength = minimum_hold_note_length.Value
-                UseHoldTailTexture = use_tail_texture.Value
-                FlipHoldTail = flip_hold_tail.Value
-                DroppedHoldColor = dropped_color.Value
-            }

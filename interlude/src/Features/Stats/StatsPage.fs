@@ -16,8 +16,6 @@ type StatsPage() =
     let all_time_stats = OverallTab.Create()
     let leaderboards = LeaderboardsTab.Create()
 
-    let view_date_listener = SkillTimelineGraph.on_view_date.Subscribe(fun date -> session_stats.ShowSessionForDate date; tab_container.Current <- session_stats)
-
     let tab_options : (Widget * string * (unit -> bool)) array =
         [|
             session_stats, %"stats.sessions", K false
@@ -31,7 +29,11 @@ type StatsPage() =
         TabButtons.CreatePersistent(tab_options, tab_container, selected_tab)
             .Position(Position.SlicePercentL(0.4f).ShrinkT(50.0f).SliceT(TabButtons.HEIGHT).ShrinkX(40.0f))
 
-    override this.Content() = tab_container
+    override this.Content() =
+        this.OnClose(
+            SkillTimelineGraph.on_view_date
+                .Subscribe(fun date -> session_stats.ShowSessionForDate date; tab_container.Current <- session_stats)
+        )
+        tab_container
 
     override this.Title = %"menu.stats"
-    override this.OnClose() = view_date_listener.Dispose()

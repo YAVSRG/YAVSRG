@@ -45,7 +45,6 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         |+ info.Pos(6, 9, PageWidth.Custom (info :> IWidth).Width)
         :> Widget
     override this.Title = "Import replay"
-    override this.OnClose() = ()
 
 module Replay =
 

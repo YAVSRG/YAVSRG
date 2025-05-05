@@ -188,7 +188,17 @@ type NotesSettingsPage() =
                     )
             )
 
+    member this.SaveChanges() =
+        Skins.save_noteskin_config
+            { Content.NoteskinConfig with
+                AnimationFrameTime = note_animation_time.Value
+                NoteColors = note_colors
+                Rotations = note_rotations
+                UseRotation = use_rotation.Value
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
         page_container()
         |+ PageSetting(
             %"generic.keymode",
@@ -234,12 +244,3 @@ type NotesSettingsPage() =
         :> Widget
 
     override this.Title = %"noteskin.notes"
-
-    override this.OnClose() =
-        Skins.save_noteskin_config
-            { Content.NoteskinConfig with
-                AnimationFrameTime = note_animation_time.Value
-                NoteColors = note_colors
-                Rotations = note_rotations
-                UseRotation = use_rotation.Value
-            }

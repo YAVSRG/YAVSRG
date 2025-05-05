@@ -95,4 +95,3 @@ type GameplayPage() =
 
     override this.Title = %"gameplay"
     override this.OnDestroy() = preview.Destroy()
-    override this.OnClose() = ()

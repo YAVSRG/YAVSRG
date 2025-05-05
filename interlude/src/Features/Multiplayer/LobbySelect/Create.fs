@@ -13,7 +13,7 @@ type CreateLobbyPage() =
     let name = Setting.simple (Network.credentials.Username + "'s lobby") |> Setting.alphanumeric
     let submit () = Network.client.Send(Upstream.CREATE_LOBBY name.Value)
 
-    override this.Content() = 
+    override this.Content() =
         page_container()
         |+ PageTextEntry(%"create_lobby.name", name)
             .Pos(0)
@@ -28,4 +28,3 @@ type CreateLobbyPage() =
         :> Widget
 
     override this.Title = %"create_lobby"
-    override this.OnClose() = ()

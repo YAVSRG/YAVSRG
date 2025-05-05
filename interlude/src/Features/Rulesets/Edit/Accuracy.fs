@@ -28,7 +28,20 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
 
     let decimal_places = Setting.simple ruleset.Value.Formatting.DecimalPlaces
 
+    member this.SaveChanges() =
+        ruleset.Set
+            { ruleset.Value with
+                Formatting = { DecimalPlaces = decimal_places.Value }
+                Accuracy =
+                    if is_wife_curve.Value then
+                        AccuracyPoints.WifeCurve wife_judge.Value
+                    else
+                        AccuracyPoints.PointsPerJudgement points_per_judgement
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         let judgements_container = FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
 
         for i, j in ruleset.Value.Judgements |> Array.indexed do
@@ -59,13 +72,3 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
                     .Pos(5, PAGE_BOTTOM - 5)
             )
     override this.Title = %"rulesets.edit.accuracy"
-    override this.OnClose() =
-        ruleset.Set
-            { ruleset.Value with
-                Formatting = { DecimalPlaces = decimal_places.Value }
-                Accuracy =
-                    if is_wife_curve.Value then
-                        AccuracyPoints.WifeCurve wife_judge.Value
-                    else
-                        AccuracyPoints.PointsPerJudgement points_per_judgement
-            }

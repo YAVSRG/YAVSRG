@@ -42,8 +42,6 @@ type ScoreContextMenu(is_leaderboard: bool, score_info: ScoreInfo) =
     override this.Title =
         sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)
 
-    override this.OnClose() = ()
-
     static member ConfirmDeleteScore(score_info: ScoreInfo, is_submenu: bool) =
         let score_name =
             sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)

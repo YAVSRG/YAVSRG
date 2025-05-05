@@ -130,48 +130,65 @@ type PlayfieldSettingsPage() =
                     )
             )
 
+    member this.SaveChanges() =
+        Skins.save_noteskin_config
+            { Content.NoteskinConfig with
+                UseKeymodeSpecificColumnWidth = use_specific_column_widths.Value
+                ColumnWidth = column_width.Value
+                KeymodeSpecificColumnWidth = column_widths
+                ColumnSpacing = column_spacing.Value
+                FillColumnGaps = fill_gaps.Value
+                PlayfieldColor = playfield_color.Value
+                PlayfieldAlignment = align_anchor.Value, align_offset.Value
+                UseAdvancedColumnSpacing = use_advanced_column_spacing.Value
+                EnableStageTextures = use_stage_textures.Value
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         page_container()
-        |+ PageSetting(%"noteskin.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
-            .Help(Help.Info("noteskin.alignmentanchor"))
-            .Pos(0)
-        |+ PageSetting(%"noteskin.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
-            .Help(Help.Info("noteskin.alignmentoffset"))
-            .Pos(2)
-        |+ PageSetting(%"noteskin.usestagetextures", Checkbox use_stage_textures)
-            .Help(Help.Info("noteskin.usestagetextures"))
-            .Pos(4)
-        |+ PageSetting(%"noteskin.playfieldcolor", ColorPicker(%"noteskin.playfieldcolor", playfield_color, true))
-            .Pos(6)
+            .With(
+                PageSetting(%"noteskin.alignmentanchor", Slider.Percent(align_anchor, Step = 0.05f))
+                    .Help(Help.Info("noteskin.alignmentanchor"))
+                    .Pos(0),
+                PageSetting(%"noteskin.alignmentoffset", Slider.Percent(align_offset, Step = 0.05f))
+                    .Help(Help.Info("noteskin.alignmentoffset"))
+                    .Pos(2),
+                PageSetting(%"noteskin.usestagetextures", Checkbox use_stage_textures)
+                    .Help(Help.Info("noteskin.usestagetextures"))
+                    .Pos(4),
+                PageSetting(%"noteskin.playfieldcolor", ColorPicker(%"noteskin.playfieldcolor", playfield_color, true))
+                    .Pos(6),
 
-        |+ PageSetting(
-                %"generic.keymode",
-                SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+                PageSetting(
+                        %"generic.keymode",
+                        SelectDropdown.FromEnum(keymode |> Setting.trigger (ignore >> refresh_spacings))
+                    )
+                    .Pos(10)
+                    .Conditional(fun () -> use_specific_column_widths.Value || use_advanced_column_spacing.Value),
+
+                PageSetting(%"noteskin.keymode_specific_column_widths", Checkbox use_specific_column_widths)
+                    .Pos(14),
+                PageSetting(%"noteskin.columnwidth", Slider(width_setting, Step = 1f))
+                    .Help(Help.Info("noteskin.columnwidth"))
+                    .Pos(16),
+
+                PageSetting(%"noteskin.fillcolumngaps", Checkbox fill_gaps)
+                    .Help(Help.Info("noteskin.fillcolumngaps"))
+                    .Pos(18),
+                PageSetting(%"noteskin.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
+                    .Help(Help.Info("noteskin.useadvancedcolumnspacing"))
+                    .Pos(20),
+                PageSetting(%"noteskin.columnspacing", Slider(column_spacing, Step = 1f))
+                    .Help(Help.Info("noteskin.columnspacing"))
+                    .Pos(22)
+                    .Conditional(use_advanced_column_spacing.Get >> not),
+                PageSetting(%"noteskin.advancedcolumnspacing", _spacings)
+                    .Help(Help.Info("noteskin.advancedcolumnspacing"))
+                    .Pos(22, 2, PageWidth.Full)
+                    .Conditional(use_advanced_column_spacing.Get)
             )
-            .Pos(10)
-            .Conditional(fun () -> use_specific_column_widths.Value || use_advanced_column_spacing.Value)
-
-        |+ PageSetting(%"noteskin.keymode_specific_column_widths", Checkbox use_specific_column_widths)
-            .Pos(14)
-        |+ PageSetting(%"noteskin.columnwidth", Slider(width_setting, Step = 1f))
-            .Help(Help.Info("noteskin.columnwidth"))
-            .Pos(16)
-
-        |+ PageSetting(%"noteskin.fillcolumngaps", Checkbox fill_gaps)
-            .Help(Help.Info("noteskin.fillcolumngaps"))
-            .Pos(18)
-        |+ PageSetting(%"noteskin.useadvancedcolumnspacing", Checkbox use_advanced_column_spacing)
-            .Help(Help.Info("noteskin.useadvancedcolumnspacing"))
-            .Pos(20)
-        |+ PageSetting(%"noteskin.columnspacing", Slider(column_spacing, Step = 1f))
-            .Help(Help.Info("noteskin.columnspacing"))
-            .Pos(22)
-            .Conditional(use_advanced_column_spacing.Get >> not)
-        |+ PageSetting(%"noteskin.advancedcolumnspacing", _spacings)
-            .Help(Help.Info("noteskin.advancedcolumnspacing"))
-            .Pos(22, 2, PageWidth.Full)
-            .Conditional(use_advanced_column_spacing.Get)
-        :> Widget
 
     override this.Draw() =
         base.Draw()
@@ -244,17 +261,3 @@ type PlayfieldSettingsPage() =
             Colors.green_accent.O2
 
     override this.Title = %"noteskin.playfield"
-
-    override this.OnClose() =
-        Skins.save_noteskin_config
-            { Content.NoteskinConfig with
-                UseKeymodeSpecificColumnWidth = use_specific_column_widths.Value
-                ColumnWidth = column_width.Value
-                KeymodeSpecificColumnWidth = column_widths
-                ColumnSpacing = column_spacing.Value
-                FillColumnGaps = fill_gaps.Value
-                PlayfieldColor = playfield_color.Value
-                PlayfieldAlignment = align_anchor.Value, align_offset.Value
-                UseAdvancedColumnSpacing = use_advanced_column_spacing.Value
-                EnableStageTextures = use_stage_textures.Value
-            }

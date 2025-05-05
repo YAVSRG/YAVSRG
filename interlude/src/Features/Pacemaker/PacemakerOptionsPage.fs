@@ -30,6 +30,9 @@ type PacemakerOptionsPage() =
     let use_personal_best = Setting.simple existing.PersonalBest
 
     override this.Content() =
+
+        this.OnClose(this.SavePacemakerSetting)
+
         let lamps =
             seq {
                 let lamp_count = Rulesets.current.Lamps.Length
@@ -75,7 +78,7 @@ type PacemakerOptionsPage() =
 
     override this.Title = sprintf "%s %s" Icons.FLAG (%"gameplay.pacemaker")
 
-    override this.OnClose() =
+    member this.SavePacemakerSetting() =
         options.Pacemaker.[ruleset_id] <-
             {
                 Accuracy = accuracy.Value

@@ -45,7 +45,6 @@ type QuickMenuPage() =
 
     override this.Direction = PageEasing.Right
     override this.Title = %"menu.quick"
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = Menu.Back()
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

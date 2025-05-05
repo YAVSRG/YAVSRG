@@ -58,7 +58,13 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
     let width_box = NumberEntry.Create width
     let height_box = NumberEntry.Create height
 
+    member this.SaveChanges() =
+        if height.Value * 4 / 3 <= width.Value then
+            setting.Set (width.Value, height.Value)
+
     override this.Content () =
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageSetting(%"system.windowresolution.width", width_box).Pos(0),
@@ -79,9 +85,6 @@ type CustomWindowedResolutionPage(setting: Setting<int * int>) =
         base.Update(elapsed_ms, moved)
 
     override this.Title = %"system.windowresolution"
-    override this.OnClose() =
-        if height.Value * 4 / 3 <= width.Value then
-            setting.Set (width.Value, height.Value)
 
 type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     inherit Page()
@@ -89,7 +92,10 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
     let horizontal = Setting.percentf (fst setting.Value)
     let vertical = Setting.percentf (snd setting.Value)
 
+    member this.SaveChanges() = setting.Set (horizontal.Value, vertical.Value)
+
     override this.Content () =
+        this.OnClose(this.SaveChanges)
         page_container()
             .With(
                 PageSetting(%"system.windowresolution.offset.horizontal", Slider.Percent(horizontal)).Pos(0),
@@ -99,7 +105,6 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
             )
 
     override this.Title = %"system.windowresolution.offset"
-    override this.OnClose() = setting.Set (horizontal.Value, vertical.Value)
 
 type WindowedResolutionPicker =
 

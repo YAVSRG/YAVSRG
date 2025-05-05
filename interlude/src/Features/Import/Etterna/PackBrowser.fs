@@ -101,4 +101,3 @@ type EtternaPacksBrowserPage() =
             when_at_bottom <- None
 
     override this.Title = %"etterna_pack_browser"
-    override this.OnClose() = ()

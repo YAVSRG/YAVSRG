@@ -57,6 +57,7 @@ type OptionsPage() =
     let header = OptionsPageHeader(content_setting)
 
     override this.Init(parent: Widget) =
+        this.OnClose(fun () -> on_destroy_current_tab(); header.Hide())
         base.Init parent
         header.Focus false
 
@@ -75,6 +76,5 @@ type OptionsPage() =
         page_body
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"options")
-    override this.OnClose() = on_destroy_current_tab(); header.Hide()
     override this.OnEnterNestedPage() = header.Hide()
     override this.OnReturnFromNestedPage() = on_return_current_tab(); header.Show()

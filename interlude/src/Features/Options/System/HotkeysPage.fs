@@ -106,4 +106,3 @@ type HotkeysPage() =
             .With(scroll_container, search_box)
 
     override this.Title = %"system.hotkeys"
-    override this.OnClose() = ()

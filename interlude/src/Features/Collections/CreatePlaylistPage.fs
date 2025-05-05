@@ -35,7 +35,6 @@ type CreatePlaylistPage(starting_name: string, on_create: (string * Collection) 
         :> Widget
 
     override this.Title = %"collections.create_playlist"
-    override this.OnClose() = ()
 
     static member Icons =
         [|

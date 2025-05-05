@@ -78,7 +78,7 @@ type JudgementDisplayPicker(ruleset: Ruleset, i: int, data: JudgementDisplayType
             elif (%%"down").Pressed() then
                 bk ()
 
-type JudgementPage(on_close: unit -> unit) =
+type JudgementPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -115,50 +115,7 @@ type JudgementPage(on_close: unit -> unit) =
             else
                 Array.create JUDGEMENT_COUNT JudgementDisplayType.Name
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(
-            %"hud.judgement.ignoreperfectjudgements",
-            Checkbox ignore_perfect_judgements
-        )
-            .Help(Help.Info("hud.judgement.ignoreperfectjudgements"))
-            .Pos(0)
-        |+ PageSetting(
-            %"hud.judgement.prioritiselowerjudgements",
-            Checkbox prioritise_lower_judgements
-        )
-            .Help(Help.Info("hud.judgement.prioritiselowerjudgements"))
-            .Pos(2)
-        |+ PageSetting(%"hud.judgement.duration", Slider(Setting.uom duration, Step = 5f))
-            .Help(Help.Info("hud.judgement.duration"))
-            .Pos(4)
-            .Conditional(fun () -> not use_texture.Value || use_animation.Value)
-        |+ PageSetting(%"hud.judgement.usetexture", Checkbox use_texture)
-            .Help(Help.Info("hud.judgement.usetexture"))
-            .Pos(6)
-        |+ PageSetting(
-            %"hud.judgement.useanimation",
-            Checkbox use_animation
-        )
-            .Help(Help.Info("hud.judgement.useanimation"))
-            .Pos(8)
-            .Conditional(use_texture.Get)
-        |+ PageSetting(%"hud.judgement.frametime", Slider(Setting.uom frame_time, Step = 5f))
-            .Help(Help.Info("hud.judgement.frametime"))
-            .Pos(10)
-            .Conditional(use_texture.Get)
-        |+ Conditional(use_texture.Get,
-            FlowContainer.Vertical<Widget>(PAGE_ITEM_HEIGHT)
-            |+ seq {
-                for i = 0 to ruleset.Judgements.Length - 1 do
-                    yield JudgementDisplayPicker(ruleset, i, judgement_display)
-            }
-            |> ScrollContainer).Position(page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal))
-        :> Widget
-
-    override this.Title = %"hud.judgement"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 JudgementMeterIgnorePerfect = ignore_perfect_judgements.Value
@@ -170,4 +127,51 @@ type JudgementPage(on_close: unit -> unit) =
                 JudgementMeterCustomDisplay = Content.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(
+                    %"hud.judgement.ignoreperfectjudgements",
+                    Checkbox ignore_perfect_judgements
+                )
+                    .Help(Help.Info("hud.judgement.ignoreperfectjudgements"))
+                    .Pos(0),
+                PageSetting(
+                    %"hud.judgement.prioritiselowerjudgements",
+                    Checkbox prioritise_lower_judgements
+                )
+                    .Help(Help.Info("hud.judgement.prioritiselowerjudgements"))
+                    .Pos(2),
+                PageSetting(%"hud.judgement.duration", Slider(Setting.uom duration, Step = 5f))
+                    .Help(Help.Info("hud.judgement.duration"))
+                    .Pos(4)
+                    .Conditional(fun () -> not use_texture.Value || use_animation.Value),
+                PageSetting(%"hud.judgement.usetexture", Checkbox use_texture)
+                    .Help(Help.Info("hud.judgement.usetexture"))
+                    .Pos(6)
+            )
+            .WithConditional(
+                use_texture.Get,
+
+                PageSetting(
+                    %"hud.judgement.useanimation",
+                    Checkbox use_animation
+                )
+                    .Help(Help.Info("hud.judgement.useanimation"))
+                    .Pos(8),
+                PageSetting(%"hud.judgement.frametime", Slider(Setting.uom frame_time, Step = 5f))
+                    .Help(Help.Info("hud.judgement.frametime"))
+                    .Pos(10),
+                ScrollContainer(
+                    FlowContainer.Vertical<JudgementDisplayPicker>(PAGE_ITEM_HEIGHT)
+                        .With(seq {
+                            for i = 0 to ruleset.Judgements.Length - 1 do
+                                yield JudgementDisplayPicker(ruleset, i, judgement_display)
+                        })
+                )
+                    .Position(page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal))
+            )
+
+    override this.Title = %"hud.judgement"

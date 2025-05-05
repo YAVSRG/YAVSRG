@@ -111,7 +111,6 @@ type BatchLikesContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         :> Widget
 
     override this.Title = %"bulk_actions"
-    override this.OnClose() = ()
 
 type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
@@ -178,7 +177,6 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
         :> Widget
 
     override this.Title = %"bulk_actions"
-    override this.OnClose() = ()
 
 type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
@@ -251,7 +249,6 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
         :> Widget
 
     override this.Title = %"bulk_actions"
-    override this.OnClose() = ()
 
 type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
     inherit Page()
@@ -308,4 +305,3 @@ type BatchContextMenu(charts: (ChartMeta * LibraryContext) seq) =
         :> Widget
 
     override this.Title = %"bulk_actions"
-    override this.OnClose() = ()

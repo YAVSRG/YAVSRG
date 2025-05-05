@@ -16,7 +16,16 @@ type private ColumnSwapPage() =
 
     static let columns_setting = Setting.simple "1234123"
 
+    member this.TrySaveChanges() =
+        match ColumnSwap.parse columns_setting.Value with
+        | Ok columns ->
+            SelectedChart.selected_mods.Value <-
+                Map.add "column_swap" (ColumnSwap.pack columns) SelectedChart.selected_mods.Value
+        | Error reason -> Notifications.error (reason, "")
+
     override this.Content() =
+        this.OnClose(this.TrySaveChanges)
+
         page_container()
             .With(
                 PageTextEntry(%"mods.column_swap_columns", columns_setting)
@@ -27,12 +36,6 @@ type private ColumnSwapPage() =
             )
 
     override this.Title = %"mod.column_swap"
-    override this.OnClose() =
-        match ColumnSwap.parse columns_setting.Value with
-        | Ok columns ->
-            SelectedChart.selected_mods.Value <-
-                Map.add "column_swap" (ColumnSwap.pack columns) SelectedChart.selected_mods.Value
-        | Error reason -> Notifications.error (reason, "")
 
 type private ModSelector(id: string, current_state: unit -> int64 option, action: unit -> unit) =
     inherit
@@ -210,7 +213,6 @@ type private ModSelectPage(change_rate: Rate -> unit) =
             SelectedChart.change_rate_hotkeys change_rate
 
     override this.Title = sprintf "%s %s" Icons.ZAP (%"mods")
-    override this.OnClose() = ()
 
 type ModSelect(change_rate: Rate -> unit) =
     inherit

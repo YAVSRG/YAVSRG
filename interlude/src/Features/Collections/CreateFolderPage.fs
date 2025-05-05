@@ -37,7 +37,6 @@ type CreateFolderPage(on_create: (string * Collection) -> unit) =
             )
 
     override this.Title = %"collections.create_folder"
-    override this.OnClose() = ()
 
     static member Icons =
         [|

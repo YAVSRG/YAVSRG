@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
@@ -32,12 +33,21 @@ type Page() as this =
     let mutable is_current = false
     let mutable content: Widget = Unchecked.defaultof<_>
 
-    member val Opacity = Animation.Fade(0.0f, Target = 1.0f) with get
+    let on_close_ev = Event<unit>()
+    let on_close = on_close_ev.Publish
+
+    member val Opacity : Animation.Fade = Animation.Fade(0.0f, Target = 1.0f) with get
+
+    member internal this.OnClose() : unit = on_close_ev.Trigger()
+
+    member this.OnClose(action: unit -> unit) = on_close.Add action
+    member this.OnClose(resource: IDisposable) = on_close.Add resource.Dispose
+
+    member this.WithOnClose(action: unit -> unit) = this.OnClose(action); this
 
     member private this._content = content
 
     abstract member Title: string
-    abstract member OnClose: unit -> unit
     abstract member OnDestroy: unit -> unit
     default this.OnDestroy() = ()
 
@@ -308,4 +318,3 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
             } : Widget seq)
 
     override this.Title = %"confirm"
-    override this.OnClose() = ()

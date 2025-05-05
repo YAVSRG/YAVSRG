@@ -22,6 +22,5 @@ type PlayerListPage() =
                 HotkeyListener("player_list", Menu.Back)
             )
 
-    override this.OnClose() = ()
     override this.Title = %"network.players"
     override this.Header() = Dummy()

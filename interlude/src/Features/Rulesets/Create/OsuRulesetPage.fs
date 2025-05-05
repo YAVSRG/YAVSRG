@@ -40,4 +40,3 @@ type OsuRulesetPage() =
             )
 
     override this.Title = %"rulesets.create.osu"
-    override this.OnClose() = ()

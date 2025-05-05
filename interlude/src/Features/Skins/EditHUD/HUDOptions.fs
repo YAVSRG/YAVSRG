@@ -58,7 +58,17 @@ type EditHUDPage(ctx: PositionerContext) =
         textures_tab.Refresh()
         problems_tab.Refresh()
 
+    member this.SaveChanges() =
+        Skins.save_skin_meta hud_id
+            {
+                Name = name.Value.Trim()
+                Author = author.Value.Trim()
+                Editor = let e = editor.Value.Trim() in if e = "" then None else Some e
+            }
+        ctx.CreateAll()
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
         refresh ()
 
         let tab_view_container = SwapContainer(elements_tab)
@@ -92,12 +102,3 @@ type EditHUDPage(ctx: PositionerContext) =
     override this.OnReturnFromNestedPage() =
         refresh ()
         preview.Refresh()
-
-    override this.OnClose() =
-        Skins.save_skin_meta hud_id
-            {
-                Name = name.Value.Trim()
-                Author = author.Value.Trim()
-                Editor = let e = editor.Value.Trim() in if e = "" then None else Some e
-            }
-        ctx.CreateAll()

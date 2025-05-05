@@ -9,7 +9,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Content
 open Interlude.UI
 
-type SkipButtonPage(on_close: unit -> unit) =
+type SkipButtonPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -27,30 +27,7 @@ type SkipButtonPage(on_close: unit -> unit) =
                 Text.fill_b (Style.font, preview_text, bounds, Colors.text, Alignment.CENTER)
         }
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.skip_button.usebackground", Checkbox use_background)
-            .Help(Help.Info("hud.skip_button.usebackground"))
-            .Pos(0)
-        |+ PageSetting(%"hud.skip_button.backgroundscale", Slider.Percent(background_scale))
-            .Help(Help.Info("hud.skip_button.backgroundscale"))
-            .Pos(2)
-            .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.skip_button.background_offset_x", Slider.Percent(background_offset_x))
-            .Help(Help.Info("hud.skip_button.background_offset_x"))
-            .Pos(4)
-            .Conditional(use_background.Get)
-        |+ PageSetting(%"hud.skip_button.background_offset_y", Slider.Percent(background_offset_y))
-            .Help(Help.Info("hud.skip_button.background_offset_y"))
-            .Pos(6)
-            .Conditional(use_background.Get)
-        |> Container.Create
-        |+ preview
-        :> Widget
-
-    override this.Title = %"hud.skip_button"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 SkipButtonBackground =
@@ -61,4 +38,31 @@ type SkipButtonPage(on_close: unit -> unit) =
                         AlignmentY = background_offset_y.Value
                     }
             }
-        on_close ()
+
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.skip_button.usebackground", Checkbox use_background)
+                    .Help(Help.Info("hud.skip_button.usebackground"))
+                    .Pos(0)
+            )
+            .WithConditional(
+                use_background.Get,
+
+                PageSetting(%"hud.skip_button.backgroundscale", Slider.Percent(background_scale))
+                    .Help(Help.Info("hud.skip_button.backgroundscale"))
+                    .Pos(2),
+                PageSetting(%"hud.skip_button.background_offset_x", Slider.Percent(background_offset_x))
+                    .Help(Help.Info("hud.skip_button.background_offset_x"))
+                    .Pos(4),
+                PageSetting(%"hud.skip_button.background_offset_y", Slider.Percent(background_offset_y))
+                    .Help(Help.Info("hud.skip_button.background_offset_y"))
+                    .Pos(6)
+            )
+        |> Container.Create
+        |+ preview
+        :> Widget
+
+    override this.Title = %"hud.skip_button"

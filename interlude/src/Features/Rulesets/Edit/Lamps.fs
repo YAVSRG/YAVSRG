@@ -16,7 +16,28 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
     let judgement_type = Setting.simple (match lamp.Requirement with LampRequirement.ComboBreaksAtMost _ -> -1 | LampRequirement.JudgementAtMost (j, _) -> j)
     let judgement_threshold = Setting.simple (match lamp.Requirement with LampRequirement.ComboBreaksAtMost n -> n | LampRequirement.JudgementAtMost (_, n) -> min 99 n)
 
+    member this.SaveChanges() =
+        let new_lamps = ruleset.Value.Lamps |> Array.copy
+        new_lamps.[id] <-
+            {
+                Name = name.Value.Trim()
+                Color = color.Value
+                Requirement =
+                    if judgement_type.Value < 0 then
+                        LampRequirement.ComboBreaksAtMost judgement_threshold.Value
+                    else
+                        LampRequirement.JudgementAtMost (judgement_type.Value, judgement_threshold.Value)
+            }
+        ruleset.Set
+            { ruleset.Value with
+                Lamps =
+                    new_lamps
+                    |> Array.sortByDescending (fun l -> l.Requirement.SortKey)
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageTextEntry(%"rulesets.lamp.name", name)
@@ -50,24 +71,6 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
             )
 
     override this.Title = lamp.Name
-    override this.OnClose() =
-        let new_lamps = ruleset.Value.Lamps |> Array.copy
-        new_lamps.[id] <-
-            {
-                Name = name.Value.Trim()
-                Color = color.Value
-                Requirement =
-                    if judgement_type.Value < 0 then
-                        LampRequirement.ComboBreaksAtMost judgement_threshold.Value
-                    else
-                        LampRequirement.JudgementAtMost (judgement_type.Value, judgement_threshold.Value)
-            }
-        ruleset.Set
-            { ruleset.Value with
-                Lamps =
-                    new_lamps
-                    |> Array.sortByDescending (fun l -> l.Requirement.SortKey)
-            }
 
 type EditLampsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
@@ -119,5 +122,4 @@ type EditLampsPage(ruleset: Setting<Ruleset>) =
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.lamps"
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh()

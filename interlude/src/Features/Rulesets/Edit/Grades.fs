@@ -15,7 +15,19 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let color = Setting.simple grade.Color
     let acc_required = float32 grade.Accuracy |> Setting.bounded (0.0f, 1.0f) |> Setting.roundf 6
 
+    member this.SaveChanges() =
+        let new_grades = ruleset.Value.Grades |> Array.copy
+        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
+        ruleset.Set
+            { ruleset.Value with
+                Grades =
+                    new_grades
+                    |> Array.sortBy (fun l -> l.Accuracy)
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageTextEntry(%"rulesets.grade.name", name)
@@ -32,15 +44,6 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
             )
 
     override this.Title = grade.Name
-    override this.OnClose() =
-        let new_grades = ruleset.Value.Grades |> Array.copy
-        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
-        ruleset.Set
-            { ruleset.Value with
-                Grades =
-                    new_grades
-                    |> Array.sortBy (fun l -> l.Accuracy)
-            }
 
 type EditGradesPage(ruleset: Setting<Ruleset>) =
     inherit Page()
@@ -92,5 +95,4 @@ type EditGradesPage(ruleset: Setting<Ruleset>) =
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.grades"
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh()

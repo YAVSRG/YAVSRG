@@ -284,5 +284,4 @@ type SelectSkinsPage() =
 
     override this.OnDestroy() = preview.Destroy()
 
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh()

@@ -23,7 +23,6 @@ type private PracticeToolsPage(state: PracticeState) =
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SETTINGS (%"practice.tools")
-    override this.OnClose() = ()
 
 type SyncSuggestionControls(state: PracticeState) =
     inherit Container(NodeType.None)

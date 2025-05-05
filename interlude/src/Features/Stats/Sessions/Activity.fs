@@ -104,7 +104,6 @@ type AllYearsActivityPage(selected: Setting<(DateOnly * Session) option>) =
             .Position(Position.ShrinkT(120.0f).ShrinkB(80.0f).SliceX(1380.0f))
 
     override this.Title = %"stats.activity"
-    override this.OnClose() = ()
 
 type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
     inherit Container(NodeType.Leaf)

@@ -29,26 +29,30 @@ type LobbySettingsPage(lobby: Lobby) =
     let host_rotation = Setting.simple settings.HostRotation
     let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
 
-    override this.Content() =
-        page_container()
-        |+ PageTextEntry(%"lobby.name", name).Pos(0)
-        |+ PageSetting(%"lobby.host_rotation", Checkbox host_rotation)
-            .Help(Help.Info("lobby.host_rotation"))
-            .Pos(3)
-        |+ PageSetting(%"lobby.auto_countdown", Checkbox auto_countdown)
-            .Help(Help.Info("lobby.auto_countdown"))
-            .Pos(5)
-        :> Widget
-
-    override this.Title = %"lobby"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         lobby.ChangeSettings
             {
                 Name = name.Value
                 HostRotation = host_rotation.Value
                 AutomaticRoundCountdown = auto_countdown.Value
             }
+
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageTextEntry(%"lobby.name", name)
+                    .Pos(0),
+                PageSetting(%"lobby.host_rotation", Checkbox host_rotation)
+                    .Help(Help.Info("lobby.host_rotation"))
+                    .Pos(3),
+                PageSetting(%"lobby.auto_countdown", Checkbox auto_countdown)
+                    .Help(Help.Info("lobby.auto_countdown"))
+                    .Pos(5)
+            )
+
+    override this.Title = %"lobby"
 
 type LobbyUI(lobby: Lobby) =
     inherit Container(NodeType.None)

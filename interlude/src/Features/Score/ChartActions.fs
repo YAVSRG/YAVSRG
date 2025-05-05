@@ -45,7 +45,7 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
             |+ PageButton(%"chart.change_offset", fun () ->
                 match SelectedChart.CHART, SelectedChart.SAVE_DATA with
                 | Some chart, Some save_data ->
-                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
+                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data)
                         .Show()
                 | _ -> ()
             )
@@ -76,4 +76,3 @@ type ScoreChartContextMenu(score_info: ScoreInfo) =
         content
 
     override this.Title = score_info.ChartMeta.Title
-    override this.OnClose() = ()

@@ -95,5 +95,3 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
             )
 
     override this.Title = %"mount.create"
-
-    override this.OnClose() = ()

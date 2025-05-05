@@ -31,7 +31,15 @@ type PerformanceSettingsPage() =
     let mutable pending_custom_frame_limit = false
     let custom_frame_limit_box = NumberEntry.Create(config.CustomFrameLimit |> Setting.trigger (fun _ -> pending_custom_frame_limit <- true))
 
+    member this.SaveChanges() =
+        if pending_custom_frame_limit then
+            pending_custom_frame_limit <- false
+            config.Apply()
+        closed <- true
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageSetting(
@@ -122,11 +130,5 @@ type PerformanceSettingsPage() =
                 (Rect.FromSize(this.Bounds.Right - 300.0f, this.Bounds.Top - 100.0f, 100.0f, 100.0f).Translate(0.0f, (this.Bounds.Height + 100.0f) * y + anti_jitter))
                 Color.White
                 texture
-
-    override this.OnClose() =
-        if pending_custom_frame_limit then
-            pending_custom_frame_limit <- false
-            config.Apply()
-        closed <- true
 
     override this.Title = %"system.performance"

@@ -36,4 +36,3 @@ type LanecoverPage() =
 
     override this.Title = %"gameplay.lanecover"
     override this.OnDestroy() = preview.Destroy()
-    override this.OnClose() = ()

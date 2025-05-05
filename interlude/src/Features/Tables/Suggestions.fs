@@ -97,7 +97,6 @@ type RejectSuggestionPage(table: Table, suggestion: Suggestion) =
         :> Widget
 
     override this.Title = suggestion.SongTitle
-    override this.OnClose() = ()
 
 type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
     inherit Page()
@@ -143,6 +142,8 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         )
 
     override this.Content() =
+        this.OnClose(fun () -> still_open <- false)
+
         page_container()
         |+ PageButton.Once(%"table.suggestions.playtest", playtest_suggestion, K (suggestion.LocalChart.IsNone && suggestion.BackbeatInfo.IsNone))
             .Icon(Icons.PLAY)
@@ -208,7 +209,6 @@ type ViewSuggestionPage(table: Table, suggestion: Suggestion) =
         } :> Widget
 
     override this.Title = %"table.suggestion"
-    override this.OnClose() = still_open <- false
 
 type SuggestionsList(table: Table) =
     inherit
@@ -259,5 +259,4 @@ type SuggestionsPage(table: Table) =
             )
 
     override this.Title = %"table.suggestions"
-    override this.OnClose() = ()
-    override this.OnReturnFromNestedPage() = suggestions_list.Reload()
+        override this.OnReturnFromNestedPage() = suggestions_list.Reload()

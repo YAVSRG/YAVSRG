@@ -62,4 +62,3 @@ type ImportsPage() =
             )
 
     override this.Title = sprintf "%s %s" Icons.DOWNLOAD (%"menu.import")
-    override this.OnClose() = ()

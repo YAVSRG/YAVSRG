@@ -7,7 +7,7 @@ open Prelude
 open Interlude.Content
 open Interlude.UI
 
-type RateModsPage(on_close: unit -> unit) =
+type RateModsPage() =
     inherit Page()
 
     let config = Content.HUD
@@ -26,19 +26,20 @@ type RateModsPage(on_close: unit -> unit) =
                 )
         }
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.ratemodmeter.showmods", Checkbox show_mods)
-            .Help(Help.Info("hud.ratemodmeter.showmods"))
-            .Pos(0)
-        :> Widget
-
-    override this.Title = %"hud.ratemodmeter"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 RateModMeterShowMods = show_mods.Value
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.ratemodmeter.showmods", Checkbox show_mods)
+                    .Help(Help.Info("hud.ratemodmeter.showmods"))
+                    .Pos(0)
+            )
+
+    override this.Title = %"hud.ratemodmeter"

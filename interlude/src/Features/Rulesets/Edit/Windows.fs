@@ -129,22 +129,21 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
             | _ -> ()
 
     override this.Title = %"rulesets.edit.windows"
-    override this.OnClose() = ()
 
+// todo: make into type with uppercase static constructors
 module EditWindows =
 
     let note_windows (ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
-        { new EditWindowsPage(
-                new_judgements,
-                Array.init new_judgements.Length (fun i ->
-                    Setting.make
-                        (fun v -> new_judgements.[i] <- { new_judgements.[i] with TimingWindows = v })
-                        (fun () -> new_judgements.[i].TimingWindows)
-                )
-            ) with
-            override this.OnClose() = ruleset.Value <- { ruleset.Value with Judgements = new_judgements }
-        }
+        EditWindowsPage(
+            new_judgements,
+            Array.init new_judgements.Length (fun i ->
+                Setting.make
+                    (fun v -> new_judgements.[i] <- { new_judgements.[i] with TimingWindows = v })
+                    (fun () -> new_judgements.[i].TimingWindows)
+            )
+        )
+            .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
     let notes_windows_as_release_windows (ruleset: Setting<Ruleset>) : Page =
         let new_judgements = ruleset.Value.Judgements |> Array.copy
@@ -156,9 +155,9 @@ module EditWindows =
                         (fun () -> new_judgements.[i].TimingWindows)
                 )
             ) with
-            override this.OnClose() = ruleset.Value <- { ruleset.Value with Judgements = new_judgements }
             override this.Title = %"rulesets.mechanics.release_windows"
         }
+            .WithOnClose(fun () -> ruleset.Value <- { ruleset.Value with Judgements = new_judgements })
 
     let release_windows (judgements: Judgement array, windows: (GameplayTime * GameplayTime) option array) : Page =
         { new EditWindowsPage(

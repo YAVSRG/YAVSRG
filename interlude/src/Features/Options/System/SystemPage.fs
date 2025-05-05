@@ -94,6 +94,4 @@ type SystemPage() =
                 SystemPage.VisualOffset().Pos(14)
             )
 
-    override this.OnClose() = ()
-
     override this.Title = %"system"

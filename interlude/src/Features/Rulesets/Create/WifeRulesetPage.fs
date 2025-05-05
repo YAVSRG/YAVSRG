@@ -39,4 +39,3 @@ type WifeRulesetPage() =
             )
 
     override this.Title = %"rulesets.create.wife"
-    override this.OnClose() = ()

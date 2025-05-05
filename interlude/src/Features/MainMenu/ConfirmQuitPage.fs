@@ -39,4 +39,3 @@ type ConfirmQuitPage(on_confirm: unit -> unit) =
         :> Widget
 
     override this.Title = %"confirm"
-    override this.OnClose() = ()

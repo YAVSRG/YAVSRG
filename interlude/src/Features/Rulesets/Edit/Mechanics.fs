@@ -76,7 +76,36 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         | HoldMechanics.JudgeReleasesSeparately (w, _) -> w
         | _ -> ruleset.Value.Judgements |> Array.map (_.TimingWindows)
 
+    member this.SaveChanges() =
+        ruleset.Set
+            { ruleset.Value with
+                HitMechanics =
+                    {
+                        NotePriority =
+                            match note_priority.Value with
+                            | 2 -> NotePriority.Etterna
+                            | 1 -> NotePriority.OsuMania
+                            | _ -> NotePriority.Interlude cbrush_window.Value
+                        GhostTapJudgement = ghost_tap_judgement.Value
+                    }
+                HoldMechanics =
+                    match hold_mechanics_type.Value with
+                    | 1 ->
+                        HoldMechanics.CombineHeadAndTail (
+                            HeadTailCombineRule.HeadJudgementOr (
+                                release_early_window.Value, release_late_window.Value,
+                                judgement_if_dropped.Value, judgement_if_overheld.Value
+                            )
+                        )
+                    | 2 -> HoldMechanics.OnlyRequireHold release_window.Value
+                    | 3 -> HoldMechanics.JudgeReleasesSeparately (release_timing_windows, judgement_if_overheld.Value)
+                    | 4 -> HoldMechanics.OnlyJudgeReleases (judgement_if_dropped.Value)
+                    | _ -> ruleset.Value.HoldMechanics
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         let ghost_tap_judgement_options : (int option * string) array =
             Array.append
                 [| None, %"rulesets.mechanics.ghost_tap_judgement.none" |]
@@ -218,29 +247,3 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
         :> Widget
 
     override this.Title = %"rulesets.edit.mechanics"
-    override this.OnClose() =
-        ruleset.Set
-            { ruleset.Value with
-                HitMechanics =
-                    {
-                        NotePriority =
-                            match note_priority.Value with
-                            | 2 -> NotePriority.Etterna
-                            | 1 -> NotePriority.OsuMania
-                            | _ -> NotePriority.Interlude cbrush_window.Value
-                        GhostTapJudgement = ghost_tap_judgement.Value
-                    }
-                HoldMechanics =
-                    match hold_mechanics_type.Value with
-                    | 1 ->
-                        HoldMechanics.CombineHeadAndTail (
-                            HeadTailCombineRule.HeadJudgementOr (
-                                release_early_window.Value, release_late_window.Value,
-                                judgement_if_dropped.Value, judgement_if_overheld.Value
-                            )
-                        )
-                    | 2 -> HoldMechanics.OnlyRequireHold release_window.Value
-                    | 3 -> HoldMechanics.JudgeReleasesSeparately (release_timing_windows, judgement_if_overheld.Value)
-                    | 4 -> HoldMechanics.OnlyJudgeReleases (judgement_if_dropped.Value)
-                    | _ -> ruleset.Value.HoldMechanics
-            }

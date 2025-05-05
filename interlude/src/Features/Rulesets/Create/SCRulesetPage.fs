@@ -32,4 +32,3 @@ type SCRulesetPage() =
             )
 
     override this.Title = %"rulesets.create.sc"
-    override this.OnClose() = ()

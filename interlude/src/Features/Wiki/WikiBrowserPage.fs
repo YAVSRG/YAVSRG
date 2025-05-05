@@ -131,7 +131,6 @@ type WikiBrowserPage() =
 
     override this.Footer() = Dummy()
 
-    override this.OnClose() = ()
     override this.Title = %"menu.wiki"
 
     static member Show() =

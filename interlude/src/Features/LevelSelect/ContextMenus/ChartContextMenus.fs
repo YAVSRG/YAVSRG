@@ -49,7 +49,6 @@ type ChartDeleteMenu(chart_meta: ChartMeta, context: LibraryContext, is_submenu:
         :> Widget
 
     override this.Title = %"chart.delete"
-    override this.OnClose() = ()
 
 #nowarn "40"
 
@@ -142,7 +141,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
             |+ PageButton(%"chart.change_offset", fun () ->
                 match SelectedChart.CHART, SelectedChart.SAVE_DATA with
                 | Some chart, Some save_data ->
-                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data, ignore)
+                    LocalOffsetPage(LocalOffset.get_recent_suggestion chart save_data, LocalOffset.offset_setting save_data)
                         .Show()
                 | _ -> ()
             )
@@ -184,4 +183,3 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
         :> Widget
 
     override this.Title = chart_meta.Title
-    override this.OnClose() = ()

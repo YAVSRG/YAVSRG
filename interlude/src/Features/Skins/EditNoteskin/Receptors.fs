@@ -466,7 +466,49 @@ type AnimationSettingsPage() =
                     .Conditional(enable_explosions.Get)
             )
 
+    member this.SaveChanges() =
+        Skins.save_noteskin_config
+            { Content.NoteskinConfig with
+                NotesUnderReceptors = notes_under_receptors.Value
+
+                UseReceptors = enable_receptors.Value
+                ReceptorStyle = receptor_style.Value
+                ReceptorOffset = receptor_offset.Value
+
+                UseJudgementLine = enable_judgement_line.Value
+                JudgementLineScale = judgement_line_scale.Value
+                JudgementLineOffset = judgement_line_offset.Value
+
+                EnableColumnLight = enable_column_light.Value
+                ColumnLightOffset = column_light_offset.Value
+                ColumnLightDuration = column_light_duration.Value
+
+                UseExplosions = enable_explosions.Value
+                NoteExplosionSettings =
+                    {
+                        AnimationFrameTime = explosion_frame_time_note.Value
+                        Scale = explosion_scale_note.Value
+                        Colors = explosion_colors_note.Value
+                        Offset = explosion_offset_note.Value
+                        UseBuiltInAnimation = explosion_builtin_note.Value
+                        Duration = explosion_duration_note.Value
+                        ExpandAmount = explosion_expand_note.Value
+                    }
+                HoldExplosionSettings =
+                    {
+                        AnimationFrameTime = explosion_frame_time_hold.Value
+                        Scale = explosion_scale_hold.Value
+                        Colors = explosion_colors_hold.Value
+                        Offset = explosion_offset_hold.Value
+                        UseReleaseExplosion = explosion_hold_use_release.Value
+                        ReleaseUseBuiltInAnimation = explosion_builtin_release.Value
+                        Duration = explosion_duration_hold.Value
+                        ExpandAmount = explosion_expand_hold.Value
+                    }
+            }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
         let tab_container = SwapContainer(receptors_tab)
 
         let tab_options : (Widget * string) array =
@@ -664,44 +706,3 @@ type AnimationSettingsPage() =
                     (Sprite.pick_texture (f_hold_ex.Loops, 0) releaseexplosion)
 
     override this.Title = %"noteskin.animations"
-
-    override this.OnClose() =
-        Skins.save_noteskin_config
-            { Content.NoteskinConfig with
-                NotesUnderReceptors = notes_under_receptors.Value
-
-                UseReceptors = enable_receptors.Value
-                ReceptorStyle = receptor_style.Value
-                ReceptorOffset = receptor_offset.Value
-
-                UseJudgementLine = enable_judgement_line.Value
-                JudgementLineScale = judgement_line_scale.Value
-                JudgementLineOffset = judgement_line_offset.Value
-
-                EnableColumnLight = enable_column_light.Value
-                ColumnLightOffset = column_light_offset.Value
-                ColumnLightDuration = column_light_duration.Value
-
-                UseExplosions = enable_explosions.Value
-                NoteExplosionSettings =
-                    {
-                        AnimationFrameTime = explosion_frame_time_note.Value
-                        Scale = explosion_scale_note.Value
-                        Colors = explosion_colors_note.Value
-                        Offset = explosion_offset_note.Value
-                        UseBuiltInAnimation = explosion_builtin_note.Value
-                        Duration = explosion_duration_note.Value
-                        ExpandAmount = explosion_expand_note.Value
-                    }
-                HoldExplosionSettings =
-                    {
-                        AnimationFrameTime = explosion_frame_time_hold.Value
-                        Scale = explosion_scale_hold.Value
-                        Colors = explosion_colors_hold.Value
-                        Offset = explosion_offset_hold.Value
-                        UseReleaseExplosion = explosion_hold_use_release.Value
-                        ReleaseUseBuiltInAnimation = explosion_builtin_release.Value
-                        Duration = explosion_duration_hold.Value
-                        ExpandAmount = explosion_expand_hold.Value
-                    }
-            }

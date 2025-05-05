@@ -71,6 +71,4 @@ type AudioPage() =
                 AudioPage.AutomaticOffset().Pos(12)
             )
 
-    override this.OnClose() = ()
-
     override this.Title = Icons.SPEAKER + " " + %"system.audio"

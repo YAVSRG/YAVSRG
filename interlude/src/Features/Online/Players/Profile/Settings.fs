@@ -57,4 +57,3 @@ type private ProfileSettingsPage(profile: ProfileData, profile_color: Setting<in
         :> Widget
 
     override this.Title = %"profile_settings"
-    override this.OnClose() = ()

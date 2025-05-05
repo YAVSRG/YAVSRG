@@ -476,7 +476,6 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = table.Info.Name
-    override this.OnClose() = ()
 
     static member LoadOrOpen(table: Table) =
         match existing_states.TryFind table.Id with

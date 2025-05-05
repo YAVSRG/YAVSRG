@@ -71,6 +71,7 @@ type private MountFileDropPage(game: MountedGameType, callback: string -> unit) 
                 | MountedGameType.Stepmania, _ -> Notifications.error (%"mount.create.stepmania.error", "")
                 | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
             |> Some
+        this.OnClose(fun () -> FileDrop.on_file_drop <- None)
 
         page_container()
             .With(
@@ -79,8 +80,6 @@ type private MountFileDropPage(game: MountedGameType, callback: string -> unit) 
             )
 
     override this.Title = %"mount.folder_not_detected"
-
-    override this.OnClose() = FileDrop.on_file_drop <- None
 
 module Mounts =
 

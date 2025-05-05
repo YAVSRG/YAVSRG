@@ -47,4 +47,3 @@ type ConfirmUnlinkedImportPage(path: string) =
             )
 
     override this.Title = %"unlinkedsongsimport"
-    override this.OnClose() = ()

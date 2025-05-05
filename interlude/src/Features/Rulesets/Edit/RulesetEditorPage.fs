@@ -35,7 +35,14 @@ type RulesetEditorPage(id: string, original: Ruleset) =
 
     let name = Setting.simple ruleset.Value.Name
 
+    member this.SaveChangesIfValid() =
+        let has_error = match validation_message.Current with :? Dummy -> false | _ -> true
+        if not has_error then
+            Rulesets.update id { ruleset.Value with Name = name.Value.Trim() }
+
     override this.Content() =
+        this.OnClose(this.SaveChangesIfValid)
+
         page_container()
             .With(
                 PageTextEntry(%"rulesets.edit.name", name)
@@ -56,7 +63,3 @@ type RulesetEditorPage(id: string, original: Ruleset) =
             )
 
     override this.Title = original.Name
-    override this.OnClose() =
-        let has_error = match validation_message.Current with :? Dummy -> false | _ -> true
-        if not has_error then
-            Rulesets.update id { ruleset.Value with Name = name.Value.Trim() }

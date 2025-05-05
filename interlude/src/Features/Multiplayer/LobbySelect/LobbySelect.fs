@@ -24,20 +24,21 @@ type LobbySelectPage() =
                 }
         )
 
-    let subscribed_events =
-        NetworkEvents.receive_lobby_list.Subscribe (fun lobbies -> lobby_list.UpdateList lobbies),
-        NetworkEvents.receive_invite.Subscribe (fun _ -> invite_list.UpdateList()),
-        NetworkEvents.join_lobby.Subscribe (fun lobby -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
-
     override this.Content() =
-        Container(NodeType.Leaf)
-        |+ lobby_list
-        |+ invite_list
-        :> Widget
+
+        this.OnClose(
+            NetworkEvents.receive_lobby_list
+                .Subscribe(fun lobbies -> lobby_list.UpdateList lobbies)
+        )
+        this.OnClose(
+            NetworkEvents.receive_invite
+                .Subscribe(fun _ -> invite_list.UpdateList())
+        )
+        this.OnClose(
+            NetworkEvents.join_lobby
+                .Subscribe(fun lobby -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
+        )
+
+        Container(NodeType.Leaf).With(lobby_list, invite_list)
 
     override this.Title = %"select_lobby"
-    override this.OnClose() =
-        let a, b, c = subscribed_events
-        a.Dispose()
-        b.Dispose()
-        c.Dispose()

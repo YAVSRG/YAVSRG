@@ -165,7 +165,9 @@ type PlayScreen =
             Song.pause()
             liveplay.Finish()
             offset_manually_changed <- true
-            LocalOffsetPage(LocalOffset.get_automatic state info.SaveData, offset_setting, retry).Show()
+            LocalOffsetPage(LocalOffset.get_automatic state info.SaveData, offset_setting)
+                .WithOnClose(retry)
+                .Show()
 
         { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
             override this.AddWidgets() =

@@ -26,7 +26,47 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
         Notifications.action_feedback (Icons.TRASH, %"notification.mount_deleted", linked_chart_count.ToString())
         Menu.Back()
 
+    member this.SaveChangesAndImport() =
+
+        if queued_import >= 0 then
+            setting.Value <-
+                Some
+                    { mount with
+                        ImportOnStartup = import_on_startup.Value
+                        CopyAssetFiles = copy_assets.Value
+                    }
+
+        if queued_import > 0 then
+
+            let task_tracking =
+                if queued_import = 2 then %"mount.importall" else %"mount.import"
+                |> sprintf "%O: %s" game
+                |> TaskTracking.add
+
+            let task =
+                if queued_import = 2 then
+                    Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
+                else
+                    Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
+
+            import_queue.Request(task,
+                function
+                | Ok result ->
+                    Notifications.task_feedback (
+                        Icons.CHECK,
+                        %"notification.import_success",
+                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
+                        %> "notification.import_success.body"
+                    )
+                    Content.TriggerChartAdded()
+                | Error reason ->
+                    Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
+                    Notifications.error (%"notification.import_failed", reason)
+            )
+
     override this.Content() =
+        this.OnClose(this.SaveChangesAndImport)
+
         page_container()
             .With(
                 PageSetting(%"mount.importatstartup",
@@ -111,41 +151,3 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
             )
 
     override this.Title = %"mount"
-
-    override this.OnClose() =
-
-        if queued_import >= 0 then
-            setting.Value <-
-                Some
-                    { mount with
-                        ImportOnStartup = import_on_startup.Value
-                        CopyAssetFiles = copy_assets.Value
-                    }
-
-        if queued_import > 0 then
-
-            let task_tracking =
-                if queued_import = 2 then %"mount.importall" else %"mount.import"
-                |> sprintf "%O: %s" game
-                |> TaskTracking.add
-
-            let task =
-                if queued_import = 2 then
-                    Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
-                else
-                    Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
-
-            import_queue.Request(task,
-                function
-                | Ok result ->
-                    Notifications.task_feedback (
-                        Icons.CHECK,
-                        %"notification.import_success",
-                        [ result.ConvertedCharts.ToString(); result.SkippedCharts.Length.ToString() ]
-                        %> "notification.import_success.body"
-                    )
-                    Content.TriggerChartAdded()
-                | Error reason ->
-                    Logging.Error "Error importing %s: %s" setting.Value.Value.SourceFolder reason
-                    Notifications.error (%"notification.import_failed", reason)
-            )

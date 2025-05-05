@@ -45,4 +45,3 @@ type AnchorPage(ctx: PositionerContext) =
         :> Widget
 
     override this.Title = %"hud.anchor" + " - " + HudElement.name ctx.Selected.Value
-    override this.OnClose() = ()

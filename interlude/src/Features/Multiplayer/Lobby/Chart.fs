@@ -32,7 +32,6 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
         :> Widget
 
     override this.Title = chart_meta.Title
-    override this.OnClose() = ()
 
 module LobbyChart =
 

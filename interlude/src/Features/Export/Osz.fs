@@ -94,4 +94,3 @@ type OsuExportOptionsPage(title: string, selected_mods: ModState, on_submit: boo
             )
 
     override this.Title = title
-    override this.OnClose() = ()

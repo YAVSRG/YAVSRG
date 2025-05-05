@@ -59,5 +59,4 @@ type SelectTablePage(refresh_table_view: unit -> unit) =
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y))
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"table")
-    override this.OnClose() = ()
-    override this.OnReturnFromNestedPage() = refresh ()
+        override this.OnReturnFromNestedPage() = refresh ()

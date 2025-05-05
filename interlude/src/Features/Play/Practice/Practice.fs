@@ -134,9 +134,10 @@ type PracticeScreen =
                     if not state.Paused.Value then pause this
                     LocalOffsetPage(
                         (match state.SyncSuggestions with Some s -> s.AudioOffset | None -> state.SaveData.Offset),
-                        LocalOffset.offset_setting state.SaveData,
-                        fun () -> restart this
-                    ).Show()
+                        LocalOffset.offset_setting state.SaveData
+                    )
+                        .WithOnClose(fun () -> restart this)
+                        .Show()
 
                 elif (%%"accept_offset").Pressed() then
                     if state.Paused.Value then

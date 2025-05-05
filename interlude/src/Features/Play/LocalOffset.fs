@@ -55,7 +55,7 @@ module LocalOffset =
         | Some (c, offset) when chart = c -> offset
         | _ -> save_data.Offset
 
-type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on_close: unit -> unit) =
+type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>) =
     inherit Page()
 
     let offset_slider =
@@ -75,6 +75,8 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
         setting.Set 0.0f<ms>
 
     override this.Content() =
+        this.OnClose(fun () -> Selection.up false)
+
         GameThread.defer (fun () -> offset_slider.Select false)
 
         page_container()
@@ -102,7 +104,3 @@ type LocalOffsetPage(recommended_offset: Time, setting: Setting<float32<ms>>, on
         base.Update(elapsed_ms, moved)
 
     override this.Title = %"play.localoffset"
-
-    override this.OnClose() =
-        Selection.up false
-        on_close()

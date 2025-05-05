@@ -99,7 +99,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             .Position(Position.ShrinkPercentL(0.35f).ShrinkX(20.0f).ShrinkL(10.0f).SliceB(10.0f, 50.0f))
             .With(
                 InlaidButton(%"score.graph.settings", fun () ->
-                    ScoreGraphSettingsPage(graph).Show()
+                    ScoreGraphSettingsPage(score_info.WithMods.Keys, graph.ApplyColumnFilter).Show()
                 )
                     .Icon(Icons.EDIT_2)
                     .Position(Position.GridX(1, 4, 30.0f)),

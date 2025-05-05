@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
 
-type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, draw_preview: Rect -> Color -> unit, on_close: unit -> unit) =
+type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, draw_preview: Rect -> Color -> unit) =
     inherit Page()
 
     let mutable hex = color.Value.ToHex()
@@ -153,7 +153,6 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, dr
         base.Draw()
 
     override this.Title = title
-    override this.OnClose() = on_close()
 
 type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as this =
     inherit Container(NodeType.Button(fun _ -> this.Edit()))
@@ -162,8 +161,8 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
 
     member val Preview: Rect -> Color -> unit = Render.rect with get, set
 
-    override this.Init (parent: Widget) =
-        this |* MouseListener().Button(this)
+    override this.Init(parent: Widget) =
+        this.Add(MouseListener().Button(this))
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
@@ -177,7 +176,9 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
 
     member this.Edit() =
         Style.click.Play()
-        ColorPickerPage(label, color, allow_alpha, this.Preview, fun () -> hex <- color.Value.ToHex()).Show()
+        ColorPickerPage(label, color, allow_alpha, this.Preview)
+            .WithOnClose(fun () -> hex <- color.Value.ToHex())
+            .Show()
 
 [<Extension>]
 type ColorPickerExtensions =

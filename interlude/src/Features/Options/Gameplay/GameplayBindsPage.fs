@@ -95,4 +95,3 @@ type GameplayBindsPage() =
             })
 
     override this.Title = %"gameplay.keybinds"
-    override this.OnClose() = ()

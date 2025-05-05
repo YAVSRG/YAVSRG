@@ -14,29 +14,36 @@ type LoginPage() =
             waiting_for_browser <- true
             Network.begin_login ()
 
-    let subscribed_events =
-        NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back()),
-        NetworkEvents.waiting_registration.Subscribe(fun discord_tag ->
-            waiting_for_browser <- false
-            RegisterPage(discord_tag).Show()
-        ),
-        NetworkEvents.login_failed.Subscribe(fun _ -> waiting_for_browser <- false),
-        NetworkEvents.registration_failed.Subscribe(fun _ -> waiting_for_browser <- false)
-
     let info = Callout.Small.Icon(Icons.GLOBE).Title(%"login.waiting_for_discord")
 
     override this.Content() =
+
+        this.OnClose(
+            NetworkEvents.successful_login.Subscribe(fun _ -> Menu.Back())
+        )
+        this.OnClose(
+            NetworkEvents.waiting_registration
+                .Subscribe(fun discord_tag ->
+                    waiting_for_browser <- false
+                    RegisterPage(discord_tag).Show()
+                )
+        )
+        this.OnClose(
+            NetworkEvents.login_failed
+                .Subscribe(fun _ -> waiting_for_browser <- false)
+        )
+        this.OnClose(
+            NetworkEvents.registration_failed
+                .Subscribe(fun _ -> waiting_for_browser <- false)
+        )
+
         page_container()
-        |+ PageButton(%"login.login_with_discord", login).Pos(0)
-        |+ (CalloutCard(info).Position(fun (w, h) -> Position.SliceT(400.0f, h)))
-            .Conditional(fun () -> waiting_for_browser)
-        :> Widget
+            .With(
+                PageButton(%"login.login_with_discord", login)
+                    .Pos(0),
+                CalloutCard(info)
+                    .Position(fun (w, h) -> Position.SliceT(400.0f, h))
+                    .Conditional(fun () -> waiting_for_browser)
+            )
 
     override this.Title = %"login"
-
-    override this.OnClose() =
-        let a,b,c,d = subscribed_events
-        a.Dispose()
-        b.Dispose()
-        c.Dispose()
-        d.Dispose()

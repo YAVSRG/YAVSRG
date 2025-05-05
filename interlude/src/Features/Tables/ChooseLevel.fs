@@ -29,5 +29,4 @@ type SelectTableLevelPage(table: Table, action: int -> unit) =
             .Position(Position.Shrink(100.0f, 200.0f))
 
     override this.Title = %"table"
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh ()

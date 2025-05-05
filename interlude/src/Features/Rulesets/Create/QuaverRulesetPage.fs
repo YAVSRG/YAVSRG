@@ -33,4 +33,3 @@ type QuaverRulesetPage() =
             )
 
     override this.Title = %"rulesets.create.quaver"
-    override this.OnClose() = ()

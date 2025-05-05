@@ -70,7 +70,6 @@ module Skins =
                 )
 
         override this.Title = Path.GetFileName source_path
-        override this.OnClose() = ()
 
     let import_stepmania_noteskin (path: string) : unit =
         let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")

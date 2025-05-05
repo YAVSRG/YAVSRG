@@ -131,4 +131,3 @@ type TableBrowserPage() =
         :> Widget
 
     override this.Title = sprintf "%s %s" Icons.SIDEBAR (%"tables.browser")
-    override this.OnClose() = ()

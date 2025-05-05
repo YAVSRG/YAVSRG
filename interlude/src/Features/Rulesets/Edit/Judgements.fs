@@ -15,7 +15,14 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
     let color = Setting.simple judgement.Color
     let breaks_combo = Setting.simple judgement.BreaksCombo
 
+    member this.SaveChanges() =
+        let new_js = ruleset.Value.Judgements |> Array.copy
+        new_js.[id] <- { judgement with Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
+        ruleset.Set { ruleset.Value with Judgements = new_js }
+
     override this.Content() =
+        this.OnClose(this.SaveChanges)
+
         page_container()
             .With(
                 PageTextEntry(%"rulesets.judgement.name", name)
@@ -30,10 +37,6 @@ type EditJudgementPage(ruleset: Setting<Ruleset>, id: int) =
             )
 
     override this.Title = judgement.Name
-    override this.OnClose() =
-        let new_js = ruleset.Value.Judgements |> Array.copy
-        new_js.[id] <- { judgement with Name = name.Value.Trim(); Color = color.Value; BreaksCombo = breaks_combo.Value }
-        ruleset.Set { ruleset.Value with Judgements = new_js }
 
 type EditJudgementsPage(ruleset: Setting<Ruleset>) =
     inherit Page()
@@ -83,5 +86,4 @@ type EditJudgementsPage(ruleset: Setting<Ruleset>) =
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceL(PAGE_ITEM_WIDTH))
 
     override this.Title = %"rulesets.edit.judgements"
-    override this.OnClose() = ()
     override this.OnReturnFromNestedPage() = refresh()

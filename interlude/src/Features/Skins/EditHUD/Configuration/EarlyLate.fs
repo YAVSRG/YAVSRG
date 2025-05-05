@@ -2,12 +2,11 @@ namespace Interlude.Features.Skins.EditHUD
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude
 open Interlude.Content
 open Interlude.UI
 
-type EarlyLatePage(on_close: unit -> unit) =
+type EarlyLatePage() =
     inherit Page()
 
     let config = Content.HUD
@@ -27,45 +26,7 @@ type EarlyLatePage(on_close: unit -> unit) =
     let early_color = Setting.simple config.EarlyLateMeterEarlyColor
     let late_color = Setting.simple config.EarlyLateMeterLateColor
 
-    override this.Content() =
-        page_container()
-        |+ PageSetting(%"hud.early_late.duration", Slider(duration |> Setting.uom, Step = 5f))
-            .Help(Help.Info("hud.early_late.duration"))
-            .Pos(0)
-        |+ PageSetting(%"hud.early_late.usetexture", Checkbox use_texture)
-            .Help(Help.Info("hud.early_late.usetexture"))
-            .Pos(2)
-        |+ PageSetting(%"hud.early_late.frametime", Slider(frame_time |> Setting.uom, Step = 5f))
-            .Help(Help.Info("hud.early_late.frametime"))
-            .Pos(4)
-            .Conditional(use_texture.Get)
-        |+ PageTextEntry(%"hud.early_late.earlytext", early_text)
-            .Help(Help.Info("hud.early_late.earlytext"))
-            .Pos(4)
-            .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.earlycolor",
-            ColorPicker(%"hud.early_late.earlycolor", early_color, false)
-                .Preview(early_text.get_Value)
-        )
-            .Help(Help.Info("hud.early_late.earlycolor"))
-            .Pos(6)
-            .Conditional(use_texture.Get >> not)
-        |+ PageTextEntry(%"hud.early_late.latetext", late_text)
-            .Help(Help.Info("hud.early_late.latetext"))
-            .Pos(9)
-            .Conditional(use_texture.Get >> not)
-        |+ PageSetting(%"hud.early_late.latecolor",
-            ColorPicker(%"hud.early_late.latecolor", late_color, false)
-                .Preview(late_text.get_Value)
-        )
-            .Help(Help.Info("hud.early_late.latecolor"))
-            .Pos(11)
-            .Conditional(use_texture.Get >> not)
-        :> Widget
-
-    override this.Title = %"hud.early_late"
-
-    override this.OnClose() =
+    member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
                 EarlyLateMeterDuration = duration.Value
@@ -76,4 +37,46 @@ type EarlyLatePage(on_close: unit -> unit) =
                 EarlyLateMeterLateColor = late_color.Value
             }
 
-        on_close ()
+    override this.Content() =
+        this.OnClose(this.SaveChanges)
+
+        page_container()
+            .With(
+                PageSetting(%"hud.early_late.duration", Slider(duration |> Setting.uom, Step = 5f))
+                    .Help(Help.Info("hud.early_late.duration"))
+                    .Pos(0),
+                PageSetting(%"hud.early_late.usetexture", Checkbox use_texture)
+                    .Help(Help.Info("hud.early_late.usetexture"))
+                    .Pos(2)
+            )
+            .WithConditional(
+                use_texture.Get,
+
+                PageSetting(%"hud.early_late.frametime", Slider(frame_time |> Setting.uom, Step = 5f))
+                    .Help(Help.Info("hud.early_late.frametime"))
+                    .Pos(4)
+            )
+            .WithConditional(
+                use_texture.Get >> not,
+
+                PageTextEntry(%"hud.early_late.earlytext", early_text)
+                    .Help(Help.Info("hud.early_late.earlytext"))
+                    .Pos(4),
+                PageSetting(%"hud.early_late.earlycolor",
+                    ColorPicker(%"hud.early_late.earlycolor", early_color, false)
+                        .Preview(early_text.get_Value)
+                )
+                    .Help(Help.Info("hud.early_late.earlycolor"))
+                    .Pos(6),
+                PageTextEntry(%"hud.early_late.latetext", late_text)
+                    .Help(Help.Info("hud.early_late.latetext"))
+                    .Pos(9),
+                PageSetting(%"hud.early_late.latecolor",
+                    ColorPicker(%"hud.early_late.latecolor", late_color, false)
+                        .Preview(late_text.get_Value)
+                )
+                    .Help(Help.Info("hud.early_late.latecolor"))
+                    .Pos(11)
+            )
+
+    override this.Title = %"hud.early_late"

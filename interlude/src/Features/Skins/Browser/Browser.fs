@@ -107,5 +107,3 @@ type SkinsBrowserPage() =
         :> Widget
 
     override this.Title = %"skins.browser"
-
-    override this.OnClose() = ()
