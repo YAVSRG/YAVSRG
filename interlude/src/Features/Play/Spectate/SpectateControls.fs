@@ -7,7 +7,7 @@ open Prelude
 open Interlude.UI
 open Interlude.Features.Gameplay
 
-type private Controls(who: unit -> string, cycle: unit -> unit) =
+type private SpectateControls(who: unit -> string, cycle: unit -> unit) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
@@ -30,7 +30,7 @@ type private Controls(who: unit -> string, cycle: unit -> unit) =
         Render.rect this.Bounds Colors.black.O2
         base.Draw()
 
-type private ControlOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: unit -> string, cycle: unit -> unit) =
+type private SpectateOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: unit -> string, cycle: unit -> unit) =
     inherit SlideContainer(NodeType.None)
 
     let mutable show = true
@@ -39,7 +39,7 @@ type private ControlOverlay(info: LoadedChartInfo, on_seek: Time -> unit, who: u
     override this.Init(parent) =
         this
         |+ Timeline(info.WithMods, on_seek, SelectedChart.rate)
-        |* Controls(who, cycle)
+        |* SpectateControls(who, cycle)
             .Position(Position.Box(0.0f, 0.0f, 30.0f, 70.0f, 440.0f, 100.0f))
 
         base.Init parent

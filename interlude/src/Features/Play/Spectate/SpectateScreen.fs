@@ -13,9 +13,9 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
-module Spectate =
+type SpectateScreen =
 
-    let spectate_screen (info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) =
+    static member Create(info: LoadedChartInfo, username: string, replay_info: LobbyPlayerReplayInfo, lobby: Lobby) : Screen =
 
         let mutable currently_spectating = username
         let mutable scoring = replay_info.ScoreProcessor
@@ -71,7 +71,7 @@ module Spectate =
 
                 this
                     .Add(
-                        ControlOverlay(
+                        SpectateOverlay(
                             info,
                             ignore,
                             (fun () -> currently_spectating),

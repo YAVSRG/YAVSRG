@@ -18,11 +18,11 @@ open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
 
-module PlayScreen =
+type PlayScreen =
 
-    let SHOW_START_OVERLAY = true
+    static let SHOW_START_OVERLAY = true
 
-    let rec play_screen (info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) =
+    static member Create(info: LoadedChartInfo, pacemaker_ctx: PacemakerCreationContext) : Screen =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote
@@ -52,7 +52,7 @@ module PlayScreen =
         let retry () =
             if
                 Screen.change_new
-                    (fun () -> play_screen (info, pacemaker_ctx) :> Screen)
+                    (fun () -> PlayScreen.Create(info, pacemaker_ctx))
                     ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then

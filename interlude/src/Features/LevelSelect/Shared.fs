@@ -102,7 +102,7 @@ module LevelSelect =
         if
             Screen.change_new
                 (fun () ->
-                    PlayScreen.play_screen (
+                    PlayScreen.Create(
                         info,
                         if options.EnablePacemaker.Value then
                             PacemakerCreationContext.FromUserSetting
@@ -213,7 +213,7 @@ module LevelSelect =
             | None ->
                 if SelectedChart.autoplay then
                     Screen.change_new
-                        (fun () -> ReplayScreen.replay_screen (info.Chart, ReplayMode.Auto info.WithColors) :> Screen)
+                        (fun () -> ReplayScreen.Create(info.Chart, ReplayMode.Auto info.WithColors))
                         ScreenType.Replay
                         Transitions.EnterGameplayFadeAudio
                     |> ignore
@@ -226,7 +226,7 @@ module LevelSelect =
 
             if
                 Screen.change_new
-                    (fun () -> PlayScreen.play_screen (info, PacemakerCreationContext.FromScore score_info))
+                    (fun () -> PlayScreen.Create(info, PacemakerCreationContext.FromScore score_info))
                     ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then
@@ -237,10 +237,7 @@ module LevelSelect =
     let watch_replay (score_info: ScoreInfo, with_colors: ColoredChart) : unit =
         if
             Screen.change_new
-                (fun () ->
-                    ReplayScreen.replay_screen (score_info.Chart, ReplayMode.Replay(score_info, with_colors))
-                    :> Screen
-                )
+                (fun () -> ReplayScreen.Create(score_info.Chart, ReplayMode.Replay(score_info, with_colors)))
                 ScreenType.Replay
                 Transitions.EnterGameplayFadeAudio
         then

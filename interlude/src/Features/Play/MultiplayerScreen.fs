@@ -21,9 +21,9 @@ open Interlude.Features.Online
 open Interlude.Features.Score
 open Interlude.Features.Play.HUD
 
-module PlayScreenMultiplayer =
+type MultiplayerScreen =
 
-    let multiplayer_screen (info: LoadedChartInfo, lobby: Lobby) =
+    static member Create(info: LoadedChartInfo, lobby: Lobby) : Screen =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote

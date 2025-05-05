@@ -153,7 +153,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                     true
                     (fun info ->
                         Screen.change_new
-                            (fun () -> PracticeScreen.practice_screen (info, 0.0f<ms>))
+                            (fun () -> PracticeScreen.Create(info, 0.0f<ms>))
                             ScreenType.Practice
                             Transitions.Default
                         |> ignore

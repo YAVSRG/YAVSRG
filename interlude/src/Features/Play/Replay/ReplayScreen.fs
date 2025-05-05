@@ -19,9 +19,9 @@ open Interlude.Features.Score
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
-module ReplayScreen =
+type ReplayScreen =
 
-    let replay_screen (chart: Chart, mode: ReplayMode) =
+    static member Create(chart: Chart, mode: ReplayMode) : Screen =
 
         let replay_data, is_auto, rate, with_colors, is_failed =
             match mode with

@@ -121,7 +121,7 @@ type LobbyUI(lobby: Lobby) =
                 <| fun info ->
                     if
                         Screen.change_new
-                            (fun () -> PlayScreenMultiplayer.multiplayer_screen(info, lobby))
+                            (fun () -> MultiplayerScreen.Create(info, lobby))
                             ScreenType.Play
                             Transitions.EnterGameplayFadeAudio
                         |> not
@@ -177,7 +177,7 @@ type LobbyUI(lobby: Lobby) =
                 then
                     if
                         Screen.change_new
-                            (fun () -> Spectate.spectate_screen (info, username, replay_info, lobby))
+                            (fun () -> SpectateScreen.Create(info, username, replay_info, lobby))
                             ScreenType.Replay
                             Transitions.Default
                         |> not

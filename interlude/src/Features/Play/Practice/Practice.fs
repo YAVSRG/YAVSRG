@@ -16,11 +16,11 @@ open Interlude.Features.Online
 open Interlude.Features.Play.HUD
 open Interlude.Features.Play.Practice
 
-module PracticeScreen =
+type PracticeScreen =
 
-    let UNPAUSE_NOTE_LEADWAY = 800.0f<ms / rate>
+    static let UNPAUSE_NOTE_LEADWAY = 800.0f<ms / rate>
 
-    let practice_screen (info: LoadedChartInfo, start_at: Time) =
+    static member Create(info: LoadedChartInfo, start_at: Time) : Screen =
 
         let mutable liveplay = Unchecked.defaultof<_>
         let mutable scoring = Unchecked.defaultof<_>
