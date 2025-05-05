@@ -73,52 +73,52 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, dr
     let saturation = Setting.make (fun x -> s <- x; update_hsv()) (fun () -> s) |> Setting.bound (0.0f, 1.0f)
     let value = Setting.make (fun x -> v <- x; update_hsv()) (fun () -> v) |> Setting.bound (0.0f, 1.0f)
 
-    let red_slider =
-        PageSetting("Red",
+    member private this.RedSlider() =
+        PageSetting(%"color.red",
             { new Slider(red, Format = sprintf "%.0f", Step = 5.0f) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromArgb(int (x * 255.0f), int g, int b)) (bounds, percentage)
             }
         )
-    let green_slider =
-        PageSetting("Green",
+    member private this.GreenSlider() =
+        PageSetting(%"color.green",
             { new Slider(green, Format = sprintf "%.0f", Step = 5.0f) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromArgb(int r, int (x * 255.0f), int b)) (bounds, percentage)
             }
         )
-    let blue_slider =
-        PageSetting("Blue",
+    member private this.BlueSlider() =
+        PageSetting(%"color.blue",
             { new Slider(blue, Format = sprintf "%.0f", Step = 5.0f) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromArgb(int r, int g, int (x * 255.0f))) (bounds, percentage)
             }
         )
 
-    let alpha_slider =
-        PageSetting("Alpha",
+    member private this.AlphaSlider() =
+        PageSetting(%"color.alpha",
             { new Slider(alpha, Format = sprintf "%.0f", Step = 5.0f) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromArgb(int (x * 255.0f), int r, int g, int b)) (bounds, percentage)
             }
         )
 
-    let hue_slider =
-        PageSetting("Hue",
+    member private this.HueSlider() =
+        PageSetting(%"color.hue",
             { new Slider(hue, Format = sprintf "%.0f'", Step = 5.0f) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromHsv(x, s, v)) (bounds, percentage)
             }
         )
-    let saturation_slider =
-        PageSetting("Saturation",
+    member private this.SaturationSlider() =
+        PageSetting(%"color.saturation",
             { new Slider(saturation, Format = fun v -> sprintf "%.0f%%" (v * 100.0f)) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromHsv(h, x, v)) (bounds, percentage)
             }
         )
-    let value_slider =
-        PageSetting("Value",
+    member private this.ValueSlider() =
+        PageSetting(%"color.value",
             { new Slider(value, Format = fun v -> sprintf "%.0f%%" (v * 100.0f)) with
                 override this.DrawBar(bounds, percentage) =
                     draw_bar (fun x -> Color.FromHsv(h, s, x)) (bounds, percentage)
@@ -128,23 +128,23 @@ type ColorPickerPage(title: string, color: Setting<Color>, allow_alpha: bool, dr
     override this.Content() =
         page_container()
             .With(
-                PageSetting("Hex", NumberEntry.Create(hex_color_setting)).Pos(0),
-                red_slider.Pos(3),
-                green_slider.Pos(5),
-                blue_slider.Pos(7)
+                PageSetting(%"color.hex", NumberEntry.Create(hex_color_setting)).Pos(0),
+                this.RedSlider().Pos(3),
+                this.GreenSlider().Pos(5),
+                this.BlueSlider().Pos(7)
             )
             .WithConditional(
                 allow_alpha,
-                alpha_slider.Pos(10),
-                hue_slider.Pos(13),
-                saturation_slider.Pos(15),
-                value_slider.Pos(17)
+                this.AlphaSlider().Pos(10),
+                this.HueSlider().Pos(13),
+                this.SaturationSlider().Pos(15),
+                this.ValueSlider().Pos(17)
             )
             .WithConditional(
                 not allow_alpha,
-                hue_slider.Pos(10),
-                saturation_slider.Pos(12),
-                value_slider.Pos(14)
+                this.HueSlider().Pos(10),
+                this.SaturationSlider().Pos(12),
+                this.ValueSlider().Pos(14)
             )
 
     override this.Draw() =
