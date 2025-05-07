@@ -69,7 +69,7 @@ module PacemakerState =
         match ctx with
         | PacemakerCreationContext.None -> PacemakerState.None
         | PacemakerCreationContext.FromScore score_info ->
-            let replay_data = StoredReplayProvider(score_info.Replay) :> IReplayProvider
+            let replay_data = StoredReplayProvider(score_info.Replay) :> IReplay
 
             let replay_scoring =
                 ScoreProcessor.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate

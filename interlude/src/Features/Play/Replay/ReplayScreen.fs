@@ -26,13 +26,13 @@ type ReplayScreen =
         let replay_data, is_auto, rate, with_colors, is_failed =
             match mode with
             | ReplayMode.Auto with_colors ->
-                StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplayProvider,
+                StoredReplayProvider.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplay,
                 true,
                 SelectedChart.rate.Value,
                 with_colors,
                 false
             | ReplayMode.Replay(score_info, with_colors) ->
-                StoredReplayProvider(score_info.Replay) :> IReplayProvider,
+                StoredReplayProvider(score_info.Replay) :> IReplay,
                 false,
                 score_info.Rate,
                 with_colors,

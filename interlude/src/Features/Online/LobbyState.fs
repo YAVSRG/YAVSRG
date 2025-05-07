@@ -30,7 +30,7 @@ type LobbyPlayer =
 
 type LobbyPlayerReplayInfo =
     {
-        Replay: IReplayProvider
+        Replay: IReplay
         ScoreProcessor: ScoreProcessor
         GetScoreInfo: unit -> ScoreInfo
     }

@@ -48,8 +48,11 @@
     <Compile Include="Mods\Randomise.fs" />
     <Compile Include="Mods\Mods.fs" />
     <Compile Include="Mods\ModState.fs" />
-    <Compile Include="Gameplay\Replays\Replays.fs" />
-    <Compile Include="Gameplay\Replays\Readers.fs" />
+    <Compile Include="Gameplay\Replays\ReplayFormat.fs" />
+    <Compile Include="Gameplay\Replays\IReplay.fs" />
+    <Compile Include="Gameplay\Replays\StoredReplay.fs" />
+    <Compile Include="Gameplay\Replays\LiveReplay.fs" />
+    <Compile Include="Gameplay\Replays\OnlineReplay.fs" />
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\Rulesets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />

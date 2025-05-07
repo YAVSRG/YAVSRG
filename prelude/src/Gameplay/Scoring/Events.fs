@@ -62,7 +62,7 @@ type HoldState =
 /// These internal actions are then processed further by rulesets to calculate accuracy, combo, score, etc
 
 [<AbstractClass>]
-type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes: TimeArray<NoteRow>, rate: Rate) =
+type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplay, notes: TimeArray<NoteRow>, rate: Rate) =
     inherit ReplayConsumer(keys, replay)
 
     let first_note = (TimeArray.first notes).Value.Time

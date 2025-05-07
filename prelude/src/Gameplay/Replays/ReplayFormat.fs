@@ -16,8 +16,8 @@ open Prelude.Charts
 // ChartTime is conventionally used as the type signature instead of Time when the time is relative to the first note instead of to the start of the audio file
 type ChartTime = float32<ms>
 
-type ReplayRow = (struct (ChartTime * Bitmask))
-type ReplayData = ReplayRow array
+type ReplayFrame = (struct (ChartTime * Bitmask))
+type ReplayData = ReplayFrame array
 
 module Replay =
 

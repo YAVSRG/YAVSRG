@@ -41,7 +41,7 @@ type ChartBuilder(keycount: int) =
             items.Add({ Time = time; Data = head })
 
         elif time = last_time then
-                
+
             let row = items.[items.Count - 1].Data
             if row.[k] <> NoteType.NOTHING then failwith "Stacked note"
             row.[k] <- NoteType.HOLDHEAD
@@ -51,7 +51,7 @@ type ChartBuilder(keycount: int) =
         let tail = Array.zeroCreate keycount
         tail.[k] <- NoteType.HOLDTAIL
         items.Add({ Time = until; Data = tail })
-            
+
         last_time <- until
 
         this
@@ -84,7 +84,7 @@ type ReplayBuilder() =
     member this.KeyDownFor(time: Time, duration: Time, k: int) = this.KeyDownUntil(time, time + duration, k)
     member this.KeyDownFor(time, duration) = this.KeyDownFor(time, duration, 0)
 
-    member this.Build() : IReplayProvider =
+    member this.Build() : IReplay =
         liveplay.Finish()
         liveplay
 
