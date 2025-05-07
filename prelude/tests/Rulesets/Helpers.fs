@@ -67,13 +67,13 @@ type ReplayBuilder() =
     member this.KeyDown(time: Time, k: int) : ReplayBuilder =
         state <- state |> Bitmask.set_key k
 
-        liveplay.Add(time, state)
+        liveplay.AddFrame(time, state)
         this
     member this.KeyDown(time) = this.KeyDown(time, 0)
 
     member this.KeyUp(time: Time, k: int) : ReplayBuilder =
         state <- state |> Bitmask.unset_key k
-        liveplay.Add(time, state)
+        liveplay.AddFrame(time, state)
 
         this
     member this.KeyUp(time) = this.KeyUp(time, 0)

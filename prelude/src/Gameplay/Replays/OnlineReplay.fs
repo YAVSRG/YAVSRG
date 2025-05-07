@@ -31,7 +31,7 @@ type OnlineReplayProvider() =
             else
                 invalidOp "Online play is not declared as over, we don't have the full replay yet!"
 
-        member this.EnumerateRecentEvents() : ReplayFrame seq =
+        member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
                 let mutable j = i - 1
                 while j >= 0 do

@@ -254,7 +254,7 @@ type PlayScreen =
                             else
                                 key_state <- Bitmask.set_key column key_state
 
-                            liveplay.Add(time, key_state)
+                            liveplay.AddFrame(time, key_state)
                             liveplay_position <- max liveplay_position (time - first_note)
                     )
 

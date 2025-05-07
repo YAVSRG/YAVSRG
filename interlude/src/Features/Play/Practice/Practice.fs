@@ -176,7 +176,7 @@ type PracticeScreen =
                             else
                                 input_key_state <- Bitmask.set_key column input_key_state
 
-                            liveplay.Add(time, input_key_state)
+                            liveplay.AddFrame(time, input_key_state)
                     )
 
                     this.State.Scoring.Update chart_time

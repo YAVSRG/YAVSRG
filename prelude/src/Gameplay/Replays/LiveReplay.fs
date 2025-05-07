@@ -13,7 +13,7 @@ type LiveReplayProvider(first_note: Time) =
 
     let mutable last_time : ChartTime = -Time.infinity
 
-    member this.Add(time: Time, pressed_keys: Bitmask) : unit =
+    member this.AddFrame(time: Time, pressed_keys: Bitmask) : unit =
         if finished then invalidOp "Live play is declared as over; cannot append to replay"
         if time - first_note < last_time then
             Logging.Warn "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
@@ -39,7 +39,7 @@ type LiveReplayProvider(first_note: Time) =
             if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
             buffer.ToArray()
 
-        member this.EnumerateRecentEvents() : ReplayFrame seq =
+        member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
                 let mutable j = buffer.Count - 1
                 while j >= 0 do

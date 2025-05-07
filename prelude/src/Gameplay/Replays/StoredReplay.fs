@@ -23,7 +23,7 @@ type StoredReplayProvider(data: ReplayData) =
 
         member this.GetFullReplay() : ReplayData = data
 
-        member this.EnumerateRecentEvents() : ReplayFrame seq =
+        member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
                 let mutable j = i - 1
                 while j >= 0 do

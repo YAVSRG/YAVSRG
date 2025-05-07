@@ -56,7 +56,7 @@ module Replay =
 
         output
 
-    let decompress_bytes (data: byte array) =
+    let decompress_bytes (data: byte array) : ReplayData =
         use stream = new MemoryStream(data)
         decompress_from stream
 

@@ -19,7 +19,7 @@ type IReplay =
 
     /// Walk backwards through recent inputs (for rendering input meter hud element)
     /// Sequence is only guaranteed to be valid for the frame it is used in, it should not be stored or iterated once the underlying replay has been modified
-    abstract member EnumerateRecentEvents: unit -> ReplayFrame seq
+    abstract member EnumerateRecentFrames: unit -> ReplayFrame seq
 
 /// Walks through a replay as far as data is available and triggers `HandleKeyDown` and `HandleKeyUp` as appropriate
 [<AbstractClass>]
