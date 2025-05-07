@@ -88,8 +88,6 @@ module API =
                     |> Async.RunSynchronously
                 | _ -> this.Response.ReplyError(404, "Not found") |> ignore
 
-                Logging.Info "%O" this.Response.Cache
-
                 Logging.Info "%s %s responded %i in %.0fms" request.Method uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
 
                 this.SendResponseAsync this.Response |> ignore

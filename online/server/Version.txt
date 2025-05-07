@@ -1,1 +1,1 @@
-﻿New protocol version bump for column swap
+﻿Fix for spam in logs
