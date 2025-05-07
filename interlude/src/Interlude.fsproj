@@ -120,6 +120,7 @@
     <Compile Include="Features\Score\Username.fs" />
     <Compile Include="Features\Score\Utils.fs" />
     <Compile Include="Features\Score\TopBanner.fs" />
+    <Compile Include="Features\Score\DeviationGraph.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
     <Compile Include="Features\Score\SessionScore.fs" />
     <Compile Include="Features\Score\Graph.fs" />

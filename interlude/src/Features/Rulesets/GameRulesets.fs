@@ -126,3 +126,22 @@ type SCRulesetPage() =
 
     override this.Title = %"rulesets.create.sc"
     override this.OnClose() = ()
+
+type ReprioritizedRulesetPage() =
+    inherit Page()
+
+    let rjudge = 5.0f |> Setting.bounded (1.0f, 10.0f)
+
+    let create () =
+        Rulesets.install (Reprioritized.create (rjudge.Value))
+        Menu.Back()
+        Menu.Back()
+
+    override this.Content() =
+        page_container()
+        |+ PageSetting(%"ruleset.reprioritized_judge", Slider(rjudge, Step = 0.1f)).Pos(0)
+        |+ PageButton.Once(%"rulesets.create", create).Pos(2)
+        :> Widget
+
+    override this.Title = %"rulesets.create.reprioritized"
+    override this.OnClose() = ()

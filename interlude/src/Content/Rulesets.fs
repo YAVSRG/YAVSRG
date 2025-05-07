@@ -7,7 +7,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Rulesets
 
-module Rulesets =
+module  Rulesets =
 
     /// Ruleset IDs are the name of the file under the Rulesets folder, without the extension
     /// e.g. Rulesets/my-ruleset.ruleset is loaded with id 'my-ruleset'

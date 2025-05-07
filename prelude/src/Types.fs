@@ -61,7 +61,7 @@ module Types =
 
     module Setting =
         open Percyqaz.Common.Setting
-        let rate x = x |> bounded (0.5f<rate>, 3.0f<rate>) |> roundf_uom 2
+        let rate x = x |> bounded (0.1f<rate>, 10.0f<rate>) |> roundf_uom 5
 
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }

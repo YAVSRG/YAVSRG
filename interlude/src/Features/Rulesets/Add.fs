@@ -17,6 +17,8 @@ type AddRulesetsPage() =
             .Pos(4)
         |+ PageButton(%"rulesets.create.wife", fun () -> WifeRulesetPage().Show())
             .Pos(6)
+        |+ PageButton(%"rulesets.create.reprioritized", fun () -> ReprioritizedRulesetPage().Show())
+            .Pos(8)
         :> Widget
 
     override this.Title = %"rulesets.add"

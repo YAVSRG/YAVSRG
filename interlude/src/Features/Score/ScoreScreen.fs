@@ -38,6 +38,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         |> ref
 
     let graph = new ScoreGraph(score_info, stats)
+    let deviationgraph = new DeviationGraph(score_info, stats)
 
     let refresh () =
         personal_bests := ImprovementFlags.None
@@ -51,6 +52,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         stats := ScoreScreenStats.calculate score_info.Scoring GraphSettings.column_filter
         previous_personal_bests := None
         graph.Refresh()
+        deviationgraph.Refresh()
 
     let on_ruleset_changed = Rulesets.on_changed.Subscribe (fun _ -> GameThread.defer refresh)
 
@@ -59,6 +61,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
             score_info,
             played_just_now,
             graph,
+            deviationgraph,
             refresh
         )
             .Position(Position.SlicePercentB(0.35f))
@@ -118,6 +121,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     override this.OnExit next =
         score_info.Ruleset <- Rulesets.current
+        (deviationgraph :> System.IDisposable).Dispose()
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
         Toolbar.show ()

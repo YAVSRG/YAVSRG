@@ -54,7 +54,9 @@
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />
     <Compile Include="Gameplay\Rulesets\Quaver.fs" />
     <Compile Include="Gameplay\Rulesets\Wife3.fs" />
+    <Compile Include="Gameplay\Rulesets\Reprioritized.fs" />
     <Compile Include="Gameplay\Scoring\WifeCurve.fs" />
+    <Compile Include="Gameplay\Scoring\ReprioritizedCurve.fs" />
     <Compile Include="Gameplay\Rulesets\Compare.fs" />
     <Compile Include="Gameplay\Rulesets\Helpers.fs" />
     <Compile Include="Gameplay\Scoring\Grades.fs" />

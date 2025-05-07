@@ -109,6 +109,8 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplayProvider, notes:
 
     let judgement_or_ms_to_points : GameplayTime -> int -> float =
         match ruleset.Accuracy with
+        | AccuracyPoints.ReprioritizedCurve j ->
+            fun (delta: GameplayTime) _ -> ReprioritizedCurve.calculate j delta
         | AccuracyPoints.WifeCurve j ->
             fun (delta: GameplayTime) _ -> Wife3Curve.calculate j delta
         | AccuracyPoints.PointsPerJudgement weights ->

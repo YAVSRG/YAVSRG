@@ -395,7 +395,7 @@ module SelectedChart =
         elif (%%"uprate_half").Pressed() then
             change_rate_by (0.05f<rate>)
         elif (%%"uprate_big").Pressed() then
-            change_rate_by (0.25f<rate>)
+            change_rate_by (0.001f<rate>)
         elif (%%"uprate").Pressed() then
             change_rate_by (0.1f<rate>)
         elif (%%"downrate_small").Pressed() then
@@ -403,7 +403,7 @@ module SelectedChart =
         elif (%%"downrate_half").Pressed() then
             change_rate_by (-0.05f<rate>)
         elif (%%"downrate_big").Pressed() then
-            change_rate_by (-0.25f<rate>)
+            change_rate_by (-0.001f<rate>)
         elif (%%"downrate").Pressed() then
             change_rate_by (-0.1f<rate>)
 

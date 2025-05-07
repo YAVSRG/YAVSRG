@@ -57,6 +57,7 @@ type Lamp =
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
 type AccuracyPoints =
+    | ReprioritizedCurve of rjudge: float32
     | WifeCurve of judge: int
     | PointsPerJudgement of points: float array
     member internal this.Clone =
@@ -314,6 +315,8 @@ module Ruleset =
             bw.Write judgement_if_dropped
 
         match ruleset.Accuracy with
+        | AccuracyPoints.ReprioritizedCurve rjudge ->
+            ()
         | AccuracyPoints.WifeCurve judge ->
             bw.Write judge
         | AccuracyPoints.PointsPerJudgement points ->
@@ -436,6 +439,7 @@ module Ruleset =
                 if judgement_if_dropped < 0 || judgement_if_dropped >= ruleset.Judgements.Length then failwith "OnlyJudgeReleases `judgement_if_dropped` must be a valid judgement"
 
             match ruleset.Accuracy with
+            | AccuracyPoints.ReprioritizedCurve rjudge -> if rjudge < 1.0f || rjudge > 10.0f then failwith "Reprioritized `judge` must be a valid judge value"
             | AccuracyPoints.WifeCurve judge -> if judge < 2 || judge > 9 then failwith "WifeCurve `judge` must be a valid judge value"
             | AccuracyPoints.PointsPerJudgement points ->
                 if points.Length <> ruleset.Judgements.Length then failwithf "PointsPerJudgement `points` provides %i values but there are %i judgements" points.Length ruleset.Judgements.Length
@@ -492,8 +496,10 @@ module Ruleset =
                 | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
             Accuracy =
                 match ruleset.Accuracy with
-                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (duplicate ps)
+                | AccuracyPoints.ReprioritizedCurve j -> AccuracyPoints.ReprioritizedCurve j
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
+                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (duplicate ps)
+
             Formatting = { DecimalPlaces = ruleset.Formatting.DecimalPlaces }
         }
 
@@ -567,7 +573,9 @@ module Ruleset =
                 | HoldMechanics.OnlyJudgeReleases if_dropped -> HoldMechanics.OnlyJudgeReleases (replace_judgement if_dropped)
             Accuracy =
                 match ruleset.Accuracy with
-                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (Array.removeAt j ps)
+                | AccuracyPoints.ReprioritizedCurve j -> AccuracyPoints.ReprioritizedCurve j
                 | AccuracyPoints.WifeCurve j -> AccuracyPoints.WifeCurve j
+                | AccuracyPoints.PointsPerJudgement ps -> AccuracyPoints.PointsPerJudgement (Array.removeAt j ps)
+
             Formatting = { DecimalPlaces = ruleset.Formatting.DecimalPlaces }
         }
