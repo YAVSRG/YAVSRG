@@ -71,22 +71,13 @@ type LiveReplayProvider(first_note: Time) =
 
     let mutable last_time : ChartTime = -Time.infinity
 
-    member this.Add(time, bitmap) =
+    member this.Add(time: Time, pressed_keys: Bitmask) =
         if finished then invalidOp "Live play is declared as over; cannot append to replay"
         if time - first_note < last_time then
-            failwithf "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
+            Logging.Warn "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
 
-        last_time <- time - first_note
-        buffer.Add(struct (last_time, bitmap))
-
-    member this.AddMultiplayerMarker(time, bitmap) =
-        if finished then invalidOp "Live play is declared as over; cannot append to replay"
-        if time - first_note >= last_time then
-            last_time <- time - first_note
-            buffer.Add(struct (last_time, bitmap))
-
-        last_time <- time - first_note
-        buffer.Add(struct (last_time, bitmap))
+        last_time <- max last_time (time - first_note)
+        buffer.Add(struct (last_time, pressed_keys))
 
     interface IReplayProvider with
         member this.Finished = finished

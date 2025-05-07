@@ -3,10 +3,8 @@
 open System
 open System.IO
 open System.IO.Compression
-open Percyqaz.Common
 open Prelude
 open Prelude.Charts
-open Prelude.Mods
 
 // "Replay" data is an array of timestamps + bitmaps of which keys are pressed down at that moment
 // A new timestamp + bitmap is recorded when the state of one of the keys change; every timestamp corresponds to at least 1 key becoming pressed or unpressed
