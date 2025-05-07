@@ -37,7 +37,7 @@ type PlayState =
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+        let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplay replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
         let first_note = info.WithMods.FirstNote
 
         let state =
@@ -53,7 +53,7 @@ type PlayState =
         scoring.Update (state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplayProvider replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
+            let recreated = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplay replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
             recreated.Update (state.CurrentChartTime())
             state.ChangeScoring recreated
 

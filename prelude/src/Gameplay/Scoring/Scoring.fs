@@ -140,7 +140,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: IReplay, notes: TimeArr
     member this.OnEvent : IEvent<GameplayEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
-    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplayProvider, notes, rate)
+    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplay, notes, rate)
     member this.Recreate() = this.Recreate(ruleset)
 
     member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
@@ -369,4 +369,4 @@ module ScoreProcessor =
         scoring
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        create SC_J4 chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f<rate>
+        create SC_J4 chart.Keys (StoredReplay Array.empty) chart.Notes 1.0f<rate>

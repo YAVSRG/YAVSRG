@@ -21,7 +21,7 @@ module EditHudScreen =
     let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit: unit -> unit) =
 
         let replay_data: IReplay =
-            StoredReplayProvider.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
+            StoredReplay.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
 
         let FIRST_NOTE = with_colors.FirstNote
         let ruleset = Rulesets.current

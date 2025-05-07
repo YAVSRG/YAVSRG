@@ -37,7 +37,7 @@ let private compare_interlude_implementation_to_osu
         ScoreProcessor.run
             (OsuMania.create (float32 chart_od) window_modifier)
             chart.Keys
-            (StoredReplayProvider(replay))
+            (StoredReplay(replay))
             chart.Notes
             rate
 

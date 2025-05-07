@@ -78,7 +78,7 @@ module OnlineScores =
                             ScoreProcessor.run
                                 req.Ruleset
                                 with_mods.Keys
-                                (StoredReplayProvider replay_data)
+                                (StoredReplay replay_data)
                                 with_mods.Notes
                                 score.Rate
 

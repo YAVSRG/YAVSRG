@@ -26,7 +26,7 @@ type PlayScreen =
 
         let ruleset = Rulesets.current
         let first_note = info.WithMods.FirstNote
-        let liveplay = LiveReplayProvider first_note
+        let liveplay = LiveReplay first_note
 
         let scoring =
             ScoreProcessor.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value

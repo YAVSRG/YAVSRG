@@ -84,7 +84,7 @@ module Scores =
             let ruleset = Backbeat.rulesets.[Score.PRIMARY_RULESET]
 
             let scoring =
-                ScoreProcessor.run ruleset chart.Keys (StoredReplayProvider replay) mod_chart.Notes rate
+                ScoreProcessor.run ruleset chart.Keys (StoredReplay replay) mod_chart.Notes rate
 
             let accuracy = scoring.Accuracy
 

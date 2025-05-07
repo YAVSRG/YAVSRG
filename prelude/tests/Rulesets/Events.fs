@@ -1187,7 +1187,7 @@ module Events =
 
         printfn "Now stepping all at once:"
 
-        let rewind_replay = replay.GetFullReplay() |> StoredReplayProvider
+        let rewind_replay = replay.GetFullReplay() |> StoredReplay
 
         let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
@@ -1251,7 +1251,7 @@ module Events =
 
         printfn "Now stepping all at once:"
 
-        let rewind_replay = replay.GetFullReplay() |> StoredReplayProvider
+        let rewind_replay = replay.GetFullReplay() |> StoredReplay
 
         let event_processing = GameplayEventCollector(RULESET, 4, rewind_replay, notes, 1.0f<rate>)
         event_processing.Update Time.infinity
@@ -1558,7 +1558,7 @@ module Events =
                 .Note(1200.0f<ms>)
                 .Build()
 
-        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
+        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplay(replay.GetFullReplay()), notes_2, 1.0f<rate>)
         event_processing_2.Update Time.infinity
 
         Assert.AreEqual(event_processing.Events, event_processing_2.Events)
@@ -1594,7 +1594,7 @@ module Events =
                 .Note(1200.0f<ms>)
                 .Build()
 
-        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplayProvider(replay.GetFullReplay()), notes_2, 1.0f<rate>)
+        let event_processing_2 = GameplayEventCollector(RULESET, 4, StoredReplay(replay.GetFullReplay()), notes_2, 1.0f<rate>)
         event_processing_2.IgnoreNotesBefore 1100.0f<ms>
         event_processing_2.Update Time.infinity
 

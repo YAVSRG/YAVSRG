@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 
 /// Replay implementation that represents another player's score, streaming in from a network
-type OnlineReplayProvider() =
+type OnlineReplay() =
     let mutable i = 0
     let mutable finished = false
     let mutable current_chart_time = 0.0f<ms>

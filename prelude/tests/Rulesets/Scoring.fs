@@ -473,7 +473,7 @@ module Scoring =
             ScoreProcessor.run
                 (SC.create 4)
                 DONUT_HOLE_CHART.Keys
-                (StoredReplayProvider(perfect_replay))
+                (StoredReplay(perfect_replay))
                 DONUT_HOLE_CHART.Notes
                 1.0f<rate>
 
@@ -481,7 +481,7 @@ module Scoring =
             ScoreProcessor.run
                 (OsuMania.create 10.0f OsuMania.NoMod)
                 DONUT_HOLE_CHART.Keys
-                (StoredReplayProvider(perfect_replay))
+                (StoredReplay(perfect_replay))
                 DONUT_HOLE_CHART.Notes
                 1.0f<rate>
 
@@ -489,7 +489,7 @@ module Scoring =
             ScoreProcessor.run
                 (Wife3.create 4)
                 DONUT_HOLE_CHART.Keys
-                (StoredReplayProvider(perfect_replay))
+                (StoredReplay(perfect_replay))
                 DONUT_HOLE_CHART.Notes
                 1.0f<rate>
 

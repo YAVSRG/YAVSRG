@@ -48,7 +48,7 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
         let rate = SelectedChart.rate.Value
         let TWO_SECONDS = 2000.0f<ms / rate> * rate
 
-        let recent_events = state.Scoring.EnumerateRecentInputs()
+        let recent_events = state.Scoring.EnumerateRecentFrames()
         let now = state.CurrentChartTime()
         kps <- 0.0f
         let mutable previous = 0us

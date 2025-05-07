@@ -60,7 +60,7 @@ type ChartBuilder(keycount: int) =
     member this.Build() : TimeArray<NoteRow> = items.ToArray()
 
 type ReplayBuilder() =
-    let liveplay = LiveReplayProvider(0.0f<ms>)
+    let liveplay = LiveReplay(0.0f<ms>)
 
     let mutable state = 0us
 

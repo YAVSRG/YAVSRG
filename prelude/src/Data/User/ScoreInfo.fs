@@ -40,7 +40,7 @@ type ScoreInfo =
         with get () = this.Scoring.Ruleset
         and set (ruleset) =
             let scoring =
-                ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+                ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplay this.Replay) this.WithMods.Notes this.Rate
 
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
@@ -48,7 +48,7 @@ type ScoreInfo =
 
     member this.WithRuleset (ruleset: Ruleset) =
         let scoring =
-            ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplayProvider this.Replay) this.WithMods.Notes this.Rate
+            ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplay this.Replay) this.WithMods.Notes this.Rate
 
         { this with
             Scoring = scoring
@@ -71,7 +71,7 @@ module ScoreInfo =
         let replay_data = score.Replay |> Replay.decompress_bytes
 
         let scoring =
-            ScoreProcessor.run ruleset with_mods.Keys (StoredReplayProvider replay_data) with_mods.Notes score.Rate
+            ScoreProcessor.run ruleset with_mods.Keys (StoredReplay replay_data) with_mods.Notes score.Rate
 
         let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
 

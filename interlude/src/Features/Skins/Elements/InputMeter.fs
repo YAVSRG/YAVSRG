@@ -66,11 +66,11 @@ type InputMeter(config: HudConfig, state: PlayState) =
             let color = Color.FromArgb(key_alpha, r, g, b)
             Render.rect box color
             if config.InputMeterShowKeybinds then
-                Text.fill(Style.font, binds.[k].ToString(), box, config.InputMeterKeybindColor, Alignment.CENTER)          
+                Text.fill(Style.font, binds.[k].ToString(), box, config.InputMeterKeybindColor, Alignment.CENTER)
             box <- box.Translate(column_width, 0.0f)
 
         if config.InputMeterShowInputs then
-            let recent_events = state.Scoring.EnumerateRecentInputs()
+            let recent_events = state.Scoring.EnumerateRecentFrames()
 
             let now = state.CurrentChartTime()
             let point (time: ChartTime) : float32 * Color =

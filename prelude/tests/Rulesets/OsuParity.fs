@@ -56,7 +56,7 @@ module OsuParity =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplayProvider(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
+        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplay(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
 
         Assert.AreEqual(
             (
@@ -81,7 +81,7 @@ module OsuParity =
     let OsuRuleset_MatchesExpectedAccuracy_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
-        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplayProvider(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
+        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplay(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
 
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
@@ -93,7 +93,7 @@ module OsuParity =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, (StoredReplayProvider(as_interlude_replay)), TEST_CHART.Notes, 1.0f<rate>)
+        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, (StoredReplay(as_interlude_replay)), TEST_CHART.Notes, 1.0f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
@@ -249,7 +249,7 @@ module OsuParity =
 
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.run ruleset TEST_CHART_2.Keys (StoredReplayProvider(replay_data)) TEST_CHART_2.Notes 1.5f<rate>
+        let score = ScoreProcessor.run ruleset TEST_CHART_2.Keys (StoredReplay(replay_data)) TEST_CHART_2.Notes 1.5f<rate>
 
         Assert.AreEqual(
             (
@@ -275,7 +275,7 @@ module OsuParity =
         let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, (StoredReplayProvider(replay_data)), TEST_CHART_2.Notes, 1.5f<rate>)
+        let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, (StoredReplay(replay_data)), TEST_CHART_2.Notes, 1.5f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
