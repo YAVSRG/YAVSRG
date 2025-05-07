@@ -22,9 +22,9 @@
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Locale\en_GB.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Resources\Locale\en_GB.txt">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\icon.png" />
     <EmbeddedResource Include="Resources\chocolate.zip" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />

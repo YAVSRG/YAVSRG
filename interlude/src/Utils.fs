@@ -11,6 +11,9 @@ module Utils =
             .GetExecutingAssembly()
             .GetManifestResourceStream("Interlude.Resources." + name)
 
+    let get_locale (id: string) : Stream =
+        get_resource_stream ("Locale." + id + ".txt")
+
     let get_resource_text (name: string) : string =
         use s = get_resource_stream name
         use tr = new StreamReader(s)

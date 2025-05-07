@@ -140,8 +140,6 @@ Information, future updates and support available at:
             Path.Combine(clean_dir, info.SQLiteLibraryFile)
         )
 
-        copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
-
         File.WriteAllText(Path.Combine(clean_dir, "README.txt"), README.Trim() + "\n")
         if not (info.ExecutableFile.EndsWith "exe") then
             File.WriteAllText(Path.Combine(clean_dir, "launch.sh"), "chmod +x ./Interlude\n./Interlude")

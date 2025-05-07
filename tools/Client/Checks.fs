@@ -11,7 +11,7 @@ module Check =
 
     let private load_locale (file: string) =
         let mapping = new Dictionary<string, string>()
-        let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt")
+        let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")
         let lines = File.ReadAllLines path
 
         Array.iter
@@ -145,7 +145,7 @@ module Check =
             |> Seq.sort
             |> Seq.map (fun key -> sprintf "%s=%s" key (new_locale.[key].Replace("\n", "\\n")))
             |> fun contents ->
-                File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
+                File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"), contents)
 
     let locale_rename (file: string) (before: string) =
         let locale = load_locale file
@@ -197,6 +197,6 @@ module Check =
         locale.Keys
         |> Seq.sort
         |> Seq.map (fun key -> sprintf "%s=%s" key (locale.[key].Replace("\n", "\\n")))
-        |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Locale", file + ".txt"), contents)
+        |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"), contents)
 
     let format_all_code () = exec "fantomas" "."

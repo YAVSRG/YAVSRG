@@ -373,7 +373,7 @@ module Options =
     let init() : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
-        Localisation.load_language options.Language.Value
+        Localisation.load_locale (Interlude.Utils.get_locale options.Language.Value)
 
     let deinit () : unit =
         try

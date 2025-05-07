@@ -1,20 +1,19 @@
 ﻿namespace Prelude
 
 open System.IO
-open System.Diagnostics
 open System.Collections.Generic
 open Percyqaz.Common
 
 module Localisation =
     let private mapping = new Dictionary<string, string>()
-    let mutable private loaded_path = ""
 
-    let load_language (language_id: string) : unit =
+    let load_locale (source: Stream) : unit =
 
-        let path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", language_id + ".txt")
+        use sr = new StreamReader(source)
 
         try
-            let lines = File.ReadAllLines path
+            let text = sr.ReadToEnd()
+            let lines = text.Replace("\r", "").Split("\n")
 
             Array.iter
                 (fun (l: string) ->
@@ -22,10 +21,8 @@ module Localisation =
                     mapping.[s.[0]] <- s.[1].Replace("\\n", "\n")
                 )
                 lines
-
-            loaded_path <- Path.GetFullPath path
         with err ->
-            Logging.Critical "Failed to load localisation file '%s': %O" path err
+            Logging.Critical "Failed to load localisation strings: %O" err
 
     let localise (key: string) : string =
         if mapping.ContainsKey key then
