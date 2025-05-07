@@ -350,6 +350,8 @@ module Options =
 
     let private CONFIG_PATH = Path.GetFullPath "config.json"
 
+    let private AVAILABLE_LANGUAGES = Set.ofList ["en_GB"]
+
     let load_window_config (instance: int) () : WindowOptions =
         // Register decoding rules for Percyqaz.Flux config
         JSON
@@ -373,7 +375,11 @@ module Options =
     let init() : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
-        Localisation.load_locale (Interlude.Utils.get_locale options.Language.Value)
+        // todo: always load en_GB in and then other languages on top so they can incrementally replace en_GB
+        if AVAILABLE_LANGUAGES.Contains options.Language.Value then
+            Localisation.load_locale (Interlude.Utils.get_locale options.Language.Value)
+        else
+            Logging.Error "Unknown locale '%s'" options.Language.Value
 
     let deinit () : unit =
         try
