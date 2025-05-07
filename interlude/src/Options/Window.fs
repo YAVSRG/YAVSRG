@@ -44,8 +44,8 @@ type WindowSettings =
             SmartCapTearlinePosition = Setting.percent 0.85
             Display = Setting.simple 0
             AudioDevice = Setting.simple -1
-            AudioDevicePeriod = Setting.simple 2
-            AudioDeviceBufferLengthMultiplier = Setting.simple 2
+            AudioDevicePeriod = Setting.simple 8
+            AudioDeviceBufferLengthMultiplier = Setting.simple 8
             InputCPUSaver = Setting.simple true
             MSAASamples = Setting.simple 4
         }
