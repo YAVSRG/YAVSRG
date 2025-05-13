@@ -213,9 +213,7 @@ module Tree =
         tree_ctx.ScrollPosition.Update elapsed_ms
         scroll_fade.Update elapsed_ms
 
-        if Dialog.exists () then
-            ()
-        elif (%%"context_menu").Pressed() && SelectedChart.CACHE_DATA.IsSome then
+        if (%%"context_menu").Pressed() && SelectedChart.CACHE_DATA.IsSome then
             match tree_ctx.MultiSelection with
             | Some s -> s.ShowActions()
             | None ->
