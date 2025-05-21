@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play.HUD
 
-open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
@@ -20,28 +19,24 @@ type SkipButton(config: HudConfig, state: PlayState) =
     let text = [ (%%"skip").ToString() ] %> "play.skiphint"
     let mutable active = true
 
-    let first_note = state.WithColors.FirstNote
-
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         let background = config.SkipButtonBackground
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
-            this
-            |* Image(Content.Texture "skip-button-bg", StretchToFill = false)
-                .Position(
-                    {
-                        Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
-                        Top = (lo - 0.5f + background.AlignmentY) %+ 0.0f
-                        Right = (hi - 0.5f + background.AlignmentX) %+ 0.0f
-                        Bottom = (hi - 0.5f + background.AlignmentY) %+ 0.0f
-                    }
-                )
-        this
-        |* Text(text)
-            .Color(Colors.text)
-            .Align(Alignment.CENTER)
-        base.Init parent
+            this.Add(
+                Image(Content.Texture "skip-button-bg", StretchToFill = false)
+                    .Position(
+                        {
+                            Left = (lo - 0.5f + background.AlignmentX) %+ 0.0f
+                            Top = (lo - 0.5f + background.AlignmentY) %+ 0.0f
+                            Right = (hi - 0.5f + background.AlignmentX) %+ 0.0f
+                            Bottom = (hi - 0.5f + background.AlignmentY) %+ 0.0f
+                        }
+                    )
+            )
+        this.Add(Text(text).Color(Colors.text).Align(Alignment.CENTER))
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -51,7 +46,7 @@ type SkipButton(config: HudConfig, state: PlayState) =
             if state.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Pressed() then
                     Song.pause ()
-                    Song.play_from (first_note - SKIP_DISTANCE)
+                    Song.play_from (state.WithColors.FirstNote - SKIP_DISTANCE)
                     active <- false
             else
                 active <- false

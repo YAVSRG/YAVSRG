@@ -18,8 +18,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     let mutable last_time = -Time.infinity
 
     let mutable playfield =
-        Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
-        |+ LanecoverOverReceptors()
+        Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
 
     let mutable timeline = Timeline(info.WithMods, Song.seek, SelectedChart.rate)
 
@@ -31,9 +30,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
             let _playstate, _recreate_scoring = PlayState.Dummy info
             playstate <- _playstate
             recreate_scoring <- _recreate_scoring
-            playfield <-
-                Playfield(info.WithColors, playstate, Content.NoteskinConfig, false)
-                |+ LanecoverOverReceptors()
+            playfield <- Playfield(info.WithColors, playstate, Content.NoteskinConfig, false).With(LanecoverOverReceptors())
             difficulty_overlay <- DifficultyOverlay(info.WithMods, playfield, info.Difficulty, playstate)
             timeline <- Timeline(info.WithMods, Song.seek, SelectedChart.rate)
             if this.Initialised then

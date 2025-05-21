@@ -37,7 +37,6 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
     let performance_rating = Difficulty.weighted_overall_difficulty (performance_strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)
     let ln_coverage = HoldCoverage.calculate_coverage (chart.Keys, chart.Notes, state.Scoring.Rate)
 
-    let first_note = chart.FirstNote
     let mutable seek = 0
     let mutable last_time = state.CurrentChartTime()
 
@@ -179,8 +178,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     override this.Draw() =
         let now =
-            state.CurrentChartTime() +
-            first_note +
+            state.CurrentTime() +
             (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
         while chart.Notes.Length - 1 > seek && chart.Notes.[seek + 1].Time < now - 100.0f<ms> do

@@ -61,8 +61,8 @@ type ScoreInfo =
 
     member this.ModStatus = this.WithMods.Status
 
-    member this.ModString() =
-        ModState.format (this.Rate, this.Mods)
+    member this.ModString() = ModState.format (this.Rate, this.Mods)
+    member this.Shorthand = sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName this.Lamp)
 
 module ScoreInfo =
 

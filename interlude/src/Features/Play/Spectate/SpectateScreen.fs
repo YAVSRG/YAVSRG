@@ -41,8 +41,6 @@ type SpectateScreen =
                 screen.State.ChangeScoring scoring
             | None -> Logging.Warn "Failed to switch to replay data for %s" next_user
 
-        let first_note = info.WithMods.FirstNote
-
         let mutable wait_for_load = 1000.0
         let mutable exiting = false
 
@@ -100,8 +98,7 @@ type SpectateScreen =
                         Song.resume ()
                 else
 
-                let now = Song.time_with_offset ()
-                let chart_time = now - first_note
+                let chart_time = this.State.CurrentChartTime()
 
                 if replay_data.Time() - chart_time < MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms> then
                     if Song.playing () then

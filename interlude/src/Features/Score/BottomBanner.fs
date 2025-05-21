@@ -7,7 +7,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
-open Prelude.Skins.Noteskins
 open Interlude
 open Interlude.Content
 open Interlude.UI

@@ -20,7 +20,10 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.Chart = info.Chart
     member this.WithColors = info.WithColors
     member this.Scoring = scoring
+    /// 0.0f<ms> = You are at the start of the audio file
+    /// Negative numbers are possible, if needed to give enough time before the first note
     member this.CurrentTime() = current_time()
+    /// 0.0f<ms> = You are at the very first note of the chart
     member this.CurrentChartTime() = current_time() - first_note
     member this.Pacemaker = pacemaker
 
@@ -48,7 +51,6 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
         let ruleset = Rulesets.current
         let scoring = ScoreProcessor.create ruleset info.WithColors.Keys (StoredReplay replay_data) info.WithColors.Source.Notes SelectedChart.rate.Value
-        let first_note = info.WithMods.FirstNote
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.time_with_offset)
 
