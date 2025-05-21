@@ -16,13 +16,13 @@ type ScoreContextMenu(is_leaderboard: bool, score_info: ScoreInfo) =
     override this.Content() =
         page_container()
         |+ PageButton(%"score.watch_replay", fun () ->
-            Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
+            Gameplay.watch_replay(score_info)
             Menu.Back()
         )
             .Icon(Icons.FILM)
             .Pos(0)
         |+ PageButton(%"score.challenge", fun () ->
-            LevelSelect.challenge_score score_info
+            LevelSelect.challenge_score(score_info)
             Menu.Back()
         )
             .Icon(Icons.FLAG)

@@ -213,7 +213,7 @@ module LevelSelect =
             | None ->
                 if SelectedChart.autoplay then
                     Screen.change_new
-                        (fun () -> ReplayScreen.Create(info.Chart, ReplayMode.Auto info.WithColors))
+                        (fun () -> ReplayScreen.Create(info, ReplayMode.Auto))
                         ScreenType.Replay
                         Transitions.EnterGameplayFadeAudio
                     |> ignore
@@ -221,27 +221,32 @@ module LevelSelect =
                     play info
 
     let challenge_score (score_info: ScoreInfo) : unit =
-        SelectedChart.if_loaded
+        SelectedChart.rate.Set score_info.Rate
+        SelectedChart.selected_mods.Set score_info.Mods
+        SelectedChart.when_loaded true
         <| fun info ->
 
-            if
-                Screen.change_new
-                    (fun () -> PlayScreen.Create(info, PacemakerCreationContext.FromScore score_info))
-                    ScreenType.Play
-                    Transitions.EnterGameplayFadeAudio
-            then
-                enter_gameplay info.LibraryContext
-                SelectedChart.rate.Set score_info.Rate
-                SelectedChart.selected_mods.Set score_info.Mods
-
-    let watch_replay (score_info: ScoreInfo, with_colors: ColoredChart) : unit =
         if
+            score_info.ChartMeta.Hash = info.ChartMeta.Hash &&
             Screen.change_new
-                (fun () -> ReplayScreen.Create(score_info.Chart, ReplayMode.Replay(score_info, with_colors)))
-                ScreenType.Replay
+                (fun () -> PlayScreen.Create(info, PacemakerCreationContext.FromScore score_info))
+                ScreenType.Play
                 Transitions.EnterGameplayFadeAudio
         then
-            SelectedChart.rate.Value <- score_info.Rate
+            enter_gameplay info.LibraryContext
+
+    let watch_replay (score_info: ScoreInfo) : unit =
+        SelectedChart.rate.Set score_info.Rate
+        SelectedChart.selected_mods.Set score_info.Mods
+        SelectedChart.when_loaded true
+        <| fun info ->
+
+        if score_info.ChartMeta.Hash = info.ChartMeta.Hash then
+            Screen.change_new
+                (fun () -> ReplayScreen.Create(info, ReplayMode.Replay score_info))
+                ScreenType.Replay
+                Transitions.EnterGameplayFadeAudio
+            |> ignore
 
 // todo: rename; relocate
 [<RequireQualifiedAccess>]

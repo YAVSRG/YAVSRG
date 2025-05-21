@@ -41,9 +41,9 @@ type ErrorBar(config: HudConfig, state: PlayState) =
     let MAX_WINDOW = state.Ruleset.LargestWindow
     let IS_ROTATED = config.TimingDisplayRotation <> ErrorBarRotation.Normal
 
-    do
+    override this.Init(parent: Widget) =
         if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
-            state.SubscribeEvents(fun ev ->
+            state.Subscribe(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     if not e.Missed then
@@ -70,8 +70,9 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                 | DropHold
                 | RegrabHold -> ()
             )
+            |> ignore
         if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
-            state.SubscribeEvents(fun ev ->
+            state.Subscribe(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     hits.Add
@@ -111,6 +112,8 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                 | DropHold
                 | RegrabHold -> ()
             )
+            |> ignore
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

@@ -37,26 +37,16 @@ module Utils =
             if pos.RelativeToPlayfield then playfield.Add w else screen.Add w
 
 [<AbstractClass>]
-type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: PacemakerState, scoring: ScoreProcessor) as this
+type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor) as this
     =
     inherit Screen()
 
-    let first_note = with_colors.FirstNote
-
-    let state: PlayState =
-        {
-            Chart = chart
-            WithColors = with_colors
-            Scoring = scoring
-            ScoringChanged = Event<unit>()
-            CurrentChartTime = fun () -> Song.time_with_offset () - first_note
-            Pacemaker = pacemaker_info
-        }
+    let state: PlayState = PlayState(info, pacemaker_info, scoring, Song.time_with_offset)
 
     let noteskin_config = Content.NoteskinConfig
 
     let playfield =
-        Playfield(with_colors, state, noteskin_config, options.VanishingNotes.Value)
+        Playfield(info.WithColors, state, noteskin_config, options.VanishingNotes.Value)
 
     do
         this.Add playfield
@@ -77,7 +67,7 @@ type IPlayScreen(chart: Chart, with_colors: ColoredChart, pacemaker_info: Pacema
         Song.change_rate SelectedChart.rate.Value
         Song.set_global_offset options.AudioOffset.Value
         Song.on_finish <- SongFinishAction.Wait
-        Song.play_leadin with_colors.FirstNote
+        Song.play_leadin info.WithColors.FirstNote
         Input.remove_listener ()
         Input.finish_frame_events ()
         WindowThread.defer WindowThread.disable_windows_key

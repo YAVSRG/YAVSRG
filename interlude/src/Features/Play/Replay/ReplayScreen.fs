@@ -21,24 +21,22 @@ open Interlude.Features.Play.HUD
 
 type ReplayScreen =
 
-    static member Create(chart: Chart, mode: ReplayMode) : Screen =
+    static member Create(info: LoadedChartInfo, mode: ReplayMode) : Screen =
 
-        let replay_data, is_auto, rate, with_colors, is_failed =
+        let replay_data, is_auto, rate, is_failed =
             match mode with
-            | ReplayMode.Auto with_colors ->
-                StoredReplay.AutoPlay(with_colors.Keys, with_colors.Source.Notes) :> IReplay,
+            | ReplayMode.Auto ->
+                StoredReplay.AutoPlay(info.WithColors.Keys, info.WithMods.Notes) :> IReplay,
                 true,
                 SelectedChart.rate.Value,
-                with_colors,
                 false
-            | ReplayMode.Replay(score_info, with_colors) ->
+            | ReplayMode.Replay score_info ->
                 StoredReplay(score_info.Replay) :> IReplay,
                 false,
                 score_info.Rate,
-                with_colors,
                 score_info.IsFailed
 
-        let FIRST_NOTE = with_colors.FirstNote
+        let LAST_NOTE = info.WithColors.LastNote
         let ruleset = Rulesets.current
 
         let replay_ended_fade = Animation.Fade 0.0f
@@ -47,14 +45,14 @@ type ReplayScreen =
         let mutable replay_data = replay_data
 
         let mutable scoring =
-            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplay(replay_data.GetFullReplay())
-            scoring <- ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes rate
+            scoring <- ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
+        { new IPlayScreen(info, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let hud_config = Content.HUD
                 let inline add_widget position constructor =
@@ -87,22 +85,22 @@ type ReplayScreen =
                                         (Colors.black.O4a(255.0f * playfield_dim.Value |> int))
                         },
                         InputOverlay(
-                            with_colors.Keys,
+                            info.WithMods.Keys,
                             replay_data.GetFullReplay(),
                             this.State,
                             this.Playfield
                         ),
                         HitOverlay(
                             rate,
-                            with_colors.Source,
+                            info.WithMods,
                             replay_data.GetFullReplay(),
                             this.State,
                             this.Playfield
                         ),
                         DifficultyOverlay(
-                            with_colors.Source,
+                            info.WithMods,
                             this.Playfield,
-                            Difficulty.calculate(rate, with_colors.Notes), // todo: get from chart info
+                            info.Difficulty,
                             this.State
                         )
                             .Conditional(show_difficulty_overlay.Get),
@@ -110,7 +108,7 @@ type ReplayScreen =
                             .Color((fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha))
                             .Position(Position.ShrinkB(100.0f).SliceB(60.0f)),
                         ReplayControls(
-                            with_colors.Source,
+                            info.WithMods,
                             is_auto,
                             rate,
                             fun t -> Song.seek t
@@ -118,6 +116,7 @@ type ReplayScreen =
                     )
 
             override this.OnEnter p =
+                Song.change_rate rate
                 DiscordRPC.playing ("Watching a replay", SelectedChart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
@@ -131,8 +130,8 @@ type ReplayScreen =
                 base.Update(elapsed_ms, moved)
                 replay_ended_fade.Target <- if is_failed && replay_data.Finished then 1.0f else 0.0f
                 replay_ended_fade.Update elapsed_ms
-                let now = Song.time_with_offset ()
-                let chart_time = now - FIRST_NOTE
+                let now = this.State.CurrentTime()
+                let chart_time = this.State.CurrentChartTime()
 
                 if last_time > now then
                     seek_backwards(this)
@@ -140,10 +139,10 @@ type ReplayScreen =
 
                 this.State.Scoring.Update chart_time
 
-                if now > chart.LastNote && replay_data.Finished then
+                if now > LAST_NOTE && replay_data.Finished then
                     match mode with
-                    | ReplayMode.Auto _ -> Screen.back Transitions.LeaveGameplay |> ignore
-                    | ReplayMode.Replay(score_info, _) ->
+                    | ReplayMode.Auto -> Screen.back Transitions.LeaveGameplay |> ignore
+                    | ReplayMode.Replay score_info ->
                         Screen.change_new
                             (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                             ScreenType.Score

@@ -33,8 +33,8 @@ type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, 
                     }
 
     override this.Init(parent) =
-        state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
-        base.Init parent
+        state.OnScoringChanged(fun _ -> seek <- 0) |> ignore
+        base.Init(parent)
 
     override this.Draw() =
 

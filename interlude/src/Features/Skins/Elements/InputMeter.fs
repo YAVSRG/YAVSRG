@@ -23,15 +23,17 @@ type InputMeter(config: HudConfig, state: PlayState) =
     let lerp_color (percentage: float) (a: byte) (b: byte) =
         (float (b - a) * percentage + float a) |> int |> max 0 |> min 255
 
-    do
+    override this.Init(parent: Widget) =
         if config.InputMeterJudgementColors then
-            state.SubscribeEvents (fun ev ->
+            state.Subscribe(fun ev ->
                 match ev.Action.Judgement with
                 | Some (j, _) ->
                     colors.[ev.Column] <- state.Ruleset.JudgementColor j
                     color_fades.[ev.Column].Reset()
                 | _ -> ()
             )
+            |> ignore
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

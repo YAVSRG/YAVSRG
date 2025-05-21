@@ -122,7 +122,7 @@
     <Compile Include="Features\Collections\CreatePlaylistPage.fs" />
     <Compile Include="Features\Collections\EditPlaylistPage.fs" />
     <Compile Include="Features\Collections\SelectCollectionsPage.fs" />
-    <Compile Include="Features\Play\State.fs" />
+    <Compile Include="Features\Play\PlayState.fs" />
     <Compile Include="Features\Play\LocalOffset.fs" />
     <Compile Include="Features\Score\Username.fs" />
     <Compile Include="Features\Score\Utils.fs" />

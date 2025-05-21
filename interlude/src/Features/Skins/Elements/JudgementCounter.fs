@@ -92,14 +92,15 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
         else
             Alignment.CENTER
 
-    override this.Init(parent) =
-        state.SubscribeEvents(fun h ->
+    override this.Init(parent: Widget) =
+        state.Subscribe(fun h ->
             match h.Action.Judgement with
             | Some(j, _) -> judgement_animations[j].Reset()
             | None -> ()
         )
+        |> ignore
 
-        base.Init parent
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

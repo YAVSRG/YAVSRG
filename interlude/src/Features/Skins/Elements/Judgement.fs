@@ -26,8 +26,8 @@ type Judgement(config: HudConfig, state: PlayState) =
                 config.JudgementMeterFrameTime * float32 texture.Columns
         ) * SelectedChart.rate.Value
 
-    do
-        state.SubscribeEvents(fun ev ->
+    override this.Init(parent: Widget) =
+        state.Subscribe(fun ev ->
             let judge = ev.Action.Judgement |> Option.map fst
 
             match judge with
@@ -42,6 +42,8 @@ type Judgement(config: HudConfig, state: PlayState) =
                     time <- ev.Time
             | _ -> ()
         )
+        |> ignore
+        base.Init(parent)
 
     override this.Draw() =
         if time > -Time.infinity then

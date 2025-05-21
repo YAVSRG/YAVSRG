@@ -4,13 +4,12 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User
-open Prelude.Skins.Noteskins
 open Interlude.UI
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
-    | Auto of ColoredChart
-    | Replay of score_info: ScoreInfo * with_colors: ColoredChart
+    | Auto
+    | Replay of score_info: ScoreInfo
 
 [<AutoOpen>]
 module private ReplayModeSettings =

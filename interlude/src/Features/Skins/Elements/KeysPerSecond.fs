@@ -61,7 +61,7 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
             previous_time <- timestamp
 
     override this.Init(parent: Widget) =
-        state.SubscribeEvents(fun h ->
+        state.Subscribe(fun h ->
             match h.Action with
             | Hit h
             | Hold h -> if not h.Missed then count <- count + 1.0f
@@ -70,7 +70,8 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
             | DropHold
             | Release _ -> ()
         )
-        state.ScoringChanged.Publish.Add(fun () -> count <- float32 state.Scoring.Events.Count)
+        |> ignore
+        state.OnScoringChanged(fun () -> count <- float32 state.Scoring.Events.Count) |> ignore
         base.Init parent
 
     override this.Draw() =

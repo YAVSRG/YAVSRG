@@ -452,6 +452,7 @@ module Players =
                 {
                     Artist: string
                     Title: string
+                    // todo: include Creator here
                     Difficulty: string
                     Score: float
                     Lamp: int

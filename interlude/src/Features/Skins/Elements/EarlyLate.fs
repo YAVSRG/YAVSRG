@@ -17,8 +17,8 @@ type EarlyLate(config: HudConfig, state: PlayState) =
 
     let texture = Content.Texture "early-late"
 
-    do
-        state.SubscribeEvents(fun ev ->
+    override this.Init(parent: Widget) =
+        state.Subscribe(fun ev ->
             let x =
                 match ev.Action with
                 | Hit e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
@@ -32,6 +32,8 @@ type EarlyLate(config: HudConfig, state: PlayState) =
                 time <- ev.Time
             | _ -> ()
         )
+        |> ignore
+        base.Init(parent)
 
     override this.Draw() =
         if time > -Time.infinity then
@@ -41,7 +43,7 @@ type EarlyLate(config: HudConfig, state: PlayState) =
             if time_ago < duration then
 
                 if config.EarlyLateMeterUseTexture then
-                    Render.tex_quad 
+                    Render.tex_quad
                         ((Sprite.fill this.Bounds texture).AsQuad)
                         Color.White.AsQuad
                         (Sprite.pick_texture (time_ago / config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int, if early then 0 else 1) texture)

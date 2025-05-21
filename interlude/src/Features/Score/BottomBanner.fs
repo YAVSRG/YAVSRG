@@ -112,7 +112,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
                     .Position(Position.GridX(2, 4, 30.0f)),
 
                 InlaidButton(%"score.watch_replay", fun () ->
-                    Gameplay.watch_replay (score_info, NoteColors.apply Content.NoteskinConfig.NoteColors score_info.WithMods)
+                    Gameplay.watch_replay(score_info)
                 )
                     .Icon(Icons.FILM)
                     .Position(Position.GridX(3, 4, 30.0f)),

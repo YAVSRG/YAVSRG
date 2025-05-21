@@ -48,7 +48,7 @@ type SpectateScreen =
 
         lobby.StartSpectating()
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
+        { new IPlayScreen(info, PacemakerState.None, scoring) with
             override this.AddWidgets() =
                 let hud_config = Content.HUD
                 let inline add_widget position constructor =

@@ -38,8 +38,8 @@ type Combo(config: HudConfig, state: PlayState) =
 
     let font_texture = Content.Texture "combo-font"
 
-    do
-        state.SubscribeEvents(fun ev ->
+    override this.Init(parent: Widget) =
+        state.Subscribe(fun ev ->
             match ev.Combo with
             | NoChange -> ()
             | _ ->
@@ -53,6 +53,8 @@ type Combo(config: HudConfig, state: PlayState) =
 
             pop_animation.Value <- config.ComboPop
         )
+        |> ignore
+        base.Init(parent)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

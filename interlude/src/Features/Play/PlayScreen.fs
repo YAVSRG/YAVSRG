@@ -169,7 +169,7 @@ type PlayScreen =
                 .WithOnClose(retry)
                 .Show()
 
-        { new IPlayScreen(info.Chart, info.WithColors, pacemaker_state, scoring) with
+        { new IPlayScreen(info, pacemaker_state, scoring) with
             override this.AddWidgets() =
                 let hud_config = Content.HUD
                 let inline add_widget position constructor =

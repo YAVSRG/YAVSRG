@@ -205,9 +205,9 @@ type private HitOverlay
             draw_delta ev.Column action_y action_y color
             label_after ev.Column action_y (sprintf "%s  %s" Icons.CHEVRONS_DOWN REGRAB_HOLD_ANNOTATION) color
 
-    override this.Init(parent) =
-        state.ScoringChanged.Publish.Add(fun _ -> seek <- 0)
-        base.Init parent
+    override this.Init(parent: Widget) =
+        state.OnScoringChanged(fun _ -> seek <- 0) |> ignore
+        base.Init(parent)
 
     override this.Draw() =
         if show_hit_overlay.Value then

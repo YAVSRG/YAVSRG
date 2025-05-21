@@ -163,7 +163,7 @@ type Lobby(client: Client, your_username: string, players: (string * int32) arra
     member this.SendReplayData (timestamp: float32, data: byte array) = client.Send(Upstream.PLAY_DATA (timestamp, data))
     member this.FinishPlaying() = client.Send(Upstream.FINISH_PLAYING false)
     member this.AbandonPlaying() = client.Send(Upstream.FINISH_PLAYING true)
-    member this.SelectChart (chart_meta: ChartMeta, rate: Rate, mods: ModState) =
+    member this.SelectChart (chart_meta: ChartMeta, rate: Rate, mods: ModState) = // todo: take single LoadedChartInfo parameter instead
         if this.YouAreHost then
             client.Send(
                 Upstream.SELECT_CHART

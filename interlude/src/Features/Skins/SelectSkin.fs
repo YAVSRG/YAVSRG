@@ -152,14 +152,15 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
 module SkinActions =
 
     let edit_hud (on_exit: unit -> unit) : unit =
-        if
-            SelectedChart.WITH_COLORS.IsSome
-            && Screen.change_new
-                (fun () -> EditHudScreen.edit_hud_screen (SelectedChart.CHART.Value, SelectedChart.WITH_COLORS.Value, on_exit))
-                ScreenType.EditHud
-                Transitions.Default
-        then
-            Menu.Exit()
+        SelectedChart.if_loaded(fun info ->
+            if
+                Screen.change_new
+                    (fun () -> EditHudScreen.edit_hud_screen (info, on_exit))
+                    ScreenType.EditHud
+                    Transitions.Default
+            then
+                Menu.Exit()
+        )
 
     let edit_or_extract_noteskin () : unit =
         let noteskin = Content.Noteskin

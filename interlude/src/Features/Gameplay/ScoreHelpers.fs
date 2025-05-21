@@ -143,6 +143,6 @@ module Gameplay =
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")
 
-    let mutable watch_replay: ScoreInfo * ColoredChart -> unit = ignore
+    let mutable watch_replay: ScoreInfo -> unit = ignore
     let mutable continue_endless_mode: unit -> bool = fun () -> false
     let mutable retry: unit -> unit = ignore

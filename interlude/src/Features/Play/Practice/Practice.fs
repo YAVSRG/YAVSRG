@@ -91,7 +91,7 @@ type PracticeScreen =
                     resume_from_current_place <- false
             )
 
-        { new IPlayScreen(info.Chart, info.WithColors, PacemakerState.None, scoring) with
+        { new IPlayScreen(info, PacemakerState.None, scoring) with
             override this.AddWidgets() =
 
                 let hud_config = Content.HUD

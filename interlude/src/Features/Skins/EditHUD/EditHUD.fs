@@ -18,16 +18,16 @@ open Interlude.Features.Pacemaker
 
 module EditHudScreen =
 
-    let edit_hud_screen (chart: Chart, with_colors: ColoredChart, on_exit: unit -> unit) =
+    let edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
         let replay_data: IReplay =
-            StoredReplay.WavingAutoPlay(with_colors.Keys, with_colors.Source.Notes)
+            StoredReplay.WavingAutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
 
-        let FIRST_NOTE = with_colors.FirstNote
+        let FIRST_NOTE = info.WithColors.FirstNote
         let ruleset = Rulesets.current
 
         let scoring =
-            ScoreProcessor.create ruleset with_colors.Keys replay_data with_colors.Source.Notes SelectedChart.rate.Value
+            ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
 
         let mutable time = -Time.infinity
 
@@ -36,7 +36,7 @@ module EditHudScreen =
 
         let mutable ctx: PositionerContext = Unchecked.defaultof<_>
 
-        { new IPlayScreen(chart, with_colors, PacemakerState.None, scoring) with
+        { new IPlayScreen(info, PacemakerState.None, scoring) with
             override this.AddWidgets() =
 
                 ctx <-
@@ -71,8 +71,7 @@ module EditHudScreen =
                 if s <> ScreenType.Play then on_exit ()
 
             override this.Update(elapsed_ms, moved) =
-                let now = Song.time_with_offset ()
-                let chart_time = now - FIRST_NOTE
+                let chart_time = this.State.CurrentChartTime()
 
                 if chart_time < time then
                     seek_backwards this
