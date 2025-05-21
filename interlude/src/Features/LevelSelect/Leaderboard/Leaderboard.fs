@@ -58,11 +58,11 @@ type Leaderboard(display: Setting<InfoPanelMode>) =
     let filter : Setting<Filter> = Setting.simple Filter.None
     let sort : Setting<Sort> = Setting.map enum int options.ScoreSortMode
 
-    let scores_list = FlowContainer.Vertical<LeaderboardCard>(75.0f, Spacing = Style.PADDING * 3.0f)
+    let scores_list = FlowContainer.Vertical<OnlineScoreCard>(75.0f, Spacing = Style.PADDING * 3.0f)
 
     do
         ScoreSync.init()
-        OnlineScores.leaderboard_score_loaded.Add (fun score_info -> score_info |> LeaderboardCard |> scores_list.Add; count <- count + 1)
+        OnlineScores.leaderboard_score_loaded.Add (fun score_info -> score_info |> OnlineScoreCard |> scores_list.Add; count <- count + 1)
 
     override this.Init(parent) =
         SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(fun s -> s.FadeOut()))

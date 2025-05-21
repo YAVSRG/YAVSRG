@@ -257,11 +257,11 @@
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
-    <Compile Include="Features\LevelSelect\Scoreboard\Score.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScores.fs" />
+    <Compile Include="Features\LevelSelect\Scoreboard\LocalScoreCard.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\Scoreboard.fs" />
-    <Compile Include="Features\LevelSelect\Leaderboard\Score.fs" />
     <Compile Include="Features\LevelSelect\Leaderboard\OnlineScores.fs" />
+    <Compile Include="Features\LevelSelect\Leaderboard\OnlineScoreCard.fs" />
     <Compile Include="Features\LevelSelect\Leaderboard\Leaderboard.fs" />
     <Compile Include="Features\LevelSelect\Info\CurrentChart.fs" />
     <Compile Include="Features\LevelSelect\Info\GameplayInfoBoxes.fs" />

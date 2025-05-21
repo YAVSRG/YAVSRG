@@ -14,6 +14,8 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Web.Shared.Requests
 
+type LeaderboardScore = Charts.Scores.Leaderboard.Score
+
 module OnlineScores =
 
     [<RequireQualifiedAccess>]
