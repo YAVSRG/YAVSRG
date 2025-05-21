@@ -15,6 +15,10 @@ type EarlyLatePage(on_close: unit -> unit) =
         config.EarlyLateMeterDuration
         |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
+    let millisecond_tolerance =
+        config.EarlyLateMeterMillisecondTolerance
+        |> Setting.bounded (0.00f<ms / rate>, 50.00f<ms / rate>)
+
     let frame_time =
         config.EarlyLateMeterFrameTime
         |> Setting.bounded (2.0f<ms / rate>, 500.0f<ms / rate>)
@@ -28,32 +32,36 @@ type EarlyLatePage(on_close: unit -> unit) =
 
     override this.Content() =
         page_container()
+        |+ PageSetting(%"hud.early_late.millisecondtolerance", Slider(millisecond_tolerance |> Setting.uom, Step = 0.125f))
+            .Help(Help.Info("hud.early_late.millisecondtolerance"))
+            .Pos(0)
         |+ PageSetting(%"hud.early_late.duration", Slider(duration |> Setting.uom, Step = 5f))
             .Help(Help.Info("hud.early_late.duration"))
-            .Pos(0)
+            .Pos(2)
         |+ PageSetting(%"hud.early_late.usetexture", Checkbox use_texture)
             .Help(Help.Info("hud.early_late.usetexture"))
-            .Pos(2)
+            .Pos(4)
         |+ PageSetting(%"hud.early_late.frametime", Slider(frame_time |> Setting.uom, Step = 5f))
             .Help(Help.Info("hud.early_late.frametime"))
-            .Pos(4)
+            .Pos(6)
             .Conditional(use_texture.Get)
         |+ PageTextEntry(%"hud.early_late.earlytext", early_text)
             .Help(Help.Info("hud.early_late.earlytext"))
-            .Pos(4)
+            .Pos(6)
             .Conditional(use_texture.Get >> not)
         |+ PageSetting(%"hud.early_late.earlycolor", ColorPicker(%"hud.early_late.earlycolor", early_color, false))
             .Help(Help.Info("hud.early_late.earlycolor"))
-            .Pos(6)
+            .Pos(8)
             .Conditional(use_texture.Get >> not)
         |+ PageTextEntry(%"hud.early_late.latetext", late_text)
             .Help(Help.Info("hud.early_late.latetext"))
-            .Pos(9)
+            .Pos(11)
             .Conditional(use_texture.Get >> not)
         |+ PageSetting(%"hud.early_late.latecolor", ColorPicker(%"hud.early_late.latecolor", late_color, false))
             .Help(Help.Info("hud.early_late.latecolor"))
-            .Pos(11)
+            .Pos(13)
             .Conditional(use_texture.Get >> not)
+
         :> Widget
 
     override this.Title = %"hud.early_late"
@@ -67,6 +75,7 @@ type EarlyLatePage(on_close: unit -> unit) =
                 EarlyLateMeterEarlyColor = early_color.Value
                 EarlyLateMeterLateText = late_text.Value
                 EarlyLateMeterLateColor = late_color.Value
+                EarlyLateMeterMillisecondTolerance = millisecond_tolerance.Value
             }
 
         on_close ()

@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Scoring
 open Prelude.Skins.HudLayouts
@@ -16,6 +17,7 @@ type EarlyLate(config: HudConfig, state: PlayState) =
     let mutable time = -Time.infinity
 
     let texture = Content.Texture "early-late"
+    let millisecondtolerance = config.EarlyLateMeterMillisecondTolerance
 
     do
         state.SubscribeEvents(fun ev ->
@@ -27,7 +29,7 @@ type EarlyLate(config: HudConfig, state: PlayState) =
                 | _ -> ValueNone
 
             match x with
-            | ValueSome (judge, delta) when judge > 0 ->
+            | ValueSome (judge, delta) when delta > millisecondtolerance || delta < -millisecondtolerance ->
                 early <- delta < 0.0f<ms / rate>
                 time <- ev.Time
             | _ -> ()
