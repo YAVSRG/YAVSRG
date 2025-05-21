@@ -7,6 +7,8 @@ open Prelude.Mods
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Interlude.UI
+open Prelude.Calculator
+open Interlude.Features.Gameplay
 
 #nowarn "3370"
 
@@ -14,7 +16,7 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
     inherit Container(NodeType.None)
 
     let show_more_info = Setting.simple false
-
+    let notecounts = Interlude.Features.Gameplay.SelectedChart.FMT_NOTECOUNTS.Value
     let mod_string = ModState.format (score_info.Rate, score_info.Mods)
 
     let category, main_clusters =
@@ -48,6 +50,9 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
             .Color (Colors.white, Difficulty.color score_info.Physical)
+        |+ Text(sprintf "%s" notecounts)
+            .Align(Alignment.CENTER)
+            .Position(Position.ShrinkT(730.0f).SliceT(75.0f).ShrinkX(25.0f))
         |+ Button(
             (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
             (fun () -> show_more_info.Set true)
