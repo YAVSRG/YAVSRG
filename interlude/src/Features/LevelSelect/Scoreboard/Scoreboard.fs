@@ -34,7 +34,7 @@ type Scoreboard(display: Setting<InfoPanelMode>) =
     let sorter () : ScoreCard -> ScoreCard -> int =
         match sort.Value with
         | Sort.Accuracy -> fun b a -> a.Data.Scoring.Accuracy.CompareTo b.Data.Scoring.Accuracy
-        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo b.Data.Physical
+        | Sort.Performance -> fun b a -> a.Data.Performance.CompareTo b.Data.Performance
         | Sort.Time
         | _ -> fun b a -> a.Data.TimePlayed.CompareTo b.Data.TimePlayed
 

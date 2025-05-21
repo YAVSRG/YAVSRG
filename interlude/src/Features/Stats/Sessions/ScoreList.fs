@@ -149,9 +149,9 @@ type Score(score_info: ScoreInfo) =
         Render.rect box box_color
         Text.fill_b (
             Style.font,
-            (sprintf "%.2f" score_info.Physical),
+            (sprintf "%.2f" score_info.Performance),
             box.ShrinkY(5.0f),
-            (Colors.white.O4a alpha, (Difficulty.color score_info.Physical).O4a alpha),
+            (Colors.white.O4a alpha, (Difficulty.color score_info.Performance).O4a alpha),
             Alignment.CENTER
         )
 

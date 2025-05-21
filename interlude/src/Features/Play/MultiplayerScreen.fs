@@ -69,7 +69,7 @@ type MultiplayerScreen =
                         Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
 
                         Rating = info.Difficulty
-                        Physical = Performance.calculate info.Difficulty scoring
+                        Performance = Performance.calculate info.Difficulty scoring
 
                         ImportedFromOsu = false
                         IsFailed = quit_out_early

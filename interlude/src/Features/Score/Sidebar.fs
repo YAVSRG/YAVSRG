@@ -6,6 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude.Mods
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
+open Prelude.Calculator
 open Interlude.UI
 
 #nowarn "3370"
@@ -38,15 +39,16 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(90.0f).SliceT(70.0f).ShrinkX(25.0f))
         |+ Text(sprintf "%s %.2f" Icons.STAR score_info.Rating.Overall)
+            .Color(Colors.white, Difficulty.color score_info.Rating.Overall)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
         |+ Text(fun () -> sprintf "%ix" score_info.Scoring.BestCombo)
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
-        |+ Text(sprintf "%.2f" score_info.Physical)
+        |+ Text(sprintf "%.2f" score_info.Performance)
+            .Color(Colors.white, Difficulty.color score_info.Performance)
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(530.0f).SliceT(70.0f).ShrinkX(25.0f))
-
         |+ Button(
             (fun () -> sprintf "MA: %s  •  PA: %s  •  M: %.2fms  •  SD: %.2fms" (!stats).MA (!stats).PA (!stats).TapMean (!stats).TapStandardDeviation),
             (fun () -> show_more_info.Set true)

@@ -31,7 +31,7 @@ type ScoreInfo =
         mutable Grade: int
 
         Rating: Difficulty
-        Physical: float32
+        Performance: float32
 
         ImportedFromOsu: bool
         IsFailed: bool
@@ -90,7 +90,7 @@ module ScoreInfo =
             Grade = Grade.calculate ruleset.Grades scoring.Accuracy
 
             Rating = difficulty
-            Physical = Performance.calculate difficulty scoring
+            Performance = Performance.calculate difficulty scoring
 
             ImportedFromOsu = score.IsImported
             IsFailed = score.IsFailed

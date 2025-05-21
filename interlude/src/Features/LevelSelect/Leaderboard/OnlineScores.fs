@@ -100,7 +100,7 @@ module OnlineScores =
                                 Grade = Grade.calculate req.Ruleset.Grades scoring.Accuracy
 
                                 Rating = rating
-                                Physical = Performance.calculate rating scoring
+                                Performance = Performance.calculate rating scoring
 
                                 ImportedFromOsu = false
                                 IsFailed = false

@@ -65,7 +65,7 @@ type private LeaderboardCard(score: LeaderboardScore, score_info: ScoreInfo) =
                 "%s  •  %ix  •  %.2f"
                 (score_info.Ruleset.LampName score_info.Lamp)
                 score_info.Scoring.BestCombo
-                score_info.Physical
+                score_info.Performance
         )
             .Color(text_subcolor)
             .Align(Alignment.LEFT)
