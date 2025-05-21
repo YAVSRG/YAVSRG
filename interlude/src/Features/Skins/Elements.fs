@@ -30,6 +30,7 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter"
         | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
+        | HudElement.HudGraph -> %"hud.hudgraph"
 
     let tooltip (element: HudElement) : string =
         match element with
@@ -47,6 +48,7 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter.tooltip"
         | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
+        | HudElement.HudGraph -> %"hud.hudgraph.tooltip"
 
     let can_configure (element: HudElement) : bool =
         match element with
@@ -77,6 +79,7 @@ module HudElement =
         | HudElement.InputMeter -> cast InputMeter
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
+        | HudElement.HudGraph -> cast HudGraph
 
     let enabled_setting (element: HudElement) : Setting<bool> =
         match element with
@@ -190,6 +193,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.CustomImageEnabled)
+        | HudElement.HudGraph ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            HudGraphEnabled = v
+                        }
+                )
+                (fun () -> Content.HUD.HudGraphEnabled)
 
     let position_setting (e: HudElement) : Setting<HudPosition> =
         match e with
@@ -320,6 +332,15 @@ module HudElement =
                 )
                 (fun () -> Content.HUD.CustomImagePosition)
 
+        | HudElement.HudGraph ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            HudGraphPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.HudGraphPosition)
     let default_position (e: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default
 
@@ -341,3 +362,4 @@ module HudElement =
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
         | HudElement.KeysPerSecond -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition
+        | HudElement.HudGraph -> all_defaults.HudGraphPosition

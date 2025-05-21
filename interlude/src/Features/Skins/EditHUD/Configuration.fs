@@ -21,3 +21,4 @@ module private ConfigurationPageHelper =
         | HudElement.Pacemaker -> PacemakerPage(on_close).Show()
         | HudElement.KeysPerSecond -> KeysPerSecondPage(on_close).Show()
         | HudElement.CustomImage -> CustomImagePage(on_close).Show()
+        | HudElement.HudGraph -> HudGraphPage(on_close).Show()

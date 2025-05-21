@@ -22,6 +22,7 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
+    | HudGraph
     static member FULL_LIST =
         [
             Accuracy
@@ -38,6 +39,7 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
+            HudGraph
         ]
 
 [<RequireQualifiedAccess>]
@@ -157,6 +159,15 @@ type HudConfig =
         ComboUseFont: bool
         ComboFontSpacing: float32
 
+        HudGraphEnabled: bool
+        HudGraphPosition: HudPosition
+        HudGraphHitSize: float32
+        HudGraphScrollSpeed: float32
+        HudGraphWindowOpacity: float32
+        HudGraphHitOpacity: float32
+        HudGraphShowIncomingNotes: bool
+        HudGraphDrawBorder: bool
+        HudGraphTransparent: bool
         SkipButtonPosition: HudPosition
         SkipButtonBackground: BackgroundTextureOptions
 
@@ -295,6 +306,23 @@ type HudConfig =
             ComboUseFont = false
             ComboFontSpacing = 0.0f
 
+
+            HudGraphEnabled = true
+            HudGraphPosition =
+                {
+                    RelativeToPlayfield = false
+                    Left = -200.0f, 0.5f
+                    Top = -200.0f, 0.5f
+                    Right = 200.0f, 0.5f
+                    Bottom = 200f, 0.5f
+                }
+            HudGraphHitSize = 15.0f
+            HudGraphScrollSpeed = 5f
+            HudGraphWindowOpacity = 40f
+            HudGraphHitOpacity = 100f
+            HudGraphShowIncomingNotes = true
+            HudGraphDrawBorder = true
+            HudGraphTransparent = false
             SkipButtonPosition =
                 {
                     RelativeToPlayfield = true

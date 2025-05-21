@@ -76,6 +76,7 @@ module ReplayScreen =
                 if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
                 if hud_config.KeysPerSecondMeterEnabled then add_widget hud_config.KeysPerSecondMeterPosition KeysPerSecond
                 if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
+                if hud_config.HudGraphEnabled then add_widget hud_config.HudGraphPosition HudGraph
 
                 this
                 |+ { new StaticWidget(NodeType.None) with

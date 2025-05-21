@@ -377,6 +377,10 @@ module SelectPreviews =
             ((Sprite.fill bounds texture).AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (1, 0) texture)
+    let private create_hudgraph (config: HudConfig) : SelectPreview =
+        None,
+        fun (bounds: Rect) ->
+            Text.fill (Style.font, "wip", bounds, Color.White, Alignment.CENTER)
 
     let create (config: HudConfig) (element: HudElement) : SelectPreview =
         match element with
@@ -394,3 +398,4 @@ module SelectPreviews =
         | HudElement.InputMeter -> create_input_meter config
         | HudElement.KeysPerSecond -> create_kps config
         | HudElement.CustomImage -> create_custom_image config
+        | HudElement.HudGraph -> create_hudgraph config
