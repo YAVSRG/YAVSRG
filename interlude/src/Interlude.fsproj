@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
@@ -120,6 +120,7 @@
     <Compile Include="Features\Score\Username.fs" />
     <Compile Include="Features\Score\Utils.fs" />
     <Compile Include="Features\Score\TopBanner.fs" />
+    <Compile Include="Features\Score\DeviationGraph.fs" />
     <Compile Include="Features\Score\Sidebar.fs" />
     <Compile Include="Features\Score\SessionScore.fs" />
     <Compile Include="Features\Score\Graph.fs" />
@@ -173,6 +174,7 @@
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
     <Compile Include="Features\Skins\Elements\ErrorBar.fs" />
     <Compile Include="Features\Skins\Elements\Judgement.fs" />
+    <Compile Include="Features\Skins\Elements\NoteCount.fs" />
     <Compile Include="Features\Skins\Elements\EarlyLate.fs" />
     <Compile Include="Features\Skins\Elements\Combo.fs" />
     <Compile Include="Features\Skins\Elements\ProgressPie.fs" />
@@ -180,6 +182,7 @@
     <Compile Include="Features\Skins\Elements\Pacemaker.fs" />
     <Compile Include="Features\Skins\Elements\JudgementCounter.fs" />
     <Compile Include="Features\Skins\Elements\MultiplayerScoreTracker.fs" />
+    <Compile Include="Features\Skins\Elements\HudGraph.fs" />
     <Compile Include="Features\Skins\Elements\RateMods.fs" />
     <Compile Include="Features\Skins\Elements\BPM.fs" />
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />
@@ -208,7 +211,9 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\Accuracy.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBar.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Judgement.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\Notecount.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\EarlyLate.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\HudGraph.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Combo.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ProgressPie.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\SkipButton.fs" />
