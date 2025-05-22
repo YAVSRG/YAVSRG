@@ -59,7 +59,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
     member this.ToggleDropdown() =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper
 
-type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGraph, refresh: unit -> unit) =
+type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGraph, deviationgraph: DeviationGraph, refresh: unit -> unit) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
@@ -86,6 +86,7 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
 
         this
         |+ graph
+        |+ deviationgraph
         |+ Text(Updates.version + "  : :  www.yavsrg.net")
             .Color(Colors.text_subheading)
             .Align(Alignment.CENTER)
@@ -100,6 +101,12 @@ type BottomBanner(score_info: ScoreInfo, played_just_now: bool, graph: ScoreGrap
             .With(
                 InlaidButton(%"score.graph.settings", fun () ->
                     ScoreGraphSettingsPage(graph).Show()
+                )
+                    .Icon(Icons.EDIT_2)
+                    .Position(Position.GridX(1, 5, 30.0f)),
+
+                InlaidButton(%"deviation.graph.settings", fun () ->
+                    DeviationGraphSettingsPage(deviationgraph).Show()
                 )
                     .Icon(Icons.EDIT_2)
                     .Position(Position.GridX(1, 4, 30.0f)),

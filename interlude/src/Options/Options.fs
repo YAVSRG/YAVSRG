@@ -213,6 +213,7 @@ type GameOptions =
         ScoreGraphLineColor: Setting<ScoreGraphLineColor>
         ScoreGraphLineOnTop: Setting<bool>
         ScoreGraphWindowBackground: Setting<bool>
+        DeviationGraphWindowBackground: Setting<bool>
         HoldToGiveUp: Setting<bool>
         MenusMuffleSong: Setting<bool>
     }
@@ -336,6 +337,7 @@ type GameOptions =
             ScoreGraphLineColor = Setting.simple ScoreGraphLineColor.Lamp
             ScoreGraphLineOnTop = Setting.simple false
             ScoreGraphWindowBackground = Setting.simple false
+            DeviationGraphWindowBackground = Setting.simple false
             HoldToGiveUp = Setting.simple false
             MenusMuffleSong = Setting.simple true
         }
