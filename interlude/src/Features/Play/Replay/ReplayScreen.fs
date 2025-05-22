@@ -5,8 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts
-open Prelude.Calculator
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User

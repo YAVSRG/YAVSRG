@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Import.Etterna
 
-open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI

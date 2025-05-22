@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Score
 
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User

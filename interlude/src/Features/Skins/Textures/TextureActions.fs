@@ -2,9 +2,6 @@
 
 open Percyqaz.Flux.UI
 open Prelude.Skins
-open Prelude.Skins.Noteskins
-open Prelude.Skins.HudLayouts
-open Interlude.Content
 open Interlude.UI
 
 type TextureActions =

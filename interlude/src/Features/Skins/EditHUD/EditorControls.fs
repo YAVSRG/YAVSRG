@@ -47,92 +47,94 @@ type private HUDEditorControls(ctx: PositionerContext) =
         )
 
         this
-        |+ Text(Icons.MOVE + " " + %"hud.editor")
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceT(90.0f).SliceL(500.0f).TranslateY(10.0f))
-        |+ HUDEditorButton(
-            sprintf "%s %s" Icons.PLUS_CIRCLE (%"hud.add_more_elements"),
-            %%"options",
-            (fun () -> EditHUDPage(ctx).Show()))
-            .Position(Position.SliceT(65.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
+            .Add(
+                Text(Icons.MOVE + " " + %"hud.editor")
+                    .Align(Alignment.CENTER)
+                    .Position(Position.SliceT(90.0f).SliceL(500.0f).TranslateY(10.0f)),
+                HUDEditorButton(
+                    sprintf "%s %s" Icons.PLUS_CIRCLE (%"hud.add_more_elements"),
+                    %%"options",
+                    (fun () -> EditHUDPage(ctx).Show()))
+                    .Position(Position.SliceT(65.0f).SliceL(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING)),
 
-        |+ Text("Click an element to move/configure")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(10.0f))
-            .Conditional(fun () -> ctx.Selected.IsNone)
+                Text("Click an element to move/configure")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(50.0f).ShrinkX(25.0f).TranslateY(10.0f))
+                    .Conditional(fun () -> ctx.Selected.IsNone),
 
-        |+ Text(fun () ->
-            match ctx.Selected with
-            | Some e -> HudElement.name e
-            | None -> ""
-        )
-            .Align(Alignment.CENTER)
-            .Position(Position.SliceT(90.0f).SliceR(500.0f).TranslateY(10.0f))
-        |+ HUDEditorButton(
-            sprintf "%s %s" Icons.SETTINGS (%"hud.configure"),
-            %%"context_menu",
-            fun () -> ctx.ConfigureElement()
-        )
-            .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ HUDEditorButton(
-            sprintf "%s %s" Icons.ANCHOR (%"hud.anchor"),
-            %%"hud_anchor",
-            fun () -> AnchorPage(ctx).Show()
-        )
-            .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(200.0f).Expand(Style.PADDING))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ HUDEditorButton(
-            sprintf "%s %s" Icons.REFRESH_CW (%"hud.reset_position"),
-            %%"hud_reset_position",
-            ctx.ResetCurrentPosition
-        )
-            .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(295.0f).Expand(Style.PADDING))
-            .Conditional(fun () -> ctx.Selected.IsSome)
+                Text(fun () ->
+                    match ctx.Selected with
+                    | Some e -> HudElement.name e
+                    | None -> ""
+                )
+                    .Align(Alignment.CENTER)
+                    .Position(Position.SliceT(90.0f).SliceR(500.0f).TranslateY(10.0f)),
+                HUDEditorButton(
+                    sprintf "%s %s" Icons.SETTINGS (%"hud.configure"),
+                    %%"context_menu",
+                    fun () -> ctx.ConfigureElement()
+                )
+                    .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(105.0f).Expand(Style.PADDING))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                HUDEditorButton(
+                    sprintf "%s %s" Icons.ANCHOR (%"hud.anchor"),
+                    %%"hud_anchor",
+                    fun () -> AnchorPage(ctx).Show()
+                )
+                    .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(200.0f).Expand(Style.PADDING))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                HUDEditorButton(
+                    sprintf "%s %s" Icons.REFRESH_CW (%"hud.reset_position"),
+                    %%"hud_reset_position",
+                    ctx.ResetCurrentPosition
+                )
+                    .Position(Position.SliceT(65.0f).SliceR(500.0f).ShrinkX(25.0f).TranslateY(295.0f).Expand(Style.PADDING))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
 
-        |+ Text("Move: Arrow keys/Drag with mouse")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(385.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text("Hold Ctrl or drag corners to resize")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(425.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text("Hold Shift for symmetrical resizes")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(465.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text("Hold Alt for smaller adjustments")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(505.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text(sprintf "Remove this element: %O" %%"delete")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(565.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text(sprintf "Mirror horizontally: %O" %%"hud_flip_horizontal")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(605.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |+ Text(sprintf "Mirror vertically: %O" %%"hud_flip_vertical")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(645.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
-        |* Text(sprintf "Undo: %O" %%"undo")
-            .Color(Colors.text_cyan)
-            .Align(Alignment.RIGHT)
-            .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(685.0f))
-            .Conditional(fun () -> ctx.Selected.IsSome)
+                Text("Move: Arrow keys/Drag with mouse")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(385.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text("Hold Ctrl or drag corners to resize")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(425.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text("Hold Shift for symmetrical resizes")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(465.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text("Hold Alt for smaller adjustments")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(505.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text(sprintf "Remove this element: %O" %%"delete")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(565.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text(sprintf "Mirror horizontally: %O" %%"hud_flip_horizontal")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(605.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text(sprintf "Mirror vertically: %O" %%"hud_flip_vertical")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(645.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                Text(sprintf "Undo: %O" %%"undo")
+                    .Color(Colors.text_cyan)
+                    .Align(Alignment.RIGHT)
+                    .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(685.0f))
+                    .Conditional(fun () -> ctx.Selected.IsSome)
+            )
 
-        base.Init parent
+        base.Init(parent)
 
     override this.Draw() =
         if fade.Alpha > 0 then

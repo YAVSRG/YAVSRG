@@ -133,12 +133,9 @@ module Gameplay =
             ImprovementFlags.None, None
 
     let delete_score (score_info: ScoreInfo) =
-        let score_name =
-            sprintf "%s | %s" score_info.Scoring.FormattedAccuracy (score_info.Ruleset.LampName score_info.Lamp)
-
         if UserDatabase.delete_score score_info.ChartMeta.Hash score_info.TimePlayed Content.UserData then
             score_deleted_ev.Trigger score_info.TimePlayed
-            Notifications.action_feedback (Icons.TRASH, [ score_name ] %> "notification.deleted", "")
+            Notifications.action_feedback (Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")
 

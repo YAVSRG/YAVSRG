@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play.HUD
 
-open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude

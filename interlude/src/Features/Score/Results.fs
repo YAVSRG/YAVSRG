@@ -5,7 +5,6 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Scoring
-open Prelude.Gameplay
 open Prelude.Data.User
 open Interlude.UI
 
