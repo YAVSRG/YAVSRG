@@ -1,8 +1,8 @@
 # How to contribute to this repository
 
-This guide assumes no pre-existing knowledge other than that you have written some code in a programming language before
+This guide assumes little pre-existing knowledge other than that you have written some code in a programming language before
 
-If you are familiar with Git, GitHub or a workflow that works for you instead, feel free to disregard or improvise upon these instructions
+If you are experienced with a workflow that works for you instead, feel free to disregard or improvise upon these instructions at your own risk
 
 If these steps don't help or you are stuck, ask in [the Discord](https://yavsrg.net/discord)
 
@@ -19,7 +19,7 @@ Once you are signed into your GitHub account, [create a fork of YAVSRG](https://
 
 This is where you can commit whatever changes you like to your own copy of the repo
 
-Once the fork is created, you can connect the repository you already have on your machine to a branch on the fork with these terminal commands:
+Once the fork is created, connect the repository on your machine to a branch on the fork with these commands:
 
 ```bash
 # terminal needs to be in the YAVSRG folder
@@ -27,17 +27,23 @@ git remote add personal https://github.com/<*YOUR GITHUB USERNAME*>/YAVSRG.git
 git checkout -b <*BRANCH NAME*>
 git push --set-upstream personal <*BRANCH NAME*>
 # now you can add commits and push them as you please
+# `git commit` and `git push` commands, etc or your IDE integration will work normally from now on
 ```
 
-Not sure what to name your branch? You can just call it `develop` or if you are adding a particular feature you could name it something descriptive like `help-mode` or `scoring-bug-fix`
+If you are adding a particular feature you could name your branch something descriptive like `help-mode` or `scoring-bug-fix`, otherwise just naming it `develop` is fine  
 
-The `main` branch is still connected to the original repo, not your fork which can come in handy for fetching the latest official changes
+I **very strongly recommend** that you don't add commits to your `main` branch locally  
+This will make your life much easier and less confusing since if you followed the instructions above, since `main` is still connected to the original repo, not your fork  
+
+
+
+The `main` on your local repo should only be used for fetching updates from the main repo, then you can merge or rebase these changes into your working branch as needed  
 
 ### 3. Make changes
 
-You can now make any changes you like and commit your work as you go using git/any tools built into your IDE that integrate with git
+You can now make any changes you like and commit/push your work as you go using git or IDE integrations with git
 
-Your commits will appear at `https://github/com/<*YOUR USERNAME*>/YAVSRG` and not on the main repo
+Any commits you push will appear at `https://github/com/<*YOUR USERNAME*>/YAVSRG` and not on the main repo
 
 When you are ready to submit your changes to be added to the main repo, you can submit a PR (step 4)
 
