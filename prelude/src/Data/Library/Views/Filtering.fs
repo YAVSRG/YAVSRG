@@ -186,12 +186,12 @@ type Filter =
             | LessThan("l", l)
             | LessThan("length", l) -> filter <- { filter with LengthMax = Some l }
 
-            | LessThan("ln", pc)
-            | LessThan("holds", pc)
-            | LessThan("lns", pc) -> filter <- { filter with LNPercentMin = Some pc }
             | MoreThan("ln", pc)
             | MoreThan("holds", pc)
-            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMax = Some pc }
+            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMin = Some pc }
+            | LessThan("ln", pc)
+            | LessThan("holds", pc)
+            | LessThan("lns", pc) -> filter <- { filter with LNPercentMax = Some pc }
 
             | Equals("mapper", creator)
             | Equals("m", creator)
