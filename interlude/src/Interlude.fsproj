@@ -177,6 +177,7 @@
     <Compile Include="Features\Play\DifficultyOverlay.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
+    <Compile Include="Features\Skins\Elements\HudGraph.fs" />
     <Compile Include="Features\Skins\Elements\ErrorBar.fs" />
     <Compile Include="Features\Skins\Elements\Judgement.fs" />
     <Compile Include="Features\Skins\Elements\EarlyLate.fs" />
@@ -212,6 +213,7 @@
     <Compile Include="Features\Skins\Textures\TextureList.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ElementPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Accuracy.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\HudGraph.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBar.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Judgement.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\EarlyLate.fs" />
