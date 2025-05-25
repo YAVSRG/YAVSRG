@@ -30,7 +30,7 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter"
         | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
-        | HudElement.HudGraph -> %"hud.hudgraph"
+        | HudElement.HudGraph -> %"hud.hud_graph"
 
     let tooltip (element: HudElement) : string =
         match element with
@@ -48,7 +48,7 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter.tooltip"
         | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
-        | HudElement.HudGraph -> %"hud.hudgraph.tooltip"
+        | HudElement.HudGraph -> %"hud.hud_graph.tooltip"
 
     let can_configure (element: HudElement) : bool =
         match element with

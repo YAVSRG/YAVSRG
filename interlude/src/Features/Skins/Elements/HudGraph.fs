@@ -239,7 +239,7 @@ type HudGraph (config: HudConfig, state: PlayState) =
 
         Text.draw_b (
             Style.font,
-            sprintf "%s (-%.0fms)" (%"hud.hudgraph.early")  (MAX_WINDOW),
+            sprintf "%s (-%.0fms)" (%"hud.hud_graph.early")  (MAX_WINDOW),
             24.0f,
             this.Bounds.Left + 10.0f,
             this.Bounds.Bottom - 40.0f,
@@ -247,7 +247,7 @@ type HudGraph (config: HudConfig, state: PlayState) =
             )
         Text.draw_b (
             Style.font,
-            sprintf "%s (-%.0fms)" (%"hud.hudgraph.late")  (MAX_WINDOW),
+            sprintf "%s (-%.0fms)" (%"hud.hud_graph.late")  (MAX_WINDOW),
             24.0f,
             this.Bounds.Left + 10.0f,
             this.Bounds.Top + 3.0f,
