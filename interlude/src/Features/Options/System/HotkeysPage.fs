@@ -19,6 +19,8 @@ type private HotkeyBinder(hotkey: Hotkey) as this =
             Style.key.Play()
         | _ -> Input.listen_to_next_key input_callback
 
+    override this.ToString() = (%%hotkey).ToString()
+
     override this.Init(parent: Widget) : unit =
         this
             .Add(
@@ -52,6 +54,21 @@ type private HotkeyBinder(hotkey: Hotkey) as this =
         base.OnDeselected by_mouse
         Input.remove_listener ()
 
+type HotkeySetting(hotkey: string) =
+    inherit PageSetting(
+        %(sprintf "hotkeys.%s" hotkey),
+        NavigationContainer.Row()
+            .With(
+                HotkeyBinder(hotkey)
+                    .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
+                Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
+                    .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
+            )
+    )
+
+    member val Label : string = %(sprintf "hotkeys.%s" hotkey)
+    member this.AsText = (%%hotkey).ToString()
+
 type HotkeysPage() =
     inherit Page()
 
@@ -70,7 +87,9 @@ type HotkeysPage() =
                     let query = query.Trim()
                     container.Filter <-
                     function
-                    | :? PageSetting as p -> p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase)
+                    | :? HotkeySetting as p ->
+                        (query.Length > 1 && p.Label.Contains(query, System.StringComparison.InvariantCultureIgnoreCase))
+                        || p.AsText.Equals(query, System.StringComparison.InvariantCultureIgnoreCase)
                     | _ -> false
             )
                 .Fill(Colors.cyan.O3)
@@ -78,15 +97,6 @@ type HotkeysPage() =
                 .TextColor(Colors.text_cyan)
                 .KeyboardAutoSelect()
                 .Position(Position.SliceT(40.0f, SearchBox.HEIGHT).Shrink(PAGE_MARGIN_X, 0.0f).SliceR(500.0f))
-
-        let hotkey_editor (hotkey: Hotkey) =
-            NavigationContainer.Row()
-                .With(
-                    HotkeyBinder(hotkey)
-                        .Position(Position.ShrinkR(PAGE_ITEM_HEIGHT)),
-                    Button(Icons.REFRESH_CCW, (fun () -> Hotkeys.reset hotkey))
-                        .Position(Position.SliceR(PAGE_ITEM_HEIGHT))
-                )
 
         container.Add(
             PageButton(%"system.hotkeys.reset", fun () ->
@@ -98,8 +108,7 @@ type HotkeysPage() =
         for hk in Hotkeys.hotkeys.Keys do
             if hk <> "none" then
                 container.Add(
-                    PageSetting(%(sprintf "hotkeys.%s" hk), hotkey_editor hk)
-                        .Help(Help.Info(sprintf "hotkeys.%s" hk))
+                    HotkeySetting(hk).Help(Help.Info(sprintf "hotkeys.%s" hk))
                 )
 
         NavigationContainer.Column()
