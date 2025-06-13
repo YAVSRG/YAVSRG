@@ -39,12 +39,10 @@ module Accuracy =
 type Accuracy(config: HudConfig, state: PlayState) =
     inherit Container(NodeType.None)
 
-    let grades = state.Ruleset.Grades
-
     let color =
         Animation.Color(
             if config.AccuracyGradeColors then
-                Array.last(grades).Color
+                state.Ruleset.GradeColor -1
             else
                 Color.White
         )
@@ -56,7 +54,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
     override this.Init(parent) =
         if config.AccuracyGradeColors then
             state.Subscribe(fun _ ->
-                color.Target <- Grade.calculate grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
+                color.Target <- Grade.calculate state.Ruleset.Grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
             ) |> ignore
 
         if not config.AccuracyUseFont then
