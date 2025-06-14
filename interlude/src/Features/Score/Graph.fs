@@ -493,53 +493,65 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let width = this.Bounds.Width
         let xscale = (width - 10.0f) / events.[events.Count - 1].Time
 
+        let dot (x: float32, y: float32) (color: Color) =
+            // x is actual x coordinate, y is relative to top edge
+            Render.rect_size
+                (x - HTHICKNESS)
+                (this.Bounds.Top + y - HTHICKNESS)
+                THICKNESS
+                THICKNESS
+                color
+
+        // todo: future use as a setting
+        let bar (x: float32) (color: Color) =
+            Render.rect_size
+                (x - 1.5f)
+                (this.Bounds.Top + THICKNESS)
+                3.0f
+                (h * 2.0f)
+                color.O1
+
         for ev in events do
-            let dot : (float32 * Color) voption =
-                match ev.Action with
-                | Hit e
-                | Hold e ->
+            let x = this.Bounds.Left + 5.0f + ev.Time * xscale
+            match ev.Action with
+            | Hit e
+            | Hold e ->
 
-                    match e.Judgement with
-                    | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y =
-                            if e.Missed then THICKNESS
-                            else h - System.Math.Clamp(h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)
-                        ValueSome(y, score_info.Ruleset.JudgementColor judgement)
+                match e.Judgement with
+                | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
+                    let color = score_info.Ruleset.JudgementColor judgement
 
-                    | _ -> ValueNone
+                    if e.Missed then
+                        //bar x color
+                        dot (x, THICKNESS) color
+                    else
+                        dot (x, h - System.Math.Clamp(h * e.Delta / MAX_WINDOW * GraphSettings.scale.Value, -h + THICKNESS, h - THICKNESS)) color
+                | _ -> ()
 
-                | Release e ->
+            | Release e ->
 
-                    match e.Judgement with
-                    | Some (judgement, _) when GraphSettings.column_filter.[ev.Column] ->
-                        // todo: figure something out about half-scale releases
-                        let y =
-                            if e.Missed then THICKNESS
-                            else h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)
-                        ValueSome(y, score_info.Ruleset.JudgementColor(judgement).O2)
+                match e.Judgement with
+                | Some (judgement, _) when GraphSettings.column_filter.[ev.Column] ->
+                    // todo: figure something out about half-scale releases
+                    let color = score_info.Ruleset.JudgementColor judgement
 
-                    | _ -> ValueNone
+                    if e.Missed then
+                        //bar x (score_info.Ruleset.JudgementColor judgement)
+                        dot (x, THICKNESS) color
+                    else
+                        dot (x, h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)) color
+                | _ -> ()
 
-                | GhostTap e ->
-                    match e.Judgement with
-                    | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
-                        let y = 2f * h - THICKNESS
-                        ValueSome(y, score_info.Ruleset.JudgementColor judgement)
-                    | _ -> ValueNone
+            | GhostTap e ->
+                match e.Judgement with
+                | Some (judgement, _) when not GraphSettings.only_releases.Value && GraphSettings.column_filter.[ev.Column] ->
+                    let color = score_info.Ruleset.JudgementColor judgement
+                    //bar x color
+                    dot (x, THICKNESS) color
+                | _ -> ()
 
-                | DropHold
-                | RegrabHold -> ValueNone
-
-            match dot with
-            | ValueNone -> ()
-            | ValueSome (y, col) ->
-                let x = this.Bounds.Left + 5.0f + ev.Time * xscale
-                Render.rect_size
-                    (x - HTHICKNESS)
-                    (this.Bounds.Top + y - HTHICKNESS)
-                    THICKNESS
-                    THICKNESS
-                    col
+            | DropHold
+            | RegrabHold -> ()
 
     member private this.Redraw() =
         refresh <- false
