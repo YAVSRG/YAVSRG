@@ -39,6 +39,12 @@ module ModState =
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 
+    let cycle_column_swap (id: string) (columns: int array) (mods: ModState) : ModState =
+        if mods.ContainsKey id then
+            Map.remove id mods
+        else
+            List.fold (fun m i -> Map.remove i m) (Map.add id (ColumnSwap.pack columns) mods) AVAILABLE_MODS.[id].Exclusions
+
     let in_priority_order (mods: ModState) : (string * Mod * int64) seq =
         APPLICATION_PRIORITY_ORDER
         |> Seq.choose (fun id ->

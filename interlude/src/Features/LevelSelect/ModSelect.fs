@@ -20,7 +20,7 @@ type private ColumnSwapPage() =
         match ColumnSwap.parse columns_setting.Value with
         | Ok columns ->
             SelectedChart.selected_mods.Value <-
-                Map.add "column_swap" (ColumnSwap.pack columns) SelectedChart.selected_mods.Value
+                ModState.cycle_column_swap "column_swap" columns SelectedChart.selected_mods.Value
         | Error reason -> Notifications.error (reason, "")
 
     override this.Content() =
