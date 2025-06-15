@@ -61,7 +61,7 @@ module OsuMania =
             Window50 = clipped MEH
             Window0 = clipped MISS
             // todo: this matches experimental data but I must not be understanding something about LNs
-            WindowOverhold200 = 
+            WindowOverhold200 =
                 let base_window = floor (43f - od * 3f) * 1.0f<ms / rate> + 0.5f<ms / rate>
                 match mode with
                 | Easy -> floor (base_window * 1.4f<rate / ms>) * 1.0f<ms / rate> - 0.5f<ms / rate>
@@ -79,7 +79,7 @@ module OsuMania =
 
         let od = round (od * 10.0f) / 10.0f
         if od < 0.0f || od > 10.0f then failwithf "Overall difficulty must be between 0 and 10, was: %.1f" od
-        
+
         let PERFECT = perfect_window od |> mode.Apply |> clipped
         let GREAT = great_window od |> mode.Apply |> clipped
         let GOOD = good_window od |> mode.Apply |> clipped
@@ -88,7 +88,7 @@ module OsuMania =
         let MISS = miss_window od |> mode.Apply |> clipped
 
         {
-            Name = sprintf "osu! OD%s%s" (od.ToString("R")) (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
+            Name = sprintf "osu! OD%s%s" (od.ToString("R", System.Globalization.CultureInfo.InvariantCulture)) (match mode with NoMod -> "" | Easy -> " +EZ" | HardRock -> " +HR")
             Description = "Simulates osu!'s scoring system"
             Judgements =
                 [|
@@ -209,8 +209,8 @@ module OsuMania =
                     }
                 |]
             Accuracy = AccuracyPoints.PointsPerJudgement([| 1.0; 1.0; 2.0/3.0; 1.0/3.0; 1.0/6.0; 0.0 |])
-            HitMechanics = 
-                { 
+            HitMechanics =
+                {
                     NotePriority = NotePriority.OsuMania
                     GhostTapJudgement = None
                 }
