@@ -13,6 +13,9 @@ open Interlude.Features.Gameplay
 type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, on_seek: Time -> unit) =
     inherit Container(NodeType.None)
 
+    let ARROW_SEEK_INCREMENT = 1000.0f<ms>
+    let SCROLL_SEEK_SPEED = 40.0f<ms>
+
     let fade = Animation.Fade(1.0f)
     let mutable auto_hide_timer = 3000.0
     let mutable show_cooldown = 0.0
@@ -111,10 +114,10 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
             if scroll <> 0.0f then
                 if Song.playing() then
                     Song.pause()
-                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+                    Song.seek(Song.time() - scroll * SCROLL_SEEK_SPEED)
                     Song.resume()
                 else
-                    Song.seek(Song.time() - scroll * 40.0f<ms>)
+                    Song.seek(Song.time() - scroll * SCROLL_SEEK_SPEED)
 
         if (%%"difficulty_overlay").Pressed() then
             show_difficulty_overlay.Set (not show_difficulty_overlay.Value)
@@ -122,5 +125,9 @@ type private ReplayControls(with_mods: ModdedChart, is_auto: bool, rate: Rate, o
             if Song.playing () then
                 (if Song.time () > 0.0f<ms> then Song.pause ())
             elif not (Mouse.held Mouse.LEFT) then Song.resume ()
+        elif (%%"left").Pressed() then
+            Song.seek(Song.time() - ARROW_SEEK_INCREMENT |> max 0.0f<ms>)
+        elif (%%"right").Pressed() then
+            Song.seek(Song.time() + ARROW_SEEK_INCREMENT)
         else
             SelectedChart.change_rate_hotkeys (fun change_by -> playback_speed.Value <- playback_speed.Value + change_by)
