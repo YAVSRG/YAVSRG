@@ -203,6 +203,7 @@
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
     <Compile Include="Features\Play\Practice\Practice.fs" />
+    <Compile Include="Features\Skins\Reload.fs" />
     <Compile Include="Features\Skins\Elements.fs" />
     <Compile Include="Features\Skins\Preview.fs" />
     <Compile Include="Features\Skins\Problems.fs" />
@@ -233,10 +234,10 @@
     <Compile Include="Features\Skins\EditHUD\AnchorPage.fs" />
     <Compile Include="Features\Skins\EditHUD\EditorControls.fs" />
     <Compile Include="Features\Skins\EditHUD\EditHUD.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Playfield.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\HoldNotes.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Notes.fs" />
-    <Compile Include="Features\Skins\EditNoteskin\Receptors.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\PlayfieldSettingsPage.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\HoldNoteSettingsPage.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\NoteSettingsPage.fs" />
+    <Compile Include="Features\Skins\EditNoteskin\AnimationSettingsPage.fs" />
     <Compile Include="Features\Skins\EditNoteskin\EditNoteskinPage.fs" />
     <Compile Include="Features\Skins\Browser\Thumbnails.fs" />
     <Compile Include="Features\Skins\Browser\Components.fs" />

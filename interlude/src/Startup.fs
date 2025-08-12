@@ -15,6 +15,7 @@ open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
 open Interlude.Features.Stats
+open Interlude.Features.Skins
 
 module Startup =
 
@@ -53,6 +54,8 @@ module Startup =
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
         Gameplay.retry <- fun () -> SelectedChart.if_loaded LevelSelect.play
+
+        SkinHotReload.init SelectSkinsPage EditNoteskin.EditNoteskinPage
 
         Screen.ScreenRoot(Toolbar())
 

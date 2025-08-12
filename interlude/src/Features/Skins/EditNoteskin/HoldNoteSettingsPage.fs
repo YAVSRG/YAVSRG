@@ -8,6 +8,7 @@ open Prelude.Skins.Noteskins
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Skins
 
 type HoldNoteSettingsPage() =
     inherit Page()
@@ -54,7 +55,8 @@ type HoldNoteSettingsPage() =
                     .Pos(7),
                 PageSetting(%"noteskin.droppedholdcolor", ColorPicker(%"noteskin.droppedholdcolor", dropped_color, false))
                     .Help(Help.Info("noteskin.droppedholdcolor"))
-                    .Pos(10)
+                    .Pos(10),
+                HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some HoldNoteSettingsPage))
             )
 
     override this.Draw() =

@@ -2,6 +2,7 @@ namespace Interlude.Features.Skins.EditNoteskin
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude
 open Interlude.Content
 open Interlude.UI
@@ -118,6 +119,11 @@ type EditNoteskinPage() =
             )
         |> Container.Create
         |+ preview
+        |+ HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(None))
+        |+ Text([(%%"reload_content").ToString()] %> "skins.reload_hint")
+            .Color(Colors.text_cyan)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceB(PAGE_ITEM_HEIGHT).Shrink(Style.PADDING, Style.PADDING * 2.0f).ShrinkR(Style.PADDING * 2.0f))
         :> Widget
 
     override this.Update(elapsed_ms, moved) =

@@ -7,9 +7,10 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
-open Interlude.Features.Gameplay
-open Interlude.UI
 open Interlude.Options
+open Interlude.UI
+open Interlude.Features.Gameplay
+open Interlude.Features.Skins
 
 type SpacingPicker(spacing: Setting.Bounded<float32>) =
     inherit Container(NodeType.Leaf)
@@ -187,7 +188,8 @@ type PlayfieldSettingsPage() =
                 PageSetting(%"noteskin.advancedcolumnspacing", _spacings)
                     .Help(Help.Info("noteskin.advancedcolumnspacing"))
                     .Pos(22, 2, PageWidth.Full)
-                    .Conditional(use_advanced_column_spacing.Get)
+                    .Conditional(use_advanced_column_spacing.Get),
+                HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some PlayfieldSettingsPage))
             )
 
     override this.Draw() =

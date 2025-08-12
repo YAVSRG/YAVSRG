@@ -10,6 +10,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Gameplay
+open Interlude.Features.Skins
 
 type ReceptorColorPicker(color: Setting<int>) =
     inherit Container(NodeType.Leaf)
@@ -524,7 +525,8 @@ type AnimationSettingsPage() =
                 TabButtons.Create(tab_options, tab_container)
                     .Position(page_position(0, 2, PageWidth.Normal).Translate(PAGE_MARGIN_X, PAGE_MARGIN_Y).SliceT(TabButtons.HEIGHT)),
                 tab_container
-                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f))
+                    .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f)),
+                HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some AnimationSettingsPage))
             )
 
     override this.Update(elapsed_ms, moved) =

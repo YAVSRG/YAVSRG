@@ -7,9 +7,10 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.Noteskins
 open Interlude.Content
-open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features.Gameplay
+open Interlude.Features.Skins
 
 type RotationPicker(rotation: Setting<float>) as this =
     inherit Container(NodeType.Leaf)
@@ -241,6 +242,7 @@ type NotesSettingsPage() =
         |+ PageSetting(%"noteskin.animationtime", Slider(Setting.uom note_animation_time))
             .Help(Help.Info("noteskin.animationtime"))
             .Pos(16)
+        |+ HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some NotesSettingsPage))
         :> Widget
 
     override this.Title = %"noteskin.notes"
