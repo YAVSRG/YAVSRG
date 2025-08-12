@@ -39,7 +39,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
     let fade = Animation.Fade(1.0f)
     let mutable auto_show_timer = 0.0
 
-    override this.Init(parent) =
+    override this.Init(parent: Widget) =
         ctx.OnElementMoved.Publish.Add(
             fun () ->
                 fade.Target <- 0.0f
@@ -131,7 +131,8 @@ type private HUDEditorControls(ctx: PositionerContext) =
                     .Color(Colors.text_cyan)
                     .Align(Alignment.RIGHT)
                     .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(685.0f))
-                    .Conditional(fun () -> ctx.Selected.IsSome)
+                    .Conditional(fun () -> ctx.Selected.IsSome),
+                VolumeSlider()
             )
 
         base.Init(parent)
@@ -167,6 +168,8 @@ type private HUDEditorControls(ctx: PositionerContext) =
             ctx.HorizontalFlipAll()
         elif (%%"hud_flip_vertical_all").Pressed() then
             ctx.VerticalFlipAll()
+        elif (%%"reload_content").Pressed() then
+            ctx.HotReload()
 
         if fade.Target = 0.0f then
             auto_show_timer <- auto_show_timer - elapsed_ms

@@ -17,12 +17,11 @@ open Interlude.Features.Pacemaker
 
 module EditHudScreen =
 
-    let edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
+    let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
         let replay_data: IReplay =
             StoredReplay.WavingAutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
 
-        let FIRST_NOTE = info.WithColors.FirstNote
         let ruleset = Rulesets.current
 
         let scoring =
@@ -34,6 +33,11 @@ module EditHudScreen =
             screen.State.ChangeScoring (screen.State.Scoring.Recreate())
 
         let mutable ctx: PositionerContext = Unchecked.defaultof<_>
+
+        let hot_reload() =
+            if not (Transitions.in_progress()) then
+                Skins.reload_current_hud()
+                Screen.change_new (fun () -> edit_hud_screen (info, on_exit)) ScreenType.EditHud Transitions.Instant |> ignore
 
         { new IPlayScreen(info, PacemakerState.None, scoring) with
             override this.AddWidgets() =
@@ -47,13 +51,12 @@ module EditHudScreen =
                         Positioners = Map.empty
                         UndoHistory = []
                         OnElementMoved = Event<unit>()
+                        HotReload = hot_reload
                     }
 
                 ctx.CreateAll()
 
-                this
-                |+ ctx.Screen
-                |* HUDEditorControls ctx
+                this.Add(ctx.Screen, HUDEditorControls(ctx))
             // todo: way to turn on multiplayer player list
 
             override this.OnEnter p =
@@ -67,7 +70,7 @@ module EditHudScreen =
 
             override this.OnExit s =
                 base.OnExit s
-                if s <> ScreenType.Play then on_exit ()
+                if s <> ScreenType.Play && s <> ScreenType.EditHud then on_exit ()
 
             override this.Update(elapsed_ms, moved) =
                 let chart_time = this.State.CurrentChartTime()

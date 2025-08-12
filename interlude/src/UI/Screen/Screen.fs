@@ -132,7 +132,7 @@ module Screen =
     let change_new (thunk: unit -> #Screen) (screen_type: ScreenType) (transition_type: Transitions.Transition) : bool =
         if
             not Song.loading
-            && (screen_type <> current_type || screen_type = ScreenType.Play)
+            && (screen_type <> current_type || screen_type = ScreenType.Play || screen_type = ScreenType.EditHud)
             && not (Transitions.in_progress())
         then
             Transitions.animate (

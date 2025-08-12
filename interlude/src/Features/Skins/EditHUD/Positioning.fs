@@ -492,6 +492,7 @@ and PositionerContext =
         mutable Positioners: Map<HudElement, Positioner>
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
+        HotReload: unit -> unit
     }
     member this.Recreate(element: HudElement) =
         match this.Positioners.TryFind element with
