@@ -4,20 +4,22 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
 open Interlude.UI
+open Interlude.Content
 open Interlude.Features.Skins
+open Interlude.Features.Gameplay
 
 type OptionsPage() =
     inherit Page()
 
     let page_body = SwapContainer()
-    let mutable current_tab = OptionsTab.System
+    let mutable current_tab = OptionsTab.Gameplay
     let mutable on_destroy_current_tab = ignore
     let mutable on_return_current_tab = ignore
 
     let content_setting : Setting<OptionsTab> =
         Setting.make
             (fun new_tab ->
-                if current_tab = new_tab then () else
+                if current_tab = new_tab && (match page_body.Current with :? Dummy -> false | _ -> true) then () else
                 on_destroy_current_tab()
                 current_tab <- new_tab
                 match new_tab with
@@ -52,7 +54,7 @@ type OptionsPage() =
             )
             (fun () -> current_tab)
 
-    do content_setting.Set OptionsTab.Gameplay
+    do content_setting.Set State.recent_tab
 
     let header = OptionsPageHeader(content_setting)
 
@@ -68,6 +70,15 @@ type OptionsPage() =
 
     override this.Footer() =
         OptionsPageFooter()
+        |+ HotkeyListener("reload_content", fun () ->
+            Menu.Exit()
+            Themes.reload_current ()
+            Skins.load()
+            Rulesets.load()
+            Notifications.action_feedback (Icons.CHECK, %"notification.reload_content", "")
+            OptionsPage().Show()
+            SkinPreview.RefreshAll()
+        )
         |> OverlayContainer
         :> Widget
 

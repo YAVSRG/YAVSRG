@@ -28,7 +28,7 @@ type private OptionsTab =
 
 module private State =
 
-    let mutable recent_tab = OptionsTab.System
+    let mutable recent_tab = OptionsTab.Gameplay
 
 type private OptionsPageHeader(current_tab: Setting<OptionsTab>) as this =
     inherit Container(NodeType.Container(fun () -> Some this.Buttons))
