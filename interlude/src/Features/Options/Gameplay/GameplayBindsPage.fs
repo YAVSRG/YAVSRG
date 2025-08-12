@@ -10,6 +10,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
     inherit Container(NodeType.FocusTrap)
 
     let mutable progress = 0
+    let mutable duplicates : Set<Keys> = Set.empty
 
     let mutable text =
         options.GameplayBinds.[int keymode - 3]
@@ -33,8 +34,16 @@ type GameplayKeybinder(keymode: Keymode) as this =
         let binds = options.GameplayBinds.[int keymode - 3]
 
         match b with
+        | Bind.Key(Keys.Escape, _) ->
+            Style.text_close.Play()
+            this.Focus false
+            refresh_text ()
+            Input.finish_frame_events()
+        | Bind.Key(k, _) when duplicates.Contains k ->
+            Input.listen_to_next_key input_callback
+            Input.finish_frame_events()
         | Bind.Key(k, _) ->
-            // todo: prevent duplicates
+            duplicates <- duplicates.Add k
             binds.[progress] <- Bind.Key(k, (false, false, false))
             progress <- progress + 1
 
@@ -68,6 +77,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
     override this.OnSelected(by_mouse: bool) =
         base.OnSelected by_mouse
         progress <- 0
+        duplicates <- Set.empty
         refresh_text ()
         Style.click.Play()
         Input.listen_to_next_key input_callback
