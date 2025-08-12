@@ -16,6 +16,7 @@ module Transitions =
         | EnterGameplayNoFadeAudio
         | EnterGameplayFadeAudio
         | LeaveGameplay
+        | Instant
         member this.Duration =
             match this with
             | Default
@@ -23,6 +24,7 @@ module Transitions =
             | EnterGameplayNoFadeAudio
             | EnterGameplayFadeAudio
             | LeaveGameplay -> 250.0
+            | Instant -> 0.0
 
     let private fancy_transition (inbound: bool) (amount: float32) (bounds: Rect) =
         let amount = if inbound then amount else 2.0f - amount
@@ -39,6 +41,7 @@ module Transitions =
     let private draw_internal (t: Transition) (inbound: bool) (amount: float32) (bounds: Rect) =
         Render.stencil_create false
         match t with
+        | Instant -> ()
         | Default
         | UnderLogo ->
             DiamondsWipe.draw inbound amount bounds
@@ -86,6 +89,11 @@ module Transitions =
         | Some _ ->
             failwith "Should not be called while a transition is already in progress"
         | None ->
+
+        if transition_type = Instant then
+            func()
+            Animation.Action(ignore)
+        else
 
         current <- Some transition_type
         in_timer.Interval <- transition_type.Duration
