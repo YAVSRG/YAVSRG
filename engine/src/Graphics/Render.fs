@@ -111,6 +111,7 @@ module Render =
 
             GL.GenTextures(1, &texture_ids.[i])
             GL.BindTexture(TextureTarget.Texture2DArray, texture_ids.[i])
+            check_gl_error()
 
             GL.TexImage3D(
                 TextureTarget.Texture2DArray,
@@ -165,13 +166,15 @@ module Render =
 
             GL.GenFramebuffers(1, &fbo_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
+            check_gl_error()
 
-            GL.RenderbufferStorage(
-                RenderbufferTarget.RenderbufferExt,
-                RenderbufferStorage.Depth24Stencil8,
-                _framebuffer_width,
-                _framebuffer_height
-            )
+            //GL.RenderbufferStorage(
+            //    RenderbufferTarget.Renderbuffer,
+            //    RenderbufferStorage.Depth24Stencil8,
+            //    _framebuffer_width,
+            //    _framebuffer_height
+            //)
+            //check_gl_error()
 
             GL.FramebufferTextureLayer(
                 FramebufferTarget.Framebuffer,
@@ -180,6 +183,7 @@ module Render =
                 0,
                 1
             )
+            check_gl_error()
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
         check_gl_error()
@@ -480,13 +484,12 @@ module Render =
             |> max 0 |> min (framebuffer_height - viewport_height)
 
         GL.Viewport(_viewport_left, _viewport_top, _viewport_width, _viewport_height)
+        check_gl_error()
         let width, height = float32 viewport_width, float32 viewport_height
         _width <- (width / height) * 1080.0f
         _height <- 1080.0f
 
         Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
-
-        check_gl_error()
 
         _bounds <- Rect.FromSize(0.0f, 0.0f, _width, _height)
 
@@ -507,12 +510,13 @@ module Render =
     let internal init (framebuffer: int * int) (viewport: _) : unit =
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
-        GL.Enable(EnableCap.Texture2D)
         GL.Enable(EnableCap.Multisample)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
         check_gl_error()
+
+        Shader.init()
 
         let vw, vh = fst viewport
         let fw, fh = framebuffer
@@ -521,7 +525,6 @@ module Render =
         else
             framebuffer_resized framebuffer viewport
 
-        Shader.init()
         _batch <- Batch.Create(1024)
         alpha_multiplier_restore 1.0f
         check_gl_error()

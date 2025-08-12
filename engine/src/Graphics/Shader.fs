@@ -22,7 +22,11 @@ module private Shader =
         handle
 
     let private get_uniform_location (uniform: string, shader: int) : int =
-        GL.GetUniformLocation(shader, uniform)
+        let loc = GL.GetUniformLocation(shader, uniform)
+        if loc < 0 then
+            failwithf "Uniform '%s' not found in shader OR was optimised out!" uniform
+        else
+            loc
 
     let private compile_and_use (vsh: string, fsh: string) : int =
         let vert = compile_shader (ShaderType.VertexShader, vsh)
@@ -68,9 +72,12 @@ module private Shader =
 
     let set_uniform_mat4 (location: int, value: Matrix4) : unit =
         GL.UniformMatrix4(location, false, ref value)
+        check_gl_error()
 
     let set_uniform_f32 (location: int, value: float32) : unit =
         GL.Uniform1(location, value)
+        check_gl_error()
 
     let set_uniform_i32 (location: int, value: int) : unit =
         GL.Uniform1(location, value)
+        check_gl_error()
