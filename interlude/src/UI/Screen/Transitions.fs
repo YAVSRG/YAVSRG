@@ -19,10 +19,10 @@ module Transitions =
         member this.Duration =
             match this with
             | Default
-            | UnderLogo -> 500.0
+            | UnderLogo -> 400.0
             | EnterGameplayNoFadeAudio
             | EnterGameplayFadeAudio
-            | LeaveGameplay -> 350.0
+            | LeaveGameplay -> 250.0
 
     let private fancy_transition (inbound: bool) (amount: float32) (bounds: Rect) =
         let amount = if inbound then amount else 2.0f - amount
