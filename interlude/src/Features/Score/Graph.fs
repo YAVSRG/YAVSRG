@@ -537,9 +537,9 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
                     if e.Missed then
                         //bar x (score_info.Ruleset.JudgementColor judgement)
-                        dot (x, THICKNESS) color
+                        dot (x, THICKNESS) color.O2
                     else
-                        dot (x, h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)) color
+                        dot (x, h - System.Math.Clamp(e.Delta / MAX_WINDOW * GraphSettings.scale.Value * 0.5f, -1.0f, 1.0f) * (h - THICKNESS - HTHICKNESS)) color.O2
                 | _ -> ()
 
             | GhostTap e ->
