@@ -6,10 +6,12 @@ OpenTK provides .NET bindings for [GLFW](https://github.com/glfw/glfw), which ha
 
 BASS provides the audio decoding and playback + tools for FFT analysis to generate waveforms
 
-This engine was originally created to power [my rhythm game client, Interlude](https://github.com/YAVSRG/Interlude), it has been extracted to be its own library so that
+This engine was originally created to power Interlude, it has been extracted to be its own library so that
 - It is available under MIT license for anyone to use, dissect or otherwise find useful
 - It can also power a planned separate rhythm game chart editor
 - I can use it for game jams or generally as reference code for other future game projects
+
+^^^ Note on the above, since this readme the engine and Interlude have been put back together in one monorepo
 
 I could have used an existing game engine, but making a bespoke engine for my needs provides me with:
 - Precise frame timing (on Windows) to ensure very exact smooth motion on a wide range of hardware, beyond what a typical engine may provide
