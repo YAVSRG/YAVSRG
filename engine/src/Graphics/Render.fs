@@ -79,6 +79,8 @@ module Render =
             if clear then
                 GL.Clear(ClearBufferMask.ColorBufferBit)
 
+            check_gl_error()
+
             fbo_stack <- this.fbo_id :: fbo_stack
 
         /// Unbinds this FBO, so drawing goes to the screen and it can be used as a sprite.
@@ -180,6 +182,7 @@ module Render =
             )
 
         GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
+        check_gl_error()
 
     (*
         User methods for drawing things to the screen
@@ -299,6 +302,8 @@ module Render =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         stencil_depth <- stencil_depth + 1
 
+        check_gl_error()
+
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
     /// In this mode, pixels can only be updated if they were stencilled during the previous step.<br/>
@@ -310,6 +315,8 @@ module Render =
         GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, stencil_depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
+
+        check_gl_error()
 
     /// <summary>
     /// Begins drawing to the screen, using the stencil created by <see cref="stencil_create"/> as a mask.<br/>
@@ -328,6 +335,8 @@ module Render =
             Shader.set_uniform_i32 (Shader.alpha_masking_loc, 0)
         else
             GL.StencilFunc(StencilFunction.Lequal, stencil_depth, 0xFF)
+
+        check_gl_error()
 
     let mutable private alpha_mult = 0.0f
 
@@ -466,7 +475,7 @@ module Render =
             |> round |> int
             |> max 0 |> min (framebuffer_width - viewport_width)
         _viewport_top <-
-            float32 (framebuffer_height - viewport_height) * (1.0f - viewport_offset_y) // in OpenGL 0 = bottom of screen not top
+            float32 (framebuffer_height - viewport_height) * (1.0f - viewport_offset_y) // in OpenGL 0 = bottom of screen not top but I prefer 0 = top
             |> round |> int
             |> max 0 |> min (framebuffer_height - viewport_height)
 
@@ -477,6 +486,8 @@ module Render =
 
         Shader.set_uniform_mat4 (Shader.projection_loc, create_flipped_projection(_width, _height))
 
+        check_gl_error()
+
         _bounds <- Rect.FromSize(0.0f, 0.0f, _width, _height)
 
         initialise_fbos ()
@@ -484,12 +495,14 @@ module Render =
     let internal start () : unit=
         GL.Clear(ClearBufferMask.ColorBufferBit)
         _batch.Start ()
+        check_gl_error()
 
     let internal finish () : unit =
         _batch.Finish ()
         assert(stencil_depth = 0)
         assert(alpha_mult = 1.0f)
         GL.Flush()
+        check_gl_error()
 
     let internal init (framebuffer: int * int) (viewport: _) : unit =
         GL.Disable(EnableCap.CullFace)
@@ -499,6 +512,7 @@ module Render =
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.One)
         GL.ClearStencil(0x00)
+        check_gl_error()
 
         let vw, vh = fst viewport
         let fw, fh = framebuffer
@@ -510,6 +524,7 @@ module Render =
         Shader.init()
         _batch <- Batch.Create(1024)
         alpha_multiplier_restore 1.0f
+        check_gl_error()
 
     (*
         Additional utilities

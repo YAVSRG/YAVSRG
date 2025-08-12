@@ -21,7 +21,7 @@ module private Shader =
 
         handle
 
-    let private get_uniform_location(uniform: string, shader: int) : int =
+    let private get_uniform_location (uniform: string, shader: int) : int =
         GL.GetUniformLocation(shader, uniform)
 
     let private compile_and_use (vsh: string, fsh: string) : int =
@@ -42,6 +42,7 @@ module private Shader =
         GL.DeleteShader frag
 
         GL.UseProgram program
+        check_gl_error()
 
         program
 

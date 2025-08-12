@@ -403,3 +403,15 @@ module AsQuadExtensions =
 
     type Rect with
         member inline this.AsQuad : Quad = Quad.from_rect this
+
+[<AutoOpen>]
+module private Helpers =
+    open OpenTK.Graphics.OpenGL
+
+    let mutable first_error = true
+
+    let check_gl_error() =
+        let error = GL.GetError()
+        if error <> ErrorCode.NoError && first_error then
+            first_error <- false
+            Percyqaz.Common.Logging.Error "%O\n%s" error (Environment.StackTrace)
