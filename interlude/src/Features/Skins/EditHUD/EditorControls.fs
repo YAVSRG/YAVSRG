@@ -169,6 +169,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
         elif (%%"hud_flip_vertical_all").Pressed() then
             ctx.VerticalFlipAll()
         elif (%%"reload_content").Pressed() then
+            Style.notify_system.Play()
             ctx.HotReload()
 
         if fade.Target = 0.0f then

@@ -69,6 +69,7 @@ module RulesetComparison =
 
         total / 10.0 // percent accuracy out of 100
 
+    /// acc is [0.0, 100.0] not [0.0, 1.0]
     let standard_deviation_for_accuracy (ruleset: Ruleset) (acc: float) (misses_per_1000_notes: float) : float =
         let mutable sd = 15.0
         let mutable increment = 5.0
@@ -83,19 +84,21 @@ module RulesetComparison =
         sd
 
     let compare (accuracy: float) (base_ruleset: Ruleset) (compare_to: Ruleset) : RulesetComparison option =
+        let accuracy_range_100 = accuracy * 100.0
+
         let range =
             seq {
                 for miss_count in [0.0; 1.0; 3.0; 8.0; 15.0] do
-                    let sd = standard_deviation_for_accuracy base_ruleset accuracy miss_count
+                    let sd = standard_deviation_for_accuracy base_ruleset accuracy_range_100 miss_count
 
                     let base_acc = simulate base_ruleset sd miss_count
                     let compare_acc = simulate compare_to sd miss_count
 
-                    if abs (base_acc - accuracy) < 0.11 then
+                    if abs (base_acc - accuracy_range_100) < 0.11 then
                         yield compare_acc
             }
             |> Array.ofSeq
         if range.Length > 0 then
-            Some { Average = Array.average range; Min = Array.min range; Max = Array.max range }
+            Some { Average = Array.average range * 0.01; Min = Array.min range * 0.01; Max = Array.max range * 0.01 }
         else
             None

@@ -54,8 +54,8 @@ type SkillBreakdownGraph(pattern_type: CorePattern, source: GraphSource, data: P
     let accuracy_label (threshold: float) =
         let base_label = sprintf "%g%% %s" (threshold * 100.0) Rulesets.DEFAULT_RULESET.Name
         if Rulesets.current_hash <> Rulesets.DEFAULT_RULESET_HASH then
-            match RulesetComparison.compare (threshold * 100.0) Rulesets.DEFAULT_RULESET Rulesets.current with
-            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label cmp.Average Rulesets.current.Name
+            match RulesetComparison.compare threshold Rulesets.DEFAULT_RULESET Rulesets.current with
+            | Some cmp -> sprintf "%s (~= %.1f%% %s)" base_label (cmp.Average * 100.0) Rulesets.current.Name
             | None -> base_label
         else base_label
 
