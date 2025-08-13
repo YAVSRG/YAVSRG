@@ -69,9 +69,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                     )
                 )
                     .Pos(4),
-                PageSetting(%"mount.importatstartup",
-                    Checkbox(import_on_startup)
-                )
+                PageSetting(%"mount.importatstartup", Checkbox(import_on_startup))
                     .Help(Help.Info("mount.importatstartup"))
                     .Pos(6)
             )
@@ -86,8 +84,11 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                 Text([game.ToString()] %> "mount.create.title")
                     .Align(Alignment.LEFT)
                     .TextPos(0),
-                Text(sprintf "%s: %s" %"mount.create.path" path)
-                    .Color(Colors.text_subheading)
+                Button(sprintf "%s: %s" %"mount.create.path" path, fun () ->
+                    Menu.Back()
+                    MountFileDropPage(game, fun path -> CreateMountPage(game, path, setting).Show()).Show()
+                )
+                    .TextColor(Colors.text_subheading)
                     .Align(Alignment.LEFT)
                     .TextPosSmall(2),
                 CalloutCard(info)
