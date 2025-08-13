@@ -42,7 +42,7 @@ type Accuracy(config: HudConfig, state: PlayState) =
     let color =
         Animation.Color(
             if config.AccuracyGradeColors then
-                state.Ruleset.GradeColor -1
+                state.Ruleset.GradeColor (state.Ruleset.Grades.Length - 1)
             else
                 Color.White
         )
