@@ -372,12 +372,20 @@ module Options =
 
         config.ToOptions
 
+    open System.Diagnostics
+
     let init() : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
         // todo: always load en_GB in and then other languages on top so they can incrementally replace en_GB
+
+        let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", options.Language.Value + ".txt")
+
         if AVAILABLE_LANGUAGES.Contains options.Language.Value then
             Localisation.load_locale (Interlude.Utils.get_locale options.Language.Value)
+        elif File.Exists(locale_path) then
+            use stream = File.OpenRead(locale_path)
+            Localisation.load_locale stream
         else
             Logging.Error "Unknown locale '%s'" options.Language.Value
 
