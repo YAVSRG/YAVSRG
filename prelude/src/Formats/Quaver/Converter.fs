@@ -109,7 +109,10 @@ module Quaver_To_Interlude =
 
     let convert (b: QuaverChart) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         try
-            let keys = b.Mode
+            let keys = int b.Mode
+
+            if keys < 3 || keys > 10 then
+                skip_conversion (sprintf "Unsupported number of keys: %d" keys)
 
             if b.HitObjects.Length < 20 then
                 skip_conversion "Chart has less than 20 notes"

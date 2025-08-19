@@ -25,6 +25,18 @@ type QuaverSliderVelocity =
         Multiplier: float32
     }
 
+type QuaverKeys =
+    | Keys1 = 1
+    | Keys2 = 2
+    | Keys3 = 3
+    | Keys4 = 4
+    | Keys5 = 5
+    | Keys6 = 6
+    | Keys7 = 7
+    | Keys8 = 8
+    | Keys9 = 9
+    | Keys10 = 10
+
 type QuaverChart =
     {
         AudioFile: string
@@ -32,7 +44,7 @@ type QuaverChart =
         BackgroundFile: string
         MapId: int
         MapSetId: int
-        Mode: int
+        Mode: QuaverKeys
         Title: string
         Artist: string
         Source: string
@@ -77,7 +89,7 @@ module QuaverChart =
             BackgroundFile = Yaml.get_string_or "BackgroundFile" "" parsed
             MapId = Yaml.get_int_or "MapId" 0 parsed
             MapSetId = Yaml.get_int_or "MapSetId" 0 parsed
-            Mode = if Yaml.get_string "Mode" parsed = "Keys7" then 7 else 4
+            Mode = Enum.Parse<QuaverKeys>(Yaml.get_string "Mode" parsed)
             Title = Yaml.get_string_or "Title" "" parsed
             Artist = Yaml.get_string_or "Artist" "" parsed
             Source = Yaml.get_string_or "Source" "" parsed
