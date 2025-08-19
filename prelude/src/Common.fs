@@ -226,13 +226,21 @@ module Common =
             | Error err ->
                 Logging.Critical "Could not load '%s'! Maybe it is corrupt?\n%O" (Path.GetFileName path) err
 
-                if prompt then
-                    Logging.Critical "This is likely a typo from manually editing the JSON yourself."
-                    Logging.Critical "Please correct the typo, or if you can't, delete the file and a fresh new one will be created."
+                let backup = Path.ChangeExtension(path, ".bak")
+                match JSON.FromFile backup with
+                | Ok data ->
+                    Logging.Info "Loading with backup instead"
+                    data
+                | Error backup_err ->
+                    Logging.Critical "Could not load '%s' either!\n%O" (Path.GetFileName backup) backup_err
 
-                    failwithf "Unable to parse JSON in %s" path
+                    if prompt then
+                        Logging.Critical "This is likely a typo from manually editing the JSON yourself."
+                        Logging.Critical "Please correct the typo, or if you can't, delete the file and a fresh new one will be created."
 
-                JSON.Default<'T>()
+                        failwithf "Unable to parse JSON in %s" path
+
+                    JSON.Default<'T>()
         else
             Logging.Info "No %s file found, creating it." name
             JSON.Default<'T>()
