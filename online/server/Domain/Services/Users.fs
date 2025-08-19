@@ -110,6 +110,20 @@ module Users =
                 User.rename (current_user_id, new_name)
                 Ok()
 
+        let reassign_discord_id (user: string) (new_id: uint64) : Result<uint64, string> =
+            match User.by_username user with
+            | None -> Error (sprintf "User '%s' doesn't exist" user)
+            | Some (current_user_id, user) ->
+
+            lock REGISTER_LOCK_OBJ
+            <| fun () ->
+                match User.by_discord_id new_id with
+                | Some (user_id, _) when user_id <> current_user_id -> Error "Discord ID already in use!"
+                | _ ->
+
+                User.reassign_discord_id (current_user_id, new_id)
+                Ok user.DiscordId
+
     module DiscordAuthFlow =
 
         [<RequireQualifiedAccess>]

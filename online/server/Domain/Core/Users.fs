@@ -357,3 +357,16 @@ module User =
 
     let rename (id: int64, new_name: string) =
         RENAME.Execute (id, new_name) core_db |> expect |> ignore
+
+    let private REASSIGN_DISCORD_ID: NonQuery<int64 * uint64> =
+        {
+            SQL = """UPDATE users SET DiscordId = @DiscordId WHERE Id = @Id;"""
+            Parameters = [ "@Id", SqliteType.Integer, 8; "@DiscordId", SqliteType.Text, -1 ]
+            FillParameters =
+                fun p (id, discord_id) ->
+                    p.Int64 id
+                    p.String(string discord_id)
+        }
+
+    let reassign_discord_id (id: int64, discord_id: uint64) =
+        REASSIGN_DISCORD_ID.Execute (id, discord_id) core_db |> expect |> ignore

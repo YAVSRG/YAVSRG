@@ -301,3 +301,20 @@ module Users =
         match User.by_id user_2 with
         | Some user -> Assert.AreEqual("RenameMe1", user.Username)
         | None -> Assert.Fail()
+
+    [<Test>]
+    let Reassign_DiscordId() =
+        let user_1 = User.create("ReassignMe1", 1234005678uL) |> User.save_new
+        let user_2 = User.create("ReassignMe2", 1234005679uL) |> User.save_new
+
+        match Users.Auth.reassign_discord_id "ReassignMe1" 1234005679uL with
+        | Error reason -> printfn "%s" reason
+        | Ok _ -> Assert.Fail("This reassignment should have failed")
+
+        match Users.Auth.reassign_discord_id "ReassignMe1" 1234005677uL with
+        | Error reason -> Assert.Fail(reason)
+        | Ok old_id -> Assert.AreEqual(1234005678uL, old_id)
+
+        match User.by_discord_id 1234005677uL with
+        | Some (_, user) -> Assert.AreEqual("ReassignMe1", user.Username)
+        | None -> Assert.Fail()

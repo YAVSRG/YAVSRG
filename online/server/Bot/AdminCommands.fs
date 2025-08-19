@@ -155,6 +155,19 @@ module AdminCommands =
                     | Ok() -> do! reply_emoji ":white_check_mark:"
                     | Error reason -> do! reply reason
 
+            | "reassignuser" ->
+                match args with
+                | []
+                | [_] -> do! reply "Enter an existing username and new discord ID, for example: $reassignuser Percyqaz$165506274820096000"
+                | old_name :: new_id :: _ ->
+                    if new_id.Length < 10 || new_id.Length > 20 || not (Seq.forall Char.IsDigit new_id) then
+                        do! reply "Provide a valid Discord ID"
+                    else
+                        let new_id = uint64 new_id
+                        match Users.Auth.reassign_discord_id old_name new_id with
+                        | Ok old_id -> do! reply (sprintf "Account belonging to <@%i> assigned to <@%i>" old_id new_id)
+                        | Error reason -> do! reply reason
+
             | "search" ->
                 match args with
 
