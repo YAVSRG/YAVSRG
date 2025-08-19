@@ -188,10 +188,10 @@ type Filter =
 
             | MoreThan("ln", pc)
             | MoreThan("holds", pc)
-            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMin = Some pc }
+            | MoreThan("lns", pc) -> filter <- { filter with LNPercentMin = Some (if pc > 1f then pc * 0.01f else pc) }
             | LessThan("ln", pc)
             | LessThan("holds", pc)
-            | LessThan("lns", pc) -> filter <- { filter with LNPercentMax = Some pc }
+            | LessThan("lns", pc) -> filter <- { filter with LNPercentMax = Some (if pc > 1f then pc * 0.01f else pc) }
 
             | Equals("mapper", creator)
             | Equals("m", creator)
