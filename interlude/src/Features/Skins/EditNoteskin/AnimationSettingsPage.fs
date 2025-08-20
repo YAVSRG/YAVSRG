@@ -221,7 +221,7 @@ type AnimationSettingsPage() =
     (* Judgement line *)
 
     let enable_judgement_line = Setting.simple data.UseJudgementLine
-    let judgement_line_scale = data.JudgementLineScale |> Setting.bounded (0.1f, 3f)
+    let judgement_line_scale = data.JudgementLineScale |> Setting.bounded (0.1f, 5f)
     let judgement_line_offset = data.JudgementLineOffset |> Setting.bounded(-1.0f, 1.0f)
 
     let judgement_line_tab =
@@ -333,7 +333,7 @@ type AnimationSettingsPage() =
 
     let explosion_scale_note =
         data.NoteExplosionSettings.Scale
-        |> Setting.bounded (0.5f, 5.0f)
+        |> Setting.bounded (0.5f, 10.0f)
 
     let explosion_expand_note = Setting.percentf data.NoteExplosionSettings.ExpandAmount
 
@@ -347,7 +347,7 @@ type AnimationSettingsPage() =
 
     let explosion_offset_hold =
         data.HoldExplosionSettings.Offset
-        |> Setting.bounded (-1.0f, 1.0f)
+        |> Setting.bounded (-4.0f, 4.0f)
 
     let explosion_hold_use_release =
         Setting.simple data.HoldExplosionSettings.UseReleaseExplosion
@@ -363,7 +363,7 @@ type AnimationSettingsPage() =
 
     let explosion_scale_hold =
         data.HoldExplosionSettings.Scale
-        |> Setting.bounded (0.5f, 5.0f)
+        |> Setting.bounded (0.5f, 10.0f)
 
     let explosion_expand_hold = Setting.percentf data.HoldExplosionSettings.ExpandAmount
 
