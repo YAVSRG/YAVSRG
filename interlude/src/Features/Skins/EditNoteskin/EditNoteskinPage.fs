@@ -40,7 +40,7 @@ type EditNoteskinPage() =
                     .Pos(13, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH)),
                 PageButton(%"noteskin.holdnotes", fun () -> HoldNoteSettingsPage().Show())
                     .Pos(15, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH)),
-                PageButton(%"noteskin.receptors", fun () -> AnimationSettingsPage().Show())
+                PageButton(%"noteskin.animations", fun () -> AnimationSettingsPage().Show())
                     .Pos(17, 2, PageWidth.Custom(PAGE_ITEM_WIDTH - ACTION_BUTTON_WIDTH))
             )
 
