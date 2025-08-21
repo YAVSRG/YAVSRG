@@ -156,6 +156,10 @@ type AnimationSettingsPage() =
     let receptor_offset = data.ReceptorOffset |> Setting.bounded (-10.0f, 10.0f)
     let notes_under_receptors = Setting.simple data.NotesUnderReceptors
 
+    let hitposition =
+        PageSetting(%"gameplay.hitposition", Slider(options.HitPosition, Step = 1f))
+            .Help(Help.Info("gameplay.hitposition"))
+
     let receptors_tab =
 
         let keymode: Setting<Keymode> = Setting.simple <| SelectedChart.keymode ()
@@ -219,7 +223,9 @@ type AnimationSettingsPage() =
                     .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
                 PageSetting(%"noteskin.receptor_colors", colors)
                     .Pos(11, 3, PageWidth.Normal)
-                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
+                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
+
+                hitposition.Pos(15)
             )
 
     (* Judgement line *)
@@ -521,7 +527,9 @@ type AnimationSettingsPage() =
             }
 
     override this.Content() =
+        let preview = new SkinPreview(SkinPreview.RIGHT_HAND_SIDE(0.35f).TranslateY(-100.0f))
         this.OnClose(this.SaveChanges)
+        this.DisposeOnDestroy(preview)
         let tab_container = SwapContainer(receptors_tab)
 
         let tab_options : (Widget * string) array =
@@ -540,6 +548,19 @@ type AnimationSettingsPage() =
                     .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ShrinkT(100.0f)),
                 HotkeyListener("reload_content", fun () -> SkinHotReload.hot_reload_noteskin(Some AnimationSettingsPage))
             )
+        |> Container.Create
+        |+ preview.Conditional(hitposition.get_Focused)
+        |+ Text(%"noteskin.explosions.hitposition_hint_a")
+            .Color(Colors.text_yellow_2)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceB(PAGE_ITEM_HEIGHT - Style.PADDING * 3.0f, PAGE_ITEM_HEIGHT).Shrink(Style.PADDING, Style.PADDING * 2.0f).ShrinkR(Style.PADDING * 2.0f))
+            .Conditional(hitposition.get_Focused)
+        |+ Text(%"noteskin.explosions.hitposition_hint_b")
+            .Color(Colors.text_yellow_2)
+            .Align(Alignment.RIGHT)
+            .Position(Position.SliceB(PAGE_ITEM_HEIGHT).Shrink(Style.PADDING, Style.PADDING * 2.0f).ShrinkR(Style.PADDING * 2.0f))
+            .Conditional(hitposition.get_Focused)
+        :> Widget
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
@@ -569,7 +590,8 @@ type AnimationSettingsPage() =
 
     override this.Draw() =
         base.Draw()
-        this.RenderPreviews()
+        if not hitposition.Focused then
+            this.RenderPreviews()
 
     member this.RenderPreviews() =
 
