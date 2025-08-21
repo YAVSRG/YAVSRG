@@ -27,14 +27,15 @@ type ReceptorColorPicker(color: Setting<int>) =
         Style.click.Play()
 
     override this.Init(parent: Widget) =
-        this
-        |* MouseListener()
-            .SelectOnClick(this, fd)
-            .FocusOnHover(this)
-            .OnRightClick(fun () ->
-                this.Select true
-                bk()
-            )
+        this.Add(
+            MouseListener()
+                .SelectOnClick(this, fd)
+                .FocusOnHover(this)
+                .OnRightClick(fun () ->
+                    this.Select true
+                    bk()
+                )
+        )
 
         base.Init parent
 
@@ -80,14 +81,15 @@ type ColumnLightColorPicker(color: Setting<int>) =
         Style.click.Play()
 
     override this.Init(parent: Widget) =
-        this
-        |* MouseListener()
-            .SelectOnClick(this, fd)
-            .FocusOnHover(this)
-            .OnRightClick(fun () ->
-                this.Select true
-                bk()
-            )
+        this.Add(
+            MouseListener()
+                .SelectOnClick(this, fd)
+                .FocusOnHover(this)
+                .OnRightClick(fun () ->
+                    this.Select true
+                    bk()
+                )
+        )
 
         base.Init parent
 
@@ -181,42 +183,44 @@ type AnimationSettingsPage() =
                 )
 
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
-            .Pos(0)
-        |+ PageSetting(
-            %"noteskin.notes_under_receptors",
-            Checkbox notes_under_receptors
-        )
-            .Pos(2)
-        |+ PageSetting(
-            %"noteskin.receptorstyle",
-            SelectDropdown(
-                [|
-                    ReceptorStyle.Receptors, %"noteskin.receptorstyle.receptors"
-                    ReceptorStyle.Keys, %"noteskin.receptorstyle.keys"
-                |],
-                receptor_style
+            .With(
+                PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
+                    .Pos(0),
+                PageSetting(
+                    %"noteskin.notes_under_receptors",
+                    Checkbox notes_under_receptors
+                )
+                    .Pos(2),
+                PageSetting(
+                    %"noteskin.receptorstyle",
+                    SelectDropdown(
+                        [|
+                            ReceptorStyle.Receptors, %"noteskin.receptorstyle.receptors"
+                            ReceptorStyle.Keys, %"noteskin.receptorstyle.keys"
+                        |],
+                        receptor_style
+                    )
+                )
+                    .Help(Help.Info("noteskin.receptorstyle"))
+                    .Pos(4)
+                    .Conditional(enable_receptors.Get),
+                PageSetting(
+                    %"noteskin.receptor_offset",
+                    Slider.Percent(receptor_offset)
+                )
+                    .Help(Help.Info("noteskin.receptor_offset"))
+                    .Pos(6)
+                    .Conditional(enable_receptors.Get),
+                PageSetting(
+                    %"generic.keymode",
+                    SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+                )
+                    .Pos(9)
+                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
+                PageSetting(%"noteskin.receptor_colors", colors)
+                    .Pos(11, 3, PageWidth.Normal)
+                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
             )
-        )
-            .Help(Help.Info("noteskin.receptorstyle"))
-            .Pos(4)
-            .Conditional(enable_receptors.Get)
-        |+ PageSetting(
-            %"noteskin.receptor_offset",
-            Slider.Percent(receptor_offset)
-        )
-            .Help(Help.Info("noteskin.receptor_offset"))
-            .Pos(6)
-            .Conditional(enable_receptors.Get)
-        |+ PageSetting(
-            %"generic.keymode",
-            SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
-        )
-            .Pos(9)
-            .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
-        |+ PageSetting(%"noteskin.receptor_colors", colors)
-            .Pos(11, 3, PageWidth.Normal)
-            .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
 
     (* Judgement line *)
 
@@ -226,24 +230,26 @@ type AnimationSettingsPage() =
 
     let judgement_line_tab =
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageSetting(
-            %"noteskin.enable_judgement_line",
-            Checkbox enable_judgement_line
-        )
-            .Pos(0)
-        |+ PageSetting(
-            %"noteskin.judgement_line_scale",
-            Slider.Percent(judgement_line_scale)
-        )
-            .Pos(2)
-            .Conditional(enable_judgement_line.Get)
-        |+ PageSetting(
-            %"noteskin.judgement_line_offset",
-            Slider.Percent(judgement_line_offset)
-        )
-            .Help(Help.Info("noteskin.judgement_line_offset"))
-            .Pos(4)
-            .Conditional(enable_judgement_line.Get)
+            .With(
+                PageSetting(
+                    %"noteskin.enable_judgement_line",
+                    Checkbox enable_judgement_line
+                )
+                    .Pos(0),
+                PageSetting(
+                    %"noteskin.judgement_line_scale",
+                    Slider.Percent(judgement_line_scale)
+                )
+                    .Pos(2)
+                    .Conditional(enable_judgement_line.Get),
+                PageSetting(
+                    %"noteskin.judgement_line_offset",
+                    Slider.Percent(judgement_line_offset)
+                )
+                    .Help(Help.Info("noteskin.judgement_line_offset"))
+                    .Pos(4)
+                    .Conditional(enable_judgement_line.Get)
+            )
 
     (* Column lighting *)
 
@@ -282,29 +288,31 @@ type AnimationSettingsPage() =
                 )
 
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
-            .Help(Help.Info("noteskin.enablecolumnlight"))
-            .Pos(0)
-        |+ PageSetting(%"noteskin.columnlightoffset", Slider.Percent(column_light_offset))
-            .Help(Help.Info("noteskin.columnlightoffset"))
-            .Pos(2)
-            .Conditional(enable_column_light.Get)
-        |+ PageSetting(
-            %"noteskin.columnlighttime",
-            Slider(column_light_duration |> Setting.f32, Step = 1f)
-        )
-            .Help(Help.Info("noteskin.columnlighttime"))
-            .Pos(4)
-            .Conditional(enable_column_light.Get)
-        |+ PageSetting(
-            %"generic.keymode",
-            SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
-        )
-            .Pos(7)
-            .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
-        |+ PageSetting(%"noteskin.column_light_colors", colors)
-            .Pos(9, 3, PageWidth.Normal)
-            .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
+            .With(
+                PageSetting(%"noteskin.enablecolumnlight", Checkbox enable_column_light)
+                    .Help(Help.Info("noteskin.enablecolumnlight"))
+                    .Pos(0),
+                PageSetting(%"noteskin.columnlightoffset", Slider.Percent(column_light_offset))
+                    .Help(Help.Info("noteskin.columnlightoffset"))
+                    .Pos(2)
+                    .Conditional(enable_column_light.Get),
+                PageSetting(
+                    %"noteskin.columnlighttime",
+                    Slider(column_light_duration |> Setting.f32, Step = 1f)
+                )
+                    .Help(Help.Info("noteskin.columnlighttime"))
+                    .Pos(4)
+                    .Conditional(enable_column_light.Get),
+                PageSetting(
+                    %"generic.keymode",
+                    SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
+                )
+                    .Pos(7)
+                    .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value),
+                PageSetting(%"noteskin.column_light_colors", colors)
+                    .Pos(9, 3, PageWidth.Normal)
+                    .Conditional(fun () -> columnlighting.Rows > 1 && enable_column_light.Value)
+            )
 
     (* Explosions *)
 
@@ -369,83 +377,87 @@ type AnimationSettingsPage() =
 
     let note_explosions_subtab =
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageSetting(
-            %"noteskin.explosionanimationtime",
-            Slider(Setting.uom explosion_frame_time_note, Step = 1f)
-        )
-            .Help(Help.Info("noteskin.explosionanimationtime"))
-            .Pos(0)
-        |+ PageSetting(
-            %"noteskin.explosioncolors",
-            SelectDropdown(
-                [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
-                explosion_colors_note
+            .With(
+                PageSetting(
+                    %"noteskin.explosionanimationtime",
+                    Slider(Setting.uom explosion_frame_time_note, Step = 1f)
+                )
+                    .Help(Help.Info("noteskin.explosionanimationtime"))
+                    .Pos(0),
+                PageSetting(
+                    %"noteskin.explosioncolors",
+                    SelectDropdown(
+                        [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
+                        explosion_colors_note
+                    )
+                )
+                    .Help(Help.Info("noteskin.explosioncolors"))
+                    .Pos(2),
+                PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_note))
+                    .Help(Help.Info("noteskin.explosionoffset"))
+                    .Pos(4),
+                PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_note))
+                    .Help(Help.Info("noteskin.explosionscale"))
+                    .Pos(6),
+                PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_note)
+                    .Help(Help.Info("noteskin.usebuiltinanimation"))
+                    .Pos(8),
+                PageSetting(
+                    %"noteskin.explosionduration",
+                    Slider(Setting.uom explosion_duration_note, Step = 1f)
+                )
+                    .Help(Help.Info("noteskin.explosionduration"))
+                    .Pos(10)
+                    .Conditional(explosion_builtin_note.Get),
+                PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_note))
+                    .Help(Help.Info("noteskin.explosionexpand"))
+                    .Pos(12)
+                    .Conditional(explosion_builtin_note.Get)
             )
-        )
-            .Help(Help.Info("noteskin.explosioncolors"))
-            .Pos(2)
-        |+ PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_note))
-            .Help(Help.Info("noteskin.explosionoffset"))
-            .Pos(4)
-        |+ PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_note))
-            .Help(Help.Info("noteskin.explosionscale"))
-            .Pos(6)
-        |+ PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_note)
-            .Help(Help.Info("noteskin.usebuiltinanimation"))
-            .Pos(8)
-        |+ PageSetting(
-            %"noteskin.explosionduration",
-            Slider(Setting.uom explosion_duration_note, Step = 1f)
-        )
-            .Help(Help.Info("noteskin.explosionduration"))
-            .Pos(10)
-            .Conditional(explosion_builtin_note.Get)
-        |+ PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_note))
-            .Help(Help.Info("noteskin.explosionexpand"))
-            .Pos(12)
-            .Conditional(explosion_builtin_note.Get)
 
     let hold_explosions_subtab =
         NavigationContainer.Column(WrapNavigation = false)
-        |+ PageSetting(
-            %"noteskin.explosionanimationtime",
-            Slider(Setting.uom explosion_frame_time_hold, Step = 1f)
-        )
-            .Help(Help.Info("noteskin.explosionanimationtime"))
-            .Pos(0)
-        |+ PageSetting(
-            %"noteskin.explosioncolors",
-            SelectDropdown(
-                [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
-                explosion_colors_hold
+            .With(
+                PageSetting(
+                    %"noteskin.explosionanimationtime",
+                    Slider(Setting.uom explosion_frame_time_hold, Step = 1f)
+                )
+                    .Help(Help.Info("noteskin.explosionanimationtime"))
+                    .Pos(0),
+                PageSetting(
+                    %"noteskin.explosioncolors",
+                    SelectDropdown(
+                        [| ExplosionColors.Note, "Note"; ExplosionColors.Judgements, "Judgements" |],
+                        explosion_colors_hold
+                    )
+                )
+                    .Help(Help.Info("noteskin.explosioncolors"))
+                    .Pos(2),
+                PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_hold))
+                    .Help(Help.Info("noteskin.explosionoffset"))
+                    .Pos(4),
+                PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_hold))
+                    .Help(Help.Info("noteskin.explosionscale"))
+                    .Pos(6),
+                PageSetting(%"noteskin.usereleaseanimation", Checkbox explosion_hold_use_release)
+                    .Help(Help.Info("noteskin.usereleaseanimation"))
+                    .Pos(8),
+                PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_release)
+                    .Help(Help.Info("noteskin.usebuiltinanimation"))
+                    .Pos(10)
+                    .Conditional(explosion_hold_use_release.Get),
+                PageSetting(
+                    %"noteskin.explosionduration",
+                    Slider(Setting.uom explosion_duration_hold, Step = 1f)
+                )
+                    .Help(Help.Info("noteskin.explosionduration"))
+                    .Pos(12)
+                    .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value),
+                PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_hold))
+                    .Help(Help.Info("noteskin.explosionexpand"))
+                    .Pos(14)
+                    .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
             )
-        )
-            .Help(Help.Info("noteskin.explosioncolors"))
-            .Pos(2)
-        |+ PageSetting(%"noteskin.explosionoffset", Slider.Percent(explosion_offset_hold))
-            .Help(Help.Info("noteskin.explosionoffset"))
-            .Pos(4)
-        |+ PageSetting(%"noteskin.explosionscale", Slider.Percent(explosion_scale_hold))
-            .Help(Help.Info("noteskin.explosionscale"))
-            .Pos(6)
-        |+ PageSetting(%"noteskin.usereleaseanimation", Checkbox explosion_hold_use_release)
-            .Help(Help.Info("noteskin.usereleaseanimation"))
-            .Pos(8)
-        |+ PageSetting(%"noteskin.usebuiltinanimation", Checkbox explosion_builtin_release)
-            .Help(Help.Info("noteskin.usebuiltinanimation"))
-            .Pos(10)
-            .Conditional(explosion_hold_use_release.Get)
-        |+ PageSetting(
-            %"noteskin.explosionduration",
-            Slider(Setting.uom explosion_duration_hold, Step = 1f)
-        )
-            .Help(Help.Info("noteskin.explosionduration"))
-            .Pos(12)
-            .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
-        |+ PageSetting(%"noteskin.explosionexpand", Slider.Percent(explosion_expand_hold))
-            .Help(Help.Info("noteskin.explosionexpand"))
-            .Pos(14)
-            .Conditional(fun () -> explosion_builtin_release.Value || not explosion_hold_use_release.Value)
 
     let explosions_tab =
         let subtab_container = SwapContainer(note_explosions_subtab)
@@ -557,6 +569,9 @@ type AnimationSettingsPage() =
 
     override this.Draw() =
         base.Draw()
+        this.RenderPreviews()
+
+    member this.RenderPreviews() =
 
         let COLUMN_WIDTH = 120.0f
         let preview_width =
