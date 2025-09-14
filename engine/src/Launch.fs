@@ -28,11 +28,7 @@ module Launch =
             with err ->
                 match err with
                 | :? DllNotFoundException ->
-                    Logging.Critical
-                        """====\nEngine failed to load a DLL! Please check that:
- - You didn't delete one of the DLLs that came with the exe\n" +
- - You have VC++ redist installed - https://aka.ms/vs/17/release/vc_redist.x64.exe\n" +
-If the program still won't start, please contact Percyqaz!\n====\n%O""" err
+                    Logging.Critical "\n====\nEngine failed to load a DLL! Please check that:\n - You didn't delete one of the DLLs that came with the exe\n - You have VC++ redist installed (if on windows) - https://aka.ms/vs/17/release/vc_redist.x64.exe\nIf the program still won't start, please contact Percyqaz!\n====\n%O" err
                 | _ -> Logging.Critical "%s failed to launch: %O" name err
                 false
 
