@@ -46,7 +46,7 @@ type NumberEntry =
             match Int32.TryParse(text, CultureInfo.InvariantCulture) with
             | true, v -> setting.Set v
             | false, _ -> ()
-        let to_string () = setting.Value.ToString()
+        let to_string () = setting.Value.ToString(CultureInfo.InvariantCulture)
 
         NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-'), to_string, from_string)
 
@@ -55,7 +55,7 @@ type NumberEntry =
             match Double.TryParse(text, CultureInfo.InvariantCulture) with
             | true, v -> setting.Set v
             | false, _ -> ()
-        let to_string () : string = setting.Value.ToString("R")
+        let to_string () : string = setting.Value.ToString("R", CultureInfo.InvariantCulture)
 
         NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-' || c = '.'), to_string, from_string)
 
@@ -66,7 +66,7 @@ type NumberEntry =
             match Single.TryParse(text, CultureInfo.InvariantCulture) with
             | true, v -> setting.Set (v |> LanguagePrimitives.Float32WithMeasure)
             | false, _ -> ()
-        let to_string () : string = (float32 setting.Value).ToString("R")
+        let to_string () : string = (float32 setting.Value).ToString("R", CultureInfo.InvariantCulture)
 
         NumberEntry.CreateInternal((fun c -> Char.IsAsciiDigit c || c = '-' || c = '.'), to_string, from_string, UNITS_LABEL_WIDTH)
             .With(
