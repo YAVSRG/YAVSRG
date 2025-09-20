@@ -90,7 +90,7 @@ module Inverse =
                 else
                     let intended_tail_time = output.[i - 1].Time - spacing
 
-                    if intended_tail_time - spacing <= start_time then
+                    if intended_tail_time - spacing * 0.66f <= start_time then
                         ()
                     else
 
@@ -99,9 +99,8 @@ module Inverse =
                         while output.[tail_position].Time > intended_tail_time do
                             tail_position <- tail_position - 1
 
-                        assert (output.[tail_position].Time <= intended_tail_time)
-
                         let { Time = time; Data = row } = output.[tail_position]
+                        assert (time <= intended_tail_time)
 
                         if time = intended_tail_time then
                             row.[k] <- NoteType.HOLDTAIL
