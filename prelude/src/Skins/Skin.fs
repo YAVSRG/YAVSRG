@@ -82,12 +82,7 @@ type Skin(storage) as this =
             match JSON.FromFile<HudConfig>(hud_settings) with
             | Ok _ -> ()
             | Error _ ->
-
-            Logging.Critical("Your default User HUD's hud.json doesn't parse! Did you make a typo?\nIn future, use the ingame editor to avoid formatting mistakes.")
-            Logging.Critical("If you want to FULLY reset your HUD file to defaults, type 'reset' now, otherwise go and fix it and then relaunch the game.")
-
-            if System.Console.ReadLine().Trim().ToLower() <> "reset" then
-                failwith "User chose to crash the game so they can fix their HUD config"
+                Logging.Warn("Ignoring User hud.json because it didn't parse - Maybe you foolishly made a typo when editing it manually")
 
         JSON.ToFile(hud_settings, true) HudConfig.Default
 
