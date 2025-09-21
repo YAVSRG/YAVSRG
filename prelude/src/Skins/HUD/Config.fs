@@ -22,6 +22,7 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
+    | HudGraph
     static member FULL_LIST =
         [
             Accuracy
@@ -38,6 +39,7 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
+            HudGraph
         ]
 
 [<RequireQualifiedAccess>]
@@ -50,6 +52,11 @@ type ProgressPieLabel =
     | None = 0
     | Countdown = 1
     | Percentage = 2
+
+type HudGraphScrollType =
+    | ScrollSpeed = 0
+    | ShowWholeChart = 1
+    | ShowXNotes = 2
 
 type ErrorBarMovingAverageType =
     | None = 0
@@ -133,6 +140,20 @@ type HudConfig =
         AccuracyFontSpacing: float32
         AccuracyDotExtraSpacing: float32
         AccuracyPercentExtraSpacing: float32
+
+        HudGraphEnabled: bool
+        HudGraphPosition: HudPosition
+        HudGraphHitSize: float32
+        HudGraphScrollSpeed: float32
+        HudGraphWindowOpacity: float32
+        HudGraphHitOpacity: float32
+        HudGraphShowWholeChart: bool
+        HudGraphShowIncomingNotes: bool
+        HudGraphDrawBorder: bool
+        HudGraphTransparent: bool
+        HudGraphSmoothScrolling: bool
+        HudGraphShowXNotes: float32
+        HudGraphScrollType: HudGraphScrollType
 
         TimingDisplayEnabled: bool
         TimingDisplayPosition: HudPosition
@@ -257,6 +278,27 @@ type HudConfig =
             AccuracyFontSpacing = 0.0f
             AccuracyDotExtraSpacing = 0.0f
             AccuracyPercentExtraSpacing = 0.0f
+
+            HudGraphEnabled = true
+            HudGraphPosition =
+                {
+                    RelativeToPlayfield = false
+                    Left = -300.0f, 0.5f
+                    Top = -200.0f, 0.5f
+                    Right = 300.0f, 0.5f
+                    Bottom = 200.0f, 0.5f
+                }
+            HudGraphHitSize = 15f
+            HudGraphScrollSpeed = 5f
+            HudGraphWindowOpacity = 40f
+            HudGraphHitOpacity = 100f
+            HudGraphShowWholeChart = false
+            HudGraphShowIncomingNotes = true
+            HudGraphDrawBorder = true
+            HudGraphTransparent = false
+            HudGraphSmoothScrolling = true
+            HudGraphShowXNotes = 0f
+            HudGraphScrollType = HudGraphScrollType.ScrollSpeed
 
             TimingDisplayEnabled = true
             TimingDisplayPosition =

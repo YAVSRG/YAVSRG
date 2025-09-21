@@ -9,6 +9,8 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play.HUD
 open Interlude.Features.Gameplay
+open System
+open Interlude.Features.Play
 
 module SelectPreviews =
 
@@ -377,6 +379,59 @@ module SelectPreviews =
             ((Sprite.fill bounds texture).AsQuad)
             Color.White.AsQuad
             (Sprite.pick_texture (1, 0) texture)
+    let private create_hudgraph (config: HudConfig): SelectPreview =
+        None,
+        fun (bounds: Rect) ->
+            let offsets = [
+                18f; -36f; 54f; 27f; -90f;
+                -18f; 45f; -72f; 9f; 36f;
+                -45f; -63f; -9f; 81f; -54f;
+                -27f; 72f; 63f; 0f; -81f
+            ]
+            Render.rect bounds Colors.black
+
+            Render.rect (
+                Rect.FromSize(
+                    bounds.Left,
+                    bounds.CenterY + 2f,
+                    bounds.Width,
+                    -4f
+                )
+            ) Colors.white.O1
+
+            let size = config.HudGraphHitSize
+            let color (y: float32) =
+                if y > bounds.CenterY +     bounds.Height / 4f then Color.Green
+                elif y > bounds.CenterY +   bounds.Height / 8f then Color.Yellow
+                elif y > bounds.CenterY -   bounds.Height / 8f then Color.Cyan
+                elif y > bounds.CenterY -   bounds.Height / 4f then Color.Yellow
+                elif y > bounds.CenterY -   bounds.Height / 2f then Color.Green
+                else Color.Red
+            for i in 0 .. offsets.Length - 1 do
+                let age = float32 i
+                let x = (bounds.Right - 1f - (age * 10f))
+                let y = Math.Clamp(bounds.CenterY + offsets[i],
+                    bounds.Top,
+                    bounds.Bottom)
+                if x > bounds.Left then
+                    Render.rect (
+                        Rect.FromEdges(
+                        Math.Clamp (x - size,       bounds.Left, bounds.Right), 
+                        Math.Clamp (y + size / 2f,  bounds.Top, bounds.Bottom),
+                        Math.Clamp (x,              bounds.Left, bounds.Right), 
+                        Math.Clamp (y - size / 2f,  bounds.Top, bounds.Bottom))
+                    )  (color y) 
+
+            if config.HudGraphWindowOpacity > 20f then
+                Render.rect (bounds.SliceY(bounds.Height / 4.0f)) (Color.Cyan.O4a 50)
+                Render.rect (bounds.SliceY(bounds.Height / 8.0f).TranslateY(bounds.Height / 8f + bounds.Height / 16f)) (Color.Yellow.O4a 50)
+                Render.rect (bounds.SliceY(bounds.Height / 8.0f).TranslateY(-(bounds.Height / 8f + bounds.Height / 16f))) (Color.Yellow.O4a 50)
+                Render.rect (bounds.SliceY(bounds.Height / 4.0f).TranslateY(bounds.Height / 4f + bounds.Height / 8f)) (Color.LightGreen.O4a 50)
+                Render.rect (bounds.SliceY(bounds.Height / 4.0f).TranslateY(-(bounds.Height / 4f + bounds.Height / 8f))) (Color.LightGreen.O4a 50)
+            if config.HudGraphShowIncomingNotes then
+                Render.rect (Rect.FromEdges(bounds.Right - size, bounds.Top + 90f, bounds.Right, bounds.Top + 90f - size)) Color.White.O1            
+                Render.rect (Rect.FromEdges(bounds.Right - size, bounds.Top + 120f, bounds.Right, bounds.Top + 120f - size)) Color.White.O1  
+            if config.HudGraphDrawBorder = true then Render.border Style.PADDING bounds Colors.white
 
     let create (config: HudConfig) (element: HudElement) : SelectPreview =
         match element with
@@ -394,3 +449,4 @@ module SelectPreviews =
         | HudElement.InputMeter -> create_input_meter config
         | HudElement.KeysPerSecond -> create_kps config
         | HudElement.CustomImage -> create_custom_image config
+        | HudElement.HudGraph -> create_hudgraph config 
