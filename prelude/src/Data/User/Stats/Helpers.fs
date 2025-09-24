@@ -13,6 +13,13 @@ module StatsHelpers =
             Logging.Error "Incoming sync value was %f, ignoring" incoming
             original
 
+    let safe_stat_max32 (original: float32) (incoming: float32) : float32 =
+        if Single.IsFinite incoming then
+            max original incoming
+        else
+            Logging.Error "Incoming sync value was %f, ignoring" incoming
+            original
+
     let combine_playtimes (op: float -> float -> float) (total: Map<int, float>) (session: Map<int, float>) : Map<int, float> =
         Map.fold
             (fun (pt: Map<int, float>) keymode time ->
