@@ -32,9 +32,10 @@ type ErrorBar(config: HudConfig, state: PlayState) =
         else
             1.0f
 
-    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity * 0.5f
     let animation_time = config.TimingDisplayFadeTime * SelectedChart.rate.Value
-    let moving_average = Animation.Fade(0.0f)
+    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity * 0.5f
+    let moving_average_fade_time = float (1.0f - config.TimingDisplayMovingAverageSensitivity) * 3000.0 |> min 1500.0 |> max 75.0
+    let moving_average = Animation.Fade(0.0f, moving_average_fade_time)
 
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
