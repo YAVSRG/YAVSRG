@@ -325,10 +325,7 @@ module HudElement =
 
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
-        | HudElement.ErrorBar ->
-            if Content.HUD.TimingDisplayRotation <> ErrorBarRotation.Normal then
-                all_defaults.TimingDisplayPosition.Rotate
-            else all_defaults.TimingDisplayPosition
+        | HudElement.ErrorBar -> all_defaults.TimingDisplayPosition
         | HudElement.Combo -> all_defaults.ComboPosition
         | HudElement.SkipButton -> all_defaults.SkipButtonPosition
         | HudElement.Judgement -> all_defaults.JudgementMeterPosition

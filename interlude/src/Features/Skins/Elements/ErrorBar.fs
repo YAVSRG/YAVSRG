@@ -40,7 +40,6 @@ type ErrorBar(config: HudConfig, state: PlayState) =
     let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
     let MAX_WINDOW = state.Ruleset.LargestWindow
-    let IS_ROTATED = config.TimingDisplayRotation <> ErrorBarRotation.Normal
 
     override this.Init(parent: Widget) =
         if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
@@ -122,7 +121,7 @@ type ErrorBar(config: HudConfig, state: PlayState) =
         moving_average.Update elapsed_ms
 
         if w = 0.0f || moved then
-            w <- if IS_ROTATED then this.Bounds.Height else this.Bounds.Width
+            w <- this.Bounds.Width
 
         let now = state.CurrentChartTime()
 
@@ -153,51 +152,24 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                     previous_late <- late
                 | None -> ()
 
-        match config.TimingDisplayRotation with
-        | ErrorBarRotation.Clockwise ->
-            let center = this.Bounds.CenterY
-            let ms_to_y =
-                let h = this.Bounds.Height * 0.5f
-                fun time -> center + time / MAX_WINDOW * h
-            let r time1 time2 = Rect.FromEdges(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
-            draw r
-        | ErrorBarRotation.Anticlockwise ->
-            let center = this.Bounds.CenterY
-            let ms_to_y =
-                let h = this.Bounds.Height * 0.5f
-                fun time -> center - time / MAX_WINDOW * h
-            let r time1 time2 = Rect.FromEdges(this.Bounds.Left, ms_to_y time1, this.Bounds.Right, ms_to_y time2)
-            draw r
-        | _ ->
-            let center = this.Bounds.CenterX
-            let ms_to_x =
-                let w = this.Bounds.Width * 0.5f
-                fun time -> center + time / MAX_WINDOW * w
-            let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
-            draw r
+        let center = this.Bounds.CenterX
+        let ms_to_x =
+            let w = this.Bounds.Width * 0.5f
+            fun time -> center + time / MAX_WINDOW * w
+        let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
+        draw r
 
     override this.Draw() =
         if window_opacity > 0 then
             this.DrawWindows window_opacity
 
-        let r =
-            match config.TimingDisplayRotation with
-            | ErrorBarRotation.Clockwise ->
-                fun p1 p2 ->
-                let center = this.Bounds.CenterY
-                Rect.FromEdges(this.Bounds.Left, center + p1, this.Bounds.Right, center + p2)
-            | ErrorBarRotation.Anticlockwise ->
-                fun p1 p2 ->
-                let center = this.Bounds.CenterY
-                Rect.FromEdges(this.Bounds.Left, center - p1, this.Bounds.Right, center - p2)
-            | _ ->
-                fun p1 p2 ->
-                let center = this.Bounds.CenterX
-                Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
+        let bar p1 p2 =
+            let center = this.Bounds.CenterX
+            Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
 
         if config.TimingDisplayShowGuide then
             Render.rect
-                (r (-config.TimingDisplayThickness * config.TimingDisplayGuideThickness) (config.TimingDisplayThickness * config.TimingDisplayGuideThickness))
+                (bar (-config.TimingDisplayThickness * config.TimingDisplayGuideThickness) (config.TimingDisplayThickness * config.TimingDisplayGuideThickness))
                 Color.White
 
         let now = state.CurrentChartTime()
@@ -205,43 +177,23 @@ type ErrorBar(config: HudConfig, state: PlayState) =
         match config.TimingDisplayMovingAverageType with
         | ErrorBarMovingAverageType.ReplaceBars ->
             Render.rect
-                (r (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
+                (bar (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
                 config.TimingDisplayMovingAverageColor
         | ErrorBarMovingAverageType.Arrow ->
-            let quad =
-                match config.TimingDisplayRotation with
-                | ErrorBarRotation.Clockwise ->
-                    let center = this.Bounds.CenterY
-                    let arrow_height = this.Bounds.Width * 0.5f
-                    Quad.from_points(
-                        (this.Bounds.Right + 10.0f, center + moving_average.Value),
-                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value - arrow_height),
-                        (this.Bounds.Right + 10.0f + arrow_height, center + moving_average.Value + arrow_height),
-                        (this.Bounds.Right + 10.0f, center + moving_average.Value)
-                    )
-                | ErrorBarRotation.Anticlockwise ->
-                    let center = this.Bounds.CenterY
-                    let arrow_height = this.Bounds.Width * 0.5f
-                    Quad.from_points(
-                        (this.Bounds.Left - 10.0f, center - moving_average.Value),
-                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value + arrow_height),
-                        (this.Bounds.Left - 10.0f - arrow_height, center - moving_average.Value - arrow_height),
-                        (this.Bounds.Left - 10.0f, center - moving_average.Value)
-                    )
-                | _ ->
-                    let center = this.Bounds.CenterX
-                    let arrow_height = this.Bounds.Height * 0.5f
-                    Quad.from_points(
-                        (center + moving_average.Value, this.Bounds.Top - 10.0f),
-                        (center + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height),
-                        (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
-                        (center + moving_average.Value, this.Bounds.Top - 10.0f)
-                    )
-            Render.quad quad config.TimingDisplayMovingAverageColor
+            let center = this.Bounds.CenterX
+            let arrow_height = this.Bounds.Height * 0.5f
+            let arrow =
+                Quad.from_points(
+                    (center + moving_average.Value, this.Bounds.Top - 10.0f),
+                    (center + moving_average.Value - arrow_height, this.Bounds.Top - 10.0f - arrow_height),
+                    (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
+                    (center + moving_average.Value, this.Bounds.Top - 10.0f)
+                )
+            Render.quad arrow config.TimingDisplayMovingAverageColor
         | _ -> ()
 
         for hit in hits do
-            let rect = r (hit.Position - config.TimingDisplayThickness) (hit.Position + config.TimingDisplayThickness)
+            let rect = bar (hit.Position - config.TimingDisplayThickness) (hit.Position + config.TimingDisplayThickness)
             let color =
                 match hit.Judgement with
                 | None ->
@@ -259,10 +211,7 @@ type ErrorBar(config: HudConfig, state: PlayState) =
                 Render.rect
                     (
                         if hit.IsRelease then
-                            if IS_ROTATED then
-                                rect.ExpandX(config.TimingDisplayReleasesExtraHeight)
-                            else
-                                rect.ExpandY(config.TimingDisplayReleasesExtraHeight)
+                            rect.ExpandY(config.TimingDisplayReleasesExtraHeight)
                         else
                             rect
                     )

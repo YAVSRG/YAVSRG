@@ -56,11 +56,6 @@ type ErrorBarMovingAverageType =
     | Arrow = 1
     | ReplaceBars = 2
 
-type ErrorBarRotation =
-    | Normal = 0
-    | Clockwise = 1
-    | Anticlockwise = 2
-
 [<Json.AutoCodec(false)>]
 type HudPosition =
     {
@@ -147,7 +142,6 @@ type HudConfig =
         TimingDisplayMovingAverageType: ErrorBarMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
-        TimingDisplayRotation: ErrorBarRotation
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -278,7 +272,6 @@ type HudConfig =
             TimingDisplayMovingAverageType = ErrorBarMovingAverageType.None
             TimingDisplayMovingAverageSensitivity = 0.75f
             TimingDisplayMovingAverageColor = Color.Aqua
-            TimingDisplayRotation = ErrorBarRotation.Normal
 
             ComboEnabled = true
             ComboPosition =
