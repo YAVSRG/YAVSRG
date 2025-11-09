@@ -41,8 +41,10 @@ module SearchResults =
             if token_match tokens [|%"system.automatic_offset"|] then
                 yield AudioPage.AutomaticOffset()
 
-            if token_match tokens [|%"system.audio_pitch_rates"|] then
-                yield AudioPage.RatesChangePitch()
+            if token_match tokens [|%"system.audio_pitch_rates_down"|] then
+                yield AudioPage.RatesChangePitchDown()
+            if token_match tokens [|%"system.audio_pitch_rates_up"|] then
+                yield AudioPage.RatesChangePitchUp()
             if token_match tokens [|%"system.menus_muffle_song"|] then
                 yield AudioPage.MenusMuffleSong(), 2, 3, PageWidth.Normal
 

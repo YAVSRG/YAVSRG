@@ -49,7 +49,8 @@ module Startup =
             |]
 
         Audio.change_volume (options.AudioVolume.Value, options.AudioVolume.Value)
-        Song.set_pitch_rates_enabled options.AudioPitchRates.Value
+        Song.set_pitch_rate_down_enabled options.AudioPitchRatesDown.Value
+        Song.set_pitch_rate_up_enabled options.AudioPitchRatesUp.Value
 
         Gameplay.watch_replay <- LevelSelect.watch_replay
         Gameplay.continue_endless_mode <- LevelSelect.continue_endless_mode
