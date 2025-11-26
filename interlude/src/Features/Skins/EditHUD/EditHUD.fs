@@ -40,7 +40,7 @@ module EditHudScreen =
                 Screen.change_new (fun () -> edit_hud_screen (info, on_exit)) ScreenType.EditHud Transitions.Instant |> ignore
 
         { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets() =
+            override this.AddWidgets hud_ctx =
 
                 ctx <-
                     {

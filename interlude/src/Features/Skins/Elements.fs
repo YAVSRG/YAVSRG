@@ -18,6 +18,7 @@ module HudElement =
         match element with
         | HudElement.Accuracy -> %"hud.accuracy"
         | HudElement.ErrorBar -> %"hud.error_bar"
+        | HudElement.ColumnErrorBars -> %"hud.column_error_bars"
         | HudElement.Combo -> %"hud.combo"
         | HudElement.SkipButton -> %"hud.skip_button"
         | HudElement.Judgement -> %"hud.judgement"
@@ -35,6 +36,7 @@ module HudElement =
         match element with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
         | HudElement.ErrorBar -> %"hud.error_bar.tooltip"
+        | HudElement.ColumnErrorBars -> %"hud.column_error_bars.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
         | HudElement.SkipButton -> %"hud.skip_button.tooltip"
         | HudElement.Judgement -> %"hud.judgement.tooltip"
@@ -65,6 +67,7 @@ module HudElement =
         match element with
         | HudElement.Accuracy -> cast Accuracy
         | HudElement.ErrorBar -> cast ErrorBar
+        | HudElement.ColumnErrorBars -> cast ColumnErrorBars
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
         | HudElement.Judgement -> cast Judgement
@@ -98,6 +101,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.TimingDisplayEnabled)
+        | HudElement.ColumnErrorBars ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            ColumnErrorBarsEnabled = v
+                        }
+                )
+                (fun () -> Content.HUD.ColumnErrorBarsEnabled)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
@@ -211,6 +223,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.TimingDisplayPosition)
+        | HudElement.ColumnErrorBars ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            ColumnErrorBarsPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.ColumnErrorBarsPosition)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
@@ -326,6 +347,7 @@ module HudElement =
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
         | HudElement.ErrorBar -> all_defaults.TimingDisplayPosition
+        | HudElement.ColumnErrorBars -> all_defaults.ColumnErrorBarsPosition
         | HudElement.Combo -> all_defaults.ComboPosition
         | HudElement.SkipButton -> all_defaults.SkipButtonPosition
         | HudElement.Judgement -> all_defaults.JudgementMeterPosition

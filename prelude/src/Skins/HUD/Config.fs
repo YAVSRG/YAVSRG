@@ -10,6 +10,7 @@ open Prelude.Skins
 type HudElement =
     | Accuracy
     | ErrorBar
+    | ColumnErrorBars
     | Combo
     | SkipButton
     | Judgement
@@ -22,10 +23,12 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
+
     static member FULL_LIST =
         [
             Accuracy
             ErrorBar
+            ColumnErrorBars
             Combo
             SkipButton
             Judgement
@@ -142,6 +145,20 @@ type HudConfig =
         TimingDisplayMovingAverageType: ErrorBarMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
+
+        ColumnErrorBarsEnabled: bool
+        ColumnErrorBarsPosition: HudPosition
+        ColumnErrorBarsFadeTime: float32<ms / rate>
+        ColumnErrorBarsThickness: float32
+        ColumnErrorBarsShowGuide: bool
+        ColumnErrorBarsGuideThickness: float32
+        ColumnErrorBarsShowNonJudgements: bool
+        ColumnErrorBarsReleasesYScale: float32
+        ColumnErrorBarsReleasesXScale: float32
+        ColumnErrorBarsWindowsOpacity: float32
+        ColumnErrorBarsMovingAverage: bool
+        ColumnErrorBarsMovingAverageSensitivity: float32
+        ColumnErrorBarsMovingAverageColor: Color
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -270,8 +287,29 @@ type HudConfig =
             TimingDisplayWindowsOpacity = 0.0f
             TimingDisplayHalfScaleReleases = true
             TimingDisplayMovingAverageType = ErrorBarMovingAverageType.None
-            TimingDisplayMovingAverageSensitivity = 0.75f
+            TimingDisplayMovingAverageSensitivity = 0.5f
             TimingDisplayMovingAverageColor = Color.Aqua
+
+            ColumnErrorBarsEnabled = false
+            ColumnErrorBarsPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 0.0f, 0.0f
+                    Top = 50.0f, 0.5f
+                    Right = 0.0f, 1.0f
+                    Bottom = 250.0f, 0.5f
+                }
+            ColumnErrorBarsFadeTime = 1000.0f<ms / rate>
+            ColumnErrorBarsThickness = 0.2f
+            ColumnErrorBarsShowGuide = true
+            ColumnErrorBarsGuideThickness = 1.0f
+            ColumnErrorBarsShowNonJudgements = false
+            ColumnErrorBarsReleasesYScale = 0.5f
+            ColumnErrorBarsReleasesXScale = 1.25f
+            ColumnErrorBarsWindowsOpacity = 0.0f
+            ColumnErrorBarsMovingAverage = false
+            ColumnErrorBarsMovingAverageSensitivity = 0.5f
+            ColumnErrorBarsMovingAverageColor = Color.Aqua
 
             ComboEnabled = true
             ComboPosition =

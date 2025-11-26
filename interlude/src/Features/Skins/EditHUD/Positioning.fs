@@ -98,6 +98,12 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
         with set value =
 
             let value =
+                if element = HudElement.ColumnErrorBars then
+                    { value with Left = 0.0f, 0.0f; Right = 0.0f, 1.0f }
+                else
+                    value
+
+            let value =
                 if this.Initialised then
                     ctx.OnElementMoved.Trigger()
                     validate_pos this.Parent.Bounds value
@@ -418,7 +424,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
             if not (Mouse.held Mouse.LEFT) then
                 dragging_from <- None
-                save_pos ()
+                save_pos()
         | None ->
 
             if hover && this.IsSelectedElement && Mouse.left_clicked () then

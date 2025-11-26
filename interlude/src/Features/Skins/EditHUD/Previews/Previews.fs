@@ -382,6 +382,7 @@ module SelectPreviews =
         match element with
         | HudElement.Accuracy -> create_accuracy config
         | HudElement.ErrorBar -> create_error_bar config
+        | HudElement.ColumnErrorBars -> create_error_bar config
         | HudElement.Judgement -> create_judgement config
         | HudElement.EarlyLate -> create_early_late config
         | HudElement.Combo -> create_combo config

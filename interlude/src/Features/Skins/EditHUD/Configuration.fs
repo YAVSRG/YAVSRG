@@ -9,6 +9,7 @@ module private ConfigurationPageHelper =
         match element with
         | HudElement.Accuracy -> AccuracyPage() :> Interlude.UI.Page
         | HudElement.ErrorBar -> ErrorBarPage()
+        | HudElement.ColumnErrorBars -> ColumnErrorBarsPage()
         | HudElement.Combo -> ComboPage()
         | HudElement.SkipButton -> SkipButtonPage()
         | HudElement.Judgement -> JudgementPage()
