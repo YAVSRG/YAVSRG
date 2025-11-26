@@ -10,30 +10,30 @@ open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type Judgement(config: HudConfig, state: PlayState) =
+type Judgement(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
     let mutable tier = 0
     let mutable time = -Time.infinity
 
     let texture = Content.Texture "judgements"
-    let display = config.GetJudgementMeterDisplay state.Ruleset
-    let animated = not config.JudgementMeterUseTexture || config.JudgementMeterUseBuiltInAnimation
+    let display = ctx.Config.GetJudgementMeterDisplay ctx.State.Ruleset
+    let animated = not ctx.Config.JudgementMeterUseTexture || ctx.Config.JudgementMeterUseBuiltInAnimation
     let duration =
         (
             if animated then
-                config.JudgementMeterDuration
+                ctx.Config.JudgementMeterDuration
             else
-                config.JudgementMeterFrameTime * float32 texture.Columns
+                ctx.Config.JudgementMeterFrameTime * float32 texture.Columns
         ) * SelectedChart.rate.Value
 
     override this.Init(parent: Widget) =
-        state.Subscribe(fun ev ->
+        ctx.State.Subscribe(fun ev ->
             let judge = ev.Action.Judgement |> Option.map fst
 
             match judge with
-            | Some j when not config.JudgementMeterIgnorePerfect || j > 0 ->
+            | Some j when not ctx.Config.JudgementMeterIgnorePerfect || j > 0 ->
                 if
-                    not config.JudgementMeterPrioritiseLower
+                    not ctx.Config.JudgementMeterPrioritiseLower
                     || j >= tier
                     || ev.Time - duration > time
                     || ev.Time < time
@@ -48,7 +48,7 @@ type Judgement(config: HudConfig, state: PlayState) =
     override this.Draw() =
         if time > -Time.infinity then
 
-            let time_ago = state.CurrentChartTime() - time
+            let time_ago = ctx.State.CurrentChartTime() - time
             let percent = Math.Clamp(time_ago / duration, 0.0f, 1.0f)
 
             if percent < 1.0f then
@@ -61,13 +61,13 @@ type Judgement(config: HudConfig, state: PlayState) =
                 | JudgementDisplayType.Name ->
                     Text.fill (
                         Style.font,
-                        state.Ruleset.JudgementName tier,
+                        ctx.State.Ruleset.JudgementName tier,
                         bounds,
-                        state.Ruleset.JudgementColor(tier).O4a alpha,
+                        ctx.State.Ruleset.JudgementColor(tier).O4a alpha,
                         Alignment.CENTER
                     )
                 | JudgementDisplayType.Texture y ->
                     Render.tex_quad
                         ((Sprite.fill bounds texture).AsQuad)
                         (Color.White.O4a alpha).AsQuad
-                        (Sprite.pick_texture (time_ago / config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)
+                        (Sprite.pick_texture (time_ago / ctx.Config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)

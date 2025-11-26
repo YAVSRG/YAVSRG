@@ -68,7 +68,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
     let mutable hover = false
 
     let child =
-        HudElement.constructor element (Content.HUD, ctx.State)
+        HudElement.constructor element ctx.HudContext
 
     let position = HudElement.position_setting element
 
@@ -500,6 +500,15 @@ and PositionerContext =
         OnElementMoved: Event<unit>
         HotReload: unit -> unit
     }
+
+    member this.HudContext : HudContext =
+        {
+            Screen = this.Screen
+            Playfield = this.Playfield
+            State = this.State
+            Config = Content.HUD
+        }
+
     member this.Recreate(element: HudElement) =
         match this.Positioners.TryFind element with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore

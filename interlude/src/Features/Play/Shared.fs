@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Play
 
+open System.Runtime.CompilerServices
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
@@ -15,55 +16,53 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
-type HudContext =
-    {
-        Screen: IContainer<Widget>
-        Playfield: Playfield
-        State: PlayState
-        Config: HudConfig
-    }
+[<Extension>]
+type HudContextExtensions =
 
-    member private this.IsEnabled(element: HudElement) : bool =
+    [<Extension>]
+    static member private IsEnabled (ctx: HudContext, element: HudElement) : bool =
         match element with
-        | HudElement.Accuracy -> this.Config.AccuracyEnabled
-        | HudElement.ErrorBar -> this.Config.TimingDisplayEnabled
-        | HudElement.ColumnErrorBars -> this.Config.ColumnErrorBarsEnabled
-        | HudElement.Combo -> this.Config.ComboEnabled
+        | HudElement.Accuracy -> ctx.Config.AccuracyEnabled
+        | HudElement.ErrorBar -> ctx.Config.TimingDisplayEnabled
+        | HudElement.ColumnErrorBars -> ctx.Config.ColumnErrorBarsEnabled
+        | HudElement.Combo -> ctx.Config.ComboEnabled
         | HudElement.SkipButton -> true
-        | HudElement.Judgement -> this.Config.JudgementMeterEnabled
-        | HudElement.EarlyLate -> this.Config.EarlyLateMeterEnabled
-        | HudElement.ProgressPie -> this.Config.ProgressMeterEnabled
-        | HudElement.JudgementCounter -> this.Config.JudgementCounterEnabled
-        | HudElement.RateMods -> this.Config.RateModMeterEnabled
-        | HudElement.BPM -> this.Config.BPMMeterEnabled
-        | HudElement.InputMeter -> this.Config.InputMeterEnabled
-        | HudElement.Pacemaker -> not this.State.Pacemaker.IsNone
-        | HudElement.KeysPerSecond -> this.Config.KeysPerSecondMeterEnabled
-        | HudElement.CustomImage -> this.Config.CustomImageEnabled
+        | HudElement.Judgement -> ctx.Config.JudgementMeterEnabled
+        | HudElement.EarlyLate -> ctx.Config.EarlyLateMeterEnabled
+        | HudElement.ProgressPie -> ctx.Config.ProgressMeterEnabled
+        | HudElement.JudgementCounter -> ctx.Config.JudgementCounterEnabled
+        | HudElement.RateMods -> ctx.Config.RateModMeterEnabled
+        | HudElement.BPM -> ctx.Config.BPMMeterEnabled
+        | HudElement.InputMeter -> ctx.Config.InputMeterEnabled
+        | HudElement.Pacemaker -> not ctx.State.Pacemaker.IsNone
+        | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterEnabled
+        | HudElement.CustomImage -> ctx.Config.CustomImageEnabled
 
-    member private this.Position(element: HudElement) : HudPosition =
+    [<Extension>]
+    static member private Position (ctx: HudContext, element: HudElement) : HudPosition =
         match element with
-        | HudElement.Accuracy -> this.Config.AccuracyPosition
-        | HudElement.ErrorBar -> this.Config.TimingDisplayPosition
-        | HudElement.ColumnErrorBars -> this.Config.ColumnErrorBarsPosition
-        | HudElement.Combo -> this.Config.ComboPosition
-        | HudElement.SkipButton -> this.Config.SkipButtonPosition
-        | HudElement.Judgement -> this.Config.JudgementMeterPosition
-        | HudElement.EarlyLate -> this.Config.EarlyLateMeterPosition
-        | HudElement.ProgressPie -> this.Config.ProgressMeterPosition
-        | HudElement.JudgementCounter -> this.Config.JudgementCounterPosition
-        | HudElement.RateMods -> this.Config.RateModMeterPosition
-        | HudElement.BPM -> this.Config.BPMMeterPosition
-        | HudElement.InputMeter -> this.Config.InputMeterPosition
-        | HudElement.Pacemaker -> this.Config.PacemakerPosition
-        | HudElement.KeysPerSecond -> this.Config.KeysPerSecondMeterPosition
-        | HudElement.CustomImage -> this.Config.CustomImagePosition
+        | HudElement.Accuracy -> ctx.Config.AccuracyPosition
+        | HudElement.ErrorBar -> ctx.Config.TimingDisplayPosition
+        | HudElement.ColumnErrorBars -> ctx.Config.ColumnErrorBarsPosition
+        | HudElement.Combo -> ctx.Config.ComboPosition
+        | HudElement.SkipButton -> ctx.Config.SkipButtonPosition
+        | HudElement.Judgement -> ctx.Config.JudgementMeterPosition
+        | HudElement.EarlyLate -> ctx.Config.EarlyLateMeterPosition
+        | HudElement.ProgressPie -> ctx.Config.ProgressMeterPosition
+        | HudElement.JudgementCounter -> ctx.Config.JudgementCounterPosition
+        | HudElement.RateMods -> ctx.Config.RateModMeterPosition
+        | HudElement.BPM -> ctx.Config.BPMMeterPosition
+        | HudElement.InputMeter -> ctx.Config.InputMeterPosition
+        | HudElement.Pacemaker -> ctx.Config.PacemakerPosition
+        | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterPosition
+        | HudElement.CustomImage -> ctx.Config.CustomImagePosition
 
-    member private this.Constructor(element: HudElement) : HudConfig * PlayState -> Widget =
+    [<Extension>]
+    static member private Constructor (ctx: HudContext, element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
         match element with
         | HudElement.Accuracy -> cast Accuracy
-        | HudElement.ErrorBar -> cast ErrorBar
+        | HudElement.ErrorBar -> cast ErrorBar // todo: in replay mode, overlay should make this element conditionally visible
         | HudElement.ColumnErrorBars -> cast ColumnErrorBars
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
@@ -79,11 +78,12 @@ type HudContext =
         | HudElement.CustomImage -> cast CustomImage
 
     /// Adds the element in its configured position, if enabled
-    member this.TryAdd(element: HudElement) =
-        if this.IsEnabled(element) then
-            let position = this.Position(element)
+    [<Extension>]
+    static member TryAdd (ctx: HudContext, element: HudElement) =
+        if ctx.IsEnabled(element) then
+            let position = ctx.Position(element)
 
-            let w = this.Constructor(element)(this.Config, this.State)
+            let w = ctx.Constructor element ctx
 
             w.Position <-
                 {
@@ -93,7 +93,7 @@ type HudContext =
                     Bottom = position.Bottom
                 }
 
-            if position.RelativeToPlayfield then this.Playfield.Add w else this.Screen.Add w
+            if position.RelativeToPlayfield then ctx.Playfield.Add w else ctx.Screen.Add w
 
 [<AbstractClass>]
 type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor) as this

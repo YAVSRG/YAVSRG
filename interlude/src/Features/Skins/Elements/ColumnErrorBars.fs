@@ -20,7 +20,7 @@ type private ColumnErrorBarEvent =
         Judgement: int option
     }
 
-type ColumnErrorBars(config: HudConfig, state: PlayState) =
+type ColumnErrorBars(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
     let hits = ResizeArray<ErrorBarEvent>()
     let mutable w = 0.0f
@@ -28,23 +28,23 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
     let mutable last_seen_time = -Time.infinity
 
     let ln_mult =
-        if config.TimingDisplayHalfScaleReleases then
+        if ctx.Config.TimingDisplayHalfScaleReleases then
             0.5f
         else
             1.0f
 
-    let animation_time = config.TimingDisplayFadeTime * SelectedChart.rate.Value
-    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity * 0.5f
-    let moving_average_fade_time = float (1.0f - config.TimingDisplayMovingAverageSensitivity) * 3000.0 |> min 1500.0 |> max 75.0
+    let animation_time = ctx.Config.TimingDisplayFadeTime * SelectedChart.rate.Value
+    let moving_average_sensitivity = ctx.Config.TimingDisplayMovingAverageSensitivity * 0.5f
+    let moving_average_fade_time = float (1.0f - ctx.Config.TimingDisplayMovingAverageSensitivity) * 3000.0 |> min 1500.0 |> max 75.0
     let moving_average = Animation.Fade(0.0f, moving_average_fade_time)
 
-    let window_opacity = config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
+    let window_opacity = ctx.Config.TimingDisplayWindowsOpacity * 255.0f |> int |> min 255 |> max 0
 
-    let MAX_WINDOW = state.Ruleset.LargestWindow
+    let MAX_WINDOW = ctx.State.Ruleset.LargestWindow
 
     override this.Init(parent: Widget) =
-        if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
-            state.Subscribe(fun ev ->
+        if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
+            ctx.State.Subscribe(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     if not e.Missed then
@@ -72,8 +72,8 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
                 | RegrabHold -> ()
             )
             |> ignore
-        if config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
-            state.Subscribe(fun ev ->
+        if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
+            ctx.State.Subscribe(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     hits.Add
@@ -124,7 +124,7 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
         if w = 0.0f || moved then
             w <- this.Bounds.Width
 
-        let now = state.CurrentChartTime()
+        let now = ctx.State.CurrentChartTime()
 
         if now < last_seen_time then
             hits.Clear()
@@ -140,7 +140,7 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
             let mutable previous_early = 0.0f<ms / rate>
             let mutable previous_late = 0.0f<ms / rate>
 
-            for j in state.Scoring.Ruleset.Judgements do
+            for j in ctx.State.Scoring.Ruleset.Judgements do
                 match j.TimingWindows with
                 | Some (early, late) ->
                     Render.rect
@@ -168,18 +168,18 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
             let center = this.Bounds.CenterX
             Rect.FromEdges(center + p1, this.Bounds.Top, center + p2, this.Bounds.Bottom)
 
-        if config.TimingDisplayShowGuide then
+        if ctx.Config.TimingDisplayShowGuide then
             Render.rect
-                (bar (-config.TimingDisplayThickness * config.TimingDisplayGuideThickness) (config.TimingDisplayThickness * config.TimingDisplayGuideThickness))
+                (bar (-ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness) (ctx.Config.TimingDisplayThickness * ctx.Config.TimingDisplayGuideThickness))
                 Color.White
 
-        let now = state.CurrentChartTime()
+        let now = ctx.State.CurrentChartTime()
 
-        match config.TimingDisplayMovingAverageType with
+        match ctx.Config.TimingDisplayMovingAverageType with
         | ErrorBarMovingAverageType.ReplaceBars ->
             Render.rect
-                (bar (moving_average.Value - config.TimingDisplayThickness) (moving_average.Value + config.TimingDisplayThickness))
-                config.TimingDisplayMovingAverageColor
+                (bar (moving_average.Value - ctx.Config.TimingDisplayThickness) (moving_average.Value + ctx.Config.TimingDisplayThickness))
+                ctx.Config.TimingDisplayMovingAverageColor
         | ErrorBarMovingAverageType.Arrow ->
             let center = this.Bounds.CenterX
             let arrow_height = this.Bounds.Height * 0.5f
@@ -190,11 +190,11 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
                     (center + moving_average.Value + arrow_height, this.Bounds.Top - 10.0f - arrow_height),
                     (center + moving_average.Value, this.Bounds.Top - 10.0f)
                 )
-            Render.quad arrow config.TimingDisplayMovingAverageColor
+            Render.quad arrow ctx.Config.TimingDisplayMovingAverageColor
         | _ -> ()
 
         for hit in hits do
-            let rect = bar (hit.Position - config.TimingDisplayThickness) (hit.Position + config.TimingDisplayThickness)
+            let rect = bar (hit.Position - ctx.Config.TimingDisplayThickness) (hit.Position + ctx.Config.TimingDisplayThickness)
             let color =
                 match hit.Judgement with
                 | None ->
@@ -205,14 +205,14 @@ type ColumnErrorBars(config: HudConfig, state: PlayState) =
                 | Some j ->
                     Color.FromArgb(
                         Math.Clamp(255 - int (255.0f * (now - hit.Time) / animation_time), 0, 255),
-                        state.Ruleset.JudgementColor j
+                        ctx.State.Ruleset.JudgementColor j
                     )
 
-            if config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
+            if ctx.Config.TimingDisplayShowNonJudgements || hit.Judgement.IsSome then
                 Render.rect
                     (
                         if hit.IsRelease then
-                            rect.ExpandY(config.TimingDisplayReleasesExtraHeight)
+                            rect.ExpandY(ctx.Config.TimingDisplayReleasesExtraHeight)
                         else
                             rect
                     )

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
@@ -176,6 +176,7 @@
     <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\DifficultyOverlay.fs" />
+    <Compile Include="Features\Play\HudContext.fs" />
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
     <Compile Include="Features\Skins\Elements\ErrorBar.fs" />
     <Compile Include="Features\Skins\Elements\ColumnErrorBars.fs" />

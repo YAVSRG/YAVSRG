@@ -18,22 +18,6 @@ type SkinPreview(position: Position) as this =
 
     let fbo = Render.borrow_fbo ()
 
-    let construct_hud_element (state: PlayState) (elem: HudElement) (playfield: Container) (outside_playfield: Container) =
-        if (HudElement.enabled_setting elem).Value then
-            let pos = (HudElement.position_setting elem).Value
-            let w = HudElement.constructor elem (Content.HUD, state)
-            w.Position <-
-                {
-                    Left = pos.Left
-                    Top = pos.Top
-                    Right = pos.Right
-                    Bottom = pos.Bottom
-                }
-            if pos.RelativeToPlayfield then
-                playfield.Add w
-            else
-                outside_playfield.Add w
-
     let create_renderer (info: LoadedChartInfo) =
         let state, recreate_scoring = PlayState.Dummy info
         let noteskin_config = Content.NoteskinConfig
@@ -43,14 +27,13 @@ type SkinPreview(position: Position) as this =
         playfield.Add(LanecoverOverReceptors())
         let overlay_items = Container(NodeType.None)
 
-        let elements =
-            HudElement.FULL_LIST
-            |> Seq.except (seq {
-                yield HudElement.SkipButton
-                if not options.EnablePacemaker.Value then yield HudElement.Pacemaker
-            })
-        for elem in elements do
-            construct_hud_element state elem playfield overlay_items
+        let hud_ctx : HudContext = { Screen = overlay_items; Playfield = playfield; State = state; Config = Content.HUD }
+        HudElement.FULL_LIST
+        |> Seq.except (seq {
+            yield HudElement.SkipButton
+            if not options.EnablePacemaker.Value then yield HudElement.Pacemaker
+        })
+        |> Seq.iter hud_ctx.TryAdd
 
         let mutable last_time = -Time.infinity
 

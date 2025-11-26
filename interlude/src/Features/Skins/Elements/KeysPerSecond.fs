@@ -8,7 +8,7 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type KeysPerSecond(config: HudConfig, state: PlayState) =
+type KeysPerSecond(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
     let UPDATE_INTERVAL = 100.0
@@ -19,9 +19,9 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
     let mutable count = 0.0f
 
     let shown_extras =
-        (if config.KeysPerSecondMeterShowAverage then 1 else 0) +
-        (if config.KeysPerSecondMeterShowMax then 1 else 0) +
-        (if config.KeysPerSecondMeterShowTotal then 1 else 0)
+        (if ctx.Config.KeysPerSecondMeterShowAverage then 1 else 0) +
+        (if ctx.Config.KeysPerSecondMeterShowMax then 1 else 0) +
+        (if ctx.Config.KeysPerSecondMeterShowTotal then 1 else 0)
 
     let extras =
         let positions : (Rect -> Rect) seq =
@@ -32,11 +32,11 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
             | _ -> [||]
         let texts : (unit -> string) seq =
             seq {
-                if config.KeysPerSecondMeterShowAverage then
-                    yield fun () -> sprintf "AVG: %.0f" (count / (state.CurrentChartTime() / state.Scoring.Rate / 1000.0f<ms / rate> |> max 0.1f))
-                if config.KeysPerSecondMeterShowMax then
+                if ctx.Config.KeysPerSecondMeterShowAverage then
+                    yield fun () -> sprintf "AVG: %.0f" (count / (ctx.State.CurrentChartTime() / ctx.State.Scoring.Rate / 1000.0f<ms / rate> |> max 0.1f))
+                if ctx.Config.KeysPerSecondMeterShowMax then
                     yield fun () -> sprintf "MAX: %.0f" max_kps
-                if config.KeysPerSecondMeterShowTotal then
+                if ctx.Config.KeysPerSecondMeterShowTotal then
                     yield fun () -> sprintf "TOTAL: %.0f" count
             }
         Seq.zip positions texts
@@ -48,8 +48,8 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
         let rate = SelectedChart.rate.Value
         let TWO_SECONDS = 2000.0f<ms / rate> * rate
 
-        let recent_events = state.Scoring.EnumerateRecentFrames()
-        let now = state.CurrentChartTime()
+        let recent_events = ctx.State.Scoring.EnumerateRecentFrames()
+        let now = ctx.State.CurrentChartTime()
         kps <- 0.0f
         let mutable previous = 0us
         let mutable previous_time = now
@@ -61,7 +61,7 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
             previous_time <- timestamp
 
     override this.Init(parent: Widget) =
-        state.Subscribe(fun h ->
+        ctx.State.Subscribe(fun h ->
             match h.Action with
             | Hit h
             | Hold h -> if not h.Missed then count <- count + 1.0f
@@ -71,7 +71,7 @@ type KeysPerSecond(config: HudConfig, state: PlayState) =
             | Release _ -> ()
         )
         |> ignore
-        state.OnScoringChanged(fun () -> count <- float32 state.Scoring.Events.Count) |> ignore
+        ctx.State.OnScoringChanged(fun () -> count <- float32 ctx.State.Scoring.Events.Count) |> ignore
         base.Init parent
 
     override this.Draw() =

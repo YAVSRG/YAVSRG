@@ -10,25 +10,25 @@ open Interlude.Features.Play
 open Interlude.Features.Gameplay
 open Interlude.Options
 
-type InputMeter(config: HudConfig, state: PlayState) =
+type InputMeter(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
-    let binds = options.GameplayBinds.[state.WithColors.Keys - 3]
-    let colors = Array.create state.WithColors.Keys config.InputMeterKeyColor
-    let color_fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
-    let fades = Array.init state.WithColors.Keys (fun _ -> Animation.Delay(float config.InputMeterKeyFadeTime |> max 0.5))
+    let binds = options.GameplayBinds.[ctx.State.WithColors.Keys - 3]
+    let colors = Array.create ctx.State.WithColors.Keys ctx.Config.InputMeterKeyColor
+    let color_fades = Array.init ctx.State.WithColors.Keys (fun _ -> Animation.Delay(float ctx.Config.InputMeterKeyFadeTime * 2.5 |> max 0.5))
+    let fades = Array.init ctx.State.WithColors.Keys (fun _ -> Animation.Delay(float ctx.Config.InputMeterKeyFadeTime |> max 0.5))
 
-    let SCROLL_SPEED = config.InputMeterScrollSpeed / SelectedChart.rate.Value
+    let SCROLL_SPEED = ctx.Config.InputMeterScrollSpeed / SelectedChart.rate.Value
 
     let lerp_color (percentage: float) (a: byte) (b: byte) =
         (float (b - a) * percentage + float a) |> int |> max 0 |> min 255
 
     override this.Init(parent: Widget) =
-        if config.InputMeterJudgementColors then
-            state.Subscribe(fun ev ->
+        if ctx.Config.InputMeterJudgementColors then
+            ctx.State.Subscribe(fun ev ->
                 match ev.Action.Judgement with
                 | Some (j, _) ->
-                    colors.[ev.Column] <- state.Ruleset.JudgementColor j
+                    colors.[ev.Column] <- ctx.State.Ruleset.JudgementColor j
                     color_fades.[ev.Column].Reset()
                 | _ -> ()
             )
@@ -38,58 +38,58 @@ type InputMeter(config: HudConfig, state: PlayState) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        for k = 0 to state.WithColors.Keys - 1 do
+        for k = 0 to ctx.State.WithColors.Keys - 1 do
             color_fades.[k].Update elapsed_ms
             fades.[k].Update elapsed_ms
-            if Bitmask.has_key k state.Scoring.KeyState then
+            if Bitmask.has_key k ctx.State.Scoring.KeyState then
                 fades.[k].Reset()
 
     override this.Draw() =
-        let column_width = this.Bounds.Width / float32 state.WithColors.Keys
+        let column_width = this.Bounds.Width / float32 ctx.State.WithColors.Keys
 
         let mutable box =
             (
-                if config.InputMeterScrollDownwards then
+                if ctx.Config.InputMeterScrollDownwards then
                     this.Bounds.SliceT(column_width)
                 else
                     this.Bounds.SliceB(column_width)
             )
                 .SliceL(column_width)
-                .ShrinkPercent(config.InputMeterColumnPadding * 0.5f)
+                .ShrinkPercent(ctx.Config.InputMeterColumnPadding * 0.5f)
 
-        for k = 0 to state.WithColors.Keys - 1 do
+        for k = 0 to ctx.State.WithColors.Keys - 1 do
 
             let press_f = float32 fades.[k].Progress
-            let key_alpha = float32 config.InputMeterKeyColor.A * (1.0f - 0.5f * press_f) |> int
+            let key_alpha = float32 ctx.Config.InputMeterKeyColor.A * (1.0f - 0.5f * press_f) |> int
             let color_f = 1.0 - (1.0 - float press_f) * (1.0 - color_fades.[k].Progress)
-            let r = lerp_color color_f colors.[k].R config.InputMeterKeyColor.R
-            let g = lerp_color color_f colors.[k].G config.InputMeterKeyColor.G
-            let b = lerp_color color_f colors.[k].B config.InputMeterKeyColor.B
+            let r = lerp_color color_f colors.[k].R ctx.Config.InputMeterKeyColor.R
+            let g = lerp_color color_f colors.[k].G ctx.Config.InputMeterKeyColor.G
+            let b = lerp_color color_f colors.[k].B ctx.Config.InputMeterKeyColor.B
             let color = Color.FromArgb(key_alpha, r, g, b)
             Render.rect box color
-            if config.InputMeterShowKeybinds then
-                Text.fill(Style.font, binds.[k].ToString(), box, config.InputMeterKeybindColor, Alignment.CENTER)
+            if ctx.Config.InputMeterShowKeybinds then
+                Text.fill(Style.font, binds.[k].ToString(), box, ctx.Config.InputMeterKeybindColor, Alignment.CENTER)
             box <- box.Translate(column_width, 0.0f)
 
-        if config.InputMeterShowInputs then
-            let recent_events = state.Scoring.EnumerateRecentFrames()
+        if ctx.Config.InputMeterShowInputs then
+            let recent_events = ctx.State.Scoring.EnumerateRecentFrames()
 
-            let now = state.CurrentChartTime()
+            let now = ctx.State.CurrentChartTime()
             let point (time: ChartTime) : float32 * Color =
                 let time_ago = now - time
                 let height = this.Bounds.Height - column_width
                 let offset = time_ago * SCROLL_SPEED |> min height
 
-                if config.InputMeterScrollDownwards then
+                if ctx.Config.InputMeterScrollDownwards then
                     this.Bounds.Top + column_width + offset
                 else
                     this.Bounds.Bottom - column_width - offset
                 ,
                 let mult =
-                    if config.InputMeterInputFadeDistance > 0.0f then
-                        (height - offset) / config.InputMeterInputFadeDistance |> min 1.0f
+                    if ctx.Config.InputMeterInputFadeDistance > 0.0f then
+                        (height - offset) / ctx.Config.InputMeterInputFadeDistance |> min 1.0f
                     else 1.0f
-                config.InputMeterInputColor.O4a (float32 config.InputMeterInputColor.A * mult |> int |> min 255 |> max 0)
+                ctx.Config.InputMeterInputColor.O4a (float32 ctx.Config.InputMeterInputColor.A * mult |> int |> min 255 |> max 0)
 
             let inline bar (k, timestamp, previous) =
                 let y1, c1 = point timestamp
@@ -105,9 +105,9 @@ type InputMeter(config: HudConfig, state: PlayState) =
 
             let mutable previous = now
             let cutoff = now - (this.Bounds.Height - column_width) / SCROLL_SPEED
-            let fade_edge = now - (this.Bounds.Height - column_width - config.InputMeterInputFadeDistance) / SCROLL_SPEED
+            let fade_edge = now - (this.Bounds.Height - column_width - ctx.Config.InputMeterInputFadeDistance) / SCROLL_SPEED
             for struct (timestamp, keystate) in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
-                for k = 0 to state.WithColors.Keys - 1 do
+                for k = 0 to ctx.State.WithColors.Keys - 1 do
                     if Bitmask.has_key k keystate then
                         if previous > fade_edge && timestamp < fade_edge then
                             bar (k, fade_edge, previous)

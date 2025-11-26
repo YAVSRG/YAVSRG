@@ -158,7 +158,7 @@ type MultiplayerScreen =
                 hud_ctx.TryAdd(HudElement.KeysPerSecond)
                 hud_ctx.TryAdd(HudElement.CustomImage)
                 if hud_ctx.Config.MultiplayerScoreTrackerPosition.RelativeToPlayfield then hud_ctx.Playfield.Add else hud_ctx.Screen.Add
-                <| MultiplayerScoreTracker(hud_ctx.Config, hud_ctx.State, lobby.Replays)
+                <| MultiplayerScoreTracker(hud_ctx, lobby.Replays)
 
                 this
                     .Add(

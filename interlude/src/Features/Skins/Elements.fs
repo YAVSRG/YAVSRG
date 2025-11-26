@@ -61,7 +61,7 @@ module HudElement =
         | HudElement.Pacemaker -> false
         | _ -> true
 
-    let constructor (element: HudElement) : HudConfig * PlayState -> Widget =
+    let constructor (element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
         match element with
