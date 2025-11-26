@@ -12,44 +12,40 @@ type ColumnErrorBarsPage() =
 
     let config = Content.HUD
 
-    let show_guide = Setting.simple config.TimingDisplayShowGuide
-    let guide_thickness = Setting.percentf config.TimingDisplayGuideThickness
-    let show_non_judgements = Setting.simple config.TimingDisplayShowNonJudgements
+    let show_guide = Setting.simple config.ColumnErrorBarsShowGuide
+    let guide_thickness = Setting.percentf config.ColumnErrorBarsGuideThickness
+    let show_non_judgements = Setting.simple config.ColumnErrorBarsShowNonJudgements
 
     let thickness =
-        config.TimingDisplayThickness |> Setting.bounded (1.0f, 25.0f)
+        config.ColumnErrorBarsThickness |> Setting.bounded (1.0f, 25.0f)
 
-    let release_thickness =
-        config.TimingDisplayReleasesExtraHeight
-        |> Setting.bounded (-20.0f, 20.0f)
+    let windows_opacity = config.ColumnErrorBarsWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
 
-    let windows_opacity = config.TimingDisplayWindowsOpacity |> Setting.bounded (0.0f, 0.6f)
-
-    let half_scale_releases = Setting.simple config.TimingDisplayHalfScaleReleases
+    let release_y_scale = config.ColumnErrorBarsReleasesYScale |> Setting.bounded (0.0f, 2.0f)
+    let release_x_scale = config.ColumnErrorBarsReleasesXScale |> Setting.bounded (0.0f, 2.0f)
 
     let animation_time =
-        config.TimingDisplayFadeTime
+        config.ColumnErrorBarsFadeTime
         |> Setting.bounded (100.0f<ms / rate>, 2000.0f<ms / rate>)
 
-    let moving_average_type = Setting.simple config.TimingDisplayMovingAverageType
-    let moving_average_sensitivity = config.TimingDisplayMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
-    let moving_average_color = Setting.simple config.TimingDisplayMovingAverageColor
+    let enable_moving_average = Setting.simple config.ColumnErrorBarsMovingAverage
+    let moving_average_sensitivity = config.ColumnErrorBarsMovingAverageSensitivity |> Setting.bounded (0.01f, 1.0f)
+    let moving_average_color = Setting.simple config.ColumnErrorBarsMovingAverageColor
 
     member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with
-                TimingDisplayShowGuide = show_guide.Value
-                TimingDisplayShowNonJudgements = show_non_judgements.Value
-                TimingDisplayThickness = thickness.Value
-                TimingDisplayGuideThickness = guide_thickness.Value
-                TimingDisplayReleasesExtraHeight = release_thickness.Value
-                TimingDisplayWindowsOpacity = windows_opacity.Value
-                TimingDisplayHalfScaleReleases = half_scale_releases.Value
-                TimingDisplayFadeTime = animation_time.Value
-                TimingDisplayMovingAverageType = moving_average_type.Value
-                TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value
-                TimingDisplayMovingAverageColor = moving_average_color.Value
-                TimingDisplayPosition = Content.HUD.TimingDisplayPosition
+                ColumnErrorBarsShowGuide = show_guide.Value
+                ColumnErrorBarsShowNonJudgements = show_non_judgements.Value
+                ColumnErrorBarsThickness = thickness.Value
+                ColumnErrorBarsGuideThickness = guide_thickness.Value
+                ColumnErrorBarsReleasesXScale = release_x_scale.Value
+                ColumnErrorBarsReleasesYScale = release_y_scale.Value
+                ColumnErrorBarsWindowsOpacity = windows_opacity.Value
+                ColumnErrorBarsFadeTime = animation_time.Value
+                ColumnErrorBarsMovingAverage = enable_moving_average.Value
+                ColumnErrorBarsMovingAverageSensitivity = moving_average_sensitivity.Value
+                ColumnErrorBarsMovingAverageColor = moving_average_color.Value
             }
 
     override this.Content() =
@@ -57,53 +53,44 @@ type ColumnErrorBarsPage() =
 
         page_container()
             .With(
-                PageSetting(%"hud.error_bar.shownonjudgements", Checkbox show_non_judgements)
-                    .Help(Help.Info("hud.error_bar.shownonjudgements"))
+                PageSetting(%"hud.column_error_bars.show_non_judgements", Checkbox show_non_judgements)
+                    .Help(Help.Info("hud.column_error_bars.show_non_judgements"))
                     .Pos(0),
-                PageSetting(%"hud.error_bar.halfscalereleases", Checkbox half_scale_releases)
-                    .Help(Help.Info("hud.error_bar.halfscalereleases"))
+                PageSetting(%"hud.column_error_bars.release_y_scale", Slider.Percent(release_y_scale))
+                    .Help(Help.Info("hud.column_error_bars.release_y_scale"))
                     .Pos(2),
-                PageSetting(%"hud.error_bar.thickness", Slider(thickness, Step = 1f))
-                    .Help(Help.Info("hud.error_bar.thickness"))
+                PageSetting(%"hud.column_error_bars.thickness", Slider(thickness, Step = 1f))
+                    .Help(Help.Info("hud.column_error_bars.thickness"))
                     .Pos(4),
-                PageSetting(%"hud.error_bar.showguide", Checkbox show_guide)
-                    .Help(Help.Info("hud.error_bar.showguide"))
+                PageSetting(%"hud.column_error_bars.show_guide", Checkbox show_guide)
+                    .Help(Help.Info("hud.column_error_bars.show_guide"))
                     .Pos(6),
-                PageSetting(%"hud.error_bar.guide_thickness", Slider.Percent(guide_thickness))
-                    .Help(Help.Info("hud.error_bar.guide_thickness"))
+                PageSetting(%"hud.column_error_bars.guide_thickness", Slider.Percent(guide_thickness))
+                    .Help(Help.Info("hud.column_error_bars.guide_thickness"))
                     .Pos(8)
                     .Conditional(show_guide.Get),
-                PageSetting(%"hud.error_bar.releasesextraheight", Slider(release_thickness, Step = 1f))
-                    .Help(Help.Info("hud.error_bar.releasesextraheight"))
+                PageSetting(%"hud.column_error_bars.release_x_scale", Slider.Percent(release_x_scale))
+                    .Help(Help.Info("hud.column_error_bars.releasesextraheight"))
                     .Pos(10),
-                PageSetting(%"hud.error_bar.animationtime", Slider(Setting.uom animation_time, Step = 5f))
-                    .Help(Help.Info("hud.error_bar.animationtime"))
+                PageSetting(%"hud.column_error_bars.animationtime", Slider(Setting.uom animation_time, Step = 5f))
+                    .Help(Help.Info("hud.column_error_bars.animationtime"))
                     .Pos(12),
-                PageSetting(%"hud.error_bar.timingwindowsopacity", Slider.Percent(windows_opacity))
-                    .Help(Help.Info("hud.error_bar.timingwindowsopacity"))
+                PageSetting(%"hud.column_error_bars.timing_windows_opacity", Slider.Percent(windows_opacity))
+                    .Help(Help.Info("hud.column_error_bars.timing_windows_opacity"))
                     .Pos(14),
-                PageSetting(%"hud.error_bar.moving_average_type",
-                    SelectDropdown(
-                        [|
-                            ErrorBarMovingAverageType.None, %"hud.error_bar.moving_average_type.none"
-                            ErrorBarMovingAverageType.Arrow, %"hud.error_bar.moving_average_type.arrow"
-                            ErrorBarMovingAverageType.ReplaceBars, %"hud.error_bar.moving_average_type.replace_bars"
-                        |],
-                        moving_average_type
-                    )
-                )
+                PageSetting(%"hud.column_error_bars.moving_average", Checkbox(enable_moving_average))
                     .Help(Help.Info("hud.error_bar.moving_average_type"))
                     .Pos(16)
             )
             .WithConditional(
-                (fun () -> moving_average_type.Value <> ErrorBarMovingAverageType.None),
+                (fun () -> enable_moving_average.Value),
 
-                PageSetting(%"hud.error_bar.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
-                    .Help(Help.Info("hud.error_bar.moving_average_sensitivity"))
+                PageSetting(%"hud.column_error_bars.moving_average_sensitivity", Slider.Percent(moving_average_sensitivity, Step = 0.01f))
+                    .Help(Help.Info("hud.column_error_bars.moving_average_sensitivity"))
                     .Pos(18),
-                PageSetting(%"hud.error_bar.moving_average_color", ColorPicker(%"hud.error_bar.moving_average_color", moving_average_color, true))
-                    .Help(Help.Info("hud.error_bar.moving_average_color"))
+                PageSetting(%"hud.column_error_bars.moving_average_color", ColorPicker(%"hud.column_error_bars.moving_average_color", moving_average_color, true))
+                    .Help(Help.Info("hud.column_error_bars.moving_average_color"))
                     .Pos(20)
             )
 
-    override this.Title = %"hud.error_bar"
+    override this.Title = %"hud.column_error_bars"

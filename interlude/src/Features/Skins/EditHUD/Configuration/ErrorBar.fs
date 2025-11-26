@@ -49,7 +49,6 @@ type ErrorBarPage() =
                 TimingDisplayMovingAverageType = moving_average_type.Value
                 TimingDisplayMovingAverageSensitivity = moving_average_sensitivity.Value
                 TimingDisplayMovingAverageColor = moving_average_color.Value
-                TimingDisplayPosition = Content.HUD.TimingDisplayPosition
             }
 
     override this.Content() =
