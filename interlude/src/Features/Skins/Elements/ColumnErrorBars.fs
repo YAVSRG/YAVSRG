@@ -14,7 +14,7 @@ type ColumnErrorBars(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
     let hits = Array.init ctx.State.WithColors.Keys (fun _ -> ResizeArray<ErrorBarEvent>())
-    let mutable w = 0.0f
+    let mutable h = 0.0f
 
     let mutable last_seen_time = -Time.infinity
 
@@ -37,21 +37,21 @@ type ColumnErrorBars(ctx: HudContext) =
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                (e.Delta / MAX_WINDOW * h * 0.5f)
                 | Hold e ->
                     if not e.Missed then
                         moving_averages.[ev.Column].Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                (e.Delta / MAX_WINDOW * h * 0.5f)
                 | Release e ->
                     if not e.Missed then
                         moving_averages.[ev.Column].Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_averages.[ev.Column].Target
-                                (e.Delta / MAX_WINDOW * w * ctx.Config.ColumnErrorBarsReleasesYScale)
+                                (e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale)
                 | GhostTap _
                 | DropHold
                 | RegrabHold -> ()
@@ -64,7 +64,7 @@ type ColumnErrorBars(ctx: HudContext) =
                     hits.[ev.Column].Add
                         {
                             Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * 0.5f
+                            Position = e.Delta / MAX_WINDOW * h * 0.5f
                             IsRelease = false
                             Judgement = e.Judgement |> Option.map fst
                         }
@@ -72,7 +72,7 @@ type ColumnErrorBars(ctx: HudContext) =
                     hits.[ev.Column].Add
                         {
                             Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * 0.5f
+                            Position = e.Delta / MAX_WINDOW * h * 0.5f
                             IsRelease = false
                             Judgement = e.Judgement |> Option.map fst
                         }
@@ -80,7 +80,7 @@ type ColumnErrorBars(ctx: HudContext) =
                     hits.[ev.Column].Add
                         {
                             Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * ctx.Config.ColumnErrorBarsReleasesYScale
+                            Position = e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale
                             IsRelease = true
                             Judgement = e.Judgement |> Option.map fst
                         }
@@ -90,7 +90,7 @@ type ColumnErrorBars(ctx: HudContext) =
                         hits.[ev.Column].Add
                             {
                                 Time = ev.Time
-                                Position = -w * 0.5f
+                                Position = -h * 0.5f
                                 IsRelease = false
                                 Judgement = Some j
                             }
@@ -107,8 +107,8 @@ type ColumnErrorBars(ctx: HudContext) =
         for moving_average in moving_averages do
             moving_average.Update elapsed_ms
 
-        if w = 0.0f || moved then
-            w <- this.Bounds.Width
+        if h = 0.0f || moved then
+            h <- this.Bounds.Height
 
         let now = ctx.State.CurrentChartTime()
 
@@ -147,7 +147,7 @@ type ColumnErrorBars(ctx: HudContext) =
             fun time -> center + time / MAX_WINDOW * h
         let r k time1 time2 =
             let left_edge = ctx.Playfield.Bounds.Left + ctx.Playfield.ColumnPositions.[k]
-            Rect.FromEdges(left_edge, ms_to_y time1, left_edge + ctx.Playfield.ColumnWidth, ms_to_y time2)
+            Rect.FromEdges(left_edge, ms_to_y time1, left_edge + ctx.Playfield.ColumnWidth, ms_to_y time2).SliceX(ctx.Config.ColumnErrorBarsWidth)
         draw r
 
     override this.Draw() =
@@ -157,7 +157,7 @@ type ColumnErrorBars(ctx: HudContext) =
         let bar k p1 p2 =
             let center = this.Bounds.CenterY
             let left_edge = ctx.Playfield.Bounds.Left + ctx.Playfield.ColumnPositions.[k]
-            Rect.FromEdges(left_edge, center + p1, left_edge + ctx.Playfield.ColumnWidth, center + p2)
+            Rect.FromEdges(left_edge, center + p1, left_edge + ctx.Playfield.ColumnWidth, center + p2).SliceX(ctx.Config.ColumnErrorBarsWidth)
 
         if ctx.Config.ColumnErrorBarsShowGuide then
             for k = 0 to ctx.State.WithColors.Keys - 1 do

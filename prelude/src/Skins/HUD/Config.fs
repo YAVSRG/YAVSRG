@@ -148,6 +148,7 @@ type HudConfig =
 
         ColumnErrorBarsEnabled: bool
         ColumnErrorBarsPosition: HudPosition
+        ColumnErrorBarsWidth: float32
         ColumnErrorBarsFadeTime: float32<ms / rate>
         ColumnErrorBarsThickness: float32
         ColumnErrorBarsShowGuide: bool
@@ -300,7 +301,8 @@ type HudConfig =
                     Bottom = 250.0f, 0.5f
                 }
             ColumnErrorBarsFadeTime = 1000.0f<ms / rate>
-            ColumnErrorBarsThickness = 0.2f
+            ColumnErrorBarsThickness = 5.0f
+            ColumnErrorBarsWidth = 25.0f
             ColumnErrorBarsShowGuide = true
             ColumnErrorBarsGuideThickness = 1.0f
             ColumnErrorBarsShowNonJudgements = false
