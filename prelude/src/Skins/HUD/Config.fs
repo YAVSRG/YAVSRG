@@ -23,9 +23,45 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
+    | MultiplayerScoreTracker
 
-    static member FULL_LIST =
-        [
+    static member HIDDEN_DURING_AUTO =
+        [|
+            Accuracy
+            ErrorBar
+            ColumnErrorBars
+            Combo
+            Judgement
+            EarlyLate
+        |]
+
+    /// Order HUD elements are drawn in, first = back
+    static member DRAW_ORDER =
+        [|
+            Combo
+            SkipButton
+            ProgressPie
+            Accuracy
+            ErrorBar
+            ColumnErrorBars
+            Pacemaker
+            JudgementCounter
+            Judgement
+            EarlyLate
+            RateMods
+            BPM
+            InputMeter
+            KeysPerSecond
+            CustomImage
+            MultiplayerScoreTracker
+        |]
+
+    static member DRAW_ORDER_WITHOUT_SKIP =
+        HudElement.DRAW_ORDER |> Array.except [| HudElement.SkipButton |]
+
+    /// Used when picking elements, putting useful stuff near the top
+    static member LIST_ORDER =
+        [|
             Accuracy
             ErrorBar
             ColumnErrorBars
@@ -41,7 +77,8 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
-        ]
+            MultiplayerScoreTracker
+        |]
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]

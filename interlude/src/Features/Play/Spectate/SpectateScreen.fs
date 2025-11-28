@@ -1,10 +1,10 @@
 ﻿namespace Interlude.Features.Play.Spectate
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Gameplay.Replays
-open Prelude.Skins.HudLayouts
 open Interlude.Web.Shared.Packets
 open Interlude.UI
 open Interlude.Features.Pacemaker
@@ -46,24 +46,8 @@ type SpectateScreen =
 
         lobby.StartSpectating()
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets hud_ctx =
-
-                hud_ctx.TryAdd(HudElement.Combo)
-                hud_ctx.TryAdd(HudElement.ProgressPie)
-                hud_ctx.TryAdd(HudElement.Accuracy)
-                hud_ctx.TryAdd(HudElement.ErrorBar)
-                hud_ctx.TryAdd(HudElement.ColumnErrorBars)
-                hud_ctx.TryAdd(HudElement.JudgementCounter)
-                hud_ctx.TryAdd(HudElement.Judgement)
-                hud_ctx.TryAdd(HudElement.EarlyLate)
-                hud_ctx.TryAdd(HudElement.RateMods)
-                hud_ctx.TryAdd(HudElement.BPM)
-                hud_ctx.TryAdd(HudElement.InputMeter)
-                hud_ctx.TryAdd(HudElement.KeysPerSecond)
-                hud_ctx.TryAdd(HudElement.CustomImage)
-                if hud_ctx.Config.MultiplayerScoreTrackerPosition.RelativeToPlayfield then hud_ctx.Playfield.Add else hud_ctx.Screen.Add
-                <| MultiplayerScoreTracker(hud_ctx, lobby.Replays)
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Spectate lobby.Replays) with
+            override this.Init(parent: Widget) =
 
                 this
                     .Add(
@@ -74,6 +58,8 @@ type SpectateScreen =
                             fun () -> cycle_spectator this
                         )
                 )
+
+                base.Init(parent)
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)

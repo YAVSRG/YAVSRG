@@ -22,4 +22,5 @@ module private ConfigurationPageHelper =
         | HudElement.Pacemaker -> PacemakerPage()
         | HudElement.KeysPerSecond -> KeysPerSecondPage()
         | HudElement.CustomImage -> CustomImagePage()
+        | HudElement.MultiplayerScoreTracker -> MultiplayerScoresPage()
         |> fun page -> page.WithOnClose(on_close).Show()

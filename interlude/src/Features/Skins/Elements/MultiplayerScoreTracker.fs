@@ -9,8 +9,14 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 
 // todo: config on your username color vs other peoples
-type MultiplayerScoreTracker(ctx: HudContext, replays: Dictionary<string, LobbyPlayerReplayInfo>) =
+type MultiplayerScoreTracker(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
+
+    let replays =
+        match ctx.Inner with
+        | HudContextInner.Multiplayer replays -> replays
+        | HudContextInner.Spectate replays -> replays
+        | _ -> Dictionary<string, LobbyPlayerReplayInfo>()
 
     override this.Draw() =
         let x = this.Bounds.CenterX

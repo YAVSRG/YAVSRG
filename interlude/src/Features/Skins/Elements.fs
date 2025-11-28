@@ -13,6 +13,7 @@ module HudElement =
 
     let private show_pacemaker = Setting.simple true
     let private show_skip_button = Setting.simple true
+    let private show_multiplayer_scores = Setting.simple false
 
     let name (element: HudElement) : string =
         match element with
@@ -31,6 +32,7 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter"
         | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
+        | HudElement.MultiplayerScoreTracker -> %"hud.multiplayer_scores"
 
     let tooltip (element: HudElement) : string =
         match element with
@@ -49,11 +51,13 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter.tooltip"
         | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
+        | HudElement.MultiplayerScoreTracker -> %"hud.multiplayer_scores.tooltip"
 
     let can_configure (element: HudElement) : bool =
         match element with
         | HudElement.BPM -> false
         | HudElement.Pacemaker -> false
+        | HudElement.MultiplayerScoreTracker -> false
         | _ -> true
 
     let can_toggle (element: HudElement) : bool =
@@ -80,6 +84,7 @@ module HudElement =
         | HudElement.InputMeter -> cast InputMeter
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
+        | HudElement.MultiplayerScoreTracker -> cast MultiplayerScoreTracker
 
     let enabled_setting (element: HudElement) : Setting<bool> =
         match element with
@@ -202,6 +207,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.CustomImageEnabled)
+        | HudElement.MultiplayerScoreTracker -> show_multiplayer_scores
 
     let position_setting (e: HudElement) : Setting<HudPosition> =
         match e with
@@ -340,6 +346,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.CustomImagePosition)
+        | HudElement.MultiplayerScoreTracker ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            MultiplayerScoreTrackerPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.MultiplayerScoreTrackerPosition)
 
     let default_position (e: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default
@@ -360,3 +375,4 @@ module HudElement =
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
         | HudElement.KeysPerSecond -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition
+        | HudElement.MultiplayerScoreTracker -> all_defaults.MultiplayerScoreTrackerPosition

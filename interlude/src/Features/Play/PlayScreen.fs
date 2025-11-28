@@ -169,25 +169,8 @@ type PlayScreen =
                 .WithOnClose(retry)
                 .Show()
 
-        { new IPlayScreen(info, pacemaker_state, scoring) with
-            override this.AddWidgets hud_ctx =
-
-                // todo: turn into a list in prelude
-                hud_ctx.TryAdd(HudElement.Combo)
-                hud_ctx.TryAdd(HudElement.SkipButton)
-                hud_ctx.TryAdd(HudElement.ProgressPie)
-                hud_ctx.TryAdd(HudElement.Accuracy)
-                hud_ctx.TryAdd(HudElement.ErrorBar)
-                hud_ctx.TryAdd(HudElement.ColumnErrorBars)
-                hud_ctx.TryAdd(HudElement.Pacemaker)
-                hud_ctx.TryAdd(HudElement.JudgementCounter)
-                hud_ctx.TryAdd(HudElement.Judgement)
-                hud_ctx.TryAdd(HudElement.EarlyLate)
-                hud_ctx.TryAdd(HudElement.RateMods)
-                hud_ctx.TryAdd(HudElement.BPM)
-                hud_ctx.TryAdd(HudElement.InputMeter)
-                hud_ctx.TryAdd(HudElement.KeysPerSecond)
-                hud_ctx.TryAdd(HudElement.CustomImage)
+        { new IPlayScreen(info, pacemaker_state, scoring, HudContextInner.Play) with
+            override this.Init(parent: Widget) =
 
                 this
                     .Add(
@@ -208,6 +191,9 @@ type PlayScreen =
                         ),
                         HotkeyListener("offset", fun () -> if not (liveplay :> IReplay).Finished then change_offset this.State)
                     )
+
+                base.Init(parent)
+                start_overlay.Init(this)
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()
@@ -234,10 +220,6 @@ type PlayScreen =
                 Song.set_low_pass 0.0f
 
                 base.OnExit(next)
-
-            override this.Init(parent) =
-                base.Init(parent)
-                start_overlay.Init this
 
             override this.Update(elapsed_ms, moved) =
                 play_time <- play_time + elapsed_ms

@@ -395,3 +395,4 @@ module SelectPreviews =
         | HudElement.InputMeter -> create_input_meter config
         | HudElement.KeysPerSecond -> create_kps config
         | HudElement.CustomImage -> create_custom_image config
+        | HudElement.MultiplayerScoreTracker -> create_accuracy config

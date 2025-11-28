@@ -37,6 +37,7 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> not ctx.State.Pacemaker.IsNone
         | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterEnabled
         | HudElement.CustomImage -> ctx.Config.CustomImageEnabled
+        | HudElement.MultiplayerScoreTracker -> ctx.Inner.IsMultiplayer || ctx.Inner.IsSpectate
 
     [<Extension>]
     static member private Position (ctx: HudContext, element: HudElement) : HudPosition =
@@ -56,14 +57,15 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> ctx.Config.PacemakerPosition
         | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> ctx.Config.CustomImagePosition
+        | HudElement.MultiplayerScoreTracker -> ctx.Config.MultiplayerScoreTrackerPosition
 
     [<Extension>]
     static member private Constructor (ctx: HudContext, element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
         match element with
         | HudElement.Accuracy -> cast Accuracy
-        | HudElement.ErrorBar -> cast ErrorBar // todo: in replay mode, overlay should make this element conditionally visible
-        | HudElement.ColumnErrorBars -> cast ColumnErrorBars
+        | HudElement.ErrorBar -> match ctx.Inner with HudContextInner.Replay (_, overlay_shown) -> cast (fun x -> ErrorBar(x).Conditional(not << overlay_shown)) | _ -> cast ErrorBar
+        | HudElement.ColumnErrorBars -> match ctx.Inner with HudContextInner.Replay (_, overlay_shown) -> cast (fun x -> ColumnErrorBars(x).Conditional(not << overlay_shown)) | _ -> cast ColumnErrorBars
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
         | HudElement.Judgement -> cast Judgement
@@ -76,6 +78,7 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> cast Pacemaker
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
+        | HudElement.MultiplayerScoreTracker -> cast MultiplayerScoreTracker
 
     /// Adds the element in its configured position, if enabled
     [<Extension>]
@@ -95,8 +98,20 @@ type HudContextExtensions =
 
             if position.RelativeToPlayfield then ctx.Playfield.Add w else ctx.Screen.Add w
 
+    [<Extension>]
+    static member Init (ctx: HudContext) =
+        match ctx.Inner with
+        | HudContextInner.Play -> HudElement.DRAW_ORDER
+        | HudContextInner.Practice -> HudElement.DRAW_ORDER_WITHOUT_SKIP
+        | HudContextInner.Replay (true, _) -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except HudElement.HIDDEN_DURING_AUTO
+        | HudContextInner.Replay (false, _) -> HudElement.DRAW_ORDER_WITHOUT_SKIP
+        | HudContextInner.Spectate _ -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except [| HudElement.SkipButton |]
+        | HudContextInner.Multiplayer _ -> HudElement.DRAW_ORDER_WITHOUT_SKIP |> Array.except [| HudElement.SkipButton |]
+        | HudContextInner.Editor -> [||] // Editor adds elements itself, with positioning controls
+        |> Array.iter ctx.TryAdd
+
 [<AbstractClass>]
-type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor) as this
+type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring: ScoreProcessor, hud_ctx_inner: HudContextInner) as this
     =
     inherit Screen()
 
@@ -107,19 +122,16 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
     let playfield =
         Playfield(info.WithColors, state, noteskin_config, options.VanishingNotes.Value)
 
-    let hud_ctx : HudContext = { Screen = this; Playfield = playfield; State = state; Config = Content.HUD }
+    let hud_ctx : HudContext = { Screen = this; Playfield = playfield; State = state; Config = Content.HUD; Inner = hud_ctx_inner }
 
     do
         this.Add playfield
-
         playfield.Add(LanecoverOverReceptors())
-
-        this.AddWidgets hud_ctx
-
-    abstract member AddWidgets: HudContext -> unit
+        hud_ctx.Init()
 
     member this.Playfield = playfield
     member this.State = state
+    member this.HudContext = hud_ctx
 
     override this.OnEnter(prev) =
         Dialog.close ()

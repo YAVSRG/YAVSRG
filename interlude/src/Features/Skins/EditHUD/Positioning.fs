@@ -499,15 +499,8 @@ and PositionerContext =
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
         HotReload: unit -> unit
+        HudContext: HudContext
     }
-
-    member this.HudContext : HudContext =
-        {
-            Screen = this.Screen
-            Playfield = this.Playfield
-            State = this.State
-            Config = Content.HUD
-        }
 
     member this.Recreate(element: HudElement) =
         match this.Positioners.TryFind element with
@@ -539,7 +532,7 @@ and PositionerContext =
             this.Positioners <- this.Positioners.Add(element, p)
 
     member this.CreateAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             this.Recreate element
 
     member this.Select(element: HudElement) = this.Selected <- Some element
@@ -620,13 +613,13 @@ and PositionerContext =
         | None -> ()
 
     member this.HorizontalFlipAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
             this.Recreate element
         Notifications.action_feedback(Icons.REPEAT, "All elements flipped horizontally", sprintf "Press %O to flip it back" %%"hud_flip_horizontal_all")
 
     member this.VerticalFlipAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
             this.Recreate element
         Notifications.action_feedback(Icons.REPEAT, "All elements flipped vertically", sprintf "Press %O to flip it back" %%"hud_flip_vertical_all")

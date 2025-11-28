@@ -27,13 +27,12 @@ type SkinPreview(position: Position) as this =
         playfield.Add(LanecoverOverReceptors())
         let overlay_items = Container(NodeType.None)
 
-        let hud_ctx : HudContext = { Screen = overlay_items; Playfield = playfield; State = state; Config = Content.HUD }
-        HudElement.FULL_LIST
-        |> Seq.except (seq {
-            yield HudElement.SkipButton
-            if not options.EnablePacemaker.Value then yield HudElement.Pacemaker
-        })
-        |> Seq.iter hud_ctx.TryAdd
+        let hud_ctx : HudContext = { Screen = overlay_items; Playfield = playfield; State = state; Config = Content.HUD; Inner = HudContextInner.Play }
+        HudElement.DRAW_ORDER_WITHOUT_SKIP
+        |> Array.except (
+            if not options.EnablePacemaker.Value then [| HudElement.Pacemaker |] else [||]
+        )
+        |> Array.iter hud_ctx.TryAdd
 
         let mutable last_time = -Time.infinity
 

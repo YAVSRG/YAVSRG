@@ -1,12 +1,12 @@
 ﻿namespace Interlude.Features.Play
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.HudLayouts
 open Prelude.Data.User.Stats
 open Interlude.Options
 open Interlude.UI
@@ -91,24 +91,10 @@ type PracticeScreen =
                     resume_from_current_place <- false
             )
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets hud_ctx =
-
-                hud_ctx.TryAdd(HudElement.Combo)
-                hud_ctx.TryAdd(HudElement.ProgressPie)
-                hud_ctx.TryAdd(HudElement.Accuracy)
-                hud_ctx.TryAdd(HudElement.ErrorBar)
-                hud_ctx.TryAdd(HudElement.ColumnErrorBars)
-                hud_ctx.TryAdd(HudElement.JudgementCounter)
-                hud_ctx.TryAdd(HudElement.Judgement)
-                hud_ctx.TryAdd(HudElement.EarlyLate)
-                hud_ctx.TryAdd(HudElement.RateMods)
-                hud_ctx.TryAdd(HudElement.BPM)
-                hud_ctx.TryAdd(HudElement.InputMeter)
-                hud_ctx.TryAdd(HudElement.KeysPerSecond)
-                hud_ctx.TryAdd(HudElement.CustomImage)
-
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Play) with
+            override this.Init(parent: Widget) =
                 this.Add (paused_overlay this)
+                base.Init(parent)
 
             override this.OnEnter(p) =
                 base.OnEnter(p)

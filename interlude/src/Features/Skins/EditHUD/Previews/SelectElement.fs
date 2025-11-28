@@ -91,6 +91,6 @@ module ElementGrid =
             else 5
 
         let grid = GridFlowContainer(400.0f, columns, Spacing = (20.0f, 20.0f))
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.LIST_ORDER do
             grid.Add(ElementCard(element, fun () -> select_element element))
         grid

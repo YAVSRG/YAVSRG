@@ -140,26 +140,8 @@ type MultiplayerScreen =
             then
                 CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets hud_ctx =
-
-                hud_ctx.TryAdd(HudElement.Combo)
-                hud_ctx.TryAdd(HudElement.ProgressPie)
-                hud_ctx.TryAdd(HudElement.Accuracy)
-                hud_ctx.TryAdd(HudElement.ErrorBar)
-                hud_ctx.TryAdd(HudElement.ColumnErrorBars)
-                hud_ctx.TryAdd(HudElement.Pacemaker)
-                hud_ctx.TryAdd(HudElement.JudgementCounter)
-                hud_ctx.TryAdd(HudElement.Judgement)
-                hud_ctx.TryAdd(HudElement.EarlyLate)
-                hud_ctx.TryAdd(HudElement.RateMods)
-                hud_ctx.TryAdd(HudElement.BPM)
-                hud_ctx.TryAdd(HudElement.InputMeter)
-                hud_ctx.TryAdd(HudElement.KeysPerSecond)
-                hud_ctx.TryAdd(HudElement.CustomImage)
-                if hud_ctx.Config.MultiplayerScoreTrackerPosition.RelativeToPlayfield then hud_ctx.Playfield.Add else hud_ctx.Screen.Add
-                <| MultiplayerScoreTracker(hud_ctx, lobby.Replays)
-
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
+            override this.Init(parent: Widget) =
                 this
                     .Add(
                         HotkeyHoldAction(
@@ -168,6 +150,8 @@ type MultiplayerScreen =
                             (if options.HoldToGiveUp.Value then give_up else ignore)
                         )
                     )
+
+                base.Init(parent)
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()

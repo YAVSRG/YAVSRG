@@ -50,23 +50,8 @@ type ReplayScreen =
             scoring <- ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
             screen.State.ChangeScoring scoring
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets hud_ctx =
-
-                hud_ctx.TryAdd(HudElement.Combo)
-                hud_ctx.TryAdd(HudElement.ProgressPie)
-                if not is_auto then
-                    hud_ctx.TryAdd(HudElement.Accuracy)
-                    hud_ctx.TryAdd(HudElement.ErrorBar)
-                    hud_ctx.TryAdd(HudElement.ColumnErrorBars)
-                    hud_ctx.TryAdd(HudElement.JudgementCounter)
-                    hud_ctx.TryAdd(HudElement.Judgement)
-                    hud_ctx.TryAdd(HudElement.EarlyLate)
-                hud_ctx.TryAdd(HudElement.RateMods)
-                hud_ctx.TryAdd(HudElement.BPM)
-                hud_ctx.TryAdd(HudElement.InputMeter)
-                hud_ctx.TryAdd(HudElement.KeysPerSecond)
-                hud_ctx.TryAdd(HudElement.CustomImage)
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay (is_auto, overlay_shown)) with
+            override this.Init(parent: Widget) =
 
                 this
                     .Add(
@@ -107,6 +92,8 @@ type ReplayScreen =
                             fun t -> Song.seek t
                         )
                     )
+
+                base.Init(parent)
 
             override this.OnEnter p =
                 Song.change_rate rate

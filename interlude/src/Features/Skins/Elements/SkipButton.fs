@@ -5,7 +5,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.HudLayouts
-open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
@@ -41,7 +40,7 @@ type SkipButton(ctx: HudContext) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if active && Screen.current_type <> ScreenType.Practice then // hack for HUD editor
+        if active && ctx.Inner.IsPlay || ctx.Inner.IsReplay then
 
             if ctx.State.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Pressed() then
