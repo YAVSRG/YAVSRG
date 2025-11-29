@@ -104,7 +104,8 @@ module Song =
     let mutable internal seek_inaccuracy_compensation = 37.0f<ms>
 
     let mutable private rate = 1.0f<rate>
-    let mutable private enable_pitch_rates = true
+    let mutable private enable_pitch_rate_down = true
+    let mutable private enable_pitch_rate_up = true
 
     let mutable private _local_offset = 0.0f<ms>
     let mutable private _global_offset = 0.0f<ms / rate>
@@ -206,7 +207,12 @@ module Song =
         let time = time ()
         rate <- new_rate
 
-        if enable_pitch_rates then
+        let pitch_enabled_for_direction =
+            if rate = 1.0f<rate> then true
+            elif rate > 1.0f<rate> then enable_pitch_rate_up
+            else enable_pitch_rate_down
+
+        if pitch_enabled_for_direction then
             Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Tempo, 0.0f) |> display_bass_error
             Bass.ChannelSetAttribute(now_playing.ID, ChannelAttribute.Frequency, float32 now_playing.Frequency * float32 rate) |> display_bass_error
         else
@@ -218,8 +224,12 @@ module Song =
 
     let playback_rate () : float32<rate> = rate
 
-    let set_pitch_rates_enabled (enabled: bool) : unit =
-        enable_pitch_rates <- enabled
+    let set_pitch_rate_down_enabled (enabled: bool) : unit =
+        enable_pitch_rate_down <- enabled
+        change_rate rate
+
+    let set_pitch_rate_up_enabled (enabled: bool) : unit =
+        enable_pitch_rate_up <- enabled
         change_rate rate
 
     let set_low_pass (amount: float32) : unit =
