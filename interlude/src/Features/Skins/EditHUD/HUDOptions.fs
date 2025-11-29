@@ -52,7 +52,7 @@ type EditHUDPage(ctx: PositionerContext) =
             .TextColor(Colors.red_accent)
             .Icon(Icons.TRASH)
             .Pos(12, 2, PageWidth.Full)
-    let elements_tab = ScrollContainer(ElementGrid.create(fun element -> HudElement.enabled_setting(element).Set true; ctx.Select element; Menu.Exit()))
+    let elements_tab = ElementGrid.create(fun element -> HudElement.enabled_setting(element).Set true; ctx.Select element; Menu.Exit())
 
     let refresh () =
         textures_tab.Refresh()

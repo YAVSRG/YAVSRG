@@ -7,6 +7,8 @@ open System.Runtime.CompilerServices
 type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
     inherit StaticWidget(NodeType.Container(fun () -> Some child))
 
+    let mutable moved_store = false
+
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
@@ -18,8 +20,11 @@ type Conditional<'T when 'T :> Widget>(condition: unit -> bool, child: 'T) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if moved || condition () then
-            child.Update(elapsed_ms, moved)
+        if condition () then
+            child.Update(elapsed_ms, moved || moved_store)
+            moved_store <- false
+        else
+            moved_store <- moved_store || moved
 
     override this.Focusable = condition () && base.Focusable
 

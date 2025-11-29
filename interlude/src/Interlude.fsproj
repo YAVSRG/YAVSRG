@@ -232,7 +232,6 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\KeysPerSecond.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\CustomImage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration.fs" />
-    <Compile Include="Features\Skins\EditHUD\Previews\Previews.fs" />
     <Compile Include="Features\Skins\EditHUD\Previews\SelectElement.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
     <Compile Include="Features\Skins\EditHUD\HUDOptions.fs" />
