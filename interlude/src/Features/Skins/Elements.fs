@@ -11,13 +11,15 @@ open Interlude.Features.Play.HUD
 // todo: move most of this to prelude and/or make them extension methods
 module HudElement =
 
-    let private show_pacemaker = Setting.simple true
+    let private show_pacemaker = Setting.simple false
     let private show_skip_button = Setting.simple true
+    let private show_multiplayer_scores = Setting.simple false
 
     let name (element: HudElement) : string =
         match element with
         | HudElement.Accuracy -> %"hud.accuracy"
         | HudElement.ErrorBar -> %"hud.error_bar"
+        | HudElement.ColumnErrorBars -> %"hud.column_error_bars"
         | HudElement.Combo -> %"hud.combo"
         | HudElement.SkipButton -> %"hud.skip_button"
         | HudElement.Judgement -> %"hud.judgement"
@@ -30,11 +32,13 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter"
         | HudElement.KeysPerSecond -> %"hud.kps_meter"
         | HudElement.CustomImage -> %"hud.custom_image"
+        | HudElement.MultiplayerScores -> %"hud.multiplayer_scores"
 
     let tooltip (element: HudElement) : string =
         match element with
         | HudElement.Accuracy -> %"hud.accuracy.tooltip"
         | HudElement.ErrorBar -> %"hud.error_bar.tooltip"
+        | HudElement.ColumnErrorBars -> %"hud.column_error_bars.tooltip"
         | HudElement.Combo -> %"hud.combo.tooltip"
         | HudElement.SkipButton -> %"hud.skip_button.tooltip"
         | HudElement.Judgement -> %"hud.judgement.tooltip"
@@ -47,24 +51,22 @@ module HudElement =
         | HudElement.InputMeter -> %"hud.input_meter.tooltip"
         | HudElement.KeysPerSecond -> %"hud.kps_meter.tooltip"
         | HudElement.CustomImage -> %"hud.custom_image.tooltip"
+        | HudElement.MultiplayerScores -> %"hud.multiplayer_scores.tooltip"
 
     let can_configure (element: HudElement) : bool =
         match element with
         | HudElement.BPM -> false
         | HudElement.Pacemaker -> false
+        | HudElement.MultiplayerScores -> false
         | _ -> true
 
-    let can_toggle (element: HudElement) : bool =
-        match element with
-        | HudElement.Pacemaker -> false
-        | _ -> true
-
-    let constructor (element: HudElement) : HudConfig * PlayState -> Widget =
+    let constructor (element: HudElement) : HudContext -> Widget =
         let inline cast (f: ^T -> ^U) = fun x -> f x :> Widget
 
         match element with
         | HudElement.Accuracy -> cast Accuracy
         | HudElement.ErrorBar -> cast ErrorBar
+        | HudElement.ColumnErrorBars -> cast ColumnErrorBars
         | HudElement.Combo -> cast Combo
         | HudElement.SkipButton -> cast SkipButton
         | HudElement.Judgement -> cast Judgement
@@ -77,6 +79,7 @@ module HudElement =
         | HudElement.InputMeter -> cast InputMeter
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
+        | HudElement.MultiplayerScores -> cast MultiplayerScores
 
     let enabled_setting (element: HudElement) : Setting<bool> =
         match element with
@@ -98,6 +101,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.TimingDisplayEnabled)
+        | HudElement.ColumnErrorBars ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            ColumnErrorBarsEnabled = v
+                        }
+                )
+                (fun () -> Content.HUD.ColumnErrorBarsEnabled)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
@@ -190,6 +202,7 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.CustomImageEnabled)
+        | HudElement.MultiplayerScores -> show_multiplayer_scores
 
     let position_setting (e: HudElement) : Setting<HudPosition> =
         match e with
@@ -211,6 +224,15 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.TimingDisplayPosition)
+        | HudElement.ColumnErrorBars ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            ColumnErrorBarsPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.ColumnErrorBarsPosition)
         | HudElement.Combo ->
             Setting.make
                 (fun v ->
@@ -319,16 +341,23 @@ module HudElement =
                         }
                 )
                 (fun () -> Content.HUD.CustomImagePosition)
+        | HudElement.MultiplayerScores ->
+            Setting.make
+                (fun v ->
+                    Skins.save_hud_config
+                        { Content.HUD with
+                            MultiplayerScoresPosition = v
+                        }
+                )
+                (fun () -> Content.HUD.MultiplayerScoresPosition)
 
     let default_position (e: HudElement) : HudPosition =
         let all_defaults = HudConfig.Default
 
         match e with
         | HudElement.Accuracy -> all_defaults.AccuracyPosition
-        | HudElement.ErrorBar ->
-            if Content.HUD.TimingDisplayRotation <> ErrorBarRotation.Normal then
-                all_defaults.TimingDisplayPosition.Rotate
-            else all_defaults.TimingDisplayPosition
+        | HudElement.ErrorBar -> all_defaults.TimingDisplayPosition
+        | HudElement.ColumnErrorBars -> all_defaults.ColumnErrorBarsPosition
         | HudElement.Combo -> all_defaults.ComboPosition
         | HudElement.SkipButton -> all_defaults.SkipButtonPosition
         | HudElement.Judgement -> all_defaults.JudgementMeterPosition
@@ -341,3 +370,4 @@ module HudElement =
         | HudElement.InputMeter -> all_defaults.InputMeterPosition
         | HudElement.KeysPerSecond -> all_defaults.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> all_defaults.CustomImagePosition
+        | HudElement.MultiplayerScores -> all_defaults.MultiplayerScoresPosition

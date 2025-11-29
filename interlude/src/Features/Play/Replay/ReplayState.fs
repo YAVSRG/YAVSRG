@@ -21,6 +21,9 @@ module private ReplayModeSettings =
     let playfield_dim: Setting.Bounded<float32> = Setting.percentf 0.5f
     let fixed_scroll_speed = Setting.simple false
 
+    let overlay_shown () =
+        show_input_overlay.Value || show_hit_overlay.Value || show_difficulty_overlay.Value
+
 type private ReplayModeSettingsPage() =
     inherit Page()
 

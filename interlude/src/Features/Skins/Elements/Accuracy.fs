@@ -36,37 +36,37 @@ module Accuracy =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type Accuracy(config: HudConfig, state: PlayState) =
+type Accuracy(ctx: HudContext) =
     inherit Container(NodeType.None)
 
     let color =
         Animation.Color(
-            if config.AccuracyGradeColors then
-                state.Ruleset.GradeColor (state.Ruleset.Grades.Length - 1)
+            if ctx.Config.AccuracyGradeColors then
+                ctx.State.Ruleset.GradeColor (ctx.State.Ruleset.Grades.Length - 1)
             else
                 Color.White
         )
 
     let font_texture = Content.Texture "accuracy-font"
 
-    let alignment = config.AccuracyPosition.TextAlignment
+    let alignment = ctx.Config.AccuracyPosition.TextAlignment
 
     override this.Init(parent) =
-        if config.AccuracyGradeColors then
-            state.Subscribe(fun _ ->
-                color.Target <- Grade.calculate state.Ruleset.Grades state.Scoring.Accuracy |> state.Ruleset.GradeColor
+        if ctx.Config.AccuracyGradeColors then
+            ctx.State.Subscribe(fun _ ->
+                color.Target <- Grade.calculate ctx.State.Ruleset.Grades ctx.State.Scoring.Accuracy |> ctx.State.Ruleset.GradeColor
             ) |> ignore
 
-        if not config.AccuracyUseFont then
+        if not ctx.Config.AccuracyUseFont then
             this
-            |* Text(fun () -> state.Scoring.FormattedAccuracy)
+            |* Text(fun () -> ctx.State.Scoring.FormattedAccuracy)
                 .Color(fun () -> color.Value, Color.Transparent)
                 .Align(alignment)
                 .Position(Position.SlicePercentT(0.7f))
 
-        if config.AccuracyShowName then
+        if ctx.Config.AccuracyShowName then
             this
-            |* Text(state.Ruleset.Name)
+            |* Text(ctx.State.Ruleset.Name)
                 .Color(Colors.text_subheading)
                 .Align(alignment)
                 .Position(Position.SlicePercentB(0.4f))
@@ -74,16 +74,16 @@ type Accuracy(config: HudConfig, state: PlayState) =
 
     override this.Draw() =
         base.Draw()
-        if config.AccuracyUseFont then
+        if ctx.Config.AccuracyUseFont then
             let text_bounds = this.Bounds.SliceT(this.Bounds.Height * 0.6f)
             Accuracy.draw_accuracy_aligned(
                 font_texture,
                 text_bounds,
                 color.Value,
-                state.Scoring.FormattedAccuracy,
-                config.AccuracyFontSpacing,
-                config.AccuracyDotExtraSpacing,
-                config.AccuracyPercentExtraSpacing,
+                ctx.State.Scoring.FormattedAccuracy,
+                ctx.Config.AccuracyFontSpacing,
+                ctx.Config.AccuracyDotExtraSpacing,
+                ctx.Config.AccuracyPercentExtraSpacing,
                 alignment
             )
 

@@ -80,7 +80,7 @@ module SearchResults =
                 yield ImportsPage.GetSkins()
             if token_match tokens [|%"skins"; %"skins.import_from_osu"|] then
                 yield ImportsPage.ImportOsuSkins()
-            if token_match tokens [|%"hud.edit"|] || token_match tokens (HudElement.FULL_LIST |> Seq.map HudElement.name |> Array.ofSeq) then
+            if token_match tokens [|%"hud.edit"|] || token_match tokens (HudElement.DRAW_ORDER |> Seq.map HudElement.name |> Array.ofSeq) then
                 yield PageButton(%"hud.edit", fun () -> SkinActions.edit_hud ignore)
                     .Help(Help.Info("hud.edit")), 2, 3, PageWidth.Normal
 

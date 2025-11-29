@@ -9,6 +9,7 @@ module private ConfigurationPageHelper =
         match element with
         | HudElement.Accuracy -> AccuracyPage() :> Interlude.UI.Page
         | HudElement.ErrorBar -> ErrorBarPage()
+        | HudElement.ColumnErrorBars -> ColumnErrorBarsPage()
         | HudElement.Combo -> ComboPage()
         | HudElement.SkipButton -> SkipButtonPage()
         | HudElement.Judgement -> JudgementPage()
@@ -21,4 +22,5 @@ module private ConfigurationPageHelper =
         | HudElement.Pacemaker -> PacemakerPage()
         | HudElement.KeysPerSecond -> KeysPerSecondPage()
         | HudElement.CustomImage -> CustomImagePage()
+        | HudElement.MultiplayerScores -> MultiplayerScoresPage()
         |> fun page -> page.WithOnClose(on_close).Show()

@@ -8,6 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
+open Prelude.Skins.HudLayouts
 open Prelude.Calculator
 open Prelude.Data.User
 open Prelude.Data.User.Stats
@@ -139,28 +140,8 @@ type MultiplayerScreen =
             then
                 CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets() =
-                let hud_config = Content.HUD
-                let inline add_widget position constructor =
-                    add_widget (this, this.Playfield, this.State, hud_config) position constructor
-
-                if hud_config.ComboEnabled then add_widget hud_config.ComboPosition Combo
-                if hud_config.ProgressMeterEnabled then add_widget hud_config.ProgressMeterPosition ProgressPie
-                if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
-                if hud_config.TimingDisplayEnabled then add_widget hud_config.TimingDisplayPosition ErrorBar
-                if this.State.Pacemaker <> PacemakerState.None then add_widget hud_config.PacemakerPosition Pacemaker
-                if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
-                if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition Judgement
-                if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLate
-                if hud_config.RateModMeterEnabled then add_widget hud_config.RateModMeterPosition RateMods
-                if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPM
-                if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
-                if hud_config.KeysPerSecondMeterEnabled then add_widget hud_config.KeysPerSecondMeterPosition KeysPerSecond
-                if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
-                add_widget hud_config.MultiplayerScoreTrackerPosition
-                    (fun (config, state) -> MultiplayerScoreTracker(config, state, lobby.Replays))
-
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
+            override this.Init(parent: Widget) =
                 this
                     .Add(
                         HotkeyHoldAction(
@@ -169,6 +150,8 @@ type MultiplayerScreen =
                             (if options.HoldToGiveUp.Value then give_up else ignore)
                         )
                     )
+
+                base.Init(parent)
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()

@@ -10,6 +10,7 @@ open Prelude.Skins
 type HudElement =
     | Accuracy
     | ErrorBar
+    | ColumnErrorBars
     | Combo
     | SkipButton
     | Judgement
@@ -22,10 +23,48 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
-    static member FULL_LIST =
-        [
+    | MultiplayerScores
+
+    static member HIDDEN_DURING_AUTO =
+        [|
             Accuracy
             ErrorBar
+            ColumnErrorBars
+            Combo
+            Judgement
+            EarlyLate
+        |]
+
+    /// Order HUD elements are drawn in, first = back
+    static member DRAW_ORDER =
+        [|
+            Combo
+            SkipButton
+            ProgressPie
+            Accuracy
+            ErrorBar
+            ColumnErrorBars
+            Pacemaker
+            JudgementCounter
+            Judgement
+            EarlyLate
+            RateMods
+            BPM
+            InputMeter
+            KeysPerSecond
+            CustomImage
+            MultiplayerScores
+        |]
+
+    static member DRAW_ORDER_WITHOUT_SKIP =
+        HudElement.DRAW_ORDER |> Array.except [| HudElement.SkipButton |]
+
+    /// Used when picking elements, putting useful stuff near the top
+    static member LIST_ORDER =
+        [|
+            Accuracy
+            ErrorBar
+            ColumnErrorBars
             Combo
             SkipButton
             Judgement
@@ -38,7 +77,8 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
-        ]
+            MultiplayerScores
+        |]
 
 [<RequireQualifiedAccess>]
 [<Json.AutoCodec>]
@@ -55,11 +95,6 @@ type ErrorBarMovingAverageType =
     | None = 0
     | Arrow = 1
     | ReplaceBars = 2
-
-type ErrorBarRotation =
-    | Normal = 0
-    | Clockwise = 1
-    | Anticlockwise = 2
 
 [<Json.AutoCodec(false)>]
 type HudPosition =
@@ -147,7 +182,21 @@ type HudConfig =
         TimingDisplayMovingAverageType: ErrorBarMovingAverageType
         TimingDisplayMovingAverageSensitivity: float32
         TimingDisplayMovingAverageColor: Color
-        TimingDisplayRotation: ErrorBarRotation
+
+        ColumnErrorBarsEnabled: bool
+        ColumnErrorBarsPosition: HudPosition
+        ColumnErrorBarsWidth: float32
+        ColumnErrorBarsFadeTime: float32<ms / rate>
+        ColumnErrorBarsThickness: float32
+        ColumnErrorBarsShowGuide: bool
+        ColumnErrorBarsGuideThickness: float32
+        ColumnErrorBarsShowNonJudgements: bool
+        ColumnErrorBarsReleasesYScale: float32
+        ColumnErrorBarsReleasesXScale: float32
+        ColumnErrorBarsWindowsOpacity: float32
+        ColumnErrorBarsMovingAverage: bool
+        ColumnErrorBarsMovingAverageSensitivity: float32
+        ColumnErrorBarsMovingAverageColor: Color
 
         ComboEnabled: bool
         ComboPosition: HudPosition
@@ -234,7 +283,7 @@ type HudConfig =
         KeysPerSecondMeterShowTotal: bool
         KeysPerSecondMeterPosition: HudPosition
 
-        MultiplayerScoreTrackerPosition: HudPosition
+        MultiplayerScoresPosition: HudPosition
 
         CustomImageEnabled: bool
         CustomImagePosition: HudPosition
@@ -276,9 +325,30 @@ type HudConfig =
             TimingDisplayWindowsOpacity = 0.0f
             TimingDisplayHalfScaleReleases = true
             TimingDisplayMovingAverageType = ErrorBarMovingAverageType.None
-            TimingDisplayMovingAverageSensitivity = 0.75f
+            TimingDisplayMovingAverageSensitivity = 0.5f
             TimingDisplayMovingAverageColor = Color.Aqua
-            TimingDisplayRotation = ErrorBarRotation.Normal
+
+            ColumnErrorBarsEnabled = false
+            ColumnErrorBarsPosition =
+                {
+                    RelativeToPlayfield = true
+                    Left = 0.0f, 0.0f
+                    Top = 50.0f, 0.5f
+                    Right = 0.0f, 1.0f
+                    Bottom = 250.0f, 0.5f
+                }
+            ColumnErrorBarsFadeTime = 1000.0f<ms / rate>
+            ColumnErrorBarsThickness = 5.0f
+            ColumnErrorBarsWidth = 25.0f
+            ColumnErrorBarsShowGuide = true
+            ColumnErrorBarsGuideThickness = 1.0f
+            ColumnErrorBarsShowNonJudgements = false
+            ColumnErrorBarsReleasesYScale = 0.5f
+            ColumnErrorBarsReleasesXScale = 1.25f
+            ColumnErrorBarsWindowsOpacity = 0.0f
+            ColumnErrorBarsMovingAverage = false
+            ColumnErrorBarsMovingAverageSensitivity = 0.5f
+            ColumnErrorBarsMovingAverageColor = Color.Aqua
 
             ComboEnabled = true
             ComboPosition =
@@ -448,7 +518,7 @@ type HudConfig =
                     Bottom = 0.0f, 1.0f
                 }
 
-            MultiplayerScoreTrackerPosition =
+            MultiplayerScoresPosition =
                 {
                     RelativeToPlayfield = true
                     Left = 50.0f, 1.0f

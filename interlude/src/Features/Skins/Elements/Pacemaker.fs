@@ -3,13 +3,12 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skins.HudLayouts
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Play
 open Interlude.Features.Pacemaker
 
-type Pacemaker(config: HudConfig, state: PlayState) =
+type Pacemaker(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
     let AHEAD_BY_SCALE = 15.0
@@ -35,7 +34,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             color.Target <- Color.FromHsv(340.0f / 360.0f, ahead_by / -AHEAD_BY_SCALE |> float32 |> min 1.0f, 1.0f)
 
     do
-        match state.Pacemaker with
+        match ctx.State.Pacemaker with
         | PacemakerState.None
         | PacemakerState.Accuracy _
         | PacemakerState.Replay _ -> ()
@@ -47,11 +46,11 @@ type Pacemaker(config: HudConfig, state: PlayState) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        match state.Pacemaker with
+        match ctx.State.Pacemaker with
         | PacemakerState.None -> ()
         | PacemakerState.Accuracy x ->
             if position_cooldown.Complete then
-                ahead_by <- state.Scoring.PointsScored - state.Scoring.MaxPossiblePoints * x
+                ahead_by <- ctx.State.Scoring.PointsScored - ctx.State.Scoring.MaxPossiblePoints * x
                 update_flag_position ()
                 position_cooldown.Reset()
 
@@ -60,10 +59,10 @@ type Pacemaker(config: HudConfig, state: PlayState) =
         | PacemakerState.Replay (_, opposing_score) ->
             if position_cooldown.Complete then
                 opposing_score.Update(time_last_frame)
-                ahead_by <- state.Scoring.PointsScored - opposing_score.PointsScored
+                ahead_by <- ctx.State.Scoring.PointsScored - opposing_score.PointsScored
                 update_flag_position ()
                 position_cooldown.Reset()
-            time_last_frame <- state.CurrentChartTime()
+            time_last_frame <- ctx.State.CurrentChartTime()
 
             flag_position.Update elapsed_ms
             position_cooldown.Update elapsed_ms
@@ -73,7 +72,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
         color.Update elapsed_ms
 
     override this.Draw() =
-        match state.Pacemaker with
+        match ctx.State.Pacemaker with
         | PacemakerState.None ->
             Text.fill_b (
                 Style.font,
@@ -99,10 +98,10 @@ type Pacemaker(config: HudConfig, state: PlayState) =
             )
         | PacemakerState.Judgement(judgement, count) ->
             let actual =
-                let mutable c = state.Scoring.JudgementCounts.[judgement]
+                let mutable c = ctx.State.Scoring.JudgementCounts.[judgement]
 
-                for j = judgement + 1 to state.Scoring.JudgementCounts.Length - 1 do
-                    if state.Scoring.JudgementCounts.[j] > 0 then
+                for j = judgement + 1 to ctx.State.Scoring.JudgementCounts.Length - 1 do
+                    if ctx.State.Scoring.JudgementCounts.[j] > 0 then
                         c <- 1000000
 
                 c
@@ -124,7 +123,7 @@ type Pacemaker(config: HudConfig, state: PlayState) =
 
             Text.fill_b (Style.font, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
         | PacemakerState.ComboBreaks count ->
-            let _hearts = 1 + count - state.Scoring.ComboBreaks
+            let _hearts = 1 + count - ctx.State.Scoring.ComboBreaks
 
             if _hearts < hearts then
                 color.Value <- color.Value.O0

@@ -17,23 +17,28 @@ module Animation =
 
     // PERMANENT ANIMATIONS - These will run indefinitely and are used for long term counting/sliding effects
 
-    type Fade(initial_value: float32) =
+    type Fade(initial_value: float32, duration: float) =
         inherit Animation()
 
-        static let DURATION_MS = 1500.0
+        static let BASE_DURATION_MS = 1500.0
+        static let BASE_POWER = 0.994
+
+        let POWER = Math.Pow(BASE_POWER, BASE_DURATION_MS / duration)
 
         let mutable start_value = initial_value
         let mutable end_value = initial_value
         let mutable time_remaining = 0.0
 
+        new(initial_value: float32) = Fade(initial_value, BASE_DURATION_MS)
+
         member this.Value
             with get () =
                 if time_remaining > 0.0 then
-                    lerp (float32 <| Math.Pow(0.994, DURATION_MS - time_remaining)) end_value start_value
+                    lerp (float32 <| Math.Pow(POWER, duration - time_remaining)) end_value start_value
                 else end_value
             and set (v) =
                 start_value <- v
-                time_remaining <- DURATION_MS
+                time_remaining <- duration
 
         member this.Alpha = int (MathF.Round(255.0f * this.Value))
 
@@ -42,7 +47,7 @@ module Animation =
             and set (t) =
                 start_value <- this.Value
                 end_value <- t
-                time_remaining <- DURATION_MS
+                time_remaining <- duration
 
         member this.Moving = time_remaining > 0.0
 

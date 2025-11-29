@@ -6,11 +6,11 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type BPM(config: HudConfig, state: PlayState) =
+type BPM(ctx: HudContext) =
     inherit Container(NodeType.None)
 
     let mutable i = 0
-    let bpms = state.WithColors.BPM
+    let bpms = ctx.State.WithColors.BPM
     let mutable last_seen_time = -Time.infinity
 
     override this.Init(parent: Widget) =
@@ -28,7 +28,7 @@ type BPM(config: HudConfig, state: PlayState) =
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
-        let now = state.CurrentTime()
+        let now = ctx.State.CurrentTime()
 
         if now < last_seen_time then
             i <- 0

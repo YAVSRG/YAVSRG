@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Play
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Prelude
@@ -13,7 +14,6 @@ open Interlude.Content
 open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
-open Interlude.Features.Play.HUD
 open Interlude.Features.Play.Practice
 
 type PracticeScreen =
@@ -91,27 +91,10 @@ type PracticeScreen =
                     resume_from_current_place <- false
             )
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets() =
-
-                let hud_config = Content.HUD
-                let inline add_widget position constructor =
-                    add_widget (this, this.Playfield, this.State, hud_config) position constructor
-
-                if hud_config.ComboEnabled then add_widget hud_config.ComboPosition Combo
-                if hud_config.ProgressMeterEnabled then add_widget hud_config.ProgressMeterPosition ProgressPie
-                if hud_config.AccuracyEnabled then add_widget hud_config.AccuracyPosition Accuracy
-                if hud_config.TimingDisplayEnabled then add_widget hud_config.TimingDisplayPosition ErrorBar
-                if hud_config.JudgementCounterEnabled then add_widget hud_config.JudgementCounterPosition JudgementCounter
-                if hud_config.JudgementMeterEnabled then add_widget hud_config.JudgementMeterPosition Judgement
-                if hud_config.EarlyLateMeterEnabled then add_widget hud_config.EarlyLateMeterPosition EarlyLate
-                if hud_config.RateModMeterEnabled then add_widget hud_config.RateModMeterPosition RateMods
-                if hud_config.BPMMeterEnabled then add_widget hud_config.BPMMeterPosition BPM
-                if hud_config.InputMeterEnabled then add_widget hud_config.InputMeterPosition InputMeter
-                if hud_config.KeysPerSecondMeterEnabled then add_widget hud_config.KeysPerSecondMeterPosition KeysPerSecond
-                if hud_config.CustomImageEnabled then add_widget hud_config.CustomImagePosition CustomImage
-
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Play) with
+            override this.Init(parent: Widget) =
                 this.Add (paused_overlay this)
+                base.Init(parent)
 
             override this.OnEnter(p) =
                 base.OnEnter(p)

@@ -68,7 +68,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
     let mutable hover = false
 
     let child =
-        HudElement.constructor element (Content.HUD, ctx.State)
+        HudElement.constructor element ctx.HudContext
 
     let position = HudElement.position_setting element
 
@@ -96,6 +96,12 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
     override this.Position
         with set value =
+
+            let value =
+                if element = HudElement.ColumnErrorBars then
+                    { value with Left = 0.0f, 0.0f; Right = 0.0f, 1.0f }
+                else
+                    value
 
             let value =
                 if this.Initialised then
@@ -418,7 +424,7 @@ and Positioner(element: HudElement, ctx: PositionerContext) =
 
             if not (Mouse.held Mouse.LEFT) then
                 dragging_from <- None
-                save_pos ()
+                save_pos()
         | None ->
 
             if hover && this.IsSelectedElement && Mouse.left_clicked () then
@@ -493,7 +499,9 @@ and PositionerContext =
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
         HotReload: unit -> unit
+        HudContext: HudContext
     }
+
     member this.Recreate(element: HudElement) =
         match this.Positioners.TryFind element with
         | Some existing -> (this.Playfield.Remove existing || this.Screen.Remove existing) |> ignore
@@ -524,7 +532,7 @@ and PositionerContext =
             this.Positioners <- this.Positioners.Add(element, p)
 
     member this.CreateAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             this.Recreate element
 
     member this.Select(element: HudElement) = this.Selected <- Some element
@@ -605,13 +613,13 @@ and PositionerContext =
         | None -> ()
 
     member this.HorizontalFlipAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
             this.Recreate element
         Notifications.action_feedback(Icons.REPEAT, "All elements flipped horizontally", sprintf "Press %O to flip it back" %%"hud_flip_horizontal_all")
 
     member this.VerticalFlipAll() =
-        for element in HudElement.FULL_LIST do
+        for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
             this.Recreate element
         Notifications.action_feedback(Icons.REPEAT, "All elements flipped vertically", sprintf "Press %O to flip it back" %%"hud_flip_vertical_all")

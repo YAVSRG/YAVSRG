@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
@@ -176,9 +176,10 @@
     <Compile Include="Features\Play\ColumnLighting.fs" />
     <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\DifficultyOverlay.fs" />
-    <Compile Include="Features\Play\Shared.fs" />
+    <Compile Include="Features\Play\HudContext.fs" />
     <Compile Include="Features\Skins\Elements\Accuracy.fs" />
     <Compile Include="Features\Skins\Elements\ErrorBar.fs" />
+    <Compile Include="Features\Skins\Elements\ColumnErrorBars.fs" />
     <Compile Include="Features\Skins\Elements\Judgement.fs" />
     <Compile Include="Features\Skins\Elements\EarlyLate.fs" />
     <Compile Include="Features\Skins\Elements\Combo.fs" />
@@ -186,12 +187,13 @@
     <Compile Include="Features\Skins\Elements\SkipButton.fs" />
     <Compile Include="Features\Skins\Elements\Pacemaker.fs" />
     <Compile Include="Features\Skins\Elements\JudgementCounter.fs" />
-    <Compile Include="Features\Skins\Elements\MultiplayerScoreTracker.fs" />
+    <Compile Include="Features\Skins\Elements\MultiplayerScores.fs" />
     <Compile Include="Features\Skins\Elements\RateMods.fs" />
     <Compile Include="Features\Skins\Elements\BPM.fs" />
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />
     <Compile Include="Features\Skins\Elements\KeysPerSecond.fs" />
     <Compile Include="Features\Skins\Elements\CustomImage.fs" />
+    <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\PlayScreen.fs" />
     <Compile Include="Features\Play\MultiplayerScreen.fs" />
     <Compile Include="Features\Play\Spectate\SpectateControls.fs" />
@@ -212,6 +214,8 @@
     <Compile Include="Features\Skins\Textures\TextureActions.fs" />
     <Compile Include="Features\Skins\Textures\EditTexturePage.fs" />
     <Compile Include="Features\Skins\Textures\TextureList.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\MultiplayerScoresPage.fs" />
+    <Compile Include="Features\Skins\EditHUD\Configuration\ColumnErrorBarsPage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ElementPreview.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\Accuracy.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\ErrorBar.fs" />
@@ -228,7 +232,6 @@
     <Compile Include="Features\Skins\EditHUD\Configuration\KeysPerSecond.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration\CustomImage.fs" />
     <Compile Include="Features\Skins\EditHUD\Configuration.fs" />
-    <Compile Include="Features\Skins\EditHUD\Previews\Previews.fs" />
     <Compile Include="Features\Skins\EditHUD\Previews\SelectElement.fs" />
     <Compile Include="Features\Skins\EditHUD\Positioning.fs" />
     <Compile Include="Features\Skins\EditHUD\HUDOptions.fs" />

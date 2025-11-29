@@ -5,12 +5,11 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Skins.HudLayouts
-open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type SkipButton(config: HudConfig, state: PlayState) =
+type SkipButton(ctx: HudContext) =
     inherit Container(NodeType.None)
 
     let SKIP_THRESHOLD = 1500.0f<ms / rate> * SelectedChart.rate.Value
@@ -20,7 +19,7 @@ type SkipButton(config: HudConfig, state: PlayState) =
     let mutable active = true
 
     override this.Init(parent: Widget) =
-        let background = config.SkipButtonBackground
+        let background = ctx.Config.SkipButtonBackground
         if background.Enable then
             let lo = (1.0f - background.Scale) * 0.5f
             let hi = 1.0f - lo
@@ -41,12 +40,12 @@ type SkipButton(config: HudConfig, state: PlayState) =
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)
 
-        if active && Screen.current_type <> ScreenType.Practice then // hack for HUD editor
+        if active && ctx.Inner.IsPlay || ctx.Inner.IsReplay then
 
-            if state.CurrentChartTime() < -SKIP_THRESHOLD then
+            if ctx.State.CurrentChartTime() < -SKIP_THRESHOLD then
                 if (%%"skip").Pressed() then
                     Song.pause ()
-                    Song.play_from (state.WithColors.FirstNote - SKIP_DISTANCE)
+                    Song.play_from (ctx.State.WithColors.FirstNote - SKIP_DISTANCE)
                     active <- false
             else
                 active <- false

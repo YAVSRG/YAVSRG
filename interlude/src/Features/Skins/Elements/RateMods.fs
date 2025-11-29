@@ -7,13 +7,13 @@ open Prelude.Skins.HudLayouts
 open Interlude.Features.Play
 open Interlude.Features.Gameplay
 
-type RateMods(config: HudConfig, state: PlayState) =
+type RateMods(ctx: HudContext) =
     inherit Container(NodeType.None)
 
     override this.Init(parent) =
         let text =
-            if config.RateModMeterShowMods then
-                ModState.format (SelectedChart.rate.Value, state.WithColors.ModsSelected)
+            if ctx.Config.RateModMeterShowMods then
+                ModState.format (SelectedChart.rate.Value, ctx.State.WithColors.ModsSelected)
             else
                 sprintf "%.2fx" SelectedChart.rate.Value
 

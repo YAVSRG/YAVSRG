@@ -73,27 +73,27 @@ module JudgementCounter =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type JudgementCounter(config: HudConfig, state: PlayState) =
+type JudgementCounter(ctx: HudContext) =
     inherit Container(NodeType.None)
 
     let judgement_animations =
-        Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(float config.JudgementCounterFadeTime))
+        Array.init ctx.State.Ruleset.Judgements.Length (fun _ -> Animation.Delay(float ctx.Config.JudgementCounterFadeTime))
 
     let texture = Content.Texture "judgement-counter-judgements"
-    let display: int option array = config.GetJudgementCounterDisplay state.Ruleset
+    let display: int option array = ctx.Config.GetJudgementCounterDisplay ctx.State.Ruleset
 
     let font = Content.Texture "judgement-counter-font"
 
-    let opacity = 255f * config.JudgementCounterOpacity |> int |> max 0 |> min 255
+    let opacity = 255f * ctx.Config.JudgementCounterOpacity |> int |> max 0 |> min 255
 
     let count_alignment =
-        if config.JudgementCounterShowLabels then
+        if ctx.Config.JudgementCounterShowLabels then
             Alignment.RIGHT
         else
             Alignment.CENTER
 
     override this.Init(parent: Widget) =
-        state.Subscribe(fun h ->
+        ctx.State.Subscribe(fun h ->
             match h.Action.Judgement with
             | Some(j, _) -> judgement_animations[j].Reset()
             | None -> ()
@@ -113,63 +113,63 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
         let h =
             this.Bounds.Height
-            / float32 (judgement_animations.Length + if config.JudgementCounterShowRatio then 1 else 0)
+            / float32 (judgement_animations.Length + if ctx.Config.JudgementCounterShowRatio then 1 else 0)
             |> min this.Bounds.Width
 
         let mutable r = this.Bounds.SliceT(h).Shrink(10.0f)
 
-        for i = 0 to state.Ruleset.Judgements.Length - 1 do
-            let j = state.Ruleset.Judgements.[i]
+        for i = 0 to ctx.State.Ruleset.Judgements.Length - 1 do
+            let j = ctx.State.Ruleset.Judgements.[i]
 
             let percent = float32 judgement_animations.[i].Progress
 
             let pop =
-                r.Expand(r.Height * (1.0f - percent) * config.JudgementCounterPopAmount * 0.1f)
+                r.Expand(r.Height * (1.0f - percent) * ctx.Config.JudgementCounterPopAmount * 0.1f)
 
             Render.border Style.PADDING pop (j.Color.O3a opacity)
             Render.rect (pop.BorderL(5.0f).SlicePercentY(0.45f)) j.Color.O2
             Render.rect pop (j.Color.O1a opacity)
 
-            if config.JudgementCounterShowLabels then
+            if ctx.Config.JudgementCounterShowLabels then
 
                 match display.[i] with
                 | Some texture_index ->
                     Render.tex_quad
-                        ((Sprite.fill_left (pop.SlicePercentY(config.JudgementCounterTextScale).ShrinkX(10.0f)) texture).AsQuad)
+                        ((Sprite.fill_left (pop.SlicePercentY(ctx.Config.JudgementCounterTextScale).ShrinkX(10.0f)) texture).AsQuad)
                         Color.White.AsQuad
                         (Sprite.pick_texture (0, texture_index) texture)
                 | None ->
                     Text.fill_b (
                         Style.font,
                         j.Name,
-                        pop.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f),
+                        pop.SlicePercentY(ctx.Config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f),
                         (Color.White, Color.Black),
                         Alignment.LEFT
                     )
 
-            if config.JudgementCounterUseFont then
+            if ctx.Config.JudgementCounterUseFont then
                 JudgementCounter.draw_count_aligned (
                     font,
                     (
-                        if config.JudgementCounterShowLabels then
-                            pop.SlicePercentY(config.JudgementCounterTextScale).ShrinkX(10.0f)
+                        if ctx.Config.JudgementCounterShowLabels then
+                            pop.SlicePercentY(ctx.Config.JudgementCounterTextScale).ShrinkX(10.0f)
                         else
-                            pop.SlicePercentY(config.JudgementCounterTextScale).ExpandPercentX(2.0f)
+                            pop.SlicePercentY(ctx.Config.JudgementCounterTextScale).ExpandPercentX(2.0f)
                     ),
                     Color.White,
-                    state.Scoring.JudgementCounts.[i],
-                    config.JudgementCounterFontSpacing,
+                    ctx.State.Scoring.JudgementCounts.[i],
+                    ctx.Config.JudgementCounterFontSpacing,
                     count_alignment
                 )
             else
                 Text.fill_b (
                     Style.font,
-                    state.Scoring.JudgementCounts.[i].ToString(),
+                    ctx.State.Scoring.JudgementCounts.[i].ToString(),
                     (
-                        if config.JudgementCounterShowLabels then
-                            pop.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f)
+                        if ctx.Config.JudgementCounterShowLabels then
+                            pop.SlicePercentY(ctx.Config.JudgementCounterTextScale / 0.6f).ShrinkX(10.0f)
                         else
-                            pop.SlicePercentY(config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f)
+                            pop.SlicePercentY(ctx.Config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f)
                     ),
                     (Color.White, Color.Black),
                     count_alignment
@@ -177,18 +177,18 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
 
             r <- r.Translate(0.0f, h)
 
-        if config.JudgementCounterShowRatio && state.Scoring.JudgementCounts.Length > 1 then
-            let ratio = state.Scoring.JudgementCounts.[0], state.Scoring.JudgementCounts.[1]
+        if ctx.Config.JudgementCounterShowRatio && ctx.State.Scoring.JudgementCounts.Length > 1 then
+            let ratio = ctx.State.Scoring.JudgementCounts.[0], ctx.State.Scoring.JudgementCounts.[1]
 
-            if config.JudgementCounterUseFont then
+            if ctx.Config.JudgementCounterUseFont then
                 JudgementCounter.draw_ratio_centered (
                     font,
-                    r.SlicePercentT(config.JudgementCounterTextScale).ExpandPercentX(2.0f),
+                    r.SlicePercentT(ctx.Config.JudgementCounterTextScale).ExpandPercentX(2.0f),
                     Color.White,
                     ratio,
-                    config.JudgementCounterFontSpacing,
-                    config.JudgementCounterDotExtraSpacing,
-                    config.JudgementCounterColonExtraSpacing
+                    ctx.Config.JudgementCounterFontSpacing,
+                    ctx.Config.JudgementCounterDotExtraSpacing,
+                    ctx.Config.JudgementCounterColonExtraSpacing
                 )
             else
                 let (mv, pf) = ratio
@@ -199,7 +199,7 @@ type JudgementCounter(config: HudConfig, state: PlayState) =
                          sprintf "%.1f:0" (float mv)
                      else
                          sprintf "%.1f:1" (float mv / float pf)),
-                    r.SlicePercentT(config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f),
+                    r.SlicePercentT(ctx.Config.JudgementCounterTextScale / 0.6f).ExpandPercentX(2.0f),
                     (Color.White, Color.Black),
                     Alignment.CENTER
                 )

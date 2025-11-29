@@ -360,8 +360,8 @@ module Input =
 
         let bind_match bind target =
             match bind, target with
-            | Bind.Key(k, _), Bind.Key(K, _) when k = K -> true
-            | Bind.Mouse b, Bind.Mouse B when b = B -> true
+            | Bind.Key(k, _), Bind.Key(k2, _) when k = k2 -> true
+            | Bind.Mouse b, Bind.Mouse b2 when b = b2 -> true
             | _ -> false
 
         let rec pop_inputs_matching_binds events =

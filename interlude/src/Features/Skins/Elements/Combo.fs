@@ -30,7 +30,7 @@ module Combo =
             Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
             char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type Combo(config: HudConfig, state: PlayState) =
+type Combo(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
     let pop_animation = Animation.Fade(0.0f)
     let color = Animation.Color(Color.White)
@@ -39,19 +39,19 @@ type Combo(config: HudConfig, state: PlayState) =
     let font_texture = Content.Texture "combo-font"
 
     override this.Init(parent: Widget) =
-        state.Subscribe(fun ev ->
+        ctx.State.Subscribe(fun ev ->
             match ev.Combo with
             | NoChange -> ()
             | _ ->
 
             event_count <- event_count + 1
 
-            if (config.ComboLampColors && event_count > 50) then
+            if (ctx.Config.ComboLampColors && event_count > 50) then
                 color.Target <-
-                    Lamp.calculate state.Ruleset.Lamps state.Scoring.JudgementCounts state.Scoring.ComboBreaks
-                    |> state.Ruleset.LampColor
+                    Lamp.calculate ctx.State.Ruleset.Lamps ctx.State.Scoring.JudgementCounts ctx.State.Scoring.ComboBreaks
+                    |> ctx.State.Ruleset.LampColor
 
-            pop_animation.Value <- config.ComboPop
+            pop_animation.Value <- ctx.Config.ComboPop
         )
         |> ignore
         base.Init(parent)
@@ -62,15 +62,15 @@ type Combo(config: HudConfig, state: PlayState) =
         pop_animation.Update elapsed_ms
 
     override this.Draw() =
-        let combo = state.Scoring.CurrentCombo
+        let combo = ctx.State.Scoring.CurrentCombo
 
         let amt =
             pop_animation.Value
-            + (((combo, 1000) |> Math.Min |> float32) * config.ComboGrowth)
+            + (((combo, 1000) |> Math.Min |> float32) * ctx.Config.ComboGrowth)
 
         let bounds = this.Bounds.Expand amt
 
-        if config.ComboUseFont then
-            Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, config.ComboFontSpacing)
+        if ctx.Config.ComboUseFont then
+            Combo.draw_combo_centered(font_texture, bounds, color.Value, combo, ctx.Config.ComboFontSpacing)
         else
             Text.fill (Style.font, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)

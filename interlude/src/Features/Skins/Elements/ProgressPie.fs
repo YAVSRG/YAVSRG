@@ -116,49 +116,49 @@ module ProgressMeter =
                 Render.tex_quad char_bounds.AsQuad color.AsQuad (Sprite.pick_texture (0, int (c - '0')) texture)
                 char_bounds <- char_bounds.Translate(scale * (1.0f + spacing) * char_width, 0.0f)
 
-type ProgressPie(config: HudConfig, state: PlayState) =
+type ProgressPie(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
     let duration =
-        let chart = state.WithColors
+        let chart = ctx.State.WithColors
         chart.LastNote - chart.FirstNote
 
     let font_texture = Content.Texture "progress-meter-font"
 
     override this.Draw() =
-        let now = state.CurrentChartTime()
+        let now = ctx.State.CurrentChartTime()
         let percent = now / duration |> max 0.0f |> min 1.0f
 
-        ProgressMeter.draw_pie(this.Bounds.SliceT(this.Bounds.Width), config.ProgressMeterColor, config.ProgressMeterBackgroundColor, percent)
+        ProgressMeter.draw_pie(this.Bounds.SliceT(this.Bounds.Width), ctx.Config.ProgressMeterColor, ctx.Config.ProgressMeterBackgroundColor, percent)
 
-        if config.ProgressMeterUseFont then
+        if ctx.Config.ProgressMeterUseFont then
 
-            match config.ProgressMeterLabel with
+            match ctx.Config.ProgressMeterLabel with
                 | ProgressPieLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.draw_countdown_centered (
                         font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
+                        this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
                         Color.White,
                         time_left,
-                        config.ProgressMeterFontSpacing,
-                        config.ProgressMeterColonExtraSpacing
+                        ctx.Config.ProgressMeterFontSpacing,
+                        ctx.Config.ProgressMeterColonExtraSpacing
                     )
                 | ProgressPieLabel.Percentage ->
                     ProgressMeter.draw_percent_progress_centered (
                         font_texture,
-                        this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
+                        this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
                         Color.White,
                         percent,
-                        config.ProgressMeterFontSpacing,
-                        config.ProgressMeterPercentExtraSpacing
+                        ctx.Config.ProgressMeterFontSpacing,
+                        ctx.Config.ProgressMeterPercentExtraSpacing
                     )
                 | _ -> ()
 
         else
 
             let text =
-                match config.ProgressMeterLabel with
+                match ctx.Config.ProgressMeterLabel with
                 | ProgressPieLabel.Countdown ->
                     let time_left = (duration - now) / SelectedChart.rate.Value |> max 0.0f<ms / rate>
                     ProgressMeter.fmt_time_left time_left
@@ -168,7 +168,7 @@ type ProgressPie(config: HudConfig, state: PlayState) =
             Text.fill_b (
                 Style.font,
                 text,
-                this.Bounds.SliceB(this.Bounds.Width * config.ProgressMeterLabelSize),
+                this.Bounds.SliceB(this.Bounds.Width * ctx.Config.ProgressMeterLabelSize),
                 Colors.text_subheading,
                 Alignment.CENTER
             )

@@ -39,8 +39,8 @@ module EditHudScreen =
                 Skins.reload_current_hud()
                 Screen.change_new (fun () -> edit_hud_screen (info, on_exit)) ScreenType.EditHud Transitions.Instant |> ignore
 
-        { new IPlayScreen(info, PacemakerState.None, scoring) with
-            override this.AddWidgets() =
+        { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Editor) with
+            override this.Init(parent: Widget) =
 
                 ctx <-
                     {
@@ -52,12 +52,14 @@ module EditHudScreen =
                         UndoHistory = []
                         OnElementMoved = Event<unit>()
                         HotReload = hot_reload
+                        HudContext = this.HudContext
                     }
 
                 ctx.CreateAll()
 
                 this.Add(ctx.Screen, HUDEditorControls(ctx))
-            // todo: way to turn on multiplayer player list
+
+                base.Init(parent)
 
             override this.OnEnter p =
                 DiscordRPC.in_menus ("Customising HUD")
