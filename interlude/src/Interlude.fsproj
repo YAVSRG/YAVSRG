@@ -187,7 +187,7 @@
     <Compile Include="Features\Skins\Elements\SkipButton.fs" />
     <Compile Include="Features\Skins\Elements\Pacemaker.fs" />
     <Compile Include="Features\Skins\Elements\JudgementCounter.fs" />
-    <Compile Include="Features\Skins\Elements\MultiplayerScoreTracker.fs" />
+    <Compile Include="Features\Skins\Elements\MultiplayerScores.fs" />
     <Compile Include="Features\Skins\Elements\RateMods.fs" />
     <Compile Include="Features\Skins\Elements\BPM.fs" />
     <Compile Include="Features\Skins\Elements\InputMeter.fs" />

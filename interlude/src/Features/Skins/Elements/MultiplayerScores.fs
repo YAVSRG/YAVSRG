@@ -4,19 +4,28 @@ open System.Collections.Generic
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude
+open Prelude.Gameplay.Replays
 open Interlude
 open Interlude.Features.Online
 open Interlude.Features.Play
 
 // todo: config on your username color vs other peoples
-type MultiplayerScoreTracker(ctx: HudContext) =
+type MultiplayerScores(ctx: HudContext) =
     inherit StaticWidget(NodeType.None)
 
     let replays =
         match ctx.Inner with
         | HudContextInner.Multiplayer replays -> replays
         | HudContextInner.Spectate replays -> replays
-        | _ -> Dictionary<string, LobbyPlayerReplayInfo>()
+        | _ ->
+            let replays = Dictionary<string, LobbyPlayerReplayInfo>()
+            let refresh () =
+                replays.Clear()
+                replays.Add("Player 1", { Replay = Unchecked.defaultof<OnlineReplay>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
+                replays.Add("Player 2", { Replay = Unchecked.defaultof<OnlineReplay>; ScoreProcessor = ctx.State.Scoring; GetScoreInfo = fun () -> failwith "impossible" })
+            refresh()
+            ctx.State.OnScoringChanged(refresh) |> ignore
+            replays
 
     override this.Draw() =
         let x = this.Bounds.CenterX

@@ -23,7 +23,7 @@ type HudElement =
     | InputMeter
     | KeysPerSecond
     | CustomImage
-    | MultiplayerScoreTracker
+    | MultiplayerScores
 
     static member HIDDEN_DURING_AUTO =
         [|
@@ -53,7 +53,7 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
-            MultiplayerScoreTracker
+            MultiplayerScores
         |]
 
     static member DRAW_ORDER_WITHOUT_SKIP =
@@ -77,7 +77,7 @@ type HudElement =
             InputMeter
             KeysPerSecond
             CustomImage
-            MultiplayerScoreTracker
+            MultiplayerScores
         |]
 
 [<RequireQualifiedAccess>]
@@ -283,7 +283,7 @@ type HudConfig =
         KeysPerSecondMeterShowTotal: bool
         KeysPerSecondMeterPosition: HudPosition
 
-        MultiplayerScoreTrackerPosition: HudPosition
+        MultiplayerScoresPosition: HudPosition
 
         CustomImageEnabled: bool
         CustomImagePosition: HudPosition
@@ -518,7 +518,7 @@ type HudConfig =
                     Bottom = 0.0f, 1.0f
                 }
 
-            MultiplayerScoreTrackerPosition =
+            MultiplayerScoresPosition =
                 {
                     RelativeToPlayfield = true
                     Left = 50.0f, 1.0f

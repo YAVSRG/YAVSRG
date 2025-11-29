@@ -37,7 +37,7 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> not ctx.State.Pacemaker.IsNone
         | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterEnabled
         | HudElement.CustomImage -> ctx.Config.CustomImageEnabled
-        | HudElement.MultiplayerScoreTracker -> ctx.Inner.IsMultiplayer || ctx.Inner.IsSpectate
+        | HudElement.MultiplayerScores -> ctx.Inner.IsMultiplayer || ctx.Inner.IsSpectate
 
     [<Extension>]
     static member private Position (ctx: HudContext, element: HudElement) : HudPosition =
@@ -57,7 +57,7 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> ctx.Config.PacemakerPosition
         | HudElement.KeysPerSecond -> ctx.Config.KeysPerSecondMeterPosition
         | HudElement.CustomImage -> ctx.Config.CustomImagePosition
-        | HudElement.MultiplayerScoreTracker -> ctx.Config.MultiplayerScoreTrackerPosition
+        | HudElement.MultiplayerScores -> ctx.Config.MultiplayerScoresPosition
 
     [<Extension>]
     static member private Constructor (ctx: HudContext, element: HudElement) : HudContext -> Widget =
@@ -78,7 +78,7 @@ type HudContextExtensions =
         | HudElement.Pacemaker -> cast Pacemaker
         | HudElement.KeysPerSecond -> cast KeysPerSecond
         | HudElement.CustomImage -> cast CustomImage
-        | HudElement.MultiplayerScoreTracker -> cast MultiplayerScoreTracker
+        | HudElement.MultiplayerScores -> cast MultiplayerScores
 
     /// Adds the element in its configured position, if enabled
     [<Extension>]

@@ -11,7 +11,6 @@ open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Play
-open Interlude.Features.Play.HUD
 
 type SpectateScreen =
 
