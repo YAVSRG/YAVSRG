@@ -5,6 +5,9 @@
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Version.txt" />
+    <None Include="generate_dev_cert.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Globals.fs" />
     <Compile Include="Domain\Core\Users.fs" />
     <Compile Include="Domain\Core\Friends.fs" />
