@@ -5,7 +5,9 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data
+open Prelude.Data.Library
 open Interlude.UI
+open Interlude.Content
 
 type EtternaPacksBrowserPage() =
     inherit Page()
@@ -36,7 +38,9 @@ type EtternaPacksBrowserPage() =
                 match data with
                 | Some d ->
                     for p in d.data do
-                        items.Add(EtternaPackCard p)
+                        // Skip packs that already exist in the local chart database
+                        if not (ChartDatabase.pack_exists p.name Content.Charts) then
+                            items.Add(EtternaPackCard p)
 
                     if d.meta.current_page < d.meta.last_page then
                         when_at_bottom <- Some action_at_bottom

@@ -365,3 +365,14 @@ module DbCharts =
 
     let update_packs_batch (chunk: (string * Set<string>) seq) (db: Database) =
         UPDATE_PACKS.Batch chunk db |> expect |> ignore
+
+    let private CHECK_PACK_EXISTS: Query<string, int> =
+        {
+            SQL = "SELECT EXISTS(SELECT 1 FROM charts, json_each(charts.Packs) WHERE json_each.value = @Pack);"
+            Parameters = [ "@Pack", SqliteType.Text, -1 ]
+            FillParameters = fun p pack -> p.String pack
+            Read = fun r -> r.Int32
+        }
+
+    let pack_exists (pack: string) (db: Database) : bool =
+        CHECK_PACK_EXISTS.Execute pack db |> expect |> fun arr -> arr.[0] = 1

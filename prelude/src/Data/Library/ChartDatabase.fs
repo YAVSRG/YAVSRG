@@ -220,3 +220,6 @@ module ChartDatabase =
                 RecalculationNeeded = use_fast_load
             }
         |> if use_fast_load then fast_load else id
+
+    let pack_exists (pack: string) (db: ChartDatabase) : bool =
+        DbCharts.pack_exists pack db.Database
