@@ -43,6 +43,20 @@ let launch (instance: int) : unit =
 
     Startup.deinit (if result = Ok() then Startup.Normal else Startup.InternalCrash) show_crash_splash
 
+let library_exists (filenames: string list) =
+    let ld_library_path = Environment.GetEnvironmentVariable "LD_LIBRARY_PATH"
+
+    let search_paths =
+        match ld_library_path with
+        | null | "" -> ["."]
+        | path -> "." :: (path.Split([|':'|], StringSplitOptions.RemoveEmptyEntries) |> Array.toList)
+
+    filenames |> List.exists (fun name ->
+        search_paths |> List.exists (fun dir ->
+            try File.Exists(Path.Combine(dir, name)) with _ -> false
+        )
+    )
+
 [<EntryPoint>]
 let main (argv: string array) : int =
     let executable_location = AppDomain.CurrentDomain.BaseDirectory
@@ -54,17 +68,9 @@ let main (argv: string array) : int =
         crash_text_file "Hello ZIP FILE USER,\n\nplease EXTRACT all contents of the Interlude zip file before running the exe\notherwise it won't work or save any of your data.\n\nThanks,\nPercyqaz"
         -1
     elif
-        (
-            not (File.Exists "bass.dll")
-            && not (File.Exists "libbass.so")
-            && not (File.Exists "libbass.dylib")
-        )
+        not (library_exists ["bass.dll"; "libbass.so"; "libbass.dylib"])
         ||
-        (
-            not (File.Exists "bass_fx.dll")
-            && not (File.Exists "libbass_fx.so")
-            && not (File.Exists "libbass_fx.dylib")
-        )
+        not (library_exists ["bass_fx.dll"; "libbass_fx.so"; "libbass_fx.dylib"])
     then
         crash_text_file "Interlude is missing the appropriate audio library dll/so/dylib files for your platform.\n If you are a developer, info on how to fix this is at https://github.com/YAVSRG/YAVSRG#readme\n If you are not a developer, looks like you deleted a file you shouldn't have!\n Redownloading the game and extracting the zip over this folder to replace what is missing should fix it."
         -1
