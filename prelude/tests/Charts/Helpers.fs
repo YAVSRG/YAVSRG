@@ -11,7 +11,7 @@ module ChartFuzzBuilder =
 
         let mutable last_time = 0.0f<ms>
         let mutable hold_notes = 0us
-        let columns = { 0 .. keys - 1 } |> Array.ofSeq
+        let columns = seq { 0 .. keys - 1 } |> Array.ofSeq
 
         let next (_: int) : TimeItem<NoteRow> =
             let next_time = last_time + 1.0f<ms> + (random.Next 500 |> Time.of_number)

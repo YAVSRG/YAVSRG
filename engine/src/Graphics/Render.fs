@@ -235,7 +235,7 @@ module Render =
     /// The FBO can then later be used as a sprite to be drawn to the screen.
     /// </summary>
     let borrow_fbo () : FBO =
-        { 0 .. (FBO_POOL_SIZE - 1) }
+        seq { 0 .. (FBO_POOL_SIZE - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
             | None -> failwithf "Ran out of FBOs! (%i max) - Some are likely not being disposed after use" FBO_POOL_SIZE
