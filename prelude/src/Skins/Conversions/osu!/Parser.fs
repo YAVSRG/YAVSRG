@@ -454,7 +454,8 @@ module SkinIni =
             | ManiaHeader ->
                 let parts = trimmed.Split([|':'|], 2, StringSplitOptions.TrimEntries)
                 if parts.Length = 2 then
-                    section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
+                    if not (Map.containsKey parts.[0] section_ref.Value) then
+                        section_ref.Value <- Map.add parts.[0] parts.[1] section_ref.Value
 
         change_state Nothing
 
