@@ -39,15 +39,14 @@ module Secrets =
 #if DEBUG
             Logging.Info "Looks like you are running the server locally, and the secrets file is missing! Starting with default"
             Logging.Info "You need to create a file: %s" (Path.GetFullPath("./secrets/secrets.json"))
-
+#else
+            Logging.Info "Looks like you are running the server through docker, and the secrets file is missing! Starting with default"
+#endif
             Secrets.Default
         else
-#else
-            failwith "Looks like you are running the server through docker, and the secrets file is missing!"
-#endif
-        match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
-        | Ok o -> o
-        | Error e -> failwithf "Error while reading secrets.json: %O" e
+            match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
+            | Ok o -> o
+            | Error e -> failwithf "Error while reading secrets.json: %O" e
 
     let TAGLINE =
         let stream =
