@@ -86,7 +86,7 @@ Information, future updates and support available at:
     let build_platform (info: BuildPlatformInfo) =
 
         let build_dir =
-            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net9.0", info.RuntimeId)
+            Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", DOTNET_VERSION, info.RuntimeId)
 
         let clean_dir =
             Path.Combine(YAVSRG_PATH, "interlude", "releases", $"Interlude-{info.Name}")
@@ -106,17 +106,6 @@ Information, future updates and support available at:
             $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
 
         Directory.CreateDirectory clean_dir |> ignore
-
-        let rec copy source target =
-            Directory.CreateDirectory target |> ignore
-
-            for file in Directory.GetFiles source do
-                match Path.GetExtension(file).ToLower() with
-                | ".dll"
-                | ".so"
-                | ".dylib"
-                | ".txt" -> File.Copy(file, Path.Combine(target, Path.GetFileName file))
-                | _ -> ()
 
         File.Copy(
             Path.Combine(YAVSRG_PATH, "engine", "lib", info.RuntimeId, info.BassLibraryFile),
