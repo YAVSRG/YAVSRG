@@ -37,13 +37,13 @@ module Secrets =
     let SECRETS =
         if not (File.Exists "./secrets/secrets.json") then
 #if DEBUG
-            Logging.Info
-                "!!! Server assembly is being run outside of docker, or examined in unit tests. Using default values for secrets"
+            Logging.Info "Looks like you are running the server locally, and the secrets file is missing! Starting with default"
+            Logging.Info "You need to create a file: %s" (Path.GetFullPath("./secrets/secrets.json"))
 
             Secrets.Default
         else
 #else
-            failwith "Secrets folder not found! Did you mount it properly?"
+            failwith "Looks like you are running the server through docker, and the secrets file is missing!"
 #endif
         match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
         | Ok o -> o

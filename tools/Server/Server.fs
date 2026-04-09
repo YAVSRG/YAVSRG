@@ -8,6 +8,7 @@ module Server =
 
     let run_in_docker () : unit =
         printfn "Running Interlude server via docker"
+        printfn "Docker should be installed and running on your system for this to work!\n"
         
         let data_path = Path.Combine(YAVSRG_PATH, "online", "data")
         if not (Directory.Exists(data_path)) then
@@ -26,11 +27,17 @@ module Server =
                 secrets_path
                 "dotnet"
                 "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT"
+                
+        let secrets_file = Path.Combine(secrets_path, "secrets.json")
+        if not (File.Exists(secrets_file)) then
+            printfn "First time setup: You need to create a secrets.json file @ %s" secrets_file 
+            printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
+            printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
             
         exec_at (Path.Combine(YAVSRG_PATH, "online")) "docker" "compose -p interludeweb up --build --detach"
         
     let run_local () : unit =
-        printfn "Running Interlude server locally (not in a docker container)"
+        printfn "Running Interlude server locally (not in a docker container)\n"
         
         let data_path = Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION, "data")
         if not (Directory.Exists(data_path)) then
@@ -49,6 +56,12 @@ module Server =
                 secrets_path
                 "dotnet"
                 "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT"
+                
+        let secrets_file = Path.Combine(secrets_path, "secrets.json")
+        if not (File.Exists(secrets_file)) then
+            printfn "First time setup: You need to create a secrets.json file @ %s" secrets_file 
+            printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
+            printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
                 
         exec_at (Path.Combine(YAVSRG_PATH, "online", "server")) "dotnet" "build --configuration Debug -v q"
         exec_at (Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))

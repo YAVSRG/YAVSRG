@@ -18,24 +18,15 @@ try
     Logging.Verbosity <- LoggingLevel.DEBUG
     Logging.Info "~~ Interlude.Web [%s] ~~" TAGLINE
 
-    if not (Directory.Exists "./secrets") then
-        Logging.Info "Creating secrets directory"
-        Directory.CreateDirectory "secrets" |> ignore
-
-    if not (Directory.Exists "./data") then
-        Logging.Info "Creating data directory"
-        Directory.CreateDirectory "data" |> ignore
-
     let api_cert_path = Path.Combine("./secrets", SECRETS.ApiCert)
     let socket_cert_path = Path.Combine("./secrets", SECRETS.SocketCert)
 
     if not (File.Exists api_cert_path) then
         Logging.Error
-            "API Certificate could not be found at %s; If you're testing locally, use generate_dev_cert.sh" api_cert_path
+            "API Certificate could not be found at %s\nFor first time setup, run the server with `yavsrg run_server_local` or `yavsrg run_server_docker`" api_cert_path
     else if not (File.Exists socket_cert_path) then
         Logging.Error
-            "Socket Certificate could not be found at %s; If you're testing locally, use generate_dev_cert.sh" socket_cert_path
-
+            "Socket Certificate could not be found at %s\nFor first time setup, run the server with `yavsrg run_server_local` or `yavsrg run_server_docker`" socket_cert_path
     else
 
     let api_cert =
