@@ -24,7 +24,7 @@ You don't have to care about them - in PRs I can just squash with an emoji commi
 Step 1: Create a fork of YAVSRG  
 
 Step 2: Make your changes  
-I reccommend doing this in a branch other than `main` as it makes it easy to have both your fork and the upstream as a remote
+I recommend doing this in a branch other than `main` as it makes it easy to have both your fork and the upstream as a remote
 
 Step 3: [Submit PR](https://github.com/YAVSRG/YAVSRG/pulls)
 
