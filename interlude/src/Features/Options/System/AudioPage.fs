@@ -26,15 +26,25 @@ type AudioPage() =
             SelectDropdown(Audio.list_devices () |> Array.map (fun d -> d.Index, d.ToString()), Setting.trigger Audio.change_device config.AudioDevice)
         )
 
-    static member RatesChangePitch() : PageSetting =
+    static member RatesChangePitchDown() : PageSetting =
         PageSetting(
-            %"system.audio_pitch_rates",
+            %"system.audio_pitch_rates_down",
             Checkbox(
-                options.AudioPitchRates
-                |> Setting.trigger (fun v -> Song.set_pitch_rates_enabled v)
+                options.AudioPitchRatesDown
+                |> Setting.trigger (fun v -> Song.set_pitch_rate_down_enabled v)
             )
         )
-            .Help(Help.Info("system.audio_pitch_rates"))
+            .Help(Help.Info("system.audio_pitch_rates_down"))
+
+    static member RatesChangePitchUp() : PageSetting =
+        PageSetting(
+            %"system.audio_pitch_rates_up",
+            Checkbox(
+                options.AudioPitchRatesUp
+                |> Setting.trigger (fun v -> Song.set_pitch_rate_up_enabled v)
+            )
+        )
+            .Help(Help.Info("system.audio_pitch_rates_up"))
 
     static member MenusMuffleSong() : PageSetting =
         PageSetting(%"system.menus_muffle_song",
@@ -65,10 +75,11 @@ type AudioPage() =
             .With(
                 AudioPage.AudioVolume().Pos(0),
                 AudioPage.AudioDevice().Pos(2),
-                AudioPage.RatesChangePitch().Pos(5),
-                AudioPage.MenusMuffleSong().Pos(7),
-                AudioPage.AudioOffset().Pos(10),
-                AudioPage.AutomaticOffset().Pos(12)
+                AudioPage.RatesChangePitchDown().Pos(5),
+                AudioPage.RatesChangePitchUp().Pos(7),
+                AudioPage.MenusMuffleSong().Pos(9),
+                AudioPage.AudioOffset().Pos(12),
+                AudioPage.AutomaticOffset().Pos(14)
             )
 
     override this.Title = Icons.SPEAKER + " " + %"system.audio"
