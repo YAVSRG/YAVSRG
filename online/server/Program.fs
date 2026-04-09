@@ -18,11 +18,24 @@ try
     Logging.Verbosity <- LoggingLevel.DEBUG
     Logging.Info "~~ Interlude.Web [%s] ~~" TAGLINE
 
+    let api_cert_path = Path.Combine("./secrets", SECRETS.ApiCert)
+    let socket_cert_path = Path.Combine("./secrets", SECRETS.SocketCert)
+
+    if not (File.Exists api_cert_path) then
+        Logging.Error "API Certificate could not be found @ %s" api_cert_path
+        Logging.Error "Make sure you're not running the server from the wrong starting directory"
+        Logging.Error "For first time setup, run the server with `yavsrg run_server_local` or `yavsrg run_server_docker`"
+    else if not (File.Exists socket_cert_path) then
+        Logging.Error "Socket Certificate could not be found at %s" socket_cert_path
+        Logging.Error "Make sure you're not running the server from the wrong starting directory"
+        Logging.Error "For first time setup, run the server with `yavsrg run_server_local` or `yavsrg run_server_docker`"
+    else
+
     let api_cert =
-        X509CertificateLoader.LoadPkcs12FromFile(Path.Combine("./secrets", SECRETS.ApiCert), SECRETS.ApiCertPassword)
+        X509CertificateLoader.LoadPkcs12FromFile(api_cert_path, SECRETS.ApiCertPassword)
 
     let socket_cert =
-        X509CertificateLoader.LoadPkcs12FromFile(Path.Combine("./secrets", SECRETS.SocketCert), SECRETS.SocketCertPassword)
+        X509CertificateLoader.LoadPkcs12FromFile(socket_cert_path, SECRETS.SocketCertPassword)
 
     Domain.Database.startup ()
 

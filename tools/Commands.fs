@@ -19,7 +19,7 @@ module Commands =
         ctx
             .WithCommand("locale_check", "Check locale for mistakes", (fun () -> Check.locale_check "en_GB" false))
             .WithCommand("locale_fix", "Tool to automatically add locale keys", (fun () -> Check.locale_check "en_GB" true))
-            .WithCommand("locale_rename", "Tool to rename locale keys/namespaces", "replaced_key", (fun arg -> Check.locale_rename "en_GB" arg))
+            .WithCommand("locale_rename", "Tool to rename locale keys/namespaces", "replaced_key", Check.locale_rename "en_GB")
             .WithCommand("check_linecounts", "Check for particularly large source code files", (fun () -> Check.check_linecounts ()))
             .WithCommand("check_simple_view", "Experimental tool to see condensed versions of all files", (fun () -> Check.simple_view_all ()))
             .WithCommand("format", "Format all source code files with Fantomas", (fun () -> Check.format_all_code ()))
@@ -37,8 +37,8 @@ module Commands =
             .WithCommand("generate_wiki_toc", "Generate markdown wiki table of contents", Wiki.generate_toc)
             .WithCommand("generate_site", "Generate site and wiki pages", Site.generate_site)
 
-            .WithCommand("server_gen_cert", "Generate certificate for local server testing", Server.generate_certs)
-            .WithCommand("server_run", "Runs the game server locally in docker", Server.run_in_docker)
+            .WithCommand("server_run_docker", "Runs the game server locally in docker", Server.run_in_docker)
+            .WithCommand("server_run_local", "Runs the game server locally", Server.run_local)
             .WithCommand("server_test_domain", "Generate markdown wiki table of contents", Server.run_domain_tests)
             .WithCommand("server_test_full", "Run entire suite of tests against server while it's running", Server.run_all_tests)
             .WithCommand("down_detector", "Ping several services Interlude depends on for status", Server.down_detector)

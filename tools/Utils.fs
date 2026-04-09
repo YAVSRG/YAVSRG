@@ -15,6 +15,7 @@ module Utils =
     let TOOLS_PATH = Path.Combine(YAVSRG_PATH, "tools")
     let ASSETS_PATH = Path.Combine(YAVSRG_PATH, "interlude", "assets")
     let SITE_PATH = Path.Combine(YAVSRG_PATH, "site")
+    let DOTNET_VERSION = "net9.0"
 
     let BUILD_RESOURCES_PATH =
         Path.Combine(YAVSRG_PATH, "interlude", "src", "Resources")
