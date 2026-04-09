@@ -7,12 +7,12 @@ Projects not mentioned are probably deliberately mentioned because there is noth
 If this is not up to date or you can't find what you're looking for, ask in [the Discord](https://yavsrg.net/discord)
 
 ## YAVSRG.CLI
-a CLI app with a bunch of build tools  
-The CI pipelines build it and then run commands like `yavsrg pack_win_x64` to create finished zipped builds of the game
-
-Has some tools to make it easier non-windows users to build and play the game without fiddling about
-
-Also has some tools for me for managing routine tasks like ensuring localisation coverage, adding skins to the repo, etc
+Contains meta-tools to help with working on other projects in this repository
+Can be installed as a `yavsrg` command on the command line, and contains tools to:
+- Create finished zipped builds of the game
+- Check translation files are up to date/perform renaming operations
+- Perform first-time setup for developers who want to build and run the client/server locally
+- Various tools just for me for maintenance purposes
 
 ## Prelude
 Core library for Interlude, it's a library which means its functions can be used independently of the game client  
@@ -25,9 +25,6 @@ It contains code for:
 - Score database storage
 - Chart caching, sorting, grouping, searching, filtering
 - Difficulty calculation and pattern analysis
-
-## Prelude.Tests
-Unit tests for prelude, there aren't many atm
 
 ## Prelude.Playground
 Console app where I write scripts to hand-test Prelude features
@@ -52,7 +49,10 @@ Consists of:
 
 ## Interlude.Web.Shared
 Contains the online protocol for Interlude client <-> Interlude server
-Both the socket protocol for sending packets live (for multiplayer) and the request formats for the HTTP API
+Both the socket protocol for sending packets live (for multiplayer) and the request formats for the Web API
 
 ## Interlude.Web
-Contains the web server for Interlude online features
+Contains the web server for Interlude online features, which hosts:
+- A discord bot primarily for admin commands and monitoring
+- Multiplayer lobby server
+- Web API and database for score submission
