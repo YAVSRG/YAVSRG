@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Mods
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
@@ -77,7 +78,8 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "Taps ~ M: %.2fms  •  SD: %.2fms"
+            sprintf "%s ~ M: %.2fms  •  SD: %.2fms"
+                (%"score.stats.taps")
                 (!stats).TapMean
                 (!stats).TapStandardDeviation
         )
@@ -86,17 +88,21 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(640.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "%.1fms earliest  •  +%.1fms latest  •  %.1f%% early"
+            sprintf "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
                 (fst (!stats).TapRange)
+                (%"score.stats.earliest")
                 (snd (!stats).TapRange)
+                (%"score.stats.latest")
                 (100.0 * (!stats).TapEarlyPercent)
+                (%"score.stats.early_percent")
         )
             .Color(fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text_subheading)
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(675.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "Releases ~ M: %.2fms  •  SD: %.2fms"
+            sprintf "%s ~ M: %.2fms  •  SD: %.2fms"
+                (%"score.stats.releases")
                 (!stats).ReleaseMean
                 (!stats).ReleaseStandardDeviation
         )
@@ -105,10 +111,13 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(715.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |* Text(fun () ->
-            sprintf "%.1fms earliest  •  +%.1fms latest  •  %.1f%% early"
+            sprintf "%.1fms %s  •  +%.1fms %s  •  %.1f%% %s"
                 (fst (!stats).ReleaseRange)
+                (%"score.stats.earliest")
                 (snd (!stats).ReleaseRange)
+                (%"score.stats.latest")
                 (100.0 * (!stats).ReleaseEarlyPercent)
+                (%"score.stats.early_percent")
         )
             .Color(fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text_subheading)
             .Align(Alignment.CENTER)
