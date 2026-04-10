@@ -174,7 +174,7 @@ type MainMenuScreen() =
                 Animation.Action(fun () -> splash_fade.Target <- 1.0f)
             ]
 
-        DiscordRPC.in_menus ("Main menu")
+        DiscordRPC.in_menus (%"discord_status.main_menu")
 
     override this.OnExit(next: ScreenType) =
         if next <> ScreenType.SplashScreen then

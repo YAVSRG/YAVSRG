@@ -209,7 +209,7 @@ type PlayScreen =
                     Background.dim 0.6f
                     Background.set_parallax_amount 240.0f
 
-                DiscordRPC.playing_timed ("Playing", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
+                DiscordRPC.playing_timed (%"discord_status.play", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
                 CURRENT_SESSION.AddPlaytime info.WithMods.Keys play_time

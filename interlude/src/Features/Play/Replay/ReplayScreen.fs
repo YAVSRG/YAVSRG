@@ -97,7 +97,7 @@ type ReplayScreen =
 
             override this.OnEnter p =
                 Song.change_rate rate
-                DiscordRPC.playing ("Watching a replay", SelectedChart.CACHE_DATA.Value.Title)
+                DiscordRPC.playing (%"discord_status.replay", SelectedChart.CACHE_DATA.Value.Title)
                 base.OnEnter p
 
             override this.OnExit p =

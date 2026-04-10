@@ -163,7 +163,7 @@ type MultiplayerScreen =
                 base.OnEnter(previous)
 
                 DiscordRPC.playing_timed (
-                    "Multiplayer",
+                    %"discord_status.play_multiplayer",
                     info.ChartMeta.Title,
                     info.ChartMeta.Length / SelectedChart.rate.Value
                 )

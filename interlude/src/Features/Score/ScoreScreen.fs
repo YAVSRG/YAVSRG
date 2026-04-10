@@ -3,6 +3,7 @@
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Prelude
 open Prelude.Gameplay.Scoring
 open Prelude.Data.User
 open Prelude.Data.User.Stats
@@ -114,7 +115,7 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
 
     override this.OnEnter prev =
         Toolbar.hide ()
-        DiscordRPC.in_menus ("Admiring a score")
+        DiscordRPC.in_menus (%"discord_status.score_screen")
 
     override this.OnExit next =
         score_info.Ruleset <- Rulesets.current

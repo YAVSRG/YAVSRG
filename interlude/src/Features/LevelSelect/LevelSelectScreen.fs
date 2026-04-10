@@ -239,7 +239,7 @@ type LevelSelectScreen() =
         Song.on_finish <- SongFinishAction.LoopFromPreview
 
         Tree.refresh ()
-        DiscordRPC.in_menus ("Choosing a song")
+        DiscordRPC.in_menus (%"discord_status.level_select")
 
     override this.OnExit(_: ScreenType) = Input.remove_listener ()
 
