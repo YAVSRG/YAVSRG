@@ -1,3 +1,4 @@
+#root
 beatmap_browser=Download osu! songs
 beatmap_browser.disclaimer=(Interlude is not affiliated with osu!, these downloads are provided through unofficial APIs)
 beatmap_browser.no_results=No results :(

@@ -59,7 +59,6 @@ type PacemakerSettings =
             Mode = PacemakerMode.Accuracy
         }
 
-[<RequireQualifiedAccess>]
 type ScoreGraphLineMode =
     | None = 0
     | Combo = 1
@@ -69,7 +68,6 @@ type ScoreGraphLineMode =
     | MA = 5
     | PA = 6
 
-[<RequireQualifiedAccess>]
 type ScoreGraphLineColor =
     | White = 0
     | Lamp = 1
@@ -200,7 +198,7 @@ type GameOptions =
         EnableExperiments: Setting<bool>
         EnableConsole: Setting<bool>
         Hotkeys: Dictionary<Hotkey, Bind>
-        GameplayBinds: (Bind array) array
+        GameplayBinds: Bind array array
 
         Preset1: Setting<Preset option>
         Preset2: Setting<Preset option>
@@ -379,17 +377,18 @@ module Options =
     let init() : unit =
         options <- load_important_json_file "Options" (Path.Combine(get_game_folder "Data", "options.json")) true
         options <- { options with Hotkeys = Hotkeys.init options.Hotkeys }
-        // todo: always load en_GB in and then other languages on top so they can incrementally replace en_GB
-
-        let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", options.Language.Value + ".txt")
-
-        if AVAILABLE_LANGUAGES.Contains options.Language.Value then
-            Localisation.load_locale (Interlude.Utils.get_locale options.Language.Value)
-        elif File.Exists(locale_path) then
-            use stream = File.OpenRead(locale_path)
-            Localisation.load_locale stream
-        else
-            Logging.Error "Unknown locale '%s'" options.Language.Value
+        
+        let get_locale_file(id: string) =
+            let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", id + ".txt")
+            if AVAILABLE_LANGUAGES.Contains id then
+                Interlude.Utils.get_embedded_locale id |> Some
+            elif File.Exists(locale_path) then
+                File.OpenRead(locale_path) :> Stream |> Some
+            else
+                Logging.Error "Locale not found '%s': It is not built in and there is no file @ %s" id locale_path
+                None
+                
+        Localisation.init(options.Language.Value, get_locale_file)
 
     let deinit () : unit =
         try
