@@ -57,9 +57,9 @@ module Background =
                                             for y = 0 to 49 do
                                                 yield
                                                     Color.FromArgb(
-                                                        int bmp.[w * x, h * x].R,
-                                                        int bmp.[w * x, h * x].G,
-                                                        int bmp.[w * x, h * x].B
+                                                        int bmp.[w * x, h * y].R,
+                                                        int bmp.[w * x, h * y].G,
+                                                        int bmp.[w * x, h * y].B
                                                     )
                                     }
                                     |> Seq.maxBy vibrance
@@ -121,7 +121,7 @@ module Background =
         background <-
             List.filter
                 (fun (sprite, fade, is_default) ->
-                    fade.Update elapsed_ms |> ignore
+                    fade.Update elapsed_ms
 
                     if fade.Target = 0.0f && fade.Value < 0.01f then
                         if not is_default then
@@ -136,7 +136,7 @@ module Background =
     let drawq (q: Quad, color: Color, depth: float32) : unit =
         Render.quad q Color.Black
         List.iter
-            (fun (bg: Sprite, (fade: Animation.Fade), is_default) ->
+            (fun (bg: Sprite, fade: Animation.Fade, _) ->
                 let color = color.O4a fade.Alpha
                 let pwidth = Render.width() + parallaxZ.Value * depth
                 let pheight = Render.height() + parallaxZ.Value * depth
