@@ -20,10 +20,9 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         CalloutCard(
             Callout.Normal
                 .Icon(Icons.ALERT_OCTAGON)
-                .Title("Attention")
-                .Body("The beatmap for this replay could not be found.")
-                .Body("This screen lets you manually try to import a replay IF\n - You are sure you currently have the right map selected\n - You are sure you have the right rate selected")
-                .Body("If you haven't reimported osu! charts since 0.7.27.6, you should and this warning will probably stop showing up."),
+                .Title(%"osu_replay_import.missing_map.title")
+                .Body(%"osu_replay_import.missing_map.body_i")
+                .Body(%"osu_replay_import.missing_map.body_ii"),
             Colors.red_accent,
             Colors.red.O3)
 
@@ -36,15 +35,15 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
     let import () : unit =
         match OsuReplay.to_score replay chart chart.FirstNote rate.Value with
         | Ok score -> show_replay score
-        | Error reason -> Notifications.error ("Replay import failed", reason)
+        | Error reason -> Notifications.error (%"osu_replay_import.failed", reason)
 
     override this.Content() =
         page_container()
-        |+ PageSetting("Rate", Slider(Setting.uom rate)).Pos(0)
-        |+ PageButton("Import!", import).Pos(3)
+        |+ PageSetting(%"osu_replay_import.rate", Slider(Setting.uom rate)).Pos(0)
+        |+ PageButton(%"osu_replay_import.import", import).Pos(3)
         |+ info.Pos(6, 9, PageWidth.Custom (info :> IWidth).Width)
         :> Widget
-    override this.Title = "Import replay"
+    override this.Title = %"osu_replay_import.missing_map"
 
 module Replay =
 
@@ -86,7 +85,7 @@ module Replay =
         | Some (chart, chart_meta, rate, first_note) ->
             match OsuReplay.to_score replay chart first_note rate with
             | Ok score -> show_replay replay.Player chart_meta chart score
-            | Error reason -> Notifications.error ("Replay import failed", reason)
+            | Error reason -> Notifications.error (%"osu_replay_import.failed", reason)
         | None ->
 
         // Strategy 2: Ask the user some details then assume it's the chart they have selected

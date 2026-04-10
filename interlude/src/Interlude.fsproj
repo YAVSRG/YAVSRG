@@ -110,7 +110,7 @@
     <Compile Include="Features\Gameplay\ScoreHelpers.fs" />
     <Compile Include="Features\Tables\Browser\DownloadMenu.fs" />
     <Compile Include="Features\Tables\Browser\Tables.fs" />
-    <Compile Include="Features\Tables\ChooseLevel.fs" />
+    <Compile Include="Features\Tables\SelectTableLevelPage.fs" />
     <Compile Include="Features\Tables\Suggestions.fs" />
     <Compile Include="Features\Tables\SelectTablePage.fs" />
     <Compile Include="Features\Pacemaker\State.fs" />
