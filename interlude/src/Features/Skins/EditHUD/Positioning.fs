@@ -5,8 +5,8 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Skins.HudLayouts
-open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Play
 open Interlude.Features.Skins
@@ -616,10 +616,10 @@ and PositionerContext =
         for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipHorizontal
             this.Recreate element
-        Notifications.action_feedback(Icons.REPEAT, "All elements flipped horizontally", sprintf "Press %O to flip it back" %%"hud_flip_horizontal_all")
+        Notifications.action_feedback(Icons.REPEAT, %"hud.horiontal_flip_all.success", [(%%"hud_flip_horizontal_all").ToString()] %> "hud.horizontal_flip_all.undo_hint")
 
     member this.VerticalFlipAll() =
         for element in HudElement.DRAW_ORDER do
             (HudElement.position_setting element) |> Setting.app _.FlipVertical
             this.Recreate element
-        Notifications.action_feedback(Icons.REPEAT, "All elements flipped vertically", sprintf "Press %O to flip it back" %%"hud_flip_vertical_all")
+        Notifications.action_feedback(Icons.REPEAT, %"hud.vertical_flip_all.success", [(%%"hud_flip_horizontal_all").ToString()] %> "hud.vertical_flip_all.undo_hint")
