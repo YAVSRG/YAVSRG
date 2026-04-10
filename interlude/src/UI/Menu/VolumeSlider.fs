@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open Percyqaz.Common
+open Prelude
 open Interlude.Options
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -55,4 +56,4 @@ type VolumeSlider() =
                 elif volume.Value < 0.05 then Icons.VOLUME
                 elif volume.Value < 0.4 then Icons.VOLUME_1
                 else Icons.VOLUME_2
-            Text.fill_b (Style.font, sprintf "%s Volume: %.0f%%" icon (volume.Value * 100.0), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
+            Text.fill_b (Style.font, sprintf "%s %s: %.0f%%" icon (%"system.audiovolume") (volume.Value * 100.0), volume_box.Shrink(10.0f, 5.0f), (Colors.white.O4a a, Colors.shadow_2.O4a a), Alignment.CENTER)
