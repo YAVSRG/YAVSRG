@@ -48,7 +48,7 @@ module WebServices =
                 async {
                     match! Async.AwaitTask(download_image_client.GetStreamAsync url) |> Async.Catch with
                     | Choice1Of2 stream -> return! Bitmap.from_stream_async true stream
-                    | Choice2Of2 exn -> return None
+                    | Choice2Of2 _ -> return None
                 }
         }
 

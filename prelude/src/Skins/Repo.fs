@@ -167,7 +167,7 @@ module SkinRepo =
         : SkinRepo * bool =
 
         let author = skin_meta.Author.Trim()
-        let editor = skin_meta.Editor |> Option.map (_.Trim())
+        let editor = skin_meta.Editor |> Option.map _.Trim()
 
         match repo.Skins |> List.tryFind (fun x -> x.Name = name) with
         | Some existing_group ->

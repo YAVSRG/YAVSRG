@@ -22,7 +22,7 @@ module Yaml =
             let line = List.head lines_remaining
             lines_remaining <- List.tail lines_remaining
 
-            let is_indented = line.StartsWith(" ") || line.StartsWith ("-")
+            let is_indented = line.StartsWith(" ") || line.StartsWith("-")
             let is_new_item = line.Trim().StartsWith("-")
 
             if not is_indented then
@@ -76,7 +76,7 @@ module Yaml =
     let get_string_or (key: string) (otherwise: string) (parsed: ParsedYamlObject) : string =
         match parsed.TryFind key with
         | Some (String s) -> s
-        | x -> otherwise
+        | _ -> otherwise
 
     let get_int (key: string) (parsed: ParsedYamlObject) : int =
         match parsed.TryFind key with
@@ -92,7 +92,7 @@ module Yaml =
             match Int32.TryParse(s, Globalization.CultureInfo.InvariantCulture) with
             | true, res -> res
             | _ -> failwithf "Failed to parse expected int '%s' for key '%s'" s key
-        | x -> otherwise
+        | _ -> otherwise
 
     let get_array<'T> (key: string) (parser: ParsedYamlNestedObject -> 'T) (parsed: ParsedYamlObject) : 'T list =
         match parsed.TryFind key with

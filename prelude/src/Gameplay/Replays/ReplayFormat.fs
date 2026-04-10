@@ -27,7 +27,7 @@ module Replay =
 
         bw.Write data.Length
 
-        for (struct (time, buttons)) in data do
+        for struct (time, buttons) in data do
             bw.Write(float32 time)
             bw.Write buttons
 

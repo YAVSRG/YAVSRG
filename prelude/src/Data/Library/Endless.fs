@@ -24,7 +24,7 @@ type SuggestionContext =
     }
     member this.LibraryViewContext: LibraryViewContext =
         {
-            Rate = let (_, rate) = this.BaseChart in rate
+            Rate = let _, rate = this.BaseChart in rate
             RulesetId = this.RulesetId
             Ruleset = this.Ruleset
             Library = this.Library
@@ -174,7 +174,7 @@ module EndlessModeState =
     let create () = { Playlist = ""; Queue = [] }
 
     let private shuffle_playlist_charts (items: 'T seq) =
-        let random = new Random()
+        let random = Random()
         items |> Seq.map (fun x -> x, random.Next()) |> Seq.sortBy snd |> Seq.map fst
 
     let queue_playlist (from: int) (name: string) (playlist: Playlist) (library: Library) (filter: FilteredSearch) (state: EndlessModeState) =

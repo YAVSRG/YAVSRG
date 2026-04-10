@@ -93,12 +93,12 @@ module OsuParity =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, (StoredReplay(as_interlude_replay)), TEST_CHART.Notes, 1.0f<rate>)
+        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, StoredReplay(as_interlude_replay), TEST_CHART.Notes, 1.0f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
             score.Events
-            |> Seq.map (_.Action)
+            |> Seq.map _.Action
             |> Seq.choose (
                 function
                 | Hit d -> if not d.Missed then Some d.Delta else None
@@ -275,12 +275,12 @@ module OsuParity =
         let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, (StoredReplay(replay_data)), TEST_CHART_2.Notes, 1.5f<rate>)
+        let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, StoredReplay(replay_data), TEST_CHART_2.Notes, 1.5f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
             score.Events
-            |> Seq.map (_.Action)
+            |> Seq.map _.Action
             |> Seq.choose (
                 function
                 | Hit d -> if not d.Missed then Some d.Delta else None

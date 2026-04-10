@@ -101,6 +101,8 @@ module DbCharts =
         Assert.AreEqual(Some TEST_CHART_META, result)
 
         Assert.AreEqual(None, DbCharts.get_meta "doesntexist" db)
+        
+        conn.Dispose()
 
     [<Test>]
     let RoundTrip_Meta_With_NaN() =
@@ -111,6 +113,8 @@ module DbCharts =
         DbCharts.save TEST_CHART_META_NAN TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
         Assert.AreEqual(Some TEST_CHART_META_NAN_FIXED, result)
+        
+        conn.Dispose()
 
     [<Test>]
     let RoundTrip_Chart() =
@@ -122,6 +126,8 @@ module DbCharts =
         | Ok chart ->
             Assert.AreEqual(TEST_CHART_META.Hash, Chart.hash chart)
         | Error reason -> Assert.Fail(reason)
+        
+        conn.Dispose()
 
     [<Test>]
     let Chart_DoesntExist () =

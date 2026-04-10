@@ -48,7 +48,7 @@ module Validation =
 
     [<Test>]
     let OsuOd8_Valid () =
-        let ruleset = OsuMania.create 8.0f (OsuMania.Mode.NoMod)
+        let ruleset = OsuMania.create 8.0f OsuMania.Mode.NoMod
 
         match Ruleset.check ruleset with
         | Ok _ -> Assert.Pass()

@@ -24,7 +24,7 @@ module LibraryView =
         (ctx: LibraryViewContext)
         : SortedGroups =
 
-        let groups = new Dictionary<string, Group>()
+        let groups = Dictionary<string, Group>()
 
         for name in ctx.Library.Collections.Folders.Keys do
             let collection = ctx.Library.Collections.Folders.[name]
@@ -107,7 +107,7 @@ module LibraryView =
         (table: Table)
         (ctx: LibraryViewContext)
         : SortedGroups =
-        let groups = new Dictionary<int * string, Group>()
+        let groups = Dictionary<int * string, Group>()
 
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
@@ -146,7 +146,7 @@ module LibraryView =
         (ctx: LibraryViewContext)
         : SortedGroups =
 
-        let found_groups = new Dictionary<int * string, GroupWithSorting>()
+        let found_groups = Dictionary<int * string, GroupWithSorting>()
 
         for chart_meta in filter_by.Apply ctx.Library.Charts.Cache.Values do
             let group_key = group_by (chart_meta, ctx)
@@ -175,7 +175,7 @@ module LibraryView =
         (ctx: LibraryViewContext)
         : SortedGroups =
 
-        let found_groups = new Dictionary<string, GroupWithSorting>()
+        let found_groups = Dictionary<string, GroupWithSorting>()
 
         for chart_meta in filter_by.Apply ctx.Library.Charts.Cache.Values do
             for pack in chart_meta.Packs do

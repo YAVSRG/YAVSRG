@@ -1,6 +1,5 @@
 ﻿module Caramell
 
-open System
 open System.IO
 open Prelude
 open Prelude.Formats.Osu

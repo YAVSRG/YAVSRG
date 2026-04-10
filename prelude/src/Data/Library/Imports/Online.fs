@@ -81,7 +81,7 @@ module OnlineImports =
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
                 return! download_osu_set (url, chart_db, user_db, progress)
 
-            | ChartOrigin.Quaver quaver ->
+            | ChartOrigin.Quaver _ ->
                 progress Faulted
                 return Error "No mirror exists for Quaver"
 

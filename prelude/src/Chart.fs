@@ -283,7 +283,7 @@ module Chart =
 
     let private find_bpm_durations (points: TimeArray<BPM>) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 
-        let data = new Dictionary<float32<ms / beat>, Time>()
+        let data = Dictionary<float32<ms / beat>, Time>()
 
         let points = points |> List.ofSeq
 

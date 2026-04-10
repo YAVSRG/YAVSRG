@@ -69,7 +69,7 @@ module internal Shared =
 
         match
             data.PersonalBests
-            |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
+            |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate
         with
         | Some (i, _, _) -> i, ctx.Ruleset.GradeName i
         | None -> -2, "No grade achieved"
@@ -79,7 +79,7 @@ module internal Shared =
 
         match
             data.PersonalBests
-            |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
+            |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate
         with
         | Some (i, _, _) -> i, ctx.Ruleset.LampName i
         | None -> -2, "No lamp achieved"

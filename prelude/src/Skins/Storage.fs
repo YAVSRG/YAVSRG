@@ -410,8 +410,8 @@ type Storage(storage: StorageType) =
             |> Seq.choose (TextureFileName.try_parse_grid name)
             |> List.ofSeq
         with
-        | x :: y :: _ as xs -> Error (sprintf "Multiple textures for '%s': %s" name (xs |> Seq.map (TextureFileName.to_grid name) |> String.concat ", "))
-        | (columns, rows) :: [] -> Ok(columns, rows, true)
+        | _ :: _ :: _ as xs -> Error (sprintf "Multiple textures for '%s': %s" name (xs |> Seq.map (TextureFileName.to_grid name) |> String.concat ", "))
+        | [ (columns, rows) ] -> Ok(columns, rows, true)
         | [] ->
 
         let loose =
@@ -804,7 +804,7 @@ type Storage(storage: StorageType) =
                     for col in 0 .. columns - 1 do
                         File.Delete(Path.Combine(f, Path.Combine path, TextureFileName.to_loose name (col, row)))
 
-    member private this.MutateLooseTexture((col, row), action: (IImageProcessingContext -> IImageProcessingContext), name: string, [<ParamArray>] path: string array) : bool =
+    member private this.MutateLooseTexture((col, row), action: IImageProcessingContext -> IImageProcessingContext, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -837,7 +837,7 @@ type Storage(storage: StorageType) =
             Logging.Warn "Couldn't find file '%s'" filename
             false
 
-    member this.MutateLooseTextures(action: (IImageProcessingContext -> IImageProcessingContext), name: string, [<ParamArray>] path: string array) : bool =
+    member this.MutateLooseTextures(action: IImageProcessingContext -> IImageProcessingContext, name: string, [<ParamArray>] path: string array) : bool =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
         | Folder f ->
@@ -883,7 +883,7 @@ type Storage(storage: StorageType) =
     member this.CycleTextures(positions: (int * int) array, name: string, [<ParamArray>] path: string array) =
         match storage with
         | Embedded _ -> failwith "Not supported for zipped content"
-        | Folder f ->
+        | Folder _ ->
 
         match this.DetectTextureFormat(name, path) with
         | Error reason ->
@@ -900,7 +900,7 @@ type Storage(storage: StorageType) =
 
         let EXTRA_FILE = sprintf "%s.png.old" name
         let mutable last_file = EXTRA_FILE
-        for (col, row) in positions do
+        for col, row in positions do
             let filename = TextureFileName.to_loose name (col, row)
             this.RenameFile(filename, last_file, path)
             last_file <- filename

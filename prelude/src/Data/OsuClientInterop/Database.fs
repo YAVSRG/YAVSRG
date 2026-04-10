@@ -114,7 +114,7 @@ module internal OsuDbHelpers =
         if count < 0 then
             failwith "Something has gone wrong reading star ratings (meaning misaligned bytes earlier on)"
 
-        Array.init count (fun i -> read_int_double_pair br)
+        Array.init count (fun _ -> read_int_double_pair br)
 
     let write_string (bw: BinaryWriter) (s: string) =
         if s = "" then
@@ -215,7 +215,7 @@ type OsuDatabase_Beatmap =
                 DrainTimeSeconds = read_int br
                 TotalTimeMilliseconds = read_int br
                 PreviewTimeMilliseconds = read_int br
-                TimingPoints = Array.init (read_int br) (fun i -> read_timing_point br)
+                TimingPoints = Array.init (read_int br) (fun _ -> read_timing_point br)
                 DifficultyID = read_int br
                 BeatmapID = read_int br
                 ThreadID = read_int br
@@ -269,7 +269,7 @@ type OsuDatabase =
             Beatmaps =
                 let count = read_int br
                 Logging.Info "osu! Database header says there are %i beatmaps to read" count
-                Array.init count (fun i -> OsuDatabase_Beatmap.Read version br)
+                Array.init count (fun _ -> OsuDatabase_Beatmap.Read version br)
             UserPermissions = read_int br
         }
 
@@ -371,7 +371,7 @@ type OsuScoreDatabase_Beatmap =
     static member Read(br: BinaryReader) =
         {
             Hash = read_string br
-            Scores = Array.init (read_int br) (fun i -> OsuScoreDatabase_Score.Read(None, br))
+            Scores = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Score.Read(None, br))
         }
 
 type OsuScoreDatabase =
@@ -382,5 +382,5 @@ type OsuScoreDatabase =
     static member Read(br: BinaryReader) =
         {
             Version = read_int br
-            Beatmaps = Array.init (read_int br) (fun i -> OsuScoreDatabase_Beatmap.Read br)
+            Beatmaps = Array.init (read_int br) (fun _ -> OsuScoreDatabase_Beatmap.Read br)
         }

@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 
 module Localisation =
-    let private mapping = new Dictionary<string, string>()
+    let private mapping = Dictionary<string, string>()
 
     let load_locale (source: Stream) : unit =
 

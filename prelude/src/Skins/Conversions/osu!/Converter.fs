@@ -159,7 +159,7 @@ module OsuSkinConverter =
 
     let arrow_fix_4k (images: Bitmap list list) : Bitmap list list =
         match images with
-        | left :: down :: up :: right :: [] ->
+        | left :: down :: up :: [ right ] ->
             [
                 left |> List.map (Image.rotate RotateMode.Rotate270)
                 down

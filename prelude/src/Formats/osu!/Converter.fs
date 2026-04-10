@@ -122,7 +122,7 @@ module Osu_To_Interlude =
 
     let private find_bpm_durations (points: TimingPoint list) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 
-        let data = new Dictionary<float32<ms / beat>, Time>()
+        let data = Dictionary<float32<ms / beat>, Time>()
 
         let uninherited =
             points
@@ -154,7 +154,7 @@ module Osu_To_Interlude =
 
         let most_common_mspb =
             (find_bpm_durations points end_time)
-                .OrderByDescending(fun p -> p.Value)
+                .OrderByDescending(_.Value)
                 .First()
                 .Key
 
@@ -194,7 +194,7 @@ module Osu_To_Interlude =
 
             let rec find_background_file e =
                 match e with
-                | (Background(bg, _, _)) :: _ -> bg
+                | Background(bg, _, _) :: _ -> bg
                 | _ :: es -> find_background_file es
                 | [] -> ""
 

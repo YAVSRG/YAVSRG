@@ -61,7 +61,7 @@ module CombinedStatLine =
             | x :: y :: xs ->
                 (float32 x.Density - float32 y.Density) * duration_value x.Duration
                 + v (y :: xs)
-            | x :: [] ->
+            | [ x ] ->
                 float32 x.Density * duration_value x.Duration
             | [] -> 0.0f
         v stats * 150.0f

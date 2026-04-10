@@ -10,7 +10,7 @@ module ModState =
 
     open Mods
 
-    let private seed_generation = new Random()
+    let private seed_generation = Random()
 
     let cycle (id: string) (mods: ModState) : ModState =
         if mods.ContainsKey id then
@@ -31,7 +31,7 @@ module ModState =
                 match AVAILABLE_MODS.[id].Type with
                 | Stateless
                 | MultipleModes _ -> 0L
-                | RandomSeed -> (seed_generation.Next(-Int32.MinValue,0))
+                | RandomSeed -> seed_generation.Next(-Int32.MinValue,0)
                 | ColumnSwap ->
                     ColumnSwap.parse "1234123"
                     |> Percyqaz.Common.Combinators.expect
@@ -84,7 +84,7 @@ module ModState =
             sprintf "%.2fx" rate
             :: (mods
                 |> in_priority_order
-                |> Seq.map (fun (id, m, state) -> m.Shorthand state)
+                |> Seq.map (fun (_, m, state) -> m.Shorthand state)
                 |> List.ofSeq)
         )
 

@@ -120,7 +120,7 @@ module UserDatabase =
     let save_score (chart_id: string) (score: Score) (db: UserDatabase) =
         lock db.LockObject
         <| fun () ->
-            DbScores.save chart_id score db.Database |> ignore
+            DbScores.save chart_id score db.Database
 
             match get_chart_data_cached chart_id db with
             | None -> ()
@@ -164,7 +164,7 @@ module UserDatabase =
             for chart_id, scores in DbScores.fast_load db.Database do
                 match get_chart_data_cached chart_id db with
                 | Some existing ->
-                    assert (existing.Scores.IsEmpty)
+                    assert existing.Scores.IsEmpty
                     existing.Scores <- scores
                 | None -> db.Cache.Add(chart_id, ChartSaveData(chart_id, default_db_data, db, Scores = scores))
 

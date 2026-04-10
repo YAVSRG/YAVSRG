@@ -61,7 +61,7 @@ module PatternStatLine =
             | x :: y :: xs ->
                 (float32 x.BPM - float32 y.BPM) * duration_value x.Duration
                 + v (y :: xs)
-            | x :: [] ->
+            | [ x ] ->
                 float32 x.BPM * duration_value x.Duration
             | [] -> 0.0f
         v stats * 10.0f

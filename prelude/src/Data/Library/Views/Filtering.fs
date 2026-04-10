@@ -57,7 +57,7 @@ module FilterParts =
     let parse (str: string) =
         match run filter (str.Trim()) with
         | Success(x, _, _) -> x
-        | Failure(f, _, _) -> [ Impossible ]
+        | Failure _ -> [ Impossible ]
 
 type Filter =
     {

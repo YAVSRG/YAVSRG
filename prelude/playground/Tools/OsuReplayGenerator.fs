@@ -61,9 +61,8 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
     // requires osu! to be open already
 
     Diagnostics.Process
-        .Start(new Diagnostics.ProcessStartInfo(file_name, UseShellExecute = true))
+        .Start(Diagnostics.ProcessStartInfo(file_name, UseShellExecute = true))
         .WaitForExit()
-    |> ignore
 
     let beatmap_hash = Beatmap.Hash beatmap
 
@@ -79,7 +78,7 @@ let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: floa
     bw.Close()
 
     Diagnostics.Process
-        .Start(new Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
+        .Start(Diagnostics.ProcessStartInfo("replay.osr", UseShellExecute = true))
         .WaitForExit()
 
 [<Json.AutoCodec(false)>]
@@ -157,7 +156,7 @@ let run_experiment () =
             Threading.Thread.Sleep(2000)
             if HANDS_FREE_AUTOMATION then
                 Diagnostics.Process
-                    .Start(new Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
+                    .Start(Diagnostics.ProcessStartInfo("click_replay_button.ahk", UseShellExecute = true))
                     .WaitForExit()
                 Threading.Thread.Sleep(8000)
             else

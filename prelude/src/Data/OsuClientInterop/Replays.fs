@@ -76,12 +76,12 @@ module OsuReplay =
             sprintf
                 "0|256|500|0,0|256|500|0,%s,-12345|0|0|32767"
                 input_as_replay_string
-            |> Text.Encoding.UTF8.GetBytes
+            |> Encoding.UTF8.GetBytes
 
         use input = new MemoryStream(raw)
         use output = new MemoryStream()
 
-        let encode = new LZMA.Encoder()
+        let encode = LZMA.Encoder()
         encode.WriteCoderProperties(output)
         output.Write(BitConverter.GetBytes(input.Length), 0, 8)
         encode.Code(input, output, input.Length, -1, null)

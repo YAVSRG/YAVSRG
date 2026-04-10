@@ -106,7 +106,7 @@ type HeadTailCombineRule =
 type HoldMechanics =
     | CombineHeadAndTail of HeadTailCombineRule
     | OnlyRequireHold of release_window: GameplayTime
-    | JudgeReleasesSeparately of windows: ((GameplayTime * GameplayTime) option) array * judgement_if_overheld: int
+    | JudgeReleasesSeparately of windows: (GameplayTime * GameplayTime) option array * judgement_if_overheld: int
     | OnlyJudgeReleases of judgement_if_dropped: int
     member internal this.Clone =
         match this with
@@ -473,7 +473,7 @@ module Ruleset =
                 |> Array.map (fun l ->
                     match l.Requirement with
                     | LampRequirement.JudgementAtMost(x, c) -> { l with Requirement = LampRequirement.JudgementAtMost(replace_judgement x, c) }
-                    | LampRequirement.ComboBreaksAtMost n -> l
+                    | LampRequirement.ComboBreaksAtMost _ -> l
                 )
             Grades = ruleset.Grades
             HitMechanics =

@@ -13,7 +13,7 @@ module Mods =
             { Mod.Default with
                 Status = ModStatus.Ranked
                 Exclusions = [ "shuffle"; "random"; "column_swap" ]
-                Apply = fun _ mc -> Mirror.apply mc
+                Apply = fun _ -> Mirror.apply
                 Shorthand = fun _ -> "MR"
             }
 
@@ -21,7 +21,7 @@ module Mods =
             { Mod.Default with
                 Status = ModStatus.Unranked
                 Type = RandomSeed
-                Apply = fun s mc -> Randomise.shuffle (int32 s) mc
+                Apply = fun s -> Randomise.shuffle (int32 s)
                 Exclusions = [ "random"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "SHF"
             }
@@ -30,7 +30,7 @@ module Mods =
             { Mod.Default with
                 Status = ModStatus.Unranked
                 Type = RandomSeed
-                Apply = fun s mc -> Randomise.randomise (int32 s) mc
+                Apply = fun s -> Randomise.randomise (int32 s)
                 Exclusions = [ "shuffle"; "mirror"; "column_swap" ]
                 Shorthand = fun _ -> "RD"
             }
@@ -38,7 +38,7 @@ module Mods =
             "nosv",
             { Mod.Default with
                 Status = ModStatus.Unranked
-                Apply = fun _ mc -> NoSV.apply mc
+                Apply = fun _ -> NoSV.apply
                 Shorthand = fun _ -> "NSV"
             }
 
@@ -85,7 +85,7 @@ module Mods =
                 Status = ModStatus.Offline
                 Type = ColumnSwap
                 Exclusions = [ "shuffle"; "random"; "mirror" ]
-                Apply = fun s mc -> ColumnSwap.apply (ColumnSwap.unpack s) mc
+                Apply = fun s -> ColumnSwap.apply (ColumnSwap.unpack s)
                 Shorthand = fun state -> sprintf "[%s]" (ColumnSwap.format (ColumnSwap.unpack state))
             }
         ]

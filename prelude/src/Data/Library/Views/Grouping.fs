@@ -15,7 +15,7 @@ module Grouping =
     let modes: IDictionary<string, GroupMethod> =
         dict
             [
-                "none", Normal <| fun (c, _) -> 0, "No grouping"
+                "none", Normal <| fun (_, _) -> 0, "No grouping"
                 "pack", Packs
                 "collection", Collections
                 "level", Levels
@@ -28,7 +28,7 @@ module Grouping =
                 "artist", Normal <| fun (c, _) -> 0, first_character c.Artist
                 "creator", Normal <| fun (c, _) -> 0, first_character c.Creator
                 "keymode", Normal <| fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
-                "patterns", Normal <| fun (c, ctx) -> 0, c.Patterns.Category
+                "patterns", Normal <| fun (c, _) -> 0, c.Patterns.Category
             ]
 
 type Group =

@@ -81,7 +81,7 @@ module Implementation =
     [<Test>]
     let Inverse_CreatesValidChart() =
 
-        let inverted, _ = Inverse.apply (0.5f<beat>) (ModdedChartInternal.OfChart SAMPLE_CHART)
+        let inverted, _ = Inverse.apply 0.5f<beat> (ModdedChartInternal.OfChart SAMPLE_CHART)
 
         match Chart.check { SAMPLE_CHART with Notes = inverted.Notes } with
         | Ok _ -> Assert.Pass()

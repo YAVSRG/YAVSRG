@@ -23,7 +23,7 @@ let main () =
                     | Ok { Chart = chart } ->
                         match Chart.check chart with
                         | Error msg -> Logging.Error "%s" msg
-                        | Ok chart -> ()
+                        | Ok _ -> ()
                     | Error skipped_reason -> printfn "%A" skipped_reason
 
     Logging.Info "Complete!"

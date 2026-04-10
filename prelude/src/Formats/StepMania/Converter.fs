@@ -95,11 +95,11 @@ module StepMania_To_Interlude =
         let mutable stops = stops
         let meter = 4<beat>
         let fmeter = float32 meter * 1.0f<beat>
-        let states = new List<TimeItem<NoteRow>>()
-        let points = new List<TimeItem<BPM>>()
+        let states = List<TimeItem<NoteRow>>()
+        let points = List<TimeItem<BPM>>()
         let mutable ln: Bitmask = 0us
         let mutable now = start
-        let (_, b) = List.head bpms
+        let _, b = List.head bpms
 
         points.Add(
             {
@@ -131,7 +131,7 @@ module StepMania_To_Interlude =
                 let beat = total_beats + float32 i * fmeter / l
 
                 while ((not (List.isEmpty stops)) && fst (List.head stops) <= beat) do
-                    let (_, s) = List.head stops in
+                    let _, s = List.head stops in
                     now <- now + s * 1000.0f<ms>
                     stops <- List.tail stops
                     point_at_end_of_measure <- true
@@ -180,7 +180,7 @@ module StepMania_To_Interlude =
                     now <- now + ms_per_beat * (hi - lo)
                     lo <- hi
                     point_at_end_of_measure <- true
-                    let (_, b) = List.head bpms in
+                    let _, b = List.head bpms in
 
                     points.Add(
                         {
@@ -324,7 +324,7 @@ module StepMania_To_Interlude =
 
         let convert_difficulty (diff: StepManiaChart) : Result<ImportChart, SkippedConversion> =
             try
-                let (keys, notes, bpm) =
+                let keys, notes, bpm =
                     convert_measures diff.STEPSTYPE diff.NOTES sm.BPMS sm.STOPS (-sm.OFFSET * 1000.0f<ms>)
 
                 if notes.Length = 0 then

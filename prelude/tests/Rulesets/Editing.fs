@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
-open Prelude
 open Prelude.Gameplay.Rulesets
 
 module Editing =

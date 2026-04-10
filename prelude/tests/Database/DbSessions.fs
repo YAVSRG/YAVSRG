@@ -12,6 +12,8 @@ module DbSessions =
 
         let result = DbSessions.get_all db
         Assert.IsEmpty(result)
+        
+        conn.Dispose()
 
     [<Test>]
     let RoundTrip () =
@@ -42,6 +44,8 @@ module DbSessions =
         Assert.IsNotEmpty(result)
         Assert.AreEqual(session, result.[0])
         Assert.AreEqual(1, result.Length)
+        
+        conn.Dispose()
 
     [<Test>]
     let Idempotence () =
@@ -75,3 +79,5 @@ module DbSessions =
         Assert.IsNotEmpty(result)
         Assert.AreEqual(session, result.[0])
         Assert.AreEqual(1, result.Length)
+        
+        conn.Dispose()

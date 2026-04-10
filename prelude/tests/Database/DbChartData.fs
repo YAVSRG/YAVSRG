@@ -3,7 +3,6 @@
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude
-open Prelude.Gameplay
 open Prelude.Data.User
 
 module DbChartData =

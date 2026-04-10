@@ -119,5 +119,5 @@ type ChartMeta =
                 else 0
             DateAdded = timestamp
             Rating = difficulty.Overall
-            Patterns = (PatternReport.from_chart(difficulty, chart))
+            Patterns = PatternReport.from_chart(difficulty, chart)
         }

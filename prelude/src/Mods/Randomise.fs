@@ -30,7 +30,7 @@ module Randomise =
             let suitable_columns =
                 column_last_used
                 |> Seq.indexed
-                |> Seq.filter (fun (i, t) -> let time_ago = (now - t) in gap_size < time_ago * 1.3f && gap_size > time_ago * 0.7f )
+                |> Seq.filter (fun (_, t) -> let time_ago = (now - t) in gap_size < time_ago * 1.3f && gap_size > time_ago * 0.7f )
                 |> Seq.map fst
                 |> Array.ofSeq
             if suitable_columns.Length > 0 then
@@ -40,7 +40,7 @@ module Randomise =
             let fallback_columns =
                 column_last_used
                 |> Seq.indexed
-                |> Seq.filter (fun (i, t) -> t < now )
+                |> Seq.filter (fun (_, t) -> t < now )
                 |> Seq.sortBy snd
                 |> Seq.map fst
                 |> Array.ofSeq

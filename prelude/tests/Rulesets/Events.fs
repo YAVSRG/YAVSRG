@@ -1287,8 +1287,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test(Description = "It is impossible to hit notes backwards in osu!mania (stable)")>]
@@ -1317,8 +1317,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test(Description = "Etterna uses nearest note, it is known that you can hit notes backwards")>]
@@ -1347,8 +1347,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test>]
@@ -1376,8 +1376,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test>]
@@ -1405,8 +1405,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test>]
@@ -1434,8 +1434,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     let SIMPLE_RULESET : Ruleset =
@@ -1490,8 +1490,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test>]
@@ -1524,8 +1524,8 @@ module Events =
         )
 
         Assert.AreEqual(
-            event_processing.Events |> Seq.map (_.Time),
-            event_processing.Events |> Seq.map (_.Time) |> Seq.sort
+            event_processing.Events |> Seq.map _.Time,
+            event_processing.Events |> Seq.map _.Time |> Seq.sort
         )
 
     [<Test>]

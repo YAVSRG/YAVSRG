@@ -55,7 +55,7 @@ type ColorConfig =
     static member Default =
         {
             Style = ColorScheme.Column
-            Colors = Array.init 9 (fun i -> Array.init 10 byte)
+            Colors = Array.init 9 (fun _ -> Array.init 10 byte)
             UseGlobalColors = true
         }
 

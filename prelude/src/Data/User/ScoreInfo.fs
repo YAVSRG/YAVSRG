@@ -38,7 +38,7 @@ type ScoreInfo =
     }
     member this.Ruleset
         with get () = this.Scoring.Ruleset
-        and set (ruleset) =
+        and set ruleset =
             let scoring =
                 ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplay this.Replay) this.WithMods.Notes this.Rate
 

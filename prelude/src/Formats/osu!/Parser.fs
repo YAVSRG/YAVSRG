@@ -26,7 +26,7 @@ type Beatmap =
     }
     member this.Filename =
         let clean =
-            String.filter (fun c -> System.Char.IsWhiteSpace c || System.Char.IsLetterOrDigit c)
+            String.filter (fun c -> Char.IsWhiteSpace c || Char.IsLetterOrDigit c)
 
         sprintf
             "%s - %s (%s) [%s].osu"
@@ -369,8 +369,8 @@ module OsuParser =
             // I have ruled to use a stable sort (`Seq.sortBy`)
             //   This means stacked timing points will stay in the order they are in the .osu file after being sorted
             // This gives a defined behaviour to my parse and conversion but anyone writing their own should be aware that it's UB
-            Objects = objects |> Seq.sortBy (_.Time) |> List.ofSeq
-            Timing = timing |> Seq.sortBy (_.Time) |> List.ofSeq
+            Objects = objects |> Seq.sortBy _.Time |> List.ofSeq
+            Timing = timing |> Seq.sortBy _.Time |> List.ofSeq
         }
 
 type Beatmap with

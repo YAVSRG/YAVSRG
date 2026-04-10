@@ -27,14 +27,14 @@ module Sorting =
                 "grade", fun (x, ctx) ->
                     match
                         (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
-                        |> Bests.ruleset_best_above ctx.RulesetId (_.Grade) ctx.Rate
+                        |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Rating
                     | None -> "", -2.0f, x.Rating
                 "lamp", fun (x, ctx) ->
                     match
                         (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
-                        |> Bests.ruleset_best_above ctx.RulesetId (_.Lamp) ctx.Rate
+                        |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate
                     with
                     | Some (i, _, _) -> "", float32 i, x.Rating
                     | None -> "", -2.0f, x.Rating

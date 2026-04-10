@@ -1,10 +1,7 @@
 ﻿namespace Prelude.Calculator.Patterns
 
 open System.IO
-open Percyqaz.Common
 open Prelude
-open Prelude.Charts
-open Prelude.Calculator
 open Prelude.Calculator.Patterns
 
 [<AutoOpen>]

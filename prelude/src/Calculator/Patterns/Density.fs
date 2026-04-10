@@ -21,7 +21,7 @@ module Density =
             for { Time = t; Data = row } in chart.Notes do
                 for k = 0 to chart.Keys - 1 do
                     if row.[k] = NoteType.NORMAL || row.[k] = NoteType.HOLDHEAD then
-                        column_densities.[k] <- note ((t - column_sinces.[k])) column_densities.[k]
+                        column_densities.[k] <- note (t - column_sinces.[k]) column_densities.[k]
                         column_sinces.[k] <- t
 
                 yield Array.max column_densities

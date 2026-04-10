@@ -50,7 +50,7 @@ module State =
     [<Test>]
     let Check() =
 
-        match ModState.check (Map.empty) with
+        match ModState.check Map.empty with
         | Ok ModStatus.Ranked -> ()
         | unexpected -> Assert.Fail("Expected Ranked status", unexpected)
 

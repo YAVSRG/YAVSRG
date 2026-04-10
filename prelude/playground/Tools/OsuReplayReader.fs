@@ -55,8 +55,8 @@ let private compare_interlude_implementation_to_osu
                 + score_data.CountMiss
             )
 
-        g_300 * float (score_data.CountGeki)
-        + 300.0 * float (score_data.Count300)
+        g_300 * float score_data.CountGeki
+        + 300.0 * float score_data.Count300
         + 200.0 * float score_data.CountKatu
         + 100.0 * float score_data.Count100
         + 50.0 * float score_data.Count50

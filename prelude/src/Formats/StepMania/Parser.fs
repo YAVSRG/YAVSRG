@@ -91,7 +91,7 @@ module StepmaniaParser =
                     { s with
                         STOPS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b))
                     }
-                | Failure(error, _, _) -> s
+                | Failure _ -> s
             | "SAMPLESTART", v :: _ when v <> "" -> { s with SAMPLESTART = float32 v }
             | "SAMPLELENGTH", v :: _ when v <> "" -> { s with SAMPLELENGTH = float32 v }
             | "DISPLAYBPM", "*" :: _ ->

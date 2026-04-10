@@ -5,7 +5,6 @@ open System.IO
 open System.Diagnostics
 open SixLabors.ImageSharp
 open System.Drawing
-open System.Collections.Generic
 open Percyqaz.Data
 open Percyqaz.Common
 
@@ -55,10 +54,10 @@ module Common =
             let cdc = ctx.GetCodec<byte * byte * byte * byte>()
 
             fun _ json ->
-                let (a, r, g, b) = cdc.FromDefault json
+                let a, r, g, b = cdc.FromDefault json
                 Color.FromArgb(int a, int r, int g, int b)
 
-        override this.Default(ctx: Json.Context) = fun () -> Color.White
+        override this.Default(_: Json.Context) = fun () -> Color.White
 
     /// Takes a function and returns an equivalent function BUT if given the same input repeatedly it will reuse the previous value instead of recalculating
     /// Used to optimise repeated calls to chart calculations where you are likely to make several for one selected chart before changing to another
@@ -143,7 +142,7 @@ module Common =
             let X = C * (1.0f - MathF.Abs((H * 6.0f) %% 2.0f - 1.0f))
             let m = V - C
 
-            let (r, g, b) =
+            let r, g, b =
                 if H < 1.0f / 6.0f then (C, X, 0.0f)
                 elif H < 2.0f / 6.0f then (X, C, 0.0f)
                 elif H < 3.0f / 6.0f then (0.0f, C, X)
@@ -194,7 +193,7 @@ module Common =
             with _ -> None
 
     let open_directory (path: string) =
-        ProcessStartInfo("file://" + System.IO.Path.GetFullPath path, UseShellExecute = true)
+        ProcessStartInfo("file://" + Path.GetFullPath path, UseShellExecute = true)
         |> Process.Start
         |> ignore
 

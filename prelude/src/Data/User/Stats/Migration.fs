@@ -22,7 +22,7 @@ module private Migration =
             let data = UserDatabase.get_chart_data chart_meta.Hash database
             match data.PersonalBests.TryFind(sc_j4_id) with
             | Some pbs ->
-                for (acc, rate, _) in pbs.Accuracy do
+                for acc, rate, _ in pbs.Accuracy do
                     KeymodeSkillBreakdown.score chart_meta.Patterns acc rate TOTAL_STATS.KeymodeSkills.[chart_meta.Keys - 3] |> ignore
             | None -> ()
 
@@ -59,7 +59,7 @@ module private Migration =
                         match data.PersonalBests.TryFind(sc_j4_id) with
                         | Some pbs ->
                             match PersonalBests.get_best_above score.Rate pbs.Accuracy with
-                            | Some (acc, rate, _) ->
+                            | Some (acc, _, _) ->
                                 KeymodeSkillBreakdown.score chart_meta.Patterns acc score.Rate skills.[chart_meta.Keys - 3] |> ignore
                             | None -> ()
                         | None -> ()
