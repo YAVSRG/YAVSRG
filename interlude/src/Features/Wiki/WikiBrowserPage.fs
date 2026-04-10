@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Wiki
+namespace Interlude.Features.Wiki
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

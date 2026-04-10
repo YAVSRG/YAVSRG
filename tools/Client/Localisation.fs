@@ -4,51 +4,25 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open System.Collections.Generic
+open Prelude
 open Prelude.Mods
 open YAVSRG.CLI.Utils
 
-module Check =
+module Localisation =
 
-    let private load_locale (file: string) =
-        let mapping = Dictionary<string, string>()
-        let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")
-        let lines = File.ReadAllLines path
-
-        Array.iter
-            (fun (l: string) ->
-                let s: string[] = l.Split([| '=' |], 2)
-                mapping.Add(s.[0], s.[1].Replace("\\n", "\n"))
-            )
-            lines
-
-        mapping
-
-    let simple_view (file_contents: string) =
-        let regex = Regex("[\t ]*(module .+? =|type .+? =|let .+? =|member .+? =|override .+? =)")
-        let span = file_contents.AsSpan()
-        for m in regex.EnumerateMatches span do
-            let match_span = span.Slice(m.Index, m.Length)
-            printfn "%s" (String match_span)
-
-    let simple_view_all () =
-        for filename, file_contents in walk_fs_files YAVSRG_PATH do
-            printfn "%s\n====\n" filename
-            simple_view file_contents
-
-    let check_linecounts () =
-        let mutable loc = 0
-        for filename, file_contents in walk_fs_files YAVSRG_PATH do
-            let lines = file_contents.Split('\n').Length
-
-            if lines > 300 then
-                printfn "%s has %i lines" filename lines
-            loc <- loc + lines
-        printfn "total %i lines of f#" loc
+    let private load_locale (file: string) : Localisation.LocaleFile =
+        match Localisation.try_load_file(file, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")) with
+        | Ok locale -> locale
+        | Error reason -> failwith reason
+        
+    let private write_locale (locale: Localisation.LocaleFile, file: string) =
+        Localisation.write_file(locale, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"))
 
     let locale_check (file: string) (cli_fix_issues: bool) =
         let locale = load_locale file
 
-        let new_locale = Dictionary(locale)
+        let unused_check = Dictionary(locale.Entries)
+        let new_locale = Dictionary(locale.Entries)
 
         let mutable sources = Map.empty<string, string>
         let mutable found = Set.empty<string>
@@ -118,8 +92,8 @@ module Check =
                 find (sprintf "levelselect.sortby.%s" m) "Level select sorting"
 
         for m in found |> Seq.sort do
-            if locale.ContainsKey m then
-                locale.Remove m |> ignore
+            if unused_check.ContainsKey m then
+                unused_check.Remove m |> ignore
             else
                 printfn "'%s' is missing!\nFound in %s" m sources.[m]
 
@@ -130,7 +104,7 @@ module Check =
                     | "" -> ()
                     | new_value -> new_locale.Add(m, new_value.Trim())
 
-        for m in locale.Keys do
+        for m in unused_check.Keys do
             printfn "Unused locale key: %s" m
 
             if cli_fix_issues then
@@ -141,17 +115,13 @@ module Check =
                 | _ -> ()
 
         if cli_fix_issues then
-            new_locale.Keys
-            |> Seq.sort
-            |> Seq.map (fun key -> sprintf "%s=%s" key (new_locale.[key].Replace("\n", "\\n")))
-            |> fun contents ->
-                File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"), contents)
+            write_locale({ locale with Entries = new_locale.AsReadOnly() }, file)
 
     let locale_rename (file: string) (before: string) =
         let locale = load_locale file
 
         let to_rename =
-            locale.Keys
+            locale.Entries.Keys
             |> Seq.where (fun key -> key.StartsWith before)
             |> Array.ofSeq
 
@@ -189,14 +159,11 @@ module Check =
 
             if replaced_contents <> file_contents then
                 File.WriteAllText(filename, replaced_contents)
+                
+        let new_locale = Dictionary(locale.Entries)
 
         for key in to_rename do
-            locale.[after + key.Substring(before.Length)] <- locale.[key]
-            locale.Remove(key) |> ignore
+            new_locale.[after + key.Substring(before.Length)] <- new_locale.[key]
+            new_locale.Remove(key) |> ignore
 
-        locale.Keys
-        |> Seq.sort
-        |> Seq.map (fun key -> sprintf "%s=%s" key (locale.[key].Replace("\n", "\\n")))
-        |> fun contents -> File.WriteAllLines(Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"), contents)
-
-    let format_all_code () = exec "fantomas" "."
+        write_locale({ locale with Entries = new_locale.AsReadOnly() }, file)
