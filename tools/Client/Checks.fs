@@ -10,7 +10,7 @@ open YAVSRG.CLI.Utils
 module Check =
 
     let private load_locale (file: string) =
-        let mapping = new Dictionary<string, string>()
+        let mapping = Dictionary<string, string>()
         let path = Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")
         let lines = File.ReadAllLines path
 
@@ -61,7 +61,7 @@ module Check =
         let matches (reg: string) (input: string) =
             seq {
                 for m in Regex(reg.Trim()).Matches(input) do
-                    yield m.Index, (m.Groups.[1].Value)
+                    yield m.Index, m.Groups.[1].Value
             }
 
         for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
