@@ -90,7 +90,7 @@ module Localisation =
         File.WriteAllLines(path, seq {
             yield (match file.Inherit with Some inherited_from -> "#inherit " + inherited_from | None -> "#root")
             for e in file.Entries do
-                yield sprintf "%s=%s" e.Key e.Value
+                yield sprintf "%s=%s" e.Key (e.Value.Replace("\n","\\n"))
         })
 
     let load (locale: string, get_locale: string -> Stream option) : Result<Dictionary<string, string>, string> =

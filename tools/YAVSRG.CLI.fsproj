@@ -17,7 +17,8 @@
     <Compile Include="Utils.fs" />
     <Compile Include="Docs\Wiki.fs" />
     <Compile Include="Docs\Site.fs" />
-    <Compile Include="Client\Checks.fs" />
+    <Compile Include="Client\Check.fs" />
+    <Compile Include="Client\Localisation.fs" />
     <Compile Include="Client\Version.fs" />
     <Compile Include="Client\Releases.fs" />
     <Compile Include="Client\Assets.fs" />
