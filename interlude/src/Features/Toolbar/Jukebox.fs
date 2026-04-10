@@ -23,7 +23,10 @@ type Jukebox() =
                     .Disabled(fun () -> Screen.current_type = ScreenType.Lobby || not (LevelSelect.History.can_go_back()))
                     .Position(Position.Shrink(5.0f).SliceL(45.0f)),
 
-                Button(Icons.PAUSE, fun () -> if Song.playing() then Song.pause() else Song.resume())
+                Button(
+                    (fun () -> if Song.playing() then Icons.PAUSE else Icons.PLAY),
+                    (fun () -> if Song.playing() then Song.pause() else Song.resume())
+                )
                     .Hotkey("pause_music")
                     .Position(Position.Shrink(5.0f).SliceL(45.0f).Translate(45.0f, 0.0f)),
 
