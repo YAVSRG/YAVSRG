@@ -7,7 +7,6 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.HudLayouts
 open Prelude.Data.User
 open Interlude.Content
 open Interlude.UI
@@ -83,13 +82,13 @@ type ReplayScreen =
                         )
                             .Conditional(show_difficulty_overlay.Get),
                         Text(%"replay.end_of_data")
-                            .Color((fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha))
+                            .Color(fun () -> Colors.red_accent.O4a replay_ended_fade.Alpha, Colors.shadow_2.O4a replay_ended_fade.Alpha)
                             .Position(Position.ShrinkB(100.0f).SliceB(60.0f)),
                         ReplayControls(
                             info.WithMods,
                             is_auto,
                             rate,
-                            fun t -> Song.seek t
+                            Song.seek
                         )
                     )
 
@@ -124,7 +123,7 @@ type ReplayScreen =
                     | ReplayMode.Auto -> Screen.back Transitions.LeaveGameplay |> ignore
                     | ReplayMode.Replay score_info ->
                         Screen.change_new
-                            (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                            (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                             ScreenType.Score
                             Transitions.EnterGameplayNoFadeAudio
                         |> ignore

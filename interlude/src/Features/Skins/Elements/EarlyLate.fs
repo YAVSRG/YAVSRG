@@ -44,7 +44,7 @@ type EarlyLate(ctx: HudContext) =
 
                 if ctx.Config.EarlyLateMeterUseTexture then
                     Render.tex_quad
-                        ((Sprite.fill this.Bounds texture).AsQuad)
+                        (Sprite.fill this.Bounds texture).AsQuad
                         Color.White.AsQuad
                         (Sprite.pick_texture (time_ago / ctx.Config.EarlyLateMeterFrameTime / SelectedChart.rate.Value |> floor |> int, if early then 0 else 1) texture)
                 else

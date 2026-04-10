@@ -16,7 +16,7 @@ type CustomImage(ctx: HudContext) =
 
     override this.Draw() =
         Render.tex_quad
-            ((Sprite.fill this.Bounds texture).AsQuad)
+            (Sprite.fill this.Bounds texture).AsQuad
             Color.White.AsQuad
             (Sprite.pick_texture (animation.Loops % texture.Columns, 0) texture)
 

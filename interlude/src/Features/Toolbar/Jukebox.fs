@@ -40,7 +40,7 @@ type Jukebox() =
         base.Init parent
 
     override this.Draw() =
-        Render.rect this.Bounds (Colors.shadow_1.O2)
+        Render.rect this.Bounds Colors.shadow_1.O2
 
         let carousel_bounds = this.Bounds.ShrinkL(145.0f).Shrink(Style.PADDING)
 

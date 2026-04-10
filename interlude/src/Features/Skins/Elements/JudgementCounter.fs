@@ -135,7 +135,7 @@ type JudgementCounter(ctx: HudContext) =
                 match display.[i] with
                 | Some texture_index ->
                     Render.tex_quad
-                        ((Sprite.fill_left (pop.SlicePercentY(ctx.Config.JudgementCounterTextScale).ShrinkX(10.0f)) texture).AsQuad)
+                        (Sprite.fill_left (pop.SlicePercentY(ctx.Config.JudgementCounterTextScale).ShrinkX(10.0f)) texture).AsQuad
                         Color.White.AsQuad
                         (Sprite.pick_texture (0, texture_index) texture)
                 | None ->
@@ -191,7 +191,7 @@ type JudgementCounter(ctx: HudContext) =
                     ctx.Config.JudgementCounterColonExtraSpacing
                 )
             else
-                let (mv, pf) = ratio
+                let mv, pf = ratio
 
                 Text.fill_b (
                     Style.font,

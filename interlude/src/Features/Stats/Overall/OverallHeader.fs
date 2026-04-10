@@ -51,7 +51,7 @@ type OverallHeader() =
                     .Align(Alignment.RIGHT)
                     .Position(Position.ShrinkB(65.0f).SliceB(35.0f).ShrinkX(20.0f)),
 
-                Text(sprintf "Level %i" level)
+                Text(sprintf "%s %i" %"stats.level" level)
                     .Align(Alignment.LEFT)
                     .Position(Position.ShrinkB(60.0f).SliceB(50.0f).ShrinkX(20.0f))
             )

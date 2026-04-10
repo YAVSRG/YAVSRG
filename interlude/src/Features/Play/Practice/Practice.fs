@@ -81,7 +81,7 @@ type PracticeScreen =
             else
                 restart screen
 
-        let paused_overlay (screen: IPlayScreen) =
+        let paused_overlay (_: IPlayScreen) =
             PracticeControls(
                 state,
                 info.WithMods,

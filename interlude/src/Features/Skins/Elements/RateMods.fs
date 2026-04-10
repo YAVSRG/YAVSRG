@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play.HUD
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Mods
 open Prelude.Skins.HudLayouts

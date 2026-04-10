@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features.Skins
 
 open Percyqaz.Flux.UI
+open Prelude
 open Prelude.Skins
 open Interlude.UI
 
@@ -12,8 +13,8 @@ type TextureActions =
             .Position(Position.SliceR(400.0f).Shrink(50.0f))
             .With(
 
-                Button(Icons.ROTATE_CW + " Rotate clockwise", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
+                Button(Icons.ROTATE_CW + " " + %"texture_editor.rotate_cw", fun () ->
+                    for col, row in texture_editor.SelectedTextures do
                         source.RotateClockwise((col, row), texture_id) |> ignore
 
                     source.Reload()
@@ -21,8 +22,8 @@ type TextureActions =
                 )
                     .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
 
-                Button(Icons.ROTATE_CCW + " Rotate anticlockwise", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
+                Button(Icons.ROTATE_CCW + " " + %"texture_editor.rotate_ccw", fun () ->
+                    for col, row in texture_editor.SelectedTextures do
                         source.RotateAnticlockwise((col, row), texture_id) |> ignore
 
                     source.Reload()
@@ -30,8 +31,8 @@ type TextureActions =
                 )
                     .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
 
-                Button(Icons.CORNER_LEFT_UP + " Vertical flip", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
+                Button(Icons.CORNER_LEFT_UP + " " + %"texture_editor.flip_v", fun () ->
+                    for col, row in texture_editor.SelectedTextures do
                         source.VerticalFlipTexture((col, row), texture_id) |> ignore
 
                     source.Reload()
@@ -39,8 +40,8 @@ type TextureActions =
                 )
                     .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
 
-                Button(Icons.CORNER_DOWN_LEFT + " Horizontal flip", fun () ->
-                    for (col, row) in texture_editor.SelectedTextures do
+                Button(Icons.CORNER_DOWN_LEFT + " " + %"texture_editor.flip_h", fun () ->
+                    for col, row in texture_editor.SelectedTextures do
                         source.HorizontalFlipTexture((col, row), texture_id) |> ignore
 
                     source.Reload()
@@ -48,7 +49,7 @@ type TextureActions =
                 )
                     .Disabled(fun () -> texture_editor.SelectedTextures |> Seq.isEmpty),
 
-                Button(Icons.REFRESH_CW + " Cycle selected", fun () ->
+                Button(Icons.REFRESH_CW + " " + %"texture_editor.cycle_selection", fun () ->
                     if source.CycleTextures(texture_editor.SelectedTextures |> Array.ofSeq, texture_id) then
                         source.Reload()
                         texture_editor.Refresh()

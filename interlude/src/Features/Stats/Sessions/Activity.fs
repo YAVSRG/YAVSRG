@@ -16,7 +16,7 @@ type YearActivityGrid(year: int, selected: Setting<(DateOnly * Session) option>)
         PREVIOUS_SESSIONS
         |> Map.filter (fun day _ -> day.Year = year)
         |> Map.map (fun _ sessions ->
-            let day_playtime_hours = (sessions |> List.sumBy (_.PlayTime)) / 3600_000.0
+            let day_playtime_hours = (sessions |> List.sumBy _.PlayTime) / 3600_000.0
             let color =
                 if day_playtime_hours < 0.25 then Colors.cyan.O2
                 elif day_playtime_hours < 0.5 then Colors.cyan.O3
@@ -111,7 +111,7 @@ type RecentActivityGrid(selected: Setting<(DateOnly * Session) option>) =
     let session_dates =
         PREVIOUS_SESSIONS
         |> Map.map (fun _ sessions ->
-            let day_playtime_hours = (sessions |> List.sumBy (_.PlayTime)) / 3600_000.0
+            let day_playtime_hours = (sessions |> List.sumBy _.PlayTime) / 3600_000.0
             let color =
                 if day_playtime_hours < 0.25 then Colors.cyan.O2
                 elif day_playtime_hours < 0.5 then Colors.cyan.O3

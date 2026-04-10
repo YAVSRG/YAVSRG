@@ -731,6 +731,7 @@ type Storage(storage: StorageType) =
                     ValidationError
                         {
                             Element = name
+                            // todo: localisation for these messages?
                             Message = sprintf "Columns must be between %i and %i" 1 max_columns
                             SuggestedFix = None
                         }

@@ -16,7 +16,6 @@ open Interlude.Features.Online
 open Interlude.Features.Play
 open Interlude.Features.Play.HUD
 
-[<Extension>]
 type HudContextExtensions =
 
     [<Extension>]
@@ -133,7 +132,7 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
     member this.State = state
     member this.HudContext = hud_ctx
 
-    override this.OnEnter(prev) =
+    override this.OnEnter(_: ScreenType) =
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
@@ -145,7 +144,7 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
         Input.finish_frame_events ()
         WindowThread.defer WindowThread.disable_windows_key
 
-    override this.OnExit next =
+    override this.OnExit(next: ScreenType) =
         Background.dim 0.7f
 
         if next <> ScreenType.Score then

@@ -17,7 +17,7 @@ type LeaderboardsTab =
         let options =
             NavigationContainer.Column()
                 .With(
-                    PageSetting("Leaderboard",
+                    PageSetting(%"stats.leaderboards.leaderboard_type",
                         Selector(
                             [| activity :> Widget, %"stats.leaderboards.activity"; keymodes, %"stats.leaderboards.rating" |],
                             Setting.make content_panel.set_Current content_panel.get_Current
@@ -29,8 +29,8 @@ type LeaderboardsTab =
                     (fun () -> content_panel.Current = activity),
 
                     PageSetting(
-                        "Time",
-                        Selector([| false, "All-time"; true, "This month" |], activity.MonthlyLeaderboard)
+                        %"stats.leaderboards.time",
+                        Selector([| false, %"stats.leaderboards.time.all"; true, %"stats.leaderboards.time.monthly" |], activity.MonthlyLeaderboard)
                     )
                         .Pos(3, 2, PageWidth.Full)
                 )
@@ -38,14 +38,14 @@ type LeaderboardsTab =
                     (fun () -> content_panel.Current = keymodes),
 
                     PageSetting(
-                        "Time",
-                        Selector([| false, "All-time"; true, "This month" |], keymodes.MonthlyLeaderboard)
+                        %"stats.leaderboards.time",
+                        Selector([| false, %"stats.leaderboards.time.all"; true, %"stats.leaderboards.time.monthly" |], keymodes.MonthlyLeaderboard)
                     )
                         .Pos(3, 2, PageWidth.Full)
                         :> Widget,
 
                     PageSetting(
-                        "Keymode",
+                        %"generic.keymode",
                         Selector([| 4, "4K"; 7, "7K" |], keymodes.Keymode)
                     )
                         .Conditional(fun () -> content_panel.Current = keymodes)

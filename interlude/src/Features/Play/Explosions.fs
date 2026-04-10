@@ -97,7 +97,7 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
     let rotation =
         if noteskin.UseRotation then
             let rotations = noteskin.Rotations.[keys - 3]
-            fun k -> Quad.rotate (rotations.[k])
+            fun k -> Quad.rotate rotations.[k]
         else
             fun _ quad -> quad
 

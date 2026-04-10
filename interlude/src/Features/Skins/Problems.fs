@@ -35,7 +35,7 @@ type ProblemCard =
 module private ProblemList =
 
     let loader =
-        { new Async.CancelQueueSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), (unit -> unit)>() with
+        { new Async.CancelQueueSeq<Storage * DynamicFlowContainer.Vertical<CalloutCard> * (unit -> unit), unit -> unit>() with
             override this.Process((storage, container, after_fix)) =
                 match storage with
                 | :? Noteskin as ns -> ns.Validate()

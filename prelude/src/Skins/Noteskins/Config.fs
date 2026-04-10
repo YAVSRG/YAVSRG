@@ -344,27 +344,27 @@ module NoteskinTextureRules =
                 "holdbody", DEFAULT
                 "holdtail",
                 { DEFAULT with
-                    IsRequired = fun config -> config.UseHoldTailTexture
+                    IsRequired = _.UseHoldTailTexture
                 }
                 "receptor",
                 {
-                    IsRequired = fun config -> config.UseReceptors
+                    IsRequired = _.UseReceptors
                     MustBeSquare = fun config -> config.ReceptorStyle = ReceptorStyle.Receptors
                     MaxGridSize = K(20, 32)
                 }
                 "judgementline",
                 {
-                    IsRequired = fun config -> config.UseJudgementLine
+                    IsRequired = _.UseJudgementLine
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
                 }
                 "noteexplosion",
                 { DEFAULT with
-                    IsRequired = fun config -> config.UseExplosions
+                    IsRequired = _.UseExplosions
                 }
                 "holdexplosion",
                 { DEFAULT with
-                    IsRequired = fun config -> config.UseExplosions
+                    IsRequired = _.UseExplosions
                 }
                 "releaseexplosion",
                 { DEFAULT with
@@ -372,13 +372,13 @@ module NoteskinTextureRules =
                 }
                 "receptorlighting",
                 {
-                    IsRequired = fun config -> config.EnableColumnLight
+                    IsRequired = _.EnableColumnLight
                     MustBeSquare = K false
                     MaxGridSize = K(10, 32)
                 }
                 "stageleft",
                 {
-                    IsRequired = fun config -> config.EnableStageTextures
+                    IsRequired = _.EnableStageTextures
                     MustBeSquare = K false
                     MaxGridSize = K(1, 1)
                 }

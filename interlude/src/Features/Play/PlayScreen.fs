@@ -8,7 +8,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.HudLayouts
 open Prelude.Data.User.Stats
 open Interlude.Options
 open Interlude.Content

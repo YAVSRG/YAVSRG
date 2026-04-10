@@ -187,7 +187,7 @@ type SkillTimelineGraph(keymode: int, day_range: Animation.Fade, day_offset: Ani
             Text.fill_b(Style.font, sprintf "%O %.0f" Jacks jack_rating, box.ShrinkT(45.0f).SliceT(40.0f), Colors.text_red, Alignment.CENTER)
             Text.fill_b(Style.font, sprintf "%O %.0f" Chordstream chordstream_rating, box.ShrinkT(85.0f).SliceT(40.0f), Colors.text_green, Alignment.CENTER)
             Text.fill_b(Style.font, sprintf "%O %.0f" Stream stream_rating, box.ShrinkT(125.0f).SliceT(40.0f), Colors.text_cyan, Alignment.CENTER)
-            Text.fill_b(Style.font, "Click to view", box.SliceB(35.0f), Colors.text_subheading, Alignment.CENTER)
+            Text.fill_b(Style.font, %"stats.timeline_graph.click_hint", box.SliceB(35.0f), Colors.text_subheading, Alignment.CENTER)
 
         if show_tooltip then
             draw_tooltip()

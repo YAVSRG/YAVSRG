@@ -83,10 +83,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holds_offscreen = Array.create keys -1
     let hold_states = Array.create keys NoHold
 
+    // todo: move to shared place as this is duplicate?
     let rotation : int -> Quad -> Quad =
         if noteskin_config.UseRotation then
             let rotations = noteskin_config.Rotations.[keys - 3]
-            fun k -> Quad.rotate (rotations.[k])
+            fun k -> Quad.rotate rotations.[k]
         else
             fun _ quad -> quad
 
@@ -130,9 +131,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         if options.Upscroll.Value then Quad.flip_vertical else id
 
     do
-        let width = Array.mapi (fun i n -> n + column_width) column_positions |> Array.max
+        let width = Array.mapi (fun _ n -> n + column_width) column_positions |> Array.max
 
-        let (screen_align_percentage, playfield_align_percentage) =
+        let screen_align_percentage, playfield_align_percentage =
             noteskin_config.PlayfieldAlignment
 
         if noteskin_config.EnableStageTextures then
@@ -248,14 +249,14 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) : unit =
             Render.tex_quad
-                ((Rect.FromEdges(
+                (Rect.FromEdges(
                     left + column_positions.[k],
                     pos_a + note_height * 0.5f - 1f,
                     left + column_positions.[k] + column_width,
                     pos_b + note_height * 0.5f + 1f |> min playfield_height
                   )
                   |> scroll_direction_transform bottom)
-                    .AsQuad)
+                    .AsQuad
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 

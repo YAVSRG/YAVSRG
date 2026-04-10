@@ -16,7 +16,7 @@ module FileDrop =
     let mutable on_file_drop : (string -> unit) option = None
 
     let handle (path: string) : unit =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
 
         match on_file_drop with
         | Some f -> f path
