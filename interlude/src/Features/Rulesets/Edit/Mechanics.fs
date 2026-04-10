@@ -74,7 +74,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
     let release_timing_windows =
         match ruleset.Value.HoldMechanics with
         | HoldMechanics.JudgeReleasesSeparately (w, _) -> w
-        | _ -> ruleset.Value.Judgements |> Array.map (_.TimingWindows)
+        | _ -> ruleset.Value.Judgements |> Array.map _.TimingWindows
 
     member this.SaveChanges() =
         ruleset.Set
@@ -99,7 +99,7 @@ type EditMechanicsPage(ruleset: Setting<Ruleset>) =
                         )
                     | 2 -> HoldMechanics.OnlyRequireHold release_window.Value
                     | 3 -> HoldMechanics.JudgeReleasesSeparately (release_timing_windows, judgement_if_overheld.Value)
-                    | 4 -> HoldMechanics.OnlyJudgeReleases (judgement_if_dropped.Value)
+                    | 4 -> HoldMechanics.OnlyJudgeReleases judgement_if_dropped.Value
                     | _ -> ruleset.Value.HoldMechanics
             }
 

@@ -46,10 +46,10 @@ type TableCard(online_table: Tables.List.Table) as this =
             .Position(Position.ShrinkT(65.0f).SliceT(60.0f).Shrink(20.0f, Style.PADDING))
         |+ Text(fun () ->
             match status with
-            | TableStatus.NotInstalled -> "Click to install"
-            | TableStatus.OutOfDate -> "Click to update"
-            | TableStatus.Installing -> "Installing ..."
-            | TableStatus.Installed -> "Click to view"
+            | TableStatus.NotInstalled -> %"table.not_installed"
+            | TableStatus.OutOfDate -> %"table.out_of_date"
+            | TableStatus.Installing -> %"table.installing"
+            | TableStatus.Installed -> %"table.installed"
         )
             .Align(Alignment.CENTER)
             .Position(Position.SliceB(60.0f).Shrink(20.0f, Style.PADDING))

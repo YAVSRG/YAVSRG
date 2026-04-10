@@ -39,4 +39,4 @@ type CompareRulesetsPage(ruleset_a: Ruleset, ruleset_b: Ruleset) =
             })
             .Position(Position.Shrink(PAGE_MARGIN_X, PAGE_MARGIN_Y).ExpandT(PAGE_ITEM_HEIGHT).SliceL(PAGE_ITEM_WIDTH))
 
-    override this.Title = sprintf "%s vs %s" ruleset_a.Name ruleset_b.Name
+    override this.Title = sprintf "%s | %s" ruleset_a.Name ruleset_b.Name

@@ -330,8 +330,8 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
         Button(
             (fun () ->
                 match state.LevelStatus level with
-                | GroupStatus.AllMissing -> Icons.DOWNLOAD + " Download"
-                | GroupStatus.SomeMissing -> Icons.DOWNLOAD + " Update"
+                | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
+                | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             ),
@@ -366,13 +366,12 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             )
             .Position(Position.Shrink(85.0f, 0.0f))
             .Align(Alignment.RIGHT)
-        |+ Text(
-            (fun () ->
+        |+ Text(fun () ->
                 if state.OpenLevel = level then
                     Icons.CHEVRON_UP
                 else
                     Icons.CHEVRON_DOWN
-            ))
+            )
             .Color(Colors.text)
             .Align(Alignment.RIGHT)
             .Position(Position.Shrink(5.0f, 0.0f))
@@ -403,8 +402,8 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
         Button(
             fun () ->
                 match state.SectionStatus info.Name with
-                | GroupStatus.AllMissing -> Icons.DOWNLOAD + " Download"
-                | GroupStatus.SomeMissing -> Icons.DOWNLOAD + " Update"
+                | GroupStatus.AllMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.download"
+                | GroupStatus.SomeMissing -> sprintf "%s %s" Icons.DOWNLOAD %"tables.group.update"
                 | GroupStatus.Downloading -> ""
                 | GroupStatus.Downloaded -> ""
             , (fun () -> state.QueueSection info.Name)
@@ -426,13 +425,12 @@ type private SectionHeader(info: TableSectionInfo, state: DownloaderState) as th
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.Shrink(5.0f).SliceB(50.0f))
-        |+ Text(
-            (fun () ->
+        |+ Text(fun () ->
                 if state.OpenSection = info.Name then
                     Icons.CHEVRON_UP
                 else
                     Icons.CHEVRON_DOWN
-            ))
+            )
             .Color(Colors.text)
             .Align(Alignment.RIGHT)
             .Position(Position.Shrink(25.0f, 20.0f))
@@ -446,7 +444,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
 
     let container = DynamicFlowContainer.Vertical<DownloadMenuFragment>(Spacing = 10.0f)
 
-    let charts_by_level = state.Charts |> Array.groupBy (fun x -> x.Level)
+    let charts_by_level = state.Charts |> Array.groupBy _.Level
 
     let sections =
         table.Info.Sections
@@ -489,7 +487,7 @@ type private TableDownloadMenu(table: Table, state: DownloaderState) =
 
                     GameThread.defer (fun () ->
                         match existing_states.TryFind table.Id with
-                        | Some state -> () // do nothing if they spam clicked the table button
+                        | Some _ -> () // do nothing if they spam clicked the table button
                         | None ->
                             existing_states <- Map.add table.Id state existing_states
                             TableDownloadMenu(table, state).Show()

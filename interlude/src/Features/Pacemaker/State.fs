@@ -30,8 +30,8 @@ module PacemakerState =
     let pacemaker_failed (scoring: ScoreProcessor) (state: PacemakerState) : bool =
         match state with
         | PacemakerState.None -> false
-        | PacemakerState.Accuracy x -> false
-        | PacemakerState.Replay (_, r) -> false
+        | PacemakerState.Accuracy _ -> false
+        | PacemakerState.Replay _ -> false
         | PacemakerState.Judgement(judgement, count) ->
             let actual =
                 let mutable c = scoring.JudgementCounts.[judgement]
@@ -86,7 +86,7 @@ module PacemakerState =
             match setting.Mode with
             | PacemakerMode.Accuracy ->
 
-                match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Accuracy) SelectedChart.rate.Value with
+                match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash _.Accuracy SelectedChart.rate.Value with
                 | Some (best_accuracy, _, timestamp)
                     when setting.PersonalBest = PacemakerPersonalBestMode.Always
                     || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_accuracy > setting.Accuracy) ->
@@ -105,7 +105,7 @@ module PacemakerState =
             | PacemakerMode.Lamp ->
 
                 let lamp =
-                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash (_.Lamp) SelectedChart.rate.Value with
+                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash _.Lamp SelectedChart.rate.Value with
                     | Some (best_lamp, _, _)
                         when setting.PersonalBest = PacemakerPersonalBestMode.Always
                         || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_lamp > setting.Lamp) ->

@@ -54,7 +54,7 @@ type EditLampPage(ruleset: Setting<Ruleset>, id: int) =
                                 seq {
                                     for i, j in ruleset.Value.Judgements |> Array.indexed do
                                         yield i, j.Name
-                                    yield -1, "Combo breaks"
+                                    yield -1, %"rulesets.lamp.requirement.combo_breaks"
                                 }
                                 |> Array.ofSeq,
                                 judgement_type

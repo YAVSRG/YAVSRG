@@ -40,7 +40,7 @@ module TaskTracking =
     let private list = ResizeArray<TrackedTask>()
 
     let add (label: string) : TrackedTask =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
 
         let status = TrackedTask(label)
         list.Add(status)
@@ -133,7 +133,7 @@ module TaskTracking =
 
     let current_progress () : TaskProgress =
         list
-        |> Seq.map (_.Progress)
+        |> Seq.map _.Progress
         |> Seq.tryPick (function Complete -> None | otherwise -> Some otherwise)
         |> Option.defaultValue Complete
 

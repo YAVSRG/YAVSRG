@@ -49,7 +49,7 @@ type VolumeSlider() =
         if a > 0 then
             Render.rect r (Palette.color (a, 0.2f, 0.0f))
             Render.rect (r.SliceL(slider.Value * r.Width)) (Palette.color (a, 1.0f, 0.0f))
-            let volume_box = r.SliceX(220.0f).BorderT(50.0f).TranslateY(-5.0f)
+            let volume_box = r.SliceX(280.0f).BorderT(50.0f).TranslateY(-5.0f)
             Render.rect volume_box (Colors.shadow_1.O1a (a * 3))
             let icon =
                 if volume.Value <= 0.005 then Icons.VOLUME_X

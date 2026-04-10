@@ -113,11 +113,11 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         ScoreScreenHelpers.animation_queue.Update elapsed_ms
         base.Update(elapsed_ms, moved)
 
-    override this.OnEnter prev =
+    override this.OnEnter(_: ScreenType) =
         Toolbar.hide ()
         DiscordRPC.in_menus (%"discord_status.score_screen")
 
-    override this.OnExit next =
+    override this.OnExit(_: ScreenType) =
         score_info.Ruleset <- Rulesets.current
         (graph :> System.IDisposable).Dispose()
         on_ruleset_changed.Dispose()
