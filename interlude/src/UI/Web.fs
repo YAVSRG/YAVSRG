@@ -19,7 +19,7 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
 
     let mutable content: Widget = Dummy()
 
-    let rerender (v) =
+    let rerender v =
         content <- render_ui this v
 
         if this.Initialised && not content.Initialised then
@@ -30,20 +30,20 @@ type WebRequestContainer<'T>(load: WebRequestContainer<'T> -> unit, render_ui: W
     member private this.Content = content
 
     member this.Offline() =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         status <- WebRequestState.Offline
 
     member this.ServerError() =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         status <- WebRequestState.ServerError
 
     member this.SetData result =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         status <- WebRequestState.Loaded
         data.Value <- result
 
     member this.Reload() =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         status <- WebRequestState.Loading
         load this
 

@@ -79,7 +79,6 @@ type AngledButton(label_func: unit -> string, on_click: unit -> unit, background
 
     override this.Focusable : bool = not (this.Disabled()) && base.Focusable
 
-[<Extension>]
 type LeaningButtonExtensions =
 
     [<Extension>]

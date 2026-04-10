@@ -5,7 +5,7 @@ open Percyqaz.Flux.Audio
 
 module Sounds =
 
-    let private cache = new Dictionary<string, SoundEffect>()
+    let private cache = Dictionary<string, SoundEffect>()
 
     let get (id: string) : SoundEffect =
         if cache.ContainsKey id then

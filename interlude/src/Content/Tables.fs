@@ -12,7 +12,7 @@ module Tables =
     /// Table IDs are the name of the file under the Data/Tables folder, without the extension
     let private _selected_id: Setting<string option> = Setting.simple None
     let mutable current: Table option = None
-    let private loaded = new Dictionary<string, Table>()
+    let private loaded = Dictionary<string, Table>()
 
     /// Once called: All tables from the Data/Tables folder have been read; The valid ones are loaded into the available list
     /// Can be called multiple times to re-load with the latest data

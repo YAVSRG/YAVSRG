@@ -20,7 +20,7 @@ module Utils =
         tr.ReadToEnd()
 
     let splash_message_picker (name: string) : unit -> string =
-        let r = new Random()
+        let r = Random()
         let text = get_resource_text name
         let lines = text.Split("\n")
 

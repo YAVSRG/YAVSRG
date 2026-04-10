@@ -50,7 +50,6 @@ module PageLayout =
         refresh ()
         r, refresh
 
-[<Extension>]
 type PageLayoutExtensions =
 
     [<Extension>]

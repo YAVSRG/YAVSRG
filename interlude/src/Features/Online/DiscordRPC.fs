@@ -15,7 +15,7 @@ module DiscordRPC =
             client.Dispose()
 
     let init () =
-        client.OnConnectionFailed.Add(fun msg ->
+        client.OnConnectionFailed.Add(fun _ ->
             Logging.Info("Discord not detected, disabling rich presence")
             deinit ()
         )
@@ -40,7 +40,7 @@ module DiscordRPC =
         if not client.IsDisposed then
 
             let rp =
-                new RichPresence(
+                RichPresence(
                     State = "In menus",
                     Details = details,
                     Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())
@@ -52,7 +52,7 @@ module DiscordRPC =
         if not client.IsDisposed then
 
             let rp =
-                new RichPresence(
+                RichPresence(
                     State = mode,
                     Details = trim_long_string song,
                     Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())
@@ -64,7 +64,7 @@ module DiscordRPC =
         if not client.IsDisposed then
 
             let rp =
-                new RichPresence(
+                RichPresence(
                     State = mode,
                     Details = trim_long_string song,
                     Assets = Assets(LargeImageKey = "icon", LargeImageText = large_image_text())

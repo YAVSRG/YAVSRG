@@ -59,7 +59,7 @@ type private LoadedNoteskin =
         match this.Textures with
         | Some (existing_atlas, existing_sprites) ->
             Texture.unclaim_texture_unit existing_atlas
-            for id, s in existing_sprites do
+            for _, s in existing_sprites do
                 Sprite.destroy s |> ignore
         | None -> ()
 
@@ -117,7 +117,7 @@ type private LoadedNoteskin =
             | Some (atlas, sprites) when not force_reload -> (atlas, sprites)
             | _ -> this.ReloadAtlas()
         Texture.claim_texture_unit atlas |> ignore
-        for (texture_id, sprite) in sprites do
+        for texture_id, sprite in sprites do
             Sprites.add false texture_id sprite
 
     member this.Inactive() =
@@ -149,7 +149,7 @@ type private LoadedHUD =
         match this.Textures with
         | Some (existing_atlas, existing_sprites) ->
             Texture.unclaim_texture_unit existing_atlas
-            for id, s in existing_sprites do
+            for _, s in existing_sprites do
                 Sprite.destroy s |> ignore
         | None -> ()
 
@@ -207,7 +207,7 @@ type private LoadedHUD =
             | Some (atlas, sprites) when not force_reload -> (atlas, sprites)
             | _ -> this.ReloadAtlas()
         Texture.claim_texture_unit atlas |> ignore
-        for (texture_id, sprite) in sprites do
+        for texture_id, sprite in sprites do
             Sprites.add false texture_id sprite
 
     member this.Inactive() =
@@ -245,7 +245,7 @@ module Skins =
         |> Noteskin.FromZipStream
     let mutable private DEFAULT_SKIN_ICON = None
 
-    let private loaded_noteskins = new Dictionary<string, LoadedNoteskin>()
+    let private loaded_noteskins = Dictionary<string, LoadedNoteskin>()
     /// Skin ID representing which skin's noteskin is selected
     let private _selected_noteskin_id = Setting.simple DEFAULT_NOTESKIN_ID
     let mutable current_noteskin = DEFAULT_NOTESKIN
@@ -259,13 +259,13 @@ module Skins =
         }
     let private DEFAULT_HUD_FOLDER = "User"
 
-    let private loaded_huds = new Dictionary<string, LoadedHUD>()
+    let private loaded_huds = Dictionary<string, LoadedHUD>()
     /// Skin ID representing which skin's HUD is selected
     let private _selected_hud_id = Setting.simple DEFAULT_HUD_FOLDER
     let mutable current_hud = Unchecked.defaultof<HudLayout>
     let mutable current_hud_meta = DEFAULT_HUD_META
 
-    let private loaded_skins = new Dictionary<string, LoadedSkin>()
+    let private loaded_skins = Dictionary<string, LoadedSkin>()
 
     let load () : unit =
 
@@ -518,7 +518,7 @@ module Skins =
                 DEFAULT_HUD_FOLDER
             else
                 Text.RegularExpressions.Regex(@"[^a-zA-Z0-9_\-'\s]").Replace(noteskin_name, "")
-                + "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
+                + "-" + DateTime.Now.ToString("ddMMyyyyHHmmss")
 
         let target_skin_config = Path.Combine(get_game_folder "Skins", id, "skin.json")
         let target_noteskin_folder = Path.Combine(get_game_folder "Skins", id, "Noteskin")
@@ -596,7 +596,7 @@ module Skins =
                 if file_safe_name = "" then id + ".isk" else file_safe_name + ".isk"
             match loaded_skins.[id].Skin.Source with
             | Embedded _ -> false
-            | Folder f ->
+            | Folder _ ->
                 let target = Path.Combine(get_game_folder "Exports", file_name)
 
                 if loaded_skins.[id].Skin.CompressToZip target then

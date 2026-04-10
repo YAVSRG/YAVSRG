@@ -46,13 +46,13 @@ type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) =
 
         if this.Selected then
             if (%%"left").Pressed() then
-                bk ()
+                bk()
             elif (%%"right").Pressed() then
-                fd ()
+                fd()
             elif (%%"up").Pressed() then
-                fd ()
+                fd()
             elif (%%"down").Pressed() then
-                bk ()
+                bk()
 
     static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
@@ -77,7 +77,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
 
     override this.Init(parent) =
         this
-        |+ Text((fun () -> snd wrapped_setting.Value))
+        |+ Text(fun () -> snd wrapped_setting.Value)
             .Align(Alignment.LEFT)
         |+ MouseListener().Button(this)
         |* dropdown_wrapper

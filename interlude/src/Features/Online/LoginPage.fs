@@ -39,7 +39,7 @@ type LoginPage() =
                 PageButton(%"login.login_with_discord", login)
                     .Pos(0),
                 CalloutCard(info)
-                    .Position(fun (w, h) -> Position.SliceT(400.0f, h))
+                    .Position(fun (_, h) -> Position.SliceT(400.0f, h))
                     .Conditional(fun () -> waiting_for_browser)
             )
 

@@ -304,7 +304,7 @@ type ConfirmPage(prompt: string, options: (string * (unit -> unit)) array) =
     new(prompt, if_yes) = ConfirmPage(prompt, [|%"confirm.yes", if_yes; %"confirm.no", ignore|])
 
     override this.Content() =
-        let lines = prompt.Split("\n", System.StringSplitOptions.TrimEntries)
+        let lines = prompt.Split("\n", StringSplitOptions.TrimEntries)
 
         page_container()
             .With(seq {

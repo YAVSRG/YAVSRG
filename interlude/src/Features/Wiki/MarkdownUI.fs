@@ -232,7 +232,7 @@ type private Spans(max_width, spans: MarkdownSpans, settings: Span.Settings) as 
     let mutable height = 0.0f
 
     do
-        for (text, settings, info) in Span.get_fragments settings spans do
+        for text, settings, info in Span.get_fragments settings spans do
             match info with
             | Span.FragmentInfo.Linebreak -> ctx.Advance(0.0f, Span.SIZE) |> ignore; ctx.StartNewLine()
             | Span.FragmentInfo.Image url ->

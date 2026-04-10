@@ -89,7 +89,6 @@ type PageButton(localised_text: string, on_click: unit -> unit) as this =
             Disabled = fun () -> clicked || disabled()
         )
 
-[<Extension>]
 type PageButtonExtensions =
 
     [<Extension>]
