@@ -71,7 +71,7 @@ type SelectDropdown<'T when 'T : equality>(items: ('T * string) array, setting: 
         let current_value = setting.Value
         match items |> Array.tryFind (fun (v, _) -> v = current_value) with
         | Some v -> v
-        | None -> items.[0]
+        | None -> (if items.Length > 0 then items.[0] else (current_value, "???"))
         |> Setting.simple
         |> Setting.trigger (fun (v, _) -> setting.Set v)
 
