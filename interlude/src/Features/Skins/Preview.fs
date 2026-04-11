@@ -41,7 +41,7 @@ type SkinPreview(position: Position) as this =
             override this.Update(elapsed_ms, moved) =
                 base.Update(elapsed_ms, moved)
                 let now = state.CurrentChartTime()
-                state.Scoring.Update (now)
+                state.Scoring.Update(now)
                 if last_time > now then
                     recreate_scoring()
                 last_time <- now

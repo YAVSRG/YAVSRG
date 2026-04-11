@@ -198,7 +198,6 @@ type Help(content: Callout) =
             .Body(%(sprintf "%s.tooltip" feature))
             .Hotkey(hotkey)
 
-[<Extension>]
 type HelpExtensions =
 
     [<Extension>]

@@ -47,15 +47,14 @@ type private NoteskinButton(id: string, meta: SkinMetadata, on_switch: unit -> u
             )
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
-        |+ Text(
-            (fun () ->
-                if this.Focused then
-                    if this.IsCurrent then
-                        if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
-                    else
-                        if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
-                else credit
-            ))
+        |+ Text(fun () ->
+            if this.Focused then
+                if this.IsCurrent then
+                    if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
+                else
+                    if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
+            else credit
+        )
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))
@@ -113,15 +112,14 @@ type private HUDButton(id: string, meta: SkinMetadata, on_switch: unit -> unit, 
             )
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkL(70.0f).ShrinkX(Style.PADDING).SliceT(45.0f))
-        |+ Text(
-            (fun () ->
-                if this.Focused then
-                    if this.IsCurrent then
-                        if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
-                    else
-                        if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
-                else credit
-            ))
+        |+ Text(fun () ->
+            if this.Focused then
+                if this.IsCurrent then
+                    if this.FocusedByMouse then %"skins.edit_hint_mouse" else [(%%"select").ToString()] %> "skins.edit_hint_keyboard"
+                else
+                    if this.FocusedByMouse then %"skins.use_hint_mouse" else [(%%"select").ToString()] %> "skins.use_hint_keyboard"
+            else credit
+        )
             .Color(Colors.text_subheading)
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkL(70.0f).Shrink(Style.PADDING).SliceB(30.0f))

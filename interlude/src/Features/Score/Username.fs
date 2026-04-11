@@ -25,5 +25,5 @@ type Username() =
             | Network.Connected
             | Network.LoggedIn -> Icons.GLOBE, Colors.green_accent
 
-        Render.rect area (Colors.shadow_1.O2)
+        Render.rect area Colors.shadow_1.O2
         Text.fill_b (Style.font, icon + "  " + username, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)

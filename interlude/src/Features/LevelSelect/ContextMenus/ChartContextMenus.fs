@@ -111,7 +111,7 @@ type ChartContextMenu(chart_meta: ChartMeta, context: LibraryContext) =
                     if CollectionActions.reorder_down context then
                         Menu.Back()
             )
-                .Disabled((index + 1 = Content.Collections.GetPlaylist(name).Value.Charts.Count))
+                .Disabled(index + 1 = Content.Collections.GetPlaylist(name).Value.Charts.Count)
                 .Icon(Icons.ARROW_DOWN_CIRCLE)
                 .Hotkey("move_down_in_playlist")
             |+ PageButton(

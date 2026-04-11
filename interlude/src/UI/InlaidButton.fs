@@ -66,7 +66,6 @@ type InlaidButton(label_func: unit -> string, on_click: unit -> unit) =
 
         base.Draw()
 
-[<Extension>]
 type InlaidButtonExtensions =
 
     [<Extension>]

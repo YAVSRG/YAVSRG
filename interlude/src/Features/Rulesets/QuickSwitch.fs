@@ -31,7 +31,7 @@ module RulesetSwitcher =
                     )
                     for name, items in groups do
                         if items.Length < 3 then
-                            for (id, rs) in items do
+                            for id, rs in items do
                                 yield ((fun () -> setting.Set id), rs.Name)
                         else
                             let inner_items = items |> Array.map (fun (id, rs) -> (fun () -> setting.Set id), rs.Name)

@@ -95,7 +95,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
                     Palette.color (255, 0.2f, 0.0f)
 
         Render.rect (bounds.Translate(10.0f, 10.0f)) bg_color
-        Background.draw (bounds, (Color.FromArgb(40, 40, 40)), 1.5f)
+        Background.draw (bounds, Color.FromArgb(40, 40, 40), 1.5f)
 
         Render.rect bounds color
 

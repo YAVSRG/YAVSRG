@@ -8,7 +8,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.HudLayouts
 open Prelude.Calculator
 open Prelude.Data.User
 open Prelude.Data.User.Stats
@@ -20,7 +19,6 @@ open Interlude.Features.Pacemaker
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
-open Interlude.Features.Play.HUD
 
 type MultiplayerScreen =
 
@@ -163,7 +161,7 @@ type MultiplayerScreen =
                 base.OnEnter(previous)
 
                 DiscordRPC.playing_timed (
-                    "Multiplayer",
+                    %"discord_status.play_multiplayer",
                     info.ChartMeta.Title,
                     info.ChartMeta.Length / SelectedChart.rate.Value
                 )

@@ -15,15 +15,15 @@ type Grade(grade: GradeResult ref, score_info: ScoreInfo) =
 
     override this.Init(parent) =
         this
-        |* Text((fun () -> score_info.Ruleset.GradeName (!grade).Grade))
-            .Color((fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black)))
+        |* Text(fun () -> score_info.Ruleset.GradeName (!grade).Grade)
+            .Color(fun () -> (score_info.Ruleset.GradeColor (!grade).Grade, Colors.black))
             .Position(Position.Expand(10.0f))
 
         base.Init parent
 
     override this.Draw() =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
         Render.rect this.Bounds grade_color.O1
         base.Draw()
@@ -54,7 +54,7 @@ type Accuracy
 
     override this.Draw() =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         let grade_color = score_info.Ruleset.GradeColor (!grade).Grade
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) grade_color.O1
         Render.rect (this.Bounds.SliceB(LOWER_SIZE)) grade_color.O2
@@ -147,8 +147,8 @@ type Lamp
 
     override this.Init(parent) =
         this
-        |* Text((fun () -> score_info.Ruleset.LampName (!lamp).Lamp))
-            .Color((fun () -> (score_info.Ruleset.LampColor (!lamp).Lamp, Colors.black)))
+        |* Text(fun () -> score_info.Ruleset.LampName (!lamp).Lamp)
+            .Color(fun () -> (score_info.Ruleset.LampColor (!lamp).Lamp, Colors.black))
             .Position(Position.ShrinkX(10.0f).ShrinkB(LOWER_SIZE))
 
         if (!improvements).Lamp <> Improvement.None then ScoreScreenHelpers.animation_queue.Add glint_animation
@@ -161,7 +161,7 @@ type Lamp
 
     override this.Draw() =
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         Render.rect (this.Bounds.ShrinkB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O1
         Render.rect (this.Bounds.SliceB(LOWER_SIZE)) (score_info.Ruleset.LampColor (!lamp).Lamp).O2
 
@@ -169,18 +169,18 @@ type Lamp
 
         let text, color =
             match (!improvements).Lamp with
-            | Improvement.New -> new_record, (Colors.text_yellow_2)
-            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), (Colors.text_cyan_2)
+            | Improvement.New -> new_record, Colors.text_yellow_2
+            | Improvement.Faster r -> sprintf "%s  •  +%gx" new_record (System.MathF.Round(float32 r, 2)), Colors.text_cyan_2
             | Improvement.Better b ->
                 let new_lamp = score_info.Ruleset.LampName (!lamp).Lamp
                 let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
-                sprintf "%s  •  %s > %s" new_record old_lamp new_lamp, (Colors.text_green_2)
+                sprintf "%s  •  %s > %s" new_record old_lamp new_lamp, Colors.text_green_2
             | Improvement.FasterBetter(r, b) ->
                 let new_lamp = score_info.Ruleset.LampName (!lamp).Lamp
                 let old_lamp = score_info.Ruleset.LampName((!lamp).Lamp - b)
 
                 sprintf "%s  •  %s > %s  •  +%gx" new_record old_lamp new_lamp (System.MathF.Round(float32 r, 2)),
-                (Colors.text_pink_2)
+                Colors.text_pink_2
             | Improvement.None ->
                 match (!previous_personal_bests) with
                 | Some pbs ->
@@ -208,7 +208,7 @@ type Lamp
 
             Text.fill_b (
                 Style.font,
-                sprintf "%.1f raw" (score_info.Scoring.MaxPossiblePoints - score_info.Scoring.PointsScored),
+                sprintf "%.1fr" (score_info.Scoring.MaxPossiblePoints - score_info.Scoring.PointsScored),
                 raw_greats_tooltip.Shrink(10.0f, 5.0f),
                 Colors.text,
                 Alignment.CENTER

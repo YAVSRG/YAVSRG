@@ -266,7 +266,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
         else
             hover_animation.Target <- 0.0f
 
-        hover_animation.Update(elapsed_ms) |> ignore
+        hover_animation.Update(elapsed_ms)
 
     member this.Update(this_top: float32, tree_top: float32, tree_bottom: float32, elapsed_ms: float) : float32 =
         this.IfVisible(this_top, tree_top, tree_bottom, (fun b -> this.UpdateCulled(tree_top, b, elapsed_ms)))

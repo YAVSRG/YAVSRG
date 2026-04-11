@@ -15,9 +15,7 @@ type private RecentScores(scores: Players.Profile.View.RecentScore array) =
         scores
         |> Array.map (fun score ->
             score,
-            (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp)
-             |> format_timespan)
-            + " ago",
+            (DateTimeOffset.UtcNow - DateTimeOffset.FromUnixTimeMilliseconds(score.Timestamp) |> format_timespan),
             Gameplay.Scoring.Grade.calculate SC_J4.Grades score.Score |> SC_J4.GradeColor,
             SC_J4.LampColor score.Lamp
         )

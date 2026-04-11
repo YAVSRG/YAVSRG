@@ -7,7 +7,7 @@ open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
 
-type CreateFolderPage(on_create: (string * Collection) -> unit) =
+type CreateFolderPage(on_create: string * Collection -> unit) =
     inherit Page()
 
     let new_name = Setting.simple "" |> Setting.alphanumeric

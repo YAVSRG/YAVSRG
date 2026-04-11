@@ -14,18 +14,6 @@ type RateModsPage() =
 
     let show_mods = Setting.simple config.RateModMeterShowMods
 
-    let preview =
-        { new ElementPreview(config.RateModMeterPosition) with
-            override this.DrawComponent(bounds) =
-                Text.fill_b (
-                    Style.font,
-                    (if show_mods.Value then "1.00x, Mirror" else "1.00x"),
-                    bounds,
-                    Colors.text_subheading,
-                    Alignment.CENTER
-                )
-        }
-
     member this.SaveChanges() =
         Skins.save_hud_config
             { Content.HUD with

@@ -84,7 +84,7 @@ type LibraryViewControls() =
 
         |+ ModeDropdown(
             Sorting.modes.Keys
-            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby." + id))),
+            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby.%s" id))),
             "Sort",
             options.ChartSortMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartSortReverse
@@ -105,7 +105,7 @@ type LibraryViewControls() =
 
         |* ModeDropdown(
             Grouping.modes.Keys
-            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
+            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby.%s" id))),
             "Group",
             options.ChartGroupMode |> Setting.trigger (ignore >> LevelSelect.refresh_all),
             options.ChartGroupReverse |> Setting.trigger (ignore >> LevelSelect.refresh_all),

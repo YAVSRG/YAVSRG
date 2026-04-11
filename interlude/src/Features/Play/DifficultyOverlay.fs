@@ -109,7 +109,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     let draw_octaves (y: float32) =
         let mutable x = Render.width() - 20.0f
-        for (burst, stamina) in
+        for burst, stamina in
             seq {
                 let mutable peek = seek
                 while peek >= 0 do
@@ -172,7 +172,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         seq {
             let mutable peek = seek
             while peek >= 0 do
-                yield (ln_coverage.[peek]) * 201.0f
+                yield ln_coverage.[peek] * 201.0f
                 peek <- peek - 1
         }
 
@@ -209,9 +209,9 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
         draw_note_data 400.0f Colors.blue note_strains
         Text.draw(Style.font, "Experimental strain, not used yet", 20.0f, this.Bounds.Right - 400.0f, 570.0f, Colors.white)
         draw_octaves 600.0f
-        let (burst, stamina) = difficulty.Hands.[seek].Right in
+        let burst, stamina = difficulty.Hands.[seek].Right in
             Text.draw(Style.font, sprintf "R: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 200.0f, 770.0f, Colors.white)
-        let (burst, stamina) = difficulty.Hands.[seek].Left in
+        let burst, stamina = difficulty.Hands.[seek].Left in
             Text.draw(Style.font, sprintf "L: %.0f | %.0f" burst stamina, 20.0f, this.Bounds.Right - 400.0f, 770.0f, Colors.white)
 
     override this.Update (elapsed_ms, moved) =

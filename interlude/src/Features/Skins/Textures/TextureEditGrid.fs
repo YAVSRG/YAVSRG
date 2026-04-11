@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Skins
+namespace Interlude.Features.Skins
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -18,8 +18,8 @@ module TextureEditorExtensions =
 
         member this.Reload() =
             match this with
-            | :? Noteskin as ns -> Skins.reload_current_noteskin()
-            | :? HudLayout as hud -> Skins.reload_current_hud()
+            | :? Noteskin as _ -> Skins.reload_current_noteskin()
+            | :? HudLayout as _ -> Skins.reload_current_hud()
             | _ -> failwith "Unrecognised storage object (maybe a theme)"
 
         member this.GetTextureRules(texture_id: string) : TextureRules =
@@ -133,7 +133,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
 
                 if r = 0 then
                     grid.Add(
-                        Text(sprintf "Frame %i" (c + 1))
+                        Text([(c + 1).ToString()] %> "texture_editor.frame_label")
                             .Color(Colors.text_subheading)
                             .Align(Alignment.CENTER)
                             .Position(Position.Box(0.0f, 0.0f, float32 c * (item_width + 10.0f), -90.0f, item_width, 40.0f)),
@@ -145,7 +145,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                         grid.Add(
                             DeleteButton(fun () ->
                                 ConfirmPage(
-                                    sprintf "Really PERMANENTLY delete animation frame %i?" (c + 1),
+                                    [(c + 1).ToString()] %> "texture_editor.confirm_delete_frame",
                                     fun () ->
                                         if source.DeleteLooseTextureColumn(c, texture_id) then
                                             source.Reload()
@@ -159,7 +159,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                         )
 
             grid.Add(
-                Text(sprintf "Color %i" (r + 1))
+                Text([(r + 1).ToString()] %> "texture_editor.color_label")
                     .Color(Colors.text_subheading)
                     .Align(Alignment.RIGHT)
                     .Position(
@@ -176,7 +176,7 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                     DeleteButton(
                         (fun () ->
                             ConfirmPage(
-                                sprintf "Really PERMANENTLY delete color %i?" (r + 1),
+                                    [(r + 1).ToString()] %> "texture_editor.confirm_delete_color",
                                 fun () ->
                                     if source.DeleteLooseTextureRow(r, texture_id) then
                                         source.Reload()
@@ -204,13 +204,11 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                     (fun () ->
                         let src_row =
                             match Seq.tryHead this.SelectedTextures with
-                            | Some(x, y) -> y
+                            | Some(_, y) -> y
                             | None -> 0
 
                         ConfirmPage(
-                            sprintf
-                                "Add a new color to this texture? (will be a copy of color %i)"
-                                (src_row + 1),
+                            [(src_row + 1).ToString()] %> "texture_editor.confirm_add_color",
                             fun () ->
                             if source.AddLooseTextureRow(src_row, texture_id) then
                                 source.Reload()
@@ -236,13 +234,11 @@ type TextureEditGrid(source: Storage, texture_id: string) as this =
                              (fun () ->
                                  let src_col =
                                      match Seq.tryHead this.SelectedTextures with
-                                     | Some(x, y) -> x
+                                     | Some(x, _) -> x
                                      | None -> 0
 
                                  ConfirmPage(
-                                     sprintf
-                                         "Add a new animation frame to this texture? (will be a copy of frame %i)"
-                                         (src_col + 1),
+                                    [(src_col + 1).ToString()] %> "texture_editor.confirm_add_frame",
                                      fun () ->
                                         if source.AddLooseTextureColumn(src_col, texture_id) then
                                             source.Reload()

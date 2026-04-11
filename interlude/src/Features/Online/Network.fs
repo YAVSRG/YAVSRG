@@ -12,28 +12,28 @@ open Interlude.Web.Shared
 
 module NetworkEvents =
 
-    let waiting_registration_ev = new Event<string>()
+    let waiting_registration_ev = Event<string>()
     let waiting_registration = waiting_registration_ev.Publish
 
-    let login_failed_ev = new Event<string>()
+    let login_failed_ev = Event<string>()
     let login_failed = login_failed_ev.Publish
 
-    let registration_failed_ev = new Event<string>()
+    let registration_failed_ev = Event<string>()
     let registration_failed = registration_failed_ev.Publish
 
-    let successful_login_ev = new Event<string>()
+    let successful_login_ev = Event<string>()
     let successful_login = successful_login_ev.Publish
 
-    let receive_lobby_list_ev = new Event<LobbyInfo array>()
+    let receive_lobby_list_ev = Event<LobbyInfo array>()
     let receive_lobby_list = receive_lobby_list_ev.Publish
 
-    let receive_invite_ev = new Event<string * Guid>()
+    let receive_invite_ev = Event<string * Guid>()
     let receive_invite = receive_invite_ev.Publish
 
-    let join_lobby_ev = new Event<Lobby>()
+    let join_lobby_ev = Event<Lobby>()
     let join_lobby = join_lobby_ev.Publish
 
-    let leave_lobby_ev = new Event<unit>()
+    let leave_lobby_ev = Event<unit>()
     let leave_lobby = leave_lobby_ev.Publish
 
 module Network =
@@ -240,7 +240,7 @@ module Network =
                             use br = new BinaryReader(ms)
                             (replay_info.Replay :?> OnlineReplay).ImportLiveBlock(Time.of_number timestamp, br)
 
-    let client = new NetworkClient()
+    let client = NetworkClient()
 
     let mutable private api_initialised = false
     let connect () =
@@ -255,19 +255,19 @@ module Network =
             client.Connect()
 
     let login_with_token () =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         client.Send(Upstream.LOGIN credentials.Token)
 
     let begin_login () =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         client.Send(Upstream.LOGIN_WITH_DISCORD)
 
-    let complete_registration (desired_username) =
-        assert(GameThread.is_game_thread())
+    let complete_registration (desired_username: string)=
+        assert GameThread.is_game_thread()
         client.Send(Upstream.COMPLETE_REGISTRATION_WITH_DISCORD desired_username)
 
     let logout () =
-        assert(GameThread.is_game_thread())
+        assert GameThread.is_game_thread()
         NetworkEvents.leave_lobby_ev.Trigger()
         lobby <- None
 
@@ -293,6 +293,6 @@ module Network =
 
         credentials.Save()
 
-    let join_lobby id =
-        assert(GameThread.is_game_thread())
+    let join_lobby (id: Guid) =
+        assert GameThread.is_game_thread()
         client.Send(Upstream.JOIN_LOBBY id)

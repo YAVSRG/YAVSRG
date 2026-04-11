@@ -196,7 +196,7 @@ type ScoreList(start_time: int64, end_time: int64) =
 
     let make_playlist() =
         let date = timestamp_to_rg_calendar_day start_time
-        CreatePlaylistPage(sprintf "Session on %s" (date.ToShortDateString()), fun (_, collection) ->
+        CreatePlaylistPage([date.ToShortDateString()] %> "stats.session.timestamp", fun (_, collection) ->
             match collection with
             | Playlist p ->
                 scores.Iter(
@@ -223,7 +223,7 @@ type ScoreList(start_time: int64, end_time: int64) =
                     .Position(Position.BorderB(75.0f).Shrink(20.0f, 10.0f).SliceR(400.0f))
                     .Conditional(fun () -> has_scores),
 
-                EmptyState(Icons.WIND, "No scores this session")
+                EmptyState(Icons.WIND, %"stats.session.no_scores")
                     .Position(Position.ShrinkT(160.0f))
                     .Conditional(fun () -> finished_loading && not has_scores)
             )

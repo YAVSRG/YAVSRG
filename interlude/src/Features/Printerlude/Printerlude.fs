@@ -35,10 +35,10 @@ module Printerlude =
 
         let focus_window (io: IOContext) =
             WindowThread.defer WindowThread.focus_window
-            io.WriteLine(sprintf "Message to focus game window sent")
+            io.WriteLine("Message to focus game window sent")
 
         let timescale (io: IOContext) (v: float) =
-            UI.Screen.timescale <- System.Math.Clamp(v, 0.01, 10.0)
+            UI.Screen.timescale <- Math.Clamp(v, 0.01, 10.0)
             io.WriteLine(sprintf "Entering warp speed (%.0f%%)" (UI.Screen.timescale * 100.0))
 
         let toggle_background (io: IOContext) (b: bool) =
@@ -80,7 +80,7 @@ module Printerlude =
                     "local_server",
                     "Switch to local development server",
                     "flag",
-                    fun (io: IOContext) (b: bool) ->
+                    fun (_: IOContext) (b: bool) ->
                         Network.credentials.Host <- (if b then "localhost" else "online.yavsrg.net")
                         Network.credentials.Api <- (if b then "localhost" else "api.yavsrg.net")
                         Updates.restart_on_exit <- true

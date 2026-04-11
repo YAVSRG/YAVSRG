@@ -7,7 +7,7 @@ open Prelude.Data.Library
 open Interlude.Content
 open Interlude.UI
 
-type CreatePlaylistPage(starting_name: string, on_create: (string * Collection) -> unit) =
+type CreatePlaylistPage(starting_name: string, on_create: string * Collection -> unit) =
     inherit Page()
 
     let new_name = Setting.simple starting_name |> Setting.alphanumeric

@@ -36,10 +36,10 @@ type RegisterPage(discord_tag: string) =
                 Text([discord_tag] %> "register.discord_tag")
                     .Align(Alignment.LEFT)
                     .TextPos(0),
-                CalloutCard(info).Position(fun (w, h) -> page_position(4, 9, PageWidth.Custom w).Translate(0.0f, 25.0f)),
-                PageButton(%"register.terms_of_service", (fun () -> open_url ("https://yavsrg.net/terms_of_service")))
+                CalloutCard(info).Position(fun (w, _) -> page_position(4, 9, PageWidth.Custom w).Translate(0.0f, 25.0f)),
+                PageButton(%"register.terms_of_service", (fun () -> open_url "https://yavsrg.net/terms_of_service"))
                     .Pos(14),
-                PageButton(%"register.privacy_policy", (fun () -> open_url ("https://yavsrg.net/privacy_policy")))
+                PageButton(%"register.privacy_policy", (fun () -> open_url "https://yavsrg.net/privacy_policy"))
                     .Pos(16),
                 PageSetting(%"register.confirm_terms_of_service", Checkbox agree_tos)
                     .Pos(18),

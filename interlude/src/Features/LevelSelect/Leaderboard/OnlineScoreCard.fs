@@ -7,19 +7,16 @@ open Prelude
 open Prelude.Data.User
 open Interlude.UI
 open Interlude.Features.Score
-open Interlude.Web.Shared.Requests
 
 type private OnlineScoreCard(score: LeaderboardScore, score_info: ScoreInfo) =
     inherit
         FrameContainer(
-            NodeType.Button(
-                (fun () ->
-                    Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
-                        ScreenType.Score
-                        Transitions.EnterGameplayNoFadeAudio
-                    |> ignore
-                )
+            NodeType.Button(fun () ->
+                Screen.change_new
+                    (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                    ScreenType.Score
+                    Transitions.EnterGameplayNoFadeAudio
+                |> ignore
             )
         )
 
@@ -110,7 +107,7 @@ type private OnlineScoreCard(score: LeaderboardScore, score_info: ScoreInfo) =
                 LevelSelect.choose_this_chart()
             else
                 Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                        (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore

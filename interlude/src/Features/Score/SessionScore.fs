@@ -45,7 +45,7 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
 
         // box
         Render.rect (this.Bounds.Translate(10.0f, 10.0f)) Colors.black
-        Background.draw (this.Bounds, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.draw (this.Bounds, Color.FromArgb(40, 40, 40), 2.0f)
         Render.rect this.Bounds (!*Palette.MAIN_100)
 
         // bar
@@ -58,11 +58,11 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
             let q = counter.AsQuad
             { q with TopLeft = q.TopLeft - OpenTK.Mathematics.Vector2(30.0f, 0.0f) }
         Render.quad (Quad.translate (10.0f, 10.0f) counterq) Colors.black
-        Background.drawq (counterq, (Color.FromArgb(40, 40, 40)), 2.0f)
+        Background.drawq (counterq, Color.FromArgb(40, 40, 40), 2.0f)
         Render.quad counterq (!*Palette.MAIN_100)
 
         Text.fill_b(Style.font, sprintf "%.0f" xp_display.Value, counter, Colors.text, Alignment.CENTER)
-        Text.fill_b(Style.font, sprintf "Level %i" level, counter.BorderB(40.0f).TranslateY(10.0f), Colors.text, Alignment.CENTER)
+        Text.fill_b(Style.font, sprintf "%s %i" (%"stats.level") level, counter.BorderB(40.0f).TranslateY(10.0f), Colors.text, Alignment.CENTER)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

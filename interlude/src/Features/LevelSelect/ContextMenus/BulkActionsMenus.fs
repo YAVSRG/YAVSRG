@@ -23,7 +23,7 @@ module BulkActions =
                 |> Seq.iter (fun (pack, charts_in_pack) -> ChartDatabase.delete_many_from_pack (charts_in_pack |> Seq.map fst) pack Content.Charts)
 
                 // delete charts picked by custom grouping, from all packs
-                ChartDatabase.delete_many (charts |> Seq.filter (function chart_meta, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst) Content.Charts
+                ChartDatabase.delete_many (charts |> Seq.filter (function _, LibraryContext.Pack _ -> false | _ -> true ) |> Seq.map fst) Content.Charts
 
                 LevelSelect.refresh_all ()
                 Menu.Back()
@@ -154,7 +154,7 @@ type BatchFolderContextMenu(folder: string, charts: (ChartMeta * LibraryContext)
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),
-            (function (f, Folder _) when f = folder -> false | _ -> true),
+            (function f, Folder _ when f = folder -> false | _ -> true),
             true
         )
             .Show()
@@ -227,7 +227,7 @@ type BatchPlaylistContextMenu(playlist: string, charts: (ChartMeta * LibraryCont
                 LevelSelect.refresh_all ()
                 Menu.Exit()
             ),
-            (function (f, Folder _) when f = playlist -> false | _ -> true),
+            (function f, Folder _ when f = playlist -> false | _ -> true),
             true
         )
             .Show()

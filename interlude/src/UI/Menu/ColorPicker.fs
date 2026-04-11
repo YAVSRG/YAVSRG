@@ -180,7 +180,6 @@ type ColorPicker(label: string, color: Setting<Color>, allow_alpha: bool) as thi
             .WithOnClose(fun () -> hex <- color.Value.ToHex())
             .Show()
 
-[<Extension>]
 type ColorPickerExtensions =
     [<Extension>]
     static member Preview(this: ColorPicker, preview: Rect -> Color -> unit) =

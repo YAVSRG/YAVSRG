@@ -53,7 +53,8 @@ type GameplayInfo() =
     override this.Draw() =
 
         let play_info = this.Bounds.SliceT(90.0f, 40.0f).ShrinkX(15.0f)
-        Text.fill_b (Style.font, mod_string + (if SelectedChart.autoplay then ", AP" else ""), play_info, Colors.text, Alignment.LEFT)
+        let mod_string_ap = mod_string + (if SelectedChart.autoplay then ", AP" else "")
+        Text.fill_b (Style.font, mod_string_ap, play_info, Colors.text, Alignment.LEFT)
         Text.fill_b (Style.font, last_played(), play_info, Colors.text, Alignment.RIGHT)
         if mod_status <> ModStatus.Ranked then
             let text, color =
@@ -62,7 +63,7 @@ type GameplayInfo() =
                 | ModStatus.Offline -> Icons.CLOUD_OFF + " " + %"mods.mod_status.offline", Colors.text_yellow_2
                 | ModStatus.Unranked -> Icons.CLOUD_OFF + " " + %"mods.mod_status.unranked", Colors.text_yellow_2
                 | ModStatus.Ranked -> failwith "impossible"
-            let x = Text.measure(Style.font, mod_string) * play_info.Height * 0.6f + 10.0f
+            let x = Text.measure(Style.font, mod_string_ap) * play_info.Height * 0.6f + 10.0f
             Text.fill_b (Style.font, text, play_info.ShrinkL(x).ShrinkY(2.0f), color, Alignment.LEFT)
 
         let chart_info = this.Bounds.SliceT(130.0f, 30.0f).ShrinkX(15.0f)

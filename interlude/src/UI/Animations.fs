@@ -99,7 +99,7 @@ module Wedge =
         let segments = int ((a2 - a1) / 0.10) |> max 1
         let segsize = (a2 - a1) / float segments
 
-        let centre = new Vector2(x, y)
+        let centre = Vector2(x, y)
 
         for i = 1 to segments do
             let a2 = a1 + float i * segsize

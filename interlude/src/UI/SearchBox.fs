@@ -1,6 +1,6 @@
 ﻿namespace Interlude.UI
 
-open System
+open System.Diagnostics
 open System.Runtime.CompilerServices
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -13,7 +13,7 @@ open Prelude.Data.Library
 // todo: reconsider fragile composition with TextColor on TextEntry
 type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
     inherit FrameContainer(NodeType.Container(fun _ -> Some this.TextEntry))
-    let search_timer = new Diagnostics.Stopwatch()
+    let search_timer = Stopwatch()
 
     let text_entry =
         TextEntry(
@@ -87,14 +87,13 @@ type SearchBox(query_text: Setting<string>, callback: string -> unit) as this =
         // This would likely activate some other button they don't actually mean to
         // Main example being hitting enter in level select = play the selected chart
         // So if they do this, eat the input - they will believe it responded to them hitting enter all the same :)
-        elif search_timer.IsRunning && (%%"select").Pressed() then
-            ignore ()
+        elif search_timer.IsRunning then
+            (%%"select").Pressed() |> ignore
 
     override this.OnFocus (by_mouse: bool) : unit =
         base.OnFocus(by_mouse: bool)
         if this.KeyboardAutoSelect && not by_mouse then GameThread.defer (fun () -> this.Select false)
 
-[<Extension>]
 type SearchBoxExtensions() =
 
     [<Extension>]

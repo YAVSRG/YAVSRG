@@ -125,7 +125,7 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
         if tab.Pressed() then
             match Selection.get_focused_element() with
             | Some (:? Widget as w) ->
-                next_entry (w.Parent.Parent)
+                next_entry w.Parent.Parent
             | _ -> ()
 
     override this.Title = %"rulesets.edit.windows"

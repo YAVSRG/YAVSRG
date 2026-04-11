@@ -5,7 +5,7 @@ open Percyqaz.Flux.Graphics
 
 module Sprites =
 
-    let private cache = new Dictionary<string, Sprite>()
+    let private cache = Dictionary<string, Sprite>()
 
     let get (id: string) : Sprite =
         if cache.ContainsKey id then

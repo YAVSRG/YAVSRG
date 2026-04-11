@@ -62,7 +62,7 @@ module EditHudScreen =
                 base.Init(parent)
 
             override this.OnEnter p =
-                DiscordRPC.in_menus ("Customising HUD")
+                DiscordRPC.in_menus (%"discord_status.edit_hud")
                 Dialog.close ()
                 Background.dim (float32 options.BackgroundDim.Value)
                 Toolbar.hide ()

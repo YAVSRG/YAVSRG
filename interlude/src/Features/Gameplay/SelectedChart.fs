@@ -186,7 +186,7 @@ module SelectedChart =
                         // if chart is loaded we can safely restart from this point for different rates and mods
 
                         let with_mods = ModState.apply mods chart
-                        let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
+                        let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
 
                         let rating = Difficulty.calculate(rate, with_mods.Notes)
                         let patterns = PatternReport.from_chart(rating, with_mods.AsChart)
@@ -219,7 +219,7 @@ module SelectedChart =
                         | Some chart ->
 
                         let with_mods = ModState.apply mods chart
-                        let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
+                        let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
 
                         let rating = Difficulty.calculate(rate, with_mods.Notes)
 
@@ -255,7 +255,7 @@ module SelectedChart =
                         | None -> ()
                         | Some with_mods ->
 
-                        let with_colors = NoteColors.apply (Content.NoteskinConfig.NoteColors) with_mods
+                        let with_colors = NoteColors.apply Content.NoteskinConfig.NoteColors with_mods
                         yield fun () ->
                             WITH_COLORS <- Some with_colors
 
@@ -391,21 +391,21 @@ module SelectedChart =
 
     let change_rate_hotkeys(change_rate_by: Rate -> unit) =
         if (%%"uprate_small").Pressed() then
-            change_rate_by (0.01f<rate>)
+            change_rate_by(0.01f<rate>)
         elif (%%"uprate_half").Pressed() then
-            change_rate_by (0.05f<rate>)
+            change_rate_by(0.05f<rate>)
         elif (%%"uprate_big").Pressed() then
-            change_rate_by (0.25f<rate>)
+            change_rate_by(0.25f<rate>)
         elif (%%"uprate").Pressed() then
-            change_rate_by (0.1f<rate>)
+            change_rate_by(0.1f<rate>)
         elif (%%"downrate_small").Pressed() then
-            change_rate_by (-0.01f<rate>)
+            change_rate_by(-0.01f<rate>)
         elif (%%"downrate_half").Pressed() then
-            change_rate_by (-0.05f<rate>)
+            change_rate_by(-0.05f<rate>)
         elif (%%"downrate_big").Pressed() then
-            change_rate_by (-0.25f<rate>)
+            change_rate_by(-0.25f<rate>)
         elif (%%"downrate").Pressed() then
-            change_rate_by (-0.1f<rate>)
+            change_rate_by(-0.1f<rate>)
 
     let init () =
 

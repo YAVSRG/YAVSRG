@@ -14,7 +14,7 @@ module Backbeat =
             override _.Handle((chart_id, folder_name)) =
                 async {
                     match ChartDatabase.get_meta chart_id Content.Charts with
-                    | Some chart_meta -> return true
+                    | Some _ -> return true
                     | None ->
 
                     let mutable identified_chart : Charts.Identify.Response option = None

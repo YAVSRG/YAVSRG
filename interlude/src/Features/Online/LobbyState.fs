@@ -38,23 +38,23 @@ type LobbyPlayerReplayInfo =
 type Lobby(client: Client, your_username: string, players: (string * int32) array) =
 
     let players =
-        let d = new Dictionary<string, LobbyPlayer>()
-        for (username, color) in players do
+        let d = Dictionary<string, LobbyPlayer>()
+        for username, color in players do
             d.Add(username, LobbyPlayer.Create color)
         d
 
-    let replays = new Dictionary<string, LobbyPlayerReplayInfo>()
+    let replays = Dictionary<string, LobbyPlayerReplayInfo>()
 
-    let chat_message_ev = new Event<string * string>()
-    let system_message_ev = new Event<string>()
-    let lobby_settings_updated_ev = new Event<LobbySettings>()
-    let lobby_event_ev = new Event<LobbyEvent * string>()
-    let lobby_players_updated_ev = new Event<unit>()
-    let player_status_ev = new Event<string * LobbyPlayerStatus>()
-    let change_chart_ev = new Event<LobbyChart>()
-    let countdown_ev = new Event<string * int>()
-    let game_start_ev = new Event<unit>()
-    let game_end_ev = new Event<unit>()
+    let chat_message_ev = Event<string * string>()
+    let system_message_ev = Event<string>()
+    let lobby_settings_updated_ev = Event<LobbySettings>()
+    let lobby_event_ev = Event<LobbyEvent * string>()
+    let lobby_players_updated_ev = Event<unit>()
+    let player_status_ev = Event<string * LobbyPlayerStatus>()
+    let change_chart_ev = Event<LobbyChart>()
+    let countdown_ev = Event<string * int>()
+    let game_start_ev = Event<unit>()
+    let game_end_ev = Event<unit>()
 
     (* Events *)
 

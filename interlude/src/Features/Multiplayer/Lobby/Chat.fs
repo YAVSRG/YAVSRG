@@ -128,7 +128,7 @@ type Chat(lobby: Lobby) =
                     |+ Text(data.Ruleset.LampName lamp)
                         .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
                         .Align(0.75f)
-                    |+ Text(sprintf "%ix" (data.Scoring.BestCombo))
+                    |+ Text(sprintf "%ix" data.Scoring.BestCombo)
                         .Color(data.Ruleset.LampColor lamp, Colors.shadow_1)
                         .Align(Alignment.RIGHT)
 
@@ -188,7 +188,7 @@ type Chat(lobby: Lobby) =
 
             add_msg(
                 Text(text)
-                    .Color((fun () -> color, Colors.shadow_1))
+                    .Color(fun () -> color, Colors.shadow_1)
                     .Align(Alignment.CENTER)
             )
         )

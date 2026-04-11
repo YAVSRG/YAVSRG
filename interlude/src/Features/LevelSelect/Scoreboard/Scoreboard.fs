@@ -10,13 +10,11 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Features.Gameplay
 
-[<RequireQualifiedAccess>]
 type private Sort =
     | Time = 0
     | Performance = 1
     | Accuracy = 2
 
-[<RequireQualifiedAccess>]
 type private Filter =
     | None = 0
     | CurrentRate = 1

@@ -220,7 +220,7 @@ module Callout =
     let update (x: float32, y: float32, width: float32, height: float32, callout: Callout) : unit =
         let x, width =
             match callout._Icon with
-            | Some i ->
+            | Some _ ->
                 let icon_size = min (icon_size callout.Size) height
                 x + icon_size + PADDING_X * 2.0f, width - icon_size - PADDING_X * 3.0f
             | None -> x + PADDING_X, width - PADDING_X * 2.0f
@@ -230,13 +230,13 @@ module Callout =
 
         for b in callout.Contents do
             match b with
-            | CalloutContent.Header s -> y <- y + header_size callout.Size
+            | CalloutContent.Header _ -> y <- y + header_size callout.Size
             | CalloutContent.Body xs ->
                 y <-
                     y
                     + (float32 xs.Length * text_size callout.Size)
                     + (float32 (xs.Length - 1) * text_spacing callout.Size)
-            | CalloutContent.Hotkey(desc, hk) -> y <- y + text_size callout.Size
+            | CalloutContent.Hotkey _ -> y <- y + text_size callout.Size
             | CalloutContent.Button(_, action) ->
                 y <- y + spacing
                 let tsize = text_size callout.Size
@@ -277,7 +277,6 @@ type CalloutCard(callout: Callout, border: Color, fill: Color) =
     interface IWidth with
         member _.Width = w
 
-[<Extension>]
 type CalloutCardExtensions =
 
     [<Extension>]

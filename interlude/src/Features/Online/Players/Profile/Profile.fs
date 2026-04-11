@@ -35,7 +35,7 @@ type StatsHeader(data: ProfileData) =
             .Color(Colors.text_subheading)
             .Position(Position.SlicePercentL(BAR_PC).SliceB(60.0f, 35.0f).ShrinkX(20.0f))
             .Align(Alignment.RIGHT)
-        |+ Text(sprintf "Level %i" level)
+        |+ Text(sprintf "%s %i" (%"stats.level") level)
             .Align(Alignment.LEFT)
             .Position(Position.SlicePercentL(BAR_PC).SliceB(55.0f, 50.0f).ShrinkX(20.0f))
         |+ Text(
@@ -124,7 +124,7 @@ type private Profile() =
         Container(NodeType.None)
         // Main details
         |+ Text(data.Username)
-            .Color((fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2))
+            .Color(fun () -> Color.FromArgb profile_color.Value, Colors.shadow_2)
             .Align(Alignment.LEFT)
             .Position(Position.SliceT(70.0f).ShrinkX(45.0f).TranslateY(10.0f))
         |+ StatsHeader(data)

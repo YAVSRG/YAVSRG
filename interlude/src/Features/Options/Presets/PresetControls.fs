@@ -55,7 +55,7 @@ type PresetControls =
         Button(
             (fun () ->
                 match setting.Value with
-                | None -> sprintf "Preset %i (Empty)" preset_id
+                | None -> sprintf "%s (%s)" ([preset_id.ToString()] %> "gameplay.preset.default_name") %"gameplay.preset.empty"
                 | Some s -> Icons.EDIT_2 + " " + s.Name
             ),
             (fun () -> Presets.confirm_if_needed Presets.load_and_edit (preset_id, setting))
@@ -76,8 +76,8 @@ type PresetControls =
             (fun () ->
                 match setting.Value with
                 | None ->
-                    let name = sprintf "Preset %i" preset_id
-                    setting.Value <- Presets.create (name) |> Some
+                    let name = [preset_id.ToString()] %> "gameplay.preset.default_name"
+                    setting.Value <- Presets.create name |> Some
                     Notifications.action_feedback (Icons.ALERT_OCTAGON, %"notification.preset_saved", name)
                 | Some existing ->
                     ConfirmPage(

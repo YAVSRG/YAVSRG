@@ -68,6 +68,6 @@ type Judgement(ctx: HudContext) =
                     )
                 | JudgementDisplayType.Texture y ->
                     Render.tex_quad
-                        ((Sprite.fill bounds texture).AsQuad)
+                        (Sprite.fill bounds texture).AsQuad
                         (Color.White.O4a alpha).AsQuad
                         (Sprite.pick_texture (time_ago / ctx.Config.JudgementMeterFrameTime / SelectedChart.rate.Value |> floor |> int, y) texture)

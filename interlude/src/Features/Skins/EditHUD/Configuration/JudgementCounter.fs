@@ -194,7 +194,7 @@ type JudgementCounterPage() =
                         match display.[i] with
                         | Some texture_index ->
                             Render.tex_quad
-                                ((Sprite.fill_left (r.SlicePercentY(text_scale.Value).ShrinkX(10.0f)) texture).AsQuad)
+                                (Sprite.fill_left (r.SlicePercentY(text_scale.Value).ShrinkX(10.0f)) texture).AsQuad
                                 Color.White.AsQuad
                                 (Sprite.pick_texture (0, texture_index) texture)
                         | None ->
@@ -250,7 +250,7 @@ type JudgementCounterPage() =
                             font_colon_spacing.Value
                         )
                     else
-                        let (mv, pf) = ratio
+                        let mv, pf = ratio
 
                         Text.fill_b (
                             Style.font,

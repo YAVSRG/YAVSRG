@@ -2,7 +2,6 @@
 
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Skins.HudLayouts
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
@@ -16,11 +15,10 @@ type BPM(ctx: HudContext) =
     override this.Init(parent: Widget) =
         this
             .Add(
-                Text(
-                    (fun () ->
-                        let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
-                        sprintf "%.0f BPM" (60000.0f<ms / minute> / ms_per_beat)
-                    ))
+                Text(fun () ->
+                    let ms_per_beat = bpms.[i].Data.MsPerBeat / SelectedChart.rate.Value in
+                    sprintf "%.0f BPM" (60000.0f<ms / minute> / ms_per_beat)
+                )
                     .Color(Colors.text_subheading)
                     .Align(Alignment.CENTER)
             )

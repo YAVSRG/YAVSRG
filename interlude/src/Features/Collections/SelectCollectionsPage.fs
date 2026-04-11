@@ -50,7 +50,7 @@ type private CollectionButton(icon: string, name: string, action: unit -> unit) 
         base.Draw()
 
 type SelectCollectionPage
-    (on_select: (string * Collection) -> unit, is_disabled: (string * Collection) -> bool, select_on_create: bool)
+    (on_select: string * Collection -> unit, is_disabled: string * Collection -> bool, select_on_create: bool)
     =
     inherit Page()
 

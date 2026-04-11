@@ -62,7 +62,7 @@ type SpectateScreen =
 
             override this.OnEnter(prev) =
                 base.OnEnter(prev)
-                DiscordRPC.playing ("Spectating", info.ChartMeta.Title)
+                DiscordRPC.playing (%"discord_status.spectate", info.ChartMeta.Title)
                 Song.pause ()
 
             override this.OnExit(next) =

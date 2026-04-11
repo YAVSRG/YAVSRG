@@ -18,7 +18,6 @@ type LeaderboardScore = Charts.Scores.Leaderboard.Score
 
 module OnlineScores =
 
-    [<RequireQualifiedAccess>]
     type State =
         | Offline = -2
         | NoLeaderboard = -1
@@ -126,7 +125,7 @@ module OnlineScores =
                 }
 
     do
-        SelectedChart.on_chart_change_started.Add (fun info ->
+        SelectedChart.on_chart_change_started.Add (fun _ ->
             leaderboard_scores.Clear()
             state <- State.Unloaded
             score_loader.Cancel()

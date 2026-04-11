@@ -16,12 +16,12 @@ type UpdateButton() as this =
 
     override this.Draw() =
         let area = this.Bounds.Shrink(0.0f, 7.5f)
-        Render.rect area (Colors.shadow_1.O2)
+        Render.rect area Colors.shadow_1.O2
 
         if Updates.update_complete then
             Text.fill_b (
                 Style.font,
-                Icons.REFRESH_CCW + " Restart game",
+                Icons.REFRESH_CCW + " " + %"update.restart",
                 area.Shrink(20.0f, 5.0f),
                 (if this.Focused then
                      Colors.text_yellow_2
@@ -33,7 +33,7 @@ type UpdateButton() as this =
         elif Updates.update_started then
             Text.fill_b (
                 Style.font,
-                Icons.DOWNLOAD + " Installing update..",
+                Icons.DOWNLOAD + " " + %"update.installing",
                 area.Shrink(20.0f, 5.0f),
                 Colors.text_yellow_2,
                 Alignment.CENTER
@@ -48,7 +48,7 @@ type UpdateButton() as this =
         else
             Text.fill_b (
                 Style.font,
-                Icons.DOWNLOAD + " Install update",
+                Icons.DOWNLOAD + " " + %"update.install",
                 area.Shrink(20.0f, 5.0f),
                 (if this.Focused then
                      Colors.text_yellow_2

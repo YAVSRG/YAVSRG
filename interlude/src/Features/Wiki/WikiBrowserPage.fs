@@ -31,7 +31,7 @@ type WikiBrowserPage() =
                     Icons.ARROW_LEFT_CIRCLE + " " + %"menu.back"
             , fun () ->
                 match page_history with
-                | x :: y :: xs ->
+                | _ :: y :: xs ->
                     load_resource y
                     page_history <- y :: xs
                 | _ -> Menu.Back()
@@ -47,9 +47,9 @@ type WikiBrowserPage() =
             .Position(Position.SliceL(200.0f, 900.0f))
         |+ Button(Icons.EXTERNAL_LINK + " " + %"wiki.openinbrowser", fun () ->
             match current_page with
-            | WikiIndex -> open_url ("https://yavsrg.net/interlude/wiki/index.html")
+            | WikiIndex -> open_url "https://yavsrg.net/interlude/wiki/index.html"
             | WikiPage p -> open_url ("https://yavsrg.net/interlude/wiki/" + p.Filename + ".html")
-            | Changelog -> open_url ("https://yavsrg.net/interlude/changelog.html")
+            | Changelog -> open_url "https://yavsrg.net/interlude/changelog.html"
         )
             .Position(Position.SliceR(300.0f))
 
@@ -59,7 +59,7 @@ type WikiBrowserPage() =
         let mutable y = 0.0f
         let PARAGRAPH_SPACING = 35.0f
         let PAGE_WIDTH = 1400.0f
-        let content = new WikiContent(NodeType.Leaf)
+        let content = WikiContent(NodeType.Leaf)
 
         match loaded_content with
         | Some paragraphs ->

@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
-open Prelude.Skins.Noteskins
 open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Endless
@@ -92,7 +91,7 @@ module LevelSelect =
 
     let private enter_gameplay (ctx: LibraryContext) : unit =
         match ctx with
-        | LibraryContext.Playlist(index, playlist_id, data) ->
+        | LibraryContext.Playlist(index, playlist_id, _) ->
             match Content.Library.Collections.GetPlaylist playlist_id with
             | Some playlist -> EndlessModeState.queue_playlist (index + 1) playlist_id playlist Content.Library filter state
             | None -> ()

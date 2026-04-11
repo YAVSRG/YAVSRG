@@ -13,7 +13,7 @@ module Terminal =
 
     let private LOCK_OBJ = obj ()
 
-    let mutable exec_command = fun (c: string) -> ()
+    let mutable exec_command = fun (_: string) -> ()
 
     module Log =
 
@@ -137,9 +137,9 @@ module Terminal =
 
         let bounds = Render.bounds().Shrink(100.0f)
 
-        Render.rect (bounds.Expand 5.0f) (Colors.white.O2)
-        Render.rect (bounds.ShrinkB 70.0f) (Colors.shadow_1.O3)
-        Render.rect (bounds.SliceB 65.0f) (Colors.shadow_2.O3)
+        Render.rect (bounds.Expand 5.0f) Colors.white.O2
+        Render.rect (bounds.ShrinkB 70.0f) Colors.shadow_1.O3
+        Render.rect (bounds.SliceB 65.0f) Colors.shadow_2.O3
 
         Text.draw_b (
             font.Value,

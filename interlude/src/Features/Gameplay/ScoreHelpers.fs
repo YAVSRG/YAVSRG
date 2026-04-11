@@ -32,13 +32,13 @@ module Gameplay =
 
     let upload_score (score_info: ScoreInfo) =
         Charts.Scores.Save.post (
-            ({
+            {
                 ChartId = score_info.ChartMeta.Hash
                 Replay = score_info.Replay |> Replay.compress_string
                 Rate = score_info.Rate
                 Mods = score_info.Mods
                 Timestamp = score_info.TimePlayed
-            }),
+            },
             (function
                 | None -> Logging.Error "Error submitting score (%s on %s)" (score_info.Ruleset.FormatAccuracy score_info.Accuracy) score_info.ChartMeta.Title
                 | Some None -> ()

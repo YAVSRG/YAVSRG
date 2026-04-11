@@ -54,7 +54,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
         Style.text_open.Play()
 
         Input.listen_to_text (
-            setting |> Setting.trigger (fun v -> Style.key.Play()),
+            setting |> Setting.trigger (fun _ -> Style.key.Play()),
             not by_mouse,
             fun () ->
                 if this.Selected then
