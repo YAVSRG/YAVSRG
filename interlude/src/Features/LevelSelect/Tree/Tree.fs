@@ -280,7 +280,7 @@ module Tree =
         Render.rect_edges
             (screen_bounds.Right - 10.0f)
             (origin + 5.0f)
-            (screen_bounds.Right)
+            screen_bounds.Right
             (originB - 50.0f)
             (Colors.shadow_2.O3a scroll_fade.Alpha)
 

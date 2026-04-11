@@ -15,14 +15,12 @@ open Interlude.Features.Gameplay
 type private LocalScoreCard(score_info: ScoreInfo) =
     inherit
         Container(
-            NodeType.Button(
-                (fun () ->
-                    Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
-                        ScreenType.Score
-                        Transitions.EnterGameplayNoFadeAudio
-                    |> ignore
-                )
+            NodeType.Button(fun () ->
+                Screen.change_new
+                    (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                    ScreenType.Score
+                    Transitions.EnterGameplayNoFadeAudio
+                |> ignore
             )
         )
 
@@ -162,7 +160,7 @@ type private LocalScoreCard(score_info: ScoreInfo) =
                 LevelSelect.choose_this_chart()
             else
                 Screen.change_new
-                        (fun () -> new ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
+                        (fun () -> ScoreScreen(score_info, (ImprovementFlags.None, None), false) :> Screen)
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                     |> ignore

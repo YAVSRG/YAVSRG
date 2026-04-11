@@ -73,7 +73,7 @@ module LocalScores =
         }
 
     do
-        SelectedChart.on_chart_change_started.Add (fun info ->
+        SelectedChart.on_chart_change_started.Add (fun _ ->
             local_scores.Clear()
             score_loader.Cancel()
         )

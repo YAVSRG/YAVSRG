@@ -183,7 +183,7 @@ type VideoModePicker =
         let toggle_resolution_dropdown () =
             dropdown_wrapper.Toggle(fun () ->
                 let current_mode = setting.Value
-                let (ax, ay) = aspect_ratio
+                let ax, ay = aspect_ratio
                 Dropdown
                     {
                         Items =

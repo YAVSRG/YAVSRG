@@ -110,9 +110,9 @@ type HoldNoteSettingsPage() =
 
             left <- left - COLUMN_WIDTH - 50.0f
 
-        draw_ln_preview ("Upscroll", Color.White, false)
-        draw_ln_preview ("Dropped", dropped_color.Value, not options.Upscroll.Value)
-        draw_ln_preview ("Downscroll", Color.White, true)
+        draw_ln_preview (%"noteskin.holdnotes.upscroll", Color.White, false)
+        draw_ln_preview (%"noteskin.holdnotes.dropped", dropped_color.Value, not options.Upscroll.Value)
+        draw_ln_preview (%"noteskin.holdnotes.downscroll", Color.White, true)
 
     override this.Update(elapsed_ms, moved) =
         base.Update(elapsed_ms, moved)

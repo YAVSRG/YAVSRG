@@ -71,4 +71,4 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
         | LibraryGroupContext.Likes -> ()
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Content.Collections.GetFolder(id).Value).Show()
         | LibraryGroupContext.Playlist id -> PlaylistContextMenu(id, Content.Collections.GetPlaylist(id).Value).Show()
-        | LibraryGroupContext.Table lvl -> ()
+        | LibraryGroupContext.Table _ -> ()

@@ -21,8 +21,8 @@ module ScoreSync =
             let best_eligible_score =
                 match SelectedChart.SAVE_DATA with
                 | Some data ->
-                    match data.PersonalBests |> Bests.ruleset_best_above SC_J4_HASH (_.Accuracy) 1.0f<rate> with
-                    | Some (acc, _, timestamp) ->
+                    match data.PersonalBests |> Bests.ruleset_best_above SC_J4_HASH _.Accuracy 1.0f<rate> with
+                    | Some (_, _, timestamp) ->
                         match LocalScores.local_scores |> Seq.tryFind (fun s -> s.TimePlayed = timestamp) with
                         | Some local_score when not local_score.ImportedFromOsu ->
                             Some (local_score, timestamp)
@@ -55,9 +55,6 @@ type Leaderboard(display: Setting<InfoPanelMode>) =
     let mutable count = 0
     let mutable load_if_visible = true
 
-    let filter : Setting<Filter> = Setting.simple Filter.None
-    let sort : Setting<Sort> = Setting.map enum int options.ScoreSortMode
-
     let scores_list = FlowContainer.Vertical<OnlineScoreCard>(75.0f, Spacing = Style.PADDING * 3.0f)
 
     do
@@ -65,7 +62,7 @@ type Leaderboard(display: Setting<InfoPanelMode>) =
         OnlineScores.leaderboard_score_loaded.Add (fun score_info -> score_info |> OnlineScoreCard |> scores_list.Add; count <- count + 1)
 
     override this.Init(parent) =
-        SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(fun s -> s.FadeOut()))
+        SelectedChart.on_chart_change_started.Add (fun _ -> scores_list.Iter(_.FadeOut()))
         SelectedChart.on_chart_change_finished.Add (fun _ -> scores_list.Clear(); count <- 0; load_if_visible <- true)
         Gameplay.leaderboard_rank_changed.Add (fun _ -> scores_list.Clear(); count <- 0)
 
