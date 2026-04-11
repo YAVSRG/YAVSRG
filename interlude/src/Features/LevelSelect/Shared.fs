@@ -220,8 +220,7 @@ module LevelSelect =
                     play info
 
     let challenge_score (score_info: ScoreInfo) : unit =
-        SelectedChart.rate.Set score_info.Rate
-        SelectedChart.selected_mods.Set score_info.Mods
+        SelectedChart.set_rate_and_mods(score_info.Rate, score_info.Mods)
         SelectedChart.when_loaded true
         <| fun info ->
 
@@ -235,8 +234,7 @@ module LevelSelect =
             enter_gameplay info.LibraryContext
 
     let watch_replay (score_info: ScoreInfo) : unit =
-        SelectedChart.rate.Set score_info.Rate
-        SelectedChart.selected_mods.Set score_info.Mods
+        SelectedChart.set_rate_and_mods(score_info.Rate, score_info.Mods)
         SelectedChart.when_loaded true
         <| fun info ->
 

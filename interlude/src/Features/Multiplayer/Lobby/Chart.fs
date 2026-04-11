@@ -58,9 +58,8 @@ module LobbyChart =
 
         match info_if_selected() with
         | Some _ ->
-            SelectedChart.rate.Set chart.Rate
-
-            SelectedChart.selected_mods.Set(
+            SelectedChart.set_rate_and_mods(
+                chart.Rate,
                 chart.Mods
                 |> Map.ofArray
                 |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)
@@ -92,9 +91,8 @@ module LobbyChart =
                 )
             | Some chart_meta ->
                 SelectedChart.change (chart_meta, LibraryContext.None, true)
-                SelectedChart.rate.Set chart.Rate
-
-                SelectedChart.selected_mods.Set(
+                SelectedChart.set_rate_and_mods(
+                    chart.Rate,
                     chart.Mods
                     |> Map.ofArray
                     |> Map.filter (fun id _ -> Mods.AVAILABLE_MODS.ContainsKey id)

@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Interlude.UI
-open Interlude.Options
 open Interlude.Features.Gameplay
 
 module ScoreSync =

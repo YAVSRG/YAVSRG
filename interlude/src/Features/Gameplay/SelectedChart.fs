@@ -313,6 +313,8 @@ module SelectedChart =
 
         if CHART.IsSome then
 
+            // todo: this can be wrong: in one instant two things call update()
+            // todo: the second interrupts the first but intended effect overall is update not load
             let is_interrupted = WITH_MODS.IsNone
 
             WITH_MODS <- None
@@ -330,7 +332,7 @@ module SelectedChart =
 
             chart_loader.Request Recolor
 
-    let if_loading (action: LoadingChartInfo -> unit) : unit =
+    let if_loading_or_loaded (action: LoadingChartInfo -> unit) : unit =
         if CACHE_DATA.IsSome then
             action
                 {
@@ -372,7 +374,7 @@ module SelectedChart =
     let rate : Setting.Bounded<float32<rate>> =
         _rate
         |> Setting.trigger (fun v ->
-            if_loading
+            if_loading_or_loaded
             <| fun info ->
                 collections_on_rate_changed info.LibraryContext v
                 Song.change_rate v
@@ -382,12 +384,23 @@ module SelectedChart =
     let selected_mods : Setting<ModState> =
         _selected_mods
         |> Setting.trigger (fun mods ->
-            if_loading
+            if_loading_or_loaded
             <| fun info ->
                 collections_on_mods_changed info.LibraryContext mods
                 Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
                 update ()
         )
+        
+    let set_rate_and_mods(rate: float32<rate>, mods: ModState) =
+        _rate.Set(rate)
+        _selected_mods.Set(mods)
+        if_loading_or_loaded
+            <| fun info ->
+                collections_on_mods_changed info.LibraryContext mods
+                collections_on_rate_changed info.LibraryContext rate
+                Song.change_rate rate
+                Presets.check_for_keymode_change(info.ChartMeta.Keys, _selected_mods.Value)
+                update ()
 
     let change_rate_hotkeys(change_rate_by: Rate -> unit) =
         if (%%"uprate_small").Pressed() then
