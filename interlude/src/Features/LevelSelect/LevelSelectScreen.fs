@@ -188,9 +188,9 @@ type LevelSelectScreen() =
         if (%%"select").Pressed() then
             LevelSelect.choose_this_chart ()
 
-        elif (%%"next").Pressed() then
+        elif (%%"next").PressedOrRepeated() then
             Tree.next ()
-        elif (%%"previous").Pressed() then
+        elif (%%"previous").PressedOrRepeated() then
             Tree.previous ()
         elif (%%"next_group").Pressed() then
             Tree.next_group ()
