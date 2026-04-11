@@ -196,7 +196,7 @@ type ScoreList(start_time: int64, end_time: int64) =
 
     let make_playlist() =
         let date = timestamp_to_rg_calendar_day start_time
-        CreatePlaylistPage(sprintf "%s %s" %"stats.session.timestamp" (date.ToShortDateString()), fun (_, collection) ->
+        CreatePlaylistPage([date.ToShortDateString()] %> "stats.session.timestamp", fun (_, collection) ->
             match collection with
             | Playlist p ->
                 scores.Iter(

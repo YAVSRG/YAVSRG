@@ -367,11 +367,11 @@ type private LevelHeader(section: TableSectionInfo, level: int, level_name: stri
             .Position(Position.Shrink(85.0f, 0.0f))
             .Align(Alignment.RIGHT)
         |+ Text(fun () ->
-                if state.OpenLevel = level then
-                    Icons.CHEVRON_UP
-                else
-                    Icons.CHEVRON_DOWN
-            )
+            if state.OpenLevel = level then
+                Icons.CHEVRON_UP
+            else
+                Icons.CHEVRON_DOWN
+        )
             .Color(Colors.text)
             .Align(Alignment.RIGHT)
             .Position(Position.Shrink(5.0f, 0.0f))
