@@ -188,13 +188,14 @@ type AnimationSettingsPage() =
 
         NavigationContainer.Column(WrapNavigation = false)
             .With(
+                hitposition.Pos(0),
                 PageSetting(%"noteskin.enable_receptors", Checkbox enable_receptors)
-                    .Pos(0),
+                    .Pos(2),
                 PageSetting(
                     %"noteskin.notes_under_receptors",
                     Checkbox notes_under_receptors
                 )
-                    .Pos(2),
+                    .Pos(4),
                 PageSetting(
                     %"noteskin.receptorstyle",
                     SelectDropdown(
@@ -206,26 +207,24 @@ type AnimationSettingsPage() =
                     )
                 )
                     .Help(Help.Info("noteskin.receptorstyle"))
-                    .Pos(4)
+                    .Pos(6)
                     .Conditional(enable_receptors.Get),
                 PageSetting(
                     %"noteskin.receptor_offset",
                     Slider.Percent(receptor_offset)
                 )
                     .Help(Help.Info("noteskin.receptor_offset"))
-                    .Pos(6)
+                    .Pos(8)
                     .Conditional(enable_receptors.Get),
                 PageSetting(
                     %"generic.keymode",
                     SelectDropdown.FromEnum(keymode |> Setting.trigger (fun _ -> refresh_colors()))
                 )
-                    .Pos(9)
+                    .Pos(11)
                     .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
                 PageSetting(%"noteskin.receptor_colors", colors)
-                    .Pos(11, 3, PageWidth.Normal)
-                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2),
-
-                hitposition.Pos(15)
+                    .Pos(13, 3, PageWidth.Normal)
+                    .Conditional(fun () -> enable_receptors.Value && receptor.Rows > 2)
             )
 
     (* Judgement line *)
