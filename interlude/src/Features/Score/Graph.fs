@@ -17,7 +17,7 @@ module GraphSettings =
     let scale = 1.0f |> Setting.bounded (1.0f, 6.0f)
     let show_slice = Setting.simple false
     let slice_size = 0.04f |> Setting.bounded (0.01f, 1.0f)
-
+    
     let COLUMN_FILTER_KEYS =
         [|
             Keys.D1
@@ -31,7 +31,6 @@ module GraphSettings =
             Keys.D9
             Keys.D0
         |]
-        |> Array.map Bind.mk
 
 type ScoreGraphSettingsPage(keys: int, apply_column_filter: unit -> unit) =
     inherit Page()
@@ -605,10 +604,17 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
                     refresh <- true
 
         for k = 0 to score_info.WithMods.Keys - 1 do
-            if GraphSettings.COLUMN_FILTER_KEYS.[k].Pressed() then
-                GraphSettings.column_filter.[k] <- not GraphSettings.column_filter.[k]
+            match Input.pop_key_any_modifiers(GraphSettings.COLUMN_FILTER_KEYS.[k], InputAction.Press) with
+            | ValueSome (_, _, shift) ->
+                if shift then
+                    for i = 0 to score_info.WithMods.Keys - 1 do 
+                        GraphSettings.column_filter.[i] <- i = k
+                else
+                    GraphSettings.column_filter.[k] <- not GraphSettings.column_filter.[k]
+                    
                 this.ApplyColumnFilter()
                 this.Refresh()
+            | ValueNone -> ()
 
         if expanded && (%%"exit").Pressed() then
             expanded <- false

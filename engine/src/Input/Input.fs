@@ -26,7 +26,7 @@ type Bind =
     member this.WithModifiers(ctrl: bool, alt: bool, shift: bool) : Bind =
         match this with
         | Dummy -> Dummy
-        | Key (k, m) -> Key (k, (ctrl, alt, shift))
+        | Key (k, _) -> Key (k, (ctrl, alt, shift))
         | Mouse b -> Mouse b
 
     member this.IsKeyWithAnyModifiers(k: Keys) : bool =
