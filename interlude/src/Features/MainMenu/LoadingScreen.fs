@@ -4,6 +4,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
+open Prelude
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI
@@ -92,7 +93,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         if closing then
             Text.draw_aligned_b (
                 Style.font,
-                "Thank you for playing",
+                %"menu.goodbye",
                 70.0f,
                 this.Bounds.CenterX,
                 40.0f,
@@ -102,7 +103,7 @@ type LoadingScreen(post_init_thunk: unit -> unit) =
         else
             Text.draw_aligned_b (
                 Style.font,
-                "Loading :)",
+                %"menu.hello",
                 70.0f,
                 this.Bounds.CenterX,
                 40.0f,

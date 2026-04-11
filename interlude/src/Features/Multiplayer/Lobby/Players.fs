@@ -92,7 +92,7 @@ type PlayerList(lobby: Lobby) =
 
         Text.fill_b (
             Style.font,
-            (if lobby.YouAreHost then Icons.STAR + " Host" else ""),
+            (if lobby.YouAreHost then Icons.STAR + " " + %"lobby.host" else ""),
             user_bounds.Shrink(10.0f, 0.0f),
             Colors.text,
             Alignment.RIGHT

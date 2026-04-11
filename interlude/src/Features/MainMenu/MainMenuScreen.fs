@@ -128,7 +128,7 @@ type MainMenuScreen() =
 
                 AngledButton(
                     Icons.MESSAGE_SQUARE + " " + %"menu.discord",
-                    (fun () -> open_url ("https://discord.gg/tA22tWR")),
+                    (fun () -> open_url "https://yavsrg.net/discord"),
                     Palette.DARK_100
                 )
                     .Position(Position.SliceB(AngledButton.HEIGHT).SliceR(300.0f).TranslateX(-325.0f))
@@ -193,7 +193,7 @@ type MainMenuScreen() =
 
     override this.Draw() =
         let c = this.Bounds.CenterX
-        let (splash, subsplash) = splash_text
+        let splash, subsplash = splash_text
         let a1 = splash_subtitle_fade.Value * splash_fade.Value * 255.0f |> int
         let a2 = splash_fade.Alpha
 

@@ -32,7 +32,7 @@ type LobbySelectPage() =
             NetworkEvents.receive_invite
                 .Subscribe(fun _ -> invite_list.UpdateList()),
             NetworkEvents.join_lobby
-                .Subscribe(fun lobby -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
+                .Subscribe(fun _ -> Menu.Exit(); Screen.change ScreenType.Lobby Transitions.Default |> ignore)
         )
 
         Container(NodeType.Leaf).With(lobby_list, invite_list)

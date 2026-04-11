@@ -203,7 +203,7 @@ type LobbyScreen() =
             current_lobby_ui.Current <- lobby_ui
         )
 
-    override this.OnEnter(_) =
+    override this.OnEnter(_: ScreenType) =
         match Network.lobby with
         | Some lobby -> LobbyChart.on_screen_enter lobby
         | None -> ()
@@ -211,14 +211,14 @@ type LobbyScreen() =
         Song.on_finish <- SongFinishAction.LoopFromPreview
         DiscordRPC.in_menus (%"discord_status.multiplayer_lobby")
 
-    override this.OnExit(_) =
+    override this.OnExit(_: ScreenType) =
         Selection.clear()
         Input.remove_listener()
 
     override this.OnBack() =
         match Network.lobby with
         | Some lobby ->
-            ConfirmPage("Leave this lobby?", lobby.Leave).Show()
+            ConfirmPage(%"lobby.confirm_leave", lobby.Leave).Show()
             None
         | None -> Some ScreenType.LevelSelect
 

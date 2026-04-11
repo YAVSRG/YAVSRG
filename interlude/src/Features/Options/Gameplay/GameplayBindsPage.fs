@@ -30,7 +30,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
 
             text <- text + "..."
 
-    let rec input_callback (b) =
+    let rec input_callback (b: Bind) =
         let binds = options.GameplayBinds.[int keymode - 3]
 
         match b with
@@ -63,7 +63,7 @@ type GameplayKeybinder(keymode: Keymode) as this =
         this
             .Add(
                 Text(fun () -> text)
-                    .Color((fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1))
+                    .Color(fun () -> (if this.Selected then Colors.yellow_accent else Colors.white), Colors.shadow_1)
                     .Align(Alignment.LEFT),
                 MouseListener().Button(this)
             )

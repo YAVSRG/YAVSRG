@@ -6,7 +6,6 @@ open Prelude
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Skins
-open Interlude.Features.Gameplay
 
 type OptionsPage() =
     inherit Page()
