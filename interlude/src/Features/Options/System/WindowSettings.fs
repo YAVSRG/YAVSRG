@@ -100,7 +100,7 @@ type CustomWindowedOffsetPage(setting: Setting<float32 * float32>) =
             .With(
                 PageSetting(%"system.windowresolution.offset.horizontal", Slider.Percent(horizontal)).Pos(0),
                 PageSetting(%"system.windowresolution.offset.vertical", Slider.Percent(vertical)).Pos(2),
-                PageButton(%"system.windowresolution.offset.apply", fun () -> this.OnClose()).Pos(5),
+                PageButton(%"system.windowresolution.offset.apply", fun () -> this.HandleClose()).Pos(5),
                 PageButton(%"confirm.yes", Menu.Back).Pos(7)
             )
 

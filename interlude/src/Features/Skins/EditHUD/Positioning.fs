@@ -499,7 +499,7 @@ and PositionerContext =
         mutable UndoHistory: List<HudElement * HudPosition>
         OnElementMoved: Event<unit>
         HotReload: unit -> unit
-        HudContext: HudContext
+        mutable HudContext: HudContext
     }
 
     member this.Recreate(element: HudElement) =
@@ -585,7 +585,10 @@ and PositionerContext =
     member this.ConfigureElement() =
         match this.Selected with
         | Some element ->
-            show_menu element (fun () -> GameThread.defer (fun () -> this.Recreate element))
+            show_menu element (fun () ->
+                this.HudContext <- { this.HudContext with Config = Interlude.Content.Content.HUD }
+                GameThread.defer (fun () -> this.Recreate element)
+            )
         | None -> ()
 
     member this.RemoveElement() =

@@ -32,23 +32,19 @@ type Page() as this =
 
     let mutable is_current = false
     let mutable content: Widget = Unchecked.defaultof<_>
-
-    let on_close_ev = Event<unit>()
-    let on_close = on_close_ev.Publish
-
-    let on_destroy_ev = Event<unit>()
-    let on_destroy = on_destroy_ev.Publish
+    let mutable on_close: (unit -> unit) list = []
+    let mutable on_destroy: (unit -> unit) list = []
 
     member val Opacity : Animation.Fade = Animation.Fade(0.0f, Target = 1.0f) with get
 
-    member internal this.OnClose() : unit = on_close_ev.Trigger()
-    member internal this.OnDestroy() : unit = on_destroy_ev.Trigger()
+    member internal this.HandleClose() : unit = List.iter (fun f -> f()) on_close
+    member internal this.HandleDestroy() : unit = List.iter (fun f -> f()) on_destroy
 
-    member this.OnClose(action: unit -> unit) = on_close.Add action
-    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) = on_close.Add (fun () -> resources |> Array.iter _.Dispose())
+    member this.OnClose(action: unit -> unit) = on_close <- action :: on_close
+    member this.DisposeOnClose([<ParamArray>] resources: IDisposable array) = on_close <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
     member this.WithOnClose(action: unit -> unit) = this.OnClose(action); this
 
-    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) = on_destroy.Add (fun () -> resources |> Array.iter _.Dispose())
+    member this.DisposeOnDestroy([<ParamArray>] resources: IDisposable array) = on_destroy <- (fun () -> resources |> Array.iter _.Dispose()) :: on_destroy
 
     member private this._content = content
 
@@ -194,7 +190,7 @@ and Menu(top_level: Page) as this =
 
         match stack.[nest_level] with
         | None -> ()
-        | Some page -> page.OnDestroy()
+        | Some page -> page.HandleDestroy()
 
         stack.[nest_level] <- Some page
 
@@ -219,7 +215,7 @@ and Menu(top_level: Page) as this =
             namestack <- List.tail namestack
             nest_level <- nest_level - 1
             let page = stack.[nest_level].Value
-            page.OnClose()
+            page.HandleClose()
             page.Hide(page.Direction.Reverse)
 
             if nest_level > 0 then
@@ -278,7 +274,7 @@ and Menu(top_level: Page) as this =
             let mutable i = 0
 
             while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-                stack.[i].Value.OnDestroy()
+                stack.[i].Value.HandleDestroy()
                 i <- i + 1
 
             this.Close()
