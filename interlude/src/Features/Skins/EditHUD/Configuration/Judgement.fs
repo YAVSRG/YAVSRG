@@ -171,7 +171,7 @@ type JudgementPage() =
                                 yield JudgementDisplayPicker(ruleset, i, judgement_display)
                         })
                 )
-                    .Position(page_position(12, PAGE_BOTTOM - 10, PageWidth.Normal))
+                    .Position(page_position(12, PAGE_BOTTOM - 12, PageWidth.Normal))
             )
 
     override this.Title = %"hud.judgement"
