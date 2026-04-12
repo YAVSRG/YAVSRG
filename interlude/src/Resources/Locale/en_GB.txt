@@ -1091,6 +1091,7 @@ ruleset.osu_modifier.nomod=None
 ruleset.osu_od=Overall difficulty (OD)
 ruleset.quaver_judgement=Judgement
 ruleset.sc_judge=Judge
+ruleset.use_native=Use original ruleset
 ruleset.wife_judge=Judge
 rulesets=Manage rulesets
 rulesets.accuracy.accuracy_type=Accuracy calculation

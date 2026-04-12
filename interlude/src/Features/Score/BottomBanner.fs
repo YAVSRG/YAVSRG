@@ -53,7 +53,7 @@ type RulesetSwitcher(setting: Setting<string>, set_ruleset_direct: Ruleset -> un
     override this.Draw() =
         base.Draw()
         if dropdown_wrapper.Active && not score_info.ChartMeta.Origins.IsEmpty then
-            Text.draw_aligned_b(Style.font, sprintf "%O: Use original ruleset" (%%"native_ruleset"), 20.0f, this.Bounds.Right - 10.0f, this.Bounds.Top - dropdown_height - 50.0f, Colors.text_cyan_2, Alignment.RIGHT)
+            Text.draw_aligned_b(Style.font, sprintf "%O: %s" %%"native_ruleset" %"ruleset.use_native", 20.0f, this.Bounds.Right - 10.0f, this.Bounds.Top - dropdown_height - 50.0f, Colors.text_cyan_2, Alignment.RIGHT)
 
     member this.ToggleDropdown() =
         RulesetSwitcher.make_dropdown setting dropdown_wrapper
