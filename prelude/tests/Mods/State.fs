@@ -10,23 +10,29 @@ module State =
 
         let empty : ModState = Map.empty
 
-        let result = ModState.cycle "mirror" empty
-        Assert.AreEqual(empty.Add("mirror", 0), result)
+        let result1 = ModState.cycle_fd "mirror" empty
+        Assert.AreEqual(empty.Add("mirror", 0), result1)
 
-        let result2 = ModState.cycle "mirror" result
+        let result2 = ModState.cycle_fd "mirror" result1
         Assert.AreEqual(empty, result2)
+        
+        let result3 = ModState.cycle_bk "mirror" empty
+        Assert.AreEqual(result1, result3)
+        
+        let result4 = ModState.cycle_bk "mirror" result3
+        Assert.AreEqual(result2, result4)
 
     [<Test>]
     let Random_Seed() =
 
-        let mod_state = ModState.cycle "mirror" Map.empty
+        let mod_state = ModState.cycle_fd "mirror" Map.empty
 
-        let result = ModState.cycle "random" mod_state
+        let result = ModState.cycle_fd "random" mod_state
         Assert.True(result.ContainsKey "random")
 
         printfn "%A" result
 
-        let result2 = ModState.cycle "random" result
+        let result2 = ModState.cycle_fd "random" result
         Assert.False(result2.ContainsKey "random")
 
         printfn "%A" result2
@@ -34,14 +40,14 @@ module State =
     [<Test>]
     let Mutual_Exclusion() =
 
-        let mod_state = ModState.cycle "mirror" Map.empty
+        let mod_state = ModState.cycle_fd "mirror" Map.empty
 
-        let result = ModState.cycle "random" mod_state
+        let result = ModState.cycle_fd "random" mod_state
         Assert.True(result.ContainsKey "random")
 
         printfn "%A" result
 
-        let result2 = ModState.cycle "shuffle" result
+        let result2 = ModState.cycle_fd "shuffle" result
         Assert.False(result2.ContainsKey "random")
         Assert.True(result2.ContainsKey "shuffle")
 

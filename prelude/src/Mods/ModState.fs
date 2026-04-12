@@ -12,7 +12,7 @@ module ModState =
 
     let private seed_generation = Random()
 
-    let cycle (id: string) (mods: ModState) : ModState =
+    let cycle_fd (id: string) (mods: ModState) : ModState =
         if mods.ContainsKey id then
 
             match AVAILABLE_MODS.[id].Type with
@@ -32,10 +32,31 @@ module ModState =
                 | Stateless
                 | MultipleModes _ -> 0L
                 | RandomSeed -> seed_generation.Next(-Int32.MinValue,0)
-                | ColumnSwap ->
-                    ColumnSwap.parse "1234123"
-                    |> Percyqaz.Common.Combinators.expect
-                    |> ColumnSwap.pack
+                | ColumnSwap -> failwith "column swap should be cycled using `cycle_column_swap`"
+
+            List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
+
+    let cycle_bk (id: string) (mods: ModState) : ModState =
+        if mods.ContainsKey id then
+
+            match AVAILABLE_MODS.[id].Type with
+            | Stateless
+            | RandomSeed
+            | ColumnSwap -> Map.remove id mods
+            | MultipleModes _ ->
+                let state = mods.[id] - 1L
+                if state < 0L then
+                    Map.remove id mods
+                else
+                    Map.add id state mods
+        else
+
+            let state =
+                match AVAILABLE_MODS.[id].Type with
+                | Stateless -> 0L
+                | MultipleModes states -> states - 1L
+                | RandomSeed -> seed_generation.Next(-Int32.MinValue,0)
+                | ColumnSwap -> failwith "column swap should be cycled using `cycle_column_swap`"
 
             List.fold (fun m i -> Map.remove i m) (Map.add id state mods) AVAILABLE_MODS.[id].Exclusions
 

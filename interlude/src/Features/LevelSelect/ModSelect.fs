@@ -37,21 +37,27 @@ type private ColumnSwapPage() =
 
     override this.Title = %"mod.column_swap"
 
-type private ModSelector(id: string, current_state: unit -> int64 option, action: unit -> unit) =
+type private ModSelector(id: string, current_state: unit -> int64 option, left_click_action: unit -> unit, right_click_action: unit -> unit) =
     inherit
         Container(
             NodeType.Button(fun () ->
                 Style.click.Play()
-                action ()
+                left_click_action ()
             )
         )
 
     static let TOP_HEIGHT = 60.0f
     static let DESCRIPTION_HEIGHT = 30.0f
     static member HEIGHT = DESCRIPTION_HEIGHT + TOP_HEIGHT
+        
+    new(id: string, current_state: unit -> int64 option, left_click_action: unit -> unit) = ModSelector(id, current_state, left_click_action, left_click_action)
 
     override this.Init(parent: Widget) =
-        this.Add(MouseListener().Button(this))
+        this.Add(
+            MouseListener()
+                .Button(this)
+                .OnRightClick(fun () -> Style.click.Play(); right_click_action())
+        )
         base.Init parent
 
     override this.OnFocus(by_mouse: bool) =
@@ -133,7 +139,13 @@ type private ModSelectPage(change_rate: Rate -> unit) =
                                 if id = "column_swap" && not (SelectedChart.selected_mods.Value.ContainsKey id) then
                                     ColumnSwapPage().Show()
                                 else
-                                    Setting.app (ModState.cycle id) SelectedChart.selected_mods
+                                    Setting.app (ModState.cycle_fd id) SelectedChart.selected_mods
+                            ),
+                            (fun _ ->
+                                if id = "column_swap" && not (SelectedChart.selected_mods.Value.ContainsKey id) then
+                                    ColumnSwapPage().Show()
+                                else
+                                    Setting.app (ModState.cycle_bk id) SelectedChart.selected_mods
                             )
                         )
                 })

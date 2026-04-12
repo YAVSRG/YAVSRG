@@ -14,8 +14,8 @@ module Implementation =
     [<Test>]
     let Mirror() =
 
-        let mirrored_chart = ModState.apply (ModState.cycle "mirror" Map.empty) SAMPLE_CHART
-        let mirrored_twice_chart = ModState.apply (ModState.cycle "mirror" Map.empty) { SAMPLE_CHART with Notes = mirrored_chart.Notes }
+        let mirrored_chart = ModState.apply (ModState.cycle_fd "mirror" Map.empty) SAMPLE_CHART
+        let mirrored_twice_chart = ModState.apply (ModState.cycle_fd "mirror" Map.empty) { SAMPLE_CHART with Notes = mirrored_chart.Notes }
 
         Assert.AreNotEqual(Chart.hash SAMPLE_CHART, Chart.hash { SAMPLE_CHART with Notes = mirrored_chart.Notes })
         Assert.AreEqual(Chart.hash SAMPLE_CHART, Chart.hash { SAMPLE_CHART with Notes = mirrored_twice_chart.Notes })
