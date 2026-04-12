@@ -13,7 +13,7 @@ type EtternaPacksBrowserPage() =
     let WIDTH = 1400.0f
     let MARGIN_TOP = 20.0f
 
-    let items = FlowContainer.Vertical<EtternaPackCard>(80.0f, Spacing = 15.0f)
+    let items = FlowContainer.Vertical<EtternaPackCard>(EtternaPackCard.HEIGHT, Spacing = Style.PADDING * 3.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
     let query_order = Setting.simple "popularity"
@@ -55,7 +55,7 @@ type EtternaPacksBrowserPage() =
             sprintf "https://api.etternaonline.com/api/packs?page=%i&limit=36&sort=%s%s%s"
                 (page + 1)
                 (if descending_order.Value then "-" else "")
-                (query_order.Value)
+                query_order.Value
                 (if query = "" then "" else "&filter[search]=" + System.Net.WebUtility.UrlEncode query)
 
         json_downloader.Request(url, (fun () -> search query (page + 1)))
@@ -84,6 +84,9 @@ type EtternaPacksBrowserPage() =
 
     override this.Header() =
         SearchBox(fun query -> GameThread.defer (fun () -> begin_search query))
+            .Fill(Color.FromArgb(0xFF_8F60F6).O2)
+            .Border(Color.FromArgb(0xFF_8F60F6))
+            .TextColor((Color.FromArgb(0xFF_8F60F6), Color.FromArgb(0xFF_48307B)))
             .Position(Position.SliceX(WIDTH).SliceT(SearchBox.HEIGHT).TranslateY(MARGIN_TOP))
             .With(LoadingIndicator.Border(fun () -> loading))
 

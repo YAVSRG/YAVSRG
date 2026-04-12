@@ -25,7 +25,6 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             )
         )
         
-    static let HEIGHT = 80.0f
     static let STAT_WIDTH = 150.0f
 
     let mutable status = NotDownloaded
@@ -86,6 +85,8 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             sprintf "%i-%iK" modes.[0] modes.[modes.Length - 1]
         else
             modes |> Seq.map (fun k -> sprintf "%iK" k) |> String.concat ", "
+        
+    static member HEIGHT = 80.0f
 
     override this.Init(parent) =
         this
@@ -114,7 +115,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         Text.fill_b (
             Style.font,
             data.title,
-            this.Bounds.SliceT(45.0f).Shrink(10.0f, 0.0f),
+            this.Bounds.SliceT(45.0f).Shrink(Style.PADDING * 2.0f, 0.0f),
             Colors.text,
             Alignment.LEFT
         )
@@ -122,12 +123,12 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         Text.fill_b (
             Style.font,
             data.artist + "  •  " + data.creator,
-            this.Bounds.SliceB(45.0f).Shrink(10.0f, 5.0f),
+            this.Bounds.SliceB(45.0f).Shrink(Style.PADDING * 2.0f, Style.PADDING),
             Colors.text_subheading,
             Alignment.LEFT
         )
 
-        let download_bounds = this.Bounds.SliceR(HEIGHT).Shrink(10.0f)
+        let download_bounds = this.Bounds.SliceR(BeatmapImportCard.HEIGHT).Shrink(Style.PADDING * 2.0f)
         Render.rect download_bounds Colors.shadow_2.O2
         Text.fill_b (
             Style.font,
@@ -136,7 +137,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
              | Downloading -> Icons.REFRESH_CW
              | DownloadFailed -> Icons.X
              | Installed -> Icons.CHECK),
-            download_bounds.Shrink(10.0f),
+            download_bounds.Shrink(Style.PADDING * 2.0f),
             (match status with
              | NotDownloaded -> if this.Focused then Colors.text_yellow_2 else Colors.text
              | Downloading -> Colors.text_yellow_2
@@ -145,42 +146,42 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             Alignment.CENTER
         )
 
-        let status = this.Bounds.ShrinkR(HEIGHT).SlicePercentB(0.5f).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
+        let status = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentB(0.5f).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
         Render.rect status Colors.shadow_2.O2
         Text.fill_b (
             Style.font,
             ranked_status,
-            status.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
+            status.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             (border, Colors.shadow_2),
             Alignment.CENTER
         )
         
-        let favourites = this.Bounds.ShrinkR(HEIGHT).SlicePercentT(0.5f).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
+        let favourites = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentT(0.5f).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
         Render.rect favourites Colors.shadow_2.O2
         Text.fill_b (
             Style.font,
             (sprintf "%s %i" Icons.HEART data.favourite_count),
-            favourites.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
+            favourites.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             Colors.text_subheading,
             Alignment.CENTER
         )
         
-        let keymodes = this.Bounds.ShrinkR(HEIGHT).SlicePercentB(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
+        let keymodes = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentB(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkT(Style.PADDING)
         Render.rect keymodes Colors.shadow_2.O2
         Text.fill_b (
             Style.font,
             keymodes_string,
-            keymodes.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
+            keymodes.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             Colors.text_subheading,
             Alignment.CENTER
         )
         
-        let playcount = this.Bounds.ShrinkR(HEIGHT).SlicePercentT(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
+        let playcount = this.Bounds.ShrinkR(BeatmapImportCard.HEIGHT).SlicePercentT(0.5f).ShrinkR(STAT_WIDTH + Style.PADDING).SliceR(STAT_WIDTH).ShrinkB(Style.PADDING)
         Render.rect playcount Colors.shadow_2.O2
         Text.fill_b (
             Style.font,
             (sprintf "%s %i" Icons.PLAY data.play_count),
-            playcount.Shrink(5.0f, 0.0f).ShrinkB(5.0f),
+            playcount.Shrink(Style.PADDING, 0.0f).ShrinkB(Style.PADDING),
             Colors.text_subheading,
             Alignment.CENTER
         )
@@ -189,7 +190,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
             let popover_bounds =
                 Rect.FromSize(
                     this.Bounds.Right - 600.0f,
-                    this.Bounds.Bottom + 10.0f,
+                    this.Bounds.Bottom + Style.PADDING * 2.0f,
                     600.0f,
                     45.0f * float32 beatmaps.Length
                 )

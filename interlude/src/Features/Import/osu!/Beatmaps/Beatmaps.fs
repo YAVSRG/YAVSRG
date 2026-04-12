@@ -30,7 +30,7 @@ type BeatmapBrowserPage() =
     let WIDTH = 1400.0f
     let MARGIN_TOP = 20.0f
 
-    let items = FlowContainer.Vertical<BeatmapImportCard>(80.0f, Spacing = 15.0f)
+    let items = FlowContainer.Vertical<BeatmapImportCard>(BeatmapImportCard.HEIGHT, Spacing = Style.PADDING * 3.0f)
     let scroll_container = ScrollContainer(items, Margin = Style.PADDING)
 
     let search_text = Setting.simple ""

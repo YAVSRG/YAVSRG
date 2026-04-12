@@ -30,7 +30,6 @@ type FrameContainer(node_type: NodeType) =
     static member Create(child: Widget) =
         FrameContainer(NodeType.Container(K (Some child))).With(child)
 
-[<Extension>]
 type FrameContainerExtensions() =
 
     [<Extension>]
