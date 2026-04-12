@@ -77,11 +77,11 @@ module SelectedChart =
             let pc = (100.0f * float32 lnotes / float32 notes)
 
             if pc < 0.5f then
-                sprintf "%i Holds" lnotes
+                sprintf "%i %s" lnotes %"levelselect.holds"
             else
-                sprintf "%.0f%% Holds" pc
+                sprintf "%.0f%% %s" pc %"levelselect.holds"
 
-        sprintf "%iK | %i Notes | %s" chart.Keys notes hold_count
+        sprintf "%iK | %i %s | %s" chart.Keys notes %"levelselect.notes" hold_count
 
     let mutable CACHE_DATA: ChartMeta option = None
     let mutable FMT_DURATION: string = format_duration None
