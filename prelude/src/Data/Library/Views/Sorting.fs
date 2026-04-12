@@ -24,12 +24,12 @@ module Sorting =
                          | Some d -> d.LastPlayed |> float32
                          | None -> 0.0f
                     "", date_played, x.Rating
-                "grade", fun (x, ctx) ->
+                "accuracy", fun (x, ctx) ->
                     match
                         (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
-                        |> Bests.ruleset_best_above ctx.RulesetId _.Grade ctx.Rate
+                        |> Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate
                     with
-                    | Some (i, _, _) -> "", float32 i, x.Rating
+                    | Some (acc, _, _) -> "", float32 acc, x.Rating
                     | None -> "", -2.0f, x.Rating
                 "lamp", fun (x, ctx) ->
                     match
