@@ -56,7 +56,7 @@ module API =
         inherit HttpsSession(server)
 
         override this.OnReceivedRequest(request: HttpRequest) =
-            let uri = new Uri(base_uri, request.Url)
+            let uri = Uri(base_uri, request.Url)
 
             let query_params =
                 let from_uri = HttpUtility.ParseQueryString uri.Query
@@ -86,7 +86,7 @@ module API =
                 | "POST" ->
                     config.Handle_Request(POST, uri.AbsolutePath, request.Body, query_params, headers, this.Response)
                     |> Async.RunSynchronously
-                | _ -> this.Response.ReplyError(404, "Not found") |> ignore
+                | _ -> this.Response.ReplyError(404, "Not found")
 
                 Logging.Info "%s %s responded %i in %.0fms" request.Method uri.AbsolutePath this.Response.Status (Stopwatch.GetElapsedTime(before).TotalMilliseconds)
 
@@ -94,7 +94,7 @@ module API =
             with e ->
                 Logging.Critical "Error handling HTTP request %O: %O" request e
 
-        override this.OnReceivedRequestError(request: HttpRequest, error: string) =
+        override this.OnReceivedRequestError(_: HttpRequest, error: string) =
             Logging.Error "Error handling HTTP request: %s" error
 
         override this.OnError(error: SocketError) =
@@ -129,7 +129,7 @@ module API =
         let private client = new HttpClient(http_client_handler)
 
         let init (base_address: string) =
-            client.BaseAddress <- new Uri(base_address)
+            client.BaseAddress <- Uri(base_address)
             client.Timeout <- TimeSpan.FromSeconds(5.0)
 
         let private queue =
@@ -138,7 +138,7 @@ module API =
             }
 
         let authenticate (token: string) =
-            client.DefaultRequestHeaders.Authorization <- new Headers.AuthenticationHeaderValue("Bearer", token)
+            client.DefaultRequestHeaders.Authorization <- Headers.AuthenticationHeaderValue("Bearer", token)
 
         let rec private _send_retry (retries_left: int) (client: HttpClient) (message: HttpRequestMessage)  =
             async {

@@ -22,7 +22,7 @@ module private Client =
         SslContext(
             SslProtocols.Tls12,
             ClientCertificateRequired = false,
-            CertificateValidationCallback = new RemoteCertificateValidationCallback(fun _ _ _ _ -> true)
+            CertificateValidationCallback = RemoteCertificateValidationCallback(fun _ _ _ _ -> true)
         )
 
     type Session(config: Config) =

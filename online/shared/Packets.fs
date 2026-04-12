@@ -41,7 +41,7 @@ module Packets =
             bw.Write (float32 this.Rate)
             bw.Write(byte this.Mods.Length)
 
-            for (id, state) in this.Mods do
+            for id, state in this.Mods do
                 bw.Write id
                 bw.Write state
 
@@ -93,7 +93,7 @@ module Packets =
 
         static member Read(br: BinaryReader) =
             {
-                Id = new Guid(br.ReadBytes 16)
+                Id = Guid(br.ReadBytes 16)
                 Name = br.ReadString()
                 Players = br.ReadByte()
                 CurrentlyPlaying =
@@ -162,7 +162,7 @@ module Packets =
                 | 0x05uy -> LOGOUT
 
                 | 0x10uy -> GET_LOBBIES
-                | 0x11uy -> JOIN_LOBBY(new Guid(br.ReadBytes 16))
+                | 0x11uy -> JOIN_LOBBY(Guid(br.ReadBytes 16))
                 | 0x12uy -> CREATE_LOBBY(br.ReadString())
 
                 | 0x20uy -> INVITE_TO_LOBBY(br.ReadString())
@@ -313,7 +313,7 @@ module Packets =
                 | 0x10uy -> LOBBY_LIST(Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br))
                 | 0x11uy ->
                     YOU_JOINED_LOBBY(Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString(), br.ReadInt32()))
-                | 0x12uy -> INVITED_TO_LOBBY(br.ReadString(), new Guid(br.ReadBytes 16))
+                | 0x12uy -> INVITED_TO_LOBBY(br.ReadString(), Guid(br.ReadBytes 16))
                 | 0x13uy -> SYSTEM_MESSAGE(br.ReadString())
 
                 | 0x20uy -> YOU_LEFT_LOBBY
@@ -379,7 +379,7 @@ module Packets =
                 | YOU_JOINED_LOBBY players ->
                     bw.Write(byte players.Length)
 
-                    for (player, color) in players do
+                    for player, color in players do
                         bw.Write player
                         bw.Write color
 
