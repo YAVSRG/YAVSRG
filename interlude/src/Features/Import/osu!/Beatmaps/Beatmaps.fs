@@ -60,11 +60,12 @@ type BeatmapBrowserPage() =
 
             override this.Handle((data: MinoBeatmapSearch option, action_at_bottom)) =
                 match data with
-                | Some d ->
-                    for p in d do
-                        items.Add(BeatmapImportCard p)
+                | Some search_results ->
+                    for mapset in search_results do
+                        if mapset.beatmaps |> Seq.exists (fun beatmap -> beatmap.cs >= 3 && beatmap.cs <= 10) then
+                            items.Add(BeatmapImportCard mapset)
 
-                    if d.Length >= 50 then
+                    if search_results.Length >= 50 then
                         when_at_bottom <- Some action_at_bottom
 
                     loading <- false

@@ -74,6 +74,7 @@ type private BeatmapImportCard(data: MinoBeatmapSet) as this =
         let modes =
             beatmaps
             |> Seq.map (fun bm -> int bm.cs)
+            |> Seq.filter (fun k -> k >= 3 && k <= 10)
             |> Seq.distinct
             |> Seq.sort
             |> Array.ofSeq
