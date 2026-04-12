@@ -14,6 +14,7 @@ type GraphPoint =
         Mean: GameplayTime
         StandardDeviation: GameplayTime
         Judgements: int array
+        GhostTaps: int
     }
     member this.Accuracy = if this.MaxPointsScored = 0.0 then 1.0 else this.PointsScored / this.MaxPointsScored
 
@@ -195,6 +196,7 @@ module ScoreScreenStats =
                         Mean = mean
                         StandardDeviation = standard_deviation
                         Judgements = filtered_judgements |> Array.copy
+                        GhostTaps = ghost_taps.Value
                     }
 
         let time_of_last_ev = if score_processor.Events.Count > 0 then score_processor.Events.[score_processor.Events.Count - 1].Time else score_processor.Duration

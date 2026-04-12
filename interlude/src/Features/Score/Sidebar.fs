@@ -80,10 +80,11 @@ type Sidebar(stats: ScoreScreenStats ref, score_info: ScoreInfo) =
             .Position(Position.ShrinkT(600.0f).SliceT(40.0f).ShrinkX(25.0f))
             .Conditional(show_more_info.Get)
         |+ Text(fun () ->
-            sprintf "%s ~ M: %.2fms  •  SD: %.2fms"
+            sprintf "%s ~ M: %.2fms  •  SD: %.2fms  •  G: %i"
                 (%"score.stats.taps")
                 (!stats).TapMean
                 (!stats).TapStandardDeviation
+                (!stats).GhostTaps
         )
             .Color(fun () -> if (!stats).ColumnFilterApplied then Colors.text_green else Colors.text)
             .Align(Alignment.CENTER)

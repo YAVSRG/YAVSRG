@@ -185,16 +185,16 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            info.Mean |> sprintf "M: %.2fms",
-            text_b.TranslateY(row_height),
+            sprintf "M: %.2fms  •  SD: %.2fms" info.Mean info.StandardDeviation,
+            text_b.Translate(0.0f, row_height),
             text_color,
             Alignment.LEFT
         )
 
         Text.fill_b (
             Style.font,
-            info.StandardDeviation |> sprintf "SD: %.2fms",
-            text_b.TranslateY(row_height * 2.0f),
+            sprintf "G: %i" info.GhostTaps,
+            text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
         )
@@ -253,6 +253,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             - (pre.StandardDeviation * pre.StandardDeviation * float32 judgement_count_pre))
             / float32 (judgement_count_post - judgement_count_pre)
             |> sqrt
+        let ghost_taps = post.GhostTaps - pre.GhostTaps
 
         Text.fill_b (
             Style.font,
@@ -264,7 +265,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            mean |> sprintf "M: %.2fms",
+            sprintf "M: %.2fms  •  SD: %.2fms" mean standard_deviation,
             text_b.Translate(0.0f, row_height),
             text_color,
             Alignment.LEFT
@@ -272,7 +273,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            standard_deviation |> sprintf "SD: %.2fms",
+            sprintf "G: %i" ghost_taps,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
