@@ -109,22 +109,22 @@ type BeatmapBrowserPage() =
     let sort_filter_buttons =
         NavigationContainer.Row()
             .With(
-                BeatmapStatusToggle.Create("Ranked", 1, Colors.cyan, statuses)
+                BeatmapStatusToggle.Create(%"beatmap_browser.status.ranked", 1, Colors.cyan, statuses)
                     .LeanLeft(false)
                     .Position(Position.ShrinkPercentR(0.28f).GridX(1, 4, AngledButton.LEAN_AMOUNT)),
-                BeatmapStatusToggle.Create("Qualified", 3, Colors.green, statuses)
+                BeatmapStatusToggle.Create(%"beatmap_browser.status.qualified", 3, Colors.green, statuses)
                     .Position(Position.ShrinkPercentR(0.28f).GridX(2, 4, AngledButton.LEAN_AMOUNT)),
-                BeatmapStatusToggle.Create("Loved", 4, Colors.pink, statuses)
+                BeatmapStatusToggle.Create(%"beatmap_browser.status.loved", 4, Colors.pink, statuses)
                     .Position(Position.ShrinkPercentR(0.28f).GridX(3, 4, AngledButton.LEAN_AMOUNT)),
-                BeatmapStatusToggle.Create("Unranked", 0, Colors.grey_2, statuses)
+                BeatmapStatusToggle.Create(%"beatmap_browser.status.unranked", 0, Colors.grey_2, statuses)
                     .Position(Position.ShrinkPercentR(0.28f).GridX(4, 4, AngledButton.LEAN_AMOUNT)),
 
                 SortingDropdown.Create(
                     [
-                        "play_count", "Play count"
-                        "submitted_date", "Date"
-                        "beatmaps.difficulty_rating", "Difficulty"
-                        "favourite_count", "Favourites"
+                        "play_count", %"beatmap_browser.sort.play_count"
+                        "submitted_date", %"beatmap_browser.sort.date"
+                        "beatmaps.difficulty_rating", %"beatmap_browser.sort.difficulty"
+                        "favourite_count", %"beatmap_browser.sort.favourites"
                     ],
                     "Sort",
                     query_order |> Setting.trigger (fun _ -> begin_search search_text.Value; search_results.Focus false),
