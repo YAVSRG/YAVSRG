@@ -25,8 +25,10 @@ type Beatmap =
         Timing: TimingPoint list
     }
     member this.Filename =
-        let clean =
-            String.filter (fun c -> Char.IsWhiteSpace c || Char.IsLetterOrDigit c)
+        let clean (s: string) =
+            s
+            |> String.filter(fun c -> c = ' ' || Char.IsAsciiLetterOrDigit c)
+            |> fun s -> s.Substring(0, min s.Length 200)
 
         sprintf
             "%s - %s (%s) [%s].osu"
