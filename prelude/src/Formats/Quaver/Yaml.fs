@@ -115,6 +115,11 @@ module Yaml =
             | _ -> failwithf "Failed to parse expected int '%s' for key '%s'" s key
         | None -> failwithf "Expected string present for key '%s'" key
 
+    let get_nested_string (key: string) (parsed: ParsedYamlNestedObject) : string =
+        match parsed.TryFind key with
+        | Some s -> s
+        | None -> failwithf "Expected string present for key '%s'" key
+
     let get_nested_float_or (key: string) (otherwise: float32) (parsed: ParsedYamlNestedObject) : float32 =
         match parsed.TryFind key with
         | Some s ->
@@ -129,4 +134,9 @@ module Yaml =
             match Int32.TryParse(s, Globalization.CultureInfo.InvariantCulture) with
             | true, res -> res
             | _ -> failwithf "Failed to parse expected int '%s' for key '%s'" s key
+        | None -> otherwise
+
+    let get_nested_string_or (key: string) (otherwise: string) (parsed: ParsedYamlNestedObject) : string =
+        match parsed.TryFind key with
+        | Some s -> s
         | None -> otherwise

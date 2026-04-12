@@ -6,11 +6,16 @@ open Percyqaz.Common
 
 // Quaver files are YAML files
 
+type QuaverHitObjectType =
+    | Normal = 0
+    | Mine = 1
+
 type QuaverHitObject =
     {
         StartTime: int
         Lane: int
         EndTime: int
+        Type: QuaverHitObjectType
     }
 
 type QuaverTimingPoint =
@@ -80,6 +85,11 @@ module QuaverChart =
             StartTime = Yaml.get_nested_int_or "StartTime" 0 parsed
             Lane = Yaml.get_nested_int "Lane" parsed
             EndTime = Yaml.get_nested_int_or "EndTime" 0 parsed
+            Type =
+                match (Yaml.get_nested_string_or "Type" "Normal" parsed).ToLower() with
+                | "normal" -> QuaverHitObjectType.Normal
+                | "mine" -> QuaverHitObjectType.Mine
+                | other -> failwithf "Unrecognised object type: '%s'" other
         }
 
     let private from_yaml (parsed: Yaml.ParsedYamlObject) : QuaverChart =

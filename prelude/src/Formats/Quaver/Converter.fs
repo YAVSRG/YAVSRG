@@ -98,7 +98,7 @@ module Quaver_To_Interlude =
                 holding_until.[column] <- Some end_time
             | _ -> skip_conversion (sprintf "Stacked LN at %f" time)
 
-        for object in objects |> List.sortBy (fun o -> o.StartTime) do
+        for object in objects |> List.filter (fun x -> x.Type = QuaverHitObjectType.Normal) |> List.sortBy _.StartTime do
             if object.EndTime > object.StartTime then
                 start_hold (object.Lane - 1) (Time.of_number object.StartTime) (Time.of_number object.EndTime)
             else
