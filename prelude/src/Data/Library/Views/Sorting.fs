@@ -32,10 +32,11 @@ module Sorting =
                     | Some (acc, _, _) -> "", float32 acc, x.Rating
                     | None -> "", -2.0f, x.Rating
                 "lamp", fun (x, ctx) ->
-                    match
-                        (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
-                        |> Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate
-                    with
-                    | Some (i, _, _) -> "", float32 i, x.Rating
+                    let pbs = (UserDatabase.get_chart_data x.Hash ctx.UserDatabase).PersonalBests
+                    match Bests.ruleset_best_above ctx.RulesetId _.Lamp ctx.Rate pbs with
+                    | Some (i, _, _) ->
+                        match Bests.ruleset_best_above ctx.RulesetId _.Accuracy ctx.Rate pbs with
+                        | Some (acc, _, _) -> "", float32 i, float32 acc
+                        | None -> "", float32 i, 0.0f
                     | None -> "", -2.0f, x.Rating
             ]
