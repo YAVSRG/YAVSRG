@@ -59,44 +59,45 @@ type ColumnErrorBars(ctx: HudContext) =
             |> ignore
         else
             ctx.State.Subscribe(fun ev ->
-                match ev.Action with
-                | Hit e ->
-                    hits.[ev.Column].Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * h * 0.5f
-                            IsRelease = false
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | Hold e ->
-                    hits.[ev.Column].Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * h * 0.5f
-                            IsRelease = false
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | Release e ->
-                    hits.[ev.Column].Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale
-                            IsRelease = true
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | GhostTap e ->
-                    match e.Judgement with
-                    | Some (j, _) ->
+                if ev.Time >= last_seen_time - animation_time then
+                    match ev.Action with
+                    | Hit e ->
                         hits.[ev.Column].Add
                             {
                                 Time = ev.Time
-                                Position = -h * 0.5f
+                                Position = e.Delta / MAX_WINDOW * h * 0.5f
                                 IsRelease = false
-                                Judgement = Some j
+                                Judgement = e.Judgement |> Option.map fst
                             }
-                    | None -> ()
-                | DropHold
-                | RegrabHold -> ()
+                    | Hold e ->
+                        hits.[ev.Column].Add
+                            {
+                                Time = ev.Time
+                                Position = e.Delta / MAX_WINDOW * h * 0.5f
+                                IsRelease = false
+                                Judgement = e.Judgement |> Option.map fst
+                            }
+                    | Release e ->
+                        hits.[ev.Column].Add
+                            {
+                                Time = ev.Time
+                                Position = e.Delta / MAX_WINDOW * h * ctx.Config.ColumnErrorBarsReleasesYScale
+                                IsRelease = true
+                                Judgement = e.Judgement |> Option.map fst
+                            }
+                    | GhostTap e ->
+                        match e.Judgement with
+                        | Some (j, _) ->
+                            hits.[ev.Column].Add
+                                {
+                                    Time = ev.Time
+                                    Position = -h * 0.5f
+                                    IsRelease = false
+                                    Judgement = Some j
+                                }
+                        | None -> ()
+                    | DropHold
+                    | RegrabHold -> ()
             )
             |> ignore
         base.Init(parent)

@@ -73,44 +73,45 @@ type ErrorBar(ctx: HudContext) =
             |> ignore
         if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.ReplaceBars then
             ctx.State.Subscribe(fun ev ->
-                match ev.Action with
-                | Hit e ->
-                    hits.Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * 0.5f
-                            IsRelease = false
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | Hold e ->
-                    hits.Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * 0.5f
-                            IsRelease = false
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | Release e ->
-                    hits.Add
-                        {
-                            Time = ev.Time
-                            Position = e.Delta / MAX_WINDOW * w * ln_mult
-                            IsRelease = true
-                            Judgement = e.Judgement |> Option.map fst
-                        }
-                | GhostTap e ->
-                    match e.Judgement with
-                    | Some (j, _) ->
+                if ev.Time >= last_seen_time - animation_time then
+                    match ev.Action with
+                    | Hit e ->
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = -w * 0.5f
+                                Position = e.Delta / MAX_WINDOW * w * 0.5f
                                 IsRelease = false
-                                Judgement = Some j
+                                Judgement = e.Judgement |> Option.map fst
                             }
-                    | None -> ()
-                | DropHold
-                | RegrabHold -> ()
+                    | Hold e ->
+                        hits.Add
+                            {
+                                Time = ev.Time
+                                Position = e.Delta / MAX_WINDOW * w * 0.5f
+                                IsRelease = false
+                                Judgement = e.Judgement |> Option.map fst
+                            }
+                    | Release e ->
+                        hits.Add
+                            {
+                                Time = ev.Time
+                                Position = e.Delta / MAX_WINDOW * w * ln_mult
+                                IsRelease = true
+                                Judgement = e.Judgement |> Option.map fst
+                            }
+                    | GhostTap e ->
+                        match e.Judgement with
+                        | Some (j, _) ->
+                            hits.Add
+                                {
+                                    Time = ev.Time
+                                    Position = -w * 0.5f
+                                    IsRelease = false
+                                    Judgement = Some j
+                                }
+                        | None -> ()
+                    | DropHold
+                    | RegrabHold -> ()
             )
             |> ignore
         base.Init(parent)
