@@ -33,8 +33,6 @@ let launch (instance: int) : unit =
         AppDomain.CurrentDomain.ProcessExit.Add(fun _ -> Startup.deinit Startup.ExternalCrash show_crash_splash)
         ui_root :> UIEntryPoint
 
-    WindowThread.on_file_drop.Add(fun paths -> if paths.Length <> 1 then Logging.Error "Multiple file drops not supported" else Import.FileDrop.handle paths.[0])
-
     let icon =
         use icon_stream = Utils.get_resource_stream "icon.png"
         Bitmap.from_stream true icon_stream

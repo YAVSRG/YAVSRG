@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.User.Stats
 open Interlude.Options
@@ -12,6 +13,7 @@ open Interlude.Features.Mounts
 open Interlude.Features.LevelSelect
 open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
+open Interlude.Features.Import
 open Interlude.Features.Toolbar
 open Interlude.Features.Online
 open Interlude.Features.Stats
@@ -37,6 +39,12 @@ module Startup =
             Network.init ()
             DiscordRPC.init ()
             Interlude.Updates.check_for_updates ()
+            // todo: tell the user why multi-drop is not supported
+            // todo: look into linux file drop issues
+            WindowThread.on_file_drop.Add(fun paths ->
+                if paths.Length <> 1 then Logging.Error "Multiple file drops not supported"
+                else FileDrop.handle paths.[0]
+            )
 
             deinit_required <- true
 
