@@ -85,22 +85,22 @@ type ChartMeta =
             true
 
     static member FromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
-        let source_folder_path = Path.GetDirectoryName(import_chart.LoadedFromPath)
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.Notes)
+        let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
 
         {
             Hash = Chart.hash chart
 
-            Title = import_chart.Header.Title
-            TitleNative = import_chart.Header.TitleNative
-            Artist = import_chart.Header.Artist
-            ArtistNative = import_chart.Header.ArtistNative
-            DifficultyName = import_chart.Header.DiffName
-            Subtitle = import_chart.Header.Subtitle
-            Source = import_chart.Header.Source
-            Creator = import_chart.Header.Creator
-            Tags = import_chart.Header.Tags
+            Title = truncate import_chart.Header.Title
+            TitleNative = Option.map truncate import_chart.Header.TitleNative
+            Artist = truncate import_chart.Header.Artist
+            ArtistNative = Option.map truncate import_chart.Header.ArtistNative
+            DifficultyName = truncate import_chart.Header.DiffName
+            Subtitle = Option.map truncate import_chart.Header.Subtitle
+            Source = Option.map truncate import_chart.Header.Source
+            Creator = truncate import_chart.Header.Creator
+            Tags = import_chart.Header.Tags // todo: consider just removing tags ?
 
             Background = handle_asset import_chart.Header.BackgroundFile
             Audio = handle_asset import_chart.Header.AudioFile
