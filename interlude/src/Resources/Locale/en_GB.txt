@@ -1217,6 +1217,7 @@ score.stats.latest=latest
 score.stats.releases=Releases
 score.stats.taps=Taps
 score.switch_ruleset=Switch ruleset
+score.use_mods=Use these mods
 score.watch_replay=Watch replay
 score.your_record=Your record: %0
 scoreboard.view_hint_keyboard=Press %0 to view

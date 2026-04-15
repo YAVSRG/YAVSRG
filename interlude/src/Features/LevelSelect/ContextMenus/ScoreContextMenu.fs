@@ -28,13 +28,20 @@ type ScoreContextMenu(is_leaderboard: bool, score_info: ScoreInfo) =
                     .Disabled(Network.lobby.IsSome)
                     .Help(Help.Info("score.challenge"))
                     .Pos(2),
+                PageButton(%"score.use_mods", fun () ->
+                    SelectedChart.set_rate_and_mods(score_info.Rate, score_info.Mods)
+                    Menu.Back()
+                )
+                    .Icon(Icons.ZAP)
+                    .Disabled(score_info.Rate = SelectedChart.rate.Value && score_info.Mods = Map.empty)
+                    .Pos(4),
                 PageButton(%"score.delete", fun () ->
                     ScoreContextMenu.ConfirmDeleteScore(score_info, true)
                 )
                     .TextColor(Colors.red_accent)
                     .Icon(Icons.TRASH)
                     .Hotkey("delete")
-                    .Pos(4)
+                    .Pos(6)
                     .Conditional(K (not is_leaderboard))
             )
 
