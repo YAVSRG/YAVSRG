@@ -122,7 +122,7 @@ module Gameplay =
                     UserDatabase.save_changes Content.UserData
                 improvement_flags, Some xp_gain
 
-            elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && not options.OnlySaveNewRecords.Value then
+            elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
                 UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
                 score_saved_ev.Trigger score_info
                 ImprovementFlags.None, None
