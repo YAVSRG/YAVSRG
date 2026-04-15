@@ -126,6 +126,7 @@ gameplay.pacemaker.lamp=Lamp
 gameplay.pacemaker.onlysavenewrecords=Only save new records
 gameplay.pacemaker.onlysavenewrecords.tooltip=When turned on, scores that are worse than one of your previous scores are not saved.\nExample: You get 96% on 1.1x, but you already have 97% on 1.2x.
 gameplay.pacemaker.save_failed_scores=Save failed scores
+gameplay.pacemaker.target=Target
 gameplay.pacemaker.tooltip=The pacemaker is an optional tool to help you meet a target score.\nWhile playing, an overlay indicates how far ahead or behind your target "pace" you are.
 gameplay.pacemaker.type=Pacemaker type
 gameplay.pacemaker.use_personal_best=Use personal best

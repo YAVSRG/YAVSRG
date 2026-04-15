@@ -23,7 +23,7 @@ type PacemakerOptionsPage() =
     let accuracy =
         existing.Accuracy
         |> Setting.bounded (0.0, 1.0)
-        |> Setting.round 3
+        |> Setting.round 4
 
     let lamp = Setting.simple existing.Lamp
 
@@ -54,13 +54,19 @@ type PacemakerOptionsPage() =
                     .Help(Help.Info("gameplay.pacemaker.onlysavenewrecords"))
                     .Pos(4),
                 PageSetting(%"gameplay.pacemaker.type",
-                    SelectDropdown([| PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"; PacemakerMode.Lamp, %"gameplay.pacemaker.lamp" |], mode)
+                    SelectDropdown(
+                        [|
+                            PacemakerMode.Accuracy, %"gameplay.pacemaker.accuracy"
+                            PacemakerMode.Lamp, %"gameplay.pacemaker.lamp"
+                        |],
+                        mode
+                    )
                 )
                     .Pos(7),
-                PageSetting(%"gameplay.pacemaker.accuracy", Slider.Percent(accuracy |> Setting.f32))
+                PageSetting(%"gameplay.pacemaker.target", NumberEntry.CreatePercent(accuracy))
                     .Pos(9)
                     .Conditional(fun () -> mode.Value = PacemakerMode.Accuracy),
-                PageSetting(%"gameplay.pacemaker.lamp", SelectDropdown(lamps, lamp))
+                PageSetting(%"gameplay.pacemaker.target", SelectDropdown(lamps, lamp))
                     .Pos(9)
                     .Conditional(fun () -> mode.Value = PacemakerMode.Lamp),
                 PageSetting(%"gameplay.pacemaker.use_personal_best",
