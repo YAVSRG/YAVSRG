@@ -40,9 +40,9 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey, focus_trap: bool) as th
                     .SelectOnClick(this)
                     .OnHover(fun now_focused ->
                         if now_focused && not this.Focused then
-                                this.Focus true
-                            elif not now_focused && not focus_trap && this.FocusedByMouse then
-                                Selection.up true
+                            this.Focus true
+                        elif not now_focused && not focus_trap && this.FocusedByMouse then
+                            Selection.up true
                     )
                     .OnRightClick(fun () -> setting.Set "")
             )

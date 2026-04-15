@@ -13,11 +13,11 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
     let grade = ruleset.Value.Grades.[id]
     let name = Setting.simple grade.Name
     let color = Setting.simple grade.Color
-    let acc_required = float32 grade.Accuracy |> Setting.bounded (0.0f, 1.0f) |> Setting.roundf 6
+    let acc_required = grade.Accuracy |> Setting.bounded (0.0, 1.0) |> Setting.round 6
 
     member this.SaveChanges() =
         let new_grades = ruleset.Value.Grades |> Array.copy
-        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(float acc_required.Value, 6) }
+        new_grades.[id] <- { Name = name.Value.Trim(); Color = color.Value; Accuracy = System.Math.Round(acc_required.Value, 6) }
         ruleset.Set
             { ruleset.Value with
                 Grades =
@@ -38,7 +38,7 @@ type EditGradePage(ruleset: Setting<Ruleset>, id: int) =
                 )
                     .Pos(2),
                 PageSetting(%"rulesets.grade.accuracy",
-                    Slider(acc_required, Format = (fun v -> sprintf "%.4f%%" (v * 100.0f)), Step = 0.001f)
+                    NumberEntry.CreatePercent(acc_required)
                 )
                     .Pos(4)
             )

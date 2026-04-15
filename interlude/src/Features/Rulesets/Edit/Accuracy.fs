@@ -68,6 +68,7 @@ type ConfigureAccuracyPage(ruleset: Setting<Ruleset>) =
                     .Conditional(is_wife_curve.Get)
                     .Pos(5),
                 ScrollContainer(judgements_container)
+                    .Margin(Style.PADDING * 4.0f)
                     .Conditional(is_wife_curve.Get >> not)
                     .Pos(5, PAGE_BOTTOM - 5)
             )

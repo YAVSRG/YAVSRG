@@ -19,7 +19,7 @@ type PageTextEntry(name: string, setting: Setting<string>) =
 
             entry
             |+ Frame(
-                Position = Position.DEFAULT.Shrink(-15.0f, 0.0f),
+                Position = Position.DEFAULT.ExpandX(Style.PADDING * 3.0f),
                 Fill = K Color.Transparent,
                 Border =
                     fun () ->

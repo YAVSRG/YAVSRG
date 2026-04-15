@@ -93,12 +93,12 @@ type private EditWindowsPage(judgements: Judgement array, windows: Setting<(Game
                 NavigationContainer.Row()
                     .With(
                         NumberEntry.Create(early_window, "ms")
-                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(1, 2, 15.0f))
+                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).ShrinkR(Style.PADDING * 3.0f).GridX(1, 2, Style.PADDING * 9.0f))
                             .Conditional(fun () -> windows.[i].Value.IsSome)
                         |> add_entry,
 
                         NumberEntry.Create(late_window, "ms")
-                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).GridX(2, 2, 15.0f))
+                            .Position(Position.ShrinkL(ADD_REMOVE_BUTTON_WIDTH).ShrinkR(Style.PADDING * 3.0f).GridX(2, 2, Style.PADDING * 9.0f))
                             .Conditional(fun () -> windows.[i].Value.IsSome)
                         |> add_entry,
 
