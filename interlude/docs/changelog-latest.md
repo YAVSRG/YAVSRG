@@ -1,32 +1,37 @@
-0.7.28.1
+0.7.28.2
 ====
 
-Hello I am back from a brief hiatus - combo of life events, spending long on some unreleased features that will be released soon (tm) and also just taking a bit of time off from the project
-Please accept this humble bug fix update and likely quite a bulky feature update in a couple of business weeks
+Please enjoy a second humble bug fix update while I
+- Get back into the swing of working on Interlude
+- Make my development process a bit more open
 
 # New features
-- Option for the Input Meter HUD element to show your keybinds by @Lylcaruis
-  Many keybinds now also show as just the symbol on the key
-- Ctrl-Shift-R now works from inside many menus to reload the current thing you're editing
-- Added a comparison screen so you can see how one ruleset compares to another
-- Support for Quaver 3-10K charts instead of just 4 and 7
+- Pitch change on rates is split into uprate/downrate thanks to @kxi0
+- New HUD element: Column error bars, which shows your hits split by column
 
 # Improvements
-- Volume slider icon is slightly more responsive
-- Color pickers now have a big square previewing the color
-- Playtime stats are shown in hours only and not days
-- Some menu layout improvements on 4:3 ratio
-- You now have to click off an element in the HUD editor to deselect it, making it harder to accidentally select something else when you meant to drag
-- Lots of little UI tweaks
-- You can now change the osu! linked path even if an incorrect path was auto-detected
+- 'Receptors' page in Noteskins is now 'Receptors & Animations'
+- Sort by Grade is now Sort by Accuracy
+- Sort by lamp now sorts by accuracy within lamps
+- Right click on mods to cycle back through modes
+- Slightly update UI for beatmap and pack downloads
+- Judgement HUD element's settings made clearer
+- Ghost tap count now shown on score screen
+- Shift + <number> in score screen sets column filter to just that key
+- Hotkey to reset mods also resets rate
 
 # Bug fixes
-- Fixed an error when the game restarts after updating
-- Fixed a crash that can happen right at the start of playing a song
-- Fixed level select wheel not scrolling when you change songs with the preview open
-- Fixed LN< and LN> level select filters being backwards
-- Fixed a crash when a ruleset has no grades
-- Fixed being able to turn on Column Swap alongside incompatible mods
-- Fixed osu! rulesets having a `,` in the name depending on system locale
-- Not a full fix but if your options.json is corrupt the game automatically uses the backup for you
+- Fixed computer's locale setting sometimes breaking the ruleset editor
+- Fixed a bug causing Inverse mod to not always generate the right gaps (i.e. in brackets)
+- Fixed overlapping mod text when Autoplay is on
+- Fixed crash when a dropdown has 0 options
+- Fixed online leaderboard clearing when you watch a replay
+- Fixed lowest judgement not being skinnable on Judgement HUD element
+- Fixed a lag/crash setup in replay mode
+- Fixed charts with long metadata lagging level select
+- Fixed a crash when switching rulesets on the score screen
+- Fixed quaver mines importing as notes
+- Fixed crash if a file is dropped while the game is loading
+- Fixed overlapping text when a ruleset has just 2 judgements
+- Fixed a parse-order bug in osu! skin imports thanks to @lotte25
 
