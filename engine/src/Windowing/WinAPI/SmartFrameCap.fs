@@ -108,8 +108,8 @@ module private FrameTimeStrategies =
 
         EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, f, IntPtr.Zero) |> ignore
 
-        match handles |> List.tryFind (fun (name, h) -> glfw_monitor_name.StartsWith name) with
-        | Some(name, h) ->
+        match handles |> List.tryFind (fun (name, _) -> glfw_monitor_name.StartsWith name) with
+        | Some(name, _) ->
             let hDc = CreateDC(null, name, null, 0)
 
             if hDc = 0 then

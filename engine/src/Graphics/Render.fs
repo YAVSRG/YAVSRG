@@ -137,7 +137,7 @@ module Render =
                 1,
                 PixelFormat.Rgba,
                 PixelType.UnsignedByte,
-                [| new Rgba32(255uy, 255uy, 255uy, 255uy) |]
+                [| Rgba32(255uy, 255uy, 255uy, 255uy) |]
             )
 
             GL.TexParameter(
@@ -607,7 +607,7 @@ Process: %s"""
 
         let image: Image<Rgba32> =
             Image<Rgba32>
-                .LoadPixelData(new Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
+                .LoadPixelData(Span<byte>(data.ToPointer(), (_viewport_width * _viewport_height * 4)), _viewport_width, _viewport_height)
 
         image.Mutate(fun i -> i.Flip(FlipMode.Vertical) |> ignore)
         image

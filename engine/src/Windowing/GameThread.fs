@@ -85,12 +85,12 @@ module GameThread =
         fatal_error
 
     let internal framebuffer_resized framebuffer viewport =
-        assert(is_game_thread())
+        assert is_game_thread()
         Render.framebuffer_resized framebuffer viewport
         resized <- true
 
     let internal change_mode (frame_limit: FrameLimit, refresh_rate: int, entire_monitor: bool, monitor: nativeptr<Monitor>) =
-        assert(is_game_thread())
+        assert is_game_thread()
         uses_compositor <- not entire_monitor
         strategy <-
             match frame_limit with
@@ -124,7 +124,7 @@ module GameThread =
         visual_latency_hi <- real_next_frame - start_of_frame
 
         match strategy with
-        | Unlimited -> ignore ()
+        | Unlimited -> ()
 
         | FrameCap frame_time ->
             estimated_next_frame <- start_of_frame + frame_time

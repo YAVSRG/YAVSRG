@@ -35,7 +35,7 @@ module WindowsKey =
     let private hook_callback_delegate = LowLevelKeyboardProc(hook_callback)
 
     let disable () : unit =
-        assert(OperatingSystem.IsWindows())
+        assert OperatingSystem.IsWindows()
         if hook = -1n then
             use current_process = Process.GetCurrentProcess()
             use current_module = current_process.MainModule

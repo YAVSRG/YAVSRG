@@ -96,7 +96,7 @@ module Song =
     let mutable internal now_playing: Song = Song.Default
 
     let mutable private _time = 0.0f<ms>
-    let private timer = new Stopwatch()
+    let private timer = Stopwatch()
     let mutable private timer_start = 0.0f<ms>
     let mutable private channel_playing = false
     let mutable private paused = false

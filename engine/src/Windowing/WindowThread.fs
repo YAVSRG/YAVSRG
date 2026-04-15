@@ -62,9 +62,9 @@ module WindowThread =
                 }
             )
             |> List.ofSeq
-        lock (ACTION_QUEUE) (fun () -> detected_monitors <- monitors)
+        lock ACTION_QUEUE (fun () -> detected_monitors <- monitors)
 
-    let get_monitors() = lock (ACTION_QUEUE) (fun () -> detected_monitors)
+    let get_monitors() = lock ACTION_QUEUE (fun () -> detected_monitors)
 
     (*
         Window options
@@ -77,7 +77,7 @@ module WindowThread =
     let mutable private letterbox: WindowedResolution option = None
 
     let apply_config(config: WindowOptions) =
-        assert(is_window_thread())
+        assert is_window_thread()
         detect_monitors()
 
         letterbox <- if config.WindowMode = WindowType.FullscreenLetterbox then Some config.WindowedResolution else None
@@ -253,18 +253,18 @@ module WindowThread =
         && OperatingSystem.IsWindows()
 
     let disable_windows_key() =
-        assert(is_window_thread())
+        assert is_window_thread()
         disabled_windows_key <- true
         if should_disable_windows_key() then
             WindowsKey.disable()
 
     let enable_windows_key() =
-        assert(is_window_thread())
+        assert is_window_thread()
         disabled_windows_key <- false
         WindowsKey.enable()
 
     let focus_window() =
-        assert(is_window_thread())
+        assert is_window_thread()
         GLFW.RestoreWindow(window)
         GLFW.FocusWindow(window)
 
@@ -363,12 +363,12 @@ module WindowThread =
 
         match icon with
         | Some icon ->
-            let mutable pixel_data = System.Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
+            let mutable pixel_data = Span<SixLabors.ImageSharp.PixelFormats.Rgba32>.Empty
             let success = icon.TryGetSinglePixelSpan(&pixel_data)
             if not success then failwithf "Couldn't get pixel span for icon"
             use pixel_data_ref = fixed pixel_data
-            let image_array = [| new Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt) |]
-            GLFW.SetWindowIcon(window, System.Span<Image>(image_array))
+            let image_array = [| Image(icon.Width, icon.Height, pixel_data_ref |> NativePtr.toNativeInt |> NativePtr.ofNativeInt) |]
+            GLFW.SetWindowIcon(window, Span<Image>(image_array))
         | None -> ()
 
         GameThread.init(window, icon, init_thunk)
@@ -415,7 +415,7 @@ module WindowThread =
 
     let debug_info() : string =
         assert(not (NativePtr.isNullPtr window))
-        assert(is_window_thread())
+        assert is_window_thread()
 
         let monitor = Monitors.GetMonitorFromWindow(window)
         let default_monitor = Monitors.GetPrimaryMonitor()
