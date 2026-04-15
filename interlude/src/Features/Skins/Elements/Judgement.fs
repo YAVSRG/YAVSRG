@@ -17,14 +17,7 @@ type Judgement(ctx: HudContext) =
 
     let texture = Content.Texture "judgements"
     let display = ctx.Config.GetJudgementMeterDisplay ctx.State.Ruleset
-    let animated = not ctx.Config.JudgementMeterUseTexture || ctx.Config.JudgementMeterUseBuiltInAnimation
-    let duration =
-        (
-            if animated then
-                ctx.Config.JudgementMeterDuration
-            else
-                ctx.Config.JudgementMeterFrameTime * float32 texture.Columns
-        ) * SelectedChart.rate.Value
+    let duration = ctx.Config.JudgementMeterDuration * SelectedChart.rate.Value
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun ev ->
@@ -53,9 +46,19 @@ type Judgement(ctx: HudContext) =
 
             if percent < 1.0f then
 
-                let pop = if animated then max (percent - 5.0f * percent * percent) (- 128f * MathF.Pow(percent - 0.5f, 8.0f)) else 0.0f
-                let alpha = Math.Clamp(255.0f * ((pop * 2.0f) + 1.0f) |> int, 0, 255)
-                let bounds = this.Bounds.Expand(pop * this.Bounds.Width, pop * this.Bounds.Height)
+                let pop = max (percent - 5.0f * percent * percent) (- 128f * MathF.Pow(percent - 0.5f, 8.0f))
+                
+                let alpha =
+                    if ctx.Config.JudgementMeterEffect = JudgementEffectType.Fade then
+                        255 - int(255.0f * percent)
+                    elif ctx.Config.JudgementMeterEffect = JudgementEffectType.Pop then
+                        Math.Clamp(255.0f * ((pop * 2.0f) + 1.0f) |> int, 0, 255)
+                    else 255
+                    
+                let bounds =
+                    if ctx.Config.JudgementMeterEffect = JudgementEffectType.Pop then
+                        this.Bounds.ExpandPercent(pop)
+                    else this.Bounds
 
                 match display.[tier] with
                 | JudgementDisplayType.Name ->
