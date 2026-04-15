@@ -85,6 +85,11 @@ type HudElement =
 type JudgementDisplayType =
     | Name
     | Texture of int
+    
+type JudgementEffectType =
+    | None = 0
+    | Fade = 1
+    | Pop = 2
 
 type ProgressPieLabel =
     | None = 0
@@ -216,7 +221,7 @@ type HudConfig =
         JudgementMeterDuration: float32<ms / rate>
         JudgementMeterFrameTime: float32<ms / rate>
         JudgementMeterUseTexture: bool
-        JudgementMeterUseBuiltInAnimation: bool
+        JudgementMeterEffect: JudgementEffectType
         JudgementMeterCustomDisplay: Map<int, JudgementDisplayType array>
 
         EarlyLateMeterEnabled: bool
@@ -393,7 +398,7 @@ type HudConfig =
             JudgementMeterIgnorePerfect = false
             JudgementMeterPrioritiseLower = false
             JudgementMeterUseTexture = false
-            JudgementMeterUseBuiltInAnimation = true
+            JudgementMeterEffect = JudgementEffectType.Pop
             JudgementMeterDuration = 300.0f<ms / rate>
             JudgementMeterFrameTime = 50f<ms / rate>
             JudgementMeterCustomDisplay = Map.empty

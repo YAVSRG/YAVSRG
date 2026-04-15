@@ -97,8 +97,8 @@ type JudgementPage() =
         config.JudgementMeterFrameTime
         |> Setting.bounded (2.0f<ms / rate>, 500.0f<ms / rate>)
 
-    let use_animation =
-        Setting.simple config.JudgementMeterUseBuiltInAnimation
+    let effect =
+        Setting.simple config.JudgementMeterEffect
 
     let use_texture =
         Setting.simple config.JudgementMeterUseTexture
@@ -123,7 +123,7 @@ type JudgementPage() =
                 JudgementMeterDuration = duration.Value
                 JudgementMeterFrameTime = frame_time.Value
                 JudgementMeterUseTexture = use_texture.Value
-                JudgementMeterUseBuiltInAnimation = use_animation.Value
+                JudgementMeterEffect = effect.Value
                 JudgementMeterCustomDisplay = Content.HUD.JudgementMeterCustomDisplay.Add (JUDGEMENT_COUNT, judgement_display)
             }
 
@@ -146,21 +146,22 @@ type JudgementPage() =
                     .Pos(2),
                 PageSetting(%"hud.judgement.duration", Slider(Setting.uom duration, Step = 5f))
                     .Help(Help.Info("hud.judgement.duration"))
-                    .Pos(4)
-                    .Conditional(fun () -> not use_texture.Value || use_animation.Value),
+                    .Pos(4),
+                PageSetting(
+                    %"hud.judgement.effect",
+                    Selector([|
+                        JudgementEffectType.None, %"hud.judgement.effect.none"
+                        JudgementEffectType.Fade, %"hud.judgement.effect.fade"
+                        JudgementEffectType.Pop, %"hud.judgement.effect.pop"
+                    |], effect)
+                )
+                    .Pos(6),
                 PageSetting(%"hud.judgement.usetexture", Checkbox use_texture)
                     .Help(Help.Info("hud.judgement.usetexture"))
-                    .Pos(6)
+                    .Pos(8)
             )
             .WithConditional(
                 use_texture.Get,
-
-                PageSetting(
-                    %"hud.judgement.useanimation",
-                    Checkbox use_animation
-                )
-                    .Help(Help.Info("hud.judgement.useanimation"))
-                    .Pos(8),
                 PageSetting(%"hud.judgement.frametime", Slider(Setting.uom frame_time, Step = 5f))
                     .Help(Help.Info("hud.judgement.frametime"))
                     .Pos(10),
