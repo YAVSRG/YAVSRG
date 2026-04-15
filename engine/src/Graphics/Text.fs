@@ -41,32 +41,32 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
     let FONT_MD = font_family.CreateFont(options.BaseScale * 8.0f / 3.0f)
     let FONT_LG = font_family.CreateFont(options.BaseScale * 16.0f / 3.0f)
 
-    let char_lookup_sm = new Dictionary<int32, Sprite>()
-    let char_lookup_md = new Dictionary<int32, Sprite>()
-    let char_lookup_lg = new Dictionary<int32, Sprite>()
+    let char_lookup_sm = Dictionary<int32, Sprite>()
+    let char_lookup_md = Dictionary<int32, Sprite>()
+    let char_lookup_lg = Dictionary<int32, Sprite>()
 
     let text_options =
-        let x = new TextOptions() in
+        let x = TextOptions() in
         x.FallbackFonts.AddRange(fallbacks)
         x
 
     let draw_options =
-        new DrawingOptions(
+        DrawingOptions(
             TextOptions = text_options,
-            GraphicsOptions = new GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
+            GraphicsOptions = GraphicsOptions(Antialias = true, AntialiasSubpixelDepth = 24)
         )
 
     let code_to_string (c: int32) : string = Char.ConvertFromUtf32 c
 
     let render_char_level (font: Font) (c: int32) : Bitmap =
         let s = code_to_string c
-        let render_options = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+        let render_options = RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
         let size = TextMeasurer.Measure(s, render_options)
         let img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
 
         try
             img.Mutate<PixelFormats.Rgba32>(fun img ->
-                img.DrawText(draw_options, s, font, Color.White, new PointF(0f, 0f))
+                img.DrawText(draw_options, s, font, Color.White, PointF(0f, 0f))
                 |> ignore
             )
         with err ->
@@ -78,7 +78,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
         let md = render_char_level FONT_MD c
         let lg = render_char_level FONT_LG c
 
-        let texture, sprites =
+        let _, sprites =
             Sprite.upload_many
                 "LOOSE_CHAR"
                 false
@@ -115,7 +115,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
     let render_atlas_level (font: Font) : Bitmap * GlyphInfo list list * float32 =
         let row_spacing = font.Size * 1.5f
-        let render_options = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+        let render_options = RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
 
         let row_glyph_info chars =
             let mutable w = 0.0f
@@ -148,7 +148,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
             + Feather.CONCAT
             |> Seq.chunkBySize 25
-            |> Seq.map (String)
+            |> Seq.map String
 
         let glyphs = Seq.map row_glyph_info rows |> List.ofSeq
 
@@ -177,12 +177,12 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
                         code_to_string glyph.Code,
                         font,
                         Color.White,
-                        new PointF(glyph.Offset, row_spacing * float32 i)
+                        PointF(glyph.Offset, row_spacing * float32 i)
                     )
                     |> ignore
                 )
 
-        img.[w - 1, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
+        img.[w - 1, 0] <- PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
 
         img, glyphs, row_spacing
 
@@ -330,7 +330,7 @@ type SpriteFont(font_family: FontFamily, fallbacks: FontFamily list, options: Sp
 
 module Fonts =
 
-    let collection = new FontCollection()
+    let collection = FontCollection()
 
     let add (stream: Stream) : unit = collection.Install stream |> ignore
 
@@ -344,7 +344,7 @@ module Fonts =
                 Logging.Error "Couldn't find font '%s', defaulting" name
                 collection.Find "Inconsolata"
 
-        new SpriteFont(family, [ collection.Find "feather" ], options)
+        SpriteFont(family, [ collection.Find "feather" ], options)
 
     open System.Reflection
 
@@ -423,7 +423,7 @@ module Text =
 
                 if (bg: Drawing.Color).A <> 0uy then
                     Render.tex_quad
-                        ((r.Translate(shadow_spacing, shadow_spacing)).AsQuad)
+                        (r.Translate(shadow_spacing, shadow_spacing)).AsQuad
                         bg.AsQuad
                         { Texture = s.Texture; Layer = s.Z; UV = s.PrecomputedQuad.Value }
 

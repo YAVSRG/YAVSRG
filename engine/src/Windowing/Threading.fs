@@ -25,7 +25,7 @@ type ThreadActionQueue() =
     member internal this.BindToCurrent() : unit = this.Bind(Thread.CurrentThread.ManagedThreadId)
 
     member internal this.RunQueue() : unit =
-        assert(this.IsCurrent())
+        assert this.IsCurrent()
         lock this (fun () ->
             while not (List.isEmpty action_queue) do
                 let actions = action_queue

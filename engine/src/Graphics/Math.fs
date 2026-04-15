@@ -357,10 +357,10 @@ module Quad =
         let a = r.Height * 0.5f * lean_percentage
 
         {
-            TopLeft = new Vector2(r.Left + a, r.Top)
-            TopRight = new Vector2(r.Right + a, r.Top)
-            BottomRight =  new Vector2(r.Right - a, r.Bottom)
-            BottomLeft = new Vector2(r.Left - a, r.Bottom)
+            TopLeft = Vector2(r.Left + a, r.Top)
+            TopRight = Vector2(r.Right + a, r.Top)
+            BottomRight = Vector2(r.Right - a, r.Bottom)
+            BottomLeft = Vector2(r.Left - a, r.Bottom)
         }
 
     let inline flip_vertical (q: Quad) : Quad =
@@ -380,7 +380,7 @@ module Quad =
         }
 
     let inline translate (x: float32, y: float32) : Quad -> Quad =
-        let v = new Vector2(x, y)
+        let v = Vector2(x, y)
         map ((+) v)
 
     let inline rotate_about (origin: Vector2) (degrees: float) : Quad -> Quad =
@@ -414,4 +414,4 @@ module private Helpers =
         let error = GL.GetError()
         if error <> ErrorCode.NoError && first_error then
             first_error <- false
-            Percyqaz.Common.Logging.Error "%O\n%s" error (Environment.StackTrace)
+            Percyqaz.Common.Logging.Error "%O\n%s" error Environment.StackTrace

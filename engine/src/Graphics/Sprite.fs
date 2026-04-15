@@ -347,11 +347,11 @@ module Sprite =
             1,
             PixelFormat.Rgba,
             PixelType.UnsignedByte,
-            [| new Rgba32(255uy, 255uy, 255uy, 255uy) |]
+            [| Rgba32(255uy, 255uy, 255uy, 255uy) |]
         )
 
         let mutable layer = 1
-        let mutable pixel_data = System.Span<Rgba32>.Empty
+        let mutable pixel_data = Span<Rgba32>.Empty
 
         for image in images do
 
@@ -502,7 +502,7 @@ module Sprite =
         {
             Texture = sprite.Texture
             Layer = sprite.Z
-            UV = Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height)) quad
+            UV = Quad.map (fun v -> Vector2((v.X - left) / width, (v.Y - top) / height)) quad
         }
 
     let aligned_box_x (x_origin: float32, y_origin: float32, x_offset: float32, y_offset: float32, x_scale: float32, y_mult: float32) (sprite: Sprite) : Rect =
