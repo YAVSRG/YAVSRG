@@ -13,14 +13,8 @@ open Interlude.Content
 
 module FileDrop =
 
-    let mutable on_file_drop : (string -> unit) option = None
-
     let handle (path: string) : unit =
         assert GameThread.is_game_thread()
-
-        match on_file_drop with
-        | Some f -> f path
-        | None ->
 
         match path with
         | OsuSkinFolder ->
@@ -53,7 +47,7 @@ module FileDrop =
                 if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
                     osu.Replay.figure_out_replay replay
                 else
-                    Notifications.error("Replay import failed!", "Must be on level select or main menu screen")
+                    Notifications.error(%"osu_replay_import.failed", %"osu_replay_import.wrong_menu")
             | None -> Notifications.error (%"notification.import_failed", "")
 
         | Unknown -> // Treat it as a chart/pack/library import

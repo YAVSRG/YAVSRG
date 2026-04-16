@@ -86,7 +86,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
                     .TextPos(0),
                 Button(sprintf "%s: %s" %"mount.create.path" path, fun () ->
                     Menu.Back()
-                    MountFileDropPage(game, fun path -> CreateMountPage(game, path, setting).Show()).Show()
+                    MountFolderPickerPage(game, fun path -> CreateMountPage(game, path, setting).Show()).Show()
                 )
                     .TextColor(Colors.text_subheading)
                     .Align(Alignment.LEFT)

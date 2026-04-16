@@ -3,6 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Formats
 open Prelude.Data.Library.Imports
@@ -31,51 +32,57 @@ type MountedGameType =
         | Etterna -> Color.FromArgb(0xFF_8F60F6)
         | Stepmania -> Color.FromArgb(0xFF_FF703C)
 
-type private MountFileDropPage(game: MountedGameType, callback: string -> unit) =
+type private MountFolderPickerPage(game: MountedGameType, callback: string -> unit) =
     inherit Page()
 
     let info =
         match game with
         | MountedGameType.Osu ->
             Callout.Normal
-                .Icon(Icons.DOWNLOAD)
+                .Icon(Icons.FOLDER_PLUS)
                 .Title(%"mount.create.osu.prompt")
                 .Body(%"mount.create.folder_hint")
         | MountedGameType.Quaver ->
             Callout.Normal
-                .Icon(Icons.DOWNLOAD)
+                .Icon(Icons.FOLDER_PLUS)
                 .Title(%"mount.create.quaver.prompt")
                 .Body(%"mount.create.folder_hint")
         | MountedGameType.Stepmania ->
             Callout.Normal
-                .Icon(Icons.DOWNLOAD)
+                .Icon(Icons.FOLDER_PLUS)
                 .Title(%"mount.create.stepmania.prompt")
                 .Body(%"mount.create.folder_hint")
         | MountedGameType.Etterna ->
             Callout.Normal
-                .Icon(Icons.DOWNLOAD)
+                .Icon(Icons.FOLDER_PLUS)
                 .Title(%"mount.create.etterna.prompt")
                 .Body(%"mount.create.folder_hint")
 
     override this.Content() =
-        FileDrop.on_file_drop <-
-            fun path ->
-                match game, path with
-                | MountedGameType.Osu, PackFolder
-                | MountedGameType.Quaver, PackFolder
-                | MountedGameType.Stepmania, FolderOfPacks
-                | MountedGameType.Etterna, FolderOfPacks -> Menu.Back(); callback path;
+        let path_chosen(path: string) : unit =
+            match game, path with
+            | MountedGameType.Osu, PackFolder
+            | MountedGameType.Quaver, PackFolder
+            | MountedGameType.Stepmania, FolderOfPacks
+            | MountedGameType.Etterna, FolderOfPacks -> Menu.Back(); callback path;
 
-                | MountedGameType.Osu, _ -> Notifications.error (%"mount.create.osu.error", "")
-                | MountedGameType.Quaver, _ -> Notifications.error (%"mount.create.quaver.error", "")
-                | MountedGameType.Stepmania, _ -> Notifications.error (%"mount.create.stepmania.error", "")
-                | MountedGameType.Etterna, _ -> Notifications.error (%"mount.create.etterna.error", "")
-            |> Some
-        this.OnClose(fun () -> FileDrop.on_file_drop <- None)
+            | MountedGameType.Osu, _ -> Notifications.error(%"mount.create.osu.error", "")
+            | MountedGameType.Quaver, _ -> Notifications.error(%"mount.create.quaver.error", "")
+            | MountedGameType.Stepmania, _ -> Notifications.error(%"mount.create.stepmania.error", "")
+            | MountedGameType.Etterna, _ -> Notifications.error(%"mount.create.etterna.error", "")
+            
+        let choose_path() : unit =
+            FileDialog.pick_folder(
+                null,
+                function
+                | FileDialogResult.Ok path -> path_chosen path
+                | FileDialogResult.Cancelled -> ()
+                | FileDialogResult.Error -> Notifications.error(%"notification.file_picker_error", "")
+            )
 
         page_container()
             .With(
-                Dummy(NodeType.Leaf),
+                PageButton(%"mount.choose_folder", choose_path).Pos(6),
                 CalloutCard(info).Pos(0)
             )
 
@@ -118,7 +125,7 @@ module Mounts =
         if Directory.Exists location then
             callback location
         else
-            MountFileDropPage(game, callback).Show()
+            MountFolderPickerPage(game, callback).Show()
 
     let import_osu_scores (osu_mount: MountedChartSource, notify_start: bool) : unit =
 
