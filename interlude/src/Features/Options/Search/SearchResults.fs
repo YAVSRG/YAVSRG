@@ -84,6 +84,10 @@ module SearchResults =
                 yield PageButton(%"hud.edit", fun () -> SkinActions.edit_hud ignore)
                     .Help(Help.Info("hud.edit")), 2, 3, PageWidth.Normal
 
+            if token_match tokens [|%"imports.from_file"; %"menu.import"|] then
+                yield ImportsPage.ImportFromFile()
+            if token_match tokens [|%"imports.from_folder"; %"menu.import"|] then
+                yield ImportsPage.ImportFromFolder()
             if token_match tokens [|%"etterna_pack_browser"; %"menu.import"|] then
                 yield ImportsPage.GetEtternaPacks()
             if token_match tokens [|%"beatmap_browser"; %"menu.import"|] then

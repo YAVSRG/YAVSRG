@@ -1,9 +1,11 @@
 namespace Interlude.Features.OptionsMenu.Library
 
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude.UI
 open Interlude.Features.Mounts
+open Interlude.Features.Import
 open Interlude.Features.Import.osu
 open Interlude.Features.Import.Etterna
 open Interlude.Features.Tables.Browser
@@ -27,24 +29,49 @@ type ImportsPage() =
         PageButton(%"tables.browser", fun () -> TableBrowserPage().Show())
 
     static member ImportOsuSkins() : PageButton =
-         PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
+        PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
+
+    static member ImportFromFile() : PageButton =
+        PageButton(%"imports.from_file", fun () ->
+            FileDialog.pick_file(
+                get_game_folder "Data",
+                "osz",
+                function
+                | FileDialogResult.Ok path -> FileDrop.handle path
+                | FileDialogResult.Cancelled -> ()
+                | FileDialogResult.Error -> () // error toast
+            )
+        )
+            .Icon(Icons.FILE_PLUS)
+
+    static member ImportFromFolder() : PageButton =
+        PageButton(%"imports.from_folder", fun () ->
+            FileDialog.pick_folder(
+                get_game_folder "Data",
+                function
+                | FileDialogResult.Ok path -> FileDrop.handle path
+                | FileDialogResult.Cancelled -> ()
+                | FileDialogResult.Error -> () // error toast
+            )
+        )
+            .Icon(Icons.FOLDER_PLUS)
 
     override this.Content() =
-        
-        Percyqaz.Flux.Windowing.FileDialog.pick_file(get_game_folder "Data")
-
         let lhs_actions =
             NavigationContainer.Column()
                 .WrapNavigation(false)
                 .With(
-                    ImportsPage.GetOsuSongs().Pos(0, 2, PageWidth.Full),
-                    ImportsPage.GetEtternaPacks().Pos(2, 2, PageWidth.Full),
-                    ImportsPage.GetSkins().Pos(4, 2, PageWidth.Full),
-                    ImportsPage.GetTables().Pos(6, 2, PageWidth.Full),
-                    ImportsPage.ImportOsuSkins().Pos(9, 2, PageWidth.Full),
+                    ImportsPage.ImportFromFile().Pos(0, 2, PageWidth.Full),
+                    ImportsPage.ImportFromFolder().Pos(2, 2, PageWidth.Full),
+                    
+                    ImportsPage.GetOsuSongs().Pos(5, 2, PageWidth.Full),
+                    ImportsPage.GetEtternaPacks().Pos(7, 2, PageWidth.Full),
+                    ImportsPage.GetSkins().Pos(9, 2, PageWidth.Full),
+                    ImportsPage.GetTables().Pos(11, 2, PageWidth.Full),
+                    ImportsPage.ImportOsuSkins().Pos(14, 2, PageWidth.Full),
 
-                    PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(12, 2, PageWidth.Full),
-                    PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(14, 2, PageWidth.Full)
+                    PageButton(%"rulesets", fun () -> SelectRulesetPage().Show()).Pos(17, 2, PageWidth.Full),
+                    PageButton(%"library.tables", fun () -> SelectTablePage(ignore).Show()).Pos(19, 2, PageWidth.Full)
                 )
 
         NavigationContainer.Row()
