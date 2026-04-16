@@ -40,6 +40,7 @@ Information, future updates and support available at:
             BassFxLibraryFile: string
             GLFWLibraryFile: string
             SQLiteLibraryFile: string
+            NfdLibraryFile: string
             ExecutableFile: string
         }
         static member WINDOWS_X64 =
@@ -50,6 +51,7 @@ Information, future updates and support available at:
                 BassFxLibraryFile = "bass_fx.dll"
                 GLFWLibraryFile = "glfw3.dll"
                 SQLiteLibraryFile = "e_sqlite3.dll"
+                NfdLibraryFile = "nfd.dll"
                 ExecutableFile = "Interlude.exe"
             }
         static member LINUX_X64 =
@@ -60,6 +62,7 @@ Information, future updates and support available at:
                 BassFxLibraryFile = "libbass_fx.so"
                 GLFWLibraryFile = "libglfw.so.3.3"
                 SQLiteLibraryFile = "libe_sqlite3.so"
+                NfdLibraryFile = "libnfd.so"
                 ExecutableFile = "Interlude"
             }
         static member OSX_X64 =
@@ -70,6 +73,7 @@ Information, future updates and support available at:
                 BassFxLibraryFile = "libbass_fx.dylib"
                 GLFWLibraryFile = "libglfw.3.dylib"
                 SQLiteLibraryFile = "libe_sqlite3.dylib"
+                NfdLibraryFile = "libnfd.dylib"
                 ExecutableFile = "Interlude"
             }
         static member OSX_ARM64 =
@@ -80,6 +84,7 @@ Information, future updates and support available at:
                 BassFxLibraryFile = "libbass_fx.dylib"
                 GLFWLibraryFile = "libglfw.3.dylib"
                 SQLiteLibraryFile = "libe_sqlite3.dylib"
+                NfdLibraryFile = "libnfd.dylib"
                 ExecutableFile = "Interlude"
             }
 
@@ -127,6 +132,11 @@ Information, future updates and support available at:
         File.Copy(
             Path.Combine(build_dir, "publish", info.SQLiteLibraryFile),
             Path.Combine(clean_dir, info.SQLiteLibraryFile)
+        )
+
+        File.Copy(
+            Path.Combine(build_dir, "publish", info.NfdLibraryFile),
+            Path.Combine(clean_dir, info.NfdLibraryFile)
         )
 
         File.WriteAllText(Path.Combine(clean_dir, "README.txt"), README.Trim() + "\n")
