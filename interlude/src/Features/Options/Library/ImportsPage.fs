@@ -30,6 +30,8 @@ type ImportsPage() =
          PageButton(%"skins.import_from_osu", fun () -> Skins.OsuSkinsListPage().Show())
 
     override this.Content() =
+        
+        Percyqaz.Flux.Windowing.FileDialog.pick_file(get_game_folder "Data")
 
         let lhs_actions =
             NavigationContainer.Column()
