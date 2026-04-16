@@ -34,8 +34,8 @@ type ImportsPage() =
     static member ImportFromFile() : PageButton =
         PageButton(%"imports.from_file", fun () ->
             FileDialog.pick_file(
-                get_game_folder "Data",
-                "osz",
+                null,
+                "osz,osu,qp,qua,zip,sm;osk,isk;osr",
                 function
                 | FileDialogResult.Ok path -> FileDrop.handle path
                 | FileDialogResult.Cancelled -> ()
@@ -47,7 +47,7 @@ type ImportsPage() =
     static member ImportFromFolder() : PageButton =
         PageButton(%"imports.from_folder", fun () ->
             FileDialog.pick_folder(
-                get_game_folder "Data",
+                null,
                 function
                 | FileDialogResult.Ok path -> FileDrop.handle path
                 | FileDialogResult.Cancelled -> ()
