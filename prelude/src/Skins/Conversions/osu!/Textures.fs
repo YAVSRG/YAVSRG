@@ -25,6 +25,10 @@ type Texture =
 
 module Texture =
 
+    let normalize_path(path: string) = 
+
+        path.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar)
+
     let find_fallback(fallback_id: string, path: string) : Result<Texture, string list> =
         let file = Path.Combine(path, fallback_id)
 
@@ -35,7 +39,7 @@ module Texture =
     let find (requested_id: string, fallback_id: string, path: string) : Result<Texture, string list> =
         if requested_id = fallback_id then find_fallback(fallback_id, path) else
 
-        let file = Path.Combine(path, requested_id)
+        let file = Path.Combine(path, normalize_path requested_id)
 
         if File.Exists(file + "@2x.png") then Ok { Path = file + "@2x.png"; Is2x = true }
         elif File.Exists(file + ".png") then Ok { Path = file + ".png"; Is2x = false }
@@ -69,7 +73,7 @@ module Texture =
     let find_animated (requested_id: string, fallback_id: string, path: string) : Result<Texture list, string list> =
         if requested_id = fallback_id then find_animated_fallback(fallback_id, path) else
 
-        let file = Path.Combine(path, requested_id)
+        let file = Path.Combine(path, normalize_path requested_id)
 
         let rec find_animation i =
             if File.Exists(file + "-" + i.ToString() + "@2x.png") then
