@@ -20,7 +20,7 @@ let crash_text_file (message: string) =
 let launch (instance: int) : unit =
     Logging.Verbosity <- if DEV_MODE then LoggingLevel.DEBUG else LoggingLevel.INFO
 
-    Logging.LogFile <- Some(Path.Combine("Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
+    Logging.LogFile <- Some(Path.Combine(get_game_folder "Logs", sprintf "log-%s.txt" (DateTime.Today.ToString("yyyyMMdd"))))
 
     if OperatingSystem.IsWindows() then
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
@@ -45,9 +45,28 @@ let launch (instance: int) : unit =
 let main (argv: string array) : int =
     let executable_location = AppDomain.CurrentDomain.BaseDirectory
     Directory.SetCurrentDirectory(executable_location)
+    // Check that the game directory is writable
+    try
+        File.WriteAllText("test.tmp", "temp")
+        File.Delete("test.tmp")
+    with _ -> (
+        let data_home =
+            if OperatingSystem.IsWindows() then
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+            elif OperatingSystem.IsMacOS() then
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support")
+            else
+                let xdg = Environment.GetEnvironmentVariable("XDG_DATA_HOME")
+                if String.IsNullOrEmpty xdg then
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share")
+                else xdg
+        let game_dir = Path.Combine(data_home, "Interlude")
+        Directory.CreateDirectory game_dir |> ignore
+        Directory.SetCurrentDirectory game_dir
+    )
 
     if
-        executable_location.Replace("\\", "/").ToLower().Contains "appdata/local/temp"
+        executable_location.Replace("\\", "/").ToLower().Contains "appdata/local/temp" && OperatingSystem.IsWindows()
     then
         crash_text_file "Hello ZIP FILE USER,\n\nplease EXTRACT all contents of the Interlude zip file before running the exe\notherwise it won't work or save any of your data.\n\nThanks,\nPercyqaz"
         -1
