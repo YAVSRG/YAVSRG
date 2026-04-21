@@ -76,6 +76,17 @@ type SystemPage() =
         PageSetting(%"system.visualoffset", Slider(Setting.uom options.VisualOffset, Step = 1f))
             .Help(Help.Info("system.visualoffset"))
 
+    static member Language(): PageSetting = 
+        PageSetting(
+            %"system.language",
+            SelectDropdown(
+                Options.available_locales
+                |> Seq.map(fun x -> x, Localisation.get_locale_display_name(x))
+                |> Seq.toArray,
+                options.Language
+            )
+        )
+
     override this.Content() =
         window_mode_changed config.WindowMode.Value
 
@@ -91,7 +102,9 @@ type SystemPage() =
                 SystemPage.Hotkeys().Pos(9),
 
                 PageButton(%"system.audio", fun () -> AudioPage().Show()).Pos(12),
-                SystemPage.VisualOffset().Pos(14)
+                SystemPage.VisualOffset().Pos(14),
+
+                SystemPage.Language().Pos(18)
             )
 
     override this.Title = %"system"
