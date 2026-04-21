@@ -26,7 +26,7 @@ module Skins =
                 .WithConditional(
                     existing_folder.IsSome,
 
-                    Text([existing_folder.Value] %> "etterna_skin_import.delete_prompt")
+                    Text([existing_folder |> Option.defaultValue ""] %> "etterna_skin_import.delete_prompt")
                         .Align(Alignment.LEFT)
                         .TextPos(5),
                     PageSetting(%"etterna_skin_import.delete_existing", Checkbox delete_existing)
