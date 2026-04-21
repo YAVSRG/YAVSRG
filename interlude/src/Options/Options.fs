@@ -350,7 +350,7 @@ module Options =
 
     let private CONFIG_PATH = Path.GetFullPath "config.json"
 
-    let private EMBEDDED_LOCALES = Set.ofList ["en_GB"]
+    let EMBEDDED_LOCALES = Set.ofList ["en_GB"]
     let mutable available_locales = Set.empty<string>
 
     let load_window_config (instance: int) () : WindowOptions =

@@ -81,7 +81,13 @@ type SystemPage() =
             %"system.language",
             SelectDropdown(
                 Options.available_locales
-                |> Seq.map(fun x -> x, Localisation.get_locale_display_name(x))
+                |> Seq.map(fun x -> 
+                    let display_option = 
+                        if Options.EMBEDDED_LOCALES.Contains(x) then
+                            Localisation.get_locale_display_name(x)
+                        else
+                            $"{Icons.FOLDER} {Localisation.get_locale_display_name(x)}"
+                    x, display_option)
                 |> Seq.toArray,
                 options.Language
             )
