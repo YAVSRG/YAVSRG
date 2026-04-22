@@ -67,9 +67,10 @@ module Shared =
                             | Ok { Chart = original; Header = header } ->
                                 let original_duration = original.LastNote - original.FirstNote
                                 let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
+                                let relative_rate = original_duration / incoming_duration * 1.0f<rate>
                                 if
                                     original.Notes.Length = import.Chart.Notes.Length &&
-                                    abs (incoming_duration * float32 rate - original_duration) < 5.0f<ms>
+                                    abs (rate - relative_rate) < 0.025f<rate>
                                 then
                                     match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
                                     | Some (ChartOrigin.Osu osu) ->
