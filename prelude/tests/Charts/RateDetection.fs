@@ -100,7 +100,8 @@ module RateDetection =
                 Ok(simulate_normal_import 1.2f<rate>)
             ]
           
-        let results = filter_rates "C:/path" example_data |> List.choose Result.toOption
+        let results = filter_rates example_data |> List.choose Result.toOption
+        printfn "%A" results
         Assert.AreEqual(1, results.Length)
         let single_result = List.head results
         Assert.AreEqual(3, single_result.Header.Origins.Count)
@@ -122,7 +123,7 @@ module RateDetection =
                 Ok(simulate_mislabelled_rate 1.3f<rate>)
             ]
           
-        let results = filter_rates "C:/path" example_data |> List.choose Result.toOption
+        let results = filter_rates example_data |> List.choose Result.toOption
         printfn "%A" results
         Assert.AreEqual(2, results.Length)
 
@@ -138,14 +139,39 @@ module RateDetection =
             )
             |> Seq.map (fun beatmap ->
                 Osu_To_Interlude.convert
-                        beatmap
-                        {
-                            Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
-                            Source = "./Data/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
-                        }
+                    beatmap
+                    {
+                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                        Source = "./Data/2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz"
+                    }
             )
             |> List.ofSeq
           
-        let results = filter_rates "C:/path" song_rates |> List.choose Result.toOption
+        let results = filter_rates song_rates |> List.choose Result.toOption
         printfn "%A" results
         Assert.AreEqual(1, results.Length)
+        Assert.AreEqual(song_rates.Length, results.Head.Header.Origins.Count)
+
+    [<Test>]
+    let RateFiltering_RealCase2() =
+        
+        let data = ZipFile.OpenRead("./Data/989392 DJ Sharpnel - World Sound.osz")
+        let song_rates =
+            data.Entries
+            |> Seq.map (fun (entry : ZipArchiveEntry) ->
+                use stream = entry.Open()
+                OsuParser.beatmap_from_stream stream
+            )
+            |> Seq.map (fun beatmap ->
+                Osu_To_Interlude.convert
+                    beatmap
+                    {
+                        Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles)
+                        Source = "./Data/989392 DJ Sharpnel - World Sound.osz"
+                    }
+            )
+            |> List.ofSeq
+          
+        let results = filter_rates song_rates |> List.choose Result.toOption
+        printfn "%A" results
+        Assert.AreEqual(2, results.Length)

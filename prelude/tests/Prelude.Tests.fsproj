@@ -33,6 +33,9 @@
     <None Include="Data\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="Data\989392 DJ Sharpnel - World Sound.osz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Localisation\Helpers.fs" />
     <Compile Include="Localisation\Localisation.fs" />
     <Compile Include="Charts\Helpers.fs" />

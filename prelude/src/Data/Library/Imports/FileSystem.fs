@@ -79,7 +79,7 @@ module Imports =
                 )
                 |> List.ofSeq
 
-            let filtered = filter_rates path results
+            let filtered = filter_rates results
 
             let mutable success_count = 0
             let charts =
