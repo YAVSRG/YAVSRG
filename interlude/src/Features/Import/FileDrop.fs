@@ -35,8 +35,10 @@ module FileDrop =
         | OsuSkinArchive ->
             let id = Path.GetFileNameWithoutExtension(path)
             let target = Path.Combine(get_game_folder "Downloads", id)
-            try Directory.Delete(target, true) with _ -> ()
-            ZipFile.ExtractToDirectory(path, target)
+            try
+                Directory.Delete(target, true)
+                ZipFile.ExtractToDirectory(path, target)
+            with _ -> ()
             Menu.Exit()
             osu.Skins.import_osu_skin target
             // todo: clean up extracted noteskin in downloads
