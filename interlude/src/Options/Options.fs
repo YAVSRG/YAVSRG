@@ -381,8 +381,6 @@ module Options =
 
         let detect_locales() =
             let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
-        let detect_locales() =
-            let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
             
             let locales =
                 Directory.GetFiles(locale_dir_path)
