@@ -94,6 +94,7 @@ type BPM =
 
 type SV = float32
 
+[<StructuredFormatDisplay("<A {Keys}K chart>")>]
 type Chart =
     {
         Keys: int
@@ -274,7 +275,7 @@ module Chart =
 
         printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
 
-    let scale (scale: Rate) (chart: Chart) : Chart =
+    let scale (scale: float32</rate>) (chart: Chart) : Chart =
         { chart with
             Notes = TimeArray.scale scale chart.Notes
             BPM = TimeArray.scale scale chart.BPM

@@ -30,6 +30,7 @@ type QuaverOrigin =
 [<RequireQualifiedAccess>]
 [<CustomComparison>]
 [<CustomEquality>]
+[<StructuredFormatDisplay("{InfoString}")>]
 type ChartOrigin =
     | Osu of OsuOrigin
     | Quaver of QuaverOrigin
@@ -43,7 +44,7 @@ type ChartOrigin =
 
     member this.InfoString : string =
         match this with
-        | Osu osu -> sprintf "osu!|%s|%i|%i" osu.Md5 osu.BeatmapSetId osu.BeatmapId
+        | Osu osu -> sprintf "osu!|%s|%.2fx|%i|%i" osu.Md5 osu.SourceRate osu.BeatmapSetId osu.BeatmapId
         | Quaver quaver -> sprintf "Quaver|%s|%i|%i" quaver.Md5 quaver.MapSetId quaver.MapId
         | Etterna pack -> sprintf "Etterna|%s" pack
 
@@ -106,6 +107,7 @@ type ImportAsset =
     | Missing
 
 [<Json.AutoCodec(false)>]
+[<StructuredFormatDisplay("{InfoString}")>]
 type ChartImportHeader =
     {
         Title: string
@@ -142,6 +144,8 @@ type ChartImportHeader =
 
             Origins = Set.empty
         }
+        
+    member this.InfoString = sprintf "%s - %s (%s) [%s] %s" this.Artist this.Title this.Creator this.DiffName (this.Origins |> Seq.map _.InfoString |> String.concat ", ")
 
 type ImportChart =
     {
