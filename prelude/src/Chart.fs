@@ -281,6 +281,19 @@ module Chart =
             BPM = TimeArray.scale scale chart.BPM
             SV = TimeArray.scale scale chart.SV
         }
+        
+    let inline notecount<^T when ^T: (member Notes : TimeArray<NoteRow>)> (chart: ^T) : int * int =
+        let mutable notes = 0
+        let mutable lnotes = 0
+
+        for { Data = nr } in chart.Notes do
+            for n in nr do
+                if n = NoteType.NORMAL then
+                    notes <- notes + 1
+                elif n = NoteType.HOLDHEAD then
+                    notes <- notes + 1
+                    lnotes <- lnotes + 1
+        notes, lnotes
 
     let private find_bpm_durations (points: TimeArray<BPM>) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 

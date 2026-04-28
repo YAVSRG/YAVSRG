@@ -73,8 +73,8 @@ module Imports =
                         match Chart.check import.Chart with
                         | Ok chart -> Ok { import with Chart = chart }
                         | Error reason ->
-                            Logging.Error "Conversion produced corrupt chart (%s): %s" path reason
-                            Error (path, sprintf "Corrupt (%s)" reason)
+                            Logging.Error "Conversion produced corrupt chart (%s): %s" import.LoadedFromPath reason
+                            Error (import.LoadedFromPath, sprintf "Corrupt (%s)" reason)
                     | Error skipped_conversion -> Error skipped_conversion
                 )
                 |> List.ofSeq

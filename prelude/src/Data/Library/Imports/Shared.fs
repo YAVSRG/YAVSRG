@@ -59,7 +59,6 @@ module Shared =
     let filter_rates (results: Result<ImportChart, string * string> list) : Result<ImportChart, string * string> list =
         
         let find_matching_1x (import: ImportChart, rate: Rate) =
-            Logging.Debug "%A" import.Header
             results
             |> List.tryPick (
                 function
@@ -68,16 +67,14 @@ module Shared =
                     let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
                     let relative_rate = original_duration / incoming_duration * 1.0f<rate>
                     if
-                        original.Notes.Length = import.Chart.Notes.Length &&
-                        abs (rate - relative_rate) < 0.025f<rate>
+                        abs (rate - relative_rate) < 0.025f<rate> &&
+                        Chart.notecount original = Chart.notecount import.Chart
                     then
                         match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
                         | Some (ChartOrigin.Osu osu) ->
                             Some (header, ChartOrigin.Osu { osu with SourceRate = rate; FirstNoteOffset = import.Chart.FirstNote })
                         | _ -> None
-                    else
-                        Logging.Debug "%.2f vs %.2f | %i vs %i" relative_rate rate original.Notes.Length import.Chart.Notes.Length
-                        None
+                    else None
                 | _ -> None
             )
         
@@ -90,7 +87,6 @@ module Shared =
                     match find_matching_1x(import, rate) with
                     | Some (h, alt_rate_origin) ->
                         h.Origins <- h.Origins.Add alt_rate_origin
-                        Logging.Debug "Skipping %.2fx rate of another map" rate
                         Error (import.LoadedFromPath, sprintf "Skipping %.2fx rate of another map" rate)
                     | None ->
                         Logging.Debug "%s: Looks like %.2fx rate, but didn't find a 1.0x version in the same folder, so keeping it" import.LoadedFromPath rate

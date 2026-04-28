@@ -62,17 +62,7 @@ module SelectedChart =
         | None -> sprintf "%s 120" Icons.MUSIC
 
     let private format_notecounts (chart: ModdedChart) =
-        let mutable notes = 0
-        let mutable lnotes = 0
-
-        for { Data = nr } in chart.Notes do
-            for n in nr do
-                if n = NoteType.NORMAL then
-                    notes <- notes + 1
-                elif n = NoteType.HOLDHEAD then
-                    notes <- notes + 1
-                    lnotes <- lnotes + 1
-
+        let notes, lnotes = Chart.notecount chart
         let hold_count =
             let pc = (100.0f * float32 lnotes / float32 notes)
 

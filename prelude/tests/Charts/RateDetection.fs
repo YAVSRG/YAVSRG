@@ -2,13 +2,11 @@ namespace Prelude.Tests.Charts
 
 open System.IO.Compression
 open NUnit.Framework
-open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Data.Library.Imports
 open Prelude.Formats
 open Prelude.Formats.Osu
-
 
 module RateDetection =
 
