@@ -350,7 +350,7 @@ module Options =
 
     let private CONFIG_PATH = Path.GetFullPath "config.json"
 
-    let EMBEDDED_LOCALES = Set.ofList ["en_GB"]
+    let EMBEDDED_LOCALES : Map<string, string> = Map.ofList ["en_GB", "English"]
     let mutable available_locales = Set.empty<string>
 
     let load_window_config (instance: int) () : WindowOptions =
@@ -382,15 +382,17 @@ module Options =
         let detect_locales() =
             let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
 
-            let locales = Directory.GetFiles(locale_dir_path) 
-                            |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x) )
+            let locales =
+                Directory.GetFiles(locale_dir_path)
+                |> Seq.where(fun x -> Path.GetExtension(x).ToLower() = ".txt") 
+                |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x))
 
             available_locales <- Set.union EMBEDDED_LOCALES (Set.ofSeq(locales))
             Logging.Debug "Available Locales: %A" available_locales
         
         let get_locale_file(id: string) =
             let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", id + ".txt")
-            if EMBEDDED_LOCALES.Contains id then
+            if EMBEDDED_LOCALES.ContainsKey id then
                 Interlude.Utils.get_embedded_locale id |> Some
             elif File.Exists(locale_path) then
                 File.OpenRead(locale_path) :> Stream |> Some

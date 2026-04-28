@@ -85,10 +85,10 @@ type SystemPage() =
                 Options.available_locales
                 |> Seq.map(fun x -> 
                     let display_option = 
-                        if Options.EMBEDDED_LOCALES.Contains(x) then
-                            Localisation.get_locale_display_name(x)
+                        if Options.EMBEDDED_LOCALES.ContainsKey(x) then
+                            $"{Options.EMBEDDED_LOCALES.[x]} ({x})"
                         else
-                            $"{Icons.FOLDER} {Localisation.get_locale_display_name(x)}"
+                            $"{Icons.FOLDER} ({x})"
                     x, display_option)
                 |> Seq.toArray,
                 options.Language |> Setting.trigger (fun _ -> language_restart <- true)
@@ -113,7 +113,7 @@ type SystemPage() =
                 SystemPage.VisualOffset().Pos(14),
 
                 SystemPage.Language().Pos(18),
-                Text(%"system.language.restart_warning")
+                Text(%"generic.restart_warning")
                     .Color(Colors.text_red)
                     .Position(page_position(20, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
                     .Align(Alignment.LEFT)
