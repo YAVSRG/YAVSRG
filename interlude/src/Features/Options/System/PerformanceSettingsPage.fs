@@ -87,7 +87,7 @@ type PerformanceSettingsPage() =
                 )
                     .Help(Help.Info("system.msaa"))
                     .Pos(6),
-                Text(%"system.msaa.restart_warning")
+                Text(%"generic.restart_warning")
                     .Color(Colors.text_red)
                     .Position(page_position(8, 1, PageWidth.Full).ShrinkL(PAGE_LABEL_WIDTH))
                     .Align(Alignment.LEFT)

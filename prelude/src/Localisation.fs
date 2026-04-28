@@ -20,7 +20,7 @@ module Localisation =
             Inherit: string option
             Entries: IReadOnlyDictionary<string, string>
         }
-        
+
     let private read_locale_file (name: string, stream: Stream) : LocaleFile =
         use sr = new StreamReader(stream)
         let mutable inherits_from = None
@@ -78,7 +78,6 @@ module Localisation =
 
         Logging.Debug "Loaded locale '%s': %i strings" ctx.Name locale.Entries.Count
         ctx.Loaded
-        
     let try_load_file(name: string, path: string) : Result<LocaleFile, string> =
         try
             use stream = File.OpenRead(path)
