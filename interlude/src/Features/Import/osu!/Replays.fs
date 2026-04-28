@@ -30,7 +30,7 @@ type ImportReplayPage(replay: OsuScoreDatabase_Score, chart: Chart, show_replay:
         detect_rate_mod replay.FilePath.Value
         |> Option.defaultValue 1.0f<rate>
 
-    let rate = Setting.bounded (0.5f<rate>, 3.0f<rate>) detected_rate |> Setting.roundf_uom 2
+    let rate = Setting.rate detected_rate
 
     let import () : unit =
         match OsuReplay.to_score replay chart chart.FirstNote rate.Value with

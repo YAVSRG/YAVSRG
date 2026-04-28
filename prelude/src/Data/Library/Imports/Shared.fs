@@ -1,9 +1,11 @@
 ﻿namespace Prelude.Data.Library.Imports
 
 open System
+open System.Globalization
 open System.IO
 open System.Text.RegularExpressions
 open Percyqaz.Common
+open Prelude
 open Prelude.Charts
 open Prelude.Formats
 open Prelude.Formats.Osu
@@ -38,7 +40,7 @@ module Shared =
 
     let private RATE_REGEX =
         Regex(
-            """((^|\s)([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([02][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
+            """((^|\s)([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)($|\s))|(x([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?))|(([023][,.][0-9][0-9]?|1[,.]0[1-9]|1[,.][1-9][0-9]?)[x\]])"""
         )
 
     let detect_rate_mod (difficulty_name: string) : float32<rate> option =
@@ -47,9 +49,10 @@ module Shared =
         if m.Success then
             let r = m.Value.Trim([| ' '; 'x'; ']' |]).Replace(',', '.')
 
-            match Single.TryParse r with
-            | true, r -> Some (r * 1.0f<rate>)
-            | false, _ -> None
+            match Single.TryParse(r, CultureInfo.InvariantCulture) with
+            | true, r when r >= float32 LOWEST_SUPPORTED_RATE && r <= float32 HIGHEST_SUPPORTED_RATE ->
+                Some (r * 1.0f<rate>)
+            | _ -> None
         else
             None
 

@@ -8,7 +8,7 @@
 	  <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
-  <ItemGroup><Compile Include="Imports/RateDetection.fs" />
+  <ItemGroup>
     <None Include="Data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -36,6 +36,7 @@
     <Compile Include="Charts\Charts.fs" />
     <Compile Include="Charts\Origins.fs" />
     <Compile Include="Charts\Conversions.fs" />
+    <Compile Include="Charts\RateDetection.fs" />
     <Compile Include="Calculator\HoldCoverage.fs" />
     <Compile Include="Calculator\Color.fs" />
     <Compile Include="Mods\Implementation.fs" />
