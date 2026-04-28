@@ -15,7 +15,7 @@ module Assets =
 
         ZipFile.CreateFromDirectory(source, target_zip)
 
-    let private cleanup_noteskin_json (id) =
+    let private cleanup_noteskin_json (id: string) =
         match Path.Combine(Utils.ASSETS_PATH, id) |> Noteskin.FromPath with
         | Ok ns ->
             ns.Config <- ns.Config
