@@ -78,11 +78,6 @@ module Localisation =
 
         Logging.Debug "Loaded locale '%s': %i strings" ctx.Name locale.Entries.Count
         ctx.Loaded
-
-    let get_locale_display_name(id: string) =
-        let normalized_id = id.Replace("_", "-")
-        $"{System.Globalization.CultureInfo(normalized_id).DisplayName} ({id})"
-
     let try_load_file(name: string, path: string) : Result<LocaleFile, string> =
         try
             use stream = File.OpenRead(path)
