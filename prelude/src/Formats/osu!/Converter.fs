@@ -284,5 +284,5 @@ module Osu_To_Interlude =
 
     let convert (b: Beatmap) (action: ConversionAction) : Result<ImportChart, SkippedConversion> =
         match convert_internal b action with
-        | Ok x -> Ok { x with Chart = { x.Chart with SV = cleaned_sv x.Chart.SV } }
+        | Ok x -> Ok { x with ImportChart.Chart.SV = cleaned_sv x.Chart.SV }
         | error -> error

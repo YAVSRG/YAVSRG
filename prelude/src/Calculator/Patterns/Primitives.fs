@@ -116,18 +116,8 @@ module Primitives =
 
 module Metrics =
 
-    let ln_percent (chart: Chart) : float32 =
-        let mutable notes = 0
-        let mutable lnotes = 0
-
-        for { Data = nr } in chart.Notes do
-            for n in nr do
-                if n = NoteType.NORMAL then
-                    notes <- notes + 1
-                elif n = NoteType.HOLDHEAD then
-                    notes <- notes + 1
-                    lnotes <- lnotes + 1
-
+    let rec ln_percent (chart: Chart) : float32 =
+        let notes, lnotes = Chart.notecount chart
         float32 lnotes / float32 notes
 
     let sv_time (chart: Chart) : Time =

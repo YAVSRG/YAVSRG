@@ -94,6 +94,7 @@ type BPM =
 
 type SV = float32
 
+[<StructuredFormatDisplay("<A {Keys}K chart>")>]
 type Chart =
     {
         Keys: int
@@ -274,12 +275,25 @@ module Chart =
 
         printfn "%f : %f" (left.LastNote - left.FirstNote) (right.LastNote - right.FirstNote)
 
-    let scale (scale: Rate) (chart: Chart) : Chart =
+    let scale (scale: float32</rate>) (chart: Chart) : Chart =
         { chart with
             Notes = TimeArray.scale scale chart.Notes
             BPM = TimeArray.scale scale chart.BPM
             SV = TimeArray.scale scale chart.SV
         }
+        
+    let inline notecount<^T when ^T: (member Notes : TimeArray<NoteRow>)> (chart: ^T) : int * int =
+        let mutable notes = 0
+        let mutable lnotes = 0
+
+        for { Data = nr } in chart.Notes do
+            for n in nr do
+                if n = NoteType.NORMAL then
+                    notes <- notes + 1
+                elif n = NoteType.HOLDHEAD then
+                    notes <- notes + 1
+                    lnotes <- lnotes + 1
+        notes, lnotes
 
     let private find_bpm_durations (points: TimeArray<BPM>) (end_time: Time) : Dictionary<float32<ms / beat>, Time> =
 

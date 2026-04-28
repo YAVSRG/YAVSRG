@@ -56,10 +56,12 @@ module Types =
     type GameplayTime = float32<ms / rate>
 
     type Rate = float32<rate>
+    let [<Literal>] LOWEST_SUPPORTED_RATE = 0.5f<rate>
+    let [<Literal>] HIGHEST_SUPPORTED_RATE = 3.0f<rate>
 
     module Setting =
         open Percyqaz.Common.Setting
-        let rate x = x |> bounded (0.5f<rate>, 3.0f<rate>) |> roundf_uom 2
+        let rate x = x |> bounded (LOWEST_SUPPORTED_RATE, HIGHEST_SUPPORTED_RATE) |> roundf_uom 2
 
     [<Struct>]
     type TimeItem<'T> = { Time: Time; Data: 'T }
