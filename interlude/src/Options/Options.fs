@@ -381,14 +381,16 @@ module Options =
 
         let detect_locales() =
             let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
-
+        let detect_locales() =
+            let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
+            
             let locales =
                 Directory.GetFiles(locale_dir_path)
                 |> Seq.where(fun x -> Path.GetExtension(x).ToLower() = ".txt") 
                 |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x))
-
-            available_locales <- Set.union EMBEDDED_LOCALES (Set.ofSeq(locales))
-            Logging.Debug "Available Locales: %A" available_locales
+                
+            available_locales <- Set.union (Set.ofSeq EMBEDDED_LOCALES.Keys) (Set.ofSeq locales)
+            Logging.Debug "%i available locales" available_locales.Count
         
         let get_locale_file(id: string) =
             let locale_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale", id + ".txt")
