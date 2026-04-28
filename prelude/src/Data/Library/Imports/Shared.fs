@@ -57,36 +57,40 @@ module Shared =
             None
 
     let filter_rates (path: string) (results: Result<ImportChart, string * string> list) : Result<ImportChart, string * string> list =
+        
+        let find_matching_1x (import: ImportChart, rate: Rate) =
+            results
+            |> List.tryPick (
+                function
+                | Ok { Chart = original; Header = header } ->
+                    let original_duration = original.LastNote - original.FirstNote
+                    let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
+                    let relative_rate = original_duration / incoming_duration * 1.0f<rate>
+                    if
+                        original.Notes.Length = import.Chart.Notes.Length &&
+                        abs (rate - relative_rate) < 0.025f<rate>
+                    then
+                        match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
+                        | Some (ChartOrigin.Osu osu) ->
+                            Some (header, ChartOrigin.Osu { osu with SourceRate = rate; FirstNoteOffset = import.Chart.FirstNote })
+                        | _ -> None
+                    else None
+                | _ -> None
+            )
+        
         results
         |> List.map (
             function
             | Ok import ->
                 match detect_rate_mod import.Header.DiffName with
                 | Some rate ->
-                    let original =
-                        results
-                        |> List.tryPick (
-                            function
-                            | Ok { Chart = original; Header = header } ->
-                                let original_duration = original.LastNote - original.FirstNote
-                                let incoming_duration = import.Chart.LastNote - import.Chart.FirstNote
-                                let relative_rate = original_duration / incoming_duration * 1.0f<rate>
-                                if
-                                    original.Notes.Length = import.Chart.Notes.Length &&
-                                    abs (rate - relative_rate) < 0.025f<rate>
-                                then
-                                    match import.Header.Origins |> Set.toSeq |> Seq.tryHead with
-                                    | Some (ChartOrigin.Osu osu) ->
-                                        Some (header, ChartOrigin.Osu { osu with SourceRate = rate; FirstNoteOffset = import.Chart.FirstNote })
-                                    | _ -> None
-                                else None
-                            | _ -> None
-                        )
-                    match original with
+                    match find_matching_1x(import, rate) with
                     | Some (h, alt_rate_origin) ->
                         h.Origins <- h.Origins.Add alt_rate_origin
                         Error (path, sprintf "Skipping %.2fx rate of another map" rate)
-                    | None -> Ok import
+                    | None ->
+                        Logging.Debug "%s: Looks like %.2fx rate, but didn't find a 1.0x version in the same folder, so keeping it" path rate
+                        Ok import
                 | None -> Ok import
             | Error skipped_conversion -> Error skipped_conversion
         )
