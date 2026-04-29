@@ -45,10 +45,12 @@ module internal NotesConverter =
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose "holdbody" (column, row)))
 
                 if image.Height > 2000 then
-                    Logging.Debug("Detected 'Percy LN' in skin, guessing what the tail texture should be..")
+                    Logging.Debug("Detected 'Percy LN' in skin (>2000 pixels high), splitting into a tail and body")
+                    // Strategy: Scan from the top of the image down the middle, looking for the first pixel with ~2% opacity or higher
                     let mutable i = 0
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
+                    // Take a 128-pixel-tall slice down from that starting point, use that as the tail
                     let percy_tail_texture = new Bitmap(width, 128)
                     percy_tail_texture.Mutate(fun img ->
                         img
@@ -56,14 +58,13 @@ module internal NotesConverter =
                             .Flip(FlipMode.Vertical)
                             .Resize(width, width)
                         |> ignore)
-
                     percy_tail_texture.Save(Path.Combine(target, TextureFileName.to_loose "holdtail" (column, row)))
-
                     percy_ln_fix <- true
 
         percy_ln_fix
 
     let private arrow_fix_4k (images: Bitmap list list) : Bitmap list list =
+        // Rotate notes to all point down, assuming they are in the LDUR layout of DDR
         match images with
         | left :: down :: up :: [ right ] ->
             [
@@ -123,7 +124,7 @@ module internal NotesConverter =
                 |> List.map (List.map _.As2x)
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> convert_element_textures ctx.Target "holdtail"
-            with err ->
+            with err -> // todo: if there is no texture, return an error instead of exception-oriented-programming
                 Logging.Warn "Error in holdtail textures - Using hold head textures instead:\n%O" err
 
                 core_textures
@@ -143,7 +144,6 @@ module internal NotesConverter =
         convert_hold_bodies(ctx, core_textures)
         convert_hold_heads(ctx, core_textures, note_height_scale)
         convert_hold_tails(ctx, core_textures, note_height_scale)
-        
         
     let get_note_height_scale(ctx: NoteskinConverterContext) : float32 =
         match ctx.KeymodeSettings.WidthForNoteHeightScale with

@@ -21,7 +21,7 @@ module NoteskinConverter =
         Logging.Debug "%i column variations to convert (Distinct by note/head/body/tail textures)" core_textures.Length
 
         NotesConverter.convert_elements(ctx, core_textures, note_height_scale)
-        ReceptorsConverter.convert_receptors(ctx, core_textures)
+        ReceptorsConverter.convert_receptors(ctx, core_textures, note_height_scale)
         JudgementLineConverter.convert_stage_hint(ctx)
         StageConverter.convert_stage_textures(ctx)
         ColumnLightingConverter.convert_column_lighting(ctx)

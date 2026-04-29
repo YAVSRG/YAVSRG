@@ -16,8 +16,8 @@ module internal JudgementLineConverter =
                 |> Texture.load_single_texture
                 |> _.As2x
             let intended_height_interlude_px = float32 stage_hint.Height
-            ctx.JudgementLineScale <- intended_height_interlude_px / (float32 ctx.KeymodeSettings.ColumnWidth.[0] * 1080f / 480f)
             stage_hint.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "judgementline" (0, 0)))
+            ctx.JudgementLineScale <- intended_height_interlude_px / (float32 ctx.KeymodeSettings.ColumnWidth.[0] * 1080f / 480f)
             ctx.JudgementLine <- true
         with err ->
             Logging.Warn "Error converting stage hint to judgement line: %O" err
