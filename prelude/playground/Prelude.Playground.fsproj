@@ -21,6 +21,7 @@
     <Compile Include="Tools\OsuReplayReader.fs" />
     <Compile Include="Tools\OsuReplayGenerator.fs" />
     <Compile Include="Tools\CompareRulesets.fs" />
+    <Compile Include="Tools\OsuSkins.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
