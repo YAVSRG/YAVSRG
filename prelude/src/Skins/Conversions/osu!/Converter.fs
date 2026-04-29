@@ -11,6 +11,7 @@ open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
 
 module Image =
+    // All image operations return a new Bitmap for simplicity
 
     let pad (width: int, height: int) (image: Bitmap) : Bitmap =
         assert (image.Width <= width)
@@ -21,28 +22,30 @@ module Image =
 
             new_image
         else
-            image
+            image.Clone()
 
     let pad_to_square (target_width: int) (image: Bitmap) : Bitmap = pad (target_width, target_width) image
 
     let upscale_to_square (target_width: int) (image: Bitmap) : Bitmap =
         assert(image.Width <= target_width)
         assert(image.Height <= target_width)
-        if image.Height > image.Width then
-            image.Mutate(fun img -> img.Resize(0, target_width) |> ignore)
+        let new_image = image.Clone()
+        if new_image.Height > new_image.Width then
+            new_image.Mutate(fun img -> img.Resize(0, target_width) |> ignore)
         else
-            image.Mutate(fun img -> img.Resize(target_width, 0) |> ignore)
-        pad_to_square target_width image
+            new_image.Mutate(fun img -> img.Resize(target_width, 0) |> ignore)
+        pad_to_square target_width new_image
 
     let stretch_to_square (target_width: int) (image: Bitmap) : Bitmap =
         assert (image.Width = target_width)
-        image.Mutate(fun img -> img.Resize(target_width, target_width) |> ignore)
-        image
+        let new_image = image.Clone()
+        new_image.Mutate(fun img -> img.Resize(target_width, target_width) |> ignore)
+        new_image
 
     let scale_y (scale: float32) (image: Bitmap) : Bitmap =
-        let image = image.Clone()
-        image.Mutate(fun img -> img.Resize(image.Width, float32 image.Height * scale |> round |> int) |> ignore)
-        image
+        let new_image = image.Clone()
+        new_image.Mutate(fun img -> img.Resize(new_image.Width, float32 new_image.Height * scale |> round |> int) |> ignore)
+        new_image
 
     let rotate (rotate_mode: RotateMode) (image: Bitmap) : Bitmap =
         let image = pad_to_square image.Width image
@@ -63,11 +66,11 @@ module Image =
             PixelFormats.Rgba32(this.R, this.G, this.B, new_alpha)
 
     let remove_black_bg (image: Bitmap) : Bitmap =
-        let newImage = new Bitmap(image.Width, image.Height)
+        let new_image = new Bitmap(image.Width, image.Height)
         for x = 0 to image.Width - 1 do
             for y = 0 to image.Height - 1 do
-                newImage.[x, y] <- image.[x, y].BlackToTransparent
-        newImage
+                new_image.[x, y] <- image.[x, y].BlackToTransparent
+        new_image
 
 module OsuSkinConverter =
 
@@ -76,9 +79,9 @@ module OsuSkinConverter =
 
     let private scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
         if is_2x_res then
-            image.Mutate(fun img -> img.Resize(target_width, image.Height) |> ignore)
+            image.Clone().Mutate(fun img -> img.Resize(target_width, image.Height) |> ignore)
         else
-            image.Mutate(fun img -> img.Resize(target_width, image.Height * 2) |> ignore)
+            image.Clone().Mutate(fun img -> img.Resize(target_width, image.Height * 2) |> ignore)
         let new_image = new Bitmap(target_width, height)
         new_image.Mutate(fun img -> img.DrawImage(image, Point(0, 0), 1.0f) |> ignore)
         new_image
@@ -97,7 +100,6 @@ module OsuSkinConverter =
 
                 let square_image = Image.upscale_to_square size image
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose element_name (column, row)))
-                square_image.Dispose()
 
     let private convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
         let animation_frames = List.map List.length images |> List.max
@@ -117,8 +119,6 @@ module OsuSkinConverter =
                         Image.pad_to_square width image
 
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose "holdbody" (column, row)))
-
-                square_image.Dispose()
 
                 if image.Height > 2000 then
                     Logging.Debug("Detected 'Percy LN' in skin, guessing what the tail texture should be..")
@@ -184,7 +184,7 @@ module OsuSkinConverter =
     let private expect_texture (t: Result<'T, string list>) : Result<'T, string list> =
         match t with
         | Ok f -> Ok f
-        | Error expected_files -> failwithf "Couldn't find any matching image %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat ", ")
+        | Error expected_files -> failwithf "Couldn't find any skin files matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
 
     let private dot_to_colon (dot_texture: Bitmap) : Bitmap =
         let new_bmp = dot_texture.Clone()
@@ -333,7 +333,6 @@ module OsuSkinConverter =
 
                     let padded = Image.pad (max_width, max_height) image
                     padded.Save(Path.Combine(target, TextureFileName.to_loose "judgements" (column, row)))
-                    padded.Dispose()
             judgement_textures <- true
         with err ->
             Logging.Warn "Error converting judgement textures: %O" err
@@ -359,7 +358,6 @@ module OsuSkinConverter =
             for i, image in List.indexed images do
                 let padded = Image.pad (max_width, max_height) image
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "judgement-counter-judgements" (0, i)))
-                padded.Dispose()
             judgement_counter_textures <- true
         with err ->
             Logging.Warn "Error converting judgement counter judgement textures: %O" err
@@ -658,14 +656,14 @@ module OsuSkinConverter =
         with err ->
             Logging.Warn "Error converting keys to receptors: %O" err
             try
-                use receptor_base =
+                let receptor_base =
                     core_textures.[if core_textures.Length > 1 then 1 else 0].Note
                     |> Texture.load_animated_texture
                     |> List.head
                     |> _.Image
 
-                use not_pressed = Image.grayscale 0.5f receptor_base |> Image.pad_to_square receptor_base.Width
-                use pressed = Image.grayscale 1.0f receptor_base |> Image.pad_to_square receptor_base.Width
+                let not_pressed = Image.grayscale 0.5f receptor_base |> Image.pad_to_square receptor_base.Width
+                let pressed = Image.grayscale 1.0f receptor_base |> Image.pad_to_square receptor_base.Width
 
                 not_pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 0)))
                 pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 1)))
@@ -757,7 +755,6 @@ module OsuSkinConverter =
             for i, image in List.indexed images do
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "noteexplosion" (i, 0)))
-                padded.Dispose()
 
             note_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->
@@ -774,7 +771,6 @@ module OsuSkinConverter =
             for i, image in List.indexed images do
                 let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "holdexplosion" (i, 0)))
-                padded.Dispose()
 
             hold_explosions_scale <- Some (float32 max_dim / 49.0f)
         with err ->

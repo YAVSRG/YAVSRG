@@ -7,7 +7,7 @@ open Prelude.Skins.Conversions.Osu
 
 let osu_skin_path = Path.Combine(OSU_SONG_FOLDER, "..", "Skins")
 
-let main() = 
+let main() =
     for skin in Directory.EnumerateDirectories(osu_skin_path) do
         
         let target_path = Path.Combine(".", "skin-converts", Path.GetFileName(skin))

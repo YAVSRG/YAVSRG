@@ -112,7 +112,7 @@ module Texture =
                 Logging.Debug "Couldn't load file '%s' (File not openable or isn't a valid image): %s" t.Path err.Message
                 fallback()
         | Error expected_files ->
-            Logging.Debug "Couldn't find any skin file matching: %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat ", ")
+            Logging.Debug "Couldn't find any skin file matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
             fallback()
 
     let load_animated_texture (textures: Result<Texture list, string list>) : LoadedTexture list =
@@ -148,7 +148,7 @@ module Texture =
             |> List.map load_texture
             |> fallback
         | Error expected_files ->
-            Logging.Debug "Couldn't find any skin files matching: %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat ", ")
+            Logging.Debug "Couldn't find any skin files matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
             Logging.Debug "As a fallback, you're getting a transparent texture"
             [ transparent_fallback() ]
 
@@ -186,7 +186,7 @@ module Texture =
                 |> List.map load_texture
                 |> fallback
             | Error expected_files ->
-                Logging.Debug "Couldn't find any skin files matching: %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat ", ")
+                Logging.Debug "Couldn't find any skin files matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
                 None
 
         let fallback (ts: LoadedTexture list option list) : LoadedTexture list list =
