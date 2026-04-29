@@ -8,7 +8,7 @@ open Prelude
 open Prelude.Skins
 open Prelude.Skins.Conversions.Osu
 
-module Receptors =
+module internal ReceptorsConverter =
 
     let private scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
         let image = image.Clone()
@@ -38,14 +38,7 @@ module Receptors =
             )
         else None
 
-    let internal convert_receptors (ctx: NoteskinConverterContext, core_textures: ColumnTextures list) : unit =
-
-        let receptor_colors =
-            [|
-                [|0; 2; 0|]; [|0; 1; 1; 0|]; [|0; 1; 2; 1; 0|];
-                [|0; 1; 0; 0; 1; 0|]; [|0; 1; 0; 2; 0; 1; 0|]; [|0; 1; 1; 0; 0; 1; 1; 0|];
-                [|0; 1; 0; 1; 2; 1; 0; 1; 0|]; [|0; 1; 2; 1; 0; 0; 1; 2; 1; 0|]
-            |]
+    let convert_receptors (ctx: NoteskinConverterContext, core_textures: ColumnTextures list) : unit =
 
         // Convert keys to receptors
         try
@@ -66,7 +59,7 @@ module Receptors =
                     if not (distinct_detection.Contains f) then
                         distinct_detection.Add f
                         distinct.Add((np, p))
-                    receptor_colors.[ctx.Keymode - 3].[i] <- distinct_detection.IndexOf f
+                    ctx.ReceptorColors.[ctx.Keymode - 3].[i] <- distinct_detection.IndexOf f
                 )
 
                 distinct
@@ -109,6 +102,7 @@ module Receptors =
                     core_textures.[if core_textures.Length > 1 then 1 else 0].Note
                     |> Texture.load_animated_texture
                     |> List.head
+                    // todo: height scaling of notes here
                     |> _.Image
 
                 let not_pressed = ImageOperations.grayscale 0.5f receptor_base |> ImageOperations.pad_to_square receptor_base.Width

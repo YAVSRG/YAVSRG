@@ -27,6 +27,7 @@ type NoteskinConverterContext =
         Source: string
         Target: string
         
+        IsArrows: bool
         mutable FlipHoldTail: bool
         mutable UseHoldTail: bool
         mutable SkipTailConversion: bool
@@ -50,7 +51,7 @@ type NoteskinConverterContext =
         ColumnLightColors: int array array
     }
     
-    static member Create(source: string, target: string, ini: SkinIni, keymode: int) : NoteskinConverterContext =
+    static member Create(source: string, target: string, ini: SkinIni, keymode: int, is_arrows: bool) : NoteskinConverterContext =
         let version =
             match Decimal.TryParse(ini.General.Version, Globalization.CultureInfo.InvariantCulture) with
             | true, v -> v
@@ -73,6 +74,7 @@ type NoteskinConverterContext =
             Source = source
             Target = target
             
+            IsArrows = is_arrows
             FlipHoldTail = keymode_settings.NoteFlipWhenUpsideDownΔT.[0]
             UseHoldTail = true
             SkipTailConversion = false
