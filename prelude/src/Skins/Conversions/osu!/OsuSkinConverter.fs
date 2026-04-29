@@ -3,6 +3,7 @@
 open System.IO
 open Prelude
 open Prelude.Skins
+open Prelude.Skins.Conversions.Osu.Noteskins
 
 module OsuSkinConverter =
 
