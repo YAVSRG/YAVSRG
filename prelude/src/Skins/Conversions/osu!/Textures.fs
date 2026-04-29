@@ -206,3 +206,10 @@ module Texture =
             )
 
         textures |> List.map load_textures |> fallback
+        
+    let expect (t: Result<'T, string list>) : Result<'T, string list> =
+        match t with
+        | Ok f -> Ok f
+        | Error expected_files -> failwithf "Couldn't find any skin files matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
+
+    

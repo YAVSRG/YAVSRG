@@ -8,74 +8,8 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Skins
 open Prelude.Skins.Noteskins
-open Prelude.Skins.HudLayouts
 
-module Image =
-    // All image operations return a new Bitmap for simplicity
-
-    let pad (width: int, height: int) (image: Bitmap) : Bitmap =
-        assert (image.Width <= width)
-
-        if image.Width <> width || image.Height <> height then
-            let new_image = new Bitmap(width, height)
-            new_image.Mutate(fun img -> img.DrawImage(image, Point((-image.Width + width) / 2, (-image.Height + height) / 2), 1.0f) |> ignore)
-
-            new_image
-        else
-            image.Clone()
-
-    let pad_to_square (target_width: int) (image: Bitmap) : Bitmap = pad (target_width, target_width) image
-
-    let upscale_to_square (target_width: int) (image: Bitmap) : Bitmap =
-        assert(image.Width <= target_width)
-        assert(image.Height <= target_width)
-        let new_image = image.Clone()
-        if new_image.Height > new_image.Width then
-            new_image.Mutate(fun img -> img.Resize(0, target_width) |> ignore)
-        else
-            new_image.Mutate(fun img -> img.Resize(target_width, 0) |> ignore)
-        pad_to_square target_width new_image
-
-    let stretch_to_square (target_width: int) (image: Bitmap) : Bitmap =
-        assert (image.Width = target_width)
-        let new_image = image.Clone()
-        new_image.Mutate(fun img -> img.Resize(target_width, target_width) |> ignore)
-        new_image
-
-    let scale_y (scale: float32) (image: Bitmap) : Bitmap =
-        let new_image = image.Clone()
-        new_image.Mutate(fun img -> img.Resize(new_image.Width, float32 new_image.Height * scale |> round |> int) |> ignore)
-        new_image
-
-    let rotate (rotate_mode: RotateMode) (image: Bitmap) : Bitmap =
-        let image = pad_to_square image.Width image
-        image.Mutate(fun img -> img.Rotate(rotate_mode) |> ignore)
-        image
-
-    let grayscale (brightness: float32) (image: Bitmap) : Bitmap =
-        let new_image = image.Clone()
-        new_image.Mutate(fun img -> img.Grayscale().Brightness(brightness) |> ignore)
-        new_image
-
-    type PixelFormats.Rgba32 with
-        member this.BlackToTransparent =
-            let new_alpha =
-                min
-                    this.A
-                    (max this.R this.G |> max this.B)
-            PixelFormats.Rgba32(this.R, this.G, this.B, new_alpha)
-
-    let remove_black_bg (image: Bitmap) : Bitmap =
-        let new_image = new Bitmap(image.Width, image.Height)
-        for x = 0 to image.Width - 1 do
-            for y = 0 to image.Height - 1 do
-                new_image.[x, y] <- image.[x, y].BlackToTransparent
-        new_image
-
-module OsuSkinConverter =
-
-    let check_before_convert (source: string) : Result<SkinIni, string> =
-        SkinIni.FromFile (Path.Combine(source, "skin.ini"))
+module NoteskinConverter =
 
     let private scale_receptor (target_width: int) (height: int) (is_2x_res: bool) (image: Bitmap) : Bitmap =
         if is_2x_res then
@@ -98,7 +32,7 @@ module OsuSkinConverter =
             for column = 0 to (animation_frames - 1) do
                 let image = let r = images.[row] in r[column % r.Length]
 
-                let square_image = Image.upscale_to_square size image
+                let square_image = ImageOperations.upscale_to_square size image
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose element_name (column, row)))
 
     let private convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
@@ -114,9 +48,9 @@ module OsuSkinConverter =
 
                 let square_image =
                     if image.Width > image.Height then
-                        Image.stretch_to_square width image
+                        ImageOperations.stretch_to_square width image
                     else
-                        Image.pad_to_square width image
+                        ImageOperations.pad_to_square width image
 
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose "holdbody" (column, row)))
 
@@ -161,10 +95,10 @@ module OsuSkinConverter =
         match images with
         | left :: down :: up :: [ right ] ->
             [
-                left |> List.map (Image.rotate RotateMode.Rotate270)
+                left |> List.map (ImageOperations.rotate RotateMode.Rotate270)
                 down
-                up |> List.map (Image.rotate RotateMode.Rotate180)
-                right |> List.map (Image.rotate RotateMode.Rotate90)
+                up |> List.map (ImageOperations.rotate RotateMode.Rotate180)
+                right |> List.map (ImageOperations.rotate RotateMode.Rotate90)
             ]
         | not_4k -> not_4k
 
@@ -181,108 +115,7 @@ module OsuSkinConverter =
             Result.toOption this.Body,
             Result.toOption this.Tail
 
-    let private expect_texture (t: Result<'T, string list>) : Result<'T, string list> =
-        match t with
-        | Ok f -> Ok f
-        | Error expected_files -> failwithf "Couldn't find any skin files matching:\n %s" (expected_files |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
-
-    let private dot_to_colon (dot_texture: Bitmap) : Bitmap =
-        let new_bmp = dot_texture.Clone()
-        new_bmp.Mutate(fun img ->
-            img
-                .Flip(FlipMode.Vertical)
-                .DrawImage(dot_texture, 1.0f)
-            |> ignore)
-        new_bmp
-
-    let private convert_font (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<float32, exn> =
-        try
-            let mutable scale_2x = 1.0f
-            let images =
-                seq { 0 .. 9 }
-                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> expect_texture)
-                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
-                |> Seq.map (Texture.load_single_texture >> _.As2x)
-                |> Array.ofSeq
-
-            let max_width = images |> Seq.map _.Width |> Seq.max
-            let max_height = images |> Seq.map _.Height |> Seq.max
-
-            let optional_extras =
-                try
-                    let dot =
-                        Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source)
-                        |> expect_texture
-                        |> Texture.load_single_texture
-                        |> _.As2x
-                    let colon = dot_to_colon dot
-                    let percent =
-                        Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source)
-                        |> expect_texture
-                        |> Texture.load_single_texture
-                        |> _.As2x
-                    percent.Mutate(fun img -> img.Crop(min percent.Width max_width, percent.Height) |> ignore)
-                    [|dot; colon; percent|]
-                with _ -> [||]
-
-            for i, img in Array.append images optional_extras |> Array.indexed do
-                let padded = Image.pad (max_width, max_height) img
-                padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
-            Ok (-scale_2x * float32 osu_overlap / float32 max_width)
-        with err ->
-            Error err
-
-    type internal ConvertedFont =
-        {
-            Spacing: float32
-            DotExtraSpacing: float32
-            ColonExtraSpacing: float32
-            PercentExtraSpacing: float32
-        }
-
-    let private convert_font_with_extras (source: string, target: string, osu_skin_prefix: string, osu_overlap: int, element_name: string) : Result<ConvertedFont, exn> =
-        try
-            let mutable scale_2x = 1.0f
-            let dot =
-                Texture.find(sprintf "%s-dot" osu_skin_prefix, "score-dot", source)
-                |> expect_texture
-                |> Texture.load_single_texture
-                |> _.As2x
-            let colon = dot_to_colon dot
-            let percent =
-                Texture.find(sprintf "%s-percent" osu_skin_prefix, "score-percent", source)
-                |> expect_texture
-                |> Texture.load_single_texture
-                |> _.As2x
-
-            let images =
-                seq { 0 .. 9 }
-                |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> Texture.find(id, fallback, source) |> expect_texture)
-                |> Seq.map (function Ok t -> (if t.Is2x then scale_2x <- 2.0f); Ok t | otherwise -> otherwise)
-                |> Seq.map (Texture.load_single_texture >> _.As2x)
-                |> Array.ofSeq
-
-            let max_width = images |> Seq.map _.Width |> Seq.max
-            let max_height = images |> Seq.map _.Height |> Seq.max
-
-            percent.Mutate(fun img -> img.Crop(min percent.Width max_width, percent.Height) |> ignore)
-
-            for i, img in Array.append images [|dot; colon; percent|] |> Array.indexed do
-                let padded = Image.pad (max_width, max_height) img
-                padded.Save(Path.Combine(target, TextureFileName.to_loose element_name (0, i)))
-
-            Ok {
-                Spacing = -scale_2x * float32 osu_overlap / float32 max_width
-                DotExtraSpacing = -0.5f * float32 (max_width - dot.Width) / float32 max_width
-                ColonExtraSpacing = -0.5f * float32 (max_width - colon.Width) / float32 max_width
-                PercentExtraSpacing = -0.5f * float32 (max_width - percent.Width) / float32 max_width
-            }
-        with err ->
-            Error err
-
-    let private convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
+    let convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
@@ -294,179 +127,7 @@ module OsuSkinConverter =
             | true, v -> v
             | false, _ -> 3.0m
 
-        let default_settings = Mania.Default keymode version
-
-        let keymode_settings =
-            ini.Mania
-            |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue default_settings
-
-        let mutable combo_font_spacing : float32 option = None
-        let mutable accuracy_font_info : ConvertedFont option = None
-        let mutable progress_meter_font_info : ConvertedFont option = None
-        let mutable judgement_counter_font_info : ConvertedFont option = None
-
-        let mutable judgement_textures = false
-        let mutable judgement_counter_textures = false
-
-        // Convert judgement textures
-        try
-            let images =
-                [
-                    keymode_settings.Hit300g, default_settings.Hit300g
-                    keymode_settings.Hit300, default_settings.Hit300
-                    keymode_settings.Hit200, default_settings.Hit200
-                    keymode_settings.Hit100, default_settings.Hit100
-                    keymode_settings.Hit50, default_settings.Hit50
-                    keymode_settings.Hit0, default_settings.Hit0
-                ]
-                |> List.map (fun (x, fallback) -> Texture.find_animated(x, fallback, source))
-                |> List.map Texture.load_animated_texture
-                |> List.map (List.map _.As2x)
-            let max_frames = images |> List.map (fun x -> x.Length) |> List.max
-            let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
-            let max_height = images |> List.map (List.map _.Height >> List.max) |> List.max
-
-            for row = 0 to images.Length - 1 do
-                for column = 0 to max_frames - 1 do
-                    let image = let r = images.[row] in r[column % r.Length]
-
-                    let padded = Image.pad (max_width, max_height) image
-                    padded.Save(Path.Combine(target, TextureFileName.to_loose "judgements" (column, row)))
-            judgement_textures <- true
-        with err ->
-            Logging.Warn "Error converting judgement textures: %O" err
-
-        // Convert judgement counter textures
-        try
-            let images =
-                [
-                    default_settings.Hit300g
-                    default_settings.Hit300
-                    default_settings.Hit200
-                    default_settings.Hit100
-                    default_settings.Hit50
-                    default_settings.Hit0
-                ]
-                |> List.map (fun x -> Texture.find_animated_fallback(x, source))
-                |> List.map (Result.map List.head)
-                |> List.map Texture.load_single_texture
-                |> List.map _.As2x
-            let max_width = images |> List.map _.Width |> List.max
-            let max_height = images |> List.map _.Height |> List.max
-
-            for i, image in List.indexed images do
-                let padded = Image.pad (max_width, max_height) image
-                padded.Save(Path.Combine(target, TextureFileName.to_loose "judgement-counter-judgements" (0, i)))
-            judgement_counter_textures <- true
-        with err ->
-            Logging.Warn "Error converting judgement counter judgement textures: %O" err
-
-        // Convert various fonts
-        match
-            convert_font (
-                source,
-                target,
-                ini.Fonts.ComboPrefix,
-                ini.Fonts.ComboOverlap,
-                "combo-font"
-            )
-        with
-        | Ok spacing ->
-            combo_font_spacing <- Some spacing
-        | Error err ->
-            Logging.Warn "Error converting combo font: %O" err
-
-        match
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "accuracy-font"
-            )
-        with
-        | Ok info ->
-            accuracy_font_info <- Some info
-        | Error err ->
-            Logging.Warn "Error converting accuracy font: %O" err
-
-        match
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "progress-meter-font"
-            )
-        with
-        | Ok info ->
-            progress_meter_font_info <- Some info
-        | Error err ->
-            Logging.Warn "Error converting progress meter font: %O" err
-
-        match
-            convert_font_with_extras (
-                source,
-                target,
-                ini.Fonts.ScorePrefix,
-                ini.Fonts.ScoreOverlap,
-                "judgement-counter-font"
-            )
-        with
-        | Ok info ->
-            judgement_counter_font_info <- Some info
-        | Error err ->
-            Logging.Warn "Error converting judgement counter font: %O" err
-
-        let config: HudConfig =
-            { HudConfig.Default with
-                JudgementMeterFrameTime = 16.7f<ms / rate>
-                JudgementMeterUseTexture = judgement_textures
-                JudgementMeterCustomDisplay =
-                    if judgement_textures then
-                        Map.ofSeq [6, Array.init 6 JudgementDisplayType.Texture]
-                    else Map.empty
-
-                ComboUseFont = combo_font_spacing.IsSome
-                ComboFontSpacing = combo_font_spacing |> Option.defaultValue 0.0f
-
-                AccuracyUseFont = accuracy_font_info.IsSome
-                AccuracyFontSpacing = accuracy_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                AccuracyDotExtraSpacing = accuracy_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                AccuracyPercentExtraSpacing = accuracy_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-
-                JudgementCounterUseFont = judgement_counter_font_info.IsSome
-                JudgementCounterFontSpacing = judgement_counter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                JudgementCounterDotExtraSpacing = judgement_counter_font_info |> Option.map _.DotExtraSpacing |> Option.defaultValue 0.0f
-                JudgementCounterColonExtraSpacing = judgement_counter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-
-                JudgementCounterCustomDisplay =
-                    if judgement_counter_textures then
-                        Map.ofSeq [6, Array.init 6 Some]
-                    else Map.empty
-
-                ProgressMeterUseFont = progress_meter_font_info.IsSome
-                ProgressMeterFontSpacing = progress_meter_font_info |> Option.map _.Spacing |> Option.defaultValue 0.0f
-                ProgressMeterColonExtraSpacing = progress_meter_font_info |> Option.map _.ColonExtraSpacing |> Option.defaultValue 0.0f
-                ProgressMeterPercentExtraSpacing = progress_meter_font_info |> Option.map _.PercentExtraSpacing |> Option.defaultValue 0.0f
-            }
-
-        JSON.ToFile (Path.Combine(target, "hud.json"), false) config
-
-    let private convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
-
-        if Directory.Exists target then
-            failwith "a folder with this name already exists!"
-
-        Directory.CreateDirectory target |> ignore
-
-        let version =
-            match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
-            | true, v -> v
-            | false, _ -> 3.0m
-
-        Logging.Debug "Converting skin '%s', version %A" ini.General.Name version
+        Logging.Debug "Converting skin '%s', version %.1f" ini.General.Name version
 
         let default_settings = Mania.Default keymode version
 
@@ -545,7 +206,7 @@ module OsuSkinConverter =
             |> List.map (fun x -> x.Note)
             |> List.map Texture.load_animated_texture
             |> List.map (List.map _.As2x)
-            |> List.map (List.map (Image.scale_y note_height_scale))
+            |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "note"
         with err ->
@@ -569,7 +230,7 @@ module OsuSkinConverter =
             |> List.map (fun x -> x.Head)
             |> List.map Texture.load_animated_texture
             |> List.map (List.map _.As2x)
-            |> List.map (List.map (Image.scale_y note_height_scale))
+            |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if is_arrows then arrow_fix_4k else id
             |> convert_element_textures target "holdhead"
         with err ->
@@ -579,20 +240,20 @@ module OsuSkinConverter =
         if not skip_tail_conversion then
             try
                 core_textures
-                |> List.map (fun x -> x.Tail)
-                |> List.map expect_texture
+                |> List.map _.Tail
+                |> List.map Texture.expect
                 |> List.map Texture.load_animated_texture
                 |> List.map (List.map _.As2x)
-                |> List.map (List.map (Image.scale_y note_height_scale))
+                |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> convert_element_textures target "holdtail"
             with err ->
                 Logging.Debug "Error in holdtail textures - Using hold head textures instead: %O" err
 
                 core_textures
-                |> List.map (fun x -> x.Head)
+                |> List.map _.Head
                 |> List.map Texture.load_animated_texture
                 |> List.map (List.map _.As2x)
-                |> List.map (List.map (Image.scale_y note_height_scale))
+                |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> if is_arrows then arrow_fix_4k else id
                 |> convert_element_textures target "holdtail"
 
@@ -662,8 +323,8 @@ module OsuSkinConverter =
                     |> List.head
                     |> _.Image
 
-                let not_pressed = Image.grayscale 0.5f receptor_base |> Image.pad_to_square receptor_base.Width
-                let pressed = Image.grayscale 1.0f receptor_base |> Image.pad_to_square receptor_base.Width
+                let not_pressed = ImageOperations.grayscale 0.5f receptor_base |> ImageOperations.pad_to_square receptor_base.Width
+                let pressed = ImageOperations.grayscale 1.0f receptor_base |> ImageOperations.pad_to_square receptor_base.Width
 
                 not_pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 0)))
                 pressed.Save(Path.Combine(target, TextureFileName.to_loose "receptor" (0, 1)))
@@ -674,7 +335,7 @@ module OsuSkinConverter =
         try
             let stage_hint =
                 Texture.find (keymode_settings.StageHint, default_settings.StageHint, source)
-                |> expect_texture
+                |> Texture.expect
                 |> Texture.load_single_texture
                 |> _.As2x
             let intended_height_interlude_px = float32 stage_hint.Height
@@ -688,12 +349,12 @@ module OsuSkinConverter =
         try
             let stage_left =
                 Texture.find (keymode_settings.StageLeft, default_settings.StageLeft, source)
-                |> expect_texture
+                |> Texture.expect
                 |> Texture.load_single_texture
                 |> _.Image
             let stage_right =
                 Texture.find (keymode_settings.StageRight, default_settings.StageRight, source)
-                |> expect_texture
+                |> Texture.expect
                 |> Texture.load_single_texture
                 |> _.Image
 
@@ -707,7 +368,7 @@ module OsuSkinConverter =
         try
             let base_image =
                 Texture.find (keymode_settings.StageLight, default_settings.StageLight, source)
-                |> expect_texture
+                |> Texture.expect
                 |> Texture.load_single_texture
                 |> _.Image
 
@@ -753,7 +414,7 @@ module OsuSkinConverter =
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
 
             for i, image in List.indexed images do
-                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                let padded = ImageOperations.pad_to_square max_dim (ImageOperations.remove_black_bg image)
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "noteexplosion" (i, 0)))
 
             note_explosions_scale <- Some (float32 max_dim / 49.0f)
@@ -769,7 +430,7 @@ module OsuSkinConverter =
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
 
             for i, image in List.indexed images do
-                let padded = Image.pad_to_square max_dim (Image.remove_black_bg image)
+                let padded = ImageOperations.pad_to_square max_dim (ImageOperations.remove_black_bg image)
                 padded.Save(Path.Combine(target, TextureFileName.to_loose "holdexplosion" (i, 0)))
 
             hold_explosions_scale <- Some (float32 max_dim / 49.0f)
@@ -822,14 +483,3 @@ module OsuSkinConverter =
             }
 
         JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
-
-    let convert_to_skin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
-        convert_to_noteskin ini source (Path.Combine(target, "Noteskin")) keymode is_arrows
-        convert_to_hud ini source (Path.Combine(target, "HUD")) keymode
-        JSON.ToFile
-            (Path.Combine(target, "skin.json"), false)
-            {
-                Name = ini.General.Name
-                Author = ini.General.Author
-                Editor = None
-            }
