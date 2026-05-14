@@ -2,7 +2,15 @@
 
 open System
 open Prelude.Skins.Conversions.Osu
-        
+
+type internal ConvertedFont =
+    {
+        Spacing: float32
+        DotExtraSpacing: float32
+        ColonExtraSpacing: float32
+        PercentExtraSpacing: float32
+    }
+     
 type HudConverterContext =
     internal {
         SkinIni: SkinIni
@@ -13,6 +21,13 @@ type HudConverterContext =
         
         Source: string
         Target: string
+        mutable ComboFontSpacing: float32 option
+        mutable AccuracyFont: ConvertedFont option
+        mutable ProgressMeterFont: ConvertedFont option
+        mutable JudgementCounterFont: ConvertedFont option
+
+        mutable JudgementTextures: bool
+        mutable JudgementCounterTextures: bool
     }
     
     static member Create(source: string, target: string, ini: SkinIni, keymode: int) : HudConverterContext =
@@ -37,4 +52,11 @@ type HudConverterContext =
             
             Source = source
             Target = target
+            ComboFontSpacing = None
+            AccuracyFont = None
+            ProgressMeterFont = None
+            JudgementCounterFont = None
+
+            JudgementTextures = false
+            JudgementCounterTextures = false
         }

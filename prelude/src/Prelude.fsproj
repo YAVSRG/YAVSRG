@@ -101,6 +101,9 @@
     <Compile Include="Skins\Conversions\osu!\Textures.fs" />
     <Compile Include="Skins\Conversions\osu!\ImageOperations.fs" />
     <Compile Include="Skins\Conversions\osu!\HUD\HudConverterContext.fs" />
+    <Compile Include="Skins\Conversions\osu!\HUD\HudJudgementConverter.fs" />
+    <Compile Include="Skins\Conversions\osu!\HUD\HudFontConverter.fs" />
+    <Compile Include="Skins\Conversions\osu!\HUD\HudConfigConverter.fs" />
     <Compile Include="Skins\Conversions\osu!\HUD\HudConverter.fs" />
     <Compile Include="Skins\Conversions\osu!\Noteskins\NoteskinConverterContext.fs" />
     <Compile Include="Skins\Conversions\osu!\Noteskins\NotesConverter.fs" />
