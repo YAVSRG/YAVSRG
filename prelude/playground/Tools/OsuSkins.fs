@@ -18,7 +18,7 @@ let main() =
             Logging.Info "Converting %s [%s]" skin skin_ini.General.Name
             
             try
-                OsuSkinConverter.convert_to_skin skin_ini skin target_path 4 false
+                OsuSkinConverter.convert_to_skin(skin_ini, skin, target_path, 4, false)
             with err ->
                 Logging.Error "%s\n%s" err.Message err.StackTrace
             

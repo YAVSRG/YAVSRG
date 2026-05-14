@@ -42,12 +42,13 @@ module Skins =
                     %"osu_skin_import.confirm",
                     fun () ->
                         try
-                            OsuSkinConverter.convert_to_skin
-                                ini
-                                source_path
-                                (Path.Combine(get_game_folder "Skins", folder_name))
-                                (int keymode.Value)
-                                (keymode.Value = Keymode.``4K`` && is_arrows.Value)
+                            OsuSkinConverter.convert_to_skin(
+                                ini,
+                                source_path,
+                                Path.Combine(get_game_folder "Skins", folder_name),
+                                int keymode.Value,
+                                keymode.Value = Keymode.``4K`` && is_arrows.Value
+                            )
 
                             if delete_existing.Value then
                                 try

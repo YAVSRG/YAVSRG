@@ -1,4 +1,4 @@
-﻿namespace Prelude.Skins.Conversions.Osu
+﻿namespace Prelude.Skins.Conversions.Osu.HUD
 
 open System.IO
 open SixLabors.ImageSharp
@@ -7,6 +7,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Skins
 open Prelude.Skins.HudLayouts
+open Prelude.Skins.Conversions.Osu
 
 module HudConverter =
 
@@ -106,24 +107,14 @@ module HudConverter =
         with err ->
             Error err
 
-    let convert_to_hud (ini: SkinIni) (source: string) (target: string) (keymode: int) =
+    let convert_to_hud (ini: SkinIni, source: string, target: string, keymode: int) : unit =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
 
         Directory.CreateDirectory target |> ignore
-
-        let version =
-            match System.Decimal.TryParse(ini.General.Version, System.Globalization.CultureInfo.InvariantCulture) with
-            | true, v -> v
-            | false, _ -> 3.0m
-
-        let default_settings = Mania.Default keymode version
-
-        let keymode_settings =
-            ini.Mania
-            |> List.tryFind (fun m -> m.Keys = keymode)
-            |> Option.defaultValue default_settings
+        
+        let ctx = HudConverterContext.Create(source, target, ini, keymode)
 
         let mutable combo_font_spacing : float32 option = None
         let mutable accuracy_font_info : ConvertedFont option = None
@@ -137,12 +128,12 @@ module HudConverter =
         try
             let images =
                 [
-                    keymode_settings.Hit300g, default_settings.Hit300g
-                    keymode_settings.Hit300, default_settings.Hit300
-                    keymode_settings.Hit200, default_settings.Hit200
-                    keymode_settings.Hit100, default_settings.Hit100
-                    keymode_settings.Hit50, default_settings.Hit50
-                    keymode_settings.Hit0, default_settings.Hit0
+                    ctx.KeymodeSettings.Hit300g, ctx.DefaultSettings.Hit300g
+                    ctx.KeymodeSettings.Hit300, ctx.DefaultSettings.Hit300
+                    ctx.KeymodeSettings.Hit200, ctx.DefaultSettings.Hit200
+                    ctx.KeymodeSettings.Hit100, ctx.DefaultSettings.Hit100
+                    ctx.KeymodeSettings.Hit50, ctx.DefaultSettings.Hit50
+                    ctx.KeymodeSettings.Hit0, ctx.DefaultSettings.Hit0
                 ]
                 |> List.map (fun (x, fallback) -> Texture.find_animated(x, fallback, source))
                 |> List.map Texture.load_animated_texture
@@ -165,12 +156,12 @@ module HudConverter =
         try
             let images =
                 [
-                    default_settings.Hit300g
-                    default_settings.Hit300
-                    default_settings.Hit200
-                    default_settings.Hit100
-                    default_settings.Hit50
-                    default_settings.Hit0
+                    ctx.DefaultSettings.Hit300g
+                    ctx.DefaultSettings.Hit300
+                    ctx.DefaultSettings.Hit200
+                    ctx.DefaultSettings.Hit100
+                    ctx.DefaultSettings.Hit50
+                    ctx.DefaultSettings.Hit0
                 ]
                 |> List.map (fun x -> Texture.find_animated_fallback(x, source))
                 |> List.map (Result.map List.head)

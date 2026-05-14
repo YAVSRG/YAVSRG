@@ -6,7 +6,7 @@ open Prelude.Skins.Conversions.Osu
 
 module NoteskinConverter =
 
-    let convert_to_noteskin (ini: SkinIni) (source: string) (target: string) (keymode: int) (is_arrows: bool) =
+    let convert_to_noteskin (ini: SkinIni, source: string, target: string, keymode: int, is_arrows: bool) : unit =
 
         if Directory.Exists target then
             failwith "a folder with this name already exists!"
