@@ -383,9 +383,12 @@ module Options =
             let locale_dir_path = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), "Locale")
             
             let locales =
-                Directory.GetFiles(locale_dir_path)
-                |> Seq.where(fun x -> Path.GetExtension(x).ToLower() = ".txt") 
-                |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x))
+                if Directory.Exists(locale_dir_path) then // First check if the locale folder exists (avoid a crash)
+                    Directory.GetFiles(locale_dir_path)
+                    |> Seq.where(fun x -> Path.GetExtension(x).ToLower() = ".txt") 
+                    |> Seq.map(fun x -> Path.GetFileNameWithoutExtension(x))
+                else
+                    Seq.empty
                 
             available_locales <- Set.union (Set.ofSeq EMBEDDED_LOCALES.Keys) (Set.ofSeq locales)
             Logging.Debug "%i available locales" available_locales.Count
