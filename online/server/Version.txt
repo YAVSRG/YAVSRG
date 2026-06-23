@@ -1,1 +1,1 @@
-﻿NaN stat fix
+﻿Case-insensitive Authorization Cloudflare fix
