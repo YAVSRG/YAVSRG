@@ -13,20 +13,27 @@ module Utils =
     exception PermissionDeniedException
     exception BadRequestException of Message: string option
 
-    let BEARER_LENGTH = "Bearer ".Length
+    let [<Literal>] BEARER_PREFIX = "Bearer "
+    let BEARER_PREFIX_LENGTH = BEARER_PREFIX.Length
 
-    let authorize (header: Map<string, string>) =
+    let authorize (headers: Map<string, string>) : int64 * User =
 
-        if header.ContainsKey("Authorization") then
-            let auth_header = header.["Authorization"]
-            if auth_header.Length > BEARER_LENGTH then
-                match User.by_auth_token (header.["Authorization"].Substring(BEARER_LENGTH)) with
+        let find_auth_header() =
+            Map.tryFind "authorization" headers
+
+        let validate_token(auth_header: string) : int64 * User =
+            if auth_header.StartsWith(BEARER_PREFIX) then
+                let bearer_token = auth_header.Substring(BEARER_PREFIX_LENGTH)
+
+                match User.by_auth_token(bearer_token) with
                 | Some(id, user) -> id, user
                 | None -> raise AuthorizeFailedException
+
             else raise AuthorizeFailedException
 
-        else
-            raise NotAuthorizedException
+        match find_auth_header() with
+        | Some auth_header -> validate_token(auth_header)
+        | None -> raise NotAuthorizedException
 
     let require_query_parameter (query_params: Map<string, string array>) (name: string) =
         if not (query_params.ContainsKey name) then

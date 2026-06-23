@@ -70,7 +70,7 @@ module API =
             let headers =
                 seq {
                     for i = 0 to int request.Headers - 1 do
-                        let struct (key, value) = request.Header i in (key, value)
+                        let struct (key, value) = request.Header i in (key.ToLower(), value)
                 }
                 |> Map.ofSeq
 
