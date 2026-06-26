@@ -15,25 +15,13 @@ type OverallTab =
 
         let content_panel = SwapContainer()
 
-        let skill_breakdown = SkillBreakdown()
-        let timeline = SkillTimeline()
-        let overview =
-            Overview(
-                fun keymode source pattern ->
-                    match pattern with
-                    | None ->
-                        timeline.Switch keymode
-                        content_panel.Current <- timeline
-                    | Some p ->
-                        skill_breakdown.Switch (keymode, source, p)
-                        content_panel.Current <- skill_breakdown
-            )
+        let under_construction() = EmptyState(Icons.ALERT_TRIANGLE, "Under construction")
 
         let tab_options : (Widget * string) array =
             [|
-                overview, %"stats.overall.overview"
-                timeline, %"stats.overall.timeline"
-                skill_breakdown, %"stats.overall.breakdown"
+                under_construction(), %"stats.overall.overview"
+                under_construction(), %"stats.overall.timeline"
+                under_construction(), %"stats.overall.breakdown"
             |]
 
         Container(NodeType.Leaf)

@@ -30,9 +30,6 @@ type SessionScoreBar(xp_gain: SessionXPGain) =
         if xp_gain.LampXP <> 0L then
             ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
             ScoreScreenHelpers.animation_queue.Add (Animation.Action (fun () -> xp_display.Target <- xp_display.Target + float32 xp_gain.LampXP))
-        if xp_gain.SkillXP <> 0L then
-            ScoreScreenHelpers.animation_queue.Add (Animation.Delay 1000.0)
-            ScoreScreenHelpers.animation_queue.Add (Animation.Action (fun () -> xp_display.Target <- xp_display.Target + float32 xp_gain.SkillXP))
         ScoreScreenHelpers.animation_queue.Add (Animation.Action(fun () -> xp_display.Target <- float32 xp_now))
 
         base.Init parent

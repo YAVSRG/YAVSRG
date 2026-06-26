@@ -2,7 +2,6 @@
 
 open System
 open Percyqaz.Common
-open Prelude.Calculator
 open Prelude.Data.User
 open Prelude.Data.Library
 
@@ -12,9 +11,8 @@ type SessionXPGain =
         BaseXP: int64
         LampXP: int64
         AccXP: int64
-        SkillXP: int64
     }
-    member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP + this.SkillXP
+    member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
 
 module Stats =
 
@@ -32,7 +30,7 @@ module Stats =
 
             DbSessions.save database_session database.Database
 
-        CURRENT_SESSION <- CurrentSession.StartNew now CURRENT_SESSION.LastTime CURRENT_SESSION.KeymodeSkills
+        CURRENT_SESSION <- CurrentSession.StartNew now CURRENT_SESSION.LastTime
         save database
 
     let save_current_session (now: int64) (database: UserDatabase) =
@@ -54,7 +52,6 @@ module Stats =
             BaseXP = 0L
             LampXP = 0L
             AccXP = 0L
-            SkillXP = 0L
         }
 
     let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) =
@@ -92,34 +89,13 @@ module Stats =
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + acc_xp
 
-        let all_time_skill_up =
-            KeymodeSkillBreakdown.score
-                score_info.ChartMeta.Patterns
-                score_info.Accuracy
-                score_info.Rate
-                TOTAL_STATS.KeymodeSkills.[score_info.WithMods.Keys - 3]
-
-        let session_skill_up =
-            KeymodeSkillBreakdown.score
-                score_info.ChartMeta.Patterns
-                score_info.Accuracy
-                score_info.Rate
-                CURRENT_SESSION.KeymodeSkills.[score_info.WithMods.Keys - 3]
-
         save_current_session (Timestamp.now()) database
-
-        let skill_xp_mult = (float32 TOTAL_STATS.XP / 100_000f - 1.0f) |> max 0.0f |> min 1.0f
-        let skill_xp =
-            int64 (session_skill_up.Total * skill_xp_mult)
-            + int64 (all_time_skill_up.Total * 10.0f * skill_xp_mult)
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + skill_xp
 
         {
             QuitPenalty = 0L
             BaseXP = base_xp // todo: separate into base + streak
             LampXP = lamp_xp
             AccXP = acc_xp
-            SkillXP = skill_xp // todo: separate into session/all time
         }
 
     let init (library: Library) (database: UserDatabase) =

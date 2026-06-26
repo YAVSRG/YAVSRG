@@ -221,6 +221,11 @@ module UserDatabase =
             (fun db -> DbSessions.ADD_KEYMODE_PLAYTIME.Execute () db |> expect |> ignore)
             db
 
+        Database.migrate
+            "RemoveKeymodeSkills"
+            (fun db -> DbSessions.REMOVE_KEYMODE_SKILLS.Execute () db |> expect |> ignore)
+            db
+
         db
 
     // Fast load true loads the contents of the db into memory (used by game client)

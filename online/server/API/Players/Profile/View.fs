@@ -85,7 +85,7 @@ module View =
                             LastUpdated = stats.LastSync
                             XP = stats.XP
                             TotalPlaytime = stats.Playtime
-                            Keymodes = Map.ofSeq [ 4, (stats._4KPlaytime, stats._4K.Average); 7, (stats._7KPlaytime, stats._7K.Average); 10, (stats._10KPlaytime, stats._10K.Average) ]
+                            Keymodes = Map.ofSeq [ 4, (stats._4KPlaytime, 0.0f); 7, (stats._7KPlaytime, 0.0f); 10, (stats._10KPlaytime, 0.0f) ]
                         }
                 }
                 : Response

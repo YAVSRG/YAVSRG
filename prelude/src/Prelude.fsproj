@@ -84,9 +84,6 @@
     <Compile Include="Calculator\Patterns\Summary.fs" />
     <Compile Include="Calculator\Patterns\PatternInfo.fs" />
     <Compile Include="Calculator\Patterns\LibraryPatternInfo.fs" />
-    <Compile Include="Calculator\Skillsets\PatternStats.fs" />
-    <Compile Include="Calculator\Skillsets\CombinedStats.fs" />
-    <Compile Include="Calculator\Skillsets\Skillsets.fs" />
     <Compile Include="Skins\Storage.fs" />
     <Compile Include="Skins\Themes.fs" />
     <Compile Include="Skins\HUD\Config.fs" />

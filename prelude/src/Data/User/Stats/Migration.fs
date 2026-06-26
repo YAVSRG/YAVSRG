@@ -3,30 +3,13 @@
 open System
 open Percyqaz.Common
 open Prelude
-open Prelude.Calculator
-open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
 open Prelude.Data.Library
 
 module private Migration =
 
-    let legacy_backfill (library: Library) (database: UserDatabase) : Session array * KeymodeSkillBreakdown array =
+    let legacy_backfill (library: Library) (database: UserDatabase) : Session array =
 
-        // calculate skillsets
-        let sc_j4 = SC.create 4
-        let sc_j4_id = Ruleset.hash sc_j4
-
-        for chart_meta_key in library.Charts.Cache.Keys do
-            let chart_meta = library.Charts.Cache.[chart_meta_key]
-
-            let data = UserDatabase.get_chart_data chart_meta.Hash database
-            match data.PersonalBests.TryFind(sc_j4_id) with
-            | Some pbs ->
-                for acc, rate, _ in pbs.Accuracy do
-                    KeymodeSkillBreakdown.score chart_meta.Patterns acc rate TOTAL_STATS.KeymodeSkills.[chart_meta.Keys - 3] |> ignore
-            | None -> ()
-
-        // calculate session
         let scores =
             seq {
                 for chart_id in database.Cache.Keys do
@@ -46,7 +29,6 @@ module private Migration =
         let mutable session_playing_time = 0.0f<ms / rate>
         let mutable last_time = session_start_time
         let mutable score_count = 0
-        let skills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
 
         seq {
             for chart_id, score in scores do
@@ -54,16 +36,6 @@ module private Migration =
                 let score_length =
                     match ChartDatabase.get_meta chart_id library.Charts with
                     | Some chart_meta ->
-
-                        let data = UserDatabase.get_chart_data chart_meta.Hash database
-                        match data.PersonalBests.TryFind(sc_j4_id) with
-                        | Some pbs ->
-                            match PersonalBests.get_best_above score.Rate pbs.Accuracy with
-                            | Some (acc, _, _) ->
-                                KeymodeSkillBreakdown.score chart_meta.Patterns acc score.Rate skills.[chart_meta.Keys - 3] |> ignore
-                            | None -> ()
-                        | None -> ()
-
                         session_playing_time <- session_playing_time + chart_meta.Length / score.Rate
                         chart_meta.Length / score.Rate |> int64
                     | None -> 2L * 60L * 1000L
@@ -84,15 +56,11 @@ module private Migration =
                         PlaysRetried = 0
 
                         XP = 0
-                        KeymodeSkills = skills |> Array.map _.Tiny
                         KeymodePlaytime = Map.empty
                     }
                     session_start_time <- score.Timestamp - score_length
                     session_playing_time <- 0.0f<ms / rate>
                     score_count <- 1
-                    let d = KeymodeSkillBreakdown.decay_over_time last_time session_start_time
-                    for i = 0 to skills.Length - 1 do
-                        skills.[i] <- skills.[i].Scale d
                 else
                     score_count <- score_count + 1
                 last_time <- score.Timestamp
@@ -112,16 +80,11 @@ module private Migration =
                     PlaysRetried = 0
 
                     XP = 0
-                    KeymodeSkills = skills |> Array.map _.Tiny
                     KeymodePlaytime = Map.empty
 
                 }
-            let d = KeymodeSkillBreakdown.decay_over_time last_time (Timestamp.now())
-            for i = 0 to skills.Length - 1 do
-                skills.[i] <- skills.[i].Scale d
         }
-        |> Seq.toArray,
-        skills
+        |> Seq.toArray
 
     let migrate_legacy_stats (library: Library) (database: UserDatabase) =
 
@@ -130,17 +93,16 @@ module private Migration =
         TOTAL_STATS <- TotalStats.Default
         CURRENT_SESSION <- CurrentSession.Default
 
-        let sessions, current_skills = legacy_backfill library database
+        let sessions = legacy_backfill library database
         DbSessions.save_batch sessions database.Database
         PREVIOUS_SESSIONS <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
-        CURRENT_SESSION <- { CURRENT_SESSION with KeymodeSkills = current_skills }
 
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
-        TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit; KeymodeSkills = TOTAL_STATS.KeymodeSkills }
+        TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit }
 
     let keymode_playtime_backfill (library: Library) (database: UserDatabase) =
 

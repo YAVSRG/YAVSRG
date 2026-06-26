@@ -15,9 +15,6 @@ type StatsSyncUpstream =
         XP: int64
         KeymodePlaytime: Map<int, float>
 
-        KeymodeSkillsAllTime: KeymodeTinyBreakdown array
-        KeymodeSkillsRecent: KeymodeTinyBreakdown array
-
         NetworkId: int64
         Month: int
         KeymodePlaytimeThisMonth: Map<int, float>
@@ -48,9 +45,6 @@ type StatsSyncUpstream =
 
             XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
             KeymodePlaytime = add_playtimes TOTAL_STATS.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime
-
-            KeymodeSkillsAllTime = TOTAL_STATS.KeymodeSkills |> Array.map _.Tiny
-            KeymodeSkillsRecent = CURRENT_SESSION.KeymodeSkills |> Array.map _.Tiny
 
             NetworkId = network_id
             Month = month

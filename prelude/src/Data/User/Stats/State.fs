@@ -28,7 +28,6 @@ type CurrentSession =
 
         mutable SessionScore: int64
         mutable Streak: int
-        KeymodeSkills: KeymodeSkillBreakdown array
         mutable KeymodePlaytime: Map<int, float>
     }
 
@@ -49,7 +48,6 @@ type CurrentSession =
             PlaysQuit = this.PlaysQuit
 
             XP = this.SessionScore
-            KeymodeSkills = this.KeymodeSkills |> Array.map _.Tiny
             KeymodePlaytime = this.KeymodePlaytime
         }
 
@@ -57,7 +55,7 @@ type CurrentSession =
         this.PlayTime <- this.PlayTime + time
         this.KeymodePlaytime <- this.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
 
-    static member StartNew (now: int64) (end_of_last_session: int64) (previous_skills: KeymodeSkillBreakdown array) =
+    static member StartNew (now: int64) (end_of_last_session: int64) =
         {
             Start = now
             LastPlay = now
@@ -75,9 +73,6 @@ type CurrentSession =
 
             SessionScore = 0L
             Streak = 0
-            KeymodeSkills =
-                let d = KeymodeSkillBreakdown.decay_over_time end_of_last_session now
-                previous_skills |> Array.map (fun k -> k.Scale d)
             KeymodePlaytime = Map.empty
         }
 
@@ -100,7 +95,6 @@ type CurrentSession =
 
             SessionScore = 0L
             Streak = 0
-            KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
             KeymodePlaytime = Map.empty
         }
 
@@ -118,7 +112,6 @@ type TotalStats =
         PlaysQuit: int
 
         XP: int64
-        KeymodeSkills: KeymodeSkillBreakdown array
         KeymodePlaytime: Map<int, float>
     }
 
@@ -134,7 +127,6 @@ type TotalStats =
             PlaysQuit = 0
 
             XP = 0L
-            KeymodeSkills = Array.init 8 (fun _ -> KeymodeSkillBreakdown.Default)
             KeymodePlaytime = Map.empty
         }
 
@@ -151,7 +143,6 @@ type TotalStats =
             PlaysQuit = this.PlaysQuit + session.PlaysQuit
 
             XP = this.XP + session.SessionScore
-            KeymodeSkills = this.KeymodeSkills
             KeymodePlaytime = add_playtimes this.KeymodePlaytime session.KeymodePlaytime
         }
 

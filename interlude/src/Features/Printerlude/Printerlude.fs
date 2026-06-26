@@ -48,16 +48,6 @@ module Printerlude =
         let toggle_experiments (b: bool) =
             options.EnableExperiments.Value <- b
 
-        let challenge_level (io: IOContext) =
-            match SelectedChart.CACHE_DATA with
-            | Some chart_meta ->
-                let skills = TOTAL_STATS.KeymodeSkills.[(SelectedChart.keymode() |> int) - 3]
-                for p in [ 0.92; 0.93; 0.94; 0.95; 0.96; 0.97; 0.98; 0.99; 1.0 ] do
-                    KeymodeSkillBreakdown.what_if chart_meta.Patterns p SelectedChart.rate.Value skills
-                    |> sprintf "What if you got %.0f%%: %O" (p * 100.0)
-                    |> io.WriteLine
-            | None -> ()
-
         let difficulty (io: IOContext) =
             match SelectedChart.DIFFICULTY with
             | Some d ->
@@ -75,7 +65,6 @@ module Printerlude =
             ctx
                 .WithCommand("exit", "Exits the game", (fun () -> WindowThread.exit()))
                 .WithCommand("clear", "Clears the terminal", Terminal.Log.clear)
-                .WithIOCommand("challenge", "Experimental challenge level", challenge_level)
                 .WithIOCommand(
                     "local_server",
                     "Switch to local development server",

@@ -9,6 +9,10 @@ type XPLeaderboardModel = { UserId: int64; XP: int64; Playtime: float }
 
 type XPRankModel = { Rank: int64; XP: int64; Playtime: float }
 
+type KeymodeTinyBreakdown =
+    { Combined: float32; Jacks: float32; Chordstream: float32; Stream: float32 }
+    static member Default = { Combined = 0.0f; Jacks = 0.0f; Chordstream = 0.0f; Stream = 0.0f }
+
 type KeymodeLeaderboardModel =
     {
         UserId: int64
