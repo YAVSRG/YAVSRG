@@ -6,7 +6,6 @@ open System.Text.RegularExpressions
 open System.Collections.Generic
 open Prelude
 open Prelude.Mods
-open YAVSRG.CLI.Utils
 
 module Localisation =
 
@@ -38,7 +37,7 @@ module Localisation =
                     yield m.Index, m.Groups.[1].Value
             }
 
-        for filename, file_contents in walk_fs_file_contents INTERLUDE_SOURCE_PATH do
+        for filename, file_contents in SourceFiles.walk_fs_file_contents INTERLUDE_SOURCE_PATH do
 
             for position, m in matches """ [^%]%"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
@@ -150,7 +149,7 @@ module Localisation =
 
             result
 
-        for filename, file_contents in walk_fs_file_contents INTERLUDE_SOURCE_PATH do
+        for filename, file_contents in SourceFiles.walk_fs_file_contents INTERLUDE_SOURCE_PATH do
             let replaced_contents =
                 file_contents
                 |> replaces """ ([^%])%"([a-z\-_\.]*)" """ "%s%%\"%s\""

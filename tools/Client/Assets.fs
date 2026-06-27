@@ -1,9 +1,8 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System.IO
 open System.IO.Compression
 open Prelude.Skins.Noteskins
-open YAVSRG.CLI
 
 module Assets =
 
@@ -16,18 +15,18 @@ module Assets =
         ZipFile.CreateFromDirectory(source, target_zip)
 
     let private cleanup_noteskin_json (id: string) =
-        match Path.Combine(Utils.ASSETS_PATH, id) |> Noteskin.FromPath with
+        match Path.Combine(ASSETS_PATH, id) |> Noteskin.FromPath with
         | Ok ns ->
             ns.Config <- ns.Config
         | Error err -> raise err
 
     let bundle_assets () =
         make_zip
-        <| Path.Combine(Utils.ASSETS_PATH, "default")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "default.zip")
+        <| Path.Combine(ASSETS_PATH, "default")
+        <| Path.Combine(BUILD_RESOURCES_PATH, "default.zip")
 
         cleanup_noteskin_json "chocolate"
 
         make_zip
-        <| Path.Combine(Utils.ASSETS_PATH, "chocolate")
-        <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "chocolate.zip")
+        <| Path.Combine(ASSETS_PATH, "chocolate")
+        <| Path.Combine(BUILD_RESOURCES_PATH, "chocolate.zip")

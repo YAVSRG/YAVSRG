@@ -1,7 +1,6 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System.IO
-open YAVSRG.CLI.Utils
 
 module Version =
 
@@ -50,6 +49,6 @@ module Version =
 
         printfn "Creating git commit"
 
-        exec "git" (sprintf "commit -a -m \"🏷️ Version %s\"" v)
+        Shell.exec "git" (sprintf "commit -a -m \"🏷️ Version %s\"" v)
 
     let version () = current_version

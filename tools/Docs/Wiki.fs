@@ -1,9 +1,8 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System.IO
 open Prelude
 open Percyqaz.Data
-open YAVSRG.CLI.Utils
 
 module Wiki =
 

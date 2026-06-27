@@ -1,7 +1,7 @@
 ﻿namespace YAVSRG.CLI
 
 open Percyqaz.Shell
-open YAVSRG.CLI.Utils
+open YAVSRG.CLI
 open YAVSRG.CLI.Features
 
 module Commands =
@@ -9,11 +9,11 @@ module Commands =
     let release_all_in_one () =
         Wiki.generate_toc ()
         Site.generate_site ()
-        exec "git" "add interlude/docs"
-        exec "git" "add site"
-        exec "git" "commit -m \"📘 Update site changelog & wiki\""
+        Shell.exec "git" "add interlude/docs"
+        Shell.exec "git" "add site"
+        Shell.exec "git" "commit -m \"📘 Update site changelog & wiki\""
         Version.publish ()
-        exec "git" "push"
+        Shell.exec "git" "push"
 
     let register (ctx: ShellContext) =
         ctx

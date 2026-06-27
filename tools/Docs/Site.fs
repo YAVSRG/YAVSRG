@@ -1,9 +1,8 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System.Text.RegularExpressions
 open System.IO
 open Percyqaz.Data.Markdown
-open YAVSRG.CLI.Utils
 
 module Site =
 

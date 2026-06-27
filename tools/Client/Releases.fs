@@ -1,8 +1,7 @@
-﻿namespace YAVSRG.CLI.Features
+﻿namespace YAVSRG.CLI
 
 open System.IO
 open System.IO.Compression
-open YAVSRG.CLI.Utils
 
 module Releases =
 
@@ -106,7 +105,7 @@ Information, future updates and support available at:
         with _ ->
             ()
 
-        exec_at INTERLUDE_SOURCE_PATH
+        Shell.exec_at INTERLUDE_SOURCE_PATH
             "dotnet"
             $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
 

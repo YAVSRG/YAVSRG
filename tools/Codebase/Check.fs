@@ -2,7 +2,8 @@
 
 open System
 open System.Text.RegularExpressions
-open YAVSRG.CLI.Utils
+open System.IO
+open YAVSRG.CLI
 
 module Check =
 
@@ -14,13 +15,13 @@ module Check =
             printfn "%s" (String match_span)
 
     let simple_view_all () =
-        for filename, file_contents in walk_fs_file_contents YAVSRG_PATH do
+        for filename, file_contents in SourceFiles.walk_fs_file_contents YAVSRG_PATH do
             printfn "%s\n====\n" filename
             simple_view file_contents
 
     let check_linecounts () =
         let mutable loc = 0
-        for filename, file_contents in walk_fs_file_contents YAVSRG_PATH do
+        for filename, file_contents in SourceFiles.walk_fs_file_contents YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
 
             if lines > 300 then
@@ -28,11 +29,11 @@ module Check =
             loc <- loc + lines
         printfn "total %i lines of f#" loc
 
-    let format_all_code () = exec "fantomas" "."
+    let format_all_code () = Shell.exec "fantomas" "."
 
     let check_filenames () =
-        walk_fs_files YAVSRG_PATH
-        |> Seq.map System.IO.Path.GetFileName
+        SourceFiles.walk_fs_files YAVSRG_PATH
+        |> Seq.map Path.GetFileName
         |> Seq.countBy id
         |> Seq.sortByDescending snd
         |> Seq.truncate 10
