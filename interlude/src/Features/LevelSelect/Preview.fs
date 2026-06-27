@@ -81,7 +81,7 @@ type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
         elif Screen.current_type = ScreenType.LevelSelect && (%%"random_chart").Pressed() then
             LevelSelect.random_chart()
         elif Screen.current_type = ScreenType.LevelSelect && (%%"previous_random_chart").Pressed() then
-            LevelSelect.History.back()
+            LevelSelectHistory.back()
         elif Screen.current_type = ScreenType.LevelSelect && (%%"next").Pressed() then
             Tree.next()
         elif Screen.current_type = ScreenType.LevelSelect && (%%"previous").Pressed() then

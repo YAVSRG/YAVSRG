@@ -42,50 +42,6 @@ module LevelSelect =
 
     let mutable filter: FilteredSearch = FilteredSearch.Empty
 
-    module History =
-
-        let mutable private history: (ChartMeta * Rate) list = []
-        let mutable private forward_history: (ChartMeta * Rate) list = []
-
-        let append_current () =
-            match SelectedChart.CACHE_DATA with
-            | Some chart_meta ->
-                forward_history <- []
-                history <- (chart_meta, SelectedChart.rate.Value) :: history
-            | None -> ()
-
-        let back () =
-            if not (Transitions.in_progress()) then
-                match history with
-                | (chart_meta, rate) :: xs ->
-
-                    match SelectedChart.CACHE_DATA with
-                    | Some chart_meta -> forward_history <- (chart_meta, SelectedChart.rate.Value) :: forward_history
-                    | None -> ()
-
-                    history <- xs
-                    SelectedChart._rate.Set rate
-                    SelectedChart.change(chart_meta, LibraryContext.None, true)
-                | _ -> ()
-
-        let can_go_back() = (List.isEmpty >> not) history
-
-        let forward () =
-            if not (Transitions.in_progress()) then
-                match forward_history with
-                | (chart_meta, rate) :: xs ->
-
-                    match SelectedChart.CACHE_DATA with
-                    | Some chart_meta -> history <- (chart_meta, SelectedChart.rate.Value) :: history
-                    | None -> ()
-
-                    forward_history <- xs
-                    SelectedChart._rate.Set rate
-                    SelectedChart.change(chart_meta, LibraryContext.None, true)
-                | _ -> ()
-
-        let can_go_forward() = (List.isEmpty >> not) forward_history
-
     let private state: EndlessModeState = EndlessModeState.create()
     let mutable private suggestion_ctx : SuggestionContext option = None
 
@@ -135,7 +91,7 @@ module LevelSelect =
 
         match EndlessModeState.next ctx state with
         | Some next ->
-            History.append_current()
+            LevelSelectHistory.append_current()
             SelectedChart._rate.Set next.Rate
             SelectedChart._selected_mods.Set next.Mods
             SelectedChart.change (next.Chart, next.LibraryContext, false)
@@ -171,7 +127,7 @@ module LevelSelect =
 
             match Suggestion.get_random filter.Filter ctx with
             | Some chart_meta ->
-                History.append_current()
+                LevelSelectHistory.append_current()
                 SelectedChart.change(chart_meta, LibraryContext.None, true)
             | None -> ()
 
@@ -193,7 +149,7 @@ module LevelSelect =
 
                 match Suggestion.get_suggestion ctx with
                 | Some (chart_meta, rate) ->
-                    History.append_current()
+                    LevelSelectHistory.append_current()
                     SelectedChart._rate.Value <- rate
                     SelectedChart.change(chart_meta, LibraryContext.None, true)
                 | None ->

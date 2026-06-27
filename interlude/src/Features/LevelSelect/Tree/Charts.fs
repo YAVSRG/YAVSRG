@@ -251,7 +251,7 @@ type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
                 elif this.Selected then
                     LevelSelect.choose_this_chart ()
                 else
-                    if not (Transitions.in_progress()) then LevelSelect.History.append_current ()
+                    if not (Transitions.in_progress()) then LevelSelectHistory.append_current ()
                     this.Select()
 
             elif this.RightClicked(tree_top) then

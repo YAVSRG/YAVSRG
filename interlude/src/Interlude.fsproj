@@ -242,6 +242,7 @@
     <Compile Include="Features\Skins\Browser\Components.fs" />
     <Compile Include="Features\Skins\Browser\Browser.fs" />
     <Compile Include="Features\Skins\SelectSkin.fs" />
+    <Compile Include="Features\LevelSelect\LevelSelectHistory.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\Filters.fs" />
     <Compile Include="Features\LevelSelect\LevelSelectOptions.fs" />
