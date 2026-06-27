@@ -14,7 +14,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Utils.fs" />
+    <Compile Include="Constants.fs" />
+    <Compile Include="Shell.fs" />
+    <Compile Include="SourceFiles.fs" />
     <Compile Include="Docs\Wiki.fs" />
     <Compile Include="Docs\Site.fs" />
     <Compile Include="Codebase\Check.fs" />
