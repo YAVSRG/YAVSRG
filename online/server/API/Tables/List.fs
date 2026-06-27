@@ -19,6 +19,7 @@ module List =
             response: HttpResponse
         ) =
         async {
+            let _, _ = authorize headers
             let tables: Table array =
                 Backbeat.Tables.TABLES
                 |> Map.toArray

@@ -20,6 +20,7 @@ module Charts =
         ) =
         async {
             require_query_parameter query_params "table"
+            let _, _ = authorize headers
 
             let table_id = query_params.["table"].[0].ToLower()
 

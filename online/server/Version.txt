@@ -1,1 +1,1 @@
-﻿Improved logging to diagnose restarts
+﻿Require auth because of API abuse
