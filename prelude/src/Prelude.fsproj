@@ -31,7 +31,8 @@
     <Compile Include="Charts\Chart.fs" />
     <Compile Include="Charts\Imports.fs" />
     <Compile Include="Formats\Conversions.fs" />
-    <Compile Include="Formats\osu!\Shared.fs" />
+    <Compile Include="Formats\osu!\MapHelpers.fs" />
+    <Compile Include="Formats\osu!\CsvHelpers.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
     <Compile Include="Formats\osu!\HitObjects.fs" />
     <Compile Include="Formats\osu!\TimingPoints.fs" />

@@ -24,7 +24,8 @@ type Beatmap =
         Objects: HitObject list
         Timing: TimingPoint list
     }
-    member this.Filename =
+
+    member this.Filename : string =
         let clean (s: string) =
             s
             |> String.filter(fun c -> c = ' ' || Char.IsAsciiLetterOrDigit c)
@@ -36,7 +37,8 @@ type Beatmap =
             (clean this.Metadata.TitleUnicode)
             (clean this.Metadata.Creator)
             (clean this.Metadata.Version)
-    member this.ToLines =
+
+    member this.ToLines : string seq =
         seq {
             yield "osu file format v14"
             yield ""
