@@ -48,7 +48,7 @@ type OnlineReplay() =
             current_chart_time <- timestamp
             try
                 while not (br.BaseStream.Position = br.BaseStream.Length) do
-                    buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
+                    buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16())))
             with err ->
                 Logging.Error "Error while receiving online replay data: %O" err
 

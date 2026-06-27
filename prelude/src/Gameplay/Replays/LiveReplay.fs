@@ -58,7 +58,7 @@ type LiveReplay(first_note: Time) =
 
             if time > -1000.0f<ms> then
                 bw.Write(float32 time)
-                bw.Write bitmap
+                bw.Write(bitmap.ToInt16())
 
             export <- export + 1
 

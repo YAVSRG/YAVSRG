@@ -42,7 +42,8 @@
     <Compile Include="Helpers\ReplayBuilder.fs" />
     <Compile Include="Helpers\GameplayEventCollector.fs" />
     <Compile Include="Helpers\ScoringEventCollector.fs" />
-    <Compile Include="Localisation\LocalisationTests.fs" />
+    <Compile Include="Shared\BitmaskTests.fs" />
+    <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
     <Compile Include="Charts\ChartOriginTests.fs" />
     <Compile Include="Charts\ChartConversionTests.fs" />

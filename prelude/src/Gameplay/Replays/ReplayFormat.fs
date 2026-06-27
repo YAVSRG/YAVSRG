@@ -29,7 +29,7 @@ module Replay =
 
         for struct (time, buttons) in data do
             bw.Write(float32 time)
-            bw.Write buttons
+            bw.Write(buttons.ToInt16())
 
         bw.Flush()
 
@@ -52,7 +52,7 @@ module Replay =
         let output = Array.zeroCreate count
 
         for i = 0 to (count - 1) do
-            output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16())
+            output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16()))
 
         output
 
@@ -96,24 +96,24 @@ module Replay =
                     failwithf "replay goes backwards in time %f -> %f" last_time time
 
                 last_time <- time
-                output.[i] <- struct (time * 1.0f<ms>, br.ReadUInt16())
+                output.[i] <- struct (time * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16()))
 
             Ok output
         with err ->
             Error(err.ToString())
 
     let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
-        let time_until_next i =
-            if i >= notes.Length - 1 then
+        let time_until_next (current_index: int) : Time =
+            if current_index + 1 >= notes.Length then
                 50.0f<ms>
             else
-                notes.[i + 1].Time - notes.[i].Time
+                notes.[current_index + 1].Time - notes.[current_index].Time
 
         let first_note = notes.[0].Time
 
         seq {
             let mutable i = 0
-            let mutable held: Bitmask = 0us
+            let mutable held: Bitmask = Bitmask.Empty
 
             while i < notes.Length do
                 let { Time = time; Data = nr } = notes.[i]
@@ -122,13 +122,13 @@ module Replay =
 
                 for k = 0 to (keys - 1) do
                     if nr.[k] = NoteType.NORMAL then
-                        hit <- Bitmask.set_key k hit
+                        hit <- hit.Add(k)
                     elif nr.[k] = NoteType.HOLDHEAD then
-                        hit <- Bitmask.set_key k hit
-                        held <- Bitmask.set_key k held
+                        hit <- hit.Add(k)
+                        held <- held.Add(k)
                     elif nr.[k] = NoteType.HOLDTAIL then
-                        hit <- Bitmask.unset_key k hit
-                        held <- Bitmask.unset_key k held
+                        hit <- hit.Remove(k)
+                        held <- held.Remove(k)
 
                 yield struct (time - first_note, hit)
                 yield struct (time - first_note + delay * 0.5f, held)

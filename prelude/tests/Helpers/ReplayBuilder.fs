@@ -6,17 +6,17 @@ open Prelude.Gameplay.Replays
 type ReplayBuilder() =
     let liveplay = LiveReplay(0.0f<ms>)
 
-    let mutable state = 0us
+    let mutable state = Bitmask.Empty
 
     member this.KeyDown(time: Time, key: int) : ReplayBuilder =
-        state <- state |> Bitmask.set_key key
+        state <- state.Add(key)
         liveplay.AddFrame(time, state)
         this
 
     member this.KeyDown(time: Time) = this.KeyDown(time, 0)
 
     member this.KeyUp(time: Time, k: int) : ReplayBuilder =
-        state <- state |> Bitmask.unset_key k
+        state <- state.Remove(k)
         liveplay.AddFrame(time, state)
         this
 

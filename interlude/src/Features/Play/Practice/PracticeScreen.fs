@@ -60,7 +60,7 @@ type PracticeScreen =
         do reset_to_practice_point ()
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
-        let mutable input_key_state = 0us
+        let mutable input_key_state = Bitmask.Empty
 
         let restart (screen: IPlayScreen) =
             reset_to_practice_point ()
@@ -147,7 +147,7 @@ type PracticeScreen =
                 elif (%%"exit").Pressed() then
                     if not state.Paused.Value then
                         pause this
-                        input_key_state <- 0us
+                        input_key_state <- Bitmask.Empty
                     else
                         Screen.back Transitions.Default |> ignore
 
@@ -155,9 +155,9 @@ type PracticeScreen =
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then
-                                input_key_state <- Bitmask.unset_key column input_key_state
+                                input_key_state <- input_key_state.Remove(column)
                             else
-                                input_key_state <- Bitmask.set_key column input_key_state
+                                input_key_state <- input_key_state.Add(column)
 
                             liveplay.AddFrame(time, input_key_state)
                     )

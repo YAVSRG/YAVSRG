@@ -96,7 +96,7 @@ module Chart =
                 last_time <- time
 
             let mutable last_time = -Time.infinity
-            let mutable ln = 0us
+            let mutable ln = Bitmask.Empty
 
             for { Time = time; Data = nr } in chart.Notes do
                 if time <= last_time then
@@ -108,27 +108,27 @@ module Chart =
 
                 for k = 0 to (chart.Keys - 1) do
                     if nr.[k] = NoteType.HOLDHEAD then
-                        if Bitmask.has_key k ln then
+                        if ln.Contains(k) then
                             failwithf "Hold head appears inside hold at %f" time
 
-                        ln <- Bitmask.set_key k ln
+                        ln <- ln.Add(k)
                     elif nr.[k] = NoteType.HOLDBODY then
-                        if Bitmask.has_key k ln |> not then
+                        if not (ln.Contains(k)) then
                             failwithf "Hold middle appears with no head at %f" time
                     elif nr.[k] = NoteType.NOTHING then
-                        if Bitmask.has_key k ln then
+                        if ln.Contains(k) then
                             failwithf "Hold middle should have been present at %f" time
                     elif nr.[k] = NoteType.HOLDTAIL then
-                        if Bitmask.has_key k ln |> not then
+                        if not (ln.Contains(k)) then
                             failwithf "Hold tail appears with no head at %f" time
 
-                        ln <- Bitmask.unset_key k ln
+                        ln <- ln.Remove(k)
 
                 if NoteRow.is_empty nr then
                     failwithf "Note row is redundant at %f" time
 
-            if ln <> 0us then
-                failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time ln
+            if not ln.IsEmpty then
+                failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time (ln.ToInt16())
 
             Ok chart
         with err ->

@@ -41,7 +41,7 @@ type InputMeter(ctx: HudContext) =
         for k = 0 to ctx.State.WithColors.Keys - 1 do
             color_fades.[k].Update elapsed_ms
             fades.[k].Update elapsed_ms
-            if Bitmask.has_key k ctx.State.Scoring.KeyState then
+            if ctx.State.Scoring.KeyState.Contains(k) then
                 fades.[k].Reset()
 
     override this.Draw() =
@@ -108,7 +108,7 @@ type InputMeter(ctx: HudContext) =
             let fade_edge = now - (this.Bounds.Height - column_width - ctx.Config.InputMeterInputFadeDistance) / SCROLL_SPEED
             for struct (timestamp, keystate) in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
                 for k = 0 to ctx.State.WithColors.Keys - 1 do
-                    if Bitmask.has_key k keystate then
+                    if keystate.Contains(k) then
                         if previous > fade_edge && timestamp < fade_edge then
                             bar (k, fade_edge, previous)
                             bar (k, timestamp, fade_edge)

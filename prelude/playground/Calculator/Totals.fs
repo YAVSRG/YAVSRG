@@ -7,11 +7,11 @@ module Totals =
 
     let RATES = [0.8f<rate>; 0.9f<rate>; 1.0f<rate>; 1.1f<rate>; 1.2f<rate>]
 
-    let calculate_rates (label: string) (pattern: _) =
+    let calculate_rates (label: string) (pattern: uint16 array) =
         for rate in RATES do
             [|1f; 2f; 3f|]
             |> Array.map (fun duration ->
-                let rating = Difficulty.calculate (rate, ChartBuilder.repeated_pattern 4 (duration * 60_000.0f<ms>) pattern)
+                let rating = Difficulty.calculate (rate, ChartBuilder.repeated_pattern 4 (duration * 60_000.0f<ms>) (Array.map Bitmask.FromInt16 pattern))
                 rating.Overall
             )
             |> printfn "'%s' on %.1fx: %A" label rate

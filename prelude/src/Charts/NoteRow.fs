@@ -1,10 +1,6 @@
 ﻿namespace Prelude.Charts
 
-open System
 open System.IO
-open System.Linq
-open System.Collections.Generic
-open System.Security.Cryptography
 open Prelude
 
 type NoteType =
@@ -20,22 +16,16 @@ module NoteRow =
 
     let clone = Array.copy
 
-    let create_empty (keycount: int) : NoteRow = Array.create keycount NoteType.NOTHING
+    let inline create_empty (keycount: int) : NoteRow = Array.create keycount NoteType.NOTHING
 
     let create_notes (keycount: int) (notes: Bitmask) : NoteRow =
         let nr = create_empty keycount
-
-        for k in Bitmask.toSeq notes do
-            nr.[k] <- NoteType.NORMAL
-
+        notes.Iter(fun key -> nr.[key] <- NoteType.NORMAL)
         nr
 
     let create_ln_bodies (keycount: int) (notes: Bitmask) : NoteRow =
         let nr = create_empty keycount
-
-        for k in Bitmask.toSeq notes do
-            nr.[k] <- NoteType.HOLDBODY
-
+        notes.Iter(fun key -> nr.[key] <- NoteType.HOLDBODY)
         nr
 
     let is_empty: NoteRow -> bool =
@@ -48,16 +38,17 @@ module NoteRow =
 
     let read (keycount: int) (br: BinaryReader) : NoteRow =
         let row = create_empty keycount
-        let columns = br.ReadUInt16()
+        let columns = Bitmask.FromInt16(br.ReadUInt16())
 
-        for k in Bitmask.toSeq columns do
-            row.[k] <-
+        columns.Iter(fun column ->
+            row.[column] <-
                 match br.ReadByte() with
                 | 1uy -> NoteType.NORMAL
                 | 2uy -> NoteType.HOLDHEAD
                 | 3uy -> NoteType.HOLDBODY
                 | 4uy -> NoteType.HOLDTAIL
                 | b -> failwithf "unexpected note type in chart data: %i" b
+        )
 
         row
 
@@ -69,7 +60,7 @@ module NoteRow =
                         yield i
             }
 
-        bw.Write(Bitmask.ofSeq columns)
+        bw.Write(Bitmask.FromSeq(columns).ToInt16())
 
         for k in columns do
             bw.Write(byte row.[k])

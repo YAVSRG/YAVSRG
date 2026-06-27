@@ -43,7 +43,7 @@ type ColumnLighting(keys: int, ns: NoteskinConfig, state: PlayState) =
 
         Array.iteri
             (fun k (s: Animation.Delay) ->
-                if state.Scoring.KeyState |> Bitmask.has_key k then
+                if state.Scoring.KeyState.Contains(k) then
                     s.Reset()
             )
             timers

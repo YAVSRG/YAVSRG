@@ -200,7 +200,7 @@
     <Compile Include="Features\Play\Replay\ReplayScreen.fs" />
     <Compile Include="Features\Play\Practice\PracticeState.fs" />
     <Compile Include="Features\Play\Practice\PracticeControls.fs" />
-    <Compile Include="Features\Play\Practice\Practice.fs" />
+    <Compile Include="Features\Play\Practice\PracticeScreen.fs" />
     <Compile Include="Features\Skins\Reload.fs" />
     <Compile Include="Features\Skins\Elements.fs" />
     <Compile Include="Features\Skins\Preview.fs" />

@@ -97,7 +97,7 @@ module StepMania_To_Interlude =
         let fmeter = float32 meter * 1.0f<beat>
         let states = List<TimeItem<NoteRow>>()
         let points = List<TimeItem<BPM>>()
-        let mutable ln: Bitmask = 0us
+        let mutable ln: Bitmask = Bitmask.Empty
         let mutable now = start
         let _, b = List.head bpms
 
@@ -139,25 +139,25 @@ module StepMania_To_Interlude =
                 let nr = NoteRow.create_ln_bodies keys ln
 
                 Seq.iteri
-                    (fun k c ->
-                        match c with
+                    (fun key note_type ->
+                        match note_type with
                         | '0' -> ()
                         | '1' ->
-                            if not (Bitmask.has_key k ln) then
-                                nr.[k] <- NoteType.NORMAL
+                            if not (ln.Contains(key)) then
+                                nr.[key] <- NoteType.NORMAL
                         | '2'
                         | '4' ->
-                            if not (Bitmask.has_key k ln) then
-                                nr.[k] <- NoteType.HOLDHEAD
-                                ln <- Bitmask.set_key k ln
+                            if not (ln.Contains(key)) then
+                                nr.[key] <- NoteType.HOLDHEAD
+                                ln <- ln.Add(key)
                         | '3' ->
-                            if Bitmask.has_key k ln then
-                                nr.[k] <- NoteType.HOLDTAIL
-                                ln <- Bitmask.unset_key k ln
+                            if ln.Contains(key) then
+                                nr.[key] <- NoteType.HOLDTAIL
+                                ln <- ln.Remove(key)
                         | 'M'
                         | 'L'
                         | 'F' -> () // ignore mines, lifts, fakes
-                        | _ -> skip_conversion (sprintf "Unknown note type '%c'" c)
+                        | _ -> skip_conversion (sprintf "Unknown note type '%c'" note_type)
                     )
                     m.[i]
 
@@ -212,12 +212,12 @@ module StepMania_To_Interlude =
             measures
 
         let mutable i = states.Count - 1
-        while ln <> 0us do
+        while not ln.IsEmpty do
             let s = states.[i].Data
-            for k in Bitmask.toSeq ln do
+            for k in ln.ToSeq() do
                 if s.[k] = NoteType.HOLDHEAD then
                     s.[k] <- NoteType.NORMAL
-                    ln <- Bitmask.unset_key k ln
+                    ln <- ln.Remove(k)
                 elif s.[k] = NoteType.HOLDBODY then
                     s.[k] <- NoteType.NOTHING
             i <- i - 1

@@ -51,10 +51,10 @@ type KeysPerSecond(ctx: HudContext) =
         let recent_events = ctx.State.Scoring.EnumerateRecentFrames()
         let now = ctx.State.CurrentChartTime()
         kps <- 0.0f
-        let mutable previous = 0us
+        let mutable previous = Bitmask.Empty
         let mutable previous_time = now
         for struct (timestamp, keystate) in recent_events |> Seq.takeWhile (fun _ -> previous_time >= now - TWO_SECONDS) do
-            let keys = Bitmask.count (previous &&& ~~~keystate) |> float32
+            let keys = previous.Subtract(keystate).Count |> float32
             kps <- kps + keys * (1f - (now - previous_time) / TWO_SECONDS)
             max_kps <- max max_kps kps
             previous <- keystate

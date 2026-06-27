@@ -203,7 +203,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplay, notes:
                         match fst hold_states.[k] with
                         | H_REGRABBED
                         | H_HOLDING
-                        | H_MISSED_HEAD_REGRABBED -> Bitmask.has_key k this.KeyState
+                        | H_MISSED_HEAD_REGRABBED -> this.KeyState.Contains(k)
                         | _ -> false
 
                     let dropped = (fst hold_states.[k]).IsDropped
@@ -390,7 +390,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplay, notes:
     member this.IgnoreNotesBefore(time: Time) =
         let mutable i = 0
 
-        let mutable hold_tails_remaining = 0us
+        let mutable hold_tails_remaining = Bitmask.Empty
 
         while i < hit_data.Length && hit_data.[i].Time < time do
             let { Data = struct (deltas, flags) } = hit_data.[i]
@@ -400,21 +400,21 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: IReplay, notes:
                     flags.[k] <- HitFlags.HIT_ACCEPTED
                 elif flags.[k] = HitFlags.HIT_HOLD_REQUIRED then
                     flags.[k] <- HitFlags.HIT_ACCEPTED
-                    hold_tails_remaining <- Bitmask.set_key k hold_tails_remaining
+                    hold_tails_remaining <- hold_tails_remaining.Add(k)
                 elif flags.[k] = HitFlags.RELEASE_REQUIRED then
                     flags.[k] <- HitFlags.RELEASE_ACCEPTED
-                    hold_tails_remaining <- Bitmask.unset_key k hold_tails_remaining
+                    hold_tails_remaining <- hold_tails_remaining.Remove(k)
                 deltas.[k] <- -infinityf * 1.0f<ms / rate>
 
             i <- i + 1
 
-        while hold_tails_remaining > 0us do
+        while not hold_tails_remaining.IsEmpty do
             let { Data = struct (deltas, flags) } = hit_data.[i]
 
             for k = 0 to keys - 1 do
                 if flags.[k] = HitFlags.RELEASE_REQUIRED then
                     flags.[k] <- HitFlags.RELEASE_ACCEPTED
-                    hold_tails_remaining <- Bitmask.unset_key k hold_tails_remaining
+                    hold_tails_remaining <- hold_tails_remaining.Remove(k)
                     deltas.[k] <- -infinityf * 1.0f<ms / rate>
 
             i <- i + 1

@@ -27,7 +27,7 @@ type ChartFuzzer =
                     yield columns.[i]
             }
 
-        let mutable hold_notes = 0us
+        let mutable hold_notes = Bitmask.Empty
         let generate_next_row (_: int) : TimeItem<NoteRow> =
 
             let next_time = timestamps.Next()
@@ -35,12 +35,12 @@ type ChartFuzzer =
 
             for column in choose_random_columns() do
 
-                if Bitmask.has_key column hold_notes then
-                    hold_notes <- Bitmask.unset_key column hold_notes
+                if hold_notes.Contains(column) then
+                    hold_notes <- hold_notes.Remove(column)
                     next_row.[column] <- NoteType.HOLDTAIL
 
                 elif random.Next(2) = 1 then
-                    hold_notes <- Bitmask.set_key column hold_notes
+                    hold_notes <- hold_notes.Add(column)
                     next_row.[column] <- NoteType.HOLDHEAD
 
                 else

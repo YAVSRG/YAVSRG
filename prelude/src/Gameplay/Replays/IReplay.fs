@@ -25,21 +25,23 @@ type IReplay =
 [<AbstractClass>]
 type ReplayConsumer(keys: int, replay: IReplay) =
 
-    let mutable current_pressed_keys: Bitmask = 0us
+    let mutable current_pressed_keys: Bitmask = Bitmask.Empty
 
     member this.PollReplay(time: ChartTime) =
-        while replay.HasNext time do
+        while replay.HasNext(time) do
             let struct (time, pressed_keys) = replay.GetNext()
             this.HandleReplayFrame(time, pressed_keys)
 
-    member private this.HandleReplayFrame(time: ChartTime, pressed_keys: Bitmask) =
-        for k = 0 to (keys - 1) do
-            if Bitmask.has_key k current_pressed_keys && not (Bitmask.has_key k pressed_keys) then
+    member private this.HandleReplayFrame(time: ChartTime, new_pressed_keys: Bitmask) =
+        for k = 0 to keys - 1 do
+
+            if current_pressed_keys.Contains(k) && not (new_pressed_keys.Contains(k)) then
                 this.HandleKeyUp(time, k)
-            elif Bitmask.has_key k pressed_keys && not (Bitmask.has_key k current_pressed_keys) then
+
+            elif new_pressed_keys.Contains(k) && not (current_pressed_keys.Contains(k)) then
                 this.HandleKeyDown(time, k)
 
-        current_pressed_keys <- pressed_keys
+        current_pressed_keys <- new_pressed_keys
 
     member this.KeyState = current_pressed_keys
     abstract member HandleKeyDown: ChartTime * int -> unit

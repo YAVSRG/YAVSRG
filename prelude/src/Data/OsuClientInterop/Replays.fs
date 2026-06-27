@@ -52,7 +52,7 @@ module OsuReplay =
                     let state = uint16 parts.[1]
 
                     if state <> last_state then
-                        yield struct ((time - original_osu_file_first_note) * float32 original_osu_file_rate, uint16 parts.[1])
+                        yield struct ((time - original_osu_file_first_note) * float32 original_osu_file_rate, Bitmask.FromInt16(state))
                         last_state <- state
         }
         |> Array.ofSeq
@@ -68,7 +68,7 @@ module OsuReplay =
                 let t = previous_time
                 let rounded_time = timestamp |> float32 |> round |> int
                 previous_time <- rounded_time
-                sprintf "%i|%i|1|0" (rounded_time - t) key_state
+                sprintf "%i|%i|1|0" (rounded_time - t) (key_state.ToInt16())
             )
             |> String.concat ","
 

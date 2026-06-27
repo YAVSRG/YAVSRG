@@ -1,29 +1,49 @@
 ﻿namespace Prelude
 
-type Bitmask = uint16
+type [<Struct>] Bitmask =
+    { Value: uint16 }
 
-module Bitmask =
+    static member Empty = { Value = 0us }
 
-    let empty = 0us
+    member inline this.IsEmpty = this.Value = 0us
 
-    let rec count (x: Bitmask) : int =
-        match x with
-        | 0us -> 0
-        | n -> (if (n &&& 1us) = 1us then 1 else 0) + (count (n >>> 1))
+    member inline this.Contains(key: int) = (1us <<< key) &&& this.Value > 0us
+    member inline this.Add(key: int) = { Value = (1us <<< key) ||| this.Value }
+    member inline this.Remove(key: int) = { Value = ~~~(1us <<< key) &&& this.Value }
+    member inline this.Toggle(key: int) = { Value = (1us <<< key) ^^^ this.Value }
 
-    let has_key (k: int) (x: Bitmask) = (1us <<< k) &&& x > 0us
-    let set_key (k: int) (x: Bitmask) = (1us <<< k) ||| x
-    let unset_key (k: int) (x: Bitmask) = ~~~(1us <<< k) &&& x
-    let toggle_key (k: int) (x: Bitmask) = (1us <<< k) ^^^ x
+    member inline this.Subtract(bitmask: Bitmask) = { Value = this.Value &&& ~~~bitmask.Value }
 
-    let rec toSeq (x: Bitmask) : int seq =
+    member inline this.Iter([<InlineIfLambda>] action: int -> unit) =
+        let mutable bits = this.Value
+        let mutable i = 0
+        while bits <> 0us do
+            if bits &&& 1us <> 0us then
+                action(i)
+            i <- i + 1
+            bits <- bits >>> 1
+
+    member inline this.Count =
+        let mutable count = 0
+        this.Iter(fun _ -> count <- count + 1)
+        count
+
+    member inline this.ToSeq() =
+        let mutable bits = this.Value
+        let mutable i = 0
         seq {
-            for i = 0 to 15 do
-                if (has_key i x) then
+            while bits <> 0us do
+                if bits &&& 1us <> 0us then
                     yield i
+                i <- i + 1
+                bits <- bits >>> 1
         }
 
-    let ofSeq (l: int seq) : Bitmask =
-        let mutable bm: Bitmask = 0us
-        Seq.iter (fun k -> bm <- set_key k bm) l
-        bm
+    static member inline FromSeq(keys: int seq) =
+        Seq.fold (fun (bitmask: Bitmask) (key: int) -> bitmask.Add key) Bitmask.Empty keys
+
+    member inline this.ToInt16() : uint16 =
+        this.Value
+
+    static member FromInt16(value: uint16) =
+        { Value = value }

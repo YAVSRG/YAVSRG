@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Localisation
+﻿namespace Prelude.Tests.Shared
 
 open NUnit.Framework
 open Prelude

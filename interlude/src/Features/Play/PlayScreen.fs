@@ -31,7 +31,7 @@ type PlayScreen =
             ScoreProcessor.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
-        let mutable key_state = 0us
+        let mutable key_state = Bitmask.Empty
         let mutable liveplay_position = -Time.infinity
 
         let mutable play_time = 0.0
@@ -227,12 +227,13 @@ type PlayScreen =
                 let chart_time = now - first_note
 
                 if not (liveplay :> IReplay).Finished && fade_in.Target = 1.0f then
+                    // todo: reduce repetition of this in all play screen implementations
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then
-                                key_state <- Bitmask.unset_key column key_state
+                                key_state <- key_state.Remove(column)
                             else
-                                key_state <- Bitmask.set_key column key_state
+                                key_state <- key_state.Add(column)
 
                             liveplay.AddFrame(time, key_state)
                             liveplay_position <- max liveplay_position (time - first_note)
