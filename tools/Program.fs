@@ -1,5 +1,4 @@
-﻿open System.IO
-open Percyqaz.Common
+﻿open Percyqaz.Common
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open YAVSRG.CLI

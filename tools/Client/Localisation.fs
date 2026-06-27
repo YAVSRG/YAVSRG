@@ -14,7 +14,7 @@ module Localisation =
         match Localisation.try_load_file(file, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt")) with
         | Ok locale -> locale
         | Error reason -> failwith reason
-        
+
     let private write_locale (locale: Localisation.LocaleFile, file: string) =
         Localisation.write_file(locale, Path.Combine(INTERLUDE_SOURCE_PATH, "Resources", "Locale", file + ".txt"))
 
@@ -38,7 +38,7 @@ module Localisation =
                     yield m.Index, m.Groups.[1].Value
             }
 
-        for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
+        for filename, file_contents in walk_fs_file_contents INTERLUDE_SOURCE_PATH do
 
             for position, m in matches """ [^%]%"([a-z\-_\.]*)" """ file_contents do
                 find m (sprintf "%s (position %i)" filename position)
@@ -150,7 +150,7 @@ module Localisation =
 
             result
 
-        for filename, file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
+        for filename, file_contents in walk_fs_file_contents INTERLUDE_SOURCE_PATH do
             let replaced_contents =
                 file_contents
                 |> replaces """ ([^%])%"([a-z\-_\.]*)" """ "%s%%\"%s\""
@@ -159,7 +159,7 @@ module Localisation =
 
             if replaced_contents <> file_contents then
                 File.WriteAllText(filename, replaced_contents)
-                
+
         let new_locale = Dictionary(locale.Entries)
 
         for key in to_rename do

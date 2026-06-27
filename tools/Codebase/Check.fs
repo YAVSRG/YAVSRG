@@ -29,3 +29,11 @@ module Check =
         printfn "total %i lines of f#" loc
 
     let format_all_code () = exec "fantomas" "."
+
+    let check_filenames () =
+        walk_fs_files YAVSRG_PATH
+        |> Seq.map System.IO.Path.GetFileName
+        |> Seq.countBy id
+        |> Seq.sortByDescending snd
+        |> Seq.truncate 10
+        |> Seq.iter (fun (file_name, count) -> printfn "%s: %i uses" file_name count)
