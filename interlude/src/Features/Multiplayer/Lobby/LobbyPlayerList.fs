@@ -45,7 +45,7 @@ type Player(lobby: Lobby, name: string, player: LobbyPlayer) =
 
     member this.Name = name
 
-type PlayerList(lobby: Lobby) =
+type LobbyPlayerList(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     let other_players = FlowContainer.Vertical<Widget>(50.0f, Spacing = 5.0f)

@@ -12,7 +12,7 @@ open Interlude.UI
 open Interlude.Features.Score
 open Interlude.Features.Online
 
-type Chat(lobby: Lobby) =
+type LobbyChat(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     let MESSAGE_HEIGHT = 40.0f

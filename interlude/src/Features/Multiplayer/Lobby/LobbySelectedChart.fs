@@ -33,7 +33,7 @@ type MultiplayerChartContextMenu(chart_meta: ChartMeta) =
 
     override this.Title = chart_meta.Title
 
-module LobbyChart =
+module LobbySelectedChart =
 
     let mutable private last_seen_lobby_chart : LobbyChart option = None
     let mutable private last_seen_loaded_chart : LoadedChartInfo option = None
@@ -122,7 +122,7 @@ module LobbyChart =
             | None -> ()
         )
 
-type SelectedChart(lobby: Lobby) =
+type LobbySelectedChart(lobby: Lobby) =
     inherit Container(NodeType.None)
 
     override this.Init(parent: Widget) =
@@ -144,7 +144,7 @@ type SelectedChart(lobby: Lobby) =
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(40.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some info -> info.ChartMeta.DifficultyName
             | None -> "???"
         )
@@ -153,42 +153,42 @@ type SelectedChart(lobby: Lobby) =
             .Position(Position.ShrinkT(70.0f).SliceT(30.0f).Shrink(10.0f, 0.0f))
 
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some info -> sprintf "%s %.2f" Icons.STAR info.Difficulty.Overall
             | None -> ""
         )
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some info -> info.DurationString
             | None -> ""
         )
             .Align(Alignment.CENTER)
             .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some info -> info.BpmString
             | None -> ""
         )
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(100.0f).SliceT(60.0f))
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some _ -> ModState.format (SelectedChart.rate.Value, SelectedChart.selected_mods.Value)
             | None -> ""
         )
             .Align(Alignment.LEFT)
             .Position(Position.ShrinkT(160.0f).SliceT(40.0f))
         |+ Text(fun () ->
-            match LobbyChart.info_if_selected() with
+            match LobbySelectedChart.info_if_selected() with
             | Some info -> info.NotecountsString
             | None -> ""
         )
             .Align(Alignment.RIGHT)
             .Position(Position.ShrinkT(160.0f).SliceT(40.0f))
         |+ Text(fun () ->
-            if LobbyChart.is_loaded_or_loading() then
+            if LobbySelectedChart.is_loaded_or_loading() then
                 ""
             else
                 %"lobby.missing_chart"
@@ -219,7 +219,7 @@ type SelectedChart(lobby: Lobby) =
                     .ShrinkR(AngledButton.LEAN_AMOUNT)
             )
             .Conditional(fun () ->
-                LobbyChart.info_if_selected().IsSome
+                LobbySelectedChart.info_if_selected().IsSome
                 && not lobby.GameInProgress
                 && lobby.ReadyStatus = ReadyFlag.NotReady
             )
@@ -229,7 +229,7 @@ type SelectedChart(lobby: Lobby) =
             (fun () ->
                 match lobby.Replays |> Seq.tryHead with
                 | Some (KeyValue (username, replay_info)) ->
-                    match LobbyChart.info_if_selected() with
+                    match LobbySelectedChart.info_if_selected() with
                     | Some info ->
                         Screen.change_new
                             (fun () -> SpectateScreen.Create(info, username, replay_info, lobby))
@@ -244,7 +244,7 @@ type SelectedChart(lobby: Lobby) =
             .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
             .LeanRight(false)
             .Conditional(fun () ->
-                LobbyChart.info_if_selected().IsSome
+                LobbySelectedChart.info_if_selected().IsSome
                 && lobby.GameInProgress
             )
 
@@ -274,7 +274,7 @@ type SelectedChart(lobby: Lobby) =
             .LeanRight(false)
             .Position(Position.SliceB(AngledButton.HEIGHT).SlicePercentR(0.5f))
             .Conditional(fun () ->
-                LobbyChart.info_if_selected().IsSome
+                LobbySelectedChart.info_if_selected().IsSome
                 && not Song.loading
                 && not lobby.GameInProgress
             )
@@ -308,13 +308,13 @@ type SelectedChart(lobby: Lobby) =
 
         lobby.OnChartChanged.Add(fun _ ->
             if Screen.current_type = ScreenType.Lobby then
-                LobbyChart.attempt_match_lobby_chart lobby
+                LobbySelectedChart.attempt_match_lobby_chart lobby
         )
 
         base.Init parent
 
     override this.Draw() =
-        let is_loaded = LobbyChart.is_loaded_or_loading()
+        let is_loaded = LobbySelectedChart.is_loaded_or_loading()
         Render.rect
             (this.Bounds.SliceT(70.0f))
             (if is_loaded then
