@@ -30,7 +30,9 @@
     <Compile Include="Bot\AdminInteractables.fs" />
     <Compile Include="Bot\AdminCommands.fs" />
     <Compile Include="Bot\Bot.fs" />
-    <Compile Include="API\Utils.fs" />
+    <Compile Include="API\API.fs" />
+    <Compile Include="API\QueryUtils.fs" />
+    <Compile Include="API\Authorization.fs" />
     <Compile Include="API\Health\Status.fs" />
     <Compile Include="API\Auth\Dummy.fs" />
     <Compile Include="API\Auth\Discord.fs" />
@@ -63,7 +65,7 @@
     <Compile Include="API\Stats\Leaderboard\MonthlyKeymode.fs" />
     <Compile Include="API\Stats\Fetch.fs" />
     <Compile Include="API\Stats\Sync.fs" />
-    <Compile Include="API\API.fs" />
+    <Compile Include="API\Endpoints.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

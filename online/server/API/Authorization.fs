@@ -3,14 +3,7 @@
 open Percyqaz.Common
 open Interlude.Web.Server.Domain.Core
 
-[<AutoOpen>]
-module Utils =
-
-    exception NotAuthorizedException
-    exception NotFoundException
-    exception AuthorizeFailedException
-    exception PermissionDeniedException
-    exception BadRequestException of Message: string option
+module [<AutoOpen>] Authorization =
 
     let [<Literal>] BEARER_PREFIX = "Bearer "
     let BEARER_PREFIX_LENGTH = BEARER_PREFIX.Length
@@ -35,7 +28,3 @@ module Utils =
         match find_auth_header() with
         | Some auth_header -> validate_token(auth_header)
         | None -> raise NotAuthorizedException
-
-    let require_query_parameter (query_params: Map<string, string array>) (name: string) =
-        if not (query_params.ContainsKey name) then
-            raise (BadRequestException(Some(sprintf "'%s' is required" name)))

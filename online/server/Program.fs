@@ -49,11 +49,12 @@ try
             Handle_Disconnect = Online.handle_disconnect
         }
 
+    let api_root = Endpoints.CreateApiRoot
     API.Server.init
         {
             Port = HTTPS_PORT
             SSLContext = SslContext(SslProtocols.Tls12, api_cert)
-            Handle_Request = API.handle_request
+            Handle_Request = api_root.Handle
         }
 
     Logging.Info "Launching game server on port %i ..." SOCKET_PORT
