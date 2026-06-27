@@ -14,13 +14,13 @@ module Check =
             printfn "%s" (String match_span)
 
     let simple_view_all () =
-        for filename, file_contents in walk_fs_files YAVSRG_PATH do
+        for filename, file_contents in walk_fs_file_contents YAVSRG_PATH do
             printfn "%s\n====\n" filename
             simple_view file_contents
 
     let check_linecounts () =
         let mutable loc = 0
-        for filename, file_contents in walk_fs_files YAVSRG_PATH do
+        for filename, file_contents in walk_fs_file_contents YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
 
             if lines > 300 then
