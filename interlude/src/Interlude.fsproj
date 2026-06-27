@@ -203,7 +203,7 @@
     <Compile Include="Features\Play\Practice\PracticeScreen.fs" />
     <Compile Include="Features\Skins\Reload.fs" />
     <Compile Include="Features\Skins\Elements.fs" />
-    <Compile Include="Features\Skins\Preview.fs" />
+    <Compile Include="Features\Skins\SkinPreview.fs" />
     <Compile Include="Features\Skins\Problems.fs" />
     <Compile Include="Features\Skins\Textures\TextureEditGrid.fs" />
     <Compile Include="Features\Skins\Textures\TextureActions.fs" />
@@ -256,7 +256,7 @@
     <Compile Include="Features\LevelSelect\Tree\TreeChart.fs" />
     <Compile Include="Features\LevelSelect\Tree\TreeGroup.fs" />
     <Compile Include="Features\LevelSelect\Tree\Tree.fs" />
-    <Compile Include="Features\LevelSelect\Preview.fs" />
+    <Compile Include="Features\LevelSelect\ChartPreview.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScores.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard\LocalScoreCard.fs" />

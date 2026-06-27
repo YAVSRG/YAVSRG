@@ -9,7 +9,7 @@ open Interlude.Content
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type Preview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
+type ChartPreview(info: LoadedChartInfo, change_rate: Rate -> unit) as this =
     inherit Dialog()
 
     let playstate, recreate_scoring = PlayState.Dummy info
