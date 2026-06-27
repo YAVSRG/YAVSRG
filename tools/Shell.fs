@@ -2,22 +2,31 @@
 
 open System.Diagnostics
 
-module Shell =
+type Shell =
+    { WorkingDirectory: string }
+    static member DefaultLocation = { WorkingDirectory = YAVSRG_PATH }
 
-    let exec (cmd: string) (args: string) =
+    member this.Exec(cmd: string, args: string) : unit =
         Process
-            .Start(ProcessStartInfo(cmd, args, WorkingDirectory = YAVSRG_PATH))
+            .Start(ProcessStartInfo(cmd, args, WorkingDirectory = this.WorkingDirectory))
             .WaitForExit()
 
-    let eval (cmd: string) (args: string) : string =
-        let p =
-            Process.Start(ProcessStartInfo(cmd, args, WorkingDirectory = YAVSRG_PATH, RedirectStandardOutput = true))
+    static member Exec(cmd: string, args: string) : unit =
+        Shell.DefaultLocation.Exec(cmd, args)
 
-        let output = p.StandardOutput.ReadToEnd()
-        p.WaitForExit()
+    member this.Eval(cmd: string, args: string) : string =
+        let start_info =
+            ProcessStartInfo(
+                cmd, args,
+                WorkingDirectory = this.WorkingDirectory,
+                RedirectStandardOutput = true
+            )
+        let proc = Process.Start(start_info)
+        let output = proc.StandardOutput.ReadToEnd()
+        proc.WaitForExit()
         output.Trim()
 
-    let exec_at (path: string) (cmd: string) (args: string) =
-        Process
-            .Start(ProcessStartInfo(cmd, args, WorkingDirectory = path))
-            .WaitForExit()
+    static member Eval(cmd: string, args: string) : string =
+        Shell.DefaultLocation.Eval(cmd, args)
+
+    static member At(path: string) = { WorkingDirectory = path }

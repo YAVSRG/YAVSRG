@@ -22,10 +22,8 @@ module Server =
         let cert_path = Path.Combine(secrets_path, "localhost.pfx")
         if not (File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.exec_at
-                secrets_path
-                "dotnet"
-                "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT"
+            Shell.At(secrets_path)
+                .Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
         if not (File.Exists(secrets_file)) then
@@ -33,7 +31,8 @@ module Server =
             printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online")) "docker" "compose -p interludeweb up --build --detach"
+        Shell.At(Path.Combine(YAVSRG_PATH, "online"))
+            .Exec("docker", "compose -p interludeweb up --build --detach")
 
     let run_local () : unit =
         printfn "Running Interlude server locally (not in a docker container)\n"
@@ -51,10 +50,8 @@ module Server =
         let cert_path = Path.Combine(secrets_path, "localhost.pfx")
         if not (File.Exists(cert_path)) then
             printfn "First time setup: Creating and trusting local certificate @ %s" cert_path
-            Shell.exec_at
-                secrets_path
-                "dotnet"
-                "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT"
+            Shell.At(secrets_path)
+                .Exec("dotnet", "dev-certs https --trust -ep localhost.pfx -p DEVELOPMENT")
 
         let secrets_file = Path.Combine(secrets_path, "secrets.json")
         if not (File.Exists(secrets_file)) then
@@ -62,18 +59,17 @@ module Server =
             printfn "Ask Percyqaz if not sure what to put in this, documentation coming soon"
             printfn "After this initial setup you can run the server just with the 'run' button in your IDE of choice"
 
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "server")) "dotnet" "build --configuration Debug -v q"
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))
-            "dotnet"
-            "run --project ../../../Interlude.Web.Server.fsproj --configuration Debug -v q"
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "server")).Exec("dotnet", "build --configuration Debug -v q")
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "server", "bin", "Debug", DOTNET_VERSION))
+            .Exec("dotnet", "run --project ../../../Interlude.Web.Server.fsproj --configuration Debug -v q")
 
     let run_domain_tests () : unit =
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "tests", "domain")) "dotnet" "test"
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "domain")).Exec("dotnet", "test")
 
     let run_all_tests () : unit =
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "tests", "domain")) "dotnet" "test"
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "tests", "integration")) "dotnet" "test"
-        Shell.exec_at (Path.Combine(YAVSRG_PATH, "online", "tests", "client")) "dotnet" "run"
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "domain")).Exec("dotnet", "test")
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "integration")).Exec("dotnet", "test")
+        Shell.At(Path.Combine(YAVSRG_PATH, "online", "tests", "client")).Exec("dotnet", "run")
 
     let down_detector () : unit =
         use client = new HttpClient()

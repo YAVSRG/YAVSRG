@@ -9,11 +9,11 @@ module Commands =
     let release_all_in_one () =
         Wiki.generate_toc ()
         Site.generate_site ()
-        Shell.exec "git" "add interlude/docs"
-        Shell.exec "git" "add site"
-        Shell.exec "git" "commit -m \"📘 Update site changelog & wiki\""
+        Shell.Exec("git", "add interlude/docs")
+        Shell.Exec("git", "add site")
+        Shell.Exec("git", "commit -m \"chore(site): Update site changelog & wiki\"")
         Version.publish ()
-        Shell.exec "git" "push"
+        Shell.Exec("git", "push")
 
     let register (ctx: ShellContext) =
         ctx

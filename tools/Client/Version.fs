@@ -49,6 +49,6 @@ module Version =
 
         printfn "Creating git commit"
 
-        Shell.exec "git" (sprintf "commit -a -m \"🏷️ Version %s\"" v)
+        Shell.Exec("git", sprintf "commit -a -m \"🏷️ Version %s\"" v)
 
     let version () = current_version

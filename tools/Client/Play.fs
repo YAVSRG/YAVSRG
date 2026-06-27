@@ -23,14 +23,14 @@ module Play =
         | _ -> failwithf "Your platform (%O) is not supported! Maybe complain in the discord?" arch
 
     let update () =
-        Shell.exec "git" "checkout main"
-        Shell.exec "git" "pull"
-        Shell.exec "git" "fetch --tags"
+        Shell.Exec("git", "checkout main")
+        Shell.Exec("git", "pull")
+        Shell.Exec("git", "fetch --tags")
 
-        let tag_digest = Shell.eval "git" "rev-list --tags --max-count=1"
-        let tag_name = Shell.eval "git" (sprintf "describe --tags \"%s\"" tag_digest)
-        Shell.exec "git" (sprintf "checkout %s" tag_name)
-        Shell.exec "git" "submodule update --recursive"
+        let tag_digest = Shell.Eval("git", "rev-list --tags --max-count=1")
+        let tag_name = Shell.Eval("git", sprintf "describe --tags \"%s\"" tag_digest)
+        Shell.Exec("git", sprintf "checkout %s" tag_name)
+        Shell.Exec("git", "submodule update --recursive")
 
         try
             Directory.CreateDirectory GAME_FOLDER |> ignore
@@ -39,8 +39,8 @@ module Play =
             ZipFile.ExtractToDirectory(Path.Combine(YAVSRG_PATH, "interlude", "releases", sprintf "Interlude-%s.zip" build_info.Name), GAME_FOLDER, true)
         with err -> printfn "Error creating GAME folder: %O" err
 
-        Shell.exec "git" "checkout main"
-        Shell.exec "git" "submodule update --recursive"
+        Shell.Exec("git", "checkout main")
+        Shell.Exec("git", "submodule update --recursive")
 
     let play () =
 
@@ -72,4 +72,4 @@ module Play =
                 true
             )
         with err -> printfn "Error detecting platform: %O" err
-        Shell.exec_at INTERLUDE_SOURCE_PATH "dotnet" "run --configuration Debug -v q"
+        Shell.At(INTERLUDE_SOURCE_PATH).Exec("dotnet", "run --configuration Debug -v q")

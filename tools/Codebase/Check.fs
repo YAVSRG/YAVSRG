@@ -29,7 +29,7 @@ module Check =
             loc <- loc + lines
         printfn "total %i lines of f#" loc
 
-    let format_all_code () = Shell.exec "fantomas" "."
+    let format_all_code () = Shell.Exec("fantomas", ".")
 
     let check_filenames () =
         SourceFiles.walk_fs_files YAVSRG_PATH

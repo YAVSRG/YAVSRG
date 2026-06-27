@@ -105,9 +105,11 @@ Information, future updates and support available at:
         with _ ->
             ()
 
-        Shell.exec_at INTERLUDE_SOURCE_PATH
-            "dotnet"
-            $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
+        Shell.At(INTERLUDE_SOURCE_PATH)
+            .Exec(
+                "dotnet",
+                $"publish --configuration Release -r {info.RuntimeId} -p:PublishSingleFile=True --self-contained true"
+            )
 
         Directory.CreateDirectory clean_dir |> ignore
 
