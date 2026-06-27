@@ -36,9 +36,13 @@
     <Content Include="Data\989392 DJ Sharpnel - World Sound.osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Localisation\LocaleFakeFileSystem.fs" />
+    <Compile Include="Helpers\LocaleFakeFileSystem.fs" />
+    <Compile Include="Helpers\ChartFuzzer.fs" />
+    <Compile Include="Helpers\NotesBuilder.fs" />
+    <Compile Include="Helpers\ReplayBuilder.fs" />
+    <Compile Include="Helpers\GameplayEventCollector.fs" />
+    <Compile Include="Helpers\ScoringEventCollector.fs" />
     <Compile Include="Localisation\LocalisationTests.fs" />
-    <Compile Include="Charts\ChartFuzzer.fs" />
     <Compile Include="Charts\ChartTests.fs" />
     <Compile Include="Charts\ChartOriginTests.fs" />
     <Compile Include="Charts\ChartConversionTests.fs" />
@@ -48,7 +52,6 @@
     <Compile Include="Mods\ModTests.fs" />
     <Compile Include="Mods\ModStateTests.fs" />
     <Compile Include="Replays\ReplayTests.fs" />
-    <Compile Include="Rulesets\Helpers.fs" />
     <Compile Include="Rulesets\RulesetEditingTests.fs" />
     <Compile Include="Rulesets\RulesetValidationTests.fs" />
     <Compile Include="Rulesets\LampTests.fs" />
@@ -59,7 +62,7 @@
     <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
     <Compile Include="Skins\Conversions\SkinIniParserTests.fs" />
-    <Compile Include="Skins\Noteskins\InMemoryNoteskinBuilder.fs" />
+    <Compile Include="Helpers\InMemoryNoteskinBuilder.fs" />
     <Compile Include="Skins\Noteskins\NoteskinValidationTests.fs" />
     <Compile Include="Database\InMemoryDatabase.fs" />
     <Compile Include="Database\UserDatabaseTests.fs" />

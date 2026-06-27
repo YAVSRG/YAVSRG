@@ -3,6 +3,7 @@
 open NUnit.Framework
 open Prelude
 open Prelude.Charts
+open Prelude.Tests.Helpers
 
 module ChartTests =
 

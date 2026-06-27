@@ -9,6 +9,7 @@ open Prelude.Formats.Osu
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
+open Prelude.Tests.Helpers
 
 module ScoringTests =
 
@@ -16,7 +17,7 @@ module ScoringTests =
 
     [<Test>]
     let BasicEndToEnd () =
-        let notes = ChartBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -41,10 +42,10 @@ module ScoringTests =
     [<Test>]
     let TimeStepped_Example () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
-                .Hold(1000.0f<ms>, 2000.0f<ms>)
-                .Hold(3000.0f<ms>, 4000.0f<ms>)
+                .HoldUntil(1000.0f<ms>, 2000.0f<ms>)
+                .HoldUntil(3000.0f<ms>, 4000.0f<ms>)
                 .Build()
 
         let replay =
@@ -160,7 +161,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Note(0.0f<ms>).Build()
+            let notes = NotesBuilder(4).Note(0.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownFor(offset, 1.0f<ms>).Build()
 
@@ -198,7 +199,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1000.0f<ms>).Build()
 
@@ -236,7 +237,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1180.0f<ms>).Build()
 
@@ -274,7 +275,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 820.0f<ms>).Build()
 
@@ -312,7 +313,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).Build()
 
@@ -350,7 +351,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay =
                 ReplayBuilder()
@@ -392,7 +393,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1500.0f<ms>).Build()
 
@@ -403,7 +404,7 @@ module ScoringTests =
 
     [<Test>]
     let SCJ4_HoldNote_CompletelyMissed () =
-        let notes = ChartBuilder(4).Hold(0.0f<ms>, 1000.0f<ms>).Build()
+        let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
         let replay = ReplayBuilder().Build()
 
@@ -504,7 +505,7 @@ module ScoringTests =
 
     [<Test>]
     let GhostTapJudgement_BreaksCombo_When_JudgementBreaksCombo () =
-        let notes = ChartBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -531,7 +532,7 @@ module ScoringTests =
 
     [<Test>]
     let GhostTapJudgement_DoesNotIncreaseCombo_When_JudgementNormallyIncreasesCombo () =
-        let notes = ChartBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()

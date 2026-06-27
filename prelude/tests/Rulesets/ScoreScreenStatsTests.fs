@@ -9,6 +9,7 @@ open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
+open Prelude.Tests.Helpers
 
 module ScoreScreenStatsTests =
 
@@ -45,7 +46,7 @@ module ScoreScreenStatsTests =
     [<Test>]
     let TwoNotes_CorrectOutput () =
 
-        let notes = ChartBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -70,7 +71,7 @@ module ScoreScreenStatsTests =
     [<Test>]
     let OneNote_CorrectOutput () =
 
-        let notes = ChartBuilder(4).Note(0.0f<ms>).Build()
+        let notes = NotesBuilder(4).Note(0.0f<ms>).Build()
 
         let replay = ReplayBuilder().KeyDownFor(-30.0f<ms>, 30.0f<ms>).Build()
 
@@ -91,7 +92,7 @@ module ScoreScreenStatsTests =
     let ColumnFilter_TwoNotes () =
 
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>, 2)
@@ -123,7 +124,7 @@ module ScoreScreenStatsTests =
     let ColumnFilter_ZeroNotes () =
 
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>, 2)

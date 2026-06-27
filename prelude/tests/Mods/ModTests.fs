@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 open Prelude.Charts
 open Prelude.Mods
-open Prelude.Tests.Charts
+open Prelude.Tests.Helpers
 
 module ModTests =
 

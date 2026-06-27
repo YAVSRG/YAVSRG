@@ -7,6 +7,7 @@ open Prelude.Charts
 open Prelude.Data.Library.Imports
 open Prelude.Formats
 open Prelude.Formats.Osu
+open Prelude.Tests.Helpers
 
 module ChartRateDetectionTests =
 

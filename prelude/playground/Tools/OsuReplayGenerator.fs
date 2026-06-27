@@ -139,8 +139,8 @@ let run_experiment () =
         for tail in [-miss; -meh; -ok; -good; -great; -perfect; perfect; great; good; ok; meh; miss] do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =

@@ -2,6 +2,7 @@
 
 open NUnit.Framework
 open Prelude
+open Prelude.Tests.Helpers
 
 module LocalisationTests =
 

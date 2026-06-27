@@ -5,6 +5,7 @@ open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
+open Prelude.Tests.Helpers
 
 module GameplayEventTests =
 
@@ -13,7 +14,7 @@ module GameplayEventTests =
     [<Test>]
     let BasicEndToEnd () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -32,7 +33,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_LateOffsets () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>)
@@ -63,7 +64,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_EarlyOffsets () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>)
@@ -94,7 +95,7 @@ module GameplayEventTests =
     [<Test(Description = "Interlude's behaviour: When a badly hit note is closer than the next note that would be hit, ignore the input")>]
     let TapNotes_EarlyBoundary_InterludeCbrushWindow () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
@@ -119,7 +120,7 @@ module GameplayEventTests =
     [<Test(Description = "Interlude's behaviour: If a hit is at least +-90ms off, look for something better to hit")>]
     let TapNotes_LateBoundary_InterludeCbrushWindow () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
@@ -145,7 +146,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_EarlyBoundary_OsuMania () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
@@ -172,7 +173,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_LateBoundary_OsuMania () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(180.0f<ms>)
                 .Build()
@@ -199,7 +200,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_SplitChords () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>, 0)
                 .Note(0.0f<ms>, 1)
                 .Note(0.0f<ms>, 2)
@@ -267,7 +268,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_ColumnLock_OsuMania () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
@@ -308,7 +309,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_ColumnLock_Interlude () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
@@ -346,7 +347,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_ColumnLock_Interlude_HalfRate () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(50.0f<ms>)
                 .Note(100.0f<ms>)
@@ -384,7 +385,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_ColumnLock_Interlude_DoubleRate () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
@@ -422,7 +423,7 @@ module GameplayEventTests =
     [<Test>]
     let TapNotes_ColumnLock_Interlude_Threshold () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
@@ -461,7 +462,7 @@ module GameplayEventTests =
     [<Test>]
     let GhostTap_BetweenNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -488,7 +489,7 @@ module GameplayEventTests =
     [<Test(Description = "Extra inputs before the first note should not count as ghost taps")>]
     let GhostTap_ImpossibleBeforeNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -519,7 +520,7 @@ module GameplayEventTests =
     [<Test(Description = "Extra inputs after the last note still count as ghost taps")>]
     let GhostTap_AfterNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -546,7 +547,7 @@ module GameplayEventTests =
     [<Test>]
     let MissedNotes_Basic () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
@@ -571,7 +572,7 @@ module GameplayEventTests =
     [<Test>]
     let MissedNotes_AfterHit () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
@@ -597,7 +598,7 @@ module GameplayEventTests =
     [<Test>]
     let MissedNotes_BetweenHits () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(200.0f<ms>)
                 .Note(400.0f<ms>)
@@ -624,7 +625,7 @@ module GameplayEventTests =
     [<Test>]
     let MissedNotes_TapsOutOfRange () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -649,7 +650,7 @@ module GameplayEventTests =
     [<Test>]
     let MissedNotes_TapsInOtherColumns () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
@@ -674,8 +675,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Basic () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -697,8 +698,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Basic_Offset () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -720,8 +721,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_InnerBoundaries () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -743,8 +744,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_OuterBoundaries () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -766,8 +767,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_InnerBoundaries_HalfRate () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -789,8 +790,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_OuterBoundaries_HalfRate () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -812,8 +813,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_InnerBoundaries_DoubleRate () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -835,8 +836,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_OuterBoundaries_DoubleRate () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -858,8 +859,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Missed () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -880,8 +881,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Overheld () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -903,8 +904,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Dropped () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -927,8 +928,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Regrabbed () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -953,8 +954,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Multiple_Regrabs () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -990,8 +991,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Regrabbed_Overheld () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -1016,8 +1017,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_MissedHead_Regrabbed () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -1040,8 +1041,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_MissedHead_HeldEarly () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -1063,8 +1064,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Dropped_IntoNote () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 999.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 999.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Build()
 
@@ -1090,9 +1091,9 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_Dropped_IntoHoldNote () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 999.0f<ms>)
-                .Hold(1000.0f<ms>, 1010.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 999.0f<ms>)
+                .HoldUntil(1000.0f<ms>, 1010.0f<ms>)
                 .Build()
 
         let replay =
@@ -1118,8 +1119,8 @@ module GameplayEventTests =
     [<Test>]
     let HoldNote_VeryLateRegrab () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -1144,9 +1145,9 @@ module GameplayEventTests =
     [<Test>]
     let TimeStepping_Normal () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
-                .Hold(500.0f<ms>, 1000.0f<ms>)
+                .HoldUntil(500.0f<ms>, 1000.0f<ms>)
                 .Note(1500.0f<ms>)
                 .Build()
 
@@ -1200,9 +1201,9 @@ module GameplayEventTests =
     [<Test(Description = "Passing in decreasing timestamps should perhaps crash in future, currently parts of the client rely on it not doing anything")>]
     let TimeStepping_BackwardsHasNoEffect () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
-                .Hold(500.0f<ms>, 1000.0f<ms>)
+                .HoldUntil(500.0f<ms>, 1000.0f<ms>)
                 .Note(1500.0f<ms>)
                 .Build()
 
@@ -1264,7 +1265,7 @@ module GameplayEventTests =
     [<Test(Description = "Interlude's cbrush window mechanic means you can hit notes in reverse order. Documented so it isn't reported as a bug")>]
     let SCJ4_BackwardsNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
@@ -1294,7 +1295,7 @@ module GameplayEventTests =
     [<Test(Description = "It is impossible to hit notes backwards in osu!mania (stable)")>]
     let OsuOd8_NoBackwardsNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
@@ -1324,7 +1325,7 @@ module GameplayEventTests =
     [<Test(Description = "Etterna uses nearest note, it is known that you can hit notes backwards")>]
     let Wife3_BackwardsNotes () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Build()
@@ -1354,7 +1355,7 @@ module GameplayEventTests =
     [<Test>]
     let Wife3_TouchingWindows () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.0f<ms>)
                 .Build()
@@ -1383,7 +1384,7 @@ module GameplayEventTests =
     [<Test>]
     let SCJ4_TouchingWindows () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.0f<ms>)
                 .Build()
@@ -1412,7 +1413,7 @@ module GameplayEventTests =
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(360.5f<ms>)
                 .Build()
@@ -1468,7 +1469,7 @@ module GameplayEventTests =
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed_AsymmetricalWindows () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(90.5f<ms>)
                 .Build()
@@ -1497,7 +1498,7 @@ module GameplayEventTests =
     [<Test>]
     let ExpiredNoteMarkedBeforeTapProcessed_WiderWindowsDueToReleases () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(90.5f<ms>)
                 .Build()
@@ -1540,7 +1541,7 @@ module GameplayEventTests =
         printfn "FIRST NOTE AT 0ms"
 
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
@@ -1552,7 +1553,7 @@ module GameplayEventTests =
         printfn "FIRST NOTE AT 1000ms"
 
         let notes_2 =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(1000.0f<ms>)
                 .Note(1100.0f<ms>)
                 .Note(1200.0f<ms>)
@@ -1575,7 +1576,7 @@ module GameplayEventTests =
         printfn "FIRST NOTE AT 0ms"
 
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(100.0f<ms>)
                 .Note(200.0f<ms>)
@@ -1588,7 +1589,7 @@ module GameplayEventTests =
         printfn "FIRST NOTE AT 1000ms"
 
         let notes_2 =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(1000.0f<ms>)
                 .Note(1100.0f<ms>)
                 .Note(1200.0f<ms>)
@@ -1609,9 +1610,9 @@ module GameplayEventTests =
                 .Build()
 
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
-                .Hold(2000.0f<ms>, 3000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
+                .HoldUntil(2000.0f<ms>, 3000.0f<ms>)
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
@@ -1629,9 +1630,9 @@ module GameplayEventTests =
     [<Test>]
     let IgnoreNotesBefore_NoPartialHolds2 () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 90.0f<ms>)
-                .Hold(100.0f<ms>, 190.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 90.0f<ms>)
+                .HoldUntil(100.0f<ms>, 190.0f<ms>)
                 .Build()
 
         let replay =

@@ -5,7 +5,7 @@ open Prelude
 open Percyqaz.Common
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
-open Prelude.Tests.Rulesets
+open Prelude.Tests.Helpers
 
 module RulesetQuaverParityTests =
 
@@ -14,8 +14,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -40,8 +40,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold_Regrab () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -66,8 +66,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold_Regrab_Overhold () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -94,8 +94,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_Overhold () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -119,8 +119,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_OkayWindowGivesGood () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -142,8 +142,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_GoodWindowGivesGood () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =
@@ -165,8 +165,8 @@ module RulesetQuaverParityTests =
     [<Test>]
     let Quaver_ExpectedBehaviour_GreatWindowGivesGreat () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1000.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
 
         let replay =

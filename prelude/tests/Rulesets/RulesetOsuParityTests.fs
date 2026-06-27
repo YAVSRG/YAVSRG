@@ -9,7 +9,7 @@ open Prelude.Data.OsuClientInterop
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
-open Prelude.Tests.Rulesets
+open Prelude.Tests.Helpers
 
 module RulesetOsuParityTests =
 
@@ -120,7 +120,7 @@ module RulesetOsuParityTests =
     let OsuManiaColumnLockMechanic_Replicate_1 () =
 
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(108.0f<ms>)
                 .Note(222.0f<ms>)
@@ -149,7 +149,7 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD10 () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
                 .Note(250.0f<ms>)
@@ -181,7 +181,7 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD8 () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
                 .Note(250.0f<ms>)
@@ -213,7 +213,7 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD8_AltCase () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
                 .Note(250.0f<ms>)
@@ -301,7 +301,7 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuRuleset_EarlyMissWindowBehaviour () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>)
@@ -345,7 +345,7 @@ module RulesetOsuParityTests =
     [<Test(Description = "Documents a possible bug (or intentional behaviour) of osu!stable on the very edge of the late window")>]
     let OsuRuleset_LateOkWindowBehaviour () =
         let notes =
-            ChartBuilder(4)
+            NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
                 .Note(2000.0f<ms>)
@@ -398,20 +398,20 @@ module RulesetOsuParityTests =
             let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 100.0f<ms>)
-                    .Hold(200.0f<ms>, 300.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 100.0f<ms>)
+                    .HoldUntil(200.0f<ms>, 300.0f<ms>)
 
-                    .Hold(400.0f<ms>, 500.0f<ms>)
-                    .Hold(600.0f<ms>, 700.0f<ms>)
+                    .HoldUntil(400.0f<ms>, 500.0f<ms>)
+                    .HoldUntil(600.0f<ms>, 700.0f<ms>)
 
-                    .Hold(800.0f<ms>, 900.0f<ms>)
-                    .Hold(1000.0f<ms>, 1100.0f<ms>)
+                    .HoldUntil(800.0f<ms>, 900.0f<ms>)
+                    .HoldUntil(1000.0f<ms>, 1100.0f<ms>)
 
-                    .Hold(1300.0f<ms>, 1400.0f<ms>)
-                    .Hold(1600.0f<ms>, 1700.0f<ms>)
+                    .HoldUntil(1300.0f<ms>, 1400.0f<ms>)
+                    .HoldUntil(1600.0f<ms>, 1700.0f<ms>)
 
-                    .Hold(1900.0f<ms>, 2000.0f<ms>)
+                    .HoldUntil(1900.0f<ms>, 2000.0f<ms>)
                     //.Hold(2200.0f<ms>, 2300.0f<ms>)
                     .Build()
 
@@ -468,10 +468,10 @@ module RulesetOsuParityTests =
     [<Ignore("Doesn't quite match up with osu!mania. Oh well it will probably never happen in a score")>]
     let OsuRuleset_LateLnHeadWindowsBehaviour () =
         let notes =
-            ChartBuilder(4)
-                .Hold(0.0f<ms>, 1.0f<ms>)
-                .Hold(400.0f<ms>, 401.0f<ms>)
-                .Hold(800.0f<ms>, 801.0f<ms>)
+            NotesBuilder(4)
+                .HoldUntil(0.0f<ms>, 1.0f<ms>)
+                .HoldUntil(400.0f<ms>, 401.0f<ms>)
+                .HoldUntil(800.0f<ms>, 801.0f<ms>)
                 .Build()
 
         let replay =
@@ -514,8 +514,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -557,8 +557,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -600,8 +600,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -643,8 +643,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -686,8 +686,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -729,8 +729,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -772,8 +772,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -815,8 +815,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -858,8 +858,8 @@ module RulesetOsuParityTests =
         for head, tail, expected_judgement in TEST_DATA do
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -904,8 +904,8 @@ module RulesetOsuParityTests =
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -949,8 +949,8 @@ module RulesetOsuParityTests =
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =
@@ -994,8 +994,8 @@ module RulesetOsuParityTests =
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
             let notes =
-                ChartBuilder(4)
-                    .Hold(0.0f<ms>, 800.0f<ms>)
+                NotesBuilder(4)
+                    .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
 
             let replay =

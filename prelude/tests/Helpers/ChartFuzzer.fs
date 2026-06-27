@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Charts
+﻿namespace Prelude.Tests.Helpers
 
 open Prelude
 open Prelude.Charts

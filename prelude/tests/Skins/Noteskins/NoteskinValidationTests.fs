@@ -4,6 +4,7 @@ open NUnit.Framework
 open Prelude
 open Prelude.Skins
 open Prelude.Skins.Noteskins
+open Prelude.Tests.Helpers
 
 module NoteskinValidationTests =
 

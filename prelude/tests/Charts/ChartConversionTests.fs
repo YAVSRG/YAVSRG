@@ -8,6 +8,7 @@ open Prelude.Charts
 open Prelude.Formats
 open Prelude.Formats.Osu
 open Prelude.Data.Library
+open Prelude.Tests.Helpers
 
 module ChartConversionTests =
 
