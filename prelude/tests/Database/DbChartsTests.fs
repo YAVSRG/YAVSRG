@@ -83,7 +83,7 @@ module DbChartsTests =
 
     [<Test>]
     let Get_Meta_DoesntExist () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let result = DbCharts.get_meta "doesntexist" db
         Assert.AreEqual(None, result)
@@ -92,7 +92,7 @@ module DbChartsTests =
 
     [<Test>]
     let RoundTrip_Meta() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
 
@@ -106,7 +106,7 @@ module DbChartsTests =
 
     [<Test>]
     let RoundTrip_Meta_With_NaN() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
 
@@ -118,7 +118,7 @@ module DbChartsTests =
 
     [<Test>]
     let RoundTrip_Chart() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_chart TEST_CHART_META.Hash db
@@ -131,7 +131,7 @@ module DbChartsTests =
 
     [<Test>]
     let Chart_DoesntExist () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let result = DbCharts.get_chart "doesntexist" db
         match result with
@@ -142,7 +142,7 @@ module DbChartsTests =
 
     [<Test>]
     let Chart_Delete () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
@@ -159,7 +159,7 @@ module DbChartsTests =
 
     [<Test>]
     let Chart_Batch_Delete () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_meta TEST_CHART_META.Hash db
@@ -176,7 +176,7 @@ module DbChartsTests =
 
     [<Test>]
     let RoundTrip_Chart_Overwriting() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
 
@@ -195,7 +195,7 @@ module DbChartsTests =
 
     [<Test>]
     let RoundTrip_Chart_Overwriting_EmptyOrigins() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
 

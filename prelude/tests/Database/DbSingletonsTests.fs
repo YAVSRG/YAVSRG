@@ -22,7 +22,7 @@ module DbSingletonsTests =
 
     [<Test>]
     let RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let data =
             {
@@ -57,7 +57,7 @@ module DbSingletonsTests =
 
     [<Test>]
     let Overwriting () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let DEFAULT =
             {
@@ -97,7 +97,7 @@ module DbSingletonsTests =
 
     [<Test>]
     let DoesntExist () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let DEFAULT =
             {

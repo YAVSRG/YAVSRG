@@ -23,8 +23,5 @@ type Setup() =
     [<OneTimeTearDown>]
     member _.Teardown() = conn.Dispose()
 
-[<AutoOpen>]
-module Helpers =
-
-    let in_memory () =
-        Database.in_memory "interlude"
+type InMemoryDatabase =
+    static member Create() = Database.in_memory "interlude"

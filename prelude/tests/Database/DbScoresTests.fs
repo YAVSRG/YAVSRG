@@ -9,7 +9,7 @@ module DbScoresTests =
 
     [<Test>]
     let RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
             {
@@ -48,7 +48,7 @@ module DbScoresTests =
 
     [<Test>]
     let Batch_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
             {
@@ -86,7 +86,7 @@ module DbScoresTests =
 
     [<Test>]
     let DeleteByTimestamp () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let ts = Timestamp.now () - 500L
 
@@ -128,7 +128,7 @@ module DbScoresTests =
 
     [<Test>]
     let GetBetween_NoResults() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
             {
@@ -162,7 +162,7 @@ module DbScoresTests =
 
     [<Test>]
     let GetBetween_CorrectResult() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
             {
@@ -197,7 +197,7 @@ module DbScoresTests =
 
     [<Test>]
     let Transfer() =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
             {

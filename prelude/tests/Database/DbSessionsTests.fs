@@ -7,7 +7,7 @@ module DbSessionsTests =
 
     [<Test>]
     let Empty () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let result = DbSessions.get_all db
         Assert.IsEmpty(result)
@@ -16,7 +16,7 @@ module DbSessionsTests =
 
     [<Test>]
     let RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let session : Session =
             {
@@ -47,7 +47,7 @@ module DbSessionsTests =
 
     [<Test>]
     let Idempotence () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let session : Session =
             {

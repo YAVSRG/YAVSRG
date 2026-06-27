@@ -9,7 +9,7 @@ module DbChartDataTests =
 
     [<Test>]
     let Get_DoesntExist () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let result = DbChartData.get "doesntexist" db
         Assert.AreEqual(DbChartData.DEFAULT, result)
@@ -18,7 +18,7 @@ module DbChartDataTests =
 
     [<Test>]
     let Offset_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbChartData.save_offsets [ "offset", 5.0f<ms> ] db
 
@@ -35,7 +35,7 @@ module DbChartDataTests =
 
     [<Test>]
     let LastPlayed_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let now = Timestamp.now ()
 
@@ -54,7 +54,7 @@ module DbChartDataTests =
 
     [<Test>]
     let Comment_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbChartData.save_comments [ "comment1", "Comment on chart 1"; "comment2", "Comment on chart 2" ] db
 
@@ -71,7 +71,7 @@ module DbChartDataTests =
 
     [<Test>]
     let Breakpoints_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         DbChartData.save_breakpoints [ "breakpoints", [ 0.0f<ms>; 1.0f<ms>; 2.0f<ms> ] ] db
 
@@ -88,7 +88,7 @@ module DbChartDataTests =
 
     [<Test>]
     let Bests_RoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let bests =
             (Map.ofList

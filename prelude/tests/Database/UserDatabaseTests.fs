@@ -9,7 +9,7 @@ module UserDatabaseTests =
 
     [<Test>]
     let BasicRoundTrip () =
-        let db, conn = in_memory ()
+        let db, conn = InMemoryDatabase.Create()
 
         let score_db = UserDatabase.create false db
 
