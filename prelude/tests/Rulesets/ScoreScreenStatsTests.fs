@@ -33,7 +33,7 @@ module ScoreScreenStatsTests =
 
         let replay_data = OsuReplay.decode (osu_replay, chart.FirstNote, 1.0f<rate>)
         let ruleset = SC.create 4
-        ScoreProcessor.run ruleset chart.Keys (StoredReplay(replay_data)) chart.Notes 1.0f<rate>
+        ScoreProcessor.run ruleset chart.Keys (StoredReplaySource(replay_data)) chart.Notes 1.0f<rate>
 
     [<Test>]
     let BasicEndToEnd () =

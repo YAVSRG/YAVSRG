@@ -42,7 +42,7 @@ type PracticeScreen =
         let FIRST_NOTE = info.WithMods.FirstNote
 
         let reset_to_practice_point () =
-            liveplay <- LiveReplay FIRST_NOTE
+            liveplay <- GameplayReplaySource FIRST_NOTE
 
             scoring <-
                 ScoreProcessor.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value

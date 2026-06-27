@@ -69,7 +69,7 @@ module PacemakerState =
         match ctx with
         | PacemakerCreationContext.None -> PacemakerState.None
         | PacemakerCreationContext.FromScore score_info ->
-            let replay_data = StoredReplay(score_info.Replay) :> ReplaySource
+            let replay_data = StoredReplaySource(score_info.Replay) :> ReplaySource
 
             let replay_scoring =
                 ScoreProcessor.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate
@@ -95,7 +95,7 @@ module PacemakerState =
                     | Some score ->
                         let with_mods = ModState.apply score.Mods info.Chart
                         let replay_data = score.Replay |> Replay.decompress_bytes
-                        let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplay replay_data) with_mods.Notes score.Rate
+                        let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
 
                         PacemakerState.Replay (best_accuracy, scoring)
 

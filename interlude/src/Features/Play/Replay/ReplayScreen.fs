@@ -23,12 +23,12 @@ type ReplayScreen =
         let replay_data, is_auto, rate, is_failed =
             match mode with
             | ReplayMode.Auto ->
-                StoredReplay.AutoPlay(info.WithColors.Keys, info.WithMods.Notes) :> ReplaySource,
+                StoredReplaySource.AutoPlay(info.WithColors.Keys, info.WithMods.Notes) :> ReplaySource,
                 true,
                 SelectedChart.rate.Value,
                 false
             | ReplayMode.Replay score_info ->
-                StoredReplay(score_info.Replay) :> ReplaySource,
+                StoredReplaySource(score_info.Replay) :> ReplaySource,
                 false,
                 score_info.Rate,
                 score_info.IsFailed
@@ -45,7 +45,7 @@ type ReplayScreen =
             ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
 
         let seek_backwards (screen: IPlayScreen) =
-            replay_data <- StoredReplay(replay_data.GetFullReplay())
+            replay_data <- StoredReplaySource(replay_data.GetFullReplay())
             scoring <- ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
             screen.State.ChangeScoring scoring
 

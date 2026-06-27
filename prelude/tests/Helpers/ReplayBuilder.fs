@@ -4,7 +4,7 @@ open Prelude
 open Prelude.Gameplay.Replays
 
 type ReplayBuilder() =
-    let liveplay = LiveReplay(0.0f<ms>)
+    let liveplay = GameplayReplaySource(0.0f<ms>)
 
     let mutable state = Bitmask.Empty
 

@@ -138,7 +138,7 @@ type LobbyUI(lobby: Lobby) =
                 SelectedChart.if_loaded
                 <| fun info ->
 
-                let replay : OnlineReplay = OnlineReplay()
+                let replay : NetworkReplaySource = NetworkReplaySource()
                 let scoring = ScoreProcessor.create Rulesets.current info.WithMods.Keys replay info.WithMods.Notes SelectedChart.rate.Value
                 let replay_info =
                     {

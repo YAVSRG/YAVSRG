@@ -18,7 +18,7 @@ type SpectateScreen =
 
         let mutable currently_spectating = username
         let mutable scoring = replay_info.ScoreProcessor
-        let mutable replay_data : OnlineReplay = replay_info.Replay :?> OnlineReplay
+        let mutable replay_data : NetworkReplaySource = replay_info.Replay :?> NetworkReplaySource
 
         let cycle_spectator (screen: IPlayScreen) =
             let users_available_to_spectate =
@@ -35,7 +35,7 @@ type SpectateScreen =
             | Some replay_info ->
                 currently_spectating <- next_user
                 scoring <- replay_info.ScoreProcessor
-                replay_data <- replay_info.Replay :?> OnlineReplay
+                replay_data <- replay_info.Replay :?> NetworkReplaySource
                 Song.seek (replay_data.Time() - MULTIPLAYER_REPLAY_DELAY_MS * 1.0f<ms>)
                 screen.State.ChangeScoring scoring
             | None -> Logging.Warn "Failed to switch to replay data for %s" next_user

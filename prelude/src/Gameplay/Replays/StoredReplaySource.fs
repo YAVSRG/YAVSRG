@@ -4,7 +4,7 @@ open Prelude
 open Prelude.Charts
 
 /// Replay implementation for a replay that already existed in full
-type StoredReplay(data: ReplayData) =
+type StoredReplaySource(data: ReplayData) =
     let mutable i = 0
 
     interface ReplaySource with
@@ -30,10 +30,10 @@ type StoredReplay(data: ReplayData) =
                     j <- j - 1
             }
 
-    new(data: string) = StoredReplay(Replay.decompress_string data)
+    new(data: string) = StoredReplaySource(Replay.decompress_string data)
 
-    static member AutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplay =
-        Replay.perfect_replay keys notes |> StoredReplay
+    static member AutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplaySource =
+        Replay.perfect_replay keys notes |> StoredReplaySource
 
-    static member WavingAutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplay =
-        Replay.auto_replay_waving keys notes |> StoredReplay
+    static member WavingAutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplaySource =
+        Replay.auto_replay_waving keys notes |> StoredReplaySource

@@ -5,7 +5,7 @@ open Percyqaz.Common
 open Prelude
 
 /// Replay implementation that supports writing information to the underlying buffer live during gameplay
-type LiveReplay(first_note: Time) =
+type GameplayReplaySource(first_note: Time) =
     let mutable i = 0
     let mutable finished = false
     let mutable export = 0
