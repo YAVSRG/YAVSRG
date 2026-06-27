@@ -25,50 +25,6 @@ module TimeArray =
         arr
         |> Array.map (fun { Time = time; Data = d } -> { Time = time * float32 scale; Data = d })
 
-    // todo: find_left, find_right, between are never used. remove? or add tests for them for future use?
-
-    // greatest index i where arr.[i] <= time
-    // if no such index because you are before all events, -1
-    let find_left (time: Time) (arr: TimeArray<'T>) =
-        let mutable low = 0
-        let mutable high = arr.Length
-        let mutable mid = -1
-
-        while low < high do
-            mid <- (high + low) / 2
-
-            if arr.[mid].Time <= time then
-                low <- mid + 1
-            else
-                high <- mid
-
-        high - 1
-
-    // least index i where arr.[i] >= time
-    let find_right (time: Time) (arr: TimeArray<'T>) =
-        let mutable low = 0
-        let mutable high = arr.Length
-        let mutable mid = -1
-
-        while low < high do
-            mid <- (high + low) / 2
-
-            if arr.[mid].Time < time then
-                low <- mid + 1
-            else
-                high <- mid
-
-        low
-
-    let between (time1: Time) (time2: Time) (arr: TimeArray<'T>) : TimeItem<'T> seq =
-        seq {
-            let mutable i = find_right time1 arr
-
-            while (i < arr.Length && arr.[i].Time < time2) do
-                yield arr.[i]
-                i <- i + 1
-        }
-
     let read<'T> (br: BinaryReader) (f: BinaryReader -> 'T) : TimeArray<'T> =
         let count = br.ReadInt32()
         let array = Array.zeroCreate<TimeItem<'T>> count
