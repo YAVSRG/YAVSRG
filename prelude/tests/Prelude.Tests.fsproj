@@ -50,7 +50,9 @@
     <Compile Include="Charts\ChartRateDetectionTests.fs" />
     <Compile Include="Calculator\HoldCoverageTests.fs" />
     <Compile Include="Calculator\DiffCalcColorTests.fs" />
-    <Compile Include="Mods\ModTests.fs" />
+    <Compile Include="Mods\MirrorTests.fs" />
+    <Compile Include="Mods\ColumnSwapTests.fs" />
+    <Compile Include="Mods\InverseTests.fs" />
     <Compile Include="Mods\ModStateTests.fs" />
     <Compile Include="Replays\ReplayTests.fs" />
     <Compile Include="Rulesets\RulesetEditingTests.fs" />
