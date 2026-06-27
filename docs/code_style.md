@@ -61,3 +61,5 @@ This intentionally ignores [the recommendation here](https://learn.microsoft.com
 Bad: `my_array[i]`, `my_2d_array[i].[j]`  
 Good: `my_array.[i]`, `my_2d_array.[i].[j]`  
 Things that don't parse: `my_2d_array[i][j]`, `my_function()[0]` hence the consistent rule everywhere
+
+Prefer `not (<expression>)` over `expression |> not`
