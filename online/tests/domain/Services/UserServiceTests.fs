@@ -6,9 +6,9 @@ open Prelude
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
-module Users =
+module UserServiceTests =
 
-    module Scores = Interlude.Web.Tests.Domain.Core.Scores
+    module Scores = Interlude.Web.Tests.Domain.Core.ScoreTests
 
     [<Test>]
     let DeleteUser_FullCleanup () =

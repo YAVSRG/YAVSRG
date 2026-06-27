@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Interlude.Web.Server.Domain.Backbeat
 
-module Sources =
+module SourcesTests =
 
     let test_source: Source =
         {

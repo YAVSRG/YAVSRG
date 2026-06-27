@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Interlude.Web.Server.Domain.Core
 
-module Friends =
+module FriendTests =
 
     let OK : Result<unit, string> = Ok()
 

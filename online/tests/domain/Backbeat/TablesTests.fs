@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Interlude.Web.Server.Domain.Backbeat
 
-module Tables =
+module TablesTests =
 
     [<Test>]
     let TableLevel_RoundTrip () =

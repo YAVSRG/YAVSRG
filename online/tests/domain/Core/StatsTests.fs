@@ -4,7 +4,7 @@ open NUnit.Framework
 open Percyqaz.Common
 open Interlude.Web.Server.Domain.Core
 
-module Stats =
+module StatsTests =
 
     [<Test>]
     let Stats_RoundTrip () =

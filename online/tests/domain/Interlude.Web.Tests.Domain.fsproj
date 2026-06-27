@@ -9,18 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Core\Users.fs" />
-    <Compile Include="Core\Friends.fs" />
-    <Compile Include="Core\Replays.fs" />
-    <Compile Include="Core\Scores.fs" />
-    <Compile Include="Core\Stats.fs" />
-    <Compile Include="Core\Tables.fs" />
-    <Compile Include="Backbeat\Sources.fs" />
-    <Compile Include="Backbeat\Songs.fs" />
-    <Compile Include="Backbeat\Tables.fs" />
-    <Compile Include="Services\Users.fs" />
-    <Compile Include="Services\Scores.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Core\UserTests.fs" />
+    <Compile Include="Core\FriendTests.fs" />
+    <Compile Include="Core\ReplayTests.fs" />
+    <Compile Include="Core\ScoreTests.fs" />
+    <Compile Include="Core\StatsTests.fs" />
+    <Compile Include="Core\TablesTests.fs" />
+    <Compile Include="Backbeat\SourcesTests.fs" />
+    <Compile Include="Backbeat\SongTests.fs" />
+    <Compile Include="Backbeat\TablesTests.fs" />
+    <Compile Include="Services\UserServiceTests.fs" />
+    <Compile Include="Services\ScoreServiceTests.fs" />
+    <Compile Include="Setup.fs" />
   </ItemGroup>
 
   <ItemGroup>

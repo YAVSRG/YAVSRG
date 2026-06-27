@@ -7,7 +7,7 @@ open Prelude.Charts
 open Prelude.Backbeat.Archive
 open Interlude.Web.Server.Domain.Backbeat
 
-module Songs =
+module SongTests =
 
     let private random = System.Random()
 

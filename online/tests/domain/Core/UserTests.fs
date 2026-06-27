@@ -5,7 +5,7 @@ open NUnit.Framework
 open Interlude.Web.Server.Domain.Core
 open Interlude.Web.Server.Domain.Services
 
-module Users =
+module UserTests =
 
     [<SetUp>]
     let Setup () = ()

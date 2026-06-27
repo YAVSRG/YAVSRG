@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Interlude.Web.Server.Domain.Core
 
-module Tables =
+module TablesTests =
 
     [<Test>]
     let TableRating_RoundTrip () =
