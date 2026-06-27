@@ -10,7 +10,7 @@ open Prelude
 open Prelude.Skins
 open Prelude.Skins.Noteskins
 open Prelude.Skins.HudLayouts
-open Interlude
+open Interlude.Resources
 
 type private LoadedSkin =
     {
@@ -241,7 +241,7 @@ module Skins =
     let private DEFAULT_NOTESKIN_ID = "*chocolate_default"
     let private DEFAULT_NOTESKIN =
         "chocolate.zip"
-        |> Utils.get_resource_stream
+        |> EmbeddedResource.GetStream
         |> Noteskin.FromZipStream
     let mutable private DEFAULT_SKIN_ICON = None
 

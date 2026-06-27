@@ -8,7 +8,7 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Data.User.Stats
 open Interlude
-open Interlude.Utils
+open Interlude.Resources
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features.Online
@@ -102,9 +102,9 @@ type MainMenuScreen() =
         )
 
     let choose_splash =
-        splash_message_picker "MenuSplashes.txt"
-        >> fun s -> s.Split '¬'
-        >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
+        EmbeddedResource.SplashMessageGenerator("MenuSplashes.txt")
+        >> fun splash_line -> splash_line.Split('¬')
+        >> fun splash_parts -> if splash_parts.Length > 1 then splash_parts.[0], splash_parts.[1] else splash_parts.[0], ""
 
     let mutable splash_text = "", ""
     let splash_fade = Animation.Fade 0.0f

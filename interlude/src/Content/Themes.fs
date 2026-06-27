@@ -10,13 +10,13 @@ open Percyqaz.Flux.Audio
 open Prelude
 open Prelude.Skins
 open Prelude.Skins.Themes
-open Interlude
+open Interlude.Resources
 
 module Themes =
 
     /// Theme IDs are: *default (represents embedded theme), or the name of a folder under Themes
     let private DEFAULT_ID = "*default"
-    let private DEFAULT : Theme = Theme.FromZipStream <| Utils.get_resource_stream "default.zip"
+    let private DEFAULT : Theme = Theme.FromZipStream <| EmbeddedResource.GetStream "default.zip"
 
     let mutable private initialised = false
     let private loaded = Dictionary<string, Theme>()

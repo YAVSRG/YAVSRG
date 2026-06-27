@@ -8,6 +8,7 @@ open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Prelude
 open Interlude
+open Interlude.Resources
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features
@@ -26,7 +27,7 @@ let launch (instance: int) : unit =
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
     let show_crash_splash =
-        Utils.splash_message_picker "CrashSplashes.txt" >> Logging.Critical "%s"
+        EmbeddedResource.SplashMessageGenerator("CrashSplashes.txt") >> Logging.Critical "%s"
 
     let init () =
         let ui_root = Startup.init instance
@@ -34,7 +35,7 @@ let launch (instance: int) : unit =
         ui_root :> UIEntryPoint
 
     let icon =
-        use icon_stream = Utils.get_resource_stream "icon.png"
+        use icon_stream = EmbeddedResource.GetStream("icon.png")
         Bitmap.from_stream true icon_stream
 
     let result = Launch.entry_point (Options.load_window_config instance, Updates.version, init, icon)
