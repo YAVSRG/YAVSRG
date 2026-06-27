@@ -19,7 +19,7 @@ module OsuReplay =
     /// e.g. if the first note is at ms 150 then the first input should have timestamp 150 to line up
     /// Interlude replay timestamps are lined up so a replay timestamp of 0 = the first note, allowing better portability
     /// `original_osu_file_first_note` and `original_osu_file_rate` are accordingly used to make a correctly synced Interlude replay
-    let decode (replay: OsuReplay, original_osu_file_first_note: Time, original_osu_file_rate: Rate) : ReplayData =
+    let decode (replay: OsuReplay, original_osu_file_first_note: Time, original_osu_file_rate: Rate) : Replay =
         if replay.CompressedReplayBytes.IsNone then
             failwith "No replay data here. Maybe you passed a score directly from the osu! database instead of reading the replay file from disk?"
 
@@ -60,7 +60,7 @@ module OsuReplay =
         }
         |> Array.ofSeq
 
-    let encode (replay: ReplayData) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
+    let encode (replay: Replay) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
 
         let first_note = first_note |> float32 |> round |> int
 

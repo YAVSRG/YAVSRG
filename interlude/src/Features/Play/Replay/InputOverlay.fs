@@ -10,7 +10,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, playfield: Playfield)
+type private InputOverlay(keys: int, replay_data: Replay, state: PlayState, playfield: Playfield)
     =
     inherit StaticWidget(NodeType.None)
 

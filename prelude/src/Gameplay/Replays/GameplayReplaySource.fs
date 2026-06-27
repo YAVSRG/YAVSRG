@@ -34,7 +34,7 @@ type GameplayReplaySource(first_note: Time) =
             i <- i + 1
             buffer.[i - 1]
 
-        member this.GetFullReplay() : ReplayData =
+        member this.GetFullReplay() : Replay =
             if not finished then invalidOp "Live play is not declared as over, we don't have the full replay yet!"
             buffer.ToArray()
 

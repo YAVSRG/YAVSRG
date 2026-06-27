@@ -17,7 +17,7 @@ type private HitOverlay
     (
         rate: Rate,
         chart: ModdedChart,
-        replay_data: ReplayData,
+        replay_data: Replay,
         state: PlayState,
         playfield: Playfield
     ) =

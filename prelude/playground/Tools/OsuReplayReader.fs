@@ -17,7 +17,7 @@ let private compare_interlude_implementation_to_osu
     (
         chart: Chart,
         header: ChartImportHeader,
-        replay: ReplayData,
+        replay: Replay,
         rate: Rate,
         chart_od: float,
         score_data: OsuScoreDatabase_Score

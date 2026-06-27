@@ -25,7 +25,7 @@ type ScoreInfo =
         TimePlayed: int64
         Rate: Rate
 
-        Replay: ReplayData
+        Replay: Replay
         mutable Scoring: ScoreProcessor
         mutable Lamp: int
         mutable Grade: int

@@ -16,7 +16,7 @@ open Prelude.Tests.Helpers
 
 let mutable recent_beatmap_hash = ""
 
-let generate_scenario (notes: TimeArray<NoteRow>) (replay: ReplayData) (od: float32) (mods: Mods) =
+let generate_scenario (notes: TimeArray<NoteRow>) (replay: Replay) (od: float32) (mods: Mods) =
 
     let chart : Chart =
         {

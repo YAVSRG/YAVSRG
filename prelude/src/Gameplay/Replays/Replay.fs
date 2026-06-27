@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.IO.Compression
+open System.Runtime.CompilerServices
 open Prelude
 open Prelude.Charts
 
@@ -33,11 +34,11 @@ type [<Struct>] ReplayFrame =
         ReplayFrame.Create(time, Bitmask.FromInt16(pressed_keys))
 
 // Invariant: timestamps are nondecreasing
-type ReplayData = ReplayFrame array
+type Replay = ReplayFrame array
 
 module Replay =
 
-    let compress_to (output_stream: Stream) (replay: ReplayData) =
+    let compress_to (output_stream: Stream) (replay: Replay) =
         use gzip_stream = new GZipStream(output_stream, CompressionLevel.SmallestSize)
         use bw = new BinaryWriter(gzip_stream)
 
@@ -48,18 +49,18 @@ module Replay =
 
         bw.Flush()
 
-    let compress_bytes (data: ReplayData) : byte array =
+    let compress_bytes (data: Replay) : byte array =
         use stream = new MemoryStream()
         compress_to stream data
         stream.ToArray()
 
-    let compress_string (data: ReplayData) : string =
+    let compress_string (data: Replay) : string =
         Convert.ToBase64String(compress_bytes data)
 
     let compressed_string_to_bytes (data: string) : byte array = Convert.FromBase64String data
     let compressed_bytes_to_string (data: byte array) : string = Convert.ToBase64String data
 
-    let decompress_from (input_stream: Stream) : ReplayData =
+    let decompress_from (input_stream: Stream) : Replay =
         use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
         use br = new BinaryReader(gzip_stream)
 
@@ -71,11 +72,11 @@ module Replay =
 
         output
 
-    let decompress_bytes (data: byte array) : ReplayData =
+    let decompress_bytes (data: byte array) : Replay =
         use stream = new MemoryStream(data)
         decompress_from stream
 
-    let decompress_string (data: string) : ReplayData =
+    let decompress_string (data: string) : Replay =
         let bytes = Convert.FromBase64String data
         decompress_bytes bytes
 
@@ -83,7 +84,7 @@ module Replay =
     let MAX_ROWS_PER_SECOND = 200
     let MAX_BYTES_PER_SECOND = MAX_ROWS_PER_SECOND * BYTES_PER_ROW
 
-    let decompress_string_untrusted (chart_duration: Time) (input: string) : Result<ReplayData, string> =
+    let decompress_string_untrusted (chart_duration: Time) (input: string) : Result<Replay, string> =
         let max_rows = (10 + int (chart_duration / 1000.0f<ms>)) * MAX_ROWS_PER_SECOND
 
         try
@@ -117,7 +118,7 @@ module Replay =
         with err ->
             Error(err.ToString())
 
-    let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+    let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : Replay =
         let time_until_next (current_index: int) : Time =
             if current_index + 1 >= notes.Length then
                 100.0f<ms>
@@ -156,7 +157,7 @@ module Replay =
     //  *unless you make a goofy ruleset where 0ms hits don't give 100% accuracy
     let perfect_replay = perfect_replay_uncached |> cached
 
-    let private auto_replay_waving_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
+    let private auto_replay_waving_uncached (keys: int) (notes: TimeArray<NoteRow>) : Replay =
         let mutable last_time = -Time.infinity
 
         let offset (time: Time) =

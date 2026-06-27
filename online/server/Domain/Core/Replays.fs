@@ -5,6 +5,8 @@ open Percyqaz.Data.Sqlite
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server
 
+type Replay_Prelude = Prelude.Gameplay.Replays.Replay
+
 type Replay =
     {
         UserId: int64
@@ -52,7 +54,7 @@ module Replay =
             """
         }
 
-    let create (user_id: int64, chart_id: string, timestamp: int64, replay: ReplayData) =
+    let create (user_id: int64, chart_id: string, timestamp: int64, replay: Replay_Prelude) : Replay =
         {
             UserId = user_id
             ChartId = chart_id

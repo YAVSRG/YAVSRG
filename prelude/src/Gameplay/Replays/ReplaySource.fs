@@ -15,7 +15,7 @@ type ReplaySource =
     abstract member GetNext: unit -> ReplayFrame
 
     /// Get the underlying data (can throw if unavailable right now)
-    abstract member GetFullReplay: unit -> ReplayData
+    abstract member GetFullReplay: unit -> Replay
 
     /// Walk backwards through recent inputs (for rendering input meter hud element)
     /// Sequence is only guaranteed to be valid for the frame it is used in, it should not be stored or iterated once the underlying replay has been modified

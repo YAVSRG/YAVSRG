@@ -24,7 +24,7 @@ type NetworkReplaySource() =
             i <- i + 1
             buffer.[i - 1]
 
-        member this.GetFullReplay() : ReplayData =
+        member this.GetFullReplay() : Replay =
             if finished then
                 buffer.ToArray()
             else

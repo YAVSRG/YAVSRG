@@ -4,7 +4,7 @@ open Prelude
 open Prelude.Charts
 
 /// Replay implementation for a replay that already existed in full
-type StoredReplaySource(data: ReplayData) =
+type StoredReplaySource(data: Replay) =
     let mutable i = 0
 
     interface ReplaySource with
@@ -20,7 +20,7 @@ type StoredReplaySource(data: ReplayData) =
             i <- i + 1
             data.[i - 1]
 
-        member this.GetFullReplay() : ReplayData = data
+        member this.GetFullReplay() : Replay = data
 
         member this.EnumerateRecentFrames() : ReplayFrame seq =
             seq {
