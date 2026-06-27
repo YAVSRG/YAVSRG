@@ -23,7 +23,7 @@ type IReplay =
 
 /// Walks through a replay as far as data is available and triggers `HandleKeyDown` and `HandleKeyUp` as appropriate
 [<AbstractClass>]
-type ReplayConsumer(keys: int, replay: IReplay) =
+type KeyPressReader(keys: int, replay: IReplay) =
 
     let mutable current_pressed_keys: Bitmask = Bitmask.Empty
 
