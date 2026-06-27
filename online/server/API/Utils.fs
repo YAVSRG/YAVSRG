@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Web.Server.API
 
-open NetCoreServer
-open Prelude
+open Percyqaz.Common
 open Interlude.Web.Server.Domain.Core
 
 [<AutoOpen>]
@@ -26,7 +25,9 @@ module Utils =
                 let bearer_token = auth_header.Substring(BEARER_PREFIX_LENGTH)
 
                 match User.by_auth_token(bearer_token) with
-                | Some(id, user) -> id, user
+                | Some(id, user) ->
+                    Logging.Debug "Authenticated request as %s" user.Username
+                    id, user
                 | None -> raise AuthorizeFailedException
 
             else raise AuthorizeFailedException
