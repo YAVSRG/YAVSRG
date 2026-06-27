@@ -60,37 +60,33 @@ type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, 
                 state.CurrentChartTime() +
                 (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
 
-            while replay_data.Length - 1 > seek
-                  && let struct (t, _) = replay_data.[seek + 1] in
-                     t < now - 100.0f<ms> do
+            while replay_data.Length - 1 > seek && replay_data.[seek + 1].Time < now - 100.0f<ms> do
                 seek <- seek + 1
 
             let until_time =
                 now + 1080.0f / (options.ScrollSpeed.Value / SelectedChart.rate.Value)
 
             let mutable peek = seek
-            let struct (t, b) = replay_data.[peek]
+            let replay_frame = replay_data.[peek]
 
             for k = 0 to keys - 1 do
-                if b.Contains(k) then
+                if replay_frame.PressedKeys.Contains(k) then
                     keys_down.[k] <- true
-                    keys_times.[k] <- t
+                    keys_times.[k] <- replay_frame.Time
                 else
                     keys_down.[k] <- false
 
-            while replay_data.Length - 1 > peek
-                  && let struct (t, _) = replay_data.[peek] in
-                     t < until_time do
-                let struct (t, b) = replay_data.[peek]
+            while replay_data.Length - 1 > peek && replay_data.[peek].Time < until_time do
+                let replay_frame = replay_data.[peek]
 
                 for k = 0 to keys - 1 do
-                    if b.Contains(k) then
+                    if replay_frame.PressedKeys.Contains(k) then
                         if not keys_down.[k] then
                             keys_down.[k] <- true
-                            keys_times.[k] <- t
+                            keys_times.[k] <- replay_frame.Time
                     else if keys_down.[k] then
                         keys_down.[k] <- false
-                        draw_press (k, now, keys_times.[k], t)
+                        draw_press (k, now, keys_times.[k], replay_frame.Time)
 
                 peek <- peek + 1
 
@@ -103,6 +99,6 @@ type private InputOverlay(keys: int, replay_data: ReplayData, state: PlayState, 
 
         let time = state.CurrentChartTime()
         if time < last_time then
-            while seek > 0 && let struct (t, _) = replay_data.[seek] in t > time do
+            while seek > 0 && replay_data.[seek].Time > time do
                 seek <- seek - 1
         last_time <- state.CurrentChartTime()

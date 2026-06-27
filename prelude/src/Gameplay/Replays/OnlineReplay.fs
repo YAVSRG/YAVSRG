@@ -18,8 +18,7 @@ type OnlineReplay() =
             if i >= buffer.Count then
                 false
             else
-                let struct (t, _) = buffer.[i]
-                t <= time
+                buffer.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1
@@ -48,7 +47,7 @@ type OnlineReplay() =
             current_chart_time <- timestamp
             try
                 while not (br.BaseStream.Position = br.BaseStream.Length) do
-                    buffer.Add(struct (br.ReadSingle() * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16())))
+                    buffer.Add(ReplayFrame.ReadFromStream(br))
             with err ->
                 Logging.Error "Error while receiving online replay data: %O" err
 

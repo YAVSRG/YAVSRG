@@ -48,10 +48,10 @@ module ReplayTests =
 
         let bad_replay_string =
             [|
-                struct (0.0f<ms>, Bitmask.FromInt16(0us))
-                struct (10.0f<ms>, Bitmask.FromInt16(1us))
-                struct (20.0f<ms>, Bitmask.FromInt16(2us))
-                struct (19.0f<ms>, Bitmask.FromInt16(1us))
+                ReplayFrame.Create(0.0f<ms>, 0us)
+                ReplayFrame.Create(10.0f<ms>, 1us)
+                ReplayFrame.Create(20.0f<ms>, 2us)
+                ReplayFrame.Create(19.0f<ms>, 1us)
             |]
             |> Replay.compress_string
 
@@ -64,10 +64,10 @@ module ReplayTests =
 
         let bad_replay_string =
             [|
-                struct (0.0f<ms>, Bitmask.FromInt16(0us))
-                struct (10.0f<ms>, Bitmask.FromInt16(1us))
-                struct (20.0f<ms>, Bitmask.FromInt16(2us))
-                struct (System.Single.NaN * 1.0f<ms>, Bitmask.FromInt16(1us))
+                ReplayFrame.Create(0.0f<ms>, 0us)
+                ReplayFrame.Create(10.0f<ms>, 1us)
+                ReplayFrame.Create(20.0f<ms>, 2us)
+                ReplayFrame.Create(System.Single.NaN * 1.0f<ms>, 1us)
             |]
             |> Replay.compress_string
 
@@ -80,10 +80,10 @@ module ReplayTests =
 
         let bad_replay_string =
             [|
-                struct (0.0f<ms>, Bitmask.FromInt16(0us))
-                struct (10.0f<ms>, Bitmask.FromInt16(1us))
-                struct (20.0f<ms>, Bitmask.FromInt16(2us))
-                struct (System.Single.NegativeInfinity * 1.0f<ms>, Bitmask.FromInt16(1us))
+                ReplayFrame.Create(0.0f<ms>, 0us)
+                ReplayFrame.Create(10.0f<ms>, 1us)
+                ReplayFrame.Create(20.0f<ms>, 2us)
+                ReplayFrame.Create(System.Single.NegativeInfinity * 1.0f<ms>, 1us)
             |]
             |> Replay.compress_string
 

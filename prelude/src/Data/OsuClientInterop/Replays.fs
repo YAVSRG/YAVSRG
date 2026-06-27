@@ -29,13 +29,13 @@ module OsuReplay =
         let props = Array.zeroCreate 5
         input.Read(props, 0, 5) |> ignore
 
-        let lengthBytes = Array.zeroCreate 8
-        input.Read(lengthBytes, 0, 8) |> ignore
+        let length_bytes = Array.zeroCreate 8
+        input.Read(length_bytes, 0, 8) |> ignore
 
-        let dec = LZMA.Decoder()
-        dec.SetDecoderProperties props
+        let lzma_decoder = LZMA.Decoder()
+        lzma_decoder.SetDecoderProperties props
 
-        dec.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(lengthBytes, 0), null)
+        lzma_decoder.Code(input, output, replay.CompressedReplayBytes.Value.Length, BitConverter.ToInt64(length_bytes, 0), null)
         output.Flush()
         let string_data = output.ToArray() |> Encoding.UTF8.GetString
 
@@ -52,7 +52,10 @@ module OsuReplay =
                     let state = uint16 parts.[1]
 
                     if state <> last_state then
-                        yield struct ((time - original_osu_file_first_note) * float32 original_osu_file_rate, Bitmask.FromInt16(state))
+                        yield {
+                            Time = (time - original_osu_file_first_note) * float32 original_osu_file_rate
+                            PressedKeys = Bitmask.FromInt16(state)
+                        }
                         last_state <- state
         }
         |> Array.ofSeq
@@ -64,11 +67,11 @@ module OsuReplay =
         let input_as_replay_string =
             let mutable previous_time = -first_note
             replay
-            |> Seq.map (fun (struct (timestamp, key_state)) ->
+            |> Seq.map (fun replay_frame ->
                 let t = previous_time
-                let rounded_time = timestamp |> float32 |> round |> int
+                let rounded_time = replay_frame.Time |> float32 |> round |> int
                 previous_time <- rounded_time
-                sprintf "%i|%i|1|0" (rounded_time - t) (key_state.ToInt16())
+                sprintf "%i|%i|1|0" (rounded_time - t) (replay_frame.PressedKeys.ToInt16())
             )
             |> String.concat ","
 

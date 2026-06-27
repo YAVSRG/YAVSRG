@@ -29,8 +29,8 @@ type ReplayConsumer(keys: int, replay: IReplay) =
 
     member this.PollReplay(time: ChartTime) =
         while replay.HasNext(time) do
-            let struct (time, pressed_keys) = replay.GetNext()
-            this.HandleReplayFrame(time, pressed_keys)
+            let replay_frame = replay.GetNext()
+            this.HandleReplayFrame(replay_frame.Time, replay_frame.PressedKeys)
 
     member private this.HandleReplayFrame(time: ChartTime, new_pressed_keys: Bitmask) =
         for k = 0 to keys - 1 do

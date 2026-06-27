@@ -6,30 +6,45 @@ open System.IO.Compression
 open Prelude
 open Prelude.Charts
 
-// "Replay" data is an array of timestamps + bitmaps of which keys are pressed down at that moment
-// A new timestamp + bitmap is recorded when the state of one of the keys change; every timestamp corresponds to at least 1 key becoming pressed or unpressed
-// Timestamps are relative to the first note in the chart; 0ms timestamp = +0ms relative to the first note
+// Unlike Time, ChartTime is relative to the first note of the chart, a value of 0 = exactly on the first note
 // This is so a replay is portable to a functionally identical copy of the chart other than its offset being shifted
-
-// ex: [|(0, 0); (1, 1)|] indicates that the leftmost (1st) column was pressed down, 1 ms into the chart AKA 1ms after the first note
-
-// ChartTime is conventionally used as the type signature instead of Time when the time is relative to the first note instead of to the start of the audio file
 type ChartTime = float32<ms>
 
-type ReplayFrame = (struct (ChartTime * Bitmask))
+type [<Struct>] ReplayFrame =
+    {
+        Time: ChartTime
+        PressedKeys: Bitmask
+    }
+
+    member inline this.WriteToStream(bw: BinaryWriter) : unit =
+        bw.Write(float32 this.Time)
+        bw.Write(this.PressedKeys.ToInt16())
+
+    static member inline ReadFromStream(br: BinaryReader) : ReplayFrame =
+        {
+            Time = br.ReadSingle() * 1.0f<ms>
+            PressedKeys = Bitmask.FromInt16(br.ReadUInt16())
+        }
+
+    static member inline Create(time: Time, pressed_keys: Bitmask) =
+        { Time = time; PressedKeys = pressed_keys }
+
+    static member inline Create(time: Time, pressed_keys: uint16) =
+        ReplayFrame.Create(time, Bitmask.FromInt16(pressed_keys))
+
+// Invariant: timestamps are nondecreasing
 type ReplayData = ReplayFrame array
 
 module Replay =
 
-    let compress_to (output_stream: Stream) (data: ReplayData) =
+    let compress_to (output_stream: Stream) (replay: ReplayData) =
         use gzip_stream = new GZipStream(output_stream, CompressionLevel.SmallestSize)
         use bw = new BinaryWriter(gzip_stream)
 
-        bw.Write data.Length
+        bw.Write(replay.Length)
 
-        for struct (time, buttons) in data do
-            bw.Write(float32 time)
-            bw.Write(buttons.ToInt16())
+        for replay_frame in replay do
+            replay_frame.WriteToStream(bw)
 
         bw.Flush()
 
@@ -52,7 +67,7 @@ module Replay =
         let output = Array.zeroCreate count
 
         for i = 0 to (count - 1) do
-            output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16()))
+            output.[i] <- ReplayFrame.ReadFromStream(br)
 
         output
 
@@ -84,19 +99,19 @@ module Replay =
                 failwith "replay header indicates it is unreasonably big"
 
             let output = Array.zeroCreate count
-            let mutable last_time = Single.NegativeInfinity
+            let mutable last_time = -Time.infinity
 
             for i = 0 to (count - 1) do
-                let time = br.ReadSingle()
+                let next_frame = ReplayFrame.ReadFromStream(br)
 
-                if not (Single.IsFinite time) then
+                if not (Single.IsFinite(float32 next_frame.Time)) then
                     failwith "replay contains invalid float value"
 
-                if time < last_time then
-                    failwithf "replay goes backwards in time %f -> %f" last_time time
+                if next_frame.Time < last_time then
+                    failwithf "replay goes backwards in time %f -> %f" last_time next_frame.Time
 
-                last_time <- time
-                output.[i] <- struct (time * 1.0f<ms>, Bitmask.FromInt16(br.ReadUInt16()))
+                last_time <- next_frame.Time
+                output.[i] <- next_frame
 
             Ok output
         with err ->
@@ -105,7 +120,7 @@ module Replay =
     let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : ReplayData =
         let time_until_next (current_index: int) : Time =
             if current_index + 1 >= notes.Length then
-                50.0f<ms>
+                100.0f<ms>
             else
                 notes.[current_index + 1].Time - notes.[current_index].Time
 
@@ -117,7 +132,7 @@ module Replay =
 
             while i < notes.Length do
                 let { Time = time; Data = nr } = notes.[i]
-                let delay = time_until_next i
+                let delay = time_until_next(i) * 0.5f
                 let mutable hit = held
 
                 for k = 0 to (keys - 1) do
@@ -130,8 +145,8 @@ module Replay =
                         hit <- hit.Remove(k)
                         held <- held.Remove(k)
 
-                yield struct (time - first_note, hit)
-                yield struct (time - first_note + delay * 0.5f, held)
+                yield { Time = time - first_note; PressedKeys = hit }
+                yield { Time = time - first_note + delay; PressedKeys = held }
                 i <- i + 1
         }
         |> Array.ofSeq
@@ -148,10 +163,10 @@ module Replay =
             MathF.Cos(time / 1000.0f<ms>) * 45.0f<ms>
 
         perfect_replay keys notes
-        |> Array.map (fun struct (time, r) ->
-            let new_time = max (last_time + 1.0f<ms>) (time + offset time)
+        |> Array.map (fun replay_frame ->
+            let new_time = max (last_time + 1.0f<ms>) (replay_frame.Time + offset replay_frame.Time)
             last_time <- new_time
-            struct (new_time, r)
+            { Time = new_time; PressedKeys = replay_frame.PressedKeys }
         )
 
     /// Generates a replay for provided notes where hits are slightly offset based on a sine wave over time

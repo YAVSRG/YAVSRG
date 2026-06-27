@@ -19,7 +19,7 @@ type LiveReplay(first_note: Time) =
             Logging.Warn "Timestamp for replay data went backwards: %f, %f" (time - first_note) last_time
 
         last_time <- max last_time (time - first_note)
-        buffer.Add(struct (last_time, pressed_keys))
+        buffer.Add(ReplayFrame.Create(last_time, pressed_keys))
 
     interface IReplay with
         member this.Finished = finished
@@ -28,8 +28,7 @@ type LiveReplay(first_note: Time) =
             if i >= buffer.Count then
                 false
             else
-                let struct (t, _) = buffer.[i]
-                t <= time
+                buffer.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1
@@ -54,11 +53,10 @@ type LiveReplay(first_note: Time) =
     /// Export all data not yet exported, for sending over a network in multiplayer
     member this.ExportLiveBlock(bw: BinaryWriter) : unit =
         while export < buffer.Count do
-            let struct (time, bitmap) = buffer.[export]
+            let replay_frame = buffer.[export]
 
-            if time > -1000.0f<ms> then
-                bw.Write(float32 time)
-                bw.Write(bitmap.ToInt16())
+            if replay_frame.Time > -1000.0f<ms> then
+                replay_frame.WriteToStream(bw)
 
             export <- export + 1
 

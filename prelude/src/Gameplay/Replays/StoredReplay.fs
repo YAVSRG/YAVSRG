@@ -14,8 +14,7 @@ type StoredReplay(data: ReplayData) =
             if i >= data.Length then
                 false
             else
-                let struct (t, _) = data.[i]
-                t <= time
+                data.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1

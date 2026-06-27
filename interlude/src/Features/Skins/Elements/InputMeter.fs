@@ -106,12 +106,12 @@ type InputMeter(ctx: HudContext) =
             let mutable previous = now
             let cutoff = now - (this.Bounds.Height - column_width) / SCROLL_SPEED
             let fade_edge = now - (this.Bounds.Height - column_width - ctx.Config.InputMeterInputFadeDistance) / SCROLL_SPEED
-            for struct (timestamp, keystate) in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
+            for replay_frame in recent_events |> Seq.takeWhile(fun _ -> previous >= cutoff) do
                 for k = 0 to ctx.State.WithColors.Keys - 1 do
-                    if keystate.Contains(k) then
-                        if previous > fade_edge && timestamp < fade_edge then
+                    if replay_frame.PressedKeys.Contains(k) then
+                        if previous > fade_edge && replay_frame.Time < fade_edge then
                             bar (k, fade_edge, previous)
-                            bar (k, timestamp, fade_edge)
+                            bar (k, replay_frame.Time, fade_edge)
                         else
-                            bar (k, timestamp, previous)
-                previous <- timestamp
+                            bar (k, replay_frame.Time, previous)
+                previous <- replay_frame.Time
