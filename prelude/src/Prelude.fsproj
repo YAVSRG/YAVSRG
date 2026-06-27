@@ -19,6 +19,8 @@
 
   <ItemGroup>
     <Compile Include="Shared\Helpers.fs" />
+    <Compile Include="Shared\Color.fs" />
+    <Compile Include="Shared\Bitmap.fs" />
     <Compile Include="Shared\Json.fs" />
     <Compile Include="Shared\Localisation.fs" />
     <Compile Include="Shared\PseudoRandom.fs" />

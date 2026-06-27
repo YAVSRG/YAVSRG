@@ -1,7 +1,8 @@
 ﻿namespace Prelude
 
-[<Struct>]
-type TimeItem<'T> = { Time: Time; Data: 'T }
+open System.IO
+
+type [<Struct>] TimeItem<'T> = { Time: Time; Data: 'T }
 
 /// Invariant: Sorted nondecreasing by time
 type TimeArray<'T> = TimeItem<'T> array
@@ -67,8 +68,6 @@ module TimeArray =
                 yield arr.[i]
                 i <- i + 1
         }
-
-    open System.IO
 
     let read<'T> (br: BinaryReader) (f: BinaryReader -> 'T) : TimeArray<'T> =
         let count = br.ReadInt32()

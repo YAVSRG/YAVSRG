@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 
 module Localisation =
-        
+
     type private LocalisationContext =
         {
             CircularReferenceCheck: Set<string>
@@ -14,7 +14,7 @@ module Localisation =
             GetLocale: string -> Stream option
             Loaded: Dictionary<string, string>
         }
-        
+
     type LocaleFile =
         {
             Inherit: string option
@@ -25,17 +25,17 @@ module Localisation =
         use sr = new StreamReader(stream)
         let mutable inherits_from = None
         let entries = Dictionary<string, string>()
-        
+
         let first_line = sr.ReadLine()
-        
+
         if first_line = null then failwithf "Locale file was empty: '%s'" name
-        
+
         elif first_line.StartsWith("#inherit ") then
             inherits_from <- Some(first_line.Substring(9))
-            
+
         elif first_line <> "#root" then
             failwithf "Locale file '%s' is missing #root or #inherit <file> as the first line" name
-            
+
         while not sr.EndOfStream do
             let line = sr.ReadLine().Trim()
             if line.Length > 0 then
@@ -46,19 +46,19 @@ module Localisation =
                     entries.[key] <- value
                 else
                     failwithf "Invalid line in locale file '%s': %s" name line
-                    
+
         { Inherit = inherits_from; Entries = entries }
-    
+
     let rec private load_locale_tree (ctx: LocalisationContext) : Dictionary<string, string> =
         let locale = read_locale_file(ctx.Name, ctx.Stream)
-        
+
         match locale.Inherit with
         | Some inherits_from ->
             Logging.Debug "Locale '%s' inherits from '%s'" ctx.Name inherits_from
-            
+
             if ctx.CircularReferenceCheck.Contains(inherits_from.ToLower()) then
                 failwithf "Circular reference: '%s' inherits from '%s'" ctx.Name inherits_from
-                
+
             match ctx.GetLocale inherits_from with
             | Some stream ->
                load_locale_tree {
@@ -70,9 +70,9 @@ module Localisation =
                }
                |> ignore
             | None -> failwithf "Could not inherit locale file for requested language: '%s'" inherits_from
-            
+
         | None -> ()
-        
+
         for e in locale.Entries do
             ctx.Loaded.[e.Key] <- e.Value
 
@@ -84,7 +84,7 @@ module Localisation =
             Ok (read_locale_file(name, stream))
         with err ->
             Error err.Message
-            
+
     let write_file(file: LocaleFile, path: string) =
         File.WriteAllLines(path, seq {
             yield (match file.Inherit with Some inherited_from -> "#inherit " + inherited_from | None -> "#root")
@@ -93,7 +93,7 @@ module Localisation =
         })
 
     let load (locale: string, get_locale: string -> Stream option) : Result<Dictionary<string, string>, string> =
-        
+
         match get_locale locale with
         | Some stream ->
             let result = Dictionary<string, string>()
@@ -107,10 +107,10 @@ module Localisation =
                 }
                 |> Ok
             with err -> Error err.Message
-                
+
         | None ->
             Error (sprintf "Could not find locale file for requested language: '%s'" locale)
-            
+
     let mutable private mapping = Dictionary<string, string>()
     let init (locale: string, get_locale: string -> Stream option) =
         match load(locale, get_locale) with
@@ -130,8 +130,7 @@ module Localisation =
         List.iteri (fun i x -> result_string <- result_string.Replace("%" + i.ToString(), x)) data
         result_string
 
-[<AutoOpen>]
-module LocalisationOperators =
+module [<AutoOpen>] LocalisationOperators =
 
     /// Shorthand operator to get the localised text from a locale string id
     let (~%) = Localisation.localise

@@ -47,8 +47,7 @@ type private ColorCodec() =
 
     override this.Default(_: Json.Context) = fun () -> Color.White
 
-[<AutoOpen>]
-module Json =
+module [<AutoOpen>] Json =
 
     let JSON =
         Json(Json.Settings.Default)
