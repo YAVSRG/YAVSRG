@@ -51,7 +51,7 @@ module ChartRateDetectionTests =
         | Some value -> Assert.Fail(sprintf "%f" value)
         | None -> Assert.Pass()
 
-    let FUZZ_REFERENCE_CHART = ChartFuzzBuilder.generate (7, 1234567)
+    let FUZZ_REFERENCE_CHART = ChartFuzzer.Generate(7, 1234567)
     let simulate_normal_import (rate: Rate) : ImportChart =
         {
             Header = {

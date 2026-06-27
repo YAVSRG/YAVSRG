@@ -126,7 +126,7 @@ type Timeline(with_mods: ModdedChart, on_seek: Time -> unit, rate: Setting.Bound
             this.DrawHoverInfo(box, hovered_time)
 
     member this.DrawHoverInfo(bounds: Rect, time: Time) =
-        let bpm = if bpms.Length > 0 then 60000.0f<ms / minute> / bpms.[bpm_index].Data.MsPerBeat * rate.Value else 120f<beat / minute> * rate.Value
+        let bpm = if bpms.Length > 0 then MS_PER_MINUTE / bpms.[bpm_index].Data.MsPerBeat * rate.Value else 120f<beat / minute> * rate.Value
         let s_index = (time - FIRST_NOTE) / (LAST_NOTE - FIRST_NOTE) * float32 samples |> floor |> int |> max 0 |> min (samples - 1)
         let nps = note_density.[s_index] * rate.Value
         let cps = chord_density.[s_index] * rate.Value

@@ -9,7 +9,7 @@ open Prelude.Tests.Charts
 
 module ModTests =
 
-    let SAMPLE_CHART = ChartFuzzBuilder.generate(4, 0)
+    let SAMPLE_CHART = ChartFuzzer.Generate(4, 0)
 
     [<Test>]
     let Mirror() =

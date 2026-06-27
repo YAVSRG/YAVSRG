@@ -46,6 +46,8 @@ module Types =
     [<Measure>]
     type second
 
+    let [<Literal>] MS_PER_MINUTE = 60_000.0f<ms / minute>
+
     type Time = Percyqaz.Common.Time
 
     module Time =

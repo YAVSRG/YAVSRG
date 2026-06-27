@@ -10,7 +10,7 @@ module ChartTests =
     let Fuzz_CreatesValidCharts() =
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
-            let chart = ChartFuzzBuilder.generate (keys, seed)
+            let chart = ChartFuzzer.Generate(keys, seed)
             match Chart.check chart with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
@@ -20,7 +20,7 @@ module ChartTests =
     [<Test>]
     let Fuzz_PrettyPrint() =
 
-        let chart = ChartFuzzBuilder.generate (5, 0)
+        let chart = ChartFuzzer.Generate(5, 0)
 
         Chart.pretty_print chart.Notes
 
@@ -29,24 +29,20 @@ module ChartTests =
     [<Test>]
     let Fuzz_Deterministic_Hashing_Deterministic() =
 
-        let TEST_DATA =
-            [
-                123, 4, "7F7ED43C7820701F541548FCA9A6692B0B6109A9F0D78FDFBE84D2BEA3E0A4F0"
-                0, 7, "9478FFC413A3FCFB65055CAF69A6F25E9B7EF5AAA73532DF8A99D320EEAD4689"
-                123, 10, "61F0F1DDE1B53E6A8382AB0879B2FF86B2CA7E0B25D29E7357BD3DCEA078EB99"
-            ]
-
-        for seed, keys, expected_hash in TEST_DATA do
-            let chart = ChartFuzzBuilder.generate (keys, seed)
-
+        let test_expected_hash(keys: int, seed: int, expected_hash: string) : unit =
+            let chart = ChartFuzzer.Generate(keys, seed)
             Assert.AreEqual(expected_hash, Chart.hash chart)
+
+        test_expected_hash(4, 123, "66FCABE08A7008B62872F80D2AD2DD144FCCF0B693E0907CD7F5F984B2A04B21")
+        test_expected_hash(7, 0, "A03A034E4B836D919906467F60CF07503CF503583638DB13FC871D026E2600D6")
+        test_expected_hash(10, 123, "73FF85CB6B2B8673EA6FD7DF317F290E1B2C7A1B81677E2E3F4D7353EF246ABD")
 
         Assert.Pass()
 
     [<Test>]
     let Scale() =
 
-        let chart = ChartFuzzBuilder.generate (4, 123)
+        let chart = ChartFuzzer.Generate(4, 123)
         let twice_as_long = Chart.scale 2.0f</rate> chart
         let scaled_to_original = Chart.scale 0.5f</rate> twice_as_long
 

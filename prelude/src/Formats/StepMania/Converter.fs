@@ -107,12 +107,12 @@ module StepMania_To_Interlude =
                 Data =
                     {
                         Meter = meter
-                        MsPerBeat = 60000.0f<ms / minute> / b
+                        MsPerBeat = MS_PER_MINUTE / b
                     }
             }
         )
 
-        let mutable ms_per_beat = 60000.0f<ms / minute> / b
+        let mutable ms_per_beat = MS_PER_MINUTE / b
         if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
         bpms <- List.tail bpms
         let mutable total_beats = 0.0f<beat>
@@ -188,12 +188,12 @@ module StepMania_To_Interlude =
                             Data =
                                 {
                                     Meter = meter
-                                    MsPerBeat = 60000.0f<ms / minute> / b
+                                    MsPerBeat = MS_PER_MINUTE / b
                                 }
                         }
                     )
 
-                    ms_per_beat <- 60000.0f<ms / minute> / b
+                    ms_per_beat <- MS_PER_MINUTE / b
                     if ms_per_beat < 0.0f<ms/beat> then skip_conversion "SM file has negative BPMs"
                     bpms <- List.tail bpms
 

@@ -7,7 +7,7 @@ module ChartBuilder =
 
     let repeated_pattern (keys: int) (duration: Time) (pattern: Bitmask array) : TimeArray<NoteRow> =
 
-        let INTERVAL = 60000.0f<ms/minute> / 120.0f<beat/minute> / 4.0f</beat>
+        let INTERVAL = MS_PER_MINUTE / 120.0f<beat/minute> / 4.0f</beat>
 
         seq {
             let mutable last_time = 0.0f<ms>

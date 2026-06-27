@@ -181,7 +181,7 @@ module Quaver_To_Interlude =
                         Data =
                             {
                                 Meter = 4<beat>
-                                MsPerBeat = 60000.0f<ms/minute> / (tp.Bpm * 1.0f<beat/minute>)
+                                MsPerBeat = MS_PER_MINUTE / (tp.Bpm * 1.0f<beat/minute>)
                             }
                     }
                 ) |> Array.ofSeq

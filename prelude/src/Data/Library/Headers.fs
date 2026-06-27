@@ -113,7 +113,7 @@ type ChartMeta =
             Length = chart.LastNote - chart.FirstNote
             BPM =
                 let mspb = Chart.find_most_common_bpm chart
-                let bpm = 60000.0f<ms/minute> / mspb |> float32
+                let bpm = MS_PER_MINUTE / mspb |> float32
                 if System.Single.IsFinite(bpm) then
                     bpm |> round |> int
                 else 0

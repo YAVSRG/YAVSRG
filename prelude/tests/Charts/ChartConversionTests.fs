@@ -16,7 +16,7 @@ module ChartConversionTests =
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
 
-            let chart = ChartFuzzBuilder.generate (keys, seed)
+            let chart = ChartFuzzer.Generate(keys, seed)
 
             let osu_notes = OsuExport.notes_to_hitobjects chart.Notes chart.Keys
             let interlude_notes = Osu_To_Interlude.convert_hit_objects osu_notes chart.Keys
@@ -44,7 +44,7 @@ module ChartConversionTests =
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
 
-            let chart = ChartFuzzBuilder.generate (keys, seed)
+            let chart = ChartFuzzer.Generate(keys, seed)
 
             let most_common_mspb = Chart.find_most_common_bpm chart
             let osu_points = OsuExport.convert_timing_points chart.BPM chart.SV most_common_mspb

@@ -18,7 +18,7 @@ type private ClusterBuilder =
 
     member this.Calculate() =
         let average = this.SumMs / float32 this.Count
-        this.BPM <- 60000.0f<ms / minute> / average |> float32 |> round |> int |> fun x -> x * 1<beat / minute / rate> |> Some
+        this.BPM <- MS_PER_MINUTE / average |> float32 |> round |> int |> fun x -> x * 1<beat / minute / rate> |> Some
 
     member this.Value = this.BPM.Value
 
