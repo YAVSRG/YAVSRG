@@ -18,13 +18,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Helpers.fs" />
-    <Compile Include="Json.fs" />
-    <Compile Include="Localisation.fs" />
-    <Compile Include="Random.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="Chart.fs" />
-    <Compile Include="Imports.fs" />
+    <Compile Include="Shared\Helpers.fs" />
+    <Compile Include="Shared\Json.fs" />
+    <Compile Include="Shared\Localisation.fs" />
+    <Compile Include="Shared\PseudoRandom.fs" />
+    <Compile Include="Shared\Bitmask.fs" />
+    <Compile Include="Shared\Units.fs" />
+    <Compile Include="Shared\TimeArray.fs" />
+    <Compile Include="Charts\NoteRow.fs" />
+    <Compile Include="Charts\Chart.fs" />
+    <Compile Include="Charts\Imports.fs" />
     <Compile Include="Formats\Conversions.fs" />
     <Compile Include="Formats\osu!\Shared.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />

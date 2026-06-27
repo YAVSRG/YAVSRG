@@ -7,85 +7,6 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open Prelude
 
-type NoteType =
-    | NOTHING = 0uy
-    | NORMAL = 1uy
-    | HOLDHEAD = 2uy
-    | HOLDBODY = 3uy
-    | HOLDTAIL = 4uy
-
-type NoteRow = NoteType array
-
-module NoteRow =
-
-    let clone = Array.copy
-
-    let create_empty (keycount: int) : NoteRow = Array.create keycount NoteType.NOTHING
-
-    let create_notes (keycount: int) (notes: Bitmask) : NoteRow =
-        let nr = create_empty keycount
-
-        for k in Bitmask.toSeq notes do
-            nr.[k] <- NoteType.NORMAL
-
-        nr
-
-    let create_ln_bodies (keycount: int) (notes: Bitmask) : NoteRow =
-        let nr = create_empty keycount
-
-        for k in Bitmask.toSeq notes do
-            nr.[k] <- NoteType.HOLDBODY
-
-        nr
-
-    let is_empty: NoteRow -> bool =
-        Array.forall (
-            function
-            | NoteType.NOTHING
-            | NoteType.HOLDBODY -> true
-            | _ -> false
-        )
-
-    let read (keycount: int) (br: BinaryReader) : NoteRow =
-        let row = create_empty keycount
-        let columns = br.ReadUInt16()
-
-        for k in Bitmask.toSeq columns do
-            row.[k] <-
-                match br.ReadByte() with
-                | 1uy -> NoteType.NORMAL
-                | 2uy -> NoteType.HOLDHEAD
-                | 3uy -> NoteType.HOLDBODY
-                | 4uy -> NoteType.HOLDTAIL
-                | b -> failwithf "unexpected note type in chart data: %i" b
-
-        row
-
-    let write (bw: BinaryWriter) (row: NoteRow) : unit =
-        let columns =
-            seq {
-                for i in 0 .. row.Length - 1 do
-                    if row.[i] <> NoteType.NOTHING then
-                        yield i
-            }
-
-        bw.Write(Bitmask.ofSeq columns)
-
-        for k in columns do
-            bw.Write(byte row.[k])
-
-    let pretty_print (row: NoteRow) : string =
-        let p =
-            function
-            | NoteType.NORMAL -> '#'
-            | NoteType.HOLDHEAD -> '^'
-            | NoteType.HOLDBODY -> '|'
-            | NoteType.HOLDTAIL -> 'v'
-            | NoteType.NOTHING
-            | _ -> ' '
-
-        new string (row |> Array.map p)
-
 type BPM =
     {
         Meter: int<beat>
@@ -281,7 +202,7 @@ module Chart =
             BPM = TimeArray.scale scale chart.BPM
             SV = TimeArray.scale scale chart.SV
         }
-        
+
     let inline notecount<^T when ^T: (member Notes : TimeArray<NoteRow>)> (chart: ^T) : int * int =
         let mutable notes = 0
         let mutable lnotes = 0
@@ -332,7 +253,7 @@ module Chart =
         let d = (find_bpm_durations chart.BPM chart.LastNote).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)
 
-    let pretty_print (notes: TimeArray<NoteRow>) =
+    let pretty_print (notes: TimeArray<NoteRow>) : unit =
         notes
         |> Array.iter (fun nr ->
             printfn "%06.1f | %s" nr.Time (NoteRow.pretty_print nr.Data)
