@@ -2,83 +2,31 @@
 
 ### Commit messages
 
-I like to put emoji in commit messages  
-You don't have to care about them - in PRs I can just squash with an emoji commit message
-
-👽️ = Bug fix  
-✨ = New client feature  
-🔥 = New developer feature, experiment or tool  
-⚙️ = New library feature, not available directly to users  
-🌍 = New server-side/online feature  
-🌸 = User interface improvement (no new functionality)  
-🧹 = Code refactoring/cleanup/formatting  
-💡 = Automated tests and CI pipelines  
-📘 = User documentation / wiki / website  
-📕 = Developer documentation / wiki  
-🎓 = Localisation changes  
-🏷️ = Releases  
-💚 = Community content  
-
-### Pull requests
-
-Step 1: Create a fork of YAVSRG  
-
-Step 2: Make your changes  
-I recommend doing this in a branch other than `main` as it makes it easy to have both your fork and the upstream as a remote
-
-Step 3: [Submit PR](https://github.com/YAVSRG/YAVSRG/pulls)
-
-Pull requests will be reviewed by Percyqaz for correctness and code style, then merged if all OK
+Use [semantic commit messages](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716)  
+e.g. `feat: added a new button in ...`, `fix: crash when ...`
 
 ### Code style
 When in doubt follow the [F# coding conventions](https://learn.microsoft.com/en-us/dotnet/fsharp/style-guide/conventions)
 
-Common variable names
-- `i` = used as a nondescript loop variable. Often as the index for a "note row" when iterating through chart data
-- `k` = Short for key, used instead of `i` when iterating through columns in note data
-
-Use other single-letter names sparingly
+Use descriptive variable names  
+One-letter variable names are not descriptive unless they follow specific conventions:  
+- `i` = generic loop counter variable
+- `k` = codebase convention for 'key' as the rhythm game concept, used when looping through keys/columns
 
 Prefer `snake_case` variable names over `camelCase`
-```fsharp
-let my_variable = 5 // :)
-let myVariable = 5 // >:(
-```
 
-There will soon be a script to run automatic indentation/formatting on all code via Fantomas, which will define how indentation, spacing, etc should be  
-So basically don't worry about or pay much mind to your formatting as it will be automatically corrected
+Use type annotations on all properties, arguments and return types for new code  
+Bad: `let calculate(rate, chart) = ...`
+Good `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`
 
-Top-level functions inside modules must have type annotations on all arguments and the return type  
-```fsharp
-module Difficulty =
+Do not use currying in methods top-level module functions for new code  
+Bad: `let calculate (rate: Rate) (chart: Chart) : Difficulty = ...`
+Good: `let calculate(rate: Rate, chart: Chart) : Difficulty = ...`
 
-	let calculate rate chart = ... // :(
-	
-	let calculate (rate: Rate) (chart: Chart) = ... // :(
-	
-	let calculate (rate: Rate) (chart: Chart) : Difficulty = ... // :)
-```
-Nested functions may not need types if they are short and clear, but lean towards also adding annotations anyway
+Use exceptions for control flow sparingly, they should be for exceptional cases and not hot paths
 
-Methods on classes must have type annotations on all parameters and the return type  
-`.Draw()` and `.Update(elapsed_ms, moved)` are excepted from this for the time being
-
-Methods should never use currying and instead have a single bracketed arguments list
-```fsharp
-type ScoreProcessor(...) =
-
-	member this.ProcessHit(delta, is_missed) = ... // :(
-	
-	member this.ProcessHit (delta: GameplayTime) (is_missed: bool) : ComboAction * GameplayAction = ... // :(
-
-	member this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction = ... // :)
-
-```
-Annotations are not mandatory on properties, but lean towards adding them anyway
-
-Do not swallow exceptions, log and return an option  
-Instead, the caller should receive a result where it has more context on what to log  
-Also, be as specific with what exceptions to catch as possible
+Do not use Option<'T> for error handling, use Result<'T, ...> instead  
+The caller has more context on what to log rather than logging at the call site and then returning None
 ```fsharp
 // Bad
 let beatmap_from_file (path: string) : Beatmap option =
@@ -108,26 +56,8 @@ let caller () =
 	| Error exn -> Logging.Error("Error while trying to do ...: ...")
 ```
 
-For consistency, array subscripting should always use a `.`, even where not having it would parse due to F#'s idiotic subscript parsing rules  
+Always use a `.` when subscripting arrays, even where it would parse without  
 This intentionally ignores [the recommendation here](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/arrays#access-elements)  
-```fsharp
-my_array.[i] // OK
-my_array[i] // parses but not OK
-
-my_2d_array.[i].[j] // OK
-my_2d_array[i].[j] // parses but not OK
-my_2d_array[i][j] // does not parse
-
-my_string.Split().[0] // OK
-my_string.Split()[0] // does not parse
-```
-
-### Development principles
-
-**Prefer one good way to do things**
-
-The average player normally just wants one button that will "do the thing" - They often don't care that you've come up with 5 different settings that thing could be on and will just pick what's familiar.  
-It is better to create one-size-fits-all systems and features, they are simpler to maintain and test as they have fewer code paths, and improvements benefit a larger proportion of players at a time.  
-Optional features will be added if:
-- Several users exist that want each variant of the option
-- It is easy to justify each variant's distinct usefulness
+Bad: `my_array[i]`, `my_2d_array[i].[j]`  
+Good: `my_array.[i]`, `my_2d_array.[i].[j]`  
+Things that don't parse: `my_2d_array[i][j]`, `my_function()[0]` hence the consistent rule everywhere
