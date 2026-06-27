@@ -21,7 +21,7 @@ type LiveReplay(first_note: Time) =
         last_time <- max last_time (time - first_note)
         buffer.Add(ReplayFrame.Create(last_time, pressed_keys))
 
-    interface IReplay with
+    interface ReplaySource with
         member this.Finished = finished
 
         member this.HasNext(time: ChartTime) : bool =

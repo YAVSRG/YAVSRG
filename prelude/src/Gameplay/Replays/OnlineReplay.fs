@@ -11,7 +11,7 @@ type OnlineReplay() =
     let mutable current_chart_time = 0.0f<ms>
     let buffer = ResizeArray<ReplayFrame>()
 
-    interface IReplay with
+    interface ReplaySource with
         member this.Finished = finished
 
         member this.HasNext(time: ChartTime) : bool =

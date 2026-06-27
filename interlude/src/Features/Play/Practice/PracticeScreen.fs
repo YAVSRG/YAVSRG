@@ -151,7 +151,7 @@ type PracticeScreen =
                     else
                         Screen.back Transitions.Default |> ignore
 
-                elif not (liveplay :> IReplay).Finished then
+                elif not (liveplay :> ReplaySource).Finished then
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
                             if is_release then

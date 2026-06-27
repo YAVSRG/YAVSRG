@@ -46,12 +46,12 @@ type MultiplayerScreen =
                 Replay = liveplay
                 ScoreProcessor = scoring
                 GetScoreInfo = fun () ->
-                    if not (liveplay :> IReplay).Finished then
+                    if not (liveplay :> ReplaySource).Finished then
                         liveplay.Finish()
 
                     scoring.Update Time.infinity
 
-                    let replay_data = (liveplay :> IReplay).GetFullReplay()
+                    let replay_data = (liveplay :> ReplaySource).GetFullReplay()
 
                     {
                         ChartMeta = info.ChartMeta
@@ -91,7 +91,7 @@ type MultiplayerScreen =
             packet_count <- packet_count + 1
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> IReplay).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
             quit_out_early <- true
 
             if
@@ -104,7 +104,7 @@ type MultiplayerScreen =
                                 Gameplay.score_info_from_gameplay
                                     info
                                     scoring
-                                    ((liveplay :> IReplay).GetFullReplay())
+                                    ((liveplay :> ReplaySource).GetFullReplay())
                                     quit_out_early
                             ScoreScreen(score_info, (ImprovementFlags.None, None), true)
                         )
@@ -127,7 +127,7 @@ type MultiplayerScreen =
                             Gameplay.score_info_from_gameplay
                                 info
                                 scoring
-                                ((liveplay :> IReplay).GetFullReplay())
+                                ((liveplay :> ReplaySource).GetFullReplay())
                                 false
 
                         (score_info, Gameplay.set_score false score_info info.SaveData, true)
@@ -179,7 +179,7 @@ type MultiplayerScreen =
                 let now = Song.time_with_offset ()
                 let chart_time : ChartTime = now - first_note
 
-                if not (liveplay :> IReplay).Finished then
+                if not (liveplay :> ReplaySource).Finished then
 
                     Input.pop_gameplay now binds (
                         fun column time is_release ->
@@ -198,5 +198,5 @@ type MultiplayerScreen =
                     this.State.Scoring.Update liveplay_position
                     liveplay_position <- max liveplay_position chart_time
 
-                if this.State.Scoring.Finished && not (liveplay :> IReplay).Finished then finish_play chart_time
+                if this.State.Scoring.Finished && not (liveplay :> ReplaySource).Finished then finish_play chart_time
         }

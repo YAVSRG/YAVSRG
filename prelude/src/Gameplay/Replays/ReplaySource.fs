@@ -4,7 +4,7 @@ open Prelude
 
 /// Abstraction that allows walking through a replay one row at a time
 /// The underlying replay could be being created live as a player plays the chart, backed by some pre-existing score, or being streamed in from a network for multiplayer
-type IReplay =
+type ReplaySource =
     /// Are we at the end of the replay?
     abstract member Finished: bool
 
@@ -23,7 +23,7 @@ type IReplay =
 
 /// Walks through a replay as far as data is available and triggers `HandleKeyDown` and `HandleKeyUp` as appropriate
 [<AbstractClass>]
-type KeyPressReader(keys: int, replay: IReplay) =
+type KeyPressReader(keys: int, replay: ReplaySource) =
 
     let mutable current_pressed_keys: Bitmask = Bitmask.Empty
 

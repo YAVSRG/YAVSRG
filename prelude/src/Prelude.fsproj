@@ -56,7 +56,7 @@
     <Compile Include="Mods\Mods.fs" />
     <Compile Include="Mods\ModState.fs" />
     <Compile Include="Gameplay\Replays\ReplayFormat.fs" />
-    <Compile Include="Gameplay\Replays\IReplay.fs" />
+    <Compile Include="Gameplay\Replays\ReplaySource.fs" />
     <Compile Include="Gameplay\Replays\StoredReplay.fs" />
     <Compile Include="Gameplay\Replays\LiveReplay.fs" />
     <Compile Include="Gameplay\Replays\OnlineReplay.fs" />

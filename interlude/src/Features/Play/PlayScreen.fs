@@ -71,7 +71,7 @@ type PlayScreen =
             if Gameplay.continue_endless_mode() then CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
 
         let give_up () =
-            let is_giving_up_play = not (liveplay :> IReplay).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
+            let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
 
             if is_giving_up_play then
                 liveplay.Finish()
@@ -85,7 +85,7 @@ type PlayScreen =
                                 Gameplay.score_info_from_gameplay
                                     info
                                     scoring
-                                    ((liveplay :> IReplay).GetFullReplay())
+                                    ((liveplay :> ReplaySource).GetFullReplay())
                                     true
                             ScoreScreen(score_info, Gameplay.set_score true score_info info.SaveData, true)
                         )
@@ -97,7 +97,7 @@ type PlayScreen =
                         Gameplay.score_info_from_gameplay
                             info
                             scoring
-                            ((liveplay :> IReplay).GetFullReplay())
+                            ((liveplay :> ReplaySource).GetFullReplay())
                             true
                     Gameplay.set_score true score_info info.SaveData |> ignore
                     Screen.back Transitions.LeaveGameplay
@@ -117,7 +117,7 @@ type PlayScreen =
                                 Gameplay.score_info_from_gameplay
                                     info
                                     scoring
-                                    ((liveplay :> IReplay).GetFullReplay())
+                                    ((liveplay :> ReplaySource).GetFullReplay())
                                     true
 
                             (score_info, Gameplay.set_score false score_info info.SaveData, true)
@@ -143,7 +143,7 @@ type PlayScreen =
                                 Gameplay.score_info_from_gameplay
                                     info
                                     scoring
-                                    ((liveplay :> IReplay).GetFullReplay())
+                                    ((liveplay :> ReplaySource).GetFullReplay())
                                     false
 
                             (score_info, Gameplay.set_score false score_info info.SaveData, true)
@@ -188,7 +188,7 @@ type PlayScreen =
                             (if options.HoldToGiveUp.Value then ignore else give_up),
                             (if options.HoldToGiveUp.Value then give_up else ignore)
                         ),
-                        HotkeyListener("offset", fun () -> if not (liveplay :> IReplay).Finished then change_offset this.State)
+                        HotkeyListener("offset", fun () -> if not (liveplay :> ReplaySource).Finished then change_offset this.State)
                     )
 
                 base.Init(parent)
@@ -226,7 +226,7 @@ type PlayScreen =
                 let now = Song.time_with_offset ()
                 let chart_time = now - first_note
 
-                if not (liveplay :> IReplay).Finished && fade_in.Target = 1.0f then
+                if not (liveplay :> ReplaySource).Finished && fade_in.Target = 1.0f then
                     // todo: reduce repetition of this in all play screen implementations
                     Input.pop_gameplay now binds (
                         fun column time is_release ->

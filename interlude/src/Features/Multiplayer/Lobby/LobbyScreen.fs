@@ -145,11 +145,11 @@ type LobbyUI(lobby: Lobby) =
                         Replay = replay
                         ScoreProcessor = scoring
                         GetScoreInfo = fun () ->
-                            if not (replay :> IReplay).Finished then
+                            if not (replay :> ReplaySource).Finished then
                                 replay.Finish()
                             scoring.Update Time.infinity
 
-                            let replay_data = (replay :> IReplay).GetFullReplay()
+                            let replay_data = (replay :> ReplaySource).GetFullReplay()
 
                             {
                                 ChartMeta = info.ChartMeta

@@ -28,6 +28,6 @@ type ReplayBuilder() =
     member this.KeyDownFor(time: Time, duration: Time, key: int) = this.KeyDownUntil(time, time + duration, key)
     member this.KeyDownFor(time: Time, duration: Time) = this.KeyDownFor(time, duration, 0)
 
-    member this.Build() : IReplay =
+    member this.Build() : ReplaySource =
         liveplay.Finish()
         liveplay

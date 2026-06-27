@@ -7,7 +7,7 @@ open Prelude.Charts
 type StoredReplay(data: ReplayData) =
     let mutable i = 0
 
-    interface IReplay with
+    interface ReplaySource with
         member this.Finished = i >= data.Length
 
         member this.HasNext(time: ChartTime) : bool =
