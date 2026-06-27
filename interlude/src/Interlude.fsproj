@@ -289,7 +289,7 @@
     <Compile Include="Features\Options\QuickMenuPage.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Create.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\Invites.fs" />
-    <Compile Include="Features\Multiplayer\LobbySelect\List.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect\LobbyList.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect\LobbySelect.fs" />
     <Compile Include="Features\Multiplayer\Lobby\Chart.fs" />
     <Compile Include="Features\Multiplayer\Lobby\Players.fs" />
