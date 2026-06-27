@@ -9,7 +9,7 @@ open Prelude.Data.Library
 open Interlude.UI
 open Interlude.Content
 
-type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<ChartItem>, group_ctx: LibraryGroupContext) =
+type private TreeGroup(tree_ctx: TreeContext, name: string, items: ResizeArray<TreeChart>, group_ctx: LibraryGroupContext) =
     inherit TreeItem(tree_ctx)
 
     let display_name = if group_ctx = LibraryGroupContext.Likes then  %"library.likes" else name
@@ -68,7 +68,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
     member this.Selected : bool = tree_ctx.IsGroupSelected(name, group_ctx)
     override this.Spacing : float32 = GROUP_SPACING
 
-    member this.Items : ResizeArray<ChartItem> = items
+    member this.Items : ResizeArray<TreeChart> = items
     member this.Name : string = name
     member this.Context : LibraryGroupContext = group_ctx
     member this.Expanded : bool =  tree_ctx.IsGroupExpanded(name, group_ctx)
@@ -161,7 +161,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
             elif this.RightClicked(tree_top) then
                 match tree_ctx.MultiSelection with
                 | Some s when s.GroupAmountSelected(name, group_ctx, charts_as_seq) <> AmountSelected.None -> s.ShowActions()
-                | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), group_ctx)
+                | _ -> GroupContextMenu.Show(name, items |> Seq.map (fun (x: TreeChart) -> x.Chart), group_ctx)
 
             elif (%%"delete").Pressed() then
                 match group_ctx with
@@ -170,7 +170,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
                 | LibraryGroupContext.Likes
                 | LibraryGroupContext.Table _ -> ()
                 | LibraryGroupContext.Pack _
-                | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(items |> Seq.map (fun (x: ChartItem) -> x.Chart), group_ctx, false)
+                | LibraryGroupContext.None -> GroupContextMenu.ConfirmDelete(items |> Seq.map (fun (x: TreeChart) -> x.Chart), group_ctx, false)
 
     member this.Update(this_top: float32, tree_top: float32, tree_bottom: float32, elapsed_ms: float) : float32 =
         if last_cached_flag < tree_ctx.CacheFlag then
@@ -200,7 +200,7 @@ type private GroupItem(tree_ctx: TreeContext, name: string, items: ResizeArray<C
             let padded_chart_height = CHART_HEIGHT + CHART_SPACING
 
             if tree_ctx.ScrollTo = ScrollTo.Chart && this.Selected then
-                match Seq.tryFindIndex (fun (s: ChartItem) -> s.Selected) items with
+                match Seq.tryFindIndex (fun (s: TreeChart) -> s.Selected) items with
                 | Some i -> tree_ctx.Scroll (-(next_top + float32 i * padded_chart_height) + 500.0f)
                 | None -> ()
                 tree_ctx.ScrollTo <- ScrollTo.Nothing

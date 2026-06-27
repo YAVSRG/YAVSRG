@@ -21,7 +21,7 @@ type PersonalBestCached =
         Details: string
     }
 
-type private ChartItem(tree_ctx: TreeContext, group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, library_ctx: LibraryContext) =
+type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: LibraryGroupContext, chart_meta: ChartMeta, library_ctx: LibraryContext) =
     inherit TreeItem(tree_ctx)
 
     let hover_animation = Animation.Fade 0.0f
