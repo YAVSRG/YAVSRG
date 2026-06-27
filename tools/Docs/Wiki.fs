@@ -1,7 +1,7 @@
 ﻿namespace YAVSRG.CLI.Features
 
 open System.IO
-open Prelude.Common
+open Prelude
 open Percyqaz.Data
 open YAVSRG.CLI.Utils
 

@@ -4,6 +4,7 @@ open System.IO
 open System.Reflection
 open Percyqaz.Common
 open Percyqaz.Data
+open Prelude
 
 [<Json.AutoCodec(false)>]
 type Secrets =
@@ -44,7 +45,7 @@ module Secrets =
 #endif
             Secrets.Default
         else
-            match Prelude.Common.JSON.FromFile<Secrets>("./secrets/secrets.json") with
+            match JSON.FromFile<Secrets>("./secrets/secrets.json") with
             | Ok o -> o
             | Error e -> failwithf "Error while reading secrets.json: %O" e
 

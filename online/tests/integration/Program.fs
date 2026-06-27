@@ -3,6 +3,7 @@ namespace Interlude.Web.Tests.Integration
 open System.Net.Http
 open Interlude.Web.Shared.API
 open NUnit.Framework
+open Prelude
 
 [<SetUpFixture>]
 type Setup() =
@@ -19,7 +20,7 @@ type Setup() =
             let! response = http_client.GetStringAsync("https://localhost/auth/dummy?username=Integration")
 
             let token =
-                match Prelude.Common.JSON.FromString<string>(response) with
+                match JSON.FromString<string>(response) with
                 | Ok t -> t
                 | _ -> failwithf "Failed to get auth token from dummy endpoint, instead got %s" response
 

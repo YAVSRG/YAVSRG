@@ -18,7 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Common.fs" />
+    <Compile Include="Helpers.fs" />
+    <Compile Include="Json.fs" />
     <Compile Include="Localisation.fs" />
     <Compile Include="Random.fs" />
     <Compile Include="Types.fs" />

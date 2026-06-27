@@ -12,7 +12,7 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Data.OsuClientInterop
 open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Tests.Rulesets
+open Prelude.Tests.Helpers
 
 let mutable recent_beatmap_hash = ""
 
