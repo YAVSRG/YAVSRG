@@ -25,7 +25,7 @@ module EditHudScreen =
         let ruleset = Rulesets.current
 
         let scoring =
-            ScoreProcessor.create ruleset info.WithColors.Keys replay_data info.WithColors.Source.Notes SelectedChart.rate.Value
+            ScoreProcessor.create ruleset replay_data (info.WithColors.ToNoteData()) SelectedChart.rate.Value
 
         let mutable time = -Time.infinity
 

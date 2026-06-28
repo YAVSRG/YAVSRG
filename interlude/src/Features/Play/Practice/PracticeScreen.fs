@@ -45,7 +45,7 @@ type PracticeScreen =
             liveplay <- GameplayReplaySource FIRST_NOTE
 
             scoring <-
-                ScoreProcessor.create Rulesets.current info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
+                ScoreProcessor.create Rulesets.current liveplay (info.WithMods.ToNoteData()) SelectedChart.rate.Value
 
             let ignore_notes_before_time : Time = state.PracticePoint.Value + UNPAUSE_NOTE_LEADWAY * SelectedChart.rate.Value
             scoring.IgnoreNotesBefore ignore_notes_before_time

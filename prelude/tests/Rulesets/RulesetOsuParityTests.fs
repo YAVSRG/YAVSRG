@@ -56,7 +56,7 @@ module RulesetOsuParityTests =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplaySource(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
+        let score = ScoreProcessor.run as_interlude_ruleset (StoredReplaySource(as_interlude_replay)) (TEST_CHART.ToNoteData()) 1.0f<rate>
 
         Assert.AreEqual(
             (
@@ -81,7 +81,7 @@ module RulesetOsuParityTests =
     let OsuRuleset_MatchesExpectedAccuracy_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
-        let score = ScoreProcessor.run as_interlude_ruleset TEST_CHART.Keys (StoredReplaySource(as_interlude_replay)) TEST_CHART.Notes 1.0f<rate>
+        let score = ScoreProcessor.run as_interlude_ruleset (StoredReplaySource(as_interlude_replay)) (TEST_CHART.ToNoteData()) 1.0f<rate>
 
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
@@ -119,7 +119,7 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_1 () =
 
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(108.0f<ms>)
@@ -134,7 +134,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(222.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -148,7 +148,7 @@ module RulesetOsuParityTests =
 
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD10 () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
@@ -163,7 +163,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(366.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = GameplayEventCollector(OD10_RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(OD10_RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.NoteWindows
@@ -180,7 +180,7 @@ module RulesetOsuParityTests =
 
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD8 () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
@@ -195,7 +195,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(366.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
@@ -212,7 +212,7 @@ module RulesetOsuParityTests =
 
     [<Test>]
     let OsuManiaColumnLockMechanic_Replicate_2_OD8_AltCase () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(125.0f<ms>)
@@ -227,7 +227,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(366.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = GameplayEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
@@ -249,7 +249,7 @@ module RulesetOsuParityTests =
 
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.run ruleset TEST_CHART_2.Keys (StoredReplaySource(replay_data)) TEST_CHART_2.Notes 1.5f<rate>
+        let score = ScoreProcessor.run ruleset (StoredReplaySource(replay_data)) (TEST_CHART_2.ToNoteData()) 1.5f<rate>
 
         Assert.AreEqual(
             (
@@ -300,7 +300,7 @@ module RulesetOsuParityTests =
 
     [<Test>]
     let OsuRuleset_EarlyMissWindowBehaviour () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -323,7 +323,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(3000.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -344,7 +344,7 @@ module RulesetOsuParityTests =
 
     [<Test(Description = "Documents a possible bug (or intentional behaviour) of osu!stable on the very edge of the late window")>]
     let OsuRuleset_LateOkWindowBehaviour () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -367,7 +367,7 @@ module RulesetOsuParityTests =
 
         let ruleset = OsuMania.create 8.0f OsuMania.NoMod
 
-        let event_processing = GameplayEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let LATE_WINDOW_ON_MISS = snd ruleset.NoteWindows
@@ -397,7 +397,7 @@ module RulesetOsuParityTests =
             let ok = floor_uom (OsuMania.ok_window od) * 1.0f<rate> |> floor_uom
             let meh = floor_uom (OsuMania.meh_window od) * 1.0f<rate> |> floor_uom
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 100.0f<ms>)
                     .HoldUntil(200.0f<ms>, 300.0f<ms>)
@@ -438,7 +438,7 @@ module RulesetOsuParityTests =
 
             printfn "TRYING OD %.1f\n" od
 
-            let event_processing = ScoreProcessor(ruleset, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement_sequence =
@@ -467,7 +467,7 @@ module RulesetOsuParityTests =
     [<Test>]
     [<Ignore("Doesn't quite match up with osu!mania. Oh well it will probably never happen in a score")>]
     let OsuRuleset_LateLnHeadWindowsBehaviour () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1.0f<ms>)
                 .HoldUntil(400.0f<ms>, 401.0f<ms>)
@@ -481,7 +481,7 @@ module RulesetOsuParityTests =
                 .KeyDownFor(800.0f<ms> + 104.0f<ms>, 1.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let judgement_sequence =
@@ -513,7 +513,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -523,7 +523,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -556,7 +556,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -566,7 +566,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -599,7 +599,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -609,7 +609,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -642,7 +642,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -652,7 +652,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -685,7 +685,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -695,7 +695,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -728,7 +728,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -738,7 +738,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -771,7 +771,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -781,7 +781,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -814,7 +814,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -824,7 +824,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -857,7 +857,7 @@ module RulesetOsuParityTests =
 
         for head, tail, expected_judgement in TEST_DATA do
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -867,7 +867,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -880,7 +880,7 @@ module RulesetOsuParityTests =
             Assert.AreEqual(Some expected_judgement, judgement)
 
     [<Test>]
-    [<Ignore("Horrible osu!mania bug where +103 hits on notes are ignored but +103 hits on a hold head are legit and don't lock you to a max judgement of MEH, but +104 hits do")>]
+    [<Ignore("Horrible osu!mania bug where +103 hits on note_data are ignored but +103 hits on a hold head are legit and don't lock you to a max judgement of MEH, but +104 hits do")>]
     let OsuRuleset_LnCombinedJudgementBehaviour_10 () =
 
         let TEST_DATA =
@@ -903,7 +903,7 @@ module RulesetOsuParityTests =
 
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -913,7 +913,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -948,7 +948,7 @@ module RulesetOsuParityTests =
 
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -958,7 +958,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =
@@ -993,7 +993,7 @@ module RulesetOsuParityTests =
 
             //printfn "trying head: %.0fms; tail: %.0fms; expecting: %i" head tail expected_judgement
 
-            let notes =
+            let note_data =
                 NotesBuilder(4)
                     .HoldUntil(0.0f<ms>, 800.0f<ms>)
                     .Build()
@@ -1003,7 +1003,7 @@ module RulesetOsuParityTests =
                     .KeyDownUntil(0.0f<ms> + head, 800.0f<ms> + tail)
                     .Build()
 
-            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement =

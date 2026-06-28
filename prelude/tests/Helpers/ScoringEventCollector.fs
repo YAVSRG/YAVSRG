@@ -1,9 +1,13 @@
 ﻿namespace Prelude.Tests.Helpers
 
+open Prelude
+open Prelude.Charts
+open Prelude.Gameplay.Replays
+open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
-type ScoringEventCollector(ruleset, keys, replay, notes, rate) as this =
-    inherit ScoreProcessor(ruleset, keys, replay, notes, rate)
+type ScoringEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) as this =
+    inherit ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
 
     let events = ResizeArray<GameplayEvent>()
 

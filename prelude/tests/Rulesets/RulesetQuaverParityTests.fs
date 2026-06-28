@@ -13,7 +13,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -23,7 +23,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(0.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
@@ -39,7 +39,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold_Regrab () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -50,7 +50,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(60.0f<ms>, 1000.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -65,7 +65,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_DropHold_Regrab_Overhold () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -76,7 +76,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(60.0f<ms>, 2000.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
@@ -93,7 +93,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_Overhold () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -103,7 +103,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(0.0f<ms>, 2000.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
@@ -118,7 +118,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_OkayWindowGivesGood () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -128,7 +128,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(0.0f<ms>, 1190.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -141,7 +141,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_GoodWindowGivesGood () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -151,7 +151,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(0.0f<ms>, 1158.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(
@@ -164,7 +164,7 @@ module RulesetQuaverParityTests =
 
     [<Test>]
     let Quaver_ExpectedBehaviour_GreatWindowGivesGreat () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .HoldUntil(0.0f<ms>, 1000.0f<ms>)
                 .Build()
@@ -174,7 +174,7 @@ module RulesetQuaverParityTests =
                 .KeyDownUntil(0.0f<ms>, 1113.0f<ms>)
                 .Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual(

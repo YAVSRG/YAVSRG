@@ -28,7 +28,7 @@ type PlayScreen =
         let liveplay = GameplayReplaySource first_note
 
         let scoring =
-            ScoreProcessor.create ruleset info.WithMods.Keys liveplay info.WithMods.Notes SelectedChart.rate.Value
+            ScoreProcessor.create ruleset liveplay (info.WithMods.ToNoteData()) SelectedChart.rate.Value
 
         let binds = options.GameplayBinds.[info.WithMods.Keys - 3]
         let mutable key_state = Bitmask.Empty

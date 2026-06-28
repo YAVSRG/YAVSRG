@@ -56,4 +56,4 @@ type NotesBuilder(keycount: int) =
 
     member this.HoldUntil(time: Time, until: Time) = this.HoldUntil(time, until, 0)
 
-    member this.Build() : TimeArray<NoteRow> = items.ToArray()
+    member this.Build() : NoteData = { Keys = keycount; Notes = items.ToArray() }

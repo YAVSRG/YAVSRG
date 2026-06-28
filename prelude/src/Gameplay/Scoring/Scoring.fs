@@ -360,13 +360,13 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: Ti
 
 module ScoreProcessor =
 
-    let create (ruleset: Ruleset) (keys: int) (replay: ReplaySource) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
-        ScoreProcessor(ruleset, keys, replay, notes, rate)
+    let create (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
+        ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
 
-    let run (ruleset: Ruleset) (keys: int) (replay: ReplaySource) (notes: TimeArray<NoteRow>) (rate: Rate) : ScoreProcessor =
-        let scoring = ScoreProcessor(ruleset, keys, replay, notes, rate)
+    let run (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
+        let scoring = ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
         scoring.Update Time.infinity
         scoring
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        create SC_J4 chart.Keys (StoredReplaySource Replay.Empty) chart.Notes 1.0f<rate>
+        create SC_J4 (StoredReplaySource Replay.Empty) (chart.ToNoteData()) 1.0f<rate>

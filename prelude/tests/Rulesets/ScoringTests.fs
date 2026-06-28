@@ -17,7 +17,7 @@ module ScoringTests =
 
     [<Test>]
     let BasicEndToEnd () =
-        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -26,7 +26,7 @@ module ScoringTests =
                 .KeyDownFor(1045.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let result = ScoreProcessor.run RULESET 4 replay notes 1.0f<rate>
+        let result = ScoreProcessor.run RULESET replay note_data 1.0f<rate>
 
         printfn "Accuracy: %.2f%%" (result.Accuracy * 100.0)
         printfn "Judgements: %A" result.JudgementCounts
@@ -41,7 +41,7 @@ module ScoringTests =
 
     [<Test>]
     let TimeStepped_Example () =
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .HoldUntil(1000.0f<ms>, 2000.0f<ms>)
@@ -56,7 +56,7 @@ module ScoringTests =
                 .KeyDownFor(3100.0f<ms>, 900.0f<ms>)
                 .Build()
 
-        let stepper = ScoreProcessor.create RULESET 4 replay notes 1.0f<rate>
+        let stepper = ScoreProcessor.create RULESET replay note_data 1.0f<rate>
 
         stepper.OnEvent.Add(printfn "%A")
 
@@ -161,11 +161,11 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).Note(0.0f<ms>).Build()
+            let note_data = NotesBuilder(4).Note(0.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownFor(offset, 1.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(1, event_processing.JudgementCounts.[expected_judgement])
@@ -199,11 +199,11 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1000.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -237,11 +237,11 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1180.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -275,11 +275,11 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 820.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -313,11 +313,11 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -351,7 +351,7 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay =
                 ReplayBuilder()
@@ -359,7 +359,7 @@ module ScoringTests =
                     .KeyDownUntil(501.0f<ms>, 1000.0f<ms>)
                     .Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
@@ -393,22 +393,22 @@ module ScoringTests =
 
         for offset, expected_judgement in TEST_CASES do
 
-            let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+            let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
             let replay = ReplayBuilder().KeyDownUntil(offset, 1500.0f<ms>).Build()
 
-            let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+            let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
     [<Test>]
     let SCJ4_HoldNote_CompletelyMissed () =
-        let notes = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
+        let note_data = NotesBuilder(4).HoldUntil(0.0f<ms>, 1000.0f<ms>).Build()
 
         let replay = ReplayBuilder().Build()
 
-        let event_processing = ScoringEventCollector(RULESET, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.AreEqual([| 0; 0; 0; 0; 0; 1 |], event_processing.JudgementCounts)
@@ -473,25 +473,22 @@ module ScoringTests =
         let result_scj4 =
             ScoreProcessor.run
                 (SC.create 4)
-                DONUT_HOLE_CHART.Keys
                 (StoredReplaySource(perfect_replay))
-                DONUT_HOLE_CHART.Notes
+                (DONUT_HOLE_CHART.ToNoteData())
                 1.0f<rate>
 
         let result_osumania =
             ScoreProcessor.run
                 (OsuMania.create 10.0f OsuMania.NoMod)
-                DONUT_HOLE_CHART.Keys
                 (StoredReplaySource(perfect_replay))
-                DONUT_HOLE_CHART.Notes
+                (DONUT_HOLE_CHART.ToNoteData())
                 1.0f<rate>
 
         let result_etterna =
             ScoreProcessor.run
                 (Wife3.create 4)
-                DONUT_HOLE_CHART.Keys
                 (StoredReplaySource(perfect_replay))
-                DONUT_HOLE_CHART.Notes
+                (DONUT_HOLE_CHART.ToNoteData())
                 1.0f<rate>
 
         Assert.AreEqual(1.0, result_scj4.Accuracy)
@@ -505,7 +502,7 @@ module ScoringTests =
 
     [<Test>]
     let GhostTapJudgement_BreaksCombo_When_JudgementBreaksCombo () =
-        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -516,13 +513,10 @@ module ScoringTests =
 
         let ruleset =
             { RULESET with
-                HitMechanics =
-                    { RULESET.HitMechanics with
-                        GhostTapJudgement = Some 5
-                    }
+                Ruleset.HitMechanics.GhostTapJudgement = Some 5
             }
 
-        let event_processing = ScoringEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.True(ruleset.Judgements.[5].BreaksCombo)
@@ -532,7 +526,7 @@ module ScoringTests =
 
     [<Test>]
     let GhostTapJudgement_DoesNotIncreaseCombo_When_JudgementNormallyIncreasesCombo () =
-        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -549,7 +543,7 @@ module ScoringTests =
                     }
             }
 
-        let event_processing = ScoringEventCollector(ruleset, 4, replay, notes, 1.0f<rate>)
+        let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
         event_processing.Update Time.infinity
 
         Assert.False(ruleset.Judgements.[2].BreaksCombo)

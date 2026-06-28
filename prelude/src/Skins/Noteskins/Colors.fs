@@ -39,11 +39,12 @@ type ColoredChart =
     member this.Keys = this.Source.Keys
     member this.BPM = this.Source.BPM
     member this.SV = this.Source.SV
-    member this.ModsSelected = this.Source.ModsSelected
-    member this.ModsApplied = this.Source.ModsApplied
+    member this.ModsSelected : ModState = this.Source.ModsSelected
+    member this.ModsApplied : ModState = this.Source.ModsApplied
     member this.FirstNote = this.Source.FirstNote
     member this.LastNote = this.Source.LastNote
     member this.Notes = this.Source.Notes
+    member this.ToNoteData() : NoteData = this.Source.ToNoteData()
 
 [<Json.AutoCodec(false)>]
 type ColorConfig =

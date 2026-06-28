@@ -40,15 +40,15 @@ type ScoreInfo =
         with get () = this.Scoring.Ruleset
         and set ruleset =
             let scoring =
-                ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplaySource this.Replay) this.WithMods.Notes this.Rate
+                ScoreProcessor.run ruleset (StoredReplaySource this.Replay) (this.WithMods.ToNoteData()) this.Rate
 
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
 
-    member this.WithRuleset (ruleset: Ruleset) =
+    member this.WithRuleset (ruleset: Ruleset) : ScoreInfo =
         let scoring =
-            ScoreProcessor.run ruleset this.WithMods.Keys (StoredReplaySource this.Replay) this.WithMods.Notes this.Rate
+            ScoreProcessor.run ruleset (StoredReplaySource this.Replay) (this.WithMods.ToNoteData()) this.Rate
 
         { this with
             Scoring = scoring
@@ -57,12 +57,12 @@ type ScoreInfo =
         }
 
     member this.Accuracy = this.Scoring.Accuracy
-    member this.Mods = this.WithMods.ModsApplied
+    member this.Mods : ModState = this.WithMods.ModsApplied
 
-    member this.ModStatus = this.WithMods.Status
+    member this.ModStatus : ModStatus = this.WithMods.Status
 
-    member this.ModString() = ModState.format (this.Rate, this.Mods)
-    member this.Shorthand = sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName this.Lamp)
+    member this.ModString() : string = ModState.format (this.Rate, this.Mods)
+    member this.Shorthand : string = sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName this.Lamp)
 
 module ScoreInfo =
 
@@ -71,7 +71,7 @@ module ScoreInfo =
         let replay_data = Replay.FromByteArray(score.Replay)
 
         let scoring =
-            ScoreProcessor.run ruleset with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
+            ScoreProcessor.run ruleset (StoredReplaySource replay_data) (with_mods.ToNoteData()) score.Rate
 
         let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
 

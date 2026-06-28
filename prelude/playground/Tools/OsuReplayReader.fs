@@ -36,9 +36,8 @@ let private compare_interlude_implementation_to_osu
     let metric =
         ScoreProcessor.run
             (OsuMania.create (float32 chart_od) window_modifier)
-            chart.Keys
             (StoredReplaySource(replay))
-            chart.Notes
+            (chart.ToNoteData())
             rate
 
     let osu_accuracy =

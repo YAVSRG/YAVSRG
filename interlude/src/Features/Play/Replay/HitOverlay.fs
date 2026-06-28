@@ -25,7 +25,7 @@ type private HitOverlay
 
     let hit_events =
         let full_score =
-            ScoreProcessor.run state.Ruleset chart.Keys (StoredReplaySource replay_data) chart.Notes rate
+            ScoreProcessor.run state.Ruleset (StoredReplaySource replay_data) (chart.ToNoteData()) rate
 
         full_score.Events |> Array.ofSeq
 

@@ -78,9 +78,8 @@ module OnlineScores =
                         let scoring =
                             ScoreProcessor.run
                                 req.Ruleset
-                                with_mods.Keys
                                 (StoredReplaySource replay_data)
-                                with_mods.Notes
+                                (with_mods.ToNoteData())
                                 score.Rate
 
                         let rating = Difficulty.calculate(score.Rate, with_mods.Notes)

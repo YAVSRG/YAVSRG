@@ -15,6 +15,8 @@ type BPM =
 
 type SV = float32
 
+type [<Struct>] NoteData = { Keys: int; Notes: TimeArray<NoteRow> }
+
 [<StructuredFormatDisplay("<A {Keys}K chart>")>]
 type Chart =
     {
@@ -26,6 +28,7 @@ type Chart =
 
     member this.FirstNote : Time = (TimeArray.first this.Notes).Value.Time
     member this.LastNote : Time = (TimeArray.last this.Notes).Value.Time
+    member this.ToNoteData() = { Keys = this.Keys; Notes = this.Notes }
 
 module Chart =
 

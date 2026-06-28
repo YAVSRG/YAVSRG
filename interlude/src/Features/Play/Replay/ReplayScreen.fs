@@ -42,11 +42,11 @@ type ReplayScreen =
         let mutable replay_data = replay_data
 
         let mutable scoring =
-            ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+            ScoreProcessor.create ruleset replay_data (info.WithMods.ToNoteData()) rate
 
         let seek_backwards (screen: IPlayScreen) =
             replay_data <- StoredReplaySource(replay_data.GetFullReplay())
-            scoring <- ScoreProcessor.create ruleset info.WithMods.Keys replay_data info.WithMods.Notes rate
+            scoring <- ScoreProcessor.create ruleset replay_data (info.WithMods.ToNoteData()) rate
             screen.State.ChangeScoring scoring
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Replay (is_auto, overlay_shown)) with

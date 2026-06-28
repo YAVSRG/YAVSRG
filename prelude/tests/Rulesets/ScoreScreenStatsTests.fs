@@ -33,7 +33,7 @@ module ScoreScreenStatsTests =
 
         let replay_data = OsuReplay.decode (osu_replay, chart.FirstNote, 1.0f<rate>)
         let ruleset = SC.create 4
-        ScoreProcessor.run ruleset chart.Keys (StoredReplaySource(replay_data)) chart.Notes 1.0f<rate>
+        ScoreProcessor.run ruleset (StoredReplaySource(replay_data)) (chart.ToNoteData()) 1.0f<rate>
 
     [<Test>]
     let BasicEndToEnd () =
@@ -46,7 +46,7 @@ module ScoreScreenStatsTests =
     [<Test>]
     let TwoNotes_CorrectOutput () =
 
-        let notes = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
+        let note_data = NotesBuilder(4).Note(0.0f<ms>).Note(1000.0f<ms>).Build()
 
         let replay =
             ReplayBuilder()
@@ -55,7 +55,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(990.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) 4 replay notes 1.0f<rate>
+        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -71,11 +71,11 @@ module ScoreScreenStatsTests =
     [<Test>]
     let OneNote_CorrectOutput () =
 
-        let notes = NotesBuilder(4).Note(0.0f<ms>).Build()
+        let note_data = NotesBuilder(4).Note(0.0f<ms>).Build()
 
         let replay = ReplayBuilder().KeyDownFor(-30.0f<ms>, 30.0f<ms>).Build()
 
-        let score = ScoreProcessor.run (SC.create 4) 4 replay notes 1.0f<rate>
+        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -91,7 +91,7 @@ module ScoreScreenStatsTests =
     [<Test>]
     let ColumnFilter_TwoNotes () =
 
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -107,7 +107,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) 4 replay notes 1.0f<rate>
+        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
 
         let result = ScoreScreenStats.calculate score [| false; false; true; true |]
         printfn "%A" result
@@ -123,7 +123,7 @@ module ScoreScreenStatsTests =
     [<Test>]
     let ColumnFilter_ZeroNotes () =
 
-        let notes =
+        let note_data =
             NotesBuilder(4)
                 .Note(0.0f<ms>)
                 .Note(1000.0f<ms>)
@@ -139,7 +139,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) 4 replay notes 1.0f<rate>
+        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
 
         let result = ScoreScreenStats.calculate score [| false; false; false; true |]
         printfn "%A" result

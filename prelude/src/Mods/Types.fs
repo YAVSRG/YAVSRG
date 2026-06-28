@@ -27,8 +27,9 @@ type ModdedChart =
         ModsApplied: Map<string, int64>
         Status: ModStatus
     }
-    member this.FirstNote = this.Notes.[0].Time
-    member this.LastNote = this.Notes.[this.Notes.Length - 1].Time
+    member this.FirstNote : Time = this.Notes.[0].Time
+    member this.LastNote : Time = this.Notes.[this.Notes.Length - 1].Time
+    member this.ToNoteData() : NoteData = { Keys = this.Keys; Notes = this.Notes }
     member this.AsChart : Chart =
         {
             Keys = this.Keys
