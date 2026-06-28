@@ -48,7 +48,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         { new IDisposable with override this.Dispose() = resubscribe_on_change.Dispose(); obj.Dispose() }
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
-        let replay_data = Replay.perfect_replay info.WithColors.Keys info.WithColors.Source.Notes
+        let replay_data = Replay.perfect_replay(info.WithColors.ToNoteData())
         let ruleset = Rulesets.current
         let scoring = ScoreProcessor.create ruleset (StoredReplaySource replay_data) (info.WithColors.ToNoteData()) SelectedChart.rate.Value
 

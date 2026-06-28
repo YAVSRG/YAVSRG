@@ -20,7 +20,7 @@ module EditHudScreen =
     let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
         let replay_data: ReplaySource =
-            StoredReplaySource.WavingAutoPlay(info.WithColors.Keys, info.WithColors.Source.Notes)
+            StoredReplaySource.WavingAutoPlay(info.WithColors.ToNoteData())
 
         let ruleset = Rulesets.current
 

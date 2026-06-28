@@ -127,25 +127,25 @@ type [<Struct>] Replay =
         
 module Replay =
 
-    let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : Replay =
+    let private perfect_replay_uncached (note_data: NoteData) : Replay =
         let time_until_next (current_index: int) : Time =
-            if current_index + 1 >= notes.Length then
+            if current_index + 1 >= note_data.Notes.Length then
                 100.0f<ms>
             else
-                notes.[current_index + 1].Time - notes.[current_index].Time
+                note_data.Notes.[current_index + 1].Time - note_data.Notes.[current_index].Time
 
-        let first_note = notes.[0].Time
+        let first_note = note_data.Notes.[0].Time
 
         seq {
             let mutable i = 0
             let mutable held: Bitmask = Bitmask.Empty
 
-            while i < notes.Length do
-                let { Time = time; Data = nr } = notes.[i]
+            while i < note_data.Notes.Length do
+                let { Time = time; Data = nr } = note_data.Notes.[i]
                 let delay = time_until_next(i) * 0.5f
                 let mutable hit = held
 
-                for k = 0 to (keys - 1) do
+                for k = 0 to note_data.Keys - 1 do
                     if nr.[k] = NoteType.NORMAL then
                         hit <- hit.Add(k)
                     elif nr.[k] = NoteType.HOLDHEAD then
@@ -167,13 +167,13 @@ module Replay =
     //  *unless you make a goofy ruleset where 0ms hits don't give 100% accuracy
     let perfect_replay = perfect_replay_uncached |> cached
 
-    let private auto_replay_waving_uncached (keys: int) (notes: TimeArray<NoteRow>) : Replay =
+    let private auto_replay_waving_uncached (note_data: NoteData) : Replay =
         let mutable last_time = -Time.infinity
 
         let offset (time: Time) =
             MathF.Cos(time / 1000.0f<ms>) * 45.0f<ms>
 
-        perfect_replay keys notes
+        perfect_replay note_data
         |> _.Frames
         |> Array.map (fun replay_frame ->
             let new_time = max (last_time + 1.0f<ms>) (replay_frame.Time + offset replay_frame.Time)

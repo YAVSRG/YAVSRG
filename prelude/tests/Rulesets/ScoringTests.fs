@@ -468,7 +468,7 @@ module ScoringTests =
     let Autoplay_PerfectScores () =
 
         let perfect_replay =
-            Replay.perfect_replay DONUT_HOLE_CHART.Keys DONUT_HOLE_CHART.Notes
+            Replay.perfect_replay(DONUT_HOLE_CHART.ToNoteData())
 
         let result_scj4 =
             ScoreProcessor.run
