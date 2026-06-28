@@ -7,7 +7,7 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 open Prelude.Tests.Helpers
 
-module GameplayEventTests =
+module GameplayEventProcessorTests =
 
     let RULESET = SC.create 4
 

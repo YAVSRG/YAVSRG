@@ -71,11 +71,11 @@
     <Compile Include="Gameplay\Rulesets\Helpers.fs" />
     <Compile Include="Gameplay\Scoring\Grades.fs" />
     <Compile Include="Gameplay\Scoring\Lamps.fs" />
-    <Compile Include="Gameplay\Scoring\HitMechanics.fs" />
-    <Compile Include="Gameplay\Scoring\Events.fs" />
     <Compile Include="Gameplay\Scoring\OsuHolds.fs" />
-    <Compile Include="Gameplay\Scoring\Scoring.fs" />
-    <Compile Include="Gameplay\Scoring\Graph.fs" />
+    <Compile Include="Gameplay\Scoring\HitMechanics.fs" />
+    <Compile Include="Gameplay\Scoring\GameplayEventProcessor.fs" />
+    <Compile Include="Gameplay\Scoring\ScoreProcessor.fs" />
+    <Compile Include="Gameplay\Scoring\ScoreScreenStats.fs" />
     <Compile Include="Calculator\Layout.fs" />
     <Compile Include="Calculator\Notes.fs" />
     <Compile Include="Calculator\Variety.fs" />

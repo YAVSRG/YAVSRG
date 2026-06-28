@@ -59,8 +59,8 @@
     <Compile Include="Rulesets\RulesetValidationTests.fs" />
     <Compile Include="Rulesets\LampTests.fs" />
     <Compile Include="Rulesets\GradeTests.fs" />
-    <Compile Include="Rulesets\GameplayEventTests.fs" />
-    <Compile Include="Rulesets\ScoringTests.fs" />
+    <Compile Include="Rulesets\GameplayEventProcessorTests.fs" />
+    <Compile Include="Rulesets\ScoreProcessorTests.fs" />
     <Compile Include="Rulesets\ScoreScreenStatsTests.fs" />
     <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
