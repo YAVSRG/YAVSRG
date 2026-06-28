@@ -114,8 +114,8 @@ module OsuReplay =
             OnlineScoreID = 0
         }
 
-    let to_score (replay: OsuReplay) (chart: Chart) (original_osu_file_first_note: Time) (original_osu_file_rate: float32<rate>) : Result<Score, string> =
-        match Mods.to_interlude_rate_and_mods replay.ModsUsed with
+    let to_score (osu_replay: OsuReplay) (chart: Chart) (original_osu_file_first_note: Time) (original_osu_file_rate: float32<rate>) : Result<Score, string> =
+        match Mods.to_interlude_rate_and_mods osu_replay.ModsUsed with
         | None -> Error "Invalid mods used in replay"
         | Some(rate, mods) ->
 
@@ -129,13 +129,13 @@ module OsuReplay =
         else
 
         try
-            let replay_data = decode(replay, original_osu_file_first_note, original_osu_file_rate)
+            let replay = decode(osu_replay, original_osu_file_first_note, original_osu_file_rate)
 
             Ok {
                 Timestamp =
-                    DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
+                    DateTime.FromFileTimeUtc(osu_replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
-                Replay = replay_data.ToByteArray()
+                Replay = replay.ToByteArray()
                 Rate = combined_rate * 1.0f<rate>
                 Mods = mods
                 IsImported = true

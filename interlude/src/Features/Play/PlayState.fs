@@ -47,16 +47,16 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
         { new IDisposable with override this.Dispose() = resubscribe_on_change.Dispose(); obj.Dispose() }
 
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
-        let replay_data = Autoplay.CreateReplay(info.WithColors)
+        let replay = Autoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
+        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.time_with_offset)
 
         scoring.Update (state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
+            let recreated = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
             recreated.Update (state.CurrentChartTime())
             state.ChangeScoring recreated
 

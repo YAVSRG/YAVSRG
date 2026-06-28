@@ -111,8 +111,8 @@ type PacemakerState =
                 
             let inline use_score(final_accuracy: float, score: Score) =
                 let with_mods = ModState.apply score.Mods info.Chart
-                let replay_data = Replay.FromByteArray(score.Replay)
-                let scoring = ScoreProcessor.Create(Rulesets.current, replay_data, with_mods, score.Rate)
+                let replay = Replay.FromByteArray(score.Replay)
+                let scoring = ScoreProcessor.Create(Rulesets.current, replay, with_mods, score.Rate)
                 PacemakerState.Replay (final_accuracy, scoring)
                 
             let inline use_accuracy(accuracy: float) =

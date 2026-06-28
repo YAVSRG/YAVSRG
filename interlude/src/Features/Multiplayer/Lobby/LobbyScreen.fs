@@ -138,18 +138,18 @@ type LobbyUI(lobby: Lobby) =
                 SelectedChart.if_loaded
                 <| fun info ->
 
-                let replay : NetworkReplaySource = NetworkReplaySource()
-                let scoring = ScoreProcessor.Create(Rulesets.current, replay, info.WithMods, SelectedChart.rate.Value)
+                let replay_source : NetworkReplaySource = NetworkReplaySource()
+                let scoring = ScoreProcessor.Create(Rulesets.current, replay_source, info.WithMods, SelectedChart.rate.Value)
                 let replay_info =
                     {
-                        Replay = replay
+                        ReplaySource = replay_source
                         ScoreProcessor = scoring
                         GetScoreInfo = fun () ->
-                            if not (replay :> ReplaySource).Finished then
-                                replay.Finish()
+                            if not (replay_source :> ReplaySource).Finished then
+                                replay_source.Finish()
                             scoring.ProcessEntireReplay()
 
-                            let replay_data = (replay :> ReplaySource).GetFullReplay()
+                            let replay = (replay_source :> ReplaySource).GetFullReplay()
 
                             {
                                 ChartMeta = info.ChartMeta
@@ -160,7 +160,7 @@ type LobbyUI(lobby: Lobby) =
                                 TimePlayed = Timestamp.now ()
                                 Rate = SelectedChart.rate.Value
 
-                                Replay = replay_data
+                                Replay = replay
                                 Scoring = scoring
                                 Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                                 Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy

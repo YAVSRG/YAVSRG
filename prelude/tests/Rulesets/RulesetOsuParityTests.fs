@@ -238,11 +238,9 @@ module RulesetOsuParityTests =
     [<Test>]
     [<Ignore("osu!mania EZ, HR, DT and HT windows are too complicated so I'm not bothering with them for the time being")>]
     let OsuRuleset_MatchesReplayJudgements_DonutHoleSample () =
-        let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
-
+        let replay = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
-
-        let score = ScoreProcessor.ProcessEntireReplay(ruleset, replay_data, TEST_CHART_2, 1.5f<rate>)
+        let score = ScoreProcessor.ProcessEntireReplay(ruleset, replay, TEST_CHART_2, 1.5f<rate>)
 
         Assert.AreEqual(
             (
@@ -265,10 +263,10 @@ module RulesetOsuParityTests =
 
     [<Test>]
     let OsuRuleset_MatchesGosuMemoryDeltas_DonutHoleSample () =
-        let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
+        let replay = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.Create(ruleset, replay_data, TEST_CHART_2, 1.5f<rate>)
+        let score = ScoreProcessor.Create(ruleset, replay, TEST_CHART_2, 1.5f<rate>)
         score.ProcessEntireReplay()
 
         let event_deltas =

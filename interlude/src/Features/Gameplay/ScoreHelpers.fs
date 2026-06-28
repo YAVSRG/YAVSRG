@@ -56,7 +56,7 @@ module Gameplay =
     let score_info_from_gameplay
         (info: LoadedChartInfo)
         (scoring: ScoreProcessor)
-        (replay_data: Replay)
+        (replay: Replay)
         (failed: bool)
         : ScoreInfo =
         {
@@ -68,7 +68,7 @@ module Gameplay =
             TimePlayed = Timestamp.now ()
             Rate = SelectedChart.rate.Value
 
-            Replay = replay_data
+            Replay = replay
             Scoring = scoring
             Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy

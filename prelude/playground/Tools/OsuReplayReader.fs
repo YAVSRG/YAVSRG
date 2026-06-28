@@ -143,12 +143,12 @@ let read_scores () =
                             sprintf "%s-%i.osr" score.BeatmapHash score.Timestamp
                         )
 
-                    let replay_data = OsuReplay.TryReadFile(replay_file).Value
+                    let replay = OsuReplay.TryReadFile(replay_file).Value
 
                     let interlude_replay =
-                        OsuReplay.decode (replay_data, chart.Value.Chart.FirstNote, 1.0f<rate>)
+                        OsuReplay.decode (replay, chart.Value.Chart.FirstNote, 1.0f<rate>)
 
-                    match Mods.to_interlude_rate_and_mods replay_data.ModsUsed with
+                    match Mods.to_interlude_rate_and_mods replay.ModsUsed with
                     | Some(rate, _) ->
                         compare_interlude_implementation_to_osu (
                             chart.Value.Chart,
@@ -156,7 +156,7 @@ let read_scores () =
                             interlude_replay,
                             rate,
                             od,
-                            replay_data
+                            replay
                         )
                     | None -> ()
 

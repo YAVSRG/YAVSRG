@@ -42,7 +42,7 @@ type MultiplayerScreen =
         lobby.AddReplayInfo(
             Network.credentials.Username,
             {
-                Replay = liveplay
+                ReplaySource = liveplay
                 ScoreProcessor = scoring
                 GetScoreInfo = fun () ->
                     if not (liveplay :> ReplaySource).Finished then
@@ -50,7 +50,7 @@ type MultiplayerScreen =
 
                     scoring.ProcessEntireReplay()
 
-                    let replay_data = (liveplay :> ReplaySource).GetFullReplay()
+                    let replay = (liveplay :> ReplaySource).GetFullReplay()
 
                     {
                         ChartMeta = info.ChartMeta
@@ -61,7 +61,7 @@ type MultiplayerScreen =
                         TimePlayed = Timestamp.now ()
                         Rate = SelectedChart.rate.Value
 
-                        Replay = replay_data
+                        Replay = replay
                         Scoring = scoring
                         Lamp = Lamp.calculate scoring.Ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                         Grade = Grade.calculate scoring.Ruleset.Grades scoring.Accuracy
