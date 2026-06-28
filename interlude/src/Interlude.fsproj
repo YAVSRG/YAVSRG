@@ -135,12 +135,13 @@
     <Compile Include="Features\Score\Confetti.fs" />
     <Compile Include="Features\Score\ScoreScreen.fs" />
     <Compile Include="Features\Import\TaskTracking.fs" />
-    <Compile Include="Features\Import\osu!\Skins.fs" />
+    <Compile Include="Features\Import\osu!\ImportOsuNoteskinPage.fs" />
+    <Compile Include="Features\Import\osu!\OsuSkinsListPage.fs" />
     <Compile Include="Features\Import\osu!\Replays.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Mino.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Components.fs" />
     <Compile Include="Features\Import\osu!\Beatmaps\Beatmaps.fs" />
-    <Compile Include="Features\Import\Etterna\Skins.fs" />
+    <Compile Include="Features\Import\Etterna\ImportEtternaNoteskinPage.fs" />
     <Compile Include="Features\Import\Etterna\EtternaOnline.fs" />
     <Compile Include="Features\Import\Etterna\Components.fs" />
     <Compile Include="Features\Import\Etterna\PackBrowser.fs" />

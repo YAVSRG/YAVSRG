@@ -12,6 +12,7 @@ open Interlude.Features.Online
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Import
+open Interlude.Features.Import.osu
 open Interlude.Features.Gameplay
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.EditHUD
@@ -242,7 +243,7 @@ type SelectSkinsPage() =
                 .Position(page_position(PAGE_BOTTOM - 4, 2, PageWidth.Full).TranslateY(-10.0f))
             |+ OptionsMenuButton(
                 Icons.DOWNLOAD + " " + %"skins.import_from_osu",
-                (fun () -> osu.Skins.OsuSkinsListPage().Show())
+                (fun () -> OsuSkinsListPage(FileDrop.import_osu_skin).Show())
             )
                 .Position(page_position(PAGE_BOTTOM - 2, 2, PageWidth.Full))
 

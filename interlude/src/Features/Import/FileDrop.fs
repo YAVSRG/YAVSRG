@@ -2,16 +2,50 @@
 
 open System.IO
 open System.IO.Compression
+open System.Text.RegularExpressions
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing
 open Prelude
 open Prelude.Data.Library.Imports
 open Prelude.Data.OsuClientInterop
 open Prelude.Skins.Conversions
+open Prelude.Skins.Conversions.Osu
 open Interlude.UI
 open Interlude.Content
+open Interlude.Features.Import.Etterna
+open Interlude.Features.Import.osu
 
 module FileDrop =
+    
+    let import_stepmania_noteskin (path: string) : unit =
+        let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
+        let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
+
+        let existing_id = Skins.list_noteskins() |> Seq.map (fun (id, _, _) -> id) |> Seq.tryFind (fun x -> x.StartsWith id)
+        ImportEtternaNoteskinPage(
+            path,
+            id + timestamp,
+            existing_id
+        )
+            .Show()
+            
+    let import_osu_skin (path: string) : unit =
+        let id = Regex("[^a-zA-Z0-9_-]").Replace(Path.GetFileName(path), "")
+        let timestamp = "-" + System.DateTime.Now.ToString("ddMMyyyyHHmmss")
+
+        match OsuSkinConverter.check_before_convert path with
+        | Ok ini ->
+            let existing_id = Skins.list_noteskins() |> Seq.map (fun (id, _, _) -> id) |> Seq.tryFind (fun x -> x.StartsWith id)
+            ImportOsuNoteskinPage(
+                ini,
+                path,
+                id + timestamp,
+                existing_id
+            )
+                .Show()
+        | Error err ->
+            Logging.Error "Error while parsing osu! skin.ini: %O" err
+            Notifications.error(%"notification.skin_ini_parse_failed.title", %"notification.skin_ini_parse_failed.body")
 
     let handle (path: string) : unit =
         assert GameThread.is_game_thread()
@@ -19,11 +53,11 @@ module FileDrop =
         match path with
         | OsuSkinFolder ->
             Menu.Exit()
-            osu.Skins.import_osu_skin path
+            import_osu_skin(path)
 
         | StepmaniaNoteskinFolder ->
             Menu.Exit()
-            Etterna.Skins.import_stepmania_noteskin path
+            import_stepmania_noteskin(path)
 
         | InterludeSkinArchive ->
             try
@@ -40,14 +74,14 @@ module FileDrop =
                 ZipFile.ExtractToDirectory(path, target)
             with _ -> ()
             Menu.Exit()
-            osu.Skins.import_osu_skin target
+            import_osu_skin target
             // todo: clean up extracted noteskin in downloads
 
         | _ when Path.GetExtension(path).ToLower() = ".osr" ->
             match OsuReplay.TryReadFile path with
             | Some replay ->
                 if Screen.current_type = ScreenType.LevelSelect || Screen.current_type = ScreenType.MainMenu then
-                    osu.Replay.figure_out_replay replay
+                    Replay.figure_out_replay replay
                 else
                     Notifications.error(%"osu_replay_import.failed", %"osu_replay_import.wrong_menu")
             | None -> Notifications.error (%"notification.import_failed", "")
