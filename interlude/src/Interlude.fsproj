@@ -113,7 +113,7 @@
     <Compile Include="Features\Tables\SelectTableLevelPage.fs" />
     <Compile Include="Features\Tables\Suggestions.fs" />
     <Compile Include="Features\Tables\SelectTablePage.fs" />
-    <Compile Include="Features\Pacemaker\State.fs" />
+    <Compile Include="Features\Pacemaker\PacemakerState.fs" />
     <Compile Include="Features\Pacemaker\PacemakerOptionsPage.fs" />
     <Compile Include="Features\Collections\Actions.fs" />
     <Compile Include="Features\Collections\CreateFolderPage.fs" />
