@@ -60,6 +60,7 @@
     <Compile Include="Gameplay\Replays\StoredReplaySource.fs" />
     <Compile Include="Gameplay\Replays\GameplayReplaySource.fs" />
     <Compile Include="Gameplay\Replays\NetworkReplaySource.fs" />
+    <Compile Include="Gameplay\Replays\KeyPressReader.fs" />
     <Compile Include="Gameplay\Rulesets\Rulesets.fs" />
     <Compile Include="Gameplay\Rulesets\SC.fs" />
     <Compile Include="Gameplay\Rulesets\osu!mania.fs" />
