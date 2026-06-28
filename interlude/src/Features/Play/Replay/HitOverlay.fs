@@ -24,9 +24,7 @@ type private HitOverlay
     inherit StaticWidget(NodeType.None)
 
     let hit_events =
-        let full_score =
-            ScoreProcessor.run state.Ruleset (StoredReplaySource replay_data) (chart.ToNoteData()) rate
-
+        let full_score = ScoreProcessor.ProcessEntireReplay(state.Ruleset, replay_data, chart, rate)
         full_score.Events |> Array.ofSeq
 
     let mutable seek = 0

@@ -39,16 +39,13 @@ type ScoreInfo =
     member this.Ruleset
         with get () = this.Scoring.Ruleset
         and set ruleset =
-            let scoring =
-                ScoreProcessor.run ruleset (StoredReplaySource this.Replay) (this.WithMods.ToNoteData()) this.Rate
-
+            let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
             this.Scoring <- scoring
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
 
     member this.WithRuleset (ruleset: Ruleset) : ScoreInfo =
-        let scoring =
-            ScoreProcessor.run ruleset (StoredReplaySource this.Replay) (this.WithMods.ToNoteData()) this.Rate
+        let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
 
         { this with
             Scoring = scoring
@@ -68,11 +65,8 @@ module ScoreInfo =
 
     let from_score (chart_meta: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
-        let replay_data = Replay.FromByteArray(score.Replay)
-
-        let scoring =
-            ScoreProcessor.run ruleset (StoredReplaySource replay_data) (with_mods.ToNoteData()) score.Rate
-
+        let replay = Replay.FromByteArray(score.Replay)
+        let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, with_mods, score.Rate)
         let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
 
         {
@@ -84,7 +78,7 @@ module ScoreInfo =
             TimePlayed = score.Timestamp
             Rate = score.Rate
 
-            Replay = replay_data
+            Replay = replay
             Scoring = scoring
             Lamp = Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             Grade = Grade.calculate ruleset.Grades scoring.Accuracy

@@ -94,11 +94,7 @@ type PacemakerState =
     static member Create(info: LoadedChartInfo, ctx: PacemakerCreationContext) : PacemakerState =
         let inline create_from_score (score_info: ScoreInfo) =
             let replay_scoring =
-                ScoreProcessor.create
-                    Rulesets.current
-                    (StoredReplaySource(score_info.Replay))
-                    (score_info.WithMods.ToNoteData())
-                    score_info.Rate
+                ScoreProcessor.Create(Rulesets.current, score_info.Replay, score_info.WithMods, score_info.Rate)
             PacemakerState.Replay (score_info.Accuracy, replay_scoring)
             
         let inline create_from_accuracy(pacemaker_settings: PacemakerSettings) : PacemakerState =
@@ -116,7 +112,7 @@ type PacemakerState =
             let inline use_score(final_accuracy: float, score: Score) =
                 let with_mods = ModState.apply score.Mods info.Chart
                 let replay_data = Replay.FromByteArray(score.Replay)
-                let scoring = ScoreProcessor.create Rulesets.current (StoredReplaySource replay_data) (with_mods.ToNoteData()) score.Rate
+                let scoring = ScoreProcessor.Create(Rulesets.current, replay_data, with_mods, score.Rate)
                 PacemakerState.Replay (final_accuracy, scoring)
                 
             let inline use_accuracy(accuracy: float) =

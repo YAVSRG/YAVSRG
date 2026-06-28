@@ -15,7 +15,9 @@ type BPM =
 
 type SV = float32
 
-type [<Struct>] NoteData = { Keys: int; Notes: TimeArray<NoteRow> }
+type [<Struct>] NoteData =
+    { Keys: int; Notes: TimeArray<NoteRow> }
+    member this.ToNoteData() = this
 
 [<StructuredFormatDisplay("<A {Keys}K chart>")>]
 type Chart =

@@ -6,7 +6,6 @@ open Prelude
 open Prelude.Formats
 open Prelude.Formats.Osu
 open Prelude.Data.OsuClientInterop
-open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 open Prelude.Tests.Helpers
@@ -31,9 +30,9 @@ module ScoreScreenStatsTests =
             OsuReplay.TryReadFile "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr"
             |> Option.get
 
-        let replay_data = OsuReplay.decode (osu_replay, chart.FirstNote, 1.0f<rate>)
+        let replay = OsuReplay.decode (osu_replay, chart.FirstNote, 1.0f<rate>)
         let ruleset = SC.create 4
-        ScoreProcessor.run ruleset (StoredReplaySource(replay_data)) (chart.ToNoteData()) 1.0f<rate>
+        ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, 1.0f<rate>)
 
     [<Test>]
     let BasicEndToEnd () =
@@ -55,7 +54,8 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(990.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
+        let score =
+            ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -75,7 +75,7 @@ module ScoreScreenStatsTests =
 
         let replay = ReplayBuilder().KeyDownFor(-30.0f<ms>, 30.0f<ms>).Build()
 
-        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| true; true; true; true |]
         printfn "%A" result
@@ -107,7 +107,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| false; false; true; true |]
         printfn "%A" result
@@ -139,7 +139,7 @@ module ScoreScreenStatsTests =
                 .KeyDownFor(1980.0f<ms>, 30.0f<ms>, 2)
                 .Build()
 
-        let score = ScoreProcessor.run (SC.create 4) replay note_data 1.0f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(SC.create 4, replay, note_data, 1.0f<rate>)
 
         let result = ScoreScreenStats.calculate score [| false; false; false; true |]
         printfn "%A" result

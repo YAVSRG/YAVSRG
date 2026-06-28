@@ -32,13 +32,8 @@ let private compare_interlude_implementation_to_osu
             OsuMania.NoMod
 
     let score_v2 = score_data.ModsUsed &&& Mods.ScoreV2 <> Mods.None
-
-    let metric =
-        ScoreProcessor.run
-            (OsuMania.create (float32 chart_od) window_modifier)
-            (StoredReplaySource(replay))
-            (chart.ToNoteData())
-            rate
+    let ruleset = OsuMania.create (float32 chart_od) window_modifier
+    let metric = ScoreProcessor.ProcessEntireReplay(ruleset, replay, chart, rate)
 
     let osu_accuracy =
         let g_300 = if score_v2 then 305.0 else 300.0

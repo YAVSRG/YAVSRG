@@ -3,7 +3,6 @@
 open System
 open Percyqaz.Flux.Audio
 open Prelude
-open Prelude.Skins.Noteskins
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
 open Interlude.Content
@@ -50,14 +49,14 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     static member Dummy(info: LoadedChartInfo) : PlayState * (unit -> unit) =
         let replay_data = Replay.perfect_replay(info.WithColors.ToNoteData())
         let ruleset = Rulesets.current
-        let scoring = ScoreProcessor.create ruleset (StoredReplaySource replay_data) (info.WithColors.ToNoteData()) SelectedChart.rate.Value
+        let scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
 
         let state = PlayState(info, PacemakerState.None, scoring, Song.time_with_offset)
 
         scoring.Update (state.CurrentChartTime())
 
         let reset () =
-            let recreated = ScoreProcessor.create ruleset (StoredReplaySource replay_data) (info.WithColors.ToNoteData()) SelectedChart.rate.Value
+            let recreated = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
             recreated.Update (state.CurrentChartTime())
             state.ChangeScoring recreated
 

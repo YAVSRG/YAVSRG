@@ -5,7 +5,6 @@ open Percyqaz.Common
 open Prelude.Formats
 open Prelude.Formats.Osu
 open Prelude.Data.OsuClientInterop
-open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 open Prelude.Tests.Helpers
@@ -52,10 +51,8 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuRuleset_MatchesReplayJudgements_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
-
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
-
-        let score = ScoreProcessor.run as_interlude_ruleset (StoredReplaySource(as_interlude_replay)) (TEST_CHART.ToNoteData()) 1.0f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
 
         Assert.AreEqual(
             (
@@ -80,7 +77,7 @@ module RulesetOsuParityTests =
     let OsuRuleset_MatchesExpectedAccuracy_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
-        let score = ScoreProcessor.run as_interlude_ruleset (StoredReplaySource(as_interlude_replay)) (TEST_CHART.ToNoteData()) 1.0f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
 
         printfn "%.2f%%" (score.Accuracy * 100.0)
 
@@ -89,11 +86,8 @@ module RulesetOsuParityTests =
     [<Test>]
     let OsuRuleset_MatchesGosuMemoryDeltas_HeHeHeSample () =
         let as_interlude_replay = OsuReplay.decode (TEST_REPLAY_FILE, TEST_CHART.FirstNote, 1.0f<rate>)
-
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
-
-        let score = ScoreProcessor(as_interlude_ruleset, StoredReplaySource(as_interlude_replay), TEST_CHART.ToNoteData(), 1.0f<rate>)
-        score.ProcessEntireReplay()
+        let score = ScoreProcessor.ProcessEntireReplay(as_interlude_ruleset, as_interlude_replay, TEST_CHART, 1.0f<rate>)
 
         let event_deltas =
             score.Events
@@ -248,7 +242,7 @@ module RulesetOsuParityTests =
 
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor.run ruleset (StoredReplaySource(replay_data)) (TEST_CHART_2.ToNoteData()) 1.5f<rate>
+        let score = ScoreProcessor.ProcessEntireReplay(ruleset, replay_data, TEST_CHART_2, 1.5f<rate>)
 
         Assert.AreEqual(
             (
@@ -274,7 +268,7 @@ module RulesetOsuParityTests =
         let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(ruleset, StoredReplaySource(replay_data), TEST_CHART_2.ToNoteData(), 1.5f<rate>)
+        let score = ScoreProcessor.Create(ruleset, replay_data, TEST_CHART_2, 1.5f<rate>)
         score.ProcessEntireReplay()
 
         let event_deltas =

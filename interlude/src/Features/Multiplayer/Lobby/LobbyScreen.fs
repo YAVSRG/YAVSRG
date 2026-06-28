@@ -139,7 +139,7 @@ type LobbyUI(lobby: Lobby) =
                 <| fun info ->
 
                 let replay : NetworkReplaySource = NetworkReplaySource()
-                let scoring = ScoreProcessor.create Rulesets.current replay (info.WithMods.ToNoteData()) SelectedChart.rate.Value
+                let scoring = ScoreProcessor.Create(Rulesets.current, replay, info.WithMods, SelectedChart.rate.Value)
                 let replay_info =
                     {
                         Replay = replay

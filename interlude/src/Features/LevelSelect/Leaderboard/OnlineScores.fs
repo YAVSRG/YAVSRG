@@ -75,12 +75,7 @@ module OnlineScores =
                         let with_mods = ModState.apply score.Mods req.CurrentChart
                         let replay_data = Replay.FromBase64String(score.Replay)
 
-                        let scoring =
-                            ScoreProcessor.run
-                                req.Ruleset
-                                (StoredReplaySource replay_data)
-                                (with_mods.ToNoteData())
-                                score.Rate
+                        let scoring = ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay_data, with_mods, score.Rate)
 
                         let rating = Difficulty.calculate(score.Rate, with_mods.Notes)
 

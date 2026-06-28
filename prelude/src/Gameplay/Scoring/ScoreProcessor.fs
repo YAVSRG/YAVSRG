@@ -2,7 +2,6 @@
 
 open System.Collections.ObjectModel
 open Prelude
-open Prelude.Mods
 open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
@@ -357,16 +356,18 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
 
         hit_events.Add gameplay_event
         on_event_ev.Trigger gameplay_event
-
-module ScoreProcessor =
-
-    let create (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
-        ScoreProcessor(ruleset, replay, note_data, rate)
-
-    let run (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
-        let scoring = ScoreProcessor(ruleset, replay, note_data, rate)
-        scoring.ProcessEntireReplay()
-        scoring
-
-    let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        create SC_J4 (StoredReplaySource Replay.Empty) (chart.ToNoteData()) 1.0f<rate>
+        
+    static member inline Create<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate) : ScoreProcessor =
+        ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
+    static member inline Create<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate) : ScoreProcessor =
+        ScoreProcessor.Create(ruleset, StoredReplaySource(replay), chart, rate)
+        
+    static member inline ProcessEntireReplay<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate) : ScoreProcessor =
+        let score_processor = ScoreProcessor(ruleset, replay, chart.ToNoteData(), rate)
+        score_processor.ProcessEntireReplay()
+        score_processor
+    static member inline ProcessEntireReplay<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: Replay, chart: ^T, rate: Rate) : ScoreProcessor =
+        ScoreProcessor.ProcessEntireReplay(ruleset, StoredReplaySource(replay), chart, rate)
+        
+    static member inline Dummy<^T when ^T : (member ToNoteData : unit -> NoteData)>(chart: ^T) : ScoreProcessor =
+        ScoreProcessor.Create(SC_J4, Replay.Empty, chart, 1.0f<rate>)

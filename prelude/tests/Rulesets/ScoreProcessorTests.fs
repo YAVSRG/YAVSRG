@@ -26,7 +26,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(1045.0f<ms>, 30.0f<ms>)
                 .Build()
 
-        let result = ScoreProcessor.run RULESET replay note_data 1.0f<rate>
+        let result = ScoreProcessor.ProcessEntireReplay(RULESET, replay, note_data, 1.0f<rate>)
 
         printfn "Accuracy: %.2f%%" (result.Accuracy * 100.0)
         printfn "Judgements: %A" result.JudgementCounts
@@ -56,7 +56,7 @@ module ScoreProcessorTests =
                 .KeyDownFor(3100.0f<ms>, 900.0f<ms>)
                 .Build()
 
-        let stepper = ScoreProcessor.create RULESET replay note_data 1.0f<rate>
+        let stepper = ScoreProcessor.Create(RULESET, replay, note_data, 1.0f<rate>)
 
         stepper.OnEvent.Add(printfn "%A")
 
@@ -469,36 +469,18 @@ module ScoreProcessorTests =
 
         let perfect_replay =
             Replay.perfect_replay(DONUT_HOLE_CHART.ToNoteData())
-
-        let result_scj4 =
-            ScoreProcessor.run
-                (SC.create 4)
-                (StoredReplaySource(perfect_replay))
-                (DONUT_HOLE_CHART.ToNoteData())
-                1.0f<rate>
-
-        let result_osumania =
-            ScoreProcessor.run
-                (OsuMania.create 10.0f OsuMania.NoMod)
-                (StoredReplaySource(perfect_replay))
-                (DONUT_HOLE_CHART.ToNoteData())
-                1.0f<rate>
-
-        let result_etterna =
-            ScoreProcessor.run
-                (Wife3.create 4)
-                (StoredReplaySource(perfect_replay))
-                (DONUT_HOLE_CHART.ToNoteData())
-                1.0f<rate>
-
-        Assert.AreEqual(1.0, result_scj4.Accuracy)
-        Assert.AreEqual(0, result_scj4.ComboBreaks)
-
-        Assert.AreEqual(1.0, result_osumania.Accuracy)
-        Assert.AreEqual(0, result_osumania.ComboBreaks)
-
-        Assert.AreEqual(1.0, result_etterna.Accuracy)
-        Assert.AreEqual(0, result_etterna.ComboBreaks)
+            
+        let inline ruleset_result(ruleset: Ruleset) : ScoreProcessor =
+            ScoreProcessor.ProcessEntireReplay(ruleset, perfect_replay, DONUT_HOLE_CHART, 1.0f<rate>)
+            
+        let inline ensure_perfect_on_ruleset(ruleset: Ruleset) =
+            let result = ruleset_result(ruleset)
+            Assert.AreEqual(1.0, result.Accuracy)
+            Assert.AreEqual(0, result.ComboBreaks)
+            
+        ensure_perfect_on_ruleset(SC.create 4)
+        ensure_perfect_on_ruleset(OsuMania.create 10.0f OsuMania.NoMod)
+        ensure_perfect_on_ruleset(Wife3.create 4)
 
     [<Test>]
     let GhostTapJudgement_BreaksCombo_When_JudgementBreaksCombo () =

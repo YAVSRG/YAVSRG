@@ -6,7 +6,6 @@ open Percyqaz.Flux.UI
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Skins.Noteskins
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -24,8 +23,7 @@ module EditHudScreen =
 
         let ruleset = Rulesets.current
 
-        let scoring =
-            ScoreProcessor.create ruleset replay_data (info.WithColors.ToNoteData()) SelectedChart.rate.Value
+        let scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
 
         let mutable time = -Time.infinity
 
