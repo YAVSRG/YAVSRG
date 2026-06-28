@@ -68,7 +68,7 @@ module ScoreInfo =
 
     let from_score (chart_meta: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
-        let replay_data = score.Replay |> Replay.decompress_bytes
+        let replay_data = Replay.FromByteArray(score.Replay)
 
         let scoring =
             ScoreProcessor.run ruleset with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
@@ -99,7 +99,7 @@ module ScoreInfo =
     let to_score (score_info: ScoreInfo) : Score =
         {
             Timestamp = score_info.TimePlayed
-            Replay = score_info.Replay |> Replay.compress_bytes
+            Replay = score_info.Replay.ToByteArray()
             Rate = score_info.Rate
             Mods = score_info.Mods
             IsImported = score_info.ImportedFromOsu

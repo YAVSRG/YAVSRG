@@ -34,7 +34,7 @@ module Gameplay =
         Charts.Scores.Save.post (
             {
                 ChartId = score_info.ChartMeta.Hash
-                Replay = score_info.Replay |> Replay.compress_string
+                Replay = score_info.Replay.ToBase64String()
                 Rate = score_info.Rate
                 Mods = score_info.Mods
                 Timestamp = score_info.TimePlayed

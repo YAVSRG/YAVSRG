@@ -60,7 +60,7 @@ module Replay =
             ChartId = chart_id
             TimePlayed = timestamp
             TimeUploaded = Timestamp.now ()
-            Data = Replay.compress_bytes replay
+            Data = replay.ToByteArray()
         }
 
     let private REPLAY_LOCK_OBJ = obj ()

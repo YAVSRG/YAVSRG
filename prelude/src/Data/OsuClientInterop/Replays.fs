@@ -135,7 +135,7 @@ module OsuReplay =
                 Timestamp =
                     DateTime.FromFileTimeUtc(replay.Timestamp).ToLocalTime()
                     |> Timestamp.from_datetime
-                Replay = Replay.compress_bytes replay_data
+                Replay = replay_data.ToByteArray()
                 Rate = combined_rate * 1.0f<rate>
                 Mods = mods
                 IsImported = true

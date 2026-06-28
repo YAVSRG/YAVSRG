@@ -30,7 +30,7 @@ type StoredReplaySource(data: Replay) =
                     j <- j - 1
             }
 
-    new(data: string) = StoredReplaySource(Replay.decompress_string data)
+    new(data: string) = StoredReplaySource(Replay.FromBase64String data)
 
     static member AutoPlay(keys: int, notes: TimeArray<NoteRow>) : StoredReplaySource =
         Replay.perfect_replay keys notes |> StoredReplaySource

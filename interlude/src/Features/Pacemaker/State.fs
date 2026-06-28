@@ -94,7 +94,7 @@ module PacemakerState =
                     match info.SaveData.ScoreByTimestamp timestamp with
                     | Some score ->
                         let with_mods = ModState.apply score.Mods info.Chart
-                        let replay_data = score.Replay |> Replay.decompress_bytes
+                        let replay_data = Replay.FromByteArray(score.Replay)
                         let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
 
                         PacemakerState.Replay (best_accuracy, scoring)

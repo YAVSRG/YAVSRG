@@ -73,7 +73,7 @@ module OnlineScores =
 
                     for score in scores do
                         let with_mods = ModState.apply score.Mods req.CurrentChart
-                        let replay_data = Replay.decompress_string score.Replay
+                        let replay_data = Replay.FromBase64String(score.Replay)
 
                         let scoring =
                             ScoreProcessor.run

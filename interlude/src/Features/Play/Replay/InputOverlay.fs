@@ -14,7 +14,7 @@ type private InputOverlay(keys: int, replay: Replay, state: PlayState, playfield
     =
     inherit StaticWidget(NodeType.None)
 
-    let replay_frames = Replay.to_array replay
+    let replay_frames = replay.ToArray()
     let mutable seek = 0
     let mutable last_time = 0.0f<ms>
     let keys_down = Array.zeroCreate keys

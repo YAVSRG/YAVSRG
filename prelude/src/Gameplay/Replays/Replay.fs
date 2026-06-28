@@ -33,56 +33,58 @@ type [<Struct>] ReplayFrame =
         ReplayFrame.Create(time, Bitmask.FromInt16(pressed_keys))
 
 // Invariant: timestamps are nondecreasing
-type [<Struct>] Replay = internal { Frames: ReplayFrame array }
+type [<Struct>] Replay =
+    internal { Frames: ReplayFrame array }
+    
+    static member Empty : Replay = { Frames = [||] }
+    
+    member this.ToArray() : ReplayFrame array = this.Frames
+    static member FromArray([<ParamArray>] frames: ReplayFrame array) : Replay = { Frames = frames }
+    
+    member this.WriteToStream(stream: Stream) : unit =
+        let inline write_frames(frames: ReplayFrame array, bw: BinaryWriter) : unit =
+            bw.Write(frames.Length)
+
+            for replay_frame in frames do
+                replay_frame.WriteToStream(bw)
+
+            bw.Flush()
+        
+        use gzip_stream = new GZipStream(stream, CompressionLevel.SmallestSize)
+        use bw = new BinaryWriter(gzip_stream)
+        write_frames(this.Frames, bw)
+
+    static member ReadFromStream(stream: Stream) : Replay =
+        let inline read_frames(br: BinaryReader) : ReplayFrame array =
+            let count: int = br.ReadInt32()
+            let output = Array.zeroCreate count
+
+            for i = 0 to count - 1 do
+                output.[i] <- ReplayFrame.ReadFromStream(br)
+
+            output
+            
+        use gzip_stream = new GZipStream(stream, CompressionMode.Decompress)
+        use br = new BinaryReader(gzip_stream)
+        { Frames = read_frames(br) }
+        
+    member inline this.ToByteArray() : byte array =
+        use stream = new MemoryStream()
+        this.WriteToStream(stream)
+        stream.ToArray()
+    
+    static member inline FromByteArray(data: byte array) : Replay =
+        use stream = new MemoryStream(data)
+        Replay.ReadFromStream(stream)
+        
+    member inline this.ToBase64String() : string =
+        Convert.ToBase64String(this.ToByteArray())
+        
+    static member inline FromBase64String(data: string) : Replay =
+        Replay.FromByteArray(Convert.FromBase64String(data))
+    
 
 module Replay =
-    
-    let empty : Replay = { Frames = [||] }
-    
-    let to_array (replay: Replay) = replay.Frames
-    let from_array (frames: ReplayFrame array) = { Frames = frames }
-
-    let compress_to (output_stream: Stream) (replay: Replay) =
-        use gzip_stream = new GZipStream(output_stream, CompressionLevel.SmallestSize)
-        use bw = new BinaryWriter(gzip_stream)
-
-        bw.Write(replay.Frames.Length)
-
-        for replay_frame in replay.Frames do
-            replay_frame.WriteToStream(bw)
-
-        bw.Flush()
-
-    let compress_bytes (data: Replay) : byte array =
-        use stream = new MemoryStream()
-        compress_to stream data
-        stream.ToArray()
-
-    let compress_string (data: Replay) : string =
-        Convert.ToBase64String(compress_bytes data)
-
-    let compressed_string_to_bytes (data: string) : byte array = Convert.FromBase64String data
-    let compressed_bytes_to_string (data: byte array) : string = Convert.ToBase64String data
-
-    let decompress_from (input_stream: Stream) : Replay =
-        use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
-        use br = new BinaryReader(gzip_stream)
-
-        let count: int = br.ReadInt32()
-        let output = Array.zeroCreate count
-
-        for i = 0 to (count - 1) do
-            output.[i] <- ReplayFrame.ReadFromStream(br)
-
-        { Frames = output }
-
-    let decompress_bytes (data: byte array) : Replay =
-        use stream = new MemoryStream(data)
-        decompress_from stream
-
-    let decompress_string (data: string) : Replay =
-        let bytes = Convert.FromBase64String data
-        decompress_bytes bytes
 
     let BYTES_PER_ROW = 6
     let MAX_ROWS_PER_SECOND = 200

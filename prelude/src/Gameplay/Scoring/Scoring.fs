@@ -369,4 +369,4 @@ module ScoreProcessor =
         scoring
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =
-        create SC_J4 chart.Keys (StoredReplaySource Replay.empty) chart.Notes 1.0f<rate>
+        create SC_J4 chart.Keys (StoredReplaySource Replay.Empty) chart.Notes 1.0f<rate>
