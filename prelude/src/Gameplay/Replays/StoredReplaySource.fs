@@ -1,8 +1,5 @@
 ﻿namespace Prelude.Gameplay.Replays
 
-open Prelude
-open Prelude.Charts
-
 /// Replay implementation for a replay that already existed in full
 type StoredReplaySource(data: Replay) =
     let mutable i = 0
@@ -29,5 +26,3 @@ type StoredReplaySource(data: Replay) =
                     yield data.Frames.[j]
                     j <- j - 1
             }
-
-    new(data: string) = StoredReplaySource(Replay.FromBase64String data)
