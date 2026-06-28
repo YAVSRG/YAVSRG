@@ -105,7 +105,7 @@ type [<Struct>] Replay =
 
             let output = Array.zeroCreate count
 
-            for i = 0 to (count - 1) do
+            for i = 0 to count - 1 do
                 let next_frame = ReplayFrame.ReadFromStream(br)
                 check_frame(next_frame)
                 output.[i] <- next_frame

@@ -90,7 +90,7 @@ module internal Shared =
     let above_ln_percent (threshold: float32) (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
         chart_meta.Patterns.LNPercent > threshold
 
-    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) =
+    let has_sv (chart_meta: ChartMeta, _: LibraryViewContext) : bool =
         chart_meta.Patterns.SVAmount > Categorise.SV_AMOUNT_THRESHOLD
 
 [<RequireQualifiedAccess>]

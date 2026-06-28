@@ -27,9 +27,9 @@ module ImageServices =
             override this.Handle(url: string) =
                 async {
                     let cached_file_name =
-                        let uri = new Uri(url)
+                        let uri = Uri(url)
                         let name = Uri.UnescapeDataString(uri.Segments[uri.Segments.Length - 1])
-                        Path.Combine(get_game_folder ("Downloads"), name)
+                        Path.Combine(get_game_folder("Downloads"), name)
 
                     if File.Exists(cached_file_name) then
                         let stream = File.Open(cached_file_name, FileMode.Open)

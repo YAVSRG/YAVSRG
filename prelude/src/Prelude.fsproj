@@ -79,7 +79,7 @@
     <Compile Include="Gameplay\Scoring\ScoreProcessor.fs" />
     <Compile Include="Gameplay\Scoring\ScoreScreenStats.fs" />
     <Compile Include="Calculator\Layout.fs" />
-    <Compile Include="Calculator\Notes.fs" />
+    <Compile Include="Calculator\NoteDifficulty.fs" />
     <Compile Include="Calculator\Variety.fs" />
     <Compile Include="Calculator\HoldCoverage.fs" />
     <Compile Include="Calculator\Strain.fs" />
@@ -126,8 +126,8 @@
     <Compile Include="Backbeat\Tables.fs" />
     <Compile Include="Backbeat\Archive.fs" />
     <Compile Include="Data\TaskProgress.fs" />
-    <Compile Include="Data\Web.fs" />
-    <Compile Include="Data\Images.fs" />
+    <Compile Include="Data\WebServices.fs" />
+    <Compile Include="Data\ImageServices.fs" />
     <Compile Include="Data\Library\Headers.fs" />
     <Compile Include="Data\User\Scores.fs" />
     <Compile Include="Data\User\ScoreInfo.fs" />
@@ -146,7 +146,7 @@
     <Compile Include="Data\Library\Imports\Shared.fs" />
     <Compile Include="Data\Library\Imports\FileSystem.fs" />
     <Compile Include="Data\Library\Imports\Mounts.fs" />
-    <Compile Include="Data\Library\Imports\Online.fs" />
+    <Compile Include="Data\Library\Imports\OnlineImports.fs" />
     <Compile Include="Data\Library\Exports.fs" />
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
