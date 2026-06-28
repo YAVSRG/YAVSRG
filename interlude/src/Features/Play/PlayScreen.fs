@@ -43,7 +43,7 @@ type PlayScreen =
             | _ -> ()
         )
 
-        let pacemaker_state = PacemakerState.create info pacemaker_ctx
+        let pacemaker_state = PacemakerState.Create(info, pacemaker_ctx)
 
         let mutable offset_manually_changed = false
         let offset_setting = LocalOffset.offset_setting info.SaveData
@@ -133,7 +133,6 @@ type PlayScreen =
 
         let finish_play (this: IPlayScreen) =
             liveplay.Finish()
-            let pacemaker_met = PacemakerState.pacemaker_met scoring pacemaker_state
 
             let view_score() =
                 if
@@ -154,11 +153,11 @@ type PlayScreen =
                 then
                     CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
 
-            if pacemaker_met then
-                view_score()
-            else
+            if pacemaker_state.IsFailedAtEnd(scoring) then
                 fade_in.Target <- 0.5f
                 this.Add(FailOverlay(pacemaker_state, retry, view_score, skip_song))
+            else
+                view_score()
 
         let change_offset (state: PlayState) =
             Song.pause()
@@ -242,7 +241,7 @@ type PlayScreen =
                     this.State.Scoring.Update liveplay_position
                     liveplay_position <- max liveplay_position chart_time
 
-                    if options.EnablePacemakerFailMidway.Value && PacemakerState.pacemaker_failed scoring pacemaker_state then fail_midway this
+                    if options.EnablePacemakerFailMidway.Value && pacemaker_state.IsFailedMidway(scoring) then fail_midway this
                     if this.State.Scoring.Finished then finish_play this
 
                 if fade_in.Value < 1.0f then

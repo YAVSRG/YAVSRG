@@ -12,127 +12,158 @@ open Interlude.Features.Gameplay
 open Interlude.UI
 
 [<RequireQualifiedAccess>]
-type PacemakerState =
-    | None
-    | Accuracy of float
-    | Replay of float * ScoreProcessor
-    | Judgement of target: int * max_count: int
-    | ComboBreaks of max_count: int
-
-[<RequireQualifiedAccess>]
 type PacemakerCreationContext =
     | None
     | FromScore of ScoreInfo
     | FromUserSetting
 
-module PacemakerState =
-
-    let pacemaker_failed (scoring: ScoreProcessor) (state: PacemakerState) : bool =
-        match state with
+[<RequireQualifiedAccess>]
+type PacemakerState =
+    | None
+    | Accuracy of float
+    | Replay of float * ScoreProcessor
+    | Judgement of judgement: int * target_max_count: int
+    | ComboBreaks of target_max_count: int
+    
+    member this.Description(ruleset: Ruleset) : string =
+        match this with
+        | PacemakerState.None -> ""
+        
+        | PacemakerState.Accuracy accuracy ->
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (ruleset.FormatAccuracy accuracy)
+            
+        | PacemakerState.Replay (accuracy, _) ->
+            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (ruleset.FormatAccuracy accuracy)
+            
+        | PacemakerState.Judgement (judgement, target_max_count) ->
+            let judgement_name = ruleset.JudgementName judgement
+            if target_max_count = 0 then
+                sprintf "%s %s" Icons.FLAG ([judgement_name] %> "pacemaker.zero_judgements")
+            else
+                sprintf "%s %s" Icons.FLAG ([target_max_count.ToString(); judgement_name] %> "pacemaker.n_judgements")
+                
+        | PacemakerState.ComboBreaks target_max_count ->
+            if target_max_count = 0 then
+                sprintf "%s %s" Icons.FLAG (%"pacemaker.full_combo")
+            else
+                sprintf "%s %s" Icons.FLAG ([target_max_count.ToString()] %> "pacemaker.n_combo_breaks")
+        
+    member this.IsFailedMidway(scoring: ScoreProcessor) : bool =
+        match this with
         | PacemakerState.None -> false
         | PacemakerState.Accuracy _ -> false
         | PacemakerState.Replay _ -> false
-        | PacemakerState.Judgement(judgement, count) ->
-            let actual =
-                let mutable c = scoring.JudgementCounts.[judgement]
+        
+        | PacemakerState.Judgement(judgement, target_max_count) ->
+            let inline has_worse_judgement() : bool =
+                let rec loop (index: int) =
+                    if index >= scoring.JudgementCounts.Length then false
+                    elif scoring.JudgementCounts.[index] > 0 then true
+                    else loop(index + 1)
+                loop(judgement + 1)
+            
+            let actual_count = scoring.JudgementCounts.[judgement]
+            (actual_count > target_max_count) || has_worse_judgement()
+            
+        | PacemakerState.ComboBreaks target_max_count ->
+            scoring.ComboBreaks > target_max_count
+            
+    member this.IsFailedAtEnd(scoring: ScoreProcessor) : bool =
+        match this with
+        | PacemakerState.None -> false
+        | PacemakerState.Accuracy x -> scoring.Accuracy < x
+        
+        | PacemakerState.Replay (_, vs_score) ->
+            vs_score.Update Time.infinity
+            scoring.Accuracy < vs_score.Accuracy
+            
+        | PacemakerState.Judgement(judgement, target_max_count) ->
+            let inline has_worse_judgement() : bool =
+                let rec loop (index: int) =
+                    if index >= scoring.JudgementCounts.Length then false
+                    elif scoring.JudgementCounts.[index] > 0 then true
+                    else loop(index + 1)
+                loop(judgement + 1)
+            
+            let actual_count = scoring.JudgementCounts.[judgement]
+            (actual_count > target_max_count) || has_worse_judgement()
+            
+        | PacemakerState.ComboBreaks target_max_count ->
+            scoring.ComboBreaks > target_max_count
+            
+    static member Create(info: LoadedChartInfo, ctx: PacemakerCreationContext) : PacemakerState =
+        let inline create_from_score (score_info: ScoreInfo) =
+            let replay_scoring =
+                ScoreProcessor.create
+                    Rulesets.current
+                    score_info.WithMods.Keys
+                    (StoredReplaySource(score_info.Replay))
+                    score_info.WithMods.Notes
+                    score_info.Rate
+            PacemakerState.Replay (score_info.Accuracy, replay_scoring)
+            
+        let inline create_from_accuracy(pacemaker_settings: PacemakerSettings) : PacemakerState =
+            let personal_best_accuracy =
+                Bests.ruleset_best_above
+                    Rulesets.current_hash
+                    _.Accuracy
+                    SelectedChart.rate.Value
+                    info.SaveData.PersonalBests
+                    
+            let inline should_use_personal_best(best_accuracy: float) : bool =
+                pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.Always
+                || (pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_accuracy > pacemaker_settings.Accuracy)
+                
+            let inline use_score(final_accuracy: float, score: Score) =
+                let with_mods = ModState.apply score.Mods info.Chart
+                let replay_data = Replay.FromByteArray(score.Replay)
+                let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
+                PacemakerState.Replay (final_accuracy, scoring)
+                
+            let inline use_accuracy(accuracy: float) =
+                PacemakerState.Accuracy accuracy
+            
+            match personal_best_accuracy with
+            | Some (best_accuracy, _, timestamp) when should_use_personal_best(best_accuracy) ->
+                match info.SaveData.ScoreByTimestamp(timestamp) with
+                | Some score -> use_score(best_accuracy, score)
+                | _ -> use_accuracy(best_accuracy)
+                
+            | _ -> use_accuracy(pacemaker_settings.Accuracy)
+            
+        let inline create_from_lamp(pacemaker_settings: PacemakerSettings) : PacemakerState =
+            let personal_best_lamp =
+                Bests.ruleset_best_above
+                    Rulesets.current_hash
+                    _.Lamp
+                    SelectedChart.rate.Value
+                    info.SaveData.PersonalBests
+                    
+            let inline should_use_personal_best(best_lamp: int) : bool =
+                pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.Always
+                || (pacemaker_settings.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_lamp > pacemaker_settings.Lamp)
+                    
+            let target_lamp =
+                match personal_best_lamp with
+                | Some (best_lamp, _, _) when should_use_personal_best(best_lamp) -> best_lamp
+                | _ -> pacemaker_settings.Lamp
+                |> max 0
+                |> min (Rulesets.current.Lamps.Length - 1)
 
-                for j = judgement + 1 to scoring.JudgementCounts.Length - 1 do
-                    if scoring.JudgementCounts.[j] > 0 then
-                        c <- System.Int32.MaxValue
-
-                c
-            actual > count
-        | PacemakerState.ComboBreaks count ->
-            scoring.ComboBreaks > count
-
-    let pacemaker_met (scoring: ScoreProcessor) (state: PacemakerState) : bool =
-        match state with
-        | PacemakerState.None -> true
-        | PacemakerState.Accuracy x -> scoring.Accuracy >= x
-        | PacemakerState.Replay (_, r) ->
-            r.Update Time.infinity
-            scoring.Accuracy >= r.Accuracy
-        | PacemakerState.Judgement(judgement, count) ->
-            let actual =
-                let mutable c = scoring.JudgementCounts.[judgement]
-
-                for j = judgement + 1 to scoring.JudgementCounts.Length - 1 do
-                    if scoring.JudgementCounts.[j] > 0 then
-                        c <- System.Int32.MaxValue
-
-                c
-            actual <= count
-        | PacemakerState.ComboBreaks count ->
-            scoring.ComboBreaks <= count
-
-    let create (info: LoadedChartInfo) (ctx: PacemakerCreationContext) : PacemakerState =
+            match Rulesets.current.Lamps.[target_lamp].Requirement with
+            | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks n
+            | LampRequirement.JudgementAtMost (j, n) -> PacemakerState.Judgement (j, n)
+        
         match ctx with
         | PacemakerCreationContext.None -> PacemakerState.None
-        | PacemakerCreationContext.FromScore score_info ->
-            let replay_data = StoredReplaySource(score_info.Replay) :> ReplaySource
-
-            let replay_scoring =
-                ScoreProcessor.create Rulesets.current score_info.WithMods.Keys replay_data score_info.WithMods.Notes score_info.Rate
-
-            PacemakerState.Replay (score_info.Accuracy, replay_scoring)
+        | PacemakerCreationContext.FromScore score_info -> create_from_score(score_info)
 
         | PacemakerCreationContext.FromUserSetting ->
-            let setting =
-                if options.Pacemaker.ContainsKey Rulesets.current_hash then
-                    options.Pacemaker.[Rulesets.current_hash]
-                else
-                    PacemakerSettings.Default
+            let pacemaker_settings =
+                match options.Pacemaker.TryGetValue(Rulesets.current_hash) with
+                | true, settings -> settings
+                | false, _ -> PacemakerSettings.Default
 
-            match setting.Mode with
-            | PacemakerMode.Accuracy ->
-
-                match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash _.Accuracy SelectedChart.rate.Value with
-                | Some (best_accuracy, _, timestamp)
-                    when setting.PersonalBest = PacemakerPersonalBestMode.Always
-                    || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_accuracy > setting.Accuracy) ->
-
-                    match info.SaveData.ScoreByTimestamp timestamp with
-                    | Some score ->
-                        let with_mods = ModState.apply score.Mods info.Chart
-                        let replay_data = Replay.FromByteArray(score.Replay)
-                        let scoring = ScoreProcessor.create Rulesets.current with_mods.Keys (StoredReplaySource replay_data) with_mods.Notes score.Rate
-
-                        PacemakerState.Replay (best_accuracy, scoring)
-
-                    | None -> PacemakerState.Accuracy best_accuracy
-                | _ -> PacemakerState.Accuracy setting.Accuracy
-
-            | PacemakerMode.Lamp ->
-
-                let lamp =
-                    match info.SaveData.PersonalBests |> Bests.ruleset_best_above Rulesets.current_hash _.Lamp SelectedChart.rate.Value with
-                    | Some (best_lamp, _, _)
-                        when setting.PersonalBest = PacemakerPersonalBestMode.Always
-                        || (setting.PersonalBest = PacemakerPersonalBestMode.IfBetter && best_lamp > setting.Lamp) ->
-                        max 0 best_lamp
-                    | _ -> setting.Lamp
-
-                if lamp >= Rulesets.current.Lamps.Length || lamp < 0 then
-                    PacemakerState.None
-                else
-                    match Rulesets.current.Lamps.[lamp].Requirement with
-                    | LampRequirement.ComboBreaksAtMost n -> PacemakerState.ComboBreaks n
-                    | LampRequirement.JudgementAtMost (j, n) -> PacemakerState.Judgement (j, n)
-
-    let description (pacemaker: PacemakerState) : string =
-        match pacemaker with
-        | PacemakerState.None -> ""
-        | PacemakerState.Accuracy acc ->
-            sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.accuracy") (Rulesets.current.FormatAccuracy acc)
-        | PacemakerState.Replay (acc, _) -> sprintf "%s %s: %s" Icons.FLAG (%"pacemaker.vs_score") (Rulesets.current.FormatAccuracy acc)
-        | PacemakerState.Judgement (j, count) ->
-            let jname = Rulesets.current.JudgementName j
-            if count = 0 then
-                sprintf "%s %s" Icons.FLAG ([jname] %> "pacemaker.zero_judgements")
-            else
-                sprintf "%s %s" Icons.FLAG ([count.ToString(); jname] %> "pacemaker.n_judgements")
-        | PacemakerState.ComboBreaks count ->
-            if count = 0 then
-                sprintf "%s %s" Icons.FLAG (%"pacemaker.full_combo")
-            else
-                sprintf "%s %s" Icons.FLAG ([count.ToString()] %> "pacemaker.n_combo_breaks")
+            match pacemaker_settings.Mode with
+            | PacemakerMode.Accuracy -> create_from_accuracy(pacemaker_settings)
+            | PacemakerMode.Lamp -> create_from_lamp(pacemaker_settings)
