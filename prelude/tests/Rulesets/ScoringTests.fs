@@ -166,7 +166,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownFor(offset, 1.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(1, event_processing.JudgementCounts.[expected_judgement])
 
@@ -204,7 +204,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownUntil(offset, 1000.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -242,7 +242,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownUntil(offset, 1180.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -280,7 +280,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownUntil(offset, 820.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -318,7 +318,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownUntil(offset, 500.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -360,7 +360,7 @@ module ScoringTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -398,7 +398,7 @@ module ScoringTests =
             let replay = ReplayBuilder().KeyDownUntil(offset, 1500.0f<ms>).Build()
 
             let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             Assert.AreEqual(expected_judgement, Array.IndexOf(event_processing.JudgementCounts, 1))
 
@@ -409,7 +409,7 @@ module ScoringTests =
         let replay = ReplayBuilder().Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual([| 0; 0; 0; 0; 0; 1 |], event_processing.JudgementCounts)
 
@@ -517,7 +517,7 @@ module ScoringTests =
             }
 
         let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.True(ruleset.Judgements.[5].BreaksCombo)
         Assert.AreEqual([| 2; 0; 0; 0; 0; 1 |], event_processing.JudgementCounts)
@@ -544,7 +544,7 @@ module ScoringTests =
             }
 
         let event_processing = ScoringEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.False(ruleset.Judgements.[2].BreaksCombo)
         Assert.AreEqual([| 2; 0; 1; 0; 0; 0 |], event_processing.JudgementCounts)

@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
-open Prelude
 open Percyqaz.Common
 open Prelude.Formats
 open Prelude.Formats.Osu
@@ -94,7 +93,7 @@ module RulesetOsuParityTests =
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score = ScoreProcessor(as_interlude_ruleset, StoredReplaySource(as_interlude_replay), TEST_CHART.ToNoteData(), 1.0f<rate>)
-        score.Update Time.infinity
+        score.ProcessEntireReplay()
 
         let event_deltas =
             score.Events
@@ -135,7 +134,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -164,7 +163,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(OD10_RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd OD10_RULESET.NoteWindows
 
@@ -196,7 +195,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
 
@@ -228,7 +227,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.NoteWindows
 
@@ -276,7 +275,7 @@ module RulesetOsuParityTests =
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
         let score = ScoreProcessor(ruleset, StoredReplaySource(replay_data), TEST_CHART_2.ToNoteData(), 1.5f<rate>)
-        score.Update Time.infinity
+        score.ProcessEntireReplay()
 
         let event_deltas =
             score.Events
@@ -324,7 +323,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -368,7 +367,7 @@ module RulesetOsuParityTests =
         let ruleset = OsuMania.create 8.0f OsuMania.NoMod
 
         let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let LATE_WINDOW_ON_MISS = snd ruleset.NoteWindows
 
@@ -439,7 +438,7 @@ module RulesetOsuParityTests =
             printfn "TRYING OD %.1f\n" od
 
             let event_processing = ScoreProcessor(ruleset, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement_sequence =
                 event_processing.Events
@@ -482,7 +481,7 @@ module RulesetOsuParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let judgement_sequence =
             event_processing.Events
@@ -524,7 +523,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -567,7 +566,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -610,7 +609,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -653,7 +652,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -696,7 +695,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -739,7 +738,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -782,7 +781,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -825,7 +824,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -868,7 +867,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -914,7 +913,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -959,7 +958,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events
@@ -1004,7 +1003,7 @@ module RulesetOsuParityTests =
                     .Build()
 
             let event_processing = ScoringEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-            event_processing.Update Time.infinity
+            event_processing.ProcessEntireReplay()
 
             let judgement =
                 event_processing.Events

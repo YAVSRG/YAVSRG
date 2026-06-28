@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
-open Prelude
 open Percyqaz.Common
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
@@ -24,7 +23,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
 
@@ -51,7 +50,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -77,7 +76,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
 
@@ -104,7 +103,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         let CONVENTIONAL_LATE_WINDOW = snd RULESET.ReleaseWindows
 
@@ -129,7 +128,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -152,7 +151,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -175,7 +174,7 @@ module RulesetQuaverParityTests =
                 .Build()
 
         let event_processing = ScoringEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [

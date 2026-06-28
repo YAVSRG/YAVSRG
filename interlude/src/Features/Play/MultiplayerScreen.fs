@@ -49,7 +49,7 @@ type MultiplayerScreen =
                     if not (liveplay :> ReplaySource).Finished then
                         liveplay.Finish()
 
-                    scoring.Update Time.infinity
+                    scoring.ProcessEntireReplay()
 
                     let replay_data = (liveplay :> ReplaySource).GetFullReplay()
 
@@ -97,7 +97,7 @@ type MultiplayerScreen =
             if
                 if is_giving_up_play then
                     liveplay.Finish()
-                    scoring.Update Time.infinity
+                    scoring.ProcessEntireReplay()
                     Screen.change_new
                         (fun () ->
                             let score_info =

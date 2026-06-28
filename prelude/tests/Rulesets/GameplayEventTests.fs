@@ -27,7 +27,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
         Assert.Pass()
 
     [<Test>]
@@ -49,7 +49,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -80,7 +80,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -107,7 +107,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -132,7 +132,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -160,7 +160,7 @@ module GameplayEventTests =
         let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -187,7 +187,7 @@ module GameplayEventTests =
         let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -233,7 +233,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(8, event_processing.Events.Count)
 
@@ -291,7 +291,7 @@ module GameplayEventTests =
         let ruleset = { RULESET with HitMechanics = { NotePriority = NotePriority.OsuMania; GhostTapJudgement = None } }
 
         let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -330,7 +330,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -368,7 +368,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -406,7 +406,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -444,7 +444,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -475,7 +475,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -502,7 +502,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.False(
             event_processing.Events
@@ -533,7 +533,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -558,7 +558,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -584,7 +584,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -611,7 +611,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -637,7 +637,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -662,7 +662,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -685,7 +685,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -708,7 +708,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -731,7 +731,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -754,7 +754,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -777,7 +777,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -800,7 +800,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 0.5f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -823,7 +823,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -846,7 +846,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 2.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -868,7 +868,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -891,7 +891,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -914,7 +914,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -939,7 +939,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -967,7 +967,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             event_processing.Events |> Seq.map _.Time |> Seq.sort,
@@ -1002,7 +1002,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1027,7 +1027,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1051,7 +1051,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1076,7 +1076,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1103,7 +1103,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1130,7 +1130,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1191,7 +1191,7 @@ module GameplayEventTests =
         let rewind_replay = replay.GetFullReplay() |> StoredReplaySource
 
         let event_processing = GameplayEventCollector(RULESET, rewind_replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             event_step_processing.Events,
@@ -1255,7 +1255,7 @@ module GameplayEventTests =
         let rewind_replay = replay.GetFullReplay() |> StoredReplaySource
 
         let event_processing = GameplayEventCollector(RULESET, rewind_replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             event_step_processing.Events,
@@ -1277,7 +1277,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1307,7 +1307,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(OsuMania.create 8.0f OsuMania.NoMod, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1337,7 +1337,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(Wife3.create 4, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1366,7 +1366,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(Wife3.create 4, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1395,7 +1395,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(Wife3.create 4, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1424,7 +1424,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(Wife3.create 4, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1480,7 +1480,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(SIMPLE_RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1514,7 +1514,7 @@ module GameplayEventTests =
             }
 
         let event_processing = GameplayEventCollector(ruleset, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1548,7 +1548,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         printfn "FIRST NOTE AT 1000ms"
 
@@ -1560,7 +1560,7 @@ module GameplayEventTests =
                 .Build()
 
         let event_processing_2 = GameplayEventCollector(RULESET, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
-        event_processing_2.Update Time.infinity
+        event_processing_2.ProcessEntireReplay()
 
         Assert.AreEqual(event_processing.Events, event_processing_2.Events)
 
@@ -1584,7 +1584,7 @@ module GameplayEventTests =
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 100.0f<ms>
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         printfn "FIRST NOTE AT 1000ms"
 
@@ -1597,7 +1597,7 @@ module GameplayEventTests =
 
         let event_processing_2 = GameplayEventCollector(RULESET, StoredReplaySource(replay.GetFullReplay()), note_data_2, 1.0f<rate>)
         event_processing_2.IgnoreNotesBefore 1100.0f<ms>
-        event_processing_2.Update Time.infinity
+        event_processing_2.ProcessEntireReplay()
 
         Assert.AreEqual(event_processing.Events, event_processing_2.Events)
 
@@ -1617,7 +1617,7 @@ module GameplayEventTests =
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 500.0f<ms>
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         Assert.AreEqual(
             [
@@ -1643,7 +1643,7 @@ module GameplayEventTests =
 
         let event_processing = GameplayEventCollector(RULESET, replay, note_data, 1.0f<rate>)
         event_processing.IgnoreNotesBefore 75.0f<ms>
-        event_processing.Update Time.infinity
+        event_processing.ProcessEntireReplay()
 
         printfn "%A" (event_processing.Events |> Seq.map (fun e -> e.Action))
 

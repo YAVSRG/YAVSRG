@@ -147,7 +147,7 @@ type LobbyUI(lobby: Lobby) =
                         GetScoreInfo = fun () ->
                             if not (replay :> ReplaySource).Finished then
                                 replay.Finish()
-                            scoring.Update Time.infinity
+                            scoring.ProcessEntireReplay()
 
                             let replay_data = (replay :> ReplaySource).GetFullReplay()
 

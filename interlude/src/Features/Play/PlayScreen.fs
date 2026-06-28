@@ -75,7 +75,7 @@ type PlayScreen =
 
             if is_giving_up_play then
                 liveplay.Finish()
-                scoring.Update Time.infinity
+                scoring.ProcessEntireReplay()
                 match options.QuitOutBehaviour.Value with
                 | QuitOutBehaviour.SaveAndShow
                 | QuitOutBehaviour.Show ->
@@ -112,7 +112,7 @@ type PlayScreen =
                 if
                     Screen.change_new
                         (fun () ->
-                            scoring.Update Time.infinity
+                            scoring.ProcessEntireReplay()
                             let score_info =
                                 Gameplay.score_info_from_gameplay
                                     info

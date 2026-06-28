@@ -365,7 +365,7 @@ module ScoreProcessor =
 
     let run (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
         let scoring = ScoreProcessor(ruleset, replay, note_data, rate)
-        scoring.Update Time.infinity
+        scoring.ProcessEntireReplay()
         scoring
 
     let create_dummy (chart: ModdedChart) : ScoreProcessor =

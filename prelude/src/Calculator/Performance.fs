@@ -58,7 +58,7 @@ module Performance =
         let scoring =
             if SC_J4_HASH <> Ruleset.hash scoring.Ruleset then
                 let on_standard_ruleset = scoring.Recreate(SC_J4)
-                on_standard_ruleset.Update Time.infinity
+                on_standard_ruleset.ProcessEntireReplay()
                 on_standard_ruleset
             else
                 scoring

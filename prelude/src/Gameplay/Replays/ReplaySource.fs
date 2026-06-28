@@ -1,9 +1,9 @@
 ﻿namespace Prelude.Gameplay.Replays
 
+// todo: represent if more data can come or if knowing the full replay is possible (HasFullReplay)
+// todo: what is even the point of finished as is currently is? investigate and then change to be clearer
 type ReplaySource =
-    /// If false, more replay data may come if you call .HasNext later
     abstract member Finished: bool
-    /// Only call if Finished = true
     abstract member GetFullReplay: unit -> Replay
 
     abstract member HasNext: ChartTime -> bool

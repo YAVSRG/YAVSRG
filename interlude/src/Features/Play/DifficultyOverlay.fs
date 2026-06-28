@@ -25,7 +25,7 @@ type DifficultyOverlay(chart: ModdedChart, playfield: Playfield, difficulty: Dif
 
     let full_score_events =
         let x = state.Scoring.Recreate()
-        x.Update Time.infinity
+        x.ProcessEntireReplay()
         x
 
     let accuracy_timeline = Performance.acc_timeline difficulty full_score_events

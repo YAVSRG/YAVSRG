@@ -166,7 +166,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
     ///  notes.[expired_notes_index].Time >= now - LATE WINDOW
     ///  All notes on rows before `expired_notes_index` now have an action assigned - if there wasn't one before, it is now marked as missed
 
-    member private this.MissUnhitExpiredNotes(chart_time: ChartTime) =
+    member private this.MissUnhitExpiredNotes(chart_time: ChartTime) : unit =
         let now = first_note + chart_time
         let end_of_search = now - late_window_scaled
 
@@ -227,7 +227,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
             expired_notes_index <- expired_notes_index + 1
 
-    override this.HandleKeyDown(chart_time: ChartTime, k: int) =
+    override this.HandleKeyDown(chart_time: ChartTime, k: int) : unit =
         this.MissUnhitExpiredNotes chart_time
         let now = first_note + chart_time
 
@@ -287,7 +287,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                     }
             | _ -> ()
 
-    override this.HandleKeyUp(chart_time: ChartTime, k: int) =
+    override this.HandleKeyUp(chart_time: ChartTime, k: int) : unit =
         this.MissUnhitExpiredNotes chart_time
         let now = first_note + chart_time
 
@@ -379,7 +379,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
     /// Expected to be called with monotonically increasing values of `chart_time` during gameplay for live scoring
     /// For processing an entire score instantly pass in Time.infinity or any time higher than the duration of the chart + late window
 
-    member this.Update(chart_time: ChartTime) =
+    member this.Update(chart_time: ChartTime) : unit =
         this.PollReplay chart_time // Process all key presses and releases up until now
         this.MissUnhitExpiredNotes chart_time // Then process any missed notes up until now if needed
 
@@ -387,7 +387,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
     /// Used by practice mode in the client to enter gameplay midway through a song
     /// Prevents accumulating misses for every single note before this point or column locking on the way in
-    member this.IgnoreNotesBefore(time: Time) =
+    member this.IgnoreNotesBefore(time: Time) : unit =
         let mutable i = 0
 
         let mutable hold_tails_remaining = Bitmask.Empty
@@ -418,3 +418,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                     deltas.[k] <- -infinityf * 1.0f<ms / rate>
 
             i <- i + 1
+        
+    member this.ProcessEntireReplay() : unit =
+        // todo: assert that replay has full data
+        this.Update(Time.infinity)

@@ -74,7 +74,7 @@ type PacemakerState =
         | PacemakerState.Accuracy x -> scoring.Accuracy < x
         
         | PacemakerState.Replay (_, vs_score) ->
-            vs_score.Update Time.infinity
+            vs_score.ProcessEntireReplay()
             scoring.Accuracy < vs_score.Accuracy
             
         | PacemakerState.Judgement(judgement, target_max_count) ->
