@@ -4,7 +4,6 @@ open System
 open System.IO
 open System.IO.Compression
 open Prelude
-open Prelude.Charts
 
 // Unlike Time, ChartTime is relative to the first note of the chart, a value of 0 = exactly on the first note
 // This is so a replay is portable to a functionally identical copy of the chart other than its offset being shifted
@@ -124,64 +123,3 @@ type [<Struct>] Replay =
             Ok { Frames = frames }
         with err ->
             Error(err.ToString())
-        
-module Replay =
-
-    let private perfect_replay_uncached (note_data: NoteData) : Replay =
-        let time_until_next (current_index: int) : Time =
-            if current_index + 1 >= note_data.Notes.Length then
-                100.0f<ms>
-            else
-                note_data.Notes.[current_index + 1].Time - note_data.Notes.[current_index].Time
-
-        let first_note = note_data.Notes.[0].Time
-
-        seq {
-            let mutable i = 0
-            let mutable held: Bitmask = Bitmask.Empty
-
-            while i < note_data.Notes.Length do
-                let { Time = time; Data = nr } = note_data.Notes.[i]
-                let delay = time_until_next(i) * 0.5f
-                let mutable hit = held
-
-                for k = 0 to note_data.Keys - 1 do
-                    if nr.[k] = NoteType.NORMAL then
-                        hit <- hit.Add(k)
-                    elif nr.[k] = NoteType.HOLDHEAD then
-                        hit <- hit.Add(k)
-                        held <- held.Add(k)
-                    elif nr.[k] = NoteType.HOLDTAIL then
-                        hit <- hit.Remove(k)
-                        held <- held.Remove(k)
-
-                yield { Time = time - first_note; PressedKeys = hit }
-                yield { Time = time - first_note + delay; PressedKeys = held }
-                i <- i + 1
-        }
-        |> Array.ofSeq
-        |> fun x -> { Frames = x }
-
-    /// Generates perfect replay inputs for provided note data
-    /// Should* score perfect judgements and accuracies on all notes and releases
-    //  *unless you make a goofy ruleset where 0ms hits don't give 100% accuracy
-    let perfect_replay = perfect_replay_uncached |> cached
-
-    let private auto_replay_waving_uncached (note_data: NoteData) : Replay =
-        let mutable last_time = -Time.infinity
-
-        let offset (time: Time) =
-            MathF.Cos(time / 1000.0f<ms>) * 45.0f<ms>
-
-        perfect_replay note_data
-        |> _.Frames
-        |> Array.map (fun replay_frame ->
-            let new_time = max (last_time + 1.0f<ms>) (replay_frame.Time + offset replay_frame.Time)
-            last_time <- new_time
-            { Time = new_time; PressedKeys = replay_frame.PressedKeys }
-        )
-        |> fun x -> { Frames = x }
-
-    /// Generates a replay for provided notes where hits are slightly offset based on a sine wave over time
-    /// Used in Interlude's HUD editor so you can see what varying hit ms deviations look like in various HUD elements
-    let auto_replay_waving = auto_replay_waving_uncached |> cached

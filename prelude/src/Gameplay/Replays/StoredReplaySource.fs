@@ -31,9 +31,3 @@ type StoredReplaySource(data: Replay) =
             }
 
     new(data: string) = StoredReplaySource(Replay.FromBase64String data)
-
-    static member AutoPlay(note_data: NoteData) : StoredReplaySource =
-        Replay.perfect_replay note_data |> StoredReplaySource
-
-    static member WavingAutoPlay(note_data: NoteData) : StoredReplaySource =
-        Replay.auto_replay_waving note_data |> StoredReplaySource

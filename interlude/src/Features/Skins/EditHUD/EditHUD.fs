@@ -18,12 +18,9 @@ module EditHudScreen =
 
     let rec edit_hud_screen (info: LoadedChartInfo, on_exit: unit -> unit) =
 
-        let replay_data: ReplaySource =
-            StoredReplaySource.WavingAutoPlay(info.WithColors.ToNoteData())
-
+        let replay = WavyAutoplay.CreateReplay(info.WithColors)
         let ruleset = Rulesets.current
-
-        let scoring = ScoreProcessor.Create(ruleset, replay_data, info.WithColors, SelectedChart.rate.Value)
+        let scoring = ScoreProcessor.Create(ruleset, replay, info.WithColors, SelectedChart.rate.Value)
 
         let mutable time = -Time.infinity
 

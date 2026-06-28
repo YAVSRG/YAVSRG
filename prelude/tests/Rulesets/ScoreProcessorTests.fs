@@ -467,8 +467,7 @@ module ScoreProcessorTests =
     [<Test>]
     let Autoplay_PerfectScores () =
 
-        let perfect_replay =
-            Replay.perfect_replay(DONUT_HOLE_CHART.ToNoteData())
+        let perfect_replay = Autoplay.CreateReplay(DONUT_HOLE_CHART)
             
         let inline ruleset_result(ruleset: Ruleset) : ScoreProcessor =
             ScoreProcessor.ProcessEntireReplay(ruleset, perfect_replay, DONUT_HOLE_CHART, 1.0f<rate>)
