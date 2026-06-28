@@ -3,7 +3,6 @@
 open System
 open System.IO
 open System.IO.Compression
-open System.Runtime.CompilerServices
 open Prelude
 open Prelude.Charts
 
@@ -34,17 +33,22 @@ type [<Struct>] ReplayFrame =
         ReplayFrame.Create(time, Bitmask.FromInt16(pressed_keys))
 
 // Invariant: timestamps are nondecreasing
-type Replay = ReplayFrame array
+type [<Struct>] Replay = internal { Frames: ReplayFrame array }
 
 module Replay =
+    
+    let empty : Replay = { Frames = [||] }
+    
+    let to_array (replay: Replay) = replay.Frames
+    let from_array (frames: ReplayFrame array) = { Frames = frames }
 
     let compress_to (output_stream: Stream) (replay: Replay) =
         use gzip_stream = new GZipStream(output_stream, CompressionLevel.SmallestSize)
         use bw = new BinaryWriter(gzip_stream)
 
-        bw.Write(replay.Length)
+        bw.Write(replay.Frames.Length)
 
-        for replay_frame in replay do
+        for replay_frame in replay.Frames do
             replay_frame.WriteToStream(bw)
 
         bw.Flush()
@@ -70,7 +74,7 @@ module Replay =
         for i = 0 to (count - 1) do
             output.[i] <- ReplayFrame.ReadFromStream(br)
 
-        output
+        { Frames = output }
 
     let decompress_bytes (data: byte array) : Replay =
         use stream = new MemoryStream(data)
@@ -114,7 +118,7 @@ module Replay =
                 last_time <- next_frame.Time
                 output.[i] <- next_frame
 
-            Ok output
+            Ok { Frames = output }
         with err ->
             Error(err.ToString())
 
@@ -151,6 +155,7 @@ module Replay =
                 i <- i + 1
         }
         |> Array.ofSeq
+        |> fun x -> { Frames = x }
 
     /// Generates perfect replay inputs for provided note data
     /// Should* score perfect judgements and accuracies on all notes and releases
@@ -164,11 +169,13 @@ module Replay =
             MathF.Cos(time / 1000.0f<ms>) * 45.0f<ms>
 
         perfect_replay keys notes
+        |> _.Frames
         |> Array.map (fun replay_frame ->
             let new_time = max (last_time + 1.0f<ms>) (replay_frame.Time + offset replay_frame.Time)
             last_time <- new_time
             { Time = new_time; PressedKeys = replay_frame.PressedKeys }
         )
+        |> fun x -> { Frames = x }
 
     /// Generates a replay for provided notes where hits are slightly offset based on a sine wave over time
     /// Used in Interlude's HUD editor so you can see what varying hit ms deviations look like in various HUD elements

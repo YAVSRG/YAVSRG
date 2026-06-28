@@ -8,17 +8,17 @@ type StoredReplaySource(data: Replay) =
     let mutable i = 0
 
     interface ReplaySource with
-        member this.Finished = i >= data.Length
+        member this.Finished = i >= data.Frames.Length
 
         member this.HasNext(time: ChartTime) : bool =
-            if i >= data.Length then
+            if i >= data.Frames.Length then
                 false
             else
-                data.[i].Time <= time
+                data.Frames.[i].Time <= time
 
         member this.GetNext() : ReplayFrame =
             i <- i + 1
-            data.[i - 1]
+            data.Frames.[i - 1]
 
         member this.GetFullReplay() : Replay = data
 
@@ -26,7 +26,7 @@ type StoredReplaySource(data: Replay) =
             seq {
                 let mutable j = i - 1
                 while j >= 0 do
-                    yield data.[j]
+                    yield data.Frames.[j]
                     j <- j - 1
             }
 

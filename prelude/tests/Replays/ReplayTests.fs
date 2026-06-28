@@ -53,6 +53,7 @@ module ReplayTests =
                 ReplayFrame.Create(20.0f<ms>, 2us)
                 ReplayFrame.Create(19.0f<ms>, 1us)
             |]
+            |> Replay.from_array
             |> Replay.compress_string
 
         match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with
@@ -69,6 +70,7 @@ module ReplayTests =
                 ReplayFrame.Create(20.0f<ms>, 2us)
                 ReplayFrame.Create(System.Single.NaN * 1.0f<ms>, 1us)
             |]
+            |> Replay.from_array
             |> Replay.compress_string
 
         match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with
@@ -85,6 +87,7 @@ module ReplayTests =
                 ReplayFrame.Create(20.0f<ms>, 2us)
                 ReplayFrame.Create(System.Single.NegativeInfinity * 1.0f<ms>, 1us)
             |]
+            |> Replay.from_array
             |> Replay.compress_string
 
         match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with

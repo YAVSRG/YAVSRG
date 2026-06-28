@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Tests.Helpers
 
+open System
 open Prelude
 open Prelude.Gameplay.Replays
 
@@ -13,20 +14,20 @@ type ReplayBuilder() =
         liveplay.AddFrame(time, state)
         this
 
-    member this.KeyDown(time: Time) = this.KeyDown(time, 0)
+    member this.KeyDown(time: Time) : ReplayBuilder = this.KeyDown(time, 0)
 
     member this.KeyUp(time: Time, k: int) : ReplayBuilder =
         state <- state.Remove(k)
         liveplay.AddFrame(time, state)
         this
 
-    member this.KeyUp(time: Time) = this.KeyUp(time, 0)
+    member this.KeyUp(time: Time) : ReplayBuilder = this.KeyUp(time, 0)
 
-    member this.KeyDownUntil(time: Time, until: Time, key: int) = this.KeyDown(time, key).KeyUp(until, key)
-    member this.KeyDownUntil(time: Time, until: Time) = this.KeyDownUntil(time, until, 0)
+    member this.KeyDownUntil(time: Time, until: Time, key: int) : ReplayBuilder = this.KeyDown(time, key).KeyUp(until, key)
+    member this.KeyDownUntil(time: Time, until: Time) : ReplayBuilder = this.KeyDownUntil(time, until, 0)
 
-    member this.KeyDownFor(time: Time, duration: Time, key: int) = this.KeyDownUntil(time, time + duration, key)
-    member this.KeyDownFor(time: Time, duration: Time) = this.KeyDownFor(time, duration, 0)
+    member this.KeyDownFor(time: Time, duration: Time, key: int) : ReplayBuilder = this.KeyDownUntil(time, time + duration, key)
+    member this.KeyDownFor(time: Time, duration: Time) : ReplayBuilder= this.KeyDownFor(time, duration, 0)
 
     member this.Build() : ReplaySource =
         liveplay.Finish()

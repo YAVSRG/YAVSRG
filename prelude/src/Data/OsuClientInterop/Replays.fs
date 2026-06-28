@@ -59,6 +59,7 @@ module OsuReplay =
                         last_state <- state
         }
         |> Array.ofSeq
+        |> fun x -> { Frames = x }
 
     let encode (replay: Replay) (first_note: Time) (mods: Mods) (beatmap_hash: string) : OsuReplay =
 
@@ -66,7 +67,7 @@ module OsuReplay =
 
         let input_as_replay_string =
             let mutable previous_time = -first_note
-            replay
+            replay.Frames
             |> Seq.map (fun replay_frame ->
                 let t = previous_time
                 let rounded_time = replay_frame.Time |> float32 |> round |> int

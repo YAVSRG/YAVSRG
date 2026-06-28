@@ -26,7 +26,7 @@ type NetworkReplaySource() =
 
         member this.GetFullReplay() : Replay =
             if finished then
-                buffer.ToArray()
+                { Frames = buffer.ToArray() }
             else
                 invalidOp "Online play is not declared as over, we don't have the full replay yet!"
 
