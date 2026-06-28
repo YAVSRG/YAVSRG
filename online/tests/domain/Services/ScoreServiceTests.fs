@@ -13,7 +13,7 @@ module ScoreServiceTests =
 
     [<Test>]
     let DecompressUntrustedString () =
-        match Replay.decompress_string_untrusted 200000.0f<ms> Scores.CRESCENT_MOON_REPLAY_STRING with
+        match Replay.FromUntrustedBase64String(200000.0f<ms>, Scores.CRESCENT_MOON_REPLAY_STRING) with
         | Ok _ -> Assert.Pass()
         | Error e -> Assert.Fail(e)
 

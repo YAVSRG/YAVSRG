@@ -30,7 +30,7 @@ module ReplayTests =
 
         let replay_string = Replay.FromByteArray(SAMPLE_REPLAY_BYTES).ToBase64String()
 
-        match Replay.decompress_string_untrusted 60000.0f<ms> replay_string with
+        match Replay.FromUntrustedBase64String(60000.0f<ms>, replay_string) with
         | Ok decoded -> Assert.AreEqual(SAMPLE_REPLAY_DATA, decoded)
         | Error reason -> Assert.Fail(reason)
 
@@ -39,7 +39,7 @@ module ReplayTests =
 
         let replay_string = Replay.FromByteArray(SAMPLE_REPLAY_BYTES).ToBase64String()
 
-        match Replay.decompress_string_untrusted 1000.0f<ms> replay_string with
+        match Replay.FromUntrustedBase64String(1000.0f<ms>, replay_string) with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -55,7 +55,7 @@ module ReplayTests =
             )
                 .ToBase64String()
 
-        match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with
+        match Replay.FromUntrustedBase64String(1000.0f<ms>, bad_replay_string) with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -71,7 +71,7 @@ module ReplayTests =
             )
                 .ToBase64String()
 
-        match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with
+        match Replay.FromUntrustedBase64String(1000.0f<ms>, bad_replay_string) with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -87,6 +87,6 @@ module ReplayTests =
             )
                 .ToBase64String()
 
-        match Replay.decompress_string_untrusted 1000.0f<ms> bad_replay_string with
+        match Replay.FromUntrustedBase64String(1000.0f<ms>, bad_replay_string) with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)

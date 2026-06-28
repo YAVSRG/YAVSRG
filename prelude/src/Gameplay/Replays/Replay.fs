@@ -26,10 +26,10 @@ type [<Struct>] ReplayFrame =
             PressedKeys = Bitmask.FromInt16(br.ReadUInt16())
         }
 
-    static member inline Create(time: Time, pressed_keys: Bitmask) =
+    static member inline Create(time: Time, pressed_keys: Bitmask) : ReplayFrame =
         { Time = time; PressedKeys = pressed_keys }
 
-    static member inline Create(time: Time, pressed_keys: uint16) =
+    static member inline Create(time: Time, pressed_keys: uint16) : ReplayFrame =
         ReplayFrame.Create(time, Bitmask.FromInt16(pressed_keys))
 
 // Invariant: timestamps are nondecreasing
@@ -83,46 +83,49 @@ type [<Struct>] Replay =
     static member inline FromBase64String(data: string) : Replay =
         Replay.FromByteArray(Convert.FromBase64String(data))
     
+    static member FromUntrustedBase64String(chart_duration: Time, data: string) : Result<Replay, string> =
+        let MAX_ROWS_PER_SECOND = 200
+        let EXTRA_SLACK_SECONDS = 10
+        
+        let mutable last_time = -Time.infinity
+        let inline check_frame(frame: ReplayFrame) : unit =
+            if not (Single.IsFinite(float32 frame.Time)) then
+                failwith "replay contains invalid float value"
 
-module Replay =
-
-    let BYTES_PER_ROW = 6
-    let MAX_ROWS_PER_SECOND = 200
-    let MAX_BYTES_PER_SECOND = MAX_ROWS_PER_SECOND * BYTES_PER_ROW
-
-    let decompress_string_untrusted (chart_duration: Time) (input: string) : Result<Replay, string> =
-        let max_rows = (10 + int (chart_duration / 1000.0f<ms>)) * MAX_ROWS_PER_SECOND
-
-        try
-            let bytes = Convert.FromBase64String input
-
-            use input_stream = new MemoryStream(bytes)
-            use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
-            use br = new BinaryReader(gzip_stream)
+            if frame.Time < last_time then
+                failwithf "replay goes backwards in time %f -> %f" last_time frame.Time
+                
+            last_time <- frame.Time
+        
+        let inline read_frames_checked(br: BinaryReader) : ReplayFrame array =
+            let max_rows = (EXTRA_SLACK_SECONDS + int (chart_duration / 1000.0f<ms>)) * MAX_ROWS_PER_SECOND
 
             let count: int = br.ReadInt32()
-
             if count > max_rows then
                 failwith "replay header indicates it is unreasonably big"
 
             let output = Array.zeroCreate count
-            let mutable last_time = -Time.infinity
 
             for i = 0 to (count - 1) do
                 let next_frame = ReplayFrame.ReadFromStream(br)
-
-                if not (Single.IsFinite(float32 next_frame.Time)) then
-                    failwith "replay contains invalid float value"
-
-                if next_frame.Time < last_time then
-                    failwithf "replay goes backwards in time %f -> %f" last_time next_frame.Time
-
-                last_time <- next_frame.Time
+                check_frame(next_frame)
                 output.[i] <- next_frame
+                
+            output
+                
+        try
+            let replay_bytes = Convert.FromBase64String(data)
 
-            Ok { Frames = output }
+            use input_stream = new MemoryStream(replay_bytes)
+            use gzip_stream = new GZipStream(input_stream, CompressionMode.Decompress)
+            use br = new BinaryReader(gzip_stream)
+            
+            let frames = read_frames_checked(br)
+            Ok { Frames = frames }
         with err ->
             Error(err.ToString())
+        
+module Replay =
 
     let private perfect_replay_uncached (keys: int) (notes: TimeArray<NoteRow>) : Replay =
         let time_until_next (current_index: int) : Time =

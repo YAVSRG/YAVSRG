@@ -71,7 +71,7 @@ module Scores =
             | None -> return ScoreUploadOutcome.Unranked
             | Some chart ->
 
-            match Replay.decompress_string_untrusted (chart.LastNote - chart.FirstNote) replay_untrusted_string with
+            match Replay.FromUntrustedBase64String(chart.LastNote - chart.FirstNote, replay_untrusted_string) with
             | Error message ->
                 Logging.Error "Replay decompression failed from user #%i: %s" user_id message
                 return ScoreUploadOutcome.Failed
