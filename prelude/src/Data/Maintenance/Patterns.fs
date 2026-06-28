@@ -31,4 +31,4 @@ module Patterns =
             progress Complete
         }
 
-    let recalculate_needed (db: ChartDatabase) = db.RecalculationNeeded
+    let recalculate_needed (db: ChartDatabase) : bool = db.RecalculationNeeded

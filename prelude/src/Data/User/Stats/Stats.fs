@@ -16,9 +16,9 @@ type SessionXPGain =
 
 module Stats =
 
-    let save (database: UserDatabase) = save_stats database
+    let save (database: UserDatabase) : unit = save_stats database
 
-    let private end_current_session (now: int64) (database: UserDatabase) =
+    let private end_current_session (now: int64) (database: UserDatabase) : unit =
         TOTAL_STATS <- TOTAL_STATS.AddSession CURRENT_SESSION
         if CURRENT_SESSION.NotesHit > 0 then
             let database_session : Session = CURRENT_SESSION.ToSession
@@ -30,10 +30,10 @@ module Stats =
 
             DbSessions.save database_session database.Database
 
-        CURRENT_SESSION <- CurrentSession.StartNew now CURRENT_SESSION.LastTime
+        CURRENT_SESSION <- CurrentSession.StartNew now
         save database
 
-    let save_current_session (now: int64) (database: UserDatabase) =
+    let save_current_session (now: int64) (database: UserDatabase) : unit =
         CURRENT_SESSION.LastTime <- now
         if now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session now database
@@ -44,7 +44,7 @@ module Stats =
             save database
 
     let QUIT_PENALTY = -100L
-    let quitter_penalty (database: UserDatabase) =
+    let quitter_penalty (database: UserDatabase) : SessionXPGain =
         CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + QUIT_PENALTY |> max 0L
         save_current_session (Timestamp.now()) database
         {
@@ -54,7 +54,7 @@ module Stats =
             AccXP = 0L
         }
 
-    let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) =
+    let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) : SessionXPGain =
         if score_info.TimePlayed - int64 (score_info.ChartMeta.Length / score_info.Rate) - STREAK_TIMEOUT > CURRENT_SESSION.LastPlay then
             CURRENT_SESSION.Streak <- CURRENT_SESSION.Streak + 1
         else
@@ -98,7 +98,7 @@ module Stats =
             AccXP = acc_xp
         }
 
-    let init (library: Library) (database: UserDatabase) =
+    let init (library: Library) (database: UserDatabase) : unit =
 
         let sessions = DbSessions.get_all database.Database
         PREVIOUS_SESSIONS <-

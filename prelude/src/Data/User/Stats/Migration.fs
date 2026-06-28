@@ -86,7 +86,7 @@ module private Migration =
         }
         |> Seq.toArray
 
-    let migrate_legacy_stats (library: Library) (database: UserDatabase) =
+    let migrate_legacy_stats (library: Library) (database: UserDatabase) : unit =
 
         Logging.Info "Backfilling session data from score history..."
 
@@ -104,7 +104,7 @@ module private Migration =
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
         TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit }
 
-    let keymode_playtime_backfill (library: Library) (database: UserDatabase) =
+    let keymode_playtime_backfill (library: Library) (database: UserDatabase) : unit =
 
         Logging.Debug "Backfilling keymode playtimes from score history..."
 
@@ -174,7 +174,7 @@ module private Migration =
         DbSessions.save_batch sessions database.Database
         save_stats database
 
-    let migrate (library: Library) (database: UserDatabase) =
+    let migrate (library: Library) (database: UserDatabase) : unit =
 
         if PREVIOUS_SESSIONS = Map.empty && TOTAL_STATS.GameTime = 0.0 then
             migrate_legacy_stats library database

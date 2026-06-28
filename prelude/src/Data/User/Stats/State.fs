@@ -3,7 +3,6 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Calculator
 open Prelude.Data.User
 
 type Session = Prelude.Data.User.Session
@@ -51,11 +50,11 @@ type CurrentSession =
             KeymodePlaytime = this.KeymodePlaytime
         }
 
-    member this.AddPlaytime (keymode: int) (time: float) =
+    member this.AddPlaytime (keymode: int) (time: float) : unit =
         this.PlayTime <- this.PlayTime + time
         this.KeymodePlaytime <- this.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
 
-    static member StartNew (now: int64) (end_of_last_session: int64) =
+    static member StartNew (now: int64) : CurrentSession =
         {
             Start = now
             LastPlay = now
@@ -130,7 +129,7 @@ type TotalStats =
             KeymodePlaytime = Map.empty
         }
 
-    member this.AddSession (session: CurrentSession) =
+    member this.AddSession (session: CurrentSession) : TotalStats =
         {
             PlayTime = this.PlayTime + session.PlayTime
             PracticeTime = this.PracticeTime + session.PracticeTime
@@ -168,13 +167,13 @@ module StatsState =
     let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
     let mutable BOUND_NETWORK_ID = None
 
-    let internal backup_stats (id: string) (database: UserDatabase) =
+    let internal backup_stats (id: string) (database: UserDatabase) : unit =
         DbSingletons.save<StatsSaveData> ("stats_" + id) { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
 
-    let internal save_stats (database: UserDatabase) =
+    let internal save_stats (database: UserDatabase) : unit =
         DbSingletons.save<StatsSaveData> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
 
-    let internal load_stats (database: UserDatabase) =
+    let internal load_stats (database: UserDatabase) : unit =
         let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database.Database
         TOTAL_STATS <- stats.TotalStats
         CURRENT_SESSION <- stats.CurrentSession

@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Data
-open Prelude.Calculator
 
 [<Json.AutoCodec>]
 type StatsSyncUpstream =
