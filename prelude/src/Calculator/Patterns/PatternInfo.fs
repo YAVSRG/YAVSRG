@@ -57,7 +57,7 @@ type PatternInfo =
 module PatternInfo =
 
     let from_chart_uncached (rate: Rate, chart: Chart) : PatternInfo =
-        let difficulty = Difficulty.calculate (rate, chart.Notes)
+        let difficulty = Difficulty.calculate (rate, chart.ToNoteData())
         let density = Density.process_chart chart
         let patterns = Patterns.find (density, difficulty, chart)
 

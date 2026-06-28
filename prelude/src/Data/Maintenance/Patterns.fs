@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
 open Prelude.Data
@@ -18,7 +17,7 @@ module Patterns =
                 for i, entry in Seq.indexed charts do
                     match ChartDatabase.get_chart entry.Hash chart_db with
                     | Ok chart ->
-                        let difficulty = Difficulty.calculate(1.0f<rate>, chart.Notes)
+                        let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
                         yield entry.Hash, difficulty.Overall, PatternReport.from_chart (difficulty, chart)
                     | Error reason -> Logging.Warn "Error recalculating patterns for %s: %s" entry.Hash reason
                     progress (Processing (i + 1, charts.Length))

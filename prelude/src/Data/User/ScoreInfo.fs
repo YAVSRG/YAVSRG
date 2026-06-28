@@ -67,7 +67,7 @@ module ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
         let replay = Replay.FromByteArray(score.Replay)
         let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, with_mods, score.Rate)
-        let difficulty = Difficulty.calculate(score.Rate, with_mods.Notes)
+        let difficulty = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
         {
             ChartMeta = chart_meta

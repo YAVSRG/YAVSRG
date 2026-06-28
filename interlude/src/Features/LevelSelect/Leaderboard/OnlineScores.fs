@@ -77,7 +77,7 @@ module OnlineScores =
 
                         let scoring = ScoreProcessor.ProcessEntireReplay(req.Ruleset, replay, with_mods, score.Rate)
 
-                        let rating = Difficulty.calculate(score.Rate, with_mods.Notes)
+                        let rating = Difficulty.calculate(score.Rate, with_mods.ToNoteData())
 
                         let score_info: ScoreInfo =
                             {

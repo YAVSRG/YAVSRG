@@ -37,8 +37,8 @@ module Strain =
     let strain_stamina = strain_func 60000.0f<ms / rate>
 
     /// Current system - Looking to be made obselete by `calculate_hand_strains`
-    let calculate_finger_strains (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulty: NoteDifficulty array array) : RowStrain array =
-        let keys = notes.[0].Data.Length
+    let calculate_finger_strains (rate: Rate, note_data: NoteData) (note_difficulty: NoteDifficulty array array) : RowStrain array =
+        let keys, notes = note_data.Keys, note_data.Notes
         let last_note_in_column = Array.zeroCreate<Time> keys
 
         let strain_v1 = Array.zeroCreate<float32> keys
@@ -74,8 +74,8 @@ module Strain =
 
     /// Upcoming system - NOT USED IN THE FINAL RATING RIGHT NOW
     /// May be a better model of strain to replace `calculate_finger_strain`
-    let calculate_hand_strains (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulty: NoteDifficulty array array) : RowStrainV2 array =
-        let keys = notes.[0].Data.Length
+    let calculate_hand_strains (rate: Rate, note_data: NoteData) (note_difficulty: NoteDifficulty array array) : RowStrainV2 array =
+        let keys, notes = note_data.Keys, note_data.Notes
         let hand_split = Layout.keys_on_left_hand keys
 
         let last_note_in_column = Array.init<_> keys (fun _ -> 0.0f, 0.0f, 0.0f<ms>)

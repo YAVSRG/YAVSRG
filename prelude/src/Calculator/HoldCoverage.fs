@@ -5,11 +5,12 @@ open Prelude.Charts
 
 module HoldCoverage =
 
-    let COVERAGE_WINDOW = 250.0f<ms / rate>
-    let SHORTEN_AMOUNT = 80.0f<ms / rate>
+    let [<Literal>] COVERAGE_WINDOW = 250.0f<ms / rate>
+    let [<Literal>] SHORTEN_AMOUNT = 80.0f<ms / rate>
 
-    let calculate_coverage (keys: int, notes: TimeArray<NoteRow>, rate: Rate) : float32 array =
-
+    let calculate_coverage (note_data: NoteData, rate: Rate) : float32 array =
+        let keys, notes = note_data.Keys, note_data.Notes
+        
         let output = Array.zeroCreate notes.Length
         let holds_in_view = Array.zeroCreate keys
         let window = COVERAGE_WINDOW * rate

@@ -2,7 +2,7 @@
 
 module Layout =
 
-    let keys_on_left_hand (keymode: int) =
+    let keys_on_left_hand (keymode: int) : int =
         match keymode with
         | 3 -> 2
         | 4 -> 2

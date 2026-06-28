@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Calculator
 
 open Prelude
+open Prelude.Charts
 open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
@@ -69,7 +70,7 @@ module Performance =
         let scaled_notes =
             rr.NoteDifficulty
             |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
-        let strains = Strain.calculate_finger_strains (scoring.Rate, note_data.Notes) scaled_notes
+        let strains = Strain.calculate_finger_strains (scoring.Rate, note_data) scaled_notes
 
         let note_values =
             seq {
@@ -81,8 +82,8 @@ module Performance =
 
         Difficulty.weighted_overall_difficulty (note_values |> Array.ofSeq)
 
-    let accuracy_to_rating (accuracy: float32, rate: Rate, notes: TimeArray<_>, rr: Difficulty) : float32 =
+    let accuracy_to_rating (accuracy: float32, rate: Rate, note_data: NoteData, rr: Difficulty) : float32 =
         // naive approach
         let scaled_notes = rr.NoteDifficulty |> Array.mapi (fun i nr -> Array.map (scale_note accuracy rr.Variety.[i]) nr)
-        let strains = Strain.calculate_finger_strains (rate, notes) scaled_notes
+        let strains = Strain.calculate_finger_strains (rate, note_data) scaled_notes
         Difficulty.weighted_overall_difficulty (strains |> Seq.map _.StrainV1Notes |> Seq.concat |> Seq.filter (fun x -> x > 0.0f) |> Array.ofSeq)

@@ -86,7 +86,7 @@ type ChartMeta =
 
     static member FromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
         let chart = import_chart.Chart
-        let difficulty = Difficulty.calculate(1.0f<rate>, chart.Notes)
+        let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
         let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
 
         {

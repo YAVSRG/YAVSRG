@@ -56,7 +56,7 @@ module Printerlude =
 
                 for acc = 90 to 100 do
                     let a = float32 acc / 100.0f
-                    Performance.accuracy_to_rating (a, SelectedChart.rate.Value, SelectedChart.CHART.Value.Notes, d)
+                    Performance.accuracy_to_rating (a, SelectedChart.rate.Value, SelectedChart.CHART.Value.ToNoteData(), d)
                     |> sprintf "PR for %i%% %.2f" acc
                     |> io.WriteLine
             | None -> ()

@@ -9,9 +9,9 @@ module Totals =
 
     let calculate_rates (label: string) (pattern: uint16 array) =
         for rate in RATES do
-            [|1f; 2f; 3f|]
+            [|1f<minute>; 2f<minute>; 3f<minute>|]
             |> Array.map (fun duration ->
-                let rating = Difficulty.calculate (rate, ChartBuilder.repeated_pattern 4 (duration * 60_000.0f<ms>) (Array.map Bitmask.FromInt16 pattern))
+                let rating = Difficulty.calculate(rate, ChartBuilder.repeated_pattern(4, duration * MS_PER_MINUTE, Array.map Bitmask.FromInt16 pattern))
                 rating.Overall
             )
             |> printfn "'%s' on %.1fx: %A" label rate

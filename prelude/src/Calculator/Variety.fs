@@ -11,8 +11,8 @@ module Variety =
     /// So basically, round all the difficulties of notes to the nearest 5bpm
     /// Then count how many unique bpms appear within +-`VARIETY_WINDOW` ms of each note
     /// Goofy but this is by FAR the best metric I have come up with for measuring variety/technicality so enjoy
-    let calculate_variety (rate: Rate, notes: TimeArray<NoteRow>) (note_difficulties: NoteDifficulty array array) : float32 array =
-        let keys = notes.[0].Data.Length
+    let calculate_variety (rate: Rate, note_data: NoteData) (note_difficulties: NoteDifficulty array array) : float32 array =
+        let keys, notes = note_data.Keys, note_data.Notes
 
         let buckets = Dictionary<float32, int>()
         let mutable front = 0

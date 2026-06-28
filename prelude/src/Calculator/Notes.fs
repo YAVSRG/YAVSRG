@@ -56,8 +56,8 @@ module NoteDifficulty =
     /// - Sets SL ("stream-left") on each note to the BPM betwen it and the previous note in the column to the left, if this column exists and is on the same hand
     /// - Sets SR ("stream-right") on each note to the BPM betwen it and the previous note in the column to the right, if this column exists and is on the same hand
     /// For higher keymodes, SL and SR get the maximum value out of all left- and right-notes respectively
-    let calculate_note_ratings (rate: Rate, notes: TimeArray<NoteRow>) : NoteDifficulty array array =
-        let keys = notes.[0].Data.Length
+    let calculate_note_ratings (rate: Rate, note_data: NoteData) : NoteDifficulty array array =
+        let keys, notes = note_data.Keys, note_data.Notes
         let data = Array.init notes.Length (fun _ -> Array.zeroCreate keys)
         let hand_split = Layout.keys_on_left_hand keys
 
