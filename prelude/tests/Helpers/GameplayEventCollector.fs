@@ -7,7 +7,7 @@ open Prelude.Gameplay.Rulesets
 open Prelude.Gameplay.Scoring
 
 type GameplayEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
-    inherit GameplayEventProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
+    inherit GameplayEventProcessor(ruleset, replay, note_data, rate)
 
     let events = ResizeArray<GameplayEventInternal>()
 

@@ -62,10 +62,10 @@ type HoldState =
 /// These internal actions are then processed further by rulesets to calculate accuracy, combo, score, etc
 
 [<AbstractClass>]
-type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: TimeArray<NoteRow>, rate: Rate) =
-    inherit KeyPressReader(keys, replay)
+type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+    inherit KeyPressReader(note_data.Keys, replay)
 
-    let first_note = (TimeArray.first notes).Value.Time
+    let first_note = (TimeArray.first note_data.Notes).Value.Time
 
     let early_note_window_raw, late_note_window_raw = ruleset.NoteWindows
     let early_release_window_raw, late_release_window_raw = ruleset.ReleaseWindows
@@ -76,9 +76,9 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, n
     let early_window_scaled = min early_release_window_scaled early_note_window_scaled
     let late_window_scaled = max late_release_window_scaled late_note_window_scaled
 
-    let hold_states = Array.create keys (H_NOTHING, -1)
+    let hold_states = Array.create note_data.Keys (H_NOTHING, -1)
 
-    let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw keys notes
+    let hit_data = HitFlagData.create_gameplay late_note_window_raw late_release_window_raw note_data
 
     let hit_mechanics =
         match ruleset.HitMechanics.NotePriority with
@@ -174,7 +174,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, n
               && hit_data.[expired_notes_index].Time < end_of_search do
             let { Time = t; Data = struct(deltas, status) } = hit_data.[expired_notes_index]
 
-            for k = 0 to (keys - 1) do
+            for k = 0 to note_data.Keys - 1 do
 
                 if status.[k] = HitFlags.HIT_REQUIRED then
                     this.HandleEvent
@@ -395,7 +395,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, n
         while i < hit_data.Length && hit_data.[i].Time < time do
             let { Data = struct (deltas, flags) } = hit_data.[i]
 
-            for k = 0 to keys - 1 do
+            for k = 0 to note_data.Keys - 1 do
                 if flags.[k] = HitFlags.HIT_REQUIRED then
                     flags.[k] <- HitFlags.HIT_ACCEPTED
                 elif flags.[k] = HitFlags.HIT_HOLD_REQUIRED then
@@ -411,7 +411,7 @@ type GameplayEventProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, n
         while not hold_tails_remaining.IsEmpty do
             let { Data = struct (deltas, flags) } = hit_data.[i]
 
-            for k = 0 to keys - 1 do
+            for k = 0 to note_data.Keys - 1 do
                 if flags.[k] = HitFlags.RELEASE_REQUIRED then
                     flags.[k] <- HitFlags.RELEASE_ACCEPTED
                     hold_tails_remaining <- hold_tails_remaining.Remove(k)

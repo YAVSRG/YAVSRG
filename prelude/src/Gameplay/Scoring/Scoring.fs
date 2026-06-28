@@ -59,8 +59,8 @@ type GameplayEvent =
 /// These raw events are converted to judgements, points, combo changes etc according to the ruleset and then output as `GameplayEvent<GameplayAction>` event markers
 /// `GameplayEvent<GameplayAction>` event markers are subscribable and exposed as a list, they power everything the gameplay HUD, score screen and playfield display in the client
 
-type ScoreProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: TimeArray<NoteRow>, rate: Rate) =
-    inherit GameplayEventProcessor(ruleset, keys, replay, notes, rate)
+type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
+    inherit GameplayEventProcessor(ruleset, replay, note_data, rate)
 
     let hit_events = ResizeArray<GameplayEvent>()
 
@@ -119,11 +119,11 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: Ti
         | AccuracyPoints.PointsPerJudgement weights -> weights.[judgement]
         | _ -> failwith "Ruleset isn't using PointsPerJudgement + a feature that expects it to be used. This line should be unreachable if the ruleset was validated"
 
-    member val Duration : Time = (TimeArray.last notes).Value.Time - (TimeArray.first notes).Value.Time
+    member val Duration : Time = (TimeArray.last note_data.Notes).Value.Time - (TimeArray.first note_data.Notes).Value.Time
     member val JudgementCounts : int array = judgement_counts
     member val Rate : Rate = rate
-    member val Keys : int = keys
-    member val internal Notes : TimeArray<NoteRow> = notes
+    // todo: currently (only) used by the performance calculator, remove once calculator uses acc-only
+    member val internal NoteData : NoteData = note_data
 
     member this.Accuracy : float = if max_possible_points = 0.0 then 1.0 else points_scored / max_possible_points
     member this.FormattedAccuracy : string = ruleset.FormatAccuracy this.Accuracy
@@ -140,7 +140,7 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: Ti
     member this.OnEvent : IEvent<GameplayEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
-    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, keys, replay.GetFullReplay() |> StoredReplaySource, notes, rate)
+    member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
     member this.Recreate() = this.Recreate(ruleset)
 
     member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
@@ -361,10 +361,10 @@ type ScoreProcessor(ruleset: Ruleset, keys: int, replay: ReplaySource, notes: Ti
 module ScoreProcessor =
 
     let create (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
-        ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
+        ScoreProcessor(ruleset, replay, note_data, rate)
 
     let run (ruleset: Ruleset) (replay: ReplaySource) (note_data: NoteData) (rate: Rate) : ScoreProcessor =
-        let scoring = ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, rate)
+        let scoring = ScoreProcessor(ruleset, replay, note_data, rate)
         scoring.Update Time.infinity
         scoring
 

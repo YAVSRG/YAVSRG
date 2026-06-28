@@ -93,7 +93,7 @@ module RulesetOsuParityTests =
 
         let as_interlude_ruleset = OsuMania.create (float32 TEST_OSU_FILE.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(as_interlude_ruleset, TEST_CHART.Keys, StoredReplaySource(as_interlude_replay), TEST_CHART.Notes, 1.0f<rate>)
+        let score = ScoreProcessor(as_interlude_ruleset, StoredReplaySource(as_interlude_replay), TEST_CHART.ToNoteData(), 1.0f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
@@ -275,7 +275,7 @@ module RulesetOsuParityTests =
         let replay_data = OsuReplay.decode (TEST_REPLAY_FILE_2, TEST_CHART_2.FirstNote, 1.0f<rate>)
         let ruleset = OsuMania.create (float32 TEST_OSU_FILE_2.Difficulty.OverallDifficulty) OsuMania.NoMod
 
-        let score = ScoreProcessor(ruleset, TEST_CHART_2.Keys, StoredReplaySource(replay_data), TEST_CHART_2.Notes, 1.5f<rate>)
+        let score = ScoreProcessor(ruleset, StoredReplaySource(replay_data), TEST_CHART_2.ToNoteData(), 1.5f<rate>)
         score.Update Time.infinity
 
         let event_deltas =
@@ -438,7 +438,7 @@ module RulesetOsuParityTests =
 
             printfn "TRYING OD %.1f\n" od
 
-            let event_processing = ScoreProcessor(ruleset, note_data.Keys, replay, note_data.Notes, 1.0f<rate>)
+            let event_processing = ScoreProcessor(ruleset, replay, note_data, 1.0f<rate>)
             event_processing.Update Time.infinity
 
             let judgement_sequence =

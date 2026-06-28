@@ -62,17 +62,19 @@ module Performance =
                 on_standard_ruleset
             else
                 scoring
+                
+        let note_data = scoring.NoteData
 
         let timeline = acc_timeline rr scoring
         let scaled_notes =
             rr.NoteDifficulty
             |> Array.mapi (fun i nr -> Array.map (scale_note timeline.[i] rr.Variety.[i]) nr)
-        let strains = Strain.calculate_finger_strains (scoring.Rate, scoring.Notes) scaled_notes
+        let strains = Strain.calculate_finger_strains (scoring.Rate, note_data.Notes) scaled_notes
 
         let note_values =
             seq {
                 for i, s in Seq.indexed strains do
-                    for k = 0 to scoring.Keys - 1 do
+                    for k = 0 to note_data.Keys - 1 do
                         if rr.Strains.[i].NotesV1.[k] > 0.0f then
                             yield s.StrainV1Notes.[k]
             }
