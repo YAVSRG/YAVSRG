@@ -108,7 +108,7 @@ module Gameplay =
                         Stats.handle_score standardised_score improvement_flags Content.UserData
 
                 if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
-                    UserDatabase.SaveScore score_info.ChartMeta.Hash (score_info.ToScore()) Content.UserData
+                    Content.UserData.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
                     score_saved_ev.Trigger score_info
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
@@ -119,11 +119,11 @@ module Gameplay =
                             | None -> Bests.create standardised_score
                         save_data.PersonalBests <- Map.add SC_J4_HASH new_standard_bests save_data.PersonalBests
 
-                    UserDatabase.SaveChanges Content.UserData
+                    Content.UserData.SaveChanges()
                 improvement_flags, Some xp_gain
 
             elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
-                UserDatabase.SaveScore score_info.ChartMeta.Hash (score_info.ToScore()) Content.UserData
+                Content.UserData.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
                 score_saved_ev.Trigger score_info
                 ImprovementFlags.None, None
 
@@ -133,7 +133,7 @@ module Gameplay =
             ImprovementFlags.None, None
 
     let delete_score (score_info: ScoreInfo) =
-        if UserDatabase.DeleteScore score_info.ChartMeta.Hash score_info.TimePlayed Content.UserData then
+        if Content.UserData.DeleteScore(score_info.ChartMeta.Hash, score_info.TimePlayed) then
             score_deleted_ev.Trigger score_info.TimePlayed
             Notifications.action_feedback (Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
         else

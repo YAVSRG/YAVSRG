@@ -95,11 +95,11 @@ type private TreeChart(tree_ctx: TreeContext, group_name: string, group_ctx: Lib
             }
         | None -> None
 
-    let update_cached_info () =
+    let update_cached_info () : unit =
         last_cached_flag <- tree_ctx.CacheFlag
 
         if chart_save_data.IsNone then
-            chart_save_data <- Some(UserDatabase.GetChartData chart_meta.Hash Content.UserData)
+            chart_save_data <- Some(Content.UserData.GetChartData(chart_meta.Hash))
 
         match chart_save_data with
         | Some d when d.PersonalBests.ContainsKey Rulesets.current_hash ->

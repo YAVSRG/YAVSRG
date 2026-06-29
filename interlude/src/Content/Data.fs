@@ -19,7 +19,7 @@ module private Data =
 
     let deinit () : unit =
         if not (isNull (user_db :> obj)) then
-            UserDatabase.SaveChanges user_db
+            user_db.SaveChanges()
             Library.save library
 
     let charts_updated_ev = Event<unit>()

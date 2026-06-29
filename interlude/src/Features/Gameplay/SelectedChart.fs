@@ -151,7 +151,7 @@ module SelectedChart =
                         | Ok chart ->
 
                         Background.load chart_meta.Background.Path
-                        let save_data = UserDatabase.GetChartData chart_meta.Hash Content.UserData
+                        let save_data = Content.UserData.GetChartData(chart_meta.Hash)
 
                         yield
                             fun () ->
