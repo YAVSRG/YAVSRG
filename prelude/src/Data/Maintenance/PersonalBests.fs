@@ -25,7 +25,7 @@ module PersonalBests =
         async {
             let charts = chart_db.Entries |> Seq.toArray
             for i, chart_meta in Seq.indexed charts do
-                let data = UserDatabase.get_chart_data chart_meta.Hash user_db
+                let data = UserDatabase.GetChartData chart_meta.Hash user_db
 
                 if not data.Scores.IsEmpty then
                     match ChartDatabase.get_chart chart_meta.Hash chart_db with
@@ -55,6 +55,6 @@ module PersonalBests =
                         data.PersonalBests <- new_bests
                 progress (Processing (i + 1, charts.Length))
 
-            UserDatabase.save_changes user_db
+            UserDatabase.SaveChanges user_db
             progress Complete
         }

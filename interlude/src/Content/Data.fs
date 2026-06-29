@@ -15,11 +15,11 @@ module private Data =
     let init () : unit =
         library <- Library.load ()
         database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db")) // todo: rename to interlude.db
-        user_db <- UserDatabase.create true database
+        user_db <- UserDatabase.CreateFullyLoaded(database)
 
     let deinit () : unit =
         if not (isNull (user_db :> obj)) then
-            UserDatabase.save_changes user_db
+            UserDatabase.SaveChanges user_db
             Library.save library
 
     let charts_updated_ev = Event<unit>()

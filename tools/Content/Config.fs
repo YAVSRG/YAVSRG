@@ -67,6 +67,6 @@ module Config =
         let db_file = Path.Combine(get_game_folder "Data", "scores.db")
         if not (File.Exists db_file) then failwith "Couldn't find your interlude scores.db"
         let db = Database.from_file db_file
-        UserDatabase.create false db
+        UserDatabase.CreateLazyLoaded(db)
 
     let INTERLUDE_SKINS_PATH = Path.Combine(backbeat_config.InterludePath, "Skins")

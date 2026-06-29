@@ -14,7 +14,7 @@ let test() =
 
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
     let library = Library.load()
-    let user_db = UserDatabase.create true (Database.from_file "Data/scores.db")
+    let user_db = UserDatabase.CreateFullyLoaded(Database.from_file("Data/scores.db"))
 
     let sc_j4 = SC.create 4
     let sc_j4_id = Ruleset.hash sc_j4

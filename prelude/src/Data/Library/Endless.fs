@@ -104,7 +104,7 @@ module Suggestion =
             )
             |> Seq.filter (fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then
-                Seq.filter (fun (chart_meta, (rate, p)) -> now - (UserDatabase.get_chart_data chart_meta.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
+                Seq.filter (fun (chart_meta, (rate, p)) -> now - (UserDatabase.GetChartData chart_meta.Hash ctx.UserDatabase).LastPlayed > THIRTY_DAYS)
                else
                 id
             |> ctx.Filter.Apply

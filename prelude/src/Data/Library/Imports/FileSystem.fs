@@ -94,7 +94,7 @@ module Imports =
                             match ChartDatabase.get_meta before_hash chart_db with
                             | Some chart_meta -> ChartDatabase.delete chart_meta chart_db
                             | None -> ()
-                            if (UserDatabase.get_chart_data before_hash user_db).Scores.Length > 0 then
+                            if (UserDatabase.GetChartData before_hash user_db).Scores.Length > 0 then
                                 UserDatabase.transfer_scores before_hash after_hash user_db
                     { c with Chart = with_pruned_svs }
                 )

@@ -40,8 +40,8 @@ module Scores =
                 match OsuReplay.to_score replay chart original_osu_file_first_note original_osu_file_rate with
                 | Error reason -> Logging.Error "Error with replay '%s': %s" replay_file reason
                 | Ok score ->
-                    let existing_score_replaced = UserDatabase.delete_score chart_hash score.Timestamp user_db
-                    UserDatabase.save_score chart_hash score user_db
+                    let existing_score_replaced = UserDatabase.DeleteScore chart_hash score.Timestamp user_db
+                    UserDatabase.SaveScore chart_hash score user_db
 
                     result.Scores <- result.Scores + 1
                     if not existing_score_replaced then
