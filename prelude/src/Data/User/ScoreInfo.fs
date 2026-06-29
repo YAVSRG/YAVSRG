@@ -44,7 +44,7 @@ type ScoreInfo =
             this.Lamp <- Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
             this.Grade <- Grade.calculate ruleset.Grades scoring.Accuracy
 
-    member this.WithRuleset (ruleset: Ruleset) : ScoreInfo =
+    member this.WithRuleset(ruleset: Ruleset) : ScoreInfo =
         let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, this.Replay, this.WithMods, this.Rate)
 
         { this with
