@@ -108,7 +108,7 @@ module Gameplay =
                         Stats.handle_score standardised_score improvement_flags Content.UserData
 
                 if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
-                    UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
+                    UserDatabase.save_score score_info.ChartMeta.Hash (score_info.ToScore()) Content.UserData
                     score_saved_ev.Trigger score_info
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
@@ -123,7 +123,7 @@ module Gameplay =
                 improvement_flags, Some xp_gain
 
             elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
-                UserDatabase.save_score score_info.ChartMeta.Hash (ScoreInfo.to_score score_info) Content.UserData
+                UserDatabase.save_score score_info.ChartMeta.Hash (score_info.ToScore()) Content.UserData
                 score_saved_ev.Trigger score_info
                 ImprovementFlags.None, None
 

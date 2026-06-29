@@ -60,10 +60,19 @@ type ScoreInfo =
 
     member this.ModString() : string = ModState.format (this.Rate, this.Mods)
     member this.Shorthand : string = sprintf "%s | %s" this.Scoring.FormattedAccuracy (this.Ruleset.LampName this.Lamp)
-
-module ScoreInfo =
-
-    let from_score (chart_meta: ChartMeta) (chart: Chart) (ruleset: Ruleset) (score: Score) : ScoreInfo =
+    
+    member this.ToScore() : Score =
+        {
+            Timestamp = this.TimePlayed
+            Replay = this.Replay.ToByteArray()
+            Rate = this.Rate
+            Mods = this.Mods
+            IsImported = this.ImportedFromOsu
+            IsFailed = this.IsFailed
+            Keys = this.WithMods.Keys
+        }
+        
+    static member CreateFromScore(chart_meta: ChartMeta, chart: Chart, ruleset: Ruleset, score: Score) : ScoreInfo =
         let with_mods = ModState.apply score.Mods chart
         let replay = Replay.FromByteArray(score.Replay)
         let scoring = ScoreProcessor.ProcessEntireReplay(ruleset, replay, with_mods, score.Rate)
@@ -88,15 +97,4 @@ module ScoreInfo =
 
             ImportedFromOsu = score.IsImported
             IsFailed = score.IsFailed
-        }
-
-    let to_score (score_info: ScoreInfo) : Score =
-        {
-            Timestamp = score_info.TimePlayed
-            Replay = score_info.Replay.ToByteArray()
-            Rate = score_info.Rate
-            Mods = score_info.Mods
-            IsImported = score_info.ImportedFromOsu
-            IsFailed = score_info.IsFailed
-            Keys = score_info.WithMods.Keys
         }

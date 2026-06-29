@@ -179,7 +179,7 @@ module private ScoreList =
                         | Some chart_meta ->
                             match ChartDatabase.get_chart chart_hash Content.Charts with
                             | Ok chart ->
-                                let score_info = ScoreInfo.from_score chart_meta chart ruleset score
+                                let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset, score)
                                 yield fun () -> callback(Score(score_info))
                             | _ -> ()
                         | _ -> yield fun () -> callback(MissingScore())

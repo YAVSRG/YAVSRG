@@ -38,7 +38,7 @@ module PersonalBests =
 
                     for score in data.Scores do
                         let _, initial_ruleset = rulesets.[0]
-                        let score_info = ScoreInfo.from_score chart_meta chart initial_ruleset score
+                        let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, initial_ruleset, score)
 
                         if score_info.ModStatus = ModStatus.Ranked then
 

@@ -49,7 +49,7 @@ module Replay =
 
     let show_replay (played_by: string) (chart_meta: ChartMeta) (chart: Chart) (score: Score) : unit =
         let score_info =
-            { ScoreInfo.from_score chart_meta chart Rulesets.current score with
+            { ScoreInfo.CreateFromScore(chart_meta, chart, Rulesets.current, score) with
                 PlayedBy = ScorePlayedBy.Username played_by
             }
         SelectedChart.change(chart_meta, LibraryContext.None, true)
