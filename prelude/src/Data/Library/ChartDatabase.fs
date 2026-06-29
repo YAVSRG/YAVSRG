@@ -101,7 +101,7 @@ module ChartDatabase =
 
         | ImportAsset.Missing -> AssetPath.Missing
 
-    let import (imported_charts: ImportChart seq) (db: ChartDatabase) =
+    let import (imported_charts: ImportChart seq) (db: ChartDatabase) : unit =
         let already_moved = Dictionary<string, string>()
         let now = Timestamp.now()
 
@@ -128,18 +128,18 @@ module ChartDatabase =
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
 
-    let delete (chart_meta: ChartMeta) (db: ChartDatabase) =
+    let delete (chart_meta: ChartMeta) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
         db.Cache.Remove(chart_meta.Hash) |> ignore
         DbCharts.delete chart_meta.Hash db.Database |> ignore
 
-    let delete_many (cs: ChartMeta seq) (db: ChartDatabase) =
+    let delete_many (cs: ChartMeta seq) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
         let deleted =
             cs |> Seq.map (fun c -> db.Cache.Remove c.Hash |> ignore; c.Hash)
         DbCharts.delete_batch deleted db.Database |> ignore
 
-    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) =
+    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
         if packs.IsEmpty then
             delete chart_meta db
@@ -147,10 +147,10 @@ module ChartDatabase =
             db.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
         DbCharts.update_packs_batch [chart_meta.Hash, packs] db.Database
 
-    let delete_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) =
+    let delete_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
         change_packs chart_meta (chart_meta.Packs.Remove pack) db
 
-    let delete_many_from_pack (cs: ChartMeta seq) (pack: string) (db: ChartDatabase) =
+    let delete_many_from_pack (cs: ChartMeta seq) (pack: string) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
         let updated =
             seq {
@@ -173,7 +173,7 @@ module ChartDatabase =
 
     (* Loading operations & Migrations *)
 
-    let sqlite_vacuum (db: ChartDatabase) =
+    let sqlite_vacuum (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
         Database.exec_raw "VACUUM;" db.Database |> ignore
 
