@@ -7,7 +7,7 @@ open Prelude
 open Prelude.Gameplay.Replays
 
 module private UserDatabaseMigrations =
-    
+
     let migrate (db: Database) : Database =
         Database.migrate "AddScoresTable" (fun db -> DbScores.CREATE_TABLE.Execute () db |> expect |> ignore) db
         Database.migrate "AddChartDataTable" (fun db -> DbChartData.CREATE_TABLE.Execute () db |> expect |> ignore) db
@@ -32,10 +32,7 @@ module private UserDatabaseMigrations =
             (fun db -> DbScores.CREATE_TIMESTAMP_INDEX.Execute () db |> expect |> ignore)
             db
 
-        Database.migrate
-            "AddSingletons"
-            (fun db -> DbSingletons.CREATE_TABLE.Execute () db |> expect |> ignore)
-            db
+        Database.migrate "AddSingletons" (fun db -> DbSingletons.CREATE_TABLE.Execute () db |> expect |> ignore) db
 
         Database.migrate
             "AddSessions"
@@ -50,7 +47,9 @@ module private UserDatabaseMigrations =
             (fun db ->
                 Database.exec_raw """DELETE FROM SESSIONS WHERE Start = 0""" db
                 |> expect
-                |> function 0 -> () | n -> Logging.Debug "Removed %i sessions with Start set to 0L" n
+                |> function
+                    | 0 -> ()
+                    | n -> Logging.Debug "Removed %i sessions with Start set to 0L" n
             )
             db
 
@@ -88,7 +87,7 @@ type ChartSaveData(chart_id: string, data: DbChartData, db: UserDatabase) =
     let mutable comment = data.Comment
     let mutable breakpoints = data.Breakpoints
     let mutable personal_bests = data.PersonalBests
-    let mutable scores : Score list = []
+    let mutable scores: Score list = []
 
     // todo: add locks to protect from threads
 
@@ -126,8 +125,8 @@ type ChartSaveData(chart_id: string, data: DbChartData, db: UserDatabase) =
         with get () = scores
         and internal set v = scores <- v
 
-    member this.ScoreByTimestamp (timestamp: int64) : Score option =
-        scores |> List.tryFind (fun score -> score.Timestamp = timestamp)
+    member this.ScoreByTimestamp(timestamp: int64) : Score option =
+        scores |> List.tryFind(fun score -> score.Timestamp = timestamp)
 
 and UserDatabase =
     internal
@@ -145,25 +144,27 @@ and UserDatabase =
     member this.TryGetCachedChartData(chart_id: string) : ChartSaveData option =
         lock this.LockObject
         <| fun () ->
+
             match this.Cache.TryGetValue(chart_id) with
-            | true, res -> Some res
+            | true, data -> Some data
             | false, _ -> None
 
     member this.GetChartData(chart_id: string) : ChartSaveData =
         lock this.LockObject
         <| fun () ->
-            match this.TryGetCachedChartData(chart_id) with
-            | Some existing -> existing
-            | None ->
-                let new_info =
-                    // Only bother to load from db -> cache if we didn't already fast load everything the database had into cache
-                    if this.FastLoaded then
-                        ChartSaveData(chart_id, DbChartData.DEFAULT, this)
-                    else
-                        let chart_db_data: DbChartData = DbChartData.get chart_id this.Database
-                        let scores = DbScores.by_chart_id chart_id this.Database
-                        ChartSaveData(chart_id, chart_db_data, this, Scores = List.ofArray scores)
 
+            let inline fetch_chart_data () : ChartSaveData =
+                if this.FastLoaded then
+                    ChartSaveData(chart_id, DbChartData.DEFAULT, this)
+                else
+                    let chart_db_data: DbChartData = DbChartData.get chart_id this.Database
+                    let scores = DbScores.by_chart_id chart_id this.Database
+                    ChartSaveData(chart_id, chart_db_data, this, Scores = List.ofArray scores)
+
+            match this.TryGetCachedChartData(chart_id) with
+            | Some already_cached -> already_cached
+            | None ->
+                let new_info = fetch_chart_data()
                 this.Cache.[chart_id] <- new_info
                 new_info
 
@@ -174,56 +175,70 @@ and UserDatabase =
         DbChartData.save_breakpoints this.ChangedBreakpoints.Dump this.Database
         DbChartData.save_personal_bests this.ChangedPersonalBests.Dump this.Database
 
-    member this.SaveScore (chart_id: string, score: Score) : unit =
+    member this.SaveScore(chart_id: string, score: Score) : unit =
         lock this.LockObject
         <| fun () ->
+
             DbScores.save chart_id score this.Database
 
             match this.TryGetCachedChartData(chart_id) with
             | None -> ()
             | Some existing_data -> existing_data.Scores <- score :: existing_data.Scores
 
-    member this.DeleteScore (chart_id: string, timestamp: int64) : bool =
+    member this.SaveScore(score_info: ScoreInfo) : unit =
+        this.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
+
+    member this.DeleteScore(chart_id: string, timestamp: int64) : bool =
         lock this.LockObject
         <| fun () ->
-            if DbScores.delete_by_timestamp chart_id timestamp this.Database > 0 then
+
+            let inline remove_score_from_cache () =
                 match this.TryGetCachedChartData(chart_id) with
                 | None -> ()
                 | Some existing_data ->
-                    existing_data.Scores <- existing_data.Scores |> List.filter (fun s -> s.Timestamp <> timestamp)
+                    existing_data.Scores <- existing_data.Scores |> List.filter(fun s -> s.Timestamp <> timestamp)
 
+            if DbScores.delete_by_timestamp chart_id timestamp this.Database > 0 then
+                remove_score_from_cache()
                 true
             else
                 false
 
-    member this.GetScoresInTimeRange (start_time: int64, end_time: int64) : (string * Score) array =
+    member this.DeleteScore(score_info: ScoreInfo) : bool =
+        this.DeleteScore(score_info.ChartMeta.Hash, score_info.TimePlayed)
+
+    member this.GetScoresInTimeRange(start_time: int64, end_time: int64) : (string * Score) array =
         DbScores.get_between start_time end_time this.Database
 
-    member this.TransferScores (source_hash: string, target_hash: string) : unit =
-        lock this.LockObject <| fun () ->
-        let before_scores = this.GetChartData(source_hash)
-        let after_scores = this.GetChartData(target_hash)
-        after_scores.Scores <- before_scores.Scores @ after_scores.Scores
-        this.Cache.Remove(source_hash) |> ignore
-        let succeeded = DbScores.transfer source_hash target_hash this.Database
-        Logging.Debug "Moved %i scores from '%s' to '%s'" succeeded source_hash target_hash
+    member this.TransferScores(source_hash: string, target_hash: string) : unit =
+        lock this.LockObject
+        <| fun () ->
 
-        
+            let before_scores = this.GetChartData(source_hash)
+            let after_scores = this.GetChartData(target_hash)
+            after_scores.Scores <- before_scores.Scores @ after_scores.Scores
+            this.Cache.Remove(source_hash) |> ignore
+            let succeeded = DbScores.transfer source_hash target_hash this.Database
+            Logging.Debug "Moved %i scores from '%s' to '%s'" succeeded source_hash target_hash
+
     // Pre-loads the contents of the db into memory (used by game client)
     static member CreateFullyLoaded(database: Database) : UserDatabase =
+
         let inline fast_load_charts (user_db: UserDatabase) : unit =
             for chart_id, chart_db_data in DbChartData.fast_load user_db.Database do
                 user_db.Cache.Add(chart_id, ChartSaveData(chart_id, chart_db_data, user_db))
-                
+
         let inline fast_load_scores (user_db: UserDatabase) : unit =
             let default_db_data = DbChartData.DEFAULT
 
             for chart_id, scores in DbScores.fast_load user_db.Database do
                 match user_db.TryGetCachedChartData(chart_id) with
                 | Some existing -> existing.Scores <- scores
-                | None -> user_db.Cache.Add(chart_id, ChartSaveData(chart_id, default_db_data, user_db, Scores = scores))
-                
+                | None ->
+                    user_db.Cache.Add(chart_id, ChartSaveData(chart_id, default_db_data, user_db, Scores = scores))
+
         let migrated_database = UserDatabaseMigrations.migrate(database)
+
         let user_db =
             {
                 Database = migrated_database
@@ -236,14 +251,16 @@ and UserDatabase =
                 ChangedPersonalBests = ChangeTracker.Empty
                 FastLoaded = true
             }
+
         fast_load_charts(user_db)
         fast_load_scores(user_db)
         user_db
-        
+
 
     // Scores, chart offsets, etc are fetched from the database on-demand and cached after first retrieval
     static member CreateLazyLoaded(database: Database) : UserDatabase =
         let migrated_database = UserDatabaseMigrations.migrate(database)
+
         {
             Database = migrated_database
             Cache = Dictionary()

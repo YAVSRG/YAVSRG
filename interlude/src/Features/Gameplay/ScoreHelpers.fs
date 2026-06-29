@@ -30,7 +30,7 @@ module Gameplay =
     let private leaderboard_rank_changed_ev = Event<ScoreInfo>()
     let leaderboard_rank_changed = leaderboard_rank_changed_ev.Publish
 
-    let upload_score (score_info: ScoreInfo) =
+    let upload_score (score_info: ScoreInfo) : unit =
         Charts.Scores.Save.post (
             {
                 ChartId = score_info.ChartMeta.Hash
@@ -108,8 +108,8 @@ module Gameplay =
                         Stats.handle_score standardised_score improvement_flags Content.UserData
 
                 if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
-                    Content.UserData.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
-                    score_saved_ev.Trigger score_info
+                    Content.UserData.SaveScore(score_info)
+                    score_saved_ev.Trigger(score_info)
                     save_data.PersonalBests <- Map.add Rulesets.current_hash new_bests save_data.PersonalBests
 
                     if Rulesets.current_hash <> SC_J4_HASH then
@@ -123,8 +123,8 @@ module Gameplay =
                 improvement_flags, Some xp_gain
 
             elif (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) then
-                Content.UserData.SaveScore(score_info.ChartMeta.Hash, score_info.ToScore())
-                score_saved_ev.Trigger score_info
+                Content.UserData.SaveScore(score_info)
+                score_saved_ev.Trigger(score_info)
                 ImprovementFlags.None, None
 
             else
@@ -132,9 +132,9 @@ module Gameplay =
         else
             ImprovementFlags.None, None
 
-    let delete_score (score_info: ScoreInfo) =
-        if Content.UserData.DeleteScore(score_info.ChartMeta.Hash, score_info.TimePlayed) then
-            score_deleted_ev.Trigger score_info.TimePlayed
+    let delete_score (score_info: ScoreInfo) : unit =
+        if Content.UserData.DeleteScore(score_info) then
+            score_deleted_ev.Trigger(score_info.TimePlayed)
             Notifications.action_feedback (Icons.TRASH, [ score_info.Shorthand ] %> "notification.deleted", "")
         else
             Logging.Debug("Couldn't find score matching timestamp to delete")
