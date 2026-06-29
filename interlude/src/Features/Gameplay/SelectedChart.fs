@@ -132,7 +132,7 @@ module SelectedChart =
                 match req with
                 | Load(chart_meta, play_audio, rate, mods) ->
                     seq {
-                        match ChartDatabase.get_chart chart_meta.Hash Content.Charts with
+                        match Content.Charts.GetChart(chart_meta.Hash) with
                         | Error reason ->
 
                             Logging.Error "Couldn't load chart: %s" reason
@@ -412,7 +412,7 @@ module SelectedChart =
 
     let init () =
 
-        match ChartDatabase.get_meta options.CurrentChart.Value Content.Charts with
+        match Content.Charts.GetChartMeta(options.CurrentChart.Value) with
         | Some chart_meta -> change (chart_meta, LibraryContext.None, true)
         | None ->
             match

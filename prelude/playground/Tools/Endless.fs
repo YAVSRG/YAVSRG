@@ -55,10 +55,14 @@ let test() =
         | None -> Logging.Info("Nothing found :("); loop <- false
         | Some next ->
             suggestion_ctx <- next.NextContext
-            printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.Chart.Artist next.Chart.Title next.Chart.DifficultyName next.Chart.Creator next.Rate
+            printfn "Next chart: %s - %s [%s] by %s ON RATE %.2f" next.ChartMeta.Artist next.ChartMeta.Title next.
+                                                                                                                 ChartMeta
+                                                                                                                 .DifficultyName next.
+                                                                                                                                     ChartMeta
+                                                                                                                                     .Creator next.Rate
 
             printfn ""
-            match ChartDatabase.get_chart next.Chart.Hash library.Charts with
+            match library.Charts.GetChart(next.ChartMeta.Hash) with
             | Ok chart ->
-                printfn "This is classed as: %A [%.2f]" next.Chart.Patterns.Category (Difficulty.calculate(1.0f<rate>, chart.ToNoteData()).Overall)
+                printfn "This is classed as: %A [%.2f]" next.ChartMeta.Patterns.Category (Difficulty.calculate(1.0f<rate>, chart.ToNoteData()).Overall)
             | Error _ -> ()

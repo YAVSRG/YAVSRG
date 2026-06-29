@@ -15,7 +15,7 @@ module Patterns =
             seq {
                 let charts = chart_db.Entries |> Seq.toArray
                 for i, entry in Seq.indexed charts do
-                    match ChartDatabase.get_chart entry.Hash chart_db with
+                    match chart_db.GetChart(entry.Hash) with
                     | Ok chart ->
                         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
                         yield entry.Hash, difficulty.Overall, PatternReport.from_chart (difficulty, chart)

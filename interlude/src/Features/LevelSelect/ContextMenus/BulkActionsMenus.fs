@@ -38,7 +38,7 @@ module BulkActions =
                 let loaded_charts =
                     seq {
                         for chart_meta, _ in charts do
-                            yield ChartDatabase.get_chart chart_meta.Hash Content.Library.Charts, chart_meta
+                            yield Content.Library.Charts.GetChart(chart_meta.Hash), chart_meta
                     }
                 OsuExport.bulk_export loaded_charts options
         )

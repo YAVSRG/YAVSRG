@@ -22,31 +22,29 @@ type ChartDatabase =
         }
     member this.Entries = this.Cache.Values
 
-module ChartDatabase =
+    member this.GetChart(chart_id: string) : Result<Chart, string> =
+        DbCharts.get_chart chart_id this.Database
 
-    (* Retrieval operations *)
-
-    let get_chart (chart_id: string) (db: ChartDatabase) : Result<Chart, string> =
-        DbCharts.get_chart chart_id db.Database
-
-    let get_meta_cached (chart_id: string) (db: ChartDatabase) : ChartMeta option =
-        match db.Cache.TryGetValue chart_id with
+    member this.TryGetCachedChartMeta(chart_id: string) : ChartMeta option =
+        match this.Cache.TryGetValue chart_id with
         | true, v -> Some v
         | false, _ -> None
 
-    let get_meta (chart_id: string) (db: ChartDatabase) : ChartMeta option =
-        lock db.LockObject
-        <| fun () ->
-            match get_meta_cached chart_id db with
-            | Some existing -> Some existing
-            | None ->
-                if db.FastLoaded then None
-                else
-                    match DbCharts.get_meta chart_id db.Database with
-                    | Some chart_meta ->
-                        db.Cache.[chart_id] <- chart_meta
-                        Some chart_meta
-                    | None -> None
+    member this.GetChartMeta(chart_id: string) : ChartMeta option =
+        lock this.LockObject <| fun () ->
+            
+        let inline fetch_chart_meta() : ChartMeta option =
+            match DbCharts.get_meta chart_id this.Database with
+            | Some chart_meta ->
+                this.Cache.[chart_id] <- chart_meta
+                Some chart_meta
+            | None -> None
+            
+        match this.TryGetCachedChartMeta(chart_id) with
+        | Some existing -> Some existing
+        | None -> if this.FastLoaded then None else fetch_chart_meta()
+
+module ChartDatabase =
 
     (* Insertion operations *)
 
@@ -119,7 +117,7 @@ module ChartDatabase =
 
                         if accept_updated_chart then incoming_chart, merged_chart_meta
                         else
-                            match get_chart incoming_meta.Hash db with
+                            match db.GetChart(incoming_meta.Hash) with
                             | Error _ -> incoming_chart, merged_chart_meta
                             | Ok existing_chart -> existing_chart, merged_chart_meta
 

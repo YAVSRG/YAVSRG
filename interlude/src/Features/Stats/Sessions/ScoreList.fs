@@ -175,9 +175,9 @@ module private ScoreList =
             member this.Process((start_time, end_time, ruleset, callback, callback_when_done)) =
                 seq {
                     for chart_hash, score in Content.UserData.GetScoresInTimeRange(start_time, end_time) do
-                        match ChartDatabase.get_meta_cached chart_hash Content.Charts with
+                        match Content.Charts.TryGetCachedChartMeta(chart_hash) with
                         | Some chart_meta ->
-                            match ChartDatabase.get_chart chart_hash Content.Charts with
+                            match Content.Charts.GetChart(chart_hash) with
                             | Ok chart ->
                                 let score_info = ScoreInfo.CreateFromScore(chart_meta, chart, ruleset, score)
                                 yield fun () -> callback(Score(score_info))

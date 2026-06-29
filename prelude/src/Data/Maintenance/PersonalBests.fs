@@ -28,7 +28,7 @@ module PersonalBests =
                 let data = user_db.GetChartData(chart_meta.Hash)
 
                 if not data.Scores.IsEmpty then
-                    match ChartDatabase.get_chart chart_meta.Hash chart_db with
+                    match chart_db.GetChart(chart_meta.Hash) with
                     | Error reason ->
                         Logging.Debug "Couldn't load '%s' for pb processing: %s" chart_meta.Hash reason
                     | Ok chart ->

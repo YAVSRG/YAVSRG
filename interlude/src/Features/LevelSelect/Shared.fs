@@ -94,7 +94,7 @@ module LevelSelect =
             LevelSelectHistory.append_current()
             SelectedChart._rate.Set next.Rate
             SelectedChart._selected_mods.Set next.Mods
-            SelectedChart.change (next.Chart, next.LibraryContext, false)
+            SelectedChart.change (next.ChartMeta, next.LibraryContext, false)
             SelectedChart.when_loaded true (fun info -> play info)
             suggestion_ctx <- Some next.NextContext
             true

@@ -31,7 +31,7 @@ module LibraryView =
 
             collection.Charts
             |> Seq.choose (fun entry ->
-                match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
+                match ctx.Library.Charts.GetChartMeta(entry.Hash) with
                 | Some chart_meta -> Some(chart_meta, LibraryContext.Folder name)
                 | None -> None
             )
@@ -55,7 +55,7 @@ module LibraryView =
             playlist.Charts
             |> Seq.indexed
             |> Seq.choose (fun (i, (entry, info)) ->
-                match ChartDatabase.get_meta entry.Hash ctx.Library.Charts with
+                match ctx.Library.Charts.GetChartMeta(entry.Hash) with
                 | Some chart_meta -> Some(chart_meta, LibraryContext.Playlist(i, name, info))
                 | None -> None
             )
@@ -73,7 +73,7 @@ module LibraryView =
 
         let liked_songs : Group option =
             ctx.Library.Collections.EnumerateLikes
-            |> Seq.choose (fun chart_id -> ChartDatabase.get_meta chart_id ctx.Library.Charts)
+            |> Seq.choose ctx.Library.Charts.GetChartMeta
             |> filter_by.Apply
             |> Seq.sortBy (fun chart_meta -> sort_by (chart_meta, ctx))
             |> if reverse_sorting then Seq.rev else id
@@ -112,7 +112,7 @@ module LibraryView =
         for level, charts in table.Charts |> Seq.groupBy (fun x -> x.Level) do
             charts
             |> Seq.choose (fun (c: TableChart) ->
-                match ChartDatabase.get_meta c.Hash ctx.Library.Charts with
+                match ctx.Library.Charts.GetChartMeta(c.Hash) with
                 | Some chart_meta -> Some(chart_meta, LibraryContext.Table level)
                 | None -> None
             )

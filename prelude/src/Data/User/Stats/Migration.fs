@@ -21,7 +21,7 @@ module private Migration =
 
         let first_score_length =
             if scores.Length = 0 then 0L else
-            match ChartDatabase.get_meta (fst scores.[0]) library.Charts with
+            match library.Charts.GetChartMeta(fst scores.[0]) with
             | Some chart_meta -> chart_meta.Length / (snd scores.[0]).Rate |> int64
             | None -> 2L * 60L * 1000L
 
@@ -34,7 +34,7 @@ module private Migration =
             for chart_id, score in scores do
 
                 let score_length =
-                    match ChartDatabase.get_meta chart_id library.Charts with
+                    match library.Charts.GetChartMeta(chart_id) with
                     | Some chart_meta ->
                         session_playing_time <- session_playing_time + chart_meta.Length / score.Rate
                         chart_meta.Length / score.Rate |> int64
@@ -118,7 +118,7 @@ module private Migration =
             |> Array.ofSeq
 
         let length_of_score (score: struct {| ChartId: string; Score: Score |}) =
-            match ChartDatabase.get_meta score.ChartId library.Charts with
+            match library.Charts.GetChartMeta(score.ChartId) with
             | Some chart_meta -> chart_meta.Length / score.Score.Rate |> float
             | None -> 123056.0
 

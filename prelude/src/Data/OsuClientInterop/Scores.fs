@@ -102,7 +102,7 @@ module Scores =
                 match Map.tryFind beatmap_score_data.Hash interlude_db_map with
                 | Some (interlude_hash, original_osu_file_first_note, original_osu_file_rate) ->
 
-                    match ChartDatabase.get_chart interlude_hash chart_db with
+                    match chart_db.GetChart(interlude_hash) with
                     | Error reason -> Logging.Error "Error loading chart '%s': %s" interlude_hash reason
                     | Ok chart ->
 

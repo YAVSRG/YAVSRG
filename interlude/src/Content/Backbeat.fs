@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Data.Library
 open Prelude.Data.Library.Imports
 open Interlude.Web.Shared.Requests
 
@@ -13,7 +12,7 @@ module Backbeat =
         { new Async.Queue<string * string, bool>() with
             override _.Handle((chart_id, folder_name)) =
                 async {
-                    match ChartDatabase.get_meta chart_id Content.Charts with
+                    match Content.Charts.GetChartMeta(chart_id) with
                     | Some _ -> return true
                     | None ->
 

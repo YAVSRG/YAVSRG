@@ -217,7 +217,7 @@ module Upload =
         seq {
             for chart_meta in interlude_chart_db.Entries |> Seq.where (fun meta -> meta.Packs.Contains folder_name) do
                 async {
-                    match ChartDatabase.get_chart chart_meta.Hash interlude_chart_db with
+                    match interlude_chart_db.GetChart(chart_meta.Hash) with
                     | Ok chart ->
                         match! upload_chart chart_meta chart with
                         | Ok () -> Logging.Debug "Uploaded '%s'" chart_meta.Title
