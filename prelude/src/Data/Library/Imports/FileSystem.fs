@@ -92,13 +92,13 @@ module Imports =
                         let after_hash = Chart.hash with_pruned_svs
                         if before_hash <> after_hash then
                             match chart_db.GetChartMeta(before_hash) with
-                            | Some chart_meta -> ChartDatabase.delete chart_meta chart_db
+                            | Some chart_meta -> chart_db.Delete(chart_meta)
                             | None -> ()
                             if user_db.GetChartData(before_hash).Scores.Length > 0 then
                                 user_db.TransferScores(before_hash, after_hash)
                     { c with Chart = with_pruned_svs }
                 )
-            ChartDatabase.import charts chart_db
+            chart_db.Import(charts)
             return {
                 ConvertedCharts = success_count
                 SkippedCharts = filtered |> List.choose (function Error skipped -> Some skipped | _ -> None)

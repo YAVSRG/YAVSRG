@@ -99,5 +99,5 @@ module Mount =
         }
 
     let delete_linked_charts (source: MountedChartSource, chart_db: ChartDatabase) : unit =
-        let charts = find_linked_charts (source, chart_db)
-        ChartDatabase.delete_many charts chart_db
+        let charts = find_linked_charts(source, chart_db)
+        chart_db.Delete(charts)

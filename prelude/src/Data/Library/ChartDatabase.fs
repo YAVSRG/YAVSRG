@@ -44,14 +44,10 @@ type ChartDatabase =
         | Some existing -> Some existing
         | None -> if this.FastLoaded then None else fetch_chart_meta()
 
-module ChartDatabase =
+    member this.PathToAsset(hash: string) : string =
+        Path.Combine(this.AssetsPath, hash.Substring(0, 2), hash)
 
-    (* Insertion operations *)
-
-    let asset_path (hash: string) (db: ChartDatabase) : string =
-        Path.Combine(db.AssetsPath, hash.Substring(0, 2), hash)
-
-    let inline internal hash_and_store_asset (file_path: string) (db: ChartDatabase) : string =
+    member this.HashAndStoreAsset(file_path: string) : string =
         
         let inline compute_asset_hash (file_path: string) : string =
             use stream = File.OpenRead(file_path)
@@ -61,7 +57,7 @@ module ChartDatabase =
             
         let hash = compute_asset_hash(file_path)
         
-        let target_folder = Path.Combine(db.AssetsPath, hash.Substring(0, 2))
+        let target_folder = Path.Combine(this.AssetsPath, hash.Substring(0, 2))
         let target_path = Path.Combine(target_folder, hash)
         
         Directory.CreateDirectory(target_folder) |> ignore
@@ -70,7 +66,7 @@ module ChartDatabase =
 
         hash
 
-    let import (imported_charts: ImportChart seq) (db: ChartDatabase) : unit =
+    member this.Import(imported_charts: ImportChart seq) : unit =
 
         let already_moved = Dictionary<string, string>()
         let inline copy_asset (absolute_path: string) : AssetPath =
@@ -78,7 +74,7 @@ module ChartDatabase =
                 AssetPath.Hash already_moved.[absolute_path]
                 
             elif File.Exists(absolute_path) then
-                let hash = hash_and_store_asset(absolute_path) db
+                let hash = this.HashAndStoreAsset(absolute_path)
                 already_moved.[absolute_path] <- hash
                 AssetPath.Hash hash
                 
@@ -97,7 +93,7 @@ module ChartDatabase =
             | ImportAsset.Missing -> AssetPath.Missing
             
         let inline merge_incoming_chart_with_existing (incoming_chart: Chart, incoming_meta: ChartMeta) : Chart * ChartMeta =
-            match db.Cache.TryGetValue(incoming_meta.Hash) with
+            match this.Cache.TryGetValue(incoming_meta.Hash) with
             | false, _ -> incoming_chart, incoming_meta
             | true, existing_meta ->
                 
@@ -105,7 +101,7 @@ module ChartDatabase =
                     incoming_meta.MergeWithExisting(existing_meta)
 
                 if existing_takes_priority then
-                    match db.GetChart(incoming_meta.Hash) with
+                    match this.GetChart(incoming_meta.Hash) with
                     | Error _ -> incoming_chart, merged_meta
                     | Ok existing_chart -> existing_chart, merged_meta
                     
@@ -113,7 +109,7 @@ module ChartDatabase =
 
         let now = Timestamp.now()
 
-        lock db.LockObject <| fun () ->
+        lock this.LockObject <| fun () ->
         seq {
             for import_chart in imported_charts do
                 let incoming_meta = ChartMeta.CreateFromImport now import_asset import_chart
@@ -122,55 +118,61 @@ module ChartDatabase =
                 let accepted_chart, accepted_meta =
                     merge_incoming_chart_with_existing(incoming_chart, incoming_meta)
 
-                db.Cache.[accepted_meta.Hash] <- accepted_meta
+                this.Cache.[accepted_meta.Hash] <- accepted_meta
                 yield accepted_meta, accepted_chart
         }
-        |> fun charts -> DbCharts.save_batch charts db.Database
+        |> fun charts -> DbCharts.save_batch charts this.Database
 
-    let delete (chart_meta: ChartMeta) (db: ChartDatabase) : unit =
-        lock db.LockObject <| fun () ->
+    member this.Delete(chart_meta: ChartMeta) : unit =
+        lock this.LockObject <| fun () ->
             
-        db.Cache.Remove(chart_meta.Hash) |> ignore
-        DbCharts.delete chart_meta.Hash db.Database |> ignore
+        this.Cache.Remove(chart_meta.Hash) |> ignore
+        DbCharts.delete chart_meta.Hash this.Database |> ignore
 
-    let delete_many (chart_metas: ChartMeta seq) (db: ChartDatabase) : unit =
-        lock db.LockObject <| fun () ->
+    member this.Delete(chart_metas: ChartMeta seq) : unit =
+        lock this.LockObject <| fun () ->
             
         for chart_meta in chart_metas do
-            db.Cache.Remove chart_meta.Hash |> ignore
+            this.Cache.Remove chart_meta.Hash |> ignore
             
-        DbCharts.delete_batch (Seq.map _.Hash chart_metas) db.Database |> ignore
+        DbCharts.delete_batch (Seq.map _.Hash chart_metas) this.Database |> ignore
 
-    let inline internal change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) : unit =
-        lock db.LockObject <| fun () ->
+    member private this.ChangePacks(chart_meta: ChartMeta, packs: Set<string>) : unit =
+        lock this.LockObject <| fun () ->
             
-        if packs.IsEmpty then delete chart_meta db
-        else db.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
+        if packs.IsEmpty then this.Delete(chart_meta)
+        else
+            this.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
+            DbCharts.update_packs_batch [chart_meta.Hash, packs] this.Database
         
-        DbCharts.update_packs_batch [chart_meta.Hash, packs] db.Database
-        
-    let add_to_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
-        change_packs chart_meta (chart_meta.Packs.Add pack) db
+    member this.AddToPack(chart_meta: ChartMeta, pack: string) : unit =
+        this.ChangePacks(chart_meta, chart_meta.Packs.Add(pack))
 
-    let remove_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
-        change_packs chart_meta (chart_meta.Packs.Remove pack) db
+    member this.RemoveFromPack(chart_meta: ChartMeta, pack: string) : unit =
+        this.ChangePacks(chart_meta, chart_meta.Packs.Remove(pack))
 
-    let remove_many_from_pack (chart_metas: ChartMeta seq) (pack: string) (db: ChartDatabase) : unit =
-        lock db.LockObject <| fun () ->
+    member this.RemoveFromPack(chart_metas: ChartMeta seq, pack: string) : unit =
+        lock this.LockObject <| fun () ->
             
         let still_in_packs = ResizeArray<string * Set<string>>()
         let now_in_no_packs = ResizeArray<string>()
         
         for chart_meta in chart_metas do
             let remaining_packs = chart_meta.Packs.Remove(pack)
+            
             if remaining_packs.IsEmpty then
+                this.Cache.Remove(chart_meta.Hash) |> ignore
                 now_in_no_packs.Add(chart_meta.Hash)
+                
             else
+                this.Cache.[chart_meta.Hash] <- { chart_meta with Packs = remaining_packs }
                 still_in_packs.Add(chart_meta.Hash, remaining_packs)
                 
-        DbCharts.update_packs_batch still_in_packs db.Database
-        DbCharts.delete_batch now_in_no_packs db.Database |> ignore
+        DbCharts.update_packs_batch still_in_packs this.Database
+        DbCharts.delete_batch now_in_no_packs this.Database |> ignore
 
+module ChartDatabase =
+    
     (* Loading operations & Migrations *)
 
     let sqlite_vacuum (db: ChartDatabase) : unit =

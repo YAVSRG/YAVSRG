@@ -126,7 +126,7 @@ module OnlineImports =
                         return Error (sprintf "Hash mismatch: '%s' expected vs '%s' actual" hash actual_hash)
                     else
 
-                    if File.Exists(ChartDatabase.asset_path chart.BackgroundHash chart_db) |> not then
+                    if File.Exists(chart_db.PathToAsset(chart.BackgroundHash)) |> not then
 
                         let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundHash)
 
@@ -139,7 +139,7 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading background '%s'" chart.BackgroundHash
 
-                        let actual_bg_hash = ChartDatabase.hash_and_store_asset bg_path chart_db
+                        let actual_bg_hash = chart_db.HashAndStoreAsset(bg_path)
                         
                         if chart.BackgroundHash <> actual_bg_hash then
                             failwithf
@@ -147,7 +147,7 @@ module OnlineImports =
                                 actual_bg_hash
                                 chart.BackgroundHash
 
-                    if File.Exists(ChartDatabase.asset_path chart.AudioHash chart_db) |> not then
+                    if File.Exists(chart_db.PathToAsset(chart.AudioHash)) |> not then
 
                         let audio_path = Path.Combine(get_game_folder "Downloads", chart.AudioHash)
 
@@ -160,12 +160,12 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading audio '%s'" chart.BackgroundHash
 
-                        let actual_audio_hash = ChartDatabase.hash_and_store_asset audio_path chart_db
+                        let actual_audio_hash = chart_db.HashAndStoreAsset(audio_path)
                         
                         if chart.AudioHash <> actual_audio_hash then
                             failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioHash
 
-                    ChartDatabase.import [{ PackName = folder; LoadedFromPath = ""; Header = header; Chart = chart_data }] chart_db
+                    chart_db.Import([{ PackName = folder; LoadedFromPath = ""; Header = header; Chart = chart_data }])
                     return Ok()
             with err ->
                 // todo: specific exception type for asset errors, handle uncaught exceptions differently

@@ -40,7 +40,7 @@ module Vacuum =
             if delete_missing_audio && to_delete.Count > 0 then
                 progress (Generic "Deleting charts without audio")
                 Logging.Debug "Found %i charts with misplaced audio files, deleting them..." to_delete.Count
-                ChartDatabase.delete_many to_delete chart_db
+                chart_db.Delete(to_delete)
 
             if asset_hashes.Count > 0 then
                 progress (Generic "Deleting unused assets")
@@ -48,8 +48,8 @@ module Vacuum =
                 let mutable bytes_freed = 0L
                 let mutable files_freed = 0
 
-                for h in asset_hashes do
-                    let path = ChartDatabase.asset_path h chart_db
+                for hash in asset_hashes do
+                    let path = chart_db.PathToAsset(hash)
                     try
                         let info = FileInfo(path)
                         let length = info.Length
