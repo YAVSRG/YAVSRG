@@ -47,7 +47,7 @@ module Upload =
         let chart_hash = Chart.hash chart
 
         match chart_meta.Background, chart_meta.Audio with
-        | AssetPath.Hash background_hash, AssetPath.Hash audio_hash ->
+        | AssetLocation.Hash background_hash, AssetLocation.Hash audio_hash ->
             let upload_notes =
                 task {
                         let file_name = chart_hash
@@ -122,14 +122,14 @@ module Upload =
         | _ ->  async { return Error "Chart is not part of cache/not using hashed assets mode" }
 
     let create_backbeat_data (chart_meta: ChartMeta) (chart: Chart) : Result<BackbeatChart * BackbeatSong, string> =
-        if chart_meta.Audio = AssetPath.Missing then
+        if chart_meta.Audio = AssetLocation.Missing then
             Error "Missing audio file"
-        elif chart_meta.Background = AssetPath.Missing then
+        elif chart_meta.Background = AssetLocation.Missing then
             Error "Missing background image"
         else
 
         match chart_meta.Audio, chart_meta.Background with
-        | AssetPath.Hash audio_hash, AssetPath.Hash background_hash ->
+        | AssetLocation.Hash audio_hash, AssetLocation.Hash background_hash ->
             if chart_meta.Length < 30000.0f<ms> then
                 Error "Chart is too short"
             else
@@ -210,7 +210,7 @@ module Upload =
     let has_folder (folder_name: string) =
         interlude_chart_db.Entries
         |> Seq.where (fun meta -> meta.Packs.Contains folder_name)
-        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetPath.Hash _ -> true | _ -> false)
+        |> Seq.map (fun meta -> meta.Origins |> Set.exists _.SuitableForUpload && match meta.Audio with AssetLocation.Hash _ -> true | _ -> false)
         |> fun s -> not (Seq.isEmpty s) && Seq.forall id s
 
     let upload_folder (folder_name: string) =

@@ -30,11 +30,11 @@ module Vacuum =
                     | _ -> ()
 
                 match entry.Audio with
-                | AssetPath.Hash h -> asset_hashes.Remove h |> ignore
+                | AssetLocation.Hash h -> asset_hashes.Remove h |> ignore
                 | _ -> ()
 
                 match entry.Background with
-                | AssetPath.Hash h -> asset_hashes.Remove h |> ignore
+                | AssetLocation.Hash h -> asset_hashes.Remove h |> ignore
                 | _ -> ()
 
             if delete_missing_audio && to_delete.Count > 0 then

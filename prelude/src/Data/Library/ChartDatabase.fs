@@ -69,28 +69,28 @@ type ChartDatabase =
     member this.Import(imported_charts: ImportChart seq) : unit =
 
         let already_moved = Dictionary<string, string>()
-        let inline copy_asset (absolute_path: string) : AssetPath =
+        let inline copy_asset (absolute_path: string) : AssetLocation =
             if already_moved.ContainsKey(absolute_path) then
-                AssetPath.Hash already_moved.[absolute_path]
+                AssetLocation.Hash already_moved.[absolute_path]
                 
             elif File.Exists(absolute_path) then
                 let hash = this.HashAndStoreAsset(absolute_path)
                 already_moved.[absolute_path] <- hash
-                AssetPath.Hash hash
+                AssetLocation.Hash hash
                 
             else
-                AssetPath.Missing
+                AssetLocation.Missing
         
-        let inline import_asset (asset: ImportAsset) : AssetPath =
+        let inline import_asset (asset: ImportAsset) : AssetLocation =
             match asset with
             | ImportAsset.Copy absolute_path -> copy_asset(absolute_path)
             
             | ImportAsset.Link absolute_path ->
-                if File.Exists(absolute_path) then AssetPath.Absolute(absolute_path)
-                else AssetPath.Missing
+                if File.Exists(absolute_path) then AssetLocation.Absolute(absolute_path)
+                else AssetLocation.Missing
 
-            | ImportAsset.Download hash -> AssetPath.Hash hash
-            | ImportAsset.Missing -> AssetPath.Missing
+            | ImportAsset.Download hash -> AssetLocation.Hash hash
+            | ImportAsset.Missing -> AssetLocation.Missing
             
         let inline merge_incoming_chart_with_existing (incoming_chart: Chart, incoming_meta: ChartMeta) : Chart * ChartMeta =
             match this.Cache.TryGetValue(incoming_meta.Hash) with

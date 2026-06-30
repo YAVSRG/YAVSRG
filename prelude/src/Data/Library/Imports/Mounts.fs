@@ -93,7 +93,7 @@ module Mount =
         seq {
             for chart_meta in chart_db.Entries |> Array.ofSeq do
                 match chart_meta.Audio with
-                | AssetPath.Absolute path when path.StartsWith(source.SourceFolder) ->
+                | AssetLocation.Absolute path when path.StartsWith(source.SourceFolder) ->
                     yield chart_meta
                 | _ -> ()
         }

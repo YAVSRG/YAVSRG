@@ -39,8 +39,8 @@ let generate_scenario (note_data: NoteData) (replay: Replay) (od: float32) (mods
             Creator = "Percyqaz"
             Tags = ["Yet"; "Another"; "Vertically"; "Scrolling"; "Rhythm"; "Game"]
 
-            Background = AssetPath.Missing
-            Audio = AssetPath.Missing
+            Background = AssetLocation.Missing
+            Audio = AssetLocation.Missing
             PreviewTime = 0.0f<ms>
 
             Packs = Set.empty

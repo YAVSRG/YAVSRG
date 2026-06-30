@@ -95,9 +95,9 @@ module OsuExport =
             {
                 AudioFilename =
                     match chart_meta.Audio with
-                    | AssetPath.Absolute s -> Path.GetFileName s
-                    | AssetPath.Hash _
-                    | AssetPath.Missing -> "audio.mp3"
+                    | AssetLocation.Absolute s -> Path.GetFileName s
+                    | AssetLocation.Hash _
+                    | AssetLocation.Missing -> "audio.mp3"
                 AudioLeadIn = 0
                 PreviewTime = int chart_meta.PreviewTime
                 Countdown = Countdown.None
@@ -146,9 +146,9 @@ module OsuExport =
                 [
                     Background(
                         ( match chart_meta.Background with
-                          | AssetPath.Absolute s -> Path.GetFileName s
-                          | AssetPath.Hash _
-                          | AssetPath.Missing -> "bg.png"),
+                          | AssetLocation.Absolute s -> Path.GetFileName s
+                          | AssetLocation.Hash _
+                          | AssetLocation.Missing -> "bg.png"),
                         0, 0
                     )
                 ]

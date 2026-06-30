@@ -9,7 +9,7 @@ open Prelude.Calculator.Patterns
 
 [<Json.AutoCodec>]
 [<RequireQualifiedAccess>]
-type AssetPath =
+type AssetLocation =
     | Absolute of string
     | Hash of string
     | Missing
@@ -33,8 +33,8 @@ type ChartMeta =
         Creator: string
         Tags: string list
 
-        Background: AssetPath
-        Audio: AssetPath
+        Background: AssetLocation
+        Audio: AssetLocation
         PreviewTime: Time
 
         Packs: Set<string>
@@ -84,7 +84,7 @@ type ChartMeta =
             },
             false
 
-    static member CreateFromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
+    static member CreateFromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetLocation) (import_chart: ImportChart) : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
         let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
