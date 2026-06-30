@@ -55,7 +55,7 @@ type GroupContextMenu(name: string, charts: ChartMeta seq, context: LibraryGroup
             fun () ->
                 match ctx with
                 | LibraryGroupContext.Pack p ->
-                    ChartDatabase.delete_many_from_pack charts p Content.Charts
+                    ChartDatabase.remove_many_from_pack charts p Content.Charts
                 | _ -> ChartDatabase.delete_many charts Content.Charts
                 LevelSelect.refresh_all ()
 

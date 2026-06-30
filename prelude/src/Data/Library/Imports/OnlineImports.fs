@@ -139,8 +139,8 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading background '%s'" chart.BackgroundHash
 
-                        let actual_bg_hash = ChartDatabase.hash_asset bg_path chart_db
-
+                        let actual_bg_hash = ChartDatabase.hash_and_store_asset bg_path chart_db
+                        
                         if chart.BackgroundHash <> actual_bg_hash then
                             failwithf
                                 "Downloaded background hash was '%s', expected '%s'"
@@ -160,8 +160,8 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading audio '%s'" chart.BackgroundHash
 
-                        let actual_audio_hash = ChartDatabase.hash_asset audio_path chart_db
-
+                        let actual_audio_hash = ChartDatabase.hash_and_store_asset audio_path chart_db
+                        
                         if chart.AudioHash <> actual_audio_hash then
                             failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioHash
 

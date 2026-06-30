@@ -250,7 +250,7 @@ module TableDownloader =
 
                     match Content.Charts.GetChartMeta(chart.Hash) with
                     | Some chart_meta ->
-                        ChartDatabase.change_packs chart_meta (chart_meta.Packs.Add table_name) Content.Charts
+                        ChartDatabase.add_to_pack chart_meta table_name Content.Charts
                         GameThread.defer (fun () -> state.SetStatus(chart.Hash, ChartStatus.Downloaded))
                     | None ->
                         match! OnlineImports.cdn_install (table_name, chart.Hash, chart.Chart, chart.Song, Content.Charts) with

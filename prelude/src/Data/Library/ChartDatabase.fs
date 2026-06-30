@@ -48,126 +48,128 @@ module ChartDatabase =
 
     (* Insertion operations *)
 
-    let private sha_256 = SHA256.Create()
+    let asset_path (hash: string) (db: ChartDatabase) : string =
+        Path.Combine(db.AssetsPath, hash.Substring(0, 2), hash)
 
-    let private compute_hash (file_path: string) : string =
-        use stream = File.OpenRead file_path
-        sha_256.ComputeHash stream
-        |> BitConverter.ToString
-        |> fun s -> s.Replace("-", "")
-
-    let internal hash_asset (file_path: string) (db: ChartDatabase) : string =
-        if not (File.Exists file_path) then
-            failwithf "Missing asset file: %s" file_path
-
-        let hash = compute_hash file_path
+    let inline internal hash_and_store_asset (file_path: string) (db: ChartDatabase) : string =
+        
+        let inline compute_asset_hash (file_path: string) : string =
+            use stream = File.OpenRead(file_path)
+            SHA256.HashData(stream)
+            |> BitConverter.ToString
+            |> _.Replace("-", "")
+            
+        let hash = compute_asset_hash(file_path)
+        
         let target_folder = Path.Combine(db.AssetsPath, hash.Substring(0, 2))
-        Directory.CreateDirectory target_folder |> ignore
         let target_path = Path.Combine(target_folder, hash)
-
-        if not (File.Exists target_path) then
+        
+        Directory.CreateDirectory(target_folder) |> ignore
+        if not (File.Exists(target_path)) then
             File.Copy(file_path, target_path)
 
         hash
 
-    let asset_path (hash: string) (db: ChartDatabase) : string =
-        Path.Combine(db.AssetsPath, hash.Substring(0, 2), hash)
+    let import (imported_charts: ImportChart seq) (db: ChartDatabase) : unit =
 
-    let import_asset (already_moved: Dictionary<string, string>) (asset: ImportAsset) (db: ChartDatabase) : AssetPath =
-        match asset with
-
-        // Copy asset from source into the .assets folder
-        | ImportAsset.Copy absolute_path ->
-            if already_moved.ContainsKey absolute_path then
+        let already_moved = Dictionary<string, string>()
+        let inline copy_asset (absolute_path: string) : AssetPath =
+            if already_moved.ContainsKey(absolute_path) then
                 AssetPath.Hash already_moved.[absolute_path]
-            elif File.Exists absolute_path then
-                let hash = hash_asset absolute_path db
+                
+            elif File.Exists(absolute_path) then
+                let hash = hash_and_store_asset(absolute_path) db
                 already_moved.[absolute_path] <- hash
                 AssetPath.Hash hash
+                
             else
                 AssetPath.Missing
+        
+        let inline import_asset (asset: ImportAsset) : AssetPath =
+            match asset with
+            | ImportAsset.Copy absolute_path -> copy_asset(absolute_path)
+            
+            | ImportAsset.Link absolute_path ->
+                if File.Exists(absolute_path) then AssetPath.Absolute(absolute_path)
+                else AssetPath.Missing
 
-        // Use asset in-place from source folder
-        | ImportAsset.Link absolute_path ->
-            if File.Exists absolute_path then
-                AssetPath.Absolute absolute_path
-            else
-                AssetPath.Missing
+            | ImportAsset.Download hash -> AssetPath.Hash hash
+            | ImportAsset.Missing -> AssetPath.Missing
+            
+        let inline merge_incoming_chart_with_existing (incoming_chart: Chart, incoming_meta: ChartMeta) : Chart * ChartMeta =
+            match db.Cache.TryGetValue(incoming_meta.Hash) with
+            | false, _ -> incoming_chart, incoming_meta
+            | true, existing_meta ->
+                
+                let merged_meta, existing_takes_priority =
+                    incoming_meta.MergeWithExisting(existing_meta)
 
-        // No action needed, asset has already been downloaded into .assets
-        | ImportAsset.Download hash -> AssetPath.Hash hash
+                if existing_takes_priority then
+                    match db.GetChart(incoming_meta.Hash) with
+                    | Error _ -> incoming_chart, merged_meta
+                    | Ok existing_chart -> existing_chart, merged_meta
+                    
+                else incoming_chart, merged_meta
 
-        | ImportAsset.Missing -> AssetPath.Missing
-
-    let import (imported_charts: ImportChart seq) (db: ChartDatabase) : unit =
-        let already_moved = Dictionary<string, string>()
         let now = Timestamp.now()
 
         lock db.LockObject <| fun () ->
         seq {
             for import_chart in imported_charts do
-                let incoming_meta = ChartMeta.FromImport now (fun x -> import_asset already_moved x db) import_chart
+                let incoming_meta = ChartMeta.CreateFromImport now import_asset import_chart
                 let incoming_chart = import_chart.Chart
 
-                let accepted_chart, accepted_chart_meta =
-                    match db.Cache.TryGetValue incoming_meta.Hash with
-                    | false, _ -> incoming_chart, incoming_meta
-                    | true, data ->
-                        let merged_chart_meta, accept_updated_chart = incoming_meta.MergeWithExisting data
+                let accepted_chart, accepted_meta =
+                    merge_incoming_chart_with_existing(incoming_chart, incoming_meta)
 
-                        if accept_updated_chart then incoming_chart, merged_chart_meta
-                        else
-                            match db.GetChart(incoming_meta.Hash) with
-                            | Error _ -> incoming_chart, merged_chart_meta
-                            | Ok existing_chart -> existing_chart, merged_chart_meta
-
-                db.Cache.[incoming_meta.Hash] <- accepted_chart_meta
-                yield accepted_chart_meta, accepted_chart
+                db.Cache.[accepted_meta.Hash] <- accepted_meta
+                yield accepted_meta, accepted_chart
         }
         |> fun charts -> DbCharts.save_batch charts db.Database
 
     let delete (chart_meta: ChartMeta) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
+            
         db.Cache.Remove(chart_meta.Hash) |> ignore
         DbCharts.delete chart_meta.Hash db.Database |> ignore
 
-    let delete_many (cs: ChartMeta seq) (db: ChartDatabase) : unit =
+    let delete_many (chart_metas: ChartMeta seq) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
-        let deleted =
-            cs |> Seq.map (fun c -> db.Cache.Remove c.Hash |> ignore; c.Hash)
-        DbCharts.delete_batch deleted db.Database |> ignore
+            
+        for chart_meta in chart_metas do
+            db.Cache.Remove chart_meta.Hash |> ignore
+            
+        DbCharts.delete_batch (Seq.map _.Hash chart_metas) db.Database |> ignore
 
-    let change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) : unit =
+    let inline internal change_packs (chart_meta: ChartMeta) (packs: Set<string>) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
-        if packs.IsEmpty then
-            delete chart_meta db
-        else
-            db.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
+            
+        if packs.IsEmpty then delete chart_meta db
+        else db.Cache.[chart_meta.Hash] <- { chart_meta with Packs = packs }
+        
         DbCharts.update_packs_batch [chart_meta.Hash, packs] db.Database
+        
+    let add_to_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
+        change_packs chart_meta (chart_meta.Packs.Add pack) db
 
-    let delete_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
+    let remove_from_pack (chart_meta: ChartMeta) (pack: string) (db: ChartDatabase) : unit =
         change_packs chart_meta (chart_meta.Packs.Remove pack) db
 
-    let delete_many_from_pack (cs: ChartMeta seq) (pack: string) (db: ChartDatabase) : unit =
+    let remove_many_from_pack (chart_metas: ChartMeta seq) (pack: string) (db: ChartDatabase) : unit =
         lock db.LockObject <| fun () ->
-        let updated =
-            seq {
-                for c in cs do
-                    let new_packs = c.Packs.Remove pack
-                    if not new_packs.IsEmpty then
-                        db.Cache.[c.Hash] <- { c with Packs = new_packs }
-                        yield c.Hash, new_packs
-            }
-        DbCharts.update_packs_batch updated db.Database
-        let deleted =
-            seq {
-                for c in cs do
-                    let new_packs = c.Packs.Remove pack
-                    if new_packs.IsEmpty then
-                        db.Cache.Remove(c.Hash) |> ignore
-                        yield c.Hash
-            }
-        DbCharts.delete_batch deleted db.Database |> ignore
+            
+        let still_in_packs = ResizeArray<string * Set<string>>()
+        let now_in_no_packs = ResizeArray<string>()
+        
+        for chart_meta in chart_metas do
+            let remaining_packs = chart_meta.Packs.Remove(pack)
+            if remaining_packs.IsEmpty then
+                now_in_no_packs.Add(chart_meta.Hash)
+            else
+                still_in_packs.Add(chart_meta.Hash, remaining_packs)
+                
+        DbCharts.update_packs_batch still_in_packs db.Database
+        DbCharts.delete_batch now_in_no_packs db.Database |> ignore
 
     (* Loading operations & Migrations *)
 
@@ -197,24 +199,15 @@ module ChartDatabase =
         Database.migrate "ResetOriginsColumn3" (fun db -> DbCharts.RESET_OSU_QUAVER_ORIGINS.Execute () db |> expect |> ignore) db
         db
 
-    let private legacy_migrate (db: ChartDatabase) : ChartDatabase =
-        // This used to move charts from the old folder structure to the new sqlite database system
-        // It is no longer supported; latest version that supported it was 0.7.27.10
-        // If updating an Interlude instance from before then you should instead just import charts fresh (and delete the leftover files)
-        let old_cache_file = Path.Combine(get_game_folder "Songs", "cache.json.old")
-        File.Delete old_cache_file
-        db
-
     // Fast load true loads the contents of the db into memory (used by game client)
     // Fast load false may be used for tools that just want to fetch stuff for a couple of charts
     let create (use_fast_load: bool) (database: Database) : ChartDatabase =
-        legacy_migrate
-            {
-                Database = migrate database
-                Cache = ConcurrentDictionary()
-                LockObject = obj ()
-                FastLoaded = use_fast_load
-                AssetsPath = Path.Combine(get_game_folder "Songs", ".assets")
-                RecalculationNeeded = use_fast_load
-            }
+        {
+            Database = migrate database
+            Cache = ConcurrentDictionary()
+            LockObject = obj ()
+            FastLoaded = use_fast_load
+            AssetsPath = Path.Combine(get_game_folder "Songs", ".assets")
+            RecalculationNeeded = use_fast_load
+        }
         |> if use_fast_load then fast_load else id

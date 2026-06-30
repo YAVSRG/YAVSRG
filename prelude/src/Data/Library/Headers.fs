@@ -56,13 +56,13 @@ type ChartMeta =
             | Some o -> o.ToString()
             | None -> "Unknown"
 
-    member this.MergeWithExisting (existing: ChartMeta) : ChartMeta * bool =
+    member this.MergeWithExisting(existing: ChartMeta) : ChartMeta * bool =
         // Tiebreaker rule when importing data over the top of an existing chart
         // Etterna metadata takes priority over osu, etc
-        let existing_data_priority =
+        let existing_takes_priority =
             not (Set.isEmpty existing.Origins) && existing.Origins < this.Origins
 
-        if existing_data_priority then
+        if existing_takes_priority then
             { existing with
                 TitleNative = existing.TitleNative |> Option.orElse this.TitleNative
                 ArtistNative = existing.ArtistNative |> Option.orElse this.ArtistNative
@@ -72,7 +72,7 @@ type ChartMeta =
                 Origins = Set.union this.Origins existing.Origins
                 Background = this.Background
             },
-            false
+            true
         else
             { this with
                 TitleNative = this.TitleNative |> Option.orElse existing.TitleNative
@@ -82,9 +82,9 @@ type ChartMeta =
                 Packs = Set.union this.Packs existing.Packs
                 Origins = Set.union this.Origins existing.Origins
             },
-            true
+            false
 
-    static member FromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
+    static member CreateFromImport (timestamp: int64) (handle_asset: ImportAsset -> AssetPath) (import_chart: ImportChart) : ChartMeta =
         let chart = import_chart.Chart
         let difficulty = Difficulty.calculate(1.0f<rate>, chart.ToNoteData())
         let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s

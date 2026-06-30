@@ -28,7 +28,7 @@ type ChartDeleteMenu(chart_meta: ChartMeta, context: LibraryContext, is_submenu:
             | LibraryContext.Pack p when chart_meta.Packs.Count > 1 ->
 
                 let delete_from_pack() =
-                    ChartDatabase.delete_from_pack chart_meta p Content.Charts
+                    ChartDatabase.remove_from_pack chart_meta p Content.Charts
                     LevelSelect.refresh_all ()
 
                     if is_submenu then
