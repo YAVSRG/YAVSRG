@@ -126,7 +126,7 @@ module OnlineImports =
                         return Error (sprintf "Hash mismatch: '%s' expected vs '%s' actual" hash actual_hash)
                     else
 
-                    if File.Exists(chart_db.PathToAsset(chart.BackgroundHash)) |> not then
+                    if not(chart_db.AssetStorage.Contains(chart.BackgroundHash)) then
 
                         let bg_path = Path.Combine(get_game_folder "Downloads", chart.BackgroundHash)
 
@@ -139,7 +139,7 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading background '%s'" chart.BackgroundHash
 
-                        let actual_bg_hash = chart_db.HashAndStoreAsset(bg_path)
+                        let actual_bg_hash = chart_db.AssetStorage.Add(bg_path)
                         
                         if chart.BackgroundHash <> actual_bg_hash then
                             failwithf
@@ -147,7 +147,7 @@ module OnlineImports =
                                 actual_bg_hash
                                 chart.BackgroundHash
 
-                    if File.Exists(chart_db.PathToAsset(chart.AudioHash)) |> not then
+                    if not(chart_db.AssetStorage.Contains(chart.AudioHash)) then
 
                         let audio_path = Path.Combine(get_game_folder "Downloads", chart.AudioHash)
 
@@ -160,7 +160,7 @@ module OnlineImports =
 
                         if not success then failwithf "Error downloading audio '%s'" chart.BackgroundHash
 
-                        let actual_audio_hash = chart_db.HashAndStoreAsset(audio_path)
+                        let actual_audio_hash = chart_db.AssetStorage.Add(audio_path)
                         
                         if chart.AudioHash <> actual_audio_hash then
                             failwithf "Downloaded audio hash was '%s', expected '%s'" actual_audio_hash chart.AudioHash

@@ -10,6 +10,61 @@ open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
 
+[<AbstractClass>]
+type AssetStorage() =
+    abstract member Add: string -> string
+    abstract member Remove : string -> int64
+    abstract member Contains : string -> bool
+    abstract member GetPath: string -> string
+    abstract member Enumerate : unit -> string seq
+    
+type FileSystemAssetStorage(assets_path: string) =
+    inherit AssetStorage()
+
+    override this.Add(file_path: string) : string =
+        
+        let inline compute_asset_hash (file_path: string) : string =
+            use stream = File.OpenRead(file_path)
+            SHA256.HashData(stream)
+            |> BitConverter.ToString
+            |> _.Replace("-", "")
+            
+        let hash = compute_asset_hash(file_path)
+        
+        let target_folder = Path.Combine(assets_path, hash.Substring(0, 2))
+        let target_path = Path.Combine(target_folder, hash)
+        
+        Directory.CreateDirectory(target_folder) |> ignore
+        if not(File.Exists(target_path)) then
+            File.Copy(file_path, target_path)
+
+        hash
+        
+    override this.Remove(hash: string) : int64 =
+        let path = this.GetPath(hash)
+        try
+            let info = FileInfo(path)
+            let length = info.Length
+            info.Delete()
+            length
+        with err ->
+            Logging.Warn "Error deleting file %s: %O" path err
+            -1L
+        
+    override this.Contains(hash: string) : bool =
+        File.Exists(this.GetPath(hash))
+    
+    override this.GetPath(hash: string) : string =
+        Path.Combine(assets_path, hash.Substring(0, 2), hash)
+        
+    override this.Enumerate() : string seq =
+        seq {
+            for directory in Directory.EnumerateDirectories(assets_path) do
+                for file in Directory.EnumerateFiles(directory) do
+                    let hash_file_name = Path.GetFileName(file)
+                    yield hash_file_name
+        }
+
 type ChartDatabase =
     internal
         {
@@ -17,7 +72,7 @@ type ChartDatabase =
             Cache: ConcurrentDictionary<string, ChartMeta>
             LockObject: obj
             FastLoaded: bool
-            AssetsPath: string
+            AssetStorage: AssetStorage
             mutable RecalculationNeeded: bool
         }
     member this.Entries = this.Cache.Values
@@ -44,28 +99,6 @@ type ChartDatabase =
         | Some existing -> Some existing
         | None -> if this.FastLoaded then None else fetch_chart_meta()
 
-    member this.PathToAsset(hash: string) : string =
-        Path.Combine(this.AssetsPath, hash.Substring(0, 2), hash)
-
-    member this.HashAndStoreAsset(file_path: string) : string =
-        
-        let inline compute_asset_hash (file_path: string) : string =
-            use stream = File.OpenRead(file_path)
-            SHA256.HashData(stream)
-            |> BitConverter.ToString
-            |> _.Replace("-", "")
-            
-        let hash = compute_asset_hash(file_path)
-        
-        let target_folder = Path.Combine(this.AssetsPath, hash.Substring(0, 2))
-        let target_path = Path.Combine(target_folder, hash)
-        
-        Directory.CreateDirectory(target_folder) |> ignore
-        if not (File.Exists(target_path)) then
-            File.Copy(file_path, target_path)
-
-        hash
-
     member this.Import(imported_charts: ImportChart seq) : unit =
 
         let already_moved = Dictionary<string, string>()
@@ -74,7 +107,7 @@ type ChartDatabase =
                 AssetLocation.Hash already_moved.[absolute_path]
                 
             elif File.Exists(absolute_path) then
-                let hash = this.HashAndStoreAsset(absolute_path)
+                let hash = this.AssetStorage.Add(absolute_path)
                 already_moved.[absolute_path] <- hash
                 AssetLocation.Hash hash
                 
@@ -209,7 +242,7 @@ module ChartDatabase =
             Cache = ConcurrentDictionary()
             LockObject = obj ()
             FastLoaded = use_fast_load
-            AssetsPath = Path.Combine(get_game_folder "Songs", ".assets")
+            AssetStorage = FileSystemAssetStorage(Path.Combine(get_game_folder "Songs", ".assets"))
             RecalculationNeeded = use_fast_load
         }
         |> if use_fast_load then fast_load else id
