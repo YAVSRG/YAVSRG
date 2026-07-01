@@ -18,7 +18,7 @@ module Library =
     let load () : Library =
 
         let db = Percyqaz.Data.Sqlite.Database.from_file (Path.Combine(get_game_folder "Songs", "charts.db"))
-        let charts_db = ChartDatabase.create true db
+        let charts_db = ChartDatabase.CreateFullyLoaded(db)
 
         File.WriteAllText(
             Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),

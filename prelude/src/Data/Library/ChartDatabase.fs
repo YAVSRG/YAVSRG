@@ -10,6 +10,14 @@ open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Charts
 
+module private ChartDatabaseMigrations =
+    let migrate (db: Database) : Database =
+        Database.migrate "AddChartsTable" (fun db -> DbCharts.CREATE_TABLE.Execute () db |> expect |> ignore) db
+        Database.migrate "ResetOriginsColumn" (fun db -> DbCharts.RESET_ORIGINS.Execute () db |> expect |> ignore) db
+        Database.migrate "ResetOriginsColumn2" (fun db -> DbCharts.RESET_ORIGINS.Execute () db |> expect |> ignore) db
+        Database.migrate "ResetOriginsColumn3" (fun db -> DbCharts.RESET_OSU_QUAVER_ORIGINS.Execute () db |> expect |> ignore) db
+        db
+
 [<AbstractClass>]
 type AssetStorage() =
     abstract member Add: string -> string
@@ -204,45 +212,55 @@ type ChartDatabase =
         DbCharts.update_packs_batch still_in_packs this.Database
         DbCharts.delete_batch now_in_no_packs this.Database |> ignore
 
-module ChartDatabase =
-    
-    (* Loading operations & Migrations *)
+    member inline internal this.VacuumSqlite() : unit =
+        lock this.LockObject <| fun () ->
+        Database.exec_raw "VACUUM;" this.Database |> ignore
+        
+    static member CreateFullyLoaded(database: Database, asset_storage: AssetStorage) : ChartDatabase =
+        
+        let inline chart_has_pattern_data(chart_meta: ChartMeta) =
+            chart_meta.Length > 0.0f<ms> && chart_meta.Patterns.Density90 <> 0.0f</rate>
+        
+        let inline load_charts_into_cache (cache: ConcurrentDictionary<string, ChartMeta>) : bool =
+            let mutable recalculation_needed = true
+            
+            for chart_meta in DbCharts.fast_load database do
+                if recalculation_needed && chart_has_pattern_data(chart_meta) then
+                    recalculation_needed <- false
+                cache.[chart_meta.Hash] <- chart_meta
 
-    let sqlite_vacuum (db: ChartDatabase) : unit =
-        lock db.LockObject <| fun () ->
-        Database.exec_raw "VACUUM;" db.Database |> ignore
-
-    let private fast_load (db: ChartDatabase) : ChartDatabase =
-        lock db.LockObject
-        <| fun () ->
-            assert (db.Cache.Count = 0)
-
-            for chart_meta in DbCharts.fast_load db.Database do
-                db.Cache.[chart_meta.Hash] <- chart_meta
-
-                if chart_meta.Length > 0.0f<ms> && chart_meta.Patterns.Density90 <> 0.0f</rate> then
-                    db.RecalculationNeeded <- false
-
-            if db.Cache.Count = 0 then db.RecalculationNeeded <- false
-
-            db
-
-    let private migrate (db: Database) : Database =
-        Database.migrate "AddChartsTable" (fun db -> DbCharts.CREATE_TABLE.Execute () db |> expect |> ignore) db
-        Database.migrate "ResetOriginsColumn" (fun db -> DbCharts.RESET_ORIGINS.Execute () db |> expect |> ignore) db
-        Database.migrate "ResetOriginsColumn2" (fun db -> DbCharts.RESET_ORIGINS.Execute () db |> expect |> ignore) db
-        Database.migrate "ResetOriginsColumn3" (fun db -> DbCharts.RESET_OSU_QUAVER_ORIGINS.Execute () db |> expect |> ignore) db
-        db
-
-    // Fast load true loads the contents of the db into memory (used by game client)
-    // Fast load false may be used for tools that just want to fetch stuff for a couple of charts
-    let create (use_fast_load: bool) (database: Database) : ChartDatabase =
+            if cache.Count = 0 then recalculation_needed <- false
+            
+            recalculation_needed
+            
+        let migrated_database = ChartDatabaseMigrations.migrate(database)
+        let cache = ConcurrentDictionary()
+        let recalculation_needed = load_charts_into_cache(cache)
+        
         {
-            Database = migrate database
+            Database = migrated_database
+            Cache = cache
+            LockObject = obj ()
+            FastLoaded = true
+            AssetStorage = asset_storage
+            RecalculationNeeded = recalculation_needed
+        }
+        
+    static member CreateFullyLoaded(database: Database) : ChartDatabase =
+        let default_asset_storage = FileSystemAssetStorage(Path.Combine(get_game_folder "Songs", ".assets"))
+        ChartDatabase.CreateFullyLoaded(database, default_asset_storage)
+        
+    static member CreateLazyLoaded(database: Database, asset_storage: AssetStorage) =
+        let migrated_database = ChartDatabaseMigrations.migrate(database)
+        {
+            Database = migrated_database
             Cache = ConcurrentDictionary()
             LockObject = obj ()
-            FastLoaded = use_fast_load
-            AssetStorage = FileSystemAssetStorage(Path.Combine(get_game_folder "Songs", ".assets"))
-            RecalculationNeeded = use_fast_load
+            FastLoaded = false
+            AssetStorage = asset_storage
+            RecalculationNeeded = false
         }
-        |> if use_fast_load then fast_load else id
+        
+    static member CreateLazyLoaded(database: Database) : ChartDatabase =
+        let default_asset_storage = FileSystemAssetStorage(Path.Combine(get_game_folder "Songs", ".assets"))
+        ChartDatabase.CreateLazyLoaded(database, default_asset_storage)

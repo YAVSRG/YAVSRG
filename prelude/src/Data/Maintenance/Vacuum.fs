@@ -12,7 +12,7 @@ module Vacuum =
         async {
             progress (Generic "Vacuuming")
             Logging.Debug "Running SQLite VACUUM command on charts.db"
-            ChartDatabase.sqlite_vacuum chart_db
+            chart_db.VacuumSqlite()
             Logging.Debug "Chart database vacuum started"
             let unused_asset_hashes = HashSet<string>(chart_db.AssetStorage.Enumerate())
             Logging.Debug "Found %i assets on disk" unused_asset_hashes.Count

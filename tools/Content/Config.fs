@@ -54,7 +54,7 @@ module Config =
         let db_file = Path.Combine(get_game_folder "Songs", "charts.db")
         if not (File.Exists db_file) then failwith "Couldn't find your interlude charts.db"
         let db = Database.from_file db_file
-        ChartDatabase.create true db
+        ChartDatabase.CreateFullyLoaded(db)
 
     let interlude_library : Library =
         {
