@@ -137,8 +137,11 @@
     <Compile Include="Data\User\DbChartData.fs" />
     <Compile Include="Data\User\DbSingletons.fs" />
     <Compile Include="Data\User\DbSessions.fs" />
+    <Compile Include="Data\User\UserDatabaseMigrations.fs" />
     <Compile Include="Data\User\UserDatabase.fs" />
     <Compile Include="Data\Library\DbCharts.fs" />
+    <Compile Include="Data\Library\AssetStorage.fs" />
+    <Compile Include="Data\Library\ChartDatabaseMigrations.fs" />
     <Compile Include="Data\Library\ChartDatabase.fs" />
     <Compile Include="Data\Library\Collections.fs" />
     <Compile Include="Data\Library\Library.fs" />
