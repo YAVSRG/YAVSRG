@@ -75,6 +75,7 @@
     <Compile Include="Database\DbSingletonsTests.fs" />
     <Compile Include="Database\DbSessionsTests.fs" />
     <Compile Include="Database\DbChartsTests.fs" />
+    <Compile Include="Database\ChartDatabaseTests.fs" />
     <Compile Include="Stats\StatsTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>

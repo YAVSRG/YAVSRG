@@ -15,21 +15,23 @@ module RulesetOsuParityTests =
 
     let TEST_REPLAY_FILE =
         OsuReplay.TryReadFile "./Data/Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr" |> Option.get
+    let TEST_OSU_FILE_PATH = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu"
     let TEST_OSU_FILE_HASH =
-        Beatmap.HashFromFile "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" |> expect
+        Beatmap.HashFromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_OSU_FILE =
-        Beatmap.FromFile "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" |> expect
+        Beatmap.FromFile(TEST_OSU_FILE_PATH) |> expect
     let TEST_CHART =
-        (Osu_To_Interlude.convert TEST_OSU_FILE { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = "./Data/Cardboard Box - He He He (DannyPX) [SPEEEDDD!!!].osu" } |> expect).Chart
+        (Osu_To_Interlude.convert TEST_OSU_FILE { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = TEST_OSU_FILE_PATH } |> expect).Chart
 
     let TEST_REPLAY_FILE_2 =
         OsuReplay.TryReadFile "./Data/Percyqaz - Hachi - DONUT HOLE [Filling] (2024-09-30) OsuMania.osr" |> Option.get
+    let TEST_OSU_FILE_PATH_2 = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu"
     let TEST_OSU_FILE_HASH_2 =
-        Beatmap.HashFromFile "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" |> expect
+        Beatmap.HashFromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_OSU_FILE_2 =
-        Beatmap.FromFile "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" |> expect
+        Beatmap.FromFile(TEST_OSU_FILE_PATH_2) |> expect
     let TEST_CHART_2 =
-        (Osu_To_Interlude.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = "./Data/Hachi - DONUT HOLE (Raveille) [Filling].osu" } |> expect).Chart
+        (Osu_To_Interlude.convert TEST_OSU_FILE_2 { Config = ConversionOptions.Pack("osu!", None, LinkAssetFiles); Source = TEST_OSU_FILE_PATH_2 } |> expect).Chart
 
     [<Test>]
     let Replay_MatchesTestFile_1 () =

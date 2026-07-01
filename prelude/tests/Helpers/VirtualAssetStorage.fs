@@ -9,7 +9,7 @@ type VirtualAssetStorage(path: string) =
     static let VIRTUAL_HASH = "00facade00facade00facade00facade00facade00facade00facade00facade"
 
     override this.Add(file_path: string) : string =
-        ignore file_path
+        printfn "virtual assets: attempted to hash and add path '%s'" file_path
         VIRTUAL_HASH
     
     override this.Remove(hash: string) =
