@@ -13,14 +13,14 @@ module private Data =
     let mutable library: Library = Unchecked.defaultof<_>
 
     let init () : unit =
-        library <- Library.load ()
+        library <- Library.Load()
         database <- Database.from_file (Path.Combine(get_game_folder "Data", "scores.db")) // todo: rename to interlude.db
         user_db <- UserDatabase.CreateFullyLoaded(database)
 
     let deinit () : unit =
         if not (isNull (user_db :> obj)) then
             user_db.SaveChanges()
-            Library.save library
+            library.Save()
 
     let charts_updated_ev = Event<unit>()
     let charts_updated = charts_updated_ev.Publish
