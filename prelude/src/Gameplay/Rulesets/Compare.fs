@@ -2,7 +2,6 @@
 
 open Prelude
 open Prelude.Gameplay.Rulesets
-open Prelude.Gameplay.Scoring
 
 type RulesetComparison =
     {

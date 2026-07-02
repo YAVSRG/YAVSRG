@@ -1,4 +1,4 @@
-﻿namespace Prelude.Gameplay.Scoring
+﻿namespace Prelude.Gameplay.Rulesets
 
 open Prelude
 
