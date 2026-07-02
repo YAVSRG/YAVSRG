@@ -98,23 +98,23 @@ module Stats =
             AccXP = acc_xp
         }
 
-    let init (library: Library) (database: UserDatabase) : unit =
+    let init (library: Library) : unit =
 
-        let sessions = DbSessions.get_all database.Database
+        let sessions = DbSessions.get_all library.UserData.Database
         PREVIOUS_SESSIONS <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
-        load_stats database
+        load_stats library.UserData
 
-        Migration.migrate library database
+        Migration.migrate library
 
         let now = Timestamp.now()
         if CURRENT_SESSION.NotesHit = 0 then
-            end_current_session now database
+            end_current_session now library.UserData
         elif Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
-            end_current_session now database
+            end_current_session now library.UserData
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error "System clock changes could break your session stats"
-            end_current_session now database
+            end_current_session now library.UserData

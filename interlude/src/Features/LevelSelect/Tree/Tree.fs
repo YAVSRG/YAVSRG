@@ -58,7 +58,6 @@ module Tree =
                     Rate = SelectedChart.rate.Value
                     RulesetId = Rulesets.current_hash
                     Ruleset = Rulesets.current
-                    UserDatabase = Content.UserData
                     Library = Content.Library
                 }
 

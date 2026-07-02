@@ -20,7 +20,6 @@ type SuggestionContext =
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
-        UserDatabase: UserDatabase
     }
     member this.LibraryViewContext: LibraryViewContext =
         {
@@ -28,7 +27,6 @@ type SuggestionContext =
             RulesetId = this.RulesetId
             Ruleset = this.Ruleset
             Library = this.Library
-            UserDatabase = this.UserDatabase
         }
 
 module Suggestion =
@@ -104,7 +102,7 @@ module Suggestion =
             )
             |> Seq.filter (fun (chart_meta, (rate, p)) -> p.LNPercent >= min_ln_pc && p.LNPercent <= max_ln_pc)
             |> if ctx.OnlyNewCharts then
-                Seq.filter (fun (chart_meta, (rate, p)) -> now - ctx.UserDatabase.GetChartData(chart_meta.Hash).LastPlayed > THIRTY_DAYS)
+                Seq.filter (fun (chart_meta, (rate, p)) -> now - ctx.Library.UserData.GetChartData(chart_meta.Hash).LastPlayed > THIRTY_DAYS)
                else
                 id
             |> ctx.Filter.Apply

@@ -2,6 +2,7 @@
 
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Gameplay.Rulesets
 open Prelude.Data.User
@@ -11,12 +12,13 @@ type Library =
     {
         Charts: ChartDatabase
         Collections: Collections
+        UserData: UserDatabase
     }
     
     static member Load() : Library =
         
         let inline init_chart_db() : ChartDatabase =
-            let db = Percyqaz.Data.Sqlite.Database.from_file (Path.Combine(get_game_folder "Songs", "charts.db"))
+            let db = Database.from_file(Path.Combine(get_game_folder "Songs", "charts.db"))
             
             File.WriteAllText(
                 Path.Combine(get_game_folder "Songs", "HOW_TO_ADD_SONGS.txt"),
@@ -26,6 +28,10 @@ type Library =
             
             ChartDatabase.CreateFullyLoaded(db)
             
+        let inline init_user_db() : UserDatabase =
+            let db = Database.from_file(Path.Combine(get_game_folder "Data", "scores.db")) // todo: rename to interlude.db
+            UserDatabase.CreateFullyLoaded(db)
+            
         let inline init_collections() : Collections =
             load_important_json_file
                 "Collections"
@@ -33,6 +39,7 @@ type Library =
                 false
                 
         let chart_db = init_chart_db()
+        let user_db = init_user_db()
         let collections = init_collections()
                 
         Logging.Info
@@ -43,10 +50,12 @@ type Library =
         
         {
             Charts = chart_db
+            UserData = user_db
             Collections = collections
         }
         
     member this.Save() : unit =
+        this.UserData.SaveChanges()
         save_important_json_file (Path.Combine(get_game_folder "Data", "collections.json")) this.Collections
 
 type LibraryViewContext =
@@ -55,5 +64,4 @@ type LibraryViewContext =
         RulesetId: string
         Ruleset: Ruleset
         Library: Library
-        UserDatabase: UserDatabase
     }

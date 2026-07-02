@@ -423,7 +423,6 @@ module SelectedChart =
                         RulesetId = Rulesets.current_hash
                         Ruleset = Rulesets.current
                         Library = Content.Library
-                        UserDatabase = Content.UserData
                     }
             with
             | Some chart_meta -> change (chart_meta, LibraryContext.None, true)

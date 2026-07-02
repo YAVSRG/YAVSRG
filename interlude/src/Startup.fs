@@ -32,7 +32,7 @@ module Startup =
 
             Content.load_data ()
             Printerlude.init instance
-            Stats.init Content.Library Content.UserData
+            Stats.init Content.Library
             StatsSync.init ()
             SelectedChart.init ()
             Mounts.init ()

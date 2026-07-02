@@ -31,7 +31,7 @@ module internal Shared =
         (local_date_now - local_date).TotalDays |> floor |> int
 
     let format_date_last_played (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let days_ago = days_ago (ctx.UserDatabase.GetChartData(chart_meta.Hash)).LastPlayed
+        let days_ago = days_ago (ctx.Library.UserData.GetChartData(chart_meta.Hash)).LastPlayed
 
         if days_ago < 1 then 0, "Today"
         elif days_ago < 2 then 1, "Yesterday"
@@ -65,7 +65,7 @@ module internal Shared =
         else 8, "A long time ago"
 
     let grade_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string =
-        let data = ctx.UserDatabase.GetChartData(chart_meta.Hash)
+        let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
         match
             data.PersonalBests
@@ -75,7 +75,7 @@ module internal Shared =
         | None -> -2, "No grade achieved"
 
     let lamp_achieved (chart_meta: ChartMeta, ctx: LibraryViewContext) : int * string  =
-        let data = ctx.UserDatabase.GetChartData(chart_meta.Hash)
+        let data = ctx.Library.UserData.GetChartData(chart_meta.Hash)
 
         match
             data.PersonalBests

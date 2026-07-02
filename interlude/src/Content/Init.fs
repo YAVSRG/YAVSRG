@@ -24,8 +24,8 @@ type Content() =
 
     static member deinit () = Data.deinit ()
 
-    static member UserData : UserDatabase = Data.user_db
     static member Library : Library = Data.library
+    static member UserData : UserDatabase = Data.library.UserData
     static member Charts : ChartDatabase = Data.library.Charts
     static member Collections : Collections = Data.library.Collections
 

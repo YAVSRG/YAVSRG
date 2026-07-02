@@ -8,12 +8,12 @@ open Prelude.Data.Library
 
 module private Migration =
 
-    let legacy_backfill (library: Library) (database: UserDatabase) : Session array =
+    let legacy_backfill (library: Library) : Session array =
 
         let scores =
             seq {
-                for chart_id in database.Cache.Keys do
-                    for score in database.Cache.[chart_id].Scores do
+                for chart_id in library.UserData.Cache.Keys do
+                    for score in library.UserData.Cache.[chart_id].Scores do
                         yield chart_id, score
             }
             |> Seq.sortBy (snd >> _.Timestamp)
@@ -86,15 +86,15 @@ module private Migration =
         }
         |> Seq.toArray
 
-    let migrate_legacy_stats (library: Library) (database: UserDatabase) : unit =
+    let migrate_legacy_stats (library: Library) : unit =
 
         Logging.Info "Backfilling session data from score history..."
 
         TOTAL_STATS <- TotalStats.Default
         CURRENT_SESSION <- CurrentSession.Default
 
-        let sessions = legacy_backfill library database
-        DbSessions.save_batch sessions database.Database
+        let sessions = legacy_backfill library
+        DbSessions.save_batch sessions library.UserData.Database
         PREVIOUS_SESSIONS <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
@@ -104,14 +104,14 @@ module private Migration =
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
         TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit }
 
-    let keymode_playtime_backfill (library: Library) (database: UserDatabase) : unit =
+    let keymode_playtime_backfill (library: Library) : unit =
 
         Logging.Debug "Backfilling keymode playtimes from score history..."
 
         let scores =
             seq {
-                for chart_id in database.Cache.Keys do
-                    for score in database.Cache.[chart_id].Scores do
+                for chart_id in library.UserData.Cache.Keys do
+                    for score in library.UserData.Cache.[chart_id].Scores do
                         yield struct {| ChartId = chart_id; Score = score |}
             }
             |> Seq.sortBy (_.Score >> _.Timestamp)
@@ -171,14 +171,14 @@ module private Migration =
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
-        DbSessions.save_batch sessions database.Database
-        save_stats database
+        DbSessions.save_batch sessions library.UserData.Database
+        save_stats library.UserData
 
-    let migrate (library: Library) (database: UserDatabase) : unit =
+    let migrate (library: Library) : unit =
 
         if PREVIOUS_SESSIONS = Map.empty && TOTAL_STATS.GameTime = 0.0 then
-            migrate_legacy_stats library database
+            migrate_legacy_stats library
 
         if not (MIGRATIONS.Contains "BackfillKeymodePlaytime") then
-            backup_stats "backup_0.7.27.7" database
-            keymode_playtime_backfill library database
+            backup_stats "backup_0.7.27.7" library.UserData
+            keymode_playtime_backfill library

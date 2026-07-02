@@ -2,11 +2,9 @@
 
 open System.IO
 open Percyqaz.Common
-open Percyqaz.Data.Sqlite
 open Prelude
 open Prelude.Calculator
 open Prelude.Gameplay.Rulesets
-open Prelude.Data.User
 open Prelude.Data.Library
 open Prelude.Data.Library.Endless
 
@@ -14,7 +12,6 @@ let test() =
 
     Directory.SetCurrentDirectory("C:/Interlude/dev") // this is my interlude install location
     let library = Library.Load()
-    let user_db = UserDatabase.CreateFullyLoaded(Database.from_file("Data/scores.db"))
 
     let sc_j4 = SC.create 4
     let sc_j4_id = Ruleset.hash sc_j4
@@ -22,7 +19,6 @@ let test() =
     let ctx : LibraryViewContext =
         {
             Library = library
-            UserDatabase = user_db
             Ruleset = sc_j4
             RulesetId = sc_j4_id
             Rate = 1.0f<rate>
@@ -38,7 +34,6 @@ let test() =
     let mutable suggestion_ctx =
         {
             Library = library
-            UserDatabase = user_db
             BaseChart = start, 1.0f<rate>
             MinimumRate = 1.0f<rate>
             MaximumRate = 1.5f<rate>
