@@ -12,7 +12,7 @@ type SessionPanel =
 
     static member CreateCurrent() =
 
-        let current_session = Content.Stats.STATE.CurrentSession
+        let current_session = Content.Stats.CurrentSession
 
         Container(NodeType.None)
             .With(

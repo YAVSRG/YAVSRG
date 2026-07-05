@@ -3,7 +3,6 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User.Stats
 open Interlude.UI
 open Interlude.Content
 
@@ -31,17 +30,17 @@ type OverallTab =
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 OverallTime(
-                    (fun () -> Content.Stats.STATE.TotalStats.GameTime + Content.Stats.STATE.CurrentSession.GameTime),
-                    (fun () -> Content.Stats.STATE.TotalStats.PlayTime + Content.Stats.STATE.CurrentSession.PlayTime),
-                    (fun () -> Content.Stats.STATE.TotalStats.PracticeTime + Content.Stats.STATE.CurrentSession.PracticeTime)
+                    (fun () -> Content.Stats.GameTime),
+                    (fun () -> Content.Stats.PlayTime),
+                    (fun () -> Content.Stats.PracticeTime)
                 )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 PlayCount(
-                    (fun () -> Content.Stats.STATE.TotalStats.PlaysStarted + Content.Stats.STATE.CurrentSession.PlaysStarted),
-                    (fun () -> Content.Stats.STATE.TotalStats.PlaysCompleted + Content.Stats.STATE.CurrentSession.PlaysCompleted),
-                    (fun () -> Content.Stats.STATE.TotalStats.PlaysRetried + Content.Stats.STATE.CurrentSession.PlaysRetried),
-                    (fun () -> Content.Stats.STATE.TotalStats.PlaysQuit + Content.Stats.STATE.CurrentSession.PlaysQuit)
+                    (fun () -> Content.Stats.PlaysStarted),
+                    (fun () -> Content.Stats.PlaysCompleted),
+                    (fun () -> Content.Stats.PlaysRetried),
+                    (fun () -> Content.Stats.PlaysQuit)
                  )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f)),
 

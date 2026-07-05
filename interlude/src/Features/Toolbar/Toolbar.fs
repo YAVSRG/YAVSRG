@@ -172,7 +172,7 @@ type Toolbar() =
 
     override this.Update(elapsed_ms, moved) =
         if Screen.current_type <> ScreenType.SplashScreen then
-            Content.Stats.STATE.CurrentSession.GameTime <- Content.Stats.STATE.CurrentSession.GameTime + elapsed_ms
+            Content.Stats.CurrentSession.GameTime <- Content.Stats.CurrentSession.GameTime + elapsed_ms
 
         Toolbar.slideout_amount.Update elapsed_ms
 

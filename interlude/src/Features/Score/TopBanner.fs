@@ -12,7 +12,7 @@ open Interlude.Content
 type TopBanner(score_info: ScoreInfo) as this =
     inherit Container(NodeType.None)
     
-    let current_session = Content.Stats.STATE.CurrentSession
+    let current_session = Content.Stats.CurrentSession
 
     do
         this

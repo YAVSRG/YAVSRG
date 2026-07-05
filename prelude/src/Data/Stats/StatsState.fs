@@ -29,7 +29,7 @@ type CurrentSession =
         mutable KeymodePlaytime: Map<int, float>
     }
 
-    member this.ToSession: Session =
+    member this.ToSession() : Session =
         assert(this.NotesHit > 0)
         {
             Start = this.Start

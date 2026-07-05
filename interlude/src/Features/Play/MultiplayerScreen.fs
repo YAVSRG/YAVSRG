@@ -78,7 +78,7 @@ type MultiplayerScreen =
         scoring.OnEvent.Add(fun h ->
             match h.Action with
             | Hit d
-            | Hold d when not d.Missed -> Content.Stats.STATE.CurrentSession.NotesHit <- Content.Stats.STATE.CurrentSession.NotesHit + 1
+            | Hold d when not d.Missed -> Content.Stats.CurrentSession.NotesHit <- Content.Stats.CurrentSession.NotesHit + 1
             | _ -> ()
         )
 
@@ -113,7 +113,7 @@ type MultiplayerScreen =
                     Screen.back Transitions.LeaveGameplay
             then
                 lobby.AbandonPlaying()
-                Content.Stats.STATE.CurrentSession.PlaysQuit <- Content.Stats.STATE.CurrentSession.PlaysQuit + 1
+                Content.Stats.CurrentSession.PlaysQuit <- Content.Stats.CurrentSession.PlaysQuit + 1
 
         let finish_play (chart_time: ChartTime) =
             liveplay.Finish()
@@ -135,7 +135,7 @@ type MultiplayerScreen =
                     ScreenType.Score
                     Transitions.EnterGameplayNoFadeAudio
             then
-                Content.Stats.STATE.CurrentSession.PlaysCompleted <- Content.Stats.STATE.CurrentSession.PlaysCompleted + 1
+                Content.Stats.CurrentSession.PlaysCompleted <- Content.Stats.CurrentSession.PlaysCompleted + 1
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
             override this.Init(parent: Widget) =
@@ -152,7 +152,7 @@ type MultiplayerScreen =
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()
-                Content.Stats.STATE.CurrentSession.PlaysStarted <- Content.Stats.STATE.CurrentSession.PlaysStarted + 1
+                Content.Stats.CurrentSession.PlaysStarted <- Content.Stats.CurrentSession.PlaysStarted + 1
                 Content.Stats.SaveCurrentSession(now)
                 info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
@@ -166,7 +166,7 @@ type MultiplayerScreen =
                 )
 
             override this.OnExit(next) =
-                Content.Stats.STATE.CurrentSession.AddPlaytime info.WithMods.Keys play_time
+                Content.Stats.CurrentSession.AddPlaytime info.WithMods.Keys play_time
                 LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 
                 Toolbar.show_cursor ()

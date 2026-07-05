@@ -8,6 +8,7 @@ module StatsHelpers =
 
     let SESSION_TIMEOUT = 2L * 60L * 60L * 1000L // 2 hours
     let STREAK_TIMEOUT = 60L * 1000L // 1 minute
+    let QUIT_PENALTY = -100L
 
     let safe_stat_max (original: float) (incoming: float) : float =
         if Double.IsFinite incoming then

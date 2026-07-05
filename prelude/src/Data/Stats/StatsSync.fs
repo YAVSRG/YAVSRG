@@ -21,7 +21,7 @@ type StatsSyncUpstream =
         XPThisMonth: int64
     }
 
-    static member Create(state: StatsState) : StatsSyncUpstream option =
+    static member Create(state: Stats) : StatsSyncUpstream option =
         match state.BoundNetworkId with
         | None -> None
         | Some network_id ->
@@ -73,7 +73,7 @@ type StatsSyncDownstream =
         KeymodePlaytime: Map<int, float>
     }
 
-    member this.Accept(state: StatsState) : bool =
+    member this.Accept(state: Stats) : bool =
         match state.BoundNetworkId with
         | Some id when id <> this.NetworkId -> false
         | _ ->
