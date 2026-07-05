@@ -1,9 +1,7 @@
 ﻿namespace Prelude.Data.User.Stats
 
-open System
 open Percyqaz.Common
 open Percyqaz.Data
-open Percyqaz.Data.Sqlite
 open Prelude.Data.User
 
 // todo: make properties internal
@@ -49,11 +47,14 @@ type CurrentSession =
             KeymodePlaytime = this.KeymodePlaytime
         }
 
-    member this.AddPlaytime (keymode: int) (time: float) : unit =
+    member this.AddPlaytime(keymode: int) (time: float) : unit =
         this.PlayTime <- this.PlayTime + time
         this.KeymodePlaytime <- this.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
+        
+    member this.AddXP(xp: int64) : unit =
+        this.SessionScore <- this.SessionScore + xp |> max 0L
 
-    static member StartNew (now: int64) : CurrentSession =
+    static member StartNew(now: int64) : CurrentSession =
         {
             Start = now
             LastPlay = now
@@ -153,38 +154,3 @@ type StatsSaveData =
         Migrations: Set<string>
     }
     static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None }
-
-type StatsState =
-    {
-        mutable TotalStats : TotalStats
-        mutable CurrentSession :  CurrentSession
-        mutable PreviousSessions : Map<DateOnly, Session list>
-        mutable BoundNetworkId : int64 option
-        mutable Migrations : Set<string>
-    }
-    static member Default : StatsState = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None; PreviousSessions = Map.empty }
-    
-    member private this.ToSaveData() : StatsSaveData =
-        {
-            Migrations = this.Migrations
-            TotalStats = this.TotalStats
-            CurrentSession = this.CurrentSession
-            BoundNetworkId = this.BoundNetworkId
-        }
-        
-    member private this.SaveToDatabaseAs(id: string, database: Database) : unit =
-        DbSingletons.save<StatsSaveData> id (this.ToSaveData()) database
-        
-    member internal this.SaveBackup(backup_id: string, database: Database) : unit =
-        this.SaveToDatabaseAs("stats_" + backup_id, database)
-        
-    member internal this.Save(database: Database) : unit =
-        this.SaveToDatabaseAs("stats", database)
-        
-    member internal this.Load(database: Database) : unit =
-        let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database
-        this.TotalStats <- stats.TotalStats
-        this.CurrentSession <- stats.CurrentSession
-        this.Migrations <- stats.Migrations
-        this.BoundNetworkId <- stats.BoundNetworkId
-        // todo: not static because previous sessions are loaded from db

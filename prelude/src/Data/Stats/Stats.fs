@@ -16,7 +16,6 @@ type SessionXPGain =
     member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
 
 type Stats =
-    //internal
     {
         Database: Database
         mutable TotalStats : TotalStats
@@ -38,10 +37,6 @@ type Stats =
         DbSingletons.save<StatsSaveData> id (this.ToSaveData()) this.Database
     member internal this.SaveBackup(backup_id: string) : unit = this.SaveAs("stats_" + backup_id)
     member internal this.Save() : unit = this.SaveAs("stats")
-        
-    member this.Migrate(library: Library) : unit =
-        ignore library
-        //Migration.migrate(this, library)
         
     static member FromLibrary(library: Library) : Stats =
         
@@ -77,7 +72,6 @@ type Stats =
             
         let user_database = library.UserData.Database
         let stats = load_from_database(user_database)
-        stats.Migrate(library)
         timeout_current_session_if_needed(stats)
         stats
 
@@ -109,7 +103,7 @@ type Stats =
             this.Save()
             
     member this.HandleQuit() : SessionXPGain =
-        this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + QUIT_PENALTY |> max 0L
+        this.CurrentSession.AddXP(QUIT_PENALTY)
         this.SaveCurrentSession(Timestamp.now())
         {
             QuitPenalty = QUIT_PENALTY
@@ -145,13 +139,13 @@ type Stats =
             | Improvement.FasterBetter _ -> 200L, 0.3f
 
         let base_xp = int64 base_xp + int64 (float32 base_xp * streak_bonus)
-        this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + base_xp
+        this.CurrentSession.AddXP(base_xp)
 
         let lamp_xp = lamp_bonus_flat + int64 (float32 base_xp * lamp_bonus_mult)
-        this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + lamp_xp
+        this.CurrentSession.AddXP(lamp_xp)
 
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
-        this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + acc_xp
+        this.CurrentSession.AddXP(acc_xp)
 
         this.SaveCurrentSession(Timestamp.now())
 

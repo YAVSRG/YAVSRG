@@ -6,7 +6,7 @@ open Prelude
 open Prelude.Data.User
 open Prelude.Data.Library
 
-module private Migration =
+module StatsMigration =
 
     let legacy_backfill (library: Library) : Session array =
 
@@ -86,7 +86,7 @@ module private Migration =
         }
         |> Seq.toArray
 
-    let migrate_legacy_stats (state: StatsState, library: Library) : unit =
+    let migrate_legacy_stats (state: Stats, library: Library) : unit =
 
         Logging.Info "Backfilling session data from score history..."
 
@@ -104,7 +104,7 @@ module private Migration =
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
         state.TotalStats <- { legacy_stats with XP = legacy_stats.NotesHit }
 
-    let keymode_playtime_backfill (state: StatsState, library: Library) : unit =
+    let keymode_playtime_backfill (state: Stats, library: Library) : unit =
 
         Logging.Debug "Backfilling keymode playtimes from score history..."
 
@@ -172,13 +172,13 @@ module private Migration =
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         DbSessions.save_batch sessions library.UserData.Database
-        state.Save(library.UserData.Database)
+        state.Save()
 
-    let migrate (state: StatsState, library: Library) : unit =
+    let migrate (state: Stats, library: Library) : unit =
 
         if state.PreviousSessions = Map.empty && state.TotalStats.GameTime = 0.0 then
             migrate_legacy_stats(state, library)
 
         if not (state.Migrations.Contains "BackfillKeymodePlaytime") then
-            state.SaveBackup("backup_0.7.27.7", library.UserData.Database)
+            state.SaveBackup("backup_0.7.27.7")
             keymode_playtime_backfill(state, library)
