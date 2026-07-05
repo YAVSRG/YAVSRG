@@ -113,7 +113,7 @@ module Stats =
         let now = Timestamp.now()
         if CURRENT_SESSION.NotesHit = 0 then
             end_current_session now library.UserData
-        elif Timestamp.now() - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
+        elif now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
             end_current_session now library.UserData
         elif now < CURRENT_SESSION.LastTime then
             Logging.Error "System clock changes could break your session stats"

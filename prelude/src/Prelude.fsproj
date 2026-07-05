@@ -156,9 +156,9 @@
     <Compile Include="Data\Library\Views\Grouping.fs" />
     <Compile Include="Data\Library\Views\Views.fs" />
     <Compile Include="Data\Library\Endless.fs" />
-    <Compile Include="Data\Stats\Helpers.fs" />
-    <Compile Include="Data\Stats\State.fs" />
-    <Compile Include="Data\Stats\Sync.fs" />
+    <Compile Include="Data\Stats\StatsHelpers.fs" />
+    <Compile Include="Data\Stats\StatsState.fs" />
+    <Compile Include="Data\Stats\StatsSync.fs" />
     <Compile Include="Data\Stats\Migration.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Maintenance\Patterns.fs" />
