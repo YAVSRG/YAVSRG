@@ -41,31 +41,46 @@ type ErrorBar(ctx: HudContext) =
 
     let MAX_WINDOW = ctx.State.Ruleset.LargestWindow
 
+    let logfactor = ctx.Config.TimingDisplayLogSensitivity
+
+    let log_error (delta: float32) =
+        if delta = 0.0f then 0.0f
+        else
+            if logfactor = 0.0f then delta / float32 MAX_WINDOW * w * 0.5f
+            else
+                let sign = if delta < 0.0f then -1.0f else 1.0f
+                let abs_delta = MathF.Abs(delta)
+                let norm = abs_delta / float32 MAX_WINDOW
+                in sign * float32 (Math.Asinh(float (norm * (6.0f * logfactor) ** 1.5f)) / Math.Asinh(float ((6.0f * logfactor) ** 1.5f))) * w * 0.5f
+
     override this.Init(parent: Widget) =
         if ctx.Config.TimingDisplayMovingAverageType <> ErrorBarMovingAverageType.None then
             ctx.State.Subscribe(fun ev ->
                 match ev.Action with
                 | Hit e ->
                     if not e.Missed then
+                        let log_hit_err = log_error (float32 e.Delta)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                log_hit_err
                 | Hold e ->
                     if not e.Missed then
+                        let log_hit_err = log_error (float32 e.Delta)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * 0.5f)
+                                log_hit_err
                 | Release e ->
                     if not e.Missed then
+                        let log_hit_err = log_error (float32 e.Delta)
                         moving_average.Target <-
                             lerp
                                 moving_average_sensitivity
                                 moving_average.Target
-                                (e.Delta / MAX_WINDOW * w * ln_mult)
+                                (log_hit_err * ln_mult)
                 | GhostTap _
                 | DropHold
                 | RegrabHold -> ()
@@ -76,26 +91,29 @@ type ErrorBar(ctx: HudContext) =
                 if ev.Time >= last_seen_time - animation_time then
                     match ev.Action with
                     | Hit e ->
+                        let log_hit_err = log_error (float32 e.Delta)
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * 0.5f
+                                Position =  log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Hold e ->
+                        let log_hit_err = log_error (float32 e.Delta) 
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * 0.5f
+                                Position = log_hit_err
                                 IsRelease = false
                                 Judgement = e.Judgement |> Option.map fst
                             }
                     | Release e ->
+                        let log_hit_err = log_error (float32 e.Delta)
                         hits.Add
                             {
                                 Time = ev.Time
-                                Position = e.Delta / MAX_WINDOW * w * ln_mult
+                                Position = log_hit_err
                                 IsRelease = true
                                 Judgement = e.Judgement |> Option.map fst
                             }
@@ -154,9 +172,19 @@ type ErrorBar(ctx: HudContext) =
                 | None -> ()
 
         let center = this.Bounds.CenterX
+        let w = this.Bounds.Width * 0.5f
+
         let ms_to_x =
-            let w = this.Bounds.Width * 0.5f
-            fun time -> center + time / MAX_WINDOW * w
+            fun (time: float32<ms/rate>) ->
+                if logfactor = 0.0f then center + time / MAX_WINDOW * w
+                else
+                    let t = time / 1.0f<ms/rate>   // make into a <ms/rate> float
+                    let sign = if t < 0.0f then -1.0f else 1.0f
+                    let abs_time = if t < 0.0f then -t else t
+                    let norm = abs_time / float32 MAX_WINDOW
+                    center + float32 (Math.Asinh(float (norm * (6.0f * logfactor) ** 1.5f)) / Math.Asinh(float ((6.0f * logfactor) ** 1.5f))) * sign * w
+                    
+
         let r time1 time2 = Rect.FromEdges(ms_to_x time1, this.Bounds.Top, ms_to_x time2, this.Bounds.Bottom)
         draw r
 
