@@ -1,23 +1,9 @@
 ﻿namespace Prelude.Data.Library
 
-open System.IO
-open Percyqaz.Data
 open Prelude
 open Prelude.Charts
 open Prelude.Calculator
 open Prelude.Calculator.Patterns
-
-[<Json.AutoCodec>]
-[<RequireQualifiedAccess>]
-type AssetLocation =
-    | Absolute of string
-    | Hash of string
-    | Missing
-    member this.Path : string option =
-        match this with
-        | Absolute p -> Some p
-        | Hash h -> Path.Combine(get_game_folder "Songs", ".assets", h.Substring(0, 2), h) |> Some
-        | Missing -> None
 
 type ChartMeta =
     {

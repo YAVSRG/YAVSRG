@@ -4,6 +4,22 @@ open System
 open System.IO
 open System.Security.Cryptography
 open Percyqaz.Common
+open Percyqaz.Data
+open Prelude
+
+[<Json.AutoCodec>]
+[<RequireQualifiedAccess>]
+type AssetLocation =
+    | Absolute of string
+    | Hash of string
+    | Missing
+    // todo: remove this hard-coded path logic and go through a member on AssetStorage of ChartDatabase instead
+    member this.Path : string option =
+        match this with
+        | Absolute p -> Some p
+        | Hash h ->
+            Path.Combine(get_game_folder "Songs", ".assets", h.Substring(0, 2), h) |> Some
+        | Missing -> None
 
 [<AbstractClass>]
 type AssetStorage() =

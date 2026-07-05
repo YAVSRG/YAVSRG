@@ -128,8 +128,8 @@
     <Compile Include="Data\TaskProgress.fs" />
     <Compile Include="Data\WebServices.fs" />
     <Compile Include="Data\ImageServices.fs" />
-    <Compile Include="Data\ChartDatabase\Headers.fs" />
     <Compile Include="Data\ChartDatabase\AssetStorage.fs" />
+    <Compile Include="Data\ChartDatabase\ChartMeta.fs" />
     <Compile Include="Data\ChartDatabase\DbCharts.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabaseMigrations.fs" />
     <Compile Include="Data\ChartDatabase\ChartDatabase.fs" />
