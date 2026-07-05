@@ -78,7 +78,7 @@ type MultiplayerScreen =
         scoring.OnEvent.Add(fun h ->
             match h.Action with
             | Hit d
-            | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.STATE.CurrentSession.NotesHit <- Stats.STATE.CurrentSession.NotesHit + 1
             | _ -> ()
         )
 
@@ -113,7 +113,7 @@ type MultiplayerScreen =
                     Screen.back Transitions.LeaveGameplay
             then
                 lobby.AbandonPlaying()
-                CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
+                Stats.STATE.CurrentSession.PlaysQuit <- Stats.STATE.CurrentSession.PlaysQuit + 1
 
         let finish_play (chart_time: ChartTime) =
             liveplay.Finish()
@@ -135,7 +135,7 @@ type MultiplayerScreen =
                     ScreenType.Score
                     Transitions.EnterGameplayNoFadeAudio
             then
-                CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
+                Stats.STATE.CurrentSession.PlaysCompleted <- Stats.STATE.CurrentSession.PlaysCompleted + 1
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
             override this.Init(parent: Widget) =
@@ -152,7 +152,7 @@ type MultiplayerScreen =
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()
-                CURRENT_SESSION.PlaysStarted <- CURRENT_SESSION.PlaysStarted + 1
+                Stats.STATE.CurrentSession.PlaysStarted <- Stats.STATE.CurrentSession.PlaysStarted + 1
                 Stats.save_current_session now Content.UserData
                 info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
@@ -166,7 +166,7 @@ type MultiplayerScreen =
                 )
 
             override this.OnExit(next) =
-                CURRENT_SESSION.AddPlaytime info.WithMods.Keys play_time
+                Stats.STATE.CurrentSession.AddPlaytime info.WithMods.Keys play_time
                 LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 
                 Toolbar.show_cursor ()

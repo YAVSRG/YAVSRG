@@ -15,29 +15,31 @@ type SessionXPGain =
     member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
 
 module Stats =
+    
+    let STATE = StatsState.Default
 
-    let save (database: UserDatabase) : unit = save_stats database
+    let save (database: UserDatabase) : unit = STATE.Save(database)
 
     let private end_current_session (now: int64) (database: UserDatabase) : unit =
-        TOTAL_STATS <- TOTAL_STATS.AddSession CURRENT_SESSION
-        if CURRENT_SESSION.NotesHit > 0 then
-            let database_session : Session = CURRENT_SESSION.ToSession
+        STATE.TotalStats <- STATE.TotalStats.AddSession(STATE.CurrentSession)
+        if STATE.CurrentSession.NotesHit > 0 then
+            let database_session : Session = STATE.CurrentSession.ToSession
 
             let date = timestamp_to_rg_calendar_day database_session.Start |> DateOnly.FromDateTime
-            match PREVIOUS_SESSIONS.TryFind date with
-            | Some sessions -> PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, database_session :: sessions)
-            | None -> PREVIOUS_SESSIONS <- PREVIOUS_SESSIONS.Add (date, [database_session])
+            match STATE.PreviousSessions.TryFind date with
+            | Some sessions -> STATE.PreviousSessions <- STATE.PreviousSessions.Add (date, database_session :: sessions)
+            | None -> STATE.PreviousSessions <- STATE.PreviousSessions.Add (date, [database_session])
 
             DbSessions.save database_session database.Database
 
-        CURRENT_SESSION <- CurrentSession.StartNew now
+        STATE.CurrentSession <- CurrentSession.StartNew now
         save database
 
     let save_current_session (now: int64) (database: UserDatabase) : unit =
-        CURRENT_SESSION.LastTime <- now
-        if now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
+        STATE.CurrentSession.LastTime <- now
+        if now - SESSION_TIMEOUT > STATE.CurrentSession.LastPlay then
             end_current_session now database
-        elif now < CURRENT_SESSION.LastTime then
+        elif now < STATE.CurrentSession.LastTime then
             Logging.Error "System clock changes could break your session stats"
             end_current_session now database
         else
@@ -45,7 +47,7 @@ module Stats =
 
     let QUIT_PENALTY = -100L
     let quitter_penalty (database: UserDatabase) : SessionXPGain =
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + QUIT_PENALTY |> max 0L
+        STATE.CurrentSession.SessionScore <- STATE.CurrentSession.SessionScore + QUIT_PENALTY |> max 0L
         save_current_session (Timestamp.now()) database
         {
             QuitPenalty = QUIT_PENALTY
@@ -55,14 +57,14 @@ module Stats =
         }
 
     let handle_score (score_info: ScoreInfo) (improvement: ImprovementFlags) (database: UserDatabase) : SessionXPGain =
-        if score_info.TimePlayed - int64 (score_info.ChartMeta.Length / score_info.Rate) - STREAK_TIMEOUT > CURRENT_SESSION.LastPlay then
-            CURRENT_SESSION.Streak <- CURRENT_SESSION.Streak + 1
+        if score_info.TimePlayed - int64 (score_info.ChartMeta.Length / score_info.Rate) - STREAK_TIMEOUT > STATE.CurrentSession.LastPlay then
+            STATE.CurrentSession.Streak <- STATE.CurrentSession.Streak + 1
         else
-            CURRENT_SESSION.Streak <- 1
-        CURRENT_SESSION.LastPlay <- max CURRENT_SESSION.LastPlay score_info.TimePlayed
+            STATE.CurrentSession.Streak <- 1
+        STATE.CurrentSession.LastPlay <- max STATE.CurrentSession.LastPlay score_info.TimePlayed
 
         let base_xp = score_info.Scoring.JudgementCounts |> Array.truncate 5 |> Array.sum
-        let streak_bonus = float32 (CURRENT_SESSION.Streak - 1) * 0.1f |> max 0.0f |> min 1.0f
+        let streak_bonus = float32 (STATE.CurrentSession.Streak - 1) * 0.1f |> max 0.0f |> min 1.0f
 
         let lamp_bonus_flat, lamp_bonus_mult =
             match improvement.Lamp with
@@ -81,13 +83,13 @@ module Stats =
             | Improvement.FasterBetter _ -> 200L, 0.3f
 
         let base_xp = int64 base_xp + int64 (float32 base_xp * streak_bonus)
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + base_xp
+        STATE.CurrentSession.SessionScore <- STATE.CurrentSession.SessionScore + base_xp
 
         let lamp_xp = lamp_bonus_flat + int64 (float32 base_xp * lamp_bonus_mult)
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + lamp_xp
+        STATE.CurrentSession.SessionScore <- STATE.CurrentSession.SessionScore + lamp_xp
 
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
-        CURRENT_SESSION.SessionScore <- CURRENT_SESSION.SessionScore + acc_xp
+        STATE.CurrentSession.SessionScore <- STATE.CurrentSession.SessionScore + acc_xp
 
         save_current_session (Timestamp.now()) database
 
@@ -101,20 +103,20 @@ module Stats =
     let init (library: Library) : unit =
 
         let sessions = DbSessions.get_all library.UserData.Database
-        PREVIOUS_SESSIONS <-
+        STATE.PreviousSessions <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
-        load_stats library.UserData
+        STATE.Load(library.UserData)
 
-        Migration.migrate library
+        Migration.migrate(STATE, library)
 
         let now = Timestamp.now()
-        if CURRENT_SESSION.NotesHit = 0 then
+        if STATE.CurrentSession.NotesHit = 0 then
             end_current_session now library.UserData
-        elif now - SESSION_TIMEOUT > CURRENT_SESSION.LastPlay then
+        elif now - SESSION_TIMEOUT > STATE.CurrentSession.LastPlay then
             end_current_session now library.UserData
-        elif now < CURRENT_SESSION.LastTime then
+        elif now < STATE.CurrentSession.LastTime then
             Logging.Error "System clock changes could break your session stats"
             end_current_session now library.UserData

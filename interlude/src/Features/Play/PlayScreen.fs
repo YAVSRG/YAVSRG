@@ -38,7 +38,7 @@ type PlayScreen =
         scoring.OnEvent.Add(fun h ->
             match h.Action with
             | Hit d
-            | Hold d when not d.Missed -> CURRENT_SESSION.NotesHit <- CURRENT_SESSION.NotesHit + 1
+            | Hold d when not d.Missed -> Stats.STATE.CurrentSession.NotesHit <- Stats.STATE.CurrentSession.NotesHit + 1
             | _ -> ()
         )
 
@@ -54,7 +54,7 @@ type PlayScreen =
                     ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then
-                CURRENT_SESSION.PlaysRetried <- CURRENT_SESSION.PlaysRetried + 1
+                Stats.STATE.CurrentSession.PlaysRetried <- Stats.STATE.CurrentSession.PlaysRetried + 1
 
         let fade_in = Animation.Fade (if SHOW_START_OVERLAY then 0.0f else 1.0f)
         let start_overlay = StartOverlay(
@@ -67,7 +67,7 @@ type PlayScreen =
         )
 
         let skip_song () =
-            if Gameplay.continue_endless_mode() then CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
+            if Gameplay.continue_endless_mode() then Stats.STATE.CurrentSession.PlaysQuit <- Stats.STATE.CurrentSession.PlaysQuit + 1
 
         let give_up () =
             let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
@@ -102,7 +102,7 @@ type PlayScreen =
                     Screen.back Transitions.LeaveGameplay
             else
                 Screen.back Transitions.LeaveGameplay
-            |> function false -> () | true -> CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
+            |> function false -> () | true -> Stats.STATE.CurrentSession.PlaysQuit <- Stats.STATE.CurrentSession.PlaysQuit + 1
 
         let fail_midway (this: IPlayScreen) =
             liveplay.Finish()
@@ -125,7 +125,7 @@ type PlayScreen =
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    CURRENT_SESSION.PlaysQuit <- CURRENT_SESSION.PlaysQuit + 1
+                    Stats.STATE.CurrentSession.PlaysQuit <- Stats.STATE.CurrentSession.PlaysQuit + 1
 
             fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
@@ -150,7 +150,7 @@ type PlayScreen =
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    CURRENT_SESSION.PlaysCompleted <- CURRENT_SESSION.PlaysCompleted + 1
+                    Stats.STATE.CurrentSession.PlaysCompleted <- Stats.STATE.CurrentSession.PlaysCompleted + 1
 
             if pacemaker_state.IsFailedAtEnd(scoring) then
                 fade_in.Target <- 0.5f
@@ -195,7 +195,7 @@ type PlayScreen =
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()
                 if previous <> ScreenType.Play then
-                    CURRENT_SESSION.PlaysStarted <- CURRENT_SESSION.PlaysStarted + 1
+                    Stats.STATE.CurrentSession.PlaysStarted <- Stats.STATE.CurrentSession.PlaysStarted + 1
                 Stats.save_current_session now Content.UserData
                 info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
@@ -209,7 +209,7 @@ type PlayScreen =
                 DiscordRPC.playing_timed (%"discord_status.play", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                CURRENT_SESSION.AddPlaytime info.WithMods.Keys play_time
+                Stats.STATE.CurrentSession.AddPlaytime info.WithMods.Keys play_time
                 if not offset_manually_changed then
                     LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
                 Toolbar.show_cursor ()

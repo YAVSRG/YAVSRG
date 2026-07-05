@@ -11,11 +11,11 @@ module StatsSync =
 
     let upload_online_stats () =
         if Network.status = Network.LoggedIn then
-            match StatsSyncUpstream.Create () with
+            match StatsSyncUpstream.Create(Stats.STATE) with
             | None -> ()
             | Some upstream_data ->
                 Stats.Sync.post (
-                    (upstream_data),
+                    upstream_data,
                     (function
                         | Some true -> ()
                         | Some false -> Logging.Error "Error submitting stats (Server indicated error)"
@@ -28,8 +28,8 @@ module StatsSync =
             (function
                 | Some data ->
                     GameThread.defer (fun () ->
-                        if data.Accept then
-                            Logging.Debug "Syncing stats with online server ...";
+                        if data.Accept(Stats.STATE) then
+                            Logging.Debug "Syncing stats with online server ..."
                             upload_online_stats ()
                     )
                 | None -> Logging.Error "Error fetching online stats"

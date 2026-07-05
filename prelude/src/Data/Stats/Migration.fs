@@ -86,25 +86,25 @@ module private Migration =
         }
         |> Seq.toArray
 
-    let migrate_legacy_stats (library: Library) : unit =
+    let migrate_legacy_stats (state: StatsState, library: Library) : unit =
 
         Logging.Info "Backfilling session data from score history..."
 
-        TOTAL_STATS <- TotalStats.Default
-        CURRENT_SESSION <- CurrentSession.Default
+        state.TotalStats <- TotalStats.Default
+        state.CurrentSession <- CurrentSession.Default
 
         let sessions = legacy_backfill library
         DbSessions.save_batch sessions library.UserData.Database
-        PREVIOUS_SESSIONS <-
+        state.PreviousSessions <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
 
         let legacy_stats = load_important_json_file "Stats" (System.IO.Path.Combine(get_game_folder "Data", "stats.json")) false
-        TOTAL_STATS <- { legacy_stats with XP = legacy_stats.NotesHit }
+        state.TotalStats <- { legacy_stats with XP = legacy_stats.NotesHit }
 
-    let keymode_playtime_backfill (library: Library) : unit =
+    let keymode_playtime_backfill (state: StatsState, library: Library) : unit =
 
         Logging.Debug "Backfilling keymode playtimes from score history..."
 
@@ -123,7 +123,7 @@ module private Migration =
             | None -> 123056.0
 
         let sessions =
-            PREVIOUS_SESSIONS
+            state.PreviousSessions
             |> Map.values
             |> Seq.concat
             |> Array.ofSeq
@@ -156,29 +156,29 @@ module private Migration =
 
         let total_playtime = sessions |> Array.sumBy _.PlayTime
         let total_gametime = sessions |> Array.sumBy _.GameTime
-        Logging.Debug "Total playtime: %s -> %s" (format_long_time TOTAL_STATS.PlayTime) (format_long_time total_playtime)
-        Logging.Debug "Total game time: %s -> %s" (format_long_time TOTAL_STATS.GameTime) (format_long_time total_gametime)
+        Logging.Debug "Total playtime: %s -> %s" (format_long_time state.TotalStats.PlayTime) (format_long_time total_playtime)
+        Logging.Debug "Total game time: %s -> %s" (format_long_time state.TotalStats.GameTime) (format_long_time total_gametime)
 
-        TOTAL_STATS <-
-            { TOTAL_STATS with
-                PlayTime = max TOTAL_STATS.PlayTime total_playtime
-                GameTime = max TOTAL_STATS.GameTime total_gametime
+        state.TotalStats <-
+            { state.TotalStats with
+                PlayTime = max state.TotalStats.PlayTime total_playtime
+                GameTime = max state.TotalStats.GameTime total_gametime
                 KeymodePlaytime = total_keymodes
             }
-        MIGRATIONS <- MIGRATIONS.Add "BackfillKeymodePlaytime"
-        PREVIOUS_SESSIONS <-
+        state.Migrations <- state.Migrations.Add "BackfillKeymodePlaytime"
+        state.PreviousSessions <-
             sessions
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         DbSessions.save_batch sessions library.UserData.Database
-        save_stats library.UserData
+        state.Save(library.UserData)
 
-    let migrate (library: Library) : unit =
+    let migrate (state: StatsState, library: Library) : unit =
 
-        if PREVIOUS_SESSIONS = Map.empty && TOTAL_STATS.GameTime = 0.0 then
-            migrate_legacy_stats library
+        if state.PreviousSessions = Map.empty && state.TotalStats.GameTime = 0.0 then
+            migrate_legacy_stats(state, library)
 
-        if not (MIGRATIONS.Contains "BackfillKeymodePlaytime") then
-            backup_stats "backup_0.7.27.7" library.UserData
-            keymode_playtime_backfill library
+        if not (state.Migrations.Contains "BackfillKeymodePlaytime") then
+            state.SaveBackup("backup_0.7.27.7", library.UserData)
+            keymode_playtime_backfill(state, library)

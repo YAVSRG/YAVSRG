@@ -9,7 +9,7 @@ open Interlude.Features.Online
 type OverallHeader() =
     inherit Container(NodeType.Leaf)
 
-    let xp = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
+    let xp = Stats.STATE.TotalStats.XP + Stats.STATE.CurrentSession.SessionScore
     let level = xp |> current_level
     let xp_to_next_level = xp_for_level (level + 1) - xp_for_level level
     let current_xp = xp - xp_for_level level
@@ -36,7 +36,7 @@ type OverallHeader() =
                     .Position(Position.SliceT(100.0f).ShrinkX(10.0f))
                     .Align(Alignment.LEFT),
 
-                Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") (TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit))
+                Text(sprintf "%s: %i" (%"stats.sessions.notes_hit") (Stats.STATE.TotalStats.NotesHit + Stats.STATE.CurrentSession.NotesHit))
                     .Color(Colors.text_subheading)
                     .Align(Alignment.RIGHT)
                     .Position(Position.SliceT(50.0f).ShrinkT(15.0f).ShrinkX(10.0f)),

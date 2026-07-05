@@ -21,8 +21,8 @@ type StatsSyncUpstream =
         XPThisMonth: int64
     }
 
-    static member Create () : StatsSyncUpstream option =
-        match BOUND_NETWORK_ID with
+    static member Create(state: StatsState) : StatsSyncUpstream option =
+        match state.BoundNetworkId with
         | None -> None
         | Some network_id ->
 
@@ -31,31 +31,31 @@ type StatsSyncUpstream =
         let month_end = start_of_leaderboard_month (month + 1)
 
         let sessions =
-            PREVIOUS_SESSIONS.Values
+            state.PreviousSessions.Values
             |> Seq.concat
             |> Seq.filter (fun s -> s.Start >= month_start && s.End <= month_end)
             |> Array.ofSeq
 
         {
-            Playtime = TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime
-            PracticeTime = TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime
-            GameTime = TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime
-            NotesHit = TOTAL_STATS.NotesHit + CURRENT_SESSION.NotesHit
+            Playtime = state.TotalStats.PlayTime + state.CurrentSession.PlayTime
+            PracticeTime = state.TotalStats.PracticeTime + state.CurrentSession.PracticeTime
+            GameTime = state.TotalStats.GameTime + state.CurrentSession.GameTime
+            NotesHit = state.TotalStats.NotesHit + state.CurrentSession.NotesHit
 
-            XP = TOTAL_STATS.XP + CURRENT_SESSION.SessionScore
-            KeymodePlaytime = add_playtimes TOTAL_STATS.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime
+            XP = state.TotalStats.XP + state.CurrentSession.SessionScore
+            KeymodePlaytime = add_playtimes state.TotalStats.KeymodePlaytime state.CurrentSession.KeymodePlaytime
 
             NetworkId = network_id
             Month = month
             KeymodePlaytimeThisMonth =
                 let month_playtimes = sessions |> Seq.map _.KeymodePlaytime |> Seq.fold add_playtimes Map.empty
-                add_playtimes month_playtimes CURRENT_SESSION.KeymodePlaytime
+                add_playtimes month_playtimes state.CurrentSession.KeymodePlaytime
             PlaytimeThisMonth =
                 let month_playtime = sessions |> Array.sumBy _.PlayTime
-                month_playtime + CURRENT_SESSION.PlayTime
+                month_playtime + state.CurrentSession.PlayTime
             XPThisMonth =
                 let month_xp = sessions |> Array.sumBy _.XP
-                month_xp + CURRENT_SESSION.SessionScore
+                month_xp + state.CurrentSession.SessionScore
         }
         |> Some
 
@@ -73,21 +73,21 @@ type StatsSyncDownstream =
         KeymodePlaytime: Map<int, float>
     }
 
-    member this.Accept : bool =
-        match BOUND_NETWORK_ID with
+    member this.Accept(state: StatsState) : bool =
+        match state.BoundNetworkId with
         | Some id when id <> this.NetworkId -> false
         | _ ->
         // in theory if never synced, could ADD online stats to current
 
-        BOUND_NETWORK_ID <- Some this.NetworkId
-        TOTAL_STATS <-
-            { TOTAL_STATS with
-                PlayTime = safe_stat_max TOTAL_STATS.PlayTime (this.PlayTime - CURRENT_SESSION.PlayTime)
-                PracticeTime = safe_stat_max TOTAL_STATS.PracticeTime (this.PracticeTime - CURRENT_SESSION.PracticeTime)
-                GameTime = safe_stat_max TOTAL_STATS.GameTime (this.GameTime - CURRENT_SESSION.GameTime)
-                NotesHit = max TOTAL_STATS.NotesHit (this.NotesHit - CURRENT_SESSION.NotesHit)
-                XP = max TOTAL_STATS.XP (this.XP - CURRENT_SESSION.SessionScore)
-                KeymodePlaytime = combine_playtimes safe_stat_max TOTAL_STATS.KeymodePlaytime (combine_playtimes (-) this.KeymodePlaytime CURRENT_SESSION.KeymodePlaytime)
+        state.BoundNetworkId <- Some this.NetworkId
+        state.TotalStats <-
+            { state.TotalStats with
+                PlayTime = safe_stat_max state.TotalStats.PlayTime (this.PlayTime - state.CurrentSession.PlayTime)
+                PracticeTime = safe_stat_max state.TotalStats.PracticeTime (this.PracticeTime - state.CurrentSession.PracticeTime)
+                GameTime = safe_stat_max state.TotalStats.GameTime (this.GameTime - state.CurrentSession.GameTime)
+                NotesHit = max state.TotalStats.NotesHit (this.NotesHit - state.CurrentSession.NotesHit)
+                XP = max state.TotalStats.XP (this.XP - state.CurrentSession.SessionScore)
+                KeymodePlaytime = combine_playtimes safe_stat_max state.TotalStats.KeymodePlaytime (combine_playtimes (-) this.KeymodePlaytime state.CurrentSession.KeymodePlaytime)
             }
 
         true

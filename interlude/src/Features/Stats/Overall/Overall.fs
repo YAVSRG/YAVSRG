@@ -30,17 +30,17 @@ type OverallTab =
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(150.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 OverallTime(
-                    (fun () -> TOTAL_STATS.GameTime + CURRENT_SESSION.GameTime),
-                    (fun () -> TOTAL_STATS.PlayTime + CURRENT_SESSION.PlayTime),
-                    (fun () -> TOTAL_STATS.PracticeTime + CURRENT_SESSION.PracticeTime)
+                    (fun () -> Stats.STATE.TotalStats.GameTime + Stats.STATE.CurrentSession.GameTime),
+                    (fun () -> Stats.STATE.TotalStats.PlayTime + Stats.STATE.CurrentSession.PlayTime),
+                    (fun () -> Stats.STATE.TotalStats.PracticeTime + Stats.STATE.CurrentSession.PracticeTime)
                 )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(450.0f).SliceT(250.0f).ShrinkX(40.0f)),
 
                 PlayCount(
-                    (fun () -> TOTAL_STATS.PlaysStarted + CURRENT_SESSION.PlaysStarted),
-                    (fun () -> TOTAL_STATS.PlaysCompleted + CURRENT_SESSION.PlaysCompleted),
-                    (fun () -> TOTAL_STATS.PlaysRetried + CURRENT_SESSION.PlaysRetried),
-                    (fun () -> TOTAL_STATS.PlaysQuit + CURRENT_SESSION.PlaysQuit)
+                    (fun () -> Stats.STATE.TotalStats.PlaysStarted + Stats.STATE.CurrentSession.PlaysStarted),
+                    (fun () -> Stats.STATE.TotalStats.PlaysCompleted + Stats.STATE.CurrentSession.PlaysCompleted),
+                    (fun () -> Stats.STATE.TotalStats.PlaysRetried + Stats.STATE.CurrentSession.PlaysRetried),
+                    (fun () -> Stats.STATE.TotalStats.PlaysQuit + Stats.STATE.CurrentSession.PlaysQuit)
                  )
                     .Position(Position.SlicePercentL(LEFT_SIDE_SPLIT).ShrinkT(750.0f).SliceT(250.0f).ShrinkX(40.0f)),
 

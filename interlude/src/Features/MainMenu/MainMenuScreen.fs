@@ -148,7 +148,7 @@ type MainMenuScreen() =
             if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
                 Library.LibraryActions.recalculate_patterns()
 
-            if TOTAL_STATS.NotesHit = 0 then
+            if Stats.STATE.TotalStats.NotesHit = 0 then
                 // todo: quick start wizard instead
                 WikiBrowserPage.Show()
 

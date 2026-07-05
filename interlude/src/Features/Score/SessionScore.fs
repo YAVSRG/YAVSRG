@@ -9,7 +9,7 @@ open Interlude.UI
 type SessionScoreBar(xp_gain: SessionXPGain) =
     inherit StaticWidget(NodeType.None)
 
-    let xp_now = CURRENT_SESSION.SessionScore
+    let xp_now = Stats.STATE.CurrentSession.SessionScore
     let xp_before = xp_now - xp_gain.Total
 
     let xp_display = Animation.Fade(float32 xp_before)

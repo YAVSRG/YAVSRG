@@ -150,32 +150,42 @@ type StatsSaveData =
     {
         TotalStats: TotalStats
         CurrentSession: CurrentSession
-        Migrations: Set<string>
         BoundNetworkId: int64 option
+        Migrations: Set<string>
     }
     static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None }
 
-[<AutoOpen>]
-module StatsState =
-
-    let SESSION_TIMEOUT = 2L * 60L * 60L * 1000L // 2 hours
-    let STREAK_TIMEOUT = 60L * 1000L // 1 minute
-
-    let mutable internal MIGRATIONS : Set<string> = Set.empty
-    let mutable TOTAL_STATS : TotalStats = Unchecked.defaultof<_>
-    let mutable CURRENT_SESSION : CurrentSession = Unchecked.defaultof<_>
-    let mutable PREVIOUS_SESSIONS : Map<DateOnly, Session list> = Map.empty
-    let mutable BOUND_NETWORK_ID = None
-
-    let internal backup_stats (id: string) (database: UserDatabase) : unit =
-        DbSingletons.save<StatsSaveData> ("stats_" + id) { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
-
-    let internal save_stats (database: UserDatabase) : unit =
-        DbSingletons.save<StatsSaveData> "stats" { TotalStats = TOTAL_STATS; CurrentSession = CURRENT_SESSION; Migrations = MIGRATIONS; BoundNetworkId = BOUND_NETWORK_ID } database.Database
-
-    let internal load_stats (database: UserDatabase) : unit =
+type StatsState =
+    {
+        mutable TotalStats : TotalStats
+        mutable CurrentSession :  CurrentSession
+        mutable PreviousSessions : Map<DateOnly, Session list>
+        mutable BoundNetworkId : int64 option
+        mutable Migrations : Set<string>
+    }
+    static member Default : StatsState = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None; PreviousSessions = Map.empty }
+    
+    member private this.ToSaveData() : StatsSaveData =
+        {
+            Migrations = this.Migrations
+            TotalStats = this.TotalStats
+            CurrentSession = this.CurrentSession
+            BoundNetworkId = this.BoundNetworkId
+        }
+        
+    member private this.SaveToDatabaseAs(id: string, database: UserDatabase) : unit =
+        DbSingletons.save<StatsSaveData> id (this.ToSaveData()) database.Database
+        
+    member internal this.SaveBackup(backup_id: string, database: UserDatabase) : unit =
+        this.SaveToDatabaseAs("stats_" + backup_id, database)
+        
+    member internal this.Save(database: UserDatabase) : unit =
+        this.SaveToDatabaseAs("stats", database)
+        
+    member internal this.Load(database: UserDatabase) : unit =
         let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database.Database
-        TOTAL_STATS <- stats.TotalStats
-        CURRENT_SESSION <- stats.CurrentSession
-        MIGRATIONS <- stats.Migrations
-        BOUND_NETWORK_ID <- stats.BoundNetworkId
+        this.TotalStats <- stats.TotalStats
+        this.CurrentSession <- stats.CurrentSession
+        this.Migrations <- stats.Migrations
+        this.BoundNetworkId <- stats.BoundNetworkId
+        // todo: not static because previous sessions are loaded from db
