@@ -6,8 +6,6 @@ open Percyqaz.Data
 open Percyqaz.Data.Sqlite
 open Prelude.Data.User
 
-type Session = Prelude.Data.User.Session
-
 // todo: make properties internal
 [<Json.AutoCodec(false)>]
 type CurrentSession =

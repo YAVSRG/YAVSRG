@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
+open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.Content
 
