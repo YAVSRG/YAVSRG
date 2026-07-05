@@ -6,12 +6,13 @@ open Prelude.Data.User.Stats
 open Interlude.Web.Shared.Requests
 open Interlude.Features.Online
 open Interlude.Features.Gameplay
+open Interlude.Content
 
 module StatsSync =
 
     let upload_online_stats () =
         if Network.status = Network.LoggedIn then
-            match StatsSyncUpstream.Create(Stats.STATE) with
+            match StatsSyncUpstream.Create(Content.Stats.STATE) with
             | None -> ()
             | Some upstream_data ->
                 Stats.Sync.post (
@@ -28,7 +29,7 @@ module StatsSync =
             (function
                 | Some data ->
                     GameThread.defer (fun () ->
-                        if data.Accept(Stats.STATE) then
+                        if data.Accept(Content.Stats.STATE) then
                             Logging.Debug "Syncing stats with online server ..."
                             upload_online_stats ()
                     )

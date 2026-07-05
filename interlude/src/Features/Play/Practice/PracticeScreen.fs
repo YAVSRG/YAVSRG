@@ -52,7 +52,7 @@ type PracticeScreen =
             scoring.OnEvent.Add(fun h ->
                 match h.Action with
                 | Hit d
-                | Hold d when not d.Missed -> Stats.STATE.CurrentSession.NotesHit <- Stats.STATE.CurrentSession.NotesHit + 1
+                | Hold d when not d.Missed -> Content.Stats.STATE.CurrentSession.NotesHit <- Content.Stats.STATE.CurrentSession.NotesHit + 1
                 | _ -> ()
             )
 
@@ -164,7 +164,7 @@ type PracticeScreen =
                     this.State.Scoring.Update chart_time
 
                 if not state.Paused.Value then
-                    Stats.STATE.CurrentSession.PracticeTime <- Stats.STATE.CurrentSession.PracticeTime + elapsed_ms
+                    Content.Stats.STATE.CurrentSession.PracticeTime <- Content.Stats.STATE.CurrentSession.PracticeTime + elapsed_ms
                     Input.finish_frame_events()
 
                 base.Update(elapsed_ms, moved)

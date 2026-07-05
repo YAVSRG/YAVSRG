@@ -32,7 +32,6 @@ module Startup =
 
             Content.load_data ()
             Printerlude.init instance
-            Stats.init Content.Library
             StatsSync.init ()
             SelectedChart.init ()
             Mounts.init ()
@@ -80,7 +79,6 @@ module Startup =
             deinit_once <- true
 
             if deinit_required then
-                Stats.save_current_session (Timestamp.now()) Content.UserData
                 Content.deinit ()
                 Options.deinit ()
                 Network.deinit ()

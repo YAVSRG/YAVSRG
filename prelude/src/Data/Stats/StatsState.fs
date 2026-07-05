@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Data
+open Percyqaz.Data.Sqlite
 open Prelude.Data.User
 
 type Session = Prelude.Data.User.Session
@@ -173,17 +174,17 @@ type StatsState =
             BoundNetworkId = this.BoundNetworkId
         }
         
-    member private this.SaveToDatabaseAs(id: string, database: UserDatabase) : unit =
-        DbSingletons.save<StatsSaveData> id (this.ToSaveData()) database.Database
+    member private this.SaveToDatabaseAs(id: string, database: Database) : unit =
+        DbSingletons.save<StatsSaveData> id (this.ToSaveData()) database
         
-    member internal this.SaveBackup(backup_id: string, database: UserDatabase) : unit =
+    member internal this.SaveBackup(backup_id: string, database: Database) : unit =
         this.SaveToDatabaseAs("stats_" + backup_id, database)
         
-    member internal this.Save(database: UserDatabase) : unit =
+    member internal this.Save(database: Database) : unit =
         this.SaveToDatabaseAs("stats", database)
         
-    member internal this.Load(database: UserDatabase) : unit =
-        let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database.Database
+    member internal this.Load(database: Database) : unit =
+        let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database
         this.TotalStats <- stats.TotalStats
         this.CurrentSession <- stats.CurrentSession
         this.Migrations <- stats.Migrations

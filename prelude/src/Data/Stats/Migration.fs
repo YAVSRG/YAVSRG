@@ -172,7 +172,7 @@ module private Migration =
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
         DbSessions.save_batch sessions library.UserData.Database
-        state.Save(library.UserData)
+        state.Save(library.UserData.Database)
 
     let migrate (state: StatsState, library: Library) : unit =
 
@@ -180,5 +180,5 @@ module private Migration =
             migrate_legacy_stats(state, library)
 
         if not (state.Migrations.Contains "BackfillKeymodePlaytime") then
-            state.SaveBackup("backup_0.7.27.7", library.UserData)
+            state.SaveBackup("backup_0.7.27.7", library.UserData.Database)
             keymode_playtime_backfill(state, library)

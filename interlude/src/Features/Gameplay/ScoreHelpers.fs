@@ -102,10 +102,8 @@ module Gameplay =
                     | None -> Bests.create score_info, ImprovementFlags.New
 
                 let xp_gain =
-                    if quit_out then
-                        Stats.quitter_penalty Content.UserData
-                    else
-                        Stats.handle_score standardised_score improvement_flags Content.UserData
+                    if quit_out then Content.Stats.HandleQuit()
+                    else Content.Stats.HandleScore(standardised_score, improvement_flags)
 
                 if (options.QuitOutBehaviour.Value = QuitOutBehaviour.SaveAndShow || not quit_out) && (not options.OnlySaveNewRecords.Value || improvement_flags <> ImprovementFlags.None) then
                     Content.UserData.SaveScore(score_info)

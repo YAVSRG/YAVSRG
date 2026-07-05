@@ -7,11 +7,12 @@ open Prelude
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.UI
+open Interlude.Content
 
 type TopBanner(score_info: ScoreInfo) as this =
     inherit Container(NodeType.None)
     
-    let current_session = Stats.STATE.CurrentSession
+    let current_session = Content.Stats.STATE.CurrentSession
 
     do
         this

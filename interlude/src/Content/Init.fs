@@ -9,6 +9,7 @@ open Prelude.Skins.Themes
 open Prelude.Backbeat
 open Prelude.Data.Library
 open Prelude.Data.User
+open Prelude.Data.User.Stats
 
 type Content() =
 
@@ -28,6 +29,7 @@ type Content() =
     static member UserData : UserDatabase = Data.library.UserData
     static member Charts : ChartDatabase = Data.library.Charts
     static member Collections : Collections = Data.library.Collections
+    static member Stats : Stats = Data.stats
 
     static member Table : Table option = Tables.current
     static member ThemeConfig : ThemeConfig = Themes.current_config
