@@ -43,7 +43,7 @@ type EtternaPackCard(data: EtternaOnlinePack) as this =
                 | _ -> ()
                 task_tracking.Progress <- p
 
-            let task = OnlineImports.download_etterna_pack(data.name, data.download, Content.Charts, Content.UserData, progress_callback)
+            let task = OnlineImports.download_etterna_pack(data.name, data.download, Content.Library, progress_callback)
             import_queue.Request(task,
                 function
                 | Ok result ->

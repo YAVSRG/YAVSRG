@@ -45,9 +45,9 @@ type private EditMountPage(game: MountedGameType, mount: MountedChartSource, set
 
             let task =
                 if queued_import = 2 then
-                    Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
+                    Mount.import_all(setting.Value.Value, Content.Library, task_tracking.set_Progress)
                 else
-                    Mount.import_new(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
+                    Mount.import_new(setting.Value.Value, Content.Library, task_tracking.set_Progress)
 
             import_queue.Request(task,
                 function

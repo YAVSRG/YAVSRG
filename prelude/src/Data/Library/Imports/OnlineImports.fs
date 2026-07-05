@@ -8,7 +8,6 @@ open Prelude.Charts
 open Prelude.Formats
 open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Data.User
 
 module OnlineImports =
 
@@ -24,7 +23,7 @@ module OnlineImports =
             | WebResult.Exception err -> return Error err.Message
         }
 
-    let download_etterna_pack (name: string, url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_etterna_pack (name: string, url: string, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".zip")
@@ -33,7 +32,7 @@ module OnlineImports =
                     progress Faulted
                     return Error "Download failure"
                 | true ->
-                    match! Imports.convert_stepmania_pack_zip(target, name, chart_db, user_db, progress) with
+                    match! Imports.convert_stepmania_pack_zip(target, name, library, progress) with
                     | Ok result ->
                         Imports.delete_file.Request(target, ignore)
                         progress Complete
@@ -48,7 +47,7 @@ module OnlineImports =
                 return Error err.Message
         }
 
-    let download_osu_set (url: string, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let download_osu_set (url: string, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 let target = Path.Combine(get_game_folder "Downloads", Guid.NewGuid().ToString() + ".osz")
@@ -57,7 +56,7 @@ module OnlineImports =
                     progress Faulted
                     return Error "Download failure"
                 | true ->
-                    match! Imports.auto_detect_import(target, chart_db, user_db, progress) with
+                    match! Imports.auto_detect_import(target, library, progress) with
                     | Ok result ->
                         Imports.delete_file.Request(target, ignore)
                         progress Complete
@@ -72,14 +71,14 @@ module OnlineImports =
                 return Error err.Message
         }
 
-    let download_by_origin (origin: ChartOrigin, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) =
+    let download_by_origin (origin: ChartOrigin, library: Library, progress: ProgressCallback) =
         async {
             match origin with
 
             | ChartOrigin.Osu osu ->
                 // todo: download via md5 if available
                 let url = sprintf "https://catboy.best/d/%in" osu.BeatmapSetId
-                return! download_osu_set (url, chart_db, user_db, progress)
+                return! download_osu_set (url, library, progress)
 
             | ChartOrigin.Quaver _ ->
                 progress Faulted
@@ -91,7 +90,7 @@ module OnlineImports =
                     progress Faulted
                     return Error (sprintf "Error getting URL from EtternaOnline for '%s': %s" pack reason)
                 | Ok url ->
-                    return! download_etterna_pack (pack, url, chart_db, user_db, progress)
+                    return! download_etterna_pack (pack, url, library, progress)
         }
 
     open Prelude.Backbeat.Archive

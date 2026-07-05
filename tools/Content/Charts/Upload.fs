@@ -79,7 +79,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (chart_meta.Audio.Path).Value
+                                    File.OpenRead(chart_meta.Audio.Path.Value)
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -98,7 +98,7 @@ module Upload =
                                 backblaze_client.UploadAsync(
                                     BUCKET_ID,
                                     file_name,
-                                    File.OpenRead (chart_meta.Background.Path).Value
+                                    File.OpenRead(chart_meta.Background.Path.Value)
                                 )
 
                             response.EnsureSuccessStatusCode() |> ignore
@@ -231,7 +231,7 @@ module Upload =
         Logging.Info "Uploading '%s' complete!" folder_name
 
     let get_etterna_pack (pack_name: string) =
-        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library.Charts, interlude_scores_db, TaskProgress.log_progress_bar pack_name)
+        OnlineImports.download_by_origin (ChartOrigin.Etterna pack_name, interlude_library, TaskProgress.log_progress_bar pack_name)
         |> Async.RunSynchronously
 
     let etterna_pack_aio (pack_name: string) =

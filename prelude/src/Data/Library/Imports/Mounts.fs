@@ -7,7 +7,6 @@ open Percyqaz.Common
 open Prelude.Formats
 open Prelude.Data
 open Prelude.Data.Library
-open Prelude.Data.User
 
 [<Json.AutoCodec>]
 type MountedChartSourceType =
@@ -35,7 +34,7 @@ type MountedChartSource =
 
 module Mount =
 
-    let import_new (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let import_new (source: MountedChartSource, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             try
                 match source.Type with
@@ -45,7 +44,7 @@ module Mount =
                     | Some date -> Logging.Info "Last import was %s, only importing song folders modified since then" (date.ToString("yyyy-MM-dd HH:mm:ss"))
                     | None -> ()
                     let config = ConversionOptions.Pack(packname, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles)
-                    let! result = Imports.convert_pack_folder(source.SourceFolder, config, chart_db, user_db, progress)
+                    let! result = Imports.convert_pack_folder(source.SourceFolder, config, library, progress)
 
                     log_conversion result
                     source.LastImported <- Some DateTime.UtcNow
@@ -67,8 +66,7 @@ module Mount =
                             Imports.convert_pack_folder(
                                 pack_folder,
                                 ConversionOptions.Pack(pack_name, source.LastImported, if source.CopyAssetFiles then CopyAssetFiles else LinkAssetFiles),
-                                chart_db,
-                                user_db,
+                                library,
                                 (fun p -> Nested (pack_name, i + 1, pack_folders.Length, p)) >> progress
                             )
                         results <- ConversionResult.Combine result results
@@ -83,10 +81,10 @@ module Mount =
                 return Error err.Message
         }
 
-    let import_all (source: MountedChartSource, chart_db: ChartDatabase, user_db: UserDatabase, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
+    let import_all (source: MountedChartSource, library: Library, progress: ProgressCallback) : Async<Result<ConversionResult, string>> =
         async {
             source.LastImported <- None
-            return! import_new(source, chart_db, user_db, progress)
+            return! import_new(source, library, progress)
         }
 
     let find_linked_charts (source: MountedChartSource, chart_db: ChartDatabase) : ChartMeta seq =

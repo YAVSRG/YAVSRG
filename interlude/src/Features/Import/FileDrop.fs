@@ -94,7 +94,7 @@ module FileDrop =
             else
 
             let task_tracking = TaskTracking.add (Path.GetFileName path)
-            let task = Imports.auto_detect_import(path, Content.Charts, Content.UserData, task_tracking.set_Progress)
+            let task = Imports.auto_detect_import(path, Content.Library, task_tracking.set_Progress)
             import_queue.Request(task,
                 function
                 | Ok result ->

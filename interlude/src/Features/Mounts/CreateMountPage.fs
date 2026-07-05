@@ -35,7 +35,7 @@ type private CreateMountPage(game: MountedGameType, path: string, setting: Setti
         setting.Value <- Some mount
 
         let task_tracking = sprintf "%O: %s" game %"mount.importall" |> TaskTracking.add
-        let task = Mount.import_all(setting.Value.Value, Content.Charts, Content.UserData, task_tracking.set_Progress)
+        let task = Mount.import_all(setting.Value.Value, Content.Library, task_tracking.set_Progress)
         import_queue.Request(task,
             function
             | Ok result ->
