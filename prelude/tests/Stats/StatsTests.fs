@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Tests.Stats
 
 open System
+open System.Linq
 open NUnit.Framework
 open Percyqaz.Common
 open Prelude.Data.User
@@ -60,10 +61,22 @@ module StatsTests =
             clock.Add(1)
             stats.SaveCurrentSession()
             Assert.AreEqual(1, stats.GetSessionsForDate(today).Length)
-            Assert.True(stats.GetCurrentSession().NotesHit = 0)
+            Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
+            Assert.AreEqual(2500 + 2500 + 500 + 750, stats.NotesHit)
+            
+        let inline database_roundtrip() : unit =
+            let round_tripped_stats = Stats.FromUserDatabase(user_db, clock)
+            printfn "%A" (round_tripped_stats.GetPreviousSessions())
+            
+            Assert.AreEqual(1, round_tripped_stats.GetPreviousSessions().Keys.Count)
+            Assert.AreEqual(1, round_tripped_stats.GetSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()).Length)
+            
+            printfn "%A" (round_tripped_stats.GetSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()))
+            Assert.AreEqual(stats.GetCurrentSession().LastPlay, round_tripped_stats.GetCurrentSession().LastPlay)
             
         assert_initial_zeros()
         test_adding_stats()
         session_time_cutoff()
+        database_roundtrip()
         
         conn.Dispose()
