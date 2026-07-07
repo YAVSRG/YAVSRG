@@ -16,10 +16,11 @@ type SessionXPGain =
     member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
 
 type Stats =
-    {
+    private {
         Database: Database
         mutable TotalStats : TotalStats
         mutable CurrentSession : CurrentSession
+        DateOfEarliestSession: DateOnly
         mutable PreviousSessions : Map<DateOnly, Session list>
         mutable BoundNetworkId : int64 option
         mutable Migrations : Set<string>
@@ -37,6 +38,9 @@ type Stats =
         DbSingletons.save<StatsSaveData> id (this.ToSaveData()) this.Database
     member internal this.SaveBackup(backup_id: string) : unit = this.SaveAs("stats_" + backup_id)
     member internal this.Save() : unit = this.SaveAs("stats")
+    
+    member this.Today() : DateOnly =
+        Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
         
     static member FromLibrary(library: Library) : Stats =
         
@@ -45,14 +49,22 @@ type Stats =
             |> Seq.groupBy (fun session -> session.Start |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime)
             |> Seq.map (fun (local_date, sessions) -> (local_date, List.ofSeq sessions))
             |> Map.ofSeq
+            
+        let inline get_earliest_session_date(previous_sessions: Map<DateOnly, _>) : DateOnly =
+            let mutable earliest =
+                Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
+            Seq.iter (fun date -> earliest <- min date earliest) previous_sessions.Keys
+            earliest
         
         let inline load_from_database(database: Database) : Stats =
             let previous_sessions = load_previous_sessions(database)
+            let earliest_session_date = get_earliest_session_date(previous_sessions)
             let stats : StatsSaveData = DbSingletons.get_or_default "stats" StatsSaveData.Default database
             
             {
                 Database = database
                 CurrentSession = stats.CurrentSession
+                DateOfEarliestSession = earliest_session_date
                 PreviousSessions = previous_sessions
                 TotalStats = stats.TotalStats
                 BoundNetworkId = stats.BoundNetworkId
@@ -110,6 +122,7 @@ type Stats =
     member this.PlaysRetried : int = this.TotalStats.PlaysRetried + this.CurrentSession.PlaysRetried
     member this.PlaysCompleted : int = this.TotalStats.PlaysCompleted + this.CurrentSession.PlaysCompleted
     member this.PlaysQuit : int = this.TotalStats.PlaysQuit + this.CurrentSession.PlaysQuit
+    member this.XP : int64 = this.TotalStats.XP + this.CurrentSession.SessionScore
         
     member this.AddPlayStats(keymode: int, time: float, notes_hit: int) : unit =
         this.CurrentSession.PlayTime <- this.CurrentSession.PlayTime + time
@@ -127,9 +140,12 @@ type Stats =
     member this.RetryPlay() : unit =
         this.CurrentSession.PlaysRetried <- this.CurrentSession.PlaysRetried + 1
         
-    member this.FinishPractice(time: float, notes_hit: int) : unit =
+    member this.AddPracticeTime(time: float, notes_hit: int) : unit =
         this.CurrentSession.PracticeTime <- this.CurrentSession.PracticeTime + time
         this.CurrentSession.NotesHit <- this.CurrentSession.NotesHit + notes_hit
+        
+    member this.AddGameTime(time: float) : unit =
+        this.CurrentSession.GameTime <- this.CurrentSession.GameTime + time
         
     member private this.AddXP(xp: int64) : unit =
         this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + xp |> max 0L
@@ -187,3 +203,67 @@ type Stats =
             LampXP = lamp_xp
             AccXP = acc_xp
         }
+        
+    member this.GetCurrentSession() : CurrentSession = this.CurrentSession
+    
+    member this.GetSessionsForDate(date: DateOnly) : Session list =
+        match Map.tryFind date this.PreviousSessions with
+        | Some sessions_on_day -> sessions_on_day
+        | None -> []
+    
+    member this.TryGetNextSession(date: DateOnly, session: Session) : (DateOnly * Session) option =
+        
+        let inline find_session_later_today() : (DateOnly * Session) option =
+            let sessions_today = this.PreviousSessions.[date]
+            let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue -1
+            if index + 1 < sessions_today.Length then
+                Some(date, sessions_today.[index + 1])
+            else
+                None
+                
+        let inline find_next_day_with_sessions() : (DateOnly * Session) option =
+            let TODAY = this.Today()
+            let mutable date = date
+            let rec loop () : (DateOnly * Session) option =
+                date <- date.AddDays(1)
+                match Map.tryFind date this.PreviousSessions with
+                | Some sessions_on_day ->
+                    Some(date, sessions_on_day.[0])
+                | None ->
+                    if date = TODAY then None else loop()
+            loop()
+                
+        find_session_later_today() |> Option.orElseWith find_next_day_with_sessions
+        
+    member this.TryGetEarliestSession() : (DateOnly * Session) option =
+        this.TryGetNextSession(this.DateOfEarliestSession, Unchecked.defaultof<_>)
+        
+    member this.TryGetPreviousSession(date: DateOnly, session: Session) : (DateOnly * Session) option =
+        
+        let inline find_session_earlier_today() : (DateOnly * Session) option =
+            let sessions_today = this.GetSessionsForDate(date)
+            let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue -1
+            if index > 0 then
+                Some(date, sessions_today.[index - 1])
+            else
+                None
+                
+        let inline find_prior_day_with_sessions() : (DateOnly * Session) option =
+            let mutable date = date
+            let rec loop () : (DateOnly * Session) option =
+                date <- date.AddDays(-1)
+                match Map.tryFind date this.PreviousSessions with
+                | Some sessions_on_day ->
+                    Some(date, List.last sessions_on_day)
+                | None ->
+                    if date <= this.DateOfEarliestSession then None else loop()
+            loop()
+                
+        find_session_earlier_today() |> Option.orElseWith find_prior_day_with_sessions
+        
+    member this.TryGetLatestSession() : (DateOnly * Session) option =
+        this.TryGetPreviousSession(this.Today(), Unchecked.defaultof<_>)
+        
+    // todo: usage of this is minimised for now but ultimately this should be replaced with intent-focused methods
+    // e.g. GetActiveYears(), GetSessionsByYear(), GetRecentSessions()
+    member this.GetPreviousSessions() : Map<DateOnly, Session list> = this.PreviousSessions

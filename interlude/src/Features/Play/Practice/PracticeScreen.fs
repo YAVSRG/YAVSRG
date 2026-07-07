@@ -104,7 +104,7 @@ type PracticeScreen =
                 
             override this.OnExit(next: ScreenType) : unit =
                 base.OnExit(next)
-                Content.Stats.FinishPractice(stats_practice_time, stats_notes_hit)
+                Content.Stats.AddPracticeTime(stats_practice_time, stats_notes_hit)
 
             override this.OnBack() =
                 Song.resume ()

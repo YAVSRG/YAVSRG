@@ -6,13 +6,10 @@ open Prelude
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 open Interlude.UI
-open Interlude.Content
 
 type SessionPanel =
 
-    static member CreateCurrent() =
-
-        let current_session = Content.Stats.CurrentSession
+    static member CreateCurrent(current_session: CurrentSession) : Container =
 
         Container(NodeType.None)
             .With(

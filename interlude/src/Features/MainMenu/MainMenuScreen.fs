@@ -6,7 +6,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User.Stats
 open Interlude
 open Interlude.Resources
 open Interlude.Content
@@ -148,7 +147,7 @@ type MainMenuScreen() =
             if Data.Maintenance.Patterns.recalculate_needed Content.Charts then
                 Library.LibraryActions.recalculate_patterns()
 
-            if Content.Stats.TotalStats.NotesHit = 0 then
+            if Content.Stats.NotesHit = 0 then
                 // todo: quick start wizard instead
                 WikiBrowserPage.Show()
 

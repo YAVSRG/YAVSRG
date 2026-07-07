@@ -5,7 +5,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude
-open Prelude.Data.User.Stats
 open Interlude.Content
 open Interlude.UI
 open Interlude
@@ -172,7 +171,7 @@ type Toolbar() =
 
     override this.Update(elapsed_ms, moved) =
         if Screen.current_type <> ScreenType.SplashScreen then
-            Content.Stats.CurrentSession.GameTime <- Content.Stats.CurrentSession.GameTime + elapsed_ms
+            Content.Stats.AddGameTime(elapsed_ms)
 
         Toolbar.slideout_amount.Update elapsed_ms
 
