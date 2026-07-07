@@ -37,7 +37,7 @@
     <Compile Include="Content\Skins.fs" />
     <Compile Include="Content\Tables.fs" />
     <Compile Include="Content\Data.fs" />
-    <Compile Include="Content\Init.fs" />
+    <Compile Include="Content\Content.fs" />
     <Compile Include="Content\Backbeat.fs" />
     <Compile Include="Options\Hotkeys.fs" />
     <Compile Include="Options\Window.fs" />

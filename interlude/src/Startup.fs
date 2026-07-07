@@ -26,11 +26,11 @@ module Startup =
 
     let init (instance: int) : Screen.ScreenRoot =
         Options.init ()
-        Content.init ()
+        Content.Init ()
 
         let post_init_thunk () =
 
-            Content.load_data ()
+            Content.LoadData ()
             Printerlude.init instance
             StatsSync.init ()
             SelectedChart.init ()
@@ -79,7 +79,7 @@ module Startup =
             deinit_once <- true
 
             if deinit_required then
-                Content.deinit ()
+                Content.Deinit ()
                 Options.deinit ()
                 Network.deinit ()
                 Printerlude.deinit ()

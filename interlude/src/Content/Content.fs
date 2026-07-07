@@ -11,19 +11,19 @@ open Prelude.Data.Library
 open Prelude.Data.User
 open Prelude.Data.User.Stats
 
-type Content() =
+type Content =
 
-    static member init () =
-        Themes.init ()
-        Skins.init ()
-        Sounds.init ()
+    static member Init() : unit =
+        Themes.init()
+        Skins.init()
+        Sounds.init()
 
-    static member load_data () =
-        Tables.init ()
-        Rulesets.init ()
-        Data.init ()
+    static member LoadData() : unit =
+        Tables.init()
+        Rulesets.init()
+        Data.init()
 
-    static member deinit () = Data.deinit ()
+    static member Deinit() : unit = Data.deinit()
 
     static member Library : Library = Data.library
     static member UserData : UserDatabase = Data.library.UserData
@@ -39,7 +39,7 @@ type Content() =
     static member NoteskinMeta : SkinMetadata = Skins.current_noteskin_meta
     static member HUD : HudConfig = Skins.current_hud.Config
     static member HUDMeta : SkinMetadata = Skins.current_hud_meta
-    static member Texture(id: string) : Sprite = Sprites.get id
+    static member Texture(id: string) : Sprite = Sprites.get(id)
 
     static member OnChartAdded = Data.charts_updated
-    static member TriggerChartAdded() = GameThread.on_game_thread Data.charts_updated_ev.Trigger
+    static member TriggerChartAdded() : unit = GameThread.on_game_thread Data.charts_updated_ev.Trigger
