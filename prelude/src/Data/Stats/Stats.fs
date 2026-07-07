@@ -101,9 +101,41 @@ type Stats =
             this.EndCurrentSession(now)
         else
             this.Save()
-            
+        
+    member this.PlayTime : float = this.TotalStats.PlayTime + this.CurrentSession.PlayTime
+    member this.PracticeTime : float = this.TotalStats.PracticeTime + this.CurrentSession.PracticeTime
+    member this.GameTime : float = this.TotalStats.GameTime + this.CurrentSession.GameTime
+    member this.NotesHit : int = this.TotalStats.NotesHit + this.CurrentSession.NotesHit
+    member this.PlaysStarted : int = this.TotalStats.PlaysStarted + this.CurrentSession.PlaysStarted
+    member this.PlaysRetried : int = this.TotalStats.PlaysRetried + this.CurrentSession.PlaysRetried
+    member this.PlaysCompleted : int = this.TotalStats.PlaysCompleted + this.CurrentSession.PlaysCompleted
+    member this.PlaysQuit : int = this.TotalStats.PlaysQuit + this.CurrentSession.PlaysQuit
+        
+    member this.AddPlayStats(keymode: int, time: float, notes_hit: int) : unit =
+        this.CurrentSession.PlayTime <- this.CurrentSession.PlayTime + time
+        this.CurrentSession.KeymodePlaytime <- this.CurrentSession.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
+        this.CurrentSession.NotesHit <- this.CurrentSession.NotesHit + notes_hit
+
+    member this.CompletePlay() : unit =
+        this.CurrentSession.PlaysStarted <- this.CurrentSession.PlaysStarted + 1
+        this.CurrentSession.PlaysCompleted <- this.CurrentSession.PlaysCompleted + 1
+        
+    member this.QuitOutOfPlay() : unit =
+        this.CurrentSession.PlaysStarted <- this.CurrentSession.PlaysStarted + 1
+        this.CurrentSession.PlaysQuit <- this.CurrentSession.PlaysQuit + 1
+        
+    member this.RetryPlay() : unit =
+        this.CurrentSession.PlaysRetried <- this.CurrentSession.PlaysRetried + 1
+        
+    member this.FinishPractice(time: float, notes_hit: int) : unit =
+        this.CurrentSession.PracticeTime <- this.CurrentSession.PracticeTime + time
+        this.CurrentSession.NotesHit <- this.CurrentSession.NotesHit + notes_hit
+        
+    member private this.AddXP(xp: int64) : unit =
+        this.CurrentSession.SessionScore <- this.CurrentSession.SessionScore + xp |> max 0L
+        
     member this.HandleQuit() : SessionXPGain =
-        this.CurrentSession.AddXP(QUIT_PENALTY)
+        this.AddXP(QUIT_PENALTY)
         this.SaveCurrentSession(Timestamp.now())
         {
             QuitPenalty = QUIT_PENALTY
@@ -139,13 +171,13 @@ type Stats =
             | Improvement.FasterBetter _ -> 200L, 0.3f
 
         let base_xp = int64 base_xp + int64 (float32 base_xp * streak_bonus)
-        this.CurrentSession.AddXP(base_xp)
+        this.AddXP(base_xp)
 
         let lamp_xp = lamp_bonus_flat + int64 (float32 base_xp * lamp_bonus_mult)
-        this.CurrentSession.AddXP(lamp_xp)
+        this.AddXP(lamp_xp)
 
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
-        this.CurrentSession.AddXP(acc_xp)
+        this.AddXP(acc_xp)
 
         this.SaveCurrentSession(Timestamp.now())
 
@@ -155,12 +187,3 @@ type Stats =
             LampXP = lamp_xp
             AccXP = acc_xp
         }
-        
-    member this.PlayTime : float = this.TotalStats.PlayTime + this.CurrentSession.PlayTime
-    member this.PracticeTime : float = this.TotalStats.PracticeTime + this.CurrentSession.PracticeTime
-    member this.GameTime : float = this.TotalStats.GameTime + this.CurrentSession.GameTime
-    member this.NotesHit : int = this.TotalStats.NotesHit + this.CurrentSession.NotesHit
-    member this.PlaysStarted : int = this.TotalStats.PlaysStarted + this.CurrentSession.PlaysStarted
-    member this.PlaysRetried : int = this.TotalStats.PlaysRetried + this.CurrentSession.PlaysRetried
-    member this.PlaysCompleted : int = this.TotalStats.PlaysCompleted + this.CurrentSession.PlaysCompleted
-    member this.PlaysQuit : int = this.TotalStats.PlaysQuit + this.CurrentSession.PlaysQuit

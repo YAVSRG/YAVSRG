@@ -47,13 +47,6 @@ type CurrentSession =
             KeymodePlaytime = this.KeymodePlaytime
         }
 
-    member this.AddPlaytime(keymode: int) (time: float) : unit =
-        this.PlayTime <- this.PlayTime + time
-        this.KeymodePlaytime <- this.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
-        
-    member this.AddXP(xp: int64) : unit =
-        this.SessionScore <- this.SessionScore + xp |> max 0L
-
     static member StartNew(now: int64) : CurrentSession =
         {
             Start = now

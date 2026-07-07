@@ -17,6 +17,12 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Online
 open Interlude.Features.Score
 
+[<RequireQualifiedAccess>]
+type ExitReason =
+    | Complete
+    | Retry
+    | Quit
+
 type PlayScreen =
 
     static let SHOW_START_OVERLAY = true
@@ -33,12 +39,14 @@ type PlayScreen =
         let mutable key_state = Bitmask.Empty
         let mutable liveplay_position = -Time.infinity
 
-        let mutable play_time = 0.0
+        let mutable stats_play_time = 0.0
+        let mutable stats_notes_hit = 0
+        let mutable stats_exit_reason = ExitReason.Complete
 
         scoring.OnEvent.Add(fun h ->
             match h.Action with
             | Hit d
-            | Hold d when not d.Missed -> Content.Stats.CurrentSession.NotesHit <- Content.Stats.CurrentSession.NotesHit + 1
+            | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
             | _ -> ()
         )
 
@@ -54,7 +62,7 @@ type PlayScreen =
                     ScreenType.Play
                     Transitions.EnterGameplayFadeAudio
             then
-                Content.Stats.CurrentSession.PlaysRetried <- Content.Stats.CurrentSession.PlaysRetried + 1
+                stats_exit_reason <- ExitReason.Retry
 
         let fade_in = Animation.Fade (if SHOW_START_OVERLAY then 0.0f else 1.0f)
         let start_overlay = StartOverlay(
@@ -67,7 +75,7 @@ type PlayScreen =
         )
 
         let skip_song () =
-            if Gameplay.continue_endless_mode() then Content.Stats.CurrentSession.PlaysQuit <- Content.Stats.CurrentSession.PlaysQuit + 1
+            if Gameplay.continue_endless_mode() then stats_exit_reason <- ExitReason.Quit
 
         let give_up () =
             let is_giving_up_play = not (liveplay :> ReplaySource).Finished && (Song.time() - first_note) / SelectedChart.rate.Value > 15000f<ms / rate>
@@ -102,7 +110,7 @@ type PlayScreen =
                     Screen.back Transitions.LeaveGameplay
             else
                 Screen.back Transitions.LeaveGameplay
-            |> function false -> () | true -> Content.Stats.CurrentSession.PlaysQuit <- Content.Stats.CurrentSession.PlaysQuit + 1
+            |> function false -> () | true -> stats_exit_reason <- ExitReason.Quit
 
         let fail_midway (this: IPlayScreen) =
             liveplay.Finish()
@@ -125,7 +133,7 @@ type PlayScreen =
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    Content.Stats.CurrentSession.PlaysQuit <- Content.Stats.CurrentSession.PlaysQuit + 1
+                    stats_exit_reason <- ExitReason.Quit
 
             fade_in.Target <- 0.5f
             this |* FailOverlay(pacemaker_state, retry, view_score, skip_song)
@@ -150,7 +158,7 @@ type PlayScreen =
                         ScreenType.Score
                         Transitions.EnterGameplayNoFadeAudio
                 then
-                    Content.Stats.CurrentSession.PlaysCompleted <- Content.Stats.CurrentSession.PlaysCompleted + 1
+                    stats_exit_reason <- ExitReason.Complete
 
             if pacemaker_state.IsFailedAtEnd(scoring) then
                 fade_in.Target <- 0.5f
@@ -194,8 +202,6 @@ type PlayScreen =
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now ()
-                if previous <> ScreenType.Play then
-                    Content.Stats.CurrentSession.PlaysStarted <- Content.Stats.CurrentSession.PlaysStarted + 1
                 Content.Stats.SaveCurrentSession(now)
                 info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
@@ -209,7 +215,12 @@ type PlayScreen =
                 DiscordRPC.playing_timed (%"discord_status.play", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                Content.Stats.CurrentSession.AddPlaytime info.WithMods.Keys play_time
+                Content.Stats.AddPlayStats(info.WithMods.Keys, stats_play_time, stats_notes_hit)
+                match stats_exit_reason with
+                | ExitReason.Complete -> Content.Stats.CompletePlay()
+                | ExitReason.Retry -> Content.Stats.RetryPlay()
+                | ExitReason.Quit -> Content.Stats.QuitOutOfPlay()
+                
                 if not offset_manually_changed then
                     LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
                 Toolbar.show_cursor ()
@@ -219,7 +230,7 @@ type PlayScreen =
                 base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
-                play_time <- play_time + elapsed_ms
+                stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chart_time = now - first_note

@@ -7,7 +7,6 @@ open Percyqaz.Flux.Input
 open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
-open Prelude.Data.User.Stats
 open Interlude.Options
 open Interlude.UI
 open Interlude.Content
@@ -25,6 +24,8 @@ type PracticeScreen =
         let mutable liveplay = Unchecked.defaultof<_>
         let mutable scoring = Unchecked.defaultof<_>
         let mutable resume_from_current_place = false
+        let mutable stats_practice_time = 0.0
+        let mutable stats_notes_hit = 0
 
         let last_allowed_practice_point =
             info.WithMods.LastNote - 5.0f<ms> - Song.LEADIN_TIME * SelectedChart.rate.Value
@@ -52,7 +53,7 @@ type PracticeScreen =
             scoring.OnEvent.Add(fun h ->
                 match h.Action with
                 | Hit d
-                | Hold d when not d.Missed -> Content.Stats.CurrentSession.NotesHit <- Content.Stats.CurrentSession.NotesHit + 1
+                | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
                 | _ -> ()
             )
 
@@ -100,6 +101,10 @@ type PracticeScreen =
                 Song.seek state.PracticePoint.Value
                 Song.pause ()
                 DiscordRPC.playing (%"discord_status.practice", info.ChartMeta.Title)
+                
+            override this.OnExit(next: ScreenType) : unit =
+                base.OnExit(next)
+                Content.Stats.FinishPractice(stats_practice_time, stats_notes_hit)
 
             override this.OnBack() =
                 Song.resume ()
@@ -164,7 +169,7 @@ type PracticeScreen =
                     this.State.Scoring.Update chart_time
 
                 if not state.Paused.Value then
-                    Content.Stats.CurrentSession.PracticeTime <- Content.Stats.CurrentSession.PracticeTime + elapsed_ms
+                    stats_practice_time <- stats_practice_time + elapsed_ms
                     Input.finish_frame_events()
 
                 base.Update(elapsed_ms, moved)

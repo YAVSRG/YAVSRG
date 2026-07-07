@@ -34,9 +34,18 @@ type MultiplayerScreen =
         let mutable key_state = Bitmask.Empty
         let mutable liveplay_position = -Time.infinity
         let mutable packet_count = 0
-        let mutable play_time = 0.0
+
+        let mutable stats_play_time = 0.0
+        let mutable stats_notes_hit = 0
 
         let mutable quit_out_early = false
+
+        scoring.OnEvent.Add(fun h ->
+            match h.Action with
+            | Hit d
+            | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
+            | _ -> ()
+        )
 
         lobby.StartPlaying()
         lobby.AddReplayInfo(
@@ -75,13 +84,6 @@ type MultiplayerScreen =
             }
         )
 
-        scoring.OnEvent.Add(fun h ->
-            match h.Action with
-            | Hit d
-            | Hold d when not d.Missed -> Content.Stats.CurrentSession.NotesHit <- Content.Stats.CurrentSession.NotesHit + 1
-            | _ -> ()
-        )
-
         let send_replay_packet (chart_time: ChartTime) =
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
@@ -113,29 +115,26 @@ type MultiplayerScreen =
                     Screen.back Transitions.LeaveGameplay
             then
                 lobby.AbandonPlaying()
-                Content.Stats.CurrentSession.PlaysQuit <- Content.Stats.CurrentSession.PlaysQuit + 1
 
-        let finish_play (chart_time: ChartTime) =
+        let finish_play (chart_time: ChartTime) : unit =
             liveplay.Finish()
             send_replay_packet chart_time
             lobby.FinishPlaying()
-            if
-                Screen.change_new
-                    (fun () ->
-                        let score_info =
-                            Gameplay.score_info_from_gameplay
-                                info
-                                scoring
-                                ((liveplay :> ReplaySource).GetFullReplay())
-                                false
+            Screen.change_new
+                (fun () ->
+                    let score_info =
+                        Gameplay.score_info_from_gameplay
+                            info
+                            scoring
+                            ((liveplay :> ReplaySource).GetFullReplay())
+                            false
 
-                        (score_info, Gameplay.set_score false score_info info.SaveData, true)
-                        |> ScoreScreen
-                    )
-                    ScreenType.Score
-                    Transitions.EnterGameplayNoFadeAudio
-            then
-                Content.Stats.CurrentSession.PlaysCompleted <- Content.Stats.CurrentSession.PlaysCompleted + 1
+                    (score_info, Gameplay.set_score false score_info info.SaveData, true)
+                    |> ScoreScreen
+                )
+                ScreenType.Score
+                Transitions.EnterGameplayNoFadeAudio
+            |> ignore
 
         { new IPlayScreen(info, PacemakerState.None, scoring, HudContextInner.Multiplayer lobby.Replays) with
             override this.Init(parent: Widget) =
@@ -152,7 +151,6 @@ type MultiplayerScreen =
 
             override this.OnEnter(previous) =
                 let now = Timestamp.now()
-                Content.Stats.CurrentSession.PlaysStarted <- Content.Stats.CurrentSession.PlaysStarted + 1
                 Content.Stats.SaveCurrentSession(now)
                 info.SaveData.LastPlayed <- now
                 Toolbar.hide_cursor ()
@@ -166,14 +164,19 @@ type MultiplayerScreen =
                 )
 
             override this.OnExit(next) =
-                Content.Stats.CurrentSession.AddPlaytime info.WithMods.Keys play_time
+                Content.Stats.AddPlayStats(info.WithMods.Keys, stats_play_time, stats_notes_hit)
+                if quit_out_early then
+                    Content.Stats.QuitOutOfPlay()
+                else
+                    Content.Stats.CompletePlay()
+                
                 LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 
                 Toolbar.show_cursor ()
                 base.OnExit(next)
 
             override this.Update(elapsed_ms, moved) =
-                play_time <- play_time + elapsed_ms
+                stats_play_time <- stats_play_time + elapsed_ms
                 base.Update(elapsed_ms, moved)
                 let now = Song.time_with_offset ()
                 let chart_time : ChartTime = now - first_note
