@@ -13,11 +13,24 @@ type SessionXPGain =
         LampXP: int64
         AccXP: int64
     }
-    member this.Total = this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
+    member this.Total : int64 =
+        this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
+    
+[<AbstractClass>]
+type Clock() =
+    abstract member Now : unit -> int64
+    member this.Today() : DateOnly = 
+        let today_as_datetime = timestamp_to_rg_calendar_day(this.Now())
+        DateOnly.FromDateTime(today_as_datetime)
+    
+type SystemClock() =
+    inherit Clock()
+    override this.Now() : int64 = Timestamp.now()
 
 type Stats =
     private {
         Database: Database
+        Clock: Clock
         mutable TotalStats : TotalStats
         mutable CurrentSession : CurrentSession
         DateOfEarliestSession: DateOnly
@@ -38,11 +51,8 @@ type Stats =
         DbSingletons.save<StatsSaveData> id (this.ToSaveData()) this.Database
     member internal this.SaveBackup(backup_id: string) : unit = this.SaveAs("stats_" + backup_id)
     member internal this.Save() : unit = this.SaveAs("stats")
-    
-    member this.Today() : DateOnly =
-        Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
         
-    static member FromLibrary(library: Library) : Stats =
+    static member FromUserDatabase(user_db: UserDatabase, clock: Clock) : Stats =
         
         let inline load_previous_sessions(database: Database) : Map<DateOnly, Session list> =
             DbSessions.get_all database
@@ -52,7 +62,7 @@ type Stats =
             
         let inline get_earliest_session_date(previous_sessions: Map<DateOnly, _>) : DateOnly =
             let mutable earliest =
-                Timestamp.now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
+                clock.Now() |> timestamp_to_rg_calendar_day |> DateOnly.FromDateTime
             Seq.iter (fun date -> earliest <- min date earliest) previous_sessions.Keys
             earliest
         
@@ -63,7 +73,8 @@ type Stats =
             
             {
                 Database = database
-                CurrentSession = stats.CurrentSession
+                Clock = clock
+                CurrentSession = if stats.CurrentSession.LastTime < 0L then CurrentSession.StartNew(clock.Now()) else stats.CurrentSession
                 DateOfEarliestSession = earliest_session_date
                 PreviousSessions = previous_sessions
                 TotalStats = stats.TotalStats
@@ -72,7 +83,7 @@ type Stats =
             }
         
         let inline timeout_current_session_if_needed(stats: Stats) : unit =
-            let now = Timestamp.now()
+            let now = clock.Now()
             let current_session_is_empty = stats.CurrentSession.NotesHit = 0
             let current_session_has_timed_out = now - SESSION_TIMEOUT > stats.CurrentSession.LastPlay
             
@@ -82,10 +93,11 @@ type Stats =
                 Logging.Error "System clock changes could break your session stats"
                 stats.EndCurrentSession(now)
             
-        let user_database = library.UserData.Database
-        let stats = load_from_database(user_database)
+        let stats = load_from_database(user_db.Database)
         timeout_current_session_if_needed(stats)
         stats
+        
+    static member FromUserDatabase(user_db: UserDatabase) : Stats = Stats.FromUserDatabase(user_db, SystemClock())
 
     member private this.EndCurrentSession(now: int64) : unit =
         
@@ -152,7 +164,7 @@ type Stats =
         
     member this.HandleQuit() : SessionXPGain =
         this.AddXP(QUIT_PENALTY)
-        this.SaveCurrentSession(Timestamp.now())
+        this.SaveCurrentSession(this.Clock.Now())
         {
             QuitPenalty = QUIT_PENALTY
             BaseXP = 0L
@@ -187,15 +199,14 @@ type Stats =
             | Improvement.FasterBetter _ -> 200L, 0.3f
 
         let base_xp = int64 base_xp + int64 (float32 base_xp * streak_bonus)
-        this.AddXP(base_xp)
-
         let lamp_xp = lamp_bonus_flat + int64 (float32 base_xp * lamp_bonus_mult)
-        this.AddXP(lamp_xp)
-
         let acc_xp = acc_bonus_flat + int64 (float32 base_xp * acc_bonus_mult)
+        
+        this.AddXP(base_xp)
+        this.AddXP(lamp_xp)
         this.AddXP(acc_xp)
 
-        this.SaveCurrentSession(Timestamp.now())
+        this.SaveCurrentSession(this.Clock.Now())
 
         {
             QuitPenalty = 0L
@@ -222,7 +233,7 @@ type Stats =
                 None
                 
         let inline find_next_day_with_sessions() : (DateOnly * Session) option =
-            let TODAY = this.Today()
+            let TODAY = this.Clock.Today()
             let mutable date = date
             let rec loop () : (DateOnly * Session) option =
                 date <- date.AddDays(1)
@@ -262,7 +273,7 @@ type Stats =
         find_session_earlier_today() |> Option.orElseWith find_prior_day_with_sessions
         
     member this.TryGetLatestSession() : (DateOnly * Session) option =
-        this.TryGetPreviousSession(this.Today(), Unchecked.defaultof<_>)
+        this.TryGetPreviousSession(this.Clock.Today(), Unchecked.defaultof<_>)
         
     // todo: usage of this is minimised for now but ultimately this should be replaced with intent-focused methods
     // e.g. GetActiveYears(), GetSessionsByYear(), GetRecentSessions()

@@ -91,7 +91,7 @@ module StatsMigration =
         Logging.Info "Backfilling session data from score history..."
 
         state.TotalStats <- TotalStats.Default
-        state.CurrentSession <- CurrentSession.Default
+        state.CurrentSession <- CurrentSession.StartNew(state.Clock.Now())
 
         let sessions = legacy_backfill library
         DbSessions.save_batch sessions library.UserData.Database

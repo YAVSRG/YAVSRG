@@ -10,7 +10,7 @@ module private Data =
 
     let init () : unit =
         library <- Library.Load()
-        stats <- Stats.FromLibrary(library)
+        stats <- Stats.FromUserDatabase(library.UserData)
         StatsMigration.migrate(stats, library)
 
     let deinit () : unit =

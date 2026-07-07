@@ -1,6 +1,5 @@
 ﻿namespace Prelude.Data.User.Stats
 
-open Percyqaz.Common
 open Percyqaz.Data
 
 [<Json.AutoCodec>]
@@ -26,7 +25,7 @@ type StatsSyncUpstream =
         | None -> None
         | Some network_id ->
 
-        let month = Timestamp.now() |> timestamp_to_leaderboard_month
+        let month = state.Clock.Now() |> timestamp_to_leaderboard_month
         let month_start = start_of_leaderboard_month month
         let month_end = start_of_leaderboard_month (month + 1)
 

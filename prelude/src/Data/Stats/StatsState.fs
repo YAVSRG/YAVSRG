@@ -4,7 +4,6 @@ open Percyqaz.Common
 open Percyqaz.Data
 open Prelude.Data.User
 
-// todo: make properties internal
 [<Json.AutoCodec(false)>]
 type CurrentSession =
     {
@@ -68,28 +67,6 @@ type CurrentSession =
             KeymodePlaytime = Map.empty
         }
 
-    static member Default =
-        let now = Timestamp.now()
-        {
-            Start = now
-            LastPlay = now
-            LastTime = now
-
-            PlayTime = 0.0
-            PracticeTime = 0.0
-            GameTime = 0.0
-            NotesHit = 0
-
-            PlaysStarted = 0
-            PlaysRetried = 0
-            PlaysCompleted = 0
-            PlaysQuit = 0
-
-            SessionScore = 0L
-            Streak = 0
-            KeymodePlaytime = Map.empty
-        }
-
 [<Json.AutoCodec(false)>]
 type TotalStats =
     {
@@ -107,7 +84,7 @@ type TotalStats =
         KeymodePlaytime: Map<int, float>
     }
 
-    static member Default =
+    static member Default: TotalStats =
         {
             PlayTime = 0.0
             PracticeTime = 0.0
@@ -122,7 +99,7 @@ type TotalStats =
             KeymodePlaytime = Map.empty
         }
 
-    member this.AddSession (session: CurrentSession) : TotalStats =
+    member this.AddSession(session: CurrentSession) : TotalStats =
         {
             PlayTime = this.PlayTime + session.PlayTime
             PracticeTime = this.PracticeTime + session.PracticeTime
@@ -146,4 +123,4 @@ type StatsSaveData =
         BoundNetworkId: int64 option
         Migrations: Set<string>
     }
-    static member Default = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None }
+    static member Default: StatsSaveData = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.StartNew(-1L); Migrations = Set.empty; BoundNetworkId = None }
