@@ -3,50 +3,67 @@
 open System
 open NUnit.Framework
 open Percyqaz.Common
+open Prelude.Data.User
 open Prelude.Data.User.Stats
+open Prelude.Tests.Database
+open Prelude.Tests.Helpers
 
 module StatsTests =
 
     [<Test>]
-    let MergeKeymodePlaytimes_CaseA () =
-        let original = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
-        let incoming = Map.ofSeq [ 8, 900.0; 4, 400.0 ]
-
-        let combined = add_playtimes original incoming
-        Assert.AreEqual(3, combined.Count)
-        Assert.AreEqual(Some 4000.0, combined.TryFind 4)
-        Assert.AreEqual(Some 1800.0, combined.TryFind 7)
-        Assert.AreEqual(Some 900.0, combined.TryFind 8)
-
-    [<Test>]
-    let MergeKeymodePlaytimes_CaseB () =
-        let original = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
-        let incoming = Map.empty
-
-        let combined = add_playtimes original incoming
-        Assert.AreEqual(original, combined)
-
-        let combined2 = add_playtimes incoming original
-        Assert.AreEqual(original, combined2)
-
-    [<Test>]
-    let LeaderboardMonths_FromTimestamp () =
-        let start_of_2025 = DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) |> Timestamp.from_datetime
-
-        Assert.AreEqual(0, timestamp_to_leaderboard_month (start_of_2025 - 1L))
-        Assert.AreEqual(1, timestamp_to_leaderboard_month start_of_2025)
-        Assert.AreEqual(1, timestamp_to_leaderboard_month (start_of_2025 + 1L))
-
-        let may_2025 = DateTime(2025, 5, 24, 12, 34, 56, DateTimeKind.Utc) |> Timestamp.from_datetime
-
-        Assert.AreEqual(5, timestamp_to_leaderboard_month (may_2025 - 1L))
-        Assert.AreEqual(5, timestamp_to_leaderboard_month may_2025)
-        Assert.AreEqual(5, timestamp_to_leaderboard_month (may_2025 + 1L))
-
-    [<Test>]
-    let LeaderboardMonths_ToTimestamp () =
-        let start_of_2025 = DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) |> Timestamp.from_datetime
-        Assert.AreEqual(start_of_2025, start_of_leaderboard_month 1)
-
-        let may_2025 = DateTime(2025, 5, 24, 12, 34, 56, DateTimeKind.Utc) |> Timestamp.from_datetime
-        Assert.AreEqual(5, timestamp_to_leaderboard_month (may_2025 - 1L) |> start_of_leaderboard_month |> timestamp_to_leaderboard_month)
+    let BasicUsage() : unit =
+        let db, conn = InMemoryDatabase.Create()
+        let user_db = UserDatabase.CreateLazyLoaded(db)
+        let clock = VirtualClock(Timestamp.now())
+        let stats = Stats.FromUserDatabase(user_db, clock)
+        
+        let inline assert_initial_zeros() : unit =
+            Assert.AreEqual(0.0, stats.PlayTime)
+            Assert.AreEqual(0.0, stats.PracticeTime)
+            Assert.AreEqual(0.0, stats.GameTime)
+            Assert.AreEqual(0, stats.NotesHit)
+            Assert.AreEqual(0, stats.PlaysStarted)
+            Assert.AreEqual(0, stats.PlaysRetried)
+            Assert.AreEqual(0, stats.PlaysCompleted)
+            Assert.AreEqual(0, stats.PlaysQuit)
+            Assert.AreEqual(0L, stats.XP)
+            Assert.AreEqual(Map.empty<int, float>, stats.GetCurrentSession().KeymodePlaytime)
+            
+        let inline test_adding_stats() : unit =
+            stats.CompletePlay(4, 60_000.0, 2500)
+            stats.AddPracticeTime(120_000.0, 2500)
+            stats.RetryPlay(7, 10_000.0, 500)
+            stats.QuitOutOfPlay(7, 15_000.0, 750)
+            
+            Assert.AreEqual(2500 + 2500 + 500 + 750, stats.NotesHit)
+            Assert.AreEqual(stats.GetCurrentSession().NotesHit, stats.NotesHit)
+            Assert.AreEqual(60_000.0 + 10_000.0 + 15_000.0, stats.PlayTime)
+            Assert.AreEqual(stats.GetCurrentSession().PlayTime, stats.PlayTime)
+            Assert.AreEqual(120_000.0, stats.PracticeTime)
+            Assert.AreEqual(stats.GetCurrentSession().PracticeTime, stats.PracticeTime)
+            Assert.AreEqual(Some(60_000.0), stats.GetCurrentSession().KeymodePlaytime.TryFind(4))
+            Assert.AreEqual(Some(25_000.0), stats.GetCurrentSession().KeymodePlaytime.TryFind(7))
+            Assert.AreEqual(None, stats.GetCurrentSession().KeymodePlaytime.TryFind(10))
+            
+        let inline session_time_cutoff() : unit =
+            let today = clock.Today()
+            
+            stats.SaveCurrentSession()
+            Assert.AreEqual(Map.empty<DateOnly, Session list>, stats.GetPreviousSessions())
+            Assert.True(stats.GetCurrentSession().NotesHit > 0)
+            
+            clock.Add(SESSION_TIMEOUT)
+            stats.SaveCurrentSession()
+            Assert.AreEqual(Map.empty<DateOnly, Session list>, stats.GetPreviousSessions())
+            Assert.True(stats.GetCurrentSession().NotesHit > 0)
+            
+            clock.Add(1)
+            stats.SaveCurrentSession()
+            Assert.AreEqual(1, stats.GetSessionsForDate(today).Length)
+            Assert.True(stats.GetCurrentSession().NotesHit = 0)
+            
+        assert_initial_zeros()
+        test_adding_stats()
+        session_time_cutoff()
+        
+        conn.Dispose()

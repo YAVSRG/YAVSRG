@@ -36,13 +36,14 @@
     <Content Include="Data\989392 DJ Sharpnel - World Sound.osz">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Compile Include="Helpers\LocaleFakeFileSystem.fs" />
     <Compile Include="Helpers\ChartFuzzer.fs" />
     <Compile Include="Helpers\NotesBuilder.fs" />
     <Compile Include="Helpers\ReplayBuilder.fs" />
     <Compile Include="Helpers\GameplayEventCollector.fs" />
     <Compile Include="Helpers\ScoringEventCollector.fs" />
+    <Compile Include="Helpers\VirtualLocaleFileSystem.fs" />
     <Compile Include="Helpers\VirtualAssetStorage.fs" />
+    <Compile Include="Helpers\VirtualClock.fs" />
     <Compile Include="Shared\BitmaskTests.fs" />
     <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
@@ -76,6 +77,7 @@
     <Compile Include="Database\DbSessionsTests.fs" />
     <Compile Include="Database\DbChartsTests.fs" />
     <Compile Include="Database\ChartDatabaseTests.fs" />
+    <Compile Include="Stats\StatsHelpersTests.fs" />
     <Compile Include="Stats\StatsTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
