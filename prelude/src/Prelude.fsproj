@@ -162,7 +162,6 @@
     <Compile Include="Data\Stats\TotalStats.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Stats\StatsSync.fs" />
-    <Compile Include="Data\Stats\StatsMigration.fs" />
     <Compile Include="Data\Maintenance\Patterns.fs" />
     <Compile Include="Data\Maintenance\Vacuum.fs" />
     <Compile Include="Data\Maintenance\PersonalBests.fs" />

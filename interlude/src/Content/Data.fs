@@ -10,7 +10,6 @@ module private Data =
     let init () : unit =
         library <- Library.Load()
         stats <- Stats.FromUserDatabase(library.UserData)
-        StatsMigration.migrate(stats, library)
 
     let deinit () : unit =
         if not (isNull (stats :> obj)) then
