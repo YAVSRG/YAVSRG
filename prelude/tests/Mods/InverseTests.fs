@@ -15,7 +15,7 @@ module InverseTests =
 
         let inverted, _ = Inverse.apply 0.5f<beat> (ModdedChartInternal.OfChart SAMPLE_CHART)
 
-        match Chart.check { SAMPLE_CHART with Notes = inverted.Notes } with
+        match { SAMPLE_CHART with Notes = inverted.Notes }.CheckForErrors() with
         | Ok _ -> Assert.Pass()
         | Error reason ->
             Chart.pretty_print inverted.Notes

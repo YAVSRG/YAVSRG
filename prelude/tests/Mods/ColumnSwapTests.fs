@@ -2,7 +2,6 @@
 
 open NUnit.Framework
 open Percyqaz.Common
-open Prelude
 open Prelude.Charts
 open Prelude.Mods
 open Prelude.Tests.Helpers
@@ -40,8 +39,8 @@ module ColumnSwapTests =
         let swapped_back_chart, _ = ColumnSwap.apply swap_2 swapped_chart
 
         Assert.AreEqual(7, swapped_chart.Keys)
-        Assert.AreNotEqual(Chart.hash SAMPLE_CHART, Chart.hash { SAMPLE_CHART with Notes = swapped_chart.Notes })
-        Assert.AreEqual(Chart.hash SAMPLE_CHART, Chart.hash { SAMPLE_CHART with Notes = swapped_back_chart.Notes })
+        Assert.AreNotEqual(SAMPLE_CHART.Hash(), { SAMPLE_CHART with Notes = swapped_chart.Notes }.Hash())
+        Assert.AreEqual(SAMPLE_CHART.Hash(), { SAMPLE_CHART with Notes = swapped_back_chart.Notes }.Hash())
 
     [<Test>]
     let ColumnSwap_NoNotes() =

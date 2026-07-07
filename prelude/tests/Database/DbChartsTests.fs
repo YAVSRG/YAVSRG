@@ -19,7 +19,7 @@ module DbChartsTests =
 
     let TEST_CHART_META : ChartMeta =
         {
-            Hash = Chart.hash TEST_CHART
+            Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers ({E+H}DM Reboot)"
             TitleNative = None
             Artist = "Nanahira"
@@ -44,7 +44,7 @@ module DbChartsTests =
 
     let TEST_CHART_META_ALT : ChartMeta =
         {
-            Hash = Chart.hash TEST_CHART
+            Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers"
             TitleNative = Some "§"
             Artist = "Camellia ft. Nanahira"
@@ -124,7 +124,7 @@ module DbChartsTests =
         let result = DbCharts.get_chart TEST_CHART_META.Hash db
         match result with
         | Ok chart ->
-            Assert.AreEqual(TEST_CHART_META.Hash, Chart.hash chart)
+            Assert.AreEqual(TEST_CHART_META.Hash, chart.Hash())
         | Error reason -> Assert.Fail(reason)
 
         conn.Dispose()

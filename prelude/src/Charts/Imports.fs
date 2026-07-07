@@ -170,7 +170,7 @@ module ImportChart =
                     Logging.Error "%O" err
                     raise err
 
-            match Chart.read_headless keys br with
+            match Chart.ReadFromStreamHeadless(keys, br) with
             | Ok chart ->
                 Ok {
                     PackName = pack_name

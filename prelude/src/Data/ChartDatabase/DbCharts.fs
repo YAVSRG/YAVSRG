@@ -185,7 +185,7 @@ module DbCharts =
                     p.Blob (
                         use ms = new MemoryStream()
                         use bw = new BinaryWriter(ms)
-                        Chart.write_headless chart_data bw
+                        chart_data.WriteToStreamHeadless(bw)
                         ms.ToArray()
                    )
                 )
@@ -294,7 +294,7 @@ module DbCharts =
                 let keys = r.Byte |> int32
                 use stream = r.Stream
                 use br = new BinaryReader(stream)
-                Chart.read_headless keys br
+                Chart.ReadFromStreamHeadless(keys, br)
         }
 
     let get_chart (hash: string) (db: Database) : Result<Chart, string> =

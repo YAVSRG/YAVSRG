@@ -290,8 +290,8 @@ module ChartConversionTests =
         printfn "%A" converted.Header
         let chart = converted.Chart
 
-        match Chart.check chart with
+        match chart.CheckForErrors() with
         | Ok _ -> ()
         | Error reason -> Assert.Fail(reason)
 
-        Assert.AreEqual(Chart.hash chart, "785CAC8E416B32EF134D16D504E1F71E43AC595219EC347B89E896758F5F2795")
+        Assert.AreEqual(chart.Hash(), "785CAC8E416B32EF134D16D504E1F71E43AC595219EC347B89E896758F5F2795")

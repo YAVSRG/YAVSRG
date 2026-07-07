@@ -17,7 +17,7 @@ type SV = float32
 
 type [<Struct>] NoteData =
     { Keys: int; Notes: TimeArray<NoteRow> }
-    member this.ToNoteData() = this
+    member this.ToNoteData() : NoteData = this
 
 [<StructuredFormatDisplay("<A {Keys}K chart>")>]
 type Chart =
@@ -30,26 +30,23 @@ type Chart =
 
     member this.FirstNote : Time = (TimeArray.first this.Notes).Value.Time
     member this.LastNote : Time = (TimeArray.last this.Notes).Value.Time
-    member this.ToNoteData() = { Keys = this.Keys; Notes = this.Notes }
+    member this.ToNoteData() : NoteData = { Keys = this.Keys; Notes = this.Notes }
 
-module Chart =
-
-    let hash (chart: Chart) : string =
-        let h = SHA256.Create()
+    member this.Hash() : string =
         use ms = new MemoryStream()
         use bw = new BinaryWriter(ms)
 
-        let offset = chart.FirstNote
+        let offset = this.FirstNote
 
-        bw.Write chart.Keys
+        bw.Write this.Keys
 
-        for r in chart.Notes do
+        for r in this.Notes do
             for nt in r.Data do
                 bw.Write(byte nt)
 
         let mutable speed = 1.0
 
-        for { Time = o; Data = f } in chart.SV do
+        for { Time = o; Data = f } in this.SV do
             let f = float f
 
             if speed <> f then
@@ -57,102 +54,108 @@ module Chart =
                 bw.Write f
                 speed <- f
 
-        bw.Write((chart.LastNote - offset) * 0.01f |> float32 |> round |> int)
+        bw.Write((this.LastNote - offset) * 0.01f |> float32 |> round |> int)
 
-        BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
+        BitConverter.ToString(SHA256.HashData(ms.ToArray())).Replace("-", "")
 
-    let check (chart: Chart) : Result<Chart, string> =
+    member this.CheckForErrors() : Result<Chart, string> =
         try
-            if chart.Notes.Length = 0 then
+            if this.Notes.Length = 0 then
                 failwith "Chart must have notes"
 
-            if chart.BPM.Length = 0 then
+            if this.BPM.Length = 0 then
                 failwith "Chart must have at least one BPM marker"
 
-            if chart.Keys < 3 || chart.Keys > 10 then
-                failwithf "Chart must have 3-10 keys (Has %i)" chart.Keys
+            if this.Keys < 3 || this.Keys > 10 then
+                failwithf "Chart must have 3-10 keys (Has %i)" this.Keys
 
-            let mutable last_time = -Time.infinity
+            let inline check_valid_bpms() : unit =
+                let mutable last_time = -Time.infinity
 
-            for { Time = time; Data = { Meter = meter; MsPerBeat = mspb } } in chart.BPM do
-                if time < last_time then
-                    failwithf "BPM appears before the previous time (%f, %f)" time last_time
-                elif not (Single.IsFinite (float32 time)) then
-                    failwithf "BPM timestamp is invalid value: %f" time
-                elif meter <= 0<beat> then
-                    failwithf "BPM meter is non-positive: %i at %f" meter time
-                elif mspb < 0.0f<ms / beat> then
-                    failwithf "BPM is negative: %f mspb at %f" mspb time
-                elif Single.IsNaN (float32 mspb) then
-                    failwithf "BPM is invalid value: %f mspb at %f" mspb time
+                for { Time = time; Data = { Meter = meter; MsPerBeat = mspb } } in this.BPM do
+                    if time < last_time then
+                        failwithf "BPM appears before the previous time (%f, %f)" time last_time
+                    elif not (Single.IsFinite (float32 time)) then
+                        failwithf "BPM timestamp is invalid value: %f" time
+                    elif meter <= 0<beat> then
+                        failwithf "BPM meter is non-positive: %i at %f" meter time
+                    elif mspb < 0.0f<ms / beat> then
+                        failwithf "BPM is negative: %f mspb at %f" mspb time
+                    elif Single.IsNaN (float32 mspb) then
+                        failwithf "BPM is invalid value: %f mspb at %f" mspb time
 
-                last_time <- time
+                    last_time <- time
+                
+            let inline check_valid_svs() : unit =
+                let mutable last_time = -Time.infinity
+                
+                for { Time = time; Data = sv } in this.SV do
+                    if time < last_time then
+                        failwithf "SV appears before the previous time (%f, %f)" time last_time
+                    elif not (Single.IsFinite (float32 time)) then
+                        failwithf "SV timestamp is invalid value: %f" time
+                    elif Single.IsNaN sv then
+                        failwithf "SV is NaN (should use +Infinity instead): %f" time
 
-            let mutable last_time = -Time.infinity
+                    last_time <- time
 
-            for { Time = time; Data = sv } in chart.SV do
-                if time < last_time then
-                    failwithf "SV appears before the previous time (%f, %f)" time last_time
-                elif not (Single.IsFinite (float32 time)) then
-                    failwithf "SV timestamp is invalid value: %f" time
-                elif Single.IsNaN sv then
-                    failwithf "SV is NaN (should use +Infinity instead): %f" time
+            let inline check_valid_notes() : unit =
+                let mutable last_time = -Time.infinity
+                let mutable ln = Bitmask.Empty
 
-                last_time <- time
+                for { Time = time; Data = nr } in this.Notes do
+                    if time <= last_time then
+                        failwithf "Note row appears on or before the previous time (%f, %f)" time last_time
+                    elif not (Single.IsFinite (float32 time)) then
+                        failwithf "Note row timestamp is invalid value: %f" time
 
-            let mutable last_time = -Time.infinity
-            let mutable ln = Bitmask.Empty
+                    last_time <- time
 
-            for { Time = time; Data = nr } in chart.Notes do
-                if time <= last_time then
-                    failwithf "Note row appears on or before the previous time (%f, %f)" time last_time
-                elif not (Single.IsFinite (float32 time)) then
-                    failwithf "Note row timestamp is invalid value: %f" time
+                    for k = 0 to (this.Keys - 1) do
+                        if nr.[k] = NoteType.HOLDHEAD then
+                            if ln.Contains(k) then
+                                failwithf "Hold head appears inside hold at %f" time
 
-                last_time <- time
+                            ln <- ln.Add(k)
+                        elif nr.[k] = NoteType.HOLDBODY then
+                            if not (ln.Contains(k)) then
+                                failwithf "Hold middle appears with no head at %f" time
+                        elif nr.[k] = NoteType.NOTHING then
+                            if ln.Contains(k) then
+                                failwithf "Hold middle should have been present at %f" time
+                        elif nr.[k] = NoteType.HOLDTAIL then
+                            if not (ln.Contains(k)) then
+                                failwithf "Hold tail appears with no head at %f" time
 
-                for k = 0 to (chart.Keys - 1) do
-                    if nr.[k] = NoteType.HOLDHEAD then
-                        if ln.Contains(k) then
-                            failwithf "Hold head appears inside hold at %f" time
+                            ln <- ln.Remove(k)
 
-                        ln <- ln.Add(k)
-                    elif nr.[k] = NoteType.HOLDBODY then
-                        if not (ln.Contains(k)) then
-                            failwithf "Hold middle appears with no head at %f" time
-                    elif nr.[k] = NoteType.NOTHING then
-                        if ln.Contains(k) then
-                            failwithf "Hold middle should have been present at %f" time
-                    elif nr.[k] = NoteType.HOLDTAIL then
-                        if not (ln.Contains(k)) then
-                            failwithf "Hold tail appears with no head at %f" time
+                    if NoteRow.is_empty nr then
+                        failwithf "Note row is redundant at %f" time
 
-                        ln <- ln.Remove(k)
-
-                if NoteRow.is_empty nr then
-                    failwithf "Note row is redundant at %f" time
-
-            if not ln.IsEmpty then
-                failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time (ln.ToInt16())
-
-            Ok chart
+                if not ln.IsEmpty then
+                    failwithf "Unterminated hold notes at end of chart at %f [%i]" last_time (ln.ToInt16())
+                    
+            check_valid_bpms()
+            check_valid_svs()
+            check_valid_notes()
+            Ok this
         with err ->
             Error err.Message
 
-    let write_headless (chart: Chart) (bw: BinaryWriter) =
-        TimeArray.write chart.Notes bw (fun bw nr -> NoteRow.write bw nr)
+    member this.WriteToStreamHeadless(bw: BinaryWriter) : unit =
+        TimeArray.write this.Notes bw (fun bw nr -> NoteRow.write bw nr)
 
         TimeArray.write
-            chart.BPM
+            this.BPM
             bw
             (fun bw bpm ->
                 bw.Write(bpm.Meter / 1<beat>)
                 bw.Write(float32 bpm.MsPerBeat)
             )
 
-        TimeArray.write chart.SV bw (fun bw f -> bw.Write f)
+        TimeArray.write this.SV bw (fun bw f -> bw.Write f)
 
-    let read_headless (keys: int) (br: BinaryReader) : Result<Chart, string> =
+    static member ReadFromStreamHeadless (keys: int, br: BinaryReader) : Result<Chart, string> =
         try
             let notes = TimeArray.read br (NoteRow.read keys)
 
@@ -166,15 +169,19 @@ module Chart =
                         }
                     )
 
-            let sv = TimeArray.read br (fun r -> r.ReadSingle())
+            let sv = TimeArray.read br _.ReadSingle()
 
-            check {
-                Keys = keys
-                Notes = notes
-                BPM = bpms
-                SV = sv
-            }
+            let result =
+                {
+                    Keys = keys
+                    Notes = notes
+                    BPM = bpms
+                    SV = sv
+                }
+            result.CheckForErrors()
         with err -> Error err.Message
+        
+module Chart =
 
     let diff (left: Chart) (right: Chart) =
         let f (o: Time) : int = o * 0.01f |> float32 |> round |> int

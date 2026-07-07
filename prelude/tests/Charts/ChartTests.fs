@@ -12,7 +12,7 @@ module ChartTests =
 
         for seed, keys in [ 123, 4; 0, 7; 123, 10 ] do
             let chart = ChartFuzzer.Generate(keys, seed)
-            match Chart.check chart with
+            match chart.CheckForErrors() with
             | Ok _ -> ()
             | Error reason -> Assert.Fail(reason)
 
@@ -32,7 +32,7 @@ module ChartTests =
 
         let test_expected_hash(keys: int, seed: int, expected_hash: string) : unit =
             let chart = ChartFuzzer.Generate(keys, seed)
-            Assert.AreEqual(expected_hash, Chart.hash chart)
+            Assert.AreEqual(expected_hash, chart.Hash())
 
         test_expected_hash(4, 123, "66FCABE08A7008B62872F80D2AD2DD144FCCF0B693E0907CD7F5F984B2A04B21")
         test_expected_hash(7, 0, "A03A034E4B836D919906467F60CF07503CF503583638DB13FC871D026E2600D6")
@@ -47,8 +47,8 @@ module ChartTests =
         let twice_as_long = Chart.scale 2.0f</rate> chart
         let scaled_to_original = Chart.scale 0.5f</rate> twice_as_long
 
-        Assert.AreNotEqual(Chart.hash twice_as_long, Chart.hash chart)
-        Assert.AreEqual(Chart.hash scaled_to_original, Chart.hash chart)
+        Assert.AreNotEqual(twice_as_long.Hash(), chart.Hash())
+        Assert.AreEqual(scaled_to_original.Hash(), chart.Hash())
 
     [<Test>]
     let Check_NoNotes() =
@@ -61,7 +61,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check chart with
+        match chart.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -76,7 +76,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check chart with
+        match chart.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
 
@@ -101,7 +101,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check empty_row with
+        match empty_row.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -127,7 +127,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check only_hold_middles with
+        match only_hold_middles.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -154,7 +154,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check correct with
+        match correct.CheckForErrors() with
         | Ok _ -> ()
         | Error reason -> Assert.Fail(reason)
 
@@ -180,7 +180,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check missing_middle with
+        match missing_middle.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -206,7 +206,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check missing_tail with
+        match missing_tail.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -228,7 +228,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check unexpected_middle with
+        match unexpected_middle.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -254,7 +254,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check unexpected_head with
+        match unexpected_head.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -281,7 +281,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check stacked with
+        match stacked.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -303,7 +303,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check backwards_notes with
+        match backwards_notes.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -325,7 +325,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check inf with
+        match inf.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -347,7 +347,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check nan with
+        match nan.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -380,7 +380,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check backwards_bpms with
+        match backwards_bpms.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -408,7 +408,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check inf with
+        match inf.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -436,7 +436,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check nan with
+        match nan.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -465,7 +465,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check negative_bpm with
+        match negative_bpm.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 
@@ -489,7 +489,7 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check zero_meter with
+        match zero_meter.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
 

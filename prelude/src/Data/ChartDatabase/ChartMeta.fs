@@ -76,7 +76,7 @@ type ChartMeta =
         let truncate (s: string) = if s.Length > 200 then s.Substring(0, 200) else s
 
         {
-            Hash = Chart.hash chart
+            Hash = chart.Hash()
 
             Title = truncate import_chart.Header.Title
             TitleNative = Option.map truncate import_chart.Header.TitleNative

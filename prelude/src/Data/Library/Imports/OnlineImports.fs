@@ -114,12 +114,12 @@ module OnlineImports =
                     use! stream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
                     use br = new BinaryReader(stream)
 
-                    match Chart.read_headless chart.Keys br with
+                    match Chart.ReadFromStreamHeadless(chart.Keys, br) with
                     | Error reason ->
                         return Error (sprintf "Malformed chart: %s" reason)
                     | Ok chart_data ->
 
-                    let actual_hash = Chart.hash chart_data
+                    let actual_hash = chart_data.Hash()
 
                     if actual_hash <> hash then
                         return Error (sprintf "Hash mismatch: '%s' expected vs '%s' actual" hash actual_hash)

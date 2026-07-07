@@ -69,7 +69,7 @@ module Imports =
                 |> Seq.map (
                     function
                     | Ok import ->
-                        match Chart.check import.Chart with
+                        match import.Chart.CheckForErrors() with
                         | Ok chart -> Ok { import with Chart = chart }
                         | Error reason ->
                             Logging.Error "Conversion produced corrupt chart (%s): %s" import.LoadedFromPath reason
@@ -87,8 +87,8 @@ module Imports =
                 |> List.map (fun c ->
                     let with_pruned_svs = { c.Chart with SV = cleaned_sv c.Chart.SV }
                     if with_pruned_svs.SV.Length < c.Chart.SV.Length then
-                        let before_hash = Chart.hash c.Chart
-                        let after_hash = Chart.hash with_pruned_svs
+                        let before_hash = c.Chart.Hash()
+                        let after_hash = with_pruned_svs.Hash()
                         if before_hash <> after_hash then
                             match library.Charts.GetChartMeta(before_hash) with
                             | Some chart_meta -> library.Charts.Delete(chart_meta)

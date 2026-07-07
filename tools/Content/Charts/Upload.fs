@@ -40,11 +40,11 @@ module Upload =
         reply.IsSuccessStatusCode
 
     let private upload_chart_to_cdn (chart_meta: ChartMeta) (chart: Chart) : Async<Result<string * int, string>> =
-        match Chart.check chart with
+        match chart.CheckForErrors() with
         | Error msg -> async { return Error (sprintf "Chart is invalid: %s" msg) }
         | Ok chart ->
 
-        let chart_hash = Chart.hash chart
+        let chart_hash = chart.Hash()
 
         match chart_meta.Background, chart_meta.Audio with
         | AssetLocation.Hash background_hash, AssetLocation.Hash audio_hash ->
@@ -58,7 +58,7 @@ module Upload =
                             use ms = new MemoryStream()
                             use bw = new BinaryWriter(ms)
 
-                            Chart.write_headless chart bw
+                            chart.WriteToStreamHeadless(bw)
                             bw.Flush()
 
                             let! response = backblaze_client.UploadAsync(BUCKET_ID, file_name, ms)
@@ -254,8 +254,8 @@ module Upload =
         let top_50 =
             match WebServices.download_json_async<_> "https://api.etternaonline.com/api/packs?page=1&limit=50&sort=-popularity" |> Async.RunSynchronously with
             | WebResult.Ok (response: {| data: {| name: string |} array |}) -> response.data |> Array.map _.name
-            | WebResult.HttpError i -> [||]
-            | WebResult.Exception err -> [||]
+            | WebResult.HttpError _ -> [||]
+            | WebResult.Exception _ -> [||]
             |> Set.ofArray
         let new_list = Set.union on_file top_50
         File.WriteAllLines(PACK_LIST_PATH, new_list)
