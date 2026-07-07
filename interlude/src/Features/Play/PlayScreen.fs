@@ -201,7 +201,7 @@ type PlayScreen =
                 start_overlay.Init(this)
 
             override this.OnEnter(previous) =
-                Content.Stats.SaveCurrentSession()
+                Content.Stats.StartOrContinueSession()
                 info.SaveData.LastPlayed <- Timestamp.now()
                 Toolbar.hide_cursor ()
 

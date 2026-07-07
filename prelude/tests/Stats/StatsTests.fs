@@ -18,7 +18,7 @@ module StatsTests =
         let clock = VirtualClock(Timestamp.now())
         let stats = Stats.FromUserDatabase(user_db, clock)
         
-        let inline assert_initial_zeros() : unit =
+        let assert_initial_zeros() : unit =
             Assert.AreEqual(0.0, stats.PlayTime)
             Assert.AreEqual(0.0, stats.PracticeTime)
             Assert.AreEqual(0.0, stats.GameTime)
@@ -30,7 +30,7 @@ module StatsTests =
             Assert.AreEqual(0L, stats.XP)
             Assert.AreEqual(Map.empty<int, float>, stats.GetCurrentSession().KeymodePlaytime)
             
-        let inline test_adding_stats() : unit =
+        let test_adding_stats() : unit =
             stats.CompletePlay(4, 60_000.0, 2500)
             stats.AddPracticeTime(120_000.0, 2500)
             stats.RetryPlay(7, 10_000.0, 500)
@@ -46,32 +46,32 @@ module StatsTests =
             Assert.AreEqual(Some(25_000.0), stats.GetCurrentSession().KeymodePlaytime.TryFind(7))
             Assert.AreEqual(None, stats.GetCurrentSession().KeymodePlaytime.TryFind(10))
             
-        let inline session_time_cutoff() : unit =
+        let session_time_cutoff() : unit =
             let today = clock.Today()
             
-            stats.SaveCurrentSession()
+            stats.StartOrContinueSession()
             Assert.AreEqual(Map.empty<DateOnly, Session list>, stats.GetPreviousSessions())
             Assert.True(stats.GetCurrentSession().NotesHit > 0)
             
             clock.Add(SESSION_TIMEOUT)
-            stats.SaveCurrentSession()
+            stats.StartOrContinueSession()
             Assert.AreEqual(Map.empty<DateOnly, Session list>, stats.GetPreviousSessions())
             Assert.True(stats.GetCurrentSession().NotesHit > 0)
             
-            clock.Add(1)
-            stats.SaveCurrentSession()
-            Assert.AreEqual(1, stats.GetSessionsForDate(today).Length)
+            clock.Add(SESSION_TIMEOUT + 1L)
+            stats.StartOrContinueSession()
+            Assert.AreEqual(1, stats.GetPreviousSessionsForDate(today).Length)
             Assert.AreEqual(0, stats.GetCurrentSession().NotesHit)
             Assert.AreEqual(2500 + 2500 + 500 + 750, stats.NotesHit)
             
-        let inline database_roundtrip() : unit =
+        let database_roundtrip() : unit =
             let round_tripped_stats = Stats.FromUserDatabase(user_db, clock)
             printfn "%A" (round_tripped_stats.GetPreviousSessions())
             
             Assert.AreEqual(1, round_tripped_stats.GetPreviousSessions().Keys.Count)
-            Assert.AreEqual(1, round_tripped_stats.GetSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()).Length)
+            Assert.AreEqual(1, round_tripped_stats.GetPreviousSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()).Length)
             
-            printfn "%A" (round_tripped_stats.GetSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()))
+            printfn "%A" (round_tripped_stats.GetPreviousSessionsForDate(round_tripped_stats.GetPreviousSessions().Keys.First()))
             Assert.AreEqual(stats.GetCurrentSession().LastPlay, round_tripped_stats.GetCurrentSession().LastPlay)
             
         assert_initial_zeros()

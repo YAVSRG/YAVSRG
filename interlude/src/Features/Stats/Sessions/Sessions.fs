@@ -21,7 +21,7 @@ type SessionsTab() =
             session_panel.Current <-
                 match v with
                 | Some (date, session) ->
-                    let sessions_today = Content.Stats.GetSessionsForDate(date)
+                    let sessions_today = Content.Stats.GetPreviousSessionsForDate(date)
                     SessionPanel.CreatePrevious(session, sessions_today, (fun () -> selected_session.Set None), cycle_session_fd, cycle_session_bk) :> Widget
                 | None ->
                     SessionPanel.CreateCurrent(Content.Stats.GetCurrentSession())
@@ -108,4 +108,4 @@ type SessionsTab() =
                 cycle_session_fd()
 
     member this.ShowSessionForDate(date: DateOnly) : unit =
-        selected_session.Value <- Some (date, Content.Stats.GetSessionsForDate(date).[0])
+        selected_session.Value <- Some (date, Content.Stats.GetPreviousSessionsForDate(date).[0])

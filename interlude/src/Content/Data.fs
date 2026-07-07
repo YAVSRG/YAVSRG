@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Content
 
-open Percyqaz.Common
 open Prelude.Data.Library
 open Prelude.Data.User.Stats
 
@@ -15,7 +14,7 @@ module private Data =
 
     let deinit () : unit =
         if not (isNull (stats :> obj)) then
-            stats.SaveCurrentSession()
+            stats.Save()
         if not (isNull (library :> obj)) then
             library.Save()
 

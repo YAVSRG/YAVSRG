@@ -24,6 +24,9 @@ type CurrentSession =
         mutable Streak: int
         mutable KeymodePlaytime: Map<int, float>
     }
+    
+    member this.HasTimedOut(now: int64) : bool = now - SESSION_TIMEOUT > this.LastTime
+    member this.IsEmpty() : bool = this.NotesHit = 0
 
     member this.ToSession() : Session =
         assert(this.NotesHit > 0)

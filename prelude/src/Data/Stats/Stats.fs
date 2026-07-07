@@ -50,7 +50,7 @@ type Stats =
     member private this.SaveAs(id: string) : unit =
         DbSingletons.save<StatsSaveData> id (this.ToSaveData()) this.Database
     member internal this.SaveBackup(backup_id: string) : unit = this.SaveAs("stats_" + backup_id)
-    member internal this.Save() : unit = this.SaveAs("stats")
+    member this.Save() : unit = this.SaveAs("stats")
         
     static member FromUserDatabase(user_db: UserDatabase, clock: Clock) : Stats =
         
@@ -84,10 +84,8 @@ type Stats =
         
         let inline timeout_current_session_if_needed(stats: Stats) : unit =
             let now = clock.Now()
-            let current_session_is_empty = stats.CurrentSession.NotesHit = 0
-            let current_session_has_timed_out = now - SESSION_TIMEOUT > stats.CurrentSession.LastPlay
             
-            if current_session_has_timed_out || current_session_is_empty then
+            if stats.CurrentSession.HasTimedOut(now) || stats.CurrentSession.IsEmpty() then
                 stats.EndCurrentSession(now)
             elif now < stats.CurrentSession.LastTime then
                 Logging.Error "System clock changes could break your session stats"
@@ -102,23 +100,25 @@ type Stats =
     member private this.EndCurrentSession(now: int64) : unit =
         
         let inline add_to_previous_sessions(session: Session) : unit =
-            let date = timestamp_to_rg_calendar_day session.Start |> DateOnly.FromDateTime
-            match this.PreviousSessions.TryFind date with
-            | Some sessions -> this.PreviousSessions <- this.PreviousSessions.Add (date, session :: sessions)
-            | None -> this.PreviousSessions <- this.PreviousSessions.Add (date, [session])
-        
-        this.TotalStats <- this.TotalStats.AddSession(this.CurrentSession)
-        if this.CurrentSession.NotesHit > 0 then
-            let database_session : Session = this.CurrentSession.ToSession()
+            let date = timestamp_to_rg_calendar_day(session.Start) |> DateOnly.FromDateTime
+            match this.PreviousSessions.TryFind(date) with
+            | Some sessions -> this.PreviousSessions <- this.PreviousSessions.Add(date, session :: sessions)
+            | None -> this.PreviousSessions <- this.PreviousSessions.Add(date, [session])
+            
+        let inline save_nonempty_session(current_session: CurrentSession) : unit =
+            let database_session : Session = current_session.ToSession()
             add_to_previous_sessions(database_session)
             DbSessions.save database_session this.Database
+            
+        this.TotalStats <- this.TotalStats.AddSession(this.CurrentSession)
+        if not(this.CurrentSession.IsEmpty()) then save_nonempty_session(this.CurrentSession)
 
-        this.CurrentSession <- CurrentSession.StartNew now
+        this.CurrentSession <- CurrentSession.StartNew(now)
         this.Save()
         
-    member this.SaveCurrentSession() : unit =
+    member this.StartOrContinueSession() : unit =
         let now = this.Clock.Now()
-        if now - SESSION_TIMEOUT > this.CurrentSession.LastPlay then
+        if this.CurrentSession.HasTimedOut(now) then
             this.EndCurrentSession(now)
         elif now < this.CurrentSession.LastTime then
             Logging.Error "System clock changes could break your session stats"
@@ -168,7 +168,7 @@ type Stats =
         
     member this.HandleQuit() : SessionXPGain =
         this.AddXP(QUIT_PENALTY)
-        this.SaveCurrentSession()
+        this.StartOrContinueSession()
         {
             QuitPenalty = QUIT_PENALTY
             BaseXP = 0L
@@ -182,6 +182,7 @@ type Stats =
         else
             this.CurrentSession.Streak <- 1
         this.CurrentSession.LastPlay <- max this.CurrentSession.LastPlay score_info.TimePlayed
+        this.CurrentSession.LastTime <- max this.CurrentSession.LastPlay this.CurrentSession.LastTime
 
         let base_xp = score_info.Scoring.JudgementCounts |> Array.truncate 5 |> Array.sum // todo: actually count notes hit
         let streak_bonus = float32 (this.CurrentSession.Streak - 1) * 0.1f |> max 0.0f |> min 1.0f
@@ -210,7 +211,7 @@ type Stats =
         this.AddXP(lamp_xp)
         this.AddXP(acc_xp)
 
-        this.SaveCurrentSession()
+        this.StartOrContinueSession()
 
         {
             QuitPenalty = 0L
@@ -218,10 +219,8 @@ type Stats =
             LampXP = lamp_xp
             AccXP = acc_xp
         }
-        
-    member this.GetCurrentSession() : CurrentSession = this.CurrentSession
     
-    member this.GetSessionsForDate(date: DateOnly) : Session list =
+    member this.GetPreviousSessionsForDate(date: DateOnly) : Session list =
         match Map.tryFind date this.PreviousSessions with
         | Some sessions_on_day -> sessions_on_day
         | None -> []
@@ -256,7 +255,7 @@ type Stats =
     member this.TryGetPreviousSession(date: DateOnly, session: Session) : (DateOnly * Session) option =
         
         let inline find_session_earlier_today() : (DateOnly * Session) option =
-            let sessions_today = this.GetSessionsForDate(date)
+            let sessions_today = this.GetPreviousSessionsForDate(date)
             let index = List.tryFindIndex (fun s -> s = session) sessions_today |> Option.defaultValue -1
             if index > 0 then
                 Some(date, sessions_today.[index - 1])
@@ -278,6 +277,8 @@ type Stats =
         
     member this.TryGetLatestSession() : (DateOnly * Session) option =
         this.TryGetPreviousSession(this.Clock.Today(), Unchecked.defaultof<_>)
+        
+    member this.GetCurrentSession() : CurrentSession = this.CurrentSession
         
     // todo: usage of this is minimised for now but ultimately this should be replaced with intent-focused methods
     // e.g. GetActiveYears(), GetSessionsByYear(), GetRecentSessions()
