@@ -12,7 +12,7 @@ open Interlude.Features.Online
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features.Import
-open Interlude.Features.Import.osu
+open Interlude.Features.Import.Osu
 open Interlude.Features.Gameplay
 open Interlude.Features.Skins.EditNoteskin
 open Interlude.Features.Skins.EditHUD

@@ -13,7 +13,7 @@ open Prelude.Skins.Conversions.Osu
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features.Import.Etterna
-open Interlude.Features.Import.osu
+open Interlude.Features.Import.Osu
 
 module FileDrop =
     

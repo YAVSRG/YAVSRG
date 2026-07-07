@@ -6,7 +6,7 @@ open Prelude
 open Interlude.UI
 open Interlude.Features.Mounts
 open Interlude.Features.Import
-open Interlude.Features.Import.osu
+open Interlude.Features.Import.Osu
 open Interlude.Features.Import.Etterna
 open Interlude.Features.Tables.Browser
 open Interlude.Features.Skins.Browser
