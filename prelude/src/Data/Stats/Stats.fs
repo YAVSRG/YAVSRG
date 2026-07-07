@@ -2,6 +2,7 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Data
 open Percyqaz.Data.Sqlite
 open Prelude.Data.User
 open Prelude.Data.Library
@@ -16,16 +17,15 @@ type SessionXPGain =
     member this.Total : int64 =
         this.QuitPenalty + this.BaseXP + this.LampXP + this.AccXP
     
-[<AbstractClass>]
-type Clock() =
-    abstract member Now : unit -> int64
-    member this.Today() : DateOnly = 
-        let today_as_datetime = timestamp_to_rg_calendar_day(this.Now())
-        DateOnly.FromDateTime(today_as_datetime)
-    
-type SystemClock() =
-    inherit Clock()
-    override this.Now() : int64 = Timestamp.now()
+[<Json.AutoCodec(false)>]
+type StatsSaveData =
+    {
+        TotalStats: TotalStats
+        CurrentSession: CurrentSession
+        BoundNetworkId: int64 option
+        Migrations: Set<string>
+    }
+    static member Default: StatsSaveData = { TotalStats = TotalStats.Default; CurrentSession = CurrentSession.Default; Migrations = Set.empty; BoundNetworkId = None }
 
 type Stats =
     private {
@@ -116,14 +116,15 @@ type Stats =
         this.CurrentSession <- CurrentSession.StartNew now
         this.Save()
         
-    member this.SaveCurrentSession(now: int64) : unit =
-        this.CurrentSession.LastTime <- now
+    member this.SaveCurrentSession() : unit =
+        let now = this.Clock.Now()
         if now - SESSION_TIMEOUT > this.CurrentSession.LastPlay then
             this.EndCurrentSession(now)
         elif now < this.CurrentSession.LastTime then
             Logging.Error "System clock changes could break your session stats"
             this.EndCurrentSession(now)
         else
+            this.CurrentSession.LastTime <- now
             this.Save()
         
     member this.PlayTime : float = this.TotalStats.PlayTime + this.CurrentSession.PlayTime
@@ -136,20 +137,23 @@ type Stats =
     member this.PlaysQuit : int = this.TotalStats.PlaysQuit + this.CurrentSession.PlaysQuit
     member this.XP : int64 = this.TotalStats.XP + this.CurrentSession.SessionScore
         
-    member this.AddPlayStats(keymode: int, time: float, notes_hit: int) : unit =
+    member private this.AddPlayStats(keymode: int, time: float, notes_hit: int) : unit =
         this.CurrentSession.PlayTime <- this.CurrentSession.PlayTime + time
         this.CurrentSession.KeymodePlaytime <- this.CurrentSession.KeymodePlaytime.Change(keymode, fun v -> (Option.defaultValue 0.0 v) + time |> Some)
         this.CurrentSession.NotesHit <- this.CurrentSession.NotesHit + notes_hit
 
-    member this.CompletePlay() : unit =
+    member this.CompletePlay(keymode: int, time: float, notes_hit: int) : unit =
+        this.AddPlayStats(keymode, time, notes_hit)
         this.CurrentSession.PlaysStarted <- this.CurrentSession.PlaysStarted + 1
         this.CurrentSession.PlaysCompleted <- this.CurrentSession.PlaysCompleted + 1
         
-    member this.QuitOutOfPlay() : unit =
+    member this.QuitOutOfPlay(keymode: int, time: float, notes_hit: int) : unit =
+        this.AddPlayStats(keymode, time, notes_hit)
         this.CurrentSession.PlaysStarted <- this.CurrentSession.PlaysStarted + 1
         this.CurrentSession.PlaysQuit <- this.CurrentSession.PlaysQuit + 1
         
-    member this.RetryPlay() : unit =
+    member this.RetryPlay(keymode: int, time: float, notes_hit: int) : unit =
+        this.AddPlayStats(keymode, time, notes_hit)
         this.CurrentSession.PlaysRetried <- this.CurrentSession.PlaysRetried + 1
         
     member this.AddPracticeTime(time: float, notes_hit: int) : unit =
@@ -164,7 +168,7 @@ type Stats =
         
     member this.HandleQuit() : SessionXPGain =
         this.AddXP(QUIT_PENALTY)
-        this.SaveCurrentSession(this.Clock.Now())
+        this.SaveCurrentSession()
         {
             QuitPenalty = QUIT_PENALTY
             BaseXP = 0L
@@ -206,7 +210,7 @@ type Stats =
         this.AddXP(lamp_xp)
         this.AddXP(acc_xp)
 
-        this.SaveCurrentSession(this.Clock.Now())
+        this.SaveCurrentSession()
 
         {
             QuitPenalty = 0L

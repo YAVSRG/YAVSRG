@@ -201,9 +201,8 @@ type PlayScreen =
                 start_overlay.Init(this)
 
             override this.OnEnter(previous) =
-                let now = Timestamp.now ()
-                Content.Stats.SaveCurrentSession(now)
-                info.SaveData.LastPlayed <- now
+                Content.Stats.SaveCurrentSession()
+                info.SaveData.LastPlayed <- Timestamp.now()
                 Toolbar.hide_cursor ()
 
                 base.OnEnter(previous)
@@ -215,11 +214,10 @@ type PlayScreen =
                 DiscordRPC.playing_timed (%"discord_status.play", info.ChartMeta.Title, info.ChartMeta.Length / SelectedChart.rate.Value)
 
             override this.OnExit(next) =
-                Content.Stats.AddPlayStats(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 match stats_exit_reason with
-                | ExitReason.Complete -> Content.Stats.CompletePlay()
-                | ExitReason.Retry -> Content.Stats.RetryPlay()
-                | ExitReason.Quit -> Content.Stats.QuitOutOfPlay()
+                | ExitReason.Complete -> Content.Stats.CompletePlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
+                | ExitReason.Retry -> Content.Stats.RetryPlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
+                | ExitReason.Quit -> Content.Stats.QuitOutOfPlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 
                 if not offset_manually_changed then
                     LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value

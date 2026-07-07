@@ -150,9 +150,8 @@ type MultiplayerScreen =
                 base.Init(parent)
 
             override this.OnEnter(previous) =
-                let now = Timestamp.now()
-                Content.Stats.SaveCurrentSession(now)
-                info.SaveData.LastPlayed <- now
+                Content.Stats.SaveCurrentSession()
+                info.SaveData.LastPlayed <- Timestamp.now()
                 Toolbar.hide_cursor ()
 
                 base.OnEnter(previous)
@@ -164,11 +163,10 @@ type MultiplayerScreen =
                 )
 
             override this.OnExit(next) =
-                Content.Stats.AddPlayStats(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 if quit_out_early then
-                    Content.Stats.QuitOutOfPlay()
+                    Content.Stats.QuitOutOfPlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 else
-                    Content.Stats.CompletePlay()
+                    Content.Stats.CompletePlay(info.WithMods.Keys, stats_play_time, stats_notes_hit)
                 
                 LocalOffset.automatic this.State info.SaveData options.AutoCalibrateOffset.Value
 

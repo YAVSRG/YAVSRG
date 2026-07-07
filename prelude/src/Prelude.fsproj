@@ -157,7 +157,9 @@
     <Compile Include="Data\Library\Views\Views.fs" />
     <Compile Include="Data\Library\Endless.fs" />
     <Compile Include="Data\Stats\StatsHelpers.fs" />
-    <Compile Include="Data\Stats\StatsState.fs" />
+    <Compile Include="Data\Stats\Clock.fs" />
+    <Compile Include="Data\Stats\CurrentSession.fs" />
+    <Compile Include="Data\Stats\TotalStats.fs" />
     <Compile Include="Data\Stats\Stats.fs" />
     <Compile Include="Data\Stats\StatsSync.fs" />
     <Compile Include="Data\Stats\StatsMigration.fs" />

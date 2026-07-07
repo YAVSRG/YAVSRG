@@ -15,7 +15,7 @@ module private Data =
 
     let deinit () : unit =
         if not (isNull (stats :> obj)) then
-            stats.SaveCurrentSession(Timestamp.now())
+            stats.SaveCurrentSession()
         if not (isNull (library :> obj)) then
             library.Save()
 
