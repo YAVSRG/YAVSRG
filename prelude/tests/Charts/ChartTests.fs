@@ -513,6 +513,60 @@ module ChartTests =
                 SV = [||]
             }
 
-        match Chart.check nan_bpm with
+        match nan_bpm.CheckForErrors() with
+        | Ok _ -> Assert.Fail()
+        | Error reason -> printfn "%s" reason
+        
+    [<Test>]
+    let Check_InvalidSVs() =
+        let nan_sv =
+            {
+                Keys = 4
+                Notes =
+                    [|
+                        {
+                            Time = 0.0f<ms>
+                            Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
+                        }
+                    |]
+                BPM =
+                    [|
+                        {
+                            Time = 0.0f<ms>
+                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
+                        }
+                    |]
+                SV = [| { Time = 0.0f<ms>; Data = nanf } |]
+            }
+
+        match nan_sv.CheckForErrors() with
+        | Ok _ -> Assert.Fail()
+        | Error reason -> printfn "%s" reason
+        
+        let backwards_sv =
+            {
+                Keys = 4
+                Notes =
+                    [|
+                        {
+                            Time = 0.0f<ms>
+                            Data = [| NoteType.NORMAL; NoteType.NOTHING; NoteType.NOTHING; NoteType.NOTHING |]
+                        }
+                    |]
+                BPM =
+                    [|
+                        {
+                            Time = 0.0f<ms>
+                            Data = { MsPerBeat = 50.0f<ms / beat>; Meter = 4<beat> }
+                        }
+                    |]
+                SV =
+                    [|
+                        { Time = 5.0f<ms>; Data = 1.0f }
+                        { Time = 0.0f<ms>; Data = 1.0f }
+                    |]
+            }
+            
+        match backwards_sv.CheckForErrors() with
         | Ok _ -> Assert.Fail()
         | Error reason -> printfn "%s" reason
