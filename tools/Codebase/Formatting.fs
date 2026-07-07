@@ -8,12 +8,14 @@ open System.IO
 type FormattingMessageId =
     | Q0001
     | Q0002
+    | Q0003
     override this.ToString() : string =
         sprintf "%A: %s" this this.Message
     member this.Message : string =
         match this with
         | Q0001 -> "function arguments missing type annotation"
-        | Q0002 -> "camel case used for identifier"
+        | Q0002 -> "method missing return type annotation"
+        | Q0003 -> "camel case used for identifier"
 
 module Formatting =
     
@@ -33,7 +35,7 @@ module Formatting =
             | None -> this.FilePath
             |> launch_rider_with_args
 
-    let run_fantomas () = Shell.Exec("fantomas", ".")
+    let run_fantomas () : unit = Shell.Exec("fantomas", ".")
         
     let inline color_text(fg: Color, bg: Color, text: string) : string =
         sprintf "\u001b[38;2;%d;%d;%d;48;2;%d;%d;%dm%s\u001b[0m" fg.R fg.G fg.B bg.R bg.G bg.B text
@@ -62,9 +64,12 @@ module Formatting =
         seq {
             let missing_arg_type_annotations = create_regex("\slet(?>( rec| mutable)?)(?>( internal| private)?)(?>( inline)?) $IDENT $IDENT")
             yield! regex_warnings(missing_arg_type_annotations, Q0001)
+            
+            let missing_member_type_annotations = create_regex("(member|override)(?>( internal| private)?)(?>( inline)?)( this\.)?[A-Za-z]+\([^\)]*\) =")
+            yield! regex_warnings(missing_member_type_annotations, Q0002)
                 
             //let camel_case_symbol = create_regex("[\(\s][a-z]+[A-Z]$IDENT")
-            //yield! regex_warnings(camel_case_symbol, Q0002)
+            //yield! regex_warnings(camel_case_symbol, Q0003)
         }
         
     let check_files () : Message array =
@@ -96,19 +101,19 @@ module Formatting =
             | ConsoleKey.Enter -> messages.[selection].Open()
             | _ -> ()
 
-    let simple_view (file_contents: string) =
+    let simple_view (file_contents: string) : unit =
         let regex = Regex("[\t ]*(module .+? =|type .+? =|let .+? =|member .+? =|override .+? =)")
         let span = file_contents.AsSpan()
         for m in regex.EnumerateMatches span do
             let match_span = span.Slice(m.Index, m.Length)
             printfn "%s" (String match_span)
 
-    let simple_view_all () =
+    let simple_view_all () : unit =
         for filename, file_contents in SourceFiles.walk_fs_file_contents YAVSRG_PATH do
             printfn "%s\n====\n" filename
-            simple_view file_contents
+            simple_view(file_contents)
 
-    let check_linecounts () =
+    let check_linecounts () : unit =
         let mutable loc = 0
         for filename, file_contents in SourceFiles.walk_fs_file_contents YAVSRG_PATH do
             let lines = file_contents.Split('\n').Length
