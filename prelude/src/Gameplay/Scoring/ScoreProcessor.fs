@@ -6,7 +6,7 @@ open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
-type GameplayAction =
+type ScoringEventInner =
     | Hit of
         {|
             Delta: GameplayTime
@@ -40,18 +40,18 @@ type GameplayAction =
         | GhostTap g -> g.Judgement
 
 [<Struct>]
-type ComboAction =
+type ComboChange =
     | Increase
     | Break of instead_of_increase: bool
     | NoChange
 
-type GameplayEvent =
+type ScoringEvent =
     {
         Index: int
         Time: ChartTime
         Column: int
-        Action: GameplayAction
-        Combo: ComboAction
+        Inner: ScoringEventInner
+        ComboChange: ComboChange
     }
 
 /// This processor extends GameplayEventProcessor, taking its series of raw `GameplayEvent<GameplayActionInternal>` event markers
@@ -61,9 +61,9 @@ type GameplayEvent =
 type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
     inherit GameplayEventProcessor(ruleset, replay, note_data, rate)
 
-    let hit_events = ResizeArray<GameplayEvent>()
+    let scoring_events = ResizeArray<ScoringEvent>()
 
-    let on_event_ev = Event<GameplayEvent>()
+    let on_event_ev = Event<ScoringEvent>()
     let on_event = on_event_ev.Publish
 
     let judgement_counts = Array.zeroCreate ruleset.Judgements.Length
@@ -135,14 +135,14 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
     member this.MaxPossiblePoints : float = max_possible_points
     member this.PointsScored : float = points_scored
 
-    member this.Events : ReadOnlyCollection<GameplayEvent> = hit_events.AsReadOnly()
-    member this.OnEvent : IEvent<GameplayEvent> = on_event
+    member this.Events : ReadOnlyCollection<ScoringEvent> = scoring_events.AsReadOnly()
+    member this.OnEvent : IEvent<ScoringEvent> = on_event
 
     /// Throws an exception if used on a live/online replay
     member this.Recreate(ruleset: Ruleset) = ScoreProcessor(ruleset, replay.GetFullReplay() |> StoredReplaySource, note_data, rate)
     member this.Recreate() = this.Recreate(ruleset)
 
-    member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
+    member private this.ProcessHit(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyJudgeReleases _ ->
@@ -167,7 +167,7 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                     Missed = is_missed
                 |}
 
-    member private this.ProcessHold(delta: GameplayTime, is_missed: bool) : ComboAction * GameplayAction =
+    member private this.ProcessHold(delta: GameplayTime, is_missed: bool) : ComboChange * ScoringEventInner =
 
         match ruleset.HoldMechanics with
         | HoldMechanics.OnlyRequireHold _
@@ -195,7 +195,10 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                     Missed = is_missed
                 |}
 
-    member private this.ProcessRelease(release_delta: GameplayTime, missed: bool, overheld: bool, dropped: bool, head_delta: GameplayTime, missed_head: bool) : ComboAction * GameplayAction =
+    member private this.ProcessRelease(release_delta: GameplayTime, missed: bool, overheld: bool, dropped: bool, head_delta: GameplayTime, missed_head: bool) :
+        ComboChange *
+                                                                                                                                                                ScoringEventInner
+        =
         match ruleset.HoldMechanics with
         | HoldMechanics.CombineHeadAndTail (HeadTailCombineRule.OsuMania windows) ->
             let judgement =
@@ -306,15 +309,15 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
                     Dropped = dropped
                 |}
 
-    member private this.ProcessDropHold() : ComboAction * GameplayAction =
+    member private this.ProcessDropHold() : ComboChange * ScoringEventInner =
         Break false,
         DropHold
 
-    member private this.ProcessRegrabHold() : ComboAction * GameplayAction =
+    member private this.ProcessRegrabHold() : ComboChange * ScoringEventInner =
         NoChange,
         RegrabHold
 
-    member private this.ProcessGhostTap() : ComboAction * GameplayAction =
+    member private this.ProcessGhostTap() : ComboChange * ScoringEventInner =
         match ruleset.HitMechanics.GhostTapJudgement with
         | Some judgement ->
             let points = judgement_to_points judgement
@@ -327,9 +330,9 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
         NoChange,
         GhostTap {| Judgement = None |}
 
-    override this.HandleEvent (internal_event: GameplayEventInternal) =
+    override this.HandleEvent (internal_event: GameplayEvent) =
         let combo_action, gameplay_action =
-            match internal_event.Action with
+            match internal_event.Inner with
             | HIT(delta, is_missed) ->
                 this.ProcessHit(delta, is_missed)
             | HOLD(delta, is_missed) ->
@@ -345,16 +348,16 @@ type ScoreProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData,
         | Increase -> incr_combo ()
         | Break instead_of_increase -> break_combo instead_of_increase
 
-        let gameplay_event : GameplayEvent =
+        let gameplay_event : ScoringEvent =
             {
                 Index = internal_event.Index
                 Time = internal_event.Time
                 Column = internal_event.Column
-                Action = gameplay_action
-                Combo = combo_action
+                Inner = gameplay_action
+                ComboChange = combo_action
             }
 
-        hit_events.Add gameplay_event
+        scoring_events.Add gameplay_event
         on_event_ev.Trigger gameplay_event
         
     static member inline Create<^T when ^T : (member ToNoteData : unit -> NoteData)>(ruleset: Ruleset, replay: ReplaySource, chart: ^T, rate: Rate) : ScoreProcessor =

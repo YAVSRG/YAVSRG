@@ -44,7 +44,7 @@ type PlayScreen =
         let mutable stats_exit_reason = ExitReason.Complete
 
         scoring.OnEvent.Add(fun h ->
-            match h.Action with
+            match h.Inner with
             | Hit d
             | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
             | _ -> ()

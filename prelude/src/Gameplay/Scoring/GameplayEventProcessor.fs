@@ -5,7 +5,7 @@ open Prelude.Charts
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
-type GameplayActionInternal =
+type GameplayEventInner =
     | HIT of delta: GameplayTime * missed: bool
     | HOLD of delta: GameplayTime * missed: bool
     | RELEASE of
@@ -19,12 +19,12 @@ type GameplayActionInternal =
     | REGRAB_HOLD
     | GHOST_TAP
 
-type GameplayEventInternal =
+type GameplayEvent =
     {
         Index: int
         Time: ChartTime
         Column: int
-        Action: GameplayActionInternal
+        Inner: GameplayEventInner
     }
 
 [<Struct>]
@@ -116,7 +116,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = tail_search_index
                             Time = chart_time
                             Column = k
-                            Action =
+                            Inner =
                                 RELEASE(
                                     late_release_window_raw,
                                     true,
@@ -182,7 +182,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
-                            Action = HIT(deltas.[k], true)
+                            Inner = HIT(deltas.[k], true)
                         }
                     status.[k] <- HitFlags.HIT_ACCEPTED
 
@@ -194,7 +194,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
-                            Action = HOLD(deltas.[k], true)
+                            Inner = HOLD(deltas.[k], true)
                         }
                     status.[k] <- HitFlags.HIT_ACCEPTED
 
@@ -217,7 +217,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = expired_notes_index
                             Time = t - first_note + late_window_scaled
                             Column = k
-                            Action = RELEASE(deltas.[k], true, overhold, dropped, head_deltas.[k], missed_head)
+                            Inner = RELEASE(deltas.[k], true, overhold, dropped, head_deltas.[k], missed_head)
                         }
                     status.[k] <- HitFlags.RELEASE_ACCEPTED
 
@@ -251,7 +251,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                     Index = index
                     Time = chart_time
                     Column = k
-                    Action = if is_hold_head then HOLD(deltas.[k], false) else HIT(deltas.[k], false)
+                    Inner = if is_hold_head then HOLD(deltas.[k], false) else HIT(deltas.[k], false)
                 }
             // Begin tracking if it's a hold note
             if is_hold_head then
@@ -266,7 +266,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                         Index = i
                         Time = chart_time
                         Column = k
-                        Action = REGRAB_HOLD
+                        Inner = REGRAB_HOLD
                     }
             | H_DROPPED, i ->
                 hold_states.[k] <- H_REGRABBED, i
@@ -275,7 +275,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                         Index = i
                         Time = chart_time
                         Column = k
-                        Action = REGRAB_HOLD
+                        Inner = REGRAB_HOLD
                     }
             | H_NOTHING, _ when chart_time > 0.0f<ms> ->
                 this.HandleEvent
@@ -283,7 +283,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                         Index = expired_notes_index
                         Time = chart_time
                         Column = k
-                        Action = GHOST_TAP
+                        Inner = GHOST_TAP
                     }
             | _ -> ()
 
@@ -335,7 +335,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                         Index = found
                         Time = chart_time
                         Column = k
-                        Action =
+                        Inner =
                             RELEASE(
                                 deltas.[k],
                                 overhold,
@@ -358,7 +358,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = i
                             Time = chart_time
                             Column = k
-                            Action = DROP_HOLD
+                            Inner = DROP_HOLD
                         }
                 | H_MISSED_HEAD_REGRABBED, i ->
                     hold_states.[k] <- H_MISSED_HEAD_DROPPED, i
@@ -367,7 +367,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
                             Index = i
                             Time = chart_time
                             Column = k
-                            Action = DROP_HOLD
+                            Inner = DROP_HOLD
                         }
                 | _ -> ()
         | _ -> ()
@@ -383,7 +383,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         this.PollReplay chart_time // Process all key presses and releases up until now
         this.MissUnhitExpiredNotes chart_time // Then process any missed notes up until now if needed
 
-    abstract member HandleEvent: GameplayEventInternal -> unit
+    abstract member HandleEvent: GameplayEvent -> unit
 
     /// Used by practice mode in the client to enter gameplay midway through a song
     /// Prevents accumulating misses for every single note before this point or column locking on the way in

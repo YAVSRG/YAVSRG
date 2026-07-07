@@ -26,7 +26,7 @@ type InputMeter(ctx: HudContext) =
     override this.Init(parent: Widget) =
         if ctx.Config.InputMeterJudgementColors then
             ctx.State.Subscribe(fun ev ->
-                match ev.Action.Judgement with
+                match ev.Inner.Judgement with
                 | Some (j, _) ->
                     colors.[ev.Column] <- ctx.State.Ruleset.JudgementColor j
                     color_fades.[ev.Column].Reset()

@@ -20,7 +20,7 @@ type EarlyLate(ctx: HudContext) =
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun ev ->
             let x =
-                match ev.Action with
+                match ev.Inner with
                 | Hit e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
                 | Hold e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone
                 | Release e when not e.Missed -> match e.Judgement with Some (j, _) -> ValueSome (j, e.Delta) | None -> ValueNone

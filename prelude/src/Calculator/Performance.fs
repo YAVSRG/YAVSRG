@@ -18,7 +18,7 @@ module Performance =
             while ev.Index > i do
                 output.[i] <- float32 v
                 i <- i + 1
-            match ev.Action.Judgement with
+            match ev.Inner.Judgement with
             | Some (_, value) ->
                 v <- ACC_SENSITIVITY * v + (1.0 - ACC_SENSITIVITY) * value |> max 0.85
             | None -> ()

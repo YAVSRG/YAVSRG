@@ -87,8 +87,8 @@ module ScoreScreenStats =
         let mutable max_points = 0.0
         let mutable scored_points = 0.0
 
-        let add_action(ev: GameplayEvent) =
-            match ev.Action with
+        let add_action(ev: ScoringEvent) =
+            match ev.Inner with
             | Hit e ->
                 if not e.Missed then
                     inc notes_hit
@@ -165,7 +165,7 @@ module ScoreScreenStats =
             | DropHold -> ()
             | RegrabHold -> ()
 
-            match ev.Combo with
+            match ev.ComboChange with
             | NoChange -> ()
             | Increase -> combo <- combo + 1
             | Break _ -> combo <- 0; combo_breaks <- combo_breaks + 1

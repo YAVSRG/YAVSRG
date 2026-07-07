@@ -9,9 +9,9 @@ open Prelude.Gameplay.Scoring
 type GameplayEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) =
     inherit GameplayEventProcessor(ruleset, replay, note_data, rate)
 
-    let events = ResizeArray<GameplayEventInternal>()
+    let events = ResizeArray<GameplayEvent>()
 
-    override this.HandleEvent(event) =
+    override this.HandleEvent(event: GameplayEvent) : unit =
         printfn "%A" event
         events.Add event
 

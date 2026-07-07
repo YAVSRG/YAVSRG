@@ -9,7 +9,7 @@ open Prelude.Gameplay.Scoring
 type ScoringEventCollector(ruleset: Ruleset, replay: ReplaySource, note_data: NoteData, rate: Rate) as this =
     inherit ScoreProcessor(ruleset, replay, note_data, rate)
 
-    let events = ResizeArray<GameplayEvent>()
+    let events = ResizeArray<ScoringEvent>()
 
     do
         this.OnEvent.Add(fun event ->

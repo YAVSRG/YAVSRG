@@ -132,13 +132,13 @@ type private HitOverlay
         |> scroll_direction_pos playfield.Bounds.Bottom
         |> fun a -> Text.fill_b (Style.font, icon, a, (color, Colors.black), 0.5f)
 
-    let draw_event (now: ChartTime) (ev: GameplayEvent) : unit =
+    let draw_event (now: ChartTime) (ev: ScoringEvent) : unit =
         let ms_to_y (time: Time) =
             options.HitPosition.Value
             + (time - now) * (options.ScrollSpeed.Value / SelectedChart.rate.Value)
             + playfield.ColumnWidth * 0.5f
 
-        match ev.Action with
+        match ev.Inner with
 
         | Hit x
         | Hold x ->

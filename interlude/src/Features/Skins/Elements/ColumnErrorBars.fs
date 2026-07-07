@@ -30,7 +30,7 @@ type ColumnErrorBars(ctx: HudContext) =
     override this.Init(parent: Widget) =
         if ctx.Config.ColumnErrorBarsMovingAverage then
             ctx.State.Subscribe(fun ev ->
-                match ev.Action with
+                match ev.Inner with
                 | Hit e ->
                     if not e.Missed then
                         moving_averages.[ev.Column].Target <-
@@ -60,7 +60,7 @@ type ColumnErrorBars(ctx: HudContext) =
         else
             ctx.State.Subscribe(fun ev ->
                 if ev.Time >= last_seen_time - animation_time then
-                    match ev.Action with
+                    match ev.Inner with
                     | Hit e ->
                         hits.[ev.Column].Add
                             {

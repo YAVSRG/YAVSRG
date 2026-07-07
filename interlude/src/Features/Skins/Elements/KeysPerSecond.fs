@@ -62,7 +62,7 @@ type KeysPerSecond(ctx: HudContext) =
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun h ->
-            match h.Action with
+            match h.Inner with
             | Hit h
             | Hold h -> if not h.Missed then count <- count + 1.0f
             | GhostTap _

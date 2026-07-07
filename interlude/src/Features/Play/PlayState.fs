@@ -36,7 +36,7 @@ type PlayState(info: LoadedChartInfo, pacemaker: PacemakerState, scoring: ScoreP
     member this.OnScoringChanged(action: unit -> unit) : IDisposable =
         scoring_changed.Subscribe action
 
-    member this.Subscribe(handler: GameplayEvent -> unit) : IDisposable =
+    member this.Subscribe(handler: ScoringEvent -> unit) : IDisposable =
         let mutable obj: IDisposable = scoring.OnEvent.Subscribe handler
 
         let resubscribe_on_change = scoring_changed.Subscribe(fun () ->

@@ -33,7 +33,7 @@ module RulesetQuaverParityTests =
                 DropHold
                 Release{| Delta = CONVENTIONAL_LATE_WINDOW; Judgement = Some (5, -0.5); Missed = true; Overhold = false; Dropped = true |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -59,7 +59,7 @@ module RulesetQuaverParityTests =
                 RegrabHold
                 Release{| Delta = 0.0f<ms / rate>; Judgement = Some (5, -0.5); Missed = false; Overhold = false; Dropped = true |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -87,7 +87,7 @@ module RulesetQuaverParityTests =
                 RegrabHold
                 Release{| Delta = CONVENTIONAL_LATE_WINDOW; Judgement = Some (5, -0.5); Missed = true; Overhold = true; Dropped = true |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -112,7 +112,7 @@ module RulesetQuaverParityTests =
                 Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
                 Release{| Delta = CONVENTIONAL_LATE_WINDOW; Judgement = Some (4, -1.0); Missed = true; Overhold = true; Dropped = false |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -135,7 +135,7 @@ module RulesetQuaverParityTests =
                 Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
                 Release{| Delta = 190.0f<ms / rate>; Judgement = Some (3, 0.25); Missed = false; Overhold = false; Dropped = false |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -158,7 +158,7 @@ module RulesetQuaverParityTests =
                 Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
                 Release{| Delta = 158.0f<ms / rate>; Judgement = Some (3, 0.25); Missed = false; Overhold = false; Dropped = false |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -181,5 +181,5 @@ module RulesetQuaverParityTests =
                 Hold{| Delta = 0.0f<ms / rate>; Judgement = Some (0, 1.0); Missed = false |}
                 Release{| Delta = 113.0f<ms / rate>; Judgement = Some (2, 0.65); Missed = false; Overhold = false; Dropped = false |}
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )

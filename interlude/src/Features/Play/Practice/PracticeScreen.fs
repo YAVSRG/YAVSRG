@@ -51,7 +51,7 @@ type PracticeScreen =
             scoring.IgnoreNotesBefore ignore_notes_before_time
 
             scoring.OnEvent.Add(fun h ->
-                match h.Action with
+                match h.Inner with
                 | Hit d
                 | Hold d when not d.Missed -> stats_notes_hit <- stats_notes_hit + 1
                 | _ -> ()

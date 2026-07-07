@@ -94,7 +94,7 @@ type JudgementCounter(ctx: HudContext) =
 
     override this.Init(parent: Widget) =
         ctx.State.Subscribe(fun h ->
-            match h.Action.Judgement with
+            match h.Inner.Judgement with
             | Some(j, _) -> judgement_animations[j].Reset()
             | None -> ()
         )

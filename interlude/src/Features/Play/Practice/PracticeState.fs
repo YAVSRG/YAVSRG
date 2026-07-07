@@ -49,7 +49,7 @@ module PracticeState =
         let mutable count = 1.0f
 
         for ev in scoring.Events do
-            match ev.Action with
+            match ev.Inner with
             | Hit x when not x.Missed ->
                 sum <- sum + x.Delta
                 count <- count + 1.0f

@@ -93,7 +93,7 @@ module RulesetOsuParityTests =
 
         let event_deltas =
             score.Events
-            |> Seq.map _.Action
+            |> Seq.map _.Inner
             |> Seq.choose (
                 function
                 | Hit d -> if not d.Missed then Some d.Delta else None
@@ -138,7 +138,7 @@ module RulesetOsuParityTests =
                 HIT(-11.0f<ms / rate>, false)
                 HIT(0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -170,7 +170,7 @@ module RulesetOsuParityTests =
                 HIT(-28.0f<ms / rate>, false)
                 HIT(-9.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -202,7 +202,7 @@ module RulesetOsuParityTests =
                 HIT(-22.0f<ms / rate>, false)
                 HIT(-9.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -234,7 +234,7 @@ module RulesetOsuParityTests =
                 HIT(CONVENTIONAL_LATE_WINDOW, true)
                 HIT(-9.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -273,7 +273,7 @@ module RulesetOsuParityTests =
 
         let event_deltas =
             score.Events
-            |> Seq.map _.Action
+            |> Seq.map _.Inner
             |> Seq.choose (
                 function
                 | Hit d -> if not d.Missed then Some d.Delta else None
@@ -332,7 +332,7 @@ module RulesetOsuParityTests =
                 HIT(-163.0f<ms / rate>, false)
                 GHOST_TAP
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test(Description = "Documents a possible bug (or intentional behaviour) of osu!stable on the very edge of the late window")>]
@@ -375,7 +375,7 @@ module RulesetOsuParityTests =
 
                 HIT(102.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
+            event_processing.Events |> Seq.map _.Inner |> Seq.filter ((<>) GHOST_TAP)
         )
 
     [<Test>]
@@ -436,7 +436,7 @@ module RulesetOsuParityTests =
 
             let judgement_sequence =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.map debug
@@ -479,7 +479,7 @@ module RulesetOsuParityTests =
 
         let judgement_sequence =
             event_processing.Events
-            |> Seq.map _.Action
+            |> Seq.map _.Inner
             |> Seq.choose (function Release e -> e.Judgement | _ -> None)
             |> Seq.map fst
 
@@ -521,7 +521,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -564,7 +564,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -607,7 +607,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -650,7 +650,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -693,7 +693,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -736,7 +736,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -779,7 +779,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -822,7 +822,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -865,7 +865,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -911,7 +911,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -956,7 +956,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne
@@ -1001,7 +1001,7 @@ module RulesetOsuParityTests =
 
             let judgement =
                 event_processing.Events
-                |> Seq.map _.Action
+                |> Seq.map _.Inner
                 |> Seq.choose (function Release e -> e.Judgement | _ -> None)
                 |> Seq.map fst
                 |> Seq.tryExactlyOne

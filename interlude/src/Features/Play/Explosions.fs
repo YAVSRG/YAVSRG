@@ -118,8 +118,8 @@ type Explosions(keys: int, noteskin: NoteskinConfig, state: PlayState) =
                 v
             )
 
-    let handle_event (ev: GameplayEvent) =
-        match ev.Action with
+    let handle_event (ev: ScoringEvent) =
+        match ev.Inner with
         | Hold e when not e.Missed ->
             hold_colors.[ev.Column] <-
                 match noteskin.HoldExplosionSettings.Colors with

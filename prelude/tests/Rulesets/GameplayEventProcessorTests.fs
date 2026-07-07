@@ -58,7 +58,7 @@ module GameplayEventProcessorTests =
                 HIT(20.0f<ms / rate>, false)
                 HIT(30.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -89,7 +89,7 @@ module GameplayEventProcessorTests =
                 HIT(-20.0f<ms / rate>, false)
                 HIT(-30.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test(Description = "Interlude's behaviour: When a badly hit note is closer than the next note that would be hit, ignore the input")>]
@@ -114,7 +114,7 @@ module GameplayEventProcessorTests =
                 HIT(-180.0f<ms / rate>, false)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test(Description = "Interlude's behaviour: If a hit is at least +-90ms off, look for something better to hit")>]
@@ -140,7 +140,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 GHOST_TAP
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -167,7 +167,7 @@ module GameplayEventProcessorTests =
                 HIT(-180.0f<ms / rate>, false)
                 HIT(-180.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -194,7 +194,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, false)
                 HIT(180.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -254,7 +254,7 @@ module GameplayEventProcessorTests =
                 HIT(5.0f<ms / rate>, false)
                 HIT(20.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -303,7 +303,7 @@ module GameplayEventProcessorTests =
                 HIT(-90.0f<ms / rate>, false)
                 GHOST_TAP
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -341,7 +341,7 @@ module GameplayEventProcessorTests =
                 HIT(10.0f<ms / rate>, false)
                 HIT(10.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -379,7 +379,7 @@ module GameplayEventProcessorTests =
                 HIT(10.0f<ms / rate>, false)
                 HIT(10.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -417,7 +417,7 @@ module GameplayEventProcessorTests =
                 HIT(10.0f<ms / rate>, false)
                 HIT(10.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -456,7 +456,7 @@ module GameplayEventProcessorTests =
                 HIT(-89.0f<ms / rate>, false)
                 GHOST_TAP
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -483,7 +483,7 @@ module GameplayEventProcessorTests =
                 GHOST_TAP
                 HIT(0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test(Description = "Extra inputs before the first note should not count as ghost taps")>]
@@ -506,7 +506,7 @@ module GameplayEventProcessorTests =
 
         Assert.False(
             event_processing.Events
-            |> Seq.exists (fun ev -> ev.Action = GHOST_TAP)
+            |> Seq.exists (fun ev -> ev.Inner = GHOST_TAP)
         )
 
         Assert.AreEqual(
@@ -514,7 +514,7 @@ module GameplayEventProcessorTests =
                 HIT(0.0f<ms / rate>, false)
                 HIT(0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test(Description = "Extra inputs after the last note still count as ghost taps")>]
@@ -541,7 +541,7 @@ module GameplayEventProcessorTests =
                 HIT(0.0f<ms / rate>, false)
                 GHOST_TAP
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -566,7 +566,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -592,7 +592,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -619,7 +619,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 HIT(0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -644,7 +644,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
+            event_processing.Events |> Seq.map _.Inner |> Seq.filter ((<>) GHOST_TAP)
         )
 
     [<Test>]
@@ -669,7 +669,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, true)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action |> Seq.filter ((<>) GHOST_TAP)
+            event_processing.Events |> Seq.map _.Inner |> Seq.filter ((<>) GHOST_TAP)
         )
 
     [<Test>]
@@ -692,7 +692,7 @@ module GameplayEventProcessorTests =
                 HOLD(0.0f<ms / rate>, false)
                 RELEASE(0.0f<ms / rate>, false, false, false, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -715,7 +715,7 @@ module GameplayEventProcessorTests =
                 HOLD(10.0f<ms / rate>, false)
                 RELEASE(-10.0f<ms / rate>, false, false, false, 10.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -738,7 +738,7 @@ module GameplayEventProcessorTests =
                 HOLD(180.0f<ms / rate>, false)
                 RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -761,7 +761,7 @@ module GameplayEventProcessorTests =
                 HOLD(-180.0f<ms / rate>, false)
                 RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -784,7 +784,7 @@ module GameplayEventProcessorTests =
                 HOLD(180.0f<ms / rate>, false)
                 RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -807,7 +807,7 @@ module GameplayEventProcessorTests =
                 HOLD(-180.0f<ms / rate>, false)
                 RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -830,7 +830,7 @@ module GameplayEventProcessorTests =
                 HOLD(180.0f<ms / rate>, false)
                 RELEASE(-180.0f<ms / rate>, false, false, false, 180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -853,7 +853,7 @@ module GameplayEventProcessorTests =
                 HOLD(-180.0f<ms / rate>, false)
                 RELEASE(180.0f<ms / rate>, false, false, false, -180.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -875,7 +875,7 @@ module GameplayEventProcessorTests =
                 HOLD(180.0f<ms / rate>, true)
                 RELEASE(180.0f<ms / rate>, true, false, true, 180.0f<ms/rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -898,7 +898,7 @@ module GameplayEventProcessorTests =
                 HOLD(0.0f<ms / rate>, false)
                 RELEASE(180.0f<ms / rate>, true, true, false, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -922,7 +922,7 @@ module GameplayEventProcessorTests =
                 DROP_HOLD
                 RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -948,7 +948,7 @@ module GameplayEventProcessorTests =
                 REGRAB_HOLD
                 RELEASE(0.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -985,7 +985,7 @@ module GameplayEventProcessorTests =
                 REGRAB_HOLD
                 RELEASE(0.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1011,7 +1011,7 @@ module GameplayEventProcessorTests =
                 REGRAB_HOLD
                 RELEASE(180.0f<ms / rate>, true, true, true, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1035,7 +1035,7 @@ module GameplayEventProcessorTests =
                 REGRAB_HOLD
                 RELEASE(0.0f<ms / rate>, false, false, true, 180.0f<ms/rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1058,7 +1058,7 @@ module GameplayEventProcessorTests =
                 HOLD(180.0f<ms / rate>, true)
                 RELEASE(180.0f<ms / rate>, true, false, true, 180.0f<ms/rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1085,7 +1085,7 @@ module GameplayEventProcessorTests =
                 RELEASE(180.0f<ms / rate>, true, false, true, 0.0f<ms/rate>, false)
                 HIT(-10.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1113,7 +1113,7 @@ module GameplayEventProcessorTests =
                 HOLD(-10.0f<ms / rate>, false)
                 RELEASE(10.0f<ms / rate>, false, false, false, -10.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1139,7 +1139,7 @@ module GameplayEventProcessorTests =
                 REGRAB_HOLD
                 RELEASE(180.0f<ms / rate>, false, false, true, 0.0f<ms/rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
     [<Test>]
@@ -1284,7 +1284,7 @@ module GameplayEventProcessorTests =
                 HIT(0.0f<ms / rate>, false)
                 HIT(102.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -1314,7 +1314,7 @@ module GameplayEventProcessorTests =
                 HIT(100.0f<ms / rate>, false)
                 HIT(2.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -1344,7 +1344,7 @@ module GameplayEventProcessorTests =
                 HIT(-49.0f<ms / rate>, false)
                 HIT(53.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -1373,7 +1373,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, false)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -1402,7 +1402,7 @@ module GameplayEventProcessorTests =
                 HIT(180.0f<ms / rate>, false)
                 HIT(180.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map _.Action
+            event_processing.Events |> Seq.map _.Inner
         )
 
         Assert.AreEqual(
@@ -1431,7 +1431,7 @@ module GameplayEventProcessorTests =
                 0, HIT(180.0f<ms / rate>, true)
                 1, HIT(-180.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Inner)
         )
 
         Assert.AreEqual(
@@ -1487,7 +1487,7 @@ module GameplayEventProcessorTests =
                 0, HIT(90.0f<ms / rate>, true)
                 1, HIT(0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Inner)
         )
 
         Assert.AreEqual(
@@ -1521,7 +1521,7 @@ module GameplayEventProcessorTests =
                 1, HIT(0.0f<ms / rate>, false)
                 0, HIT(90.0f<ms / rate>, true)
             ],
-            event_processing.Events |> Seq.map (fun e -> e.Index, e.Action)
+            event_processing.Events |> Seq.map (fun e -> e.Index, e.Inner)
         )
 
         Assert.AreEqual(
@@ -1624,7 +1624,7 @@ module GameplayEventProcessorTests =
                 HOLD(0.0f<ms / rate>, false)
                 RELEASE(0.0f<ms / rate>, false, false, false, 0.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map (fun e -> e.Action)
+            event_processing.Events |> Seq.map (fun e -> e.Inner)
         )
 
     [<Test>]
@@ -1645,12 +1645,12 @@ module GameplayEventProcessorTests =
         event_processing.IgnoreNotesBefore 75.0f<ms>
         event_processing.ProcessEntireReplay()
 
-        printfn "%A" (event_processing.Events |> Seq.map (fun e -> e.Action))
+        printfn "%A" (event_processing.Events |> Seq.map (fun e -> e.Inner))
 
         Assert.AreEqual(
             [
                 HOLD(1.0f<ms / rate>, false)
                 RELEASE(-1.0f<ms / rate>, false, false, false, 1.0f<ms / rate>, false)
             ],
-            event_processing.Events |> Seq.map (fun e -> e.Action)
+            event_processing.Events |> Seq.map (fun e -> e.Inner)
         )
