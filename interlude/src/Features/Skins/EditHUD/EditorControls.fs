@@ -133,6 +133,7 @@ type private HUDEditorControls(ctx: PositionerContext) =
                     .Position(Position.SliceT(40.0f).ShrinkX(25.0f).TranslateY(685.0f))
                     .Conditional(fun () -> ctx.Selected.IsSome),
                 VolumeSlider()
+                    .Conditional(fun () -> ctx.Selected.IsNone)
             )
 
         base.Init(parent)

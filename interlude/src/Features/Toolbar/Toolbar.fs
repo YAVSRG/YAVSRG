@@ -30,6 +30,7 @@ type Toolbar() =
     let volume_when_hidden =
         VolumeSlider()
             .Position(Position.ShrinkY(HEIGHT))
+            .Conditional(fun () -> Screen.current_type <> ScreenType.EditHud)
 
     let load_preset (i: int) : unit =
         match Presets.load i with
