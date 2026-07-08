@@ -136,10 +136,10 @@ type IPlayScreen(info: LoadedChartInfo, pacemaker_info: PacemakerState, scoring:
         Dialog.close ()
         Background.dim (float32 options.BackgroundDim.Value)
         Toolbar.hide ()
-        Song.change_rate SelectedChart.rate.Value
-        Song.set_global_offset options.AudioOffset.Value
+        Song.change_rate(SelectedChart.rate.Value)
+        Song.set_global_offset(options.AudioOffset.Value)
         Song.on_finish <- SongFinishAction.Wait
-        Song.play_leadin info.WithColors.FirstNote
+        Song.play_leadin(info.WithColors.FirstNote)
         Input.remove_listener ()
         Input.finish_frame_events ()
         WindowThread.defer WindowThread.disable_windows_key

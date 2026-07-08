@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Score
 
+open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Prelude
@@ -113,8 +114,9 @@ type ScoreScreen(score_info: ScoreInfo, results: ImprovementFlags * SessionXPGai
         base.Update(elapsed_ms, moved)
 
     override this.OnEnter(_: ScreenType) =
-        Toolbar.hide ()
-        DiscordRPC.in_menus (%"discord_status.score_screen")
+        Toolbar.hide()
+        Song.on_finish <- SongFinishAction.Wait
+        DiscordRPC.in_menus(%"discord_status.score_screen")
 
     override this.OnExit(_: ScreenType) =
         score_info.Ruleset <- Rulesets.current
