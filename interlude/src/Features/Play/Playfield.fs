@@ -232,95 +232,100 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         // SETUP CONSTANTS AND DRAW METHODS
 
-        let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value
+        let scroll_speed_scaled = options.ScrollSpeed.Value / SelectedChart.rate.Value
         let hitposition = options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
 
         let inline draw_note (k: int, pos: float32, color: int) : unit =
+            let note_bounds =
+                Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
+                |> scroll_direction_transform bottom
+                |> _.AsQuad
+                |> rotation k
+                
             Render.tex_quad
-                ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> rotation k)
+                note_bounds
                 Color.White.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) note)
 
         let inline draw_head (k: int, pos: float32, color: int, tint: Color) : unit =
+            let bounds =
+                Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
+                |> scroll_direction_transform bottom
+                |> _.AsQuad
+                |> rotation k
+                
             Render.tex_quad
-                ((Rect.FromSize(left + column_positions.[k], pos, column_width, note_height)
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
-                 |> rotation k)
+                bounds
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_body (k: int, pos_a: float32, pos_b: float32, color: int, tint: Color) : unit =
-            Render.tex_quad
-                (Rect.FromEdges(
+            let bounds = 
+                Rect.FromEdges(
                     left + column_positions.[k],
                     pos_a + note_height * 0.5f - 1f,
                     left + column_positions.[k] + column_width,
                     pos_b + note_height * 0.5f + 1f |> min playfield_height
-                  )
-                  |> scroll_direction_transform bottom)
-                    .AsQuad
+                )
+                |> scroll_direction_transform bottom
+                |> _.AsQuad
+                
+            Render.tex_quad
+                bounds
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdbody)
 
         let inline draw_tail_using_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
             let clip_percent = (clip - pos) / note_height
 
-            let quad_clip_correction (q: Quad) : Quad =
+            let inline quad_clip_correction (q: Quad) : Quad =
                 if clip_percent > 0.0f then
                     let height = q.BottomRight.Y - q.TopRight.Y
                     let correction = OpenTK.Mathematics.Vector2(0.0f, height * clip_percent)
                     Quad.from_vectors(q.TopLeft + correction, q.TopRight + correction, q.BottomRight, q.BottomLeft)
                 else q
+                
+            let bounds =
+                Rect.FromEdges(
+                    left + column_positions.[k],
+                    max clip pos,
+                    left + column_positions.[k] + note_height,
+                    pos + note_height
+                )
+                |> scroll_direction_transform bottom
+                |> _.AsQuad
+                |> hold_tail_transform k
 
             Render.tex_quad
-                (
-                    (
-                        Rect.FromEdges(
-                            left + column_positions.[k],
-                            max clip pos,
-                            left + column_positions.[k] + note_height,
-                            pos + note_height
-                        )
-                        |> scroll_direction_transform bottom
-                    ).AsQuad
-                    |> hold_tail_transform k
-                )
+                bounds
                 tint.AsQuad
                 (
                     Sprite.pick_texture
                         (animation.Loops, color)
                         holdtail
-                    |> fun x -> x.Transform(quad_clip_correction)
+                    |> _.Transform(quad_clip_correction)
                 )
 
         let inline draw_tail_using_head (k: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
             let pos = max (clip - note_height * 0.5f) pos
+            
+            let bounds =
+                Rect.FromEdges(
+                    left + column_positions.[k],
+                    pos,
+                    left + column_positions.[k] + note_height,
+                    pos + note_height
+                )
+                |> scroll_direction_transform bottom
+                |> _.AsQuad
+                |> hold_tail_transform k
 
             Render.tex_quad
-                (
-                    (
-                        Rect.FromEdges(
-                            left + column_positions.[k],
-                            pos,
-                            left + column_positions.[k] + note_height,
-                            pos + note_height
-                        )
-                        |> scroll_direction_transform bottom
-                    ).AsQuad
-                    |> hold_tail_transform k
-                )
+                bounds
                 tint.AsQuad
-                (
-                    Sprite.pick_texture
-                        (animation.Loops, color)
-                        holdhead
-                )
+                (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
             if noteskin_config.UseHoldTailTexture then
@@ -329,7 +334,25 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 draw_tail_using_head(k, pos, clip, color, tint)
 
         // CALCULATE TIME + SV STUFF
+        
+        // RESULT: note_seek <- index of the next row to appear, or notes.Length if none left
+        let inline seek_notes_to_time(time: Time) : unit =
+            while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < time do
+                let nr = chart.Notes.[note_seek].Data
 
+                for k = 0 to keys - 1 do
+                    if nr.[k] = NoteType.HOLDHEAD then
+                        holds_offscreen.[k] <- note_seek
+                    elif nr.[k] = NoteType.HOLDTAIL then
+                        holds_offscreen.[k] <- -1
+
+                note_seek <- note_seek + 1
+
+        // RESULT: sv_seek <- index of the next sv to appear, or sv.Length if none left
+        let inline seek_sv_to_time(time: Time) : unit =
+            while sv_seek < sv.Length && sv.[sv_seek].Time < time do
+                sv_seek <- sv_seek + 1
+                
         let now =
             Song.time_with_offset() +
             (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.playback_rate()
@@ -342,53 +365,42 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let begin_time =
             if vanishing_notes then
                 let space_needed = hitposition + note_height
-                let time_needed = space_needed / scale
+                let time_needed = space_needed / scroll_speed_scaled
                 // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im lazy
                 now - time_needed
             else
                 now
 
-        // note_seek = index of the next row to appear, or notes.Length if none left
-        while note_seek < chart.Notes.Length && chart.Notes.[note_seek].Time < begin_time do
-            let nr = chart.Notes.[note_seek].Data
-
-            for k = 0 to keys - 1 do
-                if nr.[k] = NoteType.HOLDHEAD then
-                    holds_offscreen.[k] <- note_seek
-                elif nr.[k] = NoteType.HOLDTAIL then
-                    holds_offscreen.[k] <- -1
-
-            note_seek <- note_seek + 1
-
+        seek_notes_to_time(begin_time)
+        seek_sv_to_time(begin_time)
         let mutable note_peek = note_seek
-
-        // sv_seek = index of the next sv to appear, or sv.Length if none left
-        while sv_seek < sv.Length && sv.[sv_seek].Time < begin_time do
-            sv_seek <- sv_seek + 1
-
         let mutable sv_value = if sv_seek > 0 then sv.[sv_seek - 1].Data else 1.0f
         if sv_value < 0.0f then has_negative_sv <- true
         let mutable sv_peek = sv_seek
 
-        // calculation of where to start drawing from (for vanishing notes this depends on sv between begin_time and now)
-        let mutable column_pos = hitposition
+        let inline calculate_starting_render_position() : float32 =
+            let mutable starting_position = hitposition
 
-        if vanishing_notes then
-            let mutable i = sv_seek
-            let mutable sv_v = sv_value
-            let mutable sv_t = begin_time
+            if vanishing_notes then
+                let mutable i = sv_seek
+                let mutable sv_v = sv_value
+                let mutable sv_t = begin_time
 
-            while (i < sv.Length && sv.[i].Time < now) do
-                let { Time = t2; Data = v } = sv.[i]
-                column_pos <- column_pos - scale * sv_v * (t2 - sv_t)
-                sv_t <- t2
-                sv_v <- v
-                i <- i + 1
+                while i < sv.Length && sv.[i].Time < now do
+                    let { Time = t2; Data = v } = sv.[i]
+                    starting_position <- starting_position - scroll_speed_scaled * sv_v * (t2 - sv_t)
+                    sv_t <- t2
+                    sv_v <- v
+                    i <- i + 1
 
-            column_pos <- column_pos - scale * sv_v * (now - sv_t)
+                starting_position <- starting_position - scroll_speed_scaled * sv_v * (now - sv_t)
+                
+            starting_position
+            
+        let mutable current_render_position = calculate_starting_render_position()
 
         let mutable sv_time = begin_time
-        let begin_pos = column_pos
+        let begin_pos = current_render_position
 
         for k = 0 to keys - 1 do
             hold_states.[k] <-
@@ -406,21 +418,21 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 this.DrawReceptors(hitposition)
 
         // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
-        while (column_pos < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
+        while (current_render_position < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
 
             let { Time = t; Data = nr } = chart.Notes.[note_peek]
             let color = chart.Colors.[note_peek].Data
             // update vertical position + scroll speed based on sv
             while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
                 let { Time = t2; Data = v } = sv.[sv_peek]
-                column_pos <- column_pos + scale * sv_value * (t2 - sv_time)
+                current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (t2 - sv_time)
                 sv_time <- t2
                 sv_value <- v
                 if sv_value < 0.0f then has_negative_sv <- true
                 sv_peek <- sv_peek + 1
 
             // render notes
-            column_pos <- column_pos + scale * sv_value * (t - sv_time)
+            current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (t - sv_time)
             sv_time <- t
 
             for k in 0 .. (keys - 1) do
@@ -428,11 +440,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     nr.[k] = NoteType.NORMAL
                     && not (vanishing_notes && state.Scoring.IsNoteHit note_peek k)
                 then
-                    draw_note (k, column_pos, int color.[k])
+                    draw_note (k, current_render_position, int color.[k])
 
                 elif nr.[k] = NoteType.HOLDHEAD then
                     // assert hold_states.[k] = NoHold
-                    hold_states.[k] <- HeadOnscreen(column_pos, note_peek)
+                    hold_states.[k] <- HeadOnscreen(current_render_position, note_peek)
 
                 elif nr.[k] = NoteType.HOLDTAIL then
                     match hold_states.[k] with
@@ -448,7 +460,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                     Color.White
 
                             let headpos = if hold_state.ShowInReceptor then hitposition else begin_pos
-                            let tailpos = (column_pos - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
+                            let tailpos = (current_render_position - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
 
                             let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
@@ -479,7 +491,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                                     max hitposition headpos
                                 else
                                     headpos
-                            let tailpos = (column_pos - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
+                            let tailpos = (current_render_position - holdnote_trim) |> if noteskin_config.MinimumHoldNoteLength then max headpos else id
 
                             let head_and_body_color = let colors = chart.Colors.[i].Data in int colors.[k]
 
