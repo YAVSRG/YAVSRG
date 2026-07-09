@@ -15,28 +15,26 @@ module Migrations =
             (fun db ->
                 Database.create_table User.TABLE db |> expect |> ignore
                 Friends.CREATE_TABLE.Execute () db |> expect |> ignore
-                Score.CREATE_TABLE_OLD.Execute () db |> expect |> ignore
-                Replay.CREATE_TABLE_OLD.Execute () db |> expect |> ignore
-                Logging.Info("Migration created initial tables")
+                Logging.Info("Created user + friends tables")
             )
             db
 
         Database.migrate
             "MigrateEverythingFromRedis"
-            (fun _ -> Logging.Info("Redis no longer exists to migrate data from"))
+            (fun _ -> Logging.Info("Migration no longer applies: Redis no longer exists to migrate data from"))
             db
 
         Database.migrate
             "AddTableRatings"
             (fun db ->
                 TableRating.CREATE_TABLE.Execute () db |> expect |> ignore
-                Logging.Info("Migration created table ratings")
+                Logging.Info("Created table ratings")
             )
             db
 
         Database.migrate
             "RulesetSCHasNewId"
-            (fun _ -> Logging.Info("Original tables to apply ruleset ID change to no longer exists"))
+            (fun _ -> Logging.Info("Migration no longer applies: Original tables to apply ruleset ID change to no longer exists"))
             db
 
         Database.migrate
@@ -45,20 +43,18 @@ module Migrations =
                 Database.exec_raw """DROP TABLE IF EXISTS leaderboards;""" db |> expect |> ignore
                 Replay.CREATE_TABLE.Execute () db |> expect |> ignore
                 Score.CREATE_TABLE.Execute () db |> expect |> ignore
+                Logging.Info("Created replay + score tables")
             )
             db
 
         Database.migrate
             "MigrateLeaderboardData"
-            (fun db -> Score.MIGRATE_OLD_TO_NEW.Execute () db |> expect |> Logging.Debug "Migrated %i scores + replays in prep of leaderboards")
+            (fun _ -> Logging.Info("Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to migrate from"))
             db
 
         Database.migrate
             "ClearOldScoreTables"
-            (fun db ->
-                Database.exec_raw """DROP TABLE IF EXISTS scores;""" db |> expect |> ignore
-                Database.exec_raw """DROP TABLE IF EXISTS replays;""" db |> expect |> ignore
-            )
+            (fun _ -> Logging.Info("Migration no longer applies: Old 'scores' and 'replays' tables no longer exist to drop"))
             db
 
         Database.migrate
@@ -91,7 +87,7 @@ module Migrations =
 
         Database.migrate
             "ImportOldCrescentLevels"
-            (fun _ -> Logging.Info("TablesV1 no longer exist to migrate data from"))
+            (fun _ -> Logging.Info("Migration no longer applies: TablesV1 no longer exist to migrate data from"))
             db
 
         Database.migrate "AddSources" (fun db -> Source.CREATE_TABLE.Execute () db |> expect |> ignore) db
@@ -99,7 +95,7 @@ module Migrations =
 
         Database.migrate
             "MoveBackbeatData"
-            (fun _ -> Logging.Info("Old backbeat chart dump no longer exists to migrate data from"))
+            (fun _ -> Logging.Info("Migration no longer applies: Old backbeat chart dump no longer exists to migrate data from"))
             db
 
         Database.migrate
@@ -126,21 +122,21 @@ module Migrations =
 module Database =
 
     let startup () =
-        core_db <- Database.from_file ("./data/core.db")
-        backbeat_db <- Database.from_file ("./data/backbeat.db")
+        core_db <- Database.from_file("./data/core.db")
+        backbeat_db <- Database.from_file("./data/backbeat.db")
         Migrations.run_core core_db
         Migrations.run_backbeat backbeat_db
 
     let startup_unit_tests () : IDisposable =
-        let _core_db, keep_alive = Database.in_memory ("unit_tests_core")
-        let _backbeat_db, keep_alive_2 = Database.in_memory ("unit_tests_backbeat")
+        let _core_db, keep_alive = Database.in_memory("unit_tests_core")
+        let _backbeat_db, keep_alive_2 = Database.in_memory("unit_tests_backbeat")
         core_db <- _core_db
         backbeat_db <- _backbeat_db
         Migrations.run_core _core_db
         Migrations.run_backbeat _backbeat_db
 
         { new IDisposable with
-            override this.Dispose() =
+            override this.Dispose() : unit =
                 keep_alive.Dispose()
                 keep_alive_2.Dispose()
         }

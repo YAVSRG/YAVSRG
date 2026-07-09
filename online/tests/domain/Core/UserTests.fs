@@ -142,14 +142,14 @@ module UserTests =
         | None -> Assert.Fail()
 
     [<Test>]
-    let UpdateLastSeen_OnNonExistentUser () = User.update_last_seen (32767)
+    let UpdateLastSeen_OnNonExistentUser () = User.update_last_seen(32767)
 
     [<Test>]
     let UpdateLastSeen () =
         let user = User.create ("UpdateLastSeen", 88888uL)
         let id = User.save_new user
 
-        User.update_last_seen (id)
+        User.update_last_seen(id)
 
         match User.by_id id with
         | Some retrieved_user ->
@@ -304,8 +304,8 @@ module UserTests =
 
     [<Test>]
     let Reassign_DiscordId() =
-        let user_1 = User.create("ReassignMe1", 1234005678uL) |> User.save_new
-        let user_2 = User.create("ReassignMe2", 1234005679uL) |> User.save_new
+        let _ = User.create("ReassignMe1", 1234005678uL) |> User.save_new
+        let _ = User.create("ReassignMe2", 1234005679uL) |> User.save_new
 
         match Users.Auth.reassign_discord_id "ReassignMe1" 1234005679uL with
         | Error reason -> printfn "%s" reason

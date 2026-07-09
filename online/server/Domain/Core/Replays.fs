@@ -18,24 +18,6 @@ type Replay =
 
 module Replay =
 
-    let internal CREATE_TABLE_OLD: NonQuery<unit> =
-        { NonQuery.without_parameters () with
-            SQL =
-                """
-            CREATE TABLE replays (
-                Id INTEGER PRIMARY KEY NOT NULL,
-                UserId INTEGER NOT NULL,
-                ChartId TEXT NOT NULL,
-                Purposes TEXT NOT NULL,
-                TimePlayed INTEGER NOT NULL,
-                TimeUploaded INTEGER NOT NULL,
-                Data BLOB NOT NULL,
-                FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
-                UNIQUE (UserId, ChartId, TimePlayed)
-            );
-            """
-        }
-
     let internal CREATE_TABLE: NonQuery<unit> =
         { NonQuery.without_parameters () with
             SQL =
