@@ -5,7 +5,7 @@ open Percyqaz.Data.Sqlite
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server
 
-type Replay_Prelude = Prelude.Gameplay.Replays.Replay
+type Replay_Prelude = Replay
 
 type Replay =
     {
@@ -113,7 +113,7 @@ module Replay =
                     "@Data", SqliteType.Blob, -1
                 ]
             FillParameters =
-                (fun p (replay) ->
+                (fun p replay ->
                     p.Int64 replay.UserId
                     p.String replay.ChartId
                     p.Int64 replay.TimePlayed
@@ -126,7 +126,7 @@ module Replay =
     // An existing replay not marked persistent will be replaced with this one, so that only 1 replay is stored per player per leaderboard
     // Replays marked as 'Persistent' will persist
     let save_leaderboard (replay: Replay) =
-        lock (REPLAY_LOCK_OBJ)
+        lock(REPLAY_LOCK_OBJ)
         <| fun () ->
             match
                 GET_EXISTING_LEADERBOARD_REPLAY.Execute (replay.UserId, replay.ChartId) core_db
@@ -181,7 +181,7 @@ module Replay =
 
     // Replay is stored long term for sharing with friends
     let save_persistent (replay: Replay) =
-        lock (REPLAY_LOCK_OBJ)
+        lock(REPLAY_LOCK_OBJ)
         <| fun () -> SAVE_CHALLENGE.Execute replay core_db |> expect |> Array.exactlyOne
 
     let private BY_ID: Query<int64, Replay> =

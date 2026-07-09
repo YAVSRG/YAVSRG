@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Web.Tests.Domain.Services
 
 open NUnit.Framework
-open Prelude
 open Percyqaz.Common
 open Prelude.Gameplay.Replays
 open Interlude.Web.Server.Domain.Core
@@ -75,7 +74,7 @@ module ScoreServiceTests =
     let LeaderboardPosition_Empty () =
 
         let score = Score.create (9999L, "LeaderboardPositionEmpty", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.95, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(Some 1, result)
 
@@ -97,7 +96,7 @@ module ScoreServiceTests =
         |> ignore
 
         let score = Score.create (9999L, "LeaderboardPosition2Of3", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.95, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(Some 2, result)
 
@@ -114,7 +113,7 @@ module ScoreServiceTests =
             |> ignore
 
         let score = Score.create (9999L, "LeaderboardPositionFull", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.95, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(None, result)
 
@@ -131,7 +130,7 @@ module ScoreServiceTests =
             |> ignore
 
         let score = Score.create (9999L, "LeaderboardPositionLastPlace", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.95, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(Some Score.LEADERBOARD_SIZE, result)
 
@@ -152,7 +151,7 @@ module ScoreServiceTests =
         |> ignore
 
         let score = Score.create (user_id2, "LeaderboardPositionOldScoreBetter", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.94, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(None, result)
 
@@ -173,6 +172,6 @@ module ScoreServiceTests =
         |> ignore
 
         let score = Score.create (user_id2, "LeaderboardPositionNewScoreBetter", Timestamp.now(), 1.0f<rate>, Map.empty, true, 0.95, 3, 2)
-        let result = Scores.new_leaderboard_position score
+        let result = Scores.new_leaderboard_rank(score)
 
         Assert.AreEqual(Some 2, result)

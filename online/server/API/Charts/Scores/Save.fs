@@ -22,13 +22,13 @@ module Save =
             let user_id, _ = authorize headers
 
             match JSON.FromString body with
-            | Error e -> raise (BadRequestException None)
+            | Error _ -> raise (BadRequestException None)
             | Ok(request: Request) -> // todo: basic clamp on how much data can be sent in one request (about 10kb?)
 
             let chart_id = request.ChartId.ToUpper()
 
-            match! Scores.submit (user_id, chart_id, request.Replay, request.Rate, request.Mods, request.Timestamp) with
-            | Scores.ScoreUploadOutcome.Failed -> raise (BadRequestException None)
+            match! Scores.submit(user_id, chart_id, request.Replay, request.Rate, request.Mods, request.Timestamp) with
+            | Scores.ScoreUploadOutcome.Failed -> raise(BadRequestException None)
             | Scores.ScoreUploadOutcome.Unranked -> response.ReplyJson<Response>(None)
             | Scores.ScoreUploadOutcome.Ranked(new_position) ->
                 response.ReplyJson<Response>(Some { LeaderboardPosition = new_position })

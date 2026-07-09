@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Prelude
-open Prelude.Charts
 open Prelude.Mods
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Scoring
@@ -17,32 +16,30 @@ module Scores =
         | Unranked
         | Ranked of int option
 
-    let new_leaderboard_position (score: Score) : int option =
+    let inline new_leaderboard_rank (score: Score) : int option =
         if not score.Ranked then None else
 
-        let existing_lb = Score.get_leaderboard score.ChartId
-
-        let mutable already_has_score = false
-        let mutable position = Score.LEADERBOARD_SIZE
-        let mutable i = 0
-
-        while i < existing_lb.Length do
-            if score.Accuracy > existing_lb.[i].Accuracy then
-                position <- i
-                i <- existing_lb.Length
-            elif existing_lb.[i].UserId = score.UserId then
-                already_has_score <- true
-                i <- existing_lb.Length
-            i <- i + 1
-
-        if already_has_score then
-            None
-        elif position < Score.LEADERBOARD_SIZE then
-            Some (position + 1)
-        elif existing_lb.Length < Score.LEADERBOARD_SIZE then
-            Some (existing_lb.Length + 1)
-        else
-            None
+        let existing_leaderboard_scores = Score.get_leaderboard(score.ChartId)
+        let existing_score =
+            existing_leaderboard_scores
+            |> Array.tryFind (fun lb_score -> lb_score.UserId = score.UserId)
+        
+        let inline position_in_leaderboard(lb_scores: Score.LeaderboardScore array) : int option =
+            let mutable position = 0
+            while position < lb_scores.Length && lb_scores.[position].Accuracy >= score.Accuracy do
+                position <- position + 1
+            
+            let rank = position + 1
+            if rank > Score.LEADERBOARD_SIZE then None else Some(rank)
+        
+        match existing_score with
+        | Some existing_score ->
+            if existing_score.Accuracy > score.Accuracy then None
+            else
+                let not_your_scores = Array.except [existing_score] existing_leaderboard_scores
+                position_in_leaderboard(not_your_scores)
+        | None ->
+            position_in_leaderboard(existing_leaderboard_scores)
 
     let submit
         (
@@ -102,18 +99,18 @@ module Scores =
                         Lamp.calculate ruleset.Lamps scoring.JudgementCounts scoring.ComboBreaks
                     )
 
-                match new_leaderboard_position score with
-                | Some p ->
+                match new_leaderboard_rank(score) with
+                | Some rank ->
                     let replay_id =
                         (user_id, chart_id, timestamp, replay)
                         |> Replay.create
                         |> Replay.save_leaderboard
 
-                    let score_id = Score.save (score.WithReplay replay_id)
-                    Logging.Debug "Saved score %i with replay %i (#%i)" score_id replay_id p
-                    return ScoreUploadOutcome.Ranked (Some p)
+                    let score_id = Score.save(score.WithReplay(replay_id))
+                    Logging.Debug "Saved score %i with replay %i (#%i)" score_id replay_id rank
+                    return ScoreUploadOutcome.Ranked(Some(rank))
                 | None ->
-                    Score.save score |> Logging.Debug "Saved score %i"
+                    Score.save(score) |> Logging.Debug "Saved score %i"
                     return ScoreUploadOutcome.Ranked None
 
             else
