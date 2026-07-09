@@ -84,7 +84,7 @@ module Score =
             ON CONFLICT DO UPDATE SET
                 TimeUploaded = excluded.TimeUploaded,
                 Ranked = excluded.Ranked,
-                ReplayId = excluded.ReplayId
+                ReplayId = COALESCE(excluded.ReplayId, ReplayId)
             RETURNING Id;
             """
             Parameters =
