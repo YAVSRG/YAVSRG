@@ -164,7 +164,19 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         if noteskin_config.UseExplosions then
             explosions.Update(elapsed_ms, moved)
             
-    member this.DrawJudgementLine(hitposition: float32) : unit =
+    member private this.DrawPlayfieldBackground() : unit =
+        if fill_column_gaps then
+            Render.rect this.Bounds playfield_color
+        else
+            for k = 0 to keys - 1 do
+                Render.rect_edges
+                    (this.Bounds.Left + column_positions.[k])
+                    this.Bounds.Top
+                    (this.Bounds.Left + column_positions.[k] + column_width)
+                    this.Bounds.Bottom
+                    playfield_color
+            
+    member private this.DrawJudgementLine(hitposition: float32) : unit =
         if noteskin_config.UseJudgementLine then
             let area =
                 Rect.FromEdges(
@@ -181,7 +193,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 Color.White.AsQuad
                 (Sprite.pick_texture (animation.Loops, 0) judgement_line)
                 
-    member this.DrawReceptors(hitposition: float32) : unit =
+    member private this.DrawReceptors(hitposition: float32) : unit =
         
         let inline get_receptor_texture(key: int) : QuadTexture =
             let is_pressed = state.Scoring.KeyState.Contains(key)
@@ -310,7 +322,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                         holdhead
                 )
 
-        let draw_tail = if noteskin_config.UseHoldTailTexture then draw_tail_using_tail else draw_tail_using_head
+        let inline draw_tail (k: int, pos: float32, clip: float32, color: int, tint: Color) =
+            if noteskin_config.UseHoldTailTexture then
+                draw_tail_using_tail(k, pos, clip, color, tint)
+            else
+                draw_tail_using_head(k, pos, clip, color, tint)
 
         // CALCULATE TIME + SV STUFF
 
@@ -327,7 +343,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             if vanishing_notes then
                 let space_needed = hitposition + note_height
                 let time_needed = space_needed / scale
-                now - time_needed // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im lazy
+                // todo: this is true at 1.0x SV but can be too small a margin for SV < 1.0x - maybe add a fade out effect cause im lazy
+                now - time_needed
             else
                 now
 
@@ -373,26 +390,15 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let mutable sv_time = begin_time
         let begin_pos = column_pos
 
-        // ACTUAL DRAWING STUFF
-
-        // draw playfield color
-        if fill_column_gaps then
-            Render.rect this.Bounds playfield_color
-
-        for k in 0 .. (keys - 1) do
-            if not fill_column_gaps then
-                Render.rect_edges
-                    (left + column_positions.[k])
-                    top
-                    (left + column_positions.[k] + column_width)
-                    bottom
-                    playfield_color
-
+        for k = 0 to keys - 1 do
             hold_states.[k] <-
                 if holds_offscreen.[k] < 0 then
                     NoHold
                 else
                     HeadOffscreen holds_offscreen.[k]
+
+        // ACTUAL DRAWING STUFF
+        this.DrawPlayfieldBackground()
 
         if not (options.LaneCover.Enabled.Value && options.LaneCover.DrawUnderReceptors.Value) then
             this.DrawJudgementLine(hitposition)
