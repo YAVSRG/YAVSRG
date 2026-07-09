@@ -87,7 +87,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             fun _ quad -> quad
 
     let mutable has_negative_sv = false
-    let mutable time = -Time.infinity
+    let mutable last_time = -Time.infinity
 
     let handle_seek_back_in_time () : unit =
         note_seek <- 0
@@ -222,7 +222,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         if noteskin_config.EnableColumnLight then
             column_lighting.Draw()
 
-    override this.Draw() : unit =
+    member private this.DrawNotes(hitposition: float32) : unit =
         let {
                 Rect.Left = left
                 Top = top
@@ -233,7 +233,6 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         // SETUP CONSTANTS AND DRAW METHODS
 
         let scroll_speed_scaled = options.ScrollSpeed.Value / SelectedChart.rate.Value
-        let hitposition = options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
 
@@ -357,10 +356,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Song.time_with_offset() +
             (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.playback_rate()
 
-        if now < time then
+        if now < last_time then
             handle_seek_back_in_time()
 
-        time <- now
+        last_time <- now
 
         let begin_time =
             if vanishing_notes then
@@ -410,15 +409,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     HeadOffscreen holds_offscreen.[k]
 
         // ACTUAL DRAWING STUFF
-        this.DrawPlayfieldBackground()
-
-        if not (options.LaneCover.Enabled.Value && options.LaneCover.DrawUnderReceptors.Value) then
-            this.DrawJudgementLine(hitposition)
-            if not noteskin_config.NotesUnderReceptors then
-                this.DrawReceptors(hitposition)
                 
         let inline advance_sv_and_render_position(time: Time) : unit =
-            while (sv_peek < sv.Length && sv.[sv_peek].Time < time) do
+            while sv_peek < sv.Length && sv.[sv_peek].Time < time do
                 let { Time = t2; Data = v } = sv.[sv_peek]
                 current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (t2 - sv_time)
                 sv_time <- t2
@@ -429,26 +422,30 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (time - sv_time)
             sv_time <- time
 
-        // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
-        while (current_render_position < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
+        let inline more_notes_to_draw() : bool =
+            let not_at_end_of_chart = note_peek < chart.Notes.Length
+            let last_note_was_offscreen = current_render_position < playfield_height
+            let negative_sv_buffer_remaining = has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT
+            
+            not_at_end_of_chart && (last_note_was_offscreen || negative_sv_buffer_remaining)
+            
+        while more_notes_to_draw() do
 
-            let { Time = t; Data = nr } = chart.Notes.[note_peek]
+            let next_row = chart.Notes.[note_peek]
             let color = chart.Colors.[note_peek].Data
             
-            advance_sv_and_render_position(t)
+            advance_sv_and_render_position(next_row.Time)
 
-            for k in 0 .. (keys - 1) do
-                if
-                    nr.[k] = NoteType.NORMAL
-                    && not (vanishing_notes && state.Scoring.IsNoteHit(note_peek, k))
-                then
-                    draw_note (k, current_render_position, int color.[k])
-
-                elif nr.[k] = NoteType.HOLDHEAD then
-                    // assert hold_states.[k] = NoHold
+            for k = 0 to keys - 1 do
+                
+                let note_type = next_row.Data.[k]
+                match note_type with
+                | NoteType.NORMAL ->
+                    if not (vanishing_notes && state.Scoring.IsNoteHit(note_peek, k)) then
+                        draw_note (k, current_render_position, int color.[k])
+                | NoteType.HOLDHEAD ->
                     hold_states.[k] <- HeadOnscreen(current_render_position, note_peek)
-
-                elif nr.[k] = NoteType.HOLDTAIL then
+                | NoteType.HOLDTAIL ->
                     match hold_states.[k] with
                     | HeadOffscreen i ->
                         let hold_state = state.Scoring.HoldState(i, k)
@@ -506,7 +503,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             draw_head (k, headpos, head_and_body_color, tint)
 
                             hold_states.[k] <- NoHold
-                    | _ -> () // assert impossible
+                    | _ -> assert false
+                | _ -> ()
 
             note_peek <- note_peek + 1
 
@@ -567,14 +565,33 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                     hold_states.[k] <- NoHold
             | NoHold -> ()
+            
+    override this.Draw() : unit =
+        
+        this.DrawPlayfieldBackground()
+        
+        let hitposition = options.HitPosition.Value
+        let lanecover_draw_under_receptors =
+            options.LaneCover.Enabled.Value
+            && options.LaneCover.DrawUnderReceptors.Value
+        
+        if not lanecover_draw_under_receptors then
+            this.DrawJudgementLine(hitposition)
+            
+            if not noteskin_config.NotesUnderReceptors then
+                this.DrawReceptors(hitposition)
+        
+        this.DrawNotes(hitposition)
 
-        if options.LaneCover.Enabled.Value && options.LaneCover.DrawUnderReceptors.Value then
+        if lanecover_draw_under_receptors then
             Lanecover.draw(this.Bounds)
             this.DrawJudgementLine(hitposition)
             this.DrawReceptors(hitposition)
+            
         elif noteskin_config.NotesUnderReceptors then
             this.DrawReceptors(hitposition)
 
         if noteskin_config.UseExplosions then
             explosions.Draw()
+            
         base.Draw()
