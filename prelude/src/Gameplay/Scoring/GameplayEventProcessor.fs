@@ -91,7 +91,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
 
     let mutable expired_notes_index = 0
 
-    member private this.KillExistingHold (chart_time: ChartTime) (k: int) =
+    member private this.KillExistingHold(chart_time: ChartTime, k: int) : unit =
         match hold_states.[k] with
         | H_NOTHING, _ -> ()
         | hold_state, head_index ->
@@ -134,7 +134,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
     member this.EnumerateRecentFrames() = replay.EnumerateRecentFrames()
     member this.Ruleset = ruleset
 
-    member this.HoldState (index: int) (k: int) : HoldState =
+    member this.HoldState(index: int, k: int) : HoldState =
         let state, i = hold_states.[k]
 
         if i = index then
@@ -155,8 +155,8 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         else
             HoldState.InTheFuture
 
-    member this.IsNoteHit (index: int) (k: int) : bool =
-        let  { Data = struct (_, flags) } = hit_data.[index]
+    member this.IsNoteHit(index: int, k: int) : bool =
+        let { Data = struct (_, flags) } = hit_data.[index]
         flags.[k] = HitFlags.HIT_ACCEPTED
 
     member this.Finished : bool = expired_notes_index = hit_data.Length
@@ -240,7 +240,7 @@ type GameplayEventProcessor(ruleset: Ruleset, replay: ReplaySource, note_data: N
         match hit_mechanics (k, start_of_search_index, now) with
         | BLOCKED -> ()
         | FOUND (index, delta) ->
-            this.KillExistingHold chart_time k
+            this.KillExistingHold(chart_time, k)
             let { Data = struct (deltas, status) } = hit_data.[index]
             let is_hold_head = status.[k] <> HitFlags.HIT_REQUIRED
             status.[k] <- HitFlags.HIT_ACCEPTED

@@ -416,29 +416,31 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             this.DrawJudgementLine(hitposition)
             if not noteskin_config.NotesUnderReceptors then
                 this.DrawReceptors(hitposition)
-
-        // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
-        while (current_render_position < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
-
-            let { Time = t; Data = nr } = chart.Notes.[note_peek]
-            let color = chart.Colors.[note_peek].Data
-            // update vertical position + scroll speed based on sv
-            while (sv_peek < sv.Length && sv.[sv_peek].Time < t) do
+                
+        let inline advance_sv_and_render_position(time: Time) : unit =
+            while (sv_peek < sv.Length && sv.[sv_peek].Time < time) do
                 let { Time = t2; Data = v } = sv.[sv_peek]
                 current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (t2 - sv_time)
                 sv_time <- t2
                 sv_value <- v
                 if sv_value < 0.0f then has_negative_sv <- true
                 sv_peek <- sv_peek + 1
+                
+            current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (time - sv_time)
+            sv_time <- time
 
-            // render notes
-            current_render_position <- current_render_position + scroll_speed_scaled * sv_value * (t - sv_time)
-            sv_time <- t
+        // main render loop - draw notes at column_pos until you go offscreen, column_pos increases* with every row drawn
+        while (current_render_position < playfield_height || (has_negative_sv && note_peek - note_seek < NEGATIVE_SV_ROW_COUNT)) && note_peek < chart.Notes.Length do
+
+            let { Time = t; Data = nr } = chart.Notes.[note_peek]
+            let color = chart.Colors.[note_peek].Data
+            
+            advance_sv_and_render_position(t)
 
             for k in 0 .. (keys - 1) do
                 if
                     nr.[k] = NoteType.NORMAL
-                    && not (vanishing_notes && state.Scoring.IsNoteHit note_peek k)
+                    && not (vanishing_notes && state.Scoring.IsNoteHit(note_peek, k))
                 then
                     draw_note (k, current_render_position, int color.[k])
 
@@ -449,7 +451,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 elif nr.[k] = NoteType.HOLDTAIL then
                     match hold_states.[k] with
                     | HeadOffscreen i ->
-                        let hold_state = state.Scoring.HoldState i k
+                        let hold_state = state.Scoring.HoldState(i, k)
 
                         if not vanishing_notes || hold_state <> HoldState.Released then
 
@@ -476,7 +478,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                             hold_states.[k] <- NoHold
 
                     | HeadOnscreen(headpos, i) ->
-                        let hold_state = state.Scoring.HoldState i k
+                        let hold_state = state.Scoring.HoldState(i, k)
 
                         if not vanishing_notes || hold_state <> HoldState.Released then
 
@@ -511,7 +513,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         for k in 0 .. (keys - 1) do
             match hold_states.[k] with
             | HeadOffscreen i ->
-                let hold_state = state.Scoring.HoldState i k
+                let hold_state = state.Scoring.HoldState(i, k)
 
                 if vanishing_notes && hold_state = HoldState.Released then
                     ()
@@ -537,7 +539,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                     hold_states.[k] <- NoHold
 
             | HeadOnscreen(headpos, i) ->
-                let hold_state = state.Scoring.HoldState i k
+                let hold_state = state.Scoring.HoldState(i, k)
 
                 if vanishing_notes && hold_state = HoldState.Released then
                     ()
