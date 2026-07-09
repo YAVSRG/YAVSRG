@@ -22,7 +22,7 @@ module UserServiceTests =
         let replay =
             Replay.create (user_id, Scores.CRESCENT_MOON, Scores.TIMEPLAYED, Scores.CRESCENT_MOON_REPLAY_DATA)
 
-        let replay_id = Replay.save_leaderboard replay
+        let replay_id = Replay.save replay
 
         let score =
             Score

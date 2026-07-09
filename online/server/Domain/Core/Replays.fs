@@ -35,6 +35,14 @@ module Replay =
             );
             """
         }
+        
+    let internal REMOVE_PERSISTENT_COLUMN: NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL =
+                """
+            ALTER TABLE replays2 DROP COLUMN Persistent;
+                """
+        }
 
     let create (user_id: int64, chart_id: string, timestamp: int64, replay: Replay_Prelude) : Replay =
         {
@@ -45,44 +53,12 @@ module Replay =
             Data = replay.ToByteArray()
         }
 
-    let private REPLAY_LOCK_OBJ = obj ()
-
-    let private GET_EXISTING_LEADERBOARD_REPLAY
-        : Query<int64 * string, int64 * int64> =
+    let private SAVE: Query<Replay, int64> =
         {
             SQL =
                 """
-                SELECT Id, TimePlayed FROM replays2
-                WHERE UserId = @UserId
-                AND ChartId = @ChartId
-                AND Persistent = 0;
-            """
-            Parameters =
-                [
-                    "@UserId", SqliteType.Integer, 8
-                    "@ChartId", SqliteType.Text, -1
-                ]
-            FillParameters =
-                (fun p (user_id, chart_id) ->
-                    p.Int64 user_id
-                    p.String chart_id
-                )
-            Read = fun r -> r.Int64, r.Int64
-        }
-
-    let private DELETE_BY_ID: NonQuery<int64> =
-        {
-            SQL = "DELETE FROM replays2 WHERE Id = @Id;"
-            Parameters = [ "@Id", SqliteType.Integer, 8 ]
-            FillParameters = fun p id -> p.Int64 id
-        }
-
-    let private SAVE_LEADERBOARD: Query<Replay, int64> =
-        {
-            SQL =
-                """
-            INSERT INTO replays2 (UserId, ChartId, Persistent, TimePlayed, TimeUploaded, Data)
-            VALUES (@UserId, @ChartId, 0, @TimePlayed, @TimeUploaded, @Data)
+            INSERT INTO replays2 (UserId, ChartId, TimePlayed, TimeUploaded, Data)
+            VALUES (@UserId, @ChartId, @TimePlayed, @TimeUploaded, @Data)
             ON CONFLICT DO UPDATE SET TimeUploaded = excluded.TimeUploaded
             RETURNING Id;
             """
@@ -105,66 +81,8 @@ module Replay =
             Read = fun r -> r.Int64
         }
 
-    // An existing replay not marked persistent will be replaced with this one, so that only 1 replay is stored per player per leaderboard
-    // Replays marked as 'Persistent' will persist
-    let save_leaderboard (replay: Replay) =
-        lock(REPLAY_LOCK_OBJ)
-        <| fun () ->
-            match
-                GET_EXISTING_LEADERBOARD_REPLAY.Execute (replay.UserId, replay.ChartId) core_db
-                |> expect
-                |> Array.tryExactlyOne
-            with
-            | Some (existing_id, existing_timestamp) ->
-
-                if existing_timestamp = replay.TimePlayed then
-                    // If exact replay already exists in DB just return that ID (should not happen)
-                    existing_id
-                else
-                    DELETE_BY_ID.Execute existing_id core_db |> expect |> ignore
-                    SAVE_LEADERBOARD.Execute replay core_db
-                    |> expect
-                    |> Array.exactlyOne
-
-            | None ->
-                SAVE_LEADERBOARD.Execute replay core_db
-                |> expect
-                |> Array.exactlyOne
-
-    let private SAVE_CHALLENGE: Query<Replay, int64> =
-        {
-            SQL =
-                """
-            INSERT INTO replays2 (UserId, ChartId, Persistent, TimePlayed, TimeUploaded, Data)
-            VALUES (@UserId, @ChartId, 1, @TimePlayed, @TimeUploaded, @Data)
-            ON CONFLICT DO UPDATE SET
-                TimeUploaded = excluded.TimeUploaded,
-                Persistent = 1
-            RETURNING Id;
-            """
-            Parameters =
-                [
-                    "@UserId", SqliteType.Integer, 8
-                    "@ChartId", SqliteType.Text, -1
-                    "@TimePlayed", SqliteType.Integer, 8
-                    "@TimeUploaded", SqliteType.Integer, 8
-                    "@Data", SqliteType.Blob, -1
-                ]
-            FillParameters =
-                (fun p replay ->
-                    p.Int64 replay.UserId
-                    p.String replay.ChartId
-                    p.Int64 replay.TimePlayed
-                    p.Int64 replay.TimeUploaded
-                    p.Blob replay.Data
-                )
-            Read = fun r -> r.Int64
-        }
-
-    // Replay is stored long term for sharing with friends
-    let save_persistent (replay: Replay) =
-        lock(REPLAY_LOCK_OBJ)
-        <| fun () -> SAVE_CHALLENGE.Execute replay core_db |> expect |> Array.exactlyOne
+    let save (replay: Replay) =
+        SAVE.Execute replay core_db |> expect |> Array.exactlyOne
 
     let private BY_ID: Query<int64, Replay> =
         {

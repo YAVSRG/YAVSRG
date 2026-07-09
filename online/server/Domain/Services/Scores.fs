@@ -104,7 +104,7 @@ module Scores =
                     let replay_id =
                         (user_id, chart_id, timestamp, replay)
                         |> Replay.create
-                        |> Replay.save_leaderboard
+                        |> Replay.save
 
                     let score_id = Score.save(score.WithReplay(replay_id))
                     Logging.Debug "Saved score %i with replay %i (#%i)" score_id replay_id rank

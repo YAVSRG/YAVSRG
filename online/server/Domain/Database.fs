@@ -73,6 +73,11 @@ module Migrations =
             "CreateMonthlyStatsTable"
             (fun db -> MonthlyStats.CREATE_TABLE.Execute () db |> expect |> ignore)
             db
+            
+        Database.migrate
+            "AllReplaysArePersistent"
+            (fun db -> Replay.REMOVE_PERSISTENT_COLUMN.Execute () db |> expect |> ignore)
+            db
 
     open Interlude.Web.Server.Domain.Backbeat
 
