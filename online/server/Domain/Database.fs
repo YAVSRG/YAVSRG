@@ -78,6 +78,11 @@ module Migrations =
             "AllReplaysArePersistent"
             (fun db -> Replay.REMOVE_PERSISTENT_COLUMN.Execute () db |> expect |> ignore)
             db
+            
+        Database.migrate
+            "RunLeaderboardBugFix"
+            (fun db -> Score.LEADERBOARD_BUG_FIX.Execute () db |> expect |> Logging.Info "Applied leaderboard fix; %i rows affected!")
+            db
 
     open Interlude.Web.Server.Domain.Backbeat
 

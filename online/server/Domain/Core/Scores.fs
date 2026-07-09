@@ -48,6 +48,28 @@ module Score =
             );
             """
         }
+        
+    let internal LEADERBOARD_BUG_FIX: NonQuery<unit> =
+        { NonQuery.without_parameters() with
+            SQL = """
+                UPDATE scores2 AS s
+                SET ReplayId = (
+                  SELECT r.Id
+                  FROM replays2 AS r
+                  WHERE r.UserId = s.UserId
+                    AND r.ChartId = s.ChartId
+                    AND r.TimePlayed = s.TimePlayed
+                )
+                WHERE s.ReplayId IS NULL
+                  AND EXISTS (
+                    SELECT 1
+                    FROM replays2 AS r
+                    WHERE r.UserId = s.UserId
+                      AND r.ChartId = s.ChartId
+                      AND r.TimePlayed = s.TimePlayed
+                  );
+                """
+        }
 
     let create
         (
