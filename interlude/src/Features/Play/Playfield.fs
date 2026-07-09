@@ -45,23 +45,14 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
     let column_width = noteskin_config.KeymodeColumnWidth keys
     let column_spacing = noteskin_config.KeymodeColumnSpacing keys
-
-    let column_positions =
+    let calculate_column_left_edges() : float32 array =
+        let left_edges = Array.zeroCreate keys
         let mutable x = 0.0f
-
-        Array.init
-            keys
-            (fun i ->
-                let v = x
-
-                if i + 1 < keys then
-                    x <- x + column_width + column_spacing.[i]
-
-                v
-            )
-
-    let column_lighting = ColumnLighting(chart.Keys, noteskin_config, state)
-    let explosions = Explosions(chart.Keys, noteskin_config, state)
+        for key = 1 to keys - 1 do
+            x <- x + column_width + column_spacing.[key - 1]
+            left_edges.[key] <- x
+        left_edges
+    let column_positions = calculate_column_left_edges()
 
     let note_height = column_width
     let holdnote_trim = column_width * noteskin_config.HoldNoteTrim
@@ -76,6 +67,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holdbody = Content.Texture "holdbody"
     let note = Content.Texture "note"
     let animation = Animation.Counter(float noteskin_config.AnimationFrameTime)
+
+    let column_lighting = ColumnLighting(chart.Keys, noteskin_config, state)
+    let explosions = Explosions(chart.Keys, noteskin_config, state)
 
     let sv = chart.SV
     let mutable note_seek = 0
@@ -150,18 +144,18 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     member this.ColumnWidth = column_width
     member this.ColumnPositions = column_positions
 
-    override this.Init(parent) =
-        base.Init parent
+    override this.Init(parent: Widget) : unit =
+        base.Init(parent)
 
         if noteskin_config.EnableColumnLight then
-            column_lighting.Init this
+            column_lighting.Init(this)
 
         if noteskin_config.UseExplosions then
-            explosions.Init this
+            explosions.Init(this)
 
-    override this.Update(elapsed_ms, moved) =
+    override this.Update(elapsed_ms: float, moved: bool) : unit =
         base.Update(elapsed_ms, moved)
-        animation.Update elapsed_ms
+        animation.Update(elapsed_ms)
 
         if noteskin_config.EnableColumnLight then
             column_lighting.Update(elapsed_ms, moved)
@@ -169,7 +163,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         if noteskin_config.UseExplosions then
             explosions.Update(elapsed_ms, moved)
 
-    override this.Draw() =
+    override this.Draw() : unit =
         let {
                 Rect.Left = left
                 Top = top
@@ -181,7 +175,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         // SETUP CONSTANTS AND DRAW METHODS
 
         let scale = options.ScrollSpeed.Value / SelectedChart.rate.Value
-        let hitposition = float32 options.HitPosition.Value
+        let hitposition = options.HitPosition.Value
 
         let playfield_height = bottom - top + (max 0.0f holdnote_trim)
         let receptor_aspect_ratio = receptor.AspectRatio
@@ -319,11 +313,11 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         // CALCULATE TIME + SV STUFF
 
         let now =
-            Song.time_with_offset () +
-            (GameThread.frame_compensation () + options.VisualOffset.Value) * Song.playback_rate()
+            Song.time_with_offset() +
+            (GameThread.frame_compensation() + options.VisualOffset.Value) * Song.playback_rate()
 
         if now < time then
-            handle_seek_back_in_time ()
+            handle_seek_back_in_time()
 
         time <- now
 
