@@ -1,1 +1,1 @@
-﻿Require auth because of API abuse
+﻿Leaderboard bug fix
