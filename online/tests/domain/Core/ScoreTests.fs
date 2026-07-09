@@ -410,5 +410,30 @@ module ScoreTests =
         Assert.AreEqual(0.97, result_map.["chart2"])
         Assert.AreEqual(0.94, result_map.["chart3"])
         Assert.AreEqual(0.99, result_map.["chart4"])
+        
+    [<Test>]
+    let Idempotent_WithAndWithoutReplay () =
+        let user_id = User.create("IdempotentWithAndWithoutReplay", 0uL) |> User.save_new
+        let replay = Replay.create (user_id, CRESCENT_MOON, TIMEPLAYED, CRESCENT_MOON_REPLAY_DATA)
+        let replay_id = Replay.save(replay)
+        let score_without_replay =
+            Score.create(user_id, CRESCENT_MOON, TIMEPLAYED, 1.0f<rate>, Map.empty, true, 0.98, 1, 3)
+        let score_with_replay = score_without_replay.WithReplay(replay_id)
+        
+        let id1 = Score.save(score_without_replay)
+        let id2 = Score.save(score_with_replay)
+        
+        Assert.AreEqual(id1, id2)
+        match Score.by_id(id2) with
+        | Some(_, None) -> Assert.Fail("After saving no replay; replay; Expected score to have replay saved")
+        | Some(_, Some retrieved_replay) -> Assert.AreEqual(replay.Data, retrieved_replay.Data)
+        | None -> Assert.Fail()
+        
+        let id3 = Score.save(score_without_replay)
+        Assert.AreEqual(id1, id3)
+        match Score.by_id(id3) with
+        | Some(_, None) -> Assert.Fail("After saving no replay; replay; no replay; Expected score to have replay saved")
+        | Some(_, Some retrieved_replay) -> Assert.AreEqual(replay.Data, retrieved_replay.Data)
+        | None -> Assert.Fail()
 
 // todo: test mixing in some unranked scores too
