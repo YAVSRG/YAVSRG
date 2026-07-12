@@ -175,6 +175,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
         let text_color = if stats.Value.ColumnFilterApplied then Colors.text_green else Colors.text
         let judgement_count = Array.sum info.Judgements
 
+        let ma = if info.Judgements.Length <= 1 then sprintf "  •  MA: %i.0:0" info.Judgements[0]
+                    else sprintf "  •  MA: %.1f:%i" (float32 info.Judgements.[0] / float32  (max 1 info.Judgements.[1])) (if info.Judgements.[1] < 1 then 0 else 1)
+
+        let pa = if info.Judgements.Length <= 1 then sprintf "  •  PA: 0.0:0"
+                    else if info.Judgements.Length <= 2 then sprintf "  •  PA: %i.0:0" info.Judgements[1]
+                    else sprintf "  •  PA: %.1f:%i" (float32 info.Judgements.[1] / float32 (max 1 info.Judgements.[2])) (if info.Judgements.[2] < 1 then 0 else 1)
+
         Text.fill_b (
             Style.font,
             sprintf "%.4f%%, %ix" (info.Accuracy * 100.0) info.Combo,
@@ -193,7 +200,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i" info.GhostTaps,
+            sprintf "G: %i%s%s" info.GhostTaps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
@@ -255,6 +262,13 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
             |> sqrt
         let ghost_taps = post.GhostTaps - pre.GhostTaps
 
+        let ma = if judgement_diff.Length <= 1 then sprintf "  •  MA: %i.0:0" judgement_diff.[0]
+                    else sprintf "  •  MA: %.1f:%i" (float32 judgement_diff.[0] / float32  (max 1 judgement_diff.[1])) (min judgement_diff.[1] 1)
+
+        let pa = if judgement_diff.Length <= 1 then "  •  PA: 0.0:0"
+                    else if judgement_diff.Length <= 2 then sprintf "  •  PA: %i:0" judgement_diff.[1]
+                    else sprintf "  •  PA: %.1f:%i" (float32 judgement_diff.[1] / float32 (max 1 judgement_diff.[2])) (min judgement_diff.[2] 1)
+
         Text.fill_b (
             Style.font,
             sprintf "%.4f%% %ix" (accuracy * 100.0) combo,
@@ -273,7 +287,7 @@ and ScoreGraph(score_info: ScoreInfo, stats: ScoreScreenStats ref) =
 
         Text.fill_b (
             Style.font,
-            sprintf "G: %i" ghost_taps,
+            sprintf "G: %i%s%s" ghost_taps ma pa,
             text_b.Translate(0.0f, row_height * 2.0f),
             text_color,
             Alignment.LEFT
