@@ -267,8 +267,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                 Render.tex_quad bounds tint.AsQuad (Sprite.pick_texture (animation.Loops, color) holdbody)
 
-        let inline draw_tail_using_tail (key: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
-            let clip_percent = (clip - pos) / note_height
+        let inline draw_tail_using_tail (key: int, tailpos: float32, headpos: float32, color: int, tint: Color) : unit =
+            let clip = headpos + note_height * 0.5f
+            let clip_percent = (clip - tailpos) / note_height
 
             let inline quad_clip_correction (quad: Quad) : Quad =
                 if clip_percent > 0.0f then
@@ -287,9 +288,9 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             let bounds =
                 Rect.FromEdges(
                     left + column_positions.[key],
-                    max clip pos,
+                    max clip tailpos,
                     left + column_positions.[key] + note_height,
-                    pos + note_height
+                    tailpos + note_height
                 )
                 |> scroll_direction_transform bottom
                 |> _.AsQuad
@@ -300,8 +301,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
                 tint.AsQuad
                 (Sprite.pick_texture (animation.Loops, color) holdtail |> _.Transform(quad_clip_correction))
 
-        let inline draw_tail_using_head (key: int, pos: float32, clip: float32, color: int, tint: Color) : unit =
-            let pos = max (clip - note_height * 0.5f) pos
+        let inline draw_tail_using_head (key: int, tailpos: float32, headpos: float32, color: int, tint: Color) : unit =
+            let pos = max headpos tailpos
 
             let bounds =
                 Rect.FromEdges(
@@ -317,11 +318,10 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
             Render.tex_quad bounds tint.AsQuad (Sprite.pick_texture (animation.Loops, color) holdhead)
 
         let inline draw_tail (key: int, tailpos: float32, headpos: float32, color: int, tint: Color) =
-            if headpos - tailpos < note_height * 0.5f then
-                if noteskin_config.UseHoldTailTexture then
-                    draw_tail_using_tail(key, tailpos, headpos + note_height * 0.5f, color, tint)
-                else
-                    draw_tail_using_head(key, tailpos, headpos + note_height * 0.5f, color, tint)
+            if noteskin_config.UseHoldTailTexture then
+                draw_tail_using_tail(key, tailpos, headpos, color, tint)
+            else
+                draw_tail_using_head(key, tailpos, headpos, color, tint)
 
         let inline prepare_hold_states () : unit =
             for key = 0 to keys - 1 do
@@ -416,10 +416,12 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                 let tailpos =
                     let pos = current_render_position - holdnote_trim
-                    if noteskin_config.MinimumHoldNoteLength then max pos headpos else pos
+                    let min_pos =
+                        if noteskin_config.MinimumHoldNoteLength then headpos else headpos - note_height * 0.5f
+                    max pos min_pos
 
                 draw_body(key, headpos, tailpos, head_and_body_color, tint)
-                draw_tail(key, tailpos, headpos + note_height * 0.5f, color, tint)
+                draw_tail(key, tailpos, headpos, color, tint)
 
                 if not vanishing_notes || hold_state.ShowInReceptor then
                     draw_head(key, headpos, head_and_body_color, tint)
@@ -437,10 +439,12 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
                 let tailpos =
                     let pos = current_render_position - holdnote_trim
-                    if noteskin_config.MinimumHoldNoteLength then max pos headpos else pos
+                    let min_pos =
+                        if noteskin_config.MinimumHoldNoteLength then headpos else headpos - note_height * 0.5f
+                    max pos min_pos
 
                 draw_body(key, headpos, tailpos, head_and_body_color, tint)
-                draw_tail(key, tailpos, headpos + note_height * 0.5f, color, tint)
+                draw_tail(key, tailpos, headpos, color, tint)
                 draw_head(key, headpos, head_and_body_color, tint)
 
                 hold_draw_states.[key] <- NoHold
