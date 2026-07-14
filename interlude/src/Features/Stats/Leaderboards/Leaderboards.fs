@@ -19,7 +19,7 @@ type LeaderboardsTab =
                 .With(
                     PageSetting(%"stats.leaderboards.leaderboard_type",
                         Selector(
-                            [| activity :> Widget, %"stats.leaderboards.activity"; keymodes, %"stats.leaderboards.rating" |],
+                            [| activity :> Widget, %"stats.leaderboards.activity" |],
                             Setting.make content_panel.set_Current content_panel.get_Current
                         )
                     )
