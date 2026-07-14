@@ -4,6 +4,17 @@ open Prelude
 open Prelude.Gameplay.Replays
 open Prelude.Gameplay.Rulesets
 
+type JudgementRatio =
+    static member Calculate(judgement_counts: int array, index: int) : string =
+        let inline judgement_count_or_zero(index: int) : int =
+            if judgement_counts.Length > index then judgement_counts.[index] else 0
+            
+        let judgement_count_a = judgement_count_or_zero(index)
+        let judgement_count_b = judgement_count_or_zero(index + 1)
+        
+        if judgement_count_b = 0 then sprintf "%.1f:0" (float judgement_count_a)
+        else sprintf "%.1f:1" (float judgement_count_a / float judgement_count_b)
+
 type GraphPoint =
     {
         Time: ChartTime
@@ -252,15 +263,8 @@ module ScoreScreenStats =
             Judgements = filtered_judgements
             JudgementCount = Array.sum filtered_judgements
 
-            MA =
-                let mv = if filtered_judgements.Length > 0 then filtered_judgements.[0] else 0
-                let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
-                if pf = 0 then sprintf "%.1f:0" (float mv) else sprintf "%.1f:1" (float mv / float pf)
-
-            PA =
-                let pf = if filtered_judgements.Length > 1 then filtered_judgements.[1] else 0
-                let gr = if filtered_judgements.Length > 2 then filtered_judgements.[2] else 0
-                if gr = 0 then sprintf "%.1f:0" (float pf) else sprintf "%.1f:1" (float pf / float gr)
+            MA = JudgementRatio.Calculate(filtered_judgements, 0)
+            PA = JudgementRatio.Calculate(filtered_judgements, 1)
 
             GraphPoints = graph_points.ToArray()
 
