@@ -1,37 +1,25 @@
-0.7.28.2
+0.7.28.3
 ====
 
-Please enjoy a second humble bug fix update while I
-- Get back into the swing of working on Interlude
-- Make my development process a bit more open
+The skill-rating stats and leaderboards have not been in a good state for a while:
+- Various bugs with pattern ratings mean there are ways to break the scale
+- It is a totally different system to the performance rating shown on the score screen leading to confusion on how it works
+- I can't easily change the pattern analyser as much as I want to because it relies on how it works currently
+
+Therefore pattern-based skill ratings have been removed this update to free me up for a pattern analysis overhaul, and something better to replace it in the long term
+XP/playtime leaderboards are still available
 
 # New features
-- Pitch change on rates is split into uprate/downrate thanks to @kxi0
-- New HUD element: Column error bars, which shows your hits split by column
-
-# Improvements
-- 'Receptors' page in Noteskins is now 'Receptors & Animations'
-- Sort by Grade is now Sort by Accuracy
-- Sort by lamp now sorts by accuracy within lamps
-- Right click on mods to cycle back through modes
-- Slightly update UI for beatmap and pack downloads
-- Judgement HUD element's settings made clearer
-- Ghost tap count now shown on score screen
-- Shift + <number> in score screen sets column filter to just that key
-- Hotkey to reset mods also resets rate
+- 'Use these mods' button when right-clicking scores
+- You can import files via a file dialog from the Import menu
+  Particularly useful if you are having drag-and-drop issues on Linux
+- You can locate game library folders for linking via a file dialog
+- Unranked scores are saved even when 'Only save new records' is ticked
+- Pacemaker targets can be set more accurately than whole % values
+- MA and PA are shown on graph hover info thanks to @MuffleTruffle
 
 # Bug fixes
-- Fixed computer's locale setting sometimes breaking the ruleset editor
-- Fixed a bug causing Inverse mod to not always generate the right gaps (i.e. in brackets)
-- Fixed overlapping mod text when Autoplay is on
-- Fixed crash when a dropdown has 0 options
-- Fixed online leaderboard clearing when you watch a replay
-- Fixed lowest judgement not being skinnable on Judgement HUD element
-- Fixed a lag/crash setup in replay mode
-- Fixed charts with long metadata lagging level select
-- Fixed a crash when switching rulesets on the score screen
-- Fixed quaver mines importing as notes
-- Fixed crash if a file is dropped while the game is loading
-- Fixed overlapping text when a ruleset has just 2 judgements
-- Fixed a parse-order bug in osu! skin imports thanks to @lotte25
+- Fixed a crash preventing importing Etterna noteskins thanks to @Forraz
+- osu! rate detection/filtering out when importing massively improved thanks to @Forraz
+- Fixed a long-standing issue where scores disappear from leaderboards (all vanished scores have been restored)
 
