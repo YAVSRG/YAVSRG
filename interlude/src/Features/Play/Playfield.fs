@@ -12,28 +12,6 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 
-type private StageLeft() =
-    inherit StaticWidget(NodeType.None)
-
-    let sprite = Content.Texture "stageleft"
-
-    override this.Draw() : unit =
-        let width = sprite.AspectRatio * this.Bounds.Height
-
-        Render.sprite
-            (Rect.FromSize(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height))
-            Color.White
-            sprite
-
-type private StageRight() =
-    inherit StaticWidget(NodeType.None)
-
-    let sprite = Content.Texture "stageright"
-
-    override this.Draw() : unit =
-        let width = sprite.AspectRatio * this.Bounds.Height
-        Render.sprite (Rect.FromSize(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)) Color.White sprite
-
 [<Struct>]
 type private HoldRenderState =
     | HeadOffscreen of index: int
@@ -74,6 +52,8 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     let holdhead = Content.Texture("holdhead")
     let holdbody = Content.Texture("holdbody")
     let note = Content.Texture("note")
+    let stage_left = Content.Texture("stageleft")
+    let stage_right = Content.Texture("stageright")
     let animation = Animation.Counter(float noteskin_config.AnimationFrameTime)
     let receptor_aspect_ratio = receptor.AspectRatio
 
@@ -140,9 +120,6 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
         let screen_align_percentage, playfield_align_percentage =
             noteskin_config.PlayfieldAlignment
 
-        if noteskin_config.EnableStageTextures then
-            this.Add(StageLeft(), StageRight())
-
         this.Position <-
             {
                 Left = screen_align_percentage %- (width * playfield_align_percentage)
@@ -168,6 +145,21 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
 
         if noteskin_config.UseExplosions then
             explosions.Update(elapsed_ms, moved)
+            
+    member private this.DrawStageTextures() : unit =
+        let inline draw_stage_left() : unit =
+            let width = stage_left.AspectRatio * this.Bounds.Height
+            let bounds = Rect.FromSize(this.Bounds.Left - width, this.Bounds.Top, width, this.Bounds.Height)
+            Render.sprite bounds Color.White stage_left
+                
+        let inline draw_stage_right() : unit =
+            let width = stage_right.AspectRatio * this.Bounds.Height
+            let bounds = Rect.FromSize(this.Bounds.Right, this.Bounds.Top, width, this.Bounds.Height)
+            Render.sprite bounds Color.White stage_right
+        
+        if noteskin_config.EnableStageTextures then
+            draw_stage_left()
+            draw_stage_right()
 
     member private this.DrawPlayfieldBackground() : unit =
         if fill_column_gaps then
@@ -532,6 +524,7 @@ type Playfield(chart: ColoredChart, state: PlayState, noteskin_config: NoteskinC
     override this.Draw() : unit =
 
         this.DrawPlayfieldBackground()
+        this.DrawStageTextures()
 
         let hitposition = options.HitPosition.Value
 
