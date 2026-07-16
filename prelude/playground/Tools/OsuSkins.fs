@@ -13,7 +13,7 @@ let main() =
         let target_path = Path.Combine(".", "skin-converts", Path.GetFileName(skin))
         try Directory.Delete(target_path, true) with _ -> ()
         
-        let skin_fs = OsuSkinFileSystem(skin)
+        let skin_fs = OsuSkinFolderFileSystem(skin)
         
         match OsuSkinConverter.check_before_convert skin_fs with
         | Ok(skin_ini) ->
