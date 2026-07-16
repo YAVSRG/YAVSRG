@@ -5,26 +5,23 @@ open Prelude.Skins.Conversions.Osu
 
 type internal ColumnTextures =
     {
-        Note: Result<Texture list, string list>
-        Head: Result<Texture list, string list>
-        Body: Result<Texture list, string list>
-        Tail: Result<Texture list, string list>
+        Note: TextureAnimationSearchResult
+        Head: TextureAnimationSearchResult
+        Body: TextureAnimationSearchResult
+        Tail: TextureAnimationSearchResult
     }
     member this.Fingerprint =
-        Result.toOption this.Note,
-        Result.toOption this.Head,
-        Result.toOption this.Body,
-        Result.toOption this.Tail
+        this.Note.ToOption(), this.Head.ToOption(), this.Body.ToOption(), this.Tail.ToOption()
         
 type NoteskinConverterContext =
     internal {
+        FileSystem: OsuSkinFileSystem
         SkinIni: SkinIni
         Version: decimal
         Keymode: int
         KeymodeSettings: Mania
         DefaultSettings: Mania
         
-        Source: string
         Target: string
         
         IsArrows: bool
@@ -51,7 +48,7 @@ type NoteskinConverterContext =
         ColumnLightColors: int array array
     }
     
-    static member Create(source: string, target: string, ini: SkinIni, keymode: int, is_arrows: bool) : NoteskinConverterContext =
+    static member Create(fs: OsuSkinFileSystem, target: string, ini: SkinIni, keymode: int, is_arrows: bool) : NoteskinConverterContext =
         let version =
             match Decimal.TryParse(ini.General.Version, Globalization.CultureInfo.InvariantCulture) with
             | true, v -> v
@@ -71,7 +68,7 @@ type NoteskinConverterContext =
             KeymodeSettings = keymode_settings
             DefaultSettings = default_settings
             
-            Source = source
+            FileSystem = fs
             Target = target
             
             IsArrows = is_arrows

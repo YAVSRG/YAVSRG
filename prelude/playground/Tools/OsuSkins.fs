@@ -13,12 +13,14 @@ let main() =
         let target_path = Path.Combine(".", "skin-converts", Path.GetFileName(skin))
         try Directory.Delete(target_path, true) with _ -> ()
         
-        match OsuSkinConverter.check_before_convert skin with
+        let skin_fs = OsuSkinFileSystem(skin)
+        
+        match OsuSkinConverter.check_before_convert skin_fs with
         | Ok(skin_ini) ->
             Logging.Info "Converting %s [%s]" skin skin_ini.General.Name
             
             try
-                OsuSkinConverter.convert_to_skin(skin_ini, skin, target_path, 4, false)
+                OsuSkinConverter.convert_to_skin(skin_ini, skin_fs, target_path, 4, false)
             with err ->
                 Logging.Error "%s\n%s" err.Message err.StackTrace
             

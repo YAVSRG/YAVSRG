@@ -79,7 +79,7 @@ module internal NotesConverter =
         try
             core_textures
             |> List.map _.Note
-            |> List.map Texture.load_animated_texture
+            |> List.map _.Load(ctx.FileSystem)
             |> List.map (List.map _.As2x)
             |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if ctx.IsArrows then arrow_fix_4k else id
@@ -92,7 +92,7 @@ module internal NotesConverter =
             let percy_ln_detected =
                 core_textures
                 |> List.map _.Body
-                |> List.map Texture.load_animated_texture
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> convert_hold_body_textures ctx.Target
             if percy_ln_detected then
@@ -105,7 +105,7 @@ module internal NotesConverter =
         try
             core_textures
             |> List.map _.Head
-            |> List.map Texture.load_animated_texture
+            |> List.map _.Load(ctx.FileSystem)
             |> List.map (List.map _.As2x)
             |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if ctx.IsArrows then arrow_fix_4k else id
@@ -119,8 +119,8 @@ module internal NotesConverter =
             try
                 core_textures
                 |> List.map _.Tail
-                |> List.map Texture.expect
-                |> List.map Texture.load_animated_texture
+                |> List.map _.ThrowIfNotFound()
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> convert_element_textures ctx.Target "holdtail"
@@ -129,7 +129,7 @@ module internal NotesConverter =
 
                 core_textures
                 |> List.map _.Head
-                |> List.map Texture.load_animated_texture
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> if ctx.IsArrows then arrow_fix_4k else id
@@ -157,10 +157,10 @@ module internal NotesConverter =
         let textures =
             Array.init ctx.Keymode (fun k ->
                 {
-                    Note = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k], ctx.Source)
-                    Head = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k], ctx.Source)
-                    Body = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k], ctx.Source)
-                    Tail = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k], ctx.Source)
+                    Note = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k], ctx.FileSystem)
+                    Head = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k], ctx.FileSystem)
+                    Body = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k], ctx.FileSystem)
+                    Tail = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k], ctx.FileSystem)
                 }
             )
         let distinct = ResizeArray<_>()

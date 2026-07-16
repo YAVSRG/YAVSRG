@@ -14,10 +14,10 @@ module internal ColumnLightingConverter =
     let convert_column_lighting(ctx: NoteskinConverterContext) =
         try
             let base_image =
-                Texture.find (ctx.KeymodeSettings.StageLight, ctx.DefaultSettings.StageLight, ctx.Source)
-                |> Texture.expect
-                |> Texture.load_single_texture
-                |> _.Image
+                TextureSearchResult.Create(ctx.KeymodeSettings.StageLight, ctx.DefaultSettings.StageLight, ctx.FileSystem)
+                    .ThrowIfNotFound()
+                    .Load(ctx.FileSystem)
+                    .Image
 
             let distinct_colors = ResizeArray<Color>()
 

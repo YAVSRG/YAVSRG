@@ -19,8 +19,8 @@ module internal HudJudgementConverter =
                     ctx.KeymodeSettings.Hit50, ctx.DefaultSettings.Hit50
                     ctx.KeymodeSettings.Hit0, ctx.DefaultSettings.Hit0
                 ]
-                |> List.map (fun (x, fallback) -> Texture.find_animated(x, fallback, ctx.Source))
-                |> List.map Texture.load_animated_texture
+                |> List.map (fun (x, fallback) -> TextureAnimationSearchResult.Create(x, fallback, ctx.FileSystem))
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
             let max_frames = images |> List.map (fun x -> x.Length) |> List.max
             let max_width = images |> List.map (List.map _.Width >> List.max) |> List.max
@@ -47,9 +47,9 @@ module internal HudJudgementConverter =
                     ctx.DefaultSettings.Hit50
                     ctx.DefaultSettings.Hit0
                 ]
-                |> List.map (fun x -> Texture.find_animated_fallback(x, ctx.Source))
-                |> List.map (Result.map List.head)
-                |> List.map Texture.load_single_texture
+                |> List.map (fun x -> TextureAnimationSearchResult.Create(x, x, ctx.FileSystem))
+                |> List.map _.FirstFrame
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map _.As2x
             let max_width = images |> List.map _.Width |> List.max
             let max_height = images |> List.map _.Height |> List.max

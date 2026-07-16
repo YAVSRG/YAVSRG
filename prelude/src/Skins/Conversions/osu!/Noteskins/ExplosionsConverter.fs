@@ -11,8 +11,9 @@ module internal ExplosionsConverter =
     let convert_note_explosions(ctx: NoteskinConverterContext) : unit =
         try
             let images =
-                Texture.find_animated(ctx.KeymodeSettings.LightingN, ctx.DefaultSettings.LightingN, ctx.Source)
-                |> Texture.load_animated_texture
+                TextureAnimationSearchResult
+                    .Create(ctx.KeymodeSettings.LightingN, ctx.DefaultSettings.LightingN, ctx.FileSystem)
+                    .Load(ctx.FileSystem)
                 |> List.map _.As2x
 
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max
@@ -28,8 +29,9 @@ module internal ExplosionsConverter =
     let convert_hold_explosions(ctx: NoteskinConverterContext) : unit =
         try
             let images =
-                Texture.find_animated(ctx.KeymodeSettings.LightingL, ctx.DefaultSettings.LightingL, ctx.Source)
-                |> Texture.load_animated_texture
+                TextureAnimationSearchResult
+                    .Create(ctx.KeymodeSettings.LightingL, ctx.DefaultSettings.LightingL, ctx.FileSystem)
+                    .Load(ctx.FileSystem)
                 |> List.map _.As2x
 
             let max_dim = images |> List.map (fun i -> max i.Width i.Height) |> List.max

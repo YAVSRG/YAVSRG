@@ -8,12 +8,14 @@ open Prelude.Skins.Conversions.Osu.HUD
 
 module OsuSkinConverter =
 
-    let check_before_convert (source: string) : Result<SkinIni, string> =
-        SkinIni.FromFile (Path.Combine(source, "skin.ini"))
+    let check_before_convert (fs: OsuSkinFileSystem) : Result<SkinIni, string> =
+        match fs.Open("skin.ini") with
+        | Ok stream -> SkinIni.FromStream(stream)
+        | Error reason -> Error reason
 
-    let convert_to_skin (ini: SkinIni, source: string, target: string, keymode: int, is_arrows: bool) : unit =
-        NoteskinConverter.convert_to_noteskin(ini, source, Path.Combine(target, "Noteskin"), keymode, is_arrows)
-        HudConverter.convert_to_hud(ini, source, Path.Combine(target, "HUD"), keymode)
+    let convert_to_skin (ini: SkinIni, fs: OsuSkinFileSystem, target: string, keymode: int, is_arrows: bool) : unit =
+        NoteskinConverter.convert_to_noteskin(ini, fs, Path.Combine(target, "Noteskin"), keymode, is_arrows)
+        HudConverter.convert_to_hud(ini, fs, Path.Combine(target, "HUD"), keymode)
         JSON.ToFile
             (Path.Combine(target, "skin.json"), false)
             {
