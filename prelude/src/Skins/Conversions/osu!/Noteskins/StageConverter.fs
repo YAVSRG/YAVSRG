@@ -11,12 +11,14 @@ module internal StageConverter =
     let convert_stage_textures(ctx: NoteskinConverterContext) : unit =
         try
             let stage_left =
-                TextureSearchResult.Create(ctx.KeymodeSettings.StageLeft, ctx.DefaultSettings.StageLeft, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForTexture(ctx.KeymodeSettings.StageLeft, ctx.DefaultSettings.StageLeft)
                     .ThrowIfNotFound()
                     .Load(ctx.FileSystem)
                     .Image
             let stage_right =
-                TextureSearchResult.Create(ctx.KeymodeSettings.StageRight, ctx.DefaultSettings.StageRight, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForTexture(ctx.KeymodeSettings.StageRight, ctx.DefaultSettings.StageRight)
                     .ThrowIfNotFound()
                     .Load(ctx.FileSystem)
                     .Image

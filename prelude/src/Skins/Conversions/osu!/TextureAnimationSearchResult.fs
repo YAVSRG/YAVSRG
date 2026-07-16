@@ -1,113 +1,8 @@
 ﻿namespace Prelude.Skins.Conversions.Osu
 
-open System.IO
+open System.Runtime.CompilerServices
 open Percyqaz.Common
-open SixLabors.ImageSharp.Processing
 open Prelude
-
-type OsuSkinFileSystem(path: string) =
-    let normalise_path(full_file_path: string) : string =
-        Path.GetRelativePath(path, full_file_path).ToLower().Replace("\\", "/")
-    
-    let create_file_map() =
-        Directory.GetFiles(path, "*.*", EnumerationOptions(RecurseSubdirectories = true, MaxRecursionDepth = 3))
-        |> Seq.map (fun file -> normalise_path(file), file)
-        |> Map.ofSeq
-        
-    let file_map = create_file_map()
-    
-    member this.Exists(key: string) : bool =
-        file_map.ContainsKey(key)
-        
-    member this.Open(key: string) : Result<Stream, string> =
-        match file_map.TryGetValue(key) with
-        | true, absolute_path ->
-            try Ok(File.OpenRead(absolute_path))
-            with exn -> Error(sprintf "File open failed: '%s' -> '%s' (%O) %s" key absolute_path (exn.GetType()) exn.Message)
-        | false, _ -> Error(sprintf "File not found: '%s'" key)
-        
-    static member NormaliseKey(user_string: string) : string =
-        user_string.ToLower().Replace(@"\\", "\\").Replace("\\", "/")
-
-type LoadedTexture =
-    {
-        Image: Bitmap
-        Is2x: bool
-    }
-    member this.As2x : Bitmap =
-        if this.Is2x then
-            let new_image = this.Image.Clone()
-            new_image.Mutate(fun img -> img.Resize(this.Image.Width * 2, 0) |> ignore)
-            new_image
-        else this.Image
-        
-    static member TransparentFallback() : LoadedTexture =
-        { Image = new Bitmap(64, 64); Is2x = true }
-        
-[<RequireQualifiedAccess>]
-type TextureSearchResult =
-    | Ok of key: string
-    | Error of tried_files: string list
-        
-    member this.ToOption() : _ option =
-        match this with
-        | Ok key -> Some key
-        | Error _ -> None
-    
-    static member private TryFile(key: string, fs: OsuSkinFileSystem) : TextureSearchResult =
-        if fs.Exists(key) then Ok key else Error [key]
-        
-    static member private TryImage2xOr1x(key: string, fs: OsuSkinFileSystem) : TextureSearchResult =
-        TextureSearchResult
-            .TryFile(key + "@2x.png", fs)
-            .ThenTryFile(key + ".png", fs)
-        
-    member private this.ThenTryFile(key: string, fs: OsuSkinFileSystem) : TextureSearchResult =
-        match this with
-        | Ok _ -> this
-        | Error tried_files ->
-            if fs.Exists(key) then Ok key else Error (key :: tried_files)
-            
-    member private this.ThenTryImage2xOr1x(key: string, fs: OsuSkinFileSystem) : TextureSearchResult =
-        this
-            .ThenTryFile(key + "@2x.png", fs)
-            .ThenTryFile(key + ".png", fs)
-            
-    static member Create(requested_name: string, fallback_name: string, fs: OsuSkinFileSystem) : TextureSearchResult =
-        let requested_name = OsuSkinFileSystem.NormaliseKey(requested_name)
-        if requested_name = fallback_name then
-            TextureSearchResult
-                .TryImage2xOr1x(fallback_name, fs)
-        else
-            TextureSearchResult
-                .TryImage2xOr1x(requested_name, fs)
-                .ThenTryImage2xOr1x(fallback_name, fs)
-            
-    member this.ThrowIfNotFound() : TextureSearchResult =
-        match this with
-        | Ok _ -> this
-        | Error tried_files ->
-            failwithf "No matching files found! Checked for: \n %s\nCannot continue without this" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
-            
-    member this.Load(fs: OsuSkinFileSystem) : LoadedTexture =
-        match this with
-        | Ok key ->
-            match fs.Open(key) with
-            | Result.Ok image_stream ->
-                
-                match Bitmap.from_stream true image_stream with
-                | Some bitmap ->
-                    { Image = bitmap; Is2x = key.EndsWith("@2x.png") }
-                | None ->
-                    Logging.Debug "Texture error, using fallback: File stream ('%s') OK but image data invalid or corrupt" key
-                    LoadedTexture.TransparentFallback()
-                    
-            | Result.Error file_error ->
-                Logging.Debug "Texture error, using fallback: %s" file_error
-                LoadedTexture.TransparentFallback()
-        | Error tried_files ->
-            Logging.Debug "Texture error, using fallback: No matching files found! Checked for: \n %s" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
-            LoadedTexture.TransparentFallback()
             
 [<RequireQualifiedAccess>]
 type TextureAnimationSearchResult =
@@ -168,8 +63,7 @@ type TextureAnimationSearchResult =
             | Ok files -> Ok files
             | Error more_tried_files -> Error (more_tried_files @ tried_files)
                 
-    static member Create(requested_name: string, fallback_name: string, fs: OsuSkinFileSystem) : TextureAnimationSearchResult =
-        let requested_name = OsuSkinFileSystem.NormaliseKey(requested_name)
+    static member private Create(requested_name: string, fallback_name: string, fs: OsuSkinFileSystem) : TextureAnimationSearchResult =
         if requested_name = fallback_name then
             TextureAnimationSearchResult
                 .TryFrames2xOr1x(fallback_name, fs)
@@ -252,3 +146,12 @@ type TextureAnimationSearchResult =
         | None ->
             Logging.Debug "Multi-animation error, using fallback: 0 valid animations were loaded"
             [ [ LoadedTexture.TransparentFallback() ] ]
+            
+    [<Extension>]
+    static member SearchForAnimation(fs: OsuSkinFileSystem, name: string, fallback: string) : TextureAnimationSearchResult =
+        TextureAnimationSearchResult.Create(OsuSkinFileSystem.NormaliseKey(name), OsuSkinFileSystem.NormaliseKey(fallback), fs)
+        
+    [<Extension>]
+    static member SearchForAnimation(fs: OsuSkinFileSystem, name_no_fallback: string) : TextureAnimationSearchResult =
+        let normalised = OsuSkinFileSystem.NormaliseKey(name_no_fallback)
+        TextureAnimationSearchResult.Create(normalised, normalised, fs)

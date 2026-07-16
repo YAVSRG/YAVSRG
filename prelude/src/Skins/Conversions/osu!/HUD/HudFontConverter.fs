@@ -25,7 +25,7 @@ module internal HudFontConverter =
             let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> TextureSearchResult.Create(id, fallback, fs).ThrowIfNotFound())
+                |> Seq.map (fun (id, fallback) -> fs.SearchForTexture(id, fallback).ThrowIfNotFound())
                 |> Seq.map (function TextureSearchResult.Ok t -> (if t.EndsWith("@2x.png") then scale_2x <- 2.0f); TextureSearchResult.Ok t | otherwise -> otherwise)
                 |> Seq.map _.Load(fs).As2x
                 |> Array.ofSeq
@@ -36,15 +36,15 @@ module internal HudFontConverter =
             let optional_extras =
                 try
                     let dot =
-                        TextureSearchResult
-                            .Create(sprintf "%s-dot" osu_skin_prefix, "score-dot", fs)
+                        fs
+                            .SearchForTexture(sprintf "%s-dot" osu_skin_prefix, "score-dot")
                             .ThrowIfNotFound()
                             .Load(fs)
                             .As2x
                     let colon = dot_to_colon dot
                     let percent =
-                        TextureSearchResult
-                            .Create(sprintf "%s-percent" osu_skin_prefix, "score-percent", fs)
+                        fs
+                            .SearchForTexture(sprintf "%s-percent" osu_skin_prefix, "score-percent")
                             .ThrowIfNotFound()
                             .Load(fs)
                             .As2x
@@ -63,15 +63,15 @@ module internal HudFontConverter =
         try
             let mutable scale_2x = 1.0f
             let dot =
-                TextureSearchResult
-                    .Create(sprintf "%s-dot" osu_skin_prefix, "score-dot", fs)
+                fs
+                    .SearchForTexture(sprintf "%s-dot" osu_skin_prefix, "score-dot")
                     .ThrowIfNotFound()
                     .Load(fs)
                     .As2x
             let colon = dot_to_colon dot
             let percent =
-                TextureSearchResult
-                    .Create(sprintf "%s-percent" osu_skin_prefix, "score-percent", fs)
+                fs
+                    .SearchForTexture(sprintf "%s-percent" osu_skin_prefix, "score-percent")
                     .ThrowIfNotFound()
                     .Load(fs)
                     .As2x
@@ -79,7 +79,7 @@ module internal HudFontConverter =
             let images =
                 seq { 0 .. 9 }
                 |> Seq.map (fun i -> sprintf "%s-%i" osu_skin_prefix i, sprintf "score-%i" i)
-                |> Seq.map (fun (id, fallback) -> TextureSearchResult.Create(id, fallback, fs).ThrowIfNotFound())
+                |> Seq.map (fun (id, fallback) -> fs.SearchForTexture(id, fallback).ThrowIfNotFound())
                 |> Seq.map (function TextureSearchResult.Ok t -> (if t.EndsWith("@2x.png") then scale_2x <- 2.0f); TextureSearchResult.Ok t | otherwise -> otherwise)
                 |> Seq.map _.Load(fs).As2x
                 |> Array.ofSeq

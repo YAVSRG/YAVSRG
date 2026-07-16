@@ -105,7 +105,10 @@
     <Compile Include="Skins\Repo.fs" />
     <Compile Include="Skins\Conversions\Helpers.fs" />
     <Compile Include="Skins\Conversions\osu!\Parser.fs" />
-    <Compile Include="Skins\Conversions\osu!\Textures.fs" />
+    <Compile Include="Skins\Conversions\osu!\OsuSkinFileSystem.fs" />
+    <Compile Include="Skins\Conversions\osu!\LoadedTexture.fs" />
+    <Compile Include="Skins\Conversions\osu!\TextureSearchResult.fs" />
+    <Compile Include="Skins\Conversions\osu!\TextureAnimationSearchResult.fs" />
     <Compile Include="Skins\Conversions\osu!\ImageOperations.fs" />
     <Compile Include="Skins\Conversions\osu!\HUD\HudConverterContext.fs" />
     <Compile Include="Skins\Conversions\osu!\HUD\HudJudgementConverter.fs" />

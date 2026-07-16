@@ -11,8 +11,8 @@ module internal ExplosionsConverter =
     let convert_note_explosions(ctx: NoteskinConverterContext) : unit =
         try
             let images =
-                TextureAnimationSearchResult
-                    .Create(ctx.KeymodeSettings.LightingN, ctx.DefaultSettings.LightingN, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForAnimation(ctx.KeymodeSettings.LightingN, ctx.DefaultSettings.LightingN)
                     .Load(ctx.FileSystem)
                 |> List.map _.As2x
 
@@ -29,8 +29,8 @@ module internal ExplosionsConverter =
     let convert_hold_explosions(ctx: NoteskinConverterContext) : unit =
         try
             let images =
-                TextureAnimationSearchResult
-                    .Create(ctx.KeymodeSettings.LightingL, ctx.DefaultSettings.LightingL, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForAnimation(ctx.KeymodeSettings.LightingL, ctx.DefaultSettings.LightingL)
                     .Load(ctx.FileSystem)
                 |> List.map _.As2x
 

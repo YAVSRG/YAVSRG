@@ -157,10 +157,10 @@ module internal NotesConverter =
         let textures =
             Array.init ctx.Keymode (fun k ->
                 {
-                    Note = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k], ctx.FileSystem)
-                    Head = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k], ctx.FileSystem)
-                    Body = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k], ctx.FileSystem)
-                    Tail = TextureAnimationSearchResult.Create(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k], ctx.FileSystem)
+                    Note = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k])
+                    Head = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k])
+                    Body = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k])
+                    Tail = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k])
                 }
             )
         let distinct = ResizeArray<_>()

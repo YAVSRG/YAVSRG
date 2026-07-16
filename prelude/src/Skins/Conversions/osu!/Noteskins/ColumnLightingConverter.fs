@@ -14,7 +14,8 @@ module internal ColumnLightingConverter =
     let convert_column_lighting(ctx: NoteskinConverterContext) =
         try
             let base_image =
-                TextureSearchResult.Create(ctx.KeymodeSettings.StageLight, ctx.DefaultSettings.StageLight, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForTexture(ctx.KeymodeSettings.StageLight, ctx.DefaultSettings.StageLight)
                     .ThrowIfNotFound()
                     .Load(ctx.FileSystem)
                     .Image

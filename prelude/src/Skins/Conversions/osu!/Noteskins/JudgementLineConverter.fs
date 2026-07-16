@@ -11,7 +11,8 @@ module internal JudgementLineConverter =
     let convert_stage_hint(ctx: NoteskinConverterContext) : unit =
         try
             let stage_hint =
-                TextureSearchResult.Create(ctx.KeymodeSettings.StageHint, ctx.DefaultSettings.StageHint, ctx.FileSystem)
+                ctx.FileSystem
+                    .SearchForTexture(ctx.KeymodeSettings.StageHint, ctx.DefaultSettings.StageHint)
                     .ThrowIfNotFound()
                     .Load(ctx.FileSystem)
                     .As2x

@@ -55,12 +55,12 @@ module internal ReceptorsConverter =
         
         let not_pressed_images =
             Array.init ctx.Keymode (fun i ->
-                TextureSearchResult.Create(ctx.KeymodeSettings.KeyImageΔ.[i], ctx.DefaultSettings.KeyImageΔ.[i], ctx.FileSystem)
+               ctx.FileSystem.SearchForTexture(ctx.KeymodeSettings.KeyImageΔ.[i], ctx.DefaultSettings.KeyImageΔ.[i])
             )
             
         let pressed_images =
             Array.init ctx.Keymode (fun i ->
-                TextureSearchResult.Create(ctx.KeymodeSettings.KeyImageΔD.[i], ctx.DefaultSettings.KeyImageΔD.[i], ctx.FileSystem)
+                ctx.FileSystem.SearchForTexture(ctx.KeymodeSettings.KeyImageΔD.[i], ctx.DefaultSettings.KeyImageΔD.[i])
             )
             
         Array.zip not_pressed_images pressed_images
