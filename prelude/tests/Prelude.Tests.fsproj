@@ -44,6 +44,7 @@
     <Compile Include="Helpers\VirtualLocaleFileSystem.fs" />
     <Compile Include="Helpers\VirtualAssetStorage.fs" />
     <Compile Include="Helpers\VirtualClock.fs" />
+    <Compile Include="Helpers\VirtualNoteskinBuilder.fs" />
     <Compile Include="Shared\BitmaskTests.fs" />
     <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
@@ -67,7 +68,6 @@
     <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
     <Compile Include="Skins\Conversions\SkinIniParserTests.fs" />
-    <Compile Include="Helpers\InMemoryNoteskinBuilder.fs" />
     <Compile Include="Skins\Noteskins\NoteskinValidationTests.fs" />
     <Compile Include="Database\InMemoryDatabase.fs" />
     <Compile Include="Database\UserDatabaseTests.fs" />

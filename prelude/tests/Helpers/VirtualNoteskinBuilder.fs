@@ -6,7 +6,7 @@ open SixLabors.ImageSharp
 open Prelude
 open Prelude.Skins.Noteskins
 
-type InMemoryNoteskinBuilder(config: NoteskinConfig) =
+type VirtualNoteskinBuilder(config: NoteskinConfig) =
     let memory_stream = new MemoryStream()
     let zip_archive = new ZipArchive(memory_stream, ZipArchiveMode.Create, true)
 
@@ -15,13 +15,13 @@ type InMemoryNoteskinBuilder(config: NoteskinConfig) =
         use stream = config_file.Open()
         JSON.ToStream stream config
 
-    member this.AddJsonFile(path: string, data: 'T) : InMemoryNoteskinBuilder =
+    member this.AddJsonFile(path: string, data: 'T) : VirtualNoteskinBuilder =
         let entry = zip_archive.CreateEntry(path)
         use stream = entry.Open()
         JSON.ToStream stream data
         this
 
-    member this.AddImageFile(path: string, image: Bitmap) : InMemoryNoteskinBuilder =
+    member this.AddImageFile(path: string, image: Bitmap) : VirtualNoteskinBuilder =
         let entry = zip_archive.CreateEntry(path)
         use stream = entry.Open()
         image.SaveAsPng stream
