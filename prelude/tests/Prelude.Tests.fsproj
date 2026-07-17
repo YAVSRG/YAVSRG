@@ -1,14 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-	  <TargetFramework>net9.0</TargetFramework>
-
-	  <IsPackable>false</IsPackable>
-	  <GenerateProgramFile>false</GenerateProgramFile>
-	  <IsTestProject>true</IsTestProject>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
-
   <ItemGroup>
+    <None Include="Data\Osz\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Data\Osz\989392 DJ Sharpnel - World Sound.osz">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Data\Camellia - Backbeat Maniac (Evening) [Rewind VIP].osu">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -30,12 +33,6 @@
     <None Include="Data\Lylcaruis - Cardboard Box - He He He [SPEEEDDD!!!] (2023-09-29) OsuMania.osr">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Data\2089086 The Living Tombstone - My Ordinary Life (Speed up Ver.).osz">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Data\989392 DJ Sharpnel - World Sound.osz">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Compile Include="Helpers\ChartFuzzer.fs" />
     <Compile Include="Helpers\NotesBuilder.fs" />
     <Compile Include="Helpers\ReplayBuilder.fs" />
@@ -45,6 +42,7 @@
     <Compile Include="Helpers\VirtualAssetStorage.fs" />
     <Compile Include="Helpers\VirtualClock.fs" />
     <Compile Include="Helpers\VirtualNoteskinBuilder.fs" />
+    <Compile Include="Helpers\VirtualOsuSkinFileSystem.fs" />
     <Compile Include="Shared\BitmaskTests.fs" />
     <Compile Include="Shared\LocalisationTests.fs" />
     <Compile Include="Charts\ChartTests.fs" />
@@ -68,6 +66,7 @@
     <Compile Include="Rulesets\RulesetOsuParityTests.fs" />
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
     <Compile Include="Skins\Conversions\SkinIniParserTests.fs" />
+    <Compile Include="Skins\Conversions\OsuSkinFileSystemTests.fs" />
     <Compile Include="Skins\Noteskins\NoteskinValidationTests.fs" />
     <Compile Include="Database\InMemoryDatabase.fs" />
     <Compile Include="Database\UserDatabaseTests.fs" />
@@ -81,17 +80,14 @@
     <Compile Include="Stats\StatsTests.fs" />
     <Compile Include="Setup.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\src\Prelude.fsproj" />
   </ItemGroup>
-
   <ItemGroup>
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
-	<PackageReference Include="NUnit" Version="3.13.3" />
-	<PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-	<PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
-	<PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.6.1" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
-
 </Project>

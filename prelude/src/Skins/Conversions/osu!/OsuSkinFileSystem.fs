@@ -16,6 +16,8 @@ type OsuSkinFileSystem() =
 type OsuSkinFolderFileSystem(path: string) =
     inherit OsuSkinFileSystem()
     
+    let path = Path.GetFullPath(path)
+    
     let normalise_path(full_file_path: string) : string =
         Path.GetRelativePath(path, full_file_path).ToLower().Replace("\\", "/")
     
