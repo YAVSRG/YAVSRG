@@ -79,7 +79,7 @@ type TextureAnimationSearchResult =
         match this with
         | Ok _ -> this
         | Error tried_files ->
-            failwithf "No matching files found! Checked for: \n %s\nCannot continue without this" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
+            failwithf "No matching files found! Checked for: %s; Cannot continue without this" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat ", ")
             
     member private this.TryLoad(fs: OsuSkinFileSystem) : LoadedTexture list option =
         
@@ -116,7 +116,7 @@ type TextureAnimationSearchResult =
                 None
                 
         | Error tried_files ->
-            Logging.Debug "Texture/animation error, using fallback: No matching files found! Checked for: \n %s" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
+            Logging.Debug "Texture/animation error, using fallback: No matching files found! Checked for: %s" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat ", ")
             None
             
     member this.Load(fs: OsuSkinFileSystem) : LoadedTexture list =

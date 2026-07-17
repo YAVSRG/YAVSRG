@@ -125,7 +125,7 @@ module internal NotesConverter =
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> convert_element_textures ctx.Target "holdtail"
             with err -> // todo: if there is no texture, return an error instead of exception-oriented-programming
-                Logging.Warn "Error in holdtail textures - Using hold head textures instead:\n%O" err
+                Logging.Warn "Error in holdtail textures - Using hold head textures instead: %O" err
 
                 core_textures
                 |> List.map _.Head

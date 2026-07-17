@@ -46,7 +46,7 @@ type TextureSearchResult =
         match this with
         | Ok _ -> this
         | Error tried_files ->
-            failwithf "No matching files found! Checked for: \n %s\nCannot continue without this" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
+            failwithf "No matching files found! Checked for: %s; Cannot continue without this" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat ", ")
             
     member this.Load(fs: OsuSkinFileSystem) : LoadedTexture =
         match this with
@@ -65,7 +65,7 @@ type TextureSearchResult =
                 Logging.Debug "Texture error, using fallback: %s" file_error
                 LoadedTexture.TransparentFallback()
         | Error tried_files ->
-            Logging.Debug "Texture error, using fallback: No matching files found! Checked for: \n %s" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat "\n ")
+            Logging.Debug "Texture error, using fallback: No matching files found! Checked for: %s" (tried_files |> List.rev |> Seq.map (sprintf "'%s'") |> String.concat ", ")
             LoadedTexture.TransparentFallback()
             
     [<Extension>]

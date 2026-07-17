@@ -29,7 +29,7 @@ type ImportsPage() =
         PageButton(%"tables.browser", fun () -> TableBrowserPage().Show())
 
     static member ImportOsuSkins() : PageButton =
-        PageButton(%"skins.import_from_osu", fun () -> OsuSkinsListPage(FileDrop.import_osu_skin).Show())
+        PageButton(%"skins.import_from_osu", fun () -> OsuSkinsListPage(FileDrop.import_osu_skin_folder).Show())
 
     static member ImportFromFile() : PageButton =
         PageButton(%"imports.from_file", fun () ->
