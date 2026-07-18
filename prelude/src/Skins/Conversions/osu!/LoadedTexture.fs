@@ -8,10 +8,8 @@ type LoadedTexture =
         Image: Bitmap
         Is2x: bool
     }
-    // todo: wtf? why does As2x double the size when already 2x and nothing when not
-    // todo: find out what is going on and fix before merging
     member this.As2x : Bitmap =
-        if this.Is2x then
+        if not(this.Is2x) then
             let new_image = this.Image.Clone()
             new_image.Mutate(fun img -> img.Resize(this.Image.Width * 2, 0) |> ignore)
             new_image

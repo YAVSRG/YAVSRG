@@ -8,6 +8,9 @@ open Prelude.Skins.Conversions.Osu
             
 module internal ExplosionsConverter =
     
+    [<Literal>]
+    let OSU_EXPLOSION_SIZE_AT_2X = 98.0f
+    
     let convert_note_explosions(ctx: NoteskinConverterContext) : unit =
         try
             let images =
@@ -22,7 +25,7 @@ module internal ExplosionsConverter =
                 let padded = ImageOperations.pad_to_square max_dim (ImageOperations.remove_black_bg image)
                 padded.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "noteexplosion" (i, 0)))
 
-            ctx.NoteExplosionsScale <- Some (float32 max_dim / 49.0f)
+            ctx.NoteExplosionsScale <- Some (float32 max_dim / OSU_EXPLOSION_SIZE_AT_2X)
         with err ->
             Logging.Warn "Error converting note explosions: %O" err
 
@@ -40,7 +43,7 @@ module internal ExplosionsConverter =
                 let padded = ImageOperations.pad_to_square max_dim (ImageOperations.remove_black_bg image)
                 padded.Save(Path.Combine(ctx.Target, TextureFileName.to_loose "holdexplosion" (i, 0)))
 
-            ctx.HoldExplosionsScale <- Some (float32 max_dim / 49.0f)
+            ctx.HoldExplosionsScale <- Some (float32 max_dim / OSU_EXPLOSION_SIZE_AT_2X)
         with err ->
             Logging.Warn "Error converting hold explosions: %O" err
             

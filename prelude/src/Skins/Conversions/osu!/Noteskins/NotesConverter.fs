@@ -24,6 +24,9 @@ module internal NotesConverter =
 
                 let square_image = ImageOperations.upscale_to_square size image
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose element_name (column, row)))
+                
+    [<Literal>]
+    let LN_TAIL_SLICE_HEIGHT = 230 // Currently a best guess for what will preserve aspect ratio correctly, it's at least very close
 
     let private convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
         let animation_frames = List.map List.length images |> List.max
@@ -50,8 +53,8 @@ module internal NotesConverter =
                     let mutable i = 0
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
-                    // Take a 128-pixel-tall slice down from that starting point, use that as the tail
-                    let percy_tail_texture = new Bitmap(width, 128)
+                    // Take a slice down from that starting point, use that as the tail
+                    let percy_tail_texture = new Bitmap(width, LN_TAIL_SLICE_HEIGHT)
                     percy_tail_texture.Mutate(fun img ->
                         img
                             .DrawImage(image, Point((-image.Width + width) / 2, -i), 1.0f)

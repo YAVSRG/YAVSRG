@@ -67,6 +67,7 @@
     <Compile Include="Rulesets\RulesetQuaverParityTests.fs" />
     <Compile Include="Skins\Conversions\SkinIniParserTests.fs" />
     <Compile Include="Skins\Conversions\OsuSkinFileSystemTests.fs" />
+    <Compile Include="Skins\Conversions\LoadedTextureTests.fs" />
     <Compile Include="Skins\Noteskins\NoteskinValidationTests.fs" />
     <Compile Include="Database\InMemoryDatabase.fs" />
     <Compile Include="Database\UserDatabaseTests.fs" />
