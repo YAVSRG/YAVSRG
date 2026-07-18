@@ -38,6 +38,6 @@ jobs:
     - name: Approve PRs from Percyqaz if checks pass
       if: ${{ github.actor == 'percyqaz' }}
       run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      env:
+        PR_URL: ${{github.event.pull_request.html_url}}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
