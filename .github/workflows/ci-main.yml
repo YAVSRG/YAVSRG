@@ -29,7 +29,7 @@ jobs:
         ./run_tests.sh
         
     - name: Run formatting checks
-      run: dotnet tool restore && fantomas --check .
+      run: dotnet tool restore && dotnet fantomas --check .
         
     - name: Notify of failure in main
       if: failure() && github.repository == 'YAVSRG/YAVSRG'
