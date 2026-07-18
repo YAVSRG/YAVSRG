@@ -9,7 +9,7 @@ open Interlude.UI
 open Interlude.Options
 open Interlude.Content
 
-type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, folder_name: string, existing_folder: string option) =
+type ImportOsuNoteskinPage(osu_skin_conversion: OsuSkinConversion, folder_name: string, existing_folder: string option) =
     inherit Page()
 
     let keymode: Setting<Keymode> = Setting.simple Keymode.``4K``
@@ -38,10 +38,8 @@ type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, folder_name: strin
                 %"osu_skin_import.confirm",
                 fun () ->
                     try
-                        OsuSkinConverter.convert_to_skin(
-                            ini,
-                            source_path,
-                            Path.Combine(get_game_folder "Skins", folder_name),
+                        osu_skin_conversion.PerformConversion(
+                            Path.Combine(get_game_folder("Skins"), folder_name),
                             int keymode.Value,
                             keymode.Value = Keymode.``4K`` && is_arrows.Value
                         )
@@ -50,15 +48,15 @@ type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, folder_name: strin
                             try
                                 match existing_folder with
                                 | Some old_name ->
-                                    let skin_path = Path.Combine(get_game_folder "Skins", old_name)
-                                    if Directory.Exists skin_path then
+                                    let skin_path = Path.Combine(get_game_folder("Skins"), old_name)
+                                    if Directory.Exists(skin_path) then
                                         Directory.Delete(skin_path, true)
                                 | None -> failwith "impossible"
                             with err ->
                                 Logging.Error "Error deleting old skin"
-                        Skins.load ()
-                        Skins.selected_noteskin_id.Set folder_name
-                        Skins.selected_hud_id.Set folder_name
+                        Skins.load()
+                        Skins.selected_noteskin_id.Set(folder_name)
+                        Skins.selected_hud_id.Set(folder_name)
                     with err ->
                         Logging.Error "Error while converting to skin: %O" err
 
@@ -75,4 +73,4 @@ type ImportOsuNoteskinPage(ini: SkinIni, source_path: string, folder_name: strin
             .Pos(15)
         :> Widget
 
-    override this.Title = ini.General.Name
+    override this.Title = osu_skin_conversion.SkinIni.General.Name

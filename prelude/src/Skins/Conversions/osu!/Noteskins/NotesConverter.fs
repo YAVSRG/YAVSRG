@@ -24,6 +24,9 @@ module internal NotesConverter =
 
                 let square_image = ImageOperations.upscale_to_square size image
                 square_image.Save(Path.Combine(target, TextureFileName.to_loose element_name (column, row)))
+                
+    [<Literal>]
+    let LN_TAIL_SLICE_HEIGHT = 230 // Currently a best guess for what will preserve aspect ratio correctly, it's at least very close
 
     let private convert_hold_body_textures (target: string) (images: Bitmap list list) : bool =
         let animation_frames = List.map List.length images |> List.max
@@ -50,8 +53,8 @@ module internal NotesConverter =
                     let mutable i = 0
                     while i < image.Height && image.[image.Width / 2, i].A < 5uy do
                         i <- i + 1
-                    // Take a 128-pixel-tall slice down from that starting point, use that as the tail
-                    let percy_tail_texture = new Bitmap(width, 128)
+                    // Take a slice down from that starting point, use that as the tail
+                    let percy_tail_texture = new Bitmap(width, LN_TAIL_SLICE_HEIGHT)
                     percy_tail_texture.Mutate(fun img ->
                         img
                             .DrawImage(image, Point((-image.Width + width) / 2, -i), 1.0f)
@@ -79,7 +82,7 @@ module internal NotesConverter =
         try
             core_textures
             |> List.map _.Note
-            |> List.map Texture.load_animated_texture
+            |> List.map _.Load(ctx.FileSystem)
             |> List.map (List.map _.As2x)
             |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if ctx.IsArrows then arrow_fix_4k else id
@@ -92,7 +95,7 @@ module internal NotesConverter =
             let percy_ln_detected =
                 core_textures
                 |> List.map _.Body
-                |> List.map Texture.load_animated_texture
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> convert_hold_body_textures ctx.Target
             if percy_ln_detected then
@@ -105,7 +108,7 @@ module internal NotesConverter =
         try
             core_textures
             |> List.map _.Head
-            |> List.map Texture.load_animated_texture
+            |> List.map _.Load(ctx.FileSystem)
             |> List.map (List.map _.As2x)
             |> List.map (List.map (ImageOperations.scale_y note_height_scale))
             |> if ctx.IsArrows then arrow_fix_4k else id
@@ -119,17 +122,17 @@ module internal NotesConverter =
             try
                 core_textures
                 |> List.map _.Tail
-                |> List.map Texture.expect
-                |> List.map Texture.load_animated_texture
+                |> List.map _.ThrowIfNotFound()
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> convert_element_textures ctx.Target "holdtail"
             with err -> // todo: if there is no texture, return an error instead of exception-oriented-programming
-                Logging.Warn "Error in holdtail textures - Using hold head textures instead:\n%O" err
+                Logging.Warn "Error in holdtail textures - Using hold head textures instead: %O" err
 
                 core_textures
                 |> List.map _.Head
-                |> List.map Texture.load_animated_texture
+                |> List.map _.Load(ctx.FileSystem)
                 |> List.map (List.map _.As2x)
                 |> List.map (List.map (ImageOperations.scale_y note_height_scale))
                 |> if ctx.IsArrows then arrow_fix_4k else id
@@ -157,10 +160,10 @@ module internal NotesConverter =
         let textures =
             Array.init ctx.Keymode (fun k ->
                 {
-                    Note = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k], ctx.Source)
-                    Head = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k], ctx.Source)
-                    Body = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k], ctx.Source)
-                    Tail = Texture.find_animated(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k], ctx.Source)
+                    Note = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔ.[k], ctx.DefaultSettings.NoteImageΔ.[k])
+                    Head = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔH.[k], ctx.DefaultSettings.NoteImageΔH.[k])
+                    Body = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔL.[k], ctx.DefaultSettings.NoteImageΔL.[k])
+                    Tail = ctx.FileSystem.SearchForAnimation(ctx.KeymodeSettings.NoteImageΔT.[k], ctx.DefaultSettings.NoteImageΔT.[k])
                 }
             )
         let distinct = ResizeArray<_>()

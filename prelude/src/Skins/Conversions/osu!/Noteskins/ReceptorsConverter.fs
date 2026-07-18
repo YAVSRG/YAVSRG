@@ -50,22 +50,22 @@ module internal ReceptorsConverter =
         else None
         
     let get_distinct_receptors_raw(ctx: NoteskinConverterContext) : LoadedTexture list =
-        let distinct_detection = ResizeArray<Texture option * Texture option>()
-        let distinct = ResizeArray<Result<Texture, string list> * Result<Texture, string list>>()
+        let distinct_detection = ResizeArray<string option * string option>()
+        let distinct = ResizeArray<TextureSearchResult * TextureSearchResult>()
         
         let not_pressed_images =
             Array.init ctx.Keymode (fun i ->
-                Texture.find(ctx.KeymodeSettings.KeyImageΔ.[i], ctx.DefaultSettings.KeyImageΔ.[i], ctx.Source)
+               ctx.FileSystem.SearchForTexture(ctx.KeymodeSettings.KeyImageΔ.[i], ctx.DefaultSettings.KeyImageΔ.[i])
             )
             
         let pressed_images =
             Array.init ctx.Keymode (fun i ->
-                Texture.find(ctx.KeymodeSettings.KeyImageΔD.[i], ctx.DefaultSettings.KeyImageΔD.[i], ctx.Source)
+                ctx.FileSystem.SearchForTexture(ctx.KeymodeSettings.KeyImageΔD.[i], ctx.DefaultSettings.KeyImageΔD.[i])
             )
             
         Array.zip not_pressed_images pressed_images
         |> Array.iteri (fun i (np, p) ->
-            let f = Result.toOption np, Result.toOption p
+            let f = np.ToOption(), p.ToOption()
             if not (distinct_detection.Contains f) then
                 distinct_detection.Add f
                 distinct.Add((np, p))
@@ -75,7 +75,7 @@ module internal ReceptorsConverter =
         distinct
         |> Seq.map (fun (not_pressed, pressed) -> [not_pressed; pressed])
         |> List.concat
-        |> List.map Texture.load_single_texture
+        |> List.map _.Load(ctx.FileSystem)
         
         // Textures are returned not-pressed/pressed interleaved e.g. Key1, Key1D, Key2, Key2D, KeyS, KeySD
     
@@ -114,7 +114,7 @@ module internal ReceptorsConverter =
     let generate_placeholder_receptors(ctx: NoteskinConverterContext, core_textures: ColumnTextures list, note_height_scale: float32) : unit =
         let receptor_base =
             core_textures.[if core_textures.Length > 1 then 1 else 0].Note
-            |> Texture.load_animated_texture
+            |> _.Load(ctx.FileSystem)
             |> List.head
             |> _.Image
             |> ImageOperations.scale_y note_height_scale
