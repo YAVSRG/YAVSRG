@@ -3,8 +3,9 @@ name: Continuous integration
 on:
   push:
     branches: [ "main" ]
+    
 jobs:
-  automated-tests:
+  main-ci-checks:
 
     runs-on: ubuntu-latest
 

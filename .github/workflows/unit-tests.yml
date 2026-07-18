@@ -9,8 +9,8 @@ permissions:
   pull-requests: write
     
 jobs:
-  automated-tests:
-
+  pull-request-ci-checks:
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
 
     steps:
