@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -13,7 +13,7 @@ module DbScoresTests =
 
         let score_1 =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
@@ -24,7 +24,7 @@ module DbScoresTests =
 
         let score_2 =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
@@ -52,7 +52,7 @@ module DbScoresTests =
 
         let score_1 =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = Map.empty
                 Replay = [| 0uy |]
@@ -63,7 +63,7 @@ module DbScoresTests =
 
         let score_2 =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
@@ -88,7 +88,7 @@ module DbScoresTests =
     let DeleteByTimestamp () =
         let db, conn = InMemoryDatabase.Create()
 
-        let ts = Timestamp.now () - 500L
+        let ts = Timestamp.now() - 500L
 
         let score_1 =
             {
@@ -103,7 +103,7 @@ module DbScoresTests =
 
         let score_2 =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.2f<rate>
                 Mods = Map.empty
                 Replay = [| 1uy |]
@@ -127,7 +127,7 @@ module DbScoresTests =
         conn.Dispose()
 
     [<Test>]
-    let GetBetween_NoResults() =
+    let GetBetween_NoResults () =
         let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
@@ -161,7 +161,7 @@ module DbScoresTests =
         conn.Dispose()
 
     [<Test>]
-    let GetBetween_CorrectResult() =
+    let GetBetween_CorrectResult () =
         let db, conn = InMemoryDatabase.Create()
 
         let score_1 =
@@ -196,7 +196,7 @@ module DbScoresTests =
         conn.Dispose()
 
     [<Test>]
-    let Transfer() =
+    let Transfer () =
         let db, conn = InMemoryDatabase.Create()
 
         let score_1 =

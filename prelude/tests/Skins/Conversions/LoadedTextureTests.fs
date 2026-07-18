@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Skins.Conversions
+namespace Prelude.Tests.Skins.Conversions
 
 open NUnit.Framework
 open Prelude
@@ -10,16 +10,16 @@ module LoadedTextureTests =
 
     [<Test>]
     let As2x_Upscales1xTexture () =
-        let texture : LoadedTexture = { Image = ONEPIXELIMAGE; Is2x = false }
-        
+        let texture: LoadedTexture = { Image = ONEPIXELIMAGE; Is2x = false }
+
         let scaled = texture.As2x
         Assert.AreEqual(2, scaled.Width)
         Assert.AreEqual(2, scaled.Height)
-        
+
     [<Test>]
     let As2x_Preserves2xTexture () =
-        let texture : LoadedTexture = { Image = ONEPIXELIMAGE; Is2x = true }
-        
+        let texture: LoadedTexture = { Image = ONEPIXELIMAGE; Is2x = true }
+
         let scaled = texture.As2x
         Assert.AreEqual(1, scaled.Width)
         Assert.AreEqual(1, scaled.Height)

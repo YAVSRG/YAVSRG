@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open System
 open NUnit.Framework

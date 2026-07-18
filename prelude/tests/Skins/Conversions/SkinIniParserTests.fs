@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Skins.Conversions
+namespace Prelude.Tests.Skins.Conversions
 
 open NUnit.Framework
 open System.IO
@@ -9,7 +9,7 @@ module SkinIniParserTests =
     let string_to_stream (s: string) =
         let ms = new MemoryStream()
         let sw = new StreamWriter(ms)
-        sw.Write s
+        sw.Write(s)
         sw.Flush()
         ms.Position <- 0
         ms

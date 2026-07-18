@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Calculator
+namespace Prelude.Tests.Calculator
 
 open NUnit.Framework
 open Prelude
@@ -7,7 +7,7 @@ open Prelude.Calculator
 module DiffCalcColorTests =
 
     [<Test>]
-    let Color_Green_Red_Pink() =
+    let Color_Green_Red_Pink () =
 
         printfn "%O" (Difficulty.color 0.0f)
         printfn "%O" (Difficulty.color 7.5f)
@@ -17,8 +17,8 @@ module DiffCalcColorTests =
         Assert.Pass()
 
     [<Test>]
-    let Color_SafeOnStrangeValues() =
+    let Color_SafeOnStrangeValues () =
 
-        Assert.AreEqual(Color.FromArgb 0xFF_00FF00, Difficulty.color nanf)
-        Assert.AreEqual(Color.FromArgb 0xFF_FF00FF, Difficulty.color infinityf)
-        Assert.AreEqual(Color.FromArgb 0xFF_00FF00, Difficulty.color -infinityf)
+        Assert.AreEqual(Color.FromArgb(0xFF_00FF00), Difficulty.color nanf)
+        Assert.AreEqual(Color.FromArgb(0xFF_FF00FF), Difficulty.color infinityf)
+        Assert.AreEqual(Color.FromArgb(0xFF_00FF00), Difficulty.color -infinityf)

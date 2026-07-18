@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -26,7 +26,7 @@ module DbSingletonsTests =
 
         let data =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = [ 17L ]
                 Replay = [| 0uy |]
@@ -41,7 +41,7 @@ module DbSingletonsTests =
             DbSingletons.get_or_default
                 "roundtrip"
                 {
-                    Timestamp = Timestamp.now ()
+                    Timestamp = Timestamp.now()
                     Rate = 2.0f<rate>
                     Mods = [ 18L ]
                     Replay = [| 1uy |]
@@ -61,7 +61,7 @@ module DbSingletonsTests =
 
         let DEFAULT =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 2.0f<rate>
                 Mods = [ 18L ]
                 Replay = [| 1uy |]
@@ -72,7 +72,7 @@ module DbSingletonsTests =
 
         let data =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = [ 17L ]
                 Replay = [| 0uy |]
@@ -84,11 +84,7 @@ module DbSingletonsTests =
         DbSingletons.save<TestDataType> "overwriting" DEFAULT db
         DbSingletons.save<TestDataType> "overwriting" data db
 
-        let result =
-            DbSingletons.get_or_default
-                "overwriting"
-                DEFAULT
-                db
+        let result = DbSingletons.get_or_default "overwriting" DEFAULT db
 
         Assert.AreEqual(data, result)
         Assert.AreNotEqual(DEFAULT, result)
@@ -101,7 +97,7 @@ module DbSingletonsTests =
 
         let DEFAULT =
             {
-                Timestamp = Timestamp.now ()
+                Timestamp = Timestamp.now()
                 Rate = 1.0f<rate>
                 Mods = [ 18L ]
                 Replay = [| 0uy |]
@@ -110,11 +106,7 @@ module DbSingletonsTests =
                 Keys = 4
             }
 
-        let result =
-            DbSingletons.get_or_default
-                "doesntexist"
-                DEFAULT
-                db
+        let result = DbSingletons.get_or_default "doesntexist" DEFAULT db
 
         Assert.AreEqual(DEFAULT, result)
 
