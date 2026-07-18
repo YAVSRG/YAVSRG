@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Skins.Noteskins
+namespace Prelude.Tests.Skins.Noteskins
 
 open NUnit.Framework
 open Prelude
@@ -131,11 +131,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithExtraTextures () =
         let noteskin =
-            VirtualNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    EnableColumnLight = false
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with EnableColumnLight = false })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -203,6 +199,7 @@ module NoteskinValidationTests =
     [<Test>]
     let WithMixedGridFiles () =
         use receptor_grid_bmp = new Bitmap(16, 3)
+
         let noteskin =
             VirtualNoteskinBuilder(NoteskinConfig.Default)
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
@@ -263,11 +260,7 @@ module NoteskinValidationTests =
         use receptor_grid_bmp = new Bitmap(16, 24)
 
         let noteskin =
-            VirtualNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -296,11 +289,7 @@ module NoteskinValidationTests =
         use receptor_grid_bmp = new Bitmap(200, 700)
 
         let noteskin =
-            VirtualNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)
@@ -329,11 +318,7 @@ module NoteskinValidationTests =
         use note_grid_bmp = new Bitmap(64, 16)
 
         let noteskin =
-            VirtualNoteskinBuilder(
-                { NoteskinConfig.Default with
-                    ReceptorStyle = ReceptorStyle.Receptors
-                }
-            )
+            VirtualNoteskinBuilder({ NoteskinConfig.Default with ReceptorStyle = ReceptorStyle.Receptors })
                 .AddImageFile("note[1x4].png", note_grid_bmp)
                 .AddImageFile("holdbody[1x1].png", ONEPIXELIMAGE)
                 .AddImageFile("holdhead[1x1].png", ONEPIXELIMAGE)

@@ -1,4 +1,4 @@
-﻿open NUnit.Framework
+open NUnit.Framework
 
 [<SetUpFixture>]
 type Setup() =

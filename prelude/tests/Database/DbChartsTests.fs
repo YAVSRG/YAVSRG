@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -9,15 +9,18 @@ open Prelude.Data.Library
 
 module DbChartsTests =
 
-    let TEST_CHART : Chart =
+    let TEST_CHART: Chart =
         {
             Keys = 4
             Notes = [| { Time = 1000.0f<ms>; Data = Array.create 4 NoteType.NORMAL } |]
-            BPM = [| { Time = 0.0f<ms>; Data = { Meter = 4<beat>; MsPerBeat = 500.0f<ms/beat> } } |]
+            BPM =
+                [|
+                    { Time = 0.0f<ms>; Data = { Meter = 4<beat>; MsPerBeat = 500.0f<ms / beat> } }
+                |]
             SV = [||]
         }
 
-    let TEST_CHART_META : ChartMeta =
+    let TEST_CHART_META: ChartMeta =
         {
             Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers ({E+H}DM Reboot)"
@@ -33,7 +36,7 @@ module DbChartsTests =
             Audio = AssetLocation.Missing
             PreviewTime = 1000.0f<ms>
             Packs = Set.singleton "Singles"
-            Origins = Set.singleton (ChartOrigin.Etterna "Bangers and Mash")
+            Origins = Set.singleton(ChartOrigin.Etterna("Bangers and Mash"))
             Keys = 4
             Length = 0.0f<ms>
             BPM = 120
@@ -42,7 +45,7 @@ module DbChartsTests =
             Patterns = PatternReport.Default
         }
 
-    let TEST_CHART_META_ALT : ChartMeta =
+    let TEST_CHART_META_ALT: ChartMeta =
         {
             Hash = TEST_CHART.Hash()
             Title = "EDM Jumpers"
@@ -53,12 +56,12 @@ module DbChartsTests =
             Subtitle = Some "Are you ready?"
             Source = None
             Creator = "Klaius"
-            Tags = ["dump"; "jumpstream"]
-            Background = AssetLocation.Absolute "C:/path/to/bg.png"
-            Audio = AssetLocation.Absolute "C:/path/to/audio.mp3"
+            Tags = [ "dump"; "jumpstream" ]
+            Background = AssetLocation.Absolute("C:/path/to/bg.png")
+            Audio = AssetLocation.Absolute("C:/path/to/audio.mp3")
             PreviewTime = 2000.0f<ms>
             Packs = Set.singleton "Nanahira Minipack"
-            Origins = Set.singleton (ChartOrigin.Etterna "Nanahira Minipack")
+            Origins = Set.singleton(ChartOrigin.Etterna("Nanahira Minipack"))
             Keys = 4
             Length = 1.0f<ms>
             BPM = 121
@@ -67,19 +70,15 @@ module DbChartsTests =
             Patterns = PatternReport.Default
         }
 
-    let TEST_CHART_META_NAN : ChartMeta =
+    let TEST_CHART_META_NAN: ChartMeta =
         { TEST_CHART_META_ALT with
             PreviewTime = System.Single.NegativeInfinity * 1.0f<ms>
             Length = System.Single.NaN * 1.0f<ms>
             Rating = System.Single.PositiveInfinity
         }
 
-    let TEST_CHART_META_NAN_FIXED : ChartMeta =
-        { TEST_CHART_META_ALT with
-            PreviewTime = 0.0f<ms>
-            Length = 0.0f<ms>
-            Rating = 0.0f
-        }
+    let TEST_CHART_META_NAN_FIXED: ChartMeta =
+        { TEST_CHART_META_ALT with PreviewTime = 0.0f<ms>; Length = 0.0f<ms>; Rating = 0.0f }
 
     [<Test>]
     let Get_Meta_DoesntExist () =
@@ -91,7 +90,7 @@ module DbChartsTests =
         conn.Dispose()
 
     [<Test>]
-    let RoundTrip_Meta() =
+    let RoundTrip_Meta () =
         let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
@@ -105,7 +104,7 @@ module DbChartsTests =
         conn.Dispose()
 
     [<Test>]
-    let RoundTrip_Meta_With_NaN() =
+    let RoundTrip_Meta_With_NaN () =
         let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
@@ -117,14 +116,14 @@ module DbChartsTests =
         conn.Dispose()
 
     [<Test>]
-    let RoundTrip_Chart() =
+    let RoundTrip_Chart () =
         let db, conn = InMemoryDatabase.Create()
 
         DbCharts.save TEST_CHART_META TEST_CHART db
         let result = DbCharts.get_chart TEST_CHART_META.Hash db
+
         match result with
-        | Ok chart ->
-            Assert.AreEqual(TEST_CHART_META.Hash, chart.Hash())
+        | Ok chart -> Assert.AreEqual(TEST_CHART_META.Hash, chart.Hash())
         | Error reason -> Assert.Fail(reason)
 
         conn.Dispose()
@@ -134,6 +133,7 @@ module DbChartsTests =
         let db, conn = InMemoryDatabase.Create()
 
         let result = DbCharts.get_chart "doesntexist" db
+
         match result with
         | Ok _ -> Assert.Fail()
         | Error reason -> Assert.Pass(reason)
@@ -166,16 +166,16 @@ module DbChartsTests =
 
         Assert.True(result.IsSome)
 
-        Assert.AreEqual(1, DbCharts.delete_batch [TEST_CHART_META.Hash] db)
+        Assert.AreEqual(1, DbCharts.delete_batch [ TEST_CHART_META.Hash ] db)
 
         Assert.AreEqual(None, DbCharts.get_meta TEST_CHART_META.Hash db)
 
-        Assert.AreEqual(0, DbCharts.delete_batch [TEST_CHART_META.Hash] db)
+        Assert.AreEqual(0, DbCharts.delete_batch [ TEST_CHART_META.Hash ] db)
 
         conn.Dispose()
 
     [<Test>]
-    let RoundTrip_Chart_Overwriting() =
+    let RoundTrip_Chart_Overwriting () =
         let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
@@ -184,17 +184,19 @@ module DbChartsTests =
         Assert.AreEqual(Some TEST_CHART_META, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         DbCharts.save TEST_CHART_META_ALT TEST_CHART db
+
         let with_merged_data =
             { TEST_CHART_META_ALT with
                 Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs
                 Origins = Set.union TEST_CHART_META.Origins TEST_CHART_META_ALT.Origins
             }
+
         Assert.AreEqual(Some with_merged_data, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         conn.Dispose()
 
     [<Test>]
-    let RoundTrip_Chart_Overwriting_EmptyOrigins() =
+    let RoundTrip_Chart_Overwriting_EmptyOrigins () =
         let db, conn = InMemoryDatabase.Create()
 
         DbCharts.delete TEST_CHART_META.Hash db |> ignore
@@ -202,11 +204,13 @@ module DbChartsTests =
         DbCharts.save { TEST_CHART_META with Origins = Set.empty } TEST_CHART db
 
         DbCharts.save { TEST_CHART_META_ALT with Origins = Set.empty } TEST_CHART db
+
         let with_merged_data =
             { TEST_CHART_META_ALT with
                 Packs = Set.union TEST_CHART_META.Packs TEST_CHART_META_ALT.Packs
                 Origins = Set.empty
             }
+
         Assert.AreEqual(Some with_merged_data, DbCharts.get_meta TEST_CHART_META.Hash db)
 
         conn.Dispose()

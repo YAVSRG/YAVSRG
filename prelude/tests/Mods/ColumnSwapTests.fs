@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Mods
+namespace Prelude.Tests.Mods
 
 open NUnit.Framework
 open Percyqaz.Common
@@ -11,7 +11,7 @@ module ColumnSwapTests =
     let SAMPLE_CHART = ChartFuzzer.Generate(4, 0)
 
     [<Test>]
-    let ColumnSwap_Parse() =
+    let ColumnSwap_Parse () =
 
         match ColumnSwap.parse "65436-" with
         | Ok x -> printfn "%A" x
@@ -30,12 +30,14 @@ module ColumnSwapTests =
         | Ok x -> Assert.Fail("Unexpected", x)
 
     [<Test>]
-    let ColumnSwap_Apply() =
+    let ColumnSwap_Apply () =
 
         let swap_1 = ColumnSwap.parse "1234321" |> expect
         let swap_2 = ColumnSwap.parse "7654" |> expect
 
-        let swapped_chart, _ = ColumnSwap.apply swap_1 (ModdedChartInternal.OfChart SAMPLE_CHART)
+        let swapped_chart, _ =
+            ColumnSwap.apply swap_1 (ModdedChartInternal.OfChart(SAMPLE_CHART))
+
         let swapped_back_chart, _ = ColumnSwap.apply swap_2 swapped_chart
 
         Assert.AreEqual(7, swapped_chart.Keys)
@@ -43,14 +45,17 @@ module ColumnSwapTests =
         Assert.AreEqual(SAMPLE_CHART.Hash(), { SAMPLE_CHART with Notes = swapped_back_chart.Notes }.Hash())
 
     [<Test>]
-    let ColumnSwap_NoNotes() =
+    let ColumnSwap_NoNotes () =
 
         let swap = ColumnSwap.parse "9999" |> expect
-        let _, mod_applied = ColumnSwap.apply swap (ModdedChartInternal.OfChart SAMPLE_CHART)
+
+        let _, mod_applied =
+            ColumnSwap.apply swap (ModdedChartInternal.OfChart(SAMPLE_CHART))
+
         Assert.False(mod_applied)
 
     [<Test>]
-    let ColumnSwap_Pack_RoundTrip() =
+    let ColumnSwap_Pack_RoundTrip () =
 
         let example = ColumnSwap.parse "54325-" |> expect
         let packed = ColumnSwap.pack example

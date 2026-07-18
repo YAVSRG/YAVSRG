@@ -3,7 +3,6 @@ engine
 libraries
 prelude/src
 prelude/playground
-prelude/tests/*
-!prelude/tests/Helpers
+prelude/tests/Rulesets/RulesetOsuParityTests.fs
 tools
 online

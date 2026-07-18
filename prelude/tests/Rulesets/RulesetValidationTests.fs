@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Rulesets
+namespace Prelude.Tests.Rulesets
 
 open NUnit.Framework
 open Prelude
@@ -120,17 +120,17 @@ module RulesetValidationTests =
                         {
                             Name = "A"
                             Color = Color.White
-                            TimingWindows = Some (25.0f<ms / rate>, 50.0f<ms / rate>)
+                            TimingWindows = Some(25.0f<ms / rate>, 50.0f<ms / rate>)
                             BreaksCombo = false
                         }
                         {
                             Name = "B"
                             Color = Color.White
-                            TimingWindows = Some (50.0f<ms / rate>, 100.0f<ms / rate>)
+                            TimingWindows = Some(50.0f<ms / rate>, 100.0f<ms / rate>)
                             BreaksCombo = false
                         }
                     |]
-                HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
+                HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
         match Ruleset.check invalid_ruleset with
@@ -147,17 +147,17 @@ module RulesetValidationTests =
                         {
                             Name = "A"
                             Color = Color.White
-                            TimingWindows = Some (-50.0f<ms / rate>, -25.0f<ms / rate>)
+                            TimingWindows = Some(-50.0f<ms / rate>, -25.0f<ms / rate>)
                             BreaksCombo = false
                         }
                         {
                             Name = "B"
                             Color = Color.White
-                            TimingWindows = Some (-100.0f<ms / rate>, -50.0f<ms / rate>)
+                            TimingWindows = Some(-100.0f<ms / rate>, -50.0f<ms / rate>)
                             BreaksCombo = false
                         }
                     |]
-                HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
+                HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
         match Ruleset.check invalid_ruleset with
@@ -174,17 +174,17 @@ module RulesetValidationTests =
                         {
                             Name = "A"
                             Color = Color.White
-                            TimingWindows = Some (-50.0f<ms / rate>, 50.0f<ms / rate>)
+                            TimingWindows = Some(-50.0f<ms / rate>, 50.0f<ms / rate>)
                             BreaksCombo = false
                         }
                         {
                             Name = "B"
                             Color = Color.White
-                            TimingWindows = Some (-25.0f<ms / rate>, -25.0f<ms / rate>)
+                            TimingWindows = Some(-25.0f<ms / rate>, -25.0f<ms / rate>)
                             BreaksCombo = false
                         }
                     |]
-                HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
+                HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
         match Ruleset.check invalid_ruleset with
@@ -201,17 +201,17 @@ module RulesetValidationTests =
                         {
                             Name = "A"
                             Color = Color.White
-                            TimingWindows = Some (nanf * 1.0f<ms / rate>, 50.0f<ms / rate>)
+                            TimingWindows = Some(nanf * 1.0f<ms / rate>, 50.0f<ms / rate>)
                             BreaksCombo = false
                         }
                         {
                             Name = "B"
                             Color = Color.White
-                            TimingWindows = Some (-100.0f<ms / rate>, 100.0f<ms / rate>)
+                            TimingWindows = Some(-100.0f<ms / rate>, 100.0f<ms / rate>)
                             BreaksCombo = false
                         }
                     |]
-                HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
+                HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
         match Ruleset.check invalid_ruleset with
@@ -228,17 +228,17 @@ module RulesetValidationTests =
                         {
                             Name = "A"
                             Color = Color.White
-                            TimingWindows = Some (-50.0f<ms / rate>, 50.0f<ms / rate>)
+                            TimingWindows = Some(-50.0f<ms / rate>, 50.0f<ms / rate>)
                             BreaksCombo = false
                         }
                         {
                             Name = "B"
                             Color = Color.White
-                            TimingWindows = Some (-infinityf * 1.0f<ms / rate>, 100.0f<ms / rate>)
+                            TimingWindows = Some(-infinityf * 1.0f<ms / rate>, 100.0f<ms / rate>)
                             BreaksCombo = false
                         }
                     |]
-                HoldMechanics = HoldMechanics.OnlyJudgeReleases 0
+                HoldMechanics = HoldMechanics.OnlyJudgeReleases(0)
             }
 
         match Ruleset.check invalid_ruleset with

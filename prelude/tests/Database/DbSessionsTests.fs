@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Database
+namespace Prelude.Tests.Database
 
 open NUnit.Framework
 open Prelude.Data.User
@@ -18,7 +18,7 @@ module DbSessionsTests =
     let RoundTrip () =
         let db, conn = InMemoryDatabase.Create()
 
-        let session : Session =
+        let session: Session =
             {
                 Start = 364L
                 End = 365L
@@ -34,7 +34,7 @@ module DbSessionsTests =
                 PlaysCompleted = 1
 
                 XP = 567L
-                KeymodePlaytime = Map.ofSeq [4, 3600.0; 7, 1800.0]
+                KeymodePlaytime = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
             }
 
         DbSessions.save session db
@@ -49,7 +49,7 @@ module DbSessionsTests =
     let Idempotence () =
         let db, conn = InMemoryDatabase.Create()
 
-        let session : Session =
+        let session: Session =
             {
                 Start = 364L
                 End = 365L
@@ -65,7 +65,7 @@ module DbSessionsTests =
                 PlaysCompleted = 1
 
                 XP = 567L
-                KeymodePlaytime = Map.ofSeq [4, 3600.0; 7, 1800.0]
+                KeymodePlaytime = Map.ofSeq [ 4, 3600.0; 7, 1800.0 ]
             }
 
         DbSessions.save session db
