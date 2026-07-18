@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Helpers
+namespace Prelude.Tests.Helpers
 
 open System.IO
 open System.IO.Compression
@@ -24,7 +24,7 @@ type VirtualNoteskinBuilder(config: NoteskinConfig) =
     member this.AddImageFile(path: string, image: Bitmap) : VirtualNoteskinBuilder =
         let entry = zip_archive.CreateEntry(path)
         use stream = entry.Open()
-        image.SaveAsPng stream
+        image.SaveAsPng(stream)
         this
 
     member this.Build() : Noteskin =

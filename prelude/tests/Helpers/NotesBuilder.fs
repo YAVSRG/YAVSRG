@@ -1,4 +1,4 @@
-﻿namespace Prelude.Tests.Helpers
+namespace Prelude.Tests.Helpers
 
 open Prelude
 open Prelude.Charts
@@ -21,14 +21,18 @@ type NotesBuilder(keycount: int) =
         elif time = last_time then
 
             let row = items.[items.Count - 1].Data
-            if row.[key] <> NoteType.NOTHING then failwith "Stacked note"
+
+            if row.[key] <> NoteType.NOTHING then
+                failwithf "Stacked note at %f" time
+
             row.[key] <- NoteType.NORMAL
 
-        else failwith "Note timestamps went backwards"
+        else
+            failwithf "Note timestamps went backwards: %f -> %f" last_time time
 
         this
 
-    member this.Note(time: Time) = this.Note(time, 0)
+    member this.Note(time: Time) : NotesBuilder = this.Note(time, 0)
 
     member this.HoldUntil(time: Time, until: Time, key: int) : NotesBuilder =
 
@@ -41,10 +45,14 @@ type NotesBuilder(keycount: int) =
         elif time = last_time then
 
             let row = items.[items.Count - 1].Data
-            if row.[key] <> NoteType.NOTHING then failwith "Stacked note"
+
+            if row.[key] <> NoteType.NOTHING then
+                failwithf "Stacked hold at %f" time
+
             row.[key] <- NoteType.HOLDHEAD
 
-        else failwith "Note timestamps went backwards"
+        else
+            failwithf "Hold timestamps went backwards: %f -> %f" last_time time
 
         let tail = Array.zeroCreate keycount
         tail.[key] <- NoteType.HOLDTAIL
@@ -54,6 +62,7 @@ type NotesBuilder(keycount: int) =
 
         this
 
-    member this.HoldUntil(time: Time, until: Time) = this.HoldUntil(time, until, 0)
+    member this.HoldUntil(time: Time, until: Time) : NotesBuilder = this.HoldUntil(time, until, 0)
 
-    member this.Build() : NoteData = { Keys = keycount; Notes = items.ToArray() }
+    member this.Build() : NoteData =
+        { Keys = keycount; Notes = items.ToArray() }
