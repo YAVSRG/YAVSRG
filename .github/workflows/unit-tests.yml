@@ -33,7 +33,7 @@ jobs:
         ./run_tests.sh
         
     - name: Run formatting checks
-      run: dotnet tool restore && fantomas --check .
+      run: dotnet tool restore && dotnet fantomas --check .
         
     - name: Approve PRs from Percyqaz if checks pass
       if: ${{ github.actor == 'percyqaz' }}
