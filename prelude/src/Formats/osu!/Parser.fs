@@ -141,16 +141,6 @@ module OsuParser =
             parse_failure "Empty line" line
         else parse(values)
 
-    let parse_hit_sample (sample: string) : HitSample =
-        let values = SplitValues.Parse(sample, ':')
-        {
-            NormalSet = values.EnumOrDefault(0, SampleSet.Default)
-            AdditionSet = values.EnumOrDefault(1, SampleSet.Default)
-            Index = values.IntOrDefault(2, 0)
-            Volume = values.IntOrDefault(3, 0)
-            Filename = values.StringOrDefault(4, "")
-        }
-
     let parse_hit_object (line: string) : HitObject =
         let values = SplitValues.Parse(line, ',')
         
@@ -176,7 +166,7 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                HitSample = parse_hit_sample(values.StringOrDefault(5, ""))
+                HitSample = HitSample.FromString(values.StringOrDefault(5, ""))
             }
             
         let inline parse_slider() =
@@ -231,7 +221,7 @@ module OsuParser =
                 Length = values.FloatOrDefault(7, 100.0)
                 EdgeSounds = edge_sounds
                 EdgeSets = edge_sets
-                HitSample = parse_hit_sample(values.StringOrDefault(10, ""))
+                HitSample = HitSample.FromString(values.StringOrDefault(10, ""))
             }
             
         let inline parse_spinner() =
@@ -243,7 +233,7 @@ module OsuParser =
                 ColorHax = color_hax
                 HitSound = hitsound
                 EndTime = values.IntOrDefault(5, time)
-                HitSample = parse_hit_sample(values.StringOrDefault(6, ""))
+                HitSample = HitSample.FromString(values.StringOrDefault(6, ""))
             }
             
         let inline parse_hold() =
@@ -259,7 +249,7 @@ module OsuParser =
                     match Int32.TryParse(endtime_and_sample.[0], CultureInfo.InvariantCulture) with
                     | true, v -> v
                     | false, _ -> time
-                HitSample = parse_hit_sample(if endtime_and_sample.Length > 1 then endtime_and_sample.[1] else "")
+                HitSample = HitSample.FromString(if endtime_and_sample.Length > 1 then endtime_and_sample.[1] else "")
             }
 
         if obj_type &&& 1 > 0 then parse_hitcircle()

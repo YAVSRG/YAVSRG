@@ -2,25 +2,6 @@
 
 open System.Globalization
 
-type HitSample =
-    {
-        NormalSet: SampleSet
-        AdditionSet: SampleSet
-        Index: int
-        Volume: int
-        Filename: string
-    }
-    static member Default =
-        {
-            NormalSet = SampleSet.None
-            AdditionSet = SampleSet.None
-            Index = 0
-            Volume = 0
-            Filename = ""
-        }
-    override this.ToString() =
-        sprintf "%i:%i:%i:%i:%s" (int this.NormalSet) (int this.AdditionSet) this.Index this.Volume this.Filename
-
 type HitSound =
     | Default = 0
     | Normal = 1

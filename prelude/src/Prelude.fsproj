@@ -35,6 +35,7 @@
     <Compile Include="Formats\osu!\MapHelpers.fs" />
     <Compile Include="Formats\osu!\SampleSet.fs" />
     <Compile Include="Formats\osu!\TimingPoint.fs" />
+    <Compile Include="Formats\osu!\HitSample.fs" />
     <Compile Include="Formats\osu!\Headers.fs" />
     <Compile Include="Formats\osu!\HitObjects.fs" />
     <Compile Include="Formats\osu!\Events.fs" />
