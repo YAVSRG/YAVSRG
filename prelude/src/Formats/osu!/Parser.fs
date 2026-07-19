@@ -90,102 +90,120 @@ module OsuParser =
     let private parse_failure (message: string) (line: string) =
         failwithf "osu! parse error: %s\nat: %s" message line
 
-    /// Incomplete parser: Returns Some _ if parsing this event is supported and None if not
-    let private _parse_storyboard_event (csv: string array) : StoryboardObject option =
-        match csv.[0].ToLowerInvariant() with
-        | "0"
-        | "background" ->
+    let parse_storyboard_event (line: string) : StoryboardObject option =
+        
+        let inline unsupported() = None
+        
+        let inline parse_background(values: SplitValues) =
             Background(
-                (CsvHelpers.string_or 2 "" csv).Trim('"'),
-                CsvHelpers.int_or 3 0 csv,
-                CsvHelpers.int_or 4 0 csv
+                values.StringOrDefault(2, ""),
+                values.IntOrDefault(3, 0),
+                values.IntOrDefault(4, 0)
             )
-            |> Some
-        | "1"
-        | "video" ->
+            
+        let inline parse_video(values: SplitValues) =
             Video(
-                CsvHelpers.int_or 1 0 csv,
-                (CsvHelpers.string_or 2 "" csv).Trim('"'),
-                CsvHelpers.int_or 3 0 csv,
-                CsvHelpers.int_or 4 0 csv
+                values.IntOrDefault(1, 0),
+                values.StringOrDefault(2, ""),
+                values.IntOrDefault(3, 0),
+                values.IntOrDefault(4, 0)
             )
-            |> Some
-        | "2"
-        | "break" ->
+            
+        let inline parse_break(values: SplitValues) =
             Break(
-                CsvHelpers.int_or 1 0 csv,
-                CsvHelpers.int_or 2 0 csv
+                values.IntOrDefault(1, 0),
+                values.IntOrDefault(2, 0)
             )
-            |> Some
-        | "sample" ->
+            
+        let inline parse_sample(values: SplitValues) =
             Sample(
-                CsvHelpers.int_or 1 0 csv,
-                CsvHelpers.enum_or 2 Layer.Background csv,
-                (CsvHelpers.string_or 3 "" csv).Trim('"'),
-                CsvHelpers.int_or 4 0 csv
+                values.IntOrDefault(1, 0),
+                values.EnumOrDefault(2, Layer.Background),
+                values.StringOrDefault(3, ""),
+                values.IntOrDefault(4, 0)
             )
-            |> Some
-        | "sprite"
-        | "animation"
-        | _ -> None
-
-    /// Incomplete parser: Returns Some _ if parsing this event is supported and None if not
-    let parse_storyboard_event (line: string): StoryboardObject option =
-        let csv = line.Split(',', StringSplitOptions.TrimEntries)
-        if csv.Length > 1 then
-            _parse_storyboard_event csv
-        else parse_failure "Empty line" line
-
-    let private _parse_timing_point (csv: string array) : TimingPoint =
-        let uninherited = CsvHelpers.int_or 6 1 csv <> 0
-        if uninherited then
-            Uninherited {
-                Time = CsvHelpers.float_or 0 0.0 csv
-                MsPerBeat = CsvHelpers.float_or 1 500.0 csv |> max 0.0
-                Meter = CsvHelpers.int_or 2 4 csv
-                SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
-                SampleIndex = CsvHelpers.int_or 4 0 csv
-                Volume = CsvHelpers.int_or 5 0 csv
-                Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
-            }
-        else
-            Inherited {
-                Time = CsvHelpers.float_or 0 0.0 csv
-                Multiplier = -100.0 / (CsvHelpers.float_or 1 1.0 csv)
-                SampleSet = CsvHelpers.enum_or 3 SampleSet.Default csv
-                SampleIndex = CsvHelpers.int_or 4 0 csv
-                Volume = CsvHelpers.int_or 5 0 csv
-                Effects = CsvHelpers.enum_or 7 TimingEffect.None csv
-            }
+        
+        let inline parse(values: SplitValues) =
+            match values.[0].ToLowerInvariant() with
+            | "0"
+            | "background" -> Some(parse_background(values))
+            | "1"
+            | "video" -> Some(parse_video(values))
+            | "2"
+            | "break" -> Some(parse_break(values))
+            | "sample" -> Some(parse_sample(values))
+            | "sprite"
+            | "animation"
+            | _ -> unsupported()
+        
+        let values = SplitValues.Parse(line, ',')
+        if values.Length = 0 then
+            parse_failure "Empty line" line
+        else parse(values)
 
     let parse_timing_point (line: string) : TimingPoint =
-        let csv = line.Split(',', StringSplitOptions.TrimEntries)
-        if csv.Length > 1 && csv.Length < 6 then
-            parse_failure "Failed to parse timing point" line
-        elif csv.Length >= 6 then
-            _parse_timing_point csv
-        else parse_failure "Empty line" line
+        
+        let inline parse_uninherited(values: SplitValues) =
+            Uninherited {
+                Time = values.Float(0)
+                MsPerBeat = values.FloatOrDefault(1, 500.0) |> max 0.0
+                Meter = values.IntOrDefault(2, 4) |> fun v -> if v <= 0 then 4 else v
+                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
+                SampleIndex = values.IntOrDefault(4, 0)
+                Volume = values.IntOrDefault(5, 100) |> max 0 |> min 100
+                Effects = values.EnumOrDefault(7, TimingEffect.None)
+            }
+            
+        let inline parse_inherited(values: SplitValues) =
+            Inherited {
+                Time = values.Float(0)
+                Multiplier =
+                    let v = values.FloatOrDefault(1, 1.0)
+                    if v < 0 then -100.0 / v else 1.0
+                SampleSet = values.EnumOrDefault(3, SampleSet.Default)
+                SampleIndex = values.IntOrDefault(4, 0)
+                Volume = values.IntOrDefault(5, 100)
+                Effects = values.EnumOrDefault(7, TimingEffect.None)
+            }
+            
+        let values = SplitValues.Parse(line, ',')
+        if values.Length = 0 then
+            parse_failure "Empty line" line
+        elif values.Length < 2 then
+            parse_failure "Failed to parse timing point (needed 2 or more values)" line
+        else
+            let is_uninherited = values.StringOrDefault(6, "1").StartsWith('1')
+            if is_uninherited then parse_uninherited(values)
+            else parse_inherited(values)
 
-    let private parse_hit_sample (colon_separated_values: string array) : HitSample =
+    let parse_hit_sample (sample: string) : HitSample =
+        let values = SplitValues.Parse(sample, ':')
         {
-            NormalSet = CsvHelpers.enum_or 0 SampleSet.Default colon_separated_values
-            AdditionSet = CsvHelpers.enum_or 1 SampleSet.Default colon_separated_values
-            Index = CsvHelpers.int_or 2 0 colon_separated_values
-            Volume = CsvHelpers.int_or 3 0 colon_separated_values
-            Filename = (CsvHelpers.string_or 4 "" colon_separated_values).Trim('"')
+            NormalSet = values.EnumOrDefault(0, SampleSet.Default)
+            AdditionSet = values.EnumOrDefault(1, SampleSet.Default)
+            Index = values.IntOrDefault(2, 0)
+            Volume = values.IntOrDefault(3, 0)
+            Filename = values.StringOrDefault(4, "")
         }
 
-    let private _parse_hit_object (line: string) (csv: string array) : HitObject =
-        let x = CsvHelpers.int_or 0 0 csv
-        let y = CsvHelpers.int_or 1 0 csv
-        let time = CsvHelpers.int_or 2 0 csv
-        let obj_type = CsvHelpers.int_or 3 0 csv
-        let hitsound = CsvHelpers.enum_or 4 HitSound.Default csv
+    let parse_hit_object (line: string) : HitObject =
+        let values = SplitValues.Parse(line, ',')
+        
+        if values.Length = 0 then
+            parse_failure "Empty line" line
+        elif values.Length < 5 then
+            parse_failure "Failed to parse hit object (needed 5 or more values)" line
+        
+        let x = values.IntOrDefault(0, 0)
+        let y = values.IntOrDefault(1, 0)
+        let time = values.IntOrDefault(2, 0)
+        let obj_type = values.IntOrDefault(3, 0)
+        let hitsound = values.EnumOrDefault(4, HitSound.Default)
 
         let starts_new_combo = obj_type &&& 4 <> 0
         let color_hax = (obj_type >>> 4) &&& 7
-
-        if obj_type &&& 1 > 0 then
+        
+        let inline parse_hitcircle() =
             HitCircle {
                 X = x
                 Y = y
@@ -193,30 +211,48 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                HitSample =
-                    CsvHelpers.string_or 5 "" csv
-                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
-                    |> parse_hit_sample
+                HitSample = parse_hit_sample(values.StringOrDefault(5, ""))
             }
-        elif obj_type &&& 2 > 0 then
-            let curve = CsvHelpers.string_or 5 "" csv |> fun s -> s.Split([|'|'|], 2, StringSplitOptions.TrimEntries)
-            let curve_shape, curve_points =
-                if curve.Length < 2 then
-                    parse_failure "Invalid slider curve" line
-                else
-                    match curve.[0].ToUpperInvariant() with
-                    | "B" -> Bezier
-                    | "C" -> Catmull
-                    | "L" -> Linear
-                    | "P" -> PerfectCircle
-                    | _ -> Bezier
-                    ,
-                    curve.[1].Split('|', StringSplitOptions.TrimEntries)
-                    |> Seq.map (fun s ->
-                        let xy = s.Split(':', StringSplitOptions.TrimEntries)
-                        CsvHelpers.int_or 0 0 xy, CsvHelpers.int_or 1 0 xy
-                    )
-                    |> List.ofSeq
+            
+        let inline parse_slider() =
+            let curve_parts = values.StringOrDefault(5, "").Split('|', 2, StringSplitOptions.TrimEntries)
+            
+            if curve_parts.Length < 2 then
+                parse_failure "Invalid slider curve" line
+                
+            let curve_shape =
+                match curve_parts.[0].ToUpperInvariant() with
+                | "B" -> Bezier
+                | "C" -> Catmull
+                | "L" -> Linear
+                | "P" -> PerfectCircle
+                | _ -> Bezier
+                
+            let curve_points =
+                curve_parts.[1].Split('|', StringSplitOptions.TrimEntries)
+                |> Seq.map (fun coordinate ->
+                    let xy = SplitValues.Parse(coordinate, ':')
+                    xy.IntOrDefault(0, 0), xy.IntOrDefault(1, 0)
+                )
+                |> List.ofSeq
+                
+            let edge_sounds =
+                values.StringOrDefault(8, "").Split('|', StringSplitOptions.TrimEntries)
+                |> Seq.choose (fun n ->
+                    match Int32.TryParse(n, CultureInfo.InvariantCulture) with
+                    | true, v -> Some (enum v)
+                    | false, _ -> None
+                )
+                |> List.ofSeq
+                
+            let edge_sets =
+                values.StringOrDefault(9, "").Split("|", StringSplitOptions.TrimEntries)
+                |> Seq.map (fun s ->
+                    let sets = SplitValues.Parse(s, ':')
+                    sets.EnumOrDefault(0, SampleSet.None), sets.EnumOrDefault(1, SampleSet.None)
+                )
+                |> List.ofSeq
+                    
             Slider {
                 X = x
                 Y = y
@@ -226,31 +262,14 @@ module OsuParser =
                 HitSound = hitsound
                 CurveType = curve_shape
                 CurvePoints = curve_points
-                Slides = CsvHelpers.int_or 6 1 csv
-                Length = CsvHelpers.float_or 7 100.0 csv
-                EdgeSounds =
-                    CsvHelpers.string_or 8 "" csv
-                    |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
-                    |> Seq.choose (fun n ->
-                        match Int32.TryParse(n, CultureInfo.InvariantCulture) with
-                        | true, v -> Some (enum v)
-                        | false, _ -> None
-                    )
-                    |> List.ofSeq
-                EdgeSets =
-                    CsvHelpers.string_or 9 "" csv
-                    |> fun s -> s.Split("|", StringSplitOptions.TrimEntries)
-                    |> Seq.map (fun s ->
-                        let sets = s.Split(':', StringSplitOptions.TrimEntries)
-                        CsvHelpers.enum_or 0 SampleSet.None sets, CsvHelpers.enum_or 1 SampleSet.None sets
-                    )
-                    |> List.ofSeq
-                HitSample =
-                    CsvHelpers.string_or 10 "" csv
-                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
-                    |> parse_hit_sample
+                Slides = values.IntOrDefault(6, 1)
+                Length = values.FloatOrDefault(7, 100.0)
+                EdgeSounds = edge_sounds
+                EdgeSets = edge_sets
+                HitSample = parse_hit_sample(values.StringOrDefault(10, ""))
             }
-        elif obj_type &&& 8 > 0 then
+            
+        let inline parse_spinner() =
             Spinner {
                 X = x
                 Y = y
@@ -258,14 +277,12 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                EndTime = CsvHelpers.int_or 5 time csv
-                HitSample =
-                    CsvHelpers.string_or 6 "" csv
-                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
-                    |> parse_hit_sample
+                EndTime = values.IntOrDefault(5, time)
+                HitSample = parse_hit_sample(values.StringOrDefault(6, ""))
             }
-        elif obj_type &&& 128 > 0 then
-            let endtime_and_sample = CsvHelpers.string_or 5 "" csv |> fun s -> s.Split([|':'|], 2, StringSplitOptions.TrimEntries)
+            
+        let inline parse_hold() =
+            let endtime_and_sample = values.StringOrDefault(5, "").Split(':', 2, StringSplitOptions.TrimEntries)
             Hold {
                 X = x
                 Y = y
@@ -273,22 +290,18 @@ module OsuParser =
                 StartsNewCombo = starts_new_combo
                 ColorHax = color_hax
                 HitSound = hitsound
-                EndTime = CsvHelpers.int_or 0 time endtime_and_sample
-                HitSample =
-                    CsvHelpers.string_or 1 "" endtime_and_sample
-                    |> fun s -> s.Split(":", StringSplitOptions.TrimEntries)
-                    |> parse_hit_sample
+                EndTime =
+                    match Int32.TryParse(endtime_and_sample.[0], CultureInfo.InvariantCulture) with
+                    | true, v -> v
+                    | false, _ -> time
+                HitSample = parse_hit_sample(if endtime_and_sample.Length > 1 then endtime_and_sample.[1] else "")
             }
-        else
-            parse_failure "Unrecognised object type" line
 
-    let parse_hit_object (line: string) =
-        let csv = line.Split(',', StringSplitOptions.TrimEntries)
-        if csv.Length > 1 && csv.Length < 5 then
-            parse_failure "Failed to parse hit object" line
-        elif csv.Length >= 5 then
-            _parse_hit_object line csv
-        else parse_failure "Empty line" line
+        if obj_type &&& 1 > 0 then parse_hitcircle()
+        elif obj_type &&& 2 > 0 then parse_slider()
+        elif obj_type &&& 8 > 0 then parse_spinner()
+        elif obj_type &&& 128 > 0 then parse_hold()
+        else parse_failure "Unrecognised object type" line
 
     [<Struct>]
     type private ParserState =

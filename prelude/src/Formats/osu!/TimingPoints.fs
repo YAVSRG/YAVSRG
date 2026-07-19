@@ -53,7 +53,7 @@ type InheritedTimingPoint =
     override this.ToString() =
         sprintf "%s,%s,4,%i,%i,%i,0,%i"
             (this.Time.ToString(CultureInfo.InvariantCulture))
-            (-100.0 / this.Multiplier |> fun f -> f.ToString(CultureInfo.InvariantCulture))
+            ((-100.0 / this.Multiplier).ToString(CultureInfo.InvariantCulture))
             (int this.SampleSet)
             this.SampleIndex
             this.Volume
