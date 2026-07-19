@@ -20,13 +20,6 @@ type Countdown =
     | Half = 2
     | Double = 3
 
-type SampleSet =
-    | None = 0
-    | Default = 0
-    | Normal = 1
-    | Soft = 2
-    | Drum = 3
-
 type General =
     {
         AudioFilename: string

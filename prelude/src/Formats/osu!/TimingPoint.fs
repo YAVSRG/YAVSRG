@@ -19,6 +19,7 @@ type UninheritedTimingPoint =
         Volume: int
         Effects: TimingEffect
     }
+    member this.KiaiMode = int this.Effects &&& int TimingEffect.Kiai <> 0
     override this.ToString() =
         sprintf "%s,%s,%i,%i,%i,%i,1,%i"
             (this.Time.ToString(CultureInfo.InvariantCulture))
@@ -50,6 +51,8 @@ type InheritedTimingPoint =
         Volume: int
         Effects: TimingEffect
     }
+    member this.KiaiMode = int this.Effects &&& int TimingEffect.Kiai <> 0
+    member this.OmitFirstBarLine = int this.Effects &&& int TimingEffect.OmitFirstBarline <> 0
     override this.ToString() =
         sprintf "%s,%s,4,%i,%i,%i,0,%i"
             (this.Time.ToString(CultureInfo.InvariantCulture))
